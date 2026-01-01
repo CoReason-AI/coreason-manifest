@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "coreason_manifest"
+version = "0.1.0"
+description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
+authors = ["Gowtham A Rao <gowtham.rao@coreason.ai>"]
+license = "Prosperity-3.0"
+readme = "README.md"
+packages = [{include = "coreason_manifest", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12, <3.15"
+loguru = "^0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+ruff = "^0.4.8"
+pre-commit = "^3.7.1"
+pytest-cov = "^5.0.0"
+mkdocs = "^1.6.0"
+mkdocs-material = "^9.5.26"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "coreason_manifest"
+version = "0.1.0"
+description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Gowtham A Rao", email = "gowtham.rao@coreason.ai" },
+]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/CoReason-AI/coreason_manifest"
+Repository = "https://github.com/CoReason-AI/coreason_manifest"
+Documentation = "https://github.com/CoReason-AI/coreason_manifest"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["tests/*"]

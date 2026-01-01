@@ -1,0 +1,44 @@
+
+# .github/workflows/publish.yml
+name: Publish Python Package to PyPI
+
+on:
+  # Trigger the workflow only when a new release is published
+  release:
+    types: [published]
+
+jobs:
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+
+    # Define the environment for trusted publishing
+    # This name 'pypi' MUST match what you configure on PyPI
+    environment: pypi
+
+    # Grant OIDC token permission for the job
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No 'user' or 'password' fields are needed here.
+        # The action automatically uses the OIDC token from the
+        # 'id-token: write' permission.

@@ -1,0 +1,5 @@
+site_name: coreason_manifest
+theme:
+  name: material
+nav:
+  - Home: index.md
