@@ -8,12 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_manifest
 
-import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+
 from coreason_manifest.utils.logger import logger
 
-def test_logger_initialization():
+
+def test_logger_initialization() -> None:
     """Test that the logger is initialized correctly and creates the log directory."""
     # Since the logger is initialized on import, we check side effects
 
@@ -29,6 +29,7 @@ def test_logger_initialization():
     # logger.info("Test log")
     # assert (log_path / "app.log").exists()
 
-def test_logger_exports():
+
+def test_logger_exports() -> None:
     """Test that logger is exported."""
     assert logger is not None
