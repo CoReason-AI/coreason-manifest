@@ -9,7 +9,8 @@
 # Source Code: https://github.com/CoReason-AI/coreason_manifest
 
 """
-This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run.
+This package is the definitive source of truth.
+If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run.
 """
 
 __version__ = "0.1.0"
