@@ -1,14 +1,14 @@
 # Prosperity-3.0
 from __future__ import annotations
 
-import yaml
 from pathlib import Path
 from typing import Any, Union
 
+import yaml
 from pydantic import ValidationError
 
-from coreason_manifest.models import AgentDefinition
 from coreason_manifest.errors import ManifestSyntaxError
+from coreason_manifest.models import AgentDefinition
 
 
 class ManifestLoader:
