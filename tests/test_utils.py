@@ -14,6 +14,8 @@ import importlib
 import shutil
 from pathlib import Path
 
+from loguru import logger
+
 from coreason_manifest.utils import logger as logger_module
 
 
@@ -22,6 +24,10 @@ def test_logger_initialization_creates_dir() -> None:
 
     # Setup: Remove logs dir if exists
     log_path = Path("logs")
+
+    # Ensure logger handlers are removed to release file locks on Windows
+    logger.remove()
+
     if log_path.exists():
         shutil.rmtree(log_path)
 
