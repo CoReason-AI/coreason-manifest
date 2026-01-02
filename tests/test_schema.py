@@ -2,21 +2,26 @@
 import json
 import os
 import uuid
-import pytest
-from jsonschema import validate, ValidationError, FormatChecker
 from typing import Any, Dict
 
-SCHEMA_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "src", "coreason_manifest", "schemas", "agent.schema.json"
-)
+import pytest
+from jsonschema import FormatChecker, ValidationError, validate
+
+SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "..", "src", "coreason_manifest", "schemas", "agent.schema.json")
+
 
 def load_schema() -> Dict[str, Any]:
     with open(SCHEMA_PATH, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+        if not isinstance(data, dict):
+            raise ValueError("Schema must be a dictionary")
+        return data
+
 
 @pytest.fixture
 def agent_schema() -> Dict[str, Any]:
     return load_schema()
+
 
 @pytest.fixture
 def valid_agent_data() -> Dict[str, Any]:
@@ -39,9 +44,11 @@ def valid_agent_data() -> Dict[str, Any]:
         "dependencies": {"tools": ["tool:search"], "libraries": ["pandas==2.0.1"]},
     }
 
+
 def test_schema_valid_agent(agent_schema: Dict[str, Any], valid_agent_data: Dict[str, Any]) -> None:
     """Test that a valid agent dictionary passes schema validation."""
     validate(instance=valid_agent_data, schema=agent_schema, format_checker=FormatChecker())
+
 
 def test_schema_invalid_version(agent_schema: Dict[str, Any], valid_agent_data: Dict[str, Any]) -> None:
     """Test that an invalid SemVer version fails schema validation."""
@@ -49,11 +56,13 @@ def test_schema_invalid_version(agent_schema: Dict[str, Any], valid_agent_data: 
     with pytest.raises(ValidationError):
         validate(instance=valid_agent_data, schema=agent_schema, format_checker=FormatChecker())
 
+
 def test_schema_invalid_uuid(agent_schema: Dict[str, Any], valid_agent_data: Dict[str, Any]) -> None:
     """Test that an invalid UUID fails schema validation."""
     valid_agent_data["metadata"]["id"] = "not-a-uuid"
     with pytest.raises(ValidationError):
         validate(instance=valid_agent_data, schema=agent_schema, format_checker=FormatChecker())
+
 
 def test_schema_invalid_temperature(agent_schema: Dict[str, Any], valid_agent_data: Dict[str, Any]) -> None:
     """Test that temperature outside range fails schema validation."""
@@ -64,6 +73,7 @@ def test_schema_invalid_temperature(agent_schema: Dict[str, Any], valid_agent_da
     valid_agent_data["topology"]["model_config"]["temperature"] = -0.1
     with pytest.raises(ValidationError):
         validate(instance=valid_agent_data, schema=agent_schema, format_checker=FormatChecker())
+
 
 def test_schema_missing_required_field(agent_schema: Dict[str, Any], valid_agent_data: Dict[str, Any]) -> None:
     """Test that missing required field fails schema validation."""
