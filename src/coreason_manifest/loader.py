@@ -22,18 +22,18 @@ class ManifestLoader:
     """
 
     @staticmethod
-    def load_from_file(path: Union[str, Path]) -> AgentDefinition:
+    def load_raw_from_file(path: Union[str, Path]) -> dict[str, Any]:
         """
-        Loads the agent manifest from a YAML file.
+        Loads the raw dict from a YAML file.
 
         Args:
             path: The path to the agent.yaml file.
 
         Returns:
-            AgentDefinition: The validated Pydantic model.
+            dict: The raw dictionary content.
 
         Raises:
-            ManifestSyntaxError: If YAML is invalid or Pydantic validation fails.
+            ManifestSyntaxError: If YAML is invalid.
             FileNotFoundError: If the file does not exist.
         """
         try:
@@ -48,17 +48,32 @@ class ManifestLoader:
             if not isinstance(data, dict):
                 raise ManifestSyntaxError(f"Invalid YAML content in {path}: must be a dictionary.")
 
-            return ManifestLoader.load_from_dict(data)
+            return data
 
         except yaml.YAMLError as e:
             raise ManifestSyntaxError(f"Failed to parse YAML file {path}: {str(e)}") from e
         except OSError as e:
-            # FileNotFoundError is an OSError, but we want to bubble it up or wrap it?
-            # The docstring says raises FileNotFoundError, so we let it bubble.
-            # But other OS errors might happen.
             if isinstance(e, FileNotFoundError):
                 raise
             raise ManifestSyntaxError(f"Error reading file {path}: {str(e)}") from e
+
+    @staticmethod
+    def load_from_file(path: Union[str, Path]) -> AgentDefinition:
+        """
+        Loads the agent manifest from a YAML file.
+
+        Args:
+            path: The path to the agent.yaml file.
+
+        Returns:
+            AgentDefinition: The validated Pydantic model.
+
+        Raises:
+            ManifestSyntaxError: If YAML is invalid or Pydantic validation fails.
+            FileNotFoundError: If the file does not exist.
+        """
+        data = ManifestLoader.load_raw_from_file(path)
+        return ManifestLoader.load_from_dict(data)
 
     @staticmethod
     def load_from_dict(data: dict[str, Any]) -> AgentDefinition:
