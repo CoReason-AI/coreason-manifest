@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coreason.ai/schemas/agent.schema.json",
+  "title": "CoReason Agent Manifest",
+  "description": "The definitive source of truth for CoReason Agent definitions.",
+  "type": "object",
+  "required": ["metadata", "interface", "topology", "dependencies"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["id", "version", "name", "author", "created_at"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique Identifier for the Agent (UUID)."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+          "description": "Semantic Version of the Agent."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the Agent."
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the Agent."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp (ISO 8601)."
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "required": ["inputs", "outputs"],
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "description": "Typed arguments the agent accepts (JSON Schema)."
+        },
+        "outputs": {
+          "type": "object",
+          "description": "Typed structure of the result."
+        }
+      }
+    },
+    "topology": {
+      "type": "object",
+      "required": ["steps", "model_config"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "description": "A directed acyclic graph (DAG) of execution steps.",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the step."
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the step."
+              }
+            }
+          }
+        },
+        "model_config": {
+          "type": "object",
+          "required": ["model", "temperature"],
+          "properties": {
+            "model": {
+              "type": "string",
+              "description": "The LLM model identifier."
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 2.0,
+              "description": "Temperature for generation."
+            }
+          }
+        }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of MCP capability URIs required."
+        },
+        "libraries": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of Python packages required (if code execution is allowed)."
+        }
+      }
+    },
+    "integrity_hash": {
+      "type": "string",
+      "description": "SHA256 hash of the source code."
+    }
+  }
+}
