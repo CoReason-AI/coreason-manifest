@@ -1,11 +1,11 @@
 # Prosperity-3.0
+from pathlib import Path
+from typing import Any, Dict
 from unittest.mock import patch
 from uuid import uuid4
-from typing import Any, Dict
 
 import pytest
 import yaml
-from pathlib import Path
 
 from coreason_manifest.errors import ManifestSyntaxError, PolicyViolationError
 from coreason_manifest.loader import ManifestLoader
