@@ -58,13 +58,14 @@ select = ["E", "F", "B", "I"]
 ignore = []
 
 [tool.mypy]
+exclude = ["tests"]
 python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=src --ignore=tests --cov-report=term-missing --cov-fail-under=100"
 testpaths = ["tests"]
 
 [tool.coverage.run]

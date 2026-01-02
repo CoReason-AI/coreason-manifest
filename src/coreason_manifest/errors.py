@@ -14,6 +14,14 @@ class ManifestSyntaxError(ManifestError):
     pass
 
 
+class SchemaValidationError(ManifestError):
+    """Raised when the manifest fails JSON Schema validation."""
+
+    def __init__(self, message: str, errors: list[str] | None = None) -> None:
+        super().__init__(message)
+        self.errors = errors or []
+
+
 class PolicyViolationError(ManifestError):
     """Raised when the agent violates a compliance policy."""
 

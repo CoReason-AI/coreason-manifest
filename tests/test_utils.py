@@ -8,28 +8,32 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_manifest
 
+# We need to reload the module to test the initialization logic again
+# because it runs at module level.
+import importlib
+import shutil
 from pathlib import Path
 
-from coreason_manifest.utils.logger import logger
+from coreason_manifest.utils import logger as logger_module
 
 
-def test_logger_initialization() -> None:
-    """Test that the logger is initialized correctly and creates the log directory."""
-    # Since the logger is initialized on import, we check side effects
+def test_logger_initialization_creates_dir() -> None:
+    """Test that the logger creates the log directory if it doesn't exist."""
 
-    # Check if logs directory creation is handled
-    # Note: running this test might actually create the directory in the test environment
-    # if it doesn't exist.
-
+    # Setup: Remove logs dir if exists
     log_path = Path("logs")
+    if log_path.exists():
+        shutil.rmtree(log_path)
+
+    # Reload the module to trigger the top-level code
+    importlib.reload(logger_module)
+
     assert log_path.exists()
     assert log_path.is_dir()
-
-    # Verify app.log creation if it was logged to (it might be empty or not created until log)
-    # logger.info("Test log")
-    # assert (log_path / "app.log").exists()
 
 
 def test_logger_exports() -> None:
     """Test that logger is exported."""
+    from coreason_manifest.utils.logger import logger
+
     assert logger is not None
