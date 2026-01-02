@@ -30,7 +30,7 @@ def valid_manifest_dict() -> Dict[str, Any]:
         "interface": {"inputs": {"type": "object"}, "outputs": {"type": "object"}},
         "topology": {"steps": [{"id": "step1"}], "model_config": {"model": "gpt-4", "temperature": 0.7}},
         "dependencies": {"tools": [], "libraries": ["requests"]},
-        "integrity_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",  # Empty hash for simplicity
+        "integrity_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     }
 
 

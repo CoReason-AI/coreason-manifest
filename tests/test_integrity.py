@@ -1,4 +1,6 @@
 # Prosperity-3.0
+from pathlib import Path
+from typing import Optional
 
 import pytest
 
@@ -16,7 +18,7 @@ from coreason_manifest.models import (
 
 
 # Helper to create a dummy agent definition
-def create_agent_def(integrity_hash=None):
+def create_agent_def(integrity_hash: Optional[str] = None) -> AgentDefinition:
     return AgentDefinition(
         metadata=AgentMetadata(
             id="123e4567-e89b-12d3-a456-426614174000",
@@ -33,7 +35,7 @@ def create_agent_def(integrity_hash=None):
 
 
 @pytest.fixture
-def source_dir(tmp_path):
+def source_dir(tmp_path: Path) -> Path:
     d = tmp_path / "src"
     d.mkdir()
     (d / "main.py").write_text("print('hello')")
@@ -44,7 +46,7 @@ def source_dir(tmp_path):
     return d
 
 
-def test_calculate_directory_hash(source_dir):
+def test_calculate_directory_hash(source_dir: Path) -> None:
     # Calculate hash manually to verify
     # Files sorted: main.py, subdir/helper.py, utils.py (based on standard sort)
     # Wait, simple string sort: 'main.py', 'subdir/helper.py', 'utils.py'
@@ -55,7 +57,7 @@ def test_calculate_directory_hash(source_dir):
     assert hash1 == hash2
 
 
-def test_calculate_directory_hash_changes_on_content(source_dir):
+def test_calculate_directory_hash_changes_on_content(source_dir: Path) -> None:
     hash1 = IntegrityChecker.calculate_directory_hash(source_dir)
 
     # Modify a file
@@ -65,7 +67,7 @@ def test_calculate_directory_hash_changes_on_content(source_dir):
     assert hash1 != hash2
 
 
-def test_calculate_directory_hash_changes_on_filename(source_dir):
+def test_calculate_directory_hash_changes_on_filename(source_dir: Path) -> None:
     hash1 = IntegrityChecker.calculate_directory_hash(source_dir)
 
     # Rename a file
@@ -75,12 +77,12 @@ def test_calculate_directory_hash_changes_on_filename(source_dir):
     assert hash1 != hash2
 
 
-def test_calculate_directory_hash_not_found():
+def test_calculate_directory_hash_not_found() -> None:
     with pytest.raises(FileNotFoundError):
         IntegrityChecker.calculate_directory_hash("non_existent_dir")
 
 
-def test_verify_success(source_dir):
+def test_verify_success(source_dir: Path) -> None:
     calculated_hash = IntegrityChecker.calculate_directory_hash(source_dir)
     agent = create_agent_def(integrity_hash=calculated_hash)
 
@@ -88,14 +90,14 @@ def test_verify_success(source_dir):
     IntegrityChecker.verify(agent, source_dir)
 
 
-def test_verify_mismatch(source_dir):
+def test_verify_mismatch(source_dir: Path) -> None:
     agent = create_agent_def(integrity_hash="wrong_hash")
 
     with pytest.raises(IntegrityCompromisedError, match="Integrity check failed"):
         IntegrityChecker.verify(agent, source_dir)
 
 
-def test_verify_missing_hash(source_dir):
+def test_verify_missing_hash(source_dir: Path) -> None:
     agent = create_agent_def(integrity_hash=None)
 
     with pytest.raises(IntegrityCompromisedError, match="Manifest is missing 'integrity_hash'"):

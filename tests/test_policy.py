@@ -2,6 +2,7 @@
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,7 +21,7 @@ from coreason_manifest.policy import PolicyEnforcer
 
 
 # Helper to create a dummy agent definition
-def create_agent_def(**kwargs):
+def create_agent_def(**kwargs: Any) -> AgentDefinition:
     return AgentDefinition(
         metadata=AgentMetadata(
             id="123e4567-e89b-12d3-a456-426614174000",
@@ -36,7 +37,7 @@ def create_agent_def(**kwargs):
 
 
 @pytest.fixture
-def policy_file(tmp_path):
+def policy_file(tmp_path: Path) -> Path:
     p = tmp_path / "compliance.rego"
     p.write_text("""
     package compliance
@@ -49,17 +50,17 @@ def policy_file(tmp_path):
     return p
 
 
-def test_policy_enforcer_init(policy_file):
+def test_policy_enforcer_init(policy_file: Path) -> None:
     enforcer = PolicyEnforcer(policy_path=policy_file)
     assert enforcer.policy_path == policy_file
 
 
-def test_policy_enforcer_init_missing_policy():
+def test_policy_enforcer_init_missing_policy() -> None:
     with pytest.raises(FileNotFoundError):
         PolicyEnforcer(policy_path="non_existent.rego")
 
 
-def test_evaluate_compliant(policy_file):
+def test_evaluate_compliant(policy_file: Path) -> None:
     # Mock subprocess.run to return empty result (no deny)
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(
@@ -71,7 +72,7 @@ def test_evaluate_compliant(policy_file):
         enforcer.evaluate(agent)
 
 
-def test_evaluate_violation(policy_file):
+def test_evaluate_violation(policy_file: Path) -> None:
     # Mock subprocess.run to return violation
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(
@@ -90,7 +91,7 @@ def test_evaluate_violation(policy_file):
         assert "pickle" in excinfo.value.violations[0]
 
 
-def test_evaluate_opa_execution_error(policy_file):
+def test_evaluate_opa_execution_error(policy_file: Path) -> None:
     with patch("subprocess.run") as mock_run:
         mock_run.side_effect = subprocess.CalledProcessError(1, ["opa"], stderr=b"Error")
 
@@ -101,7 +102,7 @@ def test_evaluate_opa_execution_error(policy_file):
             enforcer.evaluate(agent)
 
 
-def test_evaluate_opa_not_found(policy_file):
+def test_evaluate_opa_not_found(policy_file: Path) -> None:
     with patch("subprocess.run") as mock_run:
         mock_run.side_effect = FileNotFoundError()
 
@@ -112,7 +113,7 @@ def test_evaluate_opa_not_found(policy_file):
             enforcer.evaluate(agent)
 
 
-def test_evaluate_opa_json_error(policy_file):
+def test_evaluate_opa_json_error(policy_file: Path) -> None:
     with patch("subprocess.run") as mock_run:
         mock_run.return_value = MagicMock(stdout=b"Not JSON", returncode=0)
 
@@ -125,7 +126,7 @@ def test_evaluate_opa_json_error(policy_file):
 
 # Integration test with actual OPA binary if available
 @pytest.mark.skipif(not Path("tools/opa").exists(), reason="OPA binary not found at tools/opa")
-def test_evaluate_integration(policy_file):
+def test_evaluate_integration(policy_file: Path) -> None:
     opa_path = Path("tools/opa").resolve()
     enforcer = PolicyEnforcer(policy_path=policy_file, opa_path=opa_path)
 
