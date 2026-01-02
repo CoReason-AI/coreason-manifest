@@ -17,6 +17,8 @@ class IntegrityChecker:
       - Compare it against the integrity_hash defined in the manifest.
     """
 
+    IGNORED_DIRS = {".git", "__pycache__", ".venv", ".env", ".DS_Store"}
+
     @staticmethod
     def calculate_hash(source_dir: Path | str) -> str:
         """
@@ -24,6 +26,9 @@ class IntegrityChecker:
 
         It walks the directory, sorts files by relative path, hashes each file,
         and then hashes the sequence of file hashes.
+
+        Ignores hidden directories/files in IGNORED_DIRS.
+        Rejects symbolic links for security.
 
         Args:
             source_dir: The directory containing source code.
@@ -33,6 +38,7 @@ class IntegrityChecker:
 
         Raises:
             FileNotFoundError: If source_dir does not exist.
+            IntegrityCompromisedError: If a symlink is found.
         """
         source_path = Path(source_dir)
         if not source_path.exists():
@@ -42,7 +48,21 @@ class IntegrityChecker:
 
         # Collect all file paths relative to source_dir
         file_paths = []
+
+        # We assume rglog("*") returns everything. We need to filter.
+        # Efficient filtering: using rglob might descend into ignored dirs.
+        # For simplicity, we filter after list. Ideally use os.walk but Path is nicer.
         for path in source_path.rglob("*"):
+            # Check for symlinks first
+            if path.is_symlink():
+                raise IntegrityCompromisedError(f"Symbolic links are forbidden: {path}")
+
+            # Filter ignored directories/files
+            # We check if any part of the relative path is in IGNORED_DIRS
+            rel = path.relative_to(source_path)
+            if any(part in IntegrityChecker.IGNORED_DIRS for part in rel.parts):
+                continue
+
             if path.is_file():
                 file_paths.append(path)
 
