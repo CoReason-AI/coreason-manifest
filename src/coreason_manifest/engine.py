@@ -1,9 +1,9 @@
 # Prosperity-3.0
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import List, Optional, Union
 
 from coreason_manifest.integrity import IntegrityChecker
 from coreason_manifest.loader import ManifestLoader
@@ -21,6 +21,8 @@ class ManifestConfig:
 
     policy_path: Union[str, Path]
     opa_path: str = "opa"
+    tbom_path: Optional[Union[str, Path]] = None
+    extra_data_paths: List[Union[str, Path]] = field(default_factory=list)
 
 
 class ManifestEngine:
@@ -37,7 +39,17 @@ class ManifestEngine:
         """
         self.config = config
         self.schema_validator = SchemaValidator()
-        self.policy_enforcer = PolicyEnforcer(policy_path=config.policy_path, opa_path=config.opa_path)
+
+        # Collect data paths
+        data_paths = list(config.extra_data_paths)
+        if config.tbom_path:
+            data_paths.append(config.tbom_path)
+
+        self.policy_enforcer = PolicyEnforcer(
+            policy_path=config.policy_path,
+            opa_path=config.opa_path,
+            data_paths=data_paths,
+        )
 
     def load_and_validate(self, manifest_path: Union[str, Path], source_dir: Union[str, Path]) -> AgentDefinition:
         """
