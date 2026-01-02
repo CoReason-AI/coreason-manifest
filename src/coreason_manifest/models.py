@@ -5,7 +5,7 @@ import re
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # SemVer Regex pattern (simplified for standard SemVer)
 SEMVER_REGEX = (
@@ -17,6 +17,8 @@ SEMVER_REGEX = (
 
 class AgentMetadata(BaseModel):
     """Metadata for the Agent."""
+
+    model_config = ConfigDict(extra="forbid")
 
     id: UUID = Field(..., description="Unique Identifier for the Agent (UUID).")
     version: str = Field(..., description="Semantic Version of the Agent.")
@@ -35,6 +37,8 @@ class AgentMetadata(BaseModel):
 class AgentInterface(BaseModel):
     """Interface definition for the Agent."""
 
+    model_config = ConfigDict(extra="forbid")
+
     inputs: Dict[str, Any] = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: Dict[str, Any] = Field(..., description="Typed structure of the result.")
 
@@ -42,22 +46,25 @@ class AgentInterface(BaseModel):
 class Step(BaseModel):
     """A single step in the execution graph."""
 
+    model_config = ConfigDict(extra="forbid")
+
     id: str = Field(..., description="Unique identifier for the step.")
     description: Optional[str] = Field(None, description="Description of the step.")
-    # Additional fields can be added as per specific needs of the DAG,
-    # but for now we keep it generic as per the high-level spec.
 
 
 class ModelConfig(BaseModel):
     """LLM Configuration parameters."""
 
+    model_config = ConfigDict(extra="forbid")
+
     model: str = Field(..., description="The LLM model identifier.")
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
-    # Config is locked per version, so no dynamic loading here.
 
 
 class AgentTopology(BaseModel):
     """Topology of the Agent execution."""
+
+    model_config = ConfigDict(extra="forbid")
 
     steps: List[Step] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
@@ -65,6 +72,8 @@ class AgentTopology(BaseModel):
 
 class AgentDependencies(BaseModel):
     """External dependencies for the Agent."""
+
+    model_config = ConfigDict(extra="forbid")
 
     tools: List[str] = Field(default_factory=list, description="List of MCP capability URIs required.")
     libraries: List[str] = Field(
@@ -74,6 +83,8 @@ class AgentDependencies(BaseModel):
 
 class AgentDefinition(BaseModel):
     """The Root Object for the CoReason Agent Manifest."""
+
+    model_config = ConfigDict(extra="forbid")
 
     metadata: AgentMetadata
     interface: AgentInterface

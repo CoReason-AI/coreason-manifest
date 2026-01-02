@@ -5,10 +5,12 @@
   "description": "The definitive source of truth for CoReason Agent definitions.",
   "type": "object",
   "required": ["metadata", "interface", "topology", "dependencies"],
+  "additionalProperties": false,
   "properties": {
     "metadata": {
       "type": "object",
       "required": ["id", "version", "name", "author", "created_at"],
+      "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string",
@@ -38,6 +40,7 @@
     "interface": {
       "type": "object",
       "required": ["inputs", "outputs"],
+      "additionalProperties": false,
       "properties": {
         "inputs": {
           "type": "object",
@@ -52,6 +55,7 @@
     "topology": {
       "type": "object",
       "required": ["steps", "model_config"],
+      "additionalProperties": false,
       "properties": {
         "steps": {
           "type": "array",
@@ -59,6 +63,7 @@
           "items": {
             "type": "object",
             "required": ["id"],
+            "additionalProperties": false,
             "properties": {
               "id": {
                 "type": "string",
@@ -74,6 +79,7 @@
         "model_config": {
           "type": "object",
           "required": ["model", "temperature"],
+          "additionalProperties": false,
           "properties": {
             "model": {
               "type": "string",
@@ -91,6 +97,7 @@
     },
     "dependencies": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "tools": {
           "type": "array",
