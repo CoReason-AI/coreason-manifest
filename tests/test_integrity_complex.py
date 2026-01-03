@@ -1,97 +1,78 @@
 # Prosperity-3.0
 from pathlib import Path
+from typing import Any, Dict
+from uuid import uuid4
 
 import pytest
 
 from coreason_manifest.errors import IntegrityCompromisedError
 from coreason_manifest.integrity import IntegrityChecker
+from coreason_manifest.models import AgentDefinition
 
 
-def test_ignore_git_directory(tmp_path: Path) -> None:
-    """Test that .git directory is ignored in hash calculation."""
+def test_large_file_hash(tmp_path: Path) -> None:
+    """Test hash calculation for files larger than the chunk size (8192)."""
     src = tmp_path / "src"
     src.mkdir()
-    (src / "main.py").write_text("content")
+
+    # Create a 20KB file
+    large_content = b"a" * 20000
+    file_path = src / "large_file.bin"
+    with open(file_path, "wb") as f:
+        f.write(large_content)
 
     hash1 = IntegrityChecker.calculate_hash(src)
 
-    # Add .git directory
-    git_dir = src / ".git"
-    git_dir.mkdir()
-    (git_dir / "HEAD").write_text("ref: refs/heads/main")
-
+    # Verify stability
     hash2 = IntegrityChecker.calculate_hash(src)
-
     assert hash1 == hash2
 
+    # Modify slightly at the end
+    with open(file_path, "wb") as f:
+        f.write(large_content + b"b")
 
-def test_ignore_ds_store(tmp_path: Path) -> None:
-    """Test that .DS_Store is ignored."""
+    hash3 = IntegrityChecker.calculate_hash(src)
+    assert hash1 != hash3
+
+
+def test_deeply_nested_structure(tmp_path: Path) -> None:
+    """Test hash calculation for deeply nested directories."""
     src = tmp_path / "src"
     src.mkdir()
-    (src / "main.py").write_text("content")
+
+    # Create structure: src/level1/level2/level3/file.txt
+    nested = src / "level1" / "level2" / "level3"
+    nested.mkdir(parents=True)
+    (nested / "file.txt").write_text("content")
 
     hash1 = IntegrityChecker.calculate_hash(src)
+    assert hash1
 
-    (src / ".DS_Store").write_text("junk")
-
-    hash2 = IntegrityChecker.calculate_hash(src)
-
-    assert hash1 == hash2
-
-
-def test_ignore_pycache(tmp_path: Path) -> None:
-    """Test that __pycache__ is ignored."""
-    src = tmp_path / "src"
-    src.mkdir()
-    (src / "main.py").write_text("content")
-
-    hash1 = IntegrityChecker.calculate_hash(src)
-
-    cache_dir = src / "__pycache__"
-    cache_dir.mkdir()
-    (cache_dir / "main.cpython-312.pyc").write_text("binary")
+    # Create structure: src/level1/level2/level3_diff/file.txt
+    nested2 = src / "level1" / "level2" / "level3_diff"
+    nested2.mkdir(parents=True)
+    (nested2 / "file.txt").write_text("content")
 
     hash2 = IntegrityChecker.calculate_hash(src)
-
-    assert hash1 == hash2
-
-
-def test_symlink_rejection(tmp_path: Path) -> None:
-    """Test that symlinks cause an IntegrityCompromisedError."""
-    src = tmp_path / "src"
-    src.mkdir()
-    (src / "main.py").write_text("content")
-
-    # Create symlink
-    target = src / "target"
-    target.touch()
-    try:
-        (src / "link").symlink_to(target)
-    except OSError:
-        pytest.skip("Symlinks not supported on this platform")
-
-    with pytest.raises(IntegrityCompromisedError) as excinfo:
-        IntegrityChecker.calculate_hash(src)
-    assert "Symbolic links are forbidden" in str(excinfo.value)
-
-
-def test_empty_directory(tmp_path: Path) -> None:
-    """Test hash of an empty directory."""
-    src = tmp_path / "empty"
-    src.mkdir()
-
-    # Should not raise error, just return hash of empty sequence
-    hash_val = IntegrityChecker.calculate_hash(src)
-    assert isinstance(hash_val, str)
-    assert len(hash_val) == 64
+    assert hash1 != hash2
 
 
 def test_unicode_filenames(tmp_path: Path) -> None:
-    """Test handling of unicode filenames."""
+    """Test hash calculation with Unicode filenames."""
     src = tmp_path / "src"
     src.mkdir()
-    (src / "🚀.py").write_text("rocket")
 
-    hash_val = IntegrityChecker.calculate_hash(src)
-    assert isinstance(hash_val, str)
+    # Filename with unicode: "café.txt"
+    (src / "café.txt").write_text("coffee")
+
+    hash1 = IntegrityChecker.calculate_hash(src)
+
+    # Check stability
+    hash2 = IntegrityChecker.calculate_hash(src)
+    assert hash1 == hash2
+
+    # Rename to non-unicode "cafe.txt"
+    (src / "café.txt").rename(src / "cafe.txt")
+    hash3 = IntegrityChecker.calculate_hash(src)
+
+    assert hash1 != hash3

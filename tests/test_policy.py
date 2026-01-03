@@ -43,6 +43,16 @@ def test_policy_enforcer_init_error() -> None:
         PolicyEnforcer(policy_path="non_existent.rego")
 
 
+def test_policy_enforcer_data_file_not_found(tmp_path: Path) -> None:
+    """Test that PolicyEnforcer raises FileNotFoundError if data file missing."""
+    policy_file = tmp_path / "test.rego"
+    policy_file.touch()
+
+    with pytest.raises(FileNotFoundError) as excinfo:
+        PolicyEnforcer(policy_path=policy_file, data_paths=["non_existent_data.json"])
+    assert "Data file not found" in str(excinfo.value)
+
+
 def test_evaluate_success_mock(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
     """Test successful evaluation with mocked OPA."""
     policy_file = tmp_path / "test.rego"
@@ -58,6 +68,28 @@ def test_evaluate_success_mock(valid_agent_data: Dict[str, Any], tmp_path: Path)
     with patch("subprocess.run", return_value=mock_result) as mock_run:
         enforcer.evaluate(valid_agent_data)
         mock_run.assert_called_once()
+
+
+def test_evaluate_with_data_paths(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
+    """Test evaluation with data paths correctly passed to OPA."""
+    policy_file = tmp_path / "test.rego"
+    policy_file.touch()
+    data_file = tmp_path / "data.json"
+    data_file.touch()
+
+    enforcer = PolicyEnforcer(policy_path=policy_file, opa_path="opa", data_paths=[data_file])
+
+    mock_result = MagicMock()
+    mock_result.returncode = 0
+    mock_result.stdout = json.dumps({"result": [{"expressions": [{"value": []}]}]})
+
+    with patch("subprocess.run", return_value=mock_result) as mock_run:
+        enforcer.evaluate(valid_agent_data)
+
+        # Verify call args include the data path
+        args = mock_run.call_args[0][0]
+        assert "-d" in args
+        assert str(data_file) in args
 
 
 def test_evaluate_violation_mock(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
