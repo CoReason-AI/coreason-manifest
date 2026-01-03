@@ -1,0 +1,14 @@
+{
+  "tbom": [
+    "requests",
+    "pydantic",
+    "httpx",
+    "pandas",
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "torch",
+    "fastapi",
+    "uvicorn"
+  ]
+}

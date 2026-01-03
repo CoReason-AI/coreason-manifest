@@ -14,6 +14,7 @@ from coreason_manifest.policy import PolicyEnforcer
 # We assume OPA is available or mocked.
 # If unavailable, we skip real execution tests.
 POLICY_PATH = Path("src/coreason_manifest/policies/compliance.rego")
+TBOM_PATH = Path("src/coreason_manifest/policies/tbom.json")
 OPA_BINARY = "./opa" if os.path.exists("./opa") else shutil.which("opa")
 
 
@@ -55,7 +56,7 @@ def test_dependency_pinning_enforcement(valid_agent_data: Dict[str, Any], tmp_pa
 def test_rego_pinning_logic_real(valid_agent_data: Dict[str, Any]) -> None:
     """Test actual Rego logic for pinning using OPA binary."""
     assert OPA_BINARY
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY)
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
     # Case 1: Valid pinned
     enforcer.evaluate(valid_agent_data)

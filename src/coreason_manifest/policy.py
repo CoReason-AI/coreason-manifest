@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 
 from coreason_manifest.errors import PolicyViolationError
 
@@ -17,19 +17,30 @@ class PolicyEnforcer:
       - Evaluate the agent against the compliance.rego policy file using OPA.
     """
 
-    def __init__(self, policy_path: str | Path, opa_path: str = "opa") -> None:
+    def __init__(
+        self,
+        policy_path: str | Path,
+        opa_path: str = "opa",
+        data_paths: Optional[List[str | Path]] = None,
+    ) -> None:
         """
         Initialize the PolicyEnforcer.
 
         Args:
             policy_path: Path to the Rego policy file.
             opa_path: Path to the OPA executable. Defaults to "opa" (expected in PATH).
+            data_paths: List of paths to data files (e.g. JSON/YAML) to be loaded by OPA.
         """
         self.policy_path = Path(policy_path)
         self.opa_path = opa_path
+        self.data_paths = [Path(p) for p in data_paths] if data_paths else []
 
         if not self.policy_path.exists():
             raise FileNotFoundError(f"Policy file not found: {self.policy_path}")
+
+        for path in self.data_paths:
+            if not path.exists():
+                raise FileNotFoundError(f"Data file not found: {path}")
 
     def evaluate(self, agent_data: dict[str, Any]) -> None:
         """
@@ -43,7 +54,7 @@ class PolicyEnforcer:
             RuntimeError: If OPA execution fails.
         """
         # Prepare input for OPA
-        # We invoke OPA via subprocess: opa eval -d <policy> -I <input> "data.coreason.compliance.deny"
+        # We invoke OPA via subprocess: opa eval -d <policy> -d <data> ... -I <input> "data.coreason.compliance.deny"
         # We pass input via stdin to avoid temp files
 
         try:
@@ -53,17 +64,28 @@ class PolicyEnforcer:
             # Serialize input to JSON
             input_json = json.dumps(agent_data)
 
-            process = subprocess.run(
+            cmd = [
+                self.opa_path,
+                "eval",
+                "-d",
+                str(self.policy_path),
+            ]
+
+            # Add data paths
+            for data_path in self.data_paths:
+                cmd.extend(["-d", str(data_path)])
+
+            cmd.extend(
                 [
-                    self.opa_path,
-                    "eval",
-                    "-d",
-                    str(self.policy_path),
                     "-I",  # Read input from stdin
                     query,
                     "--format",
                     "json",
-                ],
+                ]
+            )
+
+            process = subprocess.run(
+                cmd,
                 input=input_json,
                 capture_output=True,
                 text=True,
