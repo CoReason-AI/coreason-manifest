@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import Any, Dict
 from uuid import uuid4
+import os
 
 import pytest
 
@@ -113,3 +114,40 @@ def test_verify_missing_hash(tmp_path: Path, agent_def_data: Dict[str, Any]) -> 
     with pytest.raises(IntegrityCompromisedError) as excinfo:
         IntegrityChecker.verify(agent_def, src)
     assert "Manifest missing integrity_hash" in str(excinfo.value)
+
+
+def test_calculate_hash_symlink_error(tmp_path: Path) -> None:
+    """Test that symlinks raise IntegrityCompromisedError."""
+    src = tmp_path / "src"
+    src.mkdir()
+    target = src / "target.txt"
+    target.write_text("content")
+    link = src / "link.txt"
+
+    try:
+        os.symlink(target, link)
+    except OSError:
+        pytest.skip("Symlinks not supported on this platform")
+
+    with pytest.raises(IntegrityCompromisedError) as excinfo:
+        IntegrityChecker.calculate_hash(src)
+    assert "Symbolic links are forbidden" in str(excinfo.value)
+
+
+def test_calculate_hash_ignores_dirs(tmp_path: Path) -> None:
+    """Test that ignored directories are skipped."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "file.txt").write_text("content")
+
+    # Calculate baseline
+    hash1 = IntegrityChecker.calculate_hash(src)
+
+    # Add ignored dir
+    ignored_dir = src / ".git"
+    ignored_dir.mkdir()
+    (ignored_dir / "ignored.txt").write_text("ignored")
+
+    hash2 = IntegrityChecker.calculate_hash(src)
+
+    assert hash1 == hash2
