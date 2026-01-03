@@ -93,6 +93,25 @@ def test_opa_execution_failure(valid_agent_data: Dict[str, Any], tmp_path: Path)
         with pytest.raises(RuntimeError) as excinfo:
             enforcer.evaluate(valid_agent_data)
         assert "OPA execution failed" in str(excinfo.value)
+        assert "OPA Error" in str(excinfo.value)
+
+
+def test_opa_execution_failure_with_stdout(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
+    """Test handling of OPA execution failure where stderr is empty but stdout has info."""
+    policy_file = tmp_path / "test.rego"
+    policy_file.touch()
+
+    enforcer = PolicyEnforcer(policy_path=policy_file, opa_path="opa")
+
+    mock_result = MagicMock()
+    mock_result.returncode = 1
+    mock_result.stderr = ""
+    mock_result.stdout = "Critical Failure in Stdout"
+
+    with patch("subprocess.run", return_value=mock_result):
+        with pytest.raises(RuntimeError) as excinfo:
+            enforcer.evaluate(valid_agent_data)
+        assert "OPA execution failed: Critical Failure in Stdout" in str(excinfo.value)
 
 
 def test_opa_not_found(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
