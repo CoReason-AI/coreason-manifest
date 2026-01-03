@@ -115,4 +115,4 @@ def test_tbom_real_opa_integration(valid_agent_data: Dict[str, Any]) -> None:
     # This might fail Rule 1 or Rule 2 depending on how regex handles "requests" (no ==)
     # Rule 1 explicitly checks for "==" so it should fail Rule 1.
     violations = str(excinfo.value.violations)
-    assert "must be pinned with '=='" in violations
+    assert "must be strictly pinned with '=='" in violations
