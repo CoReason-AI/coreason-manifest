@@ -103,15 +103,10 @@ class TestTBOMComplex:
         # If input is 'Pandas==2.0.0', and TBOM has 'pandas', it ideally should pass if we normalize,
         # or fail if we are strict. Given standard pip usage, normalization is safer, but strictly matching
         # TBOM is more secure.
-        # Let's assume STRICT matching for now as per "Source of Truth" philosophy.
-        # So 'Pandas' should fail if TBOM has 'pandas'.
+        # UPDATE: Policy now normalizes case, so 'Pandas' should pass.
 
         agent_data["dependencies"]["libraries"] = ["Pandas==2.0.0"]
-        with pytest.raises(PolicyViolationError) as excinfo:
-            enforcer.evaluate(agent_data)
-        # If the policy does NOT normalize, this will fail (which is what we test for now).
-        # If we decide to support normalization later, we update this test.
-        assert "is not in the Trusted Bill of Materials" in str(excinfo.value.violations)
+        enforcer.evaluate(agent_data)
 
     def test_no_dependencies(self, complex_tbom_file: Path, agent_data: Dict[str, Any]) -> None:
         """Test that empty dependencies list passes."""
