@@ -1,8 +1,8 @@
 # Prosperity-3.0
+import os
 from pathlib import Path
 from typing import Any, Dict
 from uuid import uuid4
-import os
 
 import pytest
 
