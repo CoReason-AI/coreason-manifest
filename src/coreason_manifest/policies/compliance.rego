@@ -1,11 +1,13 @@
 package coreason.compliance
 
+import rego.v1
+
 # Do not import data.tbom to avoid namespace confusion, access via data.tbom directly if needed or via helper.
 
-default allow = false
+default allow := false
 
 # Deny if 'pickle' is in libraries (matches "pickle", "pickle==1.0", "pickle>=2.0")
-deny[msg] {
+deny contains msg if {
     some i
     lib_str := input.dependencies.libraries[i]
     # Check if the library name starts with 'pickle' followed by end of string or version specifier
@@ -14,7 +16,7 @@ deny[msg] {
 }
 
 # Deny if 'os' is in libraries
-deny[msg] {
+deny contains msg if {
     some i
     lib_str := input.dependencies.libraries[i]
     regex.match("^os([<>=!@\\[].*)?$", lib_str)
@@ -22,14 +24,14 @@ deny[msg] {
 }
 
 # Deny if description is too short (Business Rule example)
-deny[msg] {
+deny contains msg if {
     count(input.topology.steps) > 0
     count(input.topology.steps[0].description) < 5
     msg := "Step description is too short."
 }
 
 # Rule 1 (Dependency Pinning): All library dependencies must have explicit version pins
-deny[msg] {
+deny contains msg if {
     some i
     lib := input.dependencies.libraries[i]
     # Check if '==' exists in the string
@@ -40,7 +42,7 @@ deny[msg] {
 }
 
 # Rule 2 (Allowlist Enforcement): Libraries must be in TBOM
-deny[msg] {
+deny contains msg if {
     some i
     lib_str := input.dependencies.libraries[i]
 
@@ -61,7 +63,7 @@ deny[msg] {
 
 # Helper to safely check if lib is in TBOM
 # Returns true if data.tbom exists AND contains the lib
-is_in_tbom(lib) {
+is_in_tbom(lib) if {
     # Check if data.tbom exists and is array (implicitly handled by iteration)
     # If data.tbom is undefined, this rule body is undefined (false).
     data.tbom[_] == lib
