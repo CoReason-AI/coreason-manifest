@@ -98,7 +98,7 @@ def test_multiple_violations(base_agent_data: Dict[str, Any], tmp_path: Path) ->
     # 2. banned-lib not in TBOM
     assert any("Library 'banned-lib' is not in the Trusted Bill of Materials" in v for v in violations)
     # 3. allowed-lib unpinned
-    assert any("Library 'allowed-lib' must be pinned with '=='" in v for v in violations)
+    assert any("Library 'allowed-lib' must be strictly pinned with '=='" in v for v in violations)
 
 
 @pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")

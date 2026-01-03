@@ -65,13 +65,13 @@ def test_rego_pinning_logic_real(valid_agent_data: Dict[str, Any]) -> None:
     valid_agent_data["dependencies"]["libraries"] = ["requests>=2.0.0"]
     with pytest.raises(PolicyViolationError) as excinfo:
         enforcer.evaluate(valid_agent_data)
-    assert "must be pinned with '=='" in str(excinfo.value.violations)
+    assert "must be strictly pinned with '=='" in str(excinfo.value.violations)
 
     # Case 3: No version
     valid_agent_data["dependencies"]["libraries"] = ["requests"]
     with pytest.raises(PolicyViolationError) as excinfo:
         enforcer.evaluate(valid_agent_data)
-    assert "must be pinned with '=='" in str(excinfo.value.violations)
+    assert "must be strictly pinned with '=='" in str(excinfo.value.violations)
 
 
 def test_mocked_pinning_violation(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
