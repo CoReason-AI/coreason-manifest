@@ -4,17 +4,20 @@ package coreason.compliance
 
 default allow = false
 
-# Deny if 'pickle' is in libraries
+# Deny if 'pickle' is in libraries (matches "pickle", "pickle==1.0", "pickle>=2.0")
 deny[msg] {
     some i
-    input.dependencies.libraries[i] == "pickle"
+    lib_str := input.dependencies.libraries[i]
+    # Check if the library name starts with 'pickle' followed by end of string or version specifier
+    regex.match("^pickle([<>=!@\\[].*)?$", lib_str)
     msg := "Security Risk: 'pickle' library is strictly forbidden."
 }
 
-# Deny if 'os' is in libraries (just another example)
+# Deny if 'os' is in libraries
 deny[msg] {
     some i
-    input.dependencies.libraries[i] == "os"
+    lib_str := input.dependencies.libraries[i]
+    regex.match("^os([<>=!@\\[].*)?$", lib_str)
     msg := "Security Risk: 'os' library is strictly forbidden."
 }
 
