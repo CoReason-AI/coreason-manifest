@@ -1,6 +1,6 @@
 package coreason.compliance
 
-import data.tbom
+# Do not import data.tbom to avoid namespace confusion, access via data.tbom directly if needed or via helper.
 
 default allow = false
 
@@ -42,20 +42,24 @@ deny[msg] {
     lib_str := input.dependencies.libraries[i]
 
     # Extract library name using regex (matches characters before any '==' or other version specifiers)
-    # We assume the name is at the start.
-    # Pattern: ^([a-zA-Z0-9_\-]+)
+    # Pattern must support dots (for namespace packages) and stop before extras brackets or version specifiers.
+    # Updated Pattern: ^([a-zA-Z0-9_\-\.]+)
     # Note: Regex parsing in Rego returns an array of matches.
     # regex.find_all_string_submatch_n(pattern, value, number)
-    parts := regex.find_all_string_submatch_n("^[a-zA-Z0-9_\\-]+", lib_str, 1)
+    parts := regex.find_all_string_submatch_n("^[a-zA-Z0-9_\\-\\.]+", lib_str, 1)
     count(parts) > 0
     lib_name := parts[0][0]
 
     # Check if lib_name is in tbom
-    not array_contains(tbom, lib_name)
+    not is_in_tbom(lib_name)
 
     msg := sprintf("Compliance Violation: Library '%v' is not in the Trusted Bill of Materials (TBOM).", [lib_name])
 }
 
-array_contains(arr, elem) {
-  arr[_] == elem
+# Helper to safely check if lib is in TBOM
+# Returns true if data.tbom exists AND contains the lib
+is_in_tbom(lib) {
+    # Check if data.tbom exists and is array (implicitly handled by iteration)
+    # If data.tbom is undefined, this rule body is undefined (false).
+    data.tbom[_] == lib
 }

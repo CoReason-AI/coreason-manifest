@@ -13,6 +13,7 @@ from coreason_manifest.policy import PolicyEnforcer
 
 # Path to the default policy
 POLICY_PATH = Path("src/coreason_manifest/policies/compliance.rego")
+TBOM_PATH = Path("src/coreason_manifest/policies/tbom.json")
 # Path to the OPA binary downloaded in the setup phase (assumed to be in repo root)
 OPA_BINARY = "./opa" if os.path.exists("./opa") else shutil.which("opa")
 
@@ -32,7 +33,7 @@ def valid_agent_data() -> Dict[str, Any]:
             "steps": [{"id": "step1", "description": "Long enough description"}],
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
-        "dependencies": {"tools": [], "libraries": ["requests"]},
+        "dependencies": {"tools": [], "libraries": ["requests==2.31.0"]},
     }
 
 
@@ -127,7 +128,8 @@ def test_opa_invalid_json_output(valid_agent_data: Dict[str, Any], tmp_path: Pat
 def test_real_opa_integration(valid_agent_data: Dict[str, Any]) -> None:
     """Integration test with real OPA binary."""
     assert OPA_BINARY is not None
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY)
+    # Must include TBOM for real integration to pass Rule 2
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
     # 1. Valid Case
     enforcer.evaluate(valid_agent_data)
