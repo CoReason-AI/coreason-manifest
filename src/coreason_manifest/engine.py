@@ -1,6 +1,7 @@
 # Prosperity-3.0
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Union
@@ -98,7 +99,15 @@ class ManifestEngine:
         # or raw data? Standard practice: Check against normalized data to prevent bypasses.
         # dump mode='json' converts UUIDs/Dates to strings which is what OPA expects usually.
         normalized_data = agent_def.model_dump(mode="json")
-        self.policy_enforcer.evaluate(normalized_data)
+        start_time = time.perf_counter()
+        try:
+            self.policy_enforcer.evaluate(normalized_data)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            logger.info(f"Policy Check: Pass - {duration_ms:.2f}ms")
+        except Exception:
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            logger.info(f"Policy Check: Fail - {duration_ms:.2f}ms")
+            raise
 
         # 5. Integrity Check
         logger.debug("Verifying Integrity...")
