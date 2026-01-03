@@ -93,7 +93,11 @@ class PolicyEnforcer:
             )
 
             if process.returncode != 0:
-                raise RuntimeError(f"OPA execution failed: {process.stderr}")
+                # Include stdout in error message if stderr is empty or insufficient
+                error_msg = process.stderr.strip()
+                if not error_msg:
+                    error_msg = process.stdout.strip() or "Unknown error (empty stdout/stderr)"
+                raise RuntimeError(f"OPA execution failed: {error_msg}")
 
             # Parse OPA output
             # Format: {"result": [{"expressions": [{"value": ["violation1", "violation2"]}]}]}
