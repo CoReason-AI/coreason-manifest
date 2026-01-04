@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import pytest
 import yaml
+
 from coreason_manifest.engine import ManifestConfig, ManifestEngine
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.integrity import IntegrityChecker

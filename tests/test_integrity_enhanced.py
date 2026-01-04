@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import pytest
+
 from coreason_manifest.errors import IntegrityCompromisedError
 from coreason_manifest.integrity import IntegrityChecker
 

@@ -1,8 +1,11 @@
 # Prosperity-3.0
 import json
+import re
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.policy import PolicyEnforcer
 
@@ -10,16 +13,9 @@ from coreason_manifest.policy import PolicyEnforcer
 def test_policy_regex_pinning_strictness() -> None:
     """
     Test the strictness of the regex used in PolicyEnforcer.
-    Since we cannot run OPA directly in this environment,
-    we test the regex logic by extracting it or simulating it in Python
-    to ensure it matches the Rego intent.
-
-    The regex in Rego is:
-    ^[a-zA-Z0-9_\-\.]+(\[[a-zA-Z0-9_\-\.,]+\])?==[a-zA-Z0-9_\-\.\+]+$
     """
-    import re
-
     # Matching the regex from compliance.rego
+    # Using raw string and escaping backslash for dash inside [] correctly for Python regex engine
     pattern = r"^[a-zA-Z0-9_\-\.]+(\[[a-zA-Z0-9_\-\.,]+\])?==[a-zA-Z0-9_\-\.\+]+$"
 
     valid_cases = [
@@ -44,7 +40,7 @@ def test_policy_regex_pinning_strictness() -> None:
         "==1.0",
         "pandas==",
         "pandas[extra]>=1.0",
-        "pandas==2.0; python_version<'3.10'",  # Markers not supported by this simple regex
+        "pandas==2.0; python_version<'3.10'",
     ]
 
     for case in valid_cases:
@@ -54,7 +50,7 @@ def test_policy_regex_pinning_strictness() -> None:
         assert not re.match(pattern, case), f"Should NOT match: {case}"
 
 
-def test_policy_enforcer_evaluate_success(tmp_path) -> None:
+def test_policy_enforcer_evaluate_success(tmp_path: Path) -> None:
     """Test evaluate success path with mocked subprocess."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
@@ -75,7 +71,7 @@ def test_policy_enforcer_evaluate_success(tmp_path) -> None:
         assert "eval" in args
 
 
-def test_policy_enforcer_evaluate_failure(tmp_path) -> None:
+def test_policy_enforcer_evaluate_failure(tmp_path: Path) -> None:
     """Test evaluate failure path (violations found)."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
@@ -96,7 +92,7 @@ def test_policy_enforcer_evaluate_failure(tmp_path) -> None:
         assert "Violation 2" in excinfo.value.violations
 
 
-def test_policy_enforcer_opa_error(tmp_path) -> None:
+def test_policy_enforcer_opa_error(tmp_path: Path) -> None:
     """Test OPA execution error (non-zero return code)."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
@@ -112,7 +108,7 @@ def test_policy_enforcer_opa_error(tmp_path) -> None:
             enforcer.evaluate({})
 
 
-def test_policy_enforcer_opa_not_found(tmp_path) -> None:
+def test_policy_enforcer_opa_not_found(tmp_path: Path) -> None:
     """Test OPA executable not found."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
@@ -124,7 +120,7 @@ def test_policy_enforcer_opa_not_found(tmp_path) -> None:
             enforcer.evaluate({})
 
 
-def test_policy_enforcer_json_error(tmp_path) -> None:
+def test_policy_enforcer_json_error(tmp_path: Path) -> None:
     """Test invalid JSON output from OPA."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
@@ -153,7 +149,7 @@ def test_policy_enforcer_init_files_not_found() -> None:
             PolicyEnforcer(f.name, data_paths=["non_existent.json"])
 
 
-def test_policy_enforcer_evaluate_with_data_paths(tmp_path) -> None:
+def test_policy_enforcer_evaluate_with_data_paths(tmp_path: Path) -> None:
     """Test evaluate includes data paths in command."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
@@ -177,7 +173,7 @@ def test_policy_enforcer_evaluate_with_data_paths(tmp_path) -> None:
         assert str(data_path) in args
 
 
-def test_policy_enforcer_opa_error_empty_stderr(tmp_path) -> None:
+def test_policy_enforcer_opa_error_empty_stderr(tmp_path: Path) -> None:
     """Test OPA error with empty stderr (fallback to stdout or default)."""
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()

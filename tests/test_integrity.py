@@ -5,6 +5,7 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
+
 from coreason_manifest.errors import IntegrityCompromisedError
 from coreason_manifest.integrity import IntegrityChecker
 from coreason_manifest.models import AgentDefinition

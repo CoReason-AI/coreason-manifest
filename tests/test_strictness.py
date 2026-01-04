@@ -3,10 +3,11 @@ from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.errors import ManifestSyntaxError
 from coreason_manifest.models import AgentDefinition
 from coreason_manifest.validator import SchemaValidator
-from pydantic import ValidationError
 
 
 @pytest.fixture

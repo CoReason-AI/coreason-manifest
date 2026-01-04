@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.policy import PolicyEnforcer
 
