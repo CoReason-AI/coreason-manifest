@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
-
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.policy import PolicyEnforcer
 

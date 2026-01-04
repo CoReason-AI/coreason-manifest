@@ -7,7 +7,6 @@ from uuid import uuid4
 
 import pytest
 import yaml
-
 from coreason_manifest.engine import ManifestConfig, ManifestEngine
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.integrity import IntegrityChecker
@@ -69,16 +68,24 @@ def test_policy_check_logging_pass(
     finally:
         logger.remove(handler_id)
 
-    # Check for specific log message
-    found = False
+    # Check for specific log messages
+    found_pass = False
+    found_validate = False
+
+    agent_id = valid_agent_data["metadata"]["id"]
+    agent_version = valid_agent_data["metadata"]["version"]
+    expected_validate = f"Validating Agent {agent_id} v{agent_version}"
+
     for msg in log_messages:
         # Check raw message content
         raw_msg = msg.record["message"]
         if re.match(r"Policy Check: Pass - \d+(\.\d+)?ms", raw_msg):
-            found = True
-            break
+            found_pass = True
+        if raw_msg == expected_validate:
+            found_validate = True
 
-    assert found, "Expected log message 'Policy Check: Pass - <time>ms' not found."
+    assert found_pass, "Expected log message 'Policy Check: Pass - <time>ms' not found."
+    assert found_validate, f"Expected log message '{expected_validate}' not found."
 
 
 def test_policy_check_logging_fail(

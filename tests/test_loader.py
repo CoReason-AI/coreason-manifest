@@ -6,7 +6,6 @@ from uuid import uuid4
 
 import pytest
 import yaml
-
 from coreason_manifest.errors import ManifestSyntaxError, PolicyViolationError
 from coreason_manifest.loader import ManifestLoader
 from coreason_manifest.models import AgentDefinition

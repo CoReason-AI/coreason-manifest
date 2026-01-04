@@ -7,7 +7,6 @@ from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.policy import PolicyEnforcer
 

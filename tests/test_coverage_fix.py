@@ -2,7 +2,6 @@
 from pathlib import Path
 
 import pytest
-
 from coreason_manifest.engine import ManifestConfig, ManifestEngine
 from coreason_manifest.policy import PolicyEnforcer
 

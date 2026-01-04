@@ -4,7 +4,6 @@ from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from coreason_manifest.errors import ManifestSyntaxError
 from coreason_manifest.validator import SchemaValidator
 
