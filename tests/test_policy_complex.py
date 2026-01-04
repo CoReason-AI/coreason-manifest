@@ -1,25 +1,22 @@
 # Prosperity-3.0
-import json
 import os
 import shutil
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import MagicMock, patch
 
 import pytest
 
 from coreason_manifest.errors import PolicyViolationError
 from coreason_manifest.policy import PolicyEnforcer
 
-# We assume OPA is available or mocked.
-# If unavailable, we skip real execution tests.
 POLICY_PATH = Path("src/coreason_manifest/policies/compliance.rego")
 TBOM_PATH = Path("src/coreason_manifest/policies/tbom.json")
-OPA_BINARY = "./opa" if os.path.exists("./opa") else shutil.which("opa")
+# Use the locally installed OPA if available
+OPA_BINARY: str = "./opa" if os.path.exists("./opa") else (shutil.which("opa") or "")
 
 
 @pytest.fixture
-def valid_agent_data() -> Dict[str, Any]:
+def base_agent_data() -> Dict[str, Any]:
     return {
         "metadata": {
             "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -30,68 +27,104 @@ def valid_agent_data() -> Dict[str, Any]:
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {
-            "steps": [{"id": "s1", "description": "Valid description"}],
-            "model_config": {"model": "gpt-4", "temperature": 0.5},
+            "steps": [{"id": "s1", "description": "valid description"}],
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
-        "dependencies": {"tools": [], "libraries": ["requests==2.0.0"]},
+        "dependencies": {"tools": [], "libraries": []},
     }
 
 
-def test_dependency_pinning_enforcement(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
-    """Test that libraries without '==' are rejected."""
-    # We use a mocked OPA response to simulate the policy behavior
-    # because ensuring OPA binary exists with correct version everywhere is hard.
-    # However, to truly test the REGO logic, we should use the real OPA if available.
+@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+def test_complex_dependency_pinning(base_agent_data: Dict[str, Any]) -> None:
+    """Test various dependency pinning scenarios against Rego policy."""
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
-    # If OPA is not available, we mock the expected JSON response for this violation.
-    # But wait, testing the *Rego logic* requires running the Rego.
-    # Mocking subprocess just tests Python code handling the output.
+    # 1. Valid: Standard pinning (in TBOM)
+    base_agent_data["dependencies"]["libraries"] = ["requests==2.31.0"]
+    enforcer.evaluate(base_agent_data)  # Should pass
 
-    # Since I'm tasked to "check for complex cases", verifying the REGO logic is key.
-    # I will attempt to run real OPA if available, else skip.
-    pass
+    # 2. Valid: Extras (in TBOM: requests)
+    # Note: Rego parses 'requests[security]' -> lib name 'requests'.
+    base_agent_data["dependencies"]["libraries"] = ["requests[security]==2.31.0"]
+    enforcer.evaluate(base_agent_data)  # Should pass
+
+    # 3. Valid: Build Metadata
+    base_agent_data["dependencies"]["libraries"] = ["requests==2.31.0+build.123"]
+    enforcer.evaluate(base_agent_data)  # Should pass
+
+    # 4. Invalid: Mixed constraints
+    base_agent_data["dependencies"]["libraries"] = ["requests==2.31.0,>=2.30.0"]
+    with pytest.raises(PolicyViolationError) as e:
+        enforcer.evaluate(base_agent_data)
+    assert "must be strictly pinned" in str(e.value.violations)
+
+    # 5. Invalid: Unpinned (>=)
+    base_agent_data["dependencies"]["libraries"] = ["requests>=2.31.0"]
+    with pytest.raises(PolicyViolationError) as e:
+        enforcer.evaluate(base_agent_data)
+    assert "must be strictly pinned" in str(e.value.violations)
+
+    # 6. Invalid: No version
+    base_agent_data["dependencies"]["libraries"] = ["requests"]
+    with pytest.raises(PolicyViolationError) as e:
+        enforcer.evaluate(base_agent_data)
+    assert "must be strictly pinned" in str(e.value.violations)
 
 
 @pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
-def test_rego_pinning_logic_real(valid_agent_data: Dict[str, Any]) -> None:
-    """Test actual Rego logic for pinning using OPA binary."""
-    assert OPA_BINARY
+def test_tbom_case_insensitivity(base_agent_data: Dict[str, Any]) -> None:
+    """Test TBOM case insensitivity."""
     enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
-    # Case 1: Valid pinned
-    enforcer.evaluate(valid_agent_data)
+    # TBOM contains "requests" (lowercase)
 
-    # Case 2: Unpinned (>=)
-    valid_agent_data["dependencies"]["libraries"] = ["requests>=2.0.0"]
-    with pytest.raises(PolicyViolationError) as excinfo:
-        enforcer.evaluate(valid_agent_data)
-    assert "must be strictly pinned with '=='" in str(excinfo.value.violations)
+    # 1. Valid: Uppercase input "Requests"
+    base_agent_data["dependencies"]["libraries"] = ["Requests==2.31.0"]
+    enforcer.evaluate(base_agent_data)  # Should pass
 
-    # Case 3: No version
-    valid_agent_data["dependencies"]["libraries"] = ["requests"]
-    with pytest.raises(PolicyViolationError) as excinfo:
-        enforcer.evaluate(valid_agent_data)
-    assert "must be strictly pinned with '=='" in str(excinfo.value.violations)
+    # 2. Valid: Mixed case "ReQuEsTs"
+    base_agent_data["dependencies"]["libraries"] = ["ReQuEsTs==2.31.0"]
+    enforcer.evaluate(base_agent_data)  # Should pass
+
+    # 3. Invalid: Not in TBOM "UnknownLib"
+    base_agent_data["dependencies"]["libraries"] = ["UnknownLib==1.0.0"]
+    with pytest.raises(PolicyViolationError) as e:
+        enforcer.evaluate(base_agent_data)
+    assert "not in the Trusted Bill of Materials" in str(e.value.violations)
 
 
-def test_mocked_pinning_violation(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
-    """Mock test ensuring Python code handles the pinning violation message correctly."""
-    policy_file = tmp_path / "dummy.rego"
-    policy_file.touch()
-    enforcer = PolicyEnforcer(policy_path=policy_file)
+@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+def test_malformed_tbom_file(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
+    """Test behavior when TBOM file is malformed JSON."""
+    bad_tbom = tmp_path / "bad_tbom.json"
+    bad_tbom.write_text("{ not valid json }")
 
-    mock_result = MagicMock()
-    mock_result.returncode = 0
-    # Simulate OPA output for the violation
-    mock_result.stdout = json.dumps(
-        {
-            "result": [
-                {"expressions": [{"value": ["Compliance Violation: Library 'requests' must be pinned with '=='."]}]}
-            ]
-        }
-    )
+    # Init should pass (only checks existence)
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[bad_tbom])
 
-    with patch("subprocess.run", return_value=mock_result):
-        with pytest.raises(PolicyViolationError) as excinfo:
-            enforcer.evaluate(valid_agent_data)
-        assert "must be pinned with '=='" in str(excinfo.value.violations)
+    # Evaluate should fail due to OPA error parsing data
+    with pytest.raises(RuntimeError) as e:
+        enforcer.evaluate(base_agent_data)
+    assert "OPA execution failed" in str(e.value)
+
+
+@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+def test_incorrect_tbom_structure(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
+    """Test behavior when TBOM structure is incorrect (not a list)."""
+    weird_tbom = tmp_path / "weird_tbom.json"
+    # Valid JSON, but 'tbom' is a string, not a list
+    weird_tbom.write_text('{"tbom": "just a string"}')
+
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[weird_tbom])
+
+    # Rego: `some tbom_lib in data.tbom`
+    # If data.tbom is a string "just a string", it iterates characters.
+    # So "j", "u", "s", ...
+    # If we request library "requests", it won't match any character.
+    # So it should be denied as "not in TBOM".
+
+    base_agent_data["dependencies"]["libraries"] = ["requests==2.31.0"]
+
+    with pytest.raises(PolicyViolationError) as e:
+        enforcer.evaluate(base_agent_data)
+    assert "not in the Trusted Bill of Materials" in str(e.value.violations)

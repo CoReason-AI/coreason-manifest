@@ -52,6 +52,20 @@ def test_engine_init(manifest_config: ManifestConfig) -> None:
     assert engine.policy_enforcer is not None
 
 
+def test_engine_init_with_tbom(tmp_path: Path) -> None:
+    """Test Engine initialization with TBOM path."""
+    policy_path = tmp_path / "policy.rego"
+    policy_path.touch()
+    tbom_path = tmp_path / "tbom.json"
+    tbom_path.touch()
+
+    config = ManifestConfig(policy_path=policy_path, tbom_path=tbom_path)
+    engine = ManifestEngine(config)
+
+    # Check if TBOM path is in PolicyEnforcer's data_paths
+    assert tbom_path in engine.policy_enforcer.data_paths
+
+
 def test_load_and_validate_success(
     manifest_config: ManifestConfig,
     valid_agent_data: Dict[str, Any],
