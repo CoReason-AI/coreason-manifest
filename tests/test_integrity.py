@@ -1,4 +1,5 @@
 # Prosperity-3.0
+import os
 from pathlib import Path
 from typing import Any, Dict
 from uuid import uuid4
@@ -68,6 +69,72 @@ def test_calculate_hash_structure_changes(tmp_path: Path) -> None:
     hash2 = IntegrityChecker.calculate_hash(src)
 
     assert hash1 != hash2
+
+
+def test_calculate_hash_ignores_files(tmp_path: Path) -> None:
+    """Test that ignored files/directories do not affect the hash."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "file1.py").write_text("v1")
+    hash1 = IntegrityChecker.calculate_hash(src)
+
+    # Add ignored file
+    (src / ".DS_Store").write_text("junk")
+    hash2 = IntegrityChecker.calculate_hash(src)
+    assert hash1 == hash2
+
+
+def test_calculate_hash_ignores_directories(tmp_path: Path) -> None:
+    """Test that ignored directories do not affect the hash."""
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "file1.py").write_text("v1")
+    hash1 = IntegrityChecker.calculate_hash(src)
+
+    # Add ignored directory and file inside it
+    git_dir = src / ".git"
+    git_dir.mkdir()
+    (git_dir / "config").write_text("core = ...")
+
+    hash2 = IntegrityChecker.calculate_hash(src)
+    assert hash1 == hash2
+
+
+def test_calculate_hash_symlink_file(tmp_path: Path) -> None:
+    """Test that symlinks raise IntegrityCompromisedError."""
+    src = tmp_path / "src"
+    src.mkdir()
+    target = src / "target.txt"
+    target.write_text("content")
+    link = src / "link.txt"
+
+    try:
+        os.symlink(target, link)
+    except OSError:
+        pytest.skip("Symlinks not supported on this OS/FS")
+
+    with pytest.raises(IntegrityCompromisedError) as excinfo:
+        IntegrityChecker.calculate_hash(src)
+    assert "Symbolic links are forbidden" in str(excinfo.value)
+
+
+def test_calculate_hash_symlink_dir(tmp_path: Path) -> None:
+    """Test that directory symlinks raise IntegrityCompromisedError."""
+    src = tmp_path / "src"
+    src.mkdir()
+    real_dir = src / "real"
+    real_dir.mkdir()
+    (real_dir / "file.txt").write_text("content")
+
+    link_dir = src / "link_dir"
+    try:
+        os.symlink(real_dir, link_dir)
+    except OSError:
+        pytest.skip("Symlinks not supported on this OS/FS")
+
+    with pytest.raises(IntegrityCompromisedError) as excinfo:
+        IntegrityChecker.calculate_hash(src)
+    assert "Symbolic links are forbidden" in str(excinfo.value)
 
 
 def test_calculate_hash_not_found() -> None:

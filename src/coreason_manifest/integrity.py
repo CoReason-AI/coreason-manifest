@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 
 from coreason_manifest.errors import IntegrityCompromisedError
@@ -49,22 +50,38 @@ class IntegrityChecker:
         # Collect all file paths relative to source_dir
         file_paths = []
 
-        # We assume rglog("*") returns everything. We need to filter.
-        # Efficient filtering: using rglob might descend into ignored dirs.
-        # For simplicity, we filter after list. Ideally use os.walk but Path is nicer.
-        for path in source_path.rglob("*"):
-            # Check for symlinks first
-            if path.is_symlink():
-                raise IntegrityCompromisedError(f"Symbolic links are forbidden: {path}")
+        # Use os.walk to efficiently prune ignored directories
+        for root, dirs, files in os.walk(source_path, followlinks=False):
+            # Prune ignored directories in-place
+            dirs[:] = [d for d in dirs if d not in IntegrityChecker.IGNORED_DIRS]
 
-            # Filter ignored directories/files
-            # We check if any part of the relative path is in IGNORED_DIRS
-            rel = path.relative_to(source_path)
-            if any(part in IntegrityChecker.IGNORED_DIRS for part in rel.parts):
-                continue
+            root_path = Path(root)
 
-            if path.is_file():
-                file_paths.append(path)
+            # Check for directory symlinks (os.walk with followlinks=False returns them in dirs,
+            # but we also need to be careful about the root itself if it was a symlink passed in,
+            # though pathlib handles that check before).
+            # Here we check if any of the *files* are symlinks.
+            # We also need to check if we are traversing a symlinked directory if we didn't want to.
+            # But followlinks=False ensures we don't descend into them.
+            # However, we must strictly FORBID them as per spec.
+
+            for name in files:
+                file_path = root_path / name
+
+                if file_path.is_symlink():
+                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {file_path}")
+
+                if name in IntegrityChecker.IGNORED_DIRS:
+                    continue
+
+                file_paths.append(file_path)
+
+            # Also check if any subdirectory is a symlink (even if we don't follow it)
+            # because the spec implies strict "Clean Room" rules.
+            for name in dirs:
+                dir_path = root_path / name
+                if dir_path.is_symlink():
+                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {dir_path}")
 
         # Sort to ensure deterministic order
         file_paths.sort(key=lambda p: p.relative_to(source_path))
