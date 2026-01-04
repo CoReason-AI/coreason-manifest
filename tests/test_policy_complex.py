@@ -12,7 +12,7 @@ from coreason_manifest.policy import PolicyEnforcer
 POLICY_PATH = Path("src/coreason_manifest/policies/compliance.rego")
 TBOM_PATH = Path("src/coreason_manifest/policies/tbom.json")
 # Use the locally installed OPA if available
-OPA_BINARY = "./opa" if os.path.exists("./opa") else shutil.which("opa")
+OPA_BINARY: str = "./opa" if os.path.exists("./opa") else (shutil.which("opa") or "")
 
 
 @pytest.fixture
