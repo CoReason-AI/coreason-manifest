@@ -4,7 +4,7 @@
   "title": "CoReason Agent Manifest",
   "description": "The definitive source of truth for CoReason Agent definitions.",
   "type": "object",
-  "required": ["metadata", "interface", "topology", "dependencies"],
+  "required": ["metadata", "interface", "topology", "dependencies", "integrity_hash"],
   "additionalProperties": false,
   "properties": {
     "metadata": {

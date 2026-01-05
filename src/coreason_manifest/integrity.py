@@ -113,9 +113,7 @@ class IntegrityChecker:
             IntegrityCompromisedError: If the hash does not match or is missing.
             FileNotFoundError: If source_dir does not exist.
         """
-        if not agent_def.integrity_hash:
-            raise IntegrityCompromisedError("Manifest missing integrity_hash.")
-
+        # agent_def.integrity_hash is now required by Pydantic model
         calculated = IntegrityChecker.calculate_hash(source_dir)
 
         if calculated != agent_def.integrity_hash:

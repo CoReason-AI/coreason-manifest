@@ -18,7 +18,7 @@ SEMVER_REGEX = (
 class AgentMetadata(BaseModel):
     """Metadata for the Agent."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: UUID = Field(..., description="Unique Identifier for the Agent (UUID).")
     version: str = Field(..., description="Semantic Version of the Agent.")
@@ -37,7 +37,7 @@ class AgentMetadata(BaseModel):
 class AgentInterface(BaseModel):
     """Interface definition for the Agent."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     inputs: Dict[str, Any] = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: Dict[str, Any] = Field(..., description="Typed structure of the result.")
@@ -46,7 +46,7 @@ class AgentInterface(BaseModel):
 class Step(BaseModel):
     """A single step in the execution graph."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: str = Field(..., description="Unique identifier for the step.")
     description: Optional[str] = Field(None, description="Description of the step.")
@@ -55,7 +55,7 @@ class Step(BaseModel):
 class ModelConfig(BaseModel):
     """LLM Configuration parameters."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     model: str = Field(..., description="The LLM model identifier.")
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
@@ -64,7 +64,7 @@ class ModelConfig(BaseModel):
 class AgentTopology(BaseModel):
     """Topology of the Agent execution."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     steps: List[Step] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
@@ -73,7 +73,7 @@ class AgentTopology(BaseModel):
 class AgentDependencies(BaseModel):
     """External dependencies for the Agent."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     tools: List[str] = Field(default_factory=list, description="List of MCP capability URIs required.")
     libraries: List[str] = Field(
@@ -84,10 +84,10 @@ class AgentDependencies(BaseModel):
 class AgentDefinition(BaseModel):
     """The Root Object for the CoReason Agent Manifest."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     metadata: AgentMetadata
     interface: AgentInterface
     topology: AgentTopology
     dependencies: AgentDependencies
-    integrity_hash: Optional[str] = Field(None, description="SHA256 hash of the source code.")
+    integrity_hash: str = Field(..., description="SHA256 hash of the source code.")

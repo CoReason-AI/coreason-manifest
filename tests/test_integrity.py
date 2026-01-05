@@ -104,16 +104,15 @@ def test_verify_mismatch(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None
     assert "Integrity check failed" in str(excinfo.value)
 
 
-def test_verify_missing_hash(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None:
-    """Test verification when manifest has no hash."""
+def test_verify_missing_hash_validation_error(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None:
+    """Test verification when manifest has no hash (raises ValidationError now)."""
     src = tmp_path / "src"
     src.mkdir()
+    # Explicitly set to None to simulate invalid data passed to Pydantic
     agent_def_data["integrity_hash"] = None
-    agent_def = AgentDefinition(**agent_def_data)
-
-    with pytest.raises(IntegrityCompromisedError) as excinfo:
-        IntegrityChecker.verify(agent_def, src)
-    assert "Manifest missing integrity_hash" in str(excinfo.value)
+    with pytest.raises(Exception) as excinfo:  # Catch Pydantic ValidationError
+        AgentDefinition(**agent_def_data)
+    assert "Input should be a valid string" in str(excinfo.value)
 
 
 def test_calculate_hash_symlink_error(tmp_path: Path) -> None:
