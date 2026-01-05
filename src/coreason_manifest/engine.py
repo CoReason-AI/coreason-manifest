@@ -91,7 +91,7 @@ class ManifestEngine:
         # 3. Model Conversion (Normalization)
         logger.debug("Converting to AgentDefinition...")
         agent_def = ManifestLoader.load_from_dict(raw_data)
-        logger.info(f"Loaded Agent: {agent_def.metadata.name} v{agent_def.metadata.version} ({agent_def.metadata.id})")
+        logger.info(f"Validating Agent {agent_def.metadata.id} v{agent_def.metadata.version}")
 
         # 4. Policy Enforcement
         logger.debug("Enforcing Policies...")
