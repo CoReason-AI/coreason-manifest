@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 
 from coreason_manifest.errors import IntegrityCompromisedError
@@ -24,8 +25,8 @@ class IntegrityChecker:
         """
         Calculates a deterministic SHA256 hash of the source code directory.
 
-        It walks the directory, sorts files by relative path, hashes each file,
-        and then hashes the sequence of file hashes.
+        It walks the directory using os.walk to efficiently prune ignored directories.
+        Sorts files by relative path, hashes each file, and then hashes the sequence.
 
         Ignores hidden directories/files in IGNORED_DIRS.
         Rejects symbolic links for security.
@@ -45,32 +46,49 @@ class IntegrityChecker:
             raise FileNotFoundError(f"Source directory not found: {source_path}")
 
         sha256 = hashlib.sha256()
-
-        # Collect all file paths relative to source_dir
         file_paths = []
 
-        # We assume rglog("*") returns everything. We need to filter.
-        # Efficient filtering: using rglob might descend into ignored dirs.
-        # For simplicity, we filter after list. Ideally use os.walk but Path is nicer.
-        for path in source_path.rglob("*"):
-            # Check for symlinks first
-            if path.is_symlink():
-                raise IntegrityCompromisedError(f"Symbolic links are forbidden: {path}")
+        # Use os.walk for efficient traversal and pruning
+        for root, dirs, files in os.walk(source_path, topdown=True):
+            root_path = Path(root)
 
-            # Filter ignored directories/files
-            # We check if any part of the relative path is in IGNORED_DIRS
-            rel = path.relative_to(source_path)
-            if any(part in IntegrityChecker.IGNORED_DIRS for part in rel.parts):
-                continue
+            # Check if the root itself is a symlink (edge case if source_dir is a symlink)
+            if root_path.is_symlink():
+                raise IntegrityCompromisedError(f"Symbolic links are forbidden: {root_path}")
 
-            if path.is_file():
-                file_paths.append(path)
+            # Prune directories
+            # We must iterate manually to modify 'dirs' in-place
+            i = 0
+            while i < len(dirs):
+                d_name = dirs[i]
+                d_path = root_path / d_name
+
+                if d_path.is_symlink():
+                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {d_path}")
+
+                if d_name in IntegrityChecker.IGNORED_DIRS:
+                    del dirs[i]
+                else:
+                    i += 1
+
+            # Collect files
+            for f_name in files:
+                f_path = root_path / f_name
+
+                if f_path.is_symlink():
+                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {f_path}")
+
+                if f_name in IntegrityChecker.IGNORED_DIRS:
+                    continue
+
+                file_paths.append(f_path)
 
         # Sort to ensure deterministic order
         file_paths.sort(key=lambda p: p.relative_to(source_path))
 
         for path in file_paths:
             # Update hash with relative path to ensure structure matters
+            # Use forward slashes for cross-platform consistency
             rel_path = path.relative_to(source_path).as_posix().encode("utf-8")
             sha256.update(rel_path)
 
