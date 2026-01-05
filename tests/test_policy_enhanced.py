@@ -67,7 +67,8 @@ def test_policy_enforcer_evaluate_success(tmp_path: Path) -> None:
 
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        assert args[0] == "opa"
+        # Since we mock shutil.which to return /usr/bin/mock_opa
+        assert args[0] == "/usr/bin/mock_opa"
         assert "eval" in args
 
 
@@ -113,11 +114,8 @@ def test_policy_enforcer_opa_not_found(tmp_path: Path) -> None:
     policy_path = tmp_path / "policy.rego"
     policy_path.touch()
 
-    enforcer = PolicyEnforcer(policy_path, opa_path="non_existent_opa")
-
-    with patch("subprocess.run", side_effect=FileNotFoundError):
-        with pytest.raises(RuntimeError, match="OPA executable not found"):
-            enforcer.evaluate({})
+    with pytest.raises(FileNotFoundError, match="OPA executable not found"):
+        PolicyEnforcer(policy_path, opa_path="non_existent_opa")
 
 
 def test_policy_enforcer_json_error(tmp_path: Path) -> None:

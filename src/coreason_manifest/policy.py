@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, List, Optional
@@ -32,8 +33,20 @@ class PolicyEnforcer:
             data_paths: List of paths to data files (e.g. JSON/YAML) to be loaded by OPA.
         """
         self.policy_path = Path(policy_path)
-        self.opa_path = opa_path
         self.data_paths = [Path(p) for p in data_paths] if data_paths else []
+
+        # Validate OPA executable
+        # If opa_path is a simple name (like "opa"), use shutil.which to find it
+        if "/" not in str(opa_path) and "\\" not in str(opa_path):
+            resolved_opa = shutil.which(opa_path)
+            if not resolved_opa:
+                raise FileNotFoundError(f"OPA executable not found in PATH: {opa_path}")
+            self.opa_path = resolved_opa
+        else:
+            # If it's a path, check existence
+            if not Path(opa_path).exists():
+                raise FileNotFoundError(f"OPA executable not found at: {opa_path}")
+            self.opa_path = opa_path
 
         if not self.policy_path.exists():
             raise FileNotFoundError(f"Policy file not found: {self.policy_path}")

@@ -18,7 +18,7 @@ class IntegrityChecker:
       - Compare it against the integrity_hash defined in the manifest.
     """
 
-    IGNORED_DIRS = {".git", "__pycache__", ".venv", ".env", ".DS_Store"}
+    IGNORED_DIRS = frozenset({".git", "__pycache__", ".venv", ".env", ".DS_Store"})
 
     @staticmethod
     def calculate_hash(source_dir: Path | str) -> str:
@@ -84,7 +84,8 @@ class IntegrityChecker:
                 file_paths.append(f_path)
 
         # Sort to ensure deterministic order
-        file_paths.sort(key=lambda p: p.relative_to(source_path))
+        # Use as_posix() to ensure ASCII sorting (case-sensitive) on all platforms (Windows vs Linux)
+        file_paths.sort(key=lambda p: p.relative_to(source_path).as_posix())
 
         for path in file_paths:
             # Update hash with relative path to ensure structure matters
