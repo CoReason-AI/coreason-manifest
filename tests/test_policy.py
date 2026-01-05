@@ -151,12 +151,10 @@ def test_opa_not_found(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None
     policy_file = tmp_path / "test.rego"
     policy_file.touch()
 
-    enforcer = PolicyEnforcer(policy_path=policy_file, opa_path="non_existent_opa")
-
-    with patch("subprocess.run", side_effect=FileNotFoundError):
-        with pytest.raises(RuntimeError) as excinfo:
-            enforcer.evaluate(valid_agent_data)
-        assert "OPA executable not found" in str(excinfo.value)
+    # Now raises FileNotFoundError during init
+    with pytest.raises(FileNotFoundError) as excinfo:
+        PolicyEnforcer(policy_path=policy_file, opa_path="non_existent_opa")
+    assert "OPA executable not found in PATH" in str(excinfo.value)
 
 
 def test_opa_invalid_json_output(valid_agent_data: Dict[str, Any], tmp_path: Path) -> None:
