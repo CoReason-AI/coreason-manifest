@@ -18,7 +18,7 @@ class IntegrityChecker:
       - Compare it against the integrity_hash defined in the manifest.
     """
 
-    IGNORED_DIRS = {".git", "__pycache__", ".venv", ".env", ".DS_Store"}
+    IGNORED_DIRS = frozenset({".git", "__pycache__", ".venv", ".env", ".DS_Store"})
 
     @staticmethod
     def calculate_hash(source_dir: Path | str) -> str:
