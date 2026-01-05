@@ -27,7 +27,7 @@ def agent_def_data() -> Dict[str, Any]:
             "model_config": {"model": "gpt-4", "temperature": 0.5},
         },
         "dependencies": {"tools": [], "libraries": []},
-        "integrity_hash": "dummy",
+        "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
 
@@ -96,7 +96,7 @@ def test_verify_mismatch(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None
     src.mkdir()
     (src / "main.py").write_text("pass")
 
-    agent_def_data["integrity_hash"] = "wrong_hash"
+    agent_def_data["integrity_hash"] = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     agent_def = AgentDefinition(**agent_def_data)
 
     with pytest.raises(IntegrityCompromisedError) as excinfo:

@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional
+from types import MappingProxyType
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, AfterValidator, PlainSerializer
+from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)
 SEMVER_REGEX = (
@@ -39,8 +41,16 @@ class AgentInterface(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    inputs: Dict[str, Any] = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
-    outputs: Dict[str, Any] = Field(..., description="Typed structure of the result.")
+    inputs: Annotated[
+        Mapping[str, Any],
+        AfterValidator(lambda x: MappingProxyType(x)),
+        PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
+    ] = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
+    outputs: Annotated[
+        Mapping[str, Any],
+        AfterValidator(lambda x: MappingProxyType(x)),
+        PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
+    ] = Field(..., description="Typed structure of the result.")
 
 
 class Step(BaseModel):
@@ -66,7 +76,7 @@ class AgentTopology(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    steps: List[Step] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
+    steps: Tuple[Step, ...] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
 
 
@@ -75,9 +85,9 @@ class AgentDependencies(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    tools: List[str] = Field(default_factory=list, description="List of MCP capability URIs required.")
-    libraries: List[str] = Field(
-        default_factory=list, description="List of Python packages required (if code execution is allowed)."
+    tools: Tuple[str, ...] = Field(default_factory=tuple, description="List of MCP capability URIs required.")
+    libraries: Tuple[str, ...] = Field(
+        default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )
 
 
@@ -90,4 +100,8 @@ class AgentDefinition(BaseModel):
     interface: AgentInterface
     topology: AgentTopology
     dependencies: AgentDependencies
-    integrity_hash: str = Field(..., description="SHA256 hash of the source code.")
+    integrity_hash: str = Field(
+        ...,
+        pattern=r"^[a-fA-F0-9]{64}$",
+        description="SHA256 hash of the source code.",
+    )

@@ -38,14 +38,14 @@ def test_agent_definition_immutability() -> None:
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},
-        "integrity_hash": "original_hash",
+        "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
     agent = AgentDefinition(**agent_data)
 
     # Try to modify a direct field
     with pytest.raises(ValidationError):
-        agent.integrity_hash = "modified_hash"  # type: ignore[misc]
+        agent.integrity_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"  # type: ignore[misc]
 
     # Try to replace a nested model
     with pytest.raises(ValidationError):
@@ -68,7 +68,7 @@ def test_nested_model_immutability() -> None:
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},
-        "integrity_hash": "original_hash",
+        "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
     agent = AgentDefinition(**agent_data)

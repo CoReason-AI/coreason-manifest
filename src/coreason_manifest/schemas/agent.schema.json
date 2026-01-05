@@ -113,6 +113,7 @@
     },
     "integrity_hash": {
       "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$",
       "description": "SHA256 hash of the source code."
     }
   }

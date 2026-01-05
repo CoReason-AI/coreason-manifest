@@ -28,7 +28,7 @@ def valid_agent_data() -> Dict[str, Any]:
             "model_config": {"model": "gpt-4", "temperature": 0.5},
         },
         "dependencies": {"tools": [], "libraries": ["requests==2.31.0"]},
-        "integrity_hash": "dummy_hash",
+        "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
 
