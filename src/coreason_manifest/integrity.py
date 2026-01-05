@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import hashlib
-import os
 from pathlib import Path
 
 from coreason_manifest.errors import IntegrityCompromisedError
@@ -48,23 +47,21 @@ class IntegrityChecker:
         sha256 = hashlib.sha256()
         file_paths = []
 
-        # Use os.walk for efficient traversal and pruning
-        for root, dirs, files in os.walk(source_path, topdown=True):
-            root_path = Path(root)
-
+        # Use Path.walk (Python 3.12+) for efficient traversal and pruning
+        # Note: Path.walk yields (dirpath, dirnames, filenames) where items are Strings in os.walk
+        # but Path.walk yields dirpath as Path, and lists of Strings for others?
+        # NO: Path.walk yields (path, dirnames, filenames). path is a Path object.
+        # dirnames and filenames are lists of STRINGS.
+        for root_path, dirs, files in source_path.walk(top_down=True):
             # Check if the root itself is a symlink (edge case if source_dir is a symlink)
             if root_path.is_symlink():
                 raise IntegrityCompromisedError(f"Symbolic links are forbidden: {root_path}")
 
             # Prune directories
-            # We must iterate manually to modify 'dirs' in-place
+            # We must iterate manually to modify 'dirs' in-place to affect recursion
             i = 0
             while i < len(dirs):
                 d_name = dirs[i]
-                d_path = root_path / d_name
-
-                if d_path.is_symlink():
-                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {d_path}")
 
                 if d_name in IntegrityChecker.IGNORED_DIRS:
                     del dirs[i]
