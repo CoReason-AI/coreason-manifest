@@ -56,7 +56,7 @@ def test_sorting_determinism(tmp_path: Path) -> None:
     expected_hash = IntegrityChecker.calculate_hash(src)
 
     # Custom walker that yields files in reverse order
-    def reverse_walker(top: str | Path, topdown: bool = True) -> Any:
+    def reverse_walker(top: str | Path, topdown: bool = True, *args: Any, **kwargs: Any) -> Any:
         # We need to simulate os.walk behavior for this specific directory
         # yield (root, dirs, files)
         # root is str(src), dirs is [], files is ["c.txt", "b.txt", "a.txt"]
