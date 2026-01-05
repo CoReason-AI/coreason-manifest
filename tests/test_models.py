@@ -43,7 +43,7 @@ def test_agent_metadata_invalid_version() -> None:
     """Test that invalid SemVer raises a ValidationError."""
     with pytest.raises(ValidationError) as excinfo:
         AgentMetadata(id=uuid.uuid4(), version="invalid-version", name="Test", author="Author", created_at="now")
-    assert "Version 'invalid-version' is not a valid SemVer string" in str(excinfo.value)
+    assert "String should match pattern" in str(excinfo.value)
 
 
 def test_agent_metadata_invalid_uuid() -> None:

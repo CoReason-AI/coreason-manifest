@@ -56,20 +56,14 @@ class IntegrityChecker:
             if root_path.is_symlink():
                 raise IntegrityCompromisedError(f"Symbolic links are forbidden: {root_path}")
 
-            # Prune directories
-            # We must iterate manually to modify 'dirs' in-place
-            i = 0
-            while i < len(dirs):
-                d_name = dirs[i]
+            # Check for symlinks in directories before pruning
+            for d_name in dirs:
                 d_path = root_path / d_name
-
                 if d_path.is_symlink():
                     raise IntegrityCompromisedError(f"Symbolic links are forbidden: {d_path}")
 
-                if d_name in IntegrityChecker.IGNORED_DIRS:
-                    del dirs[i]
-                else:
-                    i += 1
+            # Prune directories efficiently using slice assignment
+            dirs[:] = [d for d in dirs if d not in IntegrityChecker.IGNORED_DIRS]
 
             # Collect files
             for f_name in files:

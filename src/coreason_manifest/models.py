@@ -16,6 +16,13 @@ SEMVER_REGEX = (
     r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 )
 
+# Reusable immutable dictionary type
+ImmutableDict = Annotated[
+    Mapping[str, Any],
+    AfterValidator(lambda x: MappingProxyType(x)),
+    PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
+]
+
 
 class AgentMetadata(BaseModel):
     """Metadata for the Agent."""
@@ -23,17 +30,10 @@ class AgentMetadata(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: UUID = Field(..., description="Unique Identifier for the Agent (UUID).")
-    version: str = Field(..., description="Semantic Version of the Agent.")
+    version: str = Field(..., pattern=SEMVER_REGEX, description="Semantic Version of the Agent.")
     name: str = Field(..., description="Name of the Agent.")
     author: str = Field(..., description="Author of the Agent.")
     created_at: str = Field(..., description="Creation timestamp (ISO 8601).")
-
-    @field_validator("version")
-    @classmethod
-    def validate_version(cls, v: str) -> str:
-        if not re.match(SEMVER_REGEX, v):
-            raise ValueError(f"Version '{v}' is not a valid SemVer string.")
-        return v
 
 
 class AgentInterface(BaseModel):
@@ -41,16 +41,8 @@ class AgentInterface(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    inputs: Annotated[
-        Mapping[str, Any],
-        AfterValidator(lambda x: MappingProxyType(x)),
-        PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
-    ] = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
-    outputs: Annotated[
-        Mapping[str, Any],
-        AfterValidator(lambda x: MappingProxyType(x)),
-        PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
-    ] = Field(..., description="Typed structure of the result.")
+    inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
+    outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
 
 
 class Step(BaseModel):
@@ -94,7 +86,15 @@ class AgentDependencies(BaseModel):
 class AgentDefinition(BaseModel):
     """The Root Object for the CoReason Agent Manifest."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        title="CoReason Agent Manifest",
+        json_schema_extra={
+            "$id": "https://coreason.ai/schemas/agent.schema.json",
+            "description": "The definitive source of truth for CoReason Agent definitions.",
+        },
+    )
 
     metadata: AgentMetadata
     interface: AgentInterface
