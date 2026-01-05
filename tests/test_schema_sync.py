@@ -23,7 +23,9 @@ def test_schema_sync() -> None:
 
     # Check strict equality of properties and required fields
     assert stored_schema.get("properties") == generated_schema.get("properties"), "Schema properties do not match model"
-    assert set(stored_schema.get("required", [])) == set(generated_schema.get("required", [])), "Required fields do not match model"
+    assert set(stored_schema.get("required", [])) == set(generated_schema.get("required", [])), (
+        "Required fields do not match model"
+    )
 
     # Check definitions if any (nested models often go here in Pydantic v2)
     # Pydantic v2 puts nested models in $defs. The manual schema might use properties directly or definitions.
