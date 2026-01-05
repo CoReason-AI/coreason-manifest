@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import re
 from types import MappingProxyType
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, AfterValidator, PlainSerializer
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PlainSerializer, field_validator
 from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)

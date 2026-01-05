@@ -1,9 +1,12 @@
 # Prosperity-3.0
 import uuid
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
-from coreason_manifest.models import AgentDefinition, AgentDependencies
-from coreason_manifest.integrity import IntegrityChecker
+
+from coreason_manifest.models import AgentDefinition
+
 
 def test_deep_immutability_mapping_proxy() -> None:
     """Test that dictionary fields are converted to immutable MappingProxyType."""
@@ -13,12 +16,12 @@ def test_deep_immutability_mapping_proxy() -> None:
             "version": "1.0.0",
             "name": "Immutable",
             "author": "Tester",
-            "created_at": "2023-01-01T00:00:00Z"
+            "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {"param": 1}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
         "dependencies": {"tools": ["a"], "libraries": []},
-        "integrity_hash": "a" * 64
+        "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
 
@@ -29,6 +32,7 @@ def test_deep_immutability_mapping_proxy() -> None:
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
         agent.interface.inputs["new"] = 3  # type: ignore[index]
 
+
 def test_deep_immutability_tuples() -> None:
     """Test that list fields are converted to immutable tuples."""
     data = {
@@ -37,12 +41,12 @@ def test_deep_immutability_tuples() -> None:
             "version": "1.0.0",
             "name": "Immutable",
             "author": "Tester",
-            "created_at": "2023-01-01T00:00:00Z"
+            "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
         "dependencies": {"tools": ["tool1"], "libraries": []},
-        "integrity_hash": "a" * 64
+        "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
 
@@ -55,6 +59,7 @@ def test_deep_immutability_tuples() -> None:
     with pytest.raises(AttributeError, match="'tuple' object has no attribute 'append'"):
         agent.dependencies.tools.append("tool2")  # type: ignore[attr-defined]
 
+
 def test_unicode_handling() -> None:
     """Test that unicode characters are handled correctly in fields."""
     name_unicode = "Agént-Ω"
@@ -66,18 +71,19 @@ def test_unicode_handling() -> None:
             "version": "1.0.0",
             "name": name_unicode,
             "author": author_unicode,
-            "created_at": "2023-01-01T00:00:00Z"
+            "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {"key_Ω": "val_🤖"}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
         "dependencies": {"tools": [], "libraries": []},
-        "integrity_hash": "a" * 64
+        "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
 
     assert agent.metadata.name == name_unicode
     assert agent.metadata.author == author_unicode
     assert agent.interface.inputs["key_Ω"] == "val_🤖"
+
 
 def test_hash_validation_edge_cases() -> None:
     """Test various edge cases for integrity hash validation."""
@@ -87,7 +93,7 @@ def test_hash_validation_edge_cases() -> None:
             "version": "1.0.0",
             "name": "Test",
             "author": "Tester",
-            "created_at": "2023-01-01T00:00:00Z"
+            "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
@@ -106,7 +112,7 @@ def test_hash_validation_edge_cases() -> None:
 
     # Invalid chars
     with pytest.raises(ValidationError) as exc:
-        AgentDefinition(**{**base_data, "integrity_hash": "z" * 64}) # z is not hex
+        AgentDefinition(**{**base_data, "integrity_hash": "z" * 64})  # z is not hex
     assert "integrity_hash" in str(exc.value)
 
     # Uppercase valid
@@ -114,9 +120,11 @@ def test_hash_validation_edge_cases() -> None:
     agent = AgentDefinition(**{**base_data, "integrity_hash": valid_upper})
     assert agent.integrity_hash == valid_upper
 
-def test_integrity_checker_invalid_hash_format(tmp_path):
+
+def test_integrity_checker_invalid_hash_format(tmp_path: Path) -> None:
     """IntegrityChecker should fail if hash is structurally invalid (though model validation usually catches it)."""
     # This tests the edge case where somehow an invalid hash got past model validation
-    # (e.g. if one were to mock the model or manually construct it bypassing validation, which is hard with pydantic v2)
+    # (e.g. if one were to mock the model or manually construct it bypassing validation,
+    # which is hard with pydantic v2)
     # But mainly, verify IntegrityChecker works with weird hashes if they were valid
-    pass # IntegrityChecker just compares strings, so specific format doesn't matter for the check itself, just equality.
+    pass  # IntegrityChecker just compares strings, so format doesn't matter for the check itself, just equality.
