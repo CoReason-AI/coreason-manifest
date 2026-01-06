@@ -111,7 +111,7 @@ class ManifestEngine:
 
         # 5. Integrity Check
         logger.debug("Verifying Integrity...")
-        IntegrityChecker.verify(agent_def, source_dir)
+        IntegrityChecker.verify(agent_def, source_dir, manifest_path=manifest_path)
 
         logger.info("Agent validation successful.")
         return agent_def

@@ -150,3 +150,23 @@ def test_calculate_hash_ignores_dirs(tmp_path: Path) -> None:
     hash2 = IntegrityChecker.calculate_hash(src)
 
     assert hash1 == hash2
+
+
+def test_calculate_hash_directory_symlink_error(tmp_path: Path) -> None:
+    """Test that symlinked directories raise IntegrityCompromisedError."""
+    src = tmp_path / "src"
+    src.mkdir()
+
+    # Create target outside src to ensure src only contains the link
+    target_dir = tmp_path / "target_dir"
+    target_dir.mkdir()
+
+    link_dir = src / "link_dir"
+    try:
+        os.symlink(target_dir, link_dir)
+    except OSError:
+        pytest.skip("Symlinks not supported on this platform")
+
+    with pytest.raises(IntegrityCompromisedError) as excinfo:
+        IntegrityChecker.calculate_hash(src)
+    assert "Symbolic links are forbidden" in str(excinfo.value)

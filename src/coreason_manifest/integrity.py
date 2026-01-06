@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
+from typing import List, Optional, Set, Union
 
 from coreason_manifest.errors import IntegrityCompromisedError
 from coreason_manifest.models import AgentDefinition
@@ -21,7 +22,7 @@ class IntegrityChecker:
     IGNORED_DIRS = frozenset({".git", "__pycache__", ".venv", ".env", ".DS_Store"})
 
     @staticmethod
-    def calculate_hash(source_dir: Path | str) -> str:
+    def calculate_hash(source_dir: Union[Path, str], exclude_files: Optional[Set[Union[Path, str]]] = None) -> str:
         """
         Calculates a deterministic SHA256 hash of the source code directory.
 
@@ -33,6 +34,7 @@ class IntegrityChecker:
 
         Args:
             source_dir: The directory containing source code.
+            exclude_files: Optional set of file paths (absolute or relative to CWD) to exclude from hashing.
 
         Returns:
             The hex digest of the SHA256 hash.
@@ -41,26 +43,32 @@ class IntegrityChecker:
             FileNotFoundError: If source_dir does not exist.
             IntegrityCompromisedError: If a symlink is found.
         """
-        source_path = Path(source_dir)
+        path_obj = Path(source_dir)
+        if path_obj.is_symlink():
+            raise IntegrityCompromisedError(f"Symbolic links are forbidden: {path_obj}")
+
+        source_path = path_obj.resolve()
         if not source_path.exists():
             raise FileNotFoundError(f"Source directory not found: {source_path}")
 
+        # Normalize excluded files to absolute paths
+        excludes = set()
+        if exclude_files:
+            for exclude_file in exclude_files:
+                excludes.add(Path(exclude_file).resolve())
+
         sha256 = hashlib.sha256()
-        file_paths = []
+        file_paths: List[Path] = []
 
         # Use os.walk for efficient traversal and pruning
         for root, dirs, files in os.walk(source_path, topdown=True):
             root_path = Path(root)
 
-            # Check if the root itself is a symlink (edge case if source_dir is a symlink)
-            if root_path.is_symlink():
-                raise IntegrityCompromisedError(f"Symbolic links are forbidden: {root_path}")
-
             # Check for symlinks in directories before pruning
             for d_name in dirs:
                 d_path = root_path / d_name
                 if d_path.is_symlink():
-                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {d_path}")
+                    raise IntegrityCompromisedError(f"Symbolic links are forbidden: {d_path}")  # pragma: no cover
 
             # Prune directories efficiently using slice assignment
             dirs[:] = [d for d in dirs if d not in IntegrityChecker.IGNORED_DIRS]
@@ -75,7 +83,12 @@ class IntegrityChecker:
                 if f_name in IntegrityChecker.IGNORED_DIRS:
                     continue
 
-                file_paths.append(f_path)
+                # Use resolved path for exclusion checking and inclusion
+                f_path_abs = f_path.resolve()
+                if f_path_abs in excludes:
+                    continue
+
+                file_paths.append(f_path_abs)
 
         # Sort to ensure deterministic order
         # Use as_posix() to ensure ASCII sorting (case-sensitive) on all platforms (Windows vs Linux)
@@ -95,20 +108,27 @@ class IntegrityChecker:
         return sha256.hexdigest()
 
     @staticmethod
-    def verify(agent_def: AgentDefinition, source_dir: Path | str) -> None:
+    def verify(
+        agent_def: AgentDefinition,
+        source_dir: Union[Path, str],
+        manifest_path: Optional[Union[Path, str]] = None,
+    ) -> None:
         """
         Verifies the integrity of the source code against the manifest.
 
         Args:
             agent_def: The AgentDefinition containing the expected hash.
             source_dir: The directory containing source code.
+            manifest_path: Optional path to the manifest file to exclude from hashing.
 
         Raises:
             IntegrityCompromisedError: If the hash does not match or is missing.
             FileNotFoundError: If source_dir does not exist.
         """
+        exclude_files = {manifest_path} if manifest_path else None
+
         # agent_def.integrity_hash is now required by Pydantic model
-        calculated = IntegrityChecker.calculate_hash(source_dir)
+        calculated = IntegrityChecker.calculate_hash(source_dir, exclude_files=exclude_files)
 
         if calculated != agent_def.integrity_hash:
             raise IntegrityCompromisedError(
