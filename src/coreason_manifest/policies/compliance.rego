@@ -24,9 +24,10 @@ deny contains msg if {
 }
 
 # Deny if description is too short (Business Rule example)
+# Iterates over ALL steps to ensure compliance.
 deny contains msg if {
-    count(input.topology.steps) > 0
-    count(input.topology.steps[0].description) < 5
+    some step in input.topology.steps
+    count(step.description) < 5
     msg := "Step description is too short."
 }
 
