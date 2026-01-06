@@ -54,8 +54,8 @@ class IntegrityChecker:
         # Normalize excluded files to absolute paths
         excludes = set()
         if exclude_files:
-            for exclude_file in exclude_files:
-                excludes.add(Path(exclude_file).resolve())
+            for ex_path in exclude_files:
+                excludes.add(Path(ex_path).resolve())
 
         sha256 = hashlib.sha256()
         file_paths: List[Path] = []
