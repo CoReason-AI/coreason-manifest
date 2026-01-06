@@ -30,11 +30,10 @@ def test_semver_invalid_short() -> None:
     assert "String should match pattern" in str(e.value)
 
 
-def test_semver_invalid_prefix() -> None:
-    """Test invalid SemVer (prefix)."""
-    with pytest.raises(ValidationError) as e:
-        AgentMetadata(id=uuid4(), version="v1.0.0", name="Test", author="Me", created_at="2023-01-01T00:00:00Z")
-    assert "String should match pattern" in str(e.value)
+def test_semver_valid_prefix_normalized() -> None:
+    """Test that SemVer with 'v' prefix is now valid and normalized."""
+    metadata = AgentMetadata(id=uuid4(), version="v1.0.0", name="Test", author="Me", created_at="2023-01-01T00:00:00Z")
+    assert metadata.version == "1.0.0"
 
 
 def test_semver_invalid_quad() -> None:
