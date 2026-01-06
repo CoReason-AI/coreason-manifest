@@ -151,7 +151,7 @@ def test_load_and_validate_integrity_error(
     (src_dir / "main.py").write_text("print('ok')")
 
     # Wrong hash
-    valid_agent_data["integrity_hash"] = "wrong"
+    valid_agent_data["integrity_hash"] = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 
     manifest_path = tmp_path / "agent.yaml"
     with open(manifest_path, "w") as f:

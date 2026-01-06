@@ -30,6 +30,7 @@ def test_agent_definition_valid() -> None:
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": ["tool:search"], "libraries": ["pandas==2.0.1"]},
+        "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
     agent = AgentDefinition(**valid_data)
@@ -42,7 +43,7 @@ def test_agent_metadata_invalid_version() -> None:
     """Test that invalid SemVer raises a ValidationError."""
     with pytest.raises(ValidationError) as excinfo:
         AgentMetadata(id=uuid.uuid4(), version="invalid-version", name="Test", author="Author", created_at="now")
-    assert "Version 'invalid-version' is not a valid SemVer string" in str(excinfo.value)
+    assert "String should match pattern" in str(excinfo.value)
 
 
 def test_agent_metadata_invalid_uuid() -> None:
@@ -62,8 +63,8 @@ def test_model_config_validation() -> None:
         ModelConfig(model="gpt-4", temperature=-0.1)
 
 
-def test_optional_fields() -> None:
-    """Test that optional fields (like integrity_hash) are handled correctly."""
+def test_validation_error_on_missing_fields() -> None:
+    """Test that missing required fields (like integrity_hash) raises ValidationError."""
     valid_data = {
         "metadata": {
             "id": str(uuid.uuid4()),
@@ -76,6 +77,6 @@ def test_optional_fields() -> None:
         "topology": {"steps": [], "model_config": {"model": "gpt-4", "temperature": 0.5}},
         "dependencies": {},
     }
-    agent = AgentDefinition(**valid_data)
-    assert agent.integrity_hash is None
-    assert agent.dependencies.tools == []
+    with pytest.raises(ValidationError) as excinfo:
+        AgentDefinition(**valid_data)
+    assert "integrity_hash" in str(excinfo.value)

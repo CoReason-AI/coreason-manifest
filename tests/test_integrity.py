@@ -27,7 +27,7 @@ def agent_def_data() -> Dict[str, Any]:
             "model_config": {"model": "gpt-4", "temperature": 0.5},
         },
         "dependencies": {"tools": [], "libraries": []},
-        "integrity_hash": "dummy",
+        "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
 
@@ -96,7 +96,7 @@ def test_verify_mismatch(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None
     src.mkdir()
     (src / "main.py").write_text("pass")
 
-    agent_def_data["integrity_hash"] = "wrong_hash"
+    agent_def_data["integrity_hash"] = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     agent_def = AgentDefinition(**agent_def_data)
 
     with pytest.raises(IntegrityCompromisedError) as excinfo:
@@ -104,16 +104,15 @@ def test_verify_mismatch(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None
     assert "Integrity check failed" in str(excinfo.value)
 
 
-def test_verify_missing_hash(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None:
-    """Test verification when manifest has no hash."""
+def test_verify_missing_hash_validation_error(tmp_path: Path, agent_def_data: Dict[str, Any]) -> None:
+    """Test verification when manifest has no hash (raises ValidationError now)."""
     src = tmp_path / "src"
     src.mkdir()
+    # Explicitly set to None to simulate invalid data passed to Pydantic
     agent_def_data["integrity_hash"] = None
-    agent_def = AgentDefinition(**agent_def_data)
-
-    with pytest.raises(IntegrityCompromisedError) as excinfo:
-        IntegrityChecker.verify(agent_def, src)
-    assert "Manifest missing integrity_hash" in str(excinfo.value)
+    with pytest.raises(Exception) as excinfo:  # Catch Pydantic ValidationError
+        AgentDefinition(**agent_def_data)
+    assert "Input should be a valid string" in str(excinfo.value)
 
 
 def test_calculate_hash_symlink_error(tmp_path: Path) -> None:
@@ -151,3 +150,23 @@ def test_calculate_hash_ignores_dirs(tmp_path: Path) -> None:
     hash2 = IntegrityChecker.calculate_hash(src)
 
     assert hash1 == hash2
+
+
+def test_calculate_hash_directory_symlink_error(tmp_path: Path) -> None:
+    """Test that symlinked directories raise IntegrityCompromisedError."""
+    src = tmp_path / "src"
+    src.mkdir()
+
+    # Create target outside src to ensure src only contains the link
+    target_dir = tmp_path / "target_dir"
+    target_dir.mkdir()
+
+    link_dir = src / "link_dir"
+    try:
+        os.symlink(target_dir, link_dir)
+    except OSError:
+        pytest.skip("Symlinks not supported on this platform")
+
+    with pytest.raises(IntegrityCompromisedError) as excinfo:
+        IntegrityChecker.calculate_hash(src)
+    assert "Symbolic links are forbidden" in str(excinfo.value)
