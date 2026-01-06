@@ -48,6 +48,13 @@ class ManifestLoader:
             if not isinstance(data, dict):
                 raise ManifestSyntaxError(f"Invalid YAML content in {path}: must be a dictionary.")
 
+            # Normalization: Strip 'v' from version if present
+            # We modify the dict in-place to ensure downstream consumers get normalized data
+            if "metadata" in data and isinstance(data["metadata"], dict):
+                version = data["metadata"].get("version")
+                if isinstance(version, str) and version.lower().startswith("v"):
+                    data["metadata"]["version"] = version[1:]
+
             return data
 
         except yaml.YAMLError as e:
