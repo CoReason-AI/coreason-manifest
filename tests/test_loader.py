@@ -116,6 +116,7 @@ def test_load_from_file_os_error(tmp_path: Path) -> None:
             ManifestLoader.load_from_file(manifest_path)
     assert "Error reading file" in str(excinfo.value)
 
+
 def test_load_raw_from_file_normalization(tmp_path: Path, valid_agent_data: Dict[str, Any]) -> None:
     """Test that load_raw_from_file normalizes the version string."""
     valid_agent_data["metadata"]["version"] = "v1.2.3"
