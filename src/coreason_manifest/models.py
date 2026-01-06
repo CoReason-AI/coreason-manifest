@@ -5,7 +5,7 @@ from types import MappingProxyType
 from typing import Any, Dict, Mapping, Optional, Tuple
 from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import AfterValidator, AnyUrl, BaseModel, ConfigDict, Field, PlainSerializer
 from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -92,7 +92,10 @@ class AgentDependencies(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    tools: Tuple[str, ...] = Field(default_factory=tuple, description="List of MCP capability URIs required.")
+    # Use AnyUrl to enforce strictly valid URIs, but serialize to string
+    tools: Tuple[Annotated[AnyUrl, PlainSerializer(lambda x: str(x), return_type=str)], ...] = Field(
+        default_factory=tuple, description="List of MCP capability URIs required."
+    )
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )

@@ -20,7 +20,7 @@ def test_deep_immutability_mapping_proxy() -> None:
         },
         "interface": {"inputs": {"param": 1}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
-        "dependencies": {"tools": ["a"], "libraries": []},
+        "dependencies": {"tools": ["https://example.com/a"], "libraries": []},
         "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
@@ -45,7 +45,7 @@ def test_deep_immutability_tuples() -> None:
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
-        "dependencies": {"tools": ["tool1"], "libraries": []},
+        "dependencies": {"tools": ["https://example.com/tool1"], "libraries": []},
         "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
