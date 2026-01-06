@@ -27,18 +27,18 @@ def test_semver_invalid_short() -> None:
     """Test invalid SemVer (too short)."""
     with pytest.raises(ValidationError) as e:
         AgentMetadata(id=uuid4(), version="1.0", name="Test", author="Me", created_at="2023-01-01T00:00:00Z")
-    assert "not a valid SemVer string" in str(e.value)
+    assert "String should match pattern" in str(e.value)
 
 
 def test_semver_invalid_prefix() -> None:
     """Test invalid SemVer (prefix)."""
     with pytest.raises(ValidationError) as e:
         AgentMetadata(id=uuid4(), version="v1.0.0", name="Test", author="Me", created_at="2023-01-01T00:00:00Z")
-    assert "not a valid SemVer string" in str(e.value)
+    assert "String should match pattern" in str(e.value)
 
 
 def test_semver_invalid_quad() -> None:
     """Test invalid SemVer (four parts)."""
     with pytest.raises(ValidationError) as e:
         AgentMetadata(id=uuid4(), version="1.0.0.0", name="Test", author="Me", created_at="2023-01-01T00:00:00Z")
-    assert "not a valid SemVer string" in str(e.value)
+    assert "String should match pattern" in str(e.value)

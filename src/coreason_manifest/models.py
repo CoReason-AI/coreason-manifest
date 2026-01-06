@@ -1,11 +1,12 @@
 # Prosperity-3.0
 from __future__ import annotations
 
-import re
-from typing import Any, Dict, List, Optional
+from types import MappingProxyType
+from typing import Any, Dict, Mapping, Optional, Tuple
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PlainSerializer
+from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)
 SEMVER_REGEX = (
@@ -14,39 +15,39 @@ SEMVER_REGEX = (
     r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 )
 
+# Reusable immutable dictionary type
+ImmutableDict = Annotated[
+    Mapping[str, Any],
+    AfterValidator(lambda x: MappingProxyType(x)),
+    PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
+]
+
 
 class AgentMetadata(BaseModel):
     """Metadata for the Agent."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: UUID = Field(..., description="Unique Identifier for the Agent (UUID).")
-    version: str = Field(..., description="Semantic Version of the Agent.")
+    version: str = Field(..., pattern=SEMVER_REGEX, description="Semantic Version of the Agent.")
     name: str = Field(..., description="Name of the Agent.")
     author: str = Field(..., description="Author of the Agent.")
     created_at: str = Field(..., description="Creation timestamp (ISO 8601).")
-
-    @field_validator("version")
-    @classmethod
-    def validate_version(cls, v: str) -> str:
-        if not re.match(SEMVER_REGEX, v):
-            raise ValueError(f"Version '{v}' is not a valid SemVer string.")
-        return v
 
 
 class AgentInterface(BaseModel):
     """Interface definition for the Agent."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-    inputs: Dict[str, Any] = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
-    outputs: Dict[str, Any] = Field(..., description="Typed structure of the result.")
+    inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
+    outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
 
 
 class Step(BaseModel):
     """A single step in the execution graph."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: str = Field(..., description="Unique identifier for the step.")
     description: Optional[str] = Field(None, description="Description of the step.")
@@ -55,7 +56,7 @@ class Step(BaseModel):
 class ModelConfig(BaseModel):
     """LLM Configuration parameters."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     model: str = Field(..., description="The LLM model identifier.")
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
@@ -64,30 +65,42 @@ class ModelConfig(BaseModel):
 class AgentTopology(BaseModel):
     """Topology of the Agent execution."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-    steps: List[Step] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
+    steps: Tuple[Step, ...] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
 
 
 class AgentDependencies(BaseModel):
     """External dependencies for the Agent."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-    tools: List[str] = Field(default_factory=list, description="List of MCP capability URIs required.")
-    libraries: List[str] = Field(
-        default_factory=list, description="List of Python packages required (if code execution is allowed)."
+    tools: Tuple[str, ...] = Field(default_factory=tuple, description="List of MCP capability URIs required.")
+    libraries: Tuple[str, ...] = Field(
+        default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )
 
 
 class AgentDefinition(BaseModel):
     """The Root Object for the CoReason Agent Manifest."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        title="CoReason Agent Manifest",
+        json_schema_extra={
+            "$id": "https://coreason.ai/schemas/agent.schema.json",
+            "description": "The definitive source of truth for CoReason Agent definitions.",
+        },
+    )
 
     metadata: AgentMetadata
     interface: AgentInterface
     topology: AgentTopology
     dependencies: AgentDependencies
-    integrity_hash: Optional[str] = Field(None, description="SHA256 hash of the source code.")
+    integrity_hash: str = Field(
+        ...,
+        pattern=r"^[a-fA-F0-9]{64}$",
+        description="SHA256 hash of the source code.",
+    )
