@@ -1,5 +1,4 @@
 # Prosperity-3.0
-import json
 import os
 import shutil
 from pathlib import Path
@@ -13,6 +12,7 @@ from coreason_manifest.policy import PolicyEnforcer
 POLICY_PATH = Path("src/coreason_manifest/policies/compliance.rego")
 TBOM_PATH = Path("src/coreason_manifest/policies/tbom.json")
 OPA_BINARY = "./opa" if os.path.exists("./opa") else shutil.which("opa")
+
 
 @pytest.fixture
 def base_agent_data() -> Dict[str, Any]:
@@ -32,9 +32,11 @@ def base_agent_data() -> Dict[str, Any]:
         "dependencies": {"tools": [], "libraries": []},
     }
 
+
 @pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
 def test_description_boundary_conditions(base_agent_data: Dict[str, Any]) -> None:
     """Test description length boundary conditions."""
+    assert OPA_BINARY is not None
     enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
     # 1. Length 4 (Fail)
@@ -53,9 +55,11 @@ def test_description_boundary_conditions(base_agent_data: Dict[str, Any]) -> Non
         enforcer.evaluate(base_agent_data)
     assert "Step description is too short" in str(e.value.violations)
 
+
 @pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
 def test_unicode_description_length(base_agent_data: Dict[str, Any]) -> None:
     """Test how OPA counts unicode characters."""
+    assert OPA_BINARY is not None
     enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
     # 5 emojis
@@ -70,9 +74,11 @@ def test_unicode_description_length(base_agent_data: Dict[str, Any]) -> None:
         enforcer.evaluate(base_agent_data)
     assert "Step description is too short" in str(e.value.violations)
 
+
 @pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
 def test_multiple_steps_validation(base_agent_data: Dict[str, Any]) -> None:
     """Test that all steps are checked."""
+    assert OPA_BINARY is not None
     enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
 
     # Step 1: Good, Step 2: Good, Step 3: Bad
