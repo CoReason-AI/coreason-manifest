@@ -27,7 +27,14 @@ def test_schema_sync() -> None:
         "Required fields do not match model"
     )
 
-    # Check definitions if any (nested models often go here in Pydantic v2)
-    # Pydantic v2 puts nested models in $defs. The manual schema might use properties directly or definitions.
-    # If the manual schema is fully expanded (no $ref), validation might be tricky.
-    # Let's see what the structure looks like first by running this.
+    # Check definitions ($defs)
+    # Both stored and generated schema use $defs for nested models
+    stored_defs = stored_schema.get("$defs", {})
+    generated_defs = generated_schema.get("$defs", {})
+
+    # Compare keys
+    assert set(stored_defs.keys()) == set(generated_defs.keys()), "Schema definitions keys do not match"
+
+    # Compare content of each definition
+    for key in stored_defs:
+        assert stored_defs[key] == generated_defs[key], f"Definition '{key}' does not match model"

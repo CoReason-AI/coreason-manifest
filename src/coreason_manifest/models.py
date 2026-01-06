@@ -9,11 +9,27 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field, PlainSerializ
 from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)
+# Modified to accept optional 'v' or 'V' prefix for input normalization
 SEMVER_REGEX = (
-    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"^[vV]?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
     r"(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
     r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 )
+
+
+def normalize_version(v: str) -> str:
+    """Normalize version string by stripping 'v' or 'V' prefix."""
+    if v.lower().startswith("v"):
+        return v[1:]
+    return v
+
+
+# Annotated type that validates SemVer regex (allowing v) then normalizes to strict SemVer (no v)
+VersionStr = Annotated[
+    str,
+    Field(pattern=SEMVER_REGEX),
+    AfterValidator(normalize_version),
+]
 
 # Reusable immutable dictionary type
 ImmutableDict = Annotated[
@@ -29,7 +45,7 @@ class AgentMetadata(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: UUID = Field(..., description="Unique Identifier for the Agent (UUID).")
-    version: str = Field(..., pattern=SEMVER_REGEX, description="Semantic Version of the Agent.")
+    version: VersionStr = Field(..., description="Semantic Version of the Agent.")
     name: str = Field(..., description="Name of the Agent.")
     author: str = Field(..., description="Author of the Agent.")
     created_at: str = Field(..., description="Creation timestamp (ISO 8601).")
