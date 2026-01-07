@@ -3,11 +3,11 @@ from typing import Any, Dict
 
 import pytest
 import yaml
-from pydantic import ValidationError
+from pydantic import AnyUrl, ValidationError
 
-from coreason_manifest.loader import ManifestLoader
-from coreason_manifest.models import AgentDependencies, AgentDefinition
 from coreason_manifest.errors import ManifestSyntaxError
+from coreason_manifest.loader import ManifestLoader
+from coreason_manifest.models import AgentDependencies
 
 
 @pytest.fixture
@@ -166,6 +166,6 @@ def test_uri_validation_edge_cases() -> None:
     # Test list mutability
     deps = AgentDependencies(tools=["http://example.com"])
     assert len(deps.tools) == 1
-    deps.tools.append("http://example.org") # Should succeed
+    deps.tools.append(AnyUrl("http://example.org"))  # Should succeed and satisfy Mypy
     assert len(deps.tools) == 2
     assert str(deps.tools[1]) in ["http://example.org/", "http://example.org"]
