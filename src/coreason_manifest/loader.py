@@ -48,12 +48,17 @@ class ManifestLoader:
             if not isinstance(data, dict):
                 raise ManifestSyntaxError(f"Invalid YAML content in {path}: must be a dictionary.")
 
-            # Normalization: Strip 'v' from version if present
-            # We modify the dict in-place to ensure downstream consumers get normalized data
-            if "metadata" in data and isinstance(data["metadata"], dict):
-                version = data["metadata"].get("version")
-                if isinstance(version, str) and version.lower().startswith("v"):
-                    data["metadata"]["version"] = version[1:]
+            # Normalization logic is now centralized in load_from_dict
+            # But we perform it here too if we return the raw dict, or we delegate.
+            # However, standardizing on load_from_dict doing the normalization is cleaner.
+            # But for backward compatibility with callers who use raw dict, we keep the logic here too?
+            # Or we call a shared helper. For now, we replicate or keep it.
+            # Actually, the requirement is "explicitly strip ... before they reach Pydantic models".
+            # If load_raw returns data, and then user calls load_from_dict, load_from_dict must do it.
+            # If load_raw returns data with 'v', the caller sees 'v'. That's fine for raw.
+            # But let's apply it here too for consistency.
+
+            ManifestLoader._normalize_data(data)
 
             return data
 
@@ -97,8 +102,24 @@ class ManifestLoader:
             ManifestSyntaxError: If Pydantic validation fails.
         """
         try:
+            # Ensure normalization happens before Pydantic validation
+            # We work on a copy to avoid side effects if possible, but deep copy is expensive.
+            # The input 'data' might be modified in place.
+            ManifestLoader._normalize_data(data)
+
             return AgentDefinition.model_validate(data)
         except ValidationError as e:
             # Convert Pydantic ValidationError to ManifestSyntaxError
             # We assume "normalization" happens via Pydantic validators (e.g. UUID, SemVer checks)
             raise ManifestSyntaxError(f"Manifest validation failed: {str(e)}") from e
+
+    @staticmethod
+    def _normalize_data(data: dict[str, Any]) -> None:
+        """
+        Normalizes the data dictionary in place.
+        Specifically strips 'v' or 'V' from version strings.
+        """
+        if "metadata" in data and isinstance(data["metadata"], dict):
+            version = data["metadata"].get("version")
+            if isinstance(version, str) and version.lower().startswith("v"):
+                data["metadata"]["version"] = version[1:]
