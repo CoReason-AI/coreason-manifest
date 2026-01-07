@@ -115,3 +115,14 @@ def test_load_from_file_os_error(tmp_path: Path) -> None:
         with pytest.raises(ManifestSyntaxError) as excinfo:
             ManifestLoader.load_from_file(manifest_path)
     assert "Error reading file" in str(excinfo.value)
+
+
+def test_load_raw_from_file_normalization(tmp_path: Path, valid_agent_data: Dict[str, Any]) -> None:
+    """Test that load_raw_from_file normalizes the version string."""
+    valid_agent_data["metadata"]["version"] = "v1.2.3"
+    manifest_path = tmp_path / "agent.yaml"
+    with open(manifest_path, "w") as f:
+        yaml.dump(valid_agent_data, f)
+
+    data = ManifestLoader.load_raw_from_file(manifest_path)
+    assert data["metadata"]["version"] == "1.2.3"
