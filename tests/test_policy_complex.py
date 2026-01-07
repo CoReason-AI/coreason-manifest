@@ -34,10 +34,10 @@ def base_agent_data() -> Dict[str, Any]:
     }
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_complex_dependency_pinning(base_agent_data: Dict[str, Any]) -> None:
     """Test various dependency pinning scenarios against Rego policy."""
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # 1. Valid: Standard pinning (in TBOM)
     base_agent_data["dependencies"]["libraries"] = ["requests==2.31.0"]
@@ -71,10 +71,10 @@ def test_complex_dependency_pinning(base_agent_data: Dict[str, Any]) -> None:
     assert "must be strictly pinned" in str(e.value.violations)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_tbom_case_insensitivity(base_agent_data: Dict[str, Any]) -> None:
     """Test TBOM case insensitivity."""
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # TBOM contains "requests" (lowercase)
 
@@ -93,14 +93,14 @@ def test_tbom_case_insensitivity(base_agent_data: Dict[str, Any]) -> None:
     assert "not in the Trusted Bill of Materials" in str(e.value.violations)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_malformed_tbom_file(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
     """Test behavior when TBOM file is malformed JSON."""
     bad_tbom = tmp_path / "bad_tbom.json"
     bad_tbom.write_text("{ not valid json }")
 
     # Init should pass (only checks existence)
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[bad_tbom])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[bad_tbom])
 
     # Evaluate should fail due to OPA error parsing data
     with pytest.raises(RuntimeError) as e:
@@ -108,14 +108,14 @@ def test_malformed_tbom_file(base_agent_data: Dict[str, Any], tmp_path: Path) ->
     assert "OPA execution failed" in str(e.value)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_incorrect_tbom_structure(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
     """Test behavior when TBOM structure is incorrect (not a list)."""
     weird_tbom = tmp_path / "weird_tbom.json"
     # Valid JSON, but 'tbom' is a string, not a list
     weird_tbom.write_text('{"tbom": "just a string"}')
 
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[weird_tbom])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[weird_tbom])
 
     # Rego: `some tbom_lib in data.tbom`
     # If data.tbom is a string "just a string", it iterates characters.

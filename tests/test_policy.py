@@ -174,12 +174,12 @@ def test_opa_invalid_json_output(valid_agent_data: Dict[str, Any], tmp_path: Pat
         assert "Failed to parse OPA output" in str(excinfo.value)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_real_opa_integration(valid_agent_data: Dict[str, Any]) -> None:
     """Integration test with real OPA binary."""
-    assert OPA_BINARY is not None
+
     # Must include TBOM for real integration to pass Rule 2
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # 1. Valid Case
     enforcer.evaluate(valid_agent_data)

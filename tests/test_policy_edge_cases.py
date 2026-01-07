@@ -34,7 +34,7 @@ def base_agent_data() -> Dict[str, Any]:
     }
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_complex_library_names(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
     """
     Test edge cases for library name parsing in Rego.
@@ -42,7 +42,6 @@ def test_complex_library_names(base_agent_data: Dict[str, Any], tmp_path: Path) 
     - Names with hyphens (e.g., google-cloud-storage)
     - Names with underscores (e.g., my_lib)
     """
-    assert OPA_BINARY is not None
 
     # Create a custom TBOM for this test
     tbom_data = {"tbom": ["zope.interface", "google-cloud-storage", "my_lib"]}
@@ -50,7 +49,7 @@ def test_complex_library_names(base_agent_data: Dict[str, Any], tmp_path: Path) 
     with open(tbom_file, "w") as f:
         json.dump(tbom_data, f)
 
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[tbom_file])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[tbom_file])
 
     # Case 1: All valid complex names
     base_agent_data["dependencies"]["libraries"] = [
@@ -69,16 +68,15 @@ def test_complex_library_names(base_agent_data: Dict[str, Any], tmp_path: Path) 
     assert "Library 'other.lib' is not in the Trusted Bill of Materials" in violations
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_multiple_violations(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
     """Test that multiple violations are reported accurately."""
-    assert OPA_BINARY is not None
 
     tbom_file = tmp_path / "tbom.json"
     with open(tbom_file, "w") as f:
         json.dump({"tbom": ["allowed-lib"]}, f)
 
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[tbom_file])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[tbom_file])
 
     base_agent_data["dependencies"]["libraries"] = [
         "pickle==1.0",  # Forbidden explicitly (in compliance.rego)
@@ -101,10 +99,9 @@ def test_multiple_violations(base_agent_data: Dict[str, Any], tmp_path: Path) ->
     assert any("Library 'allowed-lib' must be strictly pinned with '=='" in v for v in violations)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_extras_handling(base_agent_data: Dict[str, Any], tmp_path: Path) -> None:
     """Test libraries with extras, e.g., fastapi[all]==0.95.0."""
-    assert OPA_BINARY is not None
 
     # Note: The current Rego regex `^[a-zA-Z0-9_\-\.]+` might not handle `[` correctly if it stops early.
     # It parses the NAME.
@@ -116,7 +113,7 @@ def test_extras_handling(base_agent_data: Dict[str, Any], tmp_path: Path) -> Non
     with open(tbom_file, "w") as f:
         json.dump({"tbom": ["fastapi"]}, f)
 
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[tbom_file])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[tbom_file])
 
     base_agent_data["dependencies"]["libraries"] = ["fastapi[all]==0.95.0"]
 

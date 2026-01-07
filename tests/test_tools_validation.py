@@ -1,6 +1,6 @@
 # Prosperity-3.0
 import pytest
-from pydantic import TypeAdapter, ValidationError
+from pydantic import AnyUrl, TypeAdapter, ValidationError
 
 from coreason_manifest.models import AgentDependencies
 
@@ -18,10 +18,11 @@ def test_tools_validation_valid_uris() -> None:
         "ftp://files.example.com",
     ]
     deps = AgentDependencies(tools=tuple(valid_uris))
-    # Check that they are stored as AnyUrl (or compatible)
+    # Check that they are stored as AnyUrl
     assert len(deps.tools) == 5
     assert str(deps.tools[0]) == "https://example.com/tool"
     assert str(deps.tools[2]) == "mcp://server/capability"
+    assert isinstance(deps.tools[0], AnyUrl)
 
 
 def test_tools_validation_complex_cases() -> None:
@@ -63,10 +64,12 @@ def test_tools_validation_empty_list() -> None:
 def test_tools_serialization() -> None:
     """Test that tools are serialized to strings."""
     deps = AgentDependencies(tools=("https://example.com", "mcp://tool"))
-    dumped = deps.model_dump()
-    # Pydantic AnyUrl adds a trailing slash to http/https URLs with no path
-    assert dumped["tools"] == ("https://example.com/", "mcp://tool")
 
-    # Check JSON dump
+    # model_dump() in python mode returns AnyUrl objects now
+    dumped = deps.model_dump()
+    assert isinstance(dumped["tools"][0], AnyUrl)
+    assert str(dumped["tools"][0]) == "https://example.com/"
+
+    # Check JSON dump (should be strings)
     json_dump = deps.model_dump_json()
     assert '"https://example.com/"' in json_dump

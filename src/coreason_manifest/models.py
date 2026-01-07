@@ -92,10 +92,10 @@ class AgentDependencies(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    # Use AnyUrl to enforce strictly valid URIs, but serialize to string
-    tools: Tuple[Annotated[AnyUrl, PlainSerializer(lambda x: str(x), return_type=str)], ...] = Field(
-        default_factory=tuple, description="List of MCP capability URIs required."
-    )
+    # Use AnyUrl to enforce strictly valid URIs
+    # Changed from Tuple[Annotated[AnyUrl, ...]] to Tuple[AnyUrl, ...] based on refactor request.
+    # Note: We use Tuple for immutability (frozen=True), but type hint corresponds to "List[AnyUrl]" concept.
+    tools: Tuple[AnyUrl, ...] = Field(default_factory=tuple, description="List of MCP capability URIs required.")
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )

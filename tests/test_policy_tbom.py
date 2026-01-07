@@ -88,15 +88,15 @@ def test_tbom_enforcement_mock(valid_agent_data: Dict[str, Any], tmp_path: Path)
         assert "not in the Trusted Bill of Materials" in str(excinfo.value.violations)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_tbom_real_opa_integration(valid_agent_data: Dict[str, Any]) -> None:
     """Integration test with real OPA binary to verify regex parsing and TBOM lookup."""
-    assert OPA_BINARY is not None
+
     # We use the real policy and tbom file
     assert POLICY_PATH.exists()
     assert TBOM_PATH.exists()
 
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # 1. Valid Case: requests is in TBOM
     # valid_agent_data has "requests==2.31.0"
