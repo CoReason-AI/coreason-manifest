@@ -15,12 +15,11 @@ OPA_BINARY = "./opa" if os.path.exists("./opa") else shutil.which("opa")
 
 @pytest.fixture
 def enforcer() -> Generator[PolicyEnforcer, None, None]:
-    if not OPA_BINARY:
-        pytest.skip("OPA binary not found")
+    # OPA binary check removed as we use mock
     # We must yield, even though we don't need teardown, to match typical fixture patterns if needed,
     # but strictly returning is fine if typed as PolicyEnforcer.
     # However, generator is standard for pytest fixtures.
-    yield PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+    yield PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
 
 def test_mixed_pinning_fails(enforcer: PolicyEnforcer) -> None:
