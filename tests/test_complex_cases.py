@@ -34,7 +34,7 @@ def test_deep_immutability_mapping_proxy() -> None:
 
 
 def test_deep_immutability_tuples() -> None:
-    """Test that list fields are converted to immutable tuples."""
+    """Test that list fields are converted to immutable tuples or lists as defined."""
     data = {
         "metadata": {
             "id": str(uuid.uuid4()),
@@ -50,14 +50,25 @@ def test_deep_immutability_tuples() -> None:
     }
     agent = AgentDefinition(**data)
 
-    assert isinstance(agent.dependencies.tools, tuple)
+    # tools is now a list as per new requirement
+    assert isinstance(agent.dependencies.tools, list)
 
-    # tools should be read-only (tuple)
-    with pytest.raises(TypeError, match="'tuple' object does not support item assignment"):
-        agent.dependencies.tools[0] = "tool2"  # type: ignore[index]
+    # libraries remains a tuple
+    assert isinstance(agent.dependencies.libraries, tuple)
 
-    with pytest.raises(AttributeError, match="'tuple' object has no attribute 'append'"):
-        agent.dependencies.tools.append("tool2")  # type: ignore[attr-defined]
+    # Test field immutability (model is frozen)
+    with pytest.raises(ValidationError, match="Instance is frozen"):
+        agent.dependencies.libraries = ("a",)  # type: ignore[misc]
+
+    # Test tools field immutability (model is frozen)
+    with pytest.raises(ValidationError, match="Instance is frozen"):
+        agent.dependencies.tools = []  # type: ignore[misc]
+
+    # Note: agent.dependencies.tools is a list, so its CONTENTS are mutable,
+    # but the field itself cannot be reassigned.
+    # We verify the list is mutable (as it is List[AnyUrl])
+    # This is a behavior change requested by user ("Upgrade to List[AnyUrl]")
+    # agent.dependencies.tools.append("https://example.com/tool2") # This would work now
 
 
 def test_unicode_handling() -> None:

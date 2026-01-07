@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from types import MappingProxyType
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 from uuid import UUID
 
 from pydantic import (
@@ -118,9 +118,8 @@ class AgentDependencies(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     # Use AnyUrl to enforce strictly valid URIs
-    # Changed from Tuple[Annotated[AnyUrl, ...]] to Tuple[AnyUrl, ...] based on refactor request.
-    # Note: We use Tuple for immutability (frozen=True), but type hint corresponds to "List[AnyUrl]" concept.
-    tools: Tuple[AnyUrl, ...] = Field(default_factory=tuple, description="List of MCP capability URIs required.")
+    # Changed to List[AnyUrl] as requested to strictly enforce valid URI formatting
+    tools: List[AnyUrl] = Field(default_factory=list, description="List of MCP capability URIs required.")
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )
