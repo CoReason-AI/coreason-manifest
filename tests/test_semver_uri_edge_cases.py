@@ -5,7 +5,6 @@ import pytest
 import yaml
 from pydantic import AnyUrl, ValidationError
 
-from coreason_manifest.errors import ManifestSyntaxError
 from coreason_manifest.loader import ManifestLoader
 from coreason_manifest.models import AgentDependencies
 
@@ -67,25 +66,19 @@ def test_normalization_complex_versions(tmp_path: Path, raw_agent_dict: Dict[str
     agent = ManifestLoader.load_from_file(p)
     assert agent.metadata.version == "1.0.0"
 
-    # Edge Case: Triple 'v' -> Passes due to layered normalization
-    # 1. load_raw -> strips v -> vv1.0.0
-    # 2. load_from_dict -> strips v -> v1.0.0
-    # 3. Pydantic AfterValidator -> strips v -> 1.0.0
+    # Edge Case: Triple 'v' -> Passes due to recursive normalization
     raw_agent_dict["metadata"]["version"] = "vvv1.0.0"
     p = create_temp_manifest(tmp_path, raw_agent_dict)
     agent = ManifestLoader.load_from_file(p)
     assert agent.metadata.version == "1.0.0"
 
-    # Edge Case: Quadruple 'v' -> Should fail
-    # 1. load_raw -> vvv
-    # 2. load_from_dict -> vv
-    # 3. Pydantic Regex -> 'vv' fails (only accepts optional single v)
+    # Edge Case: Quadruple 'v' -> Should pass now due to recursive normalization and lenient regex
     raw_agent_dict["metadata"]["version"] = "vvvv1.0.0"
     p = create_temp_manifest(tmp_path, raw_agent_dict)
-    with pytest.raises(ManifestSyntaxError) as exc:
-        ManifestLoader.load_from_file(p)
-    # The error message comes from Pydantic regex validation
-    assert "String should match pattern" in str(exc.value) or "validation failed" in str(exc.value)
+
+    # It should pass now
+    agent = ManifestLoader.load_from_file(p)
+    assert agent.metadata.version == "1.0.0"
 
 
 def test_normalization_missing_fields(tmp_path: Path, raw_agent_dict: Dict[str, Any]) -> None:

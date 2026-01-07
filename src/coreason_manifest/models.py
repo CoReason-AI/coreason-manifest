@@ -18,22 +18,22 @@ from pydantic import (
 from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)
-# Modified to accept optional 'v' or 'V' prefix for input normalization
+# Modified to accept optional 'v' or 'V' prefix (multiple allowed) for input normalization
 SEMVER_REGEX = (
-    r"^[vV]?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"^[vV]*(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
     r"(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
     r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
 )
 
 
 def normalize_version(v: str) -> str:
-    """Normalize version string by stripping 'v' or 'V' prefix."""
-    if v.lower().startswith("v"):
-        return v[1:]
+    """Normalize version string by recursively stripping 'v' or 'V' prefix."""
+    while v.lower().startswith("v"):
+        v = v[1:]
     return v
 
 
-# Annotated type that validates SemVer regex (allowing v) then normalizes to strict SemVer (no v)
+# Annotated type that validates SemVer regex (allowing multiple v) then normalizes to strict SemVer (no v)
 VersionStr = Annotated[
     str,
     Field(pattern=SEMVER_REGEX),
@@ -45,6 +45,13 @@ ImmutableDict = Annotated[
     Mapping[str, Any],
     AfterValidator(lambda x: MappingProxyType(x)),
     PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
+]
+
+
+# Strict URI type that serializes to string
+StrictUri = Annotated[
+    AnyUrl,
+    PlainSerializer(lambda x: str(x), return_type=str),
 ]
 
 
@@ -118,8 +125,8 @@ class AgentDependencies(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     # Use AnyUrl to enforce strictly valid URIs
-    # Changed to List[AnyUrl] as requested to strictly enforce valid URI formatting
-    tools: List[AnyUrl] = Field(default_factory=list, description="List of MCP capability URIs required.")
+    # Changed to List[StrictUri] to strictly enforce valid URI formatting and string serialization
+    tools: List[StrictUri] = Field(default_factory=list, description="List of MCP capability URIs required.")
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )
