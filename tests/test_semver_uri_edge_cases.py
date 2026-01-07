@@ -3,8 +3,9 @@ from typing import Any, Dict
 
 import pytest
 import yaml
-from pydantic import ValidationError
+from pydantic import AnyUrl, ValidationError
 
+from coreason_manifest.errors import ManifestSyntaxError
 from coreason_manifest.loader import ManifestLoader
 from coreason_manifest.models import AgentDependencies
 
@@ -17,7 +18,7 @@ def raw_agent_dict() -> Dict[str, Any]:
             "version": "1.0.0",
             "name": "Test",
             "author": "Test",
-            "created_at": "2023-01-01",
+            "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {"steps": [], "model_config": {"model": "gpt-4", "temperature": 0.1}},
@@ -49,7 +50,42 @@ def test_normalization_complex_versions(tmp_path: Path, raw_agent_dict: Dict[str
         raw_agent_dict["metadata"]["version"] = input_ver
         p = create_temp_manifest(tmp_path, raw_agent_dict)
         data = ManifestLoader.load_raw_from_file(p)
-        assert data["metadata"]["version"] == expected_ver, f"Failed for {input_ver}"
+        assert data["metadata"]["version"] == expected_ver, f"Failed for {input_ver} in raw load"
+
+        agent = ManifestLoader.load_from_file(p)
+        assert agent.metadata.version == expected_ver, f"Failed for {input_ver} in model load"
+
+    # Edge Case: Double 'v'
+    # load_raw strips one 'v' -> 'v1.0.0'
+    # load_from_file (model) strips second 'v' -> '1.0.0'
+    raw_agent_dict["metadata"]["version"] = "vv1.0.0"
+    p = create_temp_manifest(tmp_path, raw_agent_dict)
+
+    raw_data = ManifestLoader.load_raw_from_file(p)
+    assert raw_data["metadata"]["version"] == "v1.0.0"
+
+    agent = ManifestLoader.load_from_file(p)
+    assert agent.metadata.version == "1.0.0"
+
+    # Edge Case: Triple 'v' -> Passes due to layered normalization
+    # 1. load_raw -> strips v -> vv1.0.0
+    # 2. load_from_dict -> strips v -> v1.0.0
+    # 3. Pydantic AfterValidator -> strips v -> 1.0.0
+    raw_agent_dict["metadata"]["version"] = "vvv1.0.0"
+    p = create_temp_manifest(tmp_path, raw_agent_dict)
+    agent = ManifestLoader.load_from_file(p)
+    assert agent.metadata.version == "1.0.0"
+
+    # Edge Case: Quadruple 'v' -> Should fail
+    # 1. load_raw -> vvv
+    # 2. load_from_dict -> vv
+    # 3. Pydantic Regex -> 'vv' fails (only accepts optional single v)
+    raw_agent_dict["metadata"]["version"] = "vvvv1.0.0"
+    p = create_temp_manifest(tmp_path, raw_agent_dict)
+    with pytest.raises(ManifestSyntaxError) as exc:
+        ManifestLoader.load_from_file(p)
+    # The error message comes from Pydantic regex validation
+    assert "String should match pattern" in str(exc.value) or "validation failed" in str(exc.value)
 
 
 def test_normalization_missing_fields(tmp_path: Path, raw_agent_dict: Dict[str, Any]) -> None:
@@ -85,6 +121,13 @@ def test_normalization_false_positives(tmp_path: Path, raw_agent_dict: Dict[str,
     assert data["metadata"]["version"] == "ery-bad-version"
 
 
+def test_normalization_direct_dict_load(raw_agent_dict: Dict[str, Any]) -> None:
+    """Verify load_from_dict performs normalization."""
+    raw_agent_dict["metadata"]["version"] = "v2.0.0"
+    agent = ManifestLoader.load_from_dict(raw_agent_dict)
+    assert agent.metadata.version == "2.0.0"
+
+
 # --- URI Validation Edge Cases ---
 
 
@@ -94,7 +137,7 @@ def test_uri_validation_edge_cases() -> None:
     # Unicode in domain (IDNA)
     unicode_uri = "https://münchen.de"
     try:
-        deps = AgentDependencies(tools=(unicode_uri,))
+        deps = AgentDependencies(tools=[unicode_uri])
         # Check normalization if it passes
         assert str(deps.tools[0]) in ["https://münchen.de/", "https://xn--mnchen-3ya.de/"]
     except ValidationError:
@@ -102,20 +145,27 @@ def test_uri_validation_edge_cases() -> None:
 
     # Invalid Port
     with pytest.raises(ValidationError, match="Input should be a valid URL"):
-        AgentDependencies(tools=("http://example.com:999999",))
+        AgentDependencies(tools=["http://example.com:999999"])
 
     # Missing Host with http scheme (strict)
     with pytest.raises(ValidationError):
-        AgentDependencies(tools=("http://",))
+        AgentDependencies(tools=["http://"])
 
     # Spaces in URI - Pydantic AnyUrl often encodes them
-    deps = AgentDependencies(tools=("http://example.com/foo bar",))
+    deps = AgentDependencies(tools=["http://example.com/foo bar"])
     assert "%20" in str(deps.tools[0]) or " " in str(deps.tools[0])
 
     # Definitely invalid URI (Non-numeric port)
     with pytest.raises(ValidationError):
-        AgentDependencies(tools=("http://example.com:abc",))
+        AgentDependencies(tools=["http://example.com:abc"])
 
     # Test mcp:// (custom scheme) is accepted as a URL structure
-    deps = AgentDependencies(tools=("mcp://",))
+    deps = AgentDependencies(tools=["mcp://"])
     assert str(deps.tools[0]) in ["mcp://", "mcp:///"]
+
+    # Test list mutability
+    deps = AgentDependencies(tools=["http://example.com"])
+    assert len(deps.tools) == 1
+    deps.tools.append(AnyUrl("http://example.org"))  # Should succeed and satisfy Mypy
+    assert len(deps.tools) == 2
+    assert str(deps.tools[1]) in ["http://example.org/", "http://example.org"]
