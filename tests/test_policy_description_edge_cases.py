@@ -33,11 +33,11 @@ def base_agent_data() -> Dict[str, Any]:
     }
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_description_boundary_conditions(base_agent_data: Dict[str, Any]) -> None:
     """Test description length boundary conditions."""
-    assert OPA_BINARY is not None
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # 1. Length 4 (Fail)
     base_agent_data["topology"]["steps"] = [{"id": "s1", "description": "abcd"}]
@@ -56,11 +56,11 @@ def test_description_boundary_conditions(base_agent_data: Dict[str, Any]) -> Non
     assert "Step description is too short" in str(e.value.violations)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_unicode_description_length(base_agent_data: Dict[str, Any]) -> None:
     """Test how OPA counts unicode characters."""
-    assert OPA_BINARY is not None
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # 5 emojis
     # Python len("😊"*5) is 5.
@@ -75,11 +75,11 @@ def test_unicode_description_length(base_agent_data: Dict[str, Any]) -> None:
     assert "Step description is too short" in str(e.value.violations)
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 def test_multiple_steps_validation(base_agent_data: Dict[str, Any]) -> None:
     """Test that all steps are checked."""
-    assert OPA_BINARY is not None
-    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[TBOM_PATH])
+
+    enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[TBOM_PATH])
 
     # Step 1: Good, Step 2: Good, Step 3: Bad
     base_agent_data["topology"]["steps"] = [

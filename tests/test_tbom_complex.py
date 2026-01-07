@@ -46,12 +46,12 @@ def agent_data() -> Dict[str, Any]:
     }
 
 
-@pytest.mark.skipif(not OPA_BINARY, reason="OPA binary not found")
+# @pytest.mark.skipif removed
 class TestTBOMComplex:
     def test_dotted_package_name(self, complex_tbom_file: Path, agent_data: Dict[str, Any]) -> None:
         """Test that packages with dots (namespace packages) are correctly parsed and allowed."""
-        assert OPA_BINARY is not None
-        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[complex_tbom_file])
+
+        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[complex_tbom_file])
 
         # Allowed dotted package
         agent_data["dependencies"]["libraries"] = ["zope.interface==5.0.0"]
@@ -65,8 +65,8 @@ class TestTBOMComplex:
 
     def test_package_with_extras(self, complex_tbom_file: Path, agent_data: Dict[str, Any]) -> None:
         """Test that packages with extras (brackets) are correctly matched against base name in TBOM."""
-        assert OPA_BINARY is not None
-        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[complex_tbom_file])
+
+        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[complex_tbom_file])
 
         # 'requests' is in TBOM. 'requests[security]' should be allowed.
         agent_data["dependencies"]["libraries"] = ["requests[security]==2.31.0"]
@@ -78,8 +78,8 @@ class TestTBOMComplex:
 
     def test_similar_package_names(self, complex_tbom_file: Path, agent_data: Dict[str, Any]) -> None:
         """Test strict matching to avoid prefix/suffix confusion."""
-        assert OPA_BINARY is not None
-        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[complex_tbom_file])
+
+        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[complex_tbom_file])
 
         # 'google-cloud-storage' is allowed.
         # 'google-cloud' (prefix) should NOT be allowed unless explicitly in TBOM (it's not).
@@ -96,8 +96,8 @@ class TestTBOMComplex:
 
     def test_case_sensitivity(self, complex_tbom_file: Path, agent_data: Dict[str, Any]) -> None:
         """Test handling of case sensitivity. TBOM is lowercase. Input might be mixed."""
-        assert OPA_BINARY is not None
-        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[complex_tbom_file])
+
+        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[complex_tbom_file])
 
         # Python packages are generally case-insensitive in pip, but best practice is lowercase.
         # If input is 'Pandas==2.0.0', and TBOM has 'pandas', it ideally should pass if we normalize,
@@ -110,8 +110,8 @@ class TestTBOMComplex:
 
     def test_no_dependencies(self, complex_tbom_file: Path, agent_data: Dict[str, Any]) -> None:
         """Test that empty dependencies list passes."""
-        assert OPA_BINARY is not None
-        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[complex_tbom_file])
+
+        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[complex_tbom_file])
 
         agent_data["dependencies"]["libraries"] = []
         enforcer.evaluate(agent_data)  # Should pass
@@ -122,8 +122,7 @@ class TestTBOMComplex:
         with open(bad_tbom, "w") as f:
             json.dump({"allowed_libs": ["requests"]}, f)  # Wrong key
 
-        assert OPA_BINARY is not None
-        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path=OPA_BINARY, data_paths=[bad_tbom])
+        enforcer = PolicyEnforcer(policy_path=POLICY_PATH, opa_path="opa", data_paths=[bad_tbom])
 
         # 'requests' is requested. It should fail because 'tbom' array is undefined/empty in the policy context.
         agent_data["dependencies"]["libraries"] = ["requests==2.0.0"]

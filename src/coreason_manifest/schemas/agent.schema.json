@@ -68,16 +68,19 @@
         },
         "name": {
           "description": "Name of the Agent.",
+          "minLength": 1,
           "title": "Name",
           "type": "string"
         },
         "author": {
           "description": "Author of the Agent.",
+          "minLength": 1,
           "title": "Author",
           "type": "string"
         },
         "created_at": {
           "description": "Creation timestamp (ISO 8601).",
+          "format": "date-time",
           "title": "Created At",
           "type": "string"
         }
@@ -146,6 +149,7 @@
       "properties": {
         "id": {
           "description": "Unique identifier for the step.",
+          "minLength": 1,
           "title": "Id",
           "type": "string"
         },
