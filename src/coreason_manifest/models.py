@@ -1,11 +1,20 @@
 # Prosperity-3.0
 from __future__ import annotations
 
+from datetime import datetime
 from types import MappingProxyType
 from typing import Any, Dict, Mapping, Optional, Tuple
 from uuid import UUID
 
-from pydantic import AfterValidator, AnyUrl, BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import (
+    AfterValidator,
+    AnyUrl,
+    BaseModel,
+    ConfigDict,
+    Field,
+    PlainSerializer,
+    field_validator,
+)
 from typing_extensions import Annotated
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -46,9 +55,9 @@ class AgentMetadata(BaseModel):
 
     id: UUID = Field(..., description="Unique Identifier for the Agent (UUID).")
     version: VersionStr = Field(..., description="Semantic Version of the Agent.")
-    name: str = Field(..., description="Name of the Agent.")
-    author: str = Field(..., description="Author of the Agent.")
-    created_at: str = Field(..., description="Creation timestamp (ISO 8601).")
+    name: str = Field(..., min_length=1, description="Name of the Agent.")
+    author: str = Field(..., min_length=1, description="Author of the Agent.")
+    created_at: datetime = Field(..., description="Creation timestamp (ISO 8601).")
 
 
 class AgentInterface(BaseModel):
@@ -65,7 +74,7 @@ class Step(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    id: str = Field(..., description="Unique identifier for the step.")
+    id: str = Field(..., min_length=1, description="Unique identifier for the step.")
     description: Optional[str] = Field(None, description="Description of the step.")
 
 
@@ -85,6 +94,22 @@ class AgentTopology(BaseModel):
 
     steps: Tuple[Step, ...] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
+
+    @field_validator("steps")
+    @classmethod
+    def validate_unique_step_ids(cls, v: Tuple[Step, ...]) -> Tuple[Step, ...]:
+        """Ensure all step IDs are unique."""
+        ids = [step.id for step in v]
+        if len(ids) != len(set(ids)):
+            # Find duplicates
+            seen = set()
+            dupes = set()
+            for x in ids:
+                if x in seen:
+                    dupes.add(x)
+                seen.add(x)
+            raise ValueError(f"Duplicate step IDs found: {', '.join(dupes)}")
+        return v
 
 
 class AgentDependencies(BaseModel):
