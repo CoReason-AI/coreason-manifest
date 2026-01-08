@@ -1,0 +1,209 @@
+{
+  "$defs": {
+    "AgentDependencies": {
+      "additionalProperties": false,
+      "description": "External dependencies for the Agent.",
+      "properties": {
+        "tools": {
+          "description": "List of MCP capability URIs required.",
+          "items": {
+            "format": "uri",
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "libraries": {
+          "description": "List of Python packages required (if code execution is allowed).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Libraries",
+          "type": "array"
+        }
+      },
+      "title": "AgentDependencies",
+      "type": "object"
+    },
+    "AgentInterface": {
+      "additionalProperties": false,
+      "description": "Interface definition for the Agent.",
+      "properties": {
+        "inputs": {
+          "additionalProperties": true,
+          "description": "Typed arguments the agent accepts (JSON Schema).",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": true,
+          "description": "Typed structure of the result.",
+          "title": "Outputs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "inputs",
+        "outputs"
+      ],
+      "title": "AgentInterface",
+      "type": "object"
+    },
+    "AgentMetadata": {
+      "additionalProperties": false,
+      "description": "Metadata for the Agent.",
+      "properties": {
+        "id": {
+          "description": "Unique Identifier for the Agent (UUID).",
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "description": "Semantic Version of the Agent.",
+          "pattern": "^[vV]*(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+          "title": "Version",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the Agent.",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "author": {
+          "description": "Author of the Agent.",
+          "minLength": 1,
+          "title": "Author",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "Creation timestamp (ISO 8601).",
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "name",
+        "author",
+        "created_at"
+      ],
+      "title": "AgentMetadata",
+      "type": "object"
+    },
+    "AgentTopology": {
+      "additionalProperties": false,
+      "description": "Topology of the Agent execution.",
+      "properties": {
+        "steps": {
+          "description": "A directed acyclic graph (DAG) of execution steps.",
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "title": "Steps",
+          "type": "array"
+        },
+        "model_config": {
+          "$ref": "#/$defs/ModelConfig",
+          "description": "Specific LLM parameters."
+        }
+      },
+      "required": [
+        "steps",
+        "model_config"
+      ],
+      "title": "AgentTopology",
+      "type": "object"
+    },
+    "ModelConfig": {
+      "additionalProperties": false,
+      "description": "LLM Configuration parameters.",
+      "properties": {
+        "model": {
+          "description": "The LLM model identifier.",
+          "title": "Model",
+          "type": "string"
+        },
+        "temperature": {
+          "description": "Temperature for generation.",
+          "maximum": 2.0,
+          "minimum": 0.0,
+          "title": "Temperature",
+          "type": "number"
+        }
+      },
+      "required": [
+        "model",
+        "temperature"
+      ],
+      "title": "ModelConfig",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "description": "A single step in the execution graph.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the step.",
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of the step.",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Step",
+      "type": "object"
+    }
+  },
+  "$id": "https://coreason.ai/schemas/agent.schema.json",
+  "additionalProperties": false,
+  "description": "The definitive source of truth for CoReason Agent definitions.",
+  "properties": {
+    "metadata": {
+      "$ref": "#/$defs/AgentMetadata"
+    },
+    "interface": {
+      "$ref": "#/$defs/AgentInterface"
+    },
+    "topology": {
+      "$ref": "#/$defs/AgentTopology"
+    },
+    "dependencies": {
+      "$ref": "#/$defs/AgentDependencies"
+    },
+    "integrity_hash": {
+      "description": "SHA256 hash of the source code.",
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "title": "Integrity Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "metadata",
+    "interface",
+    "topology",
+    "dependencies",
+    "integrity_hash"
+  ],
+  "title": "CoReason Agent Manifest",
+  "type": "object"
+}
