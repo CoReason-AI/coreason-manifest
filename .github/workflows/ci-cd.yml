@@ -105,28 +105,3 @@ jobs:
       - name: Build documentation
         run: poetry run mkdocs build --strict
         shell: bash
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build-docs
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
-      - name: Set up Python
-        uses: actions/setup-python@cfd55ca82492758d853442341ad4d8010466803a
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: pip install build
-
-      - name: Build package
-        run: python -m build
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@2f6f737ca5f74c637829c0f5c3acd0e29ea5e8bf
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
