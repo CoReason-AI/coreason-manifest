@@ -56,7 +56,16 @@ StrictUri = Annotated[
 
 
 class AgentMetadata(BaseModel):
-    """Metadata for the Agent."""
+    """
+    Metadata for the Agent.
+
+    Attributes:
+        id: Unique Identifier for the Agent (UUID).
+        version: Semantic Version of the Agent.
+        name: Name of the Agent.
+        author: Author of the Agent.
+        created_at: Creation timestamp (ISO 8601).
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -68,7 +77,13 @@ class AgentMetadata(BaseModel):
 
 
 class AgentInterface(BaseModel):
-    """Interface definition for the Agent."""
+    """
+    Interface definition for the Agent.
+
+    Attributes:
+        inputs: Typed arguments the agent accepts (JSON Schema).
+        outputs: Typed structure of the result.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -77,7 +92,13 @@ class AgentInterface(BaseModel):
 
 
 class Step(BaseModel):
-    """A single step in the execution graph."""
+    """
+    A single step in the execution graph.
+
+    Attributes:
+        id: Unique identifier for the step.
+        description: Description of the step.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -86,7 +107,13 @@ class Step(BaseModel):
 
 
 class ModelConfig(BaseModel):
-    """LLM Configuration parameters."""
+    """
+    LLM Configuration parameters.
+
+    Attributes:
+        model: The LLM model identifier.
+        temperature: Temperature for generation.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -95,7 +122,13 @@ class ModelConfig(BaseModel):
 
 
 class AgentTopology(BaseModel):
-    """Topology of the Agent execution."""
+    """
+    Topology of the Agent execution.
+
+    Attributes:
+        steps: A directed acyclic graph (DAG) of execution steps.
+        llm_config: Specific LLM parameters.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -120,7 +153,13 @@ class AgentTopology(BaseModel):
 
 
 class AgentDependencies(BaseModel):
-    """External dependencies for the Agent."""
+    """
+    External dependencies for the Agent.
+
+    Attributes:
+        tools: List of MCP capability URIs required.
+        libraries: List of Python packages required (if code execution is allowed).
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -133,7 +172,16 @@ class AgentDependencies(BaseModel):
 
 
 class AgentDefinition(BaseModel):
-    """The Root Object for the CoReason Agent Manifest."""
+    """
+    The Root Object for the CoReason Agent Manifest.
+
+    Attributes:
+        metadata: Metadata for the Agent.
+        interface: Interface definition for the Agent.
+        topology: Topology of the Agent execution.
+        dependencies: External dependencies for the Agent.
+        integrity_hash: SHA256 hash of the source code.
+    """
 
     model_config = ConfigDict(
         extra="forbid",

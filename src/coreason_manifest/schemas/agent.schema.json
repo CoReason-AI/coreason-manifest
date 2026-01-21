@@ -2,7 +2,7 @@
   "$defs": {
     "AgentDependencies": {
       "additionalProperties": false,
-      "description": "External dependencies for the Agent.",
+      "description": "External dependencies for the Agent.\n\nAttributes:\n    tools: List of MCP capability URIs required.\n    libraries: List of Python packages required (if code execution is allowed).",
       "properties": {
         "tools": {
           "description": "List of MCP capability URIs required.",
@@ -28,7 +28,7 @@
     },
     "AgentInterface": {
       "additionalProperties": false,
-      "description": "Interface definition for the Agent.",
+      "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.",
       "properties": {
         "inputs": {
           "additionalProperties": true,
@@ -52,7 +52,7 @@
     },
     "AgentMetadata": {
       "additionalProperties": false,
-      "description": "Metadata for the Agent.",
+      "description": "Metadata for the Agent.\n\nAttributes:\n    id: Unique Identifier for the Agent (UUID).\n    version: Semantic Version of the Agent.\n    name: Name of the Agent.\n    author: Author of the Agent.\n    created_at: Creation timestamp (ISO 8601).",
       "properties": {
         "id": {
           "description": "Unique Identifier for the Agent (UUID).",
@@ -97,7 +97,7 @@
     },
     "AgentTopology": {
       "additionalProperties": false,
-      "description": "Topology of the Agent execution.",
+      "description": "Topology of the Agent execution.\n\nAttributes:\n    steps: A directed acyclic graph (DAG) of execution steps.\n    llm_config: Specific LLM parameters.",
       "properties": {
         "steps": {
           "description": "A directed acyclic graph (DAG) of execution steps.",
@@ -121,7 +121,7 @@
     },
     "ModelConfig": {
       "additionalProperties": false,
-      "description": "LLM Configuration parameters.",
+      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.",
       "properties": {
         "model": {
           "description": "The LLM model identifier.",
@@ -145,7 +145,7 @@
     },
     "Step": {
       "additionalProperties": false,
-      "description": "A single step in the execution graph.",
+      "description": "A single step in the execution graph.\n\nAttributes:\n    id: Unique identifier for the step.\n    description: Description of the step.",
       "properties": {
         "id": {
           "description": "Unique identifier for the step.",
