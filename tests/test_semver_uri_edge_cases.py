@@ -55,13 +55,12 @@ def test_normalization_complex_versions(tmp_path: Path, raw_agent_dict: Dict[str
         assert agent.metadata.version == expected_ver, f"Failed for {input_ver} in model load"
 
     # Edge Case: Double 'v'
-    # load_raw strips one 'v' -> 'v1.0.0'
-    # load_from_file (model) strips second 'v' -> '1.0.0'
+    # load_raw recursively strips 'v' -> '1.0.0'
     raw_agent_dict["metadata"]["version"] = "vv1.0.0"
     p = create_temp_manifest(tmp_path, raw_agent_dict)
 
     raw_data = ManifestLoader.load_raw_from_file(p)
-    assert raw_data["metadata"]["version"] == "v1.0.0"
+    assert raw_data["metadata"]["version"] == "1.0.0"
 
     agent = ManifestLoader.load_from_file(p)
     assert agent.metadata.version == "1.0.0"
