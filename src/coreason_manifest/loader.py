@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Union
 
+import aiofiles
 import yaml
 from pydantic import ValidationError
 
@@ -48,6 +49,43 @@ class ManifestLoader:
             with open(path_obj, "r", encoding="utf-8") as f:
                 # safe_load is recommended for untrusted input
                 data = yaml.safe_load(f)
+
+            if not isinstance(data, dict):
+                raise ManifestSyntaxError(f"Invalid YAML content in {path}: must be a dictionary.")
+
+            ManifestLoader._normalize_data(data)
+
+            return data
+
+        except yaml.YAMLError as e:
+            raise ManifestSyntaxError(f"Failed to parse YAML file {path}: {str(e)}") from e
+        except OSError as e:
+            if isinstance(e, FileNotFoundError):
+                raise
+            raise ManifestSyntaxError(f"Error reading file {path}: {str(e)}") from e
+
+    @staticmethod
+    async def load_raw_from_file_async(path: Union[str, Path]) -> dict[str, Any]:
+        """Loads the raw dict from a YAML file asynchronously.
+
+        Args:
+            path: The path to the agent.yaml file.
+
+        Returns:
+            dict: The raw dictionary content.
+
+        Raises:
+            ManifestSyntaxError: If YAML is invalid.
+            FileNotFoundError: If the file does not exist.
+        """
+        try:
+            path_obj = Path(path)
+            if not path_obj.exists():
+                raise FileNotFoundError(f"Manifest file not found: {path}")
+
+            async with aiofiles.open(path_obj, "r", encoding="utf-8") as f:
+                content = await f.read()
+                data = yaml.safe_load(content)
 
             if not isinstance(data, dict):
                 raise ManifestSyntaxError(f"Invalid YAML content in {path}: must be a dictionary.")

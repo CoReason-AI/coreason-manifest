@@ -16,7 +16,7 @@ Usage:
     agent_def = engine.load_and_validate("agent.yaml", "./src")
 """
 
-from .engine import ManifestConfig, ManifestEngine
+from .engine import ManifestConfig, ManifestEngine, ManifestEngineAsync
 from .errors import (
     IntegrityCompromisedError,
     ManifestError,
@@ -47,6 +47,7 @@ __all__ = [
     "IntegrityCompromisedError",
     "ManifestConfig",
     "ManifestEngine",
+    "ManifestEngineAsync",
     "ManifestError",
     "ManifestLoader",
     "ManifestSyntaxError",
