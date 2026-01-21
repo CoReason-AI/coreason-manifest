@@ -1,4 +1,10 @@
 # Prosperity-3.0
+"""Manifest Loader.
+
+This module is responsible for loading the agent manifest from YAML files or
+dictionaries, normalizing the data, and converting it into Pydantic models.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,8 +18,7 @@ from coreason_manifest.models import AgentDefinition
 
 
 class ManifestLoader:
-    """
-    Component A: ManifestLoader (The Parser).
+    """Component A: ManifestLoader (The Parser).
 
     Responsibility:
       - Load YAML safely.
@@ -23,8 +28,7 @@ class ManifestLoader:
 
     @staticmethod
     def load_raw_from_file(path: Union[str, Path]) -> dict[str, Any]:
-        """
-        Loads the raw dict from a YAML file.
+        """Loads the raw dict from a YAML file.
 
         Args:
             path: The path to the agent.yaml file.
@@ -48,16 +52,6 @@ class ManifestLoader:
             if not isinstance(data, dict):
                 raise ManifestSyntaxError(f"Invalid YAML content in {path}: must be a dictionary.")
 
-            # Normalization logic is now centralized in load_from_dict
-            # But we perform it here too if we return the raw dict, or we delegate.
-            # However, standardizing on load_from_dict doing the normalization is cleaner.
-            # But for backward compatibility with callers who use raw dict, we keep the logic here too?
-            # Or we call a shared helper. For now, we replicate or keep it.
-            # Actually, the requirement is "explicitly strip ... before they reach Pydantic models".
-            # If load_raw returns data, and then user calls load_from_dict, load_from_dict must do it.
-            # If load_raw returns data with 'v', the caller sees 'v'. That's fine for raw.
-            # But let's apply it here too for consistency.
-
             ManifestLoader._normalize_data(data)
 
             return data
@@ -71,8 +65,7 @@ class ManifestLoader:
 
     @staticmethod
     def load_from_file(path: Union[str, Path]) -> AgentDefinition:
-        """
-        Loads the agent manifest from a YAML file.
+        """Loads the agent manifest from a YAML file.
 
         Args:
             path: The path to the agent.yaml file.
@@ -89,8 +82,7 @@ class ManifestLoader:
 
     @staticmethod
     def load_from_dict(data: dict[str, Any]) -> AgentDefinition:
-        """
-        Converts a dictionary into an AgentDefinition model.
+        """Converts a dictionary into an AgentDefinition model.
 
         Args:
             data: The raw dictionary.
@@ -115,11 +107,14 @@ class ManifestLoader:
 
     @staticmethod
     def _normalize_data(data: dict[str, Any]) -> None:
-        """
-        Normalizes the data dictionary in place.
-        Specifically strips 'v' or 'V' from version strings.
+        """Normalizes the data dictionary in place.
+
+        Specifically strips 'v' or 'V' from version strings recursively until clean.
         """
         if "metadata" in data and isinstance(data["metadata"], dict):
             version = data["metadata"].get("version")
-            if isinstance(version, str) and version.lower().startswith("v"):
-                data["metadata"]["version"] = version[1:]
+            if isinstance(version, str):
+                # Recursively strip leading 'v' or 'V'
+                while version and version[0] in ("v", "V"):
+                    version = version[1:]
+                data["metadata"]["version"] = version

@@ -1,4 +1,10 @@
 # Prosperity-3.0
+"""Schema validation functionality.
+
+This module provides the `SchemaValidator` class, which uses JSON Schema to
+validate the structure and types of agent definitions.
+"""
+
 from __future__ import annotations
 
 import json
@@ -11,8 +17,7 @@ from coreason_manifest.errors import ManifestSyntaxError
 
 
 class SchemaValidator:
-    """
-    Component B: SchemaValidator (The Structural Engineer).
+    """Component B: SchemaValidator (The Structural Engineer).
 
     Responsibility:
       - Validate the dictionary against the Master JSON Schema.
@@ -24,7 +29,14 @@ class SchemaValidator:
         self.schema = self._load_schema()
 
     def _load_schema(self) -> dict[str, Any]:
-        """Loads the JSON schema from the package resources."""
+        """Loads the JSON schema from the package resources.
+
+        Returns:
+            The JSON schema dictionary.
+
+        Raises:
+            ManifestSyntaxError: If the schema file cannot be loaded or is invalid.
+        """
         try:
             schema_path = files("coreason_manifest.schemas").joinpath("agent.schema.json")
             with schema_path.open("r", encoding="utf-8") as f:
@@ -36,14 +48,13 @@ class SchemaValidator:
             raise ManifestSyntaxError(f"Failed to load agent schema: {e}") from e
 
     def validate(self, data: dict[str, Any]) -> bool:
-        """
-        Validates the given dictionary against the agent schema.
+        """Validates the given dictionary against the agent schema.
 
         Args:
             data: The raw dictionary to validate.
 
         Returns:
-            bool: True if validation passes.
+            True if validation passes.
 
         Raises:
             ManifestSyntaxError: If validation fails.

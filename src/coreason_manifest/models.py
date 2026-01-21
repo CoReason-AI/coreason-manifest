@@ -1,4 +1,10 @@
 # Prosperity-3.0
+"""Pydantic models for the Coreason Manifest system.
+
+These models define the structure and validation rules for the Agent Manifest
+(OAS). They represent the source of truth for Agent definitions.
+"""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -27,7 +33,14 @@ SEMVER_REGEX = (
 
 
 def normalize_version(v: str) -> str:
-    """Normalize version string by recursively stripping 'v' or 'V' prefix."""
+    """Normalize version string by recursively stripping 'v' or 'V' prefix.
+
+    Args:
+        v: The version string to normalize.
+
+    Returns:
+        The normalized version string without 'v' prefix.
+    """
     while v.lower().startswith("v"):
         v = v[1:]
     return v
@@ -56,8 +69,7 @@ StrictUri = Annotated[
 
 
 class AgentMetadata(BaseModel):
-    """
-    Metadata for the Agent.
+    """Metadata for the Agent.
 
     Attributes:
         id: Unique Identifier for the Agent (UUID).
@@ -77,8 +89,7 @@ class AgentMetadata(BaseModel):
 
 
 class AgentInterface(BaseModel):
-    """
-    Interface definition for the Agent.
+    """Interface definition for the Agent.
 
     Attributes:
         inputs: Typed arguments the agent accepts (JSON Schema).
@@ -92,8 +103,7 @@ class AgentInterface(BaseModel):
 
 
 class Step(BaseModel):
-    """
-    A single step in the execution graph.
+    """A single step in the execution graph.
 
     Attributes:
         id: Unique identifier for the step.
@@ -107,8 +117,7 @@ class Step(BaseModel):
 
 
 class ModelConfig(BaseModel):
-    """
-    LLM Configuration parameters.
+    """LLM Configuration parameters.
 
     Attributes:
         model: The LLM model identifier.
@@ -122,8 +131,7 @@ class ModelConfig(BaseModel):
 
 
 class AgentTopology(BaseModel):
-    """
-    Topology of the Agent execution.
+    """Topology of the Agent execution.
 
     Attributes:
         steps: A directed acyclic graph (DAG) of execution steps.
@@ -138,7 +146,17 @@ class AgentTopology(BaseModel):
     @field_validator("steps")
     @classmethod
     def validate_unique_step_ids(cls, v: Tuple[Step, ...]) -> Tuple[Step, ...]:
-        """Ensure all step IDs are unique."""
+        """Ensure all step IDs are unique.
+
+        Args:
+            v: The tuple of steps to validate.
+
+        Returns:
+            The validated tuple of steps.
+
+        Raises:
+            ValueError: If duplicate step IDs are found.
+        """
         ids = [step.id for step in v]
         if len(ids) != len(set(ids)):
             # Find duplicates
@@ -153,8 +171,7 @@ class AgentTopology(BaseModel):
 
 
 class AgentDependencies(BaseModel):
-    """
-    External dependencies for the Agent.
+    """External dependencies for the Agent.
 
     Attributes:
         tools: List of MCP capability URIs required.
@@ -172,8 +189,7 @@ class AgentDependencies(BaseModel):
 
 
 class AgentDefinition(BaseModel):
-    """
-    The Root Object for the CoReason Agent Manifest.
+    """The Root Object for the CoReason Agent Manifest.
 
     Attributes:
         metadata: Metadata for the Agent.

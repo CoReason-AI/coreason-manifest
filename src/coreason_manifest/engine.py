@@ -1,4 +1,10 @@
 # Prosperity-3.0
+"""Engine for the Coreason Manifest system.
+
+This module provides the main entry point for verifying and loading Agent Manifests.
+It coordinates schema validation, policy enforcement, and integrity checking.
+"""
+
 from __future__ import annotations
 
 import time
@@ -10,16 +16,13 @@ from coreason_manifest.integrity import IntegrityChecker
 from coreason_manifest.loader import ManifestLoader
 from coreason_manifest.models import AgentDefinition
 from coreason_manifest.policy import PolicyEnforcer
-
-# Import logger from utils to ensure configuration is applied
 from coreason_manifest.utils.logger import logger
 from coreason_manifest.validator import SchemaValidator
 
 
 @dataclass
 class ManifestConfig:
-    """
-    Configuration for the ManifestEngine.
+    """Configuration for the ManifestEngine.
 
     Attributes:
         policy_path: Path to the Rego policy file.
@@ -35,13 +38,18 @@ class ManifestConfig:
 
 
 class ManifestEngine:
-    """
-    The main entry point for verifying and loading Agent Manifests.
+    """The main entry point for verifying and loading Agent Manifests.
+
+    This class coordinates the validation process, including:
+    1.  Loading raw YAML.
+    2.  Validating against JSON Schema.
+    3.  Converting to AgentDefinition Pydantic model (Normalization).
+    4.  Enforcing Policy (Rego).
+    5.  Verifying Integrity (Hash check).
     """
 
     def __init__(self, config: ManifestConfig) -> None:
-        """
-        Initialize the ManifestEngine.
+        """Initialize the ManifestEngine.
 
         Args:
             config: Configuration including policy path and OPA path.
@@ -61,15 +69,7 @@ class ManifestEngine:
         )
 
     def load_and_validate(self, manifest_path: Union[str, Path], source_dir: Union[str, Path]) -> AgentDefinition:
-        """
-        Loads, validates, and verifies an Agent Manifest.
-
-        Steps:
-        1. Load raw YAML.
-        2. Validate against JSON Schema.
-        3. Convert to AgentDefinition Pydantic model (Normalization).
-        4. Enforce Policy (Rego).
-        5. Verify Integrity (Hash check).
+        """Loads, validates, and verifies an Agent Manifest.
 
         Args:
             manifest_path: Path to the agent.yaml file.
