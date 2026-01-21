@@ -1,4 +1,11 @@
 # Prosperity-3.0
+"""Integrity checking functionality.
+
+This module provides the `IntegrityChecker` class, which is responsible for
+calculating deterministic hashes of source code directories and verifying
+them against the expected hash in the agent manifest.
+"""
+
 from __future__ import annotations
 
 import hashlib
@@ -11,8 +18,7 @@ from coreason_manifest.models import AgentDefinition
 
 
 class IntegrityChecker:
-    """
-    Component D: IntegrityChecker (The Notary).
+    """Component D: IntegrityChecker (The Notary).
 
     Responsibility:
       - Calculate the SHA256 hash of the source code directory.
@@ -23,8 +29,7 @@ class IntegrityChecker:
 
     @staticmethod
     def calculate_hash(source_dir: Union[Path, str], exclude_files: Optional[Set[Union[Path, str]]] = None) -> str:
-        """
-        Calculates a deterministic SHA256 hash of the source code directory.
+        """Calculates a deterministic SHA256 hash of the source code directory.
 
         It walks the directory using os.walk to efficiently prune ignored directories.
         Sorts files by relative path, hashes each file, and then hashes the sequence.
@@ -34,7 +39,8 @@ class IntegrityChecker:
 
         Args:
             source_dir: The directory containing source code.
-            exclude_files: Optional set of file paths (absolute or relative to CWD) to exclude from hashing.
+            exclude_files: Optional set of file paths (absolute or relative to CWD)
+                to exclude from hashing.
 
         Returns:
             The hex digest of the SHA256 hash.
@@ -113,8 +119,7 @@ class IntegrityChecker:
         source_dir: Union[Path, str],
         manifest_path: Optional[Union[Path, str]] = None,
     ) -> None:
-        """
-        Verifies the integrity of the source code against the manifest.
+        """Verifies the integrity of the source code against the manifest.
 
         Args:
             agent_def: The AgentDefinition containing the expected hash.

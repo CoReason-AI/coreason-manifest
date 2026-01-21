@@ -1,22 +1,23 @@
-# coreason-manifest
+# Coreason Manifest
 
-> The definitive source of truth for Asset definitions.
+The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint."
 
-[![License: Prosperity 3.0](https://img.shields.io/badge/License-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason_manifest/blob/main/LICENSE)
-[![Build Status](https://github.com/CoReason-AI/coreason_manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason_manifest/actions)
-[![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: Prosperity 3.0](https://img.shields.io/badge/license-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason-manifest)
+[![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Documentation](https://img.shields.io/badge/docs-product_requirements-informational)](docs/product_requirements.md)
 
-**coreason-manifest** ("The Blueprint") is the core compliance and validation engine for the CoReason platform. It enforces strict architectural and security standards for Agent specifications, ensuring that every asset produced meets GxP and security protocols before execution.
+## Overview
+
+`coreason-manifest` acts as the validator for the "Agent Development Lifecycle" (ADLC). It ensures that every Agent produced meets strict GxP and security standards. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run.
 
 ## Features
 
-*   **Open Agent Specification (OAS):** Defines a strict, schema-driven contract for Agents (Metadata, Interface, Topology, Dependencies).
-*   **Compliance Guardrails:**
-    *   **Dependency Pinning:** Enforces explicit versioning for all libraries.
-    *   **Allowlist Enforcement:** Validates libraries against a "Trusted Bill of Materials" (TBOM).
-    *   **Integrity Checks:** Verifies source code SHA256 hashes against the manifest signature.
-*   **Policy as Code:** Leverages Open Policy Agent (OPA) and Rego for complex, logic-based compliance rules.
-*   **Standardized Validation:** Uses JSON Schema Draft 2020-12 and Pydantic V2 for robust data modeling.
+*   **Open Agent Specification (OAS) Validation:** Parses and validates agent definitions against a strict schema.
+*   **Compliance Enforcement:** Uses Open Policy Agent (OPA) / Rego to enforce complex business rules and allowlists.
+*   **Integrity Verification:** Calculates and verifies SHA256 hashes of the agent's source code to prevent tampering.
+*   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
+*   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
 
 ## Installation
 
@@ -26,31 +27,29 @@ pip install coreason-manifest
 
 ## Usage
 
-```python
-from coreason_manifest import ManifestEngine, ManifestConfig, PolicyViolationError
+Here is how to initialize the engine and validate an agent manifest:
 
-# 1. Initialize the engine with compliance policies
-config = ManifestConfig(
-    policy_path="./policies/gx_compliant.rego",
-    opa_path="opa"  # Ensure OPA is installed and in PATH
-)
+```python
+from coreason_manifest import ManifestEngine, ManifestConfig, PolicyViolationError, IntegrityCompromisedError
+
+# 1. Initialize configuration with policy path
+config = ManifestConfig(policy_path="./policies/gx_compliant.rego")
 engine = ManifestEngine(config)
 
-# 2. Load, Validate, and Verify an Agent
+# 2. Load & Validate Agent Manifest
 try:
+    # This runs Schema Validation, Policy Enforcement, and Integrity Checks
     agent_def = engine.load_and_validate(
         manifest_path="./agents/payer_war_game/agent.yaml",
         source_dir="./agents/payer_war_game/src"
     )
-    print(f"Agent {agent_def.metadata.name} (v{agent_def.metadata.version}) is compliant.")
+    print(f"Agent {agent_def.metadata.name} is compliant and ready to run.")
 
 except PolicyViolationError as e:
     print(f"Compliance Failure: {e.violations}")
 
-except Exception as e:
-    print(f"Validation Error: {e}")
+except IntegrityCompromisedError:
+    print("CRITICAL: Code has been tampered with after signing.")
 ```
 
-## License
-
-This project is licensed under the **Prosperity Public License 3.0**. See the [LICENSE](LICENSE) file for details.
+For detailed requirements and architecture, please refer to the [Product Requirements](docs/product_requirements.md).

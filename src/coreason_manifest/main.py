@@ -1,16 +1,17 @@
-# Copyright (c) 2025 CoReason, Inc.
-#
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
-#
-# Source Code: https://github.com/CoReason-AI/coreason_manifest
+# Prosperity-3.0
+"""Main module for coreason_manifest.
+
+This module is primarily used for testing and demonstration purposes.
+"""
 
 from coreason_manifest.utils.logger import logger
 
 
 def hello_world() -> str:
+    """Returns a hello world string.
+
+    Returns:
+        "Hello World!" string.
+    """
     logger.info("Hello World!")
     return "Hello World!"
