@@ -18,7 +18,15 @@ from coreason_manifest.validator import SchemaValidator
 
 @dataclass
 class ManifestConfig:
-    """Configuration for the ManifestEngine."""
+    """
+    Configuration for the ManifestEngine.
+
+    Attributes:
+        policy_path: Path to the Rego policy file.
+        opa_path: Path to the OPA executable. Defaults to "opa".
+        tbom_path: Optional path to the Trusted Bill of Materials.
+        extra_data_paths: Additional data paths to load into OPA.
+    """
 
     policy_path: Union[str, Path]
     opa_path: str = "opa"
