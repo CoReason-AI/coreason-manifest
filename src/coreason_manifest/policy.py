@@ -1,4 +1,10 @@
 # Prosperity-3.0
+"""Policy enforcement functionality using Open Policy Agent (OPA).
+
+This module provides the `PolicyEnforcer` class, which interacts with OPA to
+evaluate agent definitions against compliance policies defined in Rego.
+"""
+
 from __future__ import annotations
 
 import json
@@ -11,8 +17,7 @@ from coreason_manifest.errors import PolicyViolationError
 
 
 class PolicyEnforcer:
-    """
-    Component C: PolicyEnforcer (The Compliance Officer).
+    """Component C: PolicyEnforcer (The Compliance Officer).
 
     Responsibility:
       - Evaluate the agent against the compliance.rego policy file using OPA.
@@ -24,13 +29,15 @@ class PolicyEnforcer:
         opa_path: str = "opa",
         data_paths: Optional[List[str | Path]] = None,
     ) -> None:
-        """
-        Initialize the PolicyEnforcer.
+        """Initialize the PolicyEnforcer.
 
         Args:
             policy_path: Path to the Rego policy file.
             opa_path: Path to the OPA executable. Defaults to "opa" (expected in PATH).
             data_paths: List of paths to data files (e.g. JSON/YAML) to be loaded by OPA.
+
+        Raises:
+            FileNotFoundError: If OPA, policy file, or data files are not found.
         """
         self.policy_path = Path(policy_path)
         self.data_paths = [Path(p) for p in data_paths] if data_paths else []
@@ -38,15 +45,15 @@ class PolicyEnforcer:
         # Validate OPA executable
         # If opa_path is a simple name (like "opa"), use shutil.which to find it
         if "/" not in str(opa_path) and "\\" not in str(opa_path):
-            resolved_opa = shutil.which(opa_path)
+            resolved_opa: Optional[str] = shutil.which(opa_path)
             if not resolved_opa:
                 raise FileNotFoundError(f"OPA executable not found in PATH: {opa_path}")
-            self.opa_path = resolved_opa
+            self.opa_path: str = resolved_opa
         else:
             # If it's a path, check existence
             if not Path(opa_path).exists():
                 raise FileNotFoundError(f"OPA executable not found at: {opa_path}")
-            self.opa_path = opa_path
+            self.opa_path = str(opa_path)
 
         if not self.policy_path.exists():
             raise FileNotFoundError(f"Policy file not found: {self.policy_path}")
@@ -56,8 +63,7 @@ class PolicyEnforcer:
                 raise FileNotFoundError(f"Data file not found: {path}")
 
     def evaluate(self, agent_data: dict[str, Any]) -> None:
-        """
-        Evaluates the agent data against the policy.
+        """Evaluates the agent data against the policy.
 
         Args:
             agent_data: The dictionary representation of the AgentDefinition.

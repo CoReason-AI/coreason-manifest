@@ -35,6 +35,6 @@ def test_manifest_config_data_paths(tmp_path: Path) -> None:
 
     # Check if paths were passed to enforcer
     # We check if lists have same elements
-    assert len(engine.policy_enforcer.data_paths) == 2
-    assert tbom_path in engine.policy_enforcer.data_paths
-    assert extra_path in engine.policy_enforcer.data_paths
+    assert len(engine._async.policy_enforcer.data_paths) == 2
+    assert tbom_path in engine._async.policy_enforcer.data_paths
+    assert extra_path in engine._async.policy_enforcer.data_paths
