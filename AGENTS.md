@@ -160,6 +160,7 @@ If you encounter an error (e.g., test failure, linting error), follow this STRIC
 
 STOP and ASK the user before:
 
+
 * Modifying database migrations or schema files.
 * Deleting any file outside of src/ or tests/.
 * Adding a dependency that requires OS-level libraries (e.g., libpq-dev).
