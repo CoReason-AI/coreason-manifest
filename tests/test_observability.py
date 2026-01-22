@@ -63,7 +63,7 @@ def test_policy_check_logging_pass(
 
     try:
         # Mock PolicyEnforcer to pass
-        with patch.object(engine.policy_enforcer, "evaluate") as mock_eval:
+        with patch.object(engine._async.policy_enforcer, "evaluate") as mock_eval:
             engine.load_and_validate(manifest_path, src_dir)
             mock_eval.assert_called_once()
     finally:
@@ -113,7 +113,7 @@ def test_policy_check_logging_fail(
     try:
         # Mock PolicyEnforcer to fail
         with patch.object(
-            engine.policy_enforcer,
+            engine._async.policy_enforcer,
             "evaluate",
             side_effect=PolicyViolationError("Violation"),
         ):

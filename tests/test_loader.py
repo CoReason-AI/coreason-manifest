@@ -126,3 +126,63 @@ def test_load_raw_from_file_normalization(tmp_path: Path, valid_agent_data: Dict
 
     data = ManifestLoader.load_raw_from_file(manifest_path)
     assert data["metadata"]["version"] == "1.2.3"
+
+
+@pytest.mark.asyncio
+async def test_load_raw_from_file_async_valid(tmp_path: Path, valid_agent_data: Dict[str, Any]) -> None:
+    """Test loading raw data async."""
+    manifest_path = tmp_path / "agent.yaml"
+    with open(manifest_path, "w") as f:
+        yaml.dump(valid_agent_data, f)
+
+    data = await ManifestLoader.load_raw_from_file_async(manifest_path)
+    assert data["metadata"]["id"] == valid_agent_data["metadata"]["id"]
+
+
+@pytest.mark.asyncio
+async def test_load_raw_from_file_async_not_found() -> None:
+    """Test loading async from non-existent file."""
+    with pytest.raises(FileNotFoundError):
+        await ManifestLoader.load_raw_from_file_async("non_existent.yaml")
+
+
+@pytest.mark.asyncio
+async def test_load_raw_from_file_async_invalid_yaml(tmp_path: Path) -> None:
+    """Test loading async from invalid YAML."""
+    manifest_path = tmp_path / "invalid.yaml"
+    with open(manifest_path, "w") as f:
+        f.write("[ broken")
+
+    with pytest.raises(ManifestSyntaxError) as excinfo:
+        await ManifestLoader.load_raw_from_file_async(manifest_path)
+    assert "Failed to parse YAML" in str(excinfo.value)
+
+
+@pytest.mark.asyncio
+async def test_load_raw_from_file_async_not_dict(tmp_path: Path) -> None:
+    """Test loading async from valid YAML that is not a dict."""
+    manifest_path = tmp_path / "list.yaml"
+    with open(manifest_path, "w") as f:
+        yaml.dump(["a"], f)
+
+    with pytest.raises(ManifestSyntaxError) as excinfo:
+        await ManifestLoader.load_raw_from_file_async(manifest_path)
+    assert "must be a dictionary" in str(excinfo.value)
+
+
+@pytest.mark.asyncio
+async def test_load_raw_from_file_async_os_error(tmp_path: Path) -> None:
+    """Test loading async with OSError."""
+    manifest_path = tmp_path / "agent.yaml"
+    manifest_path.touch()
+
+    # Mock aiofiles.open to raise OSError
+    # This is tricky because aiofiles.open returns a context manager.
+    # simpler to just assume aiofiles works and test the exception block if we can trigger it.
+    # or rely on FileNotFoundError being covered.
+    # To cover OSError that is NOT FileNotFoundError:
+
+    with patch("aiofiles.open", side_effect=PermissionError("Access denied")):
+        with pytest.raises(ManifestSyntaxError) as excinfo:
+            await ManifestLoader.load_raw_from_file_async(manifest_path)
+    assert "Error reading file" in str(excinfo.value)
