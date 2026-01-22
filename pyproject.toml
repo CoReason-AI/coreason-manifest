@@ -35,7 +35,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "coreason_manifest"
-version = "0.2.0"
+version = "0.3.0"
 description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
 readme = "README.md"
 requires-python = ">=3.11"
