@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import Any
+from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
 from coreason_identity import UserContext
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, create_model
 
 from coreason_manifest.errors import ManifestSyntaxError
 from coreason_manifest.loader import ManifestLoader
@@ -40,6 +41,17 @@ def test_inspect_function_with_user_context_by_name() -> None:
     assert "user_context" in interface.injected_params
     properties = interface.inputs.get("properties", {})
     assert "user_context" not in properties
+
+
+def test_inspect_function_with_user_context_by_type_only() -> None:
+    # Test line 206: elif annotation is UserContext:
+    def my_agent(ctx: UserContext) -> str:
+        return "ok"
+
+    interface = ManifestLoader.inspect_function(my_agent)
+    assert "user_context" in interface.injected_params
+    properties = interface.inputs.get("properties", {})
+    assert "ctx" not in properties
 
 
 def test_inspect_function_without_user_context() -> None:
@@ -93,12 +105,17 @@ def test_inspect_function_class_method() -> None:
 
 
 def test_inspect_function_no_hints() -> None:
-    def my_agent(x: Any) -> Any:
+    def my_agent(x):  # type: ignore
         return x
 
     interface = ManifestLoader.inspect_function(my_agent)
     properties = interface.inputs.get("properties", {})
     assert "x" in properties
+
+    # Also verify line 195: annotation = Any
+    # x has no annotation, so it should fallback to Any.
+    # The schema for Any is typically empty object or not specified fully,
+    # but 'x' should exist in properties.
 
 
 def test_agent_definition_validation_success() -> None:
@@ -146,3 +163,52 @@ def test_inspect_function_return_none() -> None:
 
     interface = ManifestLoader.inspect_function(my_agent)
     assert interface.outputs == {}
+
+
+def test_inspect_function_get_type_hints_exception() -> None:
+    # Test lines 181-183
+    def my_agent(x: int) -> int:
+        return x
+
+    with patch("coreason_manifest.loader.get_type_hints", side_effect=Exception("mock error")):
+        interface = ManifestLoader.inspect_function(my_agent)
+        # Should proceed with empty type hints
+        # annotation for x will be empty -> Any
+        properties = interface.inputs.get("properties", {})
+        assert "x" in properties
+
+
+def test_inspect_function_create_model_exception() -> None:
+    # Test lines 225-226
+    def my_agent(x: int) -> int:
+        return x
+
+    with patch("coreason_manifest.loader.create_model", side_effect=Exception("mock error")):
+        with pytest.raises(ManifestSyntaxError) as exc:
+            ManifestLoader.inspect_function(my_agent)
+        assert "Failed to generate schema" in str(exc.value)
+
+
+def test_inspect_function_output_schema_exception() -> None:
+    # Test lines 244-245
+    def my_agent(x: int) -> int:
+        return x
+
+    # We want create_model to fail only for the output model, which is the second call
+    # Or checking return_annotation model_json_schema fail.
+
+    # Let's mock create_model. logic: first call (inputs) succeeds, second call (outputs) fails.
+
+    original_create_model = create_model
+
+    def side_effect(*args: Any, **kwargs: Any) -> Any:
+        if args[0] == "Outputs":
+            raise Exception("mock output error")
+        return original_create_model(*args, **kwargs)
+
+    with patch("coreason_manifest.loader.create_model", side_effect=side_effect):
+        interface = ManifestLoader.inspect_function(my_agent)
+        # Should silently ignore output schema failure
+        assert interface.outputs == {}
+        # Inputs should still be there
+        assert "x" in interface.inputs.get("properties", {})
