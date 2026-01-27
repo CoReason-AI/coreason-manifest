@@ -18,6 +18,7 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 *   **Integrity Verification:** Calculates and verifies SHA256 hashes of the agent's source code to prevent tampering.
 *   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
 *   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
+*   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation.
 
 ## Installation
 
@@ -27,29 +28,29 @@ pip install coreason-manifest
 
 ## Usage
 
-Here is how to initialize the engine and validate an agent manifest:
+`coreason-manifest` supports two modes: **Library (CLI)** and **Server (Microservice)**.
+
+### 1. Library Usage
+
+Use the python library to validate local agent files and verify source integrity.
 
 ```python
-from coreason_manifest import ManifestEngine, ManifestConfig, PolicyViolationError, IntegrityCompromisedError
+from coreason_manifest import ManifestEngine, ManifestConfig
 
-# 1. Initialize configuration with policy path
-config = ManifestConfig(policy_path="./policies/gx_compliant.rego")
+# Initialize and Validate
+config = ManifestConfig(policy_path="./policies/compliance.rego")
 engine = ManifestEngine(config)
-
-# 2. Load & Validate Agent Manifest
-try:
-    # This runs Schema Validation, Policy Enforcement, and Integrity Checks
-    agent_def = engine.load_and_validate(
-        manifest_path="./agents/payer_war_game/agent.yaml",
-        source_dir="./agents/payer_war_game/src"
-    )
-    print(f"Agent {agent_def.metadata.name} is compliant and ready to run.")
-
-except PolicyViolationError as e:
-    print(f"Compliance Failure: {e.violations}")
-
-except IntegrityCompromisedError:
-    print("CRITICAL: Code has been tampered with after signing.")
+agent_def = engine.load_and_validate("agent.yaml", "./src")
 ```
 
-For detailed requirements and architecture, please refer to the [Product Requirements](docs/product_requirements.md).
+### 2. Server Mode
+
+Run the package as a FastAPI server to provide a centralized compliance API.
+
+```bash
+uvicorn coreason_manifest.server:app --host 0.0.0.0 --port 8000
+```
+
+For full details, see the [Usage Documentation](docs/usage.md).
+
+For detailed requirements and architecture, please refer to the [Product Requirements](docs/product_requirements.md) or [Requirements](docs/requirements.md).
