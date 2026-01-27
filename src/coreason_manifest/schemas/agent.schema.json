@@ -41,6 +41,14 @@
           "description": "Typed structure of the result.",
           "title": "Outputs",
           "type": "object"
+        },
+        "injected_params": {
+          "description": "List of parameters injected by the system.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Injected Params",
+          "type": "array"
         }
       },
       "required": [
@@ -83,6 +91,12 @@
           "format": "date-time",
           "title": "Created At",
           "type": "string"
+        },
+        "requires_auth": {
+          "default": false,
+          "description": "Whether the agent requires user authentication.",
+          "title": "Requires Auth",
+          "type": "boolean"
         }
       },
       "required": [

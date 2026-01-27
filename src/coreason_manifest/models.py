@@ -20,6 +20,7 @@ from pydantic import (
     Field,
     PlainSerializer,
     field_validator,
+    model_validator,
 )
 from typing_extensions import Annotated
 
@@ -86,6 +87,7 @@ class AgentMetadata(BaseModel):
     name: str = Field(..., min_length=1, description="Name of the Agent.")
     author: str = Field(..., min_length=1, description="Author of the Agent.")
     created_at: datetime = Field(..., description="Creation timestamp (ISO 8601).")
+    requires_auth: bool = Field(default=False, description="Whether the agent requires user authentication.")
 
 
 class AgentInterface(BaseModel):
@@ -100,6 +102,7 @@ class AgentInterface(BaseModel):
 
     inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
+    injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
 
 
 class Step(BaseModel):
@@ -218,3 +221,11 @@ class AgentDefinition(BaseModel):
         pattern=r"^[a-fA-F0-9]{64}$",
         description="SHA256 hash of the source code.",
     )
+
+    @model_validator(mode="after")
+    def validate_auth_requirements(self) -> AgentDefinition:
+        """Validate that agents requiring auth have user_context injected."""
+        if self.metadata.requires_auth:
+            if "user_context" not in self.interface.injected_params:
+                raise ValueError("Agent requires authentication but 'user_context' is not an injected parameter.")
+        return self
