@@ -196,3 +196,22 @@ def test_load_and_validate_integrity_error(
     with patch.object(engine._async.policy_enforcer, "evaluate"):
         with pytest.raises(IntegrityCompromisedError):
             engine.load_and_validate(manifest_path, src_dir)
+
+
+def test_validate_manifest_dict_sync(
+    manifest_config: ManifestConfig,
+    valid_agent_data: Dict[str, Any],
+) -> None:
+    """Test validate_manifest_dict sync method."""
+    engine = ManifestEngine(manifest_config)
+
+    # Needs valid integrity hash format for Pydantic validation,
+    # even if integrity check is skipped in this method.
+    valid_agent_data["integrity_hash"] = "a" * 64
+
+    # Mock PolicyEnforcer to pass
+    with patch.object(engine._async.policy_enforcer, "evaluate") as mock_eval:
+        agent = engine.validate_manifest_dict(valid_agent_data)
+
+        assert isinstance(agent, AgentDefinition)
+        mock_eval.assert_called_once()
