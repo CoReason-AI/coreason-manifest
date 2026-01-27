@@ -80,29 +80,30 @@ class ManifestEngineAsync:
         # Clean up resources if necessary.
         pass
 
-    async def load_and_validate(self, manifest_path: Union[str, Path], source_dir: Union[str, Path]) -> AgentDefinition:
-        """Loads, validates, and verifies an Agent Manifest asynchronously.
+    async def validate_manifest_dict(self, raw_data: dict[str, Any]) -> AgentDefinition:
+        """Validates an Agent Manifest dictionary in memory.
+
+        Performs:
+        1. Normalization (stripping version prefixes)
+        2. Schema Validation
+        3. Model Conversion
+        4. Policy Enforcement
+
+        Does NOT perform Integrity Check (hashing).
 
         Args:
-            manifest_path: Path to the agent.yaml file.
-            source_dir: Path to the source code directory.
+            raw_data: The raw dictionary of the manifest.
 
         Returns:
-            AgentDefinition: The fully validated and verified agent definition.
+            AgentDefinition: The fully validated agent definition.
 
         Raises:
             ManifestSyntaxError: If structure or schema is invalid.
             PolicyViolationError: If business rules are violated.
-            IntegrityCompromisedError: If source code hash does not match.
-            FileNotFoundError: If files are missing.
         """
-        manifest_path = Path(manifest_path)
-        source_dir = Path(source_dir)
-
-        logger.info(f"Validating Agent Manifest: {manifest_path}")
-
-        # 1. Load Raw YAML (I/O)
-        raw_data = await ManifestLoader.load_raw_from_file_async(manifest_path)
+        # 1. Normalization (ensure version string is clean before schema/model validation)
+        # We access the static method on ManifestLoader.
+        ManifestLoader._normalize_data(raw_data)
 
         # 2. Schema Validation
         logger.debug("Running Schema Validation...")
@@ -128,13 +129,42 @@ class ManifestEngineAsync:
             logger.info(f"Policy Check: Fail - {duration_ms:.2f}ms")
             raise
 
+        return cast(AgentDefinition, agent_def)
+
+    async def load_and_validate(self, manifest_path: Union[str, Path], source_dir: Union[str, Path]) -> AgentDefinition:
+        """Loads, validates, and verifies an Agent Manifest asynchronously.
+
+        Args:
+            manifest_path: Path to the agent.yaml file.
+            source_dir: Path to the source code directory.
+
+        Returns:
+            AgentDefinition: The fully validated and verified agent definition.
+
+        Raises:
+            ManifestSyntaxError: If structure or schema is invalid.
+            PolicyViolationError: If business rules are violated.
+            IntegrityCompromisedError: If source code hash does not match.
+            FileNotFoundError: If files are missing.
+        """
+        manifest_path = Path(manifest_path)
+        source_dir = Path(source_dir)
+
+        logger.info(f"Validating Agent Manifest: {manifest_path}")
+
+        # 1. Load Raw YAML (I/O)
+        raw_data = await ManifestLoader.load_raw_from_file_async(manifest_path)
+
+        # 2. Validate Manifest Dict (Schema, Model, Policy)
+        agent_def = await self.validate_manifest_dict(raw_data)
+
         # 5. Integrity Check (Heavy I/O and CPU)
         logger.debug("Verifying Integrity...")
         # IntegrityChecker.verify is synchronous and does heavy IO, so we wrap it.
         await anyio.to_thread.run_sync(IntegrityChecker.verify, agent_def, source_dir, manifest_path)
 
         logger.info("Agent validation successful.")
-        return cast(AgentDefinition, agent_def)
+        return agent_def
 
 
 class ManifestEngine:
@@ -179,3 +209,14 @@ class ManifestEngine:
             AgentDefinition: The fully validated and verified agent definition.
         """
         return cast(AgentDefinition, anyio.run(self._async.load_and_validate, manifest_path, source_dir))
+
+    def validate_manifest_dict(self, raw_data: dict[str, Any]) -> AgentDefinition:
+        """Validates an Agent Manifest dictionary synchronously.
+
+        Args:
+            raw_data: The raw dictionary of the manifest.
+
+        Returns:
+            AgentDefinition: The fully validated agent definition.
+        """
+        return cast(AgentDefinition, anyio.run(self._async.validate_manifest_dict, raw_data))
