@@ -7,15 +7,17 @@ dictionaries, normalizing the data, and converting it into Pydantic models.
 
 from __future__ import annotations
 
+import inspect
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Callable, Dict, List, Union, get_type_hints
 
 import aiofiles
 import yaml
-from pydantic import ValidationError
+from coreason_identity import UserContext
+from pydantic import ValidationError, create_model
 
 from coreason_manifest.errors import ManifestSyntaxError
-from coreason_manifest.models import AgentDefinition
+from coreason_manifest.models import AgentDefinition, AgentInterface
 
 
 class ManifestLoader:
@@ -156,3 +158,94 @@ class ManifestLoader:
                 while version and version[0] in ("v", "V"):
                     version = version[1:]
                 data["metadata"]["version"] = version
+
+    @staticmethod
+    def inspect_function(func: Callable[..., Any]) -> AgentInterface:
+        """Generates an AgentInterface from a Python function.
+
+        Scans the function signature. If `user_context` (by name) or UserContext (by type)
+        is found, it is marked as injected and excluded from the public schema.
+
+        Args:
+            func: The function to inspect.
+
+        Returns:
+            AgentInterface: The generated interface definition.
+
+        Raises:
+            ManifestSyntaxError: If forbidden arguments are found.
+        """
+        sig = inspect.signature(func)
+        try:
+            type_hints = get_type_hints(func)
+        except Exception:
+            # Fallback if get_type_hints fails (e.g. forward refs issues)
+            type_hints = {}
+
+        field_definitions: Dict[str, Any] = {}
+        injected: List[str] = []
+
+        for param_name, param in sig.parameters.items():
+            if param_name in ("self", "cls"):
+                continue
+
+            # Determine type annotation
+            annotation = type_hints.get(param_name, param.annotation)
+            if annotation is inspect.Parameter.empty:
+                annotation = Any
+
+            # Check for forbidden arguments
+            if param_name in ("api_key", "token"):
+                raise ManifestSyntaxError(f"Function argument '{param_name}' is forbidden. Use UserContext for auth.")
+
+            # Check for injection
+            is_injected = False
+            if param_name == "user_context":
+                is_injected = True
+            elif annotation is UserContext:
+                is_injected = True
+
+            if is_injected:
+                if "user_context" not in injected:
+                    injected.append("user_context")
+                continue
+
+            # Prepare for Pydantic model creation
+            default = param.default
+            if default is inspect.Parameter.empty:
+                default = ...
+
+            field_definitions[param_name] = (annotation, default)
+
+        # Create dynamic model to generate JSON Schema for inputs
+        # We assume strict mode or similar is handled by the consumer, here we just describe it.
+        try:
+            InputsModel = create_model("Inputs", **field_definitions)
+            inputs_schema = InputsModel.model_json_schema()
+        except Exception as e:
+            raise ManifestSyntaxError(f"Failed to generate schema from function signature: {e}") from e
+
+        # Handle return type for outputs
+        return_annotation = type_hints.get("return", sig.return_annotation)
+        outputs_schema = {}
+        if (
+            return_annotation is not inspect.Parameter.empty
+            and return_annotation is not None
+            and return_annotation is not type(None)
+        ):
+            try:
+                # If return annotation is a Pydantic model, use its schema
+                if hasattr(return_annotation, "model_json_schema"):
+                    outputs_schema = return_annotation.model_json_schema()
+                else:
+                    # Wrap in a model
+                    OutputsModel = create_model("Outputs", result=(return_annotation, ...))
+                    outputs_schema = OutputsModel.model_json_schema()
+            except Exception:
+                pass
+
+        return AgentInterface(
+            inputs=inputs_schema,
+            outputs=outputs_schema,
+            injected_params=injected,
+        )
