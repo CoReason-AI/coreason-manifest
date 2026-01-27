@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from importlib import resources
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import AsyncIterator, List, Optional, Union
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from coreason_manifest.engine import ManifestConfig, ManifestEngineAsync
 from coreason_manifest.errors import ManifestSyntaxError, PolicyViolationError
 
+
 # Response Model
 class ValidationResponse(BaseModel):
     valid: bool
@@ -17,8 +18,9 @@ class ValidationResponse(BaseModel):
     version: Optional[str] = None
     policy_violations: List[str] = Field(default_factory=list)
 
+
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Locate policies
     policy_path: Optional[Path] = None
     tbom_path: Optional[Path] = None
@@ -29,7 +31,7 @@ async def lifespan(app: FastAPI):
     possible_dirs = [
         Path("policies"),
         Path("/app/policies"),
-        Path("src/coreason_manifest/policies"), # Dev from root
+        Path("src/coreason_manifest/policies"),  # Dev from root
     ]
 
     for d in possible_dirs:
@@ -59,7 +61,7 @@ async def lifespan(app: FastAPI):
     config = ManifestConfig(
         policy_path=policy_path,
         tbom_path=tbom_path,
-        opa_path="opa" # Assumes OPA is in PATH (installed via Dockerfile)
+        opa_path="opa",  # Assumes OPA is in PATH (installed via Dockerfile)
     )
 
     engine = ManifestEngineAsync(config)
@@ -72,16 +74,18 @@ async def lifespan(app: FastAPI):
         if resource_context:
             resource_context.__exit__(None, None, None)
 
+
 app = FastAPI(lifespan=lifespan)
 
-@app.post("/validate", response_model=ValidationResponse)
-async def validate_manifest(request: Request):
+
+@app.post("/validate", response_model=ValidationResponse)  # type: ignore[misc]
+async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONResponse]:
     engine: ManifestEngineAsync = app.state.engine
 
     try:
         raw_body = await request.json()
     except Exception:
-         raise HTTPException(status_code=400, detail="Invalid JSON body")
+        raise HTTPException(status_code=400, detail="Invalid JSON body") from None
 
     try:
         agent_def = await engine.validate_manifest_dict(raw_body)
@@ -89,34 +93,24 @@ async def validate_manifest(request: Request):
             valid=True,
             agent_id=str(agent_def.metadata.id),
             version=agent_def.metadata.version,
-            policy_violations=[]
+            policy_violations=[],
         )
     except ManifestSyntaxError as e:
         # Return 422 with the error
-        resp = ValidationResponse(
-            valid=False,
-            policy_violations=[f"Syntax Error: {str(e)}"]
-        )
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content=resp.model_dump()
-        )
+        resp = ValidationResponse(valid=False, policy_violations=[f"Syntax Error: {str(e)}"])
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=resp.model_dump())
     except PolicyViolationError as e:
-        resp = ValidationResponse(
-            valid=False,
-            policy_violations=e.violations
-        )
-        return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content=resp.model_dump()
-        )
+        resp = ValidationResponse(valid=False, policy_violations=e.violations)
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=resp.model_dump())
 
-@app.get("/health")
-async def health_check():
+
+@app.get("/health")  # type: ignore[misc]
+async def health_check() -> dict[str, str]:
     engine: ManifestEngineAsync = app.state.engine
     policy_version = "unknown"
     try:
         import hashlib
+
         # policy_path is guaranteed to exist by lifespan check
         policy_path = Path(engine.config.policy_path)
         if policy_path.exists():

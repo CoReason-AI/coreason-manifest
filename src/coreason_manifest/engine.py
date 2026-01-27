@@ -164,7 +164,7 @@ class ManifestEngineAsync:
         await anyio.to_thread.run_sync(IntegrityChecker.verify, agent_def, source_dir, manifest_path)
 
         logger.info("Agent validation successful.")
-        return cast(AgentDefinition, agent_def)
+        return agent_def
 
 
 class ManifestEngine:

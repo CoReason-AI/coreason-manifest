@@ -21,6 +21,7 @@ RUN python -m build --wheel --outdir /wheels
 FROM python:3.12-slim AS runtime
 
 # Install OPA
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends curl && \
     curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static && \
     chmod 755 /usr/local/bin/opa && \
