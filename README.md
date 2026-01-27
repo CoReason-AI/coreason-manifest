@@ -16,6 +16,7 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 *   **Open Agent Specification (OAS) Validation:** Parses and validates agent definitions against a strict schema.
 *   **Compliance Enforcement:** Uses Open Policy Agent (OPA) / Rego to enforce complex business rules and allowlists.
 *   **Integrity Verification:** Calculates and verifies SHA256 hashes of the agent's source code to prevent tampering.
+*   **Automatic Schema Generation:** Inspects Python functions to generate Agent Interfaces, automatically handling `UserContext` injection.
 *   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
 *   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
 *   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation.

@@ -36,7 +36,26 @@ except IntegrityCompromisedError:
     print("CRITICAL: Code has been tampered with or does not match the manifest hash.")
 ```
 
-## 2. Server Mode (Compliance Microservice)
+## 2. Generating Manifests from Code
+
+You can generate the `AgentInterface` part of the manifest by inspecting your Python agent function. This automatically handles system-injected parameters like `UserContext`, ensuring they are hidden from the public API schema.
+
+```python
+from coreason_manifest.loader import ManifestLoader
+from coreason_identity import UserContext
+
+def my_agent_function(query: str, user_context: UserContext) -> str:
+    """A sample agent function requiring auth."""
+    return f"Hello {user_context.user_id}, you asked: {query}"
+
+# Generate Interface
+interface = ManifestLoader.inspect_function(my_agent_function)
+
+# 'query' is in inputs, 'user_context' is marked as injected
+print(interface.model_dump_json(indent=2))
+```
+
+## 3. Server Mode (Compliance Microservice)
 
 The **Compliance Microservice** (Service C) runs `coreason-manifest` as a FastAPI server. It is designed for centralized validation by services like `coreason-foundry` and `coreason-publisher`.
 
