@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, List, Union, get_type_hints
 
 try:
     from typing import get_args, get_origin
-except ImportError:
+except ImportError:  # pragma: no cover
     # For Python < 3.8, though project requires 3.12+
     from typing_extensions import get_args, get_origin  # type: ignore
 
