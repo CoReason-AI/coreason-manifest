@@ -11,6 +11,12 @@ import inspect
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union, get_type_hints
 
+try:
+    from typing import get_args, get_origin
+except ImportError:
+    # For Python < 3.8, though project requires 3.12+
+    from typing_extensions import get_args, get_origin  # type: ignore
+
 import aiofiles
 import yaml
 from coreason_identity import UserContext
@@ -202,8 +208,22 @@ class ManifestLoader:
             is_injected = False
             if param_name == "user_context":
                 is_injected = True
-            elif annotation is UserContext:
-                is_injected = True
+            else:
+                # Check direct type
+                if annotation is UserContext:
+                    is_injected = True
+                else:
+                    # Check for Optional[UserContext], Annotated[UserContext, ...], Union[UserContext, ...]
+                    origin = get_origin(annotation)
+                    args = get_args(annotation)
+                    if origin is not None:
+                        # Recursively check if UserContext is in args (handles Optional/Union)
+                        # or if this is Annotated (UserContext might be the first arg)
+                        # We do a shallow check on args.
+                        for arg in args:
+                            if arg is UserContext:
+                                is_injected = True
+                                break
 
             if is_injected:
                 if "user_context" not in injected:
