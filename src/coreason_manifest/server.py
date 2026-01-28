@@ -98,10 +98,10 @@ async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONR
     except ManifestSyntaxError as e:
         # Return 422 with the error
         resp = ValidationResponse(valid=False, policy_violations=[f"Syntax Error: {str(e)}"])
-        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=resp.model_dump())
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content=resp.model_dump())
     except PolicyViolationError as e:
         resp = ValidationResponse(valid=False, policy_violations=e.violations)
-        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=resp.model_dump())
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content=resp.model_dump())
 
 
 @app.get("/health")  # type: ignore[misc]
