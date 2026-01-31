@@ -78,6 +78,15 @@ Routes to one of multiple targets based on logic.
 - **router_logic**: Python function or expression determining the path.
 - **mapping**: Map of router output values to target node IDs.
 
+## Edge Cases & Validation
+
+The schema enforces strict validation to prevent runtime errors. Common edge cases include:
+
+1.  **Missing Routing Mapping**: A `ConditionalEdge` must have a non-empty `mapping` dictionary. Runtime logic that returns a value not present in `mapping` will cause an execution error.
+2.  **Invalid Map-Reduce Config**: `MapNode` requires `concurrency_limit > 0`. A limit of 0 or negative will raise a validation error.
+3.  **Recursion**: While `RecipeNode` allows nesting, the runtime is responsible for detecting infinite recursion loops (e.g., Recipe A -> Recipe B -> Recipe A).
+4.  **State Schema Mismatch**: If a `state_schema` is defined, all nodes must output data compliant with that schema. This is enforced at runtime.
+
 ## Example Usage
 
 ```python
