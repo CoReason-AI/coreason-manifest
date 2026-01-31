@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Any, Dict
 from uuid import uuid4
 
 import pytest
@@ -12,7 +13,7 @@ from coreason_manifest.models import (
 def test_agent_auth_validation() -> None:
     """Test that agents requiring auth must have user_context injected."""
 
-    base_data = {
+    base_data: Dict[str, Any] = {
         "metadata": {
             "id": str(uuid4()),
             "version": "1.0.0",
