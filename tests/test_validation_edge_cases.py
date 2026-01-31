@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.models import (
+from coreason_manifest.definitions.agent import (
     AgentMetadata,
     AgentTopology,
     Step,
