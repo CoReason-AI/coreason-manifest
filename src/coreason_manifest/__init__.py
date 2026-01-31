@@ -9,6 +9,11 @@ Usage:
     from coreason_manifest.recipes import RecipeManifest
 """
 
+from .definitions.simulation import (
+    SimulationScenario,
+    SimulationTrace,
+    SimulationTurn,
+)
 from .models import (
     AgentDefinition,
     AgentDependencies,
@@ -28,11 +33,6 @@ from .recipes import (
     Node,
     RecipeManifest,
     VisualMetadata,
-)
-from .definitions.simulation import (
-    SimulationScenario,
-    SimulationTurn,
-    SimulationTrace,
 )
 
 __all__ = [
