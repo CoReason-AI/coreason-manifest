@@ -5,4 +5,5 @@ nav:
   - Home: index.md
   - Requirements: requirements.md
   - Usage: usage.md
+  - Observability: observability.md
   - Recipes: recipes.md

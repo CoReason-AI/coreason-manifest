@@ -1,6 +1,6 @@
 # Recipe Manifests (Workflows)
 
-The `coreason-manifest` package provides the schema definitions for **Recipes**, which are executable workflows managed by the `coreason-maco` runtime.
+The `coreason-manifest` package provides the schema definitions for **Recipes**, which are executable workflows managed by the `coreason-maco` runtime. These definitions share the same underlying graph components (`Node`, `Edge`) as the Agent Topology.
 
 ## Overview
 
@@ -39,10 +39,18 @@ Defines the shared memory available to all nodes in the graph.
 
 ### GraphTopology
 
-Contains the nodes and edges.
+Contains the nodes and edges, plus state configuration.
 
 - **nodes**: List of `Node` objects.
-- **edges**: List of `Edge` objects.
+- **edges**: List of `Edge` or `ConditionalEdge` objects.
+- **state_schema**: (Optional) Definition of the graph's state structure and persistence.
+
+#### StateSchema
+
+Defines the data structure passed between nodes.
+
+- **data_schema**: JSON Schema or Pydantic definition.
+- **persistence**: Checkpointing strategy (e.g., `'memory'`, `'redis'`).
 
 ### Nodes
 
@@ -50,7 +58,8 @@ Nodes are polymorphic and can be one of the following types:
 
 #### 1. AgentNode (`type="agent"`)
 Executes a specific atomic agent.
-- **agent_name**: The name of the agent to call.
+- **agent_name**: The name of the atomic agent to call.
+- **council_config**: Optional configuration for architectural triangulation (e.g., voting).
 
 #### 2. HumanNode (`type="human"`)
 Pauses execution for user input or approval.
@@ -60,19 +69,49 @@ Pauses execution for user input or approval.
 Executes pure Python logic.
 - **code**: The Python code to execute.
 
+#### 4. RecipeNode (`type="recipe"`)
+Executes another Recipe as a sub-graph (Hierarchical Composition).
+- **recipe_id**: ID of the child recipe.
+- **input_mapping**: Map parent state to child inputs.
+- **output_mapping**: Map child outputs to parent state.
+
+#### 5. MapNode (`type="map"`)
+Executes a sub-branch in parallel for each item in a list (Map-Reduce).
+- **items_path**: Path to the list in the state (e.g., `state.documents`).
+- **processor_node_id**: The node/subgraph to run for each item.
+- **concurrency_limit**: Max parallel executions.
+
 ### Edges
 
 Connections between nodes.
 
+#### Standard Edge
+Simple transition.
 - **source_node_id**: ID of the source node.
 - **target_node_id**: ID of the target node.
 - **condition**: Optional Python expression for conditional branching.
+
+#### ConditionalEdge (Dynamic Routing)
+Routes to one of multiple targets based on logic.
+- **source_node_id**: ID of the source node.
+- **router_logic**: Python function or expression determining the path.
+- **mapping**: Map of router output values to target node IDs.
+
+## Edge Cases & Validation
+
+The schema enforces strict validation to prevent runtime errors. Common edge cases include:
+
+1.  **Missing Routing Mapping**: A `ConditionalEdge` must have a non-empty `mapping` dictionary. Runtime logic that returns a value not present in `mapping` will cause an execution error.
+2.  **Invalid Map-Reduce Config**: `MapNode` requires `concurrency_limit > 0`. A limit of 0 or negative will raise a validation error.
+3.  **Recursion**: While `RecipeNode` allows nesting, the runtime is responsible for detecting infinite recursion loops (e.g., Recipe A -> Recipe B -> Recipe A).
+4.  **State Schema Mismatch**: If a `state_schema` is defined, all nodes must output data compliant with that schema. This is enforced at runtime.
 
 ## Example Usage
 
 ```python
 from coreason_manifest import (
-    RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge
+    RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
+    ConditionalEdge, StateSchema
 )
 from coreason_manifest.recipes import RecipeInterface, StateDefinition
 
@@ -91,8 +130,21 @@ human_node = HumanNode(
     visual={"label": "Approval"}
 )
 
-# Define Edge
-edge = Edge(source_node_id="step_1", target_node_id="step_2")
+# Define Dynamic Routing
+router = ConditionalEdge(
+    source_node_id="step_2",
+    router_logic="lambda state: 'approved' if state['approved'] else 'rejected'",
+    mapping={
+        "approved": "step_3_publish",
+        "rejected": "step_1_revise"
+    }
+)
+
+# Define State
+state = StateSchema(
+    data_schema={"type": "object", "properties": {"approved": {"type": "boolean"}}},
+    persistence="redis"
+)
 
 # Define Interface
 interface = RecipeInterface(
@@ -131,9 +183,12 @@ recipe = RecipeManifest(
     interface=interface,
     state=state,
     parameters={"model": "gpt-4"},
+    description="A simple approval workflow.",
+    inputs={"topic": "str"},
     graph=GraphTopology(
         nodes=[agent_node, human_node],
-        edges=[edge]
+        edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
+        state_schema=state
     )
 )
 
