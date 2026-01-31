@@ -21,10 +21,18 @@ The root object for a workflow.
 
 ### GraphTopology
 
-Contains the nodes and edges.
+Contains the nodes and edges, plus state configuration.
 
 - **nodes**: List of `Node` objects.
-- **edges**: List of `Edge` objects.
+- **edges**: List of `Edge` or `ConditionalEdge` objects.
+- **state_schema**: (Optional) Definition of the graph's state structure and persistence.
+
+#### StateSchema
+
+Defines the data structure passed between nodes.
+
+- **data_schema**: JSON Schema or Pydantic definition.
+- **persistence**: Checkpointing strategy (e.g., `'memory'`, `'redis'`).
 
 ### Nodes
 
@@ -42,19 +50,40 @@ Pauses execution for user input or approval.
 Executes pure Python logic.
 - **code**: The Python code to execute.
 
+#### 4. RecipeNode (`type="recipe"`)
+Executes another Recipe as a sub-graph (Hierarchical Composition).
+- **recipe_id**: ID of the child recipe.
+- **input_mapping**: Map parent state to child inputs.
+- **output_mapping**: Map child outputs to parent state.
+
+#### 5. MapNode (`type="map"`)
+Executes a sub-branch in parallel for each item in a list (Map-Reduce).
+- **items_path**: Path to the list in the state (e.g., `state.documents`).
+- **processor_node_id**: The node/subgraph to run for each item.
+- **concurrency_limit**: Max parallel executions.
+
 ### Edges
 
 Connections between nodes.
 
+#### Standard Edge
+Simple transition.
 - **source_node_id**: ID of the source node.
 - **target_node_id**: ID of the target node.
 - **condition**: Optional Python expression for conditional branching.
+
+#### ConditionalEdge (Dynamic Routing)
+Routes to one of multiple targets based on logic.
+- **source_node_id**: ID of the source node.
+- **router_logic**: Python function or expression determining the path.
+- **mapping**: Map of router output values to target node IDs.
 
 ## Example Usage
 
 ```python
 from coreason_manifest import (
-    RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge
+    RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
+    ConditionalEdge, StateSchema
 )
 
 # Define Nodes
@@ -72,8 +101,21 @@ human_node = HumanNode(
     visual={"label": "Approval"}
 )
 
-# Define Edge
-edge = Edge(source_node_id="step_1", target_node_id="step_2")
+# Define Dynamic Routing
+router = ConditionalEdge(
+    source_node_id="step_2",
+    router_logic="lambda state: 'approved' if state['approved'] else 'rejected'",
+    mapping={
+        "approved": "step_3_publish",
+        "rejected": "step_1_revise"
+    }
+)
+
+# Define State
+state = StateSchema(
+    data_schema={"type": "object", "properties": {"approved": {"type": "boolean"}}},
+    persistence="redis"
+)
 
 # Create Manifest
 recipe = RecipeManifest(
@@ -83,7 +125,8 @@ recipe = RecipeManifest(
     inputs={"topic": "str"},
     graph=GraphTopology(
         nodes=[agent_node, human_node],
-        edges=[edge]
+        edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
+        state_schema=state
     )
 )
 
