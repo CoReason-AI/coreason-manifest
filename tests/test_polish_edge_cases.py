@@ -5,8 +5,8 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import (
-    AgentConfig,
     AgentDefinition,
+    AgentRuntimeConfig,
 )
 from coreason_manifest.definitions.audit import AuditEventType, AuditLog, GenAIOperation
 from coreason_manifest.recipes import RecipeManifest
@@ -110,8 +110,10 @@ def test_recipe_manifest_legacy_key_rejection() -> None:
     assert "graph" in error_str and "Extra inputs are not permitted" in error_str
 
 
-def test_agent_config_validation() -> None:
-    """Test that AgentConfig (new name) works correctly."""
-    config = AgentConfig(nodes=[], edges=[], entry_point="start", model_config={"model": "gpt-4", "temperature": 0.5})
+def test_agent_runtime_config_validation() -> None:
+    """Test that AgentRuntimeConfig (new name) works correctly."""
+    config = AgentRuntimeConfig(
+        nodes=[], edges=[], entry_point="start", model_config={"model": "gpt-4", "temperature": 0.5}
+    )
     assert config.model_config.get("extra") == "forbid"
     assert hasattr(config, "nodes")

@@ -122,7 +122,7 @@ class ModelConfig(BaseModel):
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
 
 
-class AgentConfig(BaseModel):
+class AgentRuntimeConfig(BaseModel):
     """Configuration of the Agent execution.
 
     Attributes:
@@ -273,7 +273,7 @@ class AgentDefinition(BaseModel):
 
     metadata: AgentMetadata
     interface: AgentInterface
-    config: AgentConfig
+    config: AgentRuntimeConfig
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")

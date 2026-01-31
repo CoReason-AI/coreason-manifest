@@ -6,8 +6,8 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import (
-    AgentConfig,
     AgentMetadata,
+    AgentRuntimeConfig,
 )
 from coreason_manifest.definitions.topology import AgentNode
 
@@ -20,7 +20,9 @@ def test_unique_node_ids_validation() -> None:
     ]
 
     with pytest.raises(ValidationError) as e:
-        AgentConfig(nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5})
+        AgentRuntimeConfig(
+            nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5}
+        )
     assert "Duplicate node IDs found: node1" in str(e.value)
 
 
@@ -30,7 +32,9 @@ def test_unique_node_ids_valid() -> None:
         AgentNode(id="node1", agent_name="A"),
         AgentNode(id="node2", agent_name="B"),
     ]
-    topo = AgentConfig(nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5})
+    topo = AgentRuntimeConfig(
+        nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5}
+    )
     assert len(topo.nodes) == 2
 
 

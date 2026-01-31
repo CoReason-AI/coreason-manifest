@@ -57,11 +57,14 @@ class GenAIOperation(BaseModel):
 
 
 class ReasoningTrace(BaseModel):
-    """The full audit trail of an Agent's execution session."""
+    """The full audit trail of an Agent's execution session.
+
+    Aligned with OpenTelemetry for trace identification.
+    """
 
     model_config = ConfigDict(extra="ignore")
 
-    trace_id: UUID
+    trace_id: str = Field(..., description="Trace ID (OTel format).")
     agent_id: str
     session_id: Optional[str] = None
 
@@ -88,7 +91,12 @@ class AuditEventType(str, Enum):
 
 
 class AuditLog(BaseModel):
-    """Tamper-evident legal record."""
+    """Tamper-evident legal record.
+
+    IDs aligned with OpenTelemetry:
+    - audit_id: Unique record ID.
+    - trace_id: OTel Trace ID.
+    """
 
     audit_id: UUID = Field(..., description="Unique identifier.")
     trace_id: str = Field(..., description="Trace ID for OTel correlation.")
