@@ -8,9 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
+from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 
 class StateSchema(BaseModel):
@@ -117,6 +118,23 @@ class LogicNode(BaseNode):
     code: str = Field(..., description="The Python logic code to execute.")
 
 
+class DataMappingStrategy(str, Enum):
+    """Strategy for mapping data."""
+
+    DIRECT = "direct"
+    JSONPATH = "jsonpath"
+    LITERAL = "literal"
+
+
+class DataMapping(BaseModel):
+    """Defines how to transform data between parent and child."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source: str = Field(..., description="The path/key source.")
+    strategy: DataMappingStrategy = Field(default=DataMappingStrategy.DIRECT, description="The mapping strategy.")
+
+
 class RecipeNode(BaseNode):
     """A node that executes another Recipe as a sub-graph.
 
@@ -129,8 +147,12 @@ class RecipeNode(BaseNode):
 
     type: Literal["recipe"] = Field("recipe", description="Discriminator for RecipeNode.")
     recipe_id: str = Field(..., description="The ID of the recipe to execute.")
-    input_mapping: Dict[str, str] = Field(..., description="Mapping of parent state keys to child input keys.")
-    output_mapping: Dict[str, str] = Field(..., description="Mapping of child output keys to parent state keys.")
+    input_mapping: Dict[str, Union[str, DataMapping]] = Field(
+        ..., description="Mapping of parent state keys to child input keys."
+    )
+    output_mapping: Dict[str, Union[str, DataMapping]] = Field(
+        ..., description="Mapping of child output keys to parent state keys."
+    )
 
 
 class MapNode(BaseNode):
@@ -172,6 +194,30 @@ class Edge(BaseModel):
     condition: Optional[str] = Field(None, description="Optional Python expression for conditional branching.")
 
 
+RouterRef = Annotated[
+    str,
+    StringConstraints(
+        pattern=r"^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*$",
+        strip_whitespace=True,
+    ),
+]
+
+
+class RouterExpression(BaseModel):
+    """A structured expression for routing logic (e.g., CEL or JSONLogic)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    operator: str = Field(..., description="The operator (e.g., 'eq', 'gt').")
+    args: List[Any] = Field(..., description="Arguments for the expression.")
+
+
+RouterDefinition = Annotated[
+    Union[RouterRef, RouterExpression],
+    Field(description="A reference to a python function or a logic expression."),
+]
+
+
 class ConditionalEdge(BaseModel):
     """Represents a dynamic routing connection from one node to multiple potential targets.
 
@@ -184,7 +230,7 @@ class ConditionalEdge(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     source_node_id: str = Field(..., description="The ID of the source node.")
-    router_logic: str = Field(
+    router_logic: RouterDefinition = Field(
         ..., description="A reference to a python function or logic expression that determines the path."
     )
     mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
