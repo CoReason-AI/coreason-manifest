@@ -23,14 +23,14 @@ def test_recipe_manifest_creation() -> None:
         interface=RecipeInterface(inputs={"param1": "value1"}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=topology,
+        topology=topology,
     )
 
     assert manifest.id == "recipe1"
     assert manifest.version == "1.0.0"
-    assert len(manifest.graph.nodes) == 2
-    assert isinstance(manifest.graph.nodes[0], AgentNode)
-    assert isinstance(manifest.graph.nodes[1], HumanNode)
+    assert len(manifest.topology.nodes) == 2
+    assert isinstance(manifest.topology.nodes[0], AgentNode)
+    assert isinstance(manifest.topology.nodes[1], HumanNode)
 
 
 def test_version_validation() -> None:
@@ -47,7 +47,7 @@ def test_version_validation() -> None:
         interface=interface,
         state=state,
         parameters=params,
-        graph=GraphTopology(nodes=[], edges=[]),
+        topology=GraphTopology(nodes=[], edges=[]),
     )
     assert m.version == "1.0.0"
 
@@ -58,7 +58,7 @@ def test_version_validation() -> None:
         interface=interface,
         state=state,
         parameters=params,
-        graph=GraphTopology(nodes=[], edges=[]),
+        topology=GraphTopology(nodes=[], edges=[]),
     )
     assert m.version == "2.0.0"
 
@@ -71,7 +71,7 @@ def test_version_validation() -> None:
             interface=interface,
             state=state,
             parameters=params,
-            graph=GraphTopology(nodes=[], edges=[]),
+            topology=GraphTopology(nodes=[], edges=[]),
         )
 
 
@@ -108,7 +108,7 @@ def test_serialization() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=GraphTopology(nodes=[node], edges=[]),
+        topology=GraphTopology(nodes=[node], edges=[]),
     )
 
     json_output = manifest.model_dump_json()

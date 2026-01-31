@@ -38,7 +38,7 @@ def test_strict_schema_extra_fields() -> None:
             interface=RecipeInterface(inputs={}, outputs={}),
             state=StateDefinition(schema={}, persistence="ephemeral"),
             parameters={},
-            graph=GraphTopology(nodes=[], edges=[]),
+            topology=GraphTopology(nodes=[], edges=[]),
             extra_thing="bad",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
@@ -62,7 +62,7 @@ def test_recursive_version_normalization() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=GraphTopology(nodes=[], edges=[]),
+        topology=GraphTopology(nodes=[], edges=[]),
     )
     assert manifest.version == "1.5.0"
 
@@ -81,7 +81,7 @@ def test_complex_inputs_structure() -> None:
         interface=RecipeInterface(inputs=complex_inputs, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=GraphTopology(nodes=[], edges=[]),
+        topology=GraphTopology(nodes=[], edges=[]),
     )
 
     assert manifest.interface.inputs["user"]["name"] == "Alice"
@@ -108,7 +108,7 @@ def test_large_topology_serialization() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=topology,
+        topology=topology,
     )
 
     # Dump
@@ -117,10 +117,10 @@ def test_large_topology_serialization() -> None:
     # Load back
     loaded = RecipeManifest.model_validate_json(json_str)
 
-    assert len(loaded.graph.nodes) == count
-    assert len(loaded.graph.edges) == count - 1
-    assert loaded.graph.nodes[99].id == "node_99"
-    assert isinstance(loaded.graph.nodes[0], LogicNode)
+    assert len(loaded.topology.nodes) == count
+    assert len(loaded.topology.edges) == count - 1
+    assert loaded.topology.nodes[99].id == "node_99"
+    assert isinstance(loaded.topology.nodes[0], LogicNode)
 
 
 def test_polymorphic_list_parsing() -> None:

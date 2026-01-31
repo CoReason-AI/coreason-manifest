@@ -61,7 +61,7 @@ class RecipeManifest(BaseModel):
         interface: Defines the input/output contract for the Recipe.
         state: Defines the internal state (memory) of the Recipe.
         parameters: Dictionary of build-time constants.
-        graph: The topology definition of the workflow.
+        topology: The topology definition of the workflow.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -73,4 +73,4 @@ class RecipeManifest(BaseModel):
     interface: RecipeInterface = Field(..., description="Defines the input/output contract for the Recipe.")
     state: StateDefinition = Field(..., description="Defines the internal state (memory) of the Recipe.")
     parameters: Dict[str, Any] = Field(..., description="Dictionary of build-time constants.")
-    graph: GraphTopology = Field(..., description="The topology definition of the workflow.")
+    topology: GraphTopology = Field(..., description="The topology definition of the workflow.")

@@ -19,7 +19,7 @@ def test_deep_immutability_mapping_proxy() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {"param": 1}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
@@ -59,7 +59,7 @@ def test_deep_immutability_tuples() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
@@ -112,7 +112,7 @@ def test_unicode_handling() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {"key_Ω": "val_🤖"}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
@@ -139,7 +139,7 @@ def test_hash_validation_edge_cases() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
