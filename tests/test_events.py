@@ -1,25 +1,26 @@
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.definitions.events import (
+    ArtifactGenerated,
+    ArtifactGeneratedPayload,
+    CouncilVote,
+    CouncilVotePayload,
+    EdgeTraversed,
+    EdgeTraversedPayload,
     GraphEvent,
-    NodeInit,
-    NodeStarted,
     NodeCompleted,
+    NodeCompletedPayload,
+    NodeInit,
+    NodeInitPayload,
     NodeRestored,
     NodeSkipped,
-    NodeStream,
-    ArtifactGenerated,
-    EdgeTraversed,
-    CouncilVote,
-    WorkflowError,
-    NodeInitPayload,
-    NodeStartedPayload,
-    NodeCompletedPayload,
     NodeSkippedPayload,
+    NodeStarted,
+    NodeStartedPayload,
+    NodeStream,
     NodeStreamPayload,
-    EdgeTraversedPayload,
-    ArtifactGeneratedPayload,
-    CouncilVotePayload,
+    WorkflowError,
     WorkflowErrorPayload,
 )
 
@@ -65,7 +66,7 @@ def test_graph_event_validation_error_missing_fields() -> None:
             timestamp=1234567890.0,
             payload={},
             visual_metadata={},
-        ) # type: ignore[call-arg]
+        )  # type: ignore[call-arg]
 
 
 def test_graph_event_extra_forbid() -> None:
@@ -80,7 +81,7 @@ def test_graph_event_extra_forbid() -> None:
             payload=payload.model_dump(),
             visual_metadata={"color": "#FFFFFF"},
             extra_field="this should fail",
-        ) # type: ignore[call-arg]
+        )  # type: ignore[call-arg]
 
 
 def test_node_started_payload() -> None:

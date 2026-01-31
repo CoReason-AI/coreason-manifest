@@ -1,7 +1,9 @@
 from typing import Any, Dict, Literal, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 # --- Graph Event Wrapper ---
+
 
 class GraphEvent(BaseModel):
     """The atomic unit of communication between the Engine (MACO) and the UI (Flutter).
@@ -51,22 +53,27 @@ class GraphEvent(BaseModel):
 
 # --- Base Models ---
 
+
 class BaseNodePayload(BaseModel):
     """Base model for node-related events."""
+
     model_config = ConfigDict(extra="forbid")
     node_id: str
 
 
 # --- Payload Models ---
 
+
 class NodeInit(BaseNodePayload):
     """Payload for NODE_INIT event."""
+
     type: str = "DEFAULT"
     visual_cue: str = "IDLE"
 
 
 class NodeStarted(BaseNodePayload):
     """Payload for NODE_START event."""
+
     timestamp: float
     status: Literal["RUNNING"] = "RUNNING"
     visual_cue: str = "PULSE"
@@ -75,6 +82,7 @@ class NodeStarted(BaseNodePayload):
 
 class NodeCompleted(BaseNodePayload):
     """Payload for NODE_DONE event."""
+
     output_summary: str
     status: Literal["SUCCESS"] = "SUCCESS"
     visual_cue: str = "GREEN_GLOW"
@@ -83,6 +91,7 @@ class NodeCompleted(BaseNodePayload):
 
 class NodeRestored(BaseNodePayload):
     """Payload for NODE_RESTORED event."""
+
     output_summary: str
     status: Literal["RESTORED"] = "RESTORED"
     visual_cue: str = "INSTANT_GREEN"
@@ -90,24 +99,28 @@ class NodeRestored(BaseNodePayload):
 
 class NodeSkipped(BaseNodePayload):
     """Payload for NODE_SKIPPED event."""
+
     status: Literal["SKIPPED"] = "SKIPPED"
     visual_cue: str = "GREY_OUT"
 
 
 class NodeStream(BaseNodePayload):
     """Payload for NODE_STREAM event."""
+
     chunk: str
     visual_cue: str = "TEXT_BUBBLE"
 
 
 class ArtifactGenerated(BaseNodePayload):
     """Payload for ARTIFACT_GENERATED event."""
+
     artifact_type: str = "PDF"
     url: str
 
 
 class EdgeTraversed(BaseModel):
     """Payload for EDGE_ACTIVE event."""
+
     model_config = ConfigDict(extra="forbid")
     source: str
     target: str
@@ -116,11 +129,13 @@ class EdgeTraversed(BaseModel):
 
 class CouncilVote(BaseNodePayload):
     """Payload for COUNCIL_VOTE event."""
+
     votes: Dict[str, str]
 
 
 class WorkflowError(BaseNodePayload):
     """Payload for ERROR event."""
+
     error_message: str
     stack_trace: str
     input_snapshot: Dict[str, Any]
