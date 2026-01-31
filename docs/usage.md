@@ -55,7 +55,44 @@ interface = ManifestLoader.inspect_function(my_agent_function)
 print(interface.model_dump_json(indent=2))
 ```
 
-## 3. Server Mode (Compliance Microservice)
+## 3. Using the Shared Kernel Definitions
+
+The `coreason-manifest` package now exports the canonical Pydantic models used throughout the CoReason ecosystem. These "Shared Kernel" definitions ensure that the Builder, Foundry, and Runtime all speak the same language.
+
+### Importing Definitions
+
+You can import core schemas directly from `coreason_manifest.definitions`:
+
+```python
+from coreason_manifest.definitions import (
+    AgentManifest,
+    ToolCall,
+    TopologyGraph,
+    KnowledgeArtifact,
+    SignatureEvent
+)
+
+# Example: Instantiating a ToolCall securely
+try:
+    # Validates structure and checks for SQL injection automatically
+    call = ToolCall(
+        tool_name="database_lookup",
+        arguments={"query": "SELECT * FROM users WHERE id = 123"}
+    )
+    print(f"Valid Tool Call: {call.tool_name}")
+except ValueError as e:
+    print(f"Validation Error: {e}")
+```
+
+### Key Models
+
+*   **`AgentManifest`**: The top-level configuration for an agent.
+*   **`ToolCall`**: A structured request to execute an MCP tool, with built-in security checks.
+*   **`TopologyGraph`**: The directed acyclic graph (DAG) defining the agent's execution flow.
+*   **`KnowledgeArtifact`**: The atomic unit of data for RAG and memory systems.
+*   **`SignatureEvent`**: The immutable record for GxP audit trails.
+
+## 4. Server Mode (Compliance Microservice)
 
 The **Compliance Microservice** (Service C) runs `coreason-manifest` as a FastAPI server. It is designed for centralized validation by services like `coreason-foundry` and `coreason-publisher`.
 

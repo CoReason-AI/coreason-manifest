@@ -20,6 +20,7 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 *   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
 *   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
 *   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation.
+*   **Shared Kernel (Definitions):** Provides the definitive Pydantic models (`AgentManifest`, `ToolCall`, `TopologyGraph`, etc.) used across the entire CoReason platform.
 
 ## Installation
 
