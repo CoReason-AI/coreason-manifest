@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -135,4 +135,6 @@ class GraphTopology(BaseModel):
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Edge] = Field(..., description="List of edges connecting the nodes.")
+
+
 Topology = GraphTopology

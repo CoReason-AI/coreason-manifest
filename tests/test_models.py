@@ -81,6 +81,7 @@ def test_validation_error_on_missing_fields() -> None:
         AgentDefinition(**valid_data)
     assert "integrity_hash" in str(excinfo.value)
 
+
 def test_auth_validation_failure() -> None:
     """Test that auth requirement without user_context raises ValueError."""
     data = {
@@ -104,5 +105,7 @@ def test_auth_validation_failure() -> None:
         "dependencies": {"tools": [], "libraries": []},
         "integrity_hash": "a" * 64,
     }
-    with pytest.raises(ValueError, match="Agent requires authentication but 'user_context' is not an injected parameter"):
+    with pytest.raises(
+        ValueError, match="Agent requires authentication but 'user_context' is not an injected parameter"
+    ):
         AgentDefinition(**data)
