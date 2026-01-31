@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from coreason_manifest import Edge, RecipeManifest
 from coreason_manifest import Topology as GraphTopology
 from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode
+from coreason_manifest.recipes import RecipeInterface, StateDefinition
 
 
 def test_recipe_manifest_creation() -> None:
@@ -19,7 +20,9 @@ def test_recipe_manifest_creation() -> None:
         version="1.0.0",
         name="Test Recipe",
         description="A test recipe",
-        inputs={"param1": "value1"},
+        interface=RecipeInterface(inputs={"param1": "value1"}, outputs={}),
+        state=StateDefinition(schema={}, persistence="ephemeral"),
+        parameters={},
         graph=topology,
     )
 
@@ -32,16 +35,44 @@ def test_recipe_manifest_creation() -> None:
 
 def test_version_validation() -> None:
     """Test strict version validation."""
+    interface = RecipeInterface(inputs={}, outputs={})
+    state = StateDefinition(schema={}, persistence="ephemeral")
+    params: dict[str, str] = {}
+
     # Valid versions (normalized)
-    m = RecipeManifest(id="r1", version="v1.0.0", name="n", inputs={}, graph=GraphTopology(nodes=[], edges=[]))
+    m = RecipeManifest(
+        id="r1",
+        version="v1.0.0",
+        name="n",
+        interface=interface,
+        state=state,
+        parameters=params,
+        graph=GraphTopology(nodes=[], edges=[]),
+    )
     assert m.version == "1.0.0"
 
-    m = RecipeManifest(id="r1", version="V2.0.0", name="n", inputs={}, graph=GraphTopology(nodes=[], edges=[]))
+    m = RecipeManifest(
+        id="r1",
+        version="V2.0.0",
+        name="n",
+        interface=interface,
+        state=state,
+        parameters=params,
+        graph=GraphTopology(nodes=[], edges=[]),
+    )
     assert m.version == "2.0.0"
 
     # Invalid version
     with pytest.raises(ValidationError):
-        RecipeManifest(id="r1", version="invalid", name="n", inputs={}, graph=GraphTopology(nodes=[], edges=[]))
+        RecipeManifest(
+            id="r1",
+            version="invalid",
+            name="n",
+            interface=interface,
+            state=state,
+            parameters=params,
+            graph=GraphTopology(nodes=[], edges=[]),
+        )
 
 
 def test_node_polymorphism() -> None:
@@ -71,7 +102,13 @@ def test_serialization() -> None:
     """Test JSON serialization."""
     node = LogicNode(id="n1", type="logic", code="x=1")
     manifest = RecipeManifest(
-        id="r1", version="1.0.0", name="n", inputs={}, graph=GraphTopology(nodes=[node], edges=[])
+        id="r1",
+        version="1.0.0",
+        name="n",
+        interface=RecipeInterface(inputs={}, outputs={}),
+        state=StateDefinition(schema={}, persistence="ephemeral"),
+        parameters={},
+        graph=GraphTopology(nodes=[node], edges=[]),
     )
 
     json_output = manifest.model_dump_json()

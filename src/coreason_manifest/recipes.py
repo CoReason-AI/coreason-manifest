@@ -8,12 +8,46 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .definitions.agent import VersionStr
 from .definitions.topology import GraphTopology
+
+
+class RecipeInterface(BaseModel):
+    """Defines the input/output contract for a Recipe.
+
+    Attributes:
+        inputs: JSON Schema defining valid entry arguments.
+        outputs: JSON Schema defining the guaranteed structure of the final result.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    inputs: Dict[str, Any] = Field(..., description="JSON Schema defining valid entry arguments.")
+    outputs: Dict[str, Any] = Field(
+        ..., description="JSON Schema defining the guaranteed structure of the final result."
+    )
+
+
+class StateDefinition(BaseModel):
+    """Defines the internal state (memory) of the Recipe.
+
+    Attributes:
+        schema: JSON Schema of the keys available in the shared memory.
+        persistence: Configuration for state durability.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    schema_: Dict[str, Any] = Field(
+        ..., alias="schema", description="JSON Schema of the keys available in the shared memory."
+    )
+    persistence: Literal["ephemeral", "persistent"] = Field(
+        default="ephemeral", description="Configuration for state durability."
+    )
 
 
 class RecipeManifest(BaseModel):
@@ -24,7 +58,9 @@ class RecipeManifest(BaseModel):
         version: Version of the recipe.
         name: Human-readable name of the recipe.
         description: Detailed description of the recipe.
-        inputs: Schema defining global variables this recipe accepts.
+        interface: Defines the input/output contract for the Recipe.
+        state: Defines the internal state (memory) of the Recipe.
+        parameters: Dictionary of build-time constants.
         graph: The topology definition of the workflow.
     """
 
@@ -34,5 +70,7 @@ class RecipeManifest(BaseModel):
     version: VersionStr = Field(..., description="Version of the recipe.")
     name: str = Field(..., description="Human-readable name of the recipe.")
     description: Optional[str] = Field(None, description="Detailed description of the recipe.")
-    inputs: Dict[str, Any] = Field(..., description="Schema defining global variables this recipe accepts.")
+    interface: RecipeInterface = Field(..., description="Defines the input/output contract for the Recipe.")
+    state: StateDefinition = Field(..., description="Defines the internal state (memory) of the Recipe.")
+    parameters: Dict[str, Any] = Field(..., description="Dictionary of build-time constants.")
     graph: GraphTopology = Field(..., description="The topology definition of the workflow.")
