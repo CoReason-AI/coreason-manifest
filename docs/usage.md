@@ -97,8 +97,9 @@ except ValueError as e:
 The **Compliance Microservice** (Service C) runs `coreason-manifest` as a FastAPI server. It is designed for centralized validation by services like `coreason-foundry` and `coreason-publisher`.
 
 **Key Differences:**
-*   Accepts the Agent Manifest as a JSON body (via HTTP POST).
-*   **Skips Integrity Check:** Because the server does not have access to the client's local source code, it cannot verify the `integrity_hash`. It only validates the structure, schema, and policy compliance of the manifest itself.
+*   **Legacy Validation (`/validate`):** Validates against the full internal `AgentDefinition` model (used by current Runtime).
+*   **Shared Kernel Validation (`/validate/shared`):** Validates against the strict `AgentManifest` schema (used by Builder/Foundry).
+*   **Skips Integrity Check:** Because the server does not have access to the client's local source code, it cannot verify the `integrity_hash`. It only validates the structure, schema, and policy compliance.
 
 ### Running the Server
 
@@ -126,7 +127,7 @@ uvicorn coreason_manifest.server:app --host 0.0.0.0 --port 8000
 
 #### `POST /validate`
 
-Validates an Agent Manifest.
+Validates an Agent Manifest (Legacy/Full Internal Model).
 
 **Request:**
 *   **Method:** `POST`
@@ -155,6 +156,18 @@ Validates an Agent Manifest.
   ]
 }
 ```
+
+#### `POST /validate/shared`
+
+Validates an Agent Manifest against the **Shared Kernel** schema (`AgentManifest`).
+
+**Request:**
+*   **Method:** `POST`
+*   **Content-Type:** `application/json`
+*   **Body:** The raw Agent Manifest JSON (must match `AgentManifest` structure).
+
+**Response:**
+Returns the same `ValidationResponse` structure.
 
 #### `GET /health`
 
