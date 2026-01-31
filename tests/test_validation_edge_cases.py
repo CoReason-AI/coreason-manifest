@@ -30,9 +30,7 @@ def test_unique_node_ids_valid() -> None:
         AgentNode(id="node1", agent_name="A"),
         AgentNode(id="node2", agent_name="B"),
     ]
-    topo = AgentConfig(
-        nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5}
-    )
+    topo = AgentConfig(nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5})
     assert len(topo.nodes) == 2
 
 

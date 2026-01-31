@@ -12,8 +12,8 @@ from typing import Any, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .definitions.agent import AgentDefinition, VersionStr
-from .definitions.topology import GraphTopology, Node
+from .definitions.agent import VersionStr
+from .definitions.topology import GraphTopology
 
 
 class RecipeInterface(BaseModel):
