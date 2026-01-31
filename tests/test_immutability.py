@@ -34,7 +34,9 @@ def test_agent_definition_immutability() -> None:
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {
-            "steps": [],
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},
@@ -49,7 +51,7 @@ def test_agent_definition_immutability() -> None:
 
     # Try to replace a nested model
     with pytest.raises(ValidationError):
-        agent.dependencies = AgentDependencies(tools=["new_tool"], libraries=[])  # type: ignore[misc]
+        agent.dependencies = AgentDependencies(tools=[], libraries=[])  # type: ignore[misc]
 
 
 def test_nested_model_immutability() -> None:
@@ -64,7 +66,9 @@ def test_nested_model_immutability() -> None:
         },
         "interface": {"inputs": {}, "outputs": {}},
         "topology": {
-            "steps": [],
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},

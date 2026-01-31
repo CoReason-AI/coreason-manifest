@@ -1,6 +1,6 @@
 # Recipe Manifests (Workflows)
 
-The `coreason-manifest` package provides the schema definitions for **Recipes**, which are executable workflows managed by the `coreason-maco` runtime.
+The `coreason-manifest` package provides the schema definitions for **Recipes**, which are executable workflows managed by the `coreason-maco` runtime. These definitions share the same underlying graph components (`Node`, `Edge`) as the Agent Topology.
 
 ## Overview
 
@@ -32,7 +32,8 @@ Nodes are polymorphic and can be one of the following types:
 
 #### 1. AgentNode (`type="agent"`)
 Executes a specific atomic agent.
-- **agent_name**: The name of the agent to call.
+- **agent_name**: The name of the atomic agent to call.
+- **council_config**: Optional configuration for architectural triangulation (e.g., voting).
 
 #### 2. HumanNode (`type="human"`)
 Pauses execution for user input or approval.
@@ -53,8 +54,9 @@ Connections between nodes.
 ## Example Usage
 
 ```python
-from coreason_manifest import (
-    RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge
+from coreason_manifest.recipes import RecipeManifest
+from coreason_manifest.definitions.topology import (
+    GraphTopology, AgentNode, HumanNode, Edge
 )
 
 # Define Nodes
@@ -80,6 +82,7 @@ recipe = RecipeManifest(
     id="research_workflow",
     version="1.0.0",
     name="Research Approval Workflow",
+    description="A simple approval workflow.",
     inputs={"topic": "str"},
     graph=GraphTopology(
         nodes=[agent_node, human_node],
