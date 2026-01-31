@@ -31,7 +31,7 @@ class GenAIOperation(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    id: str = Field(..., description="Unique identifier for the operation/span.")
+    span_id: str = Field(..., description="Unique identifier for the operation/span.")
     trace_id: str = Field(..., description="Trace ID this operation belongs to.")
     parent_id: Optional[str] = Field(None, description="Parent span ID.")
 
@@ -90,7 +90,8 @@ class AuditEventType(str, Enum):
 class AuditLog(BaseModel):
     """Tamper-evident legal record."""
 
-    id: UUID = Field(..., description="Unique identifier.")
+    audit_id: UUID = Field(..., description="Unique identifier.")
+    trace_id: str = Field(..., description="Trace ID for OTel correlation.")
     timestamp: datetime = Field(..., description="ISO8601 timestamp.")
     actor: str = Field(..., description="User ID or Agent Component ID.")
     event_type: AuditEventType = Field(..., description="Type of event.")

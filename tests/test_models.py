@@ -25,7 +25,7 @@ def test_agent_definition_valid() -> None:
             "inputs": {"type": "object", "properties": {"query": {"type": "string"}}},
             "outputs": {"type": "string"},
         },
-        "topology": {
+        "config": {
             "nodes": [{"id": "step1", "type": "logic", "code": "pass"}],
             "edges": [],
             "entry_point": "step1",
@@ -47,7 +47,7 @@ def test_agent_definition_valid() -> None:
 
     agent = AgentDefinition(**valid_data)
     assert agent.metadata.name == "Test Agent"
-    assert agent.topology.llm_config.temperature == 0.7
+    assert agent.config.llm_config.temperature == 0.7
     assert len(agent.dependencies.libraries) == 1
 
 
@@ -86,7 +86,7 @@ def test_validation_error_on_missing_fields() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
@@ -115,7 +115,7 @@ def test_auth_validation_failure() -> None:
             "outputs": {"type": "string"},
             "injected_params": [],  # Missing user_context
         },
-        "topology": {
+        "config": {
             "nodes": [{"id": "step1", "type": "logic", "code": "pass"}],
             "edges": [],
             "entry_point": "step1",
@@ -141,7 +141,7 @@ def test_agent_definition_with_policy_and_observability() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",

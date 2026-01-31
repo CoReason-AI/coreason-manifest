@@ -10,7 +10,8 @@ def test_audit_tamper_evidence() -> None:
     now = datetime.now(timezone.utc)
 
     log = AuditLog(
-        id=log_id,
+        audit_id=log_id,
+        trace_id="trace_001",
         timestamp=now,
         actor="user_1",
         event_type=AuditEventType.PREDICTION,
