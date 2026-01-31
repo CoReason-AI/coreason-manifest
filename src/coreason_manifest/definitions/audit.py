@@ -1,4 +1,7 @@
+import hashlib
+import json
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
@@ -78,8 +81,33 @@ class ReasoningTrace(BaseModel):
     total_cost: float = 0.0
 
 
+class AuditEventType(str, Enum):
+    SYSTEM_CHANGE = "system_change"
+    PREDICTION = "prediction"
+    GUARDRAIL_TRIGGER = "guardrail_trigger"
+
+
+class AuditLog(BaseModel):
+    """Tamper-evident legal record."""
+
+    id: UUID = Field(..., description="Unique identifier.")
+    timestamp: datetime = Field(..., description="ISO8601 timestamp.")
+    actor: str = Field(..., description="User ID or Agent Component ID.")
+    event_type: AuditEventType = Field(..., description="Type of event.")
+    safety_metadata: Dict[str, Any] = Field(..., description="Safety metadata (e.g., PII detected).")
+    previous_hash: str = Field(..., description="Hash of the previous log entry.")
+    integrity_hash: str = Field(..., description="SHA256 hash of this record + previous_hash.")
+
+    def compute_hash(self) -> str:
+        """Computes the integrity hash of the record."""
+        # Use model_dump to get a dict, but exclude integrity_hash as it is the target
+        data = self.model_dump(exclude={"integrity_hash"}, mode="json")
+        # Ensure deterministic serialization
+        json_str = json.dumps(data, sort_keys=True, default=str)
+        return hashlib.sha256(json_str.encode("utf-8")).hexdigest()
+
+
 # --- Backward Compatibility ---
 # Adapters or Aliases
-AuditLog = ReasoningTrace
 CognitiveStep = GenAIOperation
 TokenUsage = GenAITokenUsage

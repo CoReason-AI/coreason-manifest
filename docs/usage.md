@@ -131,3 +131,8 @@ Checks the service status and active policy version.
   "policy_version": "a1b2c3d4"
 }
 ```
+
+## Advanced Documentation
+
+*   [Simulation Architecture](simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
+*   [Audit & Compliance](audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
