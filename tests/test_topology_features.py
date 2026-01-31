@@ -52,9 +52,7 @@ def test_graph_topology_with_state_schema() -> None:
 
 def test_conditional_edge_creation() -> None:
     """Test creating a valid ConditionalEdge."""
-    edge = ConditionalEdge(
-        source_node_id="start", router_logic="routers.logic", mapping={"a": "node_a", "b": "node_b"}
-    )
+    edge = ConditionalEdge(source_node_id="start", router_logic="routers.logic", mapping={"a": "node_a", "b": "node_b"})
     assert edge.source_node_id == "start"
     assert edge.mapping["a"] == "node_a"
 

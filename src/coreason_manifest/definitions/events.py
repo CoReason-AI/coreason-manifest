@@ -11,8 +11,7 @@ T = TypeVar("T")
 
 @runtime_checkable
 class CloudEventSource(Protocol):
-    def as_cloud_event_payload(self) -> Any:
-        ...
+    def as_cloud_event_payload(self) -> Any: ...
 
 
 class CloudEvent(BaseModel, Generic[T]):
