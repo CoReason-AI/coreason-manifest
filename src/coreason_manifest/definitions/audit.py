@@ -3,36 +3,48 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
-from .message import Message, ToolCall
+from .message import ChatMessage, Message
 
-class TokenUsage(BaseModel):
-    """Token consumption stats."""
+class GenAITokenUsage(BaseModel):
+    """Token consumption stats aligned with OTel conventions."""
     model_config = ConfigDict(extra="ignore")
 
+    input: int = Field(0, description="Number of input tokens (prompt).")
+    output: int = Field(0, description="Number of output tokens (completion).")
+    total: int = Field(0, description="Total number of tokens used.")
+
+    # Backward compatibility fields (mapped to new fields in logic if needed, but kept for schema)
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
     details: Dict[str, Any] = Field(default_factory=dict)
 
-class CognitiveStep(BaseModel):
-    """An atomic step in the reasoning process (e.g., one LLM call)."""
+class GenAIOperation(BaseModel):
+    """An atomic operation in the reasoning process (e.g., one LLM call), aligning with OTel Spans."""
     model_config = ConfigDict(extra="ignore")
 
-    step_id: str
-    timestamp: datetime = Field(default_factory=datetime.now)
+    id: str = Field(..., description="Unique identifier for the operation/span.")
+    trace_id: str = Field(..., description="Trace ID this operation belongs to.")
+    parent_id: Optional[str] = Field(None, description="Parent span ID.")
 
-    # Input context (The prompt sent to the LLM)
-    input_messages: List[Message]
+    operation_name: str = Field(..., description="Name of the operation (e.g., chat, embedding).")
+    provider: str = Field(..., description="GenAI provider (e.g., openai, anthropic).")
+    model: str = Field(..., description="Model name used.")
 
-    # The decision made (The LLM's response)
-    output_message: Message
+    start_time: datetime = Field(default_factory=datetime.now)
+    end_time: Optional[datetime] = None
+    duration_ms: float = 0.0
 
-    # Execution details
-    tool_calls: List[ToolCall] = Field(default_factory=list)
-    token_usage: Optional[TokenUsage] = None
-    latency_ms: float = 0.0
+    # Context
+    input_messages: List[ChatMessage] = Field(default_factory=list)
+    output_messages: List[ChatMessage] = Field(default_factory=list)
 
-    # Metadata (e.g., model used, temperature, provider)
+    # Metrics
+    token_usage: Optional[GenAITokenUsage] = None
+
+    # Metadata
+    status: str = "pending" # success, error
+    error_type: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 class ReasoningTrace(BaseModel):
@@ -46,8 +58,8 @@ class ReasoningTrace(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
 
-    # The chain of thought (Ordered list of steps)
-    steps: List[CognitiveStep] = Field(default_factory=list)
+    # The chain of thought (Ordered list of operations)
+    steps: List[GenAIOperation] = Field(default_factory=list)
 
     # Final outcome
     status: str = "pending"  # options: success, failure, pending
@@ -55,10 +67,11 @@ class ReasoningTrace(BaseModel):
     error: Optional[str] = None
 
     # Aggregated stats
-    total_tokens: TokenUsage = Field(default_factory=TokenUsage)
+    total_tokens: GenAITokenUsage = Field(default_factory=GenAITokenUsage)
     total_cost: float = 0.0
 
 # --- Backward Compatibility ---
-# This ensures that existing code importing AuditLog still works,
-# but it now possesses the full structure of ReasoningTrace.
+# Adapters or Aliases
 AuditLog = ReasoningTrace
+CognitiveStep = GenAIOperation
+TokenUsage = GenAITokenUsage

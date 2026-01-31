@@ -1,45 +1,102 @@
-from datetime import datetime
 import json
 import uuid
-from coreason_manifest.definitions.message import Message, Role, ToolCall, FunctionCall
-from coreason_manifest.definitions.audit import ReasoningTrace, AuditLog, CognitiveStep, TokenUsage
+from datetime import datetime
+
+from coreason_manifest.definitions.audit import (
+    AuditLog,
+    GenAIOperation,
+    GenAITokenUsage,
+    ReasoningTrace,
+)
+from coreason_manifest.definitions.message import (
+    ChatMessage,
+    Message,
+    Role,
+    TextPart,
+    ToolCallRequestPart,
+)
+
 
 def test_message_creation() -> None:
-    """Test creating various types of messages."""
-    # User message
-    user_msg = Message(role=Role.USER, content="Hello")
+    """Test creating various types of messages with new schema."""
+    # User message with TextPart
+    user_msg = ChatMessage(
+        role=Role.USER,
+        parts=[TextPart(content="Hello")]
+    )
     assert user_msg.role == "user"
-    assert user_msg.content == "Hello"
+    part0 = user_msg.parts[0]
+    assert isinstance(part0, TextPart)
+    assert part0.content == "Hello"
+    assert part0.type == "text"
 
     # Tool call message
-    tool_call = ToolCall(
-        id="call_123",
-        function=FunctionCall(name="get_weather", arguments='{"city": "Paris"}')
+    tool_call = ToolCallRequestPart(
+        name="get_weather",
+        arguments={"city": "Paris"},
+        id="call_123"
     )
-    assistant_msg = Message(role=Role.ASSISTANT, tool_calls=[tool_call])
-    assert assistant_msg.tool_calls
-    assert assistant_msg.tool_calls[0].function.name == "get_weather"
+    assistant_msg = ChatMessage(
+        role=Role.ASSISTANT,
+        parts=[tool_call]
+    )
+    assert len(assistant_msg.parts) == 1
+    part = assistant_msg.parts[0]
+    assert isinstance(part, ToolCallRequestPart)
+    assert part.name == "get_weather"
+    assert part.arguments["city"] == "Paris"
+
+def test_message_alias_compatibility() -> None:
+    """Verify Message alias works."""
+    msg = Message(role=Role.SYSTEM, parts=[TextPart(content="System prompt")])
+    assert isinstance(msg, ChatMessage)
+
+def test_gen_ai_operation_creation() -> None:
+    """Test creating a GenAI operation (audit step)."""
+    trace_id = str(uuid.uuid4())
+    step_id = "step_1"
+
+    input_msg = ChatMessage(role=Role.USER, parts=[TextPart(content="Calculate 2+2")])
+
+    tool_call = ToolCallRequestPart(
+        name="calculator",
+        arguments={"expression": "2+2"},
+        id="call_math"
+    )
+    output_msg = ChatMessage(role=Role.ASSISTANT, parts=[tool_call])
+
+    operation = GenAIOperation(
+        id=step_id,
+        trace_id=trace_id,
+        operation_name="chat",
+        provider="openai",
+        model="gpt-4",
+        input_messages=[input_msg],
+        output_messages=[output_msg],
+        token_usage=GenAITokenUsage(input=5, output=10, total=15)
+    )
+
+    assert operation.id == step_id
+    assert operation.provider == "openai"
+    assert operation.token_usage is not None
+    assert operation.token_usage.total == 15
+    # Check backward compatibility fields on TokenUsage
+    assert operation.token_usage.total_tokens == 0 # Default is 0 unless explicitly set, or we add a validator to sync them.
+    # Note: If we wanted strict backward compat for values, we'd need a validator.
+    # For now, we just ensure the field exists on the schema.
 
 def test_reasoning_trace_creation() -> None:
     """Test creating a full reasoning trace."""
     trace_id = uuid.uuid4()
 
-    # Input
-    input_msg = Message(role=Role.USER, content="Calculate 2+2")
-
-    # Output
-    tool_call = ToolCall(
-        id="call_math",
-        function=FunctionCall(name="calculator", arguments='{"expression": "2+2"}')
-    )
-    output_msg = Message(role=Role.ASSISTANT, tool_calls=[tool_call])
-
-    step = CognitiveStep(
-        step_id="step_1",
-        input_messages=[input_msg],
-        output_message=output_msg,
-        tool_calls=[tool_call],
-        token_usage=TokenUsage(total_tokens=10)
+    step = GenAIOperation(
+        id="step_1",
+        trace_id=str(trace_id),
+        operation_name="chat",
+        provider="openai",
+        model="gpt-4",
+        input_messages=[],
+        output_messages=[]
     )
 
     trace = ReasoningTrace(
@@ -52,15 +109,12 @@ def test_reasoning_trace_creation() -> None:
 
     assert trace.trace_id == trace_id
     assert len(trace.steps) == 1
-    assert trace.steps[0].step_id == "step_1"
-    assert trace.steps[0].token_usage is not None
-    assert trace.steps[0].token_usage.total_tokens == 10
+    assert trace.steps[0].id == "step_1"
 
 def test_audit_log_alias() -> None:
     """Verify that AuditLog is an alias for ReasoningTrace."""
     assert AuditLog is ReasoningTrace
 
-    # Instantiate using AuditLog
     log = AuditLog(
         trace_id=uuid.uuid4(),
         agent_id="test_agent",
