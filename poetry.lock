@@ -1797,7 +1797,7 @@ version = "23.2.0.20240623"
 description = "Typing stubs for aiofiles"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "types-aiofiles-23.2.0.20240623.tar.gz", hash = "sha256:d515b2fa46bf894aff45a364a704f050de3898344fd6c5994d58dc8b59ab71e6"},
     {file = "types_aiofiles-23.2.0.20240623-py3-none-any.whl", hash = "sha256:70597b29fc40c8583b6d755814b2cd5fcdb6785622e82d74ef499f9066316e08"},
@@ -1963,4 +1963,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12, <3.15"
-content-hash = "3445eb68a9c55c8f0fcd6f0859217597a6311eeffe96a3e07757cb5b404f8749"
+content-hash = "1e2952be91a2a7b0a1f27ee1ab29a06f54d053a2cb0823ee136db34c93b23aa8"
