@@ -29,6 +29,11 @@ from .recipes import (
     RecipeManifest,
     VisualMetadata,
 )
+from .definitions.simulation import (
+    SimulationScenario,
+    SimulationTurn,
+    SimulationTrace,
+)
 
 __all__ = [
     "AgentDefinition",
@@ -45,6 +50,9 @@ __all__ = [
     "ModelConfig",
     "Node",
     "RecipeManifest",
+    "SimulationScenario",
+    "SimulationTurn",
+    "SimulationTrace",
     "Step",
     "VisualMetadata",
 ]
