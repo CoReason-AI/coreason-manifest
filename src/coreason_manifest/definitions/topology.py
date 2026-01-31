@@ -8,9 +8,25 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
-from typing import Annotated, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class StateSchema(BaseModel):
+    """Defines the structure and persistence of the graph state.
+
+    Attributes:
+        data_schema: A JSON Schema or Pydantic definition describing the state structure.
+        persistence: Configuration for how state is checkpointed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    data_schema: Dict[str, Any] = Field(
+        ..., description="A JSON Schema or Pydantic definition describing the state structure."
+    )
+    persistence: str = Field(..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis').")
 
 
 class CouncilConfig(BaseModel):
@@ -101,9 +117,42 @@ class LogicNode(BaseNode):
     code: str = Field(..., description="The Python logic code to execute.")
 
 
+class RecipeNode(BaseNode):
+    """A node that executes another Recipe as a sub-graph.
+
+    Attributes:
+        type: The type of the node (must be 'recipe').
+        recipe_id: The ID of the recipe to execute.
+        input_mapping: How parent state maps to child inputs (parent_key -> child_key).
+        output_mapping: How child result maps back to parent state (child_key -> parent_key).
+    """
+
+    type: Literal["recipe"] = Field("recipe", description="Discriminator for RecipeNode.")
+    recipe_id: str = Field(..., description="The ID of the recipe to execute.")
+    input_mapping: Dict[str, str] = Field(..., description="Mapping of parent state keys to child input keys.")
+    output_mapping: Dict[str, str] = Field(..., description="Mapping of child output keys to parent state keys.")
+
+
+class MapNode(BaseNode):
+    """A node that spawns multiple parallel executions of a sub-branch.
+
+    Attributes:
+        type: The type of the node (must be 'map').
+        items_path: Dot-notation path to the list in the state.
+        processor_node_id: The node (or subgraph) to run for each item.
+        concurrency_limit: Max parallel executions.
+    """
+
+    type: Literal["map"] = Field("map", description="Discriminator for MapNode.")
+    items_path: str = Field(..., description="Dot-notation path to the list in the state.")
+    processor_node_id: str = Field(..., description="The node (or subgraph) to run for each item.")
+    concurrency_limit: int = Field(..., description="Max parallel executions.")
+
+
 # Discriminated Union for polymorphism
 Node = Annotated[
-    Union[AgentNode, HumanNode, LogicNode], Field(discriminator="type", description="Polymorphic node definition.")
+    Union[AgentNode, HumanNode, LogicNode, RecipeNode, MapNode],
+    Field(discriminator="type", description="Polymorphic node definition."),
 ]
 
 
@@ -123,18 +172,38 @@ class Edge(BaseModel):
     condition: Optional[str] = Field(None, description="Optional Python expression for conditional branching.")
 
 
+class ConditionalEdge(BaseModel):
+    """Represents a dynamic routing connection from one node to multiple potential targets.
+
+    Attributes:
+        source_node_id: The ID of the source node.
+        router_logic: A reference to a python function or a logic expression that returns the next node ID.
+        mapping: A dictionary mapping the router's output (e.g., "approve", "reject") to target Node IDs.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_node_id: str = Field(..., description="The ID of the source node.")
+    router_logic: str = Field(
+        ..., description="A reference to a python function or logic expression that determines the path."
+    )
+    mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
+
+
 class GraphTopology(BaseModel):
     """The topology definition of the recipe.
 
     Attributes:
         nodes: List of nodes in the graph.
         edges: List of edges connecting the nodes.
+        state_schema: Optional schema definition for the graph state.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
-    edges: List[Edge] = Field(..., description="List of edges connecting the nodes.")
+    edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
+    state_schema: Optional[StateSchema] = Field(None, description="Schema definition for the graph state.")
 
 
 Topology = GraphTopology
