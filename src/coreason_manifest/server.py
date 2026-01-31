@@ -5,8 +5,9 @@ from typing import AsyncIterator, List, Optional, Union
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
+from coreason_manifest.definitions import AgentManifest
 from coreason_manifest.engine import ManifestConfig, ManifestEngineAsync
 from coreason_manifest.errors import ManifestSyntaxError, PolicyViolationError
 
@@ -78,7 +79,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(lifespan=lifespan)
 
 
-@app.post("/validate", response_model=ValidationResponse)  # type: ignore[misc]
+@app.post("/validate", response_model=ValidationResponse)
 async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONResponse]:
     engine: ManifestEngineAsync = app.state.engine
 
@@ -104,7 +105,32 @@ async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONR
         return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content=resp.model_dump())
 
 
-@app.get("/health")  # type: ignore[misc]
+@app.post("/validate/shared", response_model=ValidationResponse)
+async def validate_shared_manifest(request: Request) -> Union[ValidationResponse, JSONResponse]:
+    """Validates against the new 'Shared Kernel' AgentManifest schema."""
+    try:
+        raw_body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body") from None
+
+    try:
+        # Strictly validate using the new Pydantic model
+        manifest = AgentManifest(**raw_body)
+
+        # Note: 'id' is not in AgentManifest, it uses 'name' + 'version' mostly.
+        # We return name as ID for this endpoint's contract.
+        return ValidationResponse(
+            valid=True,
+            agent_id=manifest.name,
+            version=manifest.version,
+            policy_violations=[],
+        )
+    except ValidationError as e:
+        resp = ValidationResponse(valid=False, policy_violations=[f"Schema Error: {str(e)}"])
+        return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content=resp.model_dump())
+
+
+@app.get("/health")
 async def health_check() -> dict[str, str]:
     engine: ManifestEngineAsync = app.state.engine
     policy_version = "unknown"

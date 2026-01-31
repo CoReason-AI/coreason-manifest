@@ -55,13 +55,51 @@ interface = ManifestLoader.inspect_function(my_agent_function)
 print(interface.model_dump_json(indent=2))
 ```
 
-## 3. Server Mode (Compliance Microservice)
+## 3. Using the Shared Kernel Definitions
+
+The `coreason-manifest` package now exports the canonical Pydantic models used throughout the CoReason ecosystem. These "Shared Kernel" definitions ensure that the Builder, Foundry, and Runtime all speak the same language.
+
+### Importing Definitions
+
+You can import core schemas directly from `coreason_manifest.definitions`:
+
+```python
+from coreason_manifest.definitions import (
+    AgentManifest,
+    ToolCall,
+    TopologyGraph,
+    KnowledgeArtifact,
+    SignatureEvent
+)
+
+# Example: Instantiating a ToolCall securely
+try:
+    # Validates structure and checks for SQL injection automatically
+    call = ToolCall(
+        tool_name="database_lookup",
+        arguments={"query": "SELECT * FROM users WHERE id = 123"}
+    )
+    print(f"Valid Tool Call: {call.tool_name}")
+except ValueError as e:
+    print(f"Validation Error: {e}")
+```
+
+### Key Models
+
+*   **`AgentManifest`**: The top-level configuration for an agent.
+*   **`ToolCall`**: A structured request to execute an MCP tool, with built-in security checks.
+*   **`TopologyGraph`**: The directed acyclic graph (DAG) defining the agent's execution flow.
+*   **`KnowledgeArtifact`**: The atomic unit of data for RAG and memory systems.
+*   **`SignatureEvent`**: The immutable record for GxP audit trails.
+
+## 4. Server Mode (Compliance Microservice)
 
 The **Compliance Microservice** (Service C) runs `coreason-manifest` as a FastAPI server. It is designed for centralized validation by services like `coreason-foundry` and `coreason-publisher`.
 
 **Key Differences:**
-*   Accepts the Agent Manifest as a JSON body (via HTTP POST).
-*   **Skips Integrity Check:** Because the server does not have access to the client's local source code, it cannot verify the `integrity_hash`. It only validates the structure, schema, and policy compliance of the manifest itself.
+*   **Legacy Validation (`/validate`):** Validates against the full internal `AgentDefinition` model (used by current Runtime).
+*   **Shared Kernel Validation (`/validate/shared`):** Validates against the strict `AgentManifest` schema (used by Builder/Foundry).
+*   **Skips Integrity Check:** Because the server does not have access to the client's local source code, it cannot verify the `integrity_hash`. It only validates the structure, schema, and policy compliance.
 
 ### Running the Server
 
@@ -89,7 +127,7 @@ uvicorn coreason_manifest.server:app --host 0.0.0.0 --port 8000
 
 #### `POST /validate`
 
-Validates an Agent Manifest.
+Validates an Agent Manifest (Legacy/Full Internal Model).
 
 **Request:**
 *   **Method:** `POST`
@@ -118,6 +156,18 @@ Validates an Agent Manifest.
   ]
 }
 ```
+
+#### `POST /validate/shared`
+
+Validates an Agent Manifest against the **Shared Kernel** schema (`AgentManifest`).
+
+**Request:**
+*   **Method:** `POST`
+*   **Content-Type:** `application/json`
+*   **Body:** The raw Agent Manifest JSON (must match `AgentManifest` structure).
+
+**Response:**
+Returns the same `ValidationResponse` structure.
 
 #### `GET /health`
 
