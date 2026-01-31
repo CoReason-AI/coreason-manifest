@@ -53,7 +53,7 @@ def test_graph_topology_with_state_schema() -> None:
 def test_conditional_edge_creation() -> None:
     """Test creating a valid ConditionalEdge."""
     edge = ConditionalEdge(
-        source_node_id="start", router_logic="lambda x: 'a' if x else 'b'", mapping={"a": "node_a", "b": "node_b"}
+        source_node_id="start", router_logic="routers.logic", mapping={"a": "node_a", "b": "node_b"}
     )
     assert edge.source_node_id == "start"
     assert edge.mapping["a"] == "node_a"
@@ -70,7 +70,7 @@ def test_conditional_edge_missing_fields() -> None:
 def test_topology_mixed_edges() -> None:
     """Test GraphTopology accepts both Edge and ConditionalEdge."""
     edge1 = Edge(source_node_id="a", target_node_id="b")
-    edge2 = ConditionalEdge(source_node_id="b", router_logic="logic", mapping={"res": "c"})
+    edge2 = ConditionalEdge(source_node_id="b", router_logic="routers.logic", mapping={"res": "c"})
     topology = GraphTopology(nodes=[], edges=[edge1, edge2])
     assert len(topology.edges) == 2
     assert isinstance(topology.edges[0], Edge)

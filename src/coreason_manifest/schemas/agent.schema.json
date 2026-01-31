@@ -172,7 +172,9 @@
               "mapping": {
                 "agent": "#/$defs/AgentNode",
                 "human": "#/$defs/HumanNode",
-                "logic": "#/$defs/LogicNode"
+                "logic": "#/$defs/LogicNode",
+                "map": "#/$defs/MapNode",
+                "recipe": "#/$defs/RecipeNode"
               },
               "propertyName": "type"
             },
@@ -185,6 +187,12 @@
               },
               {
                 "$ref": "#/$defs/LogicNode"
+              },
+              {
+                "$ref": "#/$defs/RecipeNode"
+              },
+              {
+                "$ref": "#/$defs/MapNode"
               }
             ]
           },
@@ -242,6 +250,37 @@
       ],
       "title": "CouncilConfig",
       "type": "object"
+    },
+    "DataMapping": {
+      "additionalProperties": false,
+      "description": "Defines how to transform data between parent and child.",
+      "properties": {
+        "source": {
+          "description": "The path/key source.",
+          "title": "Source",
+          "type": "string"
+        },
+        "strategy": {
+          "$ref": "#/$defs/DataMappingStrategy",
+          "default": "direct",
+          "description": "The mapping strategy."
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "DataMapping",
+      "type": "object"
+    },
+    "DataMappingStrategy": {
+      "description": "Strategy for mapping data.",
+      "enum": [
+        "direct",
+        "jsonpath",
+        "literal"
+      ],
+      "title": "DataMappingStrategy",
+      "type": "string"
     },
     "Edge": {
       "additionalProperties": false,
@@ -391,6 +430,71 @@
       "title": "LogicNode",
       "type": "object"
     },
+    "MapNode": {
+      "additionalProperties": false,
+      "description": "A node that spawns multiple parallel executions of a sub-branch.\n\nAttributes:\n    type: The type of the node (must be 'map').\n    items_path: Dot-notation path to the list in the state.\n    processor_node_id: The node (or subgraph) to run for each item.\n    concurrency_limit: Max parallel executions.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the node.",
+          "title": "Id",
+          "type": "string"
+        },
+        "council_config": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CouncilConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional configuration for architectural triangulation."
+        },
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisualMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Visual metadata for the UI."
+        },
+        "type": {
+          "const": "map",
+          "default": "map",
+          "description": "Discriminator for MapNode.",
+          "title": "Type",
+          "type": "string"
+        },
+        "items_path": {
+          "description": "Dot-notation path to the list in the state.",
+          "title": "Items Path",
+          "type": "string"
+        },
+        "processor_node_id": {
+          "description": "The node (or subgraph) to run for each item.",
+          "title": "Processor Node Id",
+          "type": "string"
+        },
+        "concurrency_limit": {
+          "description": "Max parallel executions.",
+          "title": "Concurrency Limit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "items_path",
+        "processor_node_id",
+        "concurrency_limit"
+      ],
+      "title": "MapNode",
+      "type": "object"
+    },
     "ModelConfig": {
       "additionalProperties": false,
       "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.",
@@ -476,6 +580,91 @@
         }
       },
       "title": "PolicyConfig",
+      "type": "object"
+    },
+    "RecipeNode": {
+      "additionalProperties": false,
+      "description": "A node that executes another Recipe as a sub-graph.\n\nAttributes:\n    type: The type of the node (must be 'recipe').\n    recipe_id: The ID of the recipe to execute.\n    input_mapping: How parent state maps to child inputs (parent_key -> child_key).\n    output_mapping: How child result maps back to parent state (child_key -> parent_key).",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the node.",
+          "title": "Id",
+          "type": "string"
+        },
+        "council_config": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CouncilConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional configuration for architectural triangulation."
+        },
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisualMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Visual metadata for the UI."
+        },
+        "type": {
+          "const": "recipe",
+          "default": "recipe",
+          "description": "Discriminator for RecipeNode.",
+          "title": "Type",
+          "type": "string"
+        },
+        "recipe_id": {
+          "description": "The ID of the recipe to execute.",
+          "title": "Recipe Id",
+          "type": "string"
+        },
+        "input_mapping": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/DataMapping"
+              }
+            ]
+          },
+          "description": "Mapping of parent state keys to child input keys.",
+          "title": "Input Mapping",
+          "type": "object"
+        },
+        "output_mapping": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/DataMapping"
+              }
+            ]
+          },
+          "description": "Mapping of child output keys to parent state keys.",
+          "title": "Output Mapping",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "recipe_id",
+        "input_mapping",
+        "output_mapping"
+      ],
+      "title": "RecipeNode",
       "type": "object"
     },
     "ToolRequirement": {

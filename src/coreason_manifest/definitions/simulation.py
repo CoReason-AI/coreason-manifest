@@ -35,6 +35,9 @@ class SimulationStep(BaseModel):
     thought: str = Field(..., description="The Chain-of-Thought reasoning.")
     action: Dict[str, Any] = Field(..., description="Tool calls or API requests.")
     observation: Dict[str, Any] = Field(..., description="Tool outputs.")
+    snapshot: Dict[str, Any] = Field(
+        default_factory=dict, description="Full copy of the graph state at the completion of this step."
+    )
 
 
 class SimulationTrace(BaseModel):

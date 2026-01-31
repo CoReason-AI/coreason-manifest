@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, Generic, Literal, Optional, TypeVar
+from typing import Any, Dict, Generic, Literal, Optional, Protocol, TypeVar, runtime_checkable
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -7,6 +7,12 @@ from pydantic import BaseModel, ConfigDict, Field
 # --- CloudEvents v1.0 Implementation ---
 
 T = TypeVar("T")
+
+
+@runtime_checkable
+class CloudEventSource(Protocol):
+    def as_cloud_event_payload(self) -> Any:
+        ...
 
 
 class CloudEvent(BaseModel, Generic[T]):
@@ -120,8 +126,15 @@ class GraphEvent(BaseModel):
 class BaseNodePayload(BaseModel):
     """Base model for node-related events."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
     node_id: str
+
+    # Common OTel attributes that might appear in payload
+    model: Optional[str] = None
+    system: Optional[str] = None
+
+    def as_cloud_event_payload(self) -> Any:
+        return self
 
 
 # --- Payload Models ---
@@ -142,6 +155,28 @@ class NodeStarted(BaseNodePayload):
     visual_cue: str = "PULSE"
     input_tokens: Optional[int] = None
 
+    def as_cloud_event_payload(self) -> Any:
+        semantics = GenAISemantics()
+        has_semantics = False
+
+        if self.input_tokens is not None:
+            semantics.usage = GenAIUsage(input_tokens=self.input_tokens)
+            has_semantics = True
+
+        if self.model:
+            semantics.request = GenAIRequest(model=self.model)
+            has_semantics = True
+
+        if self.system:
+            semantics.system = self.system
+            has_semantics = True
+
+        return StandardizedNodeStarted(
+            node_id=self.node_id,
+            status=self.status,
+            gen_ai=semantics if has_semantics else None,
+        )
+
 
 class NodeCompleted(BaseNodePayload):
     """Payload for NODE_DONE event."""
@@ -150,6 +185,21 @@ class NodeCompleted(BaseNodePayload):
     status: Literal["SUCCESS"] = "SUCCESS"
     visual_cue: str = "GREEN_GLOW"
     cost: Optional[float] = None
+
+    def as_cloud_event_payload(self) -> Any:
+        semantics = GenAISemantics()
+        has_semantics = False
+
+        if self.model:
+            semantics.request = GenAIRequest(model=self.model)
+            has_semantics = True
+
+        return StandardizedNodeCompleted(
+            node_id=self.node_id,
+            output_summary=self.output_summary,
+            status=self.status,
+            gen_ai=semantics if has_semantics else None,
+        )
 
 
 class NodeRestored(BaseNodePayload):
@@ -173,6 +223,15 @@ class NodeStream(BaseNodePayload):
     chunk: str
     visual_cue: str = "TEXT_BUBBLE"
 
+    def as_cloud_event_payload(self) -> Any:
+        semantics = GenAISemantics(completion=GenAICompletion(chunk=self.chunk))
+        if self.model:
+            if not semantics.request:
+                semantics.request = GenAIRequest()
+            semantics.request.model = self.model
+
+        return StandardizedNodeStream(node_id=self.node_id, gen_ai=semantics)
+
 
 class ArtifactGenerated(BaseNodePayload):
     """Payload for ARTIFACT_GENERATED event."""
@@ -184,10 +243,13 @@ class ArtifactGenerated(BaseNodePayload):
 class EdgeTraversed(BaseModel):
     """Payload for EDGE_ACTIVE event."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
     source: str
     target: str
     animation_speed: str = "FAST"
+
+    def as_cloud_event_payload(self) -> Any:
+        return self
 
 
 class CouncilVote(BaseNodePayload):
@@ -248,56 +310,55 @@ WorkflowErrorPayload = WorkflowError
 def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent[Any]:
     """Migrates a legacy GraphEvent to a CloudEvent v1.0."""
 
-    ce_type = f"ai.coreason.legacy.{event.event_type.lower()}"
+    ce_type_map = {
+        "NODE_START": "ai.coreason.node.started",
+        "NODE_STREAM": "ai.coreason.node.stream",
+        "NODE_DONE": "ai.coreason.node.completed",
+    }
+    ce_type = ce_type_map.get(event.event_type, f"ai.coreason.legacy.{event.event_type.lower()}")
     ce_source = f"urn:node:{event.node_id}"
 
+    # Prepare payload dict with node_id injected
+    payload_dict = event.payload.copy()
+    payload_dict["node_id"] = event.node_id
+    # Inject timestamp if missing (required by some payloads like NodeStarted)
+    if "timestamp" not in payload_dict:
+        payload_dict["timestamp"] = event.timestamp
+
+    # Mapping event types to their corresponding payload classes
+    event_class_map: Dict[str, Any] = {
+        "NODE_INIT": NodeInit,
+        "NODE_START": NodeStarted,
+        "NODE_DONE": NodeCompleted,
+        "NODE_STREAM": NodeStream,
+        "NODE_SKIPPED": NodeSkipped,
+        "NODE_RESTORED": NodeRestored,
+        "ERROR": WorkflowError,
+        "ARTIFACT_GENERATED": ArtifactGenerated,
+        "COUNCIL_VOTE": CouncilVote,
+        "EDGE_ACTIVE": EdgeTraversed,
+    }
+
     data: Any = None
-    gen_ai_semantics = GenAISemantics()
-    has_semantics = False
+    payload_class = event_class_map.get(event.event_type)
 
-    payload = event.payload
-
-    if "input_tokens" in payload:
-        gen_ai_semantics.usage = GenAIUsage(input_tokens=payload["input_tokens"])
-        has_semantics = True
-
-    if "chunk" in payload:
-        gen_ai_semantics.completion = GenAICompletion(chunk=payload["chunk"])
-        has_semantics = True
-
-    if "model" in payload:
-        gen_ai_semantics.request = GenAIRequest(model=payload["model"])
-        has_semantics = True
-
-    if "system" in payload:
-        gen_ai_semantics.system = payload["system"]
-        has_semantics = True
-
-    if event.event_type == "NODE_START":
-        ce_type = "ai.coreason.node.started"
-        data = StandardizedNodeStarted(
-            node_id=event.node_id,
-            status=payload.get("status", "RUNNING"),
-            gen_ai=gen_ai_semantics if has_semantics else None,
-        )
-    elif event.event_type == "NODE_STREAM":
-        ce_type = "ai.coreason.node.stream"
-        data = StandardizedNodeStream(node_id=event.node_id, gen_ai=gen_ai_semantics if has_semantics else None)
-    elif event.event_type == "NODE_DONE":
-        ce_type = "ai.coreason.node.completed"
-        data = StandardizedNodeCompleted(
-            node_id=event.node_id,
-            output_summary=payload.get("output_summary", ""),
-            status=payload.get("status", "SUCCESS"),
-            gen_ai=gen_ai_semantics if has_semantics else None,
-        )
+    if payload_class:
+        try:
+            # Instantiate the payload object
+            payload_obj = payload_class(**payload_dict)
+            if isinstance(payload_obj, CloudEventSource):
+                data = payload_obj.as_cloud_event_payload()
+            else:
+                data = payload_obj  # pragma: no cover
+        except Exception:
+            # Fallback if instantiation fails
+            data = event.payload
     else:
-        # Generic fallback
-        data = payload
+        data = event.payload
 
     # UI Metadata as extension
     extensions = {
-        "com_coreason_ui_cue": event.visual_metadata.get("animation") or payload.get("visual_cue"),
+        "com_coreason_ui_cue": event.visual_metadata.get("animation") or event.payload.get("visual_cue"),
         "com_coreason_ui_metadata": event.visual_metadata,
     }
 
