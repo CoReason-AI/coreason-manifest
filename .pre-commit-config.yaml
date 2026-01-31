@@ -23,7 +23,6 @@ repos:
             pytest,
             types-PyYAML,
             types-aiofiles,
-            fastapi,
             anyio,
             types-ujson,
           ]

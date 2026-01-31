@@ -14,12 +14,6 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 ## Features
 
 *   **Open Agent Specification (OAS) Validation:** Parses and validates agent definitions against a strict schema.
-*   **Compliance Enforcement:** Uses Open Policy Agent (OPA) / Rego to enforce complex business rules and allowlists.
-*   **Integrity Verification:** Calculates and verifies SHA256 hashes of the agent's source code to prevent tampering.
-*   **Automatic Schema Generation:** Inspects Python functions to generate Agent Interfaces, automatically handling `UserContext` injection.
-*   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
-*   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
-*   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation (supporting both Legacy and Shared Kernel schemas).
 *   **Shared Kernel (Definitions):** Provides the definitive Pydantic models (`AgentManifest`, `ToolCall`, `TopologyGraph`, etc.) used across the entire CoReason platform.
 
 ## Installation
@@ -30,27 +24,14 @@ pip install coreason-manifest
 
 ## Usage
 
-`coreason-manifest` supports two modes: **Library (CLI)** and **Server (Microservice)**.
-
-### 1. Library Usage
-
-Use the python library to validate local agent files and verify source integrity.
+The package provides strict Pydantic models for Agents, Recipes, and Simulations.
 
 ```python
-from coreason_manifest import ManifestEngine, ManifestConfig
+from coreason_manifest.definitions import AgentManifest
+from coreason_manifest.recipes import RecipeManifest
 
-# Initialize and Validate
-config = ManifestConfig(policy_path="./policies/compliance.rego")
-engine = ManifestEngine(config)
-agent_def = engine.load_and_validate("agent.yaml", "./src")
-```
-
-### 2. Server Mode
-
-Run the package as a FastAPI server to provide a centralized compliance API.
-
-```bash
-uvicorn coreason_manifest.server:app --host 0.0.0.0 --port 8000
+# Example: Validating a manifest
+# agent = AgentManifest.model_validate(data)
 ```
 
 For full details, see the [Usage Documentation](docs/usage.md).
