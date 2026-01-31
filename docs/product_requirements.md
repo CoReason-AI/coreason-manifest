@@ -12,14 +12,13 @@
 **Mission:** The definitive source of truth for Asset definitions.
 
 **Responsibilities:**
-*   Parses and validates Open Agent Specifications (OAS).
-*   Enforces `compliance.yaml` allowlists for libraries.
-*   Manages SHA256 dependency pinning and artifact integrity.
+*   Defines strict Pydantic schemas for Open Agent Specifications (OAS).
+*   Provides canonical hashing and versioning logic.
+*   Acts as the shared kernel for all downstream services.
 
 **Technology Stack (Standardization):**
 *   **Schema:** JSON Schema (standard interchange format).
-*   **Policy Engine:** Open Policy Agent (OPA) / Rego.
-*   **Directive:** While Pydantic is excellent for Python class validation, complex rules (e.g., "Agent X cannot use Tool Y if configured for GxP") should be offloaded to OPA or a strict JSON Schema validator to ensure language-agnostic enforcement.
+*   **Data Modeling:** Pydantic V2 (for Python-native interface).
 
 ## Agent Instructions
 
@@ -27,16 +26,14 @@
 You are strictly forbidden from writing custom validation logic where a standard schema language exists.
 
 *   **Schema Standard:** JSON Schema Draft 2020-12 (for structural validation).
-*   **Policy Engine:** Open Policy Agent (OPA) / Rego (for complex business rules and compliance).
 *   **Data Modeling:** Pydantic V2 (for Python-native interface).
 
 **Forbidden:**
 *   Do NOT write custom if/else chains to validate agent configurations.
-*   Do NOT invent a proprietary schema format; align with industry standards where possible (e.g., simplified OpenAPI for Agents).
-*   Do NOT hardcode compliance rules (e.g., `banned_libraries = ['pickle']`) in Python. These must live in external policy files (Rego or YAML).
+*   Do NOT invent a proprietary schema format; align with industry standards where possible.
 
 ### 2. Business Logic Specifications (The Source of Truth)
-The package acts as the validator for the "Agent Development Lifecycle" (ADLC). It ensures that every "Agent" produced by the factory meets strict GxP and security standards.
+The package acts as the contract for the "Agent Development Lifecycle" (ADLC). It ensures that every "Agent" produced by the factory meets strict GxP and security standards.
 
 #### 2.1 The Open Agent Specification (OAS)
 You must define the strict schema for a CoReason Agent. A valid Agent Manifest (`agent.yaml`) contains:
@@ -58,83 +55,26 @@ The system must enforce "Clean Room" rules.
 *   **Rule 3 (Integrity):** The manifest itself must include a SHA256 hash of the agent's source code to prevent tampering.
 
 ### 3. Package Architecture & Components
-The package must expose a synchronous API that validates artifacts before they can be loaded by the Runtime.
+The package exposes pure Pydantic definitions.
 
-#### Component A: ManifestLoader (The Parser)
-*   **Input:** A file path (`agent.yaml`) or raw dictionary.
+#### Component: Shared Definitions
+*   **Input:** JSON/YAML data.
 *   **Responsibility:**
-    *   Load YAML safely.
-    *   Convert raw data into a Pydantic `AgentDefinition` model.
-    *   **Normalization:** Ensure all version strings follow SemVer and all IDs are canonical UUIDs.
-*   **Output:** A raw, unvalidated dictionary or a Pydantic model structure.
+    *   Define strict Pydantic models.
+    *   Provide `canonical_hash()` methods.
+*   **Output:** Validated Python objects.
 
-#### Component B: SchemaValidator (The Structural Engineer)
-*   **Input:** Raw Dictionary from Component A.
-*   **Responsibility:**
-    *   Validate the dictionary against the Master JSON Schema.
-    *   Check required fields, data types, and format constraints (e.g., regex for names).
-*   **Output:** Boolean Success or a detailed list of `SchemaValidationError`.
-
-#### Component C: PolicyEnforcer (The Compliance Officer)
-*   **Input:** Validated `AgentDefinition`.
-*   **Responsibility:**
-    *   Embed a Rego (OPA) interpreter (using `opa-python` or similar lightweight wrapper).
-    *   Evaluate the agent against the `compliance.rego` policy file.
-*   **Logic Example:**
-    ```rego
-    deny[msg] {
-        input.libraries[_] == "pickle"
-        msg := "Security Risk: 'pickle' library is strictly forbidden."
-    }
-    ```
-*   **Output:** `ComplianceReport` (Pass/Fail with list of violations).
-
-#### Component D: IntegrityChecker (The Notary)
-*   **Input:** `AgentDefinition` and the actual Source Code (directory path).
-*   **Responsibility:**
-    *   Calculate the Merkle Tree hash or simple SHA256 of the source code directory.
-    *   Compare it against the `integrity_hash` defined in the manifest.
-*   **Output:** `IntegrityError` if hashes mismatch.
-
-### 4. Operational Requirements
-
-**Configuration:**
-*   `ManifestConfig`: Paths to standard schemas and policy files.
-
-**Error Handling:**
-*   `ManifestSyntaxError`: Bad YAML or missing fields.
-*   `PolicyViolationError`: Structurally valid, but violates business rules (e.g., disallowed tool).
-*   `IntegrityCompromisedError`: Code does not match the manifest signature.
-
-**Observability:**
-*   Log: `"Validating Agent [ID] v[Version]"`
-*   Log: `"Policy Check: [Pass/Fail] - [Duration_ms]"`
-
-### 5. Definition of Done (The Output)
-The agent must generate a Python package structure that allows the consuming middleware (`coreason-api`) and the CLI (`adk`) to write code exactly like this:
+### 4. Definition of Done (The Output)
+The agent must generate a Python package structure that allows the consuming middleware (`coreason-api`) and the CLI (`adk`) to write code like this:
 
 ```python
-# Intended Usage Example (Do NOT implement this, just enable it)
+from coreason_manifest.definitions import AgentManifest
 
-from coreason_manifest import ManifestEngine, ManifestConfig
-
-# 1. Initialize
-config = ManifestConfig(policy_path="./policies/gx_compliant.rego")
-engine = ManifestEngine(config)
-
-# 2. Load & Validate
+# Load & Validate
 try:
-    # This runs Schema Validation, Policy Enforcement, and Integrity Checks
-    agent_def = engine.load_and_validate(
-        manifest_path="./agents/payer_war_game/agent.yaml",
-        source_dir="./agents/payer_war_game/src"
-    )
-    print(f"Agent {agent_def.metadata.name} is compliant and ready to run.")
+    agent_def = AgentManifest.model_validate(data)
+    print(f"Agent {agent_def.metadata.name} is compliant.")
 
-except PolicyViolationError as e:
-    print(f"Compliance Failure: {e.violations}")
-    # e.violations -> ["Library 'requests' is not in the TBOM", "Description is too short"]
-
-except IntegrityCompromisedError:
-    print("CRITICAL: Code has been tampered with after signing.")
+except ValidationError as e:
+    print(f"Validation Failure: {e}")
 ```

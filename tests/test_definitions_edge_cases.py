@@ -6,7 +6,6 @@ from pydantic import ValidationError
 from coreason_manifest.definitions import (
     AgentManifest,
     ArtifactType,
-    BECTestCase,
     CoReasonBaseModel,
     KnowledgeArtifact,
     ToolCall,
@@ -182,22 +181,6 @@ def test_knowledge_artifact_invalid_enum() -> None:
             content="c",
             source_urn="u",
             artifact_type="VIDEO",  # Not in Enum
-        )
-
-
-# --- BECManifest Edge Cases ---
-
-
-def test_bec_manifest_invalid_json_schema_types() -> None:
-    """Test detailed JSON schema validation failure."""
-    with pytest.raises(ValidationError, match="Invalid JSON Schema"):
-        BECTestCase(
-            id="1",
-            prompt="p",
-            expected_output_structure={
-                "type": "object",
-                "properties": {"age": {"type": "unknown_type"}},  # 'unknown_type' is invalid in JSON Schema
-            },
         )
 
 

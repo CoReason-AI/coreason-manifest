@@ -11,9 +11,7 @@
 
 from typing import Any, Dict, List, Literal, Optional
 
-from jsonschema.exceptions import SchemaError
-from jsonschema.validators import validator_for
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field
 
 from .base import CoReasonBaseModel
 
@@ -31,25 +29,6 @@ class BECTestCase(CoReasonBaseModel):
     expected_output_structure: Optional[Dict[str, Any]] = Field(
         default=None, description="JSON Schema defining the expected output structure"
     )
-
-    @field_validator("expected_output_structure")
-    @classmethod
-    def validate_json_schema(cls, v: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
-        """
-        Validates that the dictionary is a valid JSON Schema.
-        """
-        if v is None:
-            return v  # pragma: no cover
-
-        try:
-            # validator_for returns the appropriate Validator class for the schema's $schema property
-            Validator = validator_for(v)
-            Validator.check_schema(v)
-        except SchemaError as e:
-            raise ValueError(f"Invalid JSON Schema in expected_output_structure: {e.message}") from e
-        except Exception as e:
-            raise ValueError(f"Invalid JSON Schema: {str(e)}") from e
-        return v
 
 
 class BECManifest(CoReasonBaseModel):

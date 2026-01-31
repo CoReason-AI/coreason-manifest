@@ -1,4 +1,3 @@
-from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
@@ -120,32 +119,13 @@ def test_tool_sql_injection() -> None:
         ToolCall(tool_name="db", arguments={"queries": ["select *", "DROP TABLE users"]})
 
 
-def test_bec_schema_validation() -> None:
-    """Test JSON Schema validation in BECTestCase."""
-    # Valid schema
-    BECTestCase(
+def test_bec_instantiation() -> None:
+    """Test BECTestCase instantiation."""
+    # Valid
+    case = BECTestCase(
         id="test1",
         prompt="hello",
         expected_output_structure={"type": "object", "properties": {"a": {"type": "string"}}},
     )
-
-    # Invalid schema
-    with pytest.raises(ValidationError, match="Invalid JSON Schema"):
-        BECTestCase(id="test2", prompt="hello", expected_output_structure={"type": "invalid_type_xyz"})
-
-
-def test_bec_schema_validation_none() -> None:
-    """Test validation when structure is None."""
-    # Should pass
-    case = BECTestCase(id="test3", prompt="hi", expected_output_structure=None)
-    assert case.expected_output_structure is None
-
-    # Explicitly call validator to ensure coverage of the None check
-    assert BECTestCase.validate_json_schema(None) is None
-
-
-def test_bec_schema_validation_generic_exception() -> None:
-    """Test generic exception handling during schema validation."""
-    with patch("coreason_manifest.definitions.bec.validator_for", side_effect=Exception("Generic error")):
-        with pytest.raises(ValidationError, match="Invalid JSON Schema: Generic error"):
-            BECTestCase(id="test4", prompt="hi", expected_output_structure={"type": "object"})
+    assert case.id == "test1"
+    assert case.expected_output_structure is not None
