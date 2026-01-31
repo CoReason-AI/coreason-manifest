@@ -19,8 +19,23 @@ def test_deep_immutability_mapping_proxy() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {"param": 1}, "outputs": {}},
-        "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
-        "dependencies": {"tools": ["https://example.com/a"], "libraries": []},
+        "topology": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt", "temperature": 0.1},
+        },
+        "dependencies": {
+            "tools": [
+                {
+                    "uri": "https://example.com/a",
+                    "hash": "a" * 64,
+                    "scopes": [],
+                    "risk_level": "safe",
+                }
+            ],
+            "libraries": [],
+        },
         "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
@@ -44,8 +59,23 @@ def test_deep_immutability_tuples() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
-        "dependencies": {"tools": ["https://example.com/tool1"], "libraries": []},
+        "topology": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt", "temperature": 0.1},
+        },
+        "dependencies": {
+            "tools": [
+                {
+                    "uri": "https://example.com/tool1",
+                    "hash": "a" * 64,
+                    "scopes": [],
+                    "risk_level": "safe",
+                }
+            ],
+            "libraries": [],
+        },
         "integrity_hash": "a" * 64,
     }
     agent = AgentDefinition(**data)
@@ -66,9 +96,6 @@ def test_deep_immutability_tuples() -> None:
 
     # Note: agent.dependencies.tools is a list, so its CONTENTS are mutable,
     # but the field itself cannot be reassigned.
-    # We verify the list is mutable (as it is List[AnyUrl])
-    # This is a behavior change requested by user ("Upgrade to List[AnyUrl]")
-    # agent.dependencies.tools.append("https://example.com/tool2") # This would work now
 
 
 def test_unicode_handling() -> None:
@@ -85,7 +112,12 @@ def test_unicode_handling() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {"key_Ω": "val_🤖"}, "outputs": {}},
-        "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
+        "topology": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt", "temperature": 0.1},
+        },
         "dependencies": {"tools": [], "libraries": []},
         "integrity_hash": "a" * 64,
     }
@@ -107,7 +139,12 @@ def test_hash_validation_edge_cases() -> None:
             "created_at": "2023-01-01T00:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {"steps": [], "model_config": {"model": "gpt", "temperature": 0.1}},
+        "topology": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt", "temperature": 0.1},
+        },
         "dependencies": {"tools": [], "libraries": []},
     }
 
