@@ -26,10 +26,22 @@ def test_agent_definition_valid() -> None:
             "outputs": {"type": "string"},
         },
         "topology": {
-            "steps": [{"id": "step1", "description": "First step"}],
+            "nodes": [{"id": "step1", "type": "logic", "code": "pass"}],
+            "edges": [],
+            "entry_point": "step1",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
-        "dependencies": {"tools": ["tool:search"], "libraries": ["pandas==2.0.1"]},
+        "dependencies": {
+            "tools": [
+                {
+                    "uri": "tool:search",
+                    "hash": "a" * 64,
+                    "scopes": ["read"],
+                    "risk_level": "safe",
+                }
+            ],
+            "libraries": ["pandas==2.0.1"],
+        },
         "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     }
 
@@ -74,7 +86,12 @@ def test_validation_error_on_missing_fields() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {"steps": [], "model_config": {"model": "gpt-4", "temperature": 0.5}},
+        "topology": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt-4", "temperature": 0.5},
+        },
         "dependencies": {},
     }
     with pytest.raises(ValidationError) as excinfo:
@@ -99,7 +116,9 @@ def test_auth_validation_failure() -> None:
             "injected_params": [],  # Missing user_context
         },
         "topology": {
-            "steps": [{"id": "step1", "description": "First step"}],
+            "nodes": [{"id": "step1", "type": "logic", "code": "pass"}],
+            "edges": [],
+            "entry_point": "step1",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},
@@ -109,3 +128,33 @@ def test_auth_validation_failure() -> None:
         ValueError, match="Agent requires authentication but 'user_context' is not an injected parameter"
     ):
         AgentDefinition(**data)
+
+
+def test_agent_definition_with_policy_and_observability() -> None:
+    """Test AgentDefinition with policy and observability fields."""
+    valid_data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Full Agent",
+            "author": "Test Author",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "interface": {"inputs": {}, "outputs": {}},
+        "topology": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+        },
+        "dependencies": {"tools": [], "libraries": []},
+        "policy": {"budget_caps": {"cost": 100.0}},
+        "observability": {"trace_level": "full"},
+        "integrity_hash": "a" * 64,
+    }
+
+    agent = AgentDefinition(**valid_data)
+    assert agent.policy is not None
+    assert agent.policy.budget_caps["cost"] == 100.0
+    assert agent.observability is not None
+    assert agent.observability.trace_level == "full"

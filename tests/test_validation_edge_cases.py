@@ -8,37 +8,32 @@ from pydantic import ValidationError
 from coreason_manifest.definitions.agent import (
     AgentMetadata,
     AgentTopology,
-    Step,
 )
+from coreason_manifest.definitions.topology import AgentNode
 
 
-def test_unique_step_ids_validation() -> None:
-    """Test that duplicate step IDs raise a ValidationError."""
-    steps = (
-        Step(id="step1", description="desc"),
-        Step(id="step1", description="desc2"),  # Duplicate
-    )
+def test_unique_node_ids_validation() -> None:
+    """Test that duplicate node IDs raise a ValidationError."""
+    nodes = [
+        AgentNode(id="node1", agent_name="A"),
+        AgentNode(id="node1", agent_name="B"),  # Duplicate
+    ]
 
     with pytest.raises(ValidationError) as e:
-        AgentTopology(steps=steps, model_config={"model": "gpt-4", "temperature": 0.5})
-    assert "Duplicate step IDs found: step1" in str(e.value)
+        AgentTopology(nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5})
+    assert "Duplicate node IDs found: node1" in str(e.value)
 
 
-def test_unique_step_ids_valid() -> None:
-    """Test that unique step IDs are accepted."""
-    steps = (
-        Step(id="step1", description="desc"),
-        Step(id="step2", description="desc2"),
+def test_unique_node_ids_valid() -> None:
+    """Test that unique node IDs are accepted."""
+    nodes = [
+        AgentNode(id="node1", agent_name="A"),
+        AgentNode(id="node2", agent_name="B"),
+    ]
+    topo = AgentTopology(
+        nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5}
     )
-    topo = AgentTopology(steps=steps, model_config={"model": "gpt-4", "temperature": 0.5})
-    assert len(topo.steps) == 2
-
-
-def test_empty_step_id_rejected() -> None:
-    """Test that empty step ID is rejected."""
-    with pytest.raises(ValidationError) as e:
-        Step(id="", description="desc")
-    assert "String should have at least 1 character" in str(e.value)
+    assert len(topo.nodes) == 2
 
 
 def test_empty_name_author_rejected() -> None:
