@@ -1,6 +1,70 @@
-from typing import Any, Dict, Literal, Optional
+from datetime import datetime, timezone
+from typing import Any, Dict, Generic, Literal, Optional, TypeVar
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
+
+# --- CloudEvents v1.0 Implementation ---
+
+T = TypeVar("T")
+
+
+class CloudEvent(BaseModel, Generic[T]):
+    """Standard CloudEvent v1.0 Envelope."""
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    specversion: Literal["1.0"] = "1.0"
+    type: str = Field(..., description="Type of occurrence (e.g. ai.coreason.node.started)")
+    source: str = Field(..., description="URI identifying the event producer")
+    id: str = Field(default_factory=lambda: str(uuid4()), description="Unique event identifier")
+    time: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of when the occurrence happened"
+    )
+    datacontenttype: Literal["application/json"] = "application/json"
+
+    data: Optional[T] = Field(None, description="The event payload")
+
+    # Distributed Tracing Extensions (W3C)
+    traceparent: Optional[str] = Field(None, description="W3C Trace Context traceparent")
+    tracestate: Optional[str] = Field(None, description="W3C Trace Context tracestate")
+
+
+# --- OTel Semantic Conventions ---
+
+
+class GenAIUsage(BaseModel):
+    """GenAI Usage metrics."""
+
+    input_tokens: Optional[int] = Field(None, alias="input_tokens")
+    output_tokens: Optional[int] = Field(None, alias="output_tokens")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class GenAIRequest(BaseModel):
+    """GenAI Request details."""
+
+    model: Optional[str] = None
+    temperature: Optional[float] = None
+    top_p: Optional[float] = None
+
+
+class GenAICompletion(BaseModel):
+    """GenAI Completion details."""
+
+    chunk: Optional[str] = None
+    finish_reason: Optional[str] = None
+
+
+class GenAISemantics(BaseModel):
+    """OpenTelemetry GenAI Semantic Conventions."""
+
+    system: Optional[str] = None
+    usage: Optional[GenAIUsage] = None
+    request: Optional[GenAIRequest] = None
+    completion: Optional[GenAICompletion] = None
+
 
 # --- Graph Event Wrapper ---
 
@@ -26,7 +90,6 @@ class GraphEvent(BaseModel):
         "NODE_START",
         "NODE_STREAM",
         "NODE_DONE",
-        "NODE_END",  # Added for compatibility with existing tests
         "NODE_SKIPPED",
         "EDGE_ACTIVE",
         "COUNCIL_VOTE",
@@ -143,6 +206,30 @@ class WorkflowError(BaseNodePayload):
     visual_cue: str = "RED_FLASH"
 
 
+# --- Standardized Payloads ---
+
+
+class StandardizedNodeStarted(BaseNodePayload):
+    """Standardized payload for node start with OTel support."""
+
+    gen_ai: Optional[GenAISemantics] = None
+    status: Literal["RUNNING"] = "RUNNING"
+
+
+class StandardizedNodeCompleted(BaseNodePayload):
+    """Standardized payload for node completion with OTel support."""
+
+    gen_ai: Optional[GenAISemantics] = None
+    output_summary: str
+    status: Literal["SUCCESS"] = "SUCCESS"
+
+
+class StandardizedNodeStream(BaseNodePayload):
+    """Standardized payload for node stream with OTel support."""
+
+    gen_ai: Optional[GenAISemantics] = None
+
+
 # --- Aliases for Backward Compatibility ---
 # These ensure that code importing `NodeInitPayload` still works.
 NodeInitPayload = NodeInit
@@ -154,3 +241,88 @@ EdgeTraversedPayload = EdgeTraversed
 ArtifactGeneratedPayload = ArtifactGenerated
 CouncilVotePayload = CouncilVote
 WorkflowErrorPayload = WorkflowError
+
+# --- Migration Logic ---
+
+
+def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent[Any]:
+    """Migrates a legacy GraphEvent to a CloudEvent v1.0."""
+
+    ce_type = f"ai.coreason.legacy.{event.event_type.lower()}"
+    ce_source = f"urn:node:{event.node_id}"
+
+    data: Any = None
+    gen_ai_semantics = GenAISemantics()
+    has_semantics = False
+
+    payload = event.payload
+
+    if "input_tokens" in payload:
+        gen_ai_semantics.usage = GenAIUsage(input_tokens=payload["input_tokens"])
+        has_semantics = True
+
+    if "chunk" in payload:
+        gen_ai_semantics.completion = GenAICompletion(chunk=payload["chunk"])
+        has_semantics = True
+
+    if "model" in payload:
+        gen_ai_semantics.request = GenAIRequest(model=payload["model"])
+        has_semantics = True
+
+    if "system" in payload:
+        gen_ai_semantics.system = payload["system"]
+        has_semantics = True
+
+    if event.event_type == "NODE_START":
+        ce_type = "ai.coreason.node.started"
+        data = StandardizedNodeStarted(
+            node_id=event.node_id,
+            status=payload.get("status", "RUNNING"),
+            gen_ai=gen_ai_semantics if has_semantics else None,
+        )
+    elif event.event_type == "NODE_STREAM":
+        ce_type = "ai.coreason.node.stream"
+        data = StandardizedNodeStream(node_id=event.node_id, gen_ai=gen_ai_semantics if has_semantics else None)
+    elif event.event_type == "NODE_DONE":
+        ce_type = "ai.coreason.node.completed"
+        data = StandardizedNodeCompleted(
+            node_id=event.node_id,
+            output_summary=payload.get("output_summary", ""),
+            status=payload.get("status", "SUCCESS"),
+            gen_ai=gen_ai_semantics if has_semantics else None,
+        )
+    else:
+        # Generic fallback
+        data = payload
+
+    # UI Metadata as extension
+    extensions = {
+        "com_coreason_ui_cue": event.visual_metadata.get("animation") or payload.get("visual_cue"),
+        "com_coreason_ui_metadata": event.visual_metadata,
+    }
+
+    # Filter out None values in extensions
+    # For dictionaries, we want to filter out empty dicts too.
+    filtered_extensions = {}
+    for k, v in extensions.items():
+        if v is None:
+            continue
+        if isinstance(v, dict) and not v:
+            continue
+        if isinstance(v, str) and not v:
+            continue
+        # Also check if it's a dict containing only empty strings (recursive check not needed for now, just 1 level)
+        if isinstance(v, dict) and all(isinstance(val, str) and not val for val in v.values()):
+            continue
+
+        filtered_extensions[k] = v
+
+    extensions = filtered_extensions
+
+    return CloudEvent(
+        type=ce_type,
+        source=ce_source,
+        time=datetime.fromtimestamp(event.timestamp, timezone.utc),
+        data=data,
+        **extensions,
+    )
