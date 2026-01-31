@@ -105,7 +105,7 @@ async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONR
         return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content=resp.model_dump())
 
 
-@app.post("/validate/shared", response_model=ValidationResponse)  # type: ignore[misc]
+@app.post("/validate/shared", response_model=ValidationResponse)
 async def validate_shared_manifest(request: Request) -> Union[ValidationResponse, JSONResponse]:
     """Validates against the new 'Shared Kernel' AgentManifest schema."""
     try:
