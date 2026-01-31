@@ -6,6 +6,8 @@ The `coreason-manifest` package provides the schema definitions for **Recipes**,
 
 A `RecipeManifest` defines a directed graph of nodes (steps) and edges (connections). It supports architectural triangulation via "Council" configurations and mixed-initiative workflows (human-in-the-loop).
 
+Starting with v2, Recipes strictly define their **Interface** (Inputs/Outputs), **Internal State** (Memory), and **Build-time Parameters**.
+
 ## Schema Structure
 
 ### RecipeManifest
@@ -16,8 +18,24 @@ The root object for a workflow.
 - **version**: Semantic version (e.g., `1.0.0`).
 - **name**: Human-readable name.
 - **description**: Detailed description.
-- **inputs**: Global variables the recipe accepts (JSON Schema).
+- **interface**: Defines the Input/Output contract (`RecipeInterface`).
+- **state**: Defines the internal memory schema (`StateDefinition`).
+- **parameters**: Build-time configuration constants (`Dict[str, Any]`).
 - **graph**: The topology (`GraphTopology`).
+
+### RecipeInterface
+
+Defines the contract for interacting with the recipe.
+
+- **inputs**: JSON Schema defining valid entry arguments.
+- **outputs**: JSON Schema defining the guaranteed structure of the final result.
+
+### StateDefinition
+
+Defines the shared memory available to all nodes in the graph.
+
+- **schema**: JSON Schema of the keys available in the shared memory.
+- **persistence**: Configuration for state durability (`ephemeral` or `persistent`).
 
 ### GraphTopology
 
@@ -95,6 +113,7 @@ from coreason_manifest import (
     RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
     ConditionalEdge, StateSchema
 )
+from coreason_manifest.recipes import RecipeInterface, StateDefinition
 
 # Define Nodes
 agent_node = AgentNode(
@@ -127,11 +146,43 @@ state = StateSchema(
     persistence="redis"
 )
 
+# Define Interface
+interface = RecipeInterface(
+    inputs={
+        "type": "object",
+        "properties": {
+            "topic": {"type": "string"}
+        },
+        "required": ["topic"]
+    },
+    outputs={
+        "type": "object",
+        "properties": {
+            "summary": {"type": "string"}
+        }
+    }
+)
+
+# Define State
+state = StateDefinition(
+    schema={
+        "type": "object",
+        "properties": {
+            "messages": {"type": "array"},
+            "draft": {"type": "string"}
+        }
+    },
+    persistence="ephemeral"
+)
+
 # Create Manifest
 recipe = RecipeManifest(
     id="research_workflow",
     version="1.0.0",
     name="Research Approval Workflow",
+    interface=interface,
+    state=state,
+    parameters={"model": "gpt-4"},
     description="A simple approval workflow.",
     inputs={"topic": "str"},
     graph=GraphTopology(
@@ -141,5 +192,6 @@ recipe = RecipeManifest(
     )
 )
 
-print(recipe.model_dump_json(indent=2))
+# Dump to JSON (use by_alias=True to correctly serialize state.schema)
+print(recipe.model_dump_json(indent=2, by_alias=True))
 ```
