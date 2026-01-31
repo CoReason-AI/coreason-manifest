@@ -33,8 +33,10 @@ def test_agent_definition_immutability() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
-            "steps": [],
+        "config": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},
@@ -49,7 +51,7 @@ def test_agent_definition_immutability() -> None:
 
     # Try to replace a nested model
     with pytest.raises(ValidationError):
-        agent.dependencies = AgentDependencies(tools=["new_tool"], libraries=[])  # type: ignore[misc]
+        agent.dependencies = AgentDependencies(tools=[], libraries=[])  # type: ignore[misc]
 
 
 def test_nested_model_immutability() -> None:
@@ -63,8 +65,10 @@ def test_nested_model_immutability() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
-            "steps": [],
+        "config": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {"tools": [], "libraries": []},
@@ -75,7 +79,7 @@ def test_nested_model_immutability() -> None:
 
     # Try to modify a field on a nested object
     with pytest.raises(ValidationError):
-        agent.topology.llm_config.temperature = 0.9  # type: ignore[misc]
+        agent.config.llm_config.temperature = 0.9  # type: ignore[misc]
 
     with pytest.raises(ValidationError):
         agent.metadata.name = "New Name"  # type: ignore[misc]

@@ -8,6 +8,7 @@ These models define the structure and validation rules for the Agent Manifest
 from __future__ import annotations
 
 from datetime import datetime
+from enum import Enum
 from types import MappingProxyType
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 from uuid import UUID
@@ -23,6 +24,8 @@ from pydantic import (
     model_validator,
 )
 from typing_extensions import Annotated
+
+from coreason_manifest.definitions.topology import Edge, Node
 
 # SemVer Regex pattern (simplified for standard SemVer)
 # Modified to accept optional 'v' or 'V' prefix (multiple allowed) for input normalization
@@ -105,20 +108,6 @@ class AgentInterface(BaseModel):
     injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
 
 
-class Step(BaseModel):
-    """A single step in the execution graph.
-
-    Attributes:
-        id: Unique identifier for the step.
-        description: Description of the step.
-    """
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    id: str = Field(..., min_length=1, description="Unique identifier for the step.")
-    description: Optional[str] = Field(None, description="Description of the step.")
-
-
 class ModelConfig(BaseModel):
     """LLM Configuration parameters.
 
@@ -133,34 +122,38 @@ class ModelConfig(BaseModel):
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
 
 
-class AgentTopology(BaseModel):
-    """Topology of the Agent execution.
+class AgentRuntimeConfig(BaseModel):
+    """Configuration of the Agent execution.
 
     Attributes:
-        steps: A directed acyclic graph (DAG) of execution steps.
+        nodes: A collection of execution units (Agents, Tools, Logic).
+        edges: Directed connections defining control flow.
+        entry_point: The ID of the starting node.
         llm_config: Specific LLM parameters.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    steps: Tuple[Step, ...] = Field(..., description="A directed acyclic graph (DAG) of execution steps.")
+    nodes: List[Node] = Field(..., description="A collection of execution units.")
+    edges: List[Edge] = Field(..., description="Directed connections defining control flow.")
+    entry_point: str = Field(..., description="The ID of the starting node.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
 
-    @field_validator("steps")
+    @field_validator("nodes")
     @classmethod
-    def validate_unique_step_ids(cls, v: Tuple[Step, ...]) -> Tuple[Step, ...]:
-        """Ensure all step IDs are unique.
+    def validate_unique_node_ids(cls, v: List[Node]) -> List[Node]:
+        """Ensure all node IDs are unique.
 
         Args:
-            v: The tuple of steps to validate.
+            v: The list of nodes to validate.
 
         Returns:
-            The validated tuple of steps.
+            The validated list of nodes.
 
         Raises:
-            ValueError: If duplicate step IDs are found.
+            ValueError: If duplicate node IDs are found.
         """
-        ids = [step.id for step in v]
+        ids = [node.id for node in v]
         if len(ids) != len(set(ids)):
             # Find duplicates
             seen = set()
@@ -169,26 +162,92 @@ class AgentTopology(BaseModel):
                 if x in seen:
                     dupes.add(x)
                 seen.add(x)
-            raise ValueError(f"Duplicate step IDs found: {', '.join(dupes)}")
+            raise ValueError(f"Duplicate node IDs found: {', '.join(dupes)}")
         return v
+
+
+class ToolRiskLevel(str, Enum):
+    """Risk level for the tool."""
+
+    SAFE = "safe"
+    STANDARD = "standard"
+    CRITICAL = "critical"
+
+
+class ToolRequirement(BaseModel):
+    """Requirement for an MCP tool.
+
+    Attributes:
+        uri: The MCP endpoint URI.
+        hash: Integrity check for the tool definition (SHA256).
+        scopes: List of permissions required.
+        risk_level: The risk level of the tool.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    uri: StrictUri = Field(..., description="The MCP endpoint URI.")
+    hash: str = Field(
+        ..., pattern=r"^[a-fA-F0-9]{64}$", description="Integrity check for the tool definition (SHA256)."
+    )
+    scopes: List[str] = Field(..., description="List of permissions required.")
+    risk_level: ToolRiskLevel = Field(..., description="The risk level of the tool.")
 
 
 class AgentDependencies(BaseModel):
     """External dependencies for the Agent.
 
     Attributes:
-        tools: List of MCP capability URIs required.
+        tools: List of MCP tool requirements.
         libraries: List of Python packages required (if code execution is allowed).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    # Use AnyUrl to enforce strictly valid URIs
-    # Changed to List[StrictUri] to strictly enforce valid URI formatting and string serialization
-    tools: List[StrictUri] = Field(default_factory=list, description="List of MCP capability URIs required.")
+    tools: List[ToolRequirement] = Field(default_factory=list, description="List of MCP tool requirements.")
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )
+
+
+class PolicyConfig(BaseModel):
+    """Governance policy configuration.
+
+    Attributes:
+        budget_caps: Dictionary defining budget limits (e.g., {"total_cost": 10.0, "total_tokens": 1000}).
+        human_in_the_loop: List of Node IDs that require human approval.
+        allowed_domains: List of allowed domains for external access.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    budget_caps: Dict[str, float] = Field(default_factory=dict, description="Budget limits.")
+    human_in_the_loop: List[str] = Field(default_factory=list, description="Node IDs requiring human approval.")
+    allowed_domains: List[str] = Field(default_factory=list, description="Allowed domains for external access.")
+
+
+class TraceLevel(str, Enum):
+    """Level of tracing detail."""
+
+    FULL = "full"
+    METADATA_ONLY = "metadata_only"
+    NONE = "none"
+
+
+class ObservabilityConfig(BaseModel):
+    """Observability configuration.
+
+    Attributes:
+        trace_level: Level of tracing detail.
+        retention_policy: Retention policy identifier (e.g., '30_days').
+        encryption_key_id: Optional ID of the key used for log encryption.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    trace_level: TraceLevel = Field(default=TraceLevel.FULL, description="Level of tracing detail.")
+    retention_policy: str = Field(default="30_days", description="Retention policy identifier.")
+    encryption_key_id: Optional[str] = Field(None, description="Optional ID of the key used for log encryption.")
 
 
 class AgentDefinition(BaseModel):
@@ -197,7 +256,7 @@ class AgentDefinition(BaseModel):
     Attributes:
         metadata: Metadata for the Agent.
         interface: Interface definition for the Agent.
-        topology: Topology of the Agent execution.
+        config: Configuration of the Agent execution.
         dependencies: External dependencies for the Agent.
         integrity_hash: SHA256 hash of the source code.
     """
@@ -214,8 +273,10 @@ class AgentDefinition(BaseModel):
 
     metadata: AgentMetadata
     interface: AgentInterface
-    topology: AgentTopology
+    config: AgentRuntimeConfig
     dependencies: AgentDependencies
+    policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
+    observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
     integrity_hash: str = Field(
         ...,
         pattern=r"^[a-fA-F0-9]{64}$",

@@ -1,133 +1,135 @@
-# Usage
+# Usage Guide
 
-`coreason-manifest` can be used in two modes: as a Python **Library** (CLI/Local) or as a **Compliance Microservice** (Server Mode).
+The `coreason-manifest` package serves as the **Shared Kernel** for the Coreason ecosystem. It provides the canonical Pydantic definitions and schemas for Agents, Workflows (Recipes), and Auditing.
 
-## 1. Library Usage (CLI / Local)
+It is designed to be a pure data library, meaning it contains **no execution logic** (no servers, no engines, no policy enforcement engines). Its sole purpose is to define the *structure* and *validation rules* for data.
 
-This mode is used by the `adk` CLI and local development workflows. It performs full validation, including:
+## Core Concepts
 
-1.  **Schema Validation:** Checks against `agent.schema.json`.
-2.  **Policy Enforcement:** Runs OPA policies (`compliance.rego`).
-3.  **Integrity Check:** Hashes the source code directory and compares it to the `integrity_hash` in the manifest.
+### 1. Agent Definition
+The `AgentDefinition` is the source of truth for an AI Agent. It includes:
+- **Metadata**: Identity, versioning (Strict SemVer), and authorship.
+- **Interface**: Strictly typed inputs and outputs (JSON Schema).
+- **Topology**: A graph-based execution flow (`GraphTopology`) supporting cyclic loops (e.g., for reflection).
+- **Dependencies**: MCP Tooling requirements (`ToolRequirement`) and Python libraries.
+- **Policy**: Governance rules for budget and human-in-the-loop triggers (`PolicyConfig`).
+- **Observability**: Telemetry configurations (`ObservabilityConfig`).
 
-### Example
+### 2. Strict Constraints
+To ensure reliability and auditability, the library enforces three strict constraints:
+
+#### A. Immutability
+All dictionary and list fields in the interface are converted to immutable types (`MappingProxyType`, `tuple`) upon validation. You cannot modify them in place.
+
+**Incorrect:**
+```python
+agent.interface.inputs["new_param"] = "value"  # Raises TypeError
+```
+
+**Correct:**
+```python
+# Construct the full dictionary first
+inputs = {
+    "query": {"type": "string"},
+    "max_results": {"type": "integer"}
+}
+# Pass it to the constructor
+```
+
+#### B. Strict SemVer
+Versions must strictly follow the `X.Y.Z` format (e.g., `1.0.0`). While `v1.0.0` is normalized to `1.0.0`, loose formats like `1.0` or `beta` are rejected.
+
+#### C. Integrity Hash
+The `integrity_hash` field is mandatory. It must be a valid 64-character SHA256 hex string representing the hash of the agent's source code.
+
+## Examples
+
+### Creating an Agent Definition
 
 ```python
-from coreason_manifest import ManifestEngine, ManifestConfig, PolicyViolationError, IntegrityCompromisedError
+import uuid
+from coreason_manifest.definitions.agent import (
+    AgentDefinition,
+    ToolRequirement,
+    ToolRiskLevel,
+    TraceLevel
+)
 
-# 1. Initialize configuration
-# Ensure you point to the correct policy file location
-config = ManifestConfig(policy_path="./policies/compliance.rego")
-engine = ManifestEngine(config)
+# 1. Define Metadata
+metadata = {
+    "id": uuid.uuid4(),
+    "version": "1.0.0",  # Strict SemVer
+    "name": "Research Agent",
+    "author": "Coreason AI",
+    "created_at": "2023-10-27T10:00:00Z"
+}
 
-# 2. Load & Validate Agent Manifest
+# 2. Define Topology (Graph)
+# Using logic nodes for demonstration
+nodes = [
+    {"id": "start", "type": "logic", "code": "print('Starting')"},
+    {"id": "process", "type": "logic", "code": "process_data()"},
+    {"id": "end", "type": "logic", "code": "return result"}
+]
+
+edges = [
+    {"source_node_id": "start", "target_node_id": "process"},
+    {"source_node_id": "process", "target_node_id": "end"}
+]
+
+# 3. Instantiate Agent
+agent = AgentDefinition(
+    metadata=metadata,
+    interface={
+        "inputs": {"topic": {"type": "string"}},
+        "outputs": {"summary": {"type": "string"}}
+    },
+    topology={
+        "nodes": nodes,
+        "edges": edges,
+        "entry_point": "start",
+        "model_config": {"model": "gpt-4", "temperature": 0.0}
+    },
+    dependencies={
+        "tools": [
+            ToolRequirement(
+                uri="mcp://search-service/google",
+                hash="a" * 64,  # Valid SHA256
+                scopes=["search:read"],
+                risk_level=ToolRiskLevel.STANDARD
+            )
+        ],
+        "libraries": ["pandas==2.0.0"]
+    },
+    policy={
+        "budget_caps": {"total_cost": 5.0},
+        "human_in_the_loop": ["process"]
+    },
+    observability={
+        "trace_level": TraceLevel.FULL,
+        "retention_policy": "90_days"
+    },
+    # Mandatory Integrity Hash
+    integrity_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+)
+
+print(f"Agent '{agent.metadata.name}' created successfully.")
+```
+
+### Accessing Immutable Fields
+
+```python
+# Reading is allowed
+print(agent.interface.inputs["topic"])
+
+# Writing raises TypeError
 try:
-    # This runs Schema Validation, Policy Enforcement, and Integrity Checks
-    agent_def = engine.load_and_validate(
-        manifest_path="./agents/my_agent/agent.yaml",
-        source_dir="./agents/my_agent/src"
-    )
-    print(f"Agent {agent_def.metadata.name} (v{agent_def.metadata.version}) is valid.")
-
-except PolicyViolationError as e:
-    print(f"Compliance Failure: {e.violations}")
-
-except IntegrityCompromisedError:
-    print("CRITICAL: Code has been tampered with or does not match the manifest hash.")
+    agent.interface.inputs["topic"] = "int"
+except TypeError as e:
+    print("Caught expected error:", e)
 ```
 
-## 2. Generating Manifests from Code
+## Advanced Documentation
 
-You can generate the `AgentInterface` part of the manifest by inspecting your Python agent function. This automatically handles system-injected parameters like `UserContext`, ensuring they are hidden from the public API schema.
-
-```python
-from coreason_manifest.loader import ManifestLoader
-from coreason_identity import UserContext
-
-def my_agent_function(query: str, user_context: UserContext) -> str:
-    """A sample agent function requiring auth."""
-    return f"Hello {user_context.user_id}, you asked: {query}"
-
-# Generate Interface
-interface = ManifestLoader.inspect_function(my_agent_function)
-
-# 'query' is in inputs, 'user_context' is marked as injected
-print(interface.model_dump_json(indent=2))
-```
-
-## 3. Server Mode (Compliance Microservice)
-
-The **Compliance Microservice** (Service C) runs `coreason-manifest` as a FastAPI server. It is designed for centralized validation by services like `coreason-foundry` and `coreason-publisher`.
-
-**Key Differences:**
-*   Accepts the Agent Manifest as a JSON body (via HTTP POST).
-*   **Skips Integrity Check:** Because the server does not have access to the client's local source code, it cannot verify the `integrity_hash`. It only validates the structure, schema, and policy compliance of the manifest itself.
-
-### Running the Server
-
-#### Using Docker (Recommended)
-
-The Docker image comes pre-configured with OPA and the latest policies.
-
-```bash
-docker run -p 8000:8000 coreason/compliance-service:v0.4.0
-```
-
-#### Running Locally
-
-Ensure `opa` is installed and in your PATH.
-
-```bash
-# Install server dependencies
-poetry install
-
-# Run the server
-uvicorn coreason_manifest.server:app --host 0.0.0.0 --port 8000
-```
-
-### API Endpoints
-
-#### `POST /validate`
-
-Validates an Agent Manifest.
-
-**Request:**
-*   **Method:** `POST`
-*   **Content-Type:** `application/json`
-*   **Body:** The full Agent Manifest JSON object.
-
-**Response (Success - 200 OK):**
-
-```json
-{
-  "valid": true,
-  "agent_id": "12345678-1234-5678-1234-567812345678",
-  "version": "1.0.0",
-  "policy_violations": []
-}
-```
-
-**Response (Failure - 422 Unprocessable Entity):**
-
-```json
-{
-  "valid": false,
-  "policy_violations": [
-    "Step description is too short.",
-    "Compliance Violation: Library 'pandas' is not in the Trusted Bill of Materials (TBOM)."
-  ]
-}
-```
-
-#### `GET /health`
-
-Checks the service status and active policy version.
-
-**Response:**
-
-```json
-{
-  "status": "active",
-  "policy_version": "a1b2c3d4"
-}
-```
+*   [Simulation Architecture](simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
+*   [Audit & Compliance](audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.

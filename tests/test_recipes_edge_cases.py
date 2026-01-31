@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from coreason_manifest import Edge, RecipeManifest
 from coreason_manifest import Topology as GraphTopology
 from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode
+from coreason_manifest.recipes import RecipeInterface, StateDefinition
 
 
 def test_invalid_node_discriminator() -> None:
@@ -34,8 +35,10 @@ def test_strict_schema_extra_fields() -> None:
             id="r1",
             version="1.0.0",
             name="N",
-            inputs={},
-            graph=GraphTopology(nodes=[], edges=[]),
+            interface=RecipeInterface(inputs={}, outputs={}),
+            state=StateDefinition(schema={}, persistence="ephemeral"),
+            parameters={},
+            topology=GraphTopology(nodes=[], edges=[]),
             extra_thing="bad",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
@@ -53,7 +56,13 @@ def test_missing_required_fields() -> None:
 def test_recursive_version_normalization() -> None:
     """Test recursive stripping of 'v' prefixes."""
     manifest = RecipeManifest(
-        id="r1", version="vVv1.5.0", name="Test", inputs={}, graph=GraphTopology(nodes=[], edges=[])
+        id="r1",
+        version="vVv1.5.0",
+        name="Test",
+        interface=RecipeInterface(inputs={}, outputs={}),
+        state=StateDefinition(schema={}, persistence="ephemeral"),
+        parameters={},
+        topology=GraphTopology(nodes=[], edges=[]),
     )
     assert manifest.version == "1.5.0"
 
@@ -66,11 +75,17 @@ def test_complex_inputs_structure() -> None:
     }
 
     manifest = RecipeManifest(
-        id="r1", version="1.0.0", name="Test", inputs=complex_inputs, graph=GraphTopology(nodes=[], edges=[])
+        id="r1",
+        version="1.0.0",
+        name="Test",
+        interface=RecipeInterface(inputs=complex_inputs, outputs={}),
+        state=StateDefinition(schema={}, persistence="ephemeral"),
+        parameters={},
+        topology=GraphTopology(nodes=[], edges=[]),
     )
 
-    assert manifest.inputs["user"]["name"] == "Alice"
-    assert manifest.inputs["config"][0]["value"] == 1.5
+    assert manifest.interface.inputs["user"]["name"] == "Alice"
+    assert manifest.interface.inputs["config"][0]["value"] == 1.5
 
 
 def test_large_topology_serialization() -> None:
@@ -86,18 +101,26 @@ def test_large_topology_serialization() -> None:
 
     topology = GraphTopology(nodes=nodes, edges=edges)
 
-    manifest = RecipeManifest(id="large_recipe", version="1.0.0", name="Large Recipe", inputs={}, graph=topology)
+    manifest = RecipeManifest(
+        id="large_recipe",
+        version="1.0.0",
+        name="Large Recipe",
+        interface=RecipeInterface(inputs={}, outputs={}),
+        state=StateDefinition(schema={}, persistence="ephemeral"),
+        parameters={},
+        topology=topology,
+    )
 
     # Dump
-    json_str = manifest.model_dump_json()
+    json_str = manifest.model_dump_json(by_alias=True)
 
     # Load back
     loaded = RecipeManifest.model_validate_json(json_str)
 
-    assert len(loaded.graph.nodes) == count
-    assert len(loaded.graph.edges) == count - 1
-    assert loaded.graph.nodes[99].id == "node_99"
-    assert isinstance(loaded.graph.nodes[0], LogicNode)
+    assert len(loaded.topology.nodes) == count
+    assert len(loaded.topology.edges) == count - 1
+    assert loaded.topology.nodes[99].id == "node_99"
+    assert isinstance(loaded.topology.nodes[0], LogicNode)
 
 
 def test_polymorphic_list_parsing() -> None:
