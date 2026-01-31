@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.models import AgentDefinition
+from coreason_manifest.definitions.agent import AgentDefinition
 
 
 def test_deep_immutability_mapping_proxy() -> None:

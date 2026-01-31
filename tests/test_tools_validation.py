@@ -2,7 +2,7 @@
 import pytest
 from pydantic import AnyUrl, TypeAdapter, ValidationError
 
-from coreason_manifest.models import AgentDependencies
+from coreason_manifest.definitions.agent import AgentDependencies
 
 # Create a TypeAdapter for easy testing of the tuple field
 ToolsAdapter = TypeAdapter(AgentDependencies)
