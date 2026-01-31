@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 
-from coreason_manifest.models import AgentDefinition
+from coreason_manifest.definitions.agent import AgentDefinition
 
 
 def test_schema_sync() -> None:
