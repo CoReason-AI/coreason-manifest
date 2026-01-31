@@ -28,7 +28,7 @@ def test_tool_requirement_invalid_risk_level() -> None:
             uri="https://example.com/tool",
             hash="a" * 64,
             scopes=[],
-            risk_level="unknown",  # type: ignore
+            risk_level="unknown",
         )
 
 

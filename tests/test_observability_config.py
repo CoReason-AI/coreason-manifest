@@ -25,4 +25,4 @@ def test_observability_config_defaults() -> None:
 def test_observability_config_invalid_trace_level() -> None:
     """Test invalid trace level."""
     with pytest.raises(ValidationError):
-        ObservabilityConfig(trace_level="invalid")  # type: ignore
+        ObservabilityConfig(trace_level="invalid")
