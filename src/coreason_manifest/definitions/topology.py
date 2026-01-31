@@ -26,9 +26,7 @@ class StateSchema(BaseModel):
     data_schema: Dict[str, Any] = Field(
         ..., description="A JSON Schema or Pydantic definition describing the state structure."
     )
-    persistence: str = Field(
-        ..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis')."
-    )
+    persistence: str = Field(..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis').")
 
 
 class CouncilConfig(BaseModel):
@@ -131,12 +129,8 @@ class RecipeNode(BaseNode):
 
     type: Literal["recipe"] = Field("recipe", description="Discriminator for RecipeNode.")
     recipe_id: str = Field(..., description="The ID of the recipe to execute.")
-    input_mapping: Dict[str, str] = Field(
-        ..., description="Mapping of parent state keys to child input keys."
-    )
-    output_mapping: Dict[str, str] = Field(
-        ..., description="Mapping of child output keys to parent state keys."
-    )
+    input_mapping: Dict[str, str] = Field(..., description="Mapping of parent state keys to child input keys.")
+    output_mapping: Dict[str, str] = Field(..., description="Mapping of child output keys to parent state keys.")
 
 
 class MapNode(BaseNode):
@@ -193,9 +187,7 @@ class ConditionalEdge(BaseModel):
     router_logic: str = Field(
         ..., description="A reference to a python function or logic expression that determines the path."
     )
-    mapping: Dict[str, str] = Field(
-        ..., description="Map of router output values to target node IDs."
-    )
+    mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
 
 
 class GraphTopology(BaseModel):
