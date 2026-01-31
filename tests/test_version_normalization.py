@@ -5,7 +5,7 @@ from typing import Any, Dict
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.models import SEMVER_REGEX, AgentMetadata
+from coreason_manifest.definitions.agent import SEMVER_REGEX, AgentMetadata
 
 
 def test_semver_regex_validation() -> None:

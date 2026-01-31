@@ -4,7 +4,7 @@ import uuid
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.models import (
+from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
     ModelConfig,
@@ -80,3 +80,29 @@ def test_validation_error_on_missing_fields() -> None:
     with pytest.raises(ValidationError) as excinfo:
         AgentDefinition(**valid_data)
     assert "integrity_hash" in str(excinfo.value)
+
+def test_auth_validation_failure() -> None:
+    """Test that auth requirement without user_context raises ValueError."""
+    data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Test Agent",
+            "author": "Test Author",
+            "created_at": "2023-10-27T10:00:00Z",
+            "requires_auth": True,
+        },
+        "interface": {
+            "inputs": {"type": "object", "properties": {"query": {"type": "string"}}},
+            "outputs": {"type": "string"},
+            "injected_params": [],  # Missing user_context
+        },
+        "topology": {
+            "steps": [{"id": "step1", "description": "First step"}],
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+        },
+        "dependencies": {"tools": [], "libraries": []},
+        "integrity_hash": "a" * 64,
+    }
+    with pytest.raises(ValueError, match="Agent requires authentication but 'user_context' is not an injected parameter"):
+        AgentDefinition(**data)
