@@ -37,7 +37,7 @@ def test_version_validation() -> None:
     """Test strict version validation."""
     interface = RecipeInterface(inputs={}, outputs={})
     state = StateDefinition(schema={}, persistence="ephemeral")
-    params = {}
+    params: dict[str, str] = {}
 
     # Valid versions (normalized)
     m = RecipeManifest(

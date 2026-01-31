@@ -1,7 +1,5 @@
 # Copyright (c) 2025 CoReason, Inc.
 
-from typing import Any, Dict
-
 import pytest
 from pydantic import ValidationError
 
@@ -21,8 +19,7 @@ def test_recipe_interface_valid() -> None:
 def test_recipe_interface_invalid_missing_fields() -> None:
     """Test validation failure for missing fields in RecipeInterface."""
     with pytest.raises(ValidationError):
-        # type: ignore[call-arg]
-        RecipeInterface(inputs={})
+        RecipeInterface(inputs={})  # type: ignore[call-arg]
 
 
 def test_state_definition_valid_defaults() -> None:
@@ -46,5 +43,5 @@ def test_state_definition_invalid_persistence() -> None:
     with pytest.raises(ValidationError):
         StateDefinition(
             schema={"type": "object"},
-            persistence="invalid_value",  # type: ignore[arg-type]
+            persistence="invalid_value",
         )

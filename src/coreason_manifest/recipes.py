@@ -27,7 +27,9 @@ class RecipeInterface(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     inputs: Dict[str, Any] = Field(..., description="JSON Schema defining valid entry arguments.")
-    outputs: Dict[str, Any] = Field(..., description="JSON Schema defining the guaranteed structure of the final result.")
+    outputs: Dict[str, Any] = Field(
+        ..., description="JSON Schema defining the guaranteed structure of the final result."
+    )
 
 
 class StateDefinition(BaseModel):

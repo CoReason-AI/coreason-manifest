@@ -1,7 +1,6 @@
 # Copyright (c) 2025 CoReason, Inc.
 
 import json
-from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
