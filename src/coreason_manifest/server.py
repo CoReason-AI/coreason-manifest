@@ -78,7 +78,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(lifespan=lifespan)
 
 
-@app.post("/validate", response_model=ValidationResponse)  # type: ignore[misc]
+@app.post("/validate", response_model=ValidationResponse)
 async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONResponse]:
     engine: ManifestEngineAsync = app.state.engine
 
@@ -104,7 +104,7 @@ async def validate_manifest(request: Request) -> Union[ValidationResponse, JSONR
         return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content=resp.model_dump())
 
 
-@app.get("/health")  # type: ignore[misc]
+@app.get("/health")
 async def health_check() -> dict[str, str]:
     engine: ManifestEngineAsync = app.state.engine
     policy_version = "unknown"

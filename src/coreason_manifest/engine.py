@@ -129,7 +129,7 @@ class ManifestEngineAsync:
             logger.info(f"Policy Check: Fail - {duration_ms:.2f}ms")
             raise
 
-        return cast(AgentDefinition, agent_def)
+        return agent_def
 
     async def load_and_validate(self, manifest_path: Union[str, Path], source_dir: Union[str, Path]) -> AgentDefinition:
         """Loads, validates, and verifies an Agent Manifest asynchronously.
@@ -208,7 +208,7 @@ class ManifestEngine:
         Returns:
             AgentDefinition: The fully validated and verified agent definition.
         """
-        return cast(AgentDefinition, anyio.run(self._async.load_and_validate, manifest_path, source_dir))
+        return anyio.run(self._async.load_and_validate, manifest_path, source_dir)
 
     def validate_manifest_dict(self, raw_data: dict[str, Any]) -> AgentDefinition:
         """Validates an Agent Manifest dictionary synchronously.
@@ -219,4 +219,4 @@ class ManifestEngine:
         Returns:
             AgentDefinition: The fully validated agent definition.
         """
-        return cast(AgentDefinition, anyio.run(self._async.validate_manifest_dict, raw_data))
+        return anyio.run(self._async.validate_manifest_dict, raw_data)
