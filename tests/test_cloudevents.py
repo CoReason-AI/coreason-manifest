@@ -1,3 +1,4 @@
+
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -304,3 +305,64 @@ def test_custom_extensions_in_constructor() -> None:
     event: CloudEvent[None] = CloudEvent(type="test", source="test", com_coreason_custom="custom_value")
     dump = event.model_dump(by_alias=True)
     assert dump["com_coreason_custom"] == "custom_value"
+
+def test_migration_node_skipped() -> None:
+    """Test migration of NODE_SKIPPED event."""
+    legacy_event = GraphEvent(
+        event_type="NODE_SKIPPED",
+        run_id="run-1",
+        node_id="node-1",
+        timestamp=1700000000.0,
+        payload={"status": "SKIPPED", "visual_cue": "GREY_OUT"},
+        visual_metadata={"animation": "skipped"},
+    )
+    cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
+
+    assert cloud_event.type == "ai.coreason.legacy.node_skipped"
+    assert isinstance(cloud_event.data, dict)
+    assert cloud_event.data["status"] == "SKIPPED"
+
+    dump = cloud_event.model_dump(by_alias=True)
+    assert dump["com_coreason_ui_cue"] == "skipped"
+
+def test_migration_error_event() -> None:
+    """Test migration of ERROR event."""
+    legacy_event = GraphEvent(
+        event_type="ERROR",
+        run_id="run-1",
+        node_id="node-1",
+        timestamp=1700000000.0,
+        payload={
+            "error_message": "Oops",
+            "stack_trace": "...",
+            "visual_cue": "RED_FLASH"
+        },
+        visual_metadata={"animation": "error"},
+    )
+    cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
+
+    assert cloud_event.type == "ai.coreason.legacy.error"
+    assert isinstance(cloud_event.data, dict)
+    assert cloud_event.data["error_message"] == "Oops"
+
+    dump = cloud_event.model_dump(by_alias=True)
+    assert dump["com_coreason_ui_cue"] == "error"
+
+def test_migration_invalid_types_handled() -> None:
+    """Test that invalid types in payload (e.g. input_tokens as string) cause validation error."""
+    # Since we want to know if it fails or works.
+    legacy_event = GraphEvent(
+        event_type="NODE_START",
+        run_id="run-1",
+        node_id="node-1",
+        timestamp=1700000000.0,
+        payload={
+            "status": "RUNNING",
+            "input_tokens": "not_an_int" # This is the edge case
+        },
+        visual_metadata={},
+    )
+
+    # It should raise a validation error because we try to coerce into GenAIUsage
+    with pytest.raises(ValidationError):
+        migrate_graph_event_to_cloud_event(legacy_event)
