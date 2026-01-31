@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 class ValidationLogic(str, Enum):
     """Logic used to validate the scenario outcome."""
+
     EXACT_MATCH = "exact_match"
     FUZZY = "fuzzy"
     CODE_EVAL = "code_eval"
@@ -15,6 +16,7 @@ class ValidationLogic(str, Enum):
 
 class SimulationScenario(BaseModel):
     """Definition of a simulation scenario."""
+
     id: str = Field(..., description="Unique identifier for the scenario.")
     name: str = Field(..., description="Name of the scenario.")
     objective: str = Field(..., description="The prompt/task instructions.")
@@ -25,6 +27,7 @@ class SimulationScenario(BaseModel):
 
 class SimulationStep(BaseModel):
     """The atomic unit of execution in a simulation."""
+
     step_id: UUID = Field(..., description="Atomic unit of execution ID.")
     timestamp: datetime = Field(..., description="Execution timestamp.")
     node_id: str = Field(..., description="The graph node executed.")
@@ -36,6 +39,7 @@ class SimulationStep(BaseModel):
 
 class SimulationTrace(BaseModel):
     """Trace of a simulation execution."""
+
     trace_id: UUID = Field(..., description="Unique trace identifier.")
     agent_version: str = Field(..., description="Agent SemVer version.")
     steps: List[SimulationStep] = Field(..., description="List of execution steps.")

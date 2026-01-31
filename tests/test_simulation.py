@@ -1,7 +1,14 @@
+import json
 import uuid
 from datetime import datetime, timezone
-import json
-from coreason_manifest.definitions.simulation import SimulationStep, SimulationTrace, SimulationScenario, ValidationLogic
+
+from coreason_manifest.definitions.simulation import (
+    SimulationScenario,
+    SimulationStep,
+    SimulationTrace,
+    ValidationLogic,
+)
+
 
 def test_trace_validity() -> None:
     """Ensure a trace can correctly serialize a list of steps."""
@@ -16,15 +23,11 @@ def test_trace_validity() -> None:
         inputs={"query": "test"},
         thought="thinking...",
         action={"tool": "search"},
-        observation={"result": "found"}
+        observation={"result": "found"},
     )
 
     trace = SimulationTrace(
-        trace_id=trace_id,
-        agent_version="1.0.0",
-        steps=[step],
-        outcome={"success": True},
-        metrics={"tokens": 100}
+        trace_id=trace_id, agent_version="1.0.0", steps=[step], outcome={"success": True}, metrics={"tokens": 100}
     )
 
     # Verify serialization
@@ -36,6 +39,7 @@ def test_trace_validity() -> None:
     assert data["steps"][0]["step_id"] == str(step_id)
     assert data["steps"][0]["thought"] == "thinking..."
 
+
 def test_scenario_creation() -> None:
     """Test scenario creation."""
     scenario = SimulationScenario(
@@ -44,7 +48,7 @@ def test_scenario_creation() -> None:
         objective="Do something",
         difficulty=2,
         expected_outcome="Done",
-        validation_logic=ValidationLogic.EXACT_MATCH
+        validation_logic=ValidationLogic.EXACT_MATCH,
     )
     assert scenario.difficulty == 2
     assert scenario.validation_logic == "exact_match"

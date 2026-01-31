@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime
 
 from coreason_manifest.definitions.audit import (
-    AuditLog,
     GenAIOperation,
     GenAITokenUsage,
     ReasoningTrace,

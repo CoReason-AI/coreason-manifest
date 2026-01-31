@@ -1,44 +1,74 @@
 import uuid
 from datetime import datetime, timezone
+
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.definitions.simulation import (
     SimulationScenario,
-    SimulationTrace,
     SimulationStep,
+    SimulationTrace,
     ValidationLogic,
 )
+
 
 def test_scenario_difficulty_bounds() -> None:
     """Test that scenario difficulty must be between 1 and 3."""
     # Valid
     SimulationScenario(
-        id="s1", name="n", objective="o", difficulty=1, expected_outcome="e", validation_logic=ValidationLogic.EXACT_MATCH
+        id="s1",
+        name="n",
+        objective="o",
+        difficulty=1,
+        expected_outcome="e",
+        validation_logic=ValidationLogic.EXACT_MATCH,
     )
     SimulationScenario(
-        id="s2", name="n", objective="o", difficulty=3, expected_outcome="e", validation_logic=ValidationLogic.EXACT_MATCH
+        id="s2",
+        name="n",
+        objective="o",
+        difficulty=3,
+        expected_outcome="e",
+        validation_logic=ValidationLogic.EXACT_MATCH,
     )
 
     # Invalid < 1
     with pytest.raises(ValidationError) as exc:
         SimulationScenario(
-            id="s3", name="n", objective="o", difficulty=0, expected_outcome="e", validation_logic=ValidationLogic.EXACT_MATCH
+            id="s3",
+            name="n",
+            objective="o",
+            difficulty=0,
+            expected_outcome="e",
+            validation_logic=ValidationLogic.EXACT_MATCH,
         )
     assert "Input should be greater than or equal to 1" in str(exc.value)
 
     # Invalid > 3
     with pytest.raises(ValidationError) as exc:
         SimulationScenario(
-            id="s4", name="n", objective="o", difficulty=4, expected_outcome="e", validation_logic=ValidationLogic.EXACT_MATCH
+            id="s4",
+            name="n",
+            objective="o",
+            difficulty=4,
+            expected_outcome="e",
+            validation_logic=ValidationLogic.EXACT_MATCH,
         )
     assert "Input should be less than or equal to 3" in str(exc.value)
+
 
 def test_scenario_invalid_validation_logic() -> None:
     """Test invalid validation logic enum."""
     with pytest.raises(ValidationError):
         SimulationScenario(
-            id="s5", name="n", objective="o", difficulty=2, expected_outcome="e", validation_logic="random_logic" # type: ignore
+            id="s5",
+            name="n",
+            objective="o",
+            difficulty=2,
+            expected_outcome="e",
+            validation_logic="random_logic",
         )
+
 
 def test_trace_empty_steps() -> None:
     """Test that a trace with empty steps is valid."""
@@ -47,9 +77,10 @@ def test_trace_empty_steps() -> None:
         agent_version="1.0.0",
         steps=[],
         outcome={},
-        metrics={}
+        metrics={},
     )
     assert len(trace.steps) == 0
+
 
 def test_step_complex_inputs() -> None:
     """Test step with complex inputs and outputs."""
@@ -60,20 +91,21 @@ def test_step_complex_inputs() -> None:
         inputs={"a": [1, 2], "b": {"c": "d"}},
         thought="t",
         action={"tool": "search", "args": {"q": "python"}},
-        observation={"results": [{"title": "Python", "url": "..."}]}
+        observation={"results": [{"title": "Python", "url": "..."}]},
     )
     assert step.inputs["a"] == [1, 2]
     assert step.observation["results"][0]["title"] == "Python"
+
 
 def test_invalid_step_id() -> None:
     """Test that step_id must be a valid UUID."""
     with pytest.raises(ValidationError):
         SimulationStep(
-            step_id="not-a-uuid", # type: ignore
+            step_id="not-a-uuid",
             timestamp=datetime.now(timezone.utc),
             node_id="node_x",
             inputs={},
             thought="t",
             action={},
-            observation={}
+            observation={},
         )

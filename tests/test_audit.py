@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, timezone
-import json
-from coreason_manifest.definitions.audit import AuditLog, AuditEventType
+
+from coreason_manifest.definitions.audit import AuditEventType, AuditLog
+
 
 def test_audit_tamper_evidence() -> None:
     """Verify that changing data in an AuditLog instance invalidates its integrity_hash."""
@@ -15,7 +16,7 @@ def test_audit_tamper_evidence() -> None:
         event_type=AuditEventType.PREDICTION,
         safety_metadata={"safe": True},
         previous_hash="0000",
-        integrity_hash="placeholder"
+        integrity_hash="placeholder",
     )
 
     # Compute correct hash
