@@ -8,6 +8,7 @@ from .knowledge import ArtifactType, EnrichmentLevel, KnowledgeArtifact
 from .message import Message
 from .protocol import OntologyTerm, PicoBlock, ProtocolDefinition
 from .scribe import DocumentationManifest, ReviewPacket, TraceabilityMatrix
+from .simulation import SimulationScenario, SimulationTrace, SimulationTurn
 from .tool import ToolCall
 from .topology import TopologyGraph, TopologyNode
 
@@ -32,6 +33,9 @@ __all__ = [
     "DocumentationManifest",
     "ReviewPacket",
     "TraceabilityMatrix",
+    "SimulationScenario",
+    "SimulationTrace",
+    "SimulationTurn",
     "ToolCall",
     "TopologyGraph",
     "TopologyNode",

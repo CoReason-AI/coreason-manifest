@@ -10,12 +10,14 @@
 
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 from .models import VersionStr
 
 
-class CouncilConfig(BaseModel):
+class CouncilConfig(CoReasonBaseModel):
     """Configuration for 'Architectural Triangulation'.
 
     Attributes:
@@ -29,7 +31,7 @@ class CouncilConfig(BaseModel):
     voters: List[str] = Field(..., description="List of agents or models that vote.")
 
 
-class VisualMetadata(BaseModel):
+class VisualMetadata(CoReasonBaseModel):
     """Data explicitly for the UI.
 
     Attributes:
@@ -49,7 +51,7 @@ class VisualMetadata(BaseModel):
     animation_style: Optional[str] = Field(None, description="The animation style for the node.")
 
 
-class BaseNode(BaseModel):
+class BaseNode(CoReasonBaseModel):
     """Base model for all node types.
 
     Attributes:
@@ -109,7 +111,7 @@ Node = Annotated[
 ]
 
 
-class Edge(BaseModel):
+class Edge(CoReasonBaseModel):
     """Represents a connection between two nodes.
 
     Attributes:
@@ -125,7 +127,7 @@ class Edge(BaseModel):
     condition: Optional[str] = Field(None, description="Optional Python expression for conditional branching.")
 
 
-class GraphTopology(BaseModel):
+class GraphTopology(CoReasonBaseModel):
     """The topology definition of the recipe.
 
     Attributes:
@@ -139,7 +141,7 @@ class GraphTopology(BaseModel):
     edges: List[Edge] = Field(..., description="List of edges connecting the nodes.")
 
 
-class RecipeManifest(BaseModel):
+class RecipeManifest(CoReasonBaseModel):
     """The executable specification for the MACO engine.
 
     Attributes:
