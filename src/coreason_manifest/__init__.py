@@ -35,6 +35,17 @@ from .models import (
     Step,
 )
 from .policy import PolicyEnforcer
+from .recipes import (
+    AgentNode,
+    CouncilConfig,
+    Edge,
+    GraphTopology,
+    HumanNode,
+    LogicNode,
+    Node,
+    RecipeManifest,
+    VisualMetadata,
+)
 from .validator import SchemaValidator
 
 __all__ = [
@@ -42,9 +53,15 @@ __all__ = [
     "AgentDependencies",
     "AgentInterface",
     "AgentMetadata",
+    "AgentNode",
     "AgentTopology",
+    "CouncilConfig",
+    "Edge",
+    "GraphTopology",
+    "HumanNode",
     "IntegrityChecker",
     "IntegrityCompromisedError",
+    "LogicNode",
     "ManifestConfig",
     "ManifestEngine",
     "ManifestEngineAsync",
@@ -52,8 +69,11 @@ __all__ = [
     "ManifestLoader",
     "ManifestSyntaxError",
     "ModelConfig",
+    "Node",
     "PolicyEnforcer",
     "PolicyViolationError",
+    "RecipeManifest",
     "SchemaValidator",
     "Step",
+    "VisualMetadata",
 ]
