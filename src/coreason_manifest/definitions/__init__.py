@@ -1,3 +1,4 @@
+from .agent import AgentConfig, AgentDefinition
 from .events import (
     ArtifactGenerated,
     ArtifactGeneratedPayload,
@@ -23,6 +24,8 @@ from .events import (
 )
 
 __all__ = [
+    "AgentConfig",
+    "AgentDefinition",
     "GraphEvent",
     "NodeInit",
     "NodeStarted",

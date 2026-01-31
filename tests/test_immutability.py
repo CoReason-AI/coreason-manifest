@@ -33,7 +33,7 @@ def test_agent_definition_immutability() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
@@ -65,7 +65,7 @@ def test_nested_model_immutability() -> None:
             "created_at": "2023-10-27T10:00:00Z",
         },
         "interface": {"inputs": {}, "outputs": {}},
-        "topology": {
+        "config": {
             "nodes": [],
             "edges": [],
             "entry_point": "start",
@@ -79,7 +79,7 @@ def test_nested_model_immutability() -> None:
 
     # Try to modify a field on a nested object
     with pytest.raises(ValidationError):
-        agent.topology.llm_config.temperature = 0.9  # type: ignore[misc]
+        agent.config.llm_config.temperature = 0.9  # type: ignore[misc]
 
     with pytest.raises(ValidationError):
         agent.metadata.name = "New Name"  # type: ignore[misc]

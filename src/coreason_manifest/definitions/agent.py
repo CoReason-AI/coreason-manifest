@@ -122,8 +122,8 @@ class ModelConfig(BaseModel):
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
 
 
-class AgentTopology(BaseModel):
-    """Topology of the Agent execution.
+class AgentConfig(BaseModel):
+    """Configuration of the Agent execution.
 
     Attributes:
         nodes: A collection of execution units (Agents, Tools, Logic).
@@ -256,7 +256,7 @@ class AgentDefinition(BaseModel):
     Attributes:
         metadata: Metadata for the Agent.
         interface: Interface definition for the Agent.
-        topology: Topology of the Agent execution.
+        config: Configuration of the Agent execution.
         dependencies: External dependencies for the Agent.
         integrity_hash: SHA256 hash of the source code.
     """
@@ -273,7 +273,7 @@ class AgentDefinition(BaseModel):
 
     metadata: AgentMetadata
     interface: AgentInterface
-    topology: AgentTopology
+    config: AgentConfig
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")

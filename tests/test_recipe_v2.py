@@ -44,7 +44,7 @@ def test_full_recipe_v2_creation() -> None:
         interface=interface,
         state=state,
         parameters=parameters,
-        graph=Topology(nodes=[], edges=[]),
+        topology=Topology(nodes=[], edges=[]),
     )
 
     assert manifest.interface.inputs["properties"]["topic"]["type"] == "string"
@@ -62,7 +62,7 @@ def test_recipe_v2_serialization() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={"foo": "bar"}, persistence="ephemeral"),
         parameters={},
-        graph=Topology(nodes=[], edges=[]),
+        topology=Topology(nodes=[], edges=[]),
     )
 
     # Must use by_alias=True to get "schema" instead of "schema_"
@@ -90,7 +90,7 @@ def test_recipe_v2_validation_error() -> None:
             # interface missing
             state=StateDefinition(schema={}, persistence="ephemeral"),
             parameters={},
-            graph=Topology(nodes=[], edges=[]),
+            topology=Topology(nodes=[], edges=[]),
         )  # type: ignore[call-arg]
     assert "interface" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
@@ -104,7 +104,7 @@ def test_recipe_v2_validation_error() -> None:
             interface=RecipeInterface(inputs={}, outputs={}),
             # state missing
             parameters={},
-            graph=Topology(nodes=[], edges=[]),
+            topology=Topology(nodes=[], edges=[]),
         )  # type: ignore[call-arg]
     assert "state" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
@@ -120,7 +120,7 @@ def test_recipe_v2_extra_fields() -> None:
             interface=RecipeInterface(inputs={}, outputs={}),
             state=StateDefinition(schema={}, persistence="ephemeral"),
             parameters={},
-            graph=Topology(nodes=[], edges=[]),
+            topology=Topology(nodes=[], edges=[]),
             extra_field="fail",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)

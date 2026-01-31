@@ -53,7 +53,7 @@ def test_gen_ai_operation_creation() -> None:
     output_msg = ChatMessage(role=Role.ASSISTANT, parts=[tool_call])
 
     operation = GenAIOperation(
-        id=step_id,
+        span_id=step_id,
         trace_id=trace_id,
         operation_name="chat",
         provider="openai",
@@ -63,7 +63,7 @@ def test_gen_ai_operation_creation() -> None:
         token_usage=GenAITokenUsage(input=5, output=10, total=15),
     )
 
-    assert operation.id == step_id
+    assert operation.span_id == step_id
     assert operation.provider == "openai"
     assert operation.token_usage is not None
     assert operation.token_usage.total == 15
@@ -79,7 +79,7 @@ def test_reasoning_trace_creation() -> None:
     trace_id = uuid.uuid4()
 
     step = GenAIOperation(
-        id="step_1",
+        span_id="step_1",
         trace_id=str(trace_id),
         operation_name="chat",
         provider="openai",
@@ -94,7 +94,7 @@ def test_reasoning_trace_creation() -> None:
 
     assert trace.trace_id == trace_id
     assert len(trace.steps) == 1
-    assert trace.steps[0].id == "step_1"
+    assert trace.steps[0].span_id == "step_1"
 
 
 def test_serialization() -> None:

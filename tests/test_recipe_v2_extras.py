@@ -31,7 +31,7 @@ def test_state_schema_aliasing_roundtrip() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=state,
         parameters={},
-        graph=Topology(nodes=[], edges=[]),
+        topology=Topology(nodes=[], edges=[]),
     )
     json_str = manifest.model_dump_json(by_alias=True)
     reloaded = RecipeManifest.model_validate_json(json_str)
@@ -47,7 +47,7 @@ def test_empty_interface_and_state() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=Topology(nodes=[], edges=[]),
+        topology=Topology(nodes=[], edges=[]),
     )
     assert manifest.interface.inputs == {}
     assert manifest.state.schema_ == {}
@@ -68,7 +68,7 @@ def test_complex_parameters() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters=params,
-        graph=Topology(nodes=[], edges=[]),
+        topology=Topology(nodes=[], edges=[]),
     )
 
     assert manifest.parameters["llm_config"]["model"] == "gpt-4"

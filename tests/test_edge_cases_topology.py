@@ -1,6 +1,6 @@
 # Prosperity-3.0
 
-from coreason_manifest.definitions.agent import AgentTopology
+from coreason_manifest.definitions.agent import AgentConfig
 from coreason_manifest.definitions.topology import Edge, LogicNode
 
 
@@ -17,7 +17,7 @@ def test_topology_allows_cycles() -> None:
     ]
 
     # Should be valid
-    topology = AgentTopology(
+    topology = AgentConfig(
         nodes=[node_a, node_b],
         edges=edges,
         entry_point="A",
@@ -35,7 +35,7 @@ def test_topology_disconnected_graph_valid() -> None:
     edges = [Edge(source_node_id="A", target_node_id="B")]
 
     # Should be valid
-    topology = AgentTopology(
+    topology = AgentConfig(
         nodes=[node_a, node_b, node_c],
         edges=edges,
         entry_point="A",
@@ -49,7 +49,7 @@ def test_topology_self_loop_valid() -> None:
     node_a = LogicNode(id="A", type="logic", code="pass")
     edges = [Edge(source_node_id="A", target_node_id="A")]
 
-    topology = AgentTopology(
+    topology = AgentConfig(
         nodes=[node_a],
         edges=edges,
         entry_point="A",
@@ -64,7 +64,7 @@ def test_topology_entry_point_must_exist() -> None:
 
     # This is currently NOT validated by the model directly (it's a string),
     # but let's see if we should add a validator or if it's acceptable for now.
-    # The current AgentTopology model only validates unique node IDs.
+    # The current AgentConfig model only validates unique node IDs.
     # If the user requirement implies strict graph validation, we might need to add it.
     # However, for now, let's verify the current behavior (it accepts it).
     # If we want to be strict, we would add a model validator.
@@ -72,7 +72,7 @@ def test_topology_entry_point_must_exist() -> None:
 
     # Actually, a robust standard SHOULD probably validate this.
     # But I am writing tests for *current* implementation edge cases.
-    topology = AgentTopology(
+    topology = AgentConfig(
         nodes=[node_a],
         edges=[],
         entry_point="Z",  # Non-existent

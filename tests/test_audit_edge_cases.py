@@ -11,7 +11,8 @@ def test_audit_hash_stability() -> None:
 
     # Same data, different key order in safety_metadata
     log1 = AuditLog(
-        id=log_id,
+        audit_id=log_id,
+        trace_id="trace_abc",
         timestamp=now,
         actor="system",
         event_type=AuditEventType.SYSTEM_CHANGE,
@@ -21,7 +22,8 @@ def test_audit_hash_stability() -> None:
     )
 
     log2 = AuditLog(
-        id=log_id,
+        audit_id=log_id,
+        trace_id="trace_abc",
         timestamp=now,
         actor="system",
         event_type=AuditEventType.SYSTEM_CHANGE,
@@ -36,7 +38,8 @@ def test_audit_hash_stability() -> None:
 def test_audit_complex_types_serialization() -> None:
     """Test that compute_hash handles complex types like UUID and datetime."""
     log = AuditLog(
-        id=uuid.uuid4(),
+        audit_id=uuid.uuid4(),
+        trace_id="trace_complex",
         timestamp=datetime.now(timezone.utc),
         actor="system",
         event_type=AuditEventType.SYSTEM_CHANGE,
@@ -54,7 +57,8 @@ def test_audit_complex_types_serialization() -> None:
 def test_audit_integrity_sensitivity() -> None:
     """Test that modifying any field changes the hash."""
     log = AuditLog(
-        id=uuid.uuid4(),
+        audit_id=uuid.uuid4(),
+        trace_id="trace_mod",
         timestamp=datetime.now(timezone.utc),
         actor="actor_1",
         event_type=AuditEventType.PREDICTION,
