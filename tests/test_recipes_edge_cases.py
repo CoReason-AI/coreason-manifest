@@ -13,12 +13,7 @@ from coreason_manifest import (
 
 def test_invalid_node_discriminator() -> None:
     """Test that an invalid discriminator value raises a ValidationError."""
-    raw_data = {
-        "nodes": [
-            {"id": "n1", "type": "alien", "agent_name": "A1"}
-        ],
-        "edges": []
-    }
+    raw_data = {"nodes": [{"id": "n1", "type": "alien", "agent_name": "A1"}], "edges": []}
     with pytest.raises(ValidationError) as excinfo:
         GraphTopology(**raw_data)
 
@@ -34,17 +29,19 @@ def test_strict_schema_extra_fields() -> None:
             id="n1",
             type="agent",
             agent_name="A1",
-            extra_field="should_fail"
+            extra_field="should_fail",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
     # Test on Manifest
     with pytest.raises(ValidationError) as excinfo:
         RecipeManifest(
-            id="r1", version="1.0.0", name="N",
+            id="r1",
+            version="1.0.0",
+            name="N",
             inputs={},
             graph=GraphTopology(nodes=[], edges=[]),
-            extra_thing="bad"
+            extra_thing="bad",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
@@ -53,7 +50,7 @@ def test_missing_required_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     # AgentNode requires 'agent_name'
     with pytest.raises(ValidationError) as excinfo:
-        AgentNode(id="n1", type="agent")
+        AgentNode(id="n1", type="agent")  # type: ignore[call-arg]
     assert "Field required" in str(excinfo.value)
     assert "agent_name" in str(excinfo.value)
 
@@ -61,11 +58,7 @@ def test_missing_required_fields() -> None:
 def test_recursive_version_normalization() -> None:
     """Test recursive stripping of 'v' prefixes."""
     manifest = RecipeManifest(
-        id="r1",
-        version="vVv1.5.0",
-        name="Test",
-        inputs={},
-        graph=GraphTopology(nodes=[], edges=[])
+        id="r1", version="vVv1.5.0", name="Test", inputs={}, graph=GraphTopology(nodes=[], edges=[])
     )
     assert manifest.version == "1.5.0"
 
@@ -73,23 +66,12 @@ def test_recursive_version_normalization() -> None:
 def test_complex_inputs_structure() -> None:
     """Test that 'inputs' can handle arbitrary complex nested structures."""
     complex_inputs = {
-        "user": {
-            "name": "Alice",
-            "roles": ["admin", "editor"],
-            "meta": {"login_count": 42}
-        },
-        "config": [
-            {"key": "k1", "value": 1.5},
-            {"key": "k2", "value": None}
-        ]
+        "user": {"name": "Alice", "roles": ["admin", "editor"], "meta": {"login_count": 42}},
+        "config": [{"key": "k1", "value": 1.5}, {"key": "k2", "value": None}],
     }
 
     manifest = RecipeManifest(
-        id="r1",
-        version="1.0.0",
-        name="Test",
-        inputs=complex_inputs,
-        graph=GraphTopology(nodes=[], edges=[])
+        id="r1", version="1.0.0", name="Test", inputs=complex_inputs, graph=GraphTopology(nodes=[], edges=[])
     )
 
     assert manifest.inputs["user"]["name"] == "Alice"
@@ -103,26 +85,13 @@ def test_large_topology_serialization() -> None:
     count = 100
 
     for i in range(count):
-        nodes.append(LogicNode(
-            id=f"node_{i}",
-            type="logic",
-            code=f"x = {i}"
-        ))
+        nodes.append(LogicNode(id=f"node_{i}", type="logic", code=f"x = {i}"))
         if i > 0:
-            edges.append(Edge(
-                source_node_id=f"node_{i-1}",
-                target_node_id=f"node_{i}"
-            ))
+            edges.append(Edge(source_node_id=f"node_{i - 1}", target_node_id=f"node_{i}"))
 
     topology = GraphTopology(nodes=nodes, edges=edges)
 
-    manifest = RecipeManifest(
-        id="large_recipe",
-        version="1.0.0",
-        name="Large Recipe",
-        inputs={},
-        graph=topology
-    )
+    manifest = RecipeManifest(id="large_recipe", version="1.0.0", name="Large Recipe", inputs={}, graph=topology)
 
     # Dump
     json_str = manifest.model_dump_json()
