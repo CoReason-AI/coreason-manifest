@@ -7,22 +7,14 @@ from coreason_manifest.definitions.agent import ToolRequirement, ToolRiskLevel
 
 def test_tool_requirement_empty_scopes() -> None:
     """Test that empty scopes list is valid."""
-    req = ToolRequirement(
-        uri="https://example.com/tool",
-        hash="a" * 64,
-        scopes=[],
-        risk_level=ToolRiskLevel.SAFE
-    )
+    req = ToolRequirement(uri="https://example.com/tool", hash="a" * 64, scopes=[], risk_level=ToolRiskLevel.SAFE)
     assert req.scopes == []
 
 
 def test_tool_requirement_critical_risk() -> None:
     """Test using CRITICAL risk level."""
     req = ToolRequirement(
-        uri="https://example.com/tool",
-        hash="a" * 64,
-        scopes=["admin"],
-        risk_level=ToolRiskLevel.CRITICAL
+        uri="https://example.com/tool", hash="a" * 64, scopes=["admin"], risk_level=ToolRiskLevel.CRITICAL
     )
     assert req.risk_level == ToolRiskLevel.CRITICAL
 
@@ -40,24 +32,14 @@ def test_tool_requirement_uri_schemes() -> None:
         "https://example.com",
         "ftp://example.com",
         "mcp://example.com",
-        "mailto:user@example.com"
+        "mailto:user@example.com",
     ]
     for scheme in schemes:
-        req = ToolRequirement(
-            uri=scheme,
-            hash="a" * 64,
-            scopes=[],
-            risk_level=ToolRiskLevel.SAFE
-        )
+        req = ToolRequirement(uri=scheme, hash="a" * 64, scopes=[], risk_level=ToolRiskLevel.SAFE)
         assert str(req.uri) == scheme or str(req.uri) == scheme + "/"
 
 
 def test_tool_requirement_invalid_uri_string() -> None:
     """Test invalid URI strings."""
     with pytest.raises(ValidationError):
-        ToolRequirement(
-            uri="not a uri",
-            hash="a" * 64,
-            scopes=[],
-            risk_level=ToolRiskLevel.SAFE
-        )
+        ToolRequirement(uri="not a uri", hash="a" * 64, scopes=[], risk_level=ToolRiskLevel.SAFE)

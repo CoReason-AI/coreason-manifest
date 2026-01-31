@@ -1,9 +1,7 @@
 # Prosperity-3.0
-import pytest
-from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import AgentTopology
-from coreason_manifest.definitions.topology import AgentNode, Edge, LogicNode
+from coreason_manifest.definitions.topology import Edge, LogicNode
 
 
 def test_topology_allows_cycles() -> None:
@@ -77,7 +75,7 @@ def test_topology_entry_point_must_exist() -> None:
     topology = AgentTopology(
         nodes=[node_a],
         edges=[],
-        entry_point="Z", # Non-existent
+        entry_point="Z",  # Non-existent
         model_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert topology.entry_point == "Z"

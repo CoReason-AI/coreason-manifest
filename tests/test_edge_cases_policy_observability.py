@@ -1,6 +1,4 @@
 # Prosperity-3.0
-import pytest
-from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import (
     ObservabilityConfig,
@@ -11,20 +9,14 @@ from coreason_manifest.definitions.agent import (
 
 def test_policy_config_empty_collections() -> None:
     """Test PolicyConfig with empty collections."""
-    policy = PolicyConfig(
-        budget_caps={},
-        human_in_the_loop=[],
-        allowed_domains=[]
-    )
+    policy = PolicyConfig(budget_caps={}, human_in_the_loop=[], allowed_domains=[])
     assert policy.budget_caps == {}
     assert policy.human_in_the_loop == []
 
 
 def test_observability_config_none_level() -> None:
     """Test TraceLevel.NONE."""
-    obs = ObservabilityConfig(
-        trace_level=TraceLevel.NONE
-    )
+    obs = ObservabilityConfig(trace_level=TraceLevel.NONE)
     assert obs.trace_level == TraceLevel.NONE
 
 
