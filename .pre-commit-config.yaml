@@ -18,7 +18,15 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          [pydantic>=2.0, pytest, types-PyYAML, types-aiofiles]
+          [
+            pydantic>=2.0,
+            pytest,
+            types-PyYAML,
+            types-aiofiles,
+            fastapi,
+            anyio,
+            types-ujson,
+          ]
   - repo: https://github.com/AleksaC/hadolint-py
     rev: v2.14.0
     hooks:

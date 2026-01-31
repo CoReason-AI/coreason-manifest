@@ -10,7 +10,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Optional, Union, cast
+from typing import Any, List, Optional, Union
 
 import anyio
 import anyio.to_thread
