@@ -20,10 +20,7 @@ from coreason_manifest.definitions.message import (
 def test_message_creation() -> None:
     """Test creating various types of messages with new schema."""
     # User message with TextPart
-    user_msg = ChatMessage(
-        role=Role.USER,
-        parts=[TextPart(content="Hello")]
-    )
+    user_msg = ChatMessage(role=Role.USER, parts=[TextPart(content="Hello")])
     assert user_msg.role == "user"
     part0 = user_msg.parts[0]
     assert isinstance(part0, TextPart)
@@ -31,25 +28,20 @@ def test_message_creation() -> None:
     assert part0.type == "text"
 
     # Tool call message
-    tool_call = ToolCallRequestPart(
-        name="get_weather",
-        arguments={"city": "Paris"},
-        id="call_123"
-    )
-    assistant_msg = ChatMessage(
-        role=Role.ASSISTANT,
-        parts=[tool_call]
-    )
+    tool_call = ToolCallRequestPart(name="get_weather", arguments={"city": "Paris"}, id="call_123")
+    assistant_msg = ChatMessage(role=Role.ASSISTANT, parts=[tool_call])
     assert len(assistant_msg.parts) == 1
     part = assistant_msg.parts[0]
     assert isinstance(part, ToolCallRequestPart)
     assert part.name == "get_weather"
     assert part.arguments["city"] == "Paris"
 
+
 def test_message_alias_compatibility() -> None:
     """Verify Message alias works."""
     msg = Message(role=Role.SYSTEM, parts=[TextPart(content="System prompt")])
     assert isinstance(msg, ChatMessage)
+
 
 def test_gen_ai_operation_creation() -> None:
     """Test creating a GenAI operation (audit step)."""
@@ -58,11 +50,7 @@ def test_gen_ai_operation_creation() -> None:
 
     input_msg = ChatMessage(role=Role.USER, parts=[TextPart(content="Calculate 2+2")])
 
-    tool_call = ToolCallRequestPart(
-        name="calculator",
-        arguments={"expression": "2+2"},
-        id="call_math"
-    )
+    tool_call = ToolCallRequestPart(name="calculator", arguments={"expression": "2+2"}, id="call_math")
     output_msg = ChatMessage(role=Role.ASSISTANT, parts=[tool_call])
 
     operation = GenAIOperation(
@@ -73,7 +61,7 @@ def test_gen_ai_operation_creation() -> None:
         model="gpt-4",
         input_messages=[input_msg],
         output_messages=[output_msg],
-        token_usage=GenAITokenUsage(input=5, output=10, total=15)
+        token_usage=GenAITokenUsage(input=5, output=10, total=15),
     )
 
     assert operation.id == step_id
@@ -81,9 +69,11 @@ def test_gen_ai_operation_creation() -> None:
     assert operation.token_usage is not None
     assert operation.token_usage.total == 15
     # Check backward compatibility fields on TokenUsage
-    assert operation.token_usage.total_tokens == 0 # Default is 0 unless explicitly set, or we add a validator to sync them.
+    # Default is 0 unless explicitly set, or we add a validator to sync them.
+    assert operation.token_usage.total_tokens == 0
     # Note: If we wanted strict backward compat for values, we'd need a validator.
     # For now, we just ensure the field exists on the schema.
+
 
 def test_reasoning_trace_creation() -> None:
     """Test creating a full reasoning trace."""
@@ -96,40 +86,29 @@ def test_reasoning_trace_creation() -> None:
         provider="openai",
         model="gpt-4",
         input_messages=[],
-        output_messages=[]
+        output_messages=[],
     )
 
     trace = ReasoningTrace(
-        trace_id=trace_id,
-        agent_id="agent_v1",
-        start_time=datetime.now(),
-        steps=[step],
-        status="success"
+        trace_id=trace_id, agent_id="agent_v1", start_time=datetime.now(), steps=[step], status="success"
     )
 
     assert trace.trace_id == trace_id
     assert len(trace.steps) == 1
     assert trace.steps[0].id == "step_1"
 
+
 def test_audit_log_alias() -> None:
     """Verify that AuditLog is an alias for ReasoningTrace."""
     assert AuditLog is ReasoningTrace
 
-    log = AuditLog(
-        trace_id=uuid.uuid4(),
-        agent_id="test_agent",
-        start_time=datetime.now()
-    )
+    log = AuditLog(trace_id=uuid.uuid4(), agent_id="test_agent", start_time=datetime.now())
     assert isinstance(log, ReasoningTrace)
+
 
 def test_serialization() -> None:
     """Test JSON serialization of the trace."""
-    trace = ReasoningTrace(
-        trace_id=uuid.uuid4(),
-        agent_id="agent_json",
-        start_time=datetime.now(),
-        steps=[]
-    )
+    trace = ReasoningTrace(trace_id=uuid.uuid4(), agent_id="agent_json", start_time=datetime.now(), steps=[])
 
     json_str = trace.model_dump_json()
     data = json.loads(json_str)

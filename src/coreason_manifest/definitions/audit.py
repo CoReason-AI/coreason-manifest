@@ -3,10 +3,13 @@ from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
-from .message import ChatMessage, Message
+
+from .message import ChatMessage
+
 
 class GenAITokenUsage(BaseModel):
     """Token consumption stats aligned with OTel conventions."""
+
     model_config = ConfigDict(extra="ignore")
 
     input: int = Field(0, description="Number of input tokens (prompt).")
@@ -19,8 +22,10 @@ class GenAITokenUsage(BaseModel):
     total_tokens: int = 0
     details: Dict[str, Any] = Field(default_factory=dict)
 
+
 class GenAIOperation(BaseModel):
     """An atomic operation in the reasoning process (e.g., one LLM call), aligning with OTel Spans."""
+
     model_config = ConfigDict(extra="ignore")
 
     id: str = Field(..., description="Unique identifier for the operation/span.")
@@ -43,12 +48,14 @@ class GenAIOperation(BaseModel):
     token_usage: Optional[GenAITokenUsage] = None
 
     # Metadata
-    status: str = "pending" # success, error
+    status: str = "pending"  # success, error
     error_type: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
+
 class ReasoningTrace(BaseModel):
     """The full audit trail of an Agent's execution session."""
+
     model_config = ConfigDict(extra="ignore")
 
     trace_id: UUID
@@ -69,6 +76,7 @@ class ReasoningTrace(BaseModel):
     # Aggregated stats
     total_tokens: GenAITokenUsage = Field(default_factory=GenAITokenUsage)
     total_cost: float = 0.0
+
 
 # --- Backward Compatibility ---
 # Adapters or Aliases
