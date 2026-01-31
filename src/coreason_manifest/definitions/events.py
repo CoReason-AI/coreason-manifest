@@ -77,6 +77,10 @@ class GenAISemantics(BaseModel):
 class GraphEvent(BaseModel):
     """The atomic unit of communication between the Engine (MACO) and the UI (Flutter).
 
+    Standardized IDs:
+    - run_id: Workflow execution ID.
+    - trace_id: OpenTelemetry Distributed Trace ID.
+
     Attributes:
         event_type: The type of the event.
         run_id: The unique ID of the workflow run.
