@@ -1,89 +1,23 @@
 {
   "$defs": {
-    "AgentConfig": {
-      "additionalProperties": false,
-      "description": "Configuration of the Agent execution.\n\nAttributes:\n    nodes: A collection of execution units (Agents, Tools, Logic).\n    edges: Directed connections defining control flow.\n    entry_point: The ID of the starting node.\n    llm_config: Specific LLM parameters.",
-      "properties": {
-        "edges": {
-          "description": "Directed connections defining control flow.",
-          "items": {
-            "$ref": "#/$defs/Edge"
-          },
-          "title": "Edges",
-          "type": "array"
-        },
-        "entry_point": {
-          "description": "The ID of the starting node.",
-          "title": "Entry Point",
-          "type": "string"
-        },
-        "model_config": {
-          "$ref": "#/$defs/ModelConfig",
-          "description": "Specific LLM parameters."
-        },
-        "nodes": {
-          "description": "A collection of execution units.",
-          "items": {
-            "description": "Polymorphic node definition.",
-            "discriminator": {
-              "mapping": {
-                "agent": "#/$defs/AgentNode",
-                "human": "#/$defs/HumanNode",
-                "logic": "#/$defs/LogicNode",
-                "map": "#/$defs/MapNode",
-                "recipe": "#/$defs/RecipeNode"
-              },
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/$defs/AgentNode"
-              },
-              {
-                "$ref": "#/$defs/HumanNode"
-              },
-              {
-                "$ref": "#/$defs/LogicNode"
-              },
-              {
-                "$ref": "#/$defs/RecipeNode"
-              },
-              {
-                "$ref": "#/$defs/MapNode"
-              }
-            ]
-          },
-          "title": "Nodes",
-          "type": "array"
-        }
-      },
-      "required": [
-        "nodes",
-        "edges",
-        "entry_point",
-        "model_config"
-      ],
-      "title": "AgentConfig",
-      "type": "object"
-    },
     "AgentDependencies": {
       "additionalProperties": false,
       "description": "External dependencies for the Agent.\n\nAttributes:\n    tools: List of MCP tool requirements.\n    libraries: List of Python packages required (if code execution is allowed).",
       "properties": {
-        "libraries": {
-          "description": "List of Python packages required (if code execution is allowed).",
-          "items": {
-            "type": "string"
-          },
-          "title": "Libraries",
-          "type": "array"
-        },
         "tools": {
           "description": "List of MCP tool requirements.",
           "items": {
             "$ref": "#/$defs/ToolRequirement"
           },
           "title": "Tools",
+          "type": "array"
+        },
+        "libraries": {
+          "description": "List of Python packages required (if code execution is allowed).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Libraries",
           "type": "array"
         }
       },
@@ -94,14 +28,6 @@
       "additionalProperties": false,
       "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.",
       "properties": {
-        "injected_params": {
-          "description": "List of parameters injected by the system.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Injected Params",
-          "type": "array"
-        },
         "inputs": {
           "additionalProperties": true,
           "description": "Typed arguments the agent accepts (JSON Schema).",
@@ -113,6 +39,14 @@
           "description": "Typed structure of the result.",
           "title": "Outputs",
           "type": "object"
+        },
+        "injected_params": {
+          "description": "List of parameters injected by the system.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Injected Params",
+          "type": "array"
         }
       },
       "required": [
@@ -126,6 +60,24 @@
       "additionalProperties": false,
       "description": "Metadata for the Agent.\n\nAttributes:\n    id: Unique Identifier for the Agent (UUID).\n    version: Semantic Version of the Agent.\n    name: Name of the Agent.\n    author: Author of the Agent.\n    created_at: Creation timestamp (ISO 8601).",
       "properties": {
+        "id": {
+          "description": "Unique Identifier for the Agent (UUID).",
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "description": "Semantic Version of the Agent.",
+          "pattern": "^[vV]*(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+          "title": "Version",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the Agent.",
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
         "author": {
           "description": "Author of the Agent.",
           "minLength": 1,
@@ -138,29 +90,11 @@
           "title": "Created At",
           "type": "string"
         },
-        "id": {
-          "description": "Unique Identifier for the Agent (UUID).",
-          "format": "uuid",
-          "title": "Id",
-          "type": "string"
-        },
-        "name": {
-          "description": "Name of the Agent.",
-          "minLength": 1,
-          "title": "Name",
-          "type": "string"
-        },
         "requires_auth": {
           "default": false,
           "description": "Whether the agent requires user authentication.",
           "title": "Requires Auth",
           "type": "boolean"
-        },
-        "version": {
-          "description": "Semantic Version of the Agent.",
-          "pattern": "^[vV]*(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-          "title": "Version",
-          "type": "string"
         }
       },
       "required": [
@@ -177,9 +111,9 @@
       "additionalProperties": false,
       "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.",
       "properties": {
-        "agent_name": {
-          "description": "The name of the atomic agent to call.",
-          "title": "Agent Name",
+        "id": {
+          "description": "Unique identifier for the node.",
+          "title": "Id",
           "type": "string"
         },
         "council_config": {
@@ -194,18 +128,6 @@
           "default": null,
           "description": "Optional configuration for architectural triangulation."
         },
-        "id": {
-          "description": "Unique identifier for the node.",
-          "title": "Id",
-          "type": "string"
-        },
-        "type": {
-          "const": "agent",
-          "default": "agent",
-          "description": "Discriminator for AgentNode.",
-          "title": "Type",
-          "type": "string"
-        },
         "visual": {
           "anyOf": [
             {
@@ -217,6 +139,18 @@
           ],
           "default": null,
           "description": "Visual metadata for the UI."
+        },
+        "type": {
+          "const": "agent",
+          "default": "agent",
+          "description": "Discriminator for AgentNode.",
+          "title": "Type",
+          "type": "string"
+        },
+        "agent_name": {
+          "description": "The name of the atomic agent to call.",
+          "title": "Agent Name",
+          "type": "string"
         }
       },
       "required": [
@@ -226,9 +160,9 @@
       "title": "AgentNode",
       "type": "object"
     },
-    "AgentTopology": {
+    "AgentRuntimeConfig": {
       "additionalProperties": false,
-      "description": "Topology of the Agent execution.\n\nAttributes:\n    nodes: A collection of execution units (Agents, Tools, Logic).\n    edges: Directed connections defining control flow.\n    entry_point: The ID of the starting node.\n    llm_config: Specific LLM parameters.",
+      "description": "Configuration of the Agent execution.\n\nAttributes:\n    nodes: A collection of execution units (Agents, Tools, Logic).\n    edges: Directed connections defining control flow.\n    entry_point: The ID of the starting node.\n    llm_config: Specific LLM parameters.",
       "properties": {
         "nodes": {
           "description": "A collection of execution units.",
@@ -289,7 +223,7 @@
         "entry_point",
         "model_config"
       ],
-      "title": "AgentTopology",
+      "title": "AgentRuntimeConfig",
       "type": "object"
     },
     "CouncilConfig": {
@@ -352,6 +286,16 @@
       "additionalProperties": false,
       "description": "Represents a connection between two nodes.\n\nAttributes:\n    source_node_id: The ID of the source node.\n    target_node_id: The ID of the target node.\n    condition: Optional Python expression for conditional branching.",
       "properties": {
+        "source_node_id": {
+          "description": "The ID of the source node.",
+          "title": "Source Node Id",
+          "type": "string"
+        },
+        "target_node_id": {
+          "description": "The ID of the target node.",
+          "title": "Target Node Id",
+          "type": "string"
+        },
         "condition": {
           "anyOf": [
             {
@@ -364,16 +308,6 @@
           "default": null,
           "description": "Optional Python expression for conditional branching.",
           "title": "Condition"
-        },
-        "source_node_id": {
-          "description": "The ID of the source node.",
-          "title": "Source Node Id",
-          "type": "string"
-        },
-        "target_node_id": {
-          "description": "The ID of the target node.",
-          "title": "Target Node Id",
-          "type": "string"
         }
       },
       "required": [
@@ -387,6 +321,11 @@
       "additionalProperties": false,
       "description": "A node that pauses execution for user input/approval.\n\nAttributes:\n    type: The type of the node (must be 'human').\n    timeout_seconds: Optional timeout in seconds for the user interaction.",
       "properties": {
+        "id": {
+          "description": "Unique identifier for the node.",
+          "title": "Id",
+          "type": "string"
+        },
         "council_config": {
           "anyOf": [
             {
@@ -399,9 +338,23 @@
           "default": null,
           "description": "Optional configuration for architectural triangulation."
         },
-        "id": {
-          "description": "Unique identifier for the node.",
-          "title": "Id",
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisualMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Visual metadata for the UI."
+        },
+        "type": {
+          "const": "human",
+          "default": "human",
+          "description": "Discriminator for HumanNode.",
+          "title": "Type",
           "type": "string"
         },
         "timeout_seconds": {
@@ -416,25 +369,6 @@
           "default": null,
           "description": "Optional timeout in seconds for the user interaction.",
           "title": "Timeout Seconds"
-        },
-        "type": {
-          "const": "human",
-          "default": "human",
-          "description": "Discriminator for HumanNode.",
-          "title": "Type",
-          "type": "string"
-        },
-        "visual": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/VisualMetadata"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Visual metadata for the UI."
         }
       },
       "required": [
@@ -447,9 +381,9 @@
       "additionalProperties": false,
       "description": "A node that executes pure Python logic.\n\nAttributes:\n    type: The type of the node (must be 'logic').\n    code: The Python logic code to execute.",
       "properties": {
-        "code": {
-          "description": "The Python logic code to execute.",
-          "title": "Code",
+        "id": {
+          "description": "Unique identifier for the node.",
+          "title": "Id",
           "type": "string"
         },
         "council_config": {
@@ -464,10 +398,17 @@
           "default": null,
           "description": "Optional configuration for architectural triangulation."
         },
-        "id": {
-          "description": "Unique identifier for the node.",
-          "title": "Id",
-          "type": "string"
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VisualMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Visual metadata for the UI."
         },
         "type": {
           "const": "logic",
@@ -476,17 +417,10 @@
           "title": "Type",
           "type": "string"
         },
-        "visual": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/VisualMetadata"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Visual metadata for the UI."
+        "code": {
+          "description": "The Python logic code to execute.",
+          "title": "Code",
+          "type": "string"
         }
       },
       "required": [
@@ -494,71 +428,6 @@
         "code"
       ],
       "title": "LogicNode",
-      "type": "object"
-    },
-    "MapNode": {
-      "additionalProperties": false,
-      "description": "A node that spawns multiple parallel executions of a sub-branch.\n\nAttributes:\n    type: The type of the node (must be 'map').\n    items_path: Dot-notation path to the list in the state.\n    processor_node_id: The node (or subgraph) to run for each item.\n    concurrency_limit: Max parallel executions.",
-      "properties": {
-        "concurrency_limit": {
-          "description": "Max parallel executions.",
-          "title": "Concurrency Limit",
-          "type": "integer"
-        },
-        "council_config": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/CouncilConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional configuration for architectural triangulation."
-        },
-        "id": {
-          "description": "Unique identifier for the node.",
-          "title": "Id",
-          "type": "string"
-        },
-        "items_path": {
-          "description": "Dot-notation path to the list in the state.",
-          "title": "Items Path",
-          "type": "string"
-        },
-        "processor_node_id": {
-          "description": "The node (or subgraph) to run for each item.",
-          "title": "Processor Node Id",
-          "type": "string"
-        },
-        "type": {
-          "const": "map",
-          "default": "map",
-          "description": "Discriminator for MapNode.",
-          "title": "Type",
-          "type": "string"
-        },
-        "visual": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/VisualMetadata"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Visual metadata for the UI."
-        }
-      },
-      "required": [
-        "id",
-        "items_path",
-        "processor_node_id",
-        "concurrency_limit"
-      ],
-      "title": "MapNode",
       "type": "object"
     },
     "MapNode": {
@@ -654,6 +523,16 @@
       "additionalProperties": false,
       "description": "Observability configuration.\n\nAttributes:\n    trace_level: Level of tracing detail.\n    retention_policy: Retention policy identifier (e.g., '30_days').\n    encryption_key_id: Optional ID of the key used for log encryption.",
       "properties": {
+        "trace_level": {
+          "$ref": "#/$defs/TraceLevel",
+          "default": "full"
+        },
+        "retention_policy": {
+          "default": "30_days",
+          "description": "Retention policy identifier.",
+          "title": "Retention Policy",
+          "type": "string"
+        },
         "encryption_key_id": {
           "anyOf": [
             {
@@ -666,16 +545,6 @@
           "default": null,
           "description": "Optional ID of the key used for log encryption.",
           "title": "Encryption Key Id"
-        },
-        "retention_policy": {
-          "default": "30_days",
-          "description": "Retention policy identifier.",
-          "title": "Retention Policy",
-          "type": "string"
-        },
-        "trace_level": {
-          "$ref": "#/$defs/TraceLevel",
-          "default": "full"
         }
       },
       "title": "ObservabilityConfig",
@@ -685,14 +554,6 @@
       "additionalProperties": false,
       "description": "Governance policy configuration.\n\nAttributes:\n    budget_caps: Dictionary defining budget limits (e.g., {\"total_cost\": 10.0, \"total_tokens\": 1000}).\n    human_in_the_loop: List of Node IDs that require human approval.\n    allowed_domains: List of allowed domains for external access.",
       "properties": {
-        "allowed_domains": {
-          "description": "Allowed domains for external access.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Allowed Domains",
-          "type": "array"
-        },
         "budget_caps": {
           "additionalProperties": {
             "type": "number"
@@ -708,80 +569,17 @@
           },
           "title": "Human In The Loop",
           "type": "array"
+        },
+        "allowed_domains": {
+          "description": "Allowed domains for external access.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Domains",
+          "type": "array"
         }
       },
       "title": "PolicyConfig",
-      "type": "object"
-    },
-    "RecipeNode": {
-      "additionalProperties": false,
-      "description": "A node that executes another Recipe as a sub-graph.\n\nAttributes:\n    type: The type of the node (must be 'recipe').\n    recipe_id: The ID of the recipe to execute.\n    input_mapping: How parent state maps to child inputs (parent_key -> child_key).\n    output_mapping: How child result maps back to parent state (child_key -> parent_key).",
-      "properties": {
-        "council_config": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/CouncilConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional configuration for architectural triangulation."
-        },
-        "id": {
-          "description": "Unique identifier for the node.",
-          "title": "Id",
-          "type": "string"
-        },
-        "input_mapping": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Mapping of parent state keys to child input keys.",
-          "title": "Input Mapping",
-          "type": "object"
-        },
-        "output_mapping": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Mapping of child output keys to parent state keys.",
-          "title": "Output Mapping",
-          "type": "object"
-        },
-        "recipe_id": {
-          "description": "The ID of the recipe to execute.",
-          "title": "Recipe Id",
-          "type": "string"
-        },
-        "type": {
-          "const": "recipe",
-          "default": "recipe",
-          "description": "Discriminator for RecipeNode.",
-          "title": "Type",
-          "type": "string"
-        },
-        "visual": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/VisualMetadata"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Visual metadata for the UI."
-        }
-      },
-      "required": [
-        "id",
-        "recipe_id",
-        "input_mapping",
-        "output_mapping"
-      ],
-      "title": "RecipeNode",
       "type": "object"
     },
     "RecipeNode": {
@@ -873,15 +671,18 @@
       "additionalProperties": false,
       "description": "Requirement for an MCP tool.\n\nAttributes:\n    uri: The MCP endpoint URI.\n    hash: Integrity check for the tool definition (SHA256).\n    scopes: List of permissions required.\n    risk_level: The risk level of the tool.",
       "properties": {
+        "uri": {
+          "description": "The MCP endpoint URI.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
         "hash": {
           "description": "Integrity check for the tool definition (SHA256).",
           "pattern": "^[a-fA-F0-9]{64}$",
           "title": "Hash",
           "type": "string"
-        },
-        "risk_level": {
-          "$ref": "#/$defs/ToolRiskLevel",
-          "description": "The risk level of the tool."
         },
         "scopes": {
           "description": "List of permissions required.",
@@ -891,12 +692,9 @@
           "title": "Scopes",
           "type": "array"
         },
-        "uri": {
-          "description": "The MCP endpoint URI.",
-          "format": "uri",
-          "minLength": 1,
-          "title": "Uri",
-          "type": "string"
+        "risk_level": {
+          "$ref": "#/$defs/ToolRiskLevel",
+          "description": "The risk level of the tool."
         }
       },
       "required": [
@@ -932,32 +730,6 @@
       "additionalProperties": false,
       "description": "Data explicitly for the UI.\n\nAttributes:\n    label: The label to display for the node.\n    x_y_coordinates: The X and Y coordinates for the node on the canvas.\n    icon: The icon to represent the node.\n    animation_style: The animation style for the node.",
       "properties": {
-        "animation_style": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The animation style for the node.",
-          "title": "Animation Style"
-        },
-        "icon": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The icon to represent the node.",
-          "title": "Icon"
-        },
         "label": {
           "anyOf": [
             {
@@ -986,6 +758,32 @@
           "default": null,
           "description": "The X and Y coordinates for the node on the canvas.",
           "title": "X Y Coordinates"
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The icon to represent the node.",
+          "title": "Icon"
+        },
+        "animation_style": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The animation style for the node.",
+          "title": "Animation Style"
         }
       },
       "title": "VisualMetadata",
@@ -996,23 +794,29 @@
   "additionalProperties": false,
   "description": "The definitive source of truth for CoReason Agent definitions.",
   "properties": {
-    "config": {
-      "$ref": "#/$defs/AgentConfig"
-    },
-    "dependencies": {
-      "$ref": "#/$defs/AgentDependencies"
-    },
-    "integrity_hash": {
-      "description": "SHA256 hash of the source code.",
-      "pattern": "^[a-fA-F0-9]{64}$",
-      "title": "Integrity Hash",
-      "type": "string"
+    "metadata": {
+      "$ref": "#/$defs/AgentMetadata"
     },
     "interface": {
       "$ref": "#/$defs/AgentInterface"
     },
-    "metadata": {
-      "$ref": "#/$defs/AgentMetadata"
+    "config": {
+      "$ref": "#/$defs/AgentRuntimeConfig"
+    },
+    "dependencies": {
+      "$ref": "#/$defs/AgentDependencies"
+    },
+    "policy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PolicyConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Governance policy configuration."
     },
     "observability": {
       "anyOf": [
@@ -1026,17 +830,11 @@
       "default": null,
       "description": "Observability configuration."
     },
-    "policy": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/PolicyConfig"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Governance policy configuration."
+    "integrity_hash": {
+      "description": "SHA256 hash of the source code.",
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "title": "Integrity Hash",
+      "type": "string"
     }
   },
   "required": [

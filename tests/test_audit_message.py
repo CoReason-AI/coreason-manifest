@@ -89,17 +89,21 @@ def test_reasoning_trace_creation() -> None:
     )
 
     trace = ReasoningTrace(
-        trace_id=trace_id, agent_id="agent_v1", start_time=datetime.now(), steps=[step], status="success"
+        trace_id=str(trace_id),
+        agent_id="agent_v1",
+        start_time=datetime.now(),
+        steps=[step],
+        status="success",
     )
 
-    assert trace.trace_id == trace_id
+    assert trace.trace_id == str(trace_id)
     assert len(trace.steps) == 1
     assert trace.steps[0].span_id == "step_1"
 
 
 def test_serialization() -> None:
     """Test JSON serialization of the trace."""
-    trace = ReasoningTrace(trace_id=uuid.uuid4(), agent_id="agent_json", start_time=datetime.now(), steps=[])
+    trace = ReasoningTrace(trace_id=str(uuid.uuid4()), agent_id="agent_json", start_time=datetime.now(), steps=[])
 
     json_str = trace.model_dump_json()
     data = json.loads(json_str)
