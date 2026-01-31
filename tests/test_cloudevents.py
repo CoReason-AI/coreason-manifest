@@ -1,4 +1,3 @@
-
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict
@@ -306,6 +305,7 @@ def test_custom_extensions_in_constructor() -> None:
     dump = event.model_dump(by_alias=True)
     assert dump["com_coreason_custom"] == "custom_value"
 
+
 def test_migration_node_skipped() -> None:
     """Test migration of NODE_SKIPPED event."""
     legacy_event = GraphEvent(
@@ -325,6 +325,7 @@ def test_migration_node_skipped() -> None:
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "skipped"
 
+
 def test_migration_error_event() -> None:
     """Test migration of ERROR event."""
     legacy_event = GraphEvent(
@@ -332,11 +333,7 @@ def test_migration_error_event() -> None:
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={
-            "error_message": "Oops",
-            "stack_trace": "...",
-            "visual_cue": "RED_FLASH"
-        },
+        payload={"error_message": "Oops", "stack_trace": "...", "visual_cue": "RED_FLASH"},
         visual_metadata={"animation": "error"},
     )
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -348,6 +345,7 @@ def test_migration_error_event() -> None:
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "error"
 
+
 def test_migration_invalid_types_handled() -> None:
     """Test that invalid types in payload (e.g. input_tokens as string) cause validation error."""
     # Since we want to know if it fails or works.
@@ -358,7 +356,7 @@ def test_migration_invalid_types_handled() -> None:
         timestamp=1700000000.0,
         payload={
             "status": "RUNNING",
-            "input_tokens": "not_an_int" # This is the edge case
+            "input_tokens": "not_an_int",  # This is the edge case
         },
         visual_metadata={},
     )
