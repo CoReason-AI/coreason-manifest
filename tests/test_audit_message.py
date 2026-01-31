@@ -3,7 +3,6 @@ import uuid
 from datetime import datetime
 
 from coreason_manifest.definitions.audit import (
-    AuditLog,
     GenAIOperation,
     GenAITokenUsage,
     ReasoningTrace,
@@ -96,14 +95,6 @@ def test_reasoning_trace_creation() -> None:
     assert trace.trace_id == trace_id
     assert len(trace.steps) == 1
     assert trace.steps[0].id == "step_1"
-
-
-def test_audit_log_alias() -> None:
-    """Verify that AuditLog is an alias for ReasoningTrace."""
-    assert AuditLog is ReasoningTrace
-
-    log = AuditLog(trace_id=uuid.uuid4(), agent_id="test_agent", start_time=datetime.now())
-    assert isinstance(log, ReasoningTrace)
 
 
 def test_serialization() -> None:
