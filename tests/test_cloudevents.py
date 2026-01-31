@@ -1,27 +1,27 @@
-
-import pytest
 import json
 from datetime import datetime, timezone
+from typing import Any, Dict
+
+import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.events import (
     CloudEvent,
+    GenAICompletion,
+    GenAIRequest,
     GenAISemantics,
     GenAIUsage,
-    GenAIRequest,
-    GenAICompletion,
-    StandardizedNodeStarted,
-    StandardizedNodeCompleted,
-    StandardizedNodeStream,
     GraphEvent,
-    migrate_graph_event_to_cloud_event
+    StandardizedNodeCompleted,
+    StandardizedNodeStarted,
+    StandardizedNodeStream,
+    migrate_graph_event_to_cloud_event,
 )
 
-def test_cloudevent_minimal():
+
+def test_cloudevent_minimal() -> None:
     """Test minimal CloudEvent creation."""
-    event = CloudEvent(
-        type="ai.coreason.test",
-        source="urn:test",
-        data={"foo": "bar"}
-    )
+    event: CloudEvent[Dict[str, str]] = CloudEvent(type="ai.coreason.test", source="urn:test", data={"foo": "bar"})
     assert event.specversion == "1.0"
     assert event.type == "ai.coreason.test"
     assert event.source == "urn:test"
@@ -30,108 +30,107 @@ def test_cloudevent_minimal():
     assert event.datacontenttype == "application/json"
     assert event.data == {"foo": "bar"}
 
-def test_cloudevent_extensions():
+
+def test_cloudevent_extensions() -> None:
     """Test CloudEvent with trace extensions."""
-    event = CloudEvent(
+    event: CloudEvent[None] = CloudEvent(
         type="ai.coreason.test",
         source="urn:test",
         traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
-        tracestate="rojo=00f067aa0ba902b7"
+        tracestate="rojo=00f067aa0ba902b7",
     )
     assert event.traceparent == "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
     assert event.tracestate == "rojo=00f067aa0ba902b7"
 
-def test_cloudevent_validation_error():
-    """Test missing required fields."""
-    with pytest.raises(Exception):
-        CloudEvent(source="urn:test") # Missing type
 
-def test_otel_semantics():
+def test_cloudevent_validation_error() -> None:
+    """Test missing required fields."""
+    with pytest.raises(ValidationError):
+        CloudEvent(source="urn:test")  # type: ignore[call-arg]
+
+
+def test_otel_semantics() -> None:
     """Test OTel semantic models."""
     semantics = GenAISemantics(
         system="Standard System Prompt",
         usage=GenAIUsage(input_tokens=100, output_tokens=50),
         request=GenAIRequest(model="gpt-4", temperature=0.7),
-        completion=GenAICompletion(chunk="Hello", finish_reason="stop")
+        completion=GenAICompletion(chunk="Hello", finish_reason="stop"),
     )
 
     assert semantics.system == "Standard System Prompt"
+    assert semantics.usage is not None
     assert semantics.usage.input_tokens == 100
+    assert semantics.request is not None
     assert semantics.request.model == "gpt-4"
+    assert semantics.completion is not None
     assert semantics.completion.chunk == "Hello"
 
     # Verify embedding in CloudEvent
-    event = CloudEvent(
-        type="ai.coreason.genai.completion",
-        source="urn:agent:123",
-        data=semantics
+    event: CloudEvent[GenAISemantics] = CloudEvent(
+        type="ai.coreason.genai.completion", source="urn:agent:123", data=semantics
     )
 
+    assert event.data is not None
+    assert event.data.usage is not None
     assert event.data.usage.input_tokens == 100
 
-def test_standardized_payloads():
+
+def test_standardized_payloads() -> None:
     """Test standardized node payloads."""
     # Test StandardizedNodeStarted
     started = StandardizedNodeStarted(
         node_id="node-123",
-        gen_ai=GenAISemantics(
-            usage=GenAIUsage(input_tokens=50),
-            request=GenAIRequest(model="gpt-3.5-turbo")
-        )
+        gen_ai=GenAISemantics(usage=GenAIUsage(input_tokens=50), request=GenAIRequest(model="gpt-3.5-turbo")),
     )
-    event_start = CloudEvent(
-        type="ai.coreason.node.started",
-        source="urn:node:node-123",
-        data=started
+    event_start: CloudEvent[StandardizedNodeStarted] = CloudEvent(
+        type="ai.coreason.node.started", source="urn:node:node-123", data=started
     )
+    assert event_start.data is not None
     assert event_start.data.node_id == "node-123"
+    assert event_start.data.gen_ai is not None
+    assert event_start.data.gen_ai.usage is not None
     assert event_start.data.gen_ai.usage.input_tokens == 50
+    assert event_start.data.gen_ai.request is not None
     assert event_start.data.gen_ai.request.model == "gpt-3.5-turbo"
 
     # Test StandardizedNodeStream
     stream = StandardizedNodeStream(
-        node_id="node-123",
-        gen_ai=GenAISemantics(
-            completion=GenAICompletion(chunk="world")
-        )
+        node_id="node-123", gen_ai=GenAISemantics(completion=GenAICompletion(chunk="world"))
     )
-    event_stream = CloudEvent(
-        type="ai.coreason.node.stream",
-        source="urn:node:node-123",
-        data=stream
+    event_stream: CloudEvent[StandardizedNodeStream] = CloudEvent(
+        type="ai.coreason.node.stream", source="urn:node:node-123", data=stream
     )
+    assert event_stream.data is not None
+    assert event_stream.data.gen_ai is not None
+    assert event_stream.data.gen_ai.completion is not None
     assert event_stream.data.gen_ai.completion.chunk == "world"
 
     # Test StandardizedNodeCompleted
     completed = StandardizedNodeCompleted(
         node_id="node-123",
         output_summary="Hello world",
-        gen_ai=GenAISemantics(
-            usage=GenAIUsage(input_tokens=50, output_tokens=10)
-        )
+        gen_ai=GenAISemantics(usage=GenAIUsage(input_tokens=50, output_tokens=10)),
     )
-    event_complete = CloudEvent(
-        type="ai.coreason.node.completed",
-        source="urn:node:node-123",
-        data=completed
+    event_complete: CloudEvent[StandardizedNodeCompleted] = CloudEvent(
+        type="ai.coreason.node.completed", source="urn:node:node-123", data=completed
     )
+    assert event_complete.data is not None
     assert event_complete.data.output_summary == "Hello world"
+    assert event_complete.data.gen_ai is not None
+    assert event_complete.data.gen_ai.usage is not None
     assert event_complete.data.gen_ai.usage.output_tokens == 10
 
-def test_migration_node_start():
+
+def test_migration_node_start() -> None:
     """Test migration of NODE_START event."""
     legacy_event = GraphEvent(
         event_type="NODE_START",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={
-            "status": "RUNNING",
-            "input_tokens": 42,
-            "model": "gpt-4",
-            "system": "You are a helpful assistant"
-        },
-        visual_metadata={"animation": "pulse", "color": "blue"}
+        payload={"status": "RUNNING", "input_tokens": 42, "model": "gpt-4", "system": "You are a helpful assistant"},
+        visual_metadata={"animation": "pulse", "color": "blue"},
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -139,14 +138,17 @@ def test_migration_node_start():
     assert cloud_event.specversion == "1.0"
     assert cloud_event.type == "ai.coreason.node.started"
     assert cloud_event.source == "urn:node:node-1"
-    # assert cloud_event.time.timestamp() == 1700000000.0 # Timezone issues might make exact equality tricky, check conversion
+    # assert cloud_event.time.timestamp() == 1700000000.0
     assert cloud_event.time == datetime.fromtimestamp(1700000000.0, timezone.utc)
 
     # Check Standardized Payload
     assert isinstance(cloud_event.data, StandardizedNodeStarted)
     assert cloud_event.data.node_id == "node-1"
     assert cloud_event.data.status == "RUNNING"
+    assert cloud_event.data.gen_ai is not None
+    assert cloud_event.data.gen_ai.usage is not None
     assert cloud_event.data.gen_ai.usage.input_tokens == 42
+    assert cloud_event.data.gen_ai.request is not None
     assert cloud_event.data.gen_ai.request.model == "gpt-4"
     assert cloud_event.data.gen_ai.system == "You are a helpful assistant"
 
@@ -155,41 +157,39 @@ def test_migration_node_start():
     assert dump["com_coreason_ui_cue"] == "pulse"
     assert dump["com_coreason_ui_metadata"] == {"animation": "pulse", "color": "blue"}
 
-def test_migration_node_stream():
+
+def test_migration_node_stream() -> None:
     """Test migration of NODE_STREAM event."""
     legacy_event = GraphEvent(
         event_type="NODE_STREAM",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={
-            "chunk": "hello ",
-            "visual_cue": "typing"
-        },
-        visual_metadata={"animation": "typing"}
+        payload={"chunk": "hello ", "visual_cue": "typing"},
+        visual_metadata={"animation": "typing"},
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
 
     assert cloud_event.type == "ai.coreason.node.stream"
     assert isinstance(cloud_event.data, StandardizedNodeStream)
+    assert cloud_event.data.gen_ai is not None
+    assert cloud_event.data.gen_ai.completion is not None
     assert cloud_event.data.gen_ai.completion.chunk == "hello "
 
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "typing"
 
-def test_migration_node_completed():
+
+def test_migration_node_completed() -> None:
     """Test migration of NODE_DONE event."""
     legacy_event = GraphEvent(
         event_type="NODE_DONE",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={
-            "output_summary": "Done.",
-            "status": "SUCCESS"
-        },
-        visual_metadata={"animation": "glow"}
+        payload={"output_summary": "Done.", "status": "SUCCESS"},
+        visual_metadata={"animation": "glow"},
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -201,18 +201,16 @@ def test_migration_node_completed():
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "glow"
 
-def test_migration_generic_fallback():
+
+def test_migration_generic_fallback() -> None:
     """Test migration of generic events like NODE_INIT."""
     legacy_event = GraphEvent(
         event_type="NODE_INIT",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={
-            "type": "DEFAULT",
-            "visual_cue": "IDLE"
-        },
-        visual_metadata={"animation": "idle"}
+        payload={"type": "DEFAULT", "visual_cue": "IDLE"},
+        visual_metadata={"animation": "idle"},
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -223,7 +221,8 @@ def test_migration_generic_fallback():
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "idle"
 
-def test_migration_partial_data():
+
+def test_migration_partial_data() -> None:
     """Test migration with missing optional fields."""
     # Missing input_tokens in NODE_START
     legacy_event = GraphEvent(
@@ -235,17 +234,20 @@ def test_migration_partial_data():
             "status": "RUNNING"
             # input_tokens missing
         },
-        visual_metadata={} # Empty visual metadata
+        visual_metadata={},  # Empty visual metadata
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
+    # Check that data is StandardizedNodeStarted
+    assert isinstance(cloud_event.data, StandardizedNodeStarted)
     assert cloud_event.data.gen_ai is None
 
     dump = cloud_event.model_dump(by_alias=True)
     assert "com_coreason_ui_cue" not in dump
     assert "com_coreason_ui_metadata" not in dump
 
-def test_migration_empty_string_extension():
+
+def test_migration_empty_string_extension() -> None:
     """Test that empty string extensions are filtered out."""
     legacy_event = GraphEvent(
         event_type="NODE_INIT",
@@ -253,20 +255,18 @@ def test_migration_empty_string_extension():
         node_id="node-1",
         timestamp=1700000000.0,
         payload={"visual_cue": ""},
-        visual_metadata={"animation": ""}
+        visual_metadata={"animation": ""},
     )
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
     dump = cloud_event.model_dump(by_alias=True)
     assert "com_coreason_ui_cue" not in dump
     assert "com_coreason_ui_metadata" not in dump
 
-def test_cloudevent_serialization():
+
+def test_cloudevent_serialization() -> None:
     """Test JSON serialization and deserialization."""
-    event = CloudEvent(
-        type="ai.coreason.test",
-        source="urn:test",
-        data={"foo": "bar"},
-        my_custom_extension="value"
+    event: CloudEvent[Dict[str, str]] = CloudEvent(
+        type="ai.coreason.test", source="urn:test", data={"foo": "bar"}, my_custom_extension="value"
     )
 
     # Serialize
@@ -278,36 +278,29 @@ def test_cloudevent_serialization():
     assert data["my_custom_extension"] == "value"
 
     # Deserialize
-    event_back = CloudEvent(**data)
+    event_back: CloudEvent[Any] = CloudEvent(**data)
     assert event_back.type == "ai.coreason.test"
     # Extensions are in model_extra if allowed
     dump_back = event_back.model_dump(by_alias=True)
     assert dump_back["my_custom_extension"] == "value"
 
-def test_timestamp_handling():
+
+def test_timestamp_handling() -> None:
     """Test that timestamps are correctly handled as UTC."""
     ts = 1700000000.0
     dt_utc = datetime.fromtimestamp(ts, timezone.utc)
 
     legacy_event = GraphEvent(
-        event_type="NODE_INIT",
-        run_id="run-1",
-        node_id="node-1",
-        timestamp=ts,
-        payload={},
-        visual_metadata={}
+        event_type="NODE_INIT", run_id="run-1", node_id="node-1", timestamp=ts, payload={}, visual_metadata={}
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
     assert cloud_event.time == dt_utc
     assert cloud_event.time.tzinfo == timezone.utc
 
-def test_custom_extensions_in_constructor():
+
+def test_custom_extensions_in_constructor() -> None:
     """Test passing custom extensions to CloudEvent constructor."""
-    event = CloudEvent(
-        type="test",
-        source="test",
-        com_coreason_custom="custom_value"
-    )
+    event: CloudEvent[None] = CloudEvent(type="test", source="test", com_coreason_custom="custom_value")
     dump = event.model_dump(by_alias=True)
     assert dump["com_coreason_custom"] == "custom_value"

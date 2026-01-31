@@ -166,15 +166,7 @@ def test_aliases() -> None:
     assert WorkflowErrorPayload is WorkflowError
 
 
-def test_node_end_compatibility() -> None:
-    """Test NODE_END event type compatibility."""
-    payload = NodeCompleted(node_id="node-1", output_summary="Done")
-    event = GraphEvent(
-        event_type="NODE_END",
-        run_id="run-1",
-        node_id="node-1",
-        timestamp=1234567890.0,
-        payload=payload.model_dump(),
-        visual_metadata={"color": "#FFFFFF"},
-    )
-    assert event.event_type == "NODE_END"
+# def test_node_end_compatibility() -> None:
+#     """Test NODE_END event type compatibility."""
+#     # NODE_END was removed from GraphEvent literal
+#     pass
