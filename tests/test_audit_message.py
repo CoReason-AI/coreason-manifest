@@ -103,9 +103,7 @@ def test_reasoning_trace_creation() -> None:
 
 def test_serialization() -> None:
     """Test JSON serialization of the trace."""
-    trace = ReasoningTrace(
-        trace_id=str(uuid.uuid4()), agent_id="agent_json", start_time=datetime.now(), steps=[]
-    )
+    trace = ReasoningTrace(trace_id=str(uuid.uuid4()), agent_id="agent_json", start_time=datetime.now(), steps=[])
 
     json_str = trace.model_dump_json()
     data = json.loads(json_str)
