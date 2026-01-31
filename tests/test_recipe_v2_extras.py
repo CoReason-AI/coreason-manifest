@@ -1,7 +1,5 @@
 # Copyright (c) 2025 CoReason, Inc.
 
-import json
-from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
@@ -12,10 +10,7 @@ from coreason_manifest.recipes import RecipeInterface, StateDefinition
 
 def test_state_schema_aliasing_roundtrip() -> None:
     """Test that 'schema' input maps to 'schema_' and serializes back to 'schema'."""
-    state_input = {
-        "schema": {"foo": "bar"},
-        "persistence": "ephemeral"
-    }
+    state_input = {"schema": {"foo": "bar"}, "persistence": "ephemeral"}
 
     # 1. Input Mapping
     state = StateDefinition(**state_input)
@@ -30,11 +25,13 @@ def test_state_schema_aliasing_roundtrip() -> None:
 
     # 3. Roundtrip via Manifest
     manifest = RecipeManifest(
-        id="r1", version="1.0.0", name="n",
+        id="r1",
+        version="1.0.0",
+        name="n",
         interface=RecipeInterface(inputs={}, outputs={}),
         state=state,
         parameters={},
-        graph=Topology(nodes=[], edges=[])
+        graph=Topology(nodes=[], edges=[]),
     )
     json_str = manifest.model_dump_json(by_alias=True)
     reloaded = RecipeManifest.model_validate_json(json_str)
@@ -50,7 +47,7 @@ def test_empty_interface_and_state() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters={},
-        graph=Topology(nodes=[], edges=[])
+        graph=Topology(nodes=[], edges=[]),
     )
     assert manifest.interface.inputs == {}
     assert manifest.state.schema_ == {}
@@ -59,13 +56,9 @@ def test_empty_interface_and_state() -> None:
 def test_complex_parameters() -> None:
     """Test parameters with nested complex types."""
     params = {
-        "llm_config": {
-            "model": "gpt-4",
-            "temperature": 0.7,
-            "stops": ["\n", "User:"]
-        },
+        "llm_config": {"model": "gpt-4", "temperature": 0.7, "stops": ["\n", "User:"]},
         "retries": 3,
-        "features": ["logging", "monitoring"]
+        "features": ["logging", "monitoring"],
     }
 
     manifest = RecipeManifest(
@@ -75,7 +68,7 @@ def test_complex_parameters() -> None:
         interface=RecipeInterface(inputs={}, outputs={}),
         state=StateDefinition(schema={}, persistence="ephemeral"),
         parameters=params,
-        graph=Topology(nodes=[], edges=[])
+        graph=Topology(nodes=[], edges=[]),
     )
 
     assert manifest.parameters["llm_config"]["model"] == "gpt-4"
@@ -90,12 +83,12 @@ def test_persistence_literal_strictness() -> None:
 
     # Invalid Case
     with pytest.raises(ValidationError) as excinfo:
-        StateDefinition(schema={}, persistence="Ephemeral") # type: ignore[arg-type]
+        StateDefinition(schema={}, persistence="Ephemeral")
     assert "Input should be 'ephemeral' or 'persistent'" in str(excinfo.value)
 
     # Invalid Value
     with pytest.raises(ValidationError) as excinfo:
-        StateDefinition(schema={}, persistence="in-memory") # type: ignore[arg-type]
+        StateDefinition(schema={}, persistence="in-memory")
     assert "Input should be 'ephemeral' or 'persistent'" in str(excinfo.value)
 
 
@@ -106,19 +99,19 @@ def test_interface_schema_structure_preservation() -> None:
         "type": "object",
         "properties": {
             "billing_address": {"$ref": "#/definitions/address"},
-            "shipping_address": {"$ref": "#/definitions/address"}
+            "shipping_address": {"$ref": "#/definitions/address"},
         },
         "definitions": {
             "address": {
                 "type": "object",
                 "properties": {
-                    "street_address": { "type": "string" },
-                    "city":           { "type": "string" },
-                    "state":          { "type": "string" }
+                    "street_address": {"type": "string"},
+                    "city": {"type": "string"},
+                    "state": {"type": "string"},
                 },
-                "required": ["street_address", "city", "state"]
+                "required": ["street_address", "city", "state"],
             }
-        }
+        },
     }
 
     interface = RecipeInterface(inputs=complex_schema, outputs={})
