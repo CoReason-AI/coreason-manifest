@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import json
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
@@ -79,8 +80,18 @@ class ToolCallRequestPart(CoReasonBaseModel):
     model_config = ConfigDict(extra="ignore")
     type: Literal["tool_call"] = "tool_call"
     name: str
-    arguments: Dict[str, Any]  # Structured arguments
+    arguments: Union[Dict[str, Any], str]  # Structured arguments or JSON string
     id: Optional[str] = None
+
+    @property
+    def parsed_arguments(self) -> Dict[str, Any]:
+        """Return arguments as a dictionary, parsing JSON if necessary."""
+        if isinstance(self.arguments, dict):
+            return self.arguments
+        try:
+            return json.loads(self.arguments)
+        except (json.JSONDecodeError, TypeError):
+            return {}
 
 
 class ToolCallResponsePart(CoReasonBaseModel):
@@ -118,6 +129,23 @@ class ChatMessage(CoReasonBaseModel):
     role: Role
     parts: List[Part] = Field(..., description="List of message parts that make up the message content.")
     name: Optional[str] = None
+
+    @classmethod
+    def user(cls, content: str, name: Optional[str] = None) -> "ChatMessage":
+        """Factory method to create a user message with text content."""
+        return cls(role=Role.USER, parts=[TextPart(content=content)], name=name)
+
+    @classmethod
+    def assistant(cls, content: str, name: Optional[str] = None) -> "ChatMessage":
+        """Factory method to create an assistant message with text content."""
+        return cls(role=Role.ASSISTANT, parts=[TextPart(content=content)], name=name)
+
+    @classmethod
+    def tool(cls, tool_call_id: str, content: Any) -> "ChatMessage":
+        """Factory method to create a tool message with the result."""
+        return cls(
+            role=Role.TOOL, parts=[ToolCallResponsePart(id=tool_call_id, response=content)]
+        )
 
 
 # --- Backward Compatibility ---

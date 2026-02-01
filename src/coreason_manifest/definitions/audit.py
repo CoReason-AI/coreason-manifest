@@ -10,6 +10,7 @@
 
 import hashlib
 import json
+import uuid
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -36,6 +37,31 @@ class GenAITokenUsage(CoReasonBaseModel):
     completion_tokens: int = 0
     total_tokens: int = 0
     details: Dict[str, Any] = Field(default_factory=dict)
+
+    def __add__(self, other: "GenAITokenUsage") -> "GenAITokenUsage":
+        """Add two TokenUsage objects."""
+        new_details = self.details.copy()
+        new_details.update(other.details)
+        return GenAITokenUsage(
+            input=self.input + other.input,
+            output=self.output + other.output,
+            total=self.total + other.total,
+            prompt_tokens=self.prompt_tokens + other.prompt_tokens,
+            completion_tokens=self.completion_tokens + other.completion_tokens,
+            total_tokens=self.total_tokens + other.total_tokens,
+            details=new_details,
+        )
+
+    def __iadd__(self, other: "GenAITokenUsage") -> "GenAITokenUsage":
+        """In-place add two TokenUsage objects."""
+        self.input += other.input
+        self.output += other.output
+        self.total += other.total
+        self.prompt_tokens += other.prompt_tokens
+        self.completion_tokens += other.completion_tokens
+        self.total_tokens += other.total_tokens
+        self.details.update(other.details)
+        return self
 
 
 class GenAIOperation(CoReasonBaseModel):
@@ -67,6 +93,24 @@ class GenAIOperation(CoReasonBaseModel):
     error_type: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
+    @classmethod
+    def thought(cls, content: str, **kwargs: Any) -> "GenAIOperation":
+        """Factory method to create a simplified thought/reasoning step."""
+        defaults = {
+            "span_id": str(uuid.uuid4()),
+            "trace_id": str(uuid.uuid4()),
+            "operation_name": "thought",
+            "provider": "internal",
+            "model": "internal",
+        }
+        defaults.update(kwargs)
+        # Ensure output_messages is not duplicated if passed in kwargs
+        defaults.pop("output_messages", None)
+        return cls(
+            **defaults,
+            output_messages=[ChatMessage.assistant(content)],
+        )
+
 
 class ReasoningTrace(CoReasonBaseModel):
     """The full audit trail of an Agent's execution session.
@@ -94,6 +138,9 @@ class ReasoningTrace(CoReasonBaseModel):
     # Aggregated stats
     total_tokens: GenAITokenUsage = Field(default_factory=GenAITokenUsage)
     total_cost: float = 0.0
+
+    # Flexible metadata
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class AuditEventType(str, Enum):
