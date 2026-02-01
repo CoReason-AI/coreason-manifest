@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .agent import AgentDefinition, AgentRuntimeConfig
+from .agent import AgentDefinition, AgentRuntimeConfig, Persona
 from .events import (
     ArtifactGenerated,
     ArtifactGeneratedPayload,
@@ -36,6 +36,7 @@ from .events import (
 __all__ = [
     "AgentRuntimeConfig",
     "AgentDefinition",
+    "Persona",
     "GraphEvent",
     "NodeInit",
     "NodeStarted",

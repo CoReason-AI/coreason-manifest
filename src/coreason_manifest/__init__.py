@@ -8,20 +8,33 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .definitions.agent import AgentDefinition
+from .definitions.agent import AgentDefinition, Persona
 from .definitions.audit import AuditLog
-from .definitions.simulation import SimulationScenario, SimulationStep, SimulationTrace
+from .definitions.simulation import (
+    SimulationMetrics,
+    SimulationScenario,
+    SimulationStep,
+    SimulationTrace,
+    StepType,
+)
+from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
 from .definitions.topology import Edge, Node, Topology
 from .recipes import RecipeManifest
 
 __all__ = [
     "AgentDefinition",
+    "Persona",
     "Topology",
     "Node",
     "Edge",
     "SimulationScenario",
     "SimulationTrace",
     "SimulationStep",
+    "SimulationMetrics",
+    "StepType",
+    "AdversaryProfile",
+    "ChaosConfig",
+    "SimulationRequest",
     "AuditLog",
     "RecipeManifest",
 ]
