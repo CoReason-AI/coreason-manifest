@@ -77,6 +77,8 @@ def test_gen_ai_operation_creation() -> None:
     assert operation.provider == "openai"
     assert operation.token_usage is not None
     assert operation.token_usage.total == 15
+    # Check arguments using parsed_arguments
+    assert tool_call.parsed_arguments["expression"] == "2+2"
     # Check backward compatibility fields on TokenUsage
     # Default is 0 unless explicitly set, or we add a validator to sync them.
     assert operation.token_usage.total_tokens == 0

@@ -1,3 +1,4 @@
+
 import unittest
 from datetime import datetime
 from uuid import uuid4
@@ -96,6 +97,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         self.assertEqual(len(step.output_messages), 1)
         msg = step.output_messages[0]
         self.assertEqual(msg.role, Role.ASSISTANT)
+
         part = msg.parts[0]
         self.assertIsInstance(part, TextPart)
         self.assertEqual(part.content, "Thinking process...")
@@ -105,6 +107,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         step2 = GenAIOperation.thought("More thinking", trace_id=custom_trace, model="gpt-4")
         self.assertEqual(step2.trace_id, custom_trace)
         self.assertEqual(step2.model, "gpt-4")
+
         part2 = step2.output_messages[0].parts[0]
         self.assertIsInstance(part2, TextPart)
         self.assertEqual(part2.content, "More thinking")
