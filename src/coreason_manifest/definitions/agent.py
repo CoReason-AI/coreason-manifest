@@ -25,7 +25,6 @@ from uuid import UUID
 from pydantic import (
     AfterValidator,
     AnyUrl,
-    BaseModel,
     ConfigDict,
     Field,
     PlainSerializer,
@@ -34,6 +33,7 @@ from pydantic import (
 )
 from typing_extensions import Annotated
 
+from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.topology import Edge, Node
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -81,7 +81,7 @@ StrictUri = Annotated[
 ]
 
 
-class AgentMetadata(BaseModel):
+class AgentMetadata(CoReasonBaseModel):
     """Metadata for the Agent.
 
     Attributes:
@@ -102,7 +102,7 @@ class AgentMetadata(BaseModel):
     requires_auth: bool = Field(default=False, description="Whether the agent requires user authentication.")
 
 
-class Persona(BaseModel):
+class Persona(CoReasonBaseModel):
     """Definition of an Agent Persona.
 
     Attributes:
@@ -118,7 +118,7 @@ class Persona(BaseModel):
     directives: List[str] = Field(..., description="List of specific instructions or directives.")
 
 
-class AgentInterface(BaseModel):
+class AgentInterface(CoReasonBaseModel):
     """Interface definition for the Agent.
 
     Attributes:
@@ -133,7 +133,7 @@ class AgentInterface(BaseModel):
     injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
 
 
-class ModelConfig(BaseModel):
+class ModelConfig(CoReasonBaseModel):
     """LLM Configuration parameters.
 
     Attributes:
@@ -149,7 +149,7 @@ class ModelConfig(BaseModel):
     system_prompt: Optional[str] = Field(None, description="The default system prompt/persona for the agent.")
 
 
-class AgentRuntimeConfig(BaseModel):
+class AgentRuntimeConfig(CoReasonBaseModel):
     """Configuration of the Agent execution.
 
     Attributes:
@@ -214,7 +214,7 @@ class ToolRiskLevel(str, Enum):
     CRITICAL = "critical"
 
 
-class ToolRequirement(BaseModel):
+class ToolRequirement(CoReasonBaseModel):
     """Requirement for an MCP tool.
 
     Attributes:
@@ -234,7 +234,7 @@ class ToolRequirement(BaseModel):
     risk_level: ToolRiskLevel = Field(..., description="The risk level of the tool.")
 
 
-class InlineToolDefinition(BaseModel):
+class InlineToolDefinition(CoReasonBaseModel):
     """Definition of an inline tool.
 
     Attributes:
@@ -252,7 +252,7 @@ class InlineToolDefinition(BaseModel):
     type: Literal["function"] = Field("function", description="The type of the tool (must be 'function').")
 
 
-class AgentDependencies(BaseModel):
+class AgentDependencies(CoReasonBaseModel):
     """External dependencies for the Agent.
 
     Attributes:
@@ -270,7 +270,7 @@ class AgentDependencies(BaseModel):
     )
 
 
-class PolicyConfig(BaseModel):
+class PolicyConfig(CoReasonBaseModel):
     """Governance policy configuration.
 
     Attributes:
@@ -294,7 +294,7 @@ class TraceLevel(str, Enum):
     NONE = "none"
 
 
-class ObservabilityConfig(BaseModel):
+class ObservabilityConfig(CoReasonBaseModel):
     """Observability configuration.
 
     Attributes:
@@ -310,7 +310,7 @@ class ObservabilityConfig(BaseModel):
     encryption_key_id: Optional[str] = Field(None, description="Optional ID of the key used for log encryption.")
 
 
-class AgentDefinition(BaseModel):
+class AgentDefinition(CoReasonBaseModel):
     """The Root Object for the CoReason Agent Manifest.
 
     Attributes:
@@ -337,6 +337,9 @@ class AgentDefinition(BaseModel):
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
+    custom_metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Container for arbitrary metadata extensions without breaking validation."
+    )
     integrity_hash: str = Field(
         ...,
         pattern=r"^[a-fA-F0-9]{64}$",

@@ -9,9 +9,11 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 # --- Enums ---
 
@@ -33,7 +35,7 @@ class Modality(str, Enum):
 # --- Message Parts ---
 
 
-class TextPart(BaseModel):
+class TextPart(CoReasonBaseModel):
     """Represents text content sent to or received from the model."""
 
     model_config = ConfigDict(extra="ignore")
@@ -41,7 +43,7 @@ class TextPart(BaseModel):
     content: str
 
 
-class BlobPart(BaseModel):
+class BlobPart(CoReasonBaseModel):
     """Represents blob binary data sent inline to the model."""
 
     model_config = ConfigDict(extra="ignore")
@@ -51,7 +53,7 @@ class BlobPart(BaseModel):
     mime_type: Optional[str] = None
 
 
-class FilePart(BaseModel):
+class FilePart(CoReasonBaseModel):
     """Represents an external referenced file sent to the model by file id."""
 
     model_config = ConfigDict(extra="ignore")
@@ -61,7 +63,7 @@ class FilePart(BaseModel):
     mime_type: Optional[str] = None
 
 
-class UriPart(BaseModel):
+class UriPart(CoReasonBaseModel):
     """Represents an external referenced file sent to the model by URI."""
 
     model_config = ConfigDict(extra="ignore")
@@ -71,7 +73,7 @@ class UriPart(BaseModel):
     mime_type: Optional[str] = None
 
 
-class ToolCallRequestPart(BaseModel):
+class ToolCallRequestPart(CoReasonBaseModel):
     """Represents a tool call requested by the model."""
 
     model_config = ConfigDict(extra="ignore")
@@ -81,7 +83,7 @@ class ToolCallRequestPart(BaseModel):
     id: Optional[str] = None
 
 
-class ToolCallResponsePart(BaseModel):
+class ToolCallResponsePart(CoReasonBaseModel):
     """Represents a tool call result sent to the model."""
 
     model_config = ConfigDict(extra="ignore")
@@ -90,7 +92,7 @@ class ToolCallResponsePart(BaseModel):
     id: Optional[str] = None
 
 
-class ReasoningPart(BaseModel):
+class ReasoningPart(CoReasonBaseModel):
     """Represents reasoning/thinking content received from the model."""
 
     model_config = ConfigDict(extra="ignore")
@@ -100,12 +102,15 @@ class ReasoningPart(BaseModel):
 
 # --- Union of All Parts ---
 
-Part = Union[TextPart, BlobPart, FilePart, UriPart, ToolCallRequestPart, ToolCallResponsePart, ReasoningPart]
+Part = Annotated[
+    Union[TextPart, BlobPart, FilePart, UriPart, ToolCallRequestPart, ToolCallResponsePart, ReasoningPart],
+    Field(discriminator="type"),
+]
 
 # --- Main Message Model ---
 
 
-class ChatMessage(BaseModel):
+class ChatMessage(CoReasonBaseModel):
     """Represents a message in a conversation with an LLM."""
 
     model_config = ConfigDict(extra="ignore")
@@ -118,14 +123,14 @@ class ChatMessage(BaseModel):
 # --- Backward Compatibility ---
 
 
-class FunctionCall(BaseModel):
+class FunctionCall(CoReasonBaseModel):
     """Deprecated: Use ToolCallRequestPart instead."""
 
     name: str
     arguments: str
 
 
-class ToolCall(BaseModel):
+class ToolCall(CoReasonBaseModel):
     """Deprecated: Use ToolCallRequestPart instead."""
 
     id: str

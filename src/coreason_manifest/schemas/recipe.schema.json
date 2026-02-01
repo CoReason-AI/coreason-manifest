@@ -1,119 +1,5 @@
 {
   "$defs": {
-    "AgentDependencies": {
-      "additionalProperties": false,
-      "description": "External dependencies for the Agent.\n\nAttributes:\n    tools: List of MCP tool requirements.\n    libraries: List of Python packages required (if code execution is allowed).",
-      "properties": {
-        "tools": {
-          "description": "List of MCP tool requirements.",
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/ToolRequirement"
-              },
-              {
-                "$ref": "#/$defs/InlineToolDefinition"
-              }
-            ]
-          },
-          "title": "Tools",
-          "type": "array"
-        },
-        "libraries": {
-          "description": "List of Python packages required (if code execution is allowed).",
-          "items": {
-            "type": "string"
-          },
-          "title": "Libraries",
-          "type": "array"
-        }
-      },
-      "title": "AgentDependencies",
-      "type": "object"
-    },
-    "AgentInterface": {
-      "additionalProperties": false,
-      "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.",
-      "properties": {
-        "inputs": {
-          "additionalProperties": true,
-          "description": "Typed arguments the agent accepts (JSON Schema).",
-          "title": "Inputs",
-          "type": "object"
-        },
-        "outputs": {
-          "additionalProperties": true,
-          "description": "Typed structure of the result.",
-          "title": "Outputs",
-          "type": "object"
-        },
-        "injected_params": {
-          "description": "List of parameters injected by the system.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Injected Params",
-          "type": "array"
-        }
-      },
-      "required": [
-        "inputs",
-        "outputs"
-      ],
-      "title": "AgentInterface",
-      "type": "object"
-    },
-    "AgentMetadata": {
-      "additionalProperties": false,
-      "description": "Metadata for the Agent.\n\nAttributes:\n    id: Unique Identifier for the Agent (UUID).\n    version: Semantic Version of the Agent.\n    name: Name of the Agent.\n    author: Author of the Agent.\n    created_at: Creation timestamp (ISO 8601).",
-      "properties": {
-        "id": {
-          "description": "Unique Identifier for the Agent (UUID).",
-          "format": "uuid",
-          "title": "Id",
-          "type": "string"
-        },
-        "version": {
-          "description": "Semantic Version of the Agent.",
-          "pattern": "^[vV]*(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
-          "title": "Version",
-          "type": "string"
-        },
-        "name": {
-          "description": "Name of the Agent.",
-          "minLength": 1,
-          "title": "Name",
-          "type": "string"
-        },
-        "author": {
-          "description": "Author of the Agent.",
-          "minLength": 1,
-          "title": "Author",
-          "type": "string"
-        },
-        "created_at": {
-          "description": "Creation timestamp (ISO 8601).",
-          "format": "date-time",
-          "title": "Created At",
-          "type": "string"
-        },
-        "requires_auth": {
-          "default": false,
-          "description": "Whether the agent requires user authentication.",
-          "title": "Requires Auth",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "id",
-        "version",
-        "name",
-        "author",
-        "created_at"
-      ],
-      "title": "AgentMetadata",
-      "type": "object"
-    },
     "AgentNode": {
       "additionalProperties": false,
       "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.\n    system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.\n    config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.\n    overrides: Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
@@ -214,88 +100,43 @@
       "title": "AgentNode",
       "type": "object"
     },
-    "AgentRuntimeConfig": {
+    "ConditionalEdge": {
       "additionalProperties": false,
-      "description": "Configuration of the Agent execution.\n\nAttributes:\n    nodes: A collection of execution units (Agents, Tools, Logic).\n    edges: Directed connections defining control flow.\n    entry_point: The ID of the starting node.\n    llm_config: Specific LLM parameters.",
+      "description": "Represents a dynamic routing connection from one node to multiple potential targets.\n\nAttributes:\n    source_node_id: The ID of the source node.\n    router_logic: A reference to a python function or a logic expression that returns the next node ID.\n    mapping: A dictionary mapping the router's output (e.g., \"approve\", \"reject\") to target Node IDs.",
       "properties": {
-        "nodes": {
-          "description": "A collection of execution units.",
-          "items": {
-            "description": "Polymorphic node definition.",
-            "discriminator": {
-              "mapping": {
-                "agent": "#/$defs/AgentNode",
-                "human": "#/$defs/HumanNode",
-                "logic": "#/$defs/LogicNode",
-                "map": "#/$defs/MapNode",
-                "recipe": "#/$defs/RecipeNode"
-              },
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/$defs/AgentNode"
-              },
-              {
-                "$ref": "#/$defs/HumanNode"
-              },
-              {
-                "$ref": "#/$defs/LogicNode"
-              },
-              {
-                "$ref": "#/$defs/RecipeNode"
-              },
-              {
-                "$ref": "#/$defs/MapNode"
-              }
-            ]
-          },
-          "title": "Nodes",
-          "type": "array"
+        "source_node_id": {
+          "description": "The ID of the source node.",
+          "title": "Source Node Id",
+          "type": "string"
         },
-        "edges": {
-          "description": "Directed connections defining control flow.",
-          "items": {
-            "$ref": "#/$defs/Edge"
-          },
-          "title": "Edges",
-          "type": "array"
-        },
-        "entry_point": {
+        "router_logic": {
           "anyOf": [
             {
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*$",
               "type": "string"
             },
             {
-              "type": "null"
+              "$ref": "#/$defs/RouterExpression"
             }
           ],
-          "default": null,
-          "description": "The ID of the starting node.",
-          "title": "Entry Point"
+          "description": "A reference to a python function or logic expression that determines the path.",
+          "title": "Router Logic"
         },
-        "model_config": {
-          "$ref": "#/$defs/ModelConfig",
-          "description": "Specific LLM parameters."
-        },
-        "system_prompt": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The global system prompt/instruction for the agent.",
-          "title": "System Prompt"
+        "mapping": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Map of router output values to target node IDs.",
+          "title": "Mapping",
+          "type": "object"
         }
       },
       "required": [
-        "model_config"
+        "source_node_id",
+        "router_logic",
+        "mapping"
       ],
-      "title": "AgentRuntimeConfig",
+      "title": "ConditionalEdge",
       "type": "object"
     },
     "CouncilConfig": {
@@ -389,6 +230,80 @@
       "title": "Edge",
       "type": "object"
     },
+    "GraphTopology": {
+      "additionalProperties": false,
+      "description": "The topology definition of the recipe.\n\nAttributes:\n    nodes: List of nodes in the graph.\n    edges: List of edges connecting the nodes.\n    state_schema: Optional schema definition for the graph state.",
+      "properties": {
+        "nodes": {
+          "description": "List of nodes in the graph.",
+          "items": {
+            "description": "Polymorphic node definition.",
+            "discriminator": {
+              "mapping": {
+                "agent": "#/$defs/AgentNode",
+                "human": "#/$defs/HumanNode",
+                "logic": "#/$defs/LogicNode",
+                "map": "#/$defs/MapNode",
+                "recipe": "#/$defs/RecipeNode"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AgentNode"
+              },
+              {
+                "$ref": "#/$defs/HumanNode"
+              },
+              {
+                "$ref": "#/$defs/LogicNode"
+              },
+              {
+                "$ref": "#/$defs/RecipeNode"
+              },
+              {
+                "$ref": "#/$defs/MapNode"
+              }
+            ]
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "description": "List of edges connecting the nodes.",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Edge"
+              },
+              {
+                "$ref": "#/$defs/ConditionalEdge"
+              }
+            ]
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "state_schema": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StateSchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Schema definition for the graph state."
+        }
+      },
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "title": "GraphTopology",
+      "type": "object"
+    },
     "HumanNode": {
       "additionalProperties": false,
       "description": "A node that pauses execution for user input/approval.\n\nAttributes:\n    type: The type of the node (must be 'human').\n    timeout_seconds: Optional timeout in seconds for the user interaction.",
@@ -453,42 +368,6 @@
         "id"
       ],
       "title": "HumanNode",
-      "type": "object"
-    },
-    "InlineToolDefinition": {
-      "additionalProperties": false,
-      "description": "Definition of an inline tool.\n\nAttributes:\n    name: Name of the tool.\n    description: Description of the tool.\n    parameters: JSON Schema of parameters.\n    type: The type of the tool (must be 'function').",
-      "properties": {
-        "name": {
-          "description": "Name of the tool.",
-          "title": "Name",
-          "type": "string"
-        },
-        "description": {
-          "description": "Description of the tool.",
-          "title": "Description",
-          "type": "string"
-        },
-        "parameters": {
-          "additionalProperties": true,
-          "description": "JSON Schema of parameters.",
-          "title": "Parameters",
-          "type": "object"
-        },
-        "type": {
-          "const": "function",
-          "default": "function",
-          "description": "The type of the tool (must be 'function').",
-          "title": "Type",
-          "type": "string"
-        }
-      },
-      "required": [
-        "name",
-        "description",
-        "parameters"
-      ],
-      "title": "InlineToolDefinition",
       "type": "object"
     },
     "LogicNode": {
@@ -621,104 +500,28 @@
       "title": "MapNode",
       "type": "object"
     },
-    "ModelConfig": {
+    "RecipeInterface": {
       "additionalProperties": false,
-      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.\n    system_prompt: The default system prompt/persona for the agent.",
+      "description": "Defines the input/output contract for a Recipe.\n\nAttributes:\n    inputs: JSON Schema defining valid entry arguments.\n    outputs: JSON Schema defining the guaranteed structure of the final result.",
       "properties": {
-        "model": {
-          "description": "The LLM model identifier.",
-          "title": "Model",
-          "type": "string"
+        "inputs": {
+          "additionalProperties": true,
+          "description": "JSON Schema defining valid entry arguments.",
+          "title": "Inputs",
+          "type": "object"
         },
-        "temperature": {
-          "description": "Temperature for generation.",
-          "maximum": 2.0,
-          "minimum": 0.0,
-          "title": "Temperature",
-          "type": "number"
-        },
-        "system_prompt": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The default system prompt/persona for the agent.",
-          "title": "System Prompt"
+        "outputs": {
+          "additionalProperties": true,
+          "description": "JSON Schema defining the guaranteed structure of the final result.",
+          "title": "Outputs",
+          "type": "object"
         }
       },
       "required": [
-        "model",
-        "temperature"
+        "inputs",
+        "outputs"
       ],
-      "title": "ModelConfig",
-      "type": "object"
-    },
-    "ObservabilityConfig": {
-      "additionalProperties": false,
-      "description": "Observability configuration.\n\nAttributes:\n    trace_level: Level of tracing detail.\n    retention_policy: Retention policy identifier (e.g., '30_days').\n    encryption_key_id: Optional ID of the key used for log encryption.",
-      "properties": {
-        "trace_level": {
-          "$ref": "#/$defs/TraceLevel",
-          "default": "full"
-        },
-        "retention_policy": {
-          "default": "30_days",
-          "description": "Retention policy identifier.",
-          "title": "Retention Policy",
-          "type": "string"
-        },
-        "encryption_key_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Optional ID of the key used for log encryption.",
-          "title": "Encryption Key Id"
-        }
-      },
-      "title": "ObservabilityConfig",
-      "type": "object"
-    },
-    "PolicyConfig": {
-      "additionalProperties": false,
-      "description": "Governance policy configuration.\n\nAttributes:\n    budget_caps: Dictionary defining budget limits (e.g., {\"total_cost\": 10.0, \"total_tokens\": 1000}).\n    human_in_the_loop: List of Node IDs that require human approval.\n    allowed_domains: List of allowed domains for external access.",
-      "properties": {
-        "budget_caps": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "description": "Budget limits.",
-          "title": "Budget Caps",
-          "type": "object"
-        },
-        "human_in_the_loop": {
-          "description": "Node IDs requiring human approval.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Human In The Loop",
-          "type": "array"
-        },
-        "allowed_domains": {
-          "description": "Allowed domains for external access.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Allowed Domains",
-          "type": "array"
-        }
-      },
-      "title": "PolicyConfig",
+      "title": "RecipeInterface",
       "type": "object"
     },
     "RecipeNode": {
@@ -812,64 +615,78 @@
       "title": "RecipeNode",
       "type": "object"
     },
-    "ToolRequirement": {
+    "RouterExpression": {
       "additionalProperties": false,
-      "description": "Requirement for an MCP tool.\n\nAttributes:\n    uri: The MCP endpoint URI.\n    hash: Integrity check for the tool definition (SHA256).\n    scopes: List of permissions required.\n    risk_level: The risk level of the tool.",
+      "description": "A structured expression for routing logic (e.g., CEL or JSONLogic).",
       "properties": {
-        "uri": {
-          "description": "The MCP endpoint URI.",
-          "format": "uri",
-          "minLength": 1,
-          "title": "Uri",
+        "operator": {
+          "description": "The operator (e.g., 'eq', 'gt').",
+          "title": "Operator",
           "type": "string"
         },
-        "hash": {
-          "description": "Integrity check for the tool definition (SHA256).",
-          "pattern": "^[a-fA-F0-9]{64}$",
-          "title": "Hash",
-          "type": "string"
-        },
-        "scopes": {
-          "description": "List of permissions required.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Scopes",
+        "args": {
+          "description": "Arguments for the expression.",
+          "items": {},
+          "title": "Args",
           "type": "array"
-        },
-        "risk_level": {
-          "$ref": "#/$defs/ToolRiskLevel",
-          "description": "The risk level of the tool."
         }
       },
       "required": [
-        "uri",
-        "hash",
-        "scopes",
-        "risk_level"
+        "operator",
+        "args"
       ],
-      "title": "ToolRequirement",
+      "title": "RouterExpression",
       "type": "object"
     },
-    "ToolRiskLevel": {
-      "description": "Risk level for the tool.",
-      "enum": [
-        "safe",
-        "standard",
-        "critical"
+    "StateDefinition": {
+      "additionalProperties": false,
+      "description": "Defines the internal state (memory) of the Recipe.\n\nAttributes:\n    schema: JSON Schema of the keys available in the shared memory.\n    persistence: Configuration for state durability.",
+      "properties": {
+        "schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema of the keys available in the shared memory.",
+          "title": "Schema",
+          "type": "object"
+        },
+        "persistence": {
+          "default": "ephemeral",
+          "description": "Configuration for state durability.",
+          "enum": [
+            "ephemeral",
+            "persistent"
+          ],
+          "title": "Persistence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema"
       ],
-      "title": "ToolRiskLevel",
-      "type": "string"
+      "title": "StateDefinition",
+      "type": "object"
     },
-    "TraceLevel": {
-      "description": "Level of tracing detail.",
-      "enum": [
-        "full",
-        "metadata_only",
-        "none"
+    "StateSchema": {
+      "additionalProperties": false,
+      "description": "Defines the structure and persistence of the graph state.\n\nAttributes:\n    data_schema: A JSON Schema or Pydantic definition describing the state structure.\n    persistence: Configuration for how state is checkpointed.",
+      "properties": {
+        "data_schema": {
+          "additionalProperties": true,
+          "description": "A JSON Schema or Pydantic definition describing the state structure.",
+          "title": "Data Schema",
+          "type": "object"
+        },
+        "persistence": {
+          "description": "Configuration for how state is checkpointed (e.g., 'memory', 'redis').",
+          "title": "Persistence",
+          "type": "string"
+        }
+      },
+      "required": [
+        "data_schema",
+        "persistence"
       ],
-      "title": "TraceLevel",
-      "type": "string"
+      "title": "StateSchema",
+      "type": "object"
     },
     "VisualMetadata": {
       "additionalProperties": false,
@@ -935,74 +752,85 @@
       "type": "object"
     }
   },
-  "$id": "https://coreason.ai/schemas/agent.schema.json",
   "additionalProperties": false,
-  "description": "The definitive source of truth for CoReason Agent definitions.",
+  "description": "The executable specification for the MACO engine.\n\nAttributes:\n    id: Unique identifier for the recipe.\n    version: Version of the recipe.\n    name: Human-readable name of the recipe.\n    description: Detailed description of the recipe.\n    interface: Defines the input/output contract for the Recipe.\n    state: Defines the internal state (memory) of the Recipe.\n    parameters: Dictionary of build-time constants.\n    topology: The topology definition of the workflow.\n    integrity_hash: SHA256 hash of the canonical JSON representation of the topology.\n    metadata: Container for design-time data.",
   "properties": {
-    "metadata": {
-      "$ref": "#/$defs/AgentMetadata"
+    "id": {
+      "description": "Unique identifier for the recipe.",
+      "title": "Id",
+      "type": "string"
+    },
+    "version": {
+      "description": "Version of the recipe.",
+      "pattern": "^[vV]*(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$",
+      "title": "Version",
+      "type": "string"
+    },
+    "name": {
+      "description": "Human-readable name of the recipe.",
+      "title": "Name",
+      "type": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Detailed description of the recipe.",
+      "title": "Description"
     },
     "interface": {
-      "$ref": "#/$defs/AgentInterface"
+      "$ref": "#/$defs/RecipeInterface",
+      "description": "Defines the input/output contract for the Recipe."
     },
-    "config": {
-      "$ref": "#/$defs/AgentRuntimeConfig"
+    "state": {
+      "$ref": "#/$defs/StateDefinition",
+      "description": "Defines the internal state (memory) of the Recipe."
     },
-    "dependencies": {
-      "$ref": "#/$defs/AgentDependencies"
+    "parameters": {
+      "additionalProperties": true,
+      "description": "Dictionary of build-time constants.",
+      "title": "Parameters",
+      "type": "object"
     },
-    "policy": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/PolicyConfig"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Governance policy configuration."
-    },
-    "observability": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ObservabilityConfig"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Observability configuration."
-    },
-    "custom_metadata": {
-      "anyOf": [
-        {
-          "additionalProperties": true,
-          "type": "object"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Container for arbitrary metadata extensions without breaking validation.",
-      "title": "Custom Metadata"
+    "topology": {
+      "$ref": "#/$defs/GraphTopology",
+      "description": "The topology definition of the workflow."
     },
     "integrity_hash": {
-      "description": "SHA256 hash of the source code.",
-      "pattern": "^[a-fA-F0-9]{64}$",
-      "title": "Integrity Hash",
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "SHA256 hash of the canonical JSON representation of the topology. Enforced by Builder, verified by Runtime.",
+      "title": "Integrity Hash"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "description": "Container for design-time data (UI coordinates, resolution logs, draft status) to support re-hydration.",
+      "title": "Metadata",
+      "type": "object"
     }
   },
   "required": [
-    "metadata",
+    "id",
+    "version",
+    "name",
     "interface",
-    "config",
-    "dependencies",
-    "integrity_hash"
+    "state",
+    "parameters",
+    "topology"
   ],
-  "title": "CoReason Agent Manifest",
+  "title": "RecipeManifest",
   "type": "object"
 }
