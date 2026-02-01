@@ -88,9 +88,14 @@ class RecipeManifest(BaseModel):
     topology: GraphTopology = Field(..., description="The topology definition of the workflow.")
     integrity_hash: Optional[str] = Field(
         default=None,
-        description="SHA256 hash of the canonical JSON representation of the topology. Enforced by Builder, verified by Runtime.",
+        description=(
+            "SHA256 hash of the canonical JSON representation of the topology. "
+            "Enforced by Builder, verified by Runtime."
+        ),
     )
     metadata: Dict[str, Any] = Field(
         default_factory=dict,
-        description="Container for design-time data (UI coordinates, resolution logs, draft status) to support re-hydration.",
+        description=(
+            "Container for design-time data (UI coordinates, resolution logs, draft status) to support re-hydration."
+        ),
     )

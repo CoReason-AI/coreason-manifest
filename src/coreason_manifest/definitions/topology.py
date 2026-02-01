@@ -110,7 +110,9 @@ class AgentNode(BaseNode):
     )
     config: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.",
+        description=(
+            "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults."
+        ),
     )
 
 
@@ -269,7 +271,7 @@ class GraphTopology(BaseModel):
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
-    state_schema: Optional[StateSchema] = Field(None, description="Schema definition for the graph state.")
+    state_schema: Optional[StateSchema] = Field(default=None, description="Schema definition for the graph state.")
 
 
 Topology = GraphTopology

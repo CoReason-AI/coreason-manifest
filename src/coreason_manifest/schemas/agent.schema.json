@@ -116,7 +116,7 @@
     },
     "AgentNode": {
       "additionalProperties": false,
-      "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.",
+      "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.\n    system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.\n    config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.",
       "properties": {
         "id": {
           "description": "Unique identifier for the node.",
@@ -158,6 +158,33 @@
           "description": "The name of the atomic agent to call.",
           "title": "Agent Name",
           "type": "string"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Overrides the registry default prompt. Required for ad-hoc/optimized agents.",
+          "title": "System Prompt"
+        },
+        "config": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.",
+          "title": "Config"
         }
       },
       "required": [
