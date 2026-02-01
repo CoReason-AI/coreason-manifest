@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,7 +18,7 @@ class AdversaryProfile(BaseModel):
     name: str
     goal: str
     strategy_model: str  # e.g., "claude-3-opus"
-    attack_model: str    # e.g., "llama-3-uncensored"
+    attack_model: str  # e.g., "llama-3-uncensored"
     # Potential future field: 'system_prompt_override'
 
 

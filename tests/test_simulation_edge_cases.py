@@ -15,6 +15,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.simulation import (
+    SimulationMetrics,
     SimulationScenario,
     SimulationStep,
     SimulationTrace,
@@ -87,7 +88,7 @@ def test_trace_empty_steps() -> None:
         agent_version="1.0.0",
         steps=[],
         outcome={},
-        metrics={},
+        metrics=SimulationMetrics(turn_count=0),
     )
     assert len(trace.steps) == 0
 
@@ -104,6 +105,7 @@ def test_step_complex_inputs() -> None:
         observation={"results": [{"title": "Python", "url": "..."}]},
     )
     assert step.inputs["a"] == [1, 2]
+    assert step.observation is not None
     assert step.observation["results"][0]["title"] == "Python"
 
 
