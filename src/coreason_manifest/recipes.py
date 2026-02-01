@@ -72,6 +72,8 @@ class RecipeManifest(BaseModel):
         state: Defines the internal state (memory) of the Recipe.
         parameters: Dictionary of build-time constants.
         topology: The topology definition of the workflow.
+        integrity_hash: SHA256 hash of the canonical JSON representation of the topology.
+        metadata: Container for design-time data.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -84,3 +86,11 @@ class RecipeManifest(BaseModel):
     state: StateDefinition = Field(..., description="Defines the internal state (memory) of the Recipe.")
     parameters: Dict[str, Any] = Field(..., description="Dictionary of build-time constants.")
     topology: GraphTopology = Field(..., description="The topology definition of the workflow.")
+    integrity_hash: Optional[str] = Field(
+        default=None,
+        description="SHA256 hash of the canonical JSON representation of the topology. Enforced by Builder, verified by Runtime.",
+    )
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Container for design-time data (UI coordinates, resolution logs, draft status) to support re-hydration.",
+    )
