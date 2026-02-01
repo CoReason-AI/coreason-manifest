@@ -158,3 +158,12 @@ def test_agent_definition_with_policy_and_observability() -> None:
     assert agent.policy.budget_caps["cost"] == 100.0
     assert agent.observability is not None
     assert agent.observability.trace_level == "full"
+
+
+def test_model_config_system_prompt() -> None:
+    """Test ModelConfig with system_prompt."""
+    config = ModelConfig(model="gpt-4", temperature=0.7, system_prompt="You are a helpful assistant.")
+    assert config.system_prompt == "You are a helpful assistant."
+
+    config_no_prompt = ModelConfig(model="gpt-4", temperature=0.7)
+    assert config_no_prompt.system_prompt is None
