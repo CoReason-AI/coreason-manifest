@@ -8,7 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from unittest.mock import patch, Mock
+from typing import Any, Dict
+
 from coreason_manifest.definitions.events import (
     ArtifactGenerated,
     CouncilVote,
@@ -19,8 +20,8 @@ from coreason_manifest.definitions.events import (
     GraphEventNodeRestored,
     NodeRestored,
     migrate_graph_event_to_cloud_event,
-    CloudEventSource
 )
+
 
 def test_coverage_node_restored() -> None:
     event = GraphEventNodeRestored(
@@ -35,6 +36,7 @@ def test_coverage_node_restored() -> None:
     assert ce.type == "ai.coreason.legacy.node_restored"
     assert isinstance(ce.data, NodeRestored)
 
+
 def test_coverage_artifact_generated() -> None:
     event = GraphEventArtifactGenerated(
         event_type="ARTIFACT_GENERATED",
@@ -47,6 +49,7 @@ def test_coverage_artifact_generated() -> None:
     ce = migrate_graph_event_to_cloud_event(event)
     assert ce.type == "ai.coreason.legacy.artifact_generated"
     assert isinstance(ce.data, ArtifactGenerated)
+
 
 def test_coverage_edge_active() -> None:
     event = GraphEventEdgeActive(
@@ -62,6 +65,7 @@ def test_coverage_edge_active() -> None:
     # EdgeTraversed.as_cloud_event_payload returns self
     assert isinstance(ce.data, EdgeTraversed)
 
+
 def test_coverage_council_vote() -> None:
     event = GraphEventCouncilVote(
         event_type="COUNCIL_VOTE",
@@ -74,6 +78,7 @@ def test_coverage_council_vote() -> None:
     ce = migrate_graph_event_to_cloud_event(event)
     assert ce.type == "ai.coreason.legacy.council_vote"
     assert isinstance(ce.data, CouncilVote)
+
 
 def test_coverage_fallback_payload() -> None:
     """Test fallback when payload does not implement CloudEventSource."""
@@ -91,8 +96,6 @@ def test_coverage_fallback_payload() -> None:
     # we can patch the protocol check mechanism or wrap the function.
     # A cleaner way given Python's dynamic nature is to temporarily wrap the payload
     # in a way that hides the method, or mock the payload object on the event.
-
-    original_payload = event.payload
 
     # Create a mock that looks like the payload but fails the protocol check?
     # CloudEventSource checks for `as_cloud_event_payload` method.
@@ -123,15 +126,19 @@ def test_coverage_fallback_payload() -> None:
 
     class DummyPayload:
         visual_cue = "dummy"
-        def model_dump(self) -> dict: return {}
+
+        def model_dump(self) -> Dict[str, Any]:
+            return {}
+
         # No as_cloud_event_payload method
 
     # Force inject the dummy payload.
     # This violates type hints but works at runtime.
-    event.payload = DummyPayload() # type: ignore
+    event.payload = DummyPayload()  # type: ignore
 
     ce = migrate_graph_event_to_cloud_event(event)
 
     # Verify fallback path was taken
     assert isinstance(ce.data, DummyPayload)
-    assert ce.com_coreason_ui_cue == "dummy"
+    # Extra fields are in model_extra or accessed via getattr dynamically if strictly typed
+    assert getattr(ce, "com_coreason_ui_cue", None) == "dummy"
