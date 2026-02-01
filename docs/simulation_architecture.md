@@ -40,3 +40,35 @@ We define scenarios that allow for rigorous, standardized benchmarking, aligned 
 - **difficulty** (`int`): Difficulty level (1-3).
 - **expected_outcome** (`Any`): The ground truth for validation.
 - **validation_logic** (`ValidationLogic`): Logic used to validate the outcome (`exact_match`, `fuzzy`, `code_eval`).
+
+## Simulation Configuration
+
+To enable reproducible and configurable simulations, we define standard configuration objects for the Simulator service.
+
+### SimulationRequest
+
+The standard payload for triggering a simulation.
+
+- **scenario** (`SimulationScenario`): The scenario to run.
+- **profile** (`AdversaryProfile`): Configuration for the adversary (Red Team).
+- **chaos_config** (`ChaosConfig`): Configuration for infrastructure chaos injection.
+
+### AdversaryProfile
+
+Defines the strategy and identity of the adversary agent.
+
+- **name** (`str`): Name of the profile.
+- **goal** (`str`): The objective of the adversary.
+- **strategy_model** (`str`): The model used for strategic planning (e.g., "claude-3-opus").
+- **attack_model** (`str`): The model used for generating attacks (e.g., "llama-3-uncensored").
+- **persona** (`Optional[Persona]`): The full persona definition (name, description, directives) for the adversary.
+
+### ChaosConfig
+
+Defines parameters for injecting simulated infrastructure faults.
+
+- **latency_ms** (`int`): Artificial latency in milliseconds.
+- **error_rate** (`float`): Probability of random errors (0.0 to 1.0).
+- **noise_rate** (`float`): Probability of noise injection (0.0 to 1.0).
+- **token_throttle** (`bool`): Whether to simulate token rate limiting.
+- **exception_type** (`str`): The type of exception to raise (default: "RuntimeError").
