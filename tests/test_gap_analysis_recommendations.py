@@ -8,8 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from coreason_manifest.definitions.topology import AgentNode, GraphTopology
-from coreason_manifest.recipes import RecipeInterface, RecipeManifest, StateDefinition
+from coreason_manifest.definitions.topology import AgentNode, GraphTopology, StateDefinition
+from coreason_manifest.recipes import RecipeInterface, RecipeManifest
 
 
 def test_agent_node_enhancements() -> None:

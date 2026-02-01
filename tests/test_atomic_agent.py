@@ -156,18 +156,12 @@ def test_edges_without_nodes_integrity() -> None:
         "integrity_hash": "a" * 64,
     }
 
-    # Currently, AgentRuntimeConfig does NOT seem to inherit GraphTopology's validator.
-    # It constructs lists.
-    # If this is a gap, we should probably know.
-    # But for Atomic Agents, edges should be empty.
+    # Currently, AgentRuntimeConfig DOES have the integrity check (added in Shared Kernel Review).
 
-    # The current implementation allows this because AgentRuntimeConfig doesn't have the integrity check
-    # that GraphTopology has. It probably should, but that might be out of scope for "Atomic Agents" PR
-    # unless we want to enforce "Atomic = No Nodes AND No Edges".
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition(**data)
 
-    agent = AgentDefinition(**data)
-    # If this passes, it means we allow edges without nodes in the config object itself.
-    assert len(agent.config.edges) == 1
+    assert "Edge source node 'a' not found in nodes" in str(exc.value)
 
 
 def test_atomic_agent_serialization_excludes_defaults() -> None:

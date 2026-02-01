@@ -15,7 +15,7 @@ from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     MapNode,
     RecipeNode,
-    StateSchema,
+    StateDefinition,
 )
 
 
@@ -41,8 +41,8 @@ def test_map_node_invalid_concurrency() -> None:
 def test_state_schema_invalid_persistence_type() -> None:
     """Test validation fails for non-string persistence."""
     with pytest.raises(ValidationError):
-        StateSchema(
-            data_schema={},
+        StateDefinition(
+            schema_={},
             persistence=123,
         )
 

@@ -15,6 +15,7 @@ from uuid import uuid4
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.topology import RuntimeVisualMetadata
 
 # --- CloudEvents v1.0 Implementation ---
 
@@ -290,7 +291,7 @@ class BaseGraphEvent(CoReasonBaseModel):
     sequence_id: Optional[int] = None  # Optional for internal use
 
     # Visual Metadata drives the Flutter animation engine
-    visual_metadata: Dict[str, str] = Field(
+    visual_metadata: RuntimeVisualMetadata = Field(
         ..., description="Hints for UI: color='#00FF00', animation='pulse', progress='0.5'"
     )
 
@@ -389,9 +390,10 @@ def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent[Any]:
     # UI Metadata as extension
     payload_visual_cue = getattr(event.payload, "visual_cue", None)
 
+    visual_dict = event.visual_metadata.model_dump(exclude_none=True)
     extensions = {
-        "com_coreason_ui_cue": event.visual_metadata.get("animation") or payload_visual_cue,
-        "com_coreason_ui_metadata": event.visual_metadata,
+        "com_coreason_ui_cue": event.visual_metadata.animation or payload_visual_cue,
+        "com_coreason_ui_metadata": visual_dict,
     }
 
     # Filter out None values in extensions

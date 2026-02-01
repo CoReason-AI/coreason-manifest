@@ -18,13 +18,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import ConfigDict, Field
 
 from .definitions.agent import VersionStr
 from .definitions.base import CoReasonBaseModel
-from .definitions.topology import GraphTopology
+from .definitions.topology import GraphTopology, StateDefinition
 
 
 class RecipeInterface(CoReasonBaseModel):
@@ -40,24 +40,6 @@ class RecipeInterface(CoReasonBaseModel):
     inputs: Dict[str, Any] = Field(..., description="JSON Schema defining valid entry arguments.")
     outputs: Dict[str, Any] = Field(
         ..., description="JSON Schema defining the guaranteed structure of the final result."
-    )
-
-
-class StateDefinition(CoReasonBaseModel):
-    """Defines the internal state (memory) of the Recipe.
-
-    Attributes:
-        schema: JSON Schema of the keys available in the shared memory.
-        persistence: Configuration for state durability.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    schema_: Dict[str, Any] = Field(
-        ..., alias="schema", description="JSON Schema of the keys available in the shared memory."
-    )
-    persistence: Literal["ephemeral", "persistent"] = Field(
-        default="ephemeral", description="Configuration for state durability."
     )
 
 

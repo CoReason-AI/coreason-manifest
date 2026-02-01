@@ -257,7 +257,7 @@ def test_extension_filtering() -> None:
         timestamp=1234567890.0,
         payload={"type": "start", "node_id": "node1"},
         visual_metadata={
-            "empty": "",
+            "label": "",
         },
     )
     ce = migrate_graph_event_to_cloud_event(event_empty)
@@ -270,9 +270,11 @@ def test_extension_filtering() -> None:
         node_id="node1",
         timestamp=1234567890.0,
         payload={"type": "start", "node_id": "node1"},
-        visual_metadata={"valid": "value", "empty": ""},
+        visual_metadata={"label": "value", "color": ""},
     )
     ce_mixed = migrate_graph_event_to_cloud_event(event_mixed)
     dump = ce_mixed.model_dump()
     assert "com_coreason_ui_metadata" in dump
-    assert dump["com_coreason_ui_metadata"] == {"valid": "value", "empty": ""}
+    # model_dump() output depends on Pydantic serialization
+    assert dump["com_coreason_ui_metadata"]["label"] == "value"
+    assert dump["com_coreason_ui_metadata"]["color"] == ""
