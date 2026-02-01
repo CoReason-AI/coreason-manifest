@@ -10,10 +10,17 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+
+
+class StepType(str, Enum):
+    """Type of the simulation step."""
+
+    INTERACTION = "interaction"  # Normal User/Agent turn
+    SYSTEM_EVENT = "system_event"  # Chaos injection, error, or info
 
 
 class ValidationLogic(str, Enum):
@@ -40,14 +47,24 @@ class SimulationStep(BaseModel):
 
     step_id: UUID = Field(..., description="Atomic unit of execution ID.")
     timestamp: datetime = Field(..., description="Execution timestamp.")
+    type: StepType = Field(default=StepType.INTERACTION, description="Type of the step.")
     node_id: str = Field(..., description="The graph node executed.")
     inputs: Dict[str, Any] = Field(..., description="Snapshot of entry state.")
-    thought: str = Field(..., description="The Chain-of-Thought reasoning.")
-    action: Dict[str, Any] = Field(..., description="Tool calls or API requests.")
-    observation: Dict[str, Any] = Field(..., description="Tool outputs.")
+    thought: Optional[str] = Field(None, description="The Chain-of-Thought reasoning.")
+    action: Optional[Dict[str, Any]] = Field(None, description="Tool calls or API requests.")
+    observation: Optional[Dict[str, Any]] = Field(None, description="Tool outputs.")
     snapshot: Dict[str, Any] = Field(
         default_factory=dict, description="Full copy of the graph state at the completion of this step."
     )
+
+
+class SimulationMetrics(BaseModel):
+    """Metrics gathered during simulation."""
+
+    turn_count: int
+    total_tokens: Optional[int] = None
+    cost_usd: Optional[float] = None
+    duration_ms: Optional[float] = None
 
 
 class SimulationTrace(BaseModel):
@@ -57,4 +74,4 @@ class SimulationTrace(BaseModel):
     agent_version: str = Field(..., description="Agent SemVer version.")
     steps: List[SimulationStep] = Field(..., description="List of execution steps.")
     outcome: Dict[str, Any] = Field(..., description="Final result.")
-    metrics: Dict[str, Any] = Field(..., description="Execution metrics (e.g., token usage, cost).")
+    metrics: SimulationMetrics = Field(..., description="Execution metrics (e.g., token usage, cost).")

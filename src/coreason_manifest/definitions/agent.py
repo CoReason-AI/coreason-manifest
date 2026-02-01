@@ -102,6 +102,22 @@ class AgentMetadata(BaseModel):
     requires_auth: bool = Field(default=False, description="Whether the agent requires user authentication.")
 
 
+class Persona(BaseModel):
+    """Definition of an Agent Persona.
+
+    Attributes:
+        name: Name of the persona.
+        description: Description of the persona.
+        directives: List of specific instructions or directives.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Name of the persona.")
+    description: str = Field(..., description="Description of the persona.")
+    directives: List[str] = Field(..., description="List of specific instructions or directives.")
+
+
 class AgentInterface(BaseModel):
     """Interface definition for the Agent.
 
