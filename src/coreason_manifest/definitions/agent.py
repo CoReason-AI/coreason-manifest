@@ -161,11 +161,23 @@ class AgentRuntimeConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    nodes: List[Node] = Field(..., description="A collection of execution units.")
-    edges: List[Edge] = Field(..., description="Directed connections defining control flow.")
-    entry_point: str = Field(..., description="The ID of the starting node.")
+    nodes: List[Node] = Field(default_factory=list, description="A collection of execution units.")
+    edges: List[Edge] = Field(default_factory=list, description="Directed connections defining control flow.")
+    entry_point: Optional[str] = Field(None, description="The ID of the starting node.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
     system_prompt: Optional[str] = Field(None, description="The global system prompt/instruction for the agent.")
+
+    @model_validator(mode="after")
+    def validate_topology_or_atomic(self) -> AgentRuntimeConfig:
+        """Ensure valid configuration: either a Graph or an Atomic Agent."""
+        has_nodes = len(self.nodes) > 0
+        has_entry = self.entry_point is not None
+
+        if has_nodes:
+            if not has_entry:
+                raise ValueError("Graph execution requires an 'entry_point'.")
+
+        return self
 
     @field_validator("nodes")
     @classmethod

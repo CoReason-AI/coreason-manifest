@@ -262,9 +262,17 @@
           "type": "array"
         },
         "entry_point": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The ID of the starting node.",
-          "title": "Entry Point",
-          "type": "string"
+          "title": "Entry Point"
         },
         "model_config": {
           "$ref": "#/$defs/ModelConfig",
@@ -285,9 +293,6 @@
         }
       },
       "required": [
-        "nodes",
-        "edges",
-        "entry_point",
         "model_config"
       ],
       "title": "AgentRuntimeConfig",
