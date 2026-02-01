@@ -43,7 +43,7 @@ def test_message_creation() -> None:
     part = assistant_msg.parts[0]
     assert isinstance(part, ToolCallRequestPart)
     assert part.name == "get_weather"
-    assert part.arguments["city"] == "Paris"
+    assert part.parsed_arguments["city"] == "Paris"
 
 
 def test_message_alias_compatibility() -> None:
@@ -77,6 +77,8 @@ def test_gen_ai_operation_creation() -> None:
     assert operation.provider == "openai"
     assert operation.token_usage is not None
     assert operation.token_usage.total == 15
+    # Check arguments using parsed_arguments
+    assert tool_call.parsed_arguments["expression"] == "2+2"
     # Check backward compatibility fields on TokenUsage
     # Default is 0 unless explicitly set, or we add a validator to sync them.
     assert operation.token_usage.total_tokens == 0

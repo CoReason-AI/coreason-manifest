@@ -85,3 +85,10 @@ cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
 Legacy `visual_metadata` and `visual_cue` fields are moved to CloudEvent extensions:
 - `com_coreason_ui_cue`: The primary visual cue (e.g., "pulse").
 - `com_coreason_ui_metadata`: The full dictionary of UI metadata.
+
+## Reasoning Trace Improvements (v0.10.0)
+
+The `ReasoningTrace` object has been enhanced to better support complex reasoning engines:
+
+*   **Metadata**: A flexible `metadata` dictionary is available on `ReasoningTrace` to store arbitrary execution context (e.g., `execution_path`, strategies used) without requiring schema changes.
+*   **Simplified Steps**: Use `GenAIOperation.thought("content")` to quickly create reasoning steps with auto-generated IDs and default provider settings.
