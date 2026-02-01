@@ -91,7 +91,7 @@ def test_graph_event_discriminated_union() -> None:
     }
 
     # Use TypeAdapter to validate the Union
-    event = TypeAdapter(GraphEvent).validate_python(event_data)
+    event: GraphEvent = TypeAdapter(GraphEvent).validate_python(event_data)
 
     # Check it is instance of GraphEventNodeInit
     assert isinstance(event, GraphEventNodeInit)
@@ -108,7 +108,7 @@ def test_graph_event_discriminated_union() -> None:
         "payload": {"node_id": "n1", "type": "AGENT"},
         "visual_metadata": {"color": "red"}
     }
-    event2 = TypeAdapter(GraphEvent).validate_python(event_data2)
+    event2: GraphEvent = TypeAdapter(GraphEvent).validate_python(event_data2)
     assert isinstance(event2.payload, NodeInit)
 
 def test_graph_event_payload_validation() -> None:

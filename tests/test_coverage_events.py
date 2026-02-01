@@ -20,7 +20,7 @@ from coreason_manifest.definitions.events import (
     migrate_graph_event_to_cloud_event,
 )
 
-def test_coverage_node_restored():
+def test_coverage_node_restored() -> None:
     event = GraphEventNodeRestored(
         event_type="NODE_RESTORED",
         run_id="run-1",
@@ -33,7 +33,7 @@ def test_coverage_node_restored():
     assert ce.type == "ai.coreason.legacy.node_restored"
     assert isinstance(ce.data, NodeRestored)
 
-def test_coverage_artifact_generated():
+def test_coverage_artifact_generated() -> None:
     event = GraphEventArtifactGenerated(
         event_type="ARTIFACT_GENERATED",
         run_id="run-1",
@@ -46,7 +46,7 @@ def test_coverage_artifact_generated():
     assert ce.type == "ai.coreason.legacy.artifact_generated"
     assert isinstance(ce.data, ArtifactGenerated)
 
-def test_coverage_edge_active():
+def test_coverage_edge_active() -> None:
     event = GraphEventEdgeActive(
         event_type="EDGE_ACTIVE",
         run_id="run-1",
@@ -60,7 +60,7 @@ def test_coverage_edge_active():
     # EdgeTraversed.as_cloud_event_payload returns self
     assert isinstance(ce.data, EdgeTraversed)
 
-def test_coverage_council_vote():
+def test_coverage_council_vote() -> None:
     event = GraphEventCouncilVote(
         event_type="COUNCIL_VOTE",
         run_id="run-1",

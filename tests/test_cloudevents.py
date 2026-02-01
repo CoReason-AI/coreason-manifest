@@ -21,13 +21,12 @@ from coreason_manifest.definitions.events import (
     GenAIRequest,
     GenAISemantics,
     GenAIUsage,
-    GraphEvent,
+    GraphEventError,
+    GraphEventNodeDone,
     GraphEventNodeInit,
+    GraphEventNodeSkipped,
     GraphEventNodeStart,
     GraphEventNodeStream,
-    GraphEventNodeDone,
-    GraphEventNodeSkipped,
-    GraphEventError,
     NodeInit,
     NodeSkipped,
     StandardizedNodeCompleted,
@@ -321,7 +320,12 @@ def test_timestamp_handling() -> None:
     dt_utc = datetime.fromtimestamp(ts, timezone.utc)
 
     legacy_event = GraphEventNodeInit(
-        event_type="NODE_INIT", run_id="run-1", node_id="node-1", timestamp=ts, payload={"node_id": "node-1"}, visual_metadata={}
+        event_type="NODE_INIT",
+        run_id="run-1",
+        node_id="node-1",
+        timestamp=ts,
+        payload={"node_id": "node-1"},
+        visual_metadata={},
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
