@@ -127,16 +127,31 @@ class EventSchema(CoReasonBaseModel):
     data_schema: ImmutableDict = Field(..., description="JSON Schema of the event payload.")
 
 
-class AgentInterface(CoReasonBaseModel):
-    """Interface definition for the Agent.
+class CapabilityType(str, Enum):
+    """The interaction mode for the capability."""
+
+    ATOMIC = "atomic"
+    STREAMING = "streaming"
+
+
+class AgentCapability(CoReasonBaseModel):
+    """Defines a specific mode of interaction for the agent.
 
     Attributes:
+        name: Unique name for this capability.
+        type: Interaction mode.
+        description: What this mode does.
         inputs: Typed arguments the agent accepts (JSON Schema).
         outputs: Typed structure of the result.
         events: List of intermediate events this agent produces during execution.
+        injected_params: List of parameters injected by the system.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Unique name for this capability.")
+    type: CapabilityType = Field(..., description="Interaction mode.")
+    description: str = Field(..., description="What this mode does.")
 
     inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
@@ -343,7 +358,7 @@ class AgentDefinition(CoReasonBaseModel):
 
     Attributes:
         metadata: Metadata for the Agent.
-        interface: Interface definition for the Agent.
+        capabilities: List of supported capabilities.
         config: Configuration of the Agent execution.
         dependencies: External dependencies for the Agent.
         integrity_hash: SHA256 hash of the source code.
@@ -360,7 +375,7 @@ class AgentDefinition(CoReasonBaseModel):
     )
 
     metadata: AgentMetadata
-    interface: AgentInterface
+    capabilities: List[AgentCapability] = Field(..., description="List of supported capabilities.")
     config: AgentRuntimeConfig
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
@@ -374,10 +389,25 @@ class AgentDefinition(CoReasonBaseModel):
         description="SHA256 hash of the source code.",
     )
 
+    @field_validator("capabilities")
+    @classmethod
+    def validate_capabilities(cls, v: List[AgentCapability]) -> List[AgentCapability]:
+        """Ensure at least one capability exists and names are unique."""
+        if not v:
+            raise ValueError("Agent must have at least one capability.")
+
+        names = [cap.name for cap in v]
+        if len(names) != len(set(names)):
+            raise ValueError(f"Duplicate capability names found: {names}")
+        return v
+
     @model_validator(mode="after")
     def validate_auth_requirements(self) -> AgentDefinition:
         """Validate that agents requiring auth have user_context injected."""
         if self.metadata.requires_auth:
-            if "user_context" not in self.interface.injected_params:
-                raise ValueError("Agent requires authentication but 'user_context' is not an injected parameter.")
+            for cap in self.capabilities:
+                if "user_context" not in cap.injected_params:
+                    raise ValueError(
+                        f"Agent requires authentication but capability '{cap.name}' does not inject 'user_context'."
+                    )
         return self
