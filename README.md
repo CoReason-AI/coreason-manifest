@@ -22,6 +22,15 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 *   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation.
 *   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like UUID and datetime.
 
+## v0.10.0 Updates
+
+Version 0.10.0 introduces several ergonomic improvements for the Reasoning Engine:
+
+*   **Simplified Construction:** New factory methods `ChatMessage.user()`, `ChatMessage.assistant()`, and `GenAIOperation.thought()` reduce boilerplate.
+*   **Token Arithmetic:** `GenAITokenUsage` now supports `+` and `+=` operators for easier aggregation.
+*   **Flexible Tool Calls:** `ToolCallRequestPart` now accepts JSON strings for arguments, with automatic parsing via `.parsed_arguments`.
+*   **Enhanced Tracing:** `ReasoningTrace` now includes a flexible `metadata` field for tracking execution state.
+
 ## Serialization & Base Model
 
 All core definitions (`AgentDefinition`, `RecipeManifest`, `GraphTopology`, `AuditLog`) inherit from `CoReasonBaseModel`. This provides a consistent interface for serialization, solving common Pydantic v2 issues with `UUID` and `datetime`.

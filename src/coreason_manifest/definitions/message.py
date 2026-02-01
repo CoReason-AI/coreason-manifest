@@ -10,7 +10,7 @@
 
 import json
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union, cast
 
 from pydantic import ConfigDict, Field
 
@@ -89,7 +89,8 @@ class ToolCallRequestPart(CoReasonBaseModel):
         if isinstance(self.arguments, dict):
             return self.arguments
         try:
-            return json.loads(self.arguments)
+            result = json.loads(self.arguments)
+            return cast(Dict[str, Any], result) if isinstance(result, dict) else {}
         except (json.JSONDecodeError, TypeError):
             return {}
 
@@ -143,9 +144,7 @@ class ChatMessage(CoReasonBaseModel):
     @classmethod
     def tool(cls, tool_call_id: str, content: Any) -> "ChatMessage":
         """Factory method to create a tool message with the result."""
-        return cls(
-            role=Role.TOOL, parts=[ToolCallResponsePart(id=tool_call_id, response=content)]
-        )
+        return cls(role=Role.TOOL, parts=[ToolCallResponsePart(id=tool_call_id, response=content)])
 
 
 # --- Backward Compatibility ---
