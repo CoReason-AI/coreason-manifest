@@ -1,8 +1,21 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 from datetime import datetime, timezone
-from typing import Any, Dict, Generic, Literal, Optional, Protocol, TypeVar, runtime_checkable
+from typing import Annotated, Any, Dict, Generic, Literal, Optional, Protocol, TypeVar, Union, runtime_checkable
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.topology import RuntimeVisualMetadata
 
 # --- CloudEvents v1.0 Implementation ---
 
@@ -14,7 +27,7 @@ class CloudEventSource(Protocol):
     def as_cloud_event_payload(self) -> Any: ...
 
 
-class CloudEvent(BaseModel, Generic[T]):
+class CloudEvent(CoReasonBaseModel, Generic[T]):
     """Standard CloudEvent v1.0 Envelope."""
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
@@ -38,7 +51,7 @@ class CloudEvent(BaseModel, Generic[T]):
 # --- OTel Semantic Conventions ---
 
 
-class GenAIUsage(BaseModel):
+class GenAIUsage(CoReasonBaseModel):
     """GenAI Usage metrics."""
 
     input_tokens: Optional[int] = Field(None, alias="input_tokens")
@@ -47,7 +60,7 @@ class GenAIUsage(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class GenAIRequest(BaseModel):
+class GenAIRequest(CoReasonBaseModel):
     """GenAI Request details."""
 
     model: Optional[str] = None
@@ -55,14 +68,14 @@ class GenAIRequest(BaseModel):
     top_p: Optional[float] = None
 
 
-class GenAICompletion(BaseModel):
+class GenAICompletion(CoReasonBaseModel):
     """GenAI Completion details."""
 
     chunk: Optional[str] = None
     finish_reason: Optional[str] = None
 
 
-class GenAISemantics(BaseModel):
+class GenAISemantics(CoReasonBaseModel):
     """OpenTelemetry GenAI Semantic Conventions."""
 
     system: Optional[str] = None
@@ -71,62 +84,10 @@ class GenAISemantics(BaseModel):
     completion: Optional[GenAICompletion] = None
 
 
-# --- Graph Event Wrapper ---
-
-
-class GraphEvent(BaseModel):
-    """The atomic unit of communication between the Engine (MACO) and the UI (Flutter).
-
-    Standardized IDs:
-    - run_id: Workflow execution ID.
-    - trace_id: OpenTelemetry Distributed Trace ID.
-
-    Attributes:
-        event_type: The type of the event.
-        run_id: The unique ID of the workflow run.
-        trace_id: The trace ID (defaults to "unknown").
-        node_id: The ID of the node associated with the event.
-        timestamp: The timestamp of the event.
-        sequence_id: Optional sequence ID.
-        payload: The event payload containing logic output.
-        visual_metadata: Metadata for UI visualization.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    event_type: Literal[
-        "NODE_INIT",
-        "NODE_START",
-        "NODE_STREAM",
-        "NODE_DONE",
-        "NODE_SKIPPED",
-        "EDGE_ACTIVE",
-        "COUNCIL_VOTE",
-        "ERROR",
-        "NODE_RESTORED",
-        "ARTIFACT_GENERATED",
-    ]
-    run_id: str
-    trace_id: str = Field(
-        default_factory=lambda: "unknown"
-    )  # Default for compatibility if missing in some legacy calls
-    node_id: str  # Required per BRD and existing tests
-    timestamp: float
-    sequence_id: Optional[int] = None  # Optional for internal use
-
-    # The payload contains the actual reasoning/data
-    payload: Dict[str, Any] = Field(..., description="The logic output")
-
-    # Visual Metadata drives the Flutter animation engine
-    visual_metadata: Dict[str, str] = Field(
-        ..., description="Hints for UI: color='#00FF00', animation='pulse', progress='0.5'"
-    )
-
-
 # --- Base Models ---
 
 
-class BaseNodePayload(BaseModel):
+class BaseNodePayload(CoReasonBaseModel):
     """Base model for node-related events."""
 
     model_config = ConfigDict(extra="ignore")
@@ -243,7 +204,7 @@ class ArtifactGenerated(BaseNodePayload):
     url: str
 
 
-class EdgeTraversed(BaseModel):
+class EdgeTraversed(CoReasonBaseModel):
     """Payload for EDGE_ACTIVE event."""
 
     model_config = ConfigDict(extra="ignore")
@@ -307,6 +268,101 @@ ArtifactGeneratedPayload = ArtifactGenerated
 CouncilVotePayload = CouncilVote
 WorkflowErrorPayload = WorkflowError
 
+
+# --- Graph Event Wrapper ---
+
+
+class BaseGraphEvent(CoReasonBaseModel):
+    """Base class for GraphEvents.
+
+    Standardized IDs:
+    - run_id: Workflow execution ID.
+    - trace_id: OpenTelemetry Distributed Trace ID.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: str
+    trace_id: str = Field(
+        default_factory=lambda: "unknown"
+    )  # Default for compatibility if missing in some legacy calls
+    node_id: str  # Required per BRD and existing tests
+    timestamp: float
+    sequence_id: Optional[int] = None  # Optional for internal use
+
+    # Visual Metadata drives the Flutter animation engine
+    visual_metadata: RuntimeVisualMetadata = Field(
+        ..., description="Hints for UI: color='#00FF00', animation='pulse', progress='0.5'"
+    )
+
+
+class GraphEventNodeInit(BaseGraphEvent):
+    event_type: Literal["NODE_INIT"] = "NODE_INIT"
+    payload: NodeInit = Field(..., description="The logic output")
+
+
+class GraphEventNodeStart(BaseGraphEvent):
+    event_type: Literal["NODE_START"] = "NODE_START"
+    payload: NodeStarted = Field(..., description="The logic output")
+
+
+class GraphEventNodeStream(BaseGraphEvent):
+    event_type: Literal["NODE_STREAM"] = "NODE_STREAM"
+    payload: NodeStream = Field(..., description="The logic output")
+
+
+class GraphEventNodeDone(BaseGraphEvent):
+    event_type: Literal["NODE_DONE"] = "NODE_DONE"
+    payload: NodeCompleted = Field(..., description="The logic output")
+
+
+class GraphEventNodeSkipped(BaseGraphEvent):
+    event_type: Literal["NODE_SKIPPED"] = "NODE_SKIPPED"
+    payload: NodeSkipped = Field(..., description="The logic output")
+
+
+class GraphEventEdgeActive(BaseGraphEvent):
+    event_type: Literal["EDGE_ACTIVE"] = "EDGE_ACTIVE"
+    payload: EdgeTraversed = Field(..., description="The logic output")
+
+
+class GraphEventCouncilVote(BaseGraphEvent):
+    event_type: Literal["COUNCIL_VOTE"] = "COUNCIL_VOTE"
+    payload: CouncilVote = Field(..., description="The logic output")
+
+
+class GraphEventError(BaseGraphEvent):
+    event_type: Literal["ERROR"] = "ERROR"
+    payload: WorkflowError = Field(..., description="The logic output")
+
+
+class GraphEventNodeRestored(BaseGraphEvent):
+    event_type: Literal["NODE_RESTORED"] = "NODE_RESTORED"
+    payload: NodeRestored = Field(..., description="The logic output")
+
+
+class GraphEventArtifactGenerated(BaseGraphEvent):
+    event_type: Literal["ARTIFACT_GENERATED"] = "ARTIFACT_GENERATED"
+    payload: ArtifactGenerated = Field(..., description="The logic output")
+
+
+GraphEvent = Annotated[
+    Union[
+        GraphEventNodeInit,
+        GraphEventNodeStart,
+        GraphEventNodeStream,
+        GraphEventNodeDone,
+        GraphEventNodeSkipped,
+        GraphEventEdgeActive,
+        GraphEventCouncilVote,
+        GraphEventError,
+        GraphEventNodeRestored,
+        GraphEventArtifactGenerated,
+    ],
+    Field(discriminator="event_type", description="Polymorphic graph event definition."),
+]
+
+
 # --- Migration Logic ---
 
 
@@ -321,48 +377,23 @@ def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent[Any]:
     ce_type = ce_type_map.get(event.event_type, f"ai.coreason.legacy.{event.event_type.lower()}")
     ce_source = f"urn:node:{event.node_id}"
 
-    # Prepare payload dict with node_id injected
-    payload_dict = event.payload.copy()
-    payload_dict["node_id"] = event.node_id
-    # Inject timestamp if missing (required by some payloads like NodeStarted)
-    if "timestamp" not in payload_dict:
-        payload_dict["timestamp"] = event.timestamp
-
-    # Mapping event types to their corresponding payload classes
-    event_class_map: Dict[str, Any] = {
-        "NODE_INIT": NodeInit,
-        "NODE_START": NodeStarted,
-        "NODE_DONE": NodeCompleted,
-        "NODE_STREAM": NodeStream,
-        "NODE_SKIPPED": NodeSkipped,
-        "NODE_RESTORED": NodeRestored,
-        "ERROR": WorkflowError,
-        "ARTIFACT_GENERATED": ArtifactGenerated,
-        "COUNCIL_VOTE": CouncilVote,
-        "EDGE_ACTIVE": EdgeTraversed,
-    }
-
     data: Any = None
-    payload_class = event_class_map.get(event.event_type)
 
-    if payload_class:
-        try:
-            # Instantiate the payload object
-            payload_obj = payload_class(**payload_dict)
-            if isinstance(payload_obj, CloudEventSource):
-                data = payload_obj.as_cloud_event_payload()
-            else:
-                data = payload_obj  # pragma: no cover
-        except Exception:
-            # Fallback if instantiation fails
-            data = event.payload
+    # event.payload is already a strictly typed Pydantic model (from GraphEvent union).
+    # All supported payload models implement CloudEventSource protocol (duck-typed or via BaseNodePayload).
+    if isinstance(event.payload, CloudEventSource):
+        data = event.payload.as_cloud_event_payload()
     else:
+        # Fallback for models that might not implement the protocol (e.g. unknown future extensions)
         data = event.payload
 
     # UI Metadata as extension
+    payload_visual_cue = getattr(event.payload, "visual_cue", None)
+
+    visual_dict = event.visual_metadata.model_dump(exclude_none=True)
     extensions = {
-        "com_coreason_ui_cue": event.visual_metadata.get("animation") or event.payload.get("visual_cue"),
-        "com_coreason_ui_metadata": event.visual_metadata,
+        "com_coreason_ui_cue": event.visual_metadata.animation or payload_visual_cue,
+        "com_coreason_ui_metadata": visual_dict,
     }
 
     # Filter out None values in extensions

@@ -1,4 +1,13 @@
-# Prosperity-3.0
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import uuid
 
 import pytest
@@ -38,6 +47,7 @@ def test_agent_definition_immutability() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Dummy",
         },
         "dependencies": {"tools": [], "libraries": []},
         "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -70,6 +80,7 @@ def test_nested_model_immutability() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Dummy",
         },
         "dependencies": {"tools": [], "libraries": []},
         "integrity_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",

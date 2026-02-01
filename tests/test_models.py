@@ -1,5 +1,15 @@
-# Prosperity-3.0
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import uuid
+from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
@@ -8,6 +18,7 @@ from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
     ModelConfig,
+    Persona,
 )
 
 
@@ -146,6 +157,7 @@ def test_agent_definition_with_policy_and_observability() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Policy agent",
         },
         "dependencies": {"tools": [], "libraries": []},
         "policy": {"budget_caps": {"cost": 100.0}},
@@ -158,3 +170,62 @@ def test_agent_definition_with_policy_and_observability() -> None:
     assert agent.policy.budget_caps["cost"] == 100.0
     assert agent.observability is not None
     assert agent.observability.trace_level == "full"
+
+
+def test_model_config_system_prompt() -> None:
+    """Test ModelConfig with system_prompt."""
+    config = ModelConfig(model="gpt-4", temperature=0.7, system_prompt="You are a helpful assistant.")
+    assert config.system_prompt == "You are a helpful assistant."
+
+    config_no_prompt = ModelConfig(model="gpt-4", temperature=0.7)
+    assert config_no_prompt.system_prompt is None
+
+
+def test_persona() -> None:
+    """Test Persona model."""
+    persona = Persona(name="Helper", description="A helpful assistant", directives=["Be nice", "Help user"])
+    assert persona.name == "Helper"
+    assert len(persona.directives) == 2
+
+
+def test_agent_config_system_prompt() -> None:
+    """Test AgentRuntimeConfig with system_prompt."""
+    valid_data: Dict[str, Any] = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Test Agent",
+            "author": "Test Author",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "interface": {"inputs": {}, "outputs": {}},
+        "config": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Global instruction",
+        },
+        "dependencies": {},
+        "integrity_hash": "a" * 64,
+    }
+
+    agent = AgentDefinition(**valid_data)
+    assert agent.config.system_prompt == "Global instruction"
+
+    # Ensure optionality:
+    # If we remove system_prompt from config AND model_config, validation should fail (Atomic Agent)
+    del valid_data["config"]["system_prompt"]
+
+    # In the valid_data setup above, nodes=[], so it is an Atomic Agent.
+    # llm_config doesn't have system_prompt set.
+    # So this should fail now.
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition(**valid_data)
+    assert "Atomic Agents require a system_prompt" in str(exc.value)
+
+    # But if we add it to model_config, it should pass
+    valid_data["config"]["model_config"]["system_prompt"] = "Model Prompt"
+    agent = AgentDefinition(**valid_data)
+    assert agent.config.system_prompt is None
+    assert agent.config.llm_config.system_prompt == "Model Prompt"

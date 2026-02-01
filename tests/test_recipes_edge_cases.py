@@ -1,10 +1,20 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import Edge, RecipeManifest
 from coreason_manifest import Topology as GraphTopology
-from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode, StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 
 def test_invalid_node_discriminator() -> None:
@@ -36,7 +46,7 @@ def test_strict_schema_extra_fields() -> None:
             version="1.0.0",
             name="N",
             interface=RecipeInterface(inputs={}, outputs={}),
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=GraphTopology(nodes=[], edges=[]),
             extra_thing="bad",  # type: ignore[call-arg]
@@ -60,7 +70,7 @@ def test_recursive_version_normalization() -> None:
         version="vVv1.5.0",
         name="Test",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[], edges=[]),
     )
@@ -79,7 +89,7 @@ def test_complex_inputs_structure() -> None:
         version="1.0.0",
         name="Test",
         interface=RecipeInterface(inputs=complex_inputs, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[], edges=[]),
     )
@@ -106,7 +116,7 @@ def test_large_topology_serialization() -> None:
         version="1.0.0",
         name="Large Recipe",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=topology,
     )

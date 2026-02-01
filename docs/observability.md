@@ -63,13 +63,32 @@ Payloads (`data`) now strictly follow [OpenTelemetry GenAI Semantic Conventions]
 
 A migration utility is provided to convert legacy `GraphEvent` objects to `CloudEvent` format on the fly.
 
-```python
-from coreason_manifest.definitions.events import migrate_graph_event_to_cloud_event
+`GraphEvent` is now a discriminated union of specific event types (e.g. `GraphEventNodeStart`, `GraphEventNodeDone`), ensuring strict type safety for payloads.
 
-cloud_event = migrate_graph_event_to_cloud_event(legacy_graph_event)
+```python
+from coreason_manifest import (
+    GraphEvent,
+    GraphEventNodeStart,
+    migrate_graph_event_to_cloud_event
+)
+
+# GraphEvent is a Union type
+legacy_event = GraphEventNodeStart(
+    event_type="NODE_START",
+    # ... fields
+)
+
+cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
 ```
 
 ### UI Metadata
 Legacy `visual_metadata` and `visual_cue` fields are moved to CloudEvent extensions:
 - `com_coreason_ui_cue`: The primary visual cue (e.g., "pulse").
 - `com_coreason_ui_metadata`: The full dictionary of UI metadata.
+
+## Reasoning Trace Improvements (v0.10.0)
+
+The `ReasoningTrace` object has been enhanced to better support complex reasoning engines:
+
+*   **Metadata**: A flexible `metadata` dictionary is available on `ReasoningTrace` to store arbitrary execution context (e.g., `execution_path`, strategies used) without requiring schema changes.
+*   **Simplified Steps**: Use `GenAIOperation.thought("content")` to quickly create reasoning steps with auto-generated IDs and default provider settings.

@@ -6,31 +6,45 @@
 # For details, see the LICENSE file.
 # Commercial use beyond a 30-day trial requires a separate license.
 #
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Union
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import ConfigDict, Field, StringConstraints, model_validator
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 
-class StateSchema(BaseModel):
-    """Defines the structure and persistence of the graph state.
+class StateDefinition(CoReasonBaseModel):
+    """Defines the internal state (memory) of the Recipe.
 
     Attributes:
-        data_schema: A JSON Schema or Pydantic definition describing the state structure.
-        persistence: Configuration for how state is checkpointed.
+        schema: JSON Schema of the keys available in the shared memory.
+        persistence: Configuration for state durability.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    data_schema: Dict[str, Any] = Field(
-        ..., description="A JSON Schema or Pydantic definition describing the state structure."
+    schema_: Dict[str, Any] = Field(
+        ..., alias="schema", description="JSON Schema of the keys available in the shared memory."
     )
-    persistence: str = Field(..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis').")
+    persistence: Literal["ephemeral", "persistent"] = Field(
+        default="ephemeral", description="Configuration for state durability."
+    )
 
 
-class CouncilConfig(BaseModel):
+class CouncilConfig(CoReasonBaseModel):
     """Configuration for 'Architectural Triangulation'.
 
     Attributes:
@@ -44,7 +58,7 @@ class CouncilConfig(BaseModel):
     voters: List[str] = Field(..., description="List of agents or models that vote.")
 
 
-class VisualMetadata(BaseModel):
+class VisualMetadata(CoReasonBaseModel):
     """Data explicitly for the UI.
 
     Attributes:
@@ -64,13 +78,28 @@ class VisualMetadata(BaseModel):
     animation_style: Optional[str] = Field(None, description="The animation style for the node.")
 
 
-class BaseNode(BaseModel):
+class RuntimeVisualMetadata(VisualMetadata):
+    """Visual metadata with runtime extensions.
+
+    Attributes:
+        color: Color override for the node (e.g., '#00FF00').
+        progress: Progress indicator (e.g., '0.5' or '50%').
+        animation: Animation override (e.g., 'pulse').
+    """
+
+    color: Optional[str] = Field(None, description="Color override for the node.")
+    progress: Optional[str] = Field(None, description="Progress indicator.")
+    animation: Optional[str] = Field(None, description="Animation override.")
+
+
+class BaseNode(CoReasonBaseModel):
     """Base model for all node types.
 
     Attributes:
         id: Unique identifier for the node.
         council_config: Optional configuration for architectural triangulation.
         visual: Visual metadata for the UI.
+        metadata: Generic metadata for operational context (e.g. cost tracking, SLAs).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -80,6 +109,10 @@ class BaseNode(BaseModel):
         None, description="Optional configuration for architectural triangulation."
     )
     visual: Optional[VisualMetadata] = Field(None, description="Visual metadata for the UI.")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Generic metadata for operational context (e.g. cost tracking, SLAs).",
+    )
 
 
 class AgentNode(BaseNode):
@@ -88,10 +121,27 @@ class AgentNode(BaseNode):
     Attributes:
         type: The type of the node (must be 'agent').
         agent_name: The name of the atomic agent to call.
+        system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.
+        config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.
+        overrides: Runtime overrides for the agent (e.g., temperature, prompt_template_vars).
     """
 
     type: Literal["agent"] = Field("agent", description="Discriminator for AgentNode.")
     agent_name: str = Field(..., description="The name of the atomic agent to call.")
+    system_prompt: Optional[str] = Field(
+        default=None,
+        description="Overrides the registry default prompt. Required for ad-hoc/optimized agents.",
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description=(
+            "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults."
+        ),
+    )
+    overrides: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
+    )
 
 
 class HumanNode(BaseNode):
@@ -126,7 +176,7 @@ class DataMappingStrategy(str, Enum):
     LITERAL = "literal"
 
 
-class DataMapping(BaseModel):
+class DataMapping(CoReasonBaseModel):
     """Defines how to transform data between parent and child."""
 
     model_config = ConfigDict(extra="forbid")
@@ -178,7 +228,7 @@ Node = Annotated[
 ]
 
 
-class Edge(BaseModel):
+class Edge(CoReasonBaseModel):
     """Represents a connection between two nodes.
 
     Attributes:
@@ -203,7 +253,7 @@ RouterRef = Annotated[
 ]
 
 
-class RouterExpression(BaseModel):
+class RouterExpression(CoReasonBaseModel):
     """A structured expression for routing logic (e.g., CEL or JSONLogic)."""
 
     model_config = ConfigDict(extra="forbid")
@@ -218,7 +268,7 @@ RouterDefinition = Annotated[
 ]
 
 
-class ConditionalEdge(BaseModel):
+class ConditionalEdge(CoReasonBaseModel):
     """Represents a dynamic routing connection from one node to multiple potential targets.
 
     Attributes:
@@ -236,7 +286,37 @@ class ConditionalEdge(BaseModel):
     mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
 
 
-class GraphTopology(BaseModel):
+def validate_edge_integrity(
+    nodes: Sequence[Node],
+    edges: Sequence[Union[Edge, ConditionalEdge]],
+) -> None:
+    """Ensures that all edges point to valid nodes.
+
+    Args:
+        nodes: List of nodes in the graph.
+        edges: List of edges connecting the nodes.
+
+    Raises:
+        ValueError: If an edge points to a non-existent node.
+    """
+    node_ids = {node.id for node in nodes}
+
+    for edge in edges:
+        if edge.source_node_id not in node_ids:
+            raise ValueError(f"Edge source node '{edge.source_node_id}' not found in nodes.")
+
+        # ConditionalEdge mapping targets
+        if isinstance(edge, ConditionalEdge):
+            for target_id in edge.mapping.values():
+                if target_id not in node_ids:
+                    raise ValueError(f"ConditionalEdge target node '{target_id}' not found in nodes.")
+        else:
+            # Regular Edge
+            if edge.target_node_id not in node_ids:
+                raise ValueError(f"Edge target node '{edge.target_node_id}' not found in nodes.")
+
+
+class GraphTopology(CoReasonBaseModel):
     """The topology definition of the recipe.
 
     Attributes:
@@ -249,7 +329,13 @@ class GraphTopology(BaseModel):
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
-    state_schema: Optional[StateSchema] = Field(None, description="Schema definition for the graph state.")
+    state_schema: Optional[StateDefinition] = Field(default=None, description="Schema definition for the graph state.")
+
+    @model_validator(mode="after")
+    def validate_graph_integrity(self) -> "GraphTopology":
+        """Ensures that all edges point to valid nodes."""
+        validate_edge_integrity(self.nodes, self.edges)
+        return self
 
 
 Topology = GraphTopology

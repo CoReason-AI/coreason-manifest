@@ -21,7 +21,9 @@ The root object for a workflow.
 - **interface**: Defines the Input/Output contract (`RecipeInterface`).
 - **state**: Defines the internal memory schema (`StateDefinition`).
 - **parameters**: Build-time configuration constants (`Dict[str, Any]`).
-- **graph**: The topology (`GraphTopology`).
+- **topology**: The topology definition of the workflow (`GraphTopology`).
+- **integrity_hash**: SHA256 hash of the canonical JSON representation of the topology.
+- **metadata**: Container for design-time data.
 
 ### RecipeInterface
 
@@ -45,12 +47,7 @@ Contains the nodes and edges, plus state configuration.
 - **edges**: List of `Edge` or `ConditionalEdge` objects.
 - **state_schema**: (Optional) Definition of the graph's state structure and persistence.
 
-#### StateSchema
-
-Defines the data structure passed between nodes.
-
-- **data_schema**: JSON Schema or Pydantic definition.
-- **persistence**: Checkpointing strategy (e.g., `'memory'`, `'redis'`).
+**Validation**: `GraphTopology` enforces integrity by ensuring that every `source_node_id` and `target_node_id` referenced in edges exists within the `nodes` list.
 
 ### Nodes
 
@@ -59,7 +56,10 @@ Nodes are polymorphic and can be one of the following types:
 #### 1. AgentNode (`type="agent"`)
 Executes a specific atomic agent.
 - **agent_name**: The name of the atomic agent to call.
+- **system_prompt**: Overrides the registry default prompt.
+- **config**: Runtime-specific configuration (e.g., model parameters).
 - **council_config**: Optional configuration for architectural triangulation (e.g., voting).
+- **overrides**: Optional runtime overrides for the agent (e.g., temperature, prompt_template_vars).
 
 #### 2. HumanNode (`type="human"`)
 Pauses execution for user input or approval.
@@ -81,6 +81,8 @@ Executes a sub-branch in parallel for each item in a list (Map-Reduce).
 - **processor_node_id**: The node/subgraph to run for each item.
 - **concurrency_limit**: Max parallel executions.
 
+**Common Fields**: All nodes include an optional `metadata` dictionary for operational context (cost tracking, SLAs, etc.).
+
 ### Edges
 
 Connections between nodes.
@@ -94,7 +96,7 @@ Simple transition.
 #### ConditionalEdge (Dynamic Routing)
 Routes to one of multiple targets based on logic.
 - **source_node_id**: ID of the source node.
-- **router_logic**: Python function or expression determining the path.
+- **router_logic**: Python function reference (dotted path) or expression definition determining the path.
 - **mapping**: Map of router output values to target node IDs.
 
 ## Edge Cases & Validation
@@ -111,38 +113,47 @@ The schema enforces strict validation to prevent runtime errors. Common edge cas
 ```python
 from coreason_manifest import (
     RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
-    ConditionalEdge, StateSchema
+    ConditionalEdge, StateDefinition
 )
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 # Define Nodes
 agent_node = AgentNode(
     id="step_1",
     type="agent",
     agent_name="ResearchAgent",
-    visual={"label": "Research Phase"}
+    visual={"label": "Research Phase"},
+    overrides={"temperature": 0.2}
 )
 
 human_node = HumanNode(
     id="step_2",
     type="human",
     timeout_seconds=3600,
-    visual={"label": "Approval"}
+    visual={"label": "Approval"},
+    metadata={"cost_center": "marketing"}
 )
 
 # Define Dynamic Routing
 router = ConditionalEdge(
     source_node_id="step_2",
-    router_logic="lambda state: 'approved' if state['approved'] else 'rejected'",
+    router_logic="logic.approve_or_reject",
     mapping={
         "approved": "step_3_publish",
         "rejected": "step_1_revise"
     }
 )
 
-# Define State
-state = StateSchema(
-    data_schema={"type": "object", "properties": {"approved": {"type": "boolean"}}},
+# Define State Schema
+state_def = StateDefinition(
+    schema={
+        "type": "object",
+        "properties": {
+            "approved": {"type": "boolean"},
+            "messages": {"type": "array"},
+            "draft": {"type": "string"}
+        }
+    },
     persistence="redis"
 )
 
@@ -163,32 +174,21 @@ interface = RecipeInterface(
     }
 )
 
-# Define State
-state = StateDefinition(
-    schema={
-        "type": "object",
-        "properties": {
-            "messages": {"type": "array"},
-            "draft": {"type": "string"}
-        }
-    },
-    persistence="ephemeral"
-)
-
 # Create Manifest
+# Note: In a real scenario, you'd define all referenced nodes (like step_3_publish)
+# or the validation would fail.
 recipe = RecipeManifest(
     id="research_workflow",
     version="1.0.0",
     name="Research Approval Workflow",
     interface=interface,
-    state=state,
+    state=state_def,
     parameters={"model": "gpt-4"},
     description="A simple approval workflow.",
-    inputs={"topic": "str"},
-    graph=GraphTopology(
-        nodes=[agent_node, human_node],
+    topology=GraphTopology(
+        nodes=[agent_node, human_node], # + other nodes referenced in edges
         edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
-        state_schema=state
+        state_schema=state_def
     )
 )
 

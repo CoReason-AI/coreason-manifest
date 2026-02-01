@@ -1,3 +1,13 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import uuid
 from datetime import datetime, timezone
 
@@ -113,7 +123,12 @@ def test_recipe_manifest_legacy_key_rejection() -> None:
 def test_agent_runtime_config_validation() -> None:
     """Test that AgentRuntimeConfig (new name) works correctly."""
     config = AgentRuntimeConfig(
-        nodes=[], edges=[], entry_point="start", model_config={"model": "gpt-4", "temperature": 0.5}
+        nodes=[],
+        edges=[],
+        entry_point="start",
+        llm_config={"model": "gpt-4", "temperature": 0.5},
+        system_prompt="Valid",
     )
-    assert config.model_config.get("extra") == "forbid"
+    # Check the class configuration directly
+    assert AgentRuntimeConfig.model_config.get("extra") == "forbid"
     assert hasattr(config, "nodes")

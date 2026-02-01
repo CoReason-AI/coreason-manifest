@@ -1,11 +1,23 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import json
 import uuid
 from datetime import datetime, timezone
 
 from coreason_manifest.definitions.simulation import (
+    SimulationMetrics,
     SimulationScenario,
     SimulationStep,
     SimulationTrace,
+    StepType,
     ValidationLogic,
 )
 
@@ -27,7 +39,11 @@ def test_trace_validity() -> None:
     )
 
     trace = SimulationTrace(
-        trace_id=trace_id, agent_version="1.0.0", steps=[step], outcome={"success": True}, metrics={"tokens": 100}
+        trace_id=trace_id,
+        agent_version="1.0.0",
+        steps=[step],
+        outcome={"success": True},
+        metrics=SimulationMetrics(turn_count=1, total_tokens=100),
     )
 
     # Verify serialization
@@ -52,3 +68,27 @@ def test_scenario_creation() -> None:
     )
     assert scenario.difficulty == 2
     assert scenario.validation_logic == "exact_match"
+
+
+def test_simulation_metrics() -> None:
+    """Test SimulationMetrics fields."""
+    metrics = SimulationMetrics(turn_count=5, total_tokens=100)
+    assert metrics.turn_count == 5
+    assert metrics.total_tokens == 100
+    assert metrics.cost_usd is None
+
+
+def test_simulation_step_system_event() -> None:
+    """Test SimulationStep with SYSTEM_EVENT type."""
+    step = SimulationStep(
+        step_id=uuid.uuid4(),
+        timestamp=datetime.now(timezone.utc),
+        type=StepType.SYSTEM_EVENT,
+        node_id="system",
+        inputs={"error": "failed"},
+        # thought, action, observation are optional now
+    )
+    assert step.type == StepType.SYSTEM_EVENT
+    assert step.thought is None
+    assert step.action is None
+    assert step.observation is None

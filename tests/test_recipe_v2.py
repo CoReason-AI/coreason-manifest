@@ -1,4 +1,14 @@
 # Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+# Copyright (c) 2025 CoReason, Inc.
 
 import json
 
@@ -6,7 +16,8 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import RecipeManifest, Topology
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.definitions.topology import StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 
 def test_full_recipe_v2_creation() -> None:
@@ -24,7 +35,7 @@ def test_full_recipe_v2_creation() -> None:
     )
 
     state = StateDefinition(
-        schema={
+        schema_={
             "type": "object",
             "properties": {
                 "messages": {"type": "array"},
@@ -60,7 +71,7 @@ def test_recipe_v2_serialization() -> None:
         version="2.0.0",
         name="Research Agent",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={"foo": "bar"}, persistence="ephemeral"),
+        state=StateDefinition(schema_={"foo": "bar"}, persistence="ephemeral"),
         parameters={},
         topology=Topology(nodes=[], edges=[]),
     )
@@ -88,7 +99,7 @@ def test_recipe_v2_validation_error() -> None:
             version="1.0.0",
             name="n",
             # interface missing
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=Topology(nodes=[], edges=[]),
         )  # type: ignore[call-arg]
@@ -118,7 +129,7 @@ def test_recipe_v2_extra_fields() -> None:
             version="1.0.0",
             name="n",
             interface=RecipeInterface(inputs={}, outputs={}),
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=Topology(nodes=[], edges=[]),
             extra_field="fail",  # type: ignore[call-arg]

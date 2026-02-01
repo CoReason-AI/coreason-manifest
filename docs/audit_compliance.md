@@ -8,7 +8,8 @@ The `AuditLog` structure provides a tamper-evident legal record of agent actions
 
 ### AuditLog
 
-- **id** (`UUID`): Unique identifier.
+- **audit_id** (`UUID`): Unique identifier.
+- **trace_id** (`str`): Trace ID for OTel correlation.
 - **timestamp** (`datetime`): ISO8601 timestamp.
 - **actor** (`str`): User ID or Agent Component ID.
 - **event_type** (`AuditEventType`): Type of event (`system_change`, `prediction`, `guardrail_trigger`).

@@ -1,3 +1,13 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import pytest
 from pydantic import ValidationError
 
@@ -8,7 +18,7 @@ from coreason_manifest.definitions.events import (
     CouncilVotePayload,
     EdgeTraversed,
     EdgeTraversedPayload,
-    GraphEvent,
+    GraphEventNodeInit,
     NodeCompleted,
     NodeCompletedPayload,
     NodeInit,
@@ -28,29 +38,29 @@ from coreason_manifest.definitions.events import (
 def test_graph_event_creation() -> None:
     """Test successful creation of a GraphEvent with NodeInit payload."""
     payload = NodeInit(node_id="node-1", type="AGENT", visual_cue="THINKING")
-    event = GraphEvent(
+    event = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run-1",
         trace_id="trace-1",
         node_id="node-1",
         timestamp=1234567890.0,
-        payload=payload.model_dump(),
+        payload=payload,
         visual_metadata={"color": "#FFFFFF"},
     )
     assert event.event_type == "NODE_INIT"
-    assert event.payload["type"] == "AGENT"
-    assert event.visual_metadata["color"] == "#FFFFFF"
+    assert event.payload.type == "AGENT"
+    assert event.visual_metadata.color == "#FFFFFF"
 
 
 def test_graph_event_default_trace_id() -> None:
     """Test default trace_id assignment."""
     payload = NodeInit(node_id="node-1")
-    event = GraphEvent(
+    event = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run-1",
         node_id="node-1",
         timestamp=1234567890.0,
-        payload=payload.model_dump(),
+        payload=payload,
         visual_metadata={"color": "#FFFFFF"},
     )
     assert event.trace_id == "unknown"
@@ -59,12 +69,12 @@ def test_graph_event_default_trace_id() -> None:
 def test_graph_event_validation_error_missing_fields() -> None:
     """Test validation error for missing required fields."""
     with pytest.raises(ValidationError):
-        GraphEvent(
+        GraphEventNodeInit(
             event_type="NODE_INIT",
             # run_id is missing
             node_id="node-1",
             timestamp=1234567890.0,
-            payload={},
+            payload=NodeInit(node_id="node-1"),
             visual_metadata={},
         )  # type: ignore[call-arg]
 
@@ -73,15 +83,15 @@ def test_graph_event_extra_forbid() -> None:
     """Test that extra fields are forbidden."""
     payload = NodeInit(node_id="node-1")
     with pytest.raises(ValidationError):
-        GraphEvent(
+        GraphEventNodeInit(
             event_type="NODE_INIT",
             run_id="run-1",
             node_id="node-1",
             timestamp=1234567890.0,
-            payload=payload.model_dump(),
+            payload=payload,
             visual_metadata={"color": "#FFFFFF"},
-            extra_field="this should fail",
-        )  # type: ignore[call-arg]
+            extra_field="this should fail",  # type: ignore[call-arg]
+        )
 
 
 def test_node_started_payload() -> None:
