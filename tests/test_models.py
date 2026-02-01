@@ -16,7 +16,9 @@ from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
+    AgentInterface,
     AgentMetadata,
+    EventSchema,
     ModelConfig,
     Persona,
 )
@@ -229,3 +231,28 @@ def test_agent_config_system_prompt() -> None:
     agent = AgentDefinition(**valid_data)
     assert agent.config.system_prompt is None
     assert agent.config.llm_config.system_prompt == "Model Prompt"
+
+
+def test_agent_interface_events() -> None:
+    """Test AgentInterface with EventSchema."""
+    event = EventSchema(
+        name="SEARCH_PROGRESS",
+        data_schema={"type": "object", "properties": {"query": {"type": "string"}}},
+    )
+    assert event.name == "SEARCH_PROGRESS"
+    assert event.data_schema["type"] == "object"
+
+    interface = AgentInterface(
+        inputs={"type": "object"},
+        outputs={"type": "string"},
+        events=[event],
+    )
+    assert len(interface.events) == 1
+    assert interface.events[0].name == "SEARCH_PROGRESS"
+
+    # Test default factory
+    interface_empty = AgentInterface(
+        inputs={"type": "object"},
+        outputs={"type": "string"},
+    )
+    assert interface_empty.events == []

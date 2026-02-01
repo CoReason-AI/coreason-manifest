@@ -33,7 +33,7 @@
     },
     "AgentInterface": {
       "additionalProperties": false,
-      "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.",
+      "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.",
       "properties": {
         "inputs": {
           "additionalProperties": true,
@@ -46,6 +46,14 @@
           "description": "Typed structure of the result.",
           "title": "Outputs",
           "type": "object"
+        },
+        "events": {
+          "description": "List of intermediate events this agent produces during execution.",
+          "items": {
+            "$ref": "#/$defs/EventSchema"
+          },
+          "title": "Events",
+          "type": "array"
         },
         "injected_params": {
           "description": "List of parameters injected by the system.",
@@ -387,6 +395,29 @@
         "target_node_id"
       ],
       "title": "Edge",
+      "type": "object"
+    },
+    "EventSchema": {
+      "additionalProperties": false,
+      "description": "Defines the structure of an intermediate event emitted by the agent.",
+      "properties": {
+        "name": {
+          "description": "Event name (e.g., 'SEARCH_PROGRESS').",
+          "title": "Name",
+          "type": "string"
+        },
+        "data_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema of the event payload.",
+          "title": "Data Schema",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "data_schema"
+      ],
+      "title": "EventSchema",
       "type": "object"
     },
     "HumanNode": {
