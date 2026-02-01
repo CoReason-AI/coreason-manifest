@@ -39,7 +39,7 @@ def test_state_schema_validation_types() -> None:
 def test_state_schema_missing_fields() -> None:
     """Test validation fails for missing required fields."""
     with pytest.raises(ValidationError) as excinfo:
-        StateSchema(persistence="memory")  # type: ignore[call-arg]
+        StateSchema(persistence="memory")
     assert "Field required" in str(excinfo.value)
     assert "data_schema" in str(excinfo.value)
 
@@ -48,7 +48,7 @@ def test_state_schema_extra_forbid() -> None:
     """Test that extra fields are forbidden."""
     schema_def = {"type": "object"}
     with pytest.raises(ValidationError) as excinfo:
-        StateSchema(data_schema=schema_def, persistence="memory", extra_field="fail")  # type: ignore[call-arg]
+        StateSchema(data_schema=schema_def, persistence="memory", extra_field="fail")
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
 
@@ -71,7 +71,7 @@ def test_conditional_edge_creation() -> None:
 def test_conditional_edge_missing_fields() -> None:
     """Test validation fails for missing required fields in ConditionalEdge."""
     with pytest.raises(ValidationError) as excinfo:
-        ConditionalEdge(source_node_id="start")  # type: ignore[call-arg]
+        ConditionalEdge(source_node_id="start")
     assert "Field required" in str(excinfo.value)
     assert "router_logic" in str(excinfo.value)
 
@@ -95,7 +95,7 @@ def test_topology_mixed_edges() -> None:
 def test_conditional_edge_extra_forbid() -> None:
     """Test that extra fields are forbidden in ConditionalEdge."""
     with pytest.raises(ValidationError):
-        ConditionalEdge(source_node_id="a", router_logic="l", mapping={"x": "y"}, extra="fail")  # type: ignore[call-arg]
+        ConditionalEdge(source_node_id="a", router_logic="l", mapping={"x": "y"}, extra="fail")
 
 
 def test_recipe_node_creation() -> None:
@@ -114,7 +114,7 @@ def test_recipe_node_creation() -> None:
 def test_recipe_node_missing_fields() -> None:
     """Test validation fails for missing required fields in RecipeNode."""
     with pytest.raises(ValidationError) as excinfo:
-        RecipeNode(id="r1", type="recipe", recipe_id="r")  # type: ignore[call-arg]
+        RecipeNode(id="r1", type="recipe", recipe_id="r")
     assert "Field required" in str(excinfo.value)
     assert "input_mapping" in str(excinfo.value)
 
@@ -129,7 +129,7 @@ def test_graph_topology_with_recipe_node() -> None:
 def test_recipe_node_extra_forbid() -> None:
     """Test extra fields forbidden in RecipeNode."""
     with pytest.raises(ValidationError):
-        RecipeNode(id="r", type="recipe", recipe_id="r", input_mapping={}, output_mapping={}, extra="fail")  # type: ignore[call-arg]
+        RecipeNode(id="r", type="recipe", recipe_id="r", input_mapping={}, output_mapping={}, extra="fail")
 
 
 def test_map_node_creation() -> None:
@@ -144,7 +144,7 @@ def test_map_node_creation() -> None:
 def test_map_node_missing_fields() -> None:
     """Test validation fails for missing required fields in MapNode."""
     with pytest.raises(ValidationError) as excinfo:
-        MapNode(id="map1", type="map", items_path="p")  # type: ignore[call-arg]
+        MapNode(id="map1", type="map", items_path="p")
     assert "Field required" in str(excinfo.value)
     assert "processor_node_id" in str(excinfo.value)
 
@@ -159,4 +159,4 @@ def test_graph_topology_with_map_node() -> None:
 def test_map_node_extra_forbid() -> None:
     """Test extra fields forbidden in MapNode."""
     with pytest.raises(ValidationError):
-        MapNode(id="m", type="map", items_path="p", processor_node_id="n", concurrency_limit=1, extra="fail")  # type: ignore[call-arg]
+        MapNode(id="m", type="map", items_path="p", processor_node_id="n", concurrency_limit=1, extra="fail")

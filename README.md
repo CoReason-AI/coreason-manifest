@@ -20,6 +20,16 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 *   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
 *   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
 *   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation.
+*   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like UUID and datetime.
+
+## Serialization & Base Model
+
+All core definitions (`AgentDefinition`, `RecipeManifest`, `GraphTopology`, `AuditLog`) inherit from `CoReasonBaseModel`. This provides a consistent interface for serialization, solving common Pydantic v2 issues with `UUID` and `datetime`.
+
+*   Use `.dump()` to get a JSON-compatible dictionary (where UUIDs/datetimes are strings).
+*   Use `.to_json()` to get a JSON string.
+
+For a detailed rationale, see [docs/coreason_base_model_rationale.md](docs/coreason_base_model_rationale.md).
 
 ## Installation
 

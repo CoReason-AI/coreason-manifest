@@ -51,10 +51,10 @@ def test_deep_immutability_mapping_proxy() -> None:
 
     # inputs should be read-only
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
-        agent.interface.inputs["param"] = 2  # type: ignore[index]
+        agent.interface.inputs["param"] = 2
 
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
-        agent.interface.inputs["new"] = 3  # type: ignore[index]
+        agent.interface.inputs["new"] = 3
 
 
 def test_deep_immutability_tuples() -> None:
@@ -97,11 +97,11 @@ def test_deep_immutability_tuples() -> None:
 
     # Test field immutability (model is frozen)
     with pytest.raises(ValidationError, match="Instance is frozen"):
-        agent.dependencies.libraries = ("a",)  # type: ignore[misc]
+        agent.dependencies.libraries = ("a",)
 
     # Test tools field immutability (model is frozen)
     with pytest.raises(ValidationError, match="Instance is frozen"):
-        agent.dependencies.tools = []  # type: ignore[misc]
+        agent.dependencies.tools = []
 
     # Note: agent.dependencies.tools is a list, so its CONTENTS are mutable,
     # but the field itself cannot be reassigned.

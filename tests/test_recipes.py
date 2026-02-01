@@ -31,7 +31,7 @@ def test_recipe_manifest_creation() -> None:
         name="Test Recipe",
         description="A test recipe",
         interface=RecipeInterface(inputs={"param1": "value1"}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=topology,
     )
@@ -46,7 +46,7 @@ def test_recipe_manifest_creation() -> None:
 def test_version_validation() -> None:
     """Test strict version validation."""
     interface = RecipeInterface(inputs={}, outputs={})
-    state = StateDefinition(schema={}, persistence="ephemeral")
+    state = StateDefinition(schema_={}, persistence="ephemeral")
     params: dict[str, str] = {}
 
     # Valid versions (normalized)
@@ -116,7 +116,7 @@ def test_serialization() -> None:
         version="1.0.0",
         name="n",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[node], edges=[]),
     )

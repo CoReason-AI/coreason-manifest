@@ -14,7 +14,13 @@ from pydantic import BaseModel, ConfigDict
 
 
 class CoReasonBaseModel(BaseModel):
-    """Base model for all CoReason Pydantic models with enhanced serialization."""
+    """Base model for all CoReason Pydantic models with enhanced serialization.
+
+    This base class addresses JSON serialization challenges in Pydantic v2 (e.g., UUID, datetime)
+    by providing standardized methods (`dump`, `to_json`) with optimal configuration.
+
+    For a detailed rationale, see `docs/coreason_base_model_rationale.md`.
+    """
 
     model_config = ConfigDict(populate_by_name=True)
 

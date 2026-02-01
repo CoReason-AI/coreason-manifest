@@ -70,7 +70,7 @@ def test_recipe_v2_serialization() -> None:
         version="2.0.0",
         name="Research Agent",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={"foo": "bar"}, persistence="ephemeral"),
+        state=StateDefinition(schema_={"foo": "bar"}, persistence="ephemeral"),
         parameters={},
         topology=Topology(nodes=[], edges=[]),
     )
@@ -98,10 +98,10 @@ def test_recipe_v2_validation_error() -> None:
             version="1.0.0",
             name="n",
             # interface missing
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=Topology(nodes=[], edges=[]),
-        )  # type: ignore[call-arg]
+        )
     assert "interface" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
 
@@ -115,7 +115,7 @@ def test_recipe_v2_validation_error() -> None:
             # state missing
             parameters={},
             topology=Topology(nodes=[], edges=[]),
-        )  # type: ignore[call-arg]
+        )
     assert "state" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
 
@@ -128,9 +128,9 @@ def test_recipe_v2_extra_fields() -> None:
             version="1.0.0",
             name="n",
             interface=RecipeInterface(inputs={}, outputs={}),
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=Topology(nodes=[], edges=[]),
-            extra_field="fail",  # type: ignore[call-arg]
+            extra_field="fail",
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)

@@ -29,12 +29,12 @@ def test_recipe_interface_valid() -> None:
 def test_recipe_interface_invalid_missing_fields() -> None:
     """Test validation failure for missing fields in RecipeInterface."""
     with pytest.raises(ValidationError):
-        RecipeInterface(inputs={})  # type: ignore[call-arg]
+        RecipeInterface(inputs={})
 
 
 def test_state_definition_valid_defaults() -> None:
     """Test creating a valid StateDefinition with defaults."""
-    state = StateDefinition(schema={"type": "object", "properties": {"messages": {"type": "array"}}})
+    state = StateDefinition(schema_={"type": "object", "properties": {"messages": {"type": "array"}}})
     assert state.schema_["type"] == "object"
     assert state.persistence == "ephemeral"
 

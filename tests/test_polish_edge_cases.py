@@ -27,7 +27,7 @@ def test_audit_log_legacy_key_rejection() -> None:
     now = datetime.now(timezone.utc)
     with pytest.raises(ValidationError) as exc:
         AuditLog(
-            id=uuid.uuid4(),  # Legacy key  # type: ignore[call-arg]
+            id=uuid.uuid4(),  # Legacy key
             trace_id="trace-123",
             timestamp=now,
             actor="user",
@@ -35,7 +35,7 @@ def test_audit_log_legacy_key_rejection() -> None:
             safety_metadata={},
             previous_hash="abc",
             integrity_hash="def",
-        )  # type: ignore[call-arg]
+        )
     # Pydantic v2 error for extra fields (if extra="forbid" which is default for these models usually)
     # or missing required field 'audit_id'
     error_str = str(exc.value)
@@ -55,7 +55,7 @@ def test_audit_log_trace_id_requirement() -> None:
             safety_metadata={},
             previous_hash="abc",
             integrity_hash="def",
-        )  # type: ignore[call-arg]
+        )
     assert "trace_id" in str(exc.value)
 
 
@@ -63,12 +63,12 @@ def test_gen_ai_operation_legacy_key_rejection() -> None:
     """Test that instantiating GenAIOperation with legacy 'id' field fails."""
     with pytest.raises(ValidationError) as exc:
         GenAIOperation(
-            id="span-123",  # Legacy  # type: ignore[call-arg]
+            id="span-123",  # Legacy
             trace_id="trace-123",
             operation_name="test",
             provider="openai",
             model="gpt-4",
-        )  # type: ignore[call-arg]
+        )
     error_str = str(exc.value)
     assert "span_id" in error_str and "Field required" in error_str
 
@@ -123,7 +123,8 @@ def test_recipe_manifest_legacy_key_rejection() -> None:
 def test_agent_runtime_config_validation() -> None:
     """Test that AgentRuntimeConfig (new name) works correctly."""
     config = AgentRuntimeConfig(
-        nodes=[], edges=[], entry_point="start", model_config={"model": "gpt-4", "temperature": 0.5}
+        nodes=[], edges=[], entry_point="start", llm_config={"model": "gpt-4", "temperature": 0.5}
     )
-    assert config.model_config.get("extra") == "forbid"
+    # Check the class configuration directly
+    assert AgentRuntimeConfig.model_config.get("extra") == "forbid"
     assert hasattr(config, "nodes")

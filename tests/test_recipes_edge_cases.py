@@ -35,7 +35,7 @@ def test_strict_schema_extra_fields() -> None:
             id="n1",
             type="agent",
             agent_name="A1",
-            extra_field="should_fail",  # type: ignore[call-arg]
+            extra_field="should_fail",
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
@@ -46,10 +46,10 @@ def test_strict_schema_extra_fields() -> None:
             version="1.0.0",
             name="N",
             interface=RecipeInterface(inputs={}, outputs={}),
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=GraphTopology(nodes=[], edges=[]),
-            extra_thing="bad",  # type: ignore[call-arg]
+            extra_thing="bad",
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
@@ -58,7 +58,7 @@ def test_missing_required_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     # AgentNode requires 'agent_name'
     with pytest.raises(ValidationError) as excinfo:
-        AgentNode(id="n1", type="agent")  # type: ignore[call-arg]
+        AgentNode(id="n1", type="agent")
     assert "Field required" in str(excinfo.value)
     assert "agent_name" in str(excinfo.value)
 
@@ -70,7 +70,7 @@ def test_recursive_version_normalization() -> None:
         version="vVv1.5.0",
         name="Test",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[], edges=[]),
     )
@@ -89,7 +89,7 @@ def test_complex_inputs_structure() -> None:
         version="1.0.0",
         name="Test",
         interface=RecipeInterface(inputs=complex_inputs, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[], edges=[]),
     )
@@ -116,7 +116,7 @@ def test_large_topology_serialization() -> None:
         version="1.0.0",
         name="Large Recipe",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=topology,
     )
