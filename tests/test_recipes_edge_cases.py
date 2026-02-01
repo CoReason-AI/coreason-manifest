@@ -13,8 +13,8 @@ from pydantic import ValidationError
 
 from coreason_manifest import Edge, RecipeManifest
 from coreason_manifest import Topology as GraphTopology
-from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode, StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 
 def test_invalid_node_discriminator() -> None:

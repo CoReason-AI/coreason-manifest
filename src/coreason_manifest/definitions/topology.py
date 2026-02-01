@@ -19,7 +19,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Union
 
 from pydantic import ConfigDict, Field, StringConstraints, model_validator
 
@@ -287,8 +287,8 @@ class ConditionalEdge(CoReasonBaseModel):
 
 
 def validate_edge_integrity(
-    nodes: List[Node],
-    edges: List[Union[Edge, ConditionalEdge]],
+    nodes: Sequence[Node],
+    edges: Sequence[Union[Edge, ConditionalEdge]],
 ) -> None:
     """Ensures that all edges point to valid nodes.
 
@@ -329,9 +329,7 @@ class GraphTopology(CoReasonBaseModel):
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
-    state_schema: Optional[StateDefinition] = Field(
-        default=None, description="Schema definition for the graph state."
-    )
+    state_schema: Optional[StateDefinition] = Field(default=None, description="Schema definition for the graph state.")
 
     @model_validator(mode="after")
     def validate_graph_integrity(self) -> "GraphTopology":

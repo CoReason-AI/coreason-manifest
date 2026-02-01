@@ -25,7 +25,7 @@ from coreason_manifest.definitions.topology import (
 def test_state_schema_creation() -> None:
     """Test creating a valid StateDefinition."""
     schema_def = {"type": "object", "properties": {"messages": {"type": "array"}}}
-    state = StateDefinition(schema=schema_def, persistence="ephemeral")
+    state = StateDefinition(schema_=schema_def, persistence="ephemeral")
     assert state.schema_ == schema_def
     assert state.persistence == "ephemeral"
 
@@ -33,7 +33,7 @@ def test_state_schema_creation() -> None:
 def test_state_schema_validation_types() -> None:
     """Test validation fails for invalid types."""
     with pytest.raises(ValidationError):
-        StateDefinition(schema="not-a-dict", persistence="ephemeral")
+        StateDefinition(schema_="not-a-dict", persistence="ephemeral")
 
 
 def test_state_schema_missing_fields() -> None:
@@ -48,14 +48,14 @@ def test_state_schema_extra_forbid() -> None:
     """Test that extra fields are forbidden."""
     schema_def = {"type": "object"}
     with pytest.raises(ValidationError) as excinfo:
-        StateDefinition(schema=schema_def, persistence="ephemeral", extra_field="fail")  # type: ignore[call-arg]
+        StateDefinition(schema_=schema_def, persistence="ephemeral", extra_field="fail")  # type: ignore[call-arg]
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
 
 def test_graph_topology_with_state_schema() -> None:
     """Test integrating StateDefinition into GraphTopology."""
     schema_def = {"type": "object", "properties": {"messages": {"type": "array"}}}
-    state = StateDefinition(schema=schema_def, persistence="ephemeral")
+    state = StateDefinition(schema_=schema_def, persistence="ephemeral")
     topology = GraphTopology(nodes=[], edges=[], state_schema=state)
     assert topology.state_schema == state
     assert topology.state_schema.persistence == "ephemeral"

@@ -42,7 +42,7 @@ def test_state_schema_invalid_persistence_type() -> None:
     """Test validation fails for non-string persistence."""
     with pytest.raises(ValidationError):
         StateDefinition(
-            schema={},
+            schema_={},
             persistence=123,
         )
 

@@ -1,6 +1,6 @@
 from coreason_manifest.definitions.agent import VersionStr
-from coreason_manifest.definitions.topology import AgentNode, GraphTopology
-from coreason_manifest.recipes import RecipeInterface, RecipeManifest, StateDefinition
+from coreason_manifest.definitions.topology import AgentNode, GraphTopology, StateDefinition
+from coreason_manifest.recipes import RecipeInterface, RecipeManifest
 
 
 def test_agent_node_v0_10_0_features() -> None:
@@ -65,7 +65,7 @@ def test_graph_topology_state_schema_optional() -> None:
     # Also verify we can provide it
     from coreason_manifest.definitions.topology import StateDefinition
 
-    schema = StateDefinition(schema={}, persistence="ephemeral")
+    schema = StateDefinition(schema_={}, persistence="ephemeral")
     topology_with_schema = GraphTopology(nodes=[], edges=[], state_schema=schema)
     assert topology_with_schema.state_schema == schema
 
