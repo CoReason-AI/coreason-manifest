@@ -5,5 +5,6 @@ nav:
   - Home: index.md
   - Requirements: requirements.md
   - Usage: usage.md
+  - Session Management: session_management.md
   - Observability: observability.md
   - Recipes: recipes.md
