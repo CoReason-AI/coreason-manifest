@@ -32,6 +32,7 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .session import Interaction, SessionState
 
 __all__ = [
     "AgentRuntimeConfig",
@@ -57,4 +58,6 @@ __all__ = [
     "ArtifactGeneratedPayload",
     "CouncilVotePayload",
     "WorkflowErrorPayload",
+    "Interaction",
+    "SessionState",
 ]
