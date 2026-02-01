@@ -37,6 +37,12 @@ For atomic agents, `nodes`, `edges`, and `entry_point` are optional. You define 
 -   `entry_point`: Defaults to `None`.
 -   `system_prompt`: The instruction for the agent.
 
+**Requirement:** An Atomic Agent (where `nodes` is empty) **MUST** have a `system_prompt` defined either:
+1.  Globally in `AgentRuntimeConfig.system_prompt`
+2.  Or within `ModelConfig.system_prompt` (via `llm_config`)
+
+If neither is provided, validation will fail.
+
 ```python
 config = AgentRuntimeConfig(
     model_config=ModelConfig(
@@ -57,7 +63,7 @@ config = AgentRuntimeConfig(
 The `AgentRuntimeConfig` includes a validator `validate_topology_or_atomic` that enforces:
 
 -   If `nodes` are present (graph-based), `entry_point` MUST be provided.
--   If `nodes` are empty (atomic), `entry_point` is optional (and typically `None`).
+-   If `nodes` are empty (atomic), a `system_prompt` MUST be provided (globally or in model config).
 
 ## Inline Tool Definitions
 
