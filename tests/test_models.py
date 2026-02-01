@@ -17,6 +17,7 @@ from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
     ModelConfig,
+    Persona,
 )
 
 
@@ -176,3 +177,10 @@ def test_model_config_system_prompt() -> None:
 
     config_no_prompt = ModelConfig(model="gpt-4", temperature=0.7)
     assert config_no_prompt.system_prompt is None
+
+
+def test_persona() -> None:
+    """Test Persona model."""
+    persona = Persona(name="Helper", description="A helpful assistant", directives=["Be nice", "Help user"])
+    assert persona.name == "Helper"
+    assert len(persona.directives) == 2
