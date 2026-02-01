@@ -184,3 +184,34 @@ def test_persona() -> None:
     persona = Persona(name="Helper", description="A helpful assistant", directives=["Be nice", "Help user"])
     assert persona.name == "Helper"
     assert len(persona.directives) == 2
+
+
+def test_agent_config_system_prompt() -> None:
+    """Test AgentRuntimeConfig with system_prompt."""
+    valid_data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Test Agent",
+            "author": "Test Author",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "interface": {"inputs": {}, "outputs": {}},
+        "config": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Global instruction",
+        },
+        "dependencies": {},
+        "integrity_hash": "a" * 64,
+    }
+
+    agent = AgentDefinition(**valid_data)
+    assert agent.config.system_prompt == "Global instruction"
+
+    # Ensure optionality
+    del valid_data["config"]["system_prompt"]
+    agent = AgentDefinition(**valid_data)
+    assert agent.config.system_prompt is None

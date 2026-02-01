@@ -222,6 +222,19 @@
         "model_config": {
           "$ref": "#/$defs/ModelConfig",
           "description": "Specific LLM parameters."
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The global system prompt/instruction for the agent.",
+          "title": "System Prompt"
         }
       },
       "required": [

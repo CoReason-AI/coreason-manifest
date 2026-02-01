@@ -165,6 +165,7 @@ class AgentRuntimeConfig(BaseModel):
     edges: List[Edge] = Field(..., description="Directed connections defining control flow.")
     entry_point: str = Field(..., description="The ID of the starting node.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
+    system_prompt: Optional[str] = Field(None, description="The global system prompt/instruction for the agent.")
 
     @field_validator("nodes")
     @classmethod
