@@ -47,13 +47,6 @@ Contains the nodes and edges, plus state configuration.
 
 **Validation**: `GraphTopology` enforces integrity by ensuring that every `source_node_id` and `target_node_id` referenced in edges exists within the `nodes` list.
 
-#### StateSchema
-
-Defines the data structure passed between nodes.
-
-- **data_schema**: JSON Schema or Pydantic definition.
-- **persistence**: Checkpointing strategy (e.g., `'memory'`, `'redis'`).
-
 ### Nodes
 
 Nodes are polymorphic and can be one of the following types:
@@ -116,9 +109,9 @@ The schema enforces strict validation to prevent runtime errors. Common edge cas
 ```python
 from coreason_manifest import (
     RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
-    ConditionalEdge, StateSchema
+    ConditionalEdge, StateDefinition
 )
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 # Define Nodes
 agent_node = AgentNode(
@@ -147,9 +140,16 @@ router = ConditionalEdge(
     }
 )
 
-# Define State
-state = StateSchema(
-    data_schema={"type": "object", "properties": {"approved": {"type": "boolean"}}},
+# Define State Schema
+state_def = StateDefinition(
+    schema={
+        "type": "object",
+        "properties": {
+            "approved": {"type": "boolean"},
+            "messages": {"type": "array"},
+            "draft": {"type": "string"}
+        }
+    },
     persistence="redis"
 )
 
@@ -170,18 +170,6 @@ interface = RecipeInterface(
     }
 )
 
-# Define State
-state_def = StateDefinition(
-    schema={
-        "type": "object",
-        "properties": {
-            "messages": {"type": "array"},
-            "draft": {"type": "string"}
-        }
-    },
-    persistence="ephemeral"
-)
-
 # Create Manifest
 # Note: In a real scenario, you'd define all referenced nodes (like step_3_publish)
 # or the validation would fail.
@@ -196,7 +184,7 @@ recipe = RecipeManifest(
     topology=GraphTopology(
         nodes=[agent_node, human_node], # + other nodes referenced in edges
         edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
-        state_schema=state
+        state_schema=state_def
     )
 )
 
