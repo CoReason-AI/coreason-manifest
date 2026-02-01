@@ -15,6 +15,7 @@ from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     Edge,
     GraphTopology,
+    LogicNode,
     MapNode,
     RecipeNode,
     StateSchema,
@@ -77,9 +78,15 @@ def test_conditional_edge_missing_fields() -> None:
 
 def test_topology_mixed_edges() -> None:
     """Test GraphTopology accepts both Edge and ConditionalEdge."""
+    # Create dummy nodes to satisfy validation
+    nodes = [
+        LogicNode(id="a", code="pass"),
+        LogicNode(id="b", code="pass"),
+        LogicNode(id="c", code="pass"),
+    ]
     edge1 = Edge(source_node_id="a", target_node_id="b")
     edge2 = ConditionalEdge(source_node_id="b", router_logic="routers.logic", mapping={"res": "c"})
-    topology = GraphTopology(nodes=[], edges=[edge1, edge2])
+    topology = GraphTopology(nodes=nodes, edges=[edge1, edge2])
     assert len(topology.edges) == 2
     assert isinstance(topology.edges[0], Edge)
     assert isinstance(topology.edges[1], ConditionalEdge)

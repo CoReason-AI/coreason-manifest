@@ -10,6 +10,29 @@
 
 from .definitions.agent import AgentDefinition, Persona
 from .definitions.audit import AuditLog
+from .definitions.events import (
+    ArtifactGenerated,
+    CouncilVote,
+    EdgeTraversed,
+    GraphEvent,
+    GraphEventArtifactGenerated,
+    GraphEventCouncilVote,
+    GraphEventEdgeActive,
+    GraphEventError,
+    GraphEventNodeDone,
+    GraphEventNodeInit,
+    GraphEventNodeRestored,
+    GraphEventNodeSkipped,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
+    NodeCompleted,
+    NodeInit,
+    NodeRestored,
+    NodeSkipped,
+    NodeStarted,
+    NodeStream,
+    WorkflowError,
+)
 from .definitions.simulation import (
     SimulationMetrics,
     SimulationScenario,
@@ -18,15 +41,38 @@ from .definitions.simulation import (
     StepType,
 )
 from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
-from .definitions.topology import Edge, Node, Topology
+from .definitions.topology import AgentNode, Edge, GraphTopology, Node, Topology
 from .recipes import RecipeManifest
 
 __all__ = [
     "AgentDefinition",
     "Persona",
     "Topology",
+    "GraphTopology",
     "Node",
+    "AgentNode",
     "Edge",
+    "GraphEvent",
+    "GraphEventNodeInit",
+    "GraphEventNodeStart",
+    "GraphEventNodeDone",
+    "GraphEventNodeStream",
+    "GraphEventNodeSkipped",
+    "GraphEventNodeRestored",
+    "GraphEventEdgeActive",
+    "GraphEventCouncilVote",
+    "GraphEventError",
+    "GraphEventArtifactGenerated",
+    "NodeInit",
+    "NodeStarted",
+    "NodeCompleted",
+    "NodeStream",
+    "NodeSkipped",
+    "NodeRestored",
+    "WorkflowError",
+    "CouncilVote",
+    "ArtifactGenerated",
+    "EdgeTraversed",
     "SimulationScenario",
     "SimulationTrace",
     "SimulationStep",

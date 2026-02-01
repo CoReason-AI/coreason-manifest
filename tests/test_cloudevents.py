@@ -21,7 +21,12 @@ from coreason_manifest.definitions.events import (
     GenAIRequest,
     GenAISemantics,
     GenAIUsage,
-    GraphEvent,
+    GraphEventError,
+    GraphEventNodeDone,
+    GraphEventNodeInit,
+    GraphEventNodeSkipped,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
     NodeInit,
     NodeSkipped,
     StandardizedNodeCompleted,
@@ -137,12 +142,19 @@ def test_standardized_payloads() -> None:
 
 def test_migration_node_start() -> None:
     """Test migration of NODE_START event."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeStart(
         event_type="NODE_START",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={"status": "RUNNING", "input_tokens": 42, "model": "gpt-4", "system": "You are a helpful assistant"},
+        payload={
+            "status": "RUNNING",
+            "input_tokens": 42,
+            "model": "gpt-4",
+            "system": "You are a helpful assistant",
+            "node_id": "node-1",
+            "timestamp": 1700000000.0,
+        },
         visual_metadata={"animation": "pulse", "color": "blue"},
     )
 
@@ -173,12 +185,12 @@ def test_migration_node_start() -> None:
 
 def test_migration_node_stream() -> None:
     """Test migration of NODE_STREAM event."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeStream(
         event_type="NODE_STREAM",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={"chunk": "hello ", "visual_cue": "typing"},
+        payload={"chunk": "hello ", "visual_cue": "typing", "node_id": "node-1"},
         visual_metadata={"animation": "typing"},
     )
 
@@ -196,12 +208,12 @@ def test_migration_node_stream() -> None:
 
 def test_migration_node_completed() -> None:
     """Test migration of NODE_DONE event."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeDone(
         event_type="NODE_DONE",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={"output_summary": "Done.", "status": "SUCCESS"},
+        payload={"output_summary": "Done.", "status": "SUCCESS", "node_id": "node-1"},
         visual_metadata={"animation": "glow"},
     )
 
@@ -217,12 +229,12 @@ def test_migration_node_completed() -> None:
 
 def test_migration_generic_fallback() -> None:
     """Test migration of generic events like NODE_INIT."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={"type": "DEFAULT", "visual_cue": "IDLE"},
+        payload={"type": "DEFAULT", "visual_cue": "IDLE", "node_id": "node-1"},
         visual_metadata={"animation": "idle"},
     )
 
@@ -239,13 +251,15 @@ def test_migration_generic_fallback() -> None:
 def test_migration_partial_data() -> None:
     """Test migration with missing optional fields."""
     # Missing input_tokens in NODE_START
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeStart(
         event_type="NODE_START",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
         payload={
-            "status": "RUNNING"
+            "status": "RUNNING",
+            "node_id": "node-1",
+            "timestamp": 1700000000.0,
             # input_tokens missing
         },
         visual_metadata={},  # Empty visual metadata
@@ -257,18 +271,19 @@ def test_migration_partial_data() -> None:
     assert cloud_event.data.gen_ai is None
 
     dump = cloud_event.model_dump(by_alias=True)
-    assert "com_coreason_ui_cue" not in dump
+    # NodeStarted has default visual_cue="PULSE", so it should be present
+    assert dump["com_coreason_ui_cue"] == "PULSE"
     assert "com_coreason_ui_metadata" not in dump
 
 
 def test_migration_empty_string_extension() -> None:
     """Test that empty string extensions are filtered out."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={"visual_cue": ""},
+        payload={"visual_cue": "", "node_id": "node-1"},
         visual_metadata={"animation": ""},
     )
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -304,8 +319,13 @@ def test_timestamp_handling() -> None:
     ts = 1700000000.0
     dt_utc = datetime.fromtimestamp(ts, timezone.utc)
 
-    legacy_event = GraphEvent(
-        event_type="NODE_INIT", run_id="run-1", node_id="node-1", timestamp=ts, payload={}, visual_metadata={}
+    legacy_event = GraphEventNodeInit(
+        event_type="NODE_INIT",
+        run_id="run-1",
+        node_id="node-1",
+        timestamp=ts,
+        payload={"node_id": "node-1"},
+        visual_metadata={},
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -322,12 +342,12 @@ def test_custom_extensions_in_constructor() -> None:
 
 def test_migration_node_skipped() -> None:
     """Test migration of NODE_SKIPPED event."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventNodeSkipped(
         event_type="NODE_SKIPPED",
         run_id="run-1",
         node_id="node-1",
         timestamp=1700000000.0,
-        payload={"status": "SKIPPED", "visual_cue": "GREY_OUT"},
+        payload={"status": "SKIPPED", "visual_cue": "GREY_OUT", "node_id": "node-1"},
         visual_metadata={"animation": "skipped"},
     )
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
@@ -342,7 +362,7 @@ def test_migration_node_skipped() -> None:
 
 def test_migration_error_event() -> None:
     """Test migration of ERROR event."""
-    legacy_event = GraphEvent(
+    legacy_event = GraphEventError(
         event_type="ERROR",
         run_id="run-1",
         node_id="node-1",
@@ -353,6 +373,7 @@ def test_migration_error_event() -> None:
             "stack_trace": "...",
             "input_snapshot": {},
             "visual_cue": "RED_FLASH",
+            "node_id": "node-1",
         },
         visual_metadata={"animation": "error"},
     )
@@ -364,24 +385,3 @@ def test_migration_error_event() -> None:
 
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "error"
-
-
-def test_migration_invalid_types_handled() -> None:
-    """Test that invalid types in payload (e.g. input_tokens as string) fallback to raw dict."""
-    # Since we want to know if it fails or works.
-    legacy_event = GraphEvent(
-        event_type="NODE_START",
-        run_id="run-1",
-        node_id="node-1",
-        timestamp=1700000000.0,
-        payload={
-            "status": "RUNNING",
-            "input_tokens": "not_an_int",  # This is the edge case
-        },
-        visual_metadata={},
-    )
-
-    # It should fallback to dict because instantiation fails (input_tokens expects int)
-    cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
-    assert isinstance(cloud_event.data, dict)
-    assert cloud_event.data["input_tokens"] == "not_an_int"

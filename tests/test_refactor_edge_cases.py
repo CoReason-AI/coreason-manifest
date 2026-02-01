@@ -16,7 +16,8 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.events import (
-    GraphEvent,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
     StandardizedNodeStarted,
     StandardizedNodeStream,
     migrate_graph_event_to_cloud_event,
@@ -96,12 +97,12 @@ def test_simulation_snapshot_serialization() -> None:
 
 def test_migration_resilience_extra_fields() -> None:
     """Test that migration ignores massive amounts of extra fields (fuzzing-lite)."""
-    payload = {"status": "RUNNING", "input_tokens": 100}
+    payload = {"status": "RUNNING", "input_tokens": 100, "node_id": "node1", "timestamp": 1234567890.0}
     # Add 100 junk fields
     for i in range(100):
         payload[f"junk_{i}"] = f"value_{i}"
 
-    event = GraphEvent(
+    event = GraphEventNodeStart(
         event_type="NODE_START",
         run_id="run1",
         node_id="node1",
@@ -124,27 +125,24 @@ def test_migration_resilience_type_mismatch() -> None:
     # input_tokens expects int. Providing a dict should fail instantiation.
     payload = {"status": "RUNNING", "input_tokens": {"not": "an int"}}
 
-    event = GraphEvent(
-        event_type="NODE_START",
-        run_id="run1",
-        node_id="node1",
-        timestamp=1234567890.0,
-        payload=payload,
-        visual_metadata={},
-    )
-
-    ce = migrate_graph_event_to_cloud_event(event)
-    # Fallback to dict
-    assert isinstance(ce.data, dict)
-    assert ce.data["input_tokens"] == {"not": "an int"}
+    # Now raises ValidationError because strict typing
+    with pytest.raises(ValidationError):
+        GraphEventNodeStart(
+            event_type="NODE_START",
+            run_id="run1",
+            node_id="node1",
+            timestamp=1234567890.0,
+            payload=payload,
+            visual_metadata={},
+        )
 
 
 def test_migration_minimal_node_stream() -> None:
     """Test NODE_STREAM with minimal fields."""
     # Chunk is required by NodeStream payload model
-    payload = {"chunk": "foo"}
+    payload = {"chunk": "foo", "node_id": "node1"}
 
-    event = GraphEvent(
+    event = GraphEventNodeStream(
         event_type="NODE_STREAM",
         run_id="run1",
         node_id="node1",
@@ -166,16 +164,13 @@ def test_migration_node_stream_missing_chunk() -> None:
     """Test NODE_STREAM missing required chunk."""
     payload = {"model": "gpt-4"}  # Missing chunk
 
-    event = GraphEvent(
-        event_type="NODE_STREAM",
-        run_id="run1",
-        node_id="node1",
-        timestamp=1234567890.0,
-        payload=payload,
-        visual_metadata={},
-    )
-
-    ce = migrate_graph_event_to_cloud_event(event)
-    # Validation fails, fallback to dict
-    assert isinstance(ce.data, dict)
-    assert ce.data["model"] == "gpt-4"
+    # Now raises ValidationError
+    with pytest.raises(ValidationError):
+        GraphEventNodeStream(
+            event_type="NODE_STREAM",
+            run_id="run1",
+            node_id="node1",
+            timestamp=1234567890.0,
+            payload=payload,
+            visual_metadata={},
+        )
