@@ -12,9 +12,10 @@ import json
 from pathlib import Path
 from typing import Type
 
+from pydantic import BaseModel
+
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.recipes import RecipeManifest
-from pydantic import BaseModel
 
 
 def verify_schema(model: Type[BaseModel], schema_path: Path) -> None:

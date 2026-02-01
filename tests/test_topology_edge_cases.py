@@ -9,13 +9,14 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     MapNode,
     RecipeNode,
     StateDefinition,
 )
-from pydantic import ValidationError
 
 
 def test_conditional_edge_empty_mapping() -> None:

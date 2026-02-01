@@ -11,9 +11,10 @@
 # Copyright (c) 2025 CoReason, Inc.
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.topology import StateDefinition
 from coreason_manifest.recipes import RecipeInterface
-from pydantic import ValidationError
 
 
 def test_recipe_interface_valid() -> None:

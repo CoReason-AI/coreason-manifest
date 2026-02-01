@@ -9,8 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from coreason_manifest.definitions.agent import PolicyConfig
 from pydantic import ValidationError
+
+from coreason_manifest.definitions.agent import PolicyConfig
 
 
 def test_policy_config_valid() -> None:

@@ -1,6 +1,7 @@
 import pytest
-from coreason_manifest.definitions.agent import AgentRuntimeConfig, ModelConfig
 from pydantic import ValidationError
+
+from coreason_manifest.definitions.agent import AgentRuntimeConfig, ModelConfig
 
 
 def test_system_prompt_in_runtime_config() -> None:

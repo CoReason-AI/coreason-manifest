@@ -12,6 +12,8 @@ import uuid
 from typing import Any, Dict
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentInterface,
@@ -20,7 +22,6 @@ from coreason_manifest.definitions.agent import (
     ModelConfig,
     Persona,
 )
-from pydantic import ValidationError
 
 
 def test_agent_definition_valid() -> None:

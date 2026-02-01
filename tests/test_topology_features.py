@@ -9,6 +9,8 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     Edge,
@@ -18,7 +20,6 @@ from coreason_manifest.definitions.topology import (
     RecipeNode,
     StateDefinition,
 )
-from pydantic import ValidationError
 
 
 def test_state_schema_creation() -> None:

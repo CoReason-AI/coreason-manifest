@@ -11,10 +11,11 @@
 # Copyright (c) 2025 CoReason, Inc.
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest import RecipeManifest, Topology
 from coreason_manifest.definitions.topology import StateDefinition
 from coreason_manifest.recipes import RecipeInterface
-from pydantic import ValidationError
 
 
 def test_state_schema_aliasing_roundtrip() -> None:

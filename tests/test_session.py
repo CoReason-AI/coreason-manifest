@@ -12,9 +12,10 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
 from coreason_manifest.definitions.session import Interaction, SessionState
-from pydantic import ValidationError
 
 
 def test_interaction_creation() -> None:

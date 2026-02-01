@@ -13,10 +13,11 @@
 import json
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest import RecipeManifest, Topology
 from coreason_manifest.definitions.topology import StateDefinition
 from coreason_manifest.recipes import RecipeInterface
-from pydantic import ValidationError
 
 
 def test_full_recipe_v2_creation() -> None:
