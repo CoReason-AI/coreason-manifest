@@ -299,6 +299,7 @@ def test_agent_capability_events() -> None:
     )
     assert capability_empty.events == []
 
+
 def test_agent_capabilities_validation() -> None:
     """Test validation of capabilities list."""
     valid_data = {
@@ -326,13 +327,7 @@ def test_agent_capabilities_validation() -> None:
     assert "Agent must have at least one capability" in str(exc.value)
 
     # Test duplicate names
-    cap = AgentCapability(
-        name="dup",
-        type=CapabilityType.ATOMIC,
-        description="D",
-        inputs={},
-        outputs={}
-    )
+    cap = AgentCapability(name="dup", type=CapabilityType.ATOMIC, description="D", inputs={}, outputs={})
     with pytest.raises(ValidationError) as exc:
         AgentDefinition(capabilities=[cap, cap], **valid_data)
     assert "Duplicate capability names found" in str(exc.value)
