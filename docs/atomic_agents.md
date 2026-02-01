@@ -39,7 +39,15 @@ For atomic agents, `nodes`, `edges`, and `entry_point` are optional. You define 
 
 ```python
 config = AgentRuntimeConfig(
-    model_config=ModelConfig(...),
+    model_config=ModelConfig(
+        model="gpt-4",
+        temperature=0.7,
+        persona=Persona(
+            name="Assistant",
+            description="A helpful assistant.",
+            directives=["Be polite.", "Be concise."]
+        )
+    ),
     system_prompt="You are a helpful assistant."
 )
 ```

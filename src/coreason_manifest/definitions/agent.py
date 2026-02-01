@@ -140,6 +140,7 @@ class ModelConfig(CoReasonBaseModel):
         model: The LLM model identifier.
         temperature: Temperature for generation.
         system_prompt: The default system prompt/persona for the agent.
+        persona: The full persona definition (name, description, directives).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -147,6 +148,7 @@ class ModelConfig(CoReasonBaseModel):
     model: str = Field(..., description="The LLM model identifier.")
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
     system_prompt: Optional[str] = Field(None, description="The default system prompt/persona for the agent.")
+    persona: Optional[Persona] = Field(None, description="The full persona definition (name, description, directives).")
 
 
 class AgentRuntimeConfig(CoReasonBaseModel):

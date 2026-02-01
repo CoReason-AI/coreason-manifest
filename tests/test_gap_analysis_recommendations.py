@@ -53,3 +53,40 @@ def test_recipe_manifest_integrity_and_metadata() -> None:
 
     assert manifest.integrity_hash == "a" * 64
     assert manifest.metadata["ui_layout"]["agent-1"] == [10, 20]
+
+
+def test_adversary_profile_accepts_persona() -> None:
+    """Test that AdversaryProfile accepts a Persona object."""
+    from coreason_manifest.definitions.agent import Persona
+    from coreason_manifest.definitions.simulation_config import AdversaryProfile
+
+    persona = Persona(
+        name="Hacker",
+        description="A skilled hacker.",
+        directives=["Be stealthy.", "Exfiltrate data."],
+    )
+    profile = AdversaryProfile(
+        name="APT28",
+        goal="Steal credentials",
+        strategy_model="gpt-4",
+        attack_model="llama-3",
+        persona=persona,
+    )
+    assert profile.persona is not None
+    assert profile.persona.name == "Hacker"
+    assert profile.persona.directives[0] == "Be stealthy."
+
+
+def test_model_config_accepts_persona() -> None:
+    """Test that ModelConfig accepts a Persona object."""
+    from coreason_manifest.definitions.agent import ModelConfig, Persona
+
+    persona = Persona(
+        name="Assistant",
+        description="A helpful assistant.",
+        directives=["Be polite.", "Be concise."],
+    )
+    config = ModelConfig(model="gpt-4", temperature=0.7, persona=persona)
+    assert config.persona is not None
+    assert config.persona.name == "Assistant"
+    assert config.persona.directives[1] == "Be concise."

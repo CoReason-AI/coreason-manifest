@@ -9,8 +9,11 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
+from coreason_manifest.definitions.agent import Persona
 from coreason_manifest.definitions.simulation import SimulationScenario
 
 
@@ -19,6 +22,7 @@ class AdversaryProfile(BaseModel):
     goal: str
     strategy_model: str  # e.g., "claude-3-opus"
     attack_model: str  # e.g., "llama-3-uncensored"
+    persona: Optional[Persona] = Field(None, description="The full persona definition (name, description, directives).")
     # Potential future field: 'system_prompt_override'
 
 

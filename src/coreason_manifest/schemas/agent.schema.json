@@ -623,7 +623,7 @@
     },
     "ModelConfig": {
       "additionalProperties": false,
-      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.\n    system_prompt: The default system prompt/persona for the agent.",
+      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.\n    system_prompt: The default system prompt/persona for the agent.\n    persona: The full persona definition (name, description, directives).",
       "properties": {
         "model": {
           "description": "The LLM model identifier.",
@@ -649,6 +649,18 @@
           "default": null,
           "description": "The default system prompt/persona for the agent.",
           "title": "System Prompt"
+        },
+        "persona": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Persona"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The full persona definition (name, description, directives)."
         }
       },
       "required": [
@@ -687,6 +699,37 @@
         }
       },
       "title": "ObservabilityConfig",
+      "type": "object"
+    },
+    "Persona": {
+      "additionalProperties": false,
+      "description": "Definition of an Agent Persona.\n\nAttributes:\n    name: Name of the persona.\n    description: Description of the persona.\n    directives: List of specific instructions or directives.",
+      "properties": {
+        "name": {
+          "description": "Name of the persona.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of the persona.",
+          "title": "Description",
+          "type": "string"
+        },
+        "directives": {
+          "description": "List of specific instructions or directives.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Directives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "directives"
+      ],
+      "title": "Persona",
       "type": "object"
     },
     "PolicyConfig": {
