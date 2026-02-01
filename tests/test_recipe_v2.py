@@ -18,6 +18,7 @@ from pydantic import ValidationError
 from coreason_manifest import RecipeManifest, Topology
 from coreason_manifest.recipes import RecipeInterface, StateDefinition
 
+
 def test_full_recipe_v2_creation() -> None:
     """Test creating a fully populated V2 RecipeManifest."""
     interface = RecipeInterface(
@@ -61,6 +62,7 @@ def test_full_recipe_v2_creation() -> None:
     assert manifest.state.persistence == "persistent"
     assert manifest.parameters["model"] == "gpt-4"
 
+
 def test_recipe_v2_serialization() -> None:
     """Test that V2 RecipeManifest serializes correctly (with aliases)."""
     manifest = RecipeManifest(
@@ -85,6 +87,7 @@ def test_recipe_v2_serialization() -> None:
     assert "schema" in data["state"]
     assert "schema_" not in data["state"]
     assert data["state"]["schema"] == {"foo": "bar"}
+
 
 def test_recipe_v2_validation_error() -> None:
     """Test validation errors for missing new fields."""
@@ -115,6 +118,7 @@ def test_recipe_v2_validation_error() -> None:
         )  # type: ignore[call-arg]
     assert "state" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
+
 
 def test_recipe_v2_extra_fields() -> None:
     """Test that extra fields are forbidden in V2 manifest."""

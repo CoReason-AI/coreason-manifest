@@ -25,6 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .definitions.agent import VersionStr
 from .definitions.topology import GraphTopology
 
+
 class RecipeInterface(BaseModel):
     """Defines the input/output contract for a Recipe.
 
@@ -39,6 +40,7 @@ class RecipeInterface(BaseModel):
     outputs: Dict[str, Any] = Field(
         ..., description="JSON Schema defining the guaranteed structure of the final result."
     )
+
 
 class StateDefinition(BaseModel):
     """Defines the internal state (memory) of the Recipe.
@@ -56,6 +58,7 @@ class StateDefinition(BaseModel):
     persistence: Literal["ephemeral", "persistent"] = Field(
         default="ephemeral", description="Configuration for state durability."
     )
+
 
 class RecipeManifest(BaseModel):
     """The executable specification for the MACO engine.
