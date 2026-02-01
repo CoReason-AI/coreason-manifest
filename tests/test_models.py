@@ -157,6 +157,7 @@ def test_agent_definition_with_policy_and_observability() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Policy agent",
         },
         "dependencies": {"tools": [], "libraries": []},
         "policy": {"budget_caps": {"cost": 100.0}},
@@ -212,7 +213,19 @@ def test_agent_config_system_prompt() -> None:
     agent = AgentDefinition(**valid_data)
     assert agent.config.system_prompt == "Global instruction"
 
-    # Ensure optionality
+    # Ensure optionality:
+    # If we remove system_prompt from config AND model_config, validation should fail (Atomic Agent)
     del valid_data["config"]["system_prompt"]
+
+    # In the valid_data setup above, nodes=[], so it is an Atomic Agent.
+    # llm_config doesn't have system_prompt set.
+    # So this should fail now.
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition(**valid_data)
+    assert "Atomic Agents require a system_prompt" in str(exc.value)
+
+    # But if we add it to model_config, it should pass
+    valid_data["config"]["model_config"]["system_prompt"] = "Model Prompt"
     agent = AgentDefinition(**valid_data)
     assert agent.config.system_prompt is None
+    assert agent.config.llm_config.system_prompt == "Model Prompt"

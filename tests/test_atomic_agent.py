@@ -150,6 +150,7 @@ def test_edges_without_nodes_integrity() -> None:
             "edges": [{"source_node_id": "a", "target_node_id": "b"}],
             "entry_point": None,
             "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Dummy prompt",
         },
         "dependencies": {},
         "integrity_hash": "a" * 64,

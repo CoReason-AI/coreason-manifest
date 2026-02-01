@@ -178,6 +178,13 @@ class AgentRuntimeConfig(CoReasonBaseModel):
         if has_nodes:
             if not has_entry:
                 raise ValueError("Graph execution requires an 'entry_point'.")
+        else:
+            # Atomic Agent: Must have a system prompt (either global or in model_config)
+            has_global_prompt = self.system_prompt is not None
+            has_model_prompt = self.llm_config.system_prompt is not None
+
+            if not (has_global_prompt or has_model_prompt):
+                raise ValueError("Atomic Agents require a system_prompt (global or in model_config).")
 
         return self
 
