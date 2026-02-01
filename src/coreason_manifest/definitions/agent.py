@@ -1,4 +1,13 @@
-# Prosperity-3.0
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 """Pydantic models for the Coreason Manifest system.
 
 These models define the structure and validation rules for the Agent Manifest
@@ -10,13 +19,12 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from types import MappingProxyType
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Literal, Mapping, Optional, Tuple, Union
 from uuid import UUID
 
 from pydantic import (
     AfterValidator,
     AnyUrl,
-    BaseModel,
     ConfigDict,
     Field,
     PlainSerializer,
@@ -25,7 +33,8 @@ from pydantic import (
 )
 from typing_extensions import Annotated
 
-from coreason_manifest.definitions.topology import Edge, Node
+from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 # SemVer Regex pattern (simplified for standard SemVer)
 # Modified to accept optional 'v' or 'V' prefix (multiple allowed) for input normalization
@@ -72,7 +81,7 @@ StrictUri = Annotated[
 ]
 
 
-class AgentMetadata(BaseModel):
+class AgentMetadata(CoReasonBaseModel):
     """Metadata for the Agent.
 
     Attributes:
@@ -93,7 +102,23 @@ class AgentMetadata(BaseModel):
     requires_auth: bool = Field(default=False, description="Whether the agent requires user authentication.")
 
 
-class AgentInterface(BaseModel):
+class Persona(CoReasonBaseModel):
+    """Definition of an Agent Persona.
+
+    Attributes:
+        name: Name of the persona.
+        description: Description of the persona.
+        directives: List of specific instructions or directives.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Name of the persona.")
+    description: str = Field(..., description="Description of the persona.")
+    directives: List[str] = Field(..., description="List of specific instructions or directives.")
+
+
+class AgentInterface(CoReasonBaseModel):
     """Interface definition for the Agent.
 
     Attributes:
@@ -108,21 +133,25 @@ class AgentInterface(BaseModel):
     injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
 
 
-class ModelConfig(BaseModel):
+class ModelConfig(CoReasonBaseModel):
     """LLM Configuration parameters.
 
     Attributes:
         model: The LLM model identifier.
         temperature: Temperature for generation.
+        system_prompt: The default system prompt/persona for the agent.
+        persona: The full persona definition (name, description, directives).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     model: str = Field(..., description="The LLM model identifier.")
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
+    system_prompt: Optional[str] = Field(None, description="The default system prompt/persona for the agent.")
+    persona: Optional[Persona] = Field(None, description="The full persona definition (name, description, directives).")
 
 
-class AgentRuntimeConfig(BaseModel):
+class AgentRuntimeConfig(CoReasonBaseModel):
     """Configuration of the Agent execution.
 
     Attributes:
@@ -134,10 +163,36 @@ class AgentRuntimeConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    nodes: List[Node] = Field(..., description="A collection of execution units.")
-    edges: List[Edge] = Field(..., description="Directed connections defining control flow.")
-    entry_point: str = Field(..., description="The ID of the starting node.")
+    nodes: List[Node] = Field(default_factory=list, description="A collection of execution units.")
+    edges: List[Edge] = Field(default_factory=list, description="Directed connections defining control flow.")
+    entry_point: Optional[str] = Field(None, description="The ID of the starting node.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
+    system_prompt: Optional[str] = Field(None, description="The global system prompt/instruction for the agent.")
+
+    @model_validator(mode="after")
+    def validate_topology_or_atomic(self) -> AgentRuntimeConfig:
+        """Ensure valid configuration: either a Graph or an Atomic Agent."""
+        has_nodes = len(self.nodes) > 0
+        has_entry = self.entry_point is not None
+
+        if has_nodes:
+            if not has_entry:
+                raise ValueError("Graph execution requires an 'entry_point'.")
+        else:
+            # Atomic Agent: Must have a system prompt (either global or in model_config)
+            has_global_prompt = self.system_prompt is not None
+            has_model_prompt = self.llm_config.system_prompt is not None
+
+            if not (has_global_prompt or has_model_prompt):
+                raise ValueError("Atomic Agents require a system_prompt (global or in model_config).")
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_topology_integrity(self) -> AgentRuntimeConfig:
+        """Ensure that edges connect existing nodes."""
+        validate_edge_integrity(self.nodes, self.edges)
+        return self
 
     @field_validator("nodes")
     @classmethod
@@ -174,7 +229,7 @@ class ToolRiskLevel(str, Enum):
     CRITICAL = "critical"
 
 
-class ToolRequirement(BaseModel):
+class ToolRequirement(CoReasonBaseModel):
     """Requirement for an MCP tool.
 
     Attributes:
@@ -194,7 +249,25 @@ class ToolRequirement(BaseModel):
     risk_level: ToolRiskLevel = Field(..., description="The risk level of the tool.")
 
 
-class AgentDependencies(BaseModel):
+class InlineToolDefinition(CoReasonBaseModel):
+    """Definition of an inline tool.
+
+    Attributes:
+        name: Name of the tool.
+        description: Description of the tool.
+        parameters: JSON Schema of parameters.
+        type: The type of the tool (must be 'function').
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Name of the tool.")
+    description: str = Field(..., description="Description of the tool.")
+    parameters: Dict[str, Any] = Field(..., description="JSON Schema of parameters.")
+    type: Literal["function"] = Field("function", description="The type of the tool (must be 'function').")
+
+
+class AgentDependencies(CoReasonBaseModel):
     """External dependencies for the Agent.
 
     Attributes:
@@ -204,13 +277,15 @@ class AgentDependencies(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    tools: List[ToolRequirement] = Field(default_factory=list, description="List of MCP tool requirements.")
+    tools: List[Union[ToolRequirement, InlineToolDefinition]] = Field(
+        default_factory=list, description="List of MCP tool requirements."
+    )
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )
 
 
-class PolicyConfig(BaseModel):
+class PolicyConfig(CoReasonBaseModel):
     """Governance policy configuration.
 
     Attributes:
@@ -234,7 +309,7 @@ class TraceLevel(str, Enum):
     NONE = "none"
 
 
-class ObservabilityConfig(BaseModel):
+class ObservabilityConfig(CoReasonBaseModel):
     """Observability configuration.
 
     Attributes:
@@ -250,7 +325,7 @@ class ObservabilityConfig(BaseModel):
     encryption_key_id: Optional[str] = Field(None, description="Optional ID of the key used for log encryption.")
 
 
-class AgentDefinition(BaseModel):
+class AgentDefinition(CoReasonBaseModel):
     """The Root Object for the CoReason Agent Manifest.
 
     Attributes:
@@ -277,6 +352,9 @@ class AgentDefinition(BaseModel):
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
+    custom_metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Container for arbitrary metadata extensions without breaking validation."
+    )
     integrity_hash: str = Field(
         ...,
         pattern=r"^[a-fA-F0-9]{64}$",

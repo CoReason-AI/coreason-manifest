@@ -1,3 +1,13 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import uuid
 from datetime import datetime, timezone
 
@@ -5,6 +15,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.simulation import (
+    SimulationMetrics,
     SimulationScenario,
     SimulationStep,
     SimulationTrace,
@@ -77,7 +88,7 @@ def test_trace_empty_steps() -> None:
         agent_version="1.0.0",
         steps=[],
         outcome={},
-        metrics={},
+        metrics=SimulationMetrics(turn_count=0),
     )
     assert len(trace.steps) == 0
 
@@ -94,6 +105,7 @@ def test_step_complex_inputs() -> None:
         observation={"results": [{"title": "Python", "url": "..."}]},
     )
     assert step.inputs["a"] == [1, 2]
+    assert step.observation is not None
     assert step.observation["results"][0]["title"] == "Python"
 
 

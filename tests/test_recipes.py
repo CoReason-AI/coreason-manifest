@@ -1,10 +1,20 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import Edge, RecipeManifest
 from coreason_manifest import Topology as GraphTopology
-from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode, StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 
 def test_recipe_manifest_creation() -> None:
@@ -21,7 +31,7 @@ def test_recipe_manifest_creation() -> None:
         name="Test Recipe",
         description="A test recipe",
         interface=RecipeInterface(inputs={"param1": "value1"}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=topology,
     )
@@ -36,7 +46,7 @@ def test_recipe_manifest_creation() -> None:
 def test_version_validation() -> None:
     """Test strict version validation."""
     interface = RecipeInterface(inputs={}, outputs={})
-    state = StateDefinition(schema={}, persistence="ephemeral")
+    state = StateDefinition(schema_={}, persistence="ephemeral")
     params: dict[str, str] = {}
 
     # Valid versions (normalized)
@@ -106,7 +116,7 @@ def test_serialization() -> None:
         version="1.0.0",
         name="n",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[node], edges=[]),
     )

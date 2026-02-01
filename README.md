@@ -9,17 +9,31 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 
 ## Overview
 
-`coreason-manifest` acts as the validator for the "Agent Development Lifecycle" (ADLC). It ensures that every Agent produced meets strict GxP and security standards. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run.
+`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It contains the canonical Pydantic definitions, schemas, and data structures for Agents, Workflows (Recipes), and Auditing.
+
+It provides the **"Blueprint"** that all other services (Builder, Engine, Simulator) rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
 
 ## Features
 
-*   **Open Agent Specification (OAS) Validation:** Parses and validates agent definitions against a strict schema.
-*   **Compliance Enforcement:** Uses Open Policy Agent (OPA) / Rego to enforce complex business rules and allowlists.
-*   **Integrity Verification:** Calculates and verifies SHA256 hashes of the agent's source code to prevent tampering.
-*   **Automatic Schema Generation:** Inspects Python functions to generate Agent Interfaces, automatically handling `UserContext` injection.
-*   **Dependency Pinning:** Enforces strict version pinning for all library dependencies.
-*   **Trusted Bill of Materials (TBOM):** Validates libraries against an approved list.
-*   **Compliance Microservice:** Can be run as a standalone API server (Service C) for centralized validation.
+*   **Open Agent Specification (OAS):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
+*   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
+*   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like `UUID` and `datetime`.
+*   **Event Protocol:** Defines the `GraphEvent` and `CloudEvent` structures for real-time communication.
+*   **Simulation Schemas:** Provides standard models for `SimulationScenario`, `AdversaryProfile`, and `SimulationTrace`.
+*   **Audit & Compliance:** Defines the `AuditLog` structure for tamper-evident record keeping.
+*   **Ergonomic Factory Methods:** Simplified construction of `ChatMessage` and `GenAIOperation`.
+*   **Token Arithmetic:** Support for `+` and `+=` operators on `GenAITokenUsage`.
+*   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
+*   **Enhanced Tracing:** `ReasoningTrace` includes flexible metadata for execution state.
+
+## Serialization & Base Model
+
+All core definitions (`AgentDefinition`, `RecipeManifest`, `GraphTopology`, `AuditLog`) inherit from `CoReasonBaseModel`. This provides a consistent interface for serialization, solving common Pydantic v2 issues with `UUID` and `datetime`.
+
+*   Use `.dump()` to get a JSON-compatible dictionary (where UUIDs/datetimes are strings).
+*   Use `.to_json()` to get a JSON string.
+
+For a detailed rationale, see [docs/coreason_base_model_rationale.md](docs/coreason_base_model_rationale.md).
 
 ## Installation
 
@@ -29,29 +43,77 @@ pip install coreason-manifest
 
 ## Usage
 
-`coreason-manifest` supports two modes: **Library (CLI)** and **Server (Microservice)**.
-
-### 1. Library Usage
-
-Use the python library to validate local agent files and verify source integrity.
+This library is used to define and validate Agent configurations programmatically.
 
 ```python
-from coreason_manifest import ManifestEngine, ManifestConfig
+import uuid
+from datetime import datetime, timezone
+from coreason_manifest.definitions.agent import (
+    AgentDefinition,
+    AgentMetadata,
+    AgentInterface,
+    AgentRuntimeConfig,
+    ModelConfig,
+    AgentDependencies,
+    ToolRequirement,
+    ToolRiskLevel,
+    PolicyConfig,
+    ObservabilityConfig,
+    TraceLevel
+)
 
-# Initialize and Validate
-config = ManifestConfig(policy_path="./policies/compliance.rego")
-engine = ManifestEngine(config)
-agent_def = engine.load_and_validate("agent.yaml", "./src")
-```
+# 1. Define Metadata
+metadata = AgentMetadata(
+    id=uuid.uuid4(),
+    version="1.0.0",  # Strict SemVer
+    name="Research Agent",
+    author="Coreason AI",
+    created_at=datetime.now(timezone.utc)
+)
 
-### 2. Server Mode
+# 2. Instantiate Agent
+agent = AgentDefinition(
+    metadata=metadata,
+    interface=AgentInterface(
+        inputs={"topic": {"type": "string"}},
+        outputs={"summary": {"type": "string"}}
+    ),
+    config=AgentRuntimeConfig(
+        model_config=ModelConfig(
+            model="gpt-4",
+            temperature=0.0,
+            system_prompt="You are a helpful assistant."
+        )
+    ),
+    dependencies=AgentDependencies(
+        tools=[
+            ToolRequirement(
+                uri="mcp://search-service/google",
+                hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",  # Valid SHA256
+                scopes=["search:read"],
+                risk_level=ToolRiskLevel.STANDARD
+            )
+        ],
+        libraries=("pandas==2.0.0",)
+    ),
+    policy=PolicyConfig(
+        budget_caps={"total_cost": 5.0}
+    ),
+    observability=ObservabilityConfig(
+        trace_level=TraceLevel.FULL,
+        retention_policy="90_days"
+    ),
+    # Mandatory Integrity Hash
+    integrity_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+)
 
-Run the package as a FastAPI server to provide a centralized compliance API.
-
-```bash
-uvicorn coreason_manifest.server:app --host 0.0.0.0 --port 8000
+print(f"Agent '{agent.metadata.name}' definition created and validated.")
 ```
 
 For full details, see the [Usage Documentation](docs/usage.md).
 
-For detailed requirements and architecture, please refer to the [Product Requirements](docs/product_requirements.md) or [Requirements](docs/requirements.md).
+## Documentation
+
+*   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
+*   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
+*   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.

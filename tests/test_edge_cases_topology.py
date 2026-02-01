@@ -1,4 +1,12 @@
-# Prosperity-3.0
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from coreason_manifest.definitions.agent import AgentRuntimeConfig
 from coreason_manifest.definitions.topology import Edge, LogicNode
@@ -21,7 +29,7 @@ def test_topology_allows_cycles() -> None:
         nodes=[node_a, node_b],
         edges=edges,
         entry_point="A",
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert len(topology.edges) == 2
 
@@ -39,7 +47,7 @@ def test_topology_disconnected_graph_valid() -> None:
         nodes=[node_a, node_b, node_c],
         edges=edges,
         entry_point="A",
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert len(topology.nodes) == 3
 
@@ -53,7 +61,7 @@ def test_topology_self_loop_valid() -> None:
         nodes=[node_a],
         edges=edges,
         entry_point="A",
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert len(topology.edges) == 1
 
@@ -76,6 +84,6 @@ def test_topology_entry_point_must_exist() -> None:
         nodes=[node_a],
         edges=[],
         entry_point="Z",  # Non-existent
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert topology.entry_point == "Z"

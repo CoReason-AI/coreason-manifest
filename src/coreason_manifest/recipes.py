@@ -6,17 +6,28 @@
 # For details, see the LICENSE file.
 # Commercial use beyond a 30-day trial requires a separate license.
 #
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
 from .definitions.agent import VersionStr
-from .definitions.topology import GraphTopology
+from .definitions.base import CoReasonBaseModel
+from .definitions.topology import GraphTopology, StateDefinition
 
 
-class RecipeInterface(BaseModel):
+class RecipeInterface(CoReasonBaseModel):
     """Defines the input/output contract for a Recipe.
 
     Attributes:
@@ -32,25 +43,7 @@ class RecipeInterface(BaseModel):
     )
 
 
-class StateDefinition(BaseModel):
-    """Defines the internal state (memory) of the Recipe.
-
-    Attributes:
-        schema: JSON Schema of the keys available in the shared memory.
-        persistence: Configuration for state durability.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    schema_: Dict[str, Any] = Field(
-        ..., alias="schema", description="JSON Schema of the keys available in the shared memory."
-    )
-    persistence: Literal["ephemeral", "persistent"] = Field(
-        default="ephemeral", description="Configuration for state durability."
-    )
-
-
-class RecipeManifest(BaseModel):
+class RecipeManifest(CoReasonBaseModel):
     """The executable specification for the MACO engine.
 
     Attributes:
@@ -62,6 +55,8 @@ class RecipeManifest(BaseModel):
         state: Defines the internal state (memory) of the Recipe.
         parameters: Dictionary of build-time constants.
         topology: The topology definition of the workflow.
+        integrity_hash: SHA256 hash of the canonical JSON representation of the topology.
+        metadata: Container for design-time data.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -74,3 +69,16 @@ class RecipeManifest(BaseModel):
     state: StateDefinition = Field(..., description="Defines the internal state (memory) of the Recipe.")
     parameters: Dict[str, Any] = Field(..., description="Dictionary of build-time constants.")
     topology: GraphTopology = Field(..., description="The topology definition of the workflow.")
+    integrity_hash: Optional[str] = Field(
+        default=None,
+        description=(
+            "SHA256 hash of the canonical JSON representation of the topology. "
+            "Enforced by Builder, verified by Runtime."
+        ),
+    )
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description=(
+            "Container for design-time data (UI coordinates, resolution logs, draft status) to support re-hydration."
+        ),
+    )

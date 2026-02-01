@@ -1,11 +1,21 @@
 # Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+# Copyright (c) 2025 CoReason, Inc.
 
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import RecipeManifest, Topology
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
+from coreason_manifest.definitions.topology import StateDefinition
+from coreason_manifest.recipes import RecipeInterface
 
 
 def test_state_schema_aliasing_roundtrip() -> None:
@@ -45,7 +55,7 @@ def test_empty_interface_and_state() -> None:
         version="1.0.0",
         name="Empty",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=Topology(nodes=[], edges=[]),
     )
@@ -66,7 +76,7 @@ def test_complex_parameters() -> None:
         version="1.0.0",
         name="Complex",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters=params,
         topology=Topology(nodes=[], edges=[]),
     )
@@ -78,17 +88,17 @@ def test_complex_parameters() -> None:
 def test_persistence_literal_strictness() -> None:
     """Test that persistence validation is case-sensitive and strict."""
     # Valid
-    StateDefinition(schema={}, persistence="ephemeral")
-    StateDefinition(schema={}, persistence="persistent")
+    StateDefinition(schema_={}, persistence="ephemeral")
+    StateDefinition(schema_={}, persistence="persistent")
 
     # Invalid Case
     with pytest.raises(ValidationError) as excinfo:
-        StateDefinition(schema={}, persistence="Ephemeral")
+        StateDefinition(schema_={}, persistence="Ephemeral")
     assert "Input should be 'ephemeral' or 'persistent'" in str(excinfo.value)
 
     # Invalid Value
     with pytest.raises(ValidationError) as excinfo:
-        StateDefinition(schema={}, persistence="in-memory")
+        StateDefinition(schema_={}, persistence="in-memory")
     assert "Input should be 'ephemeral' or 'persistent'" in str(excinfo.value)
 
 

@@ -7,7 +7,14 @@
         "tools": {
           "description": "List of MCP tool requirements.",
           "items": {
-            "$ref": "#/$defs/ToolRequirement"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ToolRequirement"
+              },
+              {
+                "$ref": "#/$defs/InlineToolDefinition"
+              }
+            ]
           },
           "title": "Tools",
           "type": "array"
@@ -109,7 +116,7 @@
     },
     "AgentNode": {
       "additionalProperties": false,
-      "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.",
+      "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.\n    system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.\n    config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.\n    overrides: Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
       "properties": {
         "id": {
           "description": "Unique identifier for the node.",
@@ -140,6 +147,12 @@
           "default": null,
           "description": "Visual metadata for the UI."
         },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
+        },
         "type": {
           "const": "agent",
           "default": "agent",
@@ -151,6 +164,47 @@
           "description": "The name of the atomic agent to call.",
           "title": "Agent Name",
           "type": "string"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Overrides the registry default prompt. Required for ad-hoc/optimized agents.",
+          "title": "System Prompt"
+        },
+        "config": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.",
+          "title": "Config"
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
+          "title": "Overrides"
         }
       },
       "required": [
@@ -208,19 +262,37 @@
           "type": "array"
         },
         "entry_point": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "The ID of the starting node.",
-          "title": "Entry Point",
-          "type": "string"
+          "title": "Entry Point"
         },
         "model_config": {
           "$ref": "#/$defs/ModelConfig",
           "description": "Specific LLM parameters."
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The global system prompt/instruction for the agent.",
+          "title": "System Prompt"
         }
       },
       "required": [
-        "nodes",
-        "edges",
-        "entry_point",
         "model_config"
       ],
       "title": "AgentRuntimeConfig",
@@ -350,6 +422,12 @@
           "default": null,
           "description": "Visual metadata for the UI."
         },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
+        },
         "type": {
           "const": "human",
           "default": "human",
@@ -375,6 +453,42 @@
         "id"
       ],
       "title": "HumanNode",
+      "type": "object"
+    },
+    "InlineToolDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of an inline tool.\n\nAttributes:\n    name: Name of the tool.\n    description: Description of the tool.\n    parameters: JSON Schema of parameters.\n    type: The type of the tool (must be 'function').",
+      "properties": {
+        "name": {
+          "description": "Name of the tool.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of the tool.",
+          "title": "Description",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "description": "JSON Schema of parameters.",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "type": {
+          "const": "function",
+          "default": "function",
+          "description": "The type of the tool (must be 'function').",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "parameters"
+      ],
+      "title": "InlineToolDefinition",
       "type": "object"
     },
     "LogicNode": {
@@ -409,6 +523,12 @@
           ],
           "default": null,
           "description": "Visual metadata for the UI."
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
         },
         "type": {
           "const": "logic",
@@ -463,6 +583,12 @@
           "default": null,
           "description": "Visual metadata for the UI."
         },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
+        },
         "type": {
           "const": "map",
           "default": "map",
@@ -497,7 +623,7 @@
     },
     "ModelConfig": {
       "additionalProperties": false,
-      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.",
+      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.\n    system_prompt: The default system prompt/persona for the agent.\n    persona: The full persona definition (name, description, directives).",
       "properties": {
         "model": {
           "description": "The LLM model identifier.",
@@ -510,6 +636,31 @@
           "minimum": 0.0,
           "title": "Temperature",
           "type": "number"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The default system prompt/persona for the agent.",
+          "title": "System Prompt"
+        },
+        "persona": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Persona"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The full persona definition (name, description, directives)."
         }
       },
       "required": [
@@ -548,6 +699,37 @@
         }
       },
       "title": "ObservabilityConfig",
+      "type": "object"
+    },
+    "Persona": {
+      "additionalProperties": false,
+      "description": "Definition of an Agent Persona.\n\nAttributes:\n    name: Name of the persona.\n    description: Description of the persona.\n    directives: List of specific instructions or directives.",
+      "properties": {
+        "name": {
+          "description": "Name of the persona.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of the persona.",
+          "title": "Description",
+          "type": "string"
+        },
+        "directives": {
+          "description": "List of specific instructions or directives.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Directives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "directives"
+      ],
+      "title": "Persona",
       "type": "object"
     },
     "PolicyConfig": {
@@ -614,6 +796,12 @@
           ],
           "default": null,
           "description": "Visual metadata for the UI."
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
         },
         "type": {
           "const": "recipe",
@@ -829,6 +1017,20 @@
       ],
       "default": null,
       "description": "Observability configuration."
+    },
+    "custom_metadata": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Container for arbitrary metadata extensions without breaking validation.",
+      "title": "Custom Metadata"
     },
     "integrity_hash": {
       "description": "SHA256 hash of the source code.",

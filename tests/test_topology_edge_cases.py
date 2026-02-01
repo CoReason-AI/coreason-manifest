@@ -1,3 +1,13 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import pytest
 from pydantic import ValidationError
 
@@ -5,7 +15,7 @@ from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     MapNode,
     RecipeNode,
-    StateSchema,
+    StateDefinition,
 )
 
 
@@ -31,8 +41,8 @@ def test_map_node_invalid_concurrency() -> None:
 def test_state_schema_invalid_persistence_type() -> None:
     """Test validation fails for non-string persistence."""
     with pytest.raises(ValidationError):
-        StateSchema(
-            data_schema={},
+        StateDefinition(
+            schema_={},
             persistence=123,
         )
 

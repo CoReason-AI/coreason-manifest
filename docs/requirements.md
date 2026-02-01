@@ -4,27 +4,21 @@
 
 *   **Python:** 3.12 or higher.
 *   **Operating System:** Linux, macOS, or Windows (WSL recommended).
-*   **Open Policy Agent (OPA):** The `opa` executable must be installed and available in the system `PATH` for policy enforcement.
-    *   [Download OPA](https://www.openpolicyagent.org/docs/latest/#running-opa)
 
 ## Python Dependencies
 
-The core library depends on the following packages:
+The core library depends on the following packages (as defined in `requirements.txt`):
 
 *   **pydantic (>=2.12.5):** Data validation and settings management using Python type hints.
-*   **jsonschema (>=4.25.1):** An implementation of the JSON Schema specification for Python.
+*   **pydantic-settings (>=2.12.0):** Settings management for Pydantic.
+*   **loguru (>=0.7.3):** Python logging made simple.
 *   **pyyaml (>=6.0.3):** YAML parser and emitter for Python.
-*   **loguru (>=0.7.2):** Python logging made (stupidly) simple.
-*   **anyio (>=4.3.0):** High level asynchronous concurrency and networking framework.
-*   **aiofiles (>=23.2.1):** File support for asyncio.
-*   **httpx (>=0.27.0):** A next-generation HTTP client for Python.
-
-### Server Mode Dependencies
-
-To run `coreason-manifest` as a Compliance Microservice (Service C), the following additional dependencies are required:
-
-*   **fastapi (>=0.111.0):** Modern, fast (high-performance), web framework for building APIs with Python.
-*   **uvicorn (>=0.30.1):** An ASGI web server implementation for Python.
+*   **opentelemetry-api (>=1.39.1):** OpenTelemetry API for observability.
+*   **coreason-identity (>=0.4.1):** Identity management for Coreason.
+*   **python-dotenv (>=1.2.1):** Read key-value pairs from a .env file.
+*   **annotated-types (>=0.7.0):** Reusable constraint types for Pydantic.
+*   **cryptography (>=46.0.4):** Cryptographic primitives.
+*   **authlib (>=1.6.6):** Authentication library.
 
 ## Development Dependencies
 
@@ -34,4 +28,3 @@ For contributing to the project, you will also need:
 *   **pytest:** A mature full-featured Python testing tool.
 *   **ruff:** An extremely fast Python linter and code formatter.
 *   **mypy:** Optional static typing for Python.
-*   **mkdocs-material:** Documentation site generator.
