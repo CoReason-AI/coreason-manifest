@@ -38,6 +38,7 @@ def test_topology_self_reference() -> None:
     topo = GraphTopology(nodes=[n1], edges=[edge])
     assert len(topo.edges) == 1
     assert topo.edges[0].source_node_id == "n1"
+    assert isinstance(topo.edges[0], Edge)
     assert topo.edges[0].target_node_id == "n1"
 
 
@@ -70,7 +71,7 @@ def test_event_payload_strictness_extra_fields() -> None:
         run_id="r1",
         node_id="n1",
         timestamp=123.0,
-        payload=payload_data,  # type: ignore [arg-type] # Mypy sees the mismatch, runtime handles it
+        payload=payload_data,  # type: ignore [arg-type]
         visual_metadata={},
     )
 
