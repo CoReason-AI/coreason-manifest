@@ -1,9 +1,11 @@
 import pytest
 from coreason_manifest.definitions.message import FunctionCall, ToolCall, ToolCallRequestPart
 
+
 def test_function_call_deprecation() -> None:
     with pytest.warns(DeprecationWarning, match="FunctionCall is deprecated"):
         FunctionCall(name="foo", arguments="{}")
+
 
 def test_tool_call_deprecation() -> None:
     # Capture the expected warning for FunctionCall to avoid breaking strict CI
@@ -12,6 +14,7 @@ def test_tool_call_deprecation() -> None:
 
     with pytest.warns(DeprecationWarning, match="ToolCall is deprecated"):
         ToolCall(id="call_123", function=fc)
+
 
 def test_tool_call_request_part_caching() -> None:
     # Test JSON parsing and caching behavior
