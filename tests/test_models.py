@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import uuid
+from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
@@ -188,7 +189,7 @@ def test_persona() -> None:
 
 def test_agent_config_system_prompt() -> None:
     """Test AgentRuntimeConfig with system_prompt."""
-    valid_data = {
+    valid_data: Dict[str, Any] = {
         "metadata": {
             "id": str(uuid.uuid4()),
             "version": "1.0.0",
