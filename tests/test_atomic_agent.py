@@ -1,7 +1,10 @@
 import uuid
+
 import pytest
 from pydantic import ValidationError
-from coreason_manifest.definitions.agent import AgentDefinition, AgentRuntimeConfig
+
+from coreason_manifest.definitions.agent import AgentDefinition
+
 
 def test_atomic_agent_without_topology_succeeds() -> None:
     """
@@ -32,6 +35,7 @@ def test_atomic_agent_without_topology_succeeds() -> None:
     assert agent.config.entry_point is None
     assert agent.config.system_prompt == "You are an atomic agent."
 
+
 def test_atomic_agent_with_skeleton_topology_succeeds() -> None:
     """
     Demonstrate that Skeleton Topology still works.
@@ -47,7 +51,7 @@ def test_atomic_agent_with_skeleton_topology_succeeds() -> None:
         "interface": {"inputs": {}, "outputs": {}},
         "config": {
             # Skeleton Topology
-            "nodes": [{"id": "main", "type": "agent", "agent_name": "self"}], # minimal node
+            "nodes": [{"id": "main", "type": "agent", "agent_name": "self"}],  # minimal node
             "edges": [],
             "entry_point": "main",
             "model_config": {"model": "gpt-4", "temperature": 0.7},
@@ -60,6 +64,7 @@ def test_atomic_agent_with_skeleton_topology_succeeds() -> None:
     agent = AgentDefinition(**data)
     assert len(agent.config.nodes) == 1
     assert agent.config.entry_point == "main"
+
 
 def test_nodes_without_entry_point_fails() -> None:
     """
