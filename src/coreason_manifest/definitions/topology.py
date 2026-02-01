@@ -98,10 +98,22 @@ class AgentNode(BaseNode):
     Attributes:
         type: The type of the node (must be 'agent').
         agent_name: The name of the atomic agent to call.
+        system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.
+        config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.
     """
 
     type: Literal["agent"] = Field("agent", description="Discriminator for AgentNode.")
     agent_name: str = Field(..., description="The name of the atomic agent to call.")
+    system_prompt: Optional[str] = Field(
+        default=None,
+        description="Overrides the registry default prompt. Required for ad-hoc/optimized agents.",
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description=(
+            "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults."
+        ),
+    )
 
 
 class HumanNode(BaseNode):
@@ -259,7 +271,7 @@ class GraphTopology(BaseModel):
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
-    state_schema: Optional[StateSchema] = Field(None, description="Schema definition for the graph state.")
+    state_schema: Optional[StateSchema] = Field(default=None, description="Schema definition for the graph state.")
 
 
 Topology = GraphTopology
