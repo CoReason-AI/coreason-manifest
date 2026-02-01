@@ -123,7 +123,11 @@ def test_recipe_manifest_legacy_key_rejection() -> None:
 def test_agent_runtime_config_validation() -> None:
     """Test that AgentRuntimeConfig (new name) works correctly."""
     config = AgentRuntimeConfig(
-        nodes=[], edges=[], entry_point="start", llm_config={"model": "gpt-4", "temperature": 0.5}
+        nodes=[],
+        edges=[],
+        entry_point="start",
+        llm_config={"model": "gpt-4", "temperature": 0.5},
+        system_prompt="Valid",
     )
     # Check the class configuration directly
     assert AgentRuntimeConfig.model_config.get("extra") == "forbid"

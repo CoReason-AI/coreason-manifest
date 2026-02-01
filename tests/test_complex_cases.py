@@ -33,6 +33,7 @@ def test_deep_immutability_mapping_proxy() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt", "temperature": 0.1},
+            "system_prompt": "Dummy",
         },
         "dependencies": {
             "tools": [
@@ -73,6 +74,7 @@ def test_deep_immutability_tuples() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt", "temperature": 0.1},
+            "system_prompt": "Dummy",
         },
         "dependencies": {
             "tools": [
@@ -126,6 +128,7 @@ def test_unicode_handling() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt", "temperature": 0.1},
+            "system_prompt": "Dummy",
         },
         "dependencies": {"tools": [], "libraries": []},
         "integrity_hash": "a" * 64,
@@ -153,6 +156,7 @@ def test_hash_validation_edge_cases() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt", "temperature": 0.1},
+            "system_prompt": "Dummy",
         },
         "dependencies": {"tools": [], "libraries": []},
     }
