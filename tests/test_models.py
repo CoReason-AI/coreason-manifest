@@ -16,11 +16,11 @@ from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
+    AgentInterface,
     AgentMetadata,
+    EventSchema,
     ModelConfig,
     Persona,
-    AgentInterface,
-    EventSchema,
 )
 
 
