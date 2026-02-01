@@ -8,13 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import functools
 import json
 import warnings
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union, cast
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, PrivateAttr, model_validator
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
@@ -85,16 +84,25 @@ class ToolCallRequestPart(CoReasonBaseModel):
     arguments: Union[Dict[str, Any], str]  # Structured arguments or JSON string
     id: Optional[str] = None
 
-    @functools.cached_property
+    _parsed_arguments: Optional[Dict[str, Any]] = PrivateAttr(default=None)
+
+    @property
     def parsed_arguments(self) -> Dict[str, Any]:
         """Return arguments as a dictionary, parsing JSON if necessary."""
+        if self._parsed_arguments is not None:
+            return self._parsed_arguments
+
         if isinstance(self.arguments, dict):
-            return self.arguments
+            self._parsed_arguments = self.arguments
+            return self._parsed_arguments
+
         try:
             result = json.loads(self.arguments)
-            return cast(Dict[str, Any], result) if isinstance(result, dict) else {}
+            self._parsed_arguments = cast(Dict[str, Any], result) if isinstance(result, dict) else {}
         except (json.JSONDecodeError, TypeError):
-            return {}
+            self._parsed_arguments = {}
+
+        return self._parsed_arguments
 
 
 class ToolCallResponsePart(CoReasonBaseModel):
