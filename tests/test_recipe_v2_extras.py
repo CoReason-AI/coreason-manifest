@@ -1,12 +1,20 @@
 # Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+# Copyright (c) 2025 CoReason, Inc.
 
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import RecipeManifest, Topology
 from coreason_manifest.recipes import RecipeInterface, StateDefinition
-
 
 def test_state_schema_aliasing_roundtrip() -> None:
     """Test that 'schema' input maps to 'schema_' and serializes back to 'schema'."""
@@ -37,7 +45,6 @@ def test_state_schema_aliasing_roundtrip() -> None:
     reloaded = RecipeManifest.model_validate_json(json_str)
     assert reloaded.state.schema_ == {"foo": "bar"}
 
-
 def test_empty_interface_and_state() -> None:
     """Test that empty but valid objects are accepted."""
     manifest = RecipeManifest(
@@ -51,7 +58,6 @@ def test_empty_interface_and_state() -> None:
     )
     assert manifest.interface.inputs == {}
     assert manifest.state.schema_ == {}
-
 
 def test_complex_parameters() -> None:
     """Test parameters with nested complex types."""
@@ -74,7 +80,6 @@ def test_complex_parameters() -> None:
     assert manifest.parameters["llm_config"]["model"] == "gpt-4"
     assert manifest.parameters["features"][0] == "logging"
 
-
 def test_persistence_literal_strictness() -> None:
     """Test that persistence validation is case-sensitive and strict."""
     # Valid
@@ -90,7 +95,6 @@ def test_persistence_literal_strictness() -> None:
     with pytest.raises(ValidationError) as excinfo:
         StateDefinition(schema={}, persistence="in-memory")
     assert "Input should be 'ephemeral' or 'persistent'" in str(excinfo.value)
-
 
 def test_interface_schema_structure_preservation() -> None:
     """Test that nested JSON Schema structures in interface are preserved exactly."""

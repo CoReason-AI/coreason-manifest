@@ -6,13 +6,22 @@
 # For details, see the LICENSE file.
 # Commercial use beyond a 30-day trial requires a separate license.
 #
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
 # Source Code: https://github.com/CoReason-AI/coreason_maco
 
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
-
 
 class StateSchema(BaseModel):
     """Defines the structure and persistence of the graph state.
@@ -29,7 +38,6 @@ class StateSchema(BaseModel):
     )
     persistence: str = Field(..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis').")
 
-
 class CouncilConfig(BaseModel):
     """Configuration for 'Architectural Triangulation'.
 
@@ -42,7 +50,6 @@ class CouncilConfig(BaseModel):
 
     strategy: str = Field(default="consensus", description="The strategy for the council, e.g., 'consensus'.")
     voters: List[str] = Field(..., description="List of agents or models that vote.")
-
 
 class VisualMetadata(BaseModel):
     """Data explicitly for the UI.
@@ -63,7 +70,6 @@ class VisualMetadata(BaseModel):
     icon: Optional[str] = Field(None, description="The icon to represent the node.")
     animation_style: Optional[str] = Field(None, description="The animation style for the node.")
 
-
 class BaseNode(BaseModel):
     """Base model for all node types.
 
@@ -81,7 +87,6 @@ class BaseNode(BaseModel):
     )
     visual: Optional[VisualMetadata] = Field(None, description="Visual metadata for the UI.")
 
-
 class AgentNode(BaseNode):
     """A node that calls a specific atomic agent.
 
@@ -92,7 +97,6 @@ class AgentNode(BaseNode):
 
     type: Literal["agent"] = Field("agent", description="Discriminator for AgentNode.")
     agent_name: str = Field(..., description="The name of the atomic agent to call.")
-
 
 class HumanNode(BaseNode):
     """A node that pauses execution for user input/approval.
@@ -105,7 +109,6 @@ class HumanNode(BaseNode):
     type: Literal["human"] = Field("human", description="Discriminator for HumanNode.")
     timeout_seconds: Optional[int] = Field(None, description="Optional timeout in seconds for the user interaction.")
 
-
 class LogicNode(BaseNode):
     """A node that executes pure Python logic.
 
@@ -117,14 +120,12 @@ class LogicNode(BaseNode):
     type: Literal["logic"] = Field("logic", description="Discriminator for LogicNode.")
     code: str = Field(..., description="The Python logic code to execute.")
 
-
 class DataMappingStrategy(str, Enum):
     """Strategy for mapping data."""
 
     DIRECT = "direct"
     JSONPATH = "jsonpath"
     LITERAL = "literal"
-
 
 class DataMapping(BaseModel):
     """Defines how to transform data between parent and child."""
@@ -133,7 +134,6 @@ class DataMapping(BaseModel):
 
     source: str = Field(..., description="The path/key source.")
     strategy: DataMappingStrategy = Field(default=DataMappingStrategy.DIRECT, description="The mapping strategy.")
-
 
 class RecipeNode(BaseNode):
     """A node that executes another Recipe as a sub-graph.
@@ -154,7 +154,6 @@ class RecipeNode(BaseNode):
         ..., description="Mapping of child output keys to parent state keys."
     )
 
-
 class MapNode(BaseNode):
     """A node that spawns multiple parallel executions of a sub-branch.
 
@@ -170,13 +169,11 @@ class MapNode(BaseNode):
     processor_node_id: str = Field(..., description="The node (or subgraph) to run for each item.")
     concurrency_limit: int = Field(..., description="Max parallel executions.")
 
-
 # Discriminated Union for polymorphism
 Node = Annotated[
     Union[AgentNode, HumanNode, LogicNode, RecipeNode, MapNode],
     Field(discriminator="type", description="Polymorphic node definition."),
 ]
-
 
 class Edge(BaseModel):
     """Represents a connection between two nodes.
@@ -193,7 +190,6 @@ class Edge(BaseModel):
     target_node_id: str = Field(..., description="The ID of the target node.")
     condition: Optional[str] = Field(None, description="Optional Python expression for conditional branching.")
 
-
 RouterRef = Annotated[
     str,
     StringConstraints(
@@ -201,7 +197,6 @@ RouterRef = Annotated[
         strip_whitespace=True,
     ),
 ]
-
 
 class RouterExpression(BaseModel):
     """A structured expression for routing logic (e.g., CEL or JSONLogic)."""
@@ -211,12 +206,10 @@ class RouterExpression(BaseModel):
     operator: str = Field(..., description="The operator (e.g., 'eq', 'gt').")
     args: List[Any] = Field(..., description="Arguments for the expression.")
 
-
 RouterDefinition = Annotated[
     Union[RouterRef, RouterExpression],
     Field(description="A reference to a python function or a logic expression."),
 ]
-
 
 class ConditionalEdge(BaseModel):
     """Represents a dynamic routing connection from one node to multiple potential targets.
@@ -235,7 +228,6 @@ class ConditionalEdge(BaseModel):
     )
     mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
 
-
 class GraphTopology(BaseModel):
     """The topology definition of the recipe.
 
@@ -250,6 +242,5 @@ class GraphTopology(BaseModel):
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
     state_schema: Optional[StateSchema] = Field(None, description="Schema definition for the graph state.")
-
 
 Topology = GraphTopology
