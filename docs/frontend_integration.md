@@ -13,22 +13,25 @@ In `coreason-manifest` v0.10.0+, `GraphEvent` is strictly defined as a **Discrim
 Every event conforms to a specific schema based on its `event_type`.
 
 ```python
-# Conceptual Structure
+# Conceptual Structure (BaseGraphEvent)
 class GraphEventNodeStart(BaseModel):
     event_type: Literal["NODE_START"]
-    run_id: str
-    node_id: str
-    timestamp: float
-    payload: NodeStarted  # Specific Payload Model
-    visual_metadata: Dict[str, str]
+    run_id: str            # Workflow execution ID
+    trace_id: str          # OpenTelemetry Trace ID
+    node_id: str           # The node related to this event
+    timestamp: float       # Epoch timestamp
+    sequence_id: Optional[int] # Optional ordering ID
+    payload: NodeStarted   # Specific Payload Model
+    visual_metadata: Dict[str, str] # Hints for UI
 ```
 
 ### Key Fields
 
 1.  **`event_type`**: The discriminator (e.g., `NODE_START`, `NODE_STREAM`, `NODE_DONE`).
 2.  **`node_id`**: The ID of the node in the `GraphTopology` currently executing.
-3.  **`payload`**: The strictly typed data associated with the event.
-4.  **`visual_metadata`**: A dictionary of hints specifically for the UI renderer.
+3.  **`trace_id`**: The OpenTelemetry Trace ID for distributed tracing.
+4.  **`payload`**: The strictly typed data associated with the event.
+5.  **`visual_metadata`**: A dictionary of hints specifically for the UI renderer.
 
 ---
 
@@ -50,7 +53,10 @@ The `visual_metadata` field allows the backend graph logic to drive frontend ani
 ```json
 {
   "event_type": "NODE_START",
+  "run_id": "run-123",
+  "trace_id": "trace-abc",
   "node_id": "agent_research",
+  "timestamp": 1700000000.0,
   "visual_metadata": {
     "animation": "pulse",
     "color": "#00AAFF",
@@ -75,32 +81,68 @@ The `visual_metadata` field allows the backend graph logic to drive frontend ani
 **When:** Execution logic begins.
 **UI Behavior:** Trigger "Running" animation (e.g., spinner, pulse).
 **Payload:** `NodeStarted`
-- `status`: "RUNNING"
+- `node_id`: ID of the node.
+- `timestamp`: Start timestamp.
+- `status`: "RUNNING".
 - `input_tokens`: (Optional) Initial token count.
-- `model`: (Optional) LLM model being used.
+- `visual_cue`: "PULSE".
 
 ### 3. `NODE_STREAM`
 **When:** The agent generates a token or chunk of text.
 **UI Behavior:** Append text to the chat bubble or log view.
 **Payload:** `NodeStream`
 - `chunk`: The string fragment generated.
-- `visual_cue`: "TEXT_BUBBLE"
+- `visual_cue`: "TEXT_BUBBLE".
 
 ### 4. `NODE_DONE`
 **When:** Execution completes successfully.
 **UI Behavior:** Mark node as complete (Green checkmark), stop animations.
 **Payload:** `NodeCompleted`
 - `output_summary`: Short summary of result.
-- `status`: "SUCCESS"
+- `status`: "SUCCESS".
+- `visual_cue`: "GREEN_GLOW".
 - `cost`: (Optional) Total cost of the step.
 
-### 5. `EDGE_ACTIVE`
+### 5. `NODE_SKIPPED`
+**When:** A node is bypassed (e.g., in a conditional branch).
+**UI Behavior:** Grey out the node.
+**Payload:** `NodeSkipped`
+- `status`: "SKIPPED".
+- `visual_cue`: "GREY_OUT".
+
+### 6. `EDGE_ACTIVE`
 **When:** Control flow moves from one node to another.
 **UI Behavior:** Animate the connecting line (Edge).
 **Payload:** `EdgeTraversed`
 - `source`: Source Node ID.
 - `target`: Target Node ID.
 - `animation_speed`: "FAST", "SLOW".
+
+### 7. `COUNCIL_VOTE`
+**When:** A voting step occurs in architectural triangulation.
+**Payload:** `CouncilVote`
+- `votes`: Dictionary of votes.
+
+### 8. `ERROR`
+**When:** A workflow error occurs.
+**UI Behavior:** Flash red.
+**Payload:** `WorkflowError`
+- `error_message`: Description of the error.
+- `stack_trace`: Debug info.
+- `visual_cue`: "RED_FLASH".
+
+### 9. `NODE_RESTORED`
+**When:** A node is restored from state.
+**UI Behavior:** Instant green/completed state.
+**Payload:** `NodeRestored`
+- `status`: "RESTORED".
+- `visual_cue`: "INSTANT_GREEN".
+
+### 10. `ARTIFACT_GENERATED`
+**When:** An artifact (e.g., PDF) is created.
+**Payload:** `ArtifactGenerated`
+- `artifact_type`: e.g., "PDF".
+- `url`: Location of the artifact.
 
 ---
 

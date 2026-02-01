@@ -21,7 +21,7 @@ The root object for a workflow.
 - **interface**: Defines the Input/Output contract (`RecipeInterface`).
 - **state**: Defines the internal memory schema (`StateDefinition`).
 - **parameters**: Build-time configuration constants (`Dict[str, Any]`).
-- **graph**: The topology (`GraphTopology`).
+- **topology**: The topology definition of the workflow (`GraphTopology`).
 
 ### RecipeInterface
 
@@ -193,8 +193,7 @@ recipe = RecipeManifest(
     state=state_def,
     parameters={"model": "gpt-4"},
     description="A simple approval workflow.",
-    inputs={"topic": "str"},
-    graph=GraphTopology(
+    topology=GraphTopology(
         nodes=[agent_node, human_node], # + other nodes referenced in edges
         edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
         state_schema=state

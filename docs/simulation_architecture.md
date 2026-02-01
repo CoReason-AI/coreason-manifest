@@ -12,11 +12,13 @@ The atomic unit of execution in a simulation is the `SimulationStep`. It capture
 
 - **step_id** (`UUID`): Unique identifier for the step.
 - **timestamp** (`datetime`): Execution timestamp.
+- **type** (`StepType`): Type of the step (`interaction` or `system_event`).
 - **node_id** (`str`): The graph node executed.
 - **inputs** (`Dict[str, Any]`): Snapshot of entry state.
-- **thought** (`str`): The Chain-of-Thought reasoning.
-- **action** (`Dict[str, Any]`): Tool calls or API requests.
-- **observation** (`Dict[str, Any]`): Tool outputs.
+- **thought** (`Optional[str]`): The Chain-of-Thought reasoning.
+- **action** (`Optional[Dict[str, Any]]`): Tool calls or API requests.
+- **observation** (`Optional[Dict[str, Any]]`): Tool outputs.
+- **snapshot** (`Dict[str, Any]`): Full copy of the graph state at the completion of this step.
 
 ### SimulationTrace
 
@@ -26,7 +28,16 @@ A trace represents a full execution session of an agent.
 - **agent_version** (`str`): Agent SemVer version.
 - **steps** (`List[SimulationStep]`): List of execution steps.
 - **outcome** (`Dict[str, Any]`): Final result.
-- **metrics** (`Dict[str, Any]`): Execution metrics (e.g., token usage, cost).
+- **metrics** (`SimulationMetrics`): Execution metrics (e.g., token usage, cost).
+
+### SimulationMetrics
+
+Metrics gathered during simulation.
+
+- **turn_count** (`int`): Number of turns.
+- **total_tokens** (`Optional[int]`): Total tokens used.
+- **cost_usd** (`Optional[float]`): Total cost in USD.
+- **duration_ms** (`Optional[float]`): Total duration in milliseconds.
 
 ## GAIA-Compliant Scenarios
 
