@@ -8,11 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import functools
 import json
+import warnings
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union, cast
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
@@ -77,13 +79,13 @@ class UriPart(CoReasonBaseModel):
 class ToolCallRequestPart(CoReasonBaseModel):
     """Represents a tool call requested by the model."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="ignore", frozen=True)
     type: Literal["tool_call"] = "tool_call"
     name: str
     arguments: Union[Dict[str, Any], str]  # Structured arguments or JSON string
     id: Optional[str] = None
 
-    @property
+    @functools.cached_property
     def parsed_arguments(self) -> Dict[str, Any]:
         """Return arguments as a dictionary, parsing JSON if necessary."""
         if isinstance(self.arguments, dict):
@@ -156,6 +158,15 @@ class FunctionCall(CoReasonBaseModel):
     name: str
     arguments: str
 
+    @model_validator(mode="after")
+    def warn_deprecated(self) -> "FunctionCall":
+        warnings.warn(
+            "FunctionCall is deprecated. Use ToolCallRequestPart instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self
+
 
 class ToolCall(CoReasonBaseModel):
     """Deprecated: Use ToolCallRequestPart instead."""
@@ -163,6 +174,15 @@ class ToolCall(CoReasonBaseModel):
     id: str
     type: str = "function"
     function: FunctionCall
+
+    @model_validator(mode="after")
+    def warn_deprecated(self) -> "ToolCall":
+        warnings.warn(
+            "ToolCall is deprecated. Use ToolCallRequestPart instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self
 
 
 Message = ChatMessage

@@ -13,7 +13,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 
 class StepType(str, Enum):
@@ -31,7 +33,7 @@ class ValidationLogic(str, Enum):
     CODE_EVAL = "code_eval"
 
 
-class SimulationScenario(BaseModel):
+class SimulationScenario(CoReasonBaseModel):
     """Definition of a simulation scenario."""
 
     id: str = Field(..., description="Unique identifier for the scenario.")
@@ -42,7 +44,7 @@ class SimulationScenario(BaseModel):
     validation_logic: ValidationLogic = Field(..., description="Logic used to validate the outcome.")
 
 
-class SimulationStep(BaseModel):
+class SimulationStep(CoReasonBaseModel):
     """The atomic unit of execution in a simulation."""
 
     step_id: UUID = Field(..., description="Atomic unit of execution ID.")
@@ -58,7 +60,7 @@ class SimulationStep(BaseModel):
     )
 
 
-class SimulationMetrics(BaseModel):
+class SimulationMetrics(CoReasonBaseModel):
     """Metrics gathered during simulation."""
 
     turn_count: int
@@ -67,7 +69,7 @@ class SimulationMetrics(BaseModel):
     duration_ms: Optional[float] = None
 
 
-class SimulationTrace(BaseModel):
+class SimulationTrace(CoReasonBaseModel):
     """Trace of a simulation execution."""
 
     trace_id: UUID = Field(..., description="Unique trace identifier.")
