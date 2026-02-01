@@ -1,4 +1,13 @@
-# Prosperity-3.0
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 """Pydantic models for the Coreason Manifest system.
 
 These models define the structure and validation rules for the Agent Manifest
@@ -10,7 +19,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from types import MappingProxyType
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Literal, Mapping, Optional, Tuple, Union
 from uuid import UUID
 
 from pydantic import (
@@ -114,12 +123,14 @@ class ModelConfig(BaseModel):
     Attributes:
         model: The LLM model identifier.
         temperature: Temperature for generation.
+        system_prompt: The default system prompt/persona for the agent.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     model: str = Field(..., description="The LLM model identifier.")
     temperature: float = Field(..., ge=0.0, le=2.0, description="Temperature for generation.")
+    system_prompt: Optional[str] = Field(None, description="The default system prompt/persona for the agent.")
 
 
 class AgentRuntimeConfig(BaseModel):
@@ -194,6 +205,24 @@ class ToolRequirement(BaseModel):
     risk_level: ToolRiskLevel = Field(..., description="The risk level of the tool.")
 
 
+class InlineToolDefinition(BaseModel):
+    """Definition of an inline tool.
+
+    Attributes:
+        name: Name of the tool.
+        description: Description of the tool.
+        parameters: JSON Schema of parameters.
+        type: The type of the tool (must be 'function').
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Name of the tool.")
+    description: str = Field(..., description="Description of the tool.")
+    parameters: Dict[str, Any] = Field(..., description="JSON Schema of parameters.")
+    type: Literal["function"] = Field("function", description="The type of the tool (must be 'function').")
+
+
 class AgentDependencies(BaseModel):
     """External dependencies for the Agent.
 
@@ -204,7 +233,9 @@ class AgentDependencies(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    tools: List[ToolRequirement] = Field(default_factory=list, description="List of MCP tool requirements.")
+    tools: List[Union[ToolRequirement, InlineToolDefinition]] = Field(
+        default_factory=list, description="List of MCP tool requirements."
+    )
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
     )

@@ -7,7 +7,14 @@
         "tools": {
           "description": "List of MCP tool requirements.",
           "items": {
-            "$ref": "#/$defs/ToolRequirement"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ToolRequirement"
+              },
+              {
+                "$ref": "#/$defs/InlineToolDefinition"
+              }
+            ]
           },
           "title": "Tools",
           "type": "array"
@@ -377,6 +384,42 @@
       "title": "HumanNode",
       "type": "object"
     },
+    "InlineToolDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of an inline tool.\n\nAttributes:\n    name: Name of the tool.\n    description: Description of the tool.\n    parameters: JSON Schema of parameters.\n    type: The type of the tool (must be 'function').",
+      "properties": {
+        "name": {
+          "description": "Name of the tool.",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of the tool.",
+          "title": "Description",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "description": "JSON Schema of parameters.",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "type": {
+          "const": "function",
+          "default": "function",
+          "description": "The type of the tool (must be 'function').",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "parameters"
+      ],
+      "title": "InlineToolDefinition",
+      "type": "object"
+    },
     "LogicNode": {
       "additionalProperties": false,
       "description": "A node that executes pure Python logic.\n\nAttributes:\n    type: The type of the node (must be 'logic').\n    code: The Python logic code to execute.",
@@ -497,7 +540,7 @@
     },
     "ModelConfig": {
       "additionalProperties": false,
-      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.",
+      "description": "LLM Configuration parameters.\n\nAttributes:\n    model: The LLM model identifier.\n    temperature: Temperature for generation.\n    system_prompt: The default system prompt/persona for the agent.",
       "properties": {
         "model": {
           "description": "The LLM model identifier.",
@@ -510,6 +553,19 @@
           "minimum": 0.0,
           "title": "Temperature",
           "type": "number"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The default system prompt/persona for the agent.",
+          "title": "System Prompt"
         }
       },
       "required": [
