@@ -1,205 +1,392 @@
-# Recipe Manifests (Workflows)
+# MACO Recipe Specification
 
-The `coreason-manifest` package provides the schema definitions for **Recipes**, which are executable workflows managed by the `coreason-maco` runtime. These definitions share the same underlying graph components (`Node`, `Edge`) as the Agent Topology.
+The `RecipeManifest` acts as the **Executable Specification** for the MACO (Multi-Agent Coreason Orchestration) engine. It serves as the shared contract between the `coreason-maco` runtime (Engine) and the `coreason-maco-builder` (Visual Editor).
 
-## Overview
+## Purpose
 
-A `RecipeManifest` defines a directed graph of nodes (steps) and edges (connections). It supports architectural triangulation via "Council" configurations and mixed-initiative workflows (human-in-the-loop).
+The Recipe Manifest defines:
+1.  **Interface Contract**: The strict inputs and outputs of the workflow, allowing it to be treated as a black-box function.
+2.  **Shared Memory**: The schema for the state that persists across steps.
+3.  **Topology**: The directed graph of execution steps (`Nodes`) and transition logic (`Edges`).
+4.  **Design-Time Data**: Metadata required for the Builder UI (e.g., coordinates) that is ignored by the runtime.
 
-Starting with v2, Recipes strictly define their **Interface** (Inputs/Outputs), **Internal State** (Memory), and **Build-time Parameters**.
+## Schema Reference
 
-## Schema Structure
+The root object is `RecipeManifest`, which inherits from `CoReasonBaseModel` (strictly validated, frozen by default).
 
 ### RecipeManifest
 
-The root object for a workflow.
-
-- **id**: Unique identifier for the recipe.
-- **version**: Semantic version (e.g., `1.0.0`).
-- **name**: Human-readable name.
-- **description**: Detailed description.
-- **interface**: Defines the Input/Output contract (`RecipeInterface`).
-- **state**: Defines the internal memory schema (`StateDefinition`).
-- **parameters**: Build-time configuration constants (`Dict[str, Any]`).
-- **topology**: The topology definition of the workflow (`GraphTopology`).
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `str` | Unique identifier for the recipe. |
+| `version` | `VersionStr` | Semantic version (e.g., `1.0.0`). |
+| `name` | `str` | Human-readable name. |
+| `description` | `str` | Detailed description of the workflow logic. |
+| `interface` | `RecipeInterface` | Defines the Input/Output contract. |
+| `state` | `StateDefinition` | Defines the internal memory schema and persistence settings. |
+| `parameters` | `Dict[str, Any]` | Build-time configuration constants (e.g. model tiers, thresholds). |
+| `topology` | `GraphTopology` | The execution graph (nodes and edges). |
+| `integrity_hash` | `Optional[str]` | SHA256 hash of the canonical topology. Enforced by Builder, verified by Runtime. |
+| `metadata` | `Dict[str, Any]` | Design-time data (UI coordinates, draft status, user info). |
 
 ### RecipeInterface
 
-Defines the contract for interacting with the recipe.
-
-- **inputs**: JSON Schema defining valid entry arguments.
-- **outputs**: JSON Schema defining the guaranteed structure of the final result.
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `inputs` | `Dict[str, Any]` | JSON Schema defining valid entry arguments. |
+| `outputs` | `Dict[str, Any]` | JSON Schema defining the guaranteed structure of the final result. |
 
 ### StateDefinition
 
-Defines the shared memory available to all nodes in the graph.
+Defines the "Memory" of the agent or workflow.
 
-- **schema**: JSON Schema of the keys available in the shared memory.
-- **persistence**: Configuration for state durability (`ephemeral` or `persistent`).
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `schema` | `Dict[str, Any]` | JSON Schema of the keys available in the shared memory. (Note: use `schema_` argument in Python constructor). |
+| `persistence` | `Literal["ephemeral", "persistent"]` | Configuration for state durability. |
 
 ### GraphTopology
 
-Contains the nodes and edges, plus state configuration.
+The core execution logic.
 
-- **nodes**: List of `Node` objects.
-- **edges**: List of `Edge` or `ConditionalEdge` objects.
-- **state_schema**: (Optional) Definition of the graph's state structure and persistence.
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `nodes` | `List[Node]` | List of polymorphic nodes. |
+| `edges` | `List[Edge]` | List of edges connecting the nodes. |
+| `state_schema` | `Optional[StateDefinition]` | Redundant definition of state for the graph context. |
 
-**Validation**: `GraphTopology` enforces integrity by ensuring that every `source_node_id` and `target_node_id` referenced in edges exists within the `nodes` list.
+**Validation**: The topology enforces **referential integrity**. Every `source_node_id` and `target_node_id` in edges must correspond to an `id` in the `nodes` list.
 
-#### StateSchema
+## Nodes
 
-Defines the data structure passed between nodes.
+Nodes are polymorphic objects distinguished by their `type` field.
 
-- **data_schema**: JSON Schema or Pydantic definition.
-- **persistence**: Checkpointing strategy (e.g., `'memory'`, `'redis'`).
+### Common Fields (All Nodes)
+- `id` (`str`): Unique identifier.
+- `metadata` (`Dict[str, Any]`): Operational context (cost tracking, SLAs).
+- `visual` (`VisualMetadata`): UI data (label, x/y coordinates, icon).
+- `council_config` (`Optional[CouncilConfig]`): Configuration for architectural triangulation (voting).
 
-### Nodes
-
-Nodes are polymorphic and can be one of the following types:
+### Node Types
 
 #### 1. AgentNode (`type="agent"`)
-Executes a specific atomic agent.
-- **agent_name**: The name of the atomic agent to call.
-- **council_config**: Optional configuration for architectural triangulation (e.g., voting).
-- **overrides**: Optional runtime overrides for the agent (e.g., temperature, prompt_template_vars).
+Executes an Atomic Agent from the registry.
+- `agent_name`: Name of the agent to invoke.
+- `system_prompt`: (Optional) Override system prompt.
+- `overrides`: (Optional) Runtime overrides (temperature, etc.).
 
 #### 2. HumanNode (`type="human"`)
-Pauses execution for user input or approval.
-- **timeout_seconds**: Optional timeout.
+Pauses execution and waits for external signal.
+- `timeout_seconds`: (Optional) Max wait time.
 
 #### 3. LogicNode (`type="logic"`)
-Executes pure Python logic.
-- **code**: The Python code to execute.
+Executes pure Python code (sandboxed).
+- `code`: The Python script to execute.
 
 #### 4. RecipeNode (`type="recipe"`)
-Executes another Recipe as a sub-graph (Hierarchical Composition).
-- **recipe_id**: ID of the child recipe.
-- **input_mapping**: Map parent state to child inputs.
-- **output_mapping**: Map child outputs to parent state.
+Executes a sub-workflow (nested recipe).
+- `recipe_id`: ID of the child recipe.
+- `input_mapping`: Maps parent state keys to child inputs.
+- `output_mapping`: Maps child outputs to parent state.
 
 #### 5. MapNode (`type="map"`)
-Executes a sub-branch in parallel for each item in a list (Map-Reduce).
-- **items_path**: Path to the list in the state (e.g., `state.documents`).
-- **processor_node_id**: The node/subgraph to run for each item.
-- **concurrency_limit**: Max parallel executions.
+Parallel execution (Map-Reduce).
+- `items_path`: Dot-notation path to a list in the state.
+- `processor_node_id`: ID of the node/subgraph to run for each item.
+- `concurrency_limit`: Max parallel threads.
 
-**Common Fields**: All nodes include an optional `metadata` dictionary for operational context (cost tracking, SLAs, etc.).
+## Edges
 
-### Edges
+Edges define the control flow.
 
-Connections between nodes.
+### Standard Edge
+A direct transition.
+- `source_node_id`: Start node.
+- `target_node_id`: End node.
+- `condition`: (Optional) Python expression that must evaluate to True.
 
-#### Standard Edge
-Simple transition.
-- **source_node_id**: ID of the source node.
-- **target_node_id**: ID of the target node.
-- **condition**: Optional Python expression for conditional branching.
-
-#### ConditionalEdge (Dynamic Routing)
+### ConditionalEdge (Dynamic Routing)
 Routes to one of multiple targets based on logic.
-- **source_node_id**: ID of the source node.
-- **router_logic**: Python function or expression determining the path.
-- **mapping**: Map of router output values to target node IDs.
+- `source_node_id`: Start node.
+- `router_logic`: A reference to a python function (e.g., `"my_module.router"`) or a `RouterExpression` object. **Note**: Raw code strings (lambdas) are not allowed for security reasons.
+- `mapping`: Dictionary mapping the router's return value (e.g., `"approved"`) to a target Node ID.
 
-## Edge Cases & Validation
+## Example
 
-The schema enforces strict validation to prevent runtime errors. Common edge cases include:
+The following example demonstrates how to programmatically construct a valid `RecipeManifest` using the Python SDK.
 
-1.  **Missing Routing Mapping**: A `ConditionalEdge` must have a non-empty `mapping` dictionary. Runtime logic that returns a value not present in `mapping` will cause an execution error.
-2.  **Invalid Map-Reduce Config**: `MapNode` requires `concurrency_limit > 0`. A limit of 0 or negative will raise a validation error.
-3.  **Recursion**: While `RecipeNode` allows nesting, the runtime is responsible for detecting infinite recursion loops (e.g., Recipe A -> Recipe B -> Recipe A).
-4.  **State Schema Mismatch**: If a `state_schema` is defined, all nodes must output data compliant with that schema. This is enforced at runtime.
-
-## Example Usage
+### Python Construction
 
 ```python
 from coreason_manifest import (
-    RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
-    ConditionalEdge, StateSchema
+    RecipeManifest, GraphTopology, AgentNode, Edge
 )
-from coreason_manifest.recipes import RecipeInterface, StateDefinition
-
-# Define Nodes
-agent_node = AgentNode(
-    id="step_1",
-    type="agent",
-    agent_name="ResearchAgent",
-    visual={"label": "Research Phase"},
-    overrides={"temperature": 0.2}
+from coreason_manifest.recipes import RecipeInterface
+from coreason_manifest.definitions.topology import (
+    HumanNode, ConditionalEdge, StateDefinition
 )
+import json
 
-human_node = HumanNode(
-    id="step_2",
-    type="human",
-    timeout_seconds=3600,
-    visual={"label": "Approval"},
-    metadata={"cost_center": "marketing"}
-)
-
-# Define Dynamic Routing
-router = ConditionalEdge(
-    source_node_id="step_2",
-    router_logic="lambda state: 'approved' if state['approved'] else 'rejected'",
-    mapping={
-        "approved": "step_3_publish",
-        "rejected": "step_1_revise"
-    }
-)
-
-# Define State
-state = StateSchema(
-    data_schema={"type": "object", "properties": {"approved": {"type": "boolean"}}},
-    persistence="redis"
-)
-
-# Define Interface
-interface = RecipeInterface(
-    inputs={
-        "type": "object",
-        "properties": {
-            "topic": {"type": "string"}
-        },
-        "required": ["topic"]
-    },
-    outputs={
-        "type": "object",
-        "properties": {
-            "summary": {"type": "string"}
-        }
-    }
-)
-
-# Define State
-state_def = StateDefinition(
-    schema={
-        "type": "object",
-        "properties": {
-            "messages": {"type": "array"},
-            "draft": {"type": "string"}
-        }
-    },
-    persistence="ephemeral"
-)
-
-# Create Manifest
-# Note: In a real scenario, you'd define all referenced nodes (like step_3_publish)
-# or the validation would fail.
-recipe = RecipeManifest(
-    id="research_workflow",
-    version="1.0.0",
-    name="Research Approval Workflow",
-    interface=interface,
-    state=state_def,
-    parameters={"model": "gpt-4"},
-    description="A simple approval workflow.",
-    topology=GraphTopology(
-        nodes=[agent_node, human_node], # + other nodes referenced in edges
-        edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
-        state_schema=state
+def main():
+    # 1. Define Nodes
+    agent_node = AgentNode(
+        id="step_1_research",
+        type="agent",
+        agent_name="ResearchAgent",
+        visual={"label": "Research Phase", "x_y_coordinates": [100.0, 200.0]},
+        overrides={"temperature": 0.2}
     )
-)
 
-# Dump to JSON (use by_alias=True to correctly serialize state.schema)
-print(recipe.model_dump_json(indent=2, by_alias=True))
+    human_node = HumanNode(
+        id="step_2_approve",
+        type="human",
+        timeout_seconds=3600,
+        visual={"label": "Manager Approval", "x_y_coordinates": [300.0, 200.0]},
+        metadata={"cost_center": "marketing"}
+    )
+
+    # Target nodes for branching (must exist in topology)
+    publish_node = AgentNode(
+        id="step_3_publish",
+        type="agent",
+        agent_name="PublisherAgent",
+        visual={"label": "Publish Content"}
+    )
+
+    revise_node = AgentNode(
+        id="step_1_revise",
+        type="agent",
+        agent_name="EditorAgent",
+        visual={"label": "Revise Content"}
+    )
+
+    # 2. Define Dynamic Routing
+    # Note: router_logic must be a reference to a function (e.g. "module.function")
+    # or a structured RouterExpression. It cannot be raw python code string.
+    router = ConditionalEdge(
+        source_node_id="step_2_approve",
+        router_logic="workflows.utils.approval_router",
+        mapping={
+            "approved": "step_3_publish",
+            "rejected": "step_1_revise"
+        }
+    )
+
+    # 3. Define Interface (Inputs/Outputs)
+    interface = RecipeInterface(
+        inputs={
+            "type": "object",
+            "properties": {
+                "topic": {"type": "string", "description": "The research topic"}
+            },
+            "required": ["topic"]
+        },
+        outputs={
+            "type": "object",
+            "properties": {
+                "final_report": {"type": "string"}
+            }
+        }
+    )
+
+    # 4. Define State (Memory)
+    # Note: Use 'schema_' kwarg or 'schema' alias if populating by dict.
+    # In python constructor, we use the field name 'schema_'.
+    state_def = StateDefinition(
+        schema_={
+            "type": "object",
+            "properties": {
+                "topic": {"type": "string"},
+                "research_notes": {"type": "array"},
+                "draft": {"type": "string"},
+                "approved": {"type": "boolean"},
+                "final_report": {"type": "string"}
+            }
+        },
+        persistence="ephemeral"
+    )
+
+    # 5. Create Manifest
+    recipe = RecipeManifest(
+        id="research_approval_workflow",
+        version="1.0.0",
+        name="Research & Approval Workflow",
+        description="A mixed-initiative workflow for researching and publishing content.",
+        interface=interface,
+        state=state_def,
+        parameters={"model_tier": "gpt-4"},
+        topology=GraphTopology(
+            nodes=[agent_node, human_node, publish_node, revise_node],
+            edges=[
+                Edge(source_node_id="step_1_research", target_node_id="step_2_approve"),
+                router,
+                # Edges to loop back or finish
+                Edge(source_node_id="step_1_revise", target_node_id="step_2_approve"),
+            ],
+            state_schema=state_def
+        ),
+        metadata={
+            "created_by": "user_123",
+            "last_modified": "2023-10-27T10:00:00Z"
+        }
+    )
+
+    # Dump to JSON
+    # by_alias=True is crucial for fields like 'schema_' -> 'schema'
+    json_output = recipe.model_dump_json(indent=2, by_alias=True)
+    print(json_output)
+
+if __name__ == "__main__":
+    main()
+```
+
+### JSON Representation
+
+The resulting JSON matches the wire format exchanged between Builder and Engine.
+
+```json
+{
+  "id": "research_approval_workflow",
+  "version": "1.0.0",
+  "name": "Research & Approval Workflow",
+  "description": "A mixed-initiative workflow for researching and publishing content.",
+  "interface": {
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string",
+          "description": "The research topic"
+        }
+      },
+      "required": [
+        "topic"
+      ]
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "final_report": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "state": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "type": "string"
+        },
+        "research_notes": {
+          "type": "array"
+        },
+        "draft": {
+          "type": "string"
+        },
+        "approved": {
+          "type": "boolean"
+        },
+        "final_report": {
+          "type": "string"
+        }
+      }
+    },
+    "persistence": "ephemeral"
+  },
+  "parameters": {
+    "model_tier": "gpt-4"
+  },
+  "topology": {
+    "nodes": [
+      {
+        "id": "step_1_research",
+        "type": "agent",
+        "agent_name": "ResearchAgent",
+        "visual": {
+          "label": "Research Phase",
+          "x_y_coordinates": [100.0, 200.0]
+        },
+        "overrides": {
+          "temperature": 0.2
+        }
+      },
+      {
+        "id": "step_2_approve",
+        "type": "human",
+        "timeout_seconds": 3600,
+        "visual": {
+          "label": "Manager Approval",
+          "x_y_coordinates": [300.0, 200.0]
+        },
+        "metadata": {
+          "cost_center": "marketing"
+        }
+      },
+      {
+        "id": "step_3_publish",
+        "type": "agent",
+        "agent_name": "PublisherAgent",
+        "visual": {
+          "label": "Publish Content"
+        }
+      },
+      {
+        "id": "step_1_revise",
+        "type": "agent",
+        "agent_name": "EditorAgent",
+        "visual": {
+          "label": "Revise Content"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source_node_id": "step_1_research",
+        "target_node_id": "step_2_approve"
+      },
+      {
+        "source_node_id": "step_2_approve",
+        "router_logic": "workflows.utils.approval_router",
+        "mapping": {
+          "approved": "step_3_publish",
+          "rejected": "step_1_revise"
+        }
+      },
+      {
+        "source_node_id": "step_1_revise",
+        "target_node_id": "step_2_approve"
+      }
+    ],
+    "state_schema": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
+          },
+          "research_notes": {
+            "type": "array"
+          },
+          "draft": {
+            "type": "string"
+          },
+          "approved": {
+            "type": "boolean"
+          },
+          "final_report": {
+            "type": "string"
+          }
+        }
+      },
+      "persistence": "ephemeral"
+    }
+  },
+  "integrity_hash": null,
+  "metadata": {
+    "created_by": "user_123",
+    "last_modified": "2023-10-27T10:00:00Z"
+  }
+}
 ```
