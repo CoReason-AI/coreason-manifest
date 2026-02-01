@@ -118,18 +118,31 @@ class Persona(CoReasonBaseModel):
     directives: List[str] = Field(..., description="List of specific instructions or directives.")
 
 
+class EventSchema(CoReasonBaseModel):
+    """Defines the structure of an intermediate event emitted by the agent."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Event name (e.g., 'SEARCH_PROGRESS').")
+    data_schema: ImmutableDict = Field(..., description="JSON Schema of the event payload.")
+
+
 class AgentInterface(CoReasonBaseModel):
     """Interface definition for the Agent.
 
     Attributes:
         inputs: Typed arguments the agent accepts (JSON Schema).
         outputs: Typed structure of the result.
+        events: List of intermediate events this agent produces during execution.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
+    events: List[EventSchema] = Field(
+        default_factory=list, description="List of intermediate events this agent produces during execution."
+    )
     injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
 
 
