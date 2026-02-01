@@ -13,8 +13,6 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.events import (
     GraphEventNodeStart,
     GraphEventNodeStream,
@@ -27,6 +25,7 @@ from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     RouterExpression,
 )
+from pydantic import ValidationError
 
 # --- Topology Security Edge Cases ---
 

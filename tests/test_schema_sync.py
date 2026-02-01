@@ -12,10 +12,9 @@ import json
 from pathlib import Path
 from typing import Type
 
-from pydantic import BaseModel
-
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.recipes import RecipeManifest
+from pydantic import BaseModel
 
 
 def verify_schema(model: Type[BaseModel], schema_path: Path) -> None:
@@ -29,9 +28,9 @@ def verify_schema(model: Type[BaseModel], schema_path: Path) -> None:
 
     # Check strict equality of properties and required fields
     assert stored_schema.get("properties") == generated_schema.get("properties"), "Schema properties do not match model"
-    assert set(stored_schema.get("required", [])) == set(generated_schema.get("required", [])), (
-        "Required fields do not match model"
-    )
+    assert set(stored_schema.get("required", [])) == set(
+        generated_schema.get("required", [])
+    ), "Required fields do not match model"
 
     # Check definitions ($defs)
     stored_defs = stored_schema.get("$defs", {})

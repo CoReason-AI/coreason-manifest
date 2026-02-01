@@ -12,13 +12,12 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.agent import (
     AgentMetadata,
     AgentRuntimeConfig,
 )
 from coreason_manifest.definitions.topology import AgentNode
+from pydantic import ValidationError
 
 
 def test_unique_node_ids_validation() -> None:

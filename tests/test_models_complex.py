@@ -11,9 +11,8 @@
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.agent import AgentMetadata
+from pydantic import ValidationError
 
 
 def test_semver_build_metadata() -> None:

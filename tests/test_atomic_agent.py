@@ -1,9 +1,8 @@
 import uuid
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.agent import AgentDefinition
+from pydantic import ValidationError
 
 
 def test_atomic_agent_without_topology_succeeds() -> None:

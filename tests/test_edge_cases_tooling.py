@@ -9,9 +9,8 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.agent import ToolRequirement, ToolRiskLevel
+from pydantic import ValidationError
 
 
 def test_tool_requirement_empty_scopes() -> None:

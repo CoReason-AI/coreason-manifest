@@ -9,8 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.events import (
     ArtifactGenerated,
     ArtifactGeneratedPayload,
@@ -33,6 +31,7 @@ from coreason_manifest.definitions.events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from pydantic import ValidationError
 
 
 def test_graph_event_creation() -> None:

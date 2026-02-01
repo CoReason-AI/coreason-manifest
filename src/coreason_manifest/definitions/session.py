@@ -32,9 +32,7 @@ class Interaction(CoReasonBaseModel):
     events: List[GraphEvent] = Field(
         default_factory=list, description="A log of intermediate events emitted during this turn"
     )
-    meta: Dict[str, Any] = Field(
-        default_factory=dict, description="Metadata (Latency, cost, model used, etc.)"
-    )
+    meta: Dict[str, Any] = Field(default_factory=dict, description="Metadata (Latency, cost, model used, etc.)")
 
 
 class SessionState(CoReasonBaseModel):
@@ -47,9 +45,7 @@ class SessionState(CoReasonBaseModel):
     user_id: Optional[str] = Field(None, description="The user identifying string")
     created_at: datetime = Field(..., description="When the session was created")
     last_updated_at: datetime = Field(..., description="When the session was last updated")
-    history: List[Interaction] = Field(
-        default_factory=list, description="Chronological list of interactions"
-    )
+    history: List[Interaction] = Field(default_factory=list, description="Chronological list of interactions")
     context_variables: Dict[str, Any] = Field(
         default_factory=dict,
         description="A 'scratchpad' for long-term memory or variables that persist across turns",

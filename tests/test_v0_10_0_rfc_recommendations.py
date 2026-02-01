@@ -9,10 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import TypeAdapter, ValidationError
-
 from coreason_manifest.definitions.events import GraphEvent, GraphEventNodeInit, NodeInit
 from coreason_manifest.definitions.topology import AgentNode, ConditionalEdge, Edge, GraphTopology, LogicNode
+from pydantic import TypeAdapter, ValidationError
 
 
 def test_agent_node_overrides() -> None:

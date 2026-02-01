@@ -13,8 +13,6 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.events import (
     CloudEvent,
     GenAICompletion,
@@ -35,6 +33,7 @@ from coreason_manifest.definitions.events import (
     WorkflowError,
     migrate_graph_event_to_cloud_event,
 )
+from pydantic import ValidationError
 
 
 def test_cloudevent_minimal() -> None:

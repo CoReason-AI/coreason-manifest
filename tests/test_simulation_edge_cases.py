@@ -12,8 +12,6 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.simulation import (
     SimulationMetrics,
     SimulationScenario,
@@ -21,6 +19,7 @@ from coreason_manifest.definitions.simulation import (
     SimulationTrace,
     ValidationLogic,
 )
+from pydantic import ValidationError
 
 
 def test_scenario_difficulty_bounds() -> None:

@@ -11,9 +11,8 @@
 import json
 from datetime import datetime
 
-from pydantic import Field
-
 from coreason_manifest.definitions.base import CoReasonBaseModel
+from pydantic import Field
 
 
 class TestModel(CoReasonBaseModel):

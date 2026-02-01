@@ -9,12 +9,11 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest import Edge, RecipeManifest
 from coreason_manifest import Topology as GraphTopology
 from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode, StateDefinition
 from coreason_manifest.recipes import RecipeInterface
+from pydantic import ValidationError
 
 
 def test_recipe_manifest_creation() -> None:

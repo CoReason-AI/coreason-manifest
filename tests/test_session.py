@@ -8,12 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from coreason_manifest.definitions.session import Interaction, SessionState
+import pytest
 from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
+from coreason_manifest.definitions.session import Interaction, SessionState
+from pydantic import ValidationError
+
 
 def test_interaction_creation() -> None:
     """Test successful creation of an Interaction."""
@@ -28,6 +30,7 @@ def test_interaction_creation() -> None:
     assert interaction.events == []
     assert interaction.meta == {}
 
+
 def test_interaction_with_events() -> None:
     """Test Interaction with GraphEvents."""
     payload = NodeInit(node_id="node-1", type="AGENT", visual_cue="THINKING")
@@ -41,13 +44,10 @@ def test_interaction_with_events() -> None:
         visual_metadata={"color": "#FFFFFF"},
     )
 
-    interaction = Interaction(
-        input={"foo": "bar"},
-        output={"baz": "qux"},
-        events=[event]
-    )
+    interaction = Interaction(input={"foo": "bar"}, output={"baz": "qux"}, events=[event])
     assert len(interaction.events) == 1
     assert interaction.events[0].event_type == "NODE_INIT"
+
 
 def test_session_state_creation() -> None:
     """Test successful creation of a SessionState."""
@@ -70,6 +70,7 @@ def test_session_state_creation() -> None:
     assert session.history == []
     assert session.context_variables == {}
 
+
 def test_session_state_immutability() -> None:
     """Test that SessionState is immutable (frozen)."""
     session_id = uuid4()
@@ -82,18 +83,19 @@ def test_session_state_immutability() -> None:
         last_updated_at=now,
     )
 
-    with pytest.raises(Exception): # Pydantic v2 raises ValidationError or TypeError depending on config
-        session.processor_id = "agent-2" # type: ignore
+    with pytest.raises(ValidationError):  # Pydantic v2 raises ValidationError or TypeError depending on config
+        session.processor_id = "agent-2"  # type: ignore
 
     # Note: session.history is a list, so append() works at runtime even if frozen=True.
     # frozen=True only prevents field reassignment.
     # To test frozen properly, we check field reassignment.
-    with pytest.raises(Exception):
-        session.history = [] # type: ignore
+    with pytest.raises(ValidationError):
+        session.history = []  # type: ignore
 
     # Better test for frozen:
-    with pytest.raises(Exception):
-        session.user_id = "new-user" # type: ignore
+    with pytest.raises(ValidationError):
+        session.user_id = "new-user"  # type: ignore
+
 
 def test_add_interaction() -> None:
     """Test add_interaction method."""
@@ -107,10 +109,7 @@ def test_add_interaction() -> None:
         last_updated_at=now,
     )
 
-    interaction = Interaction(
-        input={"a": 1},
-        output={"b": 2}
-    )
+    interaction = Interaction(input={"a": 1}, output={"b": 2})
 
     new_session = session.add_interaction(interaction)
 
@@ -128,12 +127,10 @@ def test_add_interaction() -> None:
     assert new_session.session_id == session.session_id
     assert new_session.processor_id == session.processor_id
 
+
 def test_serialization() -> None:
     """Test JSON serialization."""
-    interaction = Interaction(
-        input={"k": "v"},
-        output={"x": "y"}
-    )
+    interaction = Interaction(input={"k": "v"}, output={"x": "y"})
     json_str = interaction.to_json()
     # Check key presence without relying on exact whitespace
     assert '"k":"v"' in json_str.replace(" ", "")

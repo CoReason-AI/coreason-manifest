@@ -12,8 +12,6 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-from pydantic import TypeAdapter, ValidationError
-
 from coreason_manifest.definitions.events import (
     EdgeTraversed,
     GraphEvent,
@@ -36,6 +34,7 @@ from coreason_manifest.definitions.topology import (
     RecipeNode,
     RouterExpression,
 )
+from pydantic import TypeAdapter, ValidationError
 
 
 def test_topology_security_router_ref_valid() -> None:

@@ -9,10 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.agent import ModelConfig, Persona
 from coreason_manifest.definitions.simulation_config import AdversaryProfile
+from pydantic import ValidationError
 
 
 def test_persona_empty_strings() -> None:

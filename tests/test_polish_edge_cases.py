@@ -12,14 +12,13 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentRuntimeConfig,
 )
 from coreason_manifest.definitions.audit import AuditEventType, AuditLog, GenAIOperation
 from coreason_manifest.recipes import RecipeManifest
+from pydantic import ValidationError
 
 
 def test_audit_log_legacy_key_rejection() -> None:
