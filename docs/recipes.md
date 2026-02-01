@@ -45,6 +45,8 @@ Contains the nodes and edges, plus state configuration.
 - **edges**: List of `Edge` or `ConditionalEdge` objects.
 - **state_schema**: (Optional) Definition of the graph's state structure and persistence.
 
+**Validation**: `GraphTopology` enforces integrity by ensuring that every `source_node_id` and `target_node_id` referenced in edges exists within the `nodes` list.
+
 #### StateSchema
 
 Defines the data structure passed between nodes.
@@ -60,6 +62,7 @@ Nodes are polymorphic and can be one of the following types:
 Executes a specific atomic agent.
 - **agent_name**: The name of the atomic agent to call.
 - **council_config**: Optional configuration for architectural triangulation (e.g., voting).
+- **overrides**: Optional runtime overrides for the agent (e.g., temperature, prompt_template_vars).
 
 #### 2. HumanNode (`type="human"`)
 Pauses execution for user input or approval.
@@ -80,6 +83,8 @@ Executes a sub-branch in parallel for each item in a list (Map-Reduce).
 - **items_path**: Path to the list in the state (e.g., `state.documents`).
 - **processor_node_id**: The node/subgraph to run for each item.
 - **concurrency_limit**: Max parallel executions.
+
+**Common Fields**: All nodes include an optional `metadata` dictionary for operational context (cost tracking, SLAs, etc.).
 
 ### Edges
 
@@ -120,14 +125,16 @@ agent_node = AgentNode(
     id="step_1",
     type="agent",
     agent_name="ResearchAgent",
-    visual={"label": "Research Phase"}
+    visual={"label": "Research Phase"},
+    overrides={"temperature": 0.2}
 )
 
 human_node = HumanNode(
     id="step_2",
     type="human",
     timeout_seconds=3600,
-    visual={"label": "Approval"}
+    visual={"label": "Approval"},
+    metadata={"cost_center": "marketing"}
 )
 
 # Define Dynamic Routing
@@ -164,7 +171,7 @@ interface = RecipeInterface(
 )
 
 # Define State
-state = StateDefinition(
+state_def = StateDefinition(
     schema={
         "type": "object",
         "properties": {
@@ -176,17 +183,19 @@ state = StateDefinition(
 )
 
 # Create Manifest
+# Note: In a real scenario, you'd define all referenced nodes (like step_3_publish)
+# or the validation would fail.
 recipe = RecipeManifest(
     id="research_workflow",
     version="1.0.0",
     name="Research Approval Workflow",
     interface=interface,
-    state=state,
+    state=state_def,
     parameters={"model": "gpt-4"},
     description="A simple approval workflow.",
     inputs={"topic": "str"},
     graph=GraphTopology(
-        nodes=[agent_node, human_node],
+        nodes=[agent_node, human_node], # + other nodes referenced in edges
         edges=[Edge(source_node_id="step_1", target_node_id="step_2"), router],
         state_schema=state
     )

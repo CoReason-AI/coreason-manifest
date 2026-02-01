@@ -21,7 +21,7 @@
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 
 class StateSchema(BaseModel):
@@ -81,6 +81,7 @@ class BaseNode(BaseModel):
         id: Unique identifier for the node.
         council_config: Optional configuration for architectural triangulation.
         visual: Visual metadata for the UI.
+        metadata: Generic metadata for operational context (e.g. cost tracking, SLAs).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -90,6 +91,10 @@ class BaseNode(BaseModel):
         None, description="Optional configuration for architectural triangulation."
     )
     visual: Optional[VisualMetadata] = Field(None, description="Visual metadata for the UI.")
+    metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Generic metadata for operational context (e.g. cost tracking, SLAs).",
+    )
 
 
 class AgentNode(BaseNode):
@@ -100,6 +105,7 @@ class AgentNode(BaseNode):
         agent_name: The name of the atomic agent to call.
         system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.
         config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.
+        overrides: Runtime overrides for the agent (e.g., temperature, prompt_template_vars).
     """
 
     type: Literal["agent"] = Field("agent", description="Discriminator for AgentNode.")
@@ -113,6 +119,10 @@ class AgentNode(BaseNode):
         description=(
             "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults."
         ),
+    )
+    overrides: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
     )
 
 
@@ -272,6 +282,27 @@ class GraphTopology(BaseModel):
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
     state_schema: Optional[StateSchema] = Field(default=None, description="Schema definition for the graph state.")
+
+    @model_validator(mode="after")
+    def validate_graph_integrity(self) -> "GraphTopology":
+        """Ensures that all edges point to valid nodes."""
+        node_ids = {node.id for node in self.nodes}
+
+        for edge in self.edges:
+            if edge.source_node_id not in node_ids:
+                raise ValueError(f"Edge source node '{edge.source_node_id}' not found in nodes.")
+
+            # ConditionalEdge mapping targets
+            if isinstance(edge, ConditionalEdge):
+                for target_id in edge.mapping.values():
+                    if target_id not in node_ids:
+                        raise ValueError(f"ConditionalEdge target node '{target_id}' not found in nodes.")
+            else:
+                # Regular Edge
+                if edge.target_node_id not in node_ids:
+                    raise ValueError(f"Edge target node '{edge.target_node_id}' not found in nodes.")
+
+        return self
 
 
 Topology = GraphTopology

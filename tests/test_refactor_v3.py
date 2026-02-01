@@ -14,9 +14,15 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
+from pydantic import TypeAdapter
 from coreason_manifest.definitions.events import (
     EdgeTraversed,
     GraphEvent,
+    GraphEventEdgeActive,
+    GraphEventNodeDone,
+    GraphEventNodeInit,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
     NodeInit,
     StandardizedNodeCompleted,
     StandardizedNodeStarted,
@@ -101,7 +107,7 @@ def test_simulation_snapshot() -> None:
 
 def test_event_polymorphism_node_start() -> None:
     """Test migration of NODE_START event."""
-    event = GraphEvent(
+    event = GraphEventNodeStart(
         event_type="NODE_START",
         run_id="run1",
         node_id="node1",
@@ -112,6 +118,7 @@ def test_event_polymorphism_node_start() -> None:
             "input_tokens": 100,
             "model": "gpt-4",
             "system": "you are a bot",
+            "node_id": "node1"
         },
         visual_metadata={},
     )
@@ -129,12 +136,12 @@ def test_event_polymorphism_node_start() -> None:
 
 def test_event_polymorphism_node_stream() -> None:
     """Test migration of NODE_STREAM event."""
-    event = GraphEvent(
+    event = GraphEventNodeStream(
         event_type="NODE_STREAM",
         run_id="run1",
         node_id="node1",
         timestamp=1234567890.0,
-        payload={"chunk": "hello", "model": "gpt-4"},
+        payload={"chunk": "hello", "model": "gpt-4", "node_id": "node1"},
         visual_metadata={},
     )
 
@@ -150,7 +157,7 @@ def test_event_polymorphism_node_stream() -> None:
 
 def test_event_polymorphism_fallback() -> None:
     """Test fallback for edge events."""
-    event = GraphEvent(
+    event = GraphEventEdgeActive(
         event_type="EDGE_ACTIVE",
         run_id="run1",
         node_id="node1",
@@ -165,47 +172,42 @@ def test_event_polymorphism_fallback() -> None:
 
 
 def test_unknown_event_type() -> None:
-    """Test unknown event type fallback."""
-    # We need to bypass Pydantic validation for event_type Literal
-    # using construct
-    event = GraphEvent.model_construct(
-        event_type="UNKNOWN_TYPE",  # type: ignore[arg-type]
-        run_id="run1",
-        node_id="node1",
-        timestamp=1234567890.0,
-        payload={"foo": "bar"},
-        visual_metadata={},
-    )
-    ce = migrate_graph_event_to_cloud_event(event)
-    assert ce.data == {"foo": "bar"}
-    # Verify type fallback
-    assert ce.type == "ai.coreason.legacy.unknown_type"
+    """Test unknown event type validation error."""
+    # Strict validation prevents unknown event types via Union
+    data = {
+        "event_type": "UNKNOWN_TYPE",
+        "run_id": "run1",
+        "node_id": "node1",
+        "timestamp": 1234567890.0,
+        "payload": {"foo": "bar"},
+        "visual_metadata": {}
+    }
+    with pytest.raises(ValidationError):
+        TypeAdapter(GraphEvent).validate_python(data)
 
 
 def test_instantiation_failure() -> None:
-    """Test fallback when payload instantiation fails."""
+    """Test validation error when payload instantiation fails."""
     # NODE_START requires status="RUNNING".
-    event = GraphEvent(
-        event_type="NODE_START",
-        run_id="run1",
-        node_id="node1",
-        timestamp=1234567890.0,
-        payload={"status": "FAILED"},  # Invalid status
-        visual_metadata={},
-    )
-    ce = migrate_graph_event_to_cloud_event(event)
-    # Should fallback to dict
-    assert ce.data == {"status": "FAILED"}
+    with pytest.raises(ValidationError):
+        GraphEventNodeStart(
+            event_type="NODE_START",
+            run_id="run1",
+            node_id="node1",
+            timestamp=1234567890.0,
+            payload={"status": "FAILED", "node_id": "node1", "timestamp": 1234567890.0},  # Invalid status
+            visual_metadata={},
+        )
 
 
 def test_empty_cue_filtering() -> None:
     """Test filtering of empty string extensions."""
-    event = GraphEvent(
+    event = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run1",
         node_id="node1",
         timestamp=1234567890.0,
-        payload={"visual_cue": ""},  # Empty cue
+        payload={"visual_cue": "", "node_id": "node1"},  # Empty cue
         visual_metadata={"animation": ""},  # Empty animation
     )
     ce = migrate_graph_event_to_cloud_event(event)
@@ -215,12 +217,12 @@ def test_empty_cue_filtering() -> None:
 
 def test_event_polymorphism_node_completed() -> None:
     """Test migration of NODE_DONE event."""
-    event = GraphEvent(
+    event = GraphEventNodeDone(
         event_type="NODE_DONE",
         run_id="run1",
         node_id="node1",
         timestamp=1234567890.0,
-        payload={"output_summary": "done", "model": "gpt-4"},
+        payload={"output_summary": "done", "model": "gpt-4", "node_id": "node1"},
         visual_metadata={},
     )
     ce = migrate_graph_event_to_cloud_event(event)
@@ -233,12 +235,12 @@ def test_event_polymorphism_node_completed() -> None:
 
 def test_event_polymorphism_base_implementation() -> None:
     """Test migration using base implementation (e.g. NodeInit)."""
-    event = GraphEvent(
+    event = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run1",
         node_id="node1",
         timestamp=1234567890.0,
-        payload={"type": "start"},
+        payload={"type": "start", "node_id": "node1"},
         visual_metadata={},
     )
     ce = migrate_graph_event_to_cloud_event(event)
@@ -249,12 +251,12 @@ def test_event_polymorphism_base_implementation() -> None:
 def test_extension_filtering() -> None:
     """Test UI metadata filtering."""
     # Case 1: All empty values -> Extension dropped
-    event_empty = GraphEvent(
+    event_empty = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run1",
         node_id="node1",
         timestamp=1234567890.0,
-        payload={"type": "start"},
+        payload={"type": "start", "node_id": "node1"},
         visual_metadata={
             "empty": "",
         },
@@ -263,12 +265,12 @@ def test_extension_filtering() -> None:
     assert "com_coreason_ui_metadata" not in ce.model_dump()
 
     # Case 2: Mixed -> Extension kept (as is)
-    event_mixed = GraphEvent(
+    event_mixed = GraphEventNodeInit(
         event_type="NODE_INIT",
         run_id="run1",
         node_id="node1",
         timestamp=1234567890.0,
-        payload={"type": "start"},
+        payload={"type": "start", "node_id": "node1"},
         visual_metadata={"valid": "value", "empty": ""},
     )
     ce_mixed = migrate_graph_event_to_cloud_event(event_mixed)

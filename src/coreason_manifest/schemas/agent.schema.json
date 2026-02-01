@@ -116,7 +116,7 @@
     },
     "AgentNode": {
       "additionalProperties": false,
-      "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.\n    system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.\n    config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.",
+      "description": "A node that calls a specific atomic agent.\n\nAttributes:\n    type: The type of the node (must be 'agent').\n    agent_name: The name of the atomic agent to call.\n    system_prompt: Overrides the registry default prompt. Required for ad-hoc/optimized agents.\n    config: Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.\n    overrides: Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
       "properties": {
         "id": {
           "description": "Unique identifier for the node.",
@@ -146,6 +146,12 @@
           ],
           "default": null,
           "description": "Visual metadata for the UI."
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
         },
         "type": {
           "const": "agent",
@@ -185,6 +191,20 @@
           "default": null,
           "description": "Runtime-specific configuration (e.g., model parameters, temperature). Merged with registry defaults.",
           "title": "Config"
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Runtime overrides for the agent (e.g., temperature, prompt_template_vars).",
+          "title": "Overrides"
         }
       },
       "required": [
@@ -397,6 +417,12 @@
           "default": null,
           "description": "Visual metadata for the UI."
         },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
+        },
         "type": {
           "const": "human",
           "default": "human",
@@ -493,6 +519,12 @@
           "default": null,
           "description": "Visual metadata for the UI."
         },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
+        },
         "type": {
           "const": "logic",
           "default": "logic",
@@ -545,6 +577,12 @@
           ],
           "default": null,
           "description": "Visual metadata for the UI."
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
         },
         "type": {
           "const": "map",
@@ -710,6 +748,12 @@
           ],
           "default": null,
           "description": "Visual metadata for the UI."
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "description": "Generic metadata for operational context (e.g. cost tracking, SLAs).",
+          "title": "Metadata",
+          "type": "object"
         },
         "type": {
           "const": "recipe",
