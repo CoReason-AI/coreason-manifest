@@ -71,7 +71,7 @@ def test_event_payload_strictness_extra_fields() -> None:
         run_id="r1",
         node_id="n1",
         timestamp=123.0,
-        payload=payload_data,  # type: ignore [arg-type]
+        payload=payload_data,
         visual_metadata={},
     )
 
