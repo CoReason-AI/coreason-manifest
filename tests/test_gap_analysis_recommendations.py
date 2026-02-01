@@ -8,9 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Dict, Any
 from coreason_manifest.definitions.topology import AgentNode, GraphTopology
-from coreason_manifest.recipes import RecipeManifest, RecipeInterface, StateDefinition
+from coreason_manifest.recipes import RecipeInterface, RecipeManifest, StateDefinition
+
 
 def test_agent_node_enhancements() -> None:
     """Test that AgentNode accepts system_prompt and config as per v0.10.0 spec."""
@@ -18,35 +18,25 @@ def test_agent_node_enhancements() -> None:
         id="agent-1",
         agent_name="optimizer-agent",
         system_prompt="You are an optimized agent.",
-        config={"temperature": 0.7}
+        config={"temperature": 0.7},
     )
     assert agent_node.system_prompt == "You are an optimized agent."
     assert agent_node.config == {"temperature": 0.7}
 
+
 def test_graph_topology_state_schema_optional() -> None:
     """Test that GraphTopology state_schema is optional."""
     # We need a dummy node to validate topology
-    agent_node = AgentNode(
-        id="agent-1",
-        agent_name="test-agent"
-    )
+    agent_node = AgentNode(id="agent-1", agent_name="test-agent")
 
-    topology = GraphTopology(
-        nodes=[agent_node],
-        edges=[]
-    )
+    topology = GraphTopology(nodes=[agent_node], edges=[])
     assert topology.state_schema is None
+
 
 def test_recipe_manifest_integrity_and_metadata() -> None:
     """Test that RecipeManifest accepts integrity_hash and metadata."""
-    agent_node = AgentNode(
-        id="agent-1",
-        agent_name="test-agent"
-    )
-    topology = GraphTopology(
-        nodes=[agent_node],
-        edges=[]
-    )
+    agent_node = AgentNode(id="agent-1", agent_name="test-agent")
+    topology = GraphTopology(nodes=[agent_node], edges=[])
 
     manifest = RecipeManifest(
         id="recipe-1",
@@ -54,11 +44,11 @@ def test_recipe_manifest_integrity_and_metadata() -> None:
         name="Test Recipe",
         description="A test recipe",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=topology,
-        integrity_hash="a" * 64, # Mock SHA256
-        metadata={"ui_layout": {"agent-1": [10, 20]}}
+        integrity_hash="a" * 64,  # Mock SHA256
+        metadata={"ui_layout": {"agent-1": [10, 20]}},
     )
 
     assert manifest.integrity_hash == "a" * 64
