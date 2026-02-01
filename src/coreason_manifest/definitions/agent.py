@@ -34,7 +34,7 @@ from pydantic import (
 from typing_extensions import Annotated
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
-from coreason_manifest.definitions.topology import Edge, Node
+from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 # SemVer Regex pattern (simplified for standard SemVer)
 # Modified to accept optional 'v' or 'V' prefix (multiple allowed) for input normalization
@@ -186,6 +186,12 @@ class AgentRuntimeConfig(CoReasonBaseModel):
             if not (has_global_prompt or has_model_prompt):
                 raise ValueError("Atomic Agents require a system_prompt (global or in model_config).")
 
+        return self
+
+    @model_validator(mode="after")
+    def validate_topology_integrity(self) -> AgentRuntimeConfig:
+        """Ensure that edges connect existing nodes."""
+        validate_edge_integrity(self.nodes, self.edges)
         return self
 
     @field_validator("nodes")

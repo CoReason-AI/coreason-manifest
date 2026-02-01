@@ -49,7 +49,7 @@ def test_graph_event_creation() -> None:
     )
     assert event.event_type == "NODE_INIT"
     assert event.payload.type == "AGENT"
-    assert event.visual_metadata["color"] == "#FFFFFF"
+    assert event.visual_metadata.color == "#FFFFFF"
 
 
 def test_graph_event_default_trace_id() -> None:

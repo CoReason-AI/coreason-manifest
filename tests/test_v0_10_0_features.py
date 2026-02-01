@@ -63,9 +63,9 @@ def test_graph_topology_state_schema_optional() -> None:
     assert topology.state_schema is None
 
     # Also verify we can provide it
-    from coreason_manifest.definitions.topology import StateSchema
+    from coreason_manifest.definitions.topology import StateDefinition
 
-    schema = StateSchema(data_schema={}, persistence="memory")
+    schema = StateDefinition(schema={}, persistence="ephemeral")
     topology_with_schema = GraphTopology(nodes=[], edges=[], state_schema=schema)
     assert topology_with_schema.state_schema == schema
 

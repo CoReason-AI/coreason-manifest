@@ -287,7 +287,7 @@
         "state_schema": {
           "anyOf": [
             {
-              "$ref": "#/$defs/StateSchema"
+              "$ref": "#/$defs/StateDefinition"
             },
             {
               "type": "null"
@@ -663,29 +663,6 @@
         "schema"
       ],
       "title": "StateDefinition",
-      "type": "object"
-    },
-    "StateSchema": {
-      "additionalProperties": false,
-      "description": "Defines the structure and persistence of the graph state.\n\nAttributes:\n    data_schema: A JSON Schema or Pydantic definition describing the state structure.\n    persistence: Configuration for how state is checkpointed.",
-      "properties": {
-        "data_schema": {
-          "additionalProperties": true,
-          "description": "A JSON Schema or Pydantic definition describing the state structure.",
-          "title": "Data Schema",
-          "type": "object"
-        },
-        "persistence": {
-          "description": "Configuration for how state is checkpointed (e.g., 'memory', 'redis').",
-          "title": "Persistence",
-          "type": "string"
-        }
-      },
-      "required": [
-        "data_schema",
-        "persistence"
-      ],
-      "title": "StateSchema",
       "type": "object"
     },
     "VisualMetadata": {

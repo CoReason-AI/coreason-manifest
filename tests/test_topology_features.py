@@ -18,47 +18,47 @@ from coreason_manifest.definitions.topology import (
     LogicNode,
     MapNode,
     RecipeNode,
-    StateSchema,
+    StateDefinition,
 )
 
 
 def test_state_schema_creation() -> None:
-    """Test creating a valid StateSchema."""
+    """Test creating a valid StateDefinition."""
     schema_def = {"type": "object", "properties": {"messages": {"type": "array"}}}
-    state = StateSchema(data_schema=schema_def, persistence="memory")
-    assert state.data_schema == schema_def
-    assert state.persistence == "memory"
+    state = StateDefinition(schema=schema_def, persistence="ephemeral")
+    assert state.schema_ == schema_def
+    assert state.persistence == "ephemeral"
 
 
 def test_state_schema_validation_types() -> None:
     """Test validation fails for invalid types."""
     with pytest.raises(ValidationError):
-        StateSchema(data_schema="not-a-dict", persistence="memory")
+        StateDefinition(schema="not-a-dict", persistence="ephemeral")
 
 
 def test_state_schema_missing_fields() -> None:
     """Test validation fails for missing required fields."""
     with pytest.raises(ValidationError) as excinfo:
-        StateSchema(persistence="memory")  # type: ignore[call-arg]
+        StateDefinition(persistence="ephemeral")  # type: ignore[call-arg]
     assert "Field required" in str(excinfo.value)
-    assert "data_schema" in str(excinfo.value)
+    assert "schema" in str(excinfo.value)
 
 
 def test_state_schema_extra_forbid() -> None:
     """Test that extra fields are forbidden."""
     schema_def = {"type": "object"}
     with pytest.raises(ValidationError) as excinfo:
-        StateSchema(data_schema=schema_def, persistence="memory", extra_field="fail")  # type: ignore[call-arg]
+        StateDefinition(schema=schema_def, persistence="ephemeral", extra_field="fail")  # type: ignore[call-arg]
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
 
 def test_graph_topology_with_state_schema() -> None:
-    """Test integrating StateSchema into GraphTopology."""
+    """Test integrating StateDefinition into GraphTopology."""
     schema_def = {"type": "object", "properties": {"messages": {"type": "array"}}}
-    state = StateSchema(data_schema=schema_def, persistence="memory")
+    state = StateDefinition(schema=schema_def, persistence="ephemeral")
     topology = GraphTopology(nodes=[], edges=[], state_schema=state)
     assert topology.state_schema == state
-    assert topology.state_schema.persistence == "memory"
+    assert topology.state_schema.persistence == "ephemeral"
 
 
 def test_conditional_edge_creation() -> None:

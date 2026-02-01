@@ -26,20 +26,22 @@ from pydantic import ConfigDict, Field, StringConstraints, model_validator
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
 
-class StateSchema(CoReasonBaseModel):
-    """Defines the structure and persistence of the graph state.
+class StateDefinition(CoReasonBaseModel):
+    """Defines the internal state (memory) of the Recipe.
 
     Attributes:
-        data_schema: A JSON Schema or Pydantic definition describing the state structure.
-        persistence: Configuration for how state is checkpointed.
+        schema: JSON Schema of the keys available in the shared memory.
+        persistence: Configuration for state durability.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    data_schema: Dict[str, Any] = Field(
-        ..., description="A JSON Schema or Pydantic definition describing the state structure."
+    schema_: Dict[str, Any] = Field(
+        ..., alias="schema", description="JSON Schema of the keys available in the shared memory."
     )
-    persistence: str = Field(..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis').")
+    persistence: Literal["ephemeral", "persistent"] = Field(
+        default="ephemeral", description="Configuration for state durability."
+    )
 
 
 class CouncilConfig(CoReasonBaseModel):
@@ -74,6 +76,20 @@ class VisualMetadata(CoReasonBaseModel):
     )
     icon: Optional[str] = Field(None, description="The icon to represent the node.")
     animation_style: Optional[str] = Field(None, description="The animation style for the node.")
+
+
+class RuntimeVisualMetadata(VisualMetadata):
+    """Visual metadata with runtime extensions.
+
+    Attributes:
+        color: Color override for the node (e.g., '#00FF00').
+        progress: Progress indicator (e.g., '0.5' or '50%').
+        animation: Animation override (e.g., 'pulse').
+    """
+
+    color: Optional[str] = Field(None, description="Color override for the node.")
+    progress: Optional[str] = Field(None, description="Progress indicator.")
+    animation: Optional[str] = Field(None, description="Animation override.")
 
 
 class BaseNode(CoReasonBaseModel):
@@ -270,6 +286,36 @@ class ConditionalEdge(CoReasonBaseModel):
     mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
 
 
+def validate_edge_integrity(
+    nodes: List[Node],
+    edges: List[Union[Edge, ConditionalEdge]],
+) -> None:
+    """Ensures that all edges point to valid nodes.
+
+    Args:
+        nodes: List of nodes in the graph.
+        edges: List of edges connecting the nodes.
+
+    Raises:
+        ValueError: If an edge points to a non-existent node.
+    """
+    node_ids = {node.id for node in nodes}
+
+    for edge in edges:
+        if edge.source_node_id not in node_ids:
+            raise ValueError(f"Edge source node '{edge.source_node_id}' not found in nodes.")
+
+        # ConditionalEdge mapping targets
+        if isinstance(edge, ConditionalEdge):
+            for target_id in edge.mapping.values():
+                if target_id not in node_ids:
+                    raise ValueError(f"ConditionalEdge target node '{target_id}' not found in nodes.")
+        else:
+            # Regular Edge
+            if edge.target_node_id not in node_ids:
+                raise ValueError(f"Edge target node '{edge.target_node_id}' not found in nodes.")
+
+
 class GraphTopology(CoReasonBaseModel):
     """The topology definition of the recipe.
 
@@ -283,27 +329,14 @@ class GraphTopology(CoReasonBaseModel):
 
     nodes: List[Node] = Field(..., description="List of nodes in the graph.")
     edges: List[Union[Edge, ConditionalEdge]] = Field(..., description="List of edges connecting the nodes.")
-    state_schema: Optional[StateSchema] = Field(default=None, description="Schema definition for the graph state.")
+    state_schema: Optional[StateDefinition] = Field(
+        default=None, description="Schema definition for the graph state."
+    )
 
     @model_validator(mode="after")
     def validate_graph_integrity(self) -> "GraphTopology":
         """Ensures that all edges point to valid nodes."""
-        node_ids = {node.id for node in self.nodes}
-
-        for edge in self.edges:
-            if edge.source_node_id not in node_ids:
-                raise ValueError(f"Edge source node '{edge.source_node_id}' not found in nodes.")
-
-            # ConditionalEdge mapping targets
-            if isinstance(edge, ConditionalEdge):
-                for target_id in edge.mapping.values():
-                    if target_id not in node_ids:
-                        raise ValueError(f"ConditionalEdge target node '{target_id}' not found in nodes.")
-            else:
-                # Regular Edge
-                if edge.target_node_id not in node_ids:
-                    raise ValueError(f"Edge target node '{edge.target_node_id}' not found in nodes.")
-
+        validate_edge_integrity(self.nodes, self.edges)
         return self
 
 
