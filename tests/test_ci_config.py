@@ -27,9 +27,9 @@ def test_ci_cd_workflow_does_not_contain_release_job() -> None:
         workflow = yaml.safe_load(f)
 
     jobs = workflow.get("jobs", {})
-    assert (
-        "release" not in jobs
-    ), "The 'release' job should not exist in ci-cd.yml. Publishing is handled by publish.yml."
+    assert "release" not in jobs, (
+        "The 'release' job should not exist in ci-cd.yml. Publishing is handled by publish.yml."
+    )
 
 
 def test_ci_cd_workflow_contains_build_verification() -> None:
