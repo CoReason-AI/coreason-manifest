@@ -43,7 +43,7 @@ def test_message_creation() -> None:
     part = assistant_msg.parts[0]
     assert isinstance(part, ToolCallRequestPart)
     assert part.name == "get_weather"
-    assert part.arguments["city"] == "Paris"
+    assert part.parsed_arguments["city"] == "Paris"
 
 
 def test_message_alias_compatibility() -> None:

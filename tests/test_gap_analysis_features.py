@@ -1,4 +1,3 @@
-
 import unittest
 from datetime import datetime
 from uuid import uuid4
@@ -38,7 +37,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         self.assertEqual(user_msg.role, Role.USER)
         self.assertEqual(len(user_msg.parts), 1)
         part0 = user_msg.parts[0]
-        self.assertIsInstance(part0, TextPart)
+        assert isinstance(part0, TextPart)
         self.assertEqual(part0.content, "Hello")
 
         # Assistant
@@ -46,7 +45,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         self.assertEqual(asst_msg.role, Role.ASSISTANT)
         self.assertEqual(len(asst_msg.parts), 1)
         part_asst = asst_msg.parts[0]
-        self.assertIsInstance(part_asst, TextPart)
+        assert isinstance(part_asst, TextPart)
         self.assertEqual(part_asst.content, "Hi there")
 
         # Tool
@@ -54,7 +53,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         self.assertEqual(tool_msg.role, Role.TOOL)
         self.assertEqual(len(tool_msg.parts), 1)
         part_tool = tool_msg.parts[0]
-        self.assertIsInstance(part_tool, ToolCallResponsePart)
+        assert isinstance(part_tool, ToolCallResponsePart)
         self.assertEqual(part_tool.id, "call_123")
         self.assertEqual(part_tool.response, {"result": "success"})
 
@@ -99,7 +98,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         self.assertEqual(msg.role, Role.ASSISTANT)
 
         part = msg.parts[0]
-        self.assertIsInstance(part, TextPart)
+        assert isinstance(part, TextPart)
         self.assertEqual(part.content, "Thinking process...")
 
         # Test with overrides
@@ -109,7 +108,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         self.assertEqual(step2.model, "gpt-4")
 
         part2 = step2.output_messages[0].parts[0]
-        self.assertIsInstance(part2, TextPart)
+        assert isinstance(part2, TextPart)
         self.assertEqual(part2.content, "More thinking")
 
         # Test output_messages collision avoidance
@@ -118,7 +117,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         # Should still have the assistant message
         self.assertEqual(len(step3.output_messages), 1)
         part3 = step3.output_messages[0].parts[0]
-        self.assertIsInstance(part3, TextPart)
+        assert isinstance(part3, TextPart)
         self.assertEqual(part3.content, "Thinking")
 
     def test_reasoning_trace_metadata(self) -> None:
