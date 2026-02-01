@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime, timezone
 
 from coreason_manifest.definitions.simulation import (
+    SimulationMetrics,
     SimulationScenario,
     SimulationStep,
     SimulationTrace,
@@ -37,7 +38,11 @@ def test_trace_validity() -> None:
     )
 
     trace = SimulationTrace(
-        trace_id=trace_id, agent_version="1.0.0", steps=[step], outcome={"success": True}, metrics={"tokens": 100}
+        trace_id=trace_id,
+        agent_version="1.0.0",
+        steps=[step],
+        outcome={"success": True},
+        metrics=SimulationMetrics(turn_count=1, total_tokens=100),
     )
 
     # Verify serialization
