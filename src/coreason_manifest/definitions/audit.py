@@ -15,12 +15,14 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 from .message import ChatMessage
 
 
-class GenAITokenUsage(BaseModel):
+class GenAITokenUsage(CoReasonBaseModel):
     """Token consumption stats aligned with OTel conventions."""
 
     model_config = ConfigDict(extra="ignore")
@@ -36,7 +38,7 @@ class GenAITokenUsage(BaseModel):
     details: Dict[str, Any] = Field(default_factory=dict)
 
 
-class GenAIOperation(BaseModel):
+class GenAIOperation(CoReasonBaseModel):
     """An atomic operation in the reasoning process (e.g., one LLM call), aligning with OTel Spans."""
 
     model_config = ConfigDict(extra="ignore")
@@ -66,7 +68,7 @@ class GenAIOperation(BaseModel):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
-class ReasoningTrace(BaseModel):
+class ReasoningTrace(CoReasonBaseModel):
     """The full audit trail of an Agent's execution session.
 
     Aligned with OpenTelemetry for trace identification.
@@ -100,7 +102,7 @@ class AuditEventType(str, Enum):
     GUARDRAIL_TRIGGER = "guardrail_trigger"
 
 
-class AuditLog(BaseModel):
+class AuditLog(CoReasonBaseModel):
     """Tamper-evident legal record.
 
     IDs aligned with OpenTelemetry:

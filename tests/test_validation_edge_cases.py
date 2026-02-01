@@ -30,7 +30,7 @@ def test_unique_node_ids_validation() -> None:
 
     with pytest.raises(ValidationError) as e:
         AgentRuntimeConfig(
-            nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5}
+            nodes=nodes, edges=[], entry_point="node1", llm_config={"model": "gpt-4", "temperature": 0.5}
         )
     assert "Duplicate node IDs found: node1" in str(e.value)
 
@@ -42,7 +42,7 @@ def test_unique_node_ids_valid() -> None:
         AgentNode(id="node2", agent_name="B"),
     ]
     topo = AgentRuntimeConfig(
-        nodes=nodes, edges=[], entry_point="node1", model_config={"model": "gpt-4", "temperature": 0.5}
+        nodes=nodes, edges=[], entry_point="node1", llm_config={"model": "gpt-4", "temperature": 0.5}
     )
     assert len(topo.nodes) == 2
 

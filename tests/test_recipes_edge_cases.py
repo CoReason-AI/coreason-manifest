@@ -46,7 +46,7 @@ def test_strict_schema_extra_fields() -> None:
             version="1.0.0",
             name="N",
             interface=RecipeInterface(inputs={}, outputs={}),
-            state=StateDefinition(schema={}, persistence="ephemeral"),
+            state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=GraphTopology(nodes=[], edges=[]),
             extra_thing="bad",  # type: ignore[call-arg]
@@ -70,7 +70,7 @@ def test_recursive_version_normalization() -> None:
         version="vVv1.5.0",
         name="Test",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[], edges=[]),
     )
@@ -89,7 +89,7 @@ def test_complex_inputs_structure() -> None:
         version="1.0.0",
         name="Test",
         interface=RecipeInterface(inputs=complex_inputs, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=GraphTopology(nodes=[], edges=[]),
     )
@@ -116,7 +116,7 @@ def test_large_topology_serialization() -> None:
         version="1.0.0",
         name="Large Recipe",
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters={},
         topology=topology,
     )

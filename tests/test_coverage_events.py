@@ -134,7 +134,7 @@ def test_coverage_fallback_payload() -> None:
 
     # Force inject the dummy payload.
     # This violates type hints but works at runtime.
-    event.payload = DummyPayload()  # type: ignore
+    event.payload = DummyPayload()  # type: ignore[assignment]
 
     ce = migrate_graph_event_to_cloud_event(event)
 

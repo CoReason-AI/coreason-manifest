@@ -24,7 +24,7 @@ def test_agent_node_v0_10_0_features() -> None:
 def test_recipe_manifest_v0_10_0_features() -> None:
     """Test new optional fields in RecipeManifest."""
     interface = RecipeInterface(inputs={}, outputs={})
-    state = StateDefinition(schema={}, persistence="ephemeral")
+    state = StateDefinition(schema_={}, persistence="ephemeral")
     topology = GraphTopology(nodes=[], edges=[])
 
     # Test valid instantiation with new fields
@@ -81,7 +81,7 @@ def test_agent_node_serialization() -> None:
 def test_recipe_manifest_serialization() -> None:
     """Test serialization of RecipeManifest with new fields."""
     interface = RecipeInterface(inputs={}, outputs={})
-    state = StateDefinition(schema={}, persistence="ephemeral")
+    state = StateDefinition(schema_={}, persistence="ephemeral")
     topology = GraphTopology(nodes=[], edges=[])
 
     manifest = RecipeManifest(

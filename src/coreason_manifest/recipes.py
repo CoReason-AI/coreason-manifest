@@ -20,13 +20,14 @@
 
 from typing import Any, Dict, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
 from .definitions.agent import VersionStr
+from .definitions.base import CoReasonBaseModel
 from .definitions.topology import GraphTopology
 
 
-class RecipeInterface(BaseModel):
+class RecipeInterface(CoReasonBaseModel):
     """Defines the input/output contract for a Recipe.
 
     Attributes:
@@ -42,7 +43,7 @@ class RecipeInterface(BaseModel):
     )
 
 
-class StateDefinition(BaseModel):
+class StateDefinition(CoReasonBaseModel):
     """Defines the internal state (memory) of the Recipe.
 
     Attributes:
@@ -60,7 +61,7 @@ class StateDefinition(BaseModel):
     )
 
 
-class RecipeManifest(BaseModel):
+class RecipeManifest(CoReasonBaseModel):
     """The executable specification for the MACO engine.
 
     Attributes:

@@ -21,10 +21,12 @@
 from enum import Enum
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import ConfigDict, Field, StringConstraints, model_validator
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 
-class StateSchema(BaseModel):
+class StateSchema(CoReasonBaseModel):
     """Defines the structure and persistence of the graph state.
 
     Attributes:
@@ -40,7 +42,7 @@ class StateSchema(BaseModel):
     persistence: str = Field(..., description="Configuration for how state is checkpointed (e.g., 'memory', 'redis').")
 
 
-class CouncilConfig(BaseModel):
+class CouncilConfig(CoReasonBaseModel):
     """Configuration for 'Architectural Triangulation'.
 
     Attributes:
@@ -54,7 +56,7 @@ class CouncilConfig(BaseModel):
     voters: List[str] = Field(..., description="List of agents or models that vote.")
 
 
-class VisualMetadata(BaseModel):
+class VisualMetadata(CoReasonBaseModel):
     """Data explicitly for the UI.
 
     Attributes:
@@ -74,7 +76,7 @@ class VisualMetadata(BaseModel):
     animation_style: Optional[str] = Field(None, description="The animation style for the node.")
 
 
-class BaseNode(BaseModel):
+class BaseNode(CoReasonBaseModel):
     """Base model for all node types.
 
     Attributes:
@@ -158,7 +160,7 @@ class DataMappingStrategy(str, Enum):
     LITERAL = "literal"
 
 
-class DataMapping(BaseModel):
+class DataMapping(CoReasonBaseModel):
     """Defines how to transform data between parent and child."""
 
     model_config = ConfigDict(extra="forbid")
@@ -210,7 +212,7 @@ Node = Annotated[
 ]
 
 
-class Edge(BaseModel):
+class Edge(CoReasonBaseModel):
     """Represents a connection between two nodes.
 
     Attributes:
@@ -235,7 +237,7 @@ RouterRef = Annotated[
 ]
 
 
-class RouterExpression(BaseModel):
+class RouterExpression(CoReasonBaseModel):
     """A structured expression for routing logic (e.g., CEL or JSONLogic)."""
 
     model_config = ConfigDict(extra="forbid")
@@ -250,7 +252,7 @@ RouterDefinition = Annotated[
 ]
 
 
-class ConditionalEdge(BaseModel):
+class ConditionalEdge(CoReasonBaseModel):
     """Represents a dynamic routing connection from one node to multiple potential targets.
 
     Attributes:
@@ -268,7 +270,7 @@ class ConditionalEdge(BaseModel):
     mapping: Dict[str, str] = Field(..., description="Map of router output values to target node IDs.")
 
 
-class GraphTopology(BaseModel):
+class GraphTopology(CoReasonBaseModel):
     """The topology definition of the recipe.
 
     Attributes:

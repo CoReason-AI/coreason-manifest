@@ -90,8 +90,8 @@ def test_graph_event_extra_forbid() -> None:
             timestamp=1234567890.0,
             payload=payload,
             visual_metadata={"color": "#FFFFFF"},
-            extra_field="this should fail",
-        )  # type: ignore[call-arg]
+            extra_field="this should fail",  # type: ignore[call-arg]
+        )
 
 
 def test_node_started_payload() -> None:

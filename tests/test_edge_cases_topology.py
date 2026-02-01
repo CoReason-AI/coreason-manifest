@@ -29,7 +29,7 @@ def test_topology_allows_cycles() -> None:
         nodes=[node_a, node_b],
         edges=edges,
         entry_point="A",
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert len(topology.edges) == 2
 
@@ -47,7 +47,7 @@ def test_topology_disconnected_graph_valid() -> None:
         nodes=[node_a, node_b, node_c],
         edges=edges,
         entry_point="A",
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert len(topology.nodes) == 3
 
@@ -61,7 +61,7 @@ def test_topology_self_loop_valid() -> None:
         nodes=[node_a],
         edges=edges,
         entry_point="A",
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert len(topology.edges) == 1
 
@@ -84,6 +84,6 @@ def test_topology_entry_point_must_exist() -> None:
         nodes=[node_a],
         edges=[],
         entry_point="Z",  # Non-existent
-        model_config={"model": "gpt-4", "temperature": 0.0},
+        llm_config={"model": "gpt-4", "temperature": 0.0},
     )
     assert topology.entry_point == "Z"

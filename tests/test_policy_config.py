@@ -38,4 +38,4 @@ def test_policy_config_immutability() -> None:
     """Test that PolicyConfig is frozen."""
     policy = PolicyConfig(budget_caps={"cost": 10.0})
     with pytest.raises(ValidationError):
-        policy.human_in_the_loop = ["node1"]  # type: ignore
+        policy.human_in_the_loop = ["node1"]  # type: ignore[misc]
