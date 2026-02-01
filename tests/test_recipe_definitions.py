@@ -29,7 +29,7 @@ def test_recipe_interface_valid() -> None:
 def test_recipe_interface_invalid_missing_fields() -> None:
     """Test validation failure for missing fields in RecipeInterface."""
     with pytest.raises(ValidationError):
-        RecipeInterface(inputs={})
+        RecipeInterface(inputs={})  # type: ignore[call-arg]
 
 
 def test_state_definition_valid_defaults() -> None:
@@ -42,7 +42,7 @@ def test_state_definition_valid_defaults() -> None:
 def test_state_definition_valid_persistent() -> None:
     """Test creating a valid StateDefinition with persistence."""
     state = StateDefinition(
-        schema={"type": "object", "properties": {"messages": {"type": "array"}}},
+        schema_={"type": "object", "properties": {"messages": {"type": "array"}}},
         persistence="persistent",
     )
     assert state.persistence == "persistent"
@@ -52,6 +52,6 @@ def test_state_definition_invalid_persistence() -> None:
     """Test validation failure for invalid persistence value."""
     with pytest.raises(ValidationError):
         StateDefinition(
-            schema={"type": "object"},
+            schema_={"type": "object"},
             persistence="invalid_value",
         )

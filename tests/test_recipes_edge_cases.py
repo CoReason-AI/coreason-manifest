@@ -35,7 +35,7 @@ def test_strict_schema_extra_fields() -> None:
             id="n1",
             type="agent",
             agent_name="A1",
-            extra_field="should_fail",
+            extra_field="should_fail",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
@@ -49,7 +49,7 @@ def test_strict_schema_extra_fields() -> None:
             state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=GraphTopology(nodes=[], edges=[]),
-            extra_thing="bad",
+            extra_thing="bad",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
@@ -58,7 +58,7 @@ def test_missing_required_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     # AgentNode requires 'agent_name'
     with pytest.raises(ValidationError) as excinfo:
-        AgentNode(id="n1", type="agent")
+        AgentNode(id="n1", type="agent")  # type: ignore[call-arg]
     assert "Field required" in str(excinfo.value)
     assert "agent_name" in str(excinfo.value)
 

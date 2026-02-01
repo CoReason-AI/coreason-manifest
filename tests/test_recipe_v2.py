@@ -34,7 +34,7 @@ def test_full_recipe_v2_creation() -> None:
     )
 
     state = StateDefinition(
-        schema={
+        schema_={
             "type": "object",
             "properties": {
                 "messages": {"type": "array"},
@@ -101,7 +101,7 @@ def test_recipe_v2_validation_error() -> None:
             state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=Topology(nodes=[], edges=[]),
-        )
+        )  # type: ignore[call-arg]
     assert "interface" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
 
@@ -115,7 +115,7 @@ def test_recipe_v2_validation_error() -> None:
             # state missing
             parameters={},
             topology=Topology(nodes=[], edges=[]),
-        )
+        )  # type: ignore[call-arg]
     assert "state" in str(excinfo.value)
     assert "Field required" in str(excinfo.value)
 
@@ -131,6 +131,6 @@ def test_recipe_v2_extra_fields() -> None:
             state=StateDefinition(schema_={}, persistence="ephemeral"),
             parameters={},
             topology=Topology(nodes=[], edges=[]),
-            extra_field="fail",
+            extra_field="fail",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)

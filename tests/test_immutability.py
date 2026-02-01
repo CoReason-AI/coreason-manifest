@@ -25,10 +25,10 @@ def test_model_config_immutability() -> None:
     config = ModelConfig(model="gpt-4", temperature=0.7)
 
     with pytest.raises(ValidationError):
-        config.temperature = 0.8
+        config.temperature = 0.8  # type: ignore[misc]
 
     with pytest.raises(ValidationError):
-        config.model = "gpt-3.5"
+        config.model = "gpt-3.5"  # type: ignore[misc]
 
 
 def test_agent_definition_immutability() -> None:
@@ -56,11 +56,11 @@ def test_agent_definition_immutability() -> None:
 
     # Try to modify a direct field
     with pytest.raises(ValidationError):
-        agent.integrity_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        agent.integrity_hash = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"  # type: ignore[misc]
 
     # Try to replace a nested model
     with pytest.raises(ValidationError):
-        agent.dependencies = AgentDependencies(tools=[], libraries=[])
+        agent.dependencies = AgentDependencies(tools=[], libraries=[])  # type: ignore[misc]
 
 
 def test_nested_model_immutability() -> None:
@@ -88,7 +88,7 @@ def test_nested_model_immutability() -> None:
 
     # Try to modify a field on a nested object
     with pytest.raises(ValidationError):
-        agent.config.llm_config.temperature = 0.9
+        agent.config.llm_config.temperature = 0.9  # type: ignore[misc]
 
     with pytest.raises(ValidationError):
-        agent.metadata.name = "New Name"
+        agent.metadata.name = "New Name"  # type: ignore[misc]

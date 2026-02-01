@@ -64,7 +64,7 @@ def test_cloudevent_extensions() -> None:
 def test_cloudevent_validation_error() -> None:
     """Test missing required fields."""
     with pytest.raises(ValidationError):
-        CloudEvent(source="urn:test")
+        CloudEvent(source="urn:test")  # type: ignore[call-arg]
 
 
 def test_otel_semantics() -> None:

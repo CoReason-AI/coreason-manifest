@@ -76,7 +76,7 @@ def test_graph_event_validation_error_missing_fields() -> None:
             timestamp=1234567890.0,
             payload=NodeInit(node_id="node-1"),
             visual_metadata={},
-        )
+        )  # type: ignore[call-arg]
 
 
 def test_graph_event_extra_forbid() -> None:
@@ -90,7 +90,7 @@ def test_graph_event_extra_forbid() -> None:
             timestamp=1234567890.0,
             payload=payload,
             visual_metadata={"color": "#FFFFFF"},
-            extra_field="this should fail",
+            extra_field="this should fail",  # type: ignore[call-arg]
         )
 
 
