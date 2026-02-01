@@ -153,7 +153,7 @@ def test_migration_node_start() -> None:
             "model": "gpt-4",
             "system": "You are a helpful assistant",
             "node_id": "node-1",
-            "timestamp": 1700000000.0
+            "timestamp": 1700000000.0,
         },
         visual_metadata={"animation": "pulse", "color": "blue"},
     )
@@ -259,7 +259,7 @@ def test_migration_partial_data() -> None:
         payload={
             "status": "RUNNING",
             "node_id": "node-1",
-            "timestamp": 1700000000.0
+            "timestamp": 1700000000.0,
             # input_tokens missing
         },
         visual_metadata={},  # Empty visual metadata
@@ -373,7 +373,7 @@ def test_migration_error_event() -> None:
             "stack_trace": "...",
             "input_snapshot": {},
             "visual_cue": "RED_FLASH",
-            "node_id": "node-1"
+            "node_id": "node-1",
         },
         visual_metadata={"animation": "error"},
     )

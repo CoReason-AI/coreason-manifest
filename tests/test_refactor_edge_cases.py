@@ -97,12 +97,7 @@ def test_simulation_snapshot_serialization() -> None:
 
 def test_migration_resilience_extra_fields() -> None:
     """Test that migration ignores massive amounts of extra fields (fuzzing-lite)."""
-    payload = {
-        "status": "RUNNING",
-        "input_tokens": 100,
-        "node_id": "node1",
-        "timestamp": 1234567890.0
-    }
+    payload = {"status": "RUNNING", "input_tokens": 100, "node_id": "node1", "timestamp": 1234567890.0}
     # Add 100 junk fields
     for i in range(100):
         payload[f"junk_{i}"] = f"value_{i}"

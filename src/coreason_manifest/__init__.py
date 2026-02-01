@@ -10,14 +10,6 @@
 
 from .definitions.agent import AgentDefinition, Persona
 from .definitions.audit import AuditLog
-from .definitions.simulation import (
-    SimulationMetrics,
-    SimulationScenario,
-    SimulationStep,
-    SimulationTrace,
-    StepType,
-)
-from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
 from .definitions.events import (
     ArtifactGenerated,
     CouncilVote,
@@ -41,6 +33,14 @@ from .definitions.events import (
     NodeStream,
     WorkflowError,
 )
+from .definitions.simulation import (
+    SimulationMetrics,
+    SimulationScenario,
+    SimulationStep,
+    SimulationTrace,
+    StepType,
+)
+from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
 from .definitions.topology import AgentNode, Edge, GraphTopology, Node, Topology
 from .recipes import RecipeManifest
 

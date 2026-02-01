@@ -8,31 +8,25 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Dict, Any
 import pytest
-from pydantic import ValidationError, TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.definitions.topology import AgentNode, LogicNode, GraphTopology, Edge, ConditionalEdge, RouterDefinition, RouterRef
-from coreason_manifest.definitions.events import GraphEvent, NodeInit, GraphEventNodeInit, NodeStarted
+from coreason_manifest.definitions.events import GraphEvent, GraphEventNodeInit, NodeInit
+from coreason_manifest.definitions.topology import AgentNode, ConditionalEdge, Edge, GraphTopology, LogicNode
+
 
 def test_agent_node_overrides() -> None:
     """Test that AgentNode accepts runtime overrides."""
-    node = AgentNode(
-        id="a1",
-        agent_name="test_agent",
-        overrides={"temperature": 0.9, "model": "gpt-4"}
-    )
+    node = AgentNode(id="a1", agent_name="test_agent", overrides={"temperature": 0.9, "model": "gpt-4"})
     assert node.overrides == {"temperature": 0.9, "model": "gpt-4"}
+
 
 def test_node_metadata() -> None:
     """Test that nodes accept metadata."""
-    node = LogicNode(
-        id="l1",
-        code="pass",
-        metadata={"cost_center": "dev", "timeout_ms": 100}
-    )
+    node = LogicNode(id="l1", code="pass", metadata={"cost_center": "dev", "timeout_ms": 100})
     assert node.metadata["cost_center"] == "dev"
     assert node.metadata["timeout_ms"] == 100
+
 
 def test_graph_topology_validation_success() -> None:
     """Test successful graph validation."""
@@ -44,6 +38,7 @@ def test_graph_topology_validation_success() -> None:
     assert len(topo.nodes) == 2
     assert len(topo.edges) == 1
 
+
 def test_graph_topology_validation_failure_missing_source() -> None:
     """Test graph validation fails when edge source is missing."""
     n1 = LogicNode(id="n1", code="pass")
@@ -52,6 +47,7 @@ def test_graph_topology_validation_failure_missing_source() -> None:
     with pytest.raises(ValidationError) as exc:
         GraphTopology(nodes=[n1], edges=[edge])
     assert "Edge source node 'missing' not found in nodes" in str(exc.value)
+
 
 def test_graph_topology_validation_failure_missing_target() -> None:
     """Test graph validation fails when edge target is missing."""
@@ -62,21 +58,19 @@ def test_graph_topology_validation_failure_missing_target() -> None:
         GraphTopology(nodes=[n1], edges=[edge])
     assert "Edge target node 'missing' not found in nodes" in str(exc.value)
 
+
 def test_graph_topology_validation_conditional_edge() -> None:
     """Test graph validation for conditional edges."""
     n1 = LogicNode(id="n1", code="pass")
     n2 = LogicNode(id="n2", code="pass")
     # Missing n3
 
-    edge = ConditionalEdge(
-        source_node_id="n1",
-        router_logic="my_router",
-        mapping={"yes": "n2", "no": "n3"}
-    )
+    edge = ConditionalEdge(source_node_id="n1", router_logic="my_router", mapping={"yes": "n2", "no": "n3"})
 
     with pytest.raises(ValidationError) as exc:
         GraphTopology(nodes=[n1, n2], edges=[edge])
     assert "ConditionalEdge target node 'n3' not found in nodes" in str(exc.value)
+
 
 def test_graph_event_discriminated_union() -> None:
     """Test GraphEvent discriminated union behavior."""
@@ -87,7 +81,7 @@ def test_graph_event_discriminated_union() -> None:
         "node_id": "n1",
         "timestamp": 123.456,
         "payload": payload.model_dump(),
-        "visual_metadata": {"color": "red"}
+        "visual_metadata": {"color": "red"},
     }
 
     # Use TypeAdapter to validate the Union
@@ -106,10 +100,11 @@ def test_graph_event_discriminated_union() -> None:
         "node_id": "n1",
         "timestamp": 123.456,
         "payload": {"node_id": "n1", "type": "AGENT"},
-        "visual_metadata": {"color": "red"}
+        "visual_metadata": {"color": "red"},
     }
     event2: GraphEvent = TypeAdapter(GraphEvent).validate_python(event_data2)
     assert isinstance(event2.payload, NodeInit)
+
 
 def test_graph_event_payload_validation() -> None:
     """Test that GraphEvent strictly validates payload structure."""
@@ -122,8 +117,8 @@ def test_graph_event_payload_validation() -> None:
         "run_id": "r1",
         "node_id": "n1",
         "timestamp": 123.456,
-        "payload": {"node_id": "n1"}, # Missing status, timestamp
-        "visual_metadata": {"color": "red"}
+        "payload": {"node_id": "n1"},  # Missing status, timestamp
+        "visual_metadata": {"color": "red"},
     }
 
     with pytest.raises(ValidationError):

@@ -12,9 +12,8 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
-from pydantic import TypeAdapter
 from coreason_manifest.definitions.events import (
     EdgeTraversed,
     GraphEvent,
@@ -118,7 +117,7 @@ def test_event_polymorphism_node_start() -> None:
             "input_tokens": 100,
             "model": "gpt-4",
             "system": "you are a bot",
-            "node_id": "node1"
+            "node_id": "node1",
         },
         visual_metadata={},
     )
@@ -180,7 +179,7 @@ def test_unknown_event_type() -> None:
         "node_id": "node1",
         "timestamp": 1234567890.0,
         "payload": {"foo": "bar"},
-        "visual_metadata": {}
+        "visual_metadata": {},
     }
     with pytest.raises(ValidationError):
         TypeAdapter(GraphEvent).validate_python(data)
