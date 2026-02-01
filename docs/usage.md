@@ -84,7 +84,7 @@ agent = AgentDefinition(
         "inputs": {"topic": {"type": "string"}},
         "outputs": {"summary": {"type": "string"}}
     },
-    topology={
+    config={
         "nodes": nodes,
         "edges": edges,
         "entry_point": "start",
