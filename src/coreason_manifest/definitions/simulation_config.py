@@ -11,13 +11,14 @@
 
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from coreason_manifest.definitions.agent import Persona
+from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.simulation import SimulationScenario
 
 
-class AdversaryProfile(BaseModel):
+class AdversaryProfile(CoReasonBaseModel):
     name: str
     goal: str
     strategy_model: str  # e.g., "claude-3-opus"
@@ -26,7 +27,7 @@ class AdversaryProfile(BaseModel):
     # Potential future field: 'system_prompt_override'
 
 
-class ChaosConfig(BaseModel):
+class ChaosConfig(CoReasonBaseModel):
     latency_ms: int = Field(default=0, ge=0)
     error_rate: float = Field(default=0.0, ge=0.0, le=1.0)
     noise_rate: float = Field(default=0.0, ge=0.0, le=1.0)
@@ -34,7 +35,7 @@ class ChaosConfig(BaseModel):
     exception_type: str = "RuntimeError"
 
 
-class SimulationRequest(BaseModel):
+class SimulationRequest(CoReasonBaseModel):
     """
     Standard payload for triggering a simulation.
     This would replace the local 'SimulationRequest' in the Simulator.

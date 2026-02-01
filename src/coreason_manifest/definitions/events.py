@@ -12,7 +12,9 @@ from datetime import datetime, timezone
 from typing import Annotated, Any, Dict, Generic, Literal, Optional, Protocol, TypeVar, Union, runtime_checkable
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.definitions.base import CoReasonBaseModel
 
 # --- CloudEvents v1.0 Implementation ---
 
@@ -24,7 +26,7 @@ class CloudEventSource(Protocol):
     def as_cloud_event_payload(self) -> Any: ...
 
 
-class CloudEvent(BaseModel, Generic[T]):
+class CloudEvent(CoReasonBaseModel, Generic[T]):
     """Standard CloudEvent v1.0 Envelope."""
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
@@ -48,7 +50,7 @@ class CloudEvent(BaseModel, Generic[T]):
 # --- OTel Semantic Conventions ---
 
 
-class GenAIUsage(BaseModel):
+class GenAIUsage(CoReasonBaseModel):
     """GenAI Usage metrics."""
 
     input_tokens: Optional[int] = Field(None, alias="input_tokens")
@@ -57,7 +59,7 @@ class GenAIUsage(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class GenAIRequest(BaseModel):
+class GenAIRequest(CoReasonBaseModel):
     """GenAI Request details."""
 
     model: Optional[str] = None
@@ -65,14 +67,14 @@ class GenAIRequest(BaseModel):
     top_p: Optional[float] = None
 
 
-class GenAICompletion(BaseModel):
+class GenAICompletion(CoReasonBaseModel):
     """GenAI Completion details."""
 
     chunk: Optional[str] = None
     finish_reason: Optional[str] = None
 
 
-class GenAISemantics(BaseModel):
+class GenAISemantics(CoReasonBaseModel):
     """OpenTelemetry GenAI Semantic Conventions."""
 
     system: Optional[str] = None
@@ -84,7 +86,7 @@ class GenAISemantics(BaseModel):
 # --- Base Models ---
 
 
-class BaseNodePayload(BaseModel):
+class BaseNodePayload(CoReasonBaseModel):
     """Base model for node-related events."""
 
     model_config = ConfigDict(extra="ignore")
@@ -201,7 +203,7 @@ class ArtifactGenerated(BaseNodePayload):
     url: str
 
 
-class EdgeTraversed(BaseModel):
+class EdgeTraversed(CoReasonBaseModel):
     """Payload for EDGE_ACTIVE event."""
 
     model_config = ConfigDict(extra="ignore")
@@ -269,7 +271,7 @@ WorkflowErrorPayload = WorkflowError
 # --- Graph Event Wrapper ---
 
 
-class BaseGraphEvent(BaseModel):
+class BaseGraphEvent(CoReasonBaseModel):
     """Base class for GraphEvents.
 
     Standardized IDs:
