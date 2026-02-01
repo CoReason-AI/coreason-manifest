@@ -22,6 +22,8 @@ The root object for a workflow.
 - **state**: Defines the internal memory schema (`StateDefinition`).
 - **parameters**: Build-time configuration constants (`Dict[str, Any]`).
 - **topology**: The topology definition of the workflow (`GraphTopology`).
+- **integrity_hash**: SHA256 hash of the canonical JSON representation of the topology.
+- **metadata**: Container for design-time data.
 
 ### RecipeInterface
 
@@ -54,6 +56,8 @@ Nodes are polymorphic and can be one of the following types:
 #### 1. AgentNode (`type="agent"`)
 Executes a specific atomic agent.
 - **agent_name**: The name of the atomic agent to call.
+- **system_prompt**: Overrides the registry default prompt.
+- **config**: Runtime-specific configuration (e.g., model parameters).
 - **council_config**: Optional configuration for architectural triangulation (e.g., voting).
 - **overrides**: Optional runtime overrides for the agent (e.g., temperature, prompt_template_vars).
 
@@ -92,7 +96,7 @@ Simple transition.
 #### ConditionalEdge (Dynamic Routing)
 Routes to one of multiple targets based on logic.
 - **source_node_id**: ID of the source node.
-- **router_logic**: Python function or expression determining the path.
+- **router_logic**: Python function reference (dotted path) or expression definition determining the path.
 - **mapping**: Map of router output values to target node IDs.
 
 ## Edge Cases & Validation
@@ -133,7 +137,7 @@ human_node = HumanNode(
 # Define Dynamic Routing
 router = ConditionalEdge(
     source_node_id="step_2",
-    router_logic="lambda state: 'approved' if state['approved'] else 'rejected'",
+    router_logic="logic.approve_or_reject",
     mapping={
         "approved": "step_3_publish",
         "rejected": "step_1_revise"

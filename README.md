@@ -47,54 +47,62 @@ This library is used to define and validate Agent configurations programmaticall
 
 ```python
 import uuid
+from datetime import datetime, timezone
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
+    AgentMetadata,
+    AgentInterface,
+    AgentRuntimeConfig,
+    ModelConfig,
+    AgentDependencies,
     ToolRequirement,
     ToolRiskLevel,
+    PolicyConfig,
+    ObservabilityConfig,
     TraceLevel
 )
 
 # 1. Define Metadata
-metadata = {
-    "id": uuid.uuid4(),
-    "version": "1.0.0",  # Strict SemVer
-    "name": "Research Agent",
-    "author": "Coreason AI",
-    "created_at": "2023-10-27T10:00:00Z"
-}
+metadata = AgentMetadata(
+    id=uuid.uuid4(),
+    version="1.0.0",  # Strict SemVer
+    name="Research Agent",
+    author="Coreason AI",
+    created_at=datetime.now(timezone.utc)
+)
 
 # 2. Instantiate Agent
 agent = AgentDefinition(
     metadata=metadata,
-    interface={
-        "inputs": {"topic": {"type": "string"}},
-        "outputs": {"summary": {"type": "string"}}
-    },
-    config={
-        "nodes": [],
-        "edges": [],
-        "entry_point": None,
-        "model_config": {"model": "gpt-4", "temperature": 0.0},
-        "system_prompt": "You are a helpful assistant."
-    },
-    dependencies={
-        "tools": [
+    interface=AgentInterface(
+        inputs={"topic": {"type": "string"}},
+        outputs={"summary": {"type": "string"}}
+    ),
+    config=AgentRuntimeConfig(
+        model_config=ModelConfig(
+            model="gpt-4",
+            temperature=0.0,
+            system_prompt="You are a helpful assistant."
+        )
+    ),
+    dependencies=AgentDependencies(
+        tools=[
             ToolRequirement(
                 uri="mcp://search-service/google",
-                hash="a" * 64,  # Valid SHA256
+                hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",  # Valid SHA256
                 scopes=["search:read"],
                 risk_level=ToolRiskLevel.STANDARD
             )
         ],
-        "libraries": ["pandas==2.0.0"]
-    },
-    policy={
-        "budget_caps": {"total_cost": 5.0}
-    },
-    observability={
-        "trace_level": TraceLevel.FULL,
-        "retention_policy": "90_days"
-    },
+        libraries=("pandas==2.0.0",)
+    ),
+    policy=PolicyConfig(
+        budget_caps={"total_cost": 5.0}
+    ),
+    observability=ObservabilityConfig(
+        trace_level=TraceLevel.FULL,
+        retention_policy="90_days"
+    ),
     # Mandatory Integrity Hash
     integrity_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 )
