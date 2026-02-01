@@ -17,6 +17,7 @@ from coreason_manifest.definitions.simulation import (
     SimulationScenario,
     SimulationStep,
     SimulationTrace,
+    StepType,
     ValidationLogic,
 )
 
@@ -67,3 +68,27 @@ def test_scenario_creation() -> None:
     )
     assert scenario.difficulty == 2
     assert scenario.validation_logic == "exact_match"
+
+
+def test_simulation_metrics() -> None:
+    """Test SimulationMetrics fields."""
+    metrics = SimulationMetrics(turn_count=5, total_tokens=100)
+    assert metrics.turn_count == 5
+    assert metrics.total_tokens == 100
+    assert metrics.cost_usd is None
+
+
+def test_simulation_step_system_event() -> None:
+    """Test SimulationStep with SYSTEM_EVENT type."""
+    step = SimulationStep(
+        step_id=uuid.uuid4(),
+        timestamp=datetime.now(timezone.utc),
+        type=StepType.SYSTEM_EVENT,
+        node_id="system",
+        inputs={"error": "failed"},
+        # thought, action, observation are optional now
+    )
+    assert step.type == StepType.SYSTEM_EVENT
+    assert step.thought is None
+    assert step.action is None
+    assert step.observation is None
