@@ -22,7 +22,7 @@ class GraphEventNodeStart(BaseModel):
     timestamp: float       # Epoch timestamp
     sequence_id: Optional[int] # Optional ordering ID
     payload: NodeStarted   # Specific Payload Model
-    visual_metadata: Dict[str, str] # Hints for UI
+    visual_metadata: RuntimeVisualMetadata # Hints for UI (Pydantic Model)
 ```
 
 ### Key Fields
@@ -31,17 +31,17 @@ class GraphEventNodeStart(BaseModel):
 2.  **`node_id`**: The ID of the node in the `GraphTopology` currently executing.
 3.  **`trace_id`**: The OpenTelemetry Trace ID for distributed tracing.
 4.  **`payload`**: The strictly typed data associated with the event.
-5.  **`visual_metadata`**: A dictionary of hints specifically for the UI renderer.
+5.  **`visual_metadata`**: A strictly typed `RuntimeVisualMetadata` object containing hints for the UI renderer.
 
 ---
 
-## Visual Metadata (`visual_metadata`)
+## Visual Metadata (`RuntimeVisualMetadata`)
 
-The `visual_metadata` field allows the backend graph logic to drive frontend animations without coupling the engine to UI implementation details.
+The `visual_metadata` field allows the backend graph logic to drive frontend animations without coupling the engine to UI implementation details. It is defined as a Pydantic model, not a loose dictionary.
 
-### Common Keys
+### Fields
 
-| Key | Description | Example Values |
+| Field | Description | Example Values |
 | :--- | :--- | :--- |
 | `animation` | The primary animation style to trigger. | `pulse`, `shake`, `slide_in`, `fade_out` |
 | `color` | Hex code or semantic color name. | `#FF0000`, `success_green` |

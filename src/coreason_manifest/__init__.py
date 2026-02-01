@@ -12,6 +12,7 @@ from .definitions.agent import AgentDefinition, Persona
 from .definitions.audit import AuditLog
 from .definitions.events import (
     ArtifactGenerated,
+    CloudEvent,
     CouncilVote,
     EdgeTraversed,
     GraphEvent,
@@ -32,6 +33,7 @@ from .definitions.events import (
     NodeStarted,
     NodeStream,
     WorkflowError,
+    migrate_graph_event_to_cloud_event,
 )
 from .definitions.simulation import (
     SimulationMetrics,
@@ -41,7 +43,14 @@ from .definitions.simulation import (
     StepType,
 )
 from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
-from .definitions.topology import AgentNode, Edge, GraphTopology, Node, Topology
+from .definitions.topology import (
+    AgentNode,
+    Edge,
+    GraphTopology,
+    Node,
+    StateDefinition,
+    Topology,
+)
 from .recipes import RecipeManifest
 
 __all__ = [
@@ -52,7 +61,9 @@ __all__ = [
     "Node",
     "AgentNode",
     "Edge",
+    "StateDefinition",
     "GraphEvent",
+    "CloudEvent",
     "GraphEventNodeInit",
     "GraphEventNodeStart",
     "GraphEventNodeDone",
@@ -73,6 +84,7 @@ __all__ = [
     "CouncilVote",
     "ArtifactGenerated",
     "EdgeTraversed",
+    "migrate_graph_event_to_cloud_event",
     "SimulationScenario",
     "SimulationTrace",
     "SimulationStep",
