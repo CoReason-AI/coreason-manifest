@@ -3,7 +3,7 @@ from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.builder.agent import AgentBuilder
 from coreason_manifest.builder.capability import TypedCapability
-from coreason_manifest.definitions.agent import CapabilityType
+from coreason_manifest.definitions.agent import CapabilityType, ToolRequirement
 from coreason_manifest.definitions.topology import LogicNode
 
 
@@ -37,7 +37,9 @@ def test_builder_with_tools() -> None:
         .build()
     )
     assert len(agent.dependencies.tools) == 1
-    assert str(agent.dependencies.tools[0].uri) == "mcp://google/search"
+    tool = agent.dependencies.tools[0]
+    assert isinstance(tool, ToolRequirement)
+    assert str(tool.uri) == "mcp://google/search"
 
 
 def test_builder_topology() -> None:
