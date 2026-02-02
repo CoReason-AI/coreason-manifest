@@ -132,7 +132,10 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                         violations.append(
                             ComplianceViolation(
                                 rule="domain_restriction",
-                                message=f"Tool URI '{tool.uri}' (host: {hostname}) is not in allowed domains: {config.allowed_domains}",
+                                message=(
+                                    f"Tool URI '{tool.uri}' (host: {hostname}) is not in allowed domains: "
+                                    f"{config.allowed_domains}"
+                                ),
                                 component_id=str(tool.uri),
                             )
                         )
@@ -153,7 +156,10 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                     violations.append(
                         ComplianceViolation(
                             rule="risk_level_restriction",
-                            message=f"Tool risk level '{tool.risk_level.value}' exceeds allowed maximum '{config.max_risk_level.value}'.",
+                            message=(
+                                f"Tool risk level '{tool.risk_level.value}' exceeds allowed maximum "
+                                f"'{config.max_risk_level.value}'."
+                            ),
                             component_id=str(tool.uri),
                         )
                     )

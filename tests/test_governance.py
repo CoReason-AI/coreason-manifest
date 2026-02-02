@@ -10,7 +10,7 @@
 
 from datetime import datetime
 from uuid import uuid4
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
@@ -27,9 +27,11 @@ from coreason_manifest.definitions.agent import (
 from unittest.mock import patch
 from coreason_manifest.governance import check_compliance, GovernanceConfig
 
+ToolType = Union[ToolRequirement, InlineToolDefinition]
+
 # Helper to create a minimal valid AgentDefinition
 def create_agent(
-    tools: Optional[List] = None,
+    tools: Optional[List[ToolType]] = None,
     requires_auth: bool = False
 ) -> AgentDefinition:
     if tools is None:
@@ -57,7 +59,7 @@ def create_agent(
     )
 
     config = AgentRuntimeConfig(
-        model_config=ModelConfig(
+        llm_config=ModelConfig(
             model="gpt-4",
             temperature=0.7,
             system_prompt="You are a helpful assistant."
