@@ -63,9 +63,7 @@ class ComplianceViolation(CoReasonBaseModel):
 
     rule: str = Field(..., description="Name of the rule broken, e.g., 'domain_restriction'.")
     message: str = Field(..., description="Human readable details.")
-    component_id: Optional[str] = Field(
-        None, description="Name of the tool or component causing the issue."
-    )
+    component_id: Optional[str] = Field(None, description="Name of the tool or component causing the issue.")
 
 
 class ComplianceReport(CoReasonBaseModel):
@@ -79,9 +77,7 @@ class ComplianceReport(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     passed: bool = Field(..., description="Whether the agent passed all checks.")
-    violations: List[ComplianceViolation] = Field(
-        default_factory=list, description="List of violations found."
-    )
+    violations: List[ComplianceViolation] = Field(default_factory=list, description="List of violations found.")
 
 
 def _risk_score(level: ToolRiskLevel) -> int:
