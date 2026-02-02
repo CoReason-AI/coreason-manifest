@@ -62,7 +62,10 @@ An `AgentDefinition` consists of the following sections:
     *   `retention_policy`: How long logs are kept.
     *   `encryption_key_id`: Optional ID of the key used for log encryption.
 
-8.  **Integrity**:
+8.  **Custom Metadata (`custom_metadata`)**:
+    *   Container for arbitrary metadata extensions without breaking validation.
+
+9.  **Integrity**:
     *   `integrity_hash`: SHA256 hash of the source code (top-level field).
 
 ## Agent Types: Atomic vs. Graph

@@ -123,8 +123,22 @@ Represents dynamic routing where one source can lead to multiple possible target
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `source_node_id` | `str` | The ID of the source node. |
-| `router_logic` | `RouterDefinition` | Python function or expression that returns the next node ID key. |
+| `router_logic` | `RouterDefinition` | A reference to a python function or a logic expression that determines the path. |
 | `mapping` | `Dict[str, str]` | Map of router output values to target node IDs. |
+
+### RouterDefinition
+
+The `router_logic` field accepts a `RouterDefinition`, which is a union of:
+
+1.  **`RouterRef` (String):** A dotted-path reference to a Python function (e.g., `my_module.routers.my_function`).
+2.  **`RouterExpression` (Object):** A structured logic expression.
+
+#### `RouterExpression`
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `operator` | `str` | The operator (e.g., 'eq', 'gt'). |
+| `args` | `List[Any]` | Arguments for the expression. |
 
 ---
 
