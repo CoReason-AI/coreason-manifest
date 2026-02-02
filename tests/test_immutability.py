@@ -41,7 +41,15 @@ def test_agent_definition_immutability() -> None:
             "author": "Tester",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -74,7 +82,15 @@ def test_nested_model_immutability() -> None:
             "author": "Tester",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],

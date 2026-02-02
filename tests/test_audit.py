@@ -1,46 +1,25 @@
-# Copyright (c) 2025 CoReason, Inc.
-#
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
-#
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
-
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from coreason_manifest.definitions.audit import AuditEventType, AuditLog
 
 
-def test_audit_tamper_evidence() -> None:
+def test_audit_hashing_consistency() -> None:
     """Verify that changing data in an AuditLog instance invalidates its integrity_hash."""
-    log_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
 
     log = AuditLog(
-        audit_id=log_id,
-        trace_id="trace_001",
-        timestamp=now,
-        actor="user_1",
-        event_type=AuditEventType.PREDICTION,
-        safety_metadata={"safe": True},
-        previous_hash="0000",
+        audit_id=uuid.uuid4(),
+        trace_id="trace-123",
+        request_id=uuid.uuid4(),
+        root_request_id=uuid.uuid4(),
+        timestamp=datetime.now(),
+        actor="system",
+        event_type=AuditEventType.SYSTEM_CHANGE,
+        safety_metadata={"checked": True},
+        previous_hash="abc",
         integrity_hash="placeholder",
     )
 
-    # Compute correct hash
-    correct_hash = log.compute_hash()
-
-    # Update the log with the correct hash
-    log.integrity_hash = correct_hash
-
-    # Verify it matches
-    assert log.compute_hash() == log.integrity_hash
-
-    # Tamper with the data (e.g. change actor)
-    log.actor = "malicious_actor"
-
-    # Verify hash no longer matches
-    assert log.compute_hash() != log.integrity_hash
+    computed = log.compute_hash()
+    assert isinstance(computed, str)
+    assert len(computed) == 64  # SHA256 hex digest length

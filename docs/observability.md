@@ -29,6 +29,16 @@ Every event emitted by the Coreason Engine is wrapped in a standard `CloudEvent`
 - **source**: The producer of the event (e.g., the Node ID).
 - **traceparent**: W3C Trace Context header for distributed tracing.
 
+## Distributed Tracing with AgentRequest
+
+Distributed tracing starts at the edge. The `AgentRequest` envelope standardizes the propagation of trace IDs (Root -> Parent -> Child) into the system.
+
+*   **Ingestion:** When an `AgentRequest` is received, the Engine extracts the `root_request_id` and `parent_request_id`.
+*   **Propagation:** These IDs are mapped to the W3C `traceparent` header in all subsequent `CloudEvent` emissions.
+*   **Visualization:** This lineage allows tools like **Jaeger** or **Arize** to reconstruct the full execution tree, even across asynchronous distributed systems.
+
+See [Agent Request Envelope](agent_request_envelope.md) for implementation details.
+
 ## OpenTelemetry GenAI Semantic Conventions
 
 Payloads (`data`) now strictly follow [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/).
@@ -90,5 +100,6 @@ Legacy `visual_metadata` and `visual_cue` fields are moved to CloudEvent extensi
 
 The `ReasoningTrace` object has been enhanced to better support complex reasoning engines:
 
+*   **Request Lineage**: `ReasoningTrace` now strictly enforces lineage via `request_id` (required), `root_request_id`, and `parent_request_id` fields. This ensures that every trace can be inextricably linked back to the user request that triggered it.
 *   **Metadata**: A flexible `metadata` dictionary is available on `ReasoningTrace` to store arbitrary execution context (e.g., `execution_path`, strategies used) without requiring schema changes.
 *   **Simplified Steps**: Use `GenAIOperation.thought("content")` to quickly create reasoning steps with auto-generated IDs and default provider settings.

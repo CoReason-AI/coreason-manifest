@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from .agent import AgentDefinition, AgentRuntimeConfig, Persona
+from .deployment import DeploymentConfig, Protocol
 from .events import (
     ArtifactGenerated,
     ArtifactGeneratedPayload,
@@ -32,11 +33,30 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .interfaces import AgentInterface, LifecycleInterface
+from .presentation import (
+    DataBlock,
+    MarkdownBlock,
+    PresentationBlockType,
+    ThinkingBlock,
+    UserErrorBlock,
+)
+from .request import AgentRequest
+from .service import DEFAULT_ENDPOINT_PATH, ServerSentEvent, ServiceContract
+from .session import Interaction, SessionState
 
 __all__ = [
+    "AgentRequest",
+    "ServerSentEvent",
+    "ServiceContract",
+    "DEFAULT_ENDPOINT_PATH",
     "AgentRuntimeConfig",
     "AgentDefinition",
+    "AgentInterface",
+    "LifecycleInterface",
     "Persona",
+    "DeploymentConfig",
+    "Protocol",
     "GraphEvent",
     "NodeInit",
     "NodeStarted",
@@ -57,4 +77,11 @@ __all__ = [
     "ArtifactGeneratedPayload",
     "CouncilVotePayload",
     "WorkflowErrorPayload",
+    "Interaction",
+    "SessionState",
+    "PresentationBlockType",
+    "ThinkingBlock",
+    "DataBlock",
+    "MarkdownBlock",
+    "UserErrorBlock",
 ]

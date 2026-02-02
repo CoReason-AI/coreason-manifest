@@ -13,9 +13,13 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 
 It provides the **"Blueprint"** that all other services (Builder, Engine, Simulator) rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
 
+### Standards Clarification
+*Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
+
 ## Features
 
-*   **Open Agent Specification (OAS):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
+*   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
+*   **Behavioral Protocols:** Standard `AgentInterface` and `LifecycleInterface` protocols for runtime interoperability.
 *   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
 *   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like `UUID` and `datetime`.
 *   **Event Protocol:** Defines the `GraphEvent` and `CloudEvent` structures for real-time communication.
@@ -25,6 +29,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 *   **Token Arithmetic:** Support for `+` and `+=` operators on `GenAITokenUsage`.
 *   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
 *   **Enhanced Tracing:** `ReasoningTrace` includes flexible metadata for execution state.
+*   **Builder SDK:** A fluent, strictly-typed Python SDK for defining Agents using Pydantic models.
 
 ## Serialization & Base Model
 
@@ -51,7 +56,8 @@ from datetime import datetime, timezone
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
-    AgentInterface,
+    AgentCapability,
+    CapabilityType,
     AgentRuntimeConfig,
     ModelConfig,
     AgentDependencies,
@@ -74,10 +80,15 @@ metadata = AgentMetadata(
 # 2. Instantiate Agent
 agent = AgentDefinition(
     metadata=metadata,
-    interface=AgentInterface(
-        inputs={"topic": {"type": "string"}},
-        outputs={"summary": {"type": "string"}}
-    ),
+    capabilities=[
+        AgentCapability(
+            name="research",
+            type=CapabilityType.ATOMIC,
+            description="Deep research on a topic.",
+            inputs={"topic": {"type": "string"}},
+            outputs={"summary": {"type": "string"}}
+        )
+    ],
     config=AgentRuntimeConfig(
         model_config=ModelConfig(
             model="gpt-4",
@@ -112,8 +123,34 @@ print(f"Agent '{agent.metadata.name}' definition created and validated.")
 
 For full details, see the [Usage Documentation](docs/usage.md).
 
+## Builder SDK
+
+The **Builder SDK** offers a developer-friendly way to define agents using standard Python classes instead of raw schemas.
+
+```python
+from coreason_manifest.builder import AgentBuilder, TypedCapability
+from pydantic import BaseModel
+
+class MyInput(BaseModel):
+    query: str
+
+class MyOutput(BaseModel):
+    answer: str
+
+cap = TypedCapability("search", "Search tool", MyInput, MyOutput)
+
+agent = AgentBuilder("MyAgent").with_capability(cap).build()
+```
+
+The Builder also supports **Graph Topologies** (`with_node`, `with_edge`) and **External Tools** (`with_tool_requirement`).
+
+See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
+
 ## Documentation
 
+*   [Builder SDK](docs/builder_sdk.md): Fluent Python API for defining Agents.
+*   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
+*   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
 *   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.

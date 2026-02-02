@@ -1,14 +1,16 @@
-# Open Agent Specification (OAS)
+# Coreason Agent Manifest (CAM)
 
-The **Open Agent Specification (OAS)** is the core standard used by the Coreason ecosystem to define, configure, and validate AI Agents. It serves as the "Source of Truth," ensuring that agents are portable, strictly typed, and secure.
+The **Coreason Agent Manifest (CAM)** is the core standard used by the Coreason ecosystem to define, configure, and validate AI Agents. It serves as the "Source of Truth," ensuring that agents are portable, strictly typed, and secure.
 
-In this repository (`coreason-manifest`), the OAS is implemented as a set of strict **Pydantic v2 models**. These models define the schema for Agents, their relationships (Topology), and their execution requirements.
+**Note:** While the CAM is the "machine code" for agents, developers are encouraged to use the **[Builder SDK](builder_sdk.md)** to generate these definitions using Python classes and Pydantic models.
+
+In this repository (`coreason-manifest`), the CAM is implemented as a set of strict **Pydantic v2 models**. These models define the schema for Agents, their relationships (Topology), and their execution requirements.
 
 ## Architecture: The Shared Kernel
 
 The `coreason-manifest` package acts as a **Shared Kernel**. It contains *only* data structures, schemas, and validation logic. It does not contain execution engines, server logic, or database drivers.
 
-By centralizing the definitions here, all downstream services (Builder, Engine/MACO, Simulator) interact with a single, unified language. If a field or concept does not exist in the OAS, it does not exist in the platform.
+By centralizing the definitions here, all downstream services (Builder, Engine/MACO, Simulator) interact with a single, unified language. If a field or concept does not exist in the CAM, it does not exist in the platform.
 
 ## The Agent Manifest
 
@@ -24,8 +26,9 @@ An `AgentDefinition` consists of the following sections:
     *   **Timestamps**: `created_at`.
     *   **Auth**: `requires_auth` flag for user context injection.
 
-2.  **Interface (`AgentInterface`)**:
-    *   Defines the "contract" of the agent.
+2.  **Capabilities (`List[AgentCapability]`)**:
+    *   Defines the modes of interaction for the agent (e.g., "Atomic", "Streaming").
+    *   Each capability has a unique `name`, `type`, and `description`.
     *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas).
     *   `injected_params` lists system-injected values (e.g., `user_context`).
 
@@ -46,17 +49,28 @@ An `AgentDefinition` consists of the following sections:
     *   `human_in_the_loop`: Node IDs that trigger a pause for human approval.
     *   `allowed_domains`: Whitelisting for external access.
 
-6.  **Observability (`ObservabilityConfig`)**:
+6.  **Deployment (`DeploymentConfig`)**:
+    *   Specifies *how* the agent is hosted.
+    *   `protocol`: The communication protocol (`HTTP_SSE`, `WEBSOCKET`, `GRPC`).
+    *   `port`, `route_prefix`: Network settings.
+    *   `scaling_min_instances`, `scaling_max_instances`: Horizontal autoscaling bounds.
+    *   `timeout_seconds`: Request processing limits.
+    *   `env_vars`: Static environment variable injection.
+
+7.  **Observability (`ObservabilityConfig`)**:
     *   `trace_level`: Controls the granularity of logs (`FULL`, `METADATA_ONLY`, `NONE`).
     *   `retention_policy`: How long logs are kept.
     *   `encryption_key_id`: Optional ID of the key used for log encryption.
 
-7.  **Integrity**:
+8.  **Custom Metadata (`custom_metadata`)**:
+    *   Container for arbitrary metadata extensions without breaking validation.
+
+9.  **Integrity**:
     *   `integrity_hash`: SHA256 hash of the source code (top-level field).
 
 ## Agent Types: Atomic vs. Graph
 
-The OAS supports two distinct architectural patterns via `AgentRuntimeConfig`:
+The CAM supports two distinct architectural patterns via `AgentRuntimeConfig`:
 
 ### 1. Atomic Agents
 An Atomic Agent is a single-step execution unit. It relies on a System Prompt and an LLM to process inputs and generate outputs.
@@ -86,7 +100,7 @@ Both share the `GraphTopology` structure (from `src/coreason_manifest/definition
 ## Key Value Propositions
 
 ### 1. Strict Typing & Validation
-Built on Pydantic v2, the OAS enforces types at runtime. Invalid UUIDs, malformed semantic versions, or missing required fields cause immediate validation errors, preventing invalid states from entering the system.
+Built on Pydantic v2, the CAM enforces types at runtime. Invalid UUIDs, malformed semantic versions, or missing required fields cause immediate validation errors, preventing invalid states from entering the system.
 
 ### 2. Integrity & Security
 *   **Integrity Hashing**: The `integrity_hash` field (SHA256) ensures that the agent definition has not been tampered with since creation.
@@ -97,7 +111,7 @@ All models inherit from `CoReasonBaseModel`, which solves common serialization i
 
 ## Example Usage
 
-Here is how to programmatically define an Agent using the OAS:
+Here is how to programmatically define an Agent using the CAM:
 
 ```python
 import uuid
@@ -105,7 +119,8 @@ from datetime import datetime, timezone
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
-    AgentInterface,
+    AgentCapability,
+    CapabilityType,
     AgentRuntimeConfig,
     ModelConfig,
     AgentDependencies,
@@ -124,11 +139,16 @@ agent = AgentDefinition(
         created_at=datetime.now(timezone.utc)
     ),
 
-    # 2. Interface
-    interface=AgentInterface(
-        inputs={"location": {"type": "string"}},
-        outputs={"forecast": {"type": "string"}}
-    ),
+    # 2. Capabilities
+    capabilities=[
+        AgentCapability(
+            name="forecast",
+            type=CapabilityType.ATOMIC,
+            description="Get the weather forecast.",
+            inputs={"location": {"type": "string"}},
+            outputs={"forecast": {"type": "string"}}
+        )
+    ],
 
     # 3. Configuration (Atomic)
     config=AgentRuntimeConfig(

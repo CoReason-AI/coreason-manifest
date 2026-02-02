@@ -9,7 +9,7 @@ It is designed to be a pure data library, meaning it contains **no execution log
 ### 1. Agent Definition
 The `AgentDefinition` is the source of truth for an AI Agent. It includes:
 - **Metadata**: Identity, versioning (Strict SemVer), and authorship.
-- **Interface**: Strictly typed inputs and outputs (JSON Schema).
+- **Capabilities**: Strictly typed modes of interaction (`inputs`, `outputs` as JSON Schema).
 - **Topology**: A graph-based execution flow (`GraphTopology`) supporting cyclic loops (e.g., for reflection).
 - **Dependencies**: MCP Tooling requirements (`ToolRequirement`) and Python libraries.
 - **Policy**: Governance rules for budget and human-in-the-loop triggers (`PolicyConfig`).
@@ -19,11 +19,11 @@ The `AgentDefinition` is the source of truth for an AI Agent. It includes:
 To ensure reliability and auditability, the library enforces three strict constraints:
 
 #### A. Immutability
-All dictionary and list fields in the interface are converted to immutable types (`MappingProxyType`, `tuple`) upon validation. You cannot modify them in place.
+All dictionary and list fields in the capabilities are converted to immutable types (`MappingProxyType`, `tuple`) upon validation. You cannot modify them in place.
 
 **Incorrect:**
 ```python
-agent.interface.inputs["new_param"] = "value"  # Raises TypeError
+agent.capabilities[0].inputs["new_param"] = "value"  # Raises TypeError
 ```
 
 **Correct:**
@@ -80,10 +80,15 @@ edges = [
 # 3. Instantiate Agent
 agent = AgentDefinition(
     metadata=metadata,
-    interface={
-        "inputs": {"topic": {"type": "string"}},
-        "outputs": {"summary": {"type": "string"}}
-    },
+    capabilities=[
+        {
+            "name": "default",
+            "type": "atomic",
+            "description": "Default mode",
+            "inputs": {"topic": {"type": "string"}},
+            "outputs": {"summary": {"type": "string"}}
+        }
+    ],
     config={
         "nodes": nodes,
         "edges": edges,
@@ -120,11 +125,11 @@ print(f"Agent '{agent.metadata.name}' created successfully.")
 
 ```python
 # Reading is allowed
-print(agent.interface.inputs["topic"])
+print(agent.capabilities[0].inputs["topic"])
 
 # Writing raises TypeError
 try:
-    agent.interface.inputs["topic"] = "int"
+    agent.capabilities[0].inputs["topic"] = "int"
 except TypeError as e:
     print("Caught expected error:", e)
 ```

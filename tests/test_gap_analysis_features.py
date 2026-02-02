@@ -124,6 +124,7 @@ class TestGapAnalysisFeatures(unittest.TestCase):
         trace = ReasoningTrace(
             trace_id=str(uuid4()),
             agent_id="test-agent",
+            request_id=uuid4(),
             start_time=datetime.now(),
             metadata={"execution_path": ["node1", "node2"]},
         )
