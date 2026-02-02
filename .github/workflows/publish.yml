@@ -10,7 +10,7 @@ on:
 jobs:
   pypi-publish:
     name: Upload release to PyPI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     # Define the environment for trusted publishing
     # This name 'pypi' MUST match what you configure on PyPI
