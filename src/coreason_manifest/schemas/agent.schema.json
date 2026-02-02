@@ -1,40 +1,23 @@
 {
   "$defs": {
-    "AgentDependencies": {
+    "AgentCapability": {
       "additionalProperties": false,
-      "description": "External dependencies for the Agent.\n\nAttributes:\n    tools: List of MCP tool requirements.\n    libraries: List of Python packages required (if code execution is allowed).",
+      "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.",
       "properties": {
-        "tools": {
-          "description": "List of MCP tool requirements.",
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/ToolRequirement"
-              },
-              {
-                "$ref": "#/$defs/InlineToolDefinition"
-              }
-            ]
-          },
-          "title": "Tools",
-          "type": "array"
+        "name": {
+          "description": "Unique name for this capability.",
+          "title": "Name",
+          "type": "string"
         },
-        "libraries": {
-          "description": "List of Python packages required (if code execution is allowed).",
-          "items": {
-            "type": "string"
-          },
-          "title": "Libraries",
-          "type": "array"
-        }
-      },
-      "title": "AgentDependencies",
-      "type": "object"
-    },
-    "AgentInterface": {
-      "additionalProperties": false,
-      "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.",
-      "properties": {
+        "type": {
+          "$ref": "#/$defs/CapabilityType",
+          "description": "Interaction mode."
+        },
+        "description": {
+          "description": "What this mode does.",
+          "title": "Description",
+          "type": "string"
+        },
         "inputs": {
           "additionalProperties": true,
           "description": "Typed arguments the agent accepts (JSON Schema).",
@@ -65,10 +48,44 @@
         }
       },
       "required": [
+        "name",
+        "type",
+        "description",
         "inputs",
         "outputs"
       ],
-      "title": "AgentInterface",
+      "title": "AgentCapability",
+      "type": "object"
+    },
+    "AgentDependencies": {
+      "additionalProperties": false,
+      "description": "External dependencies for the Agent.\n\nAttributes:\n    tools: List of MCP tool requirements.\n    libraries: List of Python packages required (if code execution is allowed).",
+      "properties": {
+        "tools": {
+          "description": "List of MCP tool requirements.",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ToolRequirement"
+              },
+              {
+                "$ref": "#/$defs/InlineToolDefinition"
+              }
+            ]
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "libraries": {
+          "description": "List of Python packages required (if code execution is allowed).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Libraries",
+          "type": "array"
+        }
+      },
+      "title": "AgentDependencies",
       "type": "object"
     },
     "AgentMetadata": {
@@ -305,6 +322,15 @@
       ],
       "title": "AgentRuntimeConfig",
       "type": "object"
+    },
+    "CapabilityType": {
+      "description": "The interaction mode for the capability.",
+      "enum": [
+        "atomic",
+        "streaming"
+      ],
+      "title": "CapabilityType",
+      "type": "string"
     },
     "CouncilConfig": {
       "additionalProperties": false,
@@ -1016,8 +1042,13 @@
     "metadata": {
       "$ref": "#/$defs/AgentMetadata"
     },
-    "interface": {
-      "$ref": "#/$defs/AgentInterface"
+    "capabilities": {
+      "description": "List of supported capabilities.",
+      "items": {
+        "$ref": "#/$defs/AgentCapability"
+      },
+      "title": "Capabilities",
+      "type": "array"
     },
     "config": {
       "$ref": "#/$defs/AgentRuntimeConfig"
@@ -1072,7 +1103,7 @@
   },
   "required": [
     "metadata",
-    "interface",
+    "capabilities",
     "config",
     "dependencies",
     "integrity_hash"
