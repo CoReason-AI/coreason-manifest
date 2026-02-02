@@ -8,17 +8,21 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
+from typing import Any, Dict
+
 import jsonschema
+import pytest
+
 from coreason_manifest.builder.agent import AgentBuilder
 from coreason_manifest.definitions.agent import AgentCapability, CapabilityType, DeliveryMode
 
+
 # Helper class to bypass strict Pydantic model requirement of TypedCapability
 class RawCapability:
-    def __init__(self, name: str, input_schema: dict):
+    def __init__(self, name: str, input_schema: Dict[str, Any]):
         self.name = name
         self.input_schema = input_schema
-        self.output_schema = {"type": "object"} # Dummy output schema
+        self.output_schema = {"type": "object"}  # Dummy output schema
 
     def to_definition(self) -> AgentCapability:
         return AgentCapability(
@@ -27,8 +31,9 @@ class RawCapability:
             description="Test capability",
             inputs=self.input_schema,
             outputs=self.output_schema,
-            delivery_mode=DeliveryMode.REQUEST_RESPONSE
+            delivery_mode=DeliveryMode.REQUEST_RESPONSE,
         )
+
 
 def test_dry_run_validation() -> None:
     # 1. Test Setup
@@ -38,16 +43,13 @@ def test_dry_run_validation() -> None:
     # Add a capability named "search" with inputs:
     schema = {
         "type": "object",
-        "properties": {
-            "query": {"type": "string"},
-            "limit": {"type": "integer", "minimum": 1}
-        },
-        "required": ["query"]
+        "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1}},
+        "required": ["query"],
     }
 
     # Use RawCapability to inject the raw schema
     # We ignore the type hint error because we are intentionally mocking TypedCapability
-    builder.with_capability(RawCapability("search", schema)) # type: ignore
+    builder.with_capability(RawCapability("search", schema))  # type: ignore
 
     agent = builder.build()
 

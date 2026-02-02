@@ -24,7 +24,6 @@ from typing import Any, Dict, List, Literal, Mapping, Optional, Tuple, Union
 from uuid import UUID
 
 import jsonschema
-from jsonschema import ValidationError
 from pydantic import (
     AfterValidator,
     AnyUrl,
