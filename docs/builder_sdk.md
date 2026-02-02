@@ -35,14 +35,16 @@ Wrap your models in a `TypedCapability`.
 
 ```python
 from coreason_manifest.builder import TypedCapability
-from coreason_manifest.definitions.agent import CapabilityType
+from coreason_manifest.definitions.agent import CapabilityType, DeliveryMode
 
 search_capability = TypedCapability(
     name="search",
     description="Executes a web search.",
     input_model=SearchInput,
     output_model=SearchOutput,
-    type=CapabilityType.ATOMIC
+    type=CapabilityType.ATOMIC,
+    # Optional: Explicitly set delivery mode (Defaults to REQUEST_RESPONSE)
+    delivery_mode=DeliveryMode.REQUEST_RESPONSE
 )
 ```
 
@@ -109,6 +111,11 @@ builder.with_tool_requirement(
 
 A generic wrapper that takes two Pydantic model types (`input_model`, `output_model`).
 
+*   **Arguments**:
+    *   `name`, `description`: Metadata.
+    *   `input_model`, `output_model`: Pydantic classes.
+    *   `type`: `ATOMIC` or `GRAPH`.
+    *   `delivery_mode`: `REQUEST_RESPONSE` (default) or `SERVER_SENT_EVENTS`.
 *   **`to_definition()`**: Converts the Pydantic models into JSON Schemas and returns a standard `AgentCapability` object.
 
 ### `AgentBuilder`

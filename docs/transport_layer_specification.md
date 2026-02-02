@@ -6,9 +6,11 @@ This document formalizes the **Public API Contract** that any Coreason-compatibl
 
 To ensure that any engine (Python, Go, Node.js) implementing this manifest is guaranteed to work with standard Coreason frontends by adhering to a strict "Wire Format".
 
-## Protocol: Server-Sent Events (SSE)
+## Protocols
 
-We standardize on **Server-Sent Events (SSE)** over HTTP POST. This allows for real-time streaming of agent thoughts, partial outputs, and final results.
+The Coreason Manifest supports two distinct delivery modes, defined by the `AgentCapability.delivery_mode` field:
+1.  **Request-Response:** Standard HTTP JSON response.
+2.  **Server-Sent Events (SSE):** Streaming response.
 
 ### Endpoint
 
@@ -36,14 +38,29 @@ Example:
 
 ### Response Format
 
-The response **MUST** be a stream of Server-Sent Events (`text/event-stream`).
+The response format depends on the `delivery_mode`.
+
+#### Mode 1: Request-Response (`REQUEST_RESPONSE`)
+
+*   **Content-Type:** `application/json`
+*   **Body:** A JSON object matching the `outputs` schema defined in the Capability.
+
+```json
+{
+  "summary": "The weather is sunny."
+}
+```
+
+#### Mode 2: Server-Sent Events (`SERVER_SENT_EVENTS`)
+
+*   **Content-Type:** `text/event-stream`
+*   **Body:** A stream of `ServerSentEvent` objects.
 
 Each event in the stream corresponds to a `ServerSentEvent` object, which wraps a standard `CloudEvent`.
 
 *   **Schema:** `src/coreason_manifest/definitions/service.py`
-*   **Content-Type:** `text/event-stream`
 
-#### The `ServerSentEvent` Model
+##### The `ServerSentEvent` Model
 
 The `ServerSentEvent` model defines the strict structure of each chunk in the stream.
 
@@ -56,7 +73,7 @@ class ServerSentEvent(CoReasonBaseModel):
 
 **Critical Requirement:** The `data` field MUST be a JSON **string**. This is an SSE protocol requirement. The content of this string is the serialized `CloudEvent`.
 
-#### Example Stream
+##### Example Stream
 
 ```
 event: ai.coreason.node.started
