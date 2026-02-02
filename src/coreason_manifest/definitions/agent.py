@@ -479,3 +479,57 @@ class AgentDefinition(CoReasonBaseModel):
 
         # 4. Return True
         return True
+
+    def to_mermaid(self) -> str:
+        """Generate a Mermaid.js graph string representing the agent's execution flow.
+
+        Returns:
+            A string containing the Mermaid graph definition.
+        """
+        if len(self.config.nodes) == 0:
+            # Atomic Agent
+            return f'graph TD\nStart((Start)) --> Agent["{self.metadata.name} (Atomic)"]'
+
+        # Graph Agent
+        lines = ["graph TD"]
+
+        # Styling Definitions
+        lines.append("classDef agent fill:#e1f5fe,stroke:#01579b,stroke-width:2px;")
+        lines.append("classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:2px;")
+        lines.append("classDef human fill:#fce4ec,stroke:#880e4f,stroke-width:2px;")
+        lines.append("classDef default fill:#f5f5f5,stroke:#333,stroke-width:1px;")
+
+        # Process Nodes
+        for node in self.config.nodes:
+            label = node.visual.label if node.visual and node.visual.label else node.id
+            node_type = getattr(node, "type", "default")
+
+            if node_type == "agent":
+                shape_open, shape_close = "[", "]"
+                class_name = "agent"
+            elif node_type == "logic":
+                shape_open, shape_close = "{", "}"
+                class_name = "logic"
+            elif node_type == "human":
+                shape_open, shape_close = "(", ")"
+                class_name = "human"
+            else:
+                shape_open, shape_close = "[", "]"
+                class_name = "default"
+
+            lines.append(f'{node.id}{shape_open}"{label}"{shape_close}:::{class_name}')
+
+        # Process Edges
+        for edge in self.config.edges:
+            source = edge.source_node_id
+            target = edge.target_node_id
+            if edge.condition:
+                lines.append(f'{source} -- "{edge.condition}" --> {target}')
+            else:
+                lines.append(f"{source} --> {target}")
+
+        # Entry Point Indicator
+        if self.config.entry_point:
+            lines.append(f"Start((Start)) --> {self.config.entry_point}")
+
+        return "\n".join(lines)
