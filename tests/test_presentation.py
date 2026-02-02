@@ -14,7 +14,6 @@ from pydantic import ValidationError
 from coreason_manifest.definitions.presentation import (
     DataBlock,
     MarkdownBlock,
-    PresentationBlockType,
     ThinkingBlock,
     UserErrorBlock,
 )
@@ -50,7 +49,7 @@ def test_data_block_validation() -> None:
     """Test validation of DataBlock fields."""
     # Test invalid view_hint
     with pytest.raises(ValidationError):
-        DataBlock(data={}, view_hint="SCATTER_PLOT")  # type: ignore
+        DataBlock(data={}, view_hint="SCATTER_PLOT")
 
 
 def test_markdown_block() -> None:
@@ -64,11 +63,7 @@ def test_markdown_block() -> None:
 
 def test_user_error_block() -> None:
     """Test UserErrorBlock."""
-    block = UserErrorBlock(
-        user_message="Something went wrong",
-        technical_details={"code": 500},
-        recoverable=True
-    )
+    block = UserErrorBlock(user_message="Something went wrong", technical_details={"code": 500}, recoverable=True)
     dumped = block.dump()
     assert dumped["block_type"] == "ERROR"
     assert dumped["user_message"] == "Something went wrong"
@@ -79,5 +74,6 @@ def test_user_error_block() -> None:
 def test_inheritance() -> None:
     """Verify inheritance from CoReasonBaseModel."""
     from coreason_manifest.definitions.base import CoReasonBaseModel
+
     assert issubclass(ThinkingBlock, CoReasonBaseModel)
     assert issubclass(DataBlock, CoReasonBaseModel)

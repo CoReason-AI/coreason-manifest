@@ -19,6 +19,7 @@ from coreason_manifest.definitions.base import CoReasonBaseModel
 
 class PresentationBlockType(str, Enum):
     """Enumeration of presentation block types."""
+
     THOUGHT = "THOUGHT"
     DATA = "DATA"
     MARKDOWN = "MARKDOWN"
@@ -31,6 +32,7 @@ def _generate_uuid() -> str:
 
 class PresentationBlock(CoReasonBaseModel):
     """Base model for all presentation blocks."""
+
     block_type: PresentationBlockType
     id: str = Field(default_factory=_generate_uuid)
     title: Optional[str] = None
@@ -38,6 +40,7 @@ class PresentationBlock(CoReasonBaseModel):
 
 class ThinkingBlock(PresentationBlock):
     """Presentation block for internal monologue and planning."""
+
     block_type: Literal[PresentationBlockType.THOUGHT] = PresentationBlockType.THOUGHT
     content: str
     status: Literal["IN_PROGRESS", "COMPLETE"] = "IN_PROGRESS"
@@ -45,6 +48,7 @@ class ThinkingBlock(PresentationBlock):
 
 class DataBlock(PresentationBlock):
     """Presentation block for structured data."""
+
     block_type: Literal[PresentationBlockType.DATA] = PresentationBlockType.DATA
     data: Dict[str, Any]
     view_hint: Literal["TABLE", "JSON", "LIST", "KEY_VALUE"] = "JSON"
@@ -52,12 +56,14 @@ class DataBlock(PresentationBlock):
 
 class MarkdownBlock(PresentationBlock):
     """Presentation block for rich text content."""
+
     block_type: Literal[PresentationBlockType.MARKDOWN] = PresentationBlockType.MARKDOWN
     content: str
 
 
 class UserErrorBlock(PresentationBlock):
     """Presentation block for user-facing errors."""
+
     block_type: Literal[PresentationBlockType.ERROR] = PresentationBlockType.ERROR
     user_message: str
     technical_details: Optional[Dict[str, Any]] = None
