@@ -47,12 +47,20 @@ An `AgentDefinition` consists of the following sections:
     *   `human_in_the_loop`: Node IDs that trigger a pause for human approval.
     *   `allowed_domains`: Whitelisting for external access.
 
-6.  **Observability (`ObservabilityConfig`)**:
+6.  **Deployment (`DeploymentConfig`)**:
+    *   Specifies *how* the agent is hosted.
+    *   `protocol`: The communication protocol (`HTTP_SSE`, `WEBSOCKET`, `GRPC`).
+    *   `port`, `route_prefix`: Network settings.
+    *   `scaling_min_instances`, `scaling_max_instances`: Horizontal autoscaling bounds.
+    *   `timeout_seconds`: Request processing limits.
+    *   `env_vars`: Static environment variable injection.
+
+7.  **Observability (`ObservabilityConfig`)**:
     *   `trace_level`: Controls the granularity of logs (`FULL`, `METADATA_ONLY`, `NONE`).
     *   `retention_policy`: How long logs are kept.
     *   `encryption_key_id`: Optional ID of the key used for log encryption.
 
-7.  **Integrity**:
+8.  **Integrity**:
     *   `integrity_hash`: SHA256 hash of the source code (top-level field).
 
 ## Agent Types: Atomic vs. Graph

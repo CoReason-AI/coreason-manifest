@@ -388,6 +388,56 @@
       "title": "DataMappingStrategy",
       "type": "string"
     },
+    "DeploymentConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for hosting the agent.",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/Protocol",
+          "default": "http_sse"
+        },
+        "port": {
+          "default": 8000,
+          "description": "The port to bind to.",
+          "title": "Port",
+          "type": "integer"
+        },
+        "route_prefix": {
+          "default": "/assist",
+          "description": "URL prefix for the agent endpoints.",
+          "title": "Route Prefix",
+          "type": "string"
+        },
+        "scaling_min_instances": {
+          "default": 0,
+          "description": "Minimum number of replicas.",
+          "title": "Scaling Min Instances",
+          "type": "integer"
+        },
+        "scaling_max_instances": {
+          "default": 1,
+          "description": "Maximum number of replicas.",
+          "title": "Scaling Max Instances",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 60,
+          "description": "Request timeout.",
+          "title": "Timeout Seconds",
+          "type": "integer"
+        },
+        "env_vars": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Static environment variables.",
+          "title": "Env Vars",
+          "type": "object"
+        }
+      },
+      "title": "DeploymentConfig",
+      "type": "object"
+    },
     "Edge": {
       "additionalProperties": false,
       "description": "Represents a connection between two nodes.\n\nAttributes:\n    source_node_id: The ID of the source node.\n    target_node_id: The ID of the target node.\n    condition: Optional Python expression for conditional branching.",
@@ -821,6 +871,16 @@
       "title": "PolicyConfig",
       "type": "object"
     },
+    "Protocol": {
+      "description": "The communication protocol used to serve the agent.",
+      "enum": [
+        "http_sse",
+        "websocket",
+        "grpc"
+      ],
+      "title": "Protocol",
+      "type": "string"
+    },
     "RecipeNode": {
       "additionalProperties": false,
       "description": "A node that executes another Recipe as a sub-graph.\n\nAttributes:\n    type: The type of the node (must be 'recipe').\n    recipe_id: The ID of the recipe to execute.\n    input_mapping: How parent state maps to child inputs (parent_key -> child_key).\n    output_mapping: How child result maps back to parent state (child_key -> parent_key).",
@@ -1067,6 +1127,18 @@
       ],
       "default": null,
       "description": "Governance policy configuration."
+    },
+    "deployment": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DeploymentConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Runtime deployment settings"
     },
     "observability": {
       "anyOf": [
