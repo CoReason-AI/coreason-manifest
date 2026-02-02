@@ -16,7 +16,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
@@ -124,6 +124,11 @@ class ReasoningTrace(CoReasonBaseModel):
     agent_id: str
     session_id: Optional[str] = None
 
+    # Request Lineage
+    request_id: UUID = Field(..., description="The specific request ID that generated this trace.")
+    root_request_id: Optional[UUID] = Field(default=None, description="The root ID of the conversation tree.")
+    parent_request_id: Optional[UUID] = Field(default=None, description="The parent ID that triggered this trace.")
+
     start_time: datetime
     end_time: Optional[datetime] = None
 
@@ -142,6 +147,16 @@ class ReasoningTrace(CoReasonBaseModel):
     # Flexible metadata
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
+    @model_validator(mode="after")
+    def validate_lineage(self) -> "ReasoningTrace":
+        """Enforce strict lineage: if Root is None, handle based on Parent."""
+        if self.root_request_id is None:
+            if self.parent_request_id is None:
+                self.root_request_id = self.request_id
+            else:
+                raise ValueError("Root ID missing while Parent ID is present.")
+        return self
+
 
 class AuditEventType(str, Enum):
     SYSTEM_CHANGE = "system_change"
@@ -159,6 +174,11 @@ class AuditLog(CoReasonBaseModel):
 
     audit_id: UUID = Field(..., description="Unique identifier.")
     trace_id: str = Field(..., description="Trace ID for OTel correlation.")
+
+    # Request Lineage
+    request_id: UUID = Field(..., description="The request ID associated with this audit entry.")
+    root_request_id: UUID = Field(..., description="The root request ID of the workflow.")
+
     timestamp: datetime = Field(..., description="ISO8601 timestamp.")
     actor: str = Field(..., description="User ID or Agent Component ID.")
     event_type: AuditEventType = Field(..., description="Type of event.")
