@@ -1,8 +1,9 @@
-import pytest
 import json
+
+import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.message import ContentPart, MultiModalInput, AttachedFile
+from coreason_manifest.definitions.message import AttachedFile, ContentPart, MultiModalInput
 from coreason_manifest.definitions.session import Interaction
 
 
