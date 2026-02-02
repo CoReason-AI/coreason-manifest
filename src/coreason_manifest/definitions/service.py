@@ -56,30 +56,14 @@ class ServiceContract(CoReasonBaseModel):
         return {
             "post": {
                 "summary": "Invoke Agent",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": AgentRequest.model_json_schema()
-                        }
-                    }
-                },
+                "requestBody": {"content": {"application/json": {"schema": AgentRequest.model_json_schema()}}},
                 "responses": {
                     "200": {
                         "description": "Event Stream",
-                        "content": {
-                            CONTENT_TYPE_SSE: {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                        "content": {CONTENT_TYPE_SSE: {"schema": {"type": "string"}}},
                     },
-                    "400": {
-                        "description": "Client Error"
-                    },
-                    "500": {
-                        "description": "Server Error"
-                    }
-                }
+                    "400": {"description": "Client Error"},
+                    "500": {"description": "Server Error"},
+                },
             }
         }

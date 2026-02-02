@@ -22,18 +22,11 @@ from coreason_manifest.definitions.service import (
 def test_wire_format_serialization() -> None:
     """Test that ServerSentEvent correctly serializes a CloudEvent."""
     # Create payload
-    payload = NodeStarted(
-        node_id="node-1",
-        timestamp=1234567890.0,
-        status="RUNNING"
-    )
+    payload = NodeStarted(node_id="node-1", timestamp=1234567890.0, status="RUNNING")
 
     # Create CloudEvent
     event = CloudEvent[NodeStarted](
-        type="ai.coreason.node.started",
-        source="urn:node:node-1",
-        data=payload,
-        time=datetime.now(timezone.utc)
+        type="ai.coreason.node.started", source="urn:node:node-1", data=payload, time=datetime.now(timezone.utc)
     )
 
     # Convert to SSE
