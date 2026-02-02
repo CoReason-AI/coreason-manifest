@@ -10,6 +10,7 @@
 
 from .agent import AgentDefinition, AgentRuntimeConfig, Persona
 from .deployment import DeploymentConfig, Protocol
+from .interfaces import AgentInterface, LifecycleInterface
 from .events import (
     ArtifactGenerated,
     ArtifactGeneratedPayload,
@@ -47,6 +48,8 @@ __all__ = [
     "AgentRequest",
     "AgentRuntimeConfig",
     "AgentDefinition",
+    "AgentInterface",
+    "LifecycleInterface",
     "Persona",
     "DeploymentConfig",
     "Protocol",
