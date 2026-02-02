@@ -11,7 +11,7 @@
 """Defines the behavioral contract (Protocol) for a Coreason Agent."""
 
 from abc import abstractmethod
-from typing import AsyncIterator, Protocol, Union, runtime_checkable
+from typing import Any, AsyncIterator, Protocol, Union, runtime_checkable
 
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.definitions.events import CloudEvent, GraphEvent
@@ -29,10 +29,13 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    async def assist(
-        self, request: AgentRequest
-    ) -> AsyncIterator[Union[CloudEvent, GraphEvent]]:
+    def assist(self, request: AgentRequest) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
         """Process a request and yield a stream of events (thoughts, data, artifacts, or final answers).
+
+        Note:
+            This method is defined as a synchronous function returning an AsyncIterator
+            to correctly type-hint async generators in Protocols. Implementations should
+            use `async def` and `yield` (which produces an AsyncGenerator, satisfying AsyncIterator).
 
         Args:
             request: The strictly typed input envelope.

@@ -10,7 +10,6 @@
 
 from .agent import AgentDefinition, AgentRuntimeConfig, Persona
 from .deployment import DeploymentConfig, Protocol
-from .interfaces import AgentInterface, LifecycleInterface
 from .events import (
     ArtifactGenerated,
     ArtifactGeneratedPayload,
@@ -34,6 +33,7 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .interfaces import AgentInterface, LifecycleInterface
 from .presentation import (
     DataBlock,
     MarkdownBlock,
