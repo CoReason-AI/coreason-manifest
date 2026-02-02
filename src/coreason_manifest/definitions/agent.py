@@ -423,9 +423,7 @@ class AgentDefinition(CoReasonBaseModel):
             if self.integrity_hash is None:
                 raise ValueError("Field 'integrity_hash' is required when status is 'published'.")
             if not re.match(r"^[a-fA-F0-9]{64}$", self.integrity_hash):
-                raise ValueError(
-                    f"String should match pattern '^[a-fA-F0-9]{{64}}$' (got '{self.integrity_hash}')"
-                )
+                raise ValueError(f"String should match pattern '^[a-fA-F0-9]{{64}}$' (got '{self.integrity_hash}')")
         return self
 
     @model_validator(mode="after")
