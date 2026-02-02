@@ -3,39 +3,44 @@ from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.builder.agent import AgentBuilder
 from coreason_manifest.builder.capability import TypedCapability
-from coreason_manifest.definitions.agent import CapabilityType, ToolRiskLevel
+from coreason_manifest.definitions.agent import CapabilityType
 from coreason_manifest.definitions.topology import LogicNode
+
 
 class SimpleInput(BaseModel):
     query: str
 
+
 class SimpleOutput(BaseModel):
     result: str
 
-def get_valid_agent_builder(name="TestAgent"):
+
+def get_valid_agent_builder(name: str = "TestAgent") -> AgentBuilder:
     cap = TypedCapability(
         name="test_cap",
         description="A test capability",
         input_model=SimpleInput,
         output_model=SimpleOutput,
-        type=CapabilityType.ATOMIC
+        type=CapabilityType.ATOMIC,
     )
     return AgentBuilder(name=name).with_capability(cap).with_system_prompt("System Prompt").with_model("gpt-4o")
 
-def test_builder_with_tools():
+
+def test_builder_with_tools() -> None:
     agent = (
         get_valid_agent_builder(name="ToolAgent")
         .with_tool_requirement(
             uri="mcp://google/search",
-            hash="a" * 64, # Valid SHA256 length
-            scopes=["read"]
+            hash="a" * 64,  # Valid SHA256 length
+            scopes=["read"],
         )
         .build()
     )
     assert len(agent.dependencies.tools) == 1
     assert str(agent.dependencies.tools[0].uri) == "mcp://google/search"
 
-def test_builder_topology():
+
+def test_builder_topology() -> None:
     node_a = LogicNode(id="start", type="logic", code="print('start')")
     node_b = LogicNode(id="end", type="logic", code="print('end')")
 
@@ -52,14 +57,12 @@ def test_builder_topology():
     assert len(agent.config.edges) == 1
     assert agent.config.entry_point == "start"
 
-def test_builder_validation_failure():
+
+def test_builder_validation_failure() -> None:
     """Attempt to build a graph with nodes but without setting an entry point."""
     node_a = LogicNode(id="start", type="logic", code="print('start')")
 
-    builder = (
-        get_valid_agent_builder(name="InvalidGraphAgent")
-        .with_node(node_a)
-    )
+    builder = get_valid_agent_builder(name="InvalidGraphAgent").with_node(node_a)
 
     with pytest.raises(ValidationError) as excinfo:
         builder.build()
