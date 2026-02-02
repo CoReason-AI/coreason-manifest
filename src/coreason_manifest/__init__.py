@@ -51,6 +51,7 @@ from .definitions.topology import (
     StateDefinition,
     Topology,
 )
+from .governance import ComplianceReport, GovernanceConfig, check_compliance
 from .recipes import RecipeManifest
 
 __all__ = [
@@ -95,4 +96,7 @@ __all__ = [
     "SimulationRequest",
     "AuditLog",
     "RecipeManifest",
+    "GovernanceConfig",
+    "ComplianceReport",
+    "check_compliance",
 ]
