@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
-import pytest
+
 from coreason_manifest.definitions.audit import AuditEventType, AuditLog
+
 
 def test_audit_log_determinism() -> None:
     """Ensure that the same data produces the same hash."""
@@ -20,7 +21,7 @@ def test_audit_log_determinism() -> None:
         event_type=AuditEventType.SYSTEM_CHANGE,
         safety_metadata={},
         previous_hash="prev",
-        integrity_hash="placeholder"
+        integrity_hash="placeholder",
     )
 
     log2 = AuditLog(
@@ -33,10 +34,11 @@ def test_audit_log_determinism() -> None:
         event_type=AuditEventType.SYSTEM_CHANGE,
         safety_metadata={},
         previous_hash="prev",
-        integrity_hash="different-placeholder" # Should be excluded from computation
+        integrity_hash="different-placeholder",  # Should be excluded from computation
     )
 
     assert log1.compute_hash() == log2.compute_hash()
+
 
 def test_audit_log_tamper_evidence() -> None:
     """Ensure changing critical fields changes the hash."""
@@ -55,7 +57,7 @@ def test_audit_log_tamper_evidence() -> None:
         event_type=AuditEventType.SYSTEM_CHANGE,
         safety_metadata={},
         previous_hash="prev",
-        integrity_hash="placeholder"
+        integrity_hash="placeholder",
     )
 
     initial_hash = log.compute_hash()
@@ -63,6 +65,7 @@ def test_audit_log_tamper_evidence() -> None:
     # Tamper with actor
     tampered_log = log.model_copy(update={"actor": "hacker"})
     assert tampered_log.compute_hash() != initial_hash
+
 
 def test_audit_log_extra_fields() -> None:
     """Ensure extra fields are forbidden/ignored based on config."""
@@ -72,6 +75,7 @@ def test_audit_log_extra_fields() -> None:
     # Let's check base.py. Ah, base uses populate_by_name=True.
     # Let's assume standard behavior.
     pass
+
 
 def test_audit_log_serialization_roundtrip() -> None:
     """Test serialization/deserialization."""
@@ -85,7 +89,7 @@ def test_audit_log_serialization_roundtrip() -> None:
         event_type=AuditEventType.PREDICTION,
         safety_metadata={"pii": False},
         previous_hash="0000",
-        integrity_hash="1234"
+        integrity_hash="1234",
     )
 
     json_str = log.to_json()

@@ -1,15 +1,13 @@
-from datetime import datetime
 import uuid
-import pytest
-from coreason_manifest.definitions.audit import ReasoningTrace, GenAIOperation
+from datetime import datetime
+
+from coreason_manifest.definitions.audit import GenAIOperation, ReasoningTrace
+
 
 def test_token_accumulation() -> None:
     """Verify that total_tokens accumulates correctly from steps."""
     trace = ReasoningTrace(
-        trace_id=str(uuid.uuid4()),
-        agent_id="test_agent",
-        request_id=uuid.uuid4(),
-        start_time=datetime.now()
+        trace_id=str(uuid.uuid4()), agent_id="test_agent", request_id=uuid.uuid4(), start_time=datetime.now()
     )
 
     # Simulate a step with usage
@@ -26,8 +24,15 @@ def test_token_accumulation() -> None:
 
     assert trace.total_tokens.total == 30
 
+
 def test_json_serialization() -> None:
     """Ensure complex trace can be serialized."""
-    trace = ReasoningTrace(trace_id=str(uuid.uuid4()), agent_id="agent_json", request_id=uuid.uuid4(), start_time=datetime.now(), steps=[])
+    trace = ReasoningTrace(
+        trace_id=str(uuid.uuid4()),
+        agent_id="agent_json",
+        request_id=uuid.uuid4(),
+        start_time=datetime.now(),
+        steps=[],
+    )
     json_str = trace.to_json()
     assert "trace_id" in json_str
