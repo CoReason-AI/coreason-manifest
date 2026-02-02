@@ -37,19 +37,23 @@ An `AgentDefinition` consists of the following sections:
     *   **LLM Config**: Model selection, temperature, and system prompts.
     *   **Topology**: Defines whether the agent is Atomic (single prompt) or Graph-based (workflow).
 
-4.  **Dependencies (`AgentDependencies`)**:
+4.  **Status (`status`)**:
+    *   Lifecycle state of the agent (`draft` or `published`).
+    *   Defaults to `draft`.
+
+5.  **Dependencies (`AgentDependencies`)**:
     *   **Tools**: Supports the **Model Context Protocol (MCP)**.
     *   `ToolRequirement`: Defines external tools via URI, including `risk_level` and `scopes`.
     *   `InlineToolDefinition`: Allows embedding tool schemas directly in the manifest.
     *   **Integrity**: Tools require SHA256 hashes for security.
 
-5.  **Policy (`PolicyConfig`)**:
+6.  **Policy (`PolicyConfig`)**:
     *   Governance controls.
     *   `budget_caps`: Limits on cost or tokens.
     *   `human_in_the_loop`: Node IDs that trigger a pause for human approval.
     *   `allowed_domains`: Whitelisting for external access.
 
-6.  **Deployment (`DeploymentConfig`)**:
+7.  **Deployment (`DeploymentConfig`)**:
     *   Specifies *how* the agent is hosted.
     *   `protocol`: The communication protocol (`HTTP_SSE`, `WEBSOCKET`, `GRPC`).
     *   `port`, `route_prefix`: Network settings.
@@ -57,16 +61,30 @@ An `AgentDefinition` consists of the following sections:
     *   `timeout_seconds`: Request processing limits.
     *   `env_vars`: Static environment variable injection.
 
-7.  **Observability (`ObservabilityConfig`)**:
+8.  **Observability (`ObservabilityConfig`)**:
     *   `trace_level`: Controls the granularity of logs (`FULL`, `METADATA_ONLY`, `NONE`).
     *   `retention_policy`: How long logs are kept.
     *   `encryption_key_id`: Optional ID of the key used for log encryption.
 
-8.  **Custom Metadata (`custom_metadata`)**:
+9.  **Custom Metadata (`custom_metadata`)**:
     *   Container for arbitrary metadata extensions without breaking validation.
 
-9.  **Integrity**:
-    *   `integrity_hash`: SHA256 hash of the source code (top-level field).
+10. **Integrity**:
+    *   `integrity_hash`: SHA256 hash of the source code (top-level field). Required only when `status` is `published`.
+
+## Agent Lifecycle: Draft vs. Published
+
+The CAM introduces a "Draft Mode" to facilitate prototyping and visual editing.
+
+*   **Draft Mode (`status="draft"`)**:
+    *   **Relaxed Validation**: Topology integrity checks (e.g., ensuring all edges point to valid nodes) are skipped.
+    *   **Optional Hash**: The `integrity_hash` field is optional.
+    *   **Purpose**: Allows saving "work in progress" states where the graph might be incomplete or disconnected.
+
+*   **Published Mode (`status="published"`)**:
+    *   **Strict Validation**: Full topology integrity is enforced.
+    *   **Mandatory Hash**: A valid SHA256 `integrity_hash` is required.
+    *   **Purpose**: Ensures that executable agents are complete, valid, and tamper-proof.
 
 ## Agent Types: Atomic vs. Graph
 
@@ -86,7 +104,7 @@ A Graph Agent orchestrates a complex workflow involving multiple steps, loops, o
     *   `nodes`: A list of execution units (`AgentNode`, `LogicNode`, `RecipeNode`, etc.).
     *   `edges`: Directed connections defining control flow.
     *   `entry_point`: The ID of the starting node.
-    *   **Topology Validation**: The specification strictly validates that all edges connect to existing nodes (preventing "dangling pointers").
+    *   **Topology Validation**: The specification validates that all edges connect to existing nodes (preventing "dangling pointers"). *Note: This check is skipped if the agent is in `draft` status.*
 
 ## Recipes and Topology
 
@@ -103,7 +121,7 @@ Both share the `GraphTopology` structure (from `src/coreason_manifest/definition
 Built on Pydantic v2, the CAM enforces types at runtime. Invalid UUIDs, malformed semantic versions, or missing required fields cause immediate validation errors, preventing invalid states from entering the system.
 
 ### 2. Integrity & Security
-*   **Integrity Hashing**: The `integrity_hash` field (SHA256) ensures that the agent definition has not been tampered with since creation.
+*   **Integrity Hashing**: The `integrity_hash` field (SHA256) ensures that the agent definition has not been tampered with since creation. *Required for published agents.*
 *   **Tool Safety**: MCP tools require explicit risk levels (`SAFE`, `STANDARD`, `CRITICAL`) and scope definitions.
 
 ### 3. Serialization (`CoReasonBaseModel`)
@@ -125,7 +143,8 @@ from coreason_manifest.definitions.agent import (
     ModelConfig,
     AgentDependencies,
     ToolRequirement,
-    ToolRiskLevel
+    ToolRiskLevel,
+    AgentStatus
 )
 
 # Define the Agent
@@ -171,7 +190,8 @@ agent = AgentDefinition(
         ]
     ),
 
-    # 5. Integrity
+    # 5. Integrity & Status
+    status=AgentStatus.PUBLISHED,
     integrity_hash="a" * 64
 )
 

@@ -16,6 +16,7 @@ These models define the structure and validation rules for the Coreason Agent Ma
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from enum import Enum
 from types import MappingProxyType
@@ -128,6 +129,13 @@ class EventSchema(CoReasonBaseModel):
     data_schema: ImmutableDict = Field(..., description="JSON Schema of the event payload.")
 
 
+class AgentStatus(str, Enum):
+    """The lifecycle status of the agent."""
+
+    DRAFT = "draft"
+    PUBLISHED = "published"
+
+
 class CapabilityType(str, Enum):
     """The interaction mode for the capability."""
 
@@ -215,12 +223,6 @@ class AgentRuntimeConfig(CoReasonBaseModel):
             if not (has_global_prompt or has_model_prompt):
                 raise ValueError("Atomic Agents require a system_prompt (global or in model_config).")
 
-        return self
-
-    @model_validator(mode="after")
-    def validate_topology_integrity(self) -> AgentRuntimeConfig:
-        """Ensure that edges connect existing nodes."""
-        validate_edge_integrity(self.nodes, self.edges)
         return self
 
     @field_validator("nodes")
@@ -385,10 +387,10 @@ class AgentDefinition(CoReasonBaseModel):
     custom_metadata: Optional[Dict[str, Any]] = Field(
         None, description="Container for arbitrary metadata extensions without breaking validation."
     )
-    integrity_hash: str = Field(
-        ...,
-        pattern=r"^[a-fA-F0-9]{64}$",
-        description="SHA256 hash of the source code.",
+    status: AgentStatus = Field(default=AgentStatus.DRAFT, description="The lifecycle status of the agent.")
+    integrity_hash: Optional[str] = Field(
+        None,
+        description="SHA256 hash of the source code. Required if status is 'published'.",
     )
 
     @field_validator("capabilities")
@@ -412,4 +414,23 @@ class AgentDefinition(CoReasonBaseModel):
                     raise ValueError(
                         f"Agent requires authentication but capability '{cap.name}' does not inject 'user_context'."
                     )
+        return self
+
+    @model_validator(mode="after")
+    def validate_integrity_hash_if_published(self) -> AgentDefinition:
+        """Ensure integrity_hash is present and valid if published."""
+        if self.status == AgentStatus.PUBLISHED:
+            if self.integrity_hash is None:
+                raise ValueError("Field 'integrity_hash' is required when status is 'published'.")
+            if not re.match(r"^[a-fA-F0-9]{64}$", self.integrity_hash):
+                raise ValueError(
+                    f"String should match pattern '^[a-fA-F0-9]{{64}}$' (got '{self.integrity_hash}')"
+                )
+        return self
+
+    @model_validator(mode="after")
+    def validate_topology_if_published(self) -> AgentDefinition:
+        """Ensure topology integrity if published."""
+        if self.status == AgentStatus.PUBLISHED:
+            validate_edge_integrity(self.config.nodes, self.config.edges)
         return self

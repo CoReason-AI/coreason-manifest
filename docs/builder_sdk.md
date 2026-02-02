@@ -52,11 +52,13 @@ Use `AgentBuilder` to assemble the agent and compile it into an `AgentDefinition
 
 ```python
 from coreason_manifest.builder import AgentBuilder
+from coreason_manifest.definitions.agent import AgentStatus
 
 builder = AgentBuilder(
     name="ResearchAssistant",
     version="1.0.0",
-    author="Coreason Team"
+    author="Coreason Team",
+    status=AgentStatus.DRAFT  # Optional: defaults to DRAFT
 )
 
 agent_definition = (
@@ -115,6 +117,7 @@ A generic wrapper that takes two Pydantic model types (`input_model`, `output_mo
 
 The main entry point for creating agents.
 
+*   **`set_status(status)`**: Sets the lifecycle status (`DRAFT` or `PUBLISHED`).
 *   **`with_capability(cap)`**: Adds a capability.
 *   **`with_system_prompt(prompt)`**: Sets the global system instruction.
 *   **`with_model(model, temperature)`**: Configures the LLM settings.

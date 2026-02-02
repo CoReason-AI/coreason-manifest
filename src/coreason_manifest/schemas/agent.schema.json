@@ -323,6 +323,15 @@
       "title": "AgentRuntimeConfig",
       "type": "object"
     },
+    "AgentStatus": {
+      "description": "The lifecycle status of the agent.",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    },
     "CapabilityType": {
       "description": "The interaction mode for the capability.",
       "enum": [
@@ -1166,19 +1175,29 @@
       "description": "Container for arbitrary metadata extensions without breaking validation.",
       "title": "Custom Metadata"
     },
+    "status": {
+      "$ref": "#/$defs/AgentStatus",
+      "default": "draft"
+    },
     "integrity_hash": {
-      "description": "SHA256 hash of the source code.",
-      "pattern": "^[a-fA-F0-9]{64}$",
-      "title": "Integrity Hash",
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "SHA256 hash of the source code. Required if status is 'published'.",
+      "title": "Integrity Hash"
     }
   },
   "required": [
     "metadata",
     "capabilities",
     "config",
-    "dependencies",
-    "integrity_hash"
+    "dependencies"
   ],
   "title": "CoReason Agent Manifest",
   "type": "object"

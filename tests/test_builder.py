@@ -13,7 +13,7 @@ from typing import List
 from pydantic import BaseModel
 
 from coreason_manifest.builder import AgentBuilder, TypedCapability
-from coreason_manifest.definitions.agent import AgentDefinition
+from coreason_manifest.definitions.agent import AgentDefinition, AgentStatus
 
 
 class SearchInput(BaseModel):
@@ -58,7 +58,7 @@ def test_full_agent_build() -> None:
         output_model=SearchOutput,
     )
 
-    builder = AgentBuilder(name="SearchAgent", author="Tester")
+    builder = AgentBuilder(name="SearchAgent", author="Tester", status=AgentStatus.PUBLISHED)
     agent = builder.with_capability(cap).with_system_prompt("You are a search agent.").with_model("gpt-4-turbo").build()
 
     assert isinstance(agent, AgentDefinition)
