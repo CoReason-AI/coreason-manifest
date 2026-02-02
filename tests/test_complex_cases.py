@@ -27,7 +27,15 @@ def test_deep_immutability_mapping_proxy() -> None:
             "author": "Tester",
             "created_at": "2023-01-01T00:00:00Z",
         },
-        "interface": {"inputs": {"param": 1}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {"param": 1},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -52,10 +60,10 @@ def test_deep_immutability_mapping_proxy() -> None:
 
     # inputs should be read-only
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
-        agent.interface.inputs["param"] = 2  # type: ignore[index]
+        agent.capabilities[0].inputs["param"] = 2  # type: ignore[index]
 
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
-        agent.interface.inputs["new"] = 3  # type: ignore[index]
+        agent.capabilities[0].inputs["new"] = 3  # type: ignore[index]
 
 
 def test_deep_immutability_tuples() -> None:
@@ -68,7 +76,15 @@ def test_deep_immutability_tuples() -> None:
             "author": "Tester",
             "created_at": "2023-01-01T00:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -122,7 +138,15 @@ def test_unicode_handling() -> None:
             "author": author_unicode,
             "created_at": "2023-01-01T00:00:00Z",
         },
-        "interface": {"inputs": {"key_Ω": "val_🤖"}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {"key_Ω": "val_🤖"},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -137,7 +161,7 @@ def test_unicode_handling() -> None:
 
     assert agent.metadata.name == name_unicode
     assert agent.metadata.author == author_unicode
-    assert agent.interface.inputs["key_Ω"] == "val_🤖"
+    assert agent.capabilities[0].inputs["key_Ω"] == "val_🤖"
 
 
 def test_hash_validation_edge_cases() -> None:
@@ -150,7 +174,15 @@ def test_hash_validation_edge_cases() -> None:
             "author": "Tester",
             "created_at": "2023-01-01T00:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],

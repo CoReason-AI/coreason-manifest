@@ -10,8 +10,8 @@
 
 """Pydantic models for the Coreason Manifest system.
 
-These models define the structure and validation rules for the Agent Manifest
-(OAS). They represent the source of truth for Agent definitions.
+These models define the structure and validation rules for the Coreason Agent Manifest
+(CAM). They represent the source of truth for Agent definitions.
 """
 
 from __future__ import annotations
@@ -34,6 +34,7 @@ from pydantic import (
 from typing_extensions import Annotated
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -118,18 +119,46 @@ class Persona(CoReasonBaseModel):
     directives: List[str] = Field(..., description="List of specific instructions or directives.")
 
 
-class AgentInterface(CoReasonBaseModel):
-    """Interface definition for the Agent.
+class EventSchema(CoReasonBaseModel):
+    """Defines the structure of an intermediate event emitted by the agent."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    name: str = Field(..., description="Event name (e.g., 'SEARCH_PROGRESS').")
+    data_schema: ImmutableDict = Field(..., description="JSON Schema of the event payload.")
+
+
+class CapabilityType(str, Enum):
+    """The interaction mode for the capability."""
+
+    ATOMIC = "atomic"
+    STREAMING = "streaming"
+
+
+class AgentCapability(CoReasonBaseModel):
+    """Defines a specific mode of interaction for the agent.
 
     Attributes:
+        name: Unique name for this capability.
+        type: Interaction mode.
+        description: What this mode does.
         inputs: Typed arguments the agent accepts (JSON Schema).
         outputs: Typed structure of the result.
+        events: List of intermediate events this agent produces during execution.
+        injected_params: List of parameters injected by the system.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    name: str = Field(..., description="Unique name for this capability.")
+    type: CapabilityType = Field(..., description="Interaction mode.")
+    description: str = Field(..., description="What this mode does.")
+
     inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
+    events: List[EventSchema] = Field(
+        default_factory=list, description="List of intermediate events this agent produces during execution."
+    )
     injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
 
 
@@ -330,7 +359,7 @@ class AgentDefinition(CoReasonBaseModel):
 
     Attributes:
         metadata: Metadata for the Agent.
-        interface: Interface definition for the Agent.
+        capabilities: List of supported capabilities.
         config: Configuration of the Agent execution.
         dependencies: External dependencies for the Agent.
         integrity_hash: SHA256 hash of the source code.
@@ -347,10 +376,11 @@ class AgentDefinition(CoReasonBaseModel):
     )
 
     metadata: AgentMetadata
-    interface: AgentInterface
+    capabilities: List[AgentCapability] = Field(..., description="List of supported capabilities.")
     config: AgentRuntimeConfig
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
+    deployment: Optional[DeploymentConfig] = Field(None, description="Runtime deployment settings")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
     custom_metadata: Optional[Dict[str, Any]] = Field(
         None, description="Container for arbitrary metadata extensions without breaking validation."
@@ -361,10 +391,25 @@ class AgentDefinition(CoReasonBaseModel):
         description="SHA256 hash of the source code.",
     )
 
+    @field_validator("capabilities")
+    @classmethod
+    def validate_capabilities(cls, v: List[AgentCapability]) -> List[AgentCapability]:
+        """Ensure at least one capability exists and names are unique."""
+        if not v:
+            raise ValueError("Agent must have at least one capability.")
+
+        names = [cap.name for cap in v]
+        if len(names) != len(set(names)):
+            raise ValueError(f"Duplicate capability names found: {names}")
+        return v
+
     @model_validator(mode="after")
     def validate_auth_requirements(self) -> AgentDefinition:
         """Validate that agents requiring auth have user_context injected."""
         if self.metadata.requires_auth:
-            if "user_context" not in self.interface.injected_params:
-                raise ValueError("Agent requires authentication but 'user_context' is not an injected parameter.")
+            for cap in self.capabilities:
+                if "user_context" not in cap.injected_params:
+                    raise ValueError(
+                        f"Agent requires authentication but capability '{cap.name}' does not inject 'user_context'."
+                    )
         return self

@@ -15,8 +15,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import (
+    AgentCapability,
     AgentDefinition,
     AgentMetadata,
+    CapabilityType,
+    EventSchema,
     ModelConfig,
     Persona,
 )
@@ -32,10 +35,16 @@ def test_agent_definition_valid() -> None:
             "author": "Test Author",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {
-            "inputs": {"type": "object", "properties": {"query": {"type": "string"}}},
-            "outputs": {"type": "string"},
-        },
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {"type": "object", "properties": {"query": {"type": "string"}}},
+                "outputs": {"type": "string"},
+                "injected_params": [],  # Missing user_context
+            }
+        ],
         "config": {
             "nodes": [{"id": "step1", "type": "logic", "code": "pass"}],
             "edges": [],
@@ -96,7 +105,15 @@ def test_validation_error_on_missing_fields() -> None:
             "author": "Test Author",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -121,11 +138,16 @@ def test_auth_validation_failure() -> None:
             "created_at": "2023-10-27T10:00:00Z",
             "requires_auth": True,
         },
-        "interface": {
-            "inputs": {"type": "object", "properties": {"query": {"type": "string"}}},
-            "outputs": {"type": "string"},
-            "injected_params": [],  # Missing user_context
-        },
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {"type": "object", "properties": {"query": {"type": "string"}}},
+                "outputs": {"type": "string"},
+                "injected_params": [],  # Missing user_context
+            }
+        ],
         "config": {
             "nodes": [{"id": "step1", "type": "logic", "code": "pass"}],
             "edges": [],
@@ -136,7 +158,7 @@ def test_auth_validation_failure() -> None:
         "integrity_hash": "a" * 64,
     }
     with pytest.raises(
-        ValueError, match="Agent requires authentication but 'user_context' is not an injected parameter"
+        ValueError, match="Agent requires authentication but capability 'default' does not inject 'user_context'."
     ):
         AgentDefinition(**data)
 
@@ -151,7 +173,15 @@ def test_agent_definition_with_policy_and_observability() -> None:
             "author": "Test Author",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -198,7 +228,15 @@ def test_agent_config_system_prompt() -> None:
             "author": "Test Author",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "config": {
             "nodes": [],
             "edges": [],
@@ -229,3 +267,67 @@ def test_agent_config_system_prompt() -> None:
     agent = AgentDefinition(**valid_data)
     assert agent.config.system_prompt is None
     assert agent.config.llm_config.system_prompt == "Model Prompt"
+
+
+def test_agent_capability_events() -> None:
+    """Test AgentCapability with EventSchema."""
+    event = EventSchema(
+        name="SEARCH_PROGRESS",
+        data_schema={"type": "object", "properties": {"query": {"type": "string"}}},
+    )
+    assert event.name == "SEARCH_PROGRESS"
+    assert event.data_schema["type"] == "object"
+
+    capability = AgentCapability(
+        name="test",
+        type=CapabilityType.ATOMIC,
+        description="Test capability",
+        inputs={"type": "object"},
+        outputs={"type": "string"},
+        events=[event],
+    )
+    assert len(capability.events) == 1
+    assert capability.events[0].name == "SEARCH_PROGRESS"
+
+    # Test default factory
+    capability_empty = AgentCapability(
+        name="test",
+        type=CapabilityType.ATOMIC,
+        description="Test capability",
+        inputs={"type": "object"},
+        outputs={"type": "string"},
+    )
+    assert capability_empty.events == []
+
+
+def test_agent_capabilities_validation() -> None:
+    """Test validation of capabilities list."""
+    valid_data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Test Agent",
+            "author": "Test Author",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "config": {
+            "nodes": [],
+            "edges": [],
+            "entry_point": "start",
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+            "system_prompt": "Prompt",
+        },
+        "dependencies": {},
+        "integrity_hash": "a" * 64,
+    }
+
+    # Test empty capabilities
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition(capabilities=[], **valid_data)
+    assert "Agent must have at least one capability" in str(exc.value)
+
+    # Test duplicate names
+    cap = AgentCapability(name="dup", type=CapabilityType.ATOMIC, description="D", inputs={}, outputs={})
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition(capabilities=[cap, cap], **valid_data)
+    assert "Duplicate capability names found" in str(exc.value)

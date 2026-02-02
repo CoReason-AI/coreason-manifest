@@ -10,6 +10,8 @@ The `AuditLog` structure provides a tamper-evident legal record of agent actions
 
 - **audit_id** (`UUID`): Unique identifier.
 - **trace_id** (`str`): Trace ID for OTel correlation.
+- **request_id** (`UUID`): The specific request ID associated with this audit entry.
+- **root_request_id** (`UUID`): The root request ID of the entire workflow, ensuring full causal traceability.
 - **timestamp** (`datetime`): ISO8601 timestamp.
 - **actor** (`str`): User ID or Agent Component ID.
 - **event_type** (`AuditEventType`): Type of event (`system_change`, `prediction`, `guardrail_trigger`).

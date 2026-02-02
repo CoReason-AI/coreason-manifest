@@ -1,0 +1,88 @@
+# Transport-Layer Specification
+
+This document formalizes the **Public API Contract** that any Coreason-compatible engine must expose. It moves the `coreason-manifest` from strictly defining internal data structures to also defining *how* the outside world talks to an agent.
+
+## Goal
+
+To ensure that any engine (Python, Go, Node.js) implementing this manifest is guaranteed to work with standard Coreason frontends by adhering to a strict "Wire Format".
+
+## Protocol: Server-Sent Events (SSE)
+
+We standardize on **Server-Sent Events (SSE)** over HTTP POST. This allows for real-time streaming of agent thoughts, partial outputs, and final results.
+
+### Endpoint
+
+The default endpoint path is:
+
+`POST /v1/assist`
+
+### Request Format
+
+The request body **MUST** be a JSON object adhering to the `AgentRequest` schema.
+
+*   **Schema:** `src/coreason_manifest/definitions/request.py`
+*   **Content-Type:** `application/json`
+
+Example:
+```json
+{
+  "request_id": "req-123",
+  "input": {
+    "query": "Hello world"
+  },
+  "stream": true
+}
+```
+
+### Response Format
+
+The response **MUST** be a stream of Server-Sent Events (`text/event-stream`).
+
+Each event in the stream corresponds to a `ServerSentEvent` object, which wraps a standard `CloudEvent`.
+
+*   **Schema:** `src/coreason_manifest/definitions/service.py`
+*   **Content-Type:** `text/event-stream`
+
+#### The `ServerSentEvent` Model
+
+The `ServerSentEvent` model defines the strict structure of each chunk in the stream.
+
+```python
+class ServerSentEvent(CoReasonBaseModel):
+    event: str          # The event type (e.g., 'ai.coreason.node.started')
+    data: str           # The payload. MUST be a JSON string of the CloudEvent.
+    id: Optional[str]   # The unique ID of the event.
+```
+
+**Critical Requirement:** The `data` field MUST be a JSON **string**. This is an SSE protocol requirement. The content of this string is the serialized `CloudEvent`.
+
+#### Example Stream
+
+```
+event: ai.coreason.node.started
+id: evt-001
+data: {"specversion": "1.0", "type": "ai.coreason.node.started", "source": "urn:node:1", "data": {"node_id": "1", "status": "RUNNING"}}
+
+event: ai.coreason.node.stream
+id: evt-002
+data: {"specversion": "1.0", "type": "ai.coreason.node.stream", "source": "urn:node:1", "data": {"chunk": "Hello"}}
+
+event: ai.coreason.node.completed
+id: evt-003
+data: {"specversion": "1.0", "type": "ai.coreason.node.completed", "source": "urn:node:1", "data": {"output_summary": "Hello"}}
+```
+
+## Service Contract & OpenAPI
+
+The `coreason-manifest` includes utility classes to generate the OpenAPI specification for this contract.
+
+### `ServiceContract`
+
+The `ServiceContract` class in `src/coreason_manifest/definitions/service.py` provides a `generate_openapi_path()` method. This method returns the standard OpenAPI definition for the `/assist` endpoint, ensuring that documentation and client generators are always in sync with the manifest.
+
+```python
+from coreason_manifest.definitions.service import ServiceContract
+
+contract = ServiceContract()
+openapi_path = contract.generate_openapi_path()
+```

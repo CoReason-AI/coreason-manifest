@@ -83,7 +83,15 @@ def test_agent_definition_legacy_key_rejection() -> None:
             "author": "Me",
             "created_at": "2023-01-01T00:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [
+            {
+                "name": "default",
+                "type": "atomic",
+                "description": "Default",
+                "inputs": {},
+                "outputs": {},
+            }
+        ],
         "topology": {  # Legacy key
             "nodes": [],
             "edges": [],

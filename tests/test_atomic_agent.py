@@ -19,7 +19,7 @@ def test_atomic_agent_without_topology_succeeds() -> None:
             "author": "Me",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
         "config": {
             # No nodes, edges, entry_point
             "model_config": {"model": "gpt-4", "temperature": 0.7},
@@ -48,7 +48,7 @@ def test_atomic_agent_with_skeleton_topology_succeeds() -> None:
             "author": "Me",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
         "config": {
             # Skeleton Topology
             "nodes": [{"id": "main", "type": "agent", "agent_name": "self"}],  # minimal node
@@ -78,7 +78,7 @@ def test_nodes_without_entry_point_fails() -> None:
             "author": "Me",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
         "config": {
             "nodes": [{"id": "main", "type": "agent", "agent_name": "self"}],
             "edges": [],
@@ -106,7 +106,7 @@ def test_atomic_agent_with_explicit_empty_nodes() -> None:
             "author": "Me",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
         "config": {
             "nodes": [],  # Explicit empty
             "edges": [],
@@ -144,7 +144,7 @@ def test_edges_without_nodes_integrity() -> None:
             "author": "Me",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
         "config": {
             "nodes": [],
             "edges": [{"source_node_id": "a", "target_node_id": "b"}],
@@ -176,7 +176,7 @@ def test_atomic_agent_serialization_excludes_defaults() -> None:
             "author": "Me",
             "created_at": "2023-10-27T10:00:00Z",
         },
-        "interface": {"inputs": {}, "outputs": {}},
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
         "config": {
             "model_config": {"model": "gpt-4", "temperature": 0.7},
             "system_prompt": "Atomic",

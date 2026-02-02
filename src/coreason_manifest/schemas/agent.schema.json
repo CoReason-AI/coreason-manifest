@@ -1,5 +1,62 @@
 {
   "$defs": {
+    "AgentCapability": {
+      "additionalProperties": false,
+      "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.",
+      "properties": {
+        "name": {
+          "description": "Unique name for this capability.",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/CapabilityType",
+          "description": "Interaction mode."
+        },
+        "description": {
+          "description": "What this mode does.",
+          "title": "Description",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "description": "Typed arguments the agent accepts (JSON Schema).",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": true,
+          "description": "Typed structure of the result.",
+          "title": "Outputs",
+          "type": "object"
+        },
+        "events": {
+          "description": "List of intermediate events this agent produces during execution.",
+          "items": {
+            "$ref": "#/$defs/EventSchema"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "injected_params": {
+          "description": "List of parameters injected by the system.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Injected Params",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "description",
+        "inputs",
+        "outputs"
+      ],
+      "title": "AgentCapability",
+      "type": "object"
+    },
     "AgentDependencies": {
       "additionalProperties": false,
       "description": "External dependencies for the Agent.\n\nAttributes:\n    tools: List of MCP tool requirements.\n    libraries: List of Python packages required (if code execution is allowed).",
@@ -29,38 +86,6 @@
         }
       },
       "title": "AgentDependencies",
-      "type": "object"
-    },
-    "AgentInterface": {
-      "additionalProperties": false,
-      "description": "Interface definition for the Agent.\n\nAttributes:\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.",
-      "properties": {
-        "inputs": {
-          "additionalProperties": true,
-          "description": "Typed arguments the agent accepts (JSON Schema).",
-          "title": "Inputs",
-          "type": "object"
-        },
-        "outputs": {
-          "additionalProperties": true,
-          "description": "Typed structure of the result.",
-          "title": "Outputs",
-          "type": "object"
-        },
-        "injected_params": {
-          "description": "List of parameters injected by the system.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Injected Params",
-          "type": "array"
-        }
-      },
-      "required": [
-        "inputs",
-        "outputs"
-      ],
-      "title": "AgentInterface",
       "type": "object"
     },
     "AgentMetadata": {
@@ -298,6 +323,15 @@
       "title": "AgentRuntimeConfig",
       "type": "object"
     },
+    "CapabilityType": {
+      "description": "The interaction mode for the capability.",
+      "enum": [
+        "atomic",
+        "streaming"
+      ],
+      "title": "CapabilityType",
+      "type": "string"
+    },
     "CouncilConfig": {
       "additionalProperties": false,
       "description": "Configuration for 'Architectural Triangulation'.\n\nAttributes:\n    strategy: The strategy for the council (e.g., 'consensus').\n    voters: List of agents or models that vote.",
@@ -354,6 +388,56 @@
       "title": "DataMappingStrategy",
       "type": "string"
     },
+    "DeploymentConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for hosting the agent.",
+      "properties": {
+        "protocol": {
+          "$ref": "#/$defs/Protocol",
+          "default": "http_sse"
+        },
+        "port": {
+          "default": 8000,
+          "description": "The port to bind to.",
+          "title": "Port",
+          "type": "integer"
+        },
+        "route_prefix": {
+          "default": "/assist",
+          "description": "URL prefix for the agent endpoints.",
+          "title": "Route Prefix",
+          "type": "string"
+        },
+        "scaling_min_instances": {
+          "default": 0,
+          "description": "Minimum number of replicas.",
+          "title": "Scaling Min Instances",
+          "type": "integer"
+        },
+        "scaling_max_instances": {
+          "default": 1,
+          "description": "Maximum number of replicas.",
+          "title": "Scaling Max Instances",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 60,
+          "description": "Request timeout.",
+          "title": "Timeout Seconds",
+          "type": "integer"
+        },
+        "env_vars": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Static environment variables.",
+          "title": "Env Vars",
+          "type": "object"
+        }
+      },
+      "title": "DeploymentConfig",
+      "type": "object"
+    },
     "Edge": {
       "additionalProperties": false,
       "description": "Represents a connection between two nodes.\n\nAttributes:\n    source_node_id: The ID of the source node.\n    target_node_id: The ID of the target node.\n    condition: Optional Python expression for conditional branching.",
@@ -387,6 +471,29 @@
         "target_node_id"
       ],
       "title": "Edge",
+      "type": "object"
+    },
+    "EventSchema": {
+      "additionalProperties": false,
+      "description": "Defines the structure of an intermediate event emitted by the agent.",
+      "properties": {
+        "name": {
+          "description": "Event name (e.g., 'SEARCH_PROGRESS').",
+          "title": "Name",
+          "type": "string"
+        },
+        "data_schema": {
+          "additionalProperties": true,
+          "description": "JSON Schema of the event payload.",
+          "title": "Data Schema",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "data_schema"
+      ],
+      "title": "EventSchema",
       "type": "object"
     },
     "HumanNode": {
@@ -764,6 +871,16 @@
       "title": "PolicyConfig",
       "type": "object"
     },
+    "Protocol": {
+      "description": "The communication protocol used to serve the agent.",
+      "enum": [
+        "http_sse",
+        "websocket",
+        "grpc"
+      ],
+      "title": "Protocol",
+      "type": "string"
+    },
     "RecipeNode": {
       "additionalProperties": false,
       "description": "A node that executes another Recipe as a sub-graph.\n\nAttributes:\n    type: The type of the node (must be 'recipe').\n    recipe_id: The ID of the recipe to execute.\n    input_mapping: How parent state maps to child inputs (parent_key -> child_key).\n    output_mapping: How child result maps back to parent state (child_key -> parent_key).",
@@ -985,8 +1102,13 @@
     "metadata": {
       "$ref": "#/$defs/AgentMetadata"
     },
-    "interface": {
-      "$ref": "#/$defs/AgentInterface"
+    "capabilities": {
+      "description": "List of supported capabilities.",
+      "items": {
+        "$ref": "#/$defs/AgentCapability"
+      },
+      "title": "Capabilities",
+      "type": "array"
     },
     "config": {
       "$ref": "#/$defs/AgentRuntimeConfig"
@@ -1005,6 +1127,18 @@
       ],
       "default": null,
       "description": "Governance policy configuration."
+    },
+    "deployment": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DeploymentConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Runtime deployment settings"
     },
     "observability": {
       "anyOf": [
@@ -1041,7 +1175,7 @@
   },
   "required": [
     "metadata",
-    "interface",
+    "capabilities",
     "config",
     "dependencies",
     "integrity_hash"
