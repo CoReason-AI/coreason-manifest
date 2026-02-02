@@ -42,10 +42,14 @@ from .presentation import (
     UserErrorBlock,
 )
 from .request import AgentRequest
+from .service import DEFAULT_ENDPOINT_PATH, ServerSentEvent, ServiceContract
 from .session import Interaction, SessionState
 
 __all__ = [
     "AgentRequest",
+    "ServerSentEvent",
+    "ServiceContract",
+    "DEFAULT_ENDPOINT_PATH",
     "AgentRuntimeConfig",
     "AgentDefinition",
     "AgentInterface",
