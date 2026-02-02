@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .definitions.agent import AgentDefinition, Persona
+from .definitions.agent import AgentDefinition, AgentStatus, Persona
 from .definitions.audit import AuditLog
 from .definitions.events import (
     ArtifactGenerated,
@@ -55,6 +55,7 @@ from .recipes import RecipeManifest
 
 __all__ = [
     "AgentDefinition",
+    "AgentStatus",
     "Persona",
     "Topology",
     "GraphTopology",
