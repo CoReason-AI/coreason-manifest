@@ -34,6 +34,7 @@ from pydantic import (
 from typing_extensions import Annotated
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -379,6 +380,9 @@ class AgentDefinition(CoReasonBaseModel):
     config: AgentRuntimeConfig
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
+    deployment: Optional[DeploymentConfig] = Field(
+        None, description="Runtime deployment settings"
+    )
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
     custom_metadata: Optional[Dict[str, Any]] = Field(
         None, description="Container for arbitrary metadata extensions without breaking validation."
