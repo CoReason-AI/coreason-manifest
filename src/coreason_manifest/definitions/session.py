@@ -9,13 +9,14 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.events import GraphEvent
+from coreason_manifest.definitions.message import MultiModalInput
 
 
 class Interaction(CoReasonBaseModel):
@@ -27,7 +28,7 @@ class Interaction(CoReasonBaseModel):
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of the interaction (UTC)"
     )
-    input: Dict[str, Any] = Field(..., description="The raw input payload")
+    input: Union[MultiModalInput, Dict[str, Any]] = Field(..., description="The raw input payload")
     output: Dict[str, Any] = Field(..., description="The final output payload")
     events: List[GraphEvent] = Field(
         default_factory=list, description="A log of intermediate events emitted during this turn"

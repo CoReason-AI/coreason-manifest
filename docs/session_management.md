@@ -20,11 +20,16 @@ The `Interaction` model is immutable (`frozen=True`) to ensure history integrity
 
 ```python
 from coreason_manifest.definitions.session import Interaction
+from coreason_manifest.definitions.message import MultiModalInput, ContentPart
 from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
 
-# Example: Creating an interaction
+# Example: Creating an interaction with strictly typed input
+input_payload = MultiModalInput(
+    parts=[ContentPart(text="Hello, world!")]
+)
+
 interaction = Interaction(
-    input={"role": "user", "content": "Hello, world!"},
+    input=input_payload,
     output={"role": "assistant", "content": "Hi there!"},
     events=[
         GraphEventNodeInit(
