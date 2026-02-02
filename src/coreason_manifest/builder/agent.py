@@ -10,7 +10,7 @@
 
 import hashlib
 from datetime import datetime, timezone
-from typing import Optional, Self
+from typing import Any, Optional, Self
 from uuid import uuid4
 
 from coreason_manifest.builder.capability import TypedCapability
@@ -48,12 +48,12 @@ class AgentBuilder:
         self.version = version
         self.author = author
 
-        self._capabilities: list[TypedCapability] = []
+        self._capabilities: list[TypedCapability[Any, Any]] = []
         self._system_prompt: Optional[str] = None
         self._model_name: str = "gpt-4o"  # Default model
         self._temperature: float = 0.0
 
-    def with_capability(self, cap: TypedCapability) -> Self:
+    def with_capability(self, cap: TypedCapability[Any, Any]) -> Self:
         """Add a typed capability to the agent.
 
         Args:
@@ -122,7 +122,7 @@ class AgentBuilder:
             nodes=[],
             edges=[],
             entry_point=None,
-            model_config=model_config,
+            llm_config=model_config,
             system_prompt=self._system_prompt,
         )
 

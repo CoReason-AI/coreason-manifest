@@ -59,13 +59,7 @@ def test_full_agent_build() -> None:
     )
 
     builder = AgentBuilder(name="SearchAgent", author="Tester")
-    agent = (
-        builder
-        .with_capability(cap)
-        .with_system_prompt("You are a search agent.")
-        .with_model("gpt-4-turbo")
-        .build()
-    )
+    agent = builder.with_capability(cap).with_system_prompt("You are a search agent.").with_model("gpt-4-turbo").build()
 
     assert isinstance(agent, AgentDefinition)
     assert agent.metadata.name == "SearchAgent"
