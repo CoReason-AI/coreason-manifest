@@ -48,6 +48,9 @@ class GovernanceConfig(CoReasonBaseModel):
         True,
         description="If an agent uses a CRITICAL tool, agent.metadata.requires_auth must be True.",
     )
+    allow_inline_tools: bool = Field(
+        True, description="Whether to allow inline tool definitions (which lack risk scoring)."
+    )
 
 
 class ComplianceViolation(CoReasonBaseModel):
@@ -115,6 +118,14 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
 
     for tool in agent.dependencies.tools:
         if isinstance(tool, InlineToolDefinition):
+            if not config.allow_inline_tools:
+                violations.append(
+                    ComplianceViolation(
+                        rule="inline_tool_restriction",
+                        message="Inline tools are not allowed by policy.",
+                        component_id=tool.name,
+                    )
+                )
             # Inline tools don't have URI or risk level in current schema
             continue
 
@@ -124,8 +135,21 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                 try:
                     parsed_uri = urlparse(str(tool.uri))
                     hostname = parsed_uri.hostname
-                    # Guard against None (e.g. mailto:)
-                    if hostname and hostname not in config.allowed_domains:
+
+                    if not hostname:
+                        # If allowed_domains is set, we require a hostname to validate against it.
+                        # Schemes like file:, mailto:, data: have no hostname and are blocked.
+                        violations.append(
+                            ComplianceViolation(
+                                rule="domain_restriction",
+                                message=(
+                                    f"Tool URI '{tool.uri}' has no hostname and cannot be validated "
+                                    "against allowed domains."
+                                ),
+                                component_id=str(tool.uri),
+                            )
+                        )
+                    elif hostname not in config.allowed_domains:
                         violations.append(
                             ComplianceViolation(
                                 rule="domain_restriction",
