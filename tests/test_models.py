@@ -259,12 +259,14 @@ def test_agent_config_system_prompt() -> None:
 
     # In the valid_data setup above, nodes=[], so it is an Atomic Agent.
     # llm_config doesn't have system_prompt set.
-    # So this should fail now.
+    # So this should fail now IF published.
+    valid_data["status"] = "published"
     with pytest.raises(ValidationError) as exc:
         AgentDefinition(**valid_data)
     assert "Atomic Agents require a system_prompt" in str(exc.value)
 
     # But if we add it to model_config, it should pass
+    del valid_data["status"]
     valid_data["config"]["model_config"]["system_prompt"] = "Model Prompt"
     agent = AgentDefinition(**valid_data)
     assert agent.config.system_prompt is None

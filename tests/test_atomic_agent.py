@@ -66,9 +66,9 @@ def test_atomic_agent_with_skeleton_topology_succeeds() -> None:
     assert agent.config.entry_point == "main"
 
 
-def test_nodes_without_entry_point_fails() -> None:
+def test_published_nodes_without_entry_point_fails() -> None:
     """
-    Test that if nodes are provided, entry_point is mandatory.
+    Test that if nodes are provided, entry_point is mandatory when published.
     """
     data = {
         "metadata": {
@@ -86,12 +86,41 @@ def test_nodes_without_entry_point_fails() -> None:
             "model_config": {"model": "gpt-4", "temperature": 0.7},
         },
         "dependencies": {},
+        "status": "published",
         "integrity_hash": "a" * 64,
     }
 
     with pytest.raises(ValidationError) as exc:
         AgentDefinition(**data)
     assert "Graph execution requires an 'entry_point'" in str(exc.value)
+
+
+def test_draft_nodes_without_entry_point_succeeds() -> None:
+    """
+    Test that nodes without entry_point is valid in DRAFT mode.
+    """
+    data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Draft Agent",
+            "author": "Me",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
+        "config": {
+            "nodes": [{"id": "main", "type": "agent", "agent_name": "self"}],
+            "edges": [],
+            # entry_point missing
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+        },
+        "dependencies": {},
+        "status": "draft",
+    }
+
+    agent = AgentDefinition(**data)
+    assert len(agent.config.nodes) == 1
+    assert agent.config.entry_point is None
 
 
 def test_atomic_agent_with_explicit_empty_nodes() -> None:
