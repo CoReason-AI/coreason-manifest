@@ -77,3 +77,15 @@ def test_full_agent_build() -> None:
     assert agent.config.llm_config.model == "gpt-4-turbo"
     assert agent.config.llm_config.system_prompt == "You are a search agent."
     assert agent.integrity_hash is not None
+
+
+def test_builder_set_status() -> None:
+    """Test that set_status correctly updates the builder status."""
+    builder = AgentBuilder(name="StatusAgent")
+    assert builder._status == AgentStatus.DRAFT
+
+    builder.set_status(AgentStatus.PUBLISHED)
+    assert builder._status == AgentStatus.PUBLISHED
+
+    builder.set_status(AgentStatus.DRAFT)
+    assert builder._status == AgentStatus.DRAFT
