@@ -9,4 +9,5 @@ This is the documentation for the coreason_manifest project.
 *   [Recipe Manifests](recipes.md): Learn about defining executable workflows and graphs.
 *   [Session Management](session_management.md): Decoupling execution from memory with standardized Session and Interaction models.
 *   [Agent Request Envelope](agent_request_envelope.md): The standard envelope for agent invocations and distributed tracing.
+*   [Request Lineage](request_lineage.md): The unified approach to lineage across requests, traces, and audit logs.
 *   [Observability](observability.md): Details on tracing, logging, and metrics.

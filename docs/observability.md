@@ -100,5 +100,6 @@ Legacy `visual_metadata` and `visual_cue` fields are moved to CloudEvent extensi
 
 The `ReasoningTrace` object has been enhanced to better support complex reasoning engines:
 
+*   **Request Lineage**: `ReasoningTrace` now strictly enforces lineage via `request_id` (required), `root_request_id`, and `parent_request_id` fields. This ensures that every trace can be inextricably linked back to the user request that triggered it.
 *   **Metadata**: A flexible `metadata` dictionary is available on `ReasoningTrace` to store arbitrary execution context (e.g., `execution_path`, strategies used) without requiring schema changes.
 *   **Simplified Steps**: Use `GenAIOperation.thought("content")` to quickly create reasoning steps with auto-generated IDs and default provider settings.
