@@ -54,6 +54,17 @@ The `AuditLog` provides a tamper-evident record. To ensure that an audit entry c
 
 By including these UUIDs in the `integrity_hash`, we ensure that the causal link cannot be altered without breaking the cryptographic chain of custody.
 
+## 4. Interaction Lineage
+
+The `Interaction` model captures a single turn in a session. While `AgentRequest` drives the execution, the `Interaction` stores the *persistent history* of that execution in the `SessionState`.
+
+### Fields
+The `Interaction` uses a dedicated `LineageMetadata` object:
+-   `root_request_id`: The ID of the original request that started the entire chain.
+-   `parent_interaction_id`: The ID of the specific interaction that triggered this one.
+
+**Note:** Unlike `AgentRequest` which strictly enforces `UUID`s, the `Interaction` lineage uses `str` to ensure interoperability with external systems (e.g., AWS Request IDs, Sentient ULIDs) that may not conform to the UUID standard.
+
 ## Summary
 
 | Model | Role | Lineage Enforcement |
@@ -61,3 +72,4 @@ By including these UUIDs in the `integrity_hash`, we ensure that the causal link
 | `AgentRequest` | **Input** Envelope | Auto-roots; Forbids Parent without Root. |
 | `ReasoningTrace` | **Process** Record | Auto-roots; Forbids Parent without Root. |
 | `AuditLog` | **Output** Record | Mandatory fields; Hashed for integrity. |
+| `Interaction` | **Session** History | Optional `LineageMetadata`; Uses `str` for compatibility. |

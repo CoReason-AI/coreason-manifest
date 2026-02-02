@@ -15,11 +15,12 @@ An `Interaction` represents a single "turn" or request/response cycle in a conve
 *   **Input/Output:** The raw payloads passed to and from the agent.
 *   **Events:** A strictly typed log of `GraphEvent`s emitted during execution (e.g., node start, stream, completion).
 *   **Metadata:** Operational data like latency, cost, and model details.
+*   **Lineage:** Chain of Custody metadata linking this interaction to its trigger.
 
 The `Interaction` model is immutable (`frozen=True`) to ensure history integrity.
 
 ```python
-from coreason_manifest.definitions.session import Interaction
+from coreason_manifest.definitions.session import Interaction, LineageMetadata
 from coreason_manifest.definitions.message import MultiModalInput, ContentPart
 from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
 
@@ -40,7 +41,11 @@ interaction = Interaction(
             visual_metadata={"color": "blue"}
         )
     ],
-    meta={"latency_ms": 150}
+    meta={"latency_ms": 150},
+    lineage=LineageMetadata(
+        root_request_id="req-123",
+        parent_interaction_id="int-456"
+    )
 )
 ```
 
