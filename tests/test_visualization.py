@@ -79,3 +79,40 @@ def test_graph_agent_mermaid() -> None:
 
     # Check Entry Point
     assert "Start((Start)) --> node1" in mermaid
+
+
+def test_mermaid_coverage_defaults() -> None:
+    """Test Mermaid export for node types that fall into default styling (e.g. RecipeNode)."""
+    data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Coverage Agent",
+            "author": "Me",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
+        "config": {
+            "nodes": [
+                {
+                    "id": "node_r",
+                    "type": "recipe",
+                    "recipe_id": "other_recipe",
+                    "input_mapping": {},
+                    "output_mapping": {},
+                    "visual": {"label": "Sub Recipe"},
+                }
+            ],
+            "edges": [],
+            "entry_point": "node_r",
+            "model_config": {"model": "gpt-4", "temperature": 0.7},
+        },
+        "dependencies": {},
+    }
+
+    agent = AgentDefinition(**data)
+    mermaid = agent.to_mermaid()
+
+    # Should use default styling
+    # default shape is [ ] and class is default
+    assert 'node_r["Sub Recipe"]:::default' in mermaid
