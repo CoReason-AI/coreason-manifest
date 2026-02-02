@@ -23,6 +23,15 @@ from coreason_manifest.definitions.topology import RuntimeVisualMetadata
 T = TypeVar("T")
 
 
+class EventContentType(str, Enum):
+    """MIME content types for Coreason events."""
+
+    JSON = "application/json"
+    STREAM = "application/vnd.coreason.stream+json"
+    ERROR = "application/vnd.coreason.error+json"
+    ARTIFACT = "application/vnd.coreason.artifact+json"
+
+
 @runtime_checkable
 class CloudEventSource(Protocol):
     def as_cloud_event_payload(self) -> Any: ...
@@ -40,7 +49,9 @@ class CloudEvent(CoReasonBaseModel, Generic[T]):
     time: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of when the occurrence happened"
     )
-    datacontenttype: Literal["application/json"] = "application/json"
+    datacontenttype: Union[EventContentType, str] = Field(
+        default=EventContentType.JSON, description="MIME content type of data"
+    )
 
     data: Optional[T] = Field(None, description="The event payload")
 
@@ -393,6 +404,14 @@ def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent[Any]:
     ce_type = ce_type_map.get(event.event_type, f"ai.coreason.legacy.{event.event_type.lower()}")
     ce_source = f"urn:node:{event.node_id}"
 
+    # Determine Content-Type based on event type
+    content_type_map = {
+        "NODE_STREAM": EventContentType.STREAM,
+        "ERROR": EventContentType.ERROR,
+        "ARTIFACT_GENERATED": EventContentType.ARTIFACT,
+    }
+    content_type = content_type_map.get(event.event_type, EventContentType.JSON)
+
     data: Any = None
 
     # event.payload is already a strictly typed Pydantic model (from GraphEvent union).
@@ -434,6 +453,7 @@ def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent[Any]:
         type=ce_type,
         source=ce_source,
         time=datetime.fromtimestamp(event.timestamp, timezone.utc),
+        datacontenttype=content_type,
         data=data,
         **extensions,
     )

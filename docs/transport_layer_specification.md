@@ -64,6 +64,8 @@ Each event in the stream corresponds to a `ServerSentEvent` object, which wraps 
 
 The `ServerSentEvent` model defines the strict structure of each chunk in the stream.
 
+**Content-Type Discriminators:** The payload within `data` (the CloudEvent) includes a `datacontenttype` field. Consumers should use this MIME type to determine how to parse or render the event (e.g., `application/vnd.coreason.stream+json` for token streams). See [Event Content-Type Discriminators](event_content_types.md) for details.
+
 ```python
 class ServerSentEvent(CoReasonBaseModel):
     event: str          # The event type (e.g., 'ai.coreason.node.started')
@@ -78,15 +80,15 @@ class ServerSentEvent(CoReasonBaseModel):
 ```
 event: ai.coreason.node.started
 id: evt-001
-data: {"specversion": "1.0", "type": "ai.coreason.node.started", "source": "urn:node:1", "data": {"node_id": "1", "status": "RUNNING"}}
+data: {"specversion": "1.0", "type": "ai.coreason.node.started", "source": "urn:node:1", "datacontenttype": "application/json", "data": {"node_id": "1", "status": "RUNNING"}}
 
 event: ai.coreason.node.stream
 id: evt-002
-data: {"specversion": "1.0", "type": "ai.coreason.node.stream", "source": "urn:node:1", "data": {"chunk": "Hello"}}
+data: {"specversion": "1.0", "type": "ai.coreason.node.stream", "source": "urn:node:1", "datacontenttype": "application/vnd.coreason.stream+json", "data": {"chunk": "Hello"}}
 
 event: ai.coreason.node.completed
 id: evt-003
-data: {"specversion": "1.0", "type": "ai.coreason.node.completed", "source": "urn:node:1", "data": {"output_summary": "Hello"}}
+data: {"specversion": "1.0", "type": "ai.coreason.node.completed", "source": "urn:node:1", "datacontenttype": "application/json", "data": {"output_summary": "Hello"}}
 ```
 
 ## Service Contract & OpenAPI

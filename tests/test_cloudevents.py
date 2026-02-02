@@ -16,11 +16,13 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.events import (
+    ArtifactGenerated,
     CloudEvent,
     GenAICompletion,
     GenAIRequest,
     GenAISemantics,
     GenAIUsage,
+    GraphEventArtifactGenerated,
     GraphEventError,
     GraphEventNodeDone,
     GraphEventNodeInit,
@@ -165,6 +167,7 @@ def test_migration_node_start() -> None:
     assert cloud_event.source == "urn:node:node-1"
     # assert cloud_event.time.timestamp() == 1700000000.0
     assert cloud_event.time == datetime.fromtimestamp(1700000000.0, timezone.utc)
+    assert cloud_event.datacontenttype == "application/json"
 
     # Check Standardized Payload
     assert isinstance(cloud_event.data, StandardizedNodeStarted)
@@ -197,6 +200,7 @@ def test_migration_node_stream() -> None:
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
 
     assert cloud_event.type == "ai.coreason.node.stream"
+    assert cloud_event.datacontenttype == "application/vnd.coreason.stream+json"
     assert isinstance(cloud_event.data, StandardizedNodeStream)
     assert cloud_event.data.gen_ai is not None
     assert cloud_event.data.gen_ai.completion is not None
@@ -220,6 +224,7 @@ def test_migration_node_completed() -> None:
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
 
     assert cloud_event.type == "ai.coreason.node.completed"
+    assert cloud_event.datacontenttype == "application/json"
     assert isinstance(cloud_event.data, StandardizedNodeCompleted)
     assert cloud_event.data.output_summary == "Done."
 
@@ -380,8 +385,31 @@ def test_migration_error_event() -> None:
     cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
 
     assert cloud_event.type == "ai.coreason.legacy.error"
+    assert cloud_event.datacontenttype == "application/vnd.coreason.error+json"
     assert isinstance(cloud_event.data, WorkflowError)
     assert cloud_event.data.error_message == "Oops"
 
     dump = cloud_event.model_dump(by_alias=True)
     assert dump["com_coreason_ui_cue"] == "error"
+
+
+def test_migration_artifact_generated() -> None:
+    """Test migration of ARTIFACT_GENERATED event."""
+    legacy_event = GraphEventArtifactGenerated(
+        event_type="ARTIFACT_GENERATED",
+        run_id="run-1",
+        node_id="node-1",
+        timestamp=1700000000.0,
+        payload={
+            "artifact_type": "PDF",
+            "url": "http://example.com/doc.pdf",
+            "node_id": "node-1",
+        },
+        visual_metadata={"animation": "artifact"},
+    )
+    cloud_event = migrate_graph_event_to_cloud_event(legacy_event)
+
+    assert cloud_event.type == "ai.coreason.legacy.artifact_generated"
+    assert cloud_event.datacontenttype == "application/vnd.coreason.artifact+json"
+    assert isinstance(cloud_event.data, ArtifactGenerated)
+    assert cloud_event.data.url == "http://example.com/doc.pdf"
