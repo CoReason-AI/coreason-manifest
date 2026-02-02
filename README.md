@@ -51,7 +51,8 @@ from datetime import datetime, timezone
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
-    AgentInterface,
+    AgentCapability,
+    CapabilityType,
     AgentRuntimeConfig,
     ModelConfig,
     AgentDependencies,
@@ -74,10 +75,15 @@ metadata = AgentMetadata(
 # 2. Instantiate Agent
 agent = AgentDefinition(
     metadata=metadata,
-    interface=AgentInterface(
-        inputs={"topic": {"type": "string"}},
-        outputs={"summary": {"type": "string"}}
-    ),
+    capabilities=[
+        AgentCapability(
+            name="research",
+            type=CapabilityType.ATOMIC,
+            description="Deep research on a topic.",
+            inputs={"topic": {"type": "string"}},
+            outputs={"summary": {"type": "string"}}
+        )
+    ],
     config=AgentRuntimeConfig(
         model_config=ModelConfig(
             model="gpt-4",

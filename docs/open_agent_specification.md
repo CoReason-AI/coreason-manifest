@@ -24,8 +24,9 @@ An `AgentDefinition` consists of the following sections:
     *   **Timestamps**: `created_at`.
     *   **Auth**: `requires_auth` flag for user context injection.
 
-2.  **Interface (`AgentInterface`)**:
-    *   Defines the "contract" of the agent.
+2.  **Capabilities (`List[AgentCapability]`)**:
+    *   Defines the modes of interaction for the agent (e.g., "Atomic", "Streaming").
+    *   Each capability has a unique `name`, `type`, and `description`.
     *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas).
     *   `injected_params` lists system-injected values (e.g., `user_context`).
 
@@ -105,7 +106,8 @@ from datetime import datetime, timezone
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     AgentMetadata,
-    AgentInterface,
+    AgentCapability,
+    CapabilityType,
     AgentRuntimeConfig,
     ModelConfig,
     AgentDependencies,
@@ -124,11 +126,16 @@ agent = AgentDefinition(
         created_at=datetime.now(timezone.utc)
     ),
 
-    # 2. Interface
-    interface=AgentInterface(
-        inputs={"location": {"type": "string"}},
-        outputs={"forecast": {"type": "string"}}
-    ),
+    # 2. Capabilities
+    capabilities=[
+        AgentCapability(
+            name="forecast",
+            type=CapabilityType.ATOMIC,
+            description="Get the weather forecast.",
+            inputs={"location": {"type": "string"}},
+            outputs={"forecast": {"type": "string"}}
+        )
+    ],
 
     # 3. Configuration (Atomic)
     config=AgentRuntimeConfig(
