@@ -135,6 +135,13 @@ class CapabilityType(str, Enum):
     STREAMING = "streaming"
 
 
+class DeliveryMode(str, Enum):
+    """The delivery mechanism for the capability response."""
+
+    REQUEST_RESPONSE = "request_response"
+    SERVER_SENT_EVENTS = "server_sent_events"
+
+
 class AgentCapability(CoReasonBaseModel):
     """Defines a specific mode of interaction for the agent.
 
@@ -146,6 +153,7 @@ class AgentCapability(CoReasonBaseModel):
         outputs: Typed structure of the result.
         events: List of intermediate events this agent produces during execution.
         injected_params: List of parameters injected by the system.
+        delivery_mode: The mechanism used to deliver the response.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -156,6 +164,9 @@ class AgentCapability(CoReasonBaseModel):
 
     inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
     outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
+    delivery_mode: DeliveryMode = Field(
+        default=DeliveryMode.REQUEST_RESPONSE, description="The mechanism used to deliver the response."
+    )
     events: List[EventSchema] = Field(
         default_factory=list, description="List of intermediate events this agent produces during execution."
     )

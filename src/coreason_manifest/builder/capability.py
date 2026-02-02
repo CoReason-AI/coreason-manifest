@@ -12,7 +12,7 @@ from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel
 
-from coreason_manifest.definitions.agent import AgentCapability, CapabilityType
+from coreason_manifest.definitions.agent import AgentCapability, CapabilityType, DeliveryMode
 
 InputT = TypeVar("InputT", bound=BaseModel)
 OutputT = TypeVar("OutputT", bound=BaseModel)
@@ -33,6 +33,7 @@ class TypedCapability(Generic[InputT, OutputT]):
         output_model: type[OutputT],
         type: CapabilityType = CapabilityType.ATOMIC,
         injected_params: Optional[list[str]] = None,
+        delivery_mode: DeliveryMode = DeliveryMode.REQUEST_RESPONSE,
     ) -> None:
         """Initialize a TypedCapability.
 
@@ -43,6 +44,7 @@ class TypedCapability(Generic[InputT, OutputT]):
             output_model: The Pydantic model defining the output structure.
             type: Interaction mode (default: ATOMIC).
             injected_params: List of parameters injected by the system (optional).
+            delivery_mode: The mechanism used to deliver the response.
         """
         self.name = name
         self.description = description
@@ -50,6 +52,7 @@ class TypedCapability(Generic[InputT, OutputT]):
         self.output_model = output_model
         self.type = type
         self.injected_params = injected_params or []
+        self.delivery_mode = delivery_mode
 
     def to_definition(self) -> AgentCapability:
         """Compile the typed capability into a strict AgentCapability definition.
@@ -64,4 +67,5 @@ class TypedCapability(Generic[InputT, OutputT]):
             inputs=self.input_model.model_json_schema(),
             outputs=self.output_model.model_json_schema(),
             injected_params=self.injected_params,
+            delivery_mode=self.delivery_mode,
         )

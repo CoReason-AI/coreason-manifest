@@ -2,7 +2,7 @@
   "$defs": {
     "AgentCapability": {
       "additionalProperties": false,
-      "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.",
+      "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.\n    delivery_mode: The mechanism used to deliver the response.",
       "properties": {
         "name": {
           "description": "Unique name for this capability.",
@@ -29,6 +29,11 @@
           "description": "Typed structure of the result.",
           "title": "Outputs",
           "type": "object"
+        },
+        "delivery_mode": {
+          "$ref": "#/$defs/DeliveryMode",
+          "default": "request_response",
+          "description": "The mechanism used to deliver the response."
         },
         "events": {
           "description": "List of intermediate events this agent produces during execution.",
@@ -386,6 +391,15 @@
         "literal"
       ],
       "title": "DataMappingStrategy",
+      "type": "string"
+    },
+    "DeliveryMode": {
+      "description": "The delivery mechanism for the capability response.",
+      "enum": [
+        "request_response",
+        "server_sent_events"
+      ],
+      "title": "DeliveryMode",
       "type": "string"
     },
     "DeploymentConfig": {
