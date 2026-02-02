@@ -445,3 +445,63 @@ class AgentDefinition(CoReasonBaseModel):
         if self.status == AgentStatus.PUBLISHED:
             validate_edge_integrity(self.config.nodes, self.config.edges)
         return self
+
+    def to_mermaid(self) -> str:
+        """Generate a Mermaid.js graph representation of the agent.
+
+        Returns:
+            A string containing the Mermaid graph definition.
+        """
+        if len(self.config.nodes) == 0:
+            # Atomic Agent
+            return f'graph TD\nStart((Start)) --> Agent["{self.metadata.name}"]'
+
+        # Graph Agent
+        lines = ["graph TD"]
+
+        # Styling Definitions
+        lines.append("classDef agent fill:#e1f5fe,stroke:#01579b,stroke-width:2px;")
+        lines.append("classDef logic fill:#fff3e0,stroke:#e65100,stroke-width:2px;")
+        lines.append("classDef human fill:#fce4ec,stroke:#880e4f,stroke-width:2px;")
+        lines.append("classDef default fill:#f5f5f5,stroke:#333,stroke-width:1px;")
+
+        # Process Nodes
+        for node in self.config.nodes:
+            # Label: Use visual label if exists, else ID
+            label = node.visual.label if (node.visual and node.visual.label) else node.id
+            # Escape double quotes for Mermaid strings
+            safe_label = label.replace('"', "'")
+
+            # Determine Shape and Class
+            if node.type == "agent":
+                # Rect [...]
+                shape_start, shape_end = "[", "]"
+                css_class = "agent"
+            elif node.type == "logic":
+                # Rhombus {...}
+                shape_start, shape_end = "{", "}"
+                css_class = "logic"
+            elif node.type == "human":
+                # Round Rect (...)
+                shape_start, shape_end = "(", ")"
+                css_class = "human"
+            else:
+                # Default
+                shape_start, shape_end = "[", "]"
+                css_class = "default"
+
+            lines.append(f'{node.id}{shape_start}"{safe_label}"{shape_end}:::{css_class}')
+
+        # Process Edges
+        for edge in self.config.edges:
+            if edge.condition:
+                safe_cond = edge.condition.replace('"', "'")
+                lines.append(f'{edge.source_node_id} -- "{safe_cond}" --> {edge.target_node_id}')
+            else:
+                lines.append(f"{edge.source_node_id} --> {edge.target_node_id}")
+
+        # Entry Point Indicator
+        if self.config.entry_point:
+            lines.append(f"Start((Start)) --> {self.config.entry_point}")
+
+        return "\n".join(lines)
