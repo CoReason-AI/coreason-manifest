@@ -20,7 +20,10 @@ from coreason_manifest.definitions.agent import (
     AgentMetadata,
     AgentRuntimeConfig,
     ModelConfig,
+    ToolRequirement,
+    ToolRiskLevel,
 )
+from coreason_manifest.definitions.topology import Edge, Node
 
 
 class AgentBuilder:
@@ -52,6 +55,11 @@ class AgentBuilder:
         self._system_prompt: Optional[str] = None
         self._model_name: str = "gpt-4o"  # Default model
         self._temperature: float = 0.0
+
+        self._nodes: list[Node] = []
+        self._edges: list[Edge] = []
+        self._entry_point: Optional[str] = None
+        self._tools: list[ToolRequirement] = []
 
     def with_capability(self, cap: TypedCapability[Any, Any]) -> Self:
         """Add a typed capability to the agent.
@@ -91,6 +99,36 @@ class AgentBuilder:
         self._temperature = temperature
         return self
 
+    def with_tool_requirement(
+        self,
+        uri: str,
+        hash: str,
+        scopes: list[str],
+        risk_level: ToolRiskLevel = ToolRiskLevel.STANDARD,
+    ) -> Self:
+        """Add a required MCP tool to the agent dependencies."""
+        # Construct strict ToolRequirement immediately to validate inputs early
+        req = ToolRequirement(uri=uri, hash=hash, scopes=scopes, risk_level=risk_level)
+        self._tools.append(req)
+        return self
+
+    def with_node(self, node: Node) -> Self:
+        """Add a processing node to the agent graph."""
+        self._nodes.append(node)
+        return self
+
+    def with_edge(self, source: str, target: str, condition: Optional[str] = None) -> Self:
+        """Add a control flow edge between nodes."""
+        # Construct strict Edge immediately
+        edge = Edge(source_node_id=source, target_node_id=target, condition=condition)
+        self._edges.append(edge)
+        return self
+
+    def set_entry_point(self, node_id: str) -> Self:
+        """Define the starting node of the graph."""
+        self._entry_point = node_id
+        return self
+
     def build(self) -> AgentDefinition:
         """Construct the final immutable AgentDefinition.
 
@@ -117,19 +155,23 @@ class AgentBuilder:
             system_prompt=self._system_prompt,
         )
 
-        # Atomic Agent configuration (no nodes/edges)
         config = AgentRuntimeConfig(
-            nodes=[],
-            edges=[],
-            entry_point=None,
+            nodes=self._nodes,
+            edges=self._edges,
+            entry_point=self._entry_point,
             llm_config=model_config,
             system_prompt=self._system_prompt,
+        )
+
+        dependencies = AgentDependencies(
+            tools=self._tools,
+            libraries=(),
         )
 
         return AgentDefinition(
             metadata=metadata,
             capabilities=[cap.to_definition() for cap in self._capabilities],
             config=config,
-            dependencies=AgentDependencies(),
+            dependencies=dependencies,
             integrity_hash=integrity_hash,
         )

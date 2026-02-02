@@ -72,6 +72,37 @@ agent_definition = (
 print(agent_definition.to_json(indent=2))
 ```
 
+### 4. Define Graph Topology (Optional)
+
+You can define complex workflows using Nodes and Edges.
+
+```python
+from coreason_manifest.definitions.topology import LogicNode
+
+node_a = LogicNode(id="start", type="logic", code="print('Start')")
+node_b = LogicNode(id="end", type="logic", code="print('End')")
+
+builder.with_node(node_a)
+builder.with_node(node_b)
+builder.with_edge("start", "end")
+builder.set_entry_point("start")
+```
+
+### 5. Add External Tools (Optional)
+
+You can declare dependencies on external MCP tools.
+
+```python
+from coreason_manifest.definitions.agent import ToolRiskLevel
+
+builder.with_tool_requirement(
+    uri="mcp://google/search",
+    hash="a" * 64,  # Valid SHA256
+    scopes=["read"],
+    risk_level=ToolRiskLevel.STANDARD
+)
+```
+
 ## Key Components
 
 ### `TypedCapability[InputT, OutputT]`
@@ -87,6 +118,10 @@ The main entry point for creating agents.
 *   **`with_capability(cap)`**: Adds a capability.
 *   **`with_system_prompt(prompt)`**: Sets the global system instruction.
 *   **`with_model(model, temperature)`**: Configures the LLM settings.
+*   **`with_node(node)`**: Adds a processing node to the graph.
+*   **`with_edge(source, target, condition)`**: Adds a control flow edge.
+*   **`set_entry_point(node_id)`**: Sets the starting node for graph execution.
+*   **`with_tool_requirement(...)`**: Adds a dependency on an external MCP tool.
 *   **`build()`**: Validates configuration, generates integrity hashes, and returns the `AgentDefinition`.
 
 ## Why use the Builder?

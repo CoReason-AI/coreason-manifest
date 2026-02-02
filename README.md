@@ -139,6 +139,8 @@ cap = TypedCapability("search", "Search tool", MyInput, MyOutput)
 agent = AgentBuilder("MyAgent").with_capability(cap).build()
 ```
 
+The Builder also supports **Graph Topologies** (`with_node`, `with_edge`) and **External Tools** (`with_tool_requirement`).
+
 See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 
 ## Documentation
