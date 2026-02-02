@@ -1,7 +1,9 @@
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions.message import ContentPart, MultiModalInput
 from coreason_manifest.definitions.session import Interaction
-from uuid import uuid4
+
 
 def test_content_part_instantiation() -> None:
     # Test strict instantiation
@@ -17,8 +19,9 @@ def test_content_part_instantiation() -> None:
     assert part.mime_type is None
 
     # Test immutability
-    with pytest.raises(Exception): # ValidationError or FrozenInstanceError
-        part.text = "New Text" # type: ignore
+    with pytest.raises(ValidationError):
+        part.text = "New Text"  # type: ignore
+
 
 def test_multimodal_input_instantiation() -> None:
     part = ContentPart(text="Check this file", file_ids=["file-1"])
@@ -27,8 +30,9 @@ def test_multimodal_input_instantiation() -> None:
     assert input_obj.parts[0].text == "Check this file"
 
     # Test immutability
-    with pytest.raises(Exception):
-        input_obj.parts = [] # type: ignore
+    with pytest.raises(ValidationError):
+        input_obj.parts = []  # type: ignore
+
 
 def test_interaction_with_multimodal_input() -> None:
     part = ContentPart(text="Here is the report", file_ids=["f-999"])
@@ -46,6 +50,7 @@ def test_interaction_with_multimodal_input() -> None:
     json_str = interaction.to_json()
     assert "f-999" in json_str
     assert "Here is the report" in json_str
+
 
 def test_interaction_backward_compatibility() -> None:
     # Test with Dict

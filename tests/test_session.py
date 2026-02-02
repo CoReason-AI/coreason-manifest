@@ -26,6 +26,7 @@ def test_interaction_creation() -> None:
     )
     assert interaction.interaction_id is not None
     assert interaction.timestamp is not None
+    assert isinstance(interaction.input, dict)
     assert interaction.input["content"] == "hello"
     assert interaction.output["content"] == "hi"
     assert interaction.events == []

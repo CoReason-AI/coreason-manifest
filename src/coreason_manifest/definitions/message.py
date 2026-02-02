@@ -197,9 +197,7 @@ class ContentPart(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     text: Optional[str] = None
-    file_ids: List[str] = Field(
-        default_factory=list, description="List of strings, referencing uploaded assets"
-    )
+    file_ids: List[str] = Field(default_factory=list, description="List of strings, referencing uploaded assets")
     mime_type: Optional[str] = Field(None, description="MIME type of the content (e.g., application/pdf)")
 
 
