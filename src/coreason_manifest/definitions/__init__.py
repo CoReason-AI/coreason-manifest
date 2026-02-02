@@ -33,9 +33,11 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .request import AgentRequest
 from .session import Interaction, SessionState
 
 __all__ = [
+    "AgentRequest",
     "AgentRuntimeConfig",
     "AgentDefinition",
     "Persona",
