@@ -33,6 +33,13 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .presentation import (
+    DataBlock,
+    MarkdownBlock,
+    PresentationBlockType,
+    ThinkingBlock,
+    UserErrorBlock,
+)
 from .request import AgentRequest
 from .session import Interaction, SessionState
 
@@ -65,4 +72,9 @@ __all__ = [
     "WorkflowErrorPayload",
     "Interaction",
     "SessionState",
+    "PresentationBlockType",
+    "ThinkingBlock",
+    "DataBlock",
+    "MarkdownBlock",
+    "UserErrorBlock",
 ]
