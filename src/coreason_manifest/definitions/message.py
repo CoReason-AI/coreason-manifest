@@ -186,3 +186,26 @@ class ToolCall(CoReasonBaseModel):
 
 
 Message = ChatMessage
+
+
+# --- Multi-Modal Inputs ---
+
+
+class ContentPart(CoReasonBaseModel):
+    """Represents a part of a multi-modal input prompt."""
+
+    model_config = ConfigDict(frozen=True)
+
+    text: Optional[str] = None
+    file_ids: List[str] = Field(
+        default_factory=list, description="List of strings, referencing uploaded assets"
+    )
+    mime_type: Optional[str] = Field(None, description="MIME type of the content (e.g., application/pdf)")
+
+
+class MultiModalInput(CoReasonBaseModel):
+    """Acts as a wrapper for a list of ContentParts, effectively replacing the need for unstructured dictionaries."""
+
+    model_config = ConfigDict(frozen=True)
+
+    parts: List[ContentPart]
