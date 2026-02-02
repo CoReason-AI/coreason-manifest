@@ -11,7 +11,7 @@
 import hashlib
 import json
 from datetime import datetime, timezone
-from typing import Any, Optional, Protocol, Self, runtime_checkable
+from typing import Optional, Protocol, Self, runtime_checkable
 from uuid import uuid4
 
 from coreason_manifest.definitions.agent import (

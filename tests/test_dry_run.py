@@ -49,7 +49,7 @@ def test_dry_run_validation() -> None:
 
     # Use RawCapability to inject the raw schema
     # We ignore the type hint error because we are intentionally mocking TypedCapability
-    builder.with_capability(RawCapability("search", schema))  # type: ignore
+    builder.with_capability(RawCapability("search", schema))
 
     agent = builder.build()
 

@@ -142,7 +142,10 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                         violations.append(
                             ComplianceViolation(
                                 rule="domain_restriction",
-                                message=f"Tool URI '{tool.uri}' has no hostname and cannot be validated against allowed domains.",
+                                message=(
+                                    f"Tool URI '{tool.uri}' has no hostname and cannot be validated "
+                                    "against allowed domains."
+                                ),
                                 component_id=str(tool.uri),
                             )
                         )
