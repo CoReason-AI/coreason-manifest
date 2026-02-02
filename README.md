@@ -31,6 +31,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 *   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
 *   **Enhanced Tracing:** `ReasoningTrace` includes flexible metadata for execution state.
 *   **Builder SDK:** A fluent, strictly-typed Python SDK for defining Agents using Pydantic models.
+*   **Topology Visualization:** Export agent execution flows to Mermaid.js graph syntax (`.to_mermaid()`).
 
 ## Serialization & Base Model
 

@@ -121,6 +121,19 @@ agent = AgentDefinition(
 print(f"Agent '{agent.metadata.name}' created successfully.")
 ```
 
+### Visualizing the Topology
+You can export the agent's execution flow as a Mermaid.js graph string for documentation or debugging.
+
+```python
+mermaid_str = agent.to_mermaid()
+print(mermaid_str)
+# Output:
+# graph TD
+# ...
+# start["start"]:::logic
+# ...
+```
+
 ### Accessing Immutable Fields
 
 ```python
