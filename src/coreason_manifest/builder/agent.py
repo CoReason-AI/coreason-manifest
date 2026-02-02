@@ -9,12 +9,13 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import hashlib
+import json
 from datetime import datetime, timezone
-from typing import Any, Optional, Self
+from typing import Any, Optional, Protocol, Self, runtime_checkable
 from uuid import uuid4
 
-from coreason_manifest.builder.capability import TypedCapability
 from coreason_manifest.definitions.agent import (
+    AgentCapability,
     AgentDefinition,
     AgentDependencies,
     AgentMetadata,
@@ -25,6 +26,15 @@ from coreason_manifest.definitions.agent import (
     ToolRiskLevel,
 )
 from coreason_manifest.definitions.topology import Edge, Node
+
+
+@runtime_checkable
+class CapabilityBuilder(Protocol):
+    """Protocol for objects that can be compiled into an AgentCapability."""
+
+    def to_definition(self) -> AgentCapability:
+        """Convert to strict AgentCapability definition."""
+        ...
 
 
 class AgentBuilder:
@@ -55,7 +65,7 @@ class AgentBuilder:
         self.author = author
         self._status = status
 
-        self._capabilities: list[TypedCapability[Any, Any]] = []
+        self._capabilities: list[CapabilityBuilder] = []
         self._system_prompt: Optional[str] = None
         self._model_name: str = "gpt-4o"  # Default model
         self._temperature: float = 0.0
@@ -77,11 +87,11 @@ class AgentBuilder:
         self._status = status
         return self
 
-    def with_capability(self, cap: TypedCapability[Any, Any]) -> Self:
-        """Add a typed capability to the agent.
+    def with_capability(self, cap: CapabilityBuilder) -> Self:
+        """Add a capability (Typed or Schema) to the agent.
 
         Args:
-            cap: The TypedCapability instance to add.
+            cap: The capability builder instance to add.
 
         Returns:
             The builder instance (for chaining).
@@ -153,10 +163,7 @@ class AgentBuilder:
         Returns:
             A validated AgentDefinition object.
         """
-        # Generate dummy integrity hash based on name if PUBLISHED, or None if DRAFT
-        integrity_hash: Optional[str] = None
-        if self._status == AgentStatus.PUBLISHED:
-            integrity_hash = hashlib.sha256(self.name.encode("utf-8")).hexdigest()
+        capabilities_defs = [cap.to_definition() for cap in self._capabilities]
 
         metadata = AgentMetadata(
             id=uuid4(),
@@ -186,9 +193,20 @@ class AgentBuilder:
             libraries=(),
         )
 
+        # Generate integrity hash based on content if PUBLISHED, or None if DRAFT
+        integrity_hash: Optional[str] = None
+        if self._status == AgentStatus.PUBLISHED:
+            content = {
+                "capabilities": [c.dump() for c in capabilities_defs],
+                "config": config.dump(),
+                "dependencies": dependencies.dump(),
+            }
+            canonical_json = json.dumps(content, sort_keys=True, ensure_ascii=False)
+            integrity_hash = hashlib.sha256(canonical_json.encode("utf-8")).hexdigest()
+
         return AgentDefinition(
             metadata=metadata,
-            capabilities=[cap.to_definition() for cap in self._capabilities],
+            capabilities=capabilities_defs,
             config=config,
             dependencies=dependencies,
             integrity_hash=integrity_hash,

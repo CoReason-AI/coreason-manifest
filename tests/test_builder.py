@@ -89,3 +89,32 @@ def test_builder_set_status() -> None:
 
     builder.set_status(AgentStatus.DRAFT)
     assert builder._status == AgentStatus.DRAFT
+
+
+def test_integrity_hash_sensitivity() -> None:
+    """Test that integrity hash changes when content changes."""
+    cap = TypedCapability(
+        name="search",
+        description="Search",
+        input_model=SearchInput,
+        output_model=SearchOutput,
+    )
+
+    # Base Agent
+    builder1 = AgentBuilder(name="Agent", status=AgentStatus.PUBLISHED)
+    builder1.with_capability(cap).with_system_prompt("Prompt A")
+    agent1 = builder1.build()
+
+    # Modified Agent (different prompt)
+    builder2 = AgentBuilder(name="Agent", status=AgentStatus.PUBLISHED)
+    builder2.with_capability(cap).with_system_prompt("Prompt B")
+    agent2 = builder2.build()
+
+    assert agent1.integrity_hash != agent2.integrity_hash
+
+    # Identical Agent
+    builder3 = AgentBuilder(name="Agent", status=AgentStatus.PUBLISHED)
+    builder3.with_capability(cap).with_system_prompt("Prompt A")
+    agent3 = builder3.build()
+
+    assert agent1.integrity_hash == agent3.integrity_hash

@@ -136,6 +136,15 @@ def test_governance_inline_tool_ignored() -> None:
     assert report.passed
 
 
+def test_governance_inline_tool_blocked() -> None:
+    tool = InlineToolDefinition(name="inline_tool", description="Inline", parameters={})
+    agent = create_agent(tools=[tool])
+    config = GovernanceConfig(allow_inline_tools=False)
+    report = check_compliance(agent, config)
+    assert not report.passed
+    assert report.violations[0].rule == "inline_tool_restriction"
+
+
 def test_governance_multiple_violations() -> None:
     tool1 = ToolRequirement(
         uri="https://untrusted.com/tool", hash="a" * 64, scopes=[], risk_level=ToolRiskLevel.CRITICAL
@@ -168,11 +177,12 @@ def test_governance_malformed_uri_handling() -> None:
     assert "Failed to parse tool URI" in report.violations[0].message
 
 
-def test_governance_no_hostname_allowed() -> None:
-    # Tools with no hostname (e.g. mailto:) should be allowed if they don't violate domain rules
+def test_governance_no_hostname_violation() -> None:
+    # Tools with no hostname (e.g. mailto:) should BE A VIOLATION if strict domain rules are present
     tool = ToolRequirement(uri="mailto:user@example.com", hash="a" * 64, scopes=[], risk_level=ToolRiskLevel.SAFE)
     agent = create_agent(tools=[tool])
-    # Even if we restrict domains, "mailto:" has no domain, so it should be skipped/allowed per user request
+
     config = GovernanceConfig(allowed_domains=["trusted.com"])
     report = check_compliance(agent, config)
-    assert report.passed
+    assert not report.passed
+    assert report.violations[0].rule == "domain_restriction"

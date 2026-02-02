@@ -166,8 +166,8 @@ def load_from_yaml(content: str) -> AgentDefinition:
             delivery_mode=delivery_mode,
         )
 
-        # Add to builder - ignore type check because AgentBuilder expects TypedCapability
-        builder.with_capability(cap)  # type: ignore
+        # Add to builder
+        builder.with_capability(cap)
 
     # Process Model Config
     model_data = data.get("model")
