@@ -62,6 +62,7 @@ capabilities:
     assert cap.outputs["type"] == "object"
     assert cap.outputs["properties"]["report"] == {"type": "string"}
 
+
 def test_load_complex_types() -> None:
     yaml_content = """
 name: "ComplexBot"
@@ -89,6 +90,7 @@ capabilities:
     # Any -> {}
     summary_schema = cap.outputs["properties"]["summary"]
     assert summary_schema == {}
+
 
 def test_load_published_status() -> None:
     # Note: Published status requires integrity_hash usually, but AgentBuilder generates a dummy one if published.
@@ -124,6 +126,7 @@ capabilities:
     agent = load_from_yaml(yaml_content)
     assert agent.status == AgentStatus.PUBLISHED
     assert agent.integrity_hash is not None
+
 
 def test_load_error_cases() -> None:
     # Test unknown shorthand

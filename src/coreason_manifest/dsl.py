@@ -66,10 +66,7 @@ def _expand_shorthand_type(shorthand: str) -> Dict[str, Any]:
     array_match = re.match(r"^(?:list|array)\[(.+)\]$", shorthand, re.IGNORECASE)
     if array_match:
         inner_type = array_match.group(1)
-        return {
-            "type": "array",
-            "items": _expand_shorthand_type(inner_type)
-        }
+        return {"type": "array", "items": _expand_shorthand_type(inner_type)}
 
     # Handle basic types
     start = shorthand.lower()
@@ -107,12 +104,7 @@ def _expand_properties(props: Dict[str, str]) -> Dict[str, Any]:
         properties[name] = _expand_shorthand_type(shorthand)
         required.append(name)
 
-    return {
-        "type": "object",
-        "properties": properties,
-        "required": required,
-        "additionalProperties": False
-    }
+    return {"type": "object", "properties": properties, "required": required, "additionalProperties": False}
 
 
 def load_from_yaml(content: str) -> AgentDefinition:
@@ -171,11 +163,11 @@ def load_from_yaml(content: str) -> AgentDefinition:
             inputs=inputs_schema,
             outputs=outputs_schema,
             type=cap_type,
-            delivery_mode=delivery_mode
+            delivery_mode=delivery_mode,
         )
 
         # Add to builder - ignore type check because AgentBuilder expects TypedCapability
-        builder.with_capability(cap) # type: ignore
+        builder.with_capability(cap)  # type: ignore
 
     # Process Model Config
     model_data = data.get("model")

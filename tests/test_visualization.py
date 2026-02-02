@@ -8,18 +8,15 @@ from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNo
 class DummyInput(BaseModel):
     query: str
 
+
 class DummyOutput(BaseModel):
     result: str
+
 
 def test_atomic_agent_mermaid() -> None:
     # Create an atomic agent (no nodes)
     builder = AgentBuilder(name="AtomicAgent")
-    cap = TypedCapability(
-        name="chat",
-        description="Chat capability",
-        input_model=DummyInput,
-        output_model=DummyOutput
-    )
+    cap = TypedCapability(name="chat", description="Chat capability", input_model=DummyInput, output_model=DummyOutput)
     builder.with_capability(cap)
 
     agent = builder.build()
@@ -28,42 +25,27 @@ def test_atomic_agent_mermaid() -> None:
     assert "graph TD" in mermaid
     assert 'Start((Start)) --> Agent["AtomicAgent"]' in mermaid
 
+
 def test_graph_agent_mermaid() -> None:
     # Create a graph agent
     builder = AgentBuilder(name="GraphAgent")
-    cap = TypedCapability(
-        name="chat",
-        description="Chat capability",
-        input_model=DummyInput,
-        output_model=DummyOutput
-    )
+    cap = TypedCapability(name="chat", description="Chat capability", input_model=DummyInput, output_model=DummyOutput)
     builder.with_capability(cap)
 
     # Add nodes
     # AgentNode
-    node1 = AgentNode(
-        id="node1",
-        agent_name="SearchAgent",
-        visual=VisualMetadata(label="Search Web")
-    )
+    node1 = AgentNode(id="node1", agent_name="SearchAgent", visual=VisualMetadata(label="Search Web"))
     # LogicNode
-    node2 = LogicNode(
-        id="node2",
-        code="return True",
-        visual=VisualMetadata(label="Check Result")
-    )
+    node2 = LogicNode(id="node2", code="return True", visual=VisualMetadata(label="Check Result"))
     # HumanNode
-    node3 = HumanNode(
-        id="node3",
-        visual=VisualMetadata(label="User Approval")
-    )
+    node3 = HumanNode(id="node3", visual=VisualMetadata(label="User Approval"))
     # RecipeNode (Default Case)
     node4 = RecipeNode(
         id="node4",
         recipe_id="some_recipe",
         input_mapping={},
         output_mapping={},
-        visual=VisualMetadata(label="Sub Recipe")
+        visual=VisualMetadata(label="Sub Recipe"),
     )
 
     builder.with_node(node1)
