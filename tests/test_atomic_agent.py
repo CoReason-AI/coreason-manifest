@@ -153,6 +153,7 @@ def test_edges_without_nodes_integrity() -> None:
             "system_prompt": "Dummy prompt",
         },
         "dependencies": {},
+        "status": "published",
         "integrity_hash": "a" * 64,
     }
 

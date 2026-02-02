@@ -119,8 +119,10 @@ def test_validation_error_on_missing_fields() -> None:
             "edges": [],
             "entry_point": "start",
             "model_config": {"model": "gpt-4", "temperature": 0.5},
+            "system_prompt": "Prompt",  # Added to satisfy Atomic Agent requirement
         },
         "dependencies": {},
+        "status": "published",  # Added to trigger integrity_hash check
     }
     with pytest.raises(ValidationError) as excinfo:
         AgentDefinition(**valid_data)

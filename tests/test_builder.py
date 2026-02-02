@@ -13,7 +13,7 @@ from typing import List
 from pydantic import BaseModel
 
 from coreason_manifest.builder import AgentBuilder, TypedCapability
-from coreason_manifest.definitions.agent import AgentDefinition
+from coreason_manifest.definitions.agent import AgentDefinition, AgentStatus
 
 
 class SearchInput(BaseModel):
@@ -58,7 +58,8 @@ def test_full_agent_build() -> None:
         output_model=SearchOutput,
     )
 
-    builder = AgentBuilder(name="SearchAgent", author="Tester")
+    # Use status=PUBLISHED to ensure integrity_hash is generated
+    builder = AgentBuilder(name="SearchAgent", author="Tester", status=AgentStatus.PUBLISHED)
     agent = builder.with_capability(cap).with_system_prompt("You are a search agent.").with_model("gpt-4-turbo").build()
 
     assert isinstance(agent, AgentDefinition)
@@ -76,3 +77,15 @@ def test_full_agent_build() -> None:
     assert agent.config.llm_config.model == "gpt-4-turbo"
     assert agent.config.llm_config.system_prompt == "You are a search agent."
     assert agent.integrity_hash is not None
+
+
+def test_builder_set_status() -> None:
+    """Test that set_status correctly updates the builder status."""
+    builder = AgentBuilder(name="StatusAgent")
+    assert builder._status == AgentStatus.DRAFT
+
+    builder.set_status(AgentStatus.PUBLISHED)
+    assert builder._status == AgentStatus.PUBLISHED  # type: ignore[comparison-overlap]
+
+    builder.set_status(AgentStatus.DRAFT)
+    assert builder._status == AgentStatus.DRAFT

@@ -191,22 +191,23 @@ def test_hash_validation_edge_cases() -> None:
             "system_prompt": "Dummy",
         },
         "dependencies": {"tools": [], "libraries": []},
+        "status": "published",  # Explicitly set to published to enforce hash check
     }
 
     # Too short
     with pytest.raises(ValidationError) as exc:
         AgentDefinition(**{**base_data, "integrity_hash": "a" * 63})
-    assert "integrity_hash" in str(exc.value)
+    assert "String should match pattern" in str(exc.value)
 
     # Too long
     with pytest.raises(ValidationError) as exc:
         AgentDefinition(**{**base_data, "integrity_hash": "a" * 65})
-    assert "integrity_hash" in str(exc.value)
+    assert "String should match pattern" in str(exc.value)
 
     # Invalid chars
     with pytest.raises(ValidationError) as exc:
         AgentDefinition(**{**base_data, "integrity_hash": "z" * 64})  # z is not hex
-    assert "integrity_hash" in str(exc.value)
+    assert "String should match pattern" in str(exc.value)
 
     # Uppercase valid
     valid_upper = "A" * 64

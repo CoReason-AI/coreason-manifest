@@ -19,6 +19,7 @@ from coreason_manifest.definitions.agent import (
     AgentDependencies,
     AgentMetadata,
     AgentRuntimeConfig,
+    AgentStatus,
     ModelConfig,
     ToolRequirement,
     ToolRiskLevel,
@@ -39,6 +40,7 @@ class AgentBuilder:
         name: str,
         version: str = "0.1.0",
         author: str = "Unknown",
+        status: AgentStatus = AgentStatus.DRAFT,
     ) -> None:
         """Initialize the AgentBuilder.
 
@@ -46,10 +48,12 @@ class AgentBuilder:
             name: Name of the Agent.
             version: Semantic Version of the Agent.
             author: Author of the Agent.
+            status: Lifecycle status of the Agent (DRAFT or PUBLISHED).
         """
         self.name = name
         self.version = version
         self.author = author
+        self._status = status
 
         self._capabilities: list[TypedCapability[Any, Any]] = []
         self._system_prompt: Optional[str] = None
@@ -60,6 +64,18 @@ class AgentBuilder:
         self._edges: list[Edge] = []
         self._entry_point: Optional[str] = None
         self._tools: list[ToolRequirement] = []
+
+    def set_status(self, status: AgentStatus) -> Self:
+        """Set the lifecycle status of the agent.
+
+        Args:
+            status: The new status (DRAFT or PUBLISHED).
+
+        Returns:
+            The builder instance (for chaining).
+        """
+        self._status = status
+        return self
 
     def with_capability(self, cap: TypedCapability[Any, Any]) -> Self:
         """Add a typed capability to the agent.
@@ -137,8 +153,10 @@ class AgentBuilder:
         Returns:
             A validated AgentDefinition object.
         """
-        # Generate dummy integrity hash based on name as per instructions
-        integrity_hash = hashlib.sha256(self.name.encode("utf-8")).hexdigest()
+        # Generate dummy integrity hash based on name if PUBLISHED, or None if DRAFT
+        integrity_hash: Optional[str] = None
+        if self._status == AgentStatus.PUBLISHED:
+            integrity_hash = hashlib.sha256(self.name.encode("utf-8")).hexdigest()
 
         metadata = AgentMetadata(
             id=uuid4(),
@@ -174,4 +192,5 @@ class AgentBuilder:
             config=config,
             dependencies=dependencies,
             integrity_hash=integrity_hash,
+            status=self._status,
         )
