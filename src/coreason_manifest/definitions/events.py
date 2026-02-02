@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Annotated, Any, Dict, Generic, Literal, Optional, Protocol, TypeVar, Union, runtime_checkable
 from uuid import uuid4
 
@@ -222,6 +223,16 @@ class CouncilVote(BaseNodePayload):
     votes: Dict[str, str]
 
 
+class ErrorDomain(str, Enum):
+    """Domain of the error."""
+
+    SYSTEM = "SYSTEM"
+    LLM = "LLM"
+    TOOL = "TOOL"
+    LOGIC = "LOGIC"
+    SECURITY = "SECURITY"
+
+
 class WorkflowError(BaseNodePayload):
     """Payload for ERROR event."""
 
@@ -230,6 +241,11 @@ class WorkflowError(BaseNodePayload):
     input_snapshot: Dict[str, Any]
     status: Literal["ERROR"] = "ERROR"
     visual_cue: str = "RED_FLASH"
+
+    # Semantic Error Fields
+    code: int = 500
+    domain: ErrorDomain = ErrorDomain.SYSTEM
+    retryable: bool = False
 
 
 # --- Standardized Payloads ---

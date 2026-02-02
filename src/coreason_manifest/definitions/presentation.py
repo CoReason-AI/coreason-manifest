@@ -68,3 +68,4 @@ class UserErrorBlock(PresentationBlock):
     user_message: str
     technical_details: Optional[Dict[str, Any]] = None
     recoverable: bool = False
+    code: Optional[int] = None

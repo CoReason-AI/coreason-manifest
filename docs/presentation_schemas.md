@@ -91,6 +91,7 @@ Represents a user-facing error message. Unlike internal exceptions, these are de
 *   **`user_message`**: A friendly, human-readable error message.
 *   **`technical_details`**: Optional dictionary containing error codes or stack traces for debugging (hidden by default in most UIs).
 *   **`recoverable`**: Boolean indicating if the user can retry the action.
+*   **`code`**: Optional integer error code (e.g., 404, 429) to allow the UI to show specific icons or help text.
 
 **Example:**
 ```python
@@ -98,7 +99,8 @@ from coreason_manifest.definitions.presentation import UserErrorBlock
 
 block = UserErrorBlock(
     user_message="Unable to connect to the weather service. Please try again later.",
-    technical_details={"status_code": 503, "service": "weather-api"},
-    recoverable=True
+    technical_details={"service": "weather-api"},
+    recoverable=True,
+    code=503
 )
 ```
