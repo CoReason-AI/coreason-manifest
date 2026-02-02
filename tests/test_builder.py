@@ -58,6 +58,7 @@ def test_full_agent_build() -> None:
         output_model=SearchOutput,
     )
 
+    # Use status=PUBLISHED to ensure integrity_hash is generated
     builder = AgentBuilder(name="SearchAgent", author="Tester", status=AgentStatus.PUBLISHED)
     agent = builder.with_capability(cap).with_system_prompt("You are a search agent.").with_model("gpt-4-turbo").build()
 
