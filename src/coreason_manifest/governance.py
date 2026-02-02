@@ -124,7 +124,8 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                 try:
                     parsed_uri = urlparse(str(tool.uri))
                     hostname = parsed_uri.hostname
-                    if hostname not in config.allowed_domains:
+                    # Guard against None (e.g. mailto:)
+                    if hostname and hostname not in config.allowed_domains:
                         violations.append(
                             ComplianceViolation(
                                 rule="domain_restriction",
