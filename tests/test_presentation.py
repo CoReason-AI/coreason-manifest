@@ -63,12 +63,19 @@ def test_markdown_block() -> None:
 
 def test_user_error_block() -> None:
     """Test UserErrorBlock."""
+    # Test with default code
     block = UserErrorBlock(user_message="Something went wrong", technical_details={"code": 500}, recoverable=True)
     dumped = block.dump()
     assert dumped["block_type"] == "ERROR"
     assert dumped["user_message"] == "Something went wrong"
     assert dumped["technical_details"] == {"code": 500}
     assert dumped["recoverable"] is True
+    assert "code" not in dumped  # exclude_none=True by default
+
+    # Test with explicit code
+    block_with_code = UserErrorBlock(user_message="Not Found", code=404)
+    dumped_code = block_with_code.dump()
+    assert dumped_code["code"] == 404
 
 
 def test_inheritance() -> None:

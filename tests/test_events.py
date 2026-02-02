@@ -32,6 +32,7 @@ from coreason_manifest.definitions.events import (
     NodeStreamPayload,
     WorkflowError,
     WorkflowErrorPayload,
+    ErrorDomain,
 )
 
 
@@ -161,6 +162,26 @@ def test_workflow_error_payload() -> None:
     )
     assert payload.status == "ERROR"
     assert payload.visual_cue == "RED_FLASH"
+    # Defaults
+    assert payload.code == 500
+    assert payload.domain == ErrorDomain.SYSTEM
+    assert payload.retryable is False
+
+
+def test_workflow_error_payload_semantic_fields() -> None:
+    """Test WorkflowError payload with semantic fields."""
+    payload = WorkflowError(
+        node_id="node-1",
+        error_message="Rate Limit",
+        stack_trace="...",
+        input_snapshot={},
+        code=429,
+        domain=ErrorDomain.LLM,
+        retryable=True,
+    )
+    assert payload.code == 429
+    assert payload.domain == ErrorDomain.LLM
+    assert payload.retryable is True
 
 
 def test_aliases() -> None:
