@@ -10,8 +10,8 @@
 
 """Pydantic models for the Coreason Manifest system.
 
-These models define the structure and validation rules for the Agent Manifest
-(OAS). They represent the source of truth for Agent definitions.
+These models define the structure and validation rules for the Coreason Agent Manifest
+(CAM). They represent the source of truth for Agent definitions.
 """
 
 from __future__ import annotations

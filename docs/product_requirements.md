@@ -12,9 +12,12 @@
 **Mission:** The definitive source of truth for Asset definitions and Schemas.
 
 **Responsibilities (Shared Kernel):**
-*   **Defines** the Open Agent Specifications (OAS) and strict Pydantic models.
+*   **Defines** the Coreason Agent Manifest (CAM) and strict Pydantic models.
 *   **Provides** the data structures required for compliance enforcement and integrity verification.
 *   **Ensures** strict typing and consistent serialization across the ecosystem.
+
+### Standards Clarification
+*Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
 
 **Note:** Active policy enforcement (e.g., OPA Rego checks) and artifact integrity verification (hashing source files) are performed by consumer services (e.g., Builder, Engine) *using* the schemas defined in this package.
 
@@ -38,7 +41,7 @@ You are strictly forbidden from embedding execution logic or side effects within
 ### 2. Business Logic Specifications (The Source of Truth)
 The package acts as the validator for the "Agent Development Lifecycle" (ADLC). It ensures that every "Agent" produced by the factory meets strict GxP and security standards.
 
-#### 2.1 The Open Agent Specification (OAS)
+#### 2.1 The Coreason Agent Manifest (CAM)
 You must define the strict schema for a CoReason Agent. A valid Agent Manifest (`agent.yaml`) contains:
 *   **Metadata:** `id` (UUID), `version` (SemVer), `name`, `author`, `created_at`.
 *   **Interface:**
