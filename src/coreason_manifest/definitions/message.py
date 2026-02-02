@@ -191,14 +191,26 @@ Message = ChatMessage
 # --- Multi-Modal Inputs ---
 
 
+class AttachedFile(CoReasonBaseModel):
+    """Represents a file attached to a user input message."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(..., description="The unique identifier of the uploaded file")
+    mime_type: Optional[str] = Field(None, description="MIME type of the file (e.g., application/pdf)")
+
+
 class ContentPart(CoReasonBaseModel):
-    """Represents a part of a multi-modal input prompt."""
+    """Represents a part of a multi-modal input prompt (User -> System).
+
+    Distinction: This is for Ingress (User Input), whereas 'Part' and 'ChatMessage'
+    are for the Internal Flow (System <-> LLM).
+    """
 
     model_config = ConfigDict(frozen=True)
 
     text: Optional[str] = None
-    file_ids: List[str] = Field(default_factory=list, description="List of strings, referencing uploaded assets")
-    mime_type: Optional[str] = Field(None, description="MIME type of the content (e.g., application/pdf)")
+    attachments: List[AttachedFile] = Field(default_factory=list, description="List of attached files")
 
 
 class MultiModalInput(CoReasonBaseModel):

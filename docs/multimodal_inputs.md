@@ -7,15 +7,16 @@ As of version `0.12.0`, `coreason-manifest` supports a strictly typed structure 
 The `MultiModalInput` model serves as the standard container for user inputs. It wraps a list of `ContentPart` objects.
 
 ```python
-from coreason_manifest.definitions.message import MultiModalInput, ContentPart
+from coreason_manifest.definitions.message import MultiModalInput, ContentPart, AttachedFile
 
 # Example: A user asking to analyze a PDF
 input_payload = MultiModalInput(
     parts=[
         ContentPart(
             text="Please analyze this financial report for risks.",
-            file_ids=["file-uuid-1234-5678"],
-            mime_type="application/pdf"
+            attachments=[
+                AttachedFile(id="file-uuid-1234-5678", mime_type="application/pdf")
+            ]
         )
     ]
 )
@@ -28,8 +29,7 @@ A `ContentPart` represents a discrete unit of input. It allows associating text 
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `text` | `Optional[str]` | The text content (e.g., instructions, questions). |
-| `file_ids` | `List[str]` | A list of string IDs referencing uploaded files/assets. |
-| `mime_type` | `Optional[str]` | The MIME type of the content (e.g., `image/png`, `application/pdf`). |
+| `attachments` | `List[AttachedFile]` | A list of attached files, where each file has an `id` and optional `mime_type`. |
 
 ## Usage in Sessions
 
@@ -53,8 +53,12 @@ Like all `CoReasonBaseModel`s, `MultiModalInput` serializes to standard JSON:
   "parts": [
     {
       "text": "Please analyze this financial report for risks.",
-      "file_ids": ["file-uuid-1234-5678"],
-      "mime_type": "application/pdf"
+      "attachments": [
+        {
+          "id": "file-uuid-1234-5678",
+          "mime_type": "application/pdf"
+        }
+      ]
     }
   ]
 }
