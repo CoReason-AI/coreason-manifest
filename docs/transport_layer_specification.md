@@ -28,11 +28,11 @@ The request body **MUST** be a JSON object adhering to the `AgentRequest` schema
 Example:
 ```json
 {
-  "request_id": "req-123",
-  "input": {
+  "request_id": "123e4567-e89b-12d3-a456-426614174000",
+  "session_id": "123e4567-e89b-12d3-a456-426614174001",
+  "payload": {
     "query": "Hello world"
-  },
-  "stream": true
+  }
 }
 ```
 
