@@ -122,6 +122,7 @@ For full details, see the [Usage Documentation](docs/usage.md).
 ## Documentation
 
 *   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
+*   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
 *   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
