@@ -98,7 +98,7 @@ def _risk_score(level: ToolRiskLevel) -> int:
         return 1
     if level == ToolRiskLevel.CRITICAL:
         return 2
-    return 0  # pragma: no cover
+    raise ValueError(f"Unknown risk level: {level}")
 
 
 def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> ComplianceReport:

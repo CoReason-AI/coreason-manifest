@@ -118,3 +118,19 @@ def test_integrity_hash_sensitivity() -> None:
     agent3 = builder3.build()
 
     assert agent1.integrity_hash == agent3.integrity_hash
+
+
+def test_builder_with_auth_requirement() -> None:
+    """Test setting auth requirement."""
+    cap = TypedCapability(
+        name="search",
+        description="Search",
+        input_model=SearchInput,
+        output_model=SearchOutput,
+        injected_params=["user_context"],
+    )
+    builder = AgentBuilder(name="AuthAgent")
+    builder.with_capability(cap).with_auth_requirement(True)
+    agent = builder.build()
+
+    assert agent.metadata.requires_auth is True

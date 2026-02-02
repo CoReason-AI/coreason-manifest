@@ -13,6 +13,8 @@ from typing import List, Optional, Union
 from unittest.mock import patch
 from uuid import uuid4
 
+import pytest
+
 from coreason_manifest.definitions.agent import (
     AgentCapability,
     AgentDefinition,
@@ -25,7 +27,7 @@ from coreason_manifest.definitions.agent import (
     ToolRequirement,
     ToolRiskLevel,
 )
-from coreason_manifest.governance import GovernanceConfig, check_compliance
+from coreason_manifest.governance import GovernanceConfig, _risk_score, check_compliance
 
 ToolType = Union[ToolRequirement, InlineToolDefinition]
 
@@ -186,3 +188,9 @@ def test_governance_no_hostname_violation() -> None:
     report = check_compliance(agent, config)
     assert not report.passed
     assert report.violations[0].rule == "domain_restriction"
+
+
+def test_risk_score_unknown_error() -> None:
+    # Use a fake enum value or cast string
+    with pytest.raises(ValueError, match="Unknown risk level"):
+        _risk_score("UNKNOWN_LEVEL")  # type: ignore

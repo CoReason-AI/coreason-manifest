@@ -51,22 +51,26 @@ class SchemaCapability:
         )
 
 
-def _expand_shorthand_type(shorthand: str) -> Dict[str, Any]:
+def _expand_shorthand_type(shorthand: str, depth: int = 0) -> Dict[str, Any]:
     """Expand a shorthand type string into a JSON Schema dictionary.
 
     Args:
         shorthand: Type string like 'string', 'int', 'list[string]'.
+        depth: Current recursion depth.
 
     Returns:
         JSON Schema dictionary.
     """
+    if depth > 20:
+        raise ValueError("Type definition too deeply nested.")
+
     shorthand = shorthand.strip()
 
     # Handle array/list types
     array_match = re.match(r"^(?:list|array)\[(.+)\]$", shorthand, re.IGNORECASE)
     if array_match:
         inner_type = array_match.group(1)
-        return {"type": "array", "items": _expand_shorthand_type(inner_type)}
+        return {"type": "array", "items": _expand_shorthand_type(inner_type, depth + 1)}
 
     # Handle basic types
     start = shorthand.lower()
