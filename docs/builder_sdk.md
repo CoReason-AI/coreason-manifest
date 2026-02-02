@@ -73,7 +73,10 @@ agent_definition = (
 
 # agent_definition is now a valid, immutable AgentDefinition object
 # ready for serialization or usage by the Engine.
-print(agent_definition.to_json(indent=2))
+print(agent_definition.model_dump_json(indent=2))
+
+# Visualize the topology
+print(agent_definition.to_mermaid())
 ```
 
 ### 4. Define Graph Topology (Optional)

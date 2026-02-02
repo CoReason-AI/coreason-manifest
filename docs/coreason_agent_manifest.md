@@ -202,3 +202,30 @@ agent = AgentDefinition(
 json_output = agent.model_dump_json(indent=2)
 print(json_output)
 ```
+
+## Visualization and Topology Export
+
+Complex graph-based agents can be difficult to understand by reading JSON. The `AgentDefinition` includes a built-in method to export the topology to **Mermaid.js** format.
+
+### `to_mermaid()`
+
+Generates a string compatible with Mermaid's Live Editor or any Mermaid renderer.
+
+*   **Atomic Agents**: Renders as a single node.
+*   **Graph Agents**: Renders the full flow, including:
+    *   **Start Node**: Synthetic entry point indicator.
+    *   **Shapes**: Distinct shapes for `AgentNode` (Rectangle), `LogicNode` (Rhombus), `HumanNode` (Rounded), etc.
+    *   **Styles**: Color-coded classes for visual distinction.
+    *   **Edges**: Directional arrows, with labels for conditional logic.
+
+**Example Usage:**
+
+```python
+mermaid_graph = agent.to_mermaid()
+print(mermaid_graph)
+# Output:
+# graph TD
+# classDef agent ...
+# Start((Start)) --> node1
+# node1["Search"]:::agent --> node2{"Check"}:::logic
+```
