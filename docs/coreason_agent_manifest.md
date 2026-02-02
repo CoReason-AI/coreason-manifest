@@ -1,16 +1,16 @@
-# Open Agent Specification (OAS)
+# Coreason Agent Manifest (CAM)
 
-The **Open Agent Specification (OAS)** is the core standard used by the Coreason ecosystem to define, configure, and validate AI Agents. It serves as the "Source of Truth," ensuring that agents are portable, strictly typed, and secure.
+The **Coreason Agent Manifest (CAM)** is the core standard used by the Coreason ecosystem to define, configure, and validate AI Agents. It serves as the "Source of Truth," ensuring that agents are portable, strictly typed, and secure.
 
-**Note:** While the OAS is the "machine code" for agents, developers are encouraged to use the **[Builder SDK](builder_sdk.md)** to generate these definitions using Python classes and Pydantic models.
+**Note:** While the CAM is the "machine code" for agents, developers are encouraged to use the **[Builder SDK](builder_sdk.md)** to generate these definitions using Python classes and Pydantic models.
 
-In this repository (`coreason-manifest`), the OAS is implemented as a set of strict **Pydantic v2 models**. These models define the schema for Agents, their relationships (Topology), and their execution requirements.
+In this repository (`coreason-manifest`), the CAM is implemented as a set of strict **Pydantic v2 models**. These models define the schema for Agents, their relationships (Topology), and their execution requirements.
 
 ## Architecture: The Shared Kernel
 
 The `coreason-manifest` package acts as a **Shared Kernel**. It contains *only* data structures, schemas, and validation logic. It does not contain execution engines, server logic, or database drivers.
 
-By centralizing the definitions here, all downstream services (Builder, Engine/MACO, Simulator) interact with a single, unified language. If a field or concept does not exist in the OAS, it does not exist in the platform.
+By centralizing the definitions here, all downstream services (Builder, Engine/MACO, Simulator) interact with a single, unified language. If a field or concept does not exist in the CAM, it does not exist in the platform.
 
 ## The Agent Manifest
 
@@ -70,7 +70,7 @@ An `AgentDefinition` consists of the following sections:
 
 ## Agent Types: Atomic vs. Graph
 
-The OAS supports two distinct architectural patterns via `AgentRuntimeConfig`:
+The CAM supports two distinct architectural patterns via `AgentRuntimeConfig`:
 
 ### 1. Atomic Agents
 An Atomic Agent is a single-step execution unit. It relies on a System Prompt and an LLM to process inputs and generate outputs.
@@ -100,7 +100,7 @@ Both share the `GraphTopology` structure (from `src/coreason_manifest/definition
 ## Key Value Propositions
 
 ### 1. Strict Typing & Validation
-Built on Pydantic v2, the OAS enforces types at runtime. Invalid UUIDs, malformed semantic versions, or missing required fields cause immediate validation errors, preventing invalid states from entering the system.
+Built on Pydantic v2, the CAM enforces types at runtime. Invalid UUIDs, malformed semantic versions, or missing required fields cause immediate validation errors, preventing invalid states from entering the system.
 
 ### 2. Integrity & Security
 *   **Integrity Hashing**: The `integrity_hash` field (SHA256) ensures that the agent definition has not been tampered with since creation.
@@ -111,7 +111,7 @@ All models inherit from `CoReasonBaseModel`, which solves common serialization i
 
 ## Example Usage
 
-Here is how to programmatically define an Agent using the OAS:
+Here is how to programmatically define an Agent using the CAM:
 
 ```python
 import uuid
