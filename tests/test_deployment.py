@@ -75,7 +75,7 @@ def test_agent_definition_with_deployment() -> None:
             )
         ],
         config=AgentRuntimeConfig(
-            model_config=ModelConfig(
+            llm_config=ModelConfig(
                 model="gpt-4",
                 temperature=0.7,
                 system_prompt="You are a helper.",
@@ -110,7 +110,7 @@ def test_agent_definition_without_deployment() -> None:
             )
         ],
         config=AgentRuntimeConfig(
-            model_config=ModelConfig(
+            llm_config=ModelConfig(
                 model="gpt-4",
                 temperature=0.7,
                 system_prompt="You are a helper.",

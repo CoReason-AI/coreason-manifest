@@ -380,9 +380,7 @@ class AgentDefinition(CoReasonBaseModel):
     config: AgentRuntimeConfig
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
-    deployment: Optional[DeploymentConfig] = Field(
-        None, description="Runtime deployment settings"
-    )
+    deployment: Optional[DeploymentConfig] = Field(None, description="Runtime deployment settings")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
     custom_metadata: Optional[Dict[str, Any]] = Field(
         None, description="Container for arbitrary metadata extensions without breaking validation."

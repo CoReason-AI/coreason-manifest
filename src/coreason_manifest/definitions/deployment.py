@@ -33,16 +33,8 @@ class DeploymentConfig(CoReasonBaseModel):
         default=Protocol.HTTP_SSE, description="The communication protocol used to serve the agent."
     )
     port: int = Field(default=8000, description="The port to bind to.")
-    route_prefix: str = Field(
-        default="/assist", description="URL prefix for the agent endpoints."
-    )
-    scaling_min_instances: int = Field(
-        default=0, description="Minimum number of replicas."
-    )
-    scaling_max_instances: int = Field(
-        default=1, description="Maximum number of replicas."
-    )
+    route_prefix: str = Field(default="/assist", description="URL prefix for the agent endpoints.")
+    scaling_min_instances: int = Field(default=0, description="Minimum number of replicas.")
+    scaling_max_instances: int = Field(default=1, description="Maximum number of replicas.")
     timeout_seconds: int = Field(default=60, description="Request timeout.")
-    env_vars: Dict[str, str] = Field(
-        default_factory=dict, description="Static environment variables."
-    )
+    env_vars: Dict[str, str] = Field(default_factory=dict, description="Static environment variables.")
