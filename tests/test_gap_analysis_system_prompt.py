@@ -1,7 +1,9 @@
+import uuid
+
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.agent import AgentRuntimeConfig, ModelConfig
+from coreason_manifest.definitions.agent import AgentDefinition, AgentRuntimeConfig, ModelConfig
 
 
 def test_system_prompt_in_runtime_config() -> None:
@@ -14,16 +16,35 @@ def test_system_prompt_in_runtime_config() -> None:
     assert config.llm_config.system_prompt is None
 
 
-def test_atomic_agent_requires_system_prompt() -> None:
-    """Verify that Atomic Agents (no nodes) require a system prompt."""
+def test_atomic_agent_requires_system_prompt_if_published() -> None:
+    """Verify that Atomic Agents (no nodes) require a system prompt only when published."""
     llm_config = ModelConfig(model="gpt-4", temperature=0.7)
 
-    # Both missing -> Error
+    # RuntimeConfig does not validate anymore
+    config = AgentRuntimeConfig(
+        llm_config=llm_config,
+        nodes=[],
+    )
+    assert config.system_prompt is None
+
+    # AgentDefinition DOES validate if PUBLISHED
+    data = {
+        "metadata": {
+            "id": str(uuid.uuid4()),
+            "version": "1.0.0",
+            "name": "Atomic Agent",
+            "author": "Me",
+            "created_at": "2023-10-27T10:00:00Z",
+        },
+        "capabilities": [{"name": "default", "type": "atomic", "description": "Default", "inputs": {}, "outputs": {}}],
+        "config": config,
+        "dependencies": {},
+        "status": "published",
+        "integrity_hash": "a" * 64,
+    }
+
     with pytest.raises(ValidationError) as exc:
-        AgentRuntimeConfig(
-            llm_config=llm_config,
-            nodes=[],  # Explicitly empty nodes means Atomic Agent
-        )
+        AgentDefinition(**data)
     assert "Atomic Agents require a system_prompt" in str(exc.value)
 
 

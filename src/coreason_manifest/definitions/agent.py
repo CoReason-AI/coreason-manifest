@@ -217,25 +217,6 @@ class AgentRuntimeConfig(CoReasonBaseModel):
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
     system_prompt: Optional[str] = Field(None, description="The global system prompt/instruction for the agent.")
 
-    @model_validator(mode="after")
-    def validate_topology_or_atomic(self) -> AgentRuntimeConfig:
-        """Ensure valid configuration: either a Graph or an Atomic Agent."""
-        has_nodes = len(self.nodes) > 0
-        has_entry = self.entry_point is not None
-
-        if has_nodes:
-            if not has_entry:
-                raise ValueError("Graph execution requires an 'entry_point'.")
-        else:
-            # Atomic Agent: Must have a system prompt (either global or in model_config)
-            has_global_prompt = self.system_prompt is not None
-            has_model_prompt = self.llm_config.system_prompt is not None
-
-            if not (has_global_prompt or has_model_prompt):
-                raise ValueError("Atomic Agents require a system_prompt (global or in model_config).")
-
-        return self
-
     @field_validator("nodes")
     @classmethod
     def validate_unique_node_ids(cls, v: List[Node]) -> List[Node]:
@@ -435,6 +416,27 @@ class AgentDefinition(CoReasonBaseModel):
                 raise ValueError("Field 'integrity_hash' is required when status is 'published'.")
             if not re.match(r"^[a-fA-F0-9]{64}$", self.integrity_hash):
                 raise ValueError(f"String should match pattern '^[a-fA-F0-9]{{64}}$' (got '{self.integrity_hash}')")
+        return self
+
+    @model_validator(mode="after")
+    def validate_config_completeness_if_published(self) -> AgentDefinition:
+        """Ensure config is complete (entry points, prompts) if published."""
+        if self.status == AgentStatus.PUBLISHED:
+            cfg = self.config
+            has_nodes = len(cfg.nodes) > 0
+            has_entry = cfg.entry_point is not None
+
+            if has_nodes:
+                if not has_entry:
+                    raise ValueError("Graph execution requires an 'entry_point' when published.")
+            else:
+                # Atomic Agent checks
+                has_global_prompt = cfg.system_prompt is not None
+                has_model_prompt = cfg.llm_config.system_prompt is not None
+
+                if not (has_global_prompt or has_model_prompt):
+                    raise ValueError("Atomic Agents require a system_prompt when published.")
+
         return self
 
     @model_validator(mode="after")

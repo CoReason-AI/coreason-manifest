@@ -3,7 +3,7 @@ from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.builder.agent import AgentBuilder
 from coreason_manifest.builder.capability import TypedCapability
-from coreason_manifest.definitions.agent import CapabilityType, ToolRequirement
+from coreason_manifest.definitions.agent import AgentStatus, CapabilityType, ToolRequirement
 from coreason_manifest.definitions.topology import LogicNode
 
 
@@ -64,7 +64,7 @@ def test_builder_validation_failure() -> None:
     """Attempt to build a graph with nodes but without setting an entry point."""
     node_a = LogicNode(id="start", type="logic", code="print('start')")
 
-    builder = get_valid_agent_builder(name="InvalidGraphAgent").with_node(node_a)
+    builder = get_valid_agent_builder(name="InvalidGraphAgent").with_node(node_a).set_status(AgentStatus.PUBLISHED)
 
     with pytest.raises(ValidationError) as excinfo:
         builder.build()
