@@ -9,8 +9,10 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from coreason_manifest.dsl import load_from_yaml
+
 from coreason_manifest.definitions.agent import AgentStatus, CapabilityType
+from coreason_manifest.dsl import load_from_yaml
+
 
 def test_load_basic_agent() -> None:
     yaml_content = """
