@@ -29,6 +29,7 @@ An `AgentDefinition` consists of the following sections:
 2.  **Capabilities (`List[AgentCapability]`)**:
     *   Defines the modes of interaction for the agent (e.g., "Atomic", "Streaming").
     *   Each capability has a unique `name`, `type`, and `description`.
+    *   **Delivery Mode**: `delivery_mode` explicitly declares whether the client should expect a single `REQUEST_RESPONSE` or a stream of `SERVER_SENT_EVENTS`.
     *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas).
     *   `injected_params` lists system-injected values (e.g., `user_context`).
 
@@ -146,7 +147,8 @@ agent = AgentDefinition(
             type=CapabilityType.ATOMIC,
             description="Get the weather forecast.",
             inputs={"location": {"type": "string"}},
-            outputs={"forecast": {"type": "string"}}
+            outputs={"forecast": {"type": "string"}},
+            # delivery_mode defaults to REQUEST_RESPONSE
         )
     ],
 
