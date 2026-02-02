@@ -165,6 +165,7 @@ capabilities:
   - description: "missing name"
 """)
 
+
 def test_recursion_limit() -> None:
     """Test that deeply nested types raise ValueError."""
     nested_type = "list[" * 21 + "int" + "]" * 21
