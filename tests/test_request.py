@@ -1,15 +1,15 @@
-import pytest
-from uuid import uuid4
 from datetime import datetime
-from coreason_manifest.definitions.request import AgentRequest
+from uuid import uuid4
+
+import pytest
 from pydantic import ValidationError
 
-def test_agent_request_defaults():
+from coreason_manifest.definitions.request import AgentRequest
+
+
+def test_agent_request_defaults() -> None:
     session_id = uuid4()
-    req = AgentRequest(
-        session_id=session_id,
-        payload={"input": "test"}
-    )
+    req = AgentRequest(session_id=session_id, payload={"input": "test"})
 
     assert req.request_id is not None
     assert req.session_id == session_id
@@ -20,43 +20,35 @@ def test_agent_request_defaults():
     assert req.payload == {"input": "test"}
     assert req.metadata == {}
 
-def test_agent_request_full_trace():
+
+def test_agent_request_full_trace() -> None:
     request_id = uuid4()
     session_id = uuid4()
     root_id = uuid4()
     parent_id = uuid4()
 
     req = AgentRequest(
-        request_id=request_id,
-        session_id=session_id,
-        root_request_id=root_id,
-        parent_request_id=parent_id,
-        payload={}
+        request_id=request_id, session_id=session_id, root_request_id=root_id, parent_request_id=parent_id, payload={}
     )
 
     assert req.request_id == request_id
     assert req.root_request_id == root_id
     assert req.parent_request_id == parent_id
 
-def test_agent_request_missing_root_with_parent_error_wrapped():
+
+def test_agent_request_missing_root_with_parent_error_wrapped() -> None:
     session_id = uuid4()
     parent_id = uuid4()
 
     with pytest.raises(ValidationError) as excinfo:
-        AgentRequest(
-            session_id=session_id,
-            parent_request_id=parent_id,
-            payload={}
-        )
+        AgentRequest(session_id=session_id, parent_request_id=parent_id, payload={})
 
     assert "Root ID missing while Parent ID is present" in str(excinfo.value)
 
-def test_agent_request_json_serialization():
+
+def test_agent_request_json_serialization() -> None:
     session_id = uuid4()
-    req = AgentRequest(
-        session_id=session_id,
-        payload={"foo": "bar"}
-    )
+    req = AgentRequest(session_id=session_id, payload={"foo": "bar"})
 
     json_str = req.to_json()
     assert str(session_id) in json_str
@@ -68,10 +60,11 @@ def test_agent_request_json_serialization():
     assert req2.request_id == req.request_id
     assert req2.root_request_id == req.root_request_id
 
-def test_immutability():
+
+def test_immutability() -> None:
     session_id = uuid4()
     req = AgentRequest(session_id=session_id, payload={})
 
     # Pydantic v2 frozen models raise ValidationError on assignment
     with pytest.raises(ValidationError):
-        req.payload = {"new": "val"}
+        req.payload = {"new": "val"}  # type: ignore[misc]
