@@ -164,3 +164,16 @@ name: "NoCapName"
 capabilities:
   - description: "missing name"
 """)
+
+def test_recursion_limit() -> None:
+    """Test that deeply nested types raise ValueError."""
+    nested_type = "list[" * 21 + "int" + "]" * 21
+    yaml_content = f"""
+name: DosBot
+capabilities:
+  - name: test
+    inputs:
+      x: {nested_type}
+"""
+    with pytest.raises(ValueError, match="Type definition too deeply nested"):
+        load_from_yaml(yaml_content)

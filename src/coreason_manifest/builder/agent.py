@@ -74,6 +74,7 @@ class AgentBuilder:
         self._edges: list[Edge] = []
         self._entry_point: Optional[str] = None
         self._tools: list[ToolRequirement] = []
+        self._requires_auth: bool = False
 
     def set_status(self, status: AgentStatus) -> Self:
         """Set the lifecycle status of the agent.
@@ -155,6 +156,18 @@ class AgentBuilder:
         self._entry_point = node_id
         return self
 
+    def with_auth_requirement(self, required: bool) -> Self:
+        """Set whether the agent requires user authentication.
+
+        Args:
+            required: True if authentication is required.
+
+        Returns:
+            The builder instance (for chaining).
+        """
+        self._requires_auth = required
+        return self
+
     def build(self) -> AgentDefinition:
         """Construct the final immutable AgentDefinition.
 
@@ -171,7 +184,7 @@ class AgentBuilder:
             name=self.name,
             author=self.author,
             created_at=datetime.now(timezone.utc),
-            requires_auth=False,
+            requires_auth=self._requires_auth,
         )
 
         model_config = ModelConfig(
