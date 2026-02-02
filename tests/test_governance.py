@@ -166,3 +166,13 @@ def test_governance_malformed_uri_handling() -> None:
     assert len(report.violations) == 1
     assert report.violations[0].rule == "domain_restriction"
     assert "Failed to parse tool URI" in report.violations[0].message
+
+
+def test_governance_no_hostname_allowed() -> None:
+    # Tools with no hostname (e.g. mailto:) should be allowed if they don't violate domain rules
+    tool = ToolRequirement(uri="mailto:user@example.com", hash="a" * 64, scopes=[], risk_level=ToolRiskLevel.SAFE)
+    agent = create_agent(tools=[tool])
+    # Even if we restrict domains, "mailto:" has no domain, so it should be skipped/allowed per user request
+    config = GovernanceConfig(allowed_domains=["trusted.com"])
+    report = check_compliance(agent, config)
+    assert report.passed
