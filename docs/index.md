@@ -5,6 +5,7 @@ This is the documentation for the coreason_manifest project.
 ## Core Concepts
 
 *   [Atomic Agents](atomic_agents.md): Understand how to define simple, prompt-based agents without complex topologies.
+*   [Agent Behavior Protocols](agent_behavior_protocols.md): The standard interfaces (`AgentInterface`) for agent implementation.
 *   [Recipe Manifests](recipes.md): Learn about defining executable workflows and graphs.
 *   [Session Management](session_management.md): Decoupling execution from memory with standardized Session and Interaction models.
 *   [Agent Request Envelope](agent_request_envelope.md): The standard envelope for agent invocations and distributed tracing.

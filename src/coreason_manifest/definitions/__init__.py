@@ -33,6 +33,7 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .interfaces import AgentInterface, LifecycleInterface
 from .presentation import (
     DataBlock,
     MarkdownBlock,
@@ -47,6 +48,8 @@ __all__ = [
     "AgentRequest",
     "AgentRuntimeConfig",
     "AgentDefinition",
+    "AgentInterface",
+    "LifecycleInterface",
     "Persona",
     "DeploymentConfig",
     "Protocol",
