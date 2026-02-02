@@ -5,6 +5,7 @@ nav:
   - Home: index.md
   - Requirements: requirements.md
   - Usage: usage.md
+  - Simplified DSL: simplified_dsl.md
   - Session Management: session_management.md
   - Observability: observability.md
   - Recipes: recipes.md
