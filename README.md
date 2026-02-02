@@ -16,6 +16,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 ## Features
 
 *   **Open Agent Specification (OAS):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
+*   **Behavioral Protocols:** Standard `AgentInterface` and `LifecycleInterface` protocols for runtime interoperability.
 *   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
 *   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like `UUID` and `datetime`.
 *   **Event Protocol:** Defines the `GraphEvent` and `CloudEvent` structures for real-time communication.
@@ -120,6 +121,7 @@ For full details, see the [Usage Documentation](docs/usage.md).
 
 ## Documentation
 
+*   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
 *   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
