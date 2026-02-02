@@ -108,6 +108,26 @@ A Graph Agent orchestrates a complex workflow involving multiple steps, loops, o
     *   `entry_point`: The ID of the starting node.
     *   **Topology Validation**: The specification validates that all edges connect to existing nodes (preventing "dangling pointers"). *Note: This check is skipped if the agent is in `draft` status.*
 
+## Visualization & Export
+
+To assist with debugging and documentation, the `AgentDefinition` class includes a `to_mermaid()` method. This generates a [Mermaid.js](https://mermaid.js.org/) graph definition string representing the agent's topology.
+
+*   **Atomic Agents**: Rendered as a simple flow from Start to the Agent.
+*   **Graph Agents**: Rendered as a `graph TD` flow diagram, including:
+    *   Visual distinction between Node Types (Agents, Logic, Human).
+    *   Conditional Edges.
+    *   Entry Point indication.
+
+```python
+mermaid_graph = agent.to_mermaid()
+print(mermaid_graph)
+# Output:
+# graph TD
+# Start((Start)) --> node1
+# node1["Search"]:::agent
+# ...
+```
+
 ## Recipes and Topology
 
 While `AgentDefinition` defines an autonomous entity, the **Recipe Manifest** (`RecipeManifest`) defines a reusable workflow or "Standard Operating Procedure" (SOP).
