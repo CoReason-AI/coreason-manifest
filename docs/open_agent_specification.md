@@ -2,6 +2,8 @@
 
 The **Open Agent Specification (OAS)** is the core standard used by the Coreason ecosystem to define, configure, and validate AI Agents. It serves as the "Source of Truth," ensuring that agents are portable, strictly typed, and secure.
 
+**Note:** While the OAS is the "machine code" for agents, developers are encouraged to use the **[Builder SDK](builder_sdk.md)** to generate these definitions using Python classes and Pydantic models.
+
 In this repository (`coreason-manifest`), the OAS is implemented as a set of strict **Pydantic v2 models**. These models define the schema for Agents, their relationships (Topology), and their execution requirements.
 
 ## Architecture: The Shared Kernel
