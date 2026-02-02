@@ -19,6 +19,19 @@ from coreason_manifest.definitions.events import GraphEvent
 from coreason_manifest.definitions.message import MultiModalInput
 
 
+class LineageMetadata(CoReasonBaseModel):
+    """Metadata tracking the Chain of Custody for this interaction."""
+
+    model_config = ConfigDict(frozen=True)
+
+    root_request_id: Optional[str] = Field(
+        None, description="The ID of the original request that started the entire chain"
+    )
+    parent_interaction_id: Optional[str] = Field(
+        None, description="The ID of the specific interaction that triggered this one"
+    )
+
+
 class Interaction(CoReasonBaseModel):
     """Represents a single 'turn' or request/response cycle in a session."""
 
@@ -34,6 +47,7 @@ class Interaction(CoReasonBaseModel):
         default_factory=list, description="A log of intermediate events emitted during this turn"
     )
     meta: Dict[str, Any] = Field(default_factory=dict, description="Metadata (Latency, cost, model used, etc.)")
+    lineage: Optional[LineageMetadata] = Field(None, description="Chain of Custody metadata")
 
 
 class SessionState(CoReasonBaseModel):
