@@ -68,6 +68,20 @@ The `visual_metadata` field allows the backend graph logic to drive frontend ani
 
 ---
 
+## Presentation Schemas ("UI-First" Artifacts)
+
+In addition to workflow events, agents can emit standardized "Presentation Blocks" to render rich UI elements directly. These are defined in `coreason_manifest.definitions.presentation`.
+
+These blocks are particularly useful for:
+*   **Thinking Processes**: Showing the user what the agent is planning (`ThinkingBlock`).
+*   **Structured Data**: Rendering tables or JSON views (`DataBlock`).
+*   **Rich Text**: Displaying formatted answers (`MarkdownBlock`).
+*   **Errors**: showing user-friendly error messages (`UserErrorBlock`).
+
+See [Presentation Schemas](./presentation_schemas.md) for detailed documentation on these types.
+
+---
+
 ## Event Types & Payloads
 
 ### 1. `NODE_INIT`
