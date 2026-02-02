@@ -18,6 +18,7 @@ from coreason_manifest.definitions.events import (
     CouncilVotePayload,
     EdgeTraversed,
     EdgeTraversedPayload,
+    ErrorDomain,
     GraphEventNodeInit,
     NodeCompleted,
     NodeCompletedPayload,
@@ -32,7 +33,6 @@ from coreason_manifest.definitions.events import (
     NodeStreamPayload,
     WorkflowError,
     WorkflowErrorPayload,
-    ErrorDomain,
 )
 
 
