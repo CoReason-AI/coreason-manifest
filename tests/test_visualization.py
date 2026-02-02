@@ -1,8 +1,9 @@
-import pytest
 from pydantic import BaseModel
+
 from coreason_manifest.builder.agent import AgentBuilder
 from coreason_manifest.builder.capability import TypedCapability
-from coreason_manifest.definitions.topology import AgentNode, LogicNode, HumanNode, RecipeNode, VisualMetadata
+from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode, RecipeNode, VisualMetadata
+
 
 class DummyInput(BaseModel):
     query: str
