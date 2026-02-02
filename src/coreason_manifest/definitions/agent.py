@@ -23,6 +23,7 @@ from types import MappingProxyType
 from typing import Any, Dict, List, Literal, Mapping, Optional, Tuple, Union
 from uuid import UUID
 
+import jsonschema
 from pydantic import (
     AfterValidator,
     AnyUrl,
@@ -445,3 +446,36 @@ class AgentDefinition(CoReasonBaseModel):
         if self.status == AgentStatus.PUBLISHED:
             validate_edge_integrity(self.config.nodes, self.config.edges)
         return self
+
+    def validate_input(self, capability_name: str, payload: Dict[str, Any]) -> bool:
+        """Validates a payload against the schema of a specific capability.
+
+        This acts as a 'Dry Run' to ensure the input meets the contract requirements
+        before execution.
+
+        Args:
+            capability_name: The name of the capability to validate against.
+            payload: The input dictionary to validate.
+
+        Returns:
+            True if valid.
+
+        Raises:
+            ValueError: If the capability_name is not found.
+            jsonschema.ValidationError: If the payload does not match the schema.
+        """
+        # 1. Find the capability
+        # Iterate through self.capabilities to find the one matching capability_name
+        target_capability = next((c for c in self.capabilities if c.name == capability_name), None)
+
+        # 2. If not found:
+        if not target_capability:
+            raise ValueError(f"Capability '{capability_name}' not found in agent '{self.metadata.name}'.")
+
+        # 3. If found:
+        # Use jsonschema.validate(instance=payload, schema=target_capability.inputs)
+        # Note: capability.inputs is an ImmutableDict, so we cast to dict for jsonschema.
+        jsonschema.validate(instance=payload, schema=dict(target_capability.inputs))
+
+        # 4. Return True
+        return True
