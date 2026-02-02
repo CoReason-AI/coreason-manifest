@@ -31,6 +31,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 *   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
 *   **Enhanced Tracing:** `ReasoningTrace` includes flexible metadata for execution state.
 *   **Builder SDK:** A fluent, strictly-typed Python SDK for defining Agents using Pydantic models.
+*   **Simplified YAML DSL:** define Agents using a concise, human-readable YAML syntax.
 
 ## Serialization & Base Model
 
@@ -150,6 +151,7 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 ## Documentation
 
 *   [Builder SDK](docs/builder_sdk.md): Fluent Python API for defining Agents.
+*   [Simplified DSL](docs/simplified_dsl.md): Define Agents using simplified YAML syntax.
 *   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
 *   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.

@@ -51,6 +51,7 @@ from .definitions.topology import (
     StateDefinition,
     Topology,
 )
+from .dsl import load_from_yaml
 from .governance import ComplianceReport, GovernanceConfig, check_compliance
 from .recipes import RecipeManifest
 
@@ -99,4 +100,5 @@ __all__ = [
     "GovernanceConfig",
     "ComplianceReport",
     "check_compliance",
+    "load_from_yaml",
 ]
