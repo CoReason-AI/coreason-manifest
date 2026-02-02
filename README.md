@@ -26,6 +26,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 *   **Token Arithmetic:** Support for `+` and `+=` operators on `GenAITokenUsage`.
 *   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
 *   **Enhanced Tracing:** `ReasoningTrace` includes flexible metadata for execution state.
+*   **Builder SDK:** A fluent, strictly-typed Python SDK for defining Agents using Pydantic models.
 
 ## Serialization & Base Model
 
@@ -119,8 +120,30 @@ print(f"Agent '{agent.metadata.name}' definition created and validated.")
 
 For full details, see the [Usage Documentation](docs/usage.md).
 
+## Builder SDK
+
+The **Builder SDK** offers a developer-friendly way to define agents using standard Python classes instead of raw schemas.
+
+```python
+from coreason_manifest.builder import AgentBuilder, TypedCapability
+from pydantic import BaseModel
+
+class MyInput(BaseModel):
+    query: str
+
+class MyOutput(BaseModel):
+    answer: str
+
+cap = TypedCapability("search", "Search tool", MyInput, MyOutput)
+
+agent = AgentBuilder("MyAgent").with_capability(cap).build()
+```
+
+See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
+
 ## Documentation
 
+*   [Builder SDK](docs/builder_sdk.md): Fluent Python API for defining Agents.
 *   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
 *   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
