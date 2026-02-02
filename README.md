@@ -25,6 +25,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 *   **Event Protocol:** Defines the `GraphEvent` and `CloudEvent` structures for real-time communication.
 *   **Simulation Schemas:** Provides standard models for `SimulationScenario`, `AdversaryProfile`, and `SimulationTrace`.
 *   **Audit & Compliance:** Defines the `AuditLog` structure for tamper-evident record keeping.
+*   **Governance & Policy:** Enforce organizational rules (domains, risk levels) on agents via `GovernanceConfig`.
 *   **Ergonomic Factory Methods:** Simplified construction of `ChatMessage` and `GenAIOperation`.
 *   **Token Arithmetic:** Support for `+` and `+=` operators on `GenAITokenUsage`.
 *   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
@@ -154,3 +155,4 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
 *   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
+*   [Governance & Policy Enforcement](docs/governance_policy_enforcement.md): Validating agents against organizational rules.

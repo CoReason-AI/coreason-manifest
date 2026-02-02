@@ -49,10 +49,11 @@ An `AgentDefinition` consists of the following sections:
     *   **Integrity**: Tools require SHA256 hashes for security.
 
 6.  **Policy (`PolicyConfig`)**:
-    *   Governance controls.
+    *   Internal governance controls defined *by* the agent.
     *   `budget_caps`: Limits on cost or tokens.
     *   `human_in_the_loop`: Node IDs that trigger a pause for human approval.
     *   `allowed_domains`: Whitelisting for external access.
+    *   *Note: For external enforcement of organizational rules (e.g., blocking unsafe tools), see the [Governance & Policy Enforcement](governance_policy_enforcement.md) module.*
 
 7.  **Deployment (`DeploymentConfig`)**:
     *   Specifies *how* the agent is hosted.
