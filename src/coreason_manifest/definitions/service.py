@@ -8,13 +8,16 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict, Optional
+from datetime import datetime
+from typing import Any, Dict, Literal, Optional
+from uuid import UUID
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.events import CloudEvent
 from coreason_manifest.definitions.request import AgentRequest
+from coreason_manifest.definitions.session import SessionContext
 
 DEFAULT_ENDPOINT_PATH = "/v1/assist"
 CONTENT_TYPE_SSE = "text/event-stream"
@@ -44,6 +47,42 @@ class ServerSentEvent(CoReasonBaseModel):
         )
 
 
+class ServiceRequest(CoReasonBaseModel):
+    """The envelope for agent invocations, strictly separating context from payload.
+
+    Allows the engine to strip off authentication/tracing (SessionContext)
+    before passing the raw payload (AgentRequest) to the agent logic.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    request_id: UUID = Field(..., description="Unique ID for this HTTP transaction.")
+    context: SessionContext = Field(..., description="Immutable session context (Who is asking).")
+    payload: AgentRequest = Field(..., description="The actual query payload (What they are asking).")
+
+
+class ServiceResponse(CoReasonBaseModel):
+    """Standard synchronous response for non-streaming agent invocations."""
+
+    model_config = ConfigDict(frozen=True)
+
+    request_id: UUID = Field(..., description="Echoes the request ID.")
+    created_at: datetime = Field(..., description="Timestamp of response creation.")
+    output: Dict[str, Any] = Field(..., description="The final result.")
+    metrics: Optional[Dict[str, Any]] = Field(None, description="Execution stats like token count, latency.")
+
+
+class HealthCheckResponse(CoReasonBaseModel):
+    """Response model for service health checks."""
+
+    model_config = ConfigDict(frozen=True)
+
+    status: Literal["ok", "degraded", "maintenance"] = Field(..., description="Current service status.")
+    agent_id: UUID = Field(..., description="Unique ID of the agent instance.")
+    version: str = Field(..., description="Semantic version string.")
+    uptime_seconds: float = Field(..., description="Service uptime in seconds.")
+
+
 class ServiceContract(CoReasonBaseModel):
     """Generates the OpenAPI specification for the Agent Service."""
 
@@ -56,7 +95,7 @@ class ServiceContract(CoReasonBaseModel):
         return {
             "post": {
                 "summary": "Invoke Agent",
-                "requestBody": {"content": {"application/json": {"schema": AgentRequest.model_json_schema()}}},
+                "requestBody": {"content": {"application/json": {"schema": ServiceRequest.model_json_schema()}}},
                 "responses": {
                     "200": {
                         "description": "Event Stream",
