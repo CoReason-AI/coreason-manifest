@@ -157,3 +157,7 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
 *   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
 *   [Governance & Policy Enforcement](docs/governance_policy_enforcement.md): Validating agents against organizational rules.
+
+## Roadmap
+
+*   **RFC 001: Canonical YAML (v2)**: We are working on a new "Human-Centric" YAML format for manifests. See [docs/rfcs/001-v2-canonical-yaml.md](docs/rfcs/001-v2-canonical-yaml.md) for the specification.
