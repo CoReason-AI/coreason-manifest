@@ -61,7 +61,7 @@ def test_agent_definition_with_memory_config() -> None:
     mem_config = MemoryConfig(strategy=MemoryStrategy.SLIDING_WINDOW, limit=5, summary_prompt="Summarize me")
 
     runtime_config = AgentRuntimeConfig(
-        nodes=[], edges=[], model_config=ModelConfig(model="gpt-4", temperature=0.5), memory=mem_config
+        nodes=[], edges=[], llm_config=ModelConfig(model="gpt-4", temperature=0.5), memory=mem_config
     )
 
     assert runtime_config.memory is not None
@@ -82,7 +82,9 @@ def test_prune_sliding_window() -> None:
 
     # Check that we have the LAST 5 interactions (indices 5, 6, 7, 8, 9)
     # The input content was "msg {i}"
+    assert isinstance(pruned_session.history[0].input, dict)
     assert pruned_session.history[0].input["content"] == "msg 5"
+    assert isinstance(pruned_session.history[4].input, dict)
     assert pruned_session.history[4].input["content"] == "msg 9"
 
     # Check context preservation
@@ -91,6 +93,7 @@ def test_prune_sliding_window() -> None:
 
     # Check immutability of original session
     assert len(session.history) == 10
+    assert isinstance(session.history[0].input, dict)
     assert session.history[0].input["content"] == "msg 0"
 
 
@@ -102,6 +105,7 @@ def test_prune_sliding_window_limit_larger_than_history() -> None:
     pruned_session = session.prune(MemoryStrategy.SLIDING_WINDOW, limit=10)
 
     assert len(pruned_session.history) == 5
+    assert isinstance(pruned_session.history[0].input, dict)
     assert pruned_session.history[0].input["content"] == "msg 0"
 
 
