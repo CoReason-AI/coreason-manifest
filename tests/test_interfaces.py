@@ -36,9 +36,7 @@ class MockSession:
     async def history(self, limit: int = 10, offset: int = 0) -> List[Interaction]:
         return []
 
-    async def recall(
-        self, query: str, limit: int = 5, threshold: float = 0.7
-    ) -> List[str]:
+    async def recall(self, query: str, limit: int = 5, threshold: float = 0.7) -> List[str]:
         return []
 
     async def store(self, key: str, value: Any) -> None:
@@ -53,9 +51,7 @@ class ValidAgent:
     def manifest(self) -> AgentDefinition:
         return MagicMock(spec=AgentDefinition)
 
-    async def assist(
-        self, request: AgentRequest, session: SessionHandle, response: ResponseHandler
-    ) -> None:
+    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
         pass
 
 

@@ -194,9 +194,7 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    async def assist(
-        self, request: AgentRequest, session: SessionHandle, response: ResponseHandler
-    ) -> None:
+    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
         """Process a request and use the response handler to emit events.
 
         Args:
