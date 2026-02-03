@@ -16,17 +16,9 @@ from pydantic import ValidationError
 
 from coreason_manifest.definitions import (
     AgentDefinition,
-    AgentRuntimeConfig,
     DeploymentConfig,
     ResourceLimits,
     SecretReference,
-)
-from coreason_manifest.definitions.agent import (
-    AgentCapability,
-    AgentDependencies,
-    AgentMetadata,
-    CapabilityType,
-    ModelConfig,
 )
 
 
@@ -80,12 +72,14 @@ def test_agent_definition_parsing() -> None:
             "env_vars": [{"key": "API_KEY", "description": "Key"}],
             "resources": {"cpu_cores": 1.0, "memory_mb": 512},
         },
+        "integrity_hash": "a" * 64,
     }
 
     agent = AgentDefinition.model_validate(agent_data)
     assert agent.deployment is not None
     assert len(agent.deployment.env_vars) == 1
     assert agent.deployment.env_vars[0].key == "API_KEY"
+    assert agent.deployment.resources is not None
     assert agent.deployment.resources.cpu_cores == 1.0
 
 
@@ -97,7 +91,7 @@ def test_deployment_immutability() -> None:
     )
 
     with pytest.raises(ValidationError):
-        config.scaling_strategy = "dedicated"  # type: ignore
+        config.scaling_strategy = "dedicated"
 
     with pytest.raises(ValidationError):
-        config.resources.cpu_cores = 2.0  # type: ignore
+        config.resources.cpu_cores = 2.0
