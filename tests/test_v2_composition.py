@@ -141,3 +141,23 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     # Since we are not resolving, the dict value for my_tool will be {"$ref": "tool.yaml"}
     manifest = load_from_yaml(main_path, recursive=False)
     assert manifest.definitions["my_tool"] == {"$ref": "tool.yaml"}
+
+
+def test_invalid_yaml_content(manifest_dir: Path) -> None:
+    """Test handling of invalid YAML content."""
+    invalid_path = manifest_dir / "invalid.yaml"
+    with open(invalid_path, "w") as f:
+        f.write(":: invalid yaml ::")
+
+    with pytest.raises(ValueError, match="Invalid YAML"):
+        load_from_yaml(invalid_path)
+
+
+def test_non_dict_content(manifest_dir: Path) -> None:
+    """Test handling of valid YAML that is not a dictionary."""
+    list_path = manifest_dir / "list.yaml"
+    with open(list_path, "w") as f:
+        yaml.dump(["item1", "item2"], f)
+
+    with pytest.raises(ValueError, match="Expected a dictionary"):
+        load_from_yaml(list_path)
