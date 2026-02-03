@@ -79,9 +79,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                         violations.append(
                             ComplianceViolation(
                                 rule="domain_restriction",
-                                message=(
-                                    f"Tool '{definition.name}' URI '{definition.uri}' has no hostname."
-                                ),
+                                message=(f"Tool '{definition.name}' URI '{definition.uri}' has no hostname."),
                                 component_id=definition.id,
                             )
                         )
