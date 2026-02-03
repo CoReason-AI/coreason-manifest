@@ -72,7 +72,7 @@ def test_session_state_creation() -> None:
     assert session.processor == processor
     assert session.processor.id == "agent-1"
     assert session.user == user
-    assert session.user.id == "user-1"  # type: ignore
+    assert session.user.id == "user-1"
     assert session.created_at == now
     assert session.last_updated_at == now
     assert session.history == []
@@ -94,17 +94,17 @@ def test_session_state_immutability() -> None:
     )
 
     with pytest.raises(ValidationError):  # Pydantic v2 raises ValidationError or TypeError depending on config
-        session.processor = Identity(id="agent-2", name="Agent 2")  # type: ignore
+        session.processor = Identity(id="agent-2", name="Agent 2")
 
     # Note: session.history is a list, so append() works at runtime even if frozen=True.
     # frozen=True only prevents field reassignment.
     # To test frozen properly, we check field reassignment.
     with pytest.raises(ValidationError):
-        session.history = []  # type: ignore
+        session.history = []
 
     # Better test for frozen:
     with pytest.raises(ValidationError):
-        session.user = Identity.anonymous()  # type: ignore
+        session.user = Identity.anonymous()
 
 
 def test_add_interaction() -> None:
