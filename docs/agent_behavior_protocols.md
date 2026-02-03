@@ -77,6 +77,42 @@ class LifecycleInterface(Protocol):
         ...
 ```
 
+## Response Streaming Protocols
+
+To ensure robust streaming, Coreason uses explicit handles for managing output streams. This prevents "zombie streams" and ensures correct UI routing.
+
+See [Stream Identity and Lifecycle](stream_lifecycle_and_identity.md) for a detailed explanation.
+
+### StreamHandle
+
+Encapsulates the lifecycle of a single output stream (Open -> Emit -> Close).
+
+```python
+@runtime_checkable
+class StreamHandle(Protocol):
+    @property
+    def stream_id(self) -> str: ...
+    @property
+    def is_active(self) -> bool: ...
+    async def write(self, chunk: str) -> None: ...
+    async def close(self) -> None: ...
+    async def abort(self, reason: str) -> None: ...
+```
+
+### ResponseHandler
+
+A factory protocol used to create new streams. This is typically provided to the Agent or used within the Agent's helpers.
+
+```python
+@runtime_checkable
+class ResponseHandler(Protocol):
+    async def create_stream(
+        self, title: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None
+    ) -> StreamHandle:
+        """Create a new output stream."""
+        ...
+```
+
 ## Usage Example
 
 ```python
