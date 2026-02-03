@@ -37,6 +37,7 @@ An `AgentDefinition` consists of the following sections:
     *   The "brain" of the agent.
     *   **LLM Config**: Model selection, temperature, and system prompts.
     *   **Topology**: Defines whether the agent is Atomic (single prompt) or Graph-based (workflow).
+    *   **Interoperability**: `adapter_hints` allow embedding "Rosetta Stone" metadata for external frameworks (e.g., LangGraph, AutoGen).
 
 4.  **Status (`status`)**:
     *   Lifecycle state of the agent (`draft` or `published`).

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .definitions.agent import AgentDefinition, AgentStatus, Persona
+from .definitions.agent import AdapterHints, AgentDefinition, AgentStatus, Persona
 from .definitions.audit import AuditLog
 from .definitions.evaluation import EvaluationProfile, SuccessCriterion
 from .definitions.events import (
@@ -63,6 +63,7 @@ from .governance import ComplianceReport, GovernanceConfig, check_compliance
 from .recipes import RecipeManifest
 
 __all__ = [
+    "AdapterHints",
     "AgentDefinition",
     "AgentStatus",
     "Persona",
