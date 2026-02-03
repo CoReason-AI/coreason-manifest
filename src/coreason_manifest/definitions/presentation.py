@@ -146,6 +146,38 @@ class StreamOpCode(str, Enum):
     CLOSE = "CLOSE"
 
 
+class ErrorSeverity(str, Enum):
+    """Severity levels for stream errors.
+
+    Values:
+        FATAL: The stream is dead; do not retry.
+        TRANSIENT: The stream was interrupted; immediate retry is safe.
+        WARNING: The stream continues, but something minor failed.
+    """
+
+    FATAL = "FATAL"
+    TRANSIENT = "TRANSIENT"
+    WARNING = "WARNING"
+
+
+class StreamError(CoReasonBaseModel):
+    """Structured error payload for stream errors.
+
+    Attributes:
+        code: Stable, machine-readable error code in snake_case.
+        message: Human-readable error description.
+        severity: The severity of the error.
+        details: Optional dictionary of additional details.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    code: str
+    message: str
+    severity: ErrorSeverity
+    details: Optional[Dict[str, Any]] = None
+
+
 class StreamPacket(CoReasonBaseModel):
     """Standardized wire format for streaming data.
 
@@ -163,7 +195,7 @@ class StreamPacket(CoReasonBaseModel):
     seq: int
     op: StreamOpCode
     t: datetime
-    p: Union[str, PresentationEvent, Dict[str, Any]]
+    p: Union[str, PresentationEvent, StreamError, Dict[str, Any]]
 
     @model_validator(mode="after")
     def validate_payload(self) -> "StreamPacket":
@@ -172,4 +204,11 @@ class StreamPacket(CoReasonBaseModel):
             raise ValueError("Payload must be a string for DELTA op.")
         if self.op == StreamOpCode.EVENT and isinstance(self.p, str):
             raise ValueError("Payload must be a PresentationEvent or Dict for EVENT op.")
+        if self.op == StreamOpCode.ERROR:
+            if isinstance(self.p, str):
+                raise ValueError("Payload must be a StreamError or Dict for ERROR op.")
+            if isinstance(self.p, dict):
+                self.__dict__["p"] = StreamError.model_validate(self.p)
+            if not isinstance(self.p, StreamError):
+                raise ValueError("Payload must be a StreamError for ERROR op.")
         return self

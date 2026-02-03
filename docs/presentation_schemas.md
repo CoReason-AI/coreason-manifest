@@ -67,6 +67,37 @@ class CitationBlock(CoReasonBaseModel):
 }
 ```
 
+### StreamError
+
+Structured error payload for stream errors, ensuring clients can make intelligent retry decisions.
+
+```python
+class ErrorSeverity(str, Enum):
+    FATAL = "FATAL"         # Do not retry (e.g., Auth failed)
+    TRANSIENT = "TRANSIENT" # Retry immediately (e.g., Timeout)
+    WARNING = "WARNING"     # Minor failure, stream continues
+
+class StreamError(CoReasonBaseModel):
+    code: str               # Stable snake_case code (e.g., "rate_limit_exceeded")
+    message: str            # Human-readable message
+    severity: ErrorSeverity
+    details: Optional[Dict[str, Any]]
+```
+
+**JSON Example:**
+
+```json
+{
+  "code": "upstream_timeout",
+  "message": "The LLM provider failed to respond in time.",
+  "severity": "TRANSIENT",
+  "details": {
+    "provider": "openai",
+    "latency_ms": 15000
+  }
+}
+```
+
 ## Streaming Wire Format
 
 When sending these events over a stream (Server-Sent Events), they are wrapped in a `StreamPacket`. See [SSE Wire Protocol Specification](./sse_wire_protocol.md) for details.
