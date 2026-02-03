@@ -18,7 +18,7 @@ class StreamPacket(CoReasonBaseModel):
     seq: int
     op: StreamOpCode
     t: datetime
-    p: Union[str, PresentationEvent, Dict[str, Any]]
+    p: Union[str, PresentationEvent, StreamError, Dict[str, Any]]
 ```
 
 ### Fields
@@ -35,7 +35,7 @@ class StreamPacket(CoReasonBaseModel):
 | :--- | :--- | :--- |
 | `DELTA` | `str` | A raw text token. Used for streaming prose (e.g., from an LLM). |
 | `EVENT` | `PresentationEvent` or `Dict` | A structured event for the UI (e.g., a Citation, Progress Update). |
-| `ERROR` | `str` or `Dict` | A stream-level error. |
+| `ERROR` | `StreamError` | A strict stream-level error. |
 | `CLOSE` | `Any` (usually `str` reason) | Indicates the stream has finished. No further packets with this `stream_id` will be sent. |
 
 ## JSON Serialization Examples
@@ -82,16 +82,37 @@ Used for inserting rich UI components into the stream.
 }
 ```
 
-### 3. Stream Close
+### 3. Stream Error
+
+Indicates a stream-level error (fatal or transient).
+
+```json
+{
+  "stream_id": "123e4567-e89b-12d3-a456-426614174000",
+  "seq": 3,
+  "op": "ERROR",
+  "t": "2023-10-27T10:00:02.000000+00:00",
+  "p": {
+    "code": "rate_limit_exceeded",
+    "message": "You have exceeded your quota.",
+    "severity": "TRANSIENT",
+    "details": {
+      "retry_after": 60
+    }
+  }
+}
+```
+
+### 4. Stream Close
 
 Indicates the end of the stream.
 
 ```json
 {
   "stream_id": "123e4567-e89b-12d3-a456-426614174000",
-  "seq": 3,
+  "seq": 4,
   "op": "CLOSE",
-  "t": "2023-10-27T10:00:02.000000+00:00",
+  "t": "2023-10-27T10:00:03.000000+00:00",
   "p": "Stream completed successfully"
 }
 ```

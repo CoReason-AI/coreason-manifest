@@ -86,7 +86,7 @@ class StreamPacket(CoReasonBaseModel):
     seq: int
     op: StreamOpCode
     t: datetime
-    p: Union[str, PresentationEvent, Dict[str, Any]]
+    p: Union[str, PresentationEvent, StreamError, Dict[str, Any]]
 ```
 
 ##### Example Stream
