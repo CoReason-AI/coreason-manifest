@@ -235,8 +235,8 @@ Here is how to programmatically define an Agent using the CAM:
 ```python
 import uuid
 from datetime import datetime, timezone
+from coreason_manifest.v1 import AgentDefinition
 from coreason_manifest.definitions.agent import (
-    AgentDefinition,
     AgentMetadata,
     AgentCapability,
     CapabilityType,

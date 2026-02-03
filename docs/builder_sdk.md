@@ -54,7 +54,7 @@ Use `AgentBuilder` to assemble the agent and compile it into an `AgentDefinition
 
 ```python
 from coreason_manifest.builder import AgentBuilder
-from coreason_manifest.definitions.agent import AgentStatus
+from coreason_manifest.v1 import AgentStatus
 
 builder = AgentBuilder(
     name="ResearchAssistant",
@@ -81,7 +81,7 @@ print(agent_definition.to_json(indent=2))
 You can define complex workflows using Nodes and Edges.
 
 ```python
-from coreason_manifest.definitions.topology import LogicNode
+from coreason_manifest.v1 import LogicNode
 
 node_a = LogicNode(id="start", type="logic", code="print('Start')")
 node_b = LogicNode(id="end", type="logic", code="print('End')")

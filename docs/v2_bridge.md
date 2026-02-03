@@ -21,12 +21,12 @@ To run a V2 YAML file, you use the `load_from_yaml` function. This function auto
 
 ```python
 from pathlib import Path
-from coreason_manifest.v2.io import load_from_yaml
+from coreason_manifest import load
 from coreason_manifest.v2.adapter import v2_to_recipe
 
 # 1. Load V2 Manifest (Human Friendly)
 # By default, this resolves imports relative to the file's directory.
-v2_manifest = load_from_yaml("my_workflow.v2.yaml")
+v2_manifest = load("my_workflow.v2.yaml")
 
 # 2. Convert to V1 Recipe (Machine Optimized)
 recipe = v2_to_recipe(v2_manifest)
@@ -104,8 +104,10 @@ To prevent **Path Traversal Attacks**, the loader enforces a "Jail" constraint. 
 You can explicitly set the root directory:
 
 ```python
+from coreason_manifest import load
+
 # Enforce that all imports must be within /safe/base/dir
-manifest = load_from_yaml(
+manifest = load(
     "project/main.yaml",
     root_dir="/safe/base/dir"
 )
@@ -133,8 +135,8 @@ The compiler performs several transformations:
 You can also programmatically create V2 manifests and dump them to YAML. The dumper ensures that `apiVersion`, `kind`, and `metadata` appear at the top of the file.
 
 ```python
-from coreason_manifest.v2.io import dump_to_yaml
+from coreason_manifest import dump
 
-yaml_str = dump_to_yaml(v2_manifest)
+yaml_str = dump(v2_manifest)
 print(yaml_str)
 ```

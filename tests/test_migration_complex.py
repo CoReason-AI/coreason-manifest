@@ -4,6 +4,7 @@ import importlib
 from typing import Any, cast
 
 import coreason_manifest
+from pydantic import BaseModel
 
 
 def test_mixed_namespace_usage() -> None:
@@ -93,3 +94,27 @@ def test_manifest_load_consistency() -> None:
     from coreason_manifest.v2.io import load_from_yaml
 
     assert coreason_manifest.load is load_from_yaml
+
+
+def test_builder_integration() -> None:
+    """
+    Complex Case: Verify that the Builder SDK still produces valid V1 objects
+    even though the root package has changed.
+    """
+    from coreason_manifest.builder import AgentBuilder, TypedCapability
+    from coreason_manifest.v1 import AgentDefinition
+
+    class Input(BaseModel):
+        q: str
+
+    class Output(BaseModel):
+        a: str
+
+    cap = TypedCapability(name="test", description="test", input_model=Input, output_model=Output)
+
+    builder = AgentBuilder("TestAgent")
+    builder.with_capability(cap)
+    agent = builder.build()
+
+    assert isinstance(agent, AgentDefinition)
+    assert agent.metadata.name == "TestAgent"
