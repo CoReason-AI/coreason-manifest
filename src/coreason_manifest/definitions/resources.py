@@ -60,7 +60,5 @@ class RemoteServiceResource(CoReasonBaseModel):
     name: str = Field(..., description="Name of the remote service.")
     uri: StrictUri = Field(..., description="The service URI.")
     scopes: Optional[List[str]] = Field(default=None, description="List of required scopes/permissions.")
-    connection_secret_env: Optional[str] = Field(
-        default=None, description="Name of the env var holding the API key."
-    )
+    connection_secret_env: Optional[str] = Field(default=None, description="Name of the env var holding the API key.")
     risk_level: ResourceRiskLevel = Field(..., description="Risk level of the resource.")
