@@ -1,52 +1,74 @@
-# Coreason Agent Manifest (CAM)
+# Coreason Agent Manifest (CAM) V2
 
-The **Coreason Agent Manifest (CAM)** is the core standard used by the Coreason ecosystem to define, configure, and validate AI Agents. It serves as the "Source of Truth," ensuring that agents are portable, strictly typed, and secure.
+The **Coreason Agent Manifest (CAM)**, also known as **Manifest V2**, is the "Human-Centric" Canonical YAML format designed for defining Agents and Recipes in the Coreason ecosystem. It serves as the primary interface for developers and the Visual Builder.
 
-**Note:** While the CAM is the "machine code" for agents, developers are encouraged to use the **[Builder SDK](builder_sdk.md)** to generate these definitions using Python classes and Pydantic models.
+> **Note:** The CAM is designed for ease of authoring. At runtime, the Coreason Engine compiles this YAML into strict, machine-optimized Pydantic models. For details on the runtime format, see the [Runtime Agent Definition (V1)](runtime_agent_definition.md) and [Runtime Recipe Definition (V1)](runtime_recipe_definition.md).
 
-In this repository (`coreason-manifest`), the CAM is implemented as a set of strict **Pydantic v2 models**. These models define the schema for Agents, their relationships (Topology), and their execution requirements.
+## Root Object (`ManifestV2`)
 
-## Architecture: The Shared Kernel
-
-The `coreason-manifest` package acts as a **Shared Kernel**. It contains *only* data structures, schemas, and validation logic. It does not contain execution engines, server logic, or database drivers.
-
-By centralizing the definitions here, all downstream services (Builder, Engine/MACO, Simulator) interact with a single, unified language. If a field or concept does not exist in the CAM, it does not exist in the platform.
-
-## V2 Manifest Structure
-
-The V2 Manifest (`ManifestV2`) is the authoring format for defining agents and recipes. It supports a polymorphic `definitions` block that allows defining reusable components like Tools and Agents.
-
-### Definitions Section
-
-The `definitions` section is a key-value map where you can define:
-
-1.  **Tools (`ToolDefinition`)**:
-    *   `type`: `tool`
-    *   `id`: Unique identifier.
-    *   `name`: Human-readable name.
-    *   `uri`: The MCP endpoint URI.
-    *   `risk_level`: `safe`, `standard`, or `critical`.
-
-2.  **Agents (`AgentDefinition`)**:
-    *   `type`: `agent`
-    *   `id`: Unique identifier.
-    *   `name`: Agent name.
-    *   `role`: The persona/job title.
-    *   `goal`: The primary objective.
-    *   `backstory`: Detailed instructions or persona background.
-    *   `tools`: List of tool IDs (referencing other definitions).
-    *   `model`: LLM identifier (e.g., `gpt-4`).
-
-3.  **Generic Definitions**:
-    *   Fallback for loose dictionaries or references (`$ref`) that haven't been resolved yet or don't match a strict schema.
-
-#### Example V2 Agent Definition
+The root of the document follows a "Kubernetes-style" header structure.
 
 ```yaml
 apiVersion: coreason.ai/v2
-kind: Agent
+kind: Recipe  # or 'Agent'
 metadata:
-  name: Research Team
+  name: "My Workflow"
+  version: "1.0.0"
+  x-design:
+    color: "#4A90E2"
+interface:
+  inputs: ...
+  outputs: ...
+state:
+  schema: ...
+policy:
+  max_retries: 3
+definitions:
+  ...
+workflow:
+  start: "step1"
+  steps: ...
+```
+
+### Top-Level Fields
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `apiVersion` | `Literal["coreason.ai/v2"]` | Must be `coreason.ai/v2`. |
+| `kind` | `Literal["Recipe", "Agent"]` | The type of asset being defined. |
+| `metadata` | `ManifestMetadata` | Metadata including name, version, and design info. |
+| `interface` | `InterfaceDefinition` | Defines the Input/Output contract. |
+| `state` | `StateDefinition` | Defines the internal memory schema. |
+| `policy` | `PolicyDefinition` | Governance and execution policy. |
+| `definitions` | `Dict[str, Any]` | Reusable component definitions (Tools, Agents, etc.). |
+| `workflow` | `Workflow` | The main execution topology. |
+
+## 1. Definitions Section
+
+The `definitions` section is a polymorphic key-value map where you can define reusable components. These components can then be referenced by ID within the workflow.
+
+### Tool Definition (`ToolDefinition`)
+*   `type`: `tool`
+*   `id`: Unique identifier.
+*   `name`: Human-readable name.
+*   `uri`: The MCP endpoint URI.
+*   `risk_level`: `safe`, `standard`, or `critical`.
+
+### Agent Definition (`AgentDefinition`)
+*   `type`: `agent`
+*   `id`: Unique identifier.
+*   `name`: Agent name.
+*   `role`: The persona/job title.
+*   `goal`: The primary objective.
+*   `backstory`: Detailed instructions or persona background.
+*   `tools`: List of tool IDs (referencing other definitions).
+*   `model`: LLM identifier (e.g., `gpt-4`).
+
+### Generic Definition
+Fallback for loose dictionaries or references (`$ref`) that haven't been resolved yet.
+
+#### Example Definitions Block
+```yaml
 definitions:
   # Define a Tool
   search_tool:
@@ -64,239 +86,136 @@ definitions:
     role: Senior Editor
     goal: Summarize research into a blog post.
     backstory: You are an expert editor with a focus on clarity.
-    tools: [] # No tools for this agent
+    tools: ["search"] # References the tool ID above
+    model: "gpt-4"
+```
+
+## 2. Interface (`InterfaceDefinition`)
+
+Defines the contract for interacting with the workflow.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `inputs` | `Dict[str, Any]` | JSON Schema definitions for arguments. |
+| `outputs` | `Dict[str, Any]` | JSON Schema definitions for return values. |
+
+**Example:**
+```yaml
+interface:
+  inputs:
+    topic:
+      type: string
+      description: "The research topic."
+  outputs:
+    summary:
+      type: string
+      description: "The final summary."
+```
+
+## 3. State (`StateDefinition`)
+
+Defines the shared memory available to the workflow.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `schema` | `Dict[str, Any]` | JSON Schema of the keys available in the shared memory. |
+| `backend` | `Optional[str]` | Backend storage type (e.g., `redis`, `memory`). |
+
+**Example:**
+```yaml
+state:
+  schema:
+    messages:
+      type: array
+      items:
+        type: string
+  backend: "redis"
+```
+
+## 4. Policy (`PolicyDefinition`)
+
+Defines execution limits and governance rules.
+
+| Field | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `max_steps` | `Optional[int]` | `None` | Execution limit on number of steps. |
+| `max_retries` | `int` | `3` | Maximum number of retries for failed steps. |
+| `timeout` | `Optional[int]` | `None` | Timeout in seconds. |
+| `human_in_the_loop` | `bool` | `False` | Whether to require human approval. |
+
+## 5. Workflow (`Workflow`)
+
+Defines the steps and their flow. Unlike V1, which uses an explicit Edge List, V2 uses an implicit "Linked List" via the `next` field in each step.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `start` | `str` | The ID of the starting step. |
+| `steps` | `Dict[str, Step]` | Dictionary of all steps indexed by ID. |
+
+### Step Types
+
+All steps include `id`, `inputs`, and `next` (except `switch`).
+
+#### Agent Step (`type: agent`)
+Executes an AI Agent.
+- `agent`: Reference to an Agent definition (by ID or name).
+- `system_prompt`: Optional override.
+
+#### Logic Step (`type: logic`)
+Executes Python code.
+- `code`: The Python code to execute.
+
+#### Switch Step (`type: switch`)
+Routes execution based on conditions.
+- `cases`: Dictionary of condition expressions to Step IDs.
+- `default`: Default Step ID if no cases match.
+- *Note: Does not use `next`.*
+
+#### Council Step (`type: council`)
+Involves multiple voters/agents.
+- `voters`: List of Agent IDs.
+- `strategy`: Voting strategy (e.g., `consensus`).
+
+## Complete Example Manifest
+
+```yaml
+apiVersion: coreason.ai/v2
+kind: Recipe
+metadata:
+  name: "Research Workflow"
+interface:
+  inputs:
+    query:
+      type: string
+policy:
+  max_retries: 5
+definitions:
+  google_search:
+    type: tool
+    id: google_search
+    uri: mcp://google
+    risk_level: safe
+
+  researcher:
+    type: agent
+    id: researcher
+    role: Researcher
+    goal: Find information
+    tools: ["google_search"]
+    model: "gpt-4"
 
 workflow:
-  start: step1
+  start: "search"
   steps:
-    step1:
+    search:
       type: agent
-      id: step1
-      agent: writer_agent
-```
+      id: "search"
+      agent: "researcher"
+      next: "summarize"
 
-## The V1 Runtime Agent Manifest
-
-The root of the runtime specification is the `AgentDefinition` class (located in `src/coreason_manifest/definitions/agent.py`). It encapsulates everything needed to instantiate and run an agent. The **V2 Loader Bridge** automatically converts the V2 YAML format into this runtime object.
-
-### Core Components (V1)
-
-An `AgentDefinition` consists of the following sections:
-
-1.  **Metadata (`AgentMetadata`)**:
-    *   **Identity**: `id` (UUID), `name`, `author`.
-    *   **Versioning**: strict semantic versioning (`version`).
-    *   **Timestamps**: `created_at`.
-    *   **Auth**: `requires_auth` flag for user context injection.
-
-2.  **Capabilities (`List[AgentCapability]`)**:
-    *   Defines the modes of interaction for the agent (e.g., "Atomic", "Streaming").
-    *   Each capability has a unique `name`, `type`, and `description`.
-    *   **Delivery Mode**: `delivery_mode` explicitly declares whether the client should expect a single `REQUEST_RESPONSE` or a stream of `SERVER_SENT_EVENTS`.
-    *   **Interface Contracts**: Can reference a reusable `InterfaceDefinition` via `interface_id`.
-    *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas). *Note: These are optional if `interface_id` is provided.*
-    *   `injected_params` lists system-injected values (e.g., `user_context`).
-    *   See [Interface Contracts](interface_contracts.md) for details.
-
-3.  **Configuration (`AgentRuntimeConfig`)**:
-    *   The "brain" of the agent.
-    *   **LLM Config**: Model selection, temperature, and system prompts.
-    *   **Topology**: Defines whether the agent is Atomic (single prompt) or Graph-based (workflow).
-    *   **Interoperability**: `adapter_hints` allow embedding "Rosetta Stone" metadata for external frameworks (e.g., LangGraph, AutoGen).
-
-4.  **Status (`status`)**:
-    *   Lifecycle state of the agent (`draft` or `published`).
-    *   Defaults to `draft`.
-
-5.  **Dependencies (`AgentDependencies`)**:
-    *   **Tools**: Supports the **Model Context Protocol (MCP)**.
-    *   `ToolRequirement`: Defines external tools via URI, including `risk_level` and `scopes`.
-    *   `InlineToolDefinition`: Allows embedding tool schemas directly in the manifest.
-    *   **Integrity**: Tools require SHA256 hashes for security.
-
-6.  **Policy (`PolicyConfig`)**:
-    *   Internal governance controls defined *by* the agent.
-    *   `budget_caps`: Limits on cost or tokens.
-    *   `human_in_the_loop`: Node IDs that trigger a pause for human approval.
-    *   `allowed_domains`: Whitelisting for external access.
-    *   *Note: For external enforcement of organizational rules (e.g., blocking unsafe tools), see the [Governance & Policy Enforcement](governance_policy_enforcement.md) module.*
-
-7.  **Deployment (`DeploymentConfig`)**:
-    *   Specifies *how* the agent is hosted ("Zero-Surprise Deployment").
-    *   `env_vars`: List of `SecretReference`s (key, description, provider hint) required for the agent.
-    *   `resources`: Hardware limits (`cpu_cores`, `memory_mb`, `timeout_seconds`).
-    *   `scaling_strategy`: `serverless` or `dedicated`.
-    *   `concurrency_limit`: Max simultaneous requests.
-    *   See [Runtime Deployment Configuration](runtime_deployment_configuration.md) for details.
-
-8.  **Evaluation (`EvaluationProfile`)**:
-    *   **Evaluation-Ready Metadata**: Defines test contracts directly in the manifest.
-    *   `expected_latency_ms`: SLA for response time.
-    *   `golden_dataset_uri`: Reference to a test dataset.
-    *   `grading_rubric`: List of `SuccessCriterion` for quality checks.
-    *   `evaluator_model`: Model to use for evaluation.
-    *   See [Evaluation-Ready Metadata](evaluation.md) for details.
-
-9.  **Observability (`ObservabilityConfig`)**:
-    *   `trace_level`: Controls the granularity of logs (`FULL`, `METADATA_ONLY`, `NONE`).
-    *   `retention_policy`: How long logs are kept.
-    *   `encryption_key_id`: Optional ID of the key used for log encryption.
-
-10.  **Presentation (`PresentationEvent`)**:
-    *   Standardized schemas for emitting UI-ready events (`THOUGHT_TRACE`, `CITATION_BLOCK`, `PROGRESS_INDICATOR`, etc.).
-    *   See the **[Presentation Schemas](presentation_schemas.md)** documentation for details.
-
-11. **Custom Metadata (`custom_metadata`)**:
-    *   Container for arbitrary metadata extensions without breaking validation.
-
-12. **Integrity**:
-    *   `integrity_hash`: SHA256 hash of the source code (top-level field). Required only when `status` is `published`.
-
-## Agent Lifecycle: Draft vs. Published
-
-The CAM introduces a "Draft Mode" to facilitate prototyping and visual editing.
-
-*   **Draft Mode (`status="draft"`)**:
-    *   **Relaxed Validation**: Topology integrity checks (e.g., ensuring all edges point to valid nodes) are skipped.
-    *   **Optional Hash**: The `integrity_hash` field is optional.
-    *   **Purpose**: Allows saving "work in progress" states where the graph might be incomplete or disconnected.
-
-*   **Published Mode (`status="published"`)**:
-    *   **Strict Validation**: Full topology integrity is enforced.
-    *   **Mandatory Hash**: A valid SHA256 `integrity_hash` is required.
-    *   **Purpose**: Ensures that executable agents are complete, valid, and tamper-proof.
-
-## Agent Types: Atomic vs. Graph
-
-The CAM supports two distinct architectural patterns via `AgentRuntimeConfig`:
-
-### 1. Atomic Agents
-An Atomic Agent is a single-step execution unit. It relies on a System Prompt and an LLM to process inputs and generate outputs.
-
-*   **Requirements**:
-    *   `nodes` and `edges` lists must be empty.
-    *   Must have a `system_prompt` (either global or within `llm_config`).
-
-### 2. Graph-Based Agents
-A Graph Agent orchestrates a complex workflow involving multiple steps, loops, or sub-agents.
-
-*   **Requirements**:
-    *   `nodes`: A list of execution units (`AgentNode`, `LogicNode`, `RecipeNode`, etc.).
-    *   `edges`: Directed connections defining control flow.
-    *   `entry_point`: The ID of the starting node.
-    *   **Topology Validation**: The specification validates that all edges connect to existing nodes (preventing "dangling pointers"). *Note: This check is skipped if the agent is in `draft` status.*
-
-## Visualization & Export
-
-To assist with debugging and documentation, the `AgentDefinition` class includes a `to_mermaid()` method. This generates a [Mermaid.js](https://mermaid.js.org/) graph definition string representing the agent's topology.
-
-*   **Atomic Agents**: Rendered as a simple flow from Start to the Agent.
-*   **Graph Agents**: Rendered as a `graph TD` flow diagram, including:
-    *   Visual distinction between Node Types (Agents, Logic, Human).
-    *   Conditional Edges.
-    *   Entry Point indication.
-
-```python
-mermaid_graph = agent.to_mermaid()
-print(mermaid_graph)
-# Output:
-# graph TD
-# Start((Start)) --> node1
-# node1["Search"]:::agent
-# ...
-```
-
-## Recipes and Topology
-
-While `AgentDefinition` defines an autonomous entity, the **Recipe Manifest** (`RecipeManifest`) defines a reusable workflow or "Standard Operating Procedure" (SOP).
-
-Both share the `GraphTopology` structure (from `src/coreason_manifest/definitions/topology.py`), which supports:
-*   **Polymorphic Nodes**: Agents, Human input, Pure Python logic, Map/Reduce operations.
-*   **Conditional Edges**: Dynamic routing based on logic or router expressions.
-*   **State Management**: `StateDefinition` schemas for persistent memory across steps.
-
-## Key Value Propositions
-
-### 1. Strict Typing & Validation
-Built on Pydantic v2, the CAM enforces types at runtime. Invalid UUIDs, malformed semantic versions, or missing required fields cause immediate validation errors, preventing invalid states from entering the system.
-
-### 2. Integrity & Security
-*   **Integrity Hashing**: The `integrity_hash` field (SHA256) ensures that the agent definition has not been tampered with since creation. *Required for published agents.*
-*   **Tool Safety**: MCP tools require explicit risk levels (`SAFE`, `STANDARD`, `CRITICAL`) and scope definitions.
-
-### 3. Serialization (`CoReasonBaseModel`)
-All models inherit from `CoReasonBaseModel`, which solves common serialization issues. It ensures that complex types like `UUID` and `datetime` are consistently serialized to JSON-compatible strings, making the manifest easily portable between Python and frontend (JSON/JS) environments.
-
-## Example Usage
-
-Here is how to programmatically define an Agent using the CAM:
-
-```python
-import uuid
-from datetime import datetime, timezone
-from coreason_manifest.definitions.agent import (
-    AgentDefinition,
-    AgentMetadata,
-    AgentCapability,
-    CapabilityType,
-    AgentRuntimeConfig,
-    ModelConfig,
-    AgentDependencies,
-    ToolRequirement,
-    ToolRiskLevel,
-    AgentStatus
-)
-
-# Define the Agent
-agent = AgentDefinition(
-    # 1. Metadata
-    metadata=AgentMetadata(
-        id=uuid.uuid4(),
-        version="1.0.0",
-        name="Weather Researcher",
-        author="Coreason AI",
-        created_at=datetime.now(timezone.utc)
-    ),
-
-    # 2. Capabilities
-    capabilities=[
-        AgentCapability(
-            name="forecast",
-            type=CapabilityType.ATOMIC,
-            description="Get the weather forecast.",
-            inputs={"location": {"type": "string"}},
-            outputs={"forecast": {"type": "string"}},
-            # delivery_mode defaults to REQUEST_RESPONSE
-        )
-    ],
-
-    # 3. Configuration (Atomic)
-    config=AgentRuntimeConfig(
-        model_config=ModelConfig(
-            model="gpt-4-turbo",
-            temperature=0.7,
-            system_prompt="You are a weather expert."
-        )
-    ),
-
-    # 4. Dependencies
-    dependencies=AgentDependencies(
-        tools=[
-            ToolRequirement(
-                uri="mcp://weather-service/api",
-                hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                scopes=["weather:read"],
-                risk_level=ToolRiskLevel.SAFE
-            )
-        ]
-    ),
-
-    # 5. Integrity & Status
-    status=AgentStatus.PUBLISHED,
-    integrity_hash="a" * 64
-)
-
-# Dump to JSON
-json_output = agent.model_dump_json(indent=2)
-print(json_output)
+    summarize:
+      type: agent
+      id: "summarize"
+      agent: "gpt-4-turbo" # Can reference model directly if simple
+      system_prompt: "Summarize the findings."
 ```
