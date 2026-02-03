@@ -101,14 +101,18 @@ Indicates the end of the stream.
 1.  **Connection:** The client initiates an HTTP GET request to the streaming endpoint (e.g., `/v1/assist` with `Accept: text/event-stream`).
 2.  **Handshake:** The server responds with `Content-Type: text/event-stream`.
 3.  **Transmission:** The server sends `StreamPacket` objects serialized as JSON, each within an SSE `data:` field.
-    *   `data: {"stream_id": "...", "op": "DELTA", ...}`
-    *   `data: {"stream_id": "...", "op": "EVENT", ...}`
+    *   **Event Type:** The SSE `event` field is set to `stream.packet`.
+    *   **ID:** The SSE `id` field is set to the `stream_id` to allow resumption.
+    *   **Payload:**
+        *   `event: stream.packet`
+        *   `id: 123e4567-e89b-12d3-a456-426614174000`
+        *   `data: {"stream_id": "...", "op": "DELTA", ...}`
 4.  **Termination:** The server sends a packet with `op=CLOSE`. The client should then close the connection (or expect the server to close it).
 
 ## Frontend Integration
 
 The frontend should implement a parser that:
-1.  Listens for SSE `message` events.
+1.  Listens for SSE events of type `stream.packet` (or generic `message` if using a raw reader).
 2.  Parses the `data` string as JSON into a `StreamPacket` object.
 3.  Checks the `op` code:
     *   If `DELTA`: Append `packet.p` to the current text buffer.
