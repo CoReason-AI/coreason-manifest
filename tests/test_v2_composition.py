@@ -152,7 +152,7 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
 
     # Explicitly annotated variable
     tool_ref_data: Dict[str, Any]
-    tool_ref_data = raw_data  # type: ignore[assignment]
+    tool_ref_data = raw_data
 
     # Avoid literal comparison to prevent bidirectional type inference issues in mypy
     assert tool_ref_data.get("$ref") == "tool.yaml"
