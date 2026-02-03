@@ -39,9 +39,7 @@ class SidecarResource(CoReasonBaseModel):
 
     name: str = Field(..., description="Name of the sidecar.")
     image: str = Field(..., description="Docker image (e.g., 'redis:alpine').")
-    env_vars: Optional[Dict[str, str]] = Field(
-        default=None, description="Environment variables for the sidecar."
-    )
+    env_vars: Optional[Dict[str, str]] = Field(default=None, description="Environment variables for the sidecar.")
     ports: Optional[List[int]] = Field(default=None, description="Ports to expose.")
     command: Optional[List[str]] = Field(default=None, description="Command to run.")
 
@@ -61,9 +59,7 @@ class RemoteServiceResource(CoReasonBaseModel):
 
     name: str = Field(..., description="Name of the remote service.")
     uri: StrictUri = Field(..., description="The service URI.")
-    scopes: Optional[List[str]] = Field(
-        default=None, description="List of required scopes/permissions."
-    )
+    scopes: Optional[List[str]] = Field(default=None, description="List of required scopes/permissions.")
     connection_secret_env: Optional[str] = Field(
         default=None, description="Name of the env var holding the API key."
     )

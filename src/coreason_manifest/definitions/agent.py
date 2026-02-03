@@ -321,9 +321,7 @@ class AgentDependencies(CoReasonBaseModel):
         default_factory=list,
         description="List of MCP tool requirements. (Deprecated: Use sidecars/remote_services instead)",
     )
-    sidecars: List[SidecarResource] = Field(
-        default_factory=list, description="List of Sidecar containers."
-    )
+    sidecars: List[SidecarResource] = Field(default_factory=list, description="List of Sidecar containers.")
     remote_services: List[RemoteServiceResource] = Field(
         default_factory=list, description="List of Remote API/MCP services."
     )
