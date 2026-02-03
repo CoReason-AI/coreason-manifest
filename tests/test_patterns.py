@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any
+
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
@@ -21,9 +23,10 @@ from coreason_manifest.definitions.patterns import (
 
 def test_pattern_type_enum() -> None:
     """Test PatternType enum values."""
-    assert PatternType.SWARM == "swarm"
-    assert PatternType.HIERARCHICAL_TEAM == "hierarchical_team"
-    assert PatternType.ROUTER_SOLVER == "router_solver"
+    # Use Any to avoid mypy overlapping comparison error for Literals
+    assert str(PatternType.SWARM.value) == "swarm"
+    assert str(PatternType.HIERARCHICAL_TEAM.value) == "hierarchical_team"
+    assert str(PatternType.ROUTER_SOLVER.value) == "router_solver"
 
 
 def test_swarm_pattern_creation() -> None:
@@ -58,7 +61,7 @@ def test_hierarchical_team_pattern_creation() -> None:
 
 def test_pattern_polymorphism_swarm() -> None:
     """Test polymorphic validation for SwarmPattern."""
-    adapter = TypeAdapter(PatternDefinition)
+    adapter: TypeAdapter[PatternDefinition] = TypeAdapter(PatternDefinition)
     data = {
         "type": "swarm",
         "participants": ["a1", "a2"],
@@ -71,7 +74,7 @@ def test_pattern_polymorphism_swarm() -> None:
 
 def test_pattern_polymorphism_hierarchical() -> None:
     """Test polymorphic validation for HierarchicalTeamPattern."""
-    adapter = TypeAdapter(PatternDefinition)
+    adapter: TypeAdapter[PatternDefinition] = TypeAdapter(PatternDefinition)
     data = {
         "type": "hierarchical_team",
         "manager_id": "m1",
@@ -83,7 +86,7 @@ def test_pattern_polymorphism_hierarchical() -> None:
 
 def test_invalid_pattern_discriminator() -> None:
     """Test invalid discriminator raises ValidationError."""
-    adapter = TypeAdapter(PatternDefinition)
+    adapter: TypeAdapter[PatternDefinition] = TypeAdapter(PatternDefinition)
     data = {
         "type": "invalid_pattern",
         "participants": [],
