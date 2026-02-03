@@ -137,9 +137,7 @@ def test_compile_chained_steps() -> None:
             start="step1",
             steps={
                 "step1": LogicStep(id="step1", code="pass", next="step2"),
-                "step2": CouncilStep(
-                    id="step2", voters=["a"], next="step3", strategy="consensus"
-                ),
+                "step2": CouncilStep(id="step2", voters=["a"], next="step3", strategy="consensus"),
                 "step3": LogicStep(id="step3", code="pass"),
             },
         ),
