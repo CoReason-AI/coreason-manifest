@@ -16,9 +16,11 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.events import CloudEvent, NodeStarted
+from coreason_manifest.definitions.presentation import StreamOpCode, StreamPacket
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.service import (
     CONTENT_TYPE_SSE,
+    STREAM_PACKET_EVENT_TYPE,
     HealthCheckResponse,
     ServerSentEvent,
     ServiceContract,
@@ -53,6 +55,30 @@ def test_wire_format_serialization() -> None:
     # Check payload inside data
     assert cloud_event_dict["data"]["node_id"] == "node-1"
     assert cloud_event_dict["data"]["status"] == "RUNNING"
+
+
+def test_sse_from_stream_packet() -> None:
+    """Test converting a StreamPacket directly to ServerSentEvent."""
+    stream_id = uuid4()
+    packet = StreamPacket(
+        stream_id=stream_id,
+        seq=1,
+        op=StreamOpCode.DELTA,
+        t=datetime.now(timezone.utc),
+        p="Hello",
+    )
+
+    sse = ServerSentEvent.from_stream_packet(packet)
+
+    assert sse.event == STREAM_PACKET_EVENT_TYPE
+    assert sse.id == str(stream_id)
+    assert isinstance(sse.data, str)
+
+    # Decode data
+    data_dict = json.loads(sse.data)
+    assert data_dict["p"] == "Hello"
+    assert data_dict["op"] == "DELTA"
+    assert data_dict["stream_id"] == str(stream_id)
 
 
 def test_openapi_generation() -> None:

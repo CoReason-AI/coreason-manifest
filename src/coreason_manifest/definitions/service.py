@@ -18,11 +18,13 @@ from pydantic import ConfigDict, Field
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.events import CloudEvent
+from coreason_manifest.definitions.presentation import StreamPacket
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import SessionContext
 
 DEFAULT_ENDPOINT_PATH = "/v1/assist"
 CONTENT_TYPE_SSE = "text/event-stream"
+STREAM_PACKET_EVENT_TYPE = "stream.packet"
 
 
 class ServerSentEvent(CoReasonBaseModel):
@@ -46,6 +48,22 @@ class ServerSentEvent(CoReasonBaseModel):
             event=event.type,
             data=event.to_json(),
             id=event.id,
+        )
+
+    @classmethod
+    def from_stream_packet(cls, packet: StreamPacket) -> "ServerSentEvent":
+        """Factory method to create a ServerSentEvent from a StreamPacket.
+
+        Args:
+            packet: The StreamPacket to wrap.
+
+        Returns:
+            A strictly formatted SSE object ready for the wire.
+        """
+        return cls(
+            event=STREAM_PACKET_EVENT_TYPE,
+            data=packet.to_json(),
+            id=str(packet.stream_id),
         )
 
 
