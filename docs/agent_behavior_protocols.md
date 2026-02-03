@@ -6,7 +6,7 @@ They are defined in `src/coreason_manifest/definitions/interfaces.py` and are ba
 
 ## AgentInterface
 
-The `AgentInterface` protocol defines the core responsibility of an Agent: to accept a request and yield a stream of events.
+The `AgentInterface` protocol defines the core responsibility of an Agent: to accept a request and use a provided handler to emit events.
 
 ### Definition
 
@@ -22,13 +22,15 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    def assist(
-        self, request: AgentRequest
-    ) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
-        """Process a request and yield a stream of events.
+    def assist(self, request: AgentRequest, response: ResponseHandler) -> Awaitable[None]:
+        """Process a request and use the response handler to emit events.
+
+        Args:
+            request: The strictly typed input envelope.
+            response: The handler for emitting thoughts, data, artifacts, or final answers.
 
         Returns:
-            An async iterator yielding thoughts, data, artifacts, or final answers.
+            None (awaited).
         """
         ...
 ```
@@ -38,26 +40,10 @@ class AgentInterface(Protocol):
 1.  **`manifest`**: A property that returns the agent's static configuration (`AgentDefinition`). This allows runtime inspection of the agent's capabilities, inputs, and outputs.
 2.  **`assist`**: The primary entry point for execution.
     *   **Input**: Strictly typed `AgentRequest` envelope.
-    *   **Output**: An asynchronous stream (`AsyncIterator`) of events.
+    *   **Output Mechanism**: Inversion of Control via the `ResponseHandler` argument.
     *   **Event Types**: Supports both `CloudEvent[Any]` (modern) and `GraphEvent` (legacy/internal).
 
-### Why `def` instead of `async def`?
-
-In the Protocol definition, `assist` is defined as a synchronous function (`def`) that returns an `AsyncIterator`. This is a technical requirement to satisfy static type checkers (like Mypy) when using `AsyncGenerator` implementations.
-
-**Implementers should use `async def`:**
-
-```python
-class MyAgent:
-    @property
-    def manifest(self) -> AgentDefinition:
-        return self._manifest
-
-    async def assist(self, request: AgentRequest) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
-        yield CloudEvent(...)
-```
-
-An `async def` function that yields is an `AsyncGenerator`, which is a subtype of `AsyncIterator`. This implementation correctly satisfies the protocol.
+For a detailed explanation of the `ResponseHandler` pattern, see [Response Handler Protocol](response_handler_protocol.md).
 
 ## LifecycleInterface
 
@@ -81,8 +67,8 @@ class LifecycleInterface(Protocol):
 
 ```python
 import asyncio
-from typing import AsyncIterator, Union, Any
-from coreason_manifest import AgentInterface, AgentRequest, CloudEvent, GraphEvent, AgentDefinition
+from typing import Awaitable
+from coreason_manifest import AgentInterface, AgentRequest, ResponseHandler, AgentDefinition
 
 class EchoAgent:
     """A simple agent that strictly implements AgentInterface."""
@@ -94,20 +80,12 @@ class EchoAgent:
     def manifest(self) -> AgentDefinition:
         return self._manifest
 
-    async def assist(self, request: AgentRequest) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
-        # Emit a "thinking" event
-        yield CloudEvent(
-            type="ai.coreason.thought",
-            source="agent:echo",
-            data={"content": "Processing request..."}
-        )
+    async def assist(self, request: AgentRequest, response: ResponseHandler) -> None:
+        # Emit a "thinking" log (System)
+        await response.log("INFO", "Processing request...")
 
-        # Emit the result
-        yield CloudEvent(
-            type="ai.coreason.output",
-            source="agent:echo",
-            data={"echo": request.payload}
-        )
+        # Emit the result (User)
+        await response.emit_text_block(f"Echo: {request.payload}")
 
 # Runtime Check
 agent = EchoAgent(manifest=...)
