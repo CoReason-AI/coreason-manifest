@@ -58,9 +58,7 @@ class GovernanceConfig(CoReasonBaseModel):
     allow_custom_logic: bool = Field(
         False, description="Whether to allow LogicNodes and conditional Edges with custom code."
     )
-    strict_url_validation: bool = Field(
-        True, description="Enforce strict, normalized URL validation."
-    )
+    strict_url_validation: bool = Field(True, description="Enforce strict, normalized URL validation.")
 
 
 class ComplianceViolation(CoReasonBaseModel):
