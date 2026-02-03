@@ -76,10 +76,14 @@ An `AgentDefinition` consists of the following sections:
     *   `retention_policy`: How long logs are kept.
     *   `encryption_key_id`: Optional ID of the key used for log encryption.
 
-10. **Custom Metadata (`custom_metadata`)**:
+10.  **Presentation (`PresentationEvent`)**:
+    *   Standardized schemas for emitting UI-ready events (`THOUGHT_TRACE`, `CITATION_BLOCK`, `PROGRESS_INDICATOR`, etc.).
+    *   See the **[Presentation Schemas](presentation_schemas.md)** documentation for details.
+
+11. **Custom Metadata (`custom_metadata`)**:
     *   Container for arbitrary metadata extensions without breaking validation.
 
-11. **Integrity**:
+12. **Integrity**:
     *   `integrity_hash`: SHA256 hash of the source code (top-level field). Required only when `status` is `published`.
 
 ## Agent Lifecycle: Draft vs. Published

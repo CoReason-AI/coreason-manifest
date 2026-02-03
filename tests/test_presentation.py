@@ -8,79 +8,105 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import json
+from datetime import datetime, timezone
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.presentation import (
-    DataBlock,
-    MarkdownBlock,
-    ThinkingBlock,
-    UserErrorBlock,
+from coreason_manifest.definitions import (
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    MediaItem,
+    PresentationEvent,
+    PresentationEventType,
+    ProgressUpdate,
 )
 
 
-def test_thinking_block_serialization() -> None:
-    """Test serialization of ThinkingBlock."""
-    block = ThinkingBlock(content="Thinking about the problem...")
-    dumped = block.dump()
-    assert dumped["block_type"] == "THOUGHT"
-    assert dumped["content"] == "Thinking about the problem..."
-    assert dumped["status"] == "IN_PROGRESS"
-    assert isinstance(dumped["id"], str)
+def test_citation_serialization() -> None:
+    """Test serialization and immutability of Citation models."""
+    item = CitationItem(
+        source_id="1",
+        uri="https://example.com/source",
+        title="Example Source",
+        confidence=0.95,
+    )
+    block = CitationBlock(citations=[item])
 
-    json_str = block.to_json()
-    # Check for presence of key fields in JSON
-    assert '"block_type":"THOUGHT"' in json_str or '"block_type": "THOUGHT"' in json_str
+    dump = block.dump()
+    assert dump["citations"][0]["source_id"] == "1"
+    assert dump["citations"][0]["uri"] == "https://example.com/source"
 
-
-def test_data_block_structure() -> None:
-    """Test DataBlock structure preservation."""
-    data = {"users": [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]}
-    block = DataBlock(data=data, view_hint="TABLE", title="User List")
-    dumped = block.dump()
-
-    assert dumped["block_type"] == "DATA"
-    assert dumped["data"] == data
-    assert dumped["view_hint"] == "TABLE"
-    assert dumped["title"] == "User List"
-
-
-def test_data_block_validation() -> None:
-    """Test validation of DataBlock fields."""
-    # Test invalid view_hint
+    # Test immutability
     with pytest.raises(ValidationError):
-        DataBlock(data={}, view_hint="SCATTER_PLOT")
+        item.source_id = "2"  # type: ignore
 
 
-def test_markdown_block() -> None:
-    """Test MarkdownBlock."""
-    content = "# Heading\n\n- Item 1\n- Item 2"
-    block = MarkdownBlock(content=content)
-    dumped = block.dump()
-    assert dumped["block_type"] == "MARKDOWN"
-    assert dumped["content"] == content
+def test_progress_update_serialization() -> None:
+    """Test serialization of ProgressUpdate model."""
+    update = ProgressUpdate(
+        label="Searching...",
+        status="running",
+        progress_percent=0.5,
+    )
+
+    dump = update.dump()
+    assert dump["status"] == "running"
+    assert dump["progress_percent"] == 0.5
 
 
-def test_user_error_block() -> None:
-    """Test UserErrorBlock."""
-    # Test with default code
-    block = UserErrorBlock(user_message="Something went wrong", technical_details={"code": 500}, recoverable=True)
-    dumped = block.dump()
-    assert dumped["block_type"] == "ERROR"
-    assert dumped["user_message"] == "Something went wrong"
-    assert dumped["technical_details"] == {"code": 500}
-    assert dumped["recoverable"] is True
-    assert "code" not in dumped  # exclude_none=True by default
+def test_media_carousel_serialization() -> None:
+    """Test serialization of Media models."""
+    item = MediaItem(
+        url="https://example.com/image.png",
+        mime_type="image/png",
+        alt_text="An example image",
+    )
+    carousel = MediaCarousel(items=[item])
 
-    # Test with explicit code
-    block_with_code = UserErrorBlock(user_message="Not Found", code=404)
-    dumped_code = block_with_code.dump()
-    assert dumped_code["code"] == 404
+    dump = carousel.dump()
+    assert len(dump["items"]) == 1
+    assert dump["items"][0]["mime_type"] == "image/png"
 
 
-def test_inheritance() -> None:
-    """Verify inheritance from CoReasonBaseModel."""
-    from coreason_manifest.definitions.base import CoReasonBaseModel
+def test_presentation_event_serialization() -> None:
+    """Test serialization of PresentationEvent wrapper."""
+    update = ProgressUpdate(
+        label="Processing...",
+        status="complete",
+    )
+    event_id = uuid4()
+    now = datetime.now(timezone.utc)
 
-    assert issubclass(ThinkingBlock, CoReasonBaseModel)
-    assert issubclass(DataBlock, CoReasonBaseModel)
+    event = PresentationEvent(
+        id=event_id,
+        timestamp=now,
+        type=PresentationEventType.PROGRESS_INDICATOR,
+        data=update,
+    )
+
+    # Test JSON serialization of UUID and datetime
+    json_str = event.to_json()
+    data = json.loads(json_str)
+
+    assert data["id"] == str(event_id)
+    # Pydantic v2 might serialize UTC datetime with 'Z' instead of '+00:00'
+    assert data["timestamp"].replace("Z", "+00:00") == now.isoformat()
+    assert data["type"] == "PROGRESS_INDICATOR"
+    assert data["data"]["status"] == "complete"
+
+
+def test_presentation_event_generic_data() -> None:
+    """Test PresentationEvent with generic dict data."""
+    event = PresentationEvent(
+        id=uuid4(),
+        timestamp=datetime.now(timezone.utc),
+        type=PresentationEventType.THOUGHT_TRACE,
+        data={"thought": "This is a thought trace."},
+    )
+
+    dump = event.dump()
+    assert dump["data"]["thought"] == "This is a thought trace."

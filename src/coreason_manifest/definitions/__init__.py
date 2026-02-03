@@ -36,11 +36,13 @@ from .events import (
 from .identity import Identity
 from .interfaces import AgentInterface, LifecycleInterface
 from .presentation import (
-    DataBlock,
-    MarkdownBlock,
-    PresentationBlockType,
-    ThinkingBlock,
-    UserErrorBlock,
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    MediaItem,
+    PresentationEvent,
+    PresentationEventType,
+    ProgressUpdate,
 )
 from .request import AgentRequest
 from .service import DEFAULT_ENDPOINT_PATH, ServerSentEvent, ServiceContract
@@ -81,9 +83,11 @@ __all__ = [
     "WorkflowErrorPayload",
     "Interaction",
     "SessionState",
-    "PresentationBlockType",
-    "ThinkingBlock",
-    "DataBlock",
-    "MarkdownBlock",
-    "UserErrorBlock",
+    "PresentationEventType",
+    "CitationItem",
+    "CitationBlock",
+    "ProgressUpdate",
+    "MediaItem",
+    "MediaCarousel",
+    "PresentationEvent",
 ]
