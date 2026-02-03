@@ -1,6 +1,4 @@
-from pathlib import Path
-
-from coreason_manifest import Manifest, load
+from coreason_manifest import Manifest
 from coreason_manifest.v2.spec.contracts import (
     InterfaceDefinition,
     PolicyDefinition,
@@ -59,8 +57,6 @@ def test_usage_guide_mutable_fields() -> None:
     # Writing is allowed (V2 Manifests are mutable for ease of authoring)
     manifest.interface.inputs["topic"] = {"type": "integer"}
     assert manifest.interface.inputs["topic"]["type"] == "integer"
-
-
 
 
 def test_migration_guide_v1_legacy_import() -> None:

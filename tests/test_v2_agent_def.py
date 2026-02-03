@@ -74,5 +74,3 @@ definitions:
     assert isinstance(manifest.definitions["bad_agent"], GenericDefinition)
     # Ensure it is NOT AgentDefinition
     assert not isinstance(manifest.definitions["bad_agent"], AgentDefinition)
-
-

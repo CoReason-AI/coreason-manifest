@@ -101,7 +101,6 @@ manifest.interface.inputs["topic"] = {"type": "integer"}
 ## Advanced Documentation
 
 *   [Coreason Agent Manifest (V2)](coreason_agent_manifest.md): The Canonical YAML Authoring Format.
-*   [V2 Loader Bridge](v2_bridge.md): How V2 manifests are compiled to V1 runtime objects.
 *   [Runtime Agent Definition (V1)](runtime_agent_definition.md): The internal runtime model (legacy/compiled).
 *   [Runtime Recipe Definition (V1)](runtime_recipe_definition.md): The internal runtime model (legacy/compiled).
 *   [Migration Guide](migration_guide_v2.md): How to migrate from V1 to V2.

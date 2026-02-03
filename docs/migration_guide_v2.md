@@ -76,4 +76,3 @@ manifest = load("agent.yaml")
 | **Agent** | `coreason_manifest.v1.AgentDefinition` | `coreason_manifest.Manifest` (kind='Agent') |
 | **Topology** | `coreason_manifest.v1.GraphTopology` | `coreason_manifest.v2.spec.definitions.Workflow` |
 | **Node Types** | `coreason_manifest.v1.AgentNode` | `coreason_manifest.v2.spec.definitions.AgentStep` |
-
