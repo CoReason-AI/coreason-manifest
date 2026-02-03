@@ -36,7 +36,7 @@ def basic_manifest() -> ManifestV2:
                 "step2": AgentStep(id="step2", agent="my-agent"),
             },
         ),
-        definitions={"my-agent": "some-definition"},  # Mock definition for strict check
+        definitions={"my-agent": {}},  # Mock definition for strict check
     )
 
 
@@ -52,7 +52,7 @@ def test_validation_loose_vs_strict() -> None:
                 "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
             },
         ),
-        definitions={"my-agent": "def"},
+        definitions={"my-agent": {}},
     )
 
     # Loose validation should be clean (or just warnings)
@@ -82,7 +82,7 @@ def test_governance_tool_risk() -> None:
         kind="Agent",
         metadata=ManifestMetadata(name="Risky Agent"),
         workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")}),
-        definitions={"critical-tool": tool_def, "agent1": "def"},
+        definitions={"critical-tool": tool_def, "agent1": {}},
     )
 
     # Config allowing only STANDARD
@@ -107,7 +107,7 @@ def test_governance_allowed_domains() -> None:
         kind="Agent",
         metadata=ManifestMetadata(name="Domain Agent"),
         workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")}),
-        definitions={"tool1": tool_def, "agent1": "def"},
+        definitions={"tool1": tool_def, "agent1": {}},
     )
 
     config = GovernanceConfig(allowed_domains=["good.com"])
@@ -130,7 +130,7 @@ def test_compiler_dependencies() -> None:
         kind="Agent",
         metadata=ManifestMetadata(name="Calc Agent"),
         workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")}),
-        definitions={"tool1": tool_def, "agent1": "def"},
+        definitions={"tool1": tool_def, "agent1": {}},
     )
 
     deps = compile_dependencies(manifest)
@@ -158,7 +158,7 @@ def test_compiler_strict_validation_integration() -> None:
                 "step1": AgentStep(id="step1", agent="my-agent", next="missing_step"),
             },
         ),
-        definitions={"my-agent": "def"},
+        definitions={"my-agent": {}},
     )
 
     with pytest.raises(ValueError, match="Manifest validation failed"):

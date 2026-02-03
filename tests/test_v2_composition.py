@@ -7,7 +7,7 @@ import pytest
 import yaml
 
 from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
-from coreason_manifest.v2.spec.definitions import ManifestV2, ToolDefinition
+from coreason_manifest.v2.spec.definitions import GenericDefinition, ManifestV2, ToolDefinition
 
 
 @pytest.fixture
@@ -51,15 +51,17 @@ def test_simple_import(manifest_dir: Path) -> None:
     assert "my_tool" in manifest.definitions
     tool = manifest.definitions["my_tool"]
 
-    # ManifestV2 definitions is Dict[str, Union[ToolDefinition, Any]]
+    # ManifestV2 definitions is Dict[str, Union[ToolDefinition, AgentDefinition, GenericDefinition]]
     # Pydantic might resolve it as a dict (Any) instead of ToolDefinition model.
     if isinstance(tool, ToolDefinition):
         assert tool.id == "weather-tool"
         assert tool.name == "Weather Tool"
     else:
-        assert isinstance(tool, dict)
-        assert tool["id"] == "weather-tool"
-        assert tool["name"] == "Weather Tool"
+        # Fallback to model_dump for generic comparison to satisfy mypy strictness
+        tool_dict = tool.model_dump() if hasattr(tool, "model_dump") else tool
+        assert isinstance(tool_dict, dict)
+        assert tool_dict["id"] == "weather-tool"
+        assert tool_dict["name"] == "Weather Tool"
 
 
 def test_security_jailbreak(manifest_dir: Path) -> None:
@@ -123,10 +125,12 @@ def test_cycles(manifest_dir: Path) -> None:
 def test_recursive_disabled(manifest_dir: Path) -> None:
     """Test that recursive=False does not resolve refs."""
 
-    tool_def = {"id": "t", "name": "T", "uri": "u", "risk_level": "safe"}
+    # 1. Create a tool definition file
+    tool_def_source = {"id": "t", "name": "T", "uri": "u", "risk_level": "safe"}
     with open(manifest_dir / "tool.yaml", "w") as f:
-        yaml.dump(tool_def, f)
+        yaml.dump(tool_def_source, f)
 
+    # 2. Create a main manifest referencing it
     main_manifest = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
@@ -138,9 +142,23 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     with open(main_path, "w") as f:
         yaml.dump(main_manifest, f)
 
-    # Since we are not resolving, the dict value for my_tool will be {"$ref": "tool.yaml"}
+    # 3. Load with recursive=False
+    # Since we are not resolving, the definition remains a reference dict.
+    # Because it lacks a 'type' discriminator matching known models,
+    # it should be parsed as a GenericDefinition (fallback).
     manifest = load_from_yaml(main_path, recursive=False)
-    assert manifest.definitions["my_tool"] == {"$ref": "tool.yaml"}
+
+    # 4. Verify
+    # We use a unique variable name to avoid Mypy confusion with previous dict literals.
+    fetched_def = manifest.definitions["my_tool"]
+
+    # It should be GenericDefinition because it's just {"$ref": ...}
+    assert isinstance(fetched_def, GenericDefinition)
+
+    # Verify content
+    # model_dump() returns Dict[str, Any]
+    data = fetched_def.model_dump(exclude_none=True)
+    assert data.get("$ref") == "tool.yaml"
 
 
 def test_invalid_yaml_content(manifest_dir: Path) -> None:

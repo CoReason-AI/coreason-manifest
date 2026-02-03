@@ -12,11 +12,74 @@ The `coreason-manifest` package acts as a **Shared Kernel**. It contains *only* 
 
 By centralizing the definitions here, all downstream services (Builder, Engine/MACO, Simulator) interact with a single, unified language. If a field or concept does not exist in the CAM, it does not exist in the platform.
 
-## The Agent Manifest
+## V2 Manifest Structure
 
-The root of the specification is the `AgentDefinition` class (located in `src/coreason_manifest/definitions/agent.py`). It encapsulates everything needed to instantiate and run an agent.
+The V2 Manifest (`ManifestV2`) is the authoring format for defining agents and recipes. It supports a polymorphic `definitions` block that allows defining reusable components like Tools and Agents.
 
-### Core Components
+### Definitions Section
+
+The `definitions` section is a key-value map where you can define:
+
+1.  **Tools (`ToolDefinition`)**:
+    *   `type`: `tool`
+    *   `id`: Unique identifier.
+    *   `name`: Human-readable name.
+    *   `uri`: The MCP endpoint URI.
+    *   `risk_level`: `safe`, `standard`, or `critical`.
+
+2.  **Agents (`AgentDefinition`)**:
+    *   `type`: `agent`
+    *   `id`: Unique identifier.
+    *   `name`: Agent name.
+    *   `role`: The persona/job title.
+    *   `goal`: The primary objective.
+    *   `backstory`: Detailed instructions or persona background.
+    *   `tools`: List of tool IDs (referencing other definitions).
+    *   `model`: LLM identifier (e.g., `gpt-4`).
+
+3.  **Generic Definitions**:
+    *   Fallback for loose dictionaries or references (`$ref`) that haven't been resolved yet or don't match a strict schema.
+
+#### Example V2 Agent Definition
+
+```yaml
+apiVersion: coreason.ai/v2
+kind: Agent
+metadata:
+  name: Research Team
+definitions:
+  # Define a Tool
+  search_tool:
+    type: tool
+    id: search
+    name: Google Search
+    uri: mcp://google-search
+    risk_level: safe
+
+  # Define a Native Agent
+  writer_agent:
+    type: agent
+    id: writer
+    name: Content Writer
+    role: Senior Editor
+    goal: Summarize research into a blog post.
+    backstory: You are an expert editor with a focus on clarity.
+    tools: [] # No tools for this agent
+
+workflow:
+  start: step1
+  steps:
+    step1:
+      type: agent
+      id: step1
+      agent: writer_agent
+```
+
+## The V1 Runtime Agent Manifest
+
+The root of the runtime specification is the `AgentDefinition` class (located in `src/coreason_manifest/definitions/agent.py`). It encapsulates everything needed to instantiate and run an agent. The **V2 Loader Bridge** automatically converts the V2 YAML format into this runtime object.
+
+### Core Components (V1)
 
 An `AgentDefinition` consists of the following sections:
 
