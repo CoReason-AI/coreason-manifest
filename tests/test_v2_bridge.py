@@ -13,12 +13,15 @@ from coreason_manifest.definitions.topology import (
 )
 from coreason_manifest.recipes import RecipeManifest
 from coreason_manifest.v2.adapter import v2_to_recipe
-from coreason_manifest.v2.compiler import compile_to_topology
+from coreason_manifest.v2.compiler import _convert_visual_metadata, compile_to_topology
 from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
 from coreason_manifest.v2.spec.definitions import (
     AgentStep,
+    CouncilStep,
+    LogicStep,
     ManifestMetadata,
     ManifestV2,
+    SwitchStep,
     Workflow,
 )
 
@@ -74,6 +77,11 @@ def test_load_from_yaml(tmp_path: Path) -> None:
     assert manifest.metadata.design_metadata.icon == "test-icon"
 
 
+def test_load_from_yaml_file_not_found() -> None:
+    with pytest.raises(FileNotFoundError):
+        load_from_yaml("non_existent_file.yaml")
+
+
 def test_compile_to_topology(tmp_path: Path) -> None:
     f = tmp_path / "manifest.yaml"
     f.write_text(SAMPLE_V2_YAML, encoding="utf-8")
@@ -118,6 +126,71 @@ def test_compile_to_topology(tmp_path: Path) -> None:
     assert "case_0" in edge2.mapping
     assert edge2.mapping["case_0"] == "step3"
     assert edge2.mapping["default"] == "step4"
+
+
+def test_compile_chained_steps() -> None:
+    """Test LogicStep and CouncilStep with 'next' pointers."""
+    manifest = ManifestV2(
+        kind="Recipe",
+        metadata=ManifestMetadata(name="Chain"),
+        workflow=Workflow(
+            start="step1",
+            steps={
+                "step1": LogicStep(id="step1", code="pass", next="step2"),
+                "step2": CouncilStep(
+                    id="step2", voters=["a"], next="step3", strategy="consensus"
+                ),
+                "step3": LogicStep(id="step3", code="pass"),
+            },
+        ),
+    )
+
+    topology = compile_to_topology(manifest)
+    assert len(topology.nodes) == 3
+    assert len(topology.edges) == 2
+
+    # Verify edges
+    edges = {e.source_node_id: e.target_node_id for e in topology.edges if isinstance(e, Edge)}
+    assert edges["step1"] == "step2"
+    assert edges["step2"] == "step3"
+
+
+def test_compile_switch_no_default() -> None:
+    """Test SwitchStep without a default case."""
+    manifest = ManifestV2(
+        kind="Recipe",
+        metadata=ManifestMetadata(name="SwitchNoDefault"),
+        workflow=Workflow(
+            start="step1",
+            steps={
+                "step1": SwitchStep(
+                    id="step1",
+                    cases={"x>1": "step2"},
+                    default=None,
+                ),
+                "step2": LogicStep(id="step2", code="pass"),
+            },
+        ),
+    )
+
+    topology = compile_to_topology(manifest)
+    node_map = {n.id: n for n in topology.nodes}
+    switch_node = node_map["step1"]
+    assert isinstance(switch_node, LogicNode)
+    assert "raise ValueError" in switch_node.code
+
+
+def test_visual_metadata_conversion_edge_cases() -> None:
+    # Test with None
+    assert _convert_visual_metadata(None) is None
+
+    # Test with dict
+    data = {"label": "Test", "x": 10, "y": 20, "icon": "icon.png"}
+    visual = _convert_visual_metadata(data)
+    assert visual is not None
+    assert visual.label == "Test"
+    assert visual.x_y_coordinates == [10.0, 20.0]
+    assert visual.icon == "icon.png"
 
 
 def test_dangling_pointer() -> None:
