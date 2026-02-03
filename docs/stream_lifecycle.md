@@ -15,32 +15,22 @@ This led to several issues:
 
 We now treat a "Stream" as an explicit object with a unique identity and a strict lifecycle.
 
-### The `StreamHandle` Protocol
+### The `IStreamEmitter` Protocol
 
-The `StreamHandle` is an object returned by the `ResponseHandler`. It encapsulates the state of a single stream.
+The `IStreamEmitter` is an object returned by the `IResponseHandler`. It encapsulates the state of a single stream.
 
 ```python
-class StreamHandle(Protocol):
-    @property
-    def stream_id(self) -> str:
-        """Unique UUID for this stream instance."""
+class IStreamEmitter(Protocol):
+    """Abstracts the concept of a streaming response."""
+
+    @abstractmethod
+    def emit_chunk(self, content: str) -> Awaitable[None]:
+        """Emit a token/chunk."""
         ...
 
-    @property
-    def is_active(self) -> bool:
-        """True if the stream is open and accepting data."""
-        ...
-
-    async def write(self, chunk: str) -> None:
-        """Emit a chunk of text."""
-        ...
-
-    async def close(self) -> None:
-        """Seal the stream successfully."""
-        ...
-
-    async def abort(self, reason: str) -> None:
-        """Kill the stream with an error."""
+    @abstractmethod
+    def close(self) -> Awaitable[None]:
+        """Close the stream."""
         ...
 ```
 
@@ -48,28 +38,25 @@ class StreamHandle(Protocol):
 
 A stream transitions through a strict state machine:
 
-1.  **OPEN**: Created via `response.create_stream()`. A unique `stream_id` is assigned.
-2.  **ACTIVE**: The agent calls `stream.write()`. Data flows to the client.
+1.  **OPEN**: Created via `response.create_text_stream()`.
+2.  **ACTIVE**: The agent calls `stream.emit_chunk()`. Data flows to the client.
 3.  **CLOSED**: The agent calls `stream.close()`. The stream is sealed. No further writes are allowed.
-4.  **ABORTED**: The agent calls `stream.abort()`. The stream is terminated with an error.
-
-**Rule:** Calling `write()` on a `CLOSED` or `ABORTED` stream MUST raise a `RuntimeError`.
 
 ## Usage Pattern
 
-This pattern allows the agent to pass the `StreamHandle` to helper functions, decoupling the "streaming logic" from the main "response logic".
+This pattern allows the agent to pass the `IStreamEmitter` to helper functions, decoupling the "streaming logic" from the main "response logic".
 
 ```python
-async def generate_poem(stream: StreamHandle, topic: str):
+async def generate_poem(stream: IStreamEmitter, topic: str):
     """Helper function that just knows how to write to a stream."""
     # ... expensive LLM generation ...
     for token in llm.generate(topic):
-        await stream.write(token)
+        await stream.emit_chunk(token)
     await stream.close()
 
-async def assist(request, response):
+async def assist(session, request, handler):
     # Main logic decides TO stream
-    stream = await response.create_stream(title="Poem")
+    stream = await handler.create_text_stream("Poem")
 
     # And delegates the writing
     await generate_poem(stream, "Nature")
@@ -77,14 +64,8 @@ async def assist(request, response):
 
 ## UI Routing
 
-On the frontend, the `stream_id` allows the UI to route tokens to the correct component.
+On the frontend, the `stream_id` (managed by the Runtime) allows the UI to route tokens to the correct component.
 
-*   **Event:** `ai.coreason.stream.start` (contains `stream_id`, `title`) -> **UI:** Create new message bubble.
-*   **Event:** `ai.coreason.stream.chunk` (contains `stream_id`, `chunk`) -> **UI:** Append text to bubble with matching ID.
-*   **Event:** `ai.coreason.stream.end` (contains `stream_id`) -> **UI:** Mark bubble as complete (stop loading spinner).
-
-## Error Handling
-
-Separation of concerns is key:
-*   **Stream Errors:** `stream.abort("LLM Timeout")` affects *only* that stream content (e.g., shows a red "Error" badge on that specific bubble).
-*   **Agent Errors:** `response.error("Database Down")` affects the entire request.
+*   **Event:** `ai.coreason.stream.start` -> **UI:** Create new message bubble.
+*   **Event:** `ai.coreason.stream.chunk` -> **UI:** Append text to bubble.
+*   **Event:** `ai.coreason.stream.end` -> **UI:** Mark bubble as complete (stop loading spinner).

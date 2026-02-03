@@ -19,7 +19,7 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 ## Features
 
 *   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
-*   **Behavioral Protocols:** Standard `AgentInterface` and `LifecycleInterface` protocols for runtime interoperability.
+*   **Runtime Contract:** Standard `IAgentRuntime` and `IResponseHandler` protocols for runtime interoperability.
 *   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
 *   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like `UUID` and `datetime`.
 *   **Event Protocol:** Defines the `GraphEvent` and `CloudEvent` structures for real-time communication.
@@ -150,8 +150,8 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 
 ## Documentation
 
+*   [Runtime Contract](docs/runtime_contract.md): The standard `IAgentRuntime` and protocols.
 *   [Builder SDK](docs/builder_sdk.md): Fluent Python API for defining Agents.
-*   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
 *   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
 *   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.

@@ -8,19 +8,20 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
 from typing import Any, List, cast
+
+from coreason_manifest.definitions.agent import AgentDefinition
+from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.interfaces import (
-    IStreamEmitter,
+    IAgentRuntime,
     IResponseHandler,
     ISession,
-    IAgentRuntime,
-    AgentDefinition
+    IStreamEmitter,
 )
-from coreason_manifest.definitions.presentation import PresentationEvent, CitationBlock
+from coreason_manifest.definitions.presentation import CitationBlock, PresentationEvent
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import Interaction
-from coreason_manifest.definitions.identity import Identity
+
 
 class MockStreamEmitter:
     """Mock implementation of IStreamEmitter."""
@@ -79,14 +80,14 @@ class MyAgent:
     async def assist(self, session: ISession, request: AgentRequest, handler: IResponseHandler) -> None:
         pass
 
-def test_protocols_runtime_check():
+def test_protocols_runtime_check() -> None:
     """Verify that the classes satisfy the protocols at runtime."""
     assert isinstance(MockStreamEmitter(), IStreamEmitter)
     assert isinstance(MockHandler(), IResponseHandler)
     assert isinstance(MockSession(), ISession)
     assert isinstance(MyAgent(), IAgentRuntime)
 
-def test_type_checking():
+def test_type_checking() -> None:
     """Verify type checking concepts (this is mostly for static analysis but runs to ensure no errors)."""
     handler: IResponseHandler = MockHandler()
     session: ISession = MockSession()

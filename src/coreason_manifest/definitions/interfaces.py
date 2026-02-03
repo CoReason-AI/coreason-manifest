@@ -11,7 +11,7 @@
 """Defines the behavioral contract (Protocol) for a Coreason Agent."""
 
 from abc import abstractmethod
-from typing import Any, Awaitable, Dict, List, Optional, Protocol, runtime_checkable
+from typing import Any, Awaitable, List, Protocol, runtime_checkable
 
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.definitions.identity import Identity
