@@ -214,9 +214,7 @@ class AdapterHints(CoReasonBaseModel):
 
     framework: str = Field(..., description="The target framework (e.g., 'langgraph', 'autogen').")
     adapter_type: str = Field(..., description="The specific class or node type in that framework.")
-    settings: Dict[str, Any] = Field(
-        default_factory=dict, description="Framework-specific configuration parameters."
-    )
+    settings: Dict[str, Any] = Field(default_factory=dict, description="Framework-specific configuration parameters.")
 
 
 class AgentRuntimeConfig(CoReasonBaseModel):
