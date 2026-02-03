@@ -84,7 +84,7 @@ def test_full_agent_build() -> None:
 
 def test_builder_set_status() -> None:
     """Test that set_status correctly updates the builder status."""
-    builder = AgentBuilder(name="StatusAgent")
+    builder: AgentBuilder = AgentBuilder(name="StatusAgent")
     assert builder._status == AgentStatus.DRAFT
 
     builder.set_status(AgentStatus.PUBLISHED)
