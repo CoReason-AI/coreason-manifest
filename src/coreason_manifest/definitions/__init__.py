@@ -43,6 +43,8 @@ from .presentation import (
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,
+    StreamOpCode,
+    StreamPacket,
 )
 from .request import AgentRequest
 from .service import DEFAULT_ENDPOINT_PATH, ServerSentEvent, ServiceContract
@@ -90,4 +92,6 @@ __all__ = [
     "MediaItem",
     "MediaCarousel",
     "PresentationEvent",
+    "StreamOpCode",
+    "StreamPacket",
 ]

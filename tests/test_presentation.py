@@ -23,6 +23,8 @@ from coreason_manifest.definitions import (
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,
+    StreamOpCode,
+    StreamPacket,
 )
 
 
@@ -110,3 +112,83 @@ def test_presentation_event_generic_data() -> None:
 
     dump = event.dump()
     assert dump["data"]["thought"] == "This is a thought trace."
+
+
+def test_stream_packet_serialization() -> None:
+    """Test serialization of StreamPacket."""
+    stream_id = uuid4()
+    now = datetime.now(timezone.utc)
+
+    # Test DELTA
+    packet_delta = StreamPacket(
+        stream_id=stream_id,
+        seq=1,
+        op=StreamOpCode.DELTA,
+        t=now,
+        p="Hello",
+    )
+    dump_delta = packet_delta.dump()
+    assert dump_delta["op"] == "DELTA"
+    assert dump_delta["p"] == "Hello"
+
+    # Test EVENT
+    update = ProgressUpdate(
+        label="Processing...",
+        status="complete",
+    )
+    event_id = uuid4()
+    event = PresentationEvent(
+        id=event_id,
+        timestamp=now,
+        type=PresentationEventType.PROGRESS_INDICATOR,
+        data=update,
+    )
+
+    packet_event = StreamPacket(
+        stream_id=stream_id,
+        seq=2,
+        op=StreamOpCode.EVENT,
+        t=now,
+        p=event,
+    )
+    dump_event = packet_event.dump()
+    assert dump_event["op"] == "EVENT"
+    assert dump_event["p"]["type"] == "PROGRESS_INDICATOR"
+
+    # Test CLOSE (String payload allowed for CLOSE as per current validation logic)
+    packet_close = StreamPacket(
+        stream_id=stream_id,
+        seq=3,
+        op=StreamOpCode.CLOSE,
+        t=now,
+        p="Connection closed",
+    )
+    assert packet_close.p == "Connection closed"
+
+
+def test_stream_packet_validation() -> None:
+    """Test validation logic of StreamPacket."""
+    stream_id = uuid4()
+    now = datetime.now(timezone.utc)
+
+    # DELTA must be string
+    with pytest.raises(ValueError, match="Payload must be a string for DELTA op"):
+        StreamPacket(
+            stream_id=stream_id,
+            seq=1,
+            op=StreamOpCode.DELTA,
+            t=now,
+            p={"foo": "bar"},  # type: ignore
+        )
+
+    # EVENT must not be string
+    with pytest.raises(
+        ValueError, match="Payload must be a PresentationEvent or Dict for EVENT op"
+    ):
+        StreamPacket(
+            stream_id=stream_id,
+            seq=1,
+            op=StreamOpCode.EVENT,
+            t=now,
+            p="Not an event",
+        )
