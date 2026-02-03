@@ -10,7 +10,7 @@ The bridge consists of three main modules located in `src/coreason_manifest/v2/`
 
 1.  **Compiler** (`compiler.py`): Transforms the implicit "Linked List" topology of V2 into the explicit "Graph" topology of V1.
 2.  **I/O** (`io.py`): Handles loading and dumping of V2 YAML files. It supports **recursive multi-file composition** (via `$ref`) and enforces secure path resolution.
-3.  **Adapter** (`adapter.py`): Converts a loaded V2 `ManifestV2` object into a V1 `RecipeManifest` ready for execution.
+*   **Adapter** (`adapter.py`): Converts a loaded V2 `ManifestV2` object into a V1 `RecipeManifest` ready for execution, mapping Interface, State, and Policy configurations.
 4.  **Resolver** (`resolver.py`): A helper module used by the loader to securely resolve file paths against a root "Jail" directory.
 
 ## Usage
@@ -34,6 +34,7 @@ recipe = v2_to_recipe(v2_manifest)
 # 3. The 'recipe' object is now a standard RecipeManifest
 # compatible with the coreason-maco engine.
 print(f"Loaded Recipe: {recipe.name} (ID: {recipe.id})")
+print(f"Policy: {recipe.policy.max_retries} retries")
 print(f"Topology has {len(recipe.topology.nodes)} nodes.")
 ```
 

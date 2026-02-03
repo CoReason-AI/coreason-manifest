@@ -20,6 +20,7 @@ The root object for a workflow.
 - **description**: Detailed description.
 - **interface**: Defines the Input/Output contract (`RecipeInterface`).
 - **state**: Defines the internal memory schema (`StateDefinition`).
+- **policy**: Policy configuration (`PolicyConfig`).
 - **parameters**: Build-time configuration constants (`Dict[str, Any]`).
 - **topology**: The topology definition of the workflow (`GraphTopology`).
 - **integrity_hash**: SHA256 hash of the canonical JSON representation of the topology.
@@ -38,6 +39,15 @@ Defines the shared memory available to all nodes in the graph.
 
 - **schema**: JSON Schema of the keys available in the shared memory.
 - **persistence**: Configuration for state durability (`ephemeral` or `persistent`).
+
+### PolicyConfig
+
+Configuration for execution policy and governance.
+
+- **max_steps**: Execution limit on number of steps.
+- **max_retries**: Maximum number of retries.
+- **timeout**: Timeout in seconds.
+- **human_in_the_loop**: Whether to require human approval.
 
 ### GraphTopology
 

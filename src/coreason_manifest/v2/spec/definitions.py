@@ -3,6 +3,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.common import StrictUri, ToolRiskLevel
+from coreason_manifest.v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 
 
 class DesignMetadata(BaseModel):
@@ -108,6 +109,9 @@ class ManifestV2(BaseModel):
     apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")
     kind: Literal["Recipe", "Agent"] = Field(..., description="Kind of the object.")
     metadata: ManifestMetadata = Field(..., description="Metadata including name and design info.")
+    interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition)
+    state: StateDefinition = Field(default_factory=StateDefinition)
+    policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: Dict[str, Union[ToolDefinition, Any]] = Field(
         default_factory=dict, description="Reusable definitions."
     )

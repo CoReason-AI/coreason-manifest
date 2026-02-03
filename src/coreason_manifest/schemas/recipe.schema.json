@@ -500,6 +500,52 @@
       "title": "MapNode",
       "type": "object"
     },
+    "PolicyConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for execution policy and governance.\n\nAttributes:\n    max_steps: Execution limit on number of steps.\n    max_retries: Maximum number of retries.\n    timeout: Timeout in seconds.\n    human_in_the_loop: Whether to require human approval.",
+      "properties": {
+        "max_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Execution limit on number of steps.",
+          "title": "Max Steps"
+        },
+        "max_retries": {
+          "default": 3,
+          "description": "Maximum number of retries.",
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timeout in seconds.",
+          "title": "Timeout"
+        },
+        "human_in_the_loop": {
+          "default": false,
+          "description": "Whether to require human approval.",
+          "title": "Human In The Loop",
+          "type": "boolean"
+        }
+      },
+      "title": "PolicyConfig",
+      "type": "object"
+    },
     "RecipeInterface": {
       "additionalProperties": false,
       "description": "Defines the input/output contract for a Recipe.\n\nAttributes:\n    inputs: JSON Schema defining valid entry arguments.\n    outputs: JSON Schema defining the guaranteed structure of the final result.",
@@ -730,7 +776,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "The executable specification for the MACO engine.\n\nAttributes:\n    id: Unique identifier for the recipe.\n    version: Version of the recipe.\n    name: Human-readable name of the recipe.\n    description: Detailed description of the recipe.\n    interface: Defines the input/output contract for the Recipe.\n    state: Defines the internal state (memory) of the Recipe.\n    parameters: Dictionary of build-time constants.\n    topology: The topology definition of the workflow.\n    integrity_hash: SHA256 hash of the canonical JSON representation of the topology.\n    metadata: Container for design-time data.",
+  "description": "The executable specification for the MACO engine.\n\nAttributes:\n    id: Unique identifier for the recipe.\n    version: Version of the recipe.\n    name: Human-readable name of the recipe.\n    description: Detailed description of the recipe.\n    interface: Defines the input/output contract for the Recipe.\n    state: Defines the internal state (memory) of the Recipe.\n    policy: Policy configuration.\n    parameters: Dictionary of build-time constants.\n    topology: The topology definition of the workflow.\n    integrity_hash: SHA256 hash of the canonical JSON representation of the topology.\n    metadata: Container for design-time data.",
   "properties": {
     "id": {
       "description": "Unique identifier for the recipe.",
@@ -768,6 +814,18 @@
     "state": {
       "$ref": "#/$defs/StateDefinition",
       "description": "Defines the internal state (memory) of the Recipe."
+    },
+    "policy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PolicyConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Policy configuration."
     },
     "parameters": {
       "additionalProperties": true,
