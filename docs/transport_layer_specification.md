@@ -20,18 +20,28 @@ The default endpoint path is:
 
 ### Request Format
 
-The request body **MUST** be a JSON object adhering to the `AgentRequest` schema.
+The request body **MUST** be a JSON object adhering to the `ServiceRequest` schema (the "Envelope").
 
-*   **Schema:** `src/coreason_manifest/definitions/request.py`
+*   **Schema:** `src/coreason_manifest/definitions/service.py`
 *   **Content-Type:** `application/json`
 
 Example:
 ```json
 {
   "request_id": "123e4567-e89b-12d3-a456-426614174000",
-  "session_id": "123e4567-e89b-12d3-a456-426614174001",
+  "context": {
+    "session_id": "123e4567-e89b-12d3-a456-426614174001",
+    "agent_id": "...",
+    "user": { ... },
+    "trace": { ... },
+    "permissions": ["..."],
+    "created_at": "..."
+  },
   "payload": {
-    "query": "Hello world"
+    "session_id": "123e4567-e89b-12d3-a456-426614174001",
+    "payload": {
+      "query": "Hello world"
+    }
   }
 }
 ```
@@ -43,20 +53,25 @@ The response format depends on the `delivery_mode`.
 #### Mode 1: Request-Response (`REQUEST_RESPONSE`)
 
 *   **Content-Type:** `application/json`
-*   **Body:** A JSON object matching the `outputs` schema defined in the Capability.
+*   **Body:** A JSON object matching the `ServiceResponse` schema.
 
 ```json
 {
-  "summary": "The weather is sunny."
+  "request_id": "123e4567-e89b-12d3-a456-426614174000",
+  "created_at": "...",
+  "output": {
+    "summary": "The weather is sunny."
+  },
+  "metrics": { ... }
 }
 ```
 
 #### Mode 2: Server-Sent Events (`SERVER_SENT_EVENTS`)
 
 *   **Content-Type:** `text/event-stream`
-*   **Body:** A stream of `ServerSentEvent` objects.
+*   **Body:** A stream of `StreamPacket` objects (wrapped in `ServerSentEvent` for wire transmission).
 
-Each event in the stream corresponds to a `ServerSentEvent` object. The payload of these events now follows the **Strict Wire Format** defined in `src/coreason_manifest/definitions/presentation.py`.
+Each event in the stream corresponds to a `StreamPacket` object. The payload of these events follows the **Strict Wire Format** defined in `src/coreason_manifest/definitions/presentation.py`.
 
 *   **Schema:** `src/coreason_manifest/definitions/presentation.py` (`StreamPacket`)
 *   **Protocol Spec:** [SSE Wire Protocol Specification](./sse_wire_protocol.md)
