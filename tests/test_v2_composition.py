@@ -145,8 +145,8 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     manifest = load_from_yaml(main_path, recursive=False)
     # It will be parsed as GenericDefinition because it has no known 'type'
     tool_def = manifest.definitions["my_tool"]
-    tool_dict: Dict[str, Any] = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def  # type: ignore[assignment]
-    assert tool_dict == {"$ref": "tool.yaml"}
+    tool_ref_data: Dict[str, Any] = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def  # type: ignore[assignment]
+    assert tool_ref_data == {"$ref": "tool.yaml"}
 
 
 def test_invalid_yaml_content(manifest_dir: Path) -> None:
