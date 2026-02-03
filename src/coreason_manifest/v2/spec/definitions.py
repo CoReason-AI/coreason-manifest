@@ -25,11 +25,34 @@ class ToolDefinition(BaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
+    type: Literal["tool"] = "tool"
     id: str = Field(..., description="Unique ID for the tool within the manifest.")
     name: str = Field(..., description="Name of the tool.")
     uri: StrictUri = Field(..., description="The MCP endpoint URI.")
     risk_level: ToolRiskLevel = Field(..., description="Risk level (safe, standard, critical).")
     description: Optional[str] = Field(None, description="Description of the tool.")
+
+
+class AgentDefinition(BaseModel):
+    """Definition of an Agent."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    type: Literal["agent"] = "agent"
+    id: str = Field(..., description="Unique ID for the agent.")
+    name: str = Field(..., description="Name of the agent.")
+    role: str = Field(..., description="The persona/job title.")
+    goal: str = Field(..., description="Primary objective.")
+    backstory: Optional[str] = Field(None, description="Backstory or directives.")
+    model: Optional[str] = Field(None, description="LLM identifier.")
+    tools: List[str] = Field(default_factory=list, description="List of Tool IDs or URI references.")
+    knowledge: List[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+
+
+class GenericDefinition(BaseModel):
+    """Fallback for unknown definitions."""
+
+    model_config = ConfigDict(extra="allow")
 
 
 class BaseStep(BaseModel):
@@ -112,7 +135,11 @@ class ManifestV2(BaseModel):
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition)
     state: StateDefinition = Field(default_factory=StateDefinition)
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
-    definitions: Dict[str, Union[ToolDefinition, Any]] = Field(
-        default_factory=dict, description="Reusable definitions."
-    )
+    definitions: Dict[
+        str,
+        Union[
+            Annotated[Union[ToolDefinition, AgentDefinition], Field(discriminator="type")],
+            GenericDefinition,
+        ],
+    ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
