@@ -19,10 +19,10 @@ from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
 from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.session import (
     Interaction,
-    SessionState,
     SessionContext,
-    UserContext,
+    SessionState,
     TraceContext,
+    UserContext,
 )
 
 
@@ -35,19 +35,10 @@ def create_default_context(
     return SessionContext(
         session_id=session_id,
         agent_id=agent_id,
-        user=UserContext(
-            user_id=user_id,
-            email="test@example.com",
-            tier="free",
-            locale="en-US"
-        ),
-        trace=TraceContext(
-            trace_id=trace_id,
-            span_id=uuid4(),
-            parent_id=None
-        ),
+        user=UserContext(user_id=user_id, email="test@example.com", tier="free", locale="en-US"),
+        trace=TraceContext(trace_id=trace_id, span_id=uuid4(), parent_id=None),
         permissions=["read", "write"],
-        created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc),
     )
 
 
@@ -198,18 +189,9 @@ def test_session_context_serialization() -> None:
     trace_id = uuid4()
     span_id = uuid4()
 
-    user_context = UserContext(
-        user_id="user-123",
-        email="test@test.com",
-        tier="pro",
-        locale="fr-FR"
-    )
+    user_context = UserContext(user_id="user-123", email="test@test.com", tier="pro", locale="fr-FR")
 
-    trace_context = TraceContext(
-        trace_id=trace_id,
-        span_id=span_id,
-        parent_id=None
-    )
+    trace_context = TraceContext(trace_id=trace_id, span_id=span_id, parent_id=None)
 
     now = datetime.now(timezone.utc)
 
@@ -219,7 +201,7 @@ def test_session_context_serialization() -> None:
         user=user_context,
         trace=trace_context,
         permissions=["search:read"],
-        created_at=now
+        created_at=now,
     )
 
     # Test json dump
