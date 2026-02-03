@@ -2,7 +2,7 @@
 
 
 from pathlib import Path
-from typing import Any, Dict, cast
+from typing import Any, Dict
 
 import pytest
 import yaml
@@ -154,7 +154,9 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     tool_ref_data: Dict[str, Any]
     tool_ref_data = raw_data  # type: ignore[assignment]
 
-    assert tool_ref_data == {"$ref": "tool.yaml"}
+    # Avoid literal comparison to prevent bidirectional type inference issues in mypy
+    assert tool_ref_data.get("$ref") == "tool.yaml"
+    assert len(tool_ref_data) == 1
 
 
 def test_invalid_yaml_content(manifest_dir: Path) -> None:
