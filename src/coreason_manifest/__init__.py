@@ -35,18 +35,18 @@ from .definitions.events import (
     WorkflowError,
     migrate_graph_event_to_cloud_event,
 )
+from .definitions.patterns import (
+    HierarchicalTeamPattern,
+    PatternDefinition,
+    PatternType,
+    SwarmPattern,
+)
 from .definitions.simulation import (
     SimulationMetrics,
     SimulationScenario,
     SimulationStep,
     SimulationTrace,
     StepType,
-)
-from .definitions.patterns import (
-    HierarchicalTeamPattern,
-    PatternDefinition,
-    PatternType,
-    SwarmPattern,
 )
 from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
 from .definitions.topology import (

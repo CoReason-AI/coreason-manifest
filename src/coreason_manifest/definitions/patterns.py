@@ -9,16 +9,17 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import List, Optional, Union, Literal
-from typing_extensions import Annotated
+from typing import List, Literal, Optional, Union
 
-from pydantic import Field, ConfigDict
+from pydantic import ConfigDict, Field
+from typing_extensions import Annotated
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
 
 class PatternType(str, Enum):
     """The architectural pattern type."""
+
     SWARM = "swarm"
     HIERARCHICAL_TEAM = "hierarchical_team"
     ROUTER_SOLVER = "router_solver"
@@ -37,18 +38,10 @@ class SwarmPattern(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    type: Literal[PatternType.SWARM] = Field(
-        PatternType.SWARM, description="Discriminator for SwarmPattern."
-    )
-    participants: List[str] = Field(
-        ..., description="List of Agent IDs or references."
-    )
-    handoff_mode: str = Field(
-        ..., description="Mode of handoff (e.g., 'shared_scratchpad', 'direct_message')."
-    )
-    max_turns: int = Field(
-        ..., description="Maximum number of turns."
-    )
+    type: Literal[PatternType.SWARM] = Field(PatternType.SWARM, description="Discriminator for SwarmPattern.")
+    participants: List[str] = Field(..., description="List of Agent IDs or references.")
+    handoff_mode: str = Field(..., description="Mode of handoff (e.g., 'shared_scratchpad', 'direct_message').")
+    max_turns: int = Field(..., description="Maximum number of turns.")
     voting_mechanism: Optional[str] = Field(
         None, description="Optional voting mechanism (e.g., 'consensus', 'majority')."
     )
@@ -70,18 +63,10 @@ class HierarchicalTeamPattern(CoReasonBaseModel):
     type: Literal[PatternType.HIERARCHICAL_TEAM] = Field(
         PatternType.HIERARCHICAL_TEAM, description="Discriminator for HierarchicalTeamPattern."
     )
-    manager_id: str = Field(
-        ..., description="The Agent ID of the manager."
-    )
-    workers: List[str] = Field(
-        ..., description="List of Agent IDs for the workers."
-    )
-    escalation_policy: Optional[str] = Field(
-        None, description="Policy for escalating issues to the manager."
-    )
-    delegation_depth: Optional[int] = Field(
-        None, description="Maximum depth of delegation."
-    )
+    manager_id: str = Field(..., description="The Agent ID of the manager.")
+    workers: List[str] = Field(..., description="List of Agent IDs for the workers.")
+    escalation_policy: Optional[str] = Field(None, description="Policy for escalating issues to the manager.")
+    delegation_depth: Optional[int] = Field(None, description="Maximum depth of delegation.")
 
 
 # Polymorphic Container
