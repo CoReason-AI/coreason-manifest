@@ -8,12 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, AsyncIterator, Union
 from unittest.mock import MagicMock
 
 from coreason_manifest.definitions.agent import AgentDefinition
-from coreason_manifest.definitions.events import CloudEvent, GraphEvent
-from coreason_manifest.definitions.interfaces import AgentInterface
+from coreason_manifest.definitions.interfaces import AgentInterface, ResponseHandler
 from coreason_manifest.definitions.request import AgentRequest
 
 
@@ -22,8 +20,8 @@ class ValidAgent:
     def manifest(self) -> AgentDefinition:
         return MagicMock(spec=AgentDefinition)
 
-    async def assist(self, request: AgentRequest) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
-        yield MagicMock(spec=GraphEvent)
+    async def assist(self, request: AgentRequest, response: ResponseHandler) -> None:
+        pass
 
 
 class InvalidAgent:
