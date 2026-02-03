@@ -2,50 +2,83 @@
 
 ## Overview
 
-The **Runtime Deployment Configuration** feature introduces a new "Deployment" layer to the Agent Manifest. This allows agent developers to specify *how* their agent should be hosted, scaled, and accessed directly within the manifest, replacing the need for external Infrastructure-as-Code (IaC) files like Terraform or Helm for basic deployment parameters.
+The **Runtime Deployment Configuration** implements the "Zero-Surprise Deployment" contract. It allows agent developers to explicitly declare the infrastructure requirements (secrets, hardware resources, scaling strategies) necessary for their agent to run reliably.
 
-## Rationale
+## Rationale: Zero-Surprise Deployments
 
-Previously, the Agent Manifest defined *what* the agent is (metadata, capabilities) and *how it thinks* (runtime config, topology). However, it lacked information on *how to run it*. This separation meant that deploying an agent required two distinct artifacts: the manifest and a separate deployment script.
+Previously, agent dependencies like API keys or specific hardware requirements were often hidden in code or `.env` files, leading to runtime crashes ("Works on my machine, fails in Prod").
 
-By including deployment configuration in the manifest, the Agent Definition becomes a self-contained **"deployable unit"**. The Execution Engine (MACO) or a Platform Orchestrator can read this manifest and automatically:
-1.  Spin up the correct server container (e.g., FastAPI for HTTP, gRPC server).
-2.  Configure network routes and ports.
-3.  Apply autoscaling policies based on expected load.
-4.  Inject necessary environment variables.
+By making these requirements explicit in the Manifest, the Orchestration Platform (e.g., K8s, Lambda, MACO) can:
+1.  **Pre-flight Validate**: Refuse to start the agent if required secrets or resources are missing.
+2.  **Auto-Provision**: Automatically allocate the requested CPU/Memory.
+3.  **Secure**: Integrate with secret managers (Vault, AWS Secrets Manager) based on `provider_hint`s.
 
 ## Configuration Schema
 
-The new `DeploymentConfig` model is integrated into the root `AgentDefinition` under the `deployment` field.
+The `DeploymentConfig` model is integrated into the root `AgentDefinition` under the `deployment` field.
 
-### Fields
+### 1. Environment Variables & Secrets (`SecretReference`)
+
+Defines the external values the agent needs.
 
 | Field | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `protocol` | `Protocol` (Enum) | `http_sse` | The communication protocol (`http_sse`, `websocket`, `grpc`). |
-| `port` | `int` | `8000` | The port the agent server binds to. |
-| `route_prefix` | `str` | `/assist` | URL prefix for the agent endpoints. |
-| `scaling_min_instances` | `int` | `0` | Minimum number of replicas (0 allows scale-to-zero). |
-| `scaling_max_instances` | `int` | `1` | Maximum number of replicas. |
-| `timeout_seconds` | `int` | `60` | Hard timeout for processing requests. |
-| `env_vars` | `Dict[str, str]` | `{}` | Static environment variables to inject into the container. |
+| `key` | `str` | **Required** | The name of the environment variable (e.g., `OPENAI_API_KEY`). |
+| `description` | `str` | **Required** | Human-readable explanation of why this secret is needed. |
+| `required` | `bool` | `True` | Whether the agent can start without this variable. |
+| `provider_hint` | `str` | `None` | Hint for the secret provider (e.g., `aws-secrets-manager`, `vault`). |
 
-### Example
+### 2. Resource Limits (`ResourceLimits`)
+
+Defines the hardware constraints.
+
+| Field | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `cpu_cores` | `float` | `None` | CPU limit (e.g., `0.5` or `2.0`). |
+| `memory_mb` | `int` | `None` | RAM limit in Megabytes. |
+| `timeout_seconds` | `int` | `60` | Execution time limit. |
+
+### 3. Deployment Strategy (`DeploymentConfig`)
+
+The top-level configuration.
+
+| Field | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `env_vars` | `List[SecretReference]` | **Required** | List of required secrets/vars. |
+| `resources` | `ResourceLimits` | `None` | Hardware constraints. |
+| `scaling_strategy` | `Literal` | `serverless` | Strategy: `serverless` (scale-to-zero) or `dedicated` (always on). |
+| `concurrency_limit` | `int` | `None` | Max simultaneous requests per instance. |
+
+## Example
 
 ```yaml
 deployment:
-  protocol: "http_sse"
-  port: 8080
-  route_prefix: "/api/v1/agent"
-  scaling_min_instances: 1
-  scaling_max_instances: 5
-  timeout_seconds: 30
+  scaling_strategy: "serverless"
+  concurrency_limit: 10
+
+  resources:
+    cpu_cores: 1.0
+    memory_mb: 2048
+    timeout_seconds: 120
+
   env_vars:
-    LOG_LEVEL: "INFO"
+    - key: "OPENAI_API_KEY"
+      description: "Required for the main LLM inference."
+      required: true
+      provider_hint: "vault"
+
+    - key: "DATABASE_URL"
+      description: "Connection string for the vector store."
+      required: true
+
+    - key: "DEBUG_MODE"
+      description: "Enable verbose logging."
+      required: false
+      provider_hint: "env"
 ```
 
 ## Benefits
 
-*   **Portability**: The agent carries its own deployment constraints. You can move the manifest between environments (Dev, Stage, Prod) or different cloud providers, and the orchestrator respects the settings.
-*   **Simplification**: Removes the need for developers to learn Kubernetes manifests or Helm charts for standard agent deployments.
-*   **Automation**: Enables "Click to Deploy" functionality where the platform simply reads the manifest and provisions resources accordingly.
+*   **infrastructure-Aware**: The manifest is now a complete blueprint for execution, not just logic.
+*   **Validation**: Orchestrators can block deployment if requirements (like expensive GPU availability) cannot be met.
+*   **Security**: Secrets are referenced by key, never hardcoded values.

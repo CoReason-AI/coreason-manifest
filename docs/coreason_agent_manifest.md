@@ -59,13 +59,12 @@ An `AgentDefinition` consists of the following sections:
     *   *Note: For external enforcement of organizational rules (e.g., blocking unsafe tools), see the [Governance & Policy Enforcement](governance_policy_enforcement.md) module.*
 
 7.  **Deployment (`DeploymentConfig`)**:
-    *   Specifies *how* the agent is hosted.
-    *   `protocol`: The communication protocol (`HTTP_SSE`, `WEBSOCKET`, `GRPC`).
-    *   `port`, `route_prefix`: Network settings.
-    *   `scaling_min_instances`, `scaling_max_instances`: Horizontal autoscaling bounds.
-    *   `timeout_seconds`: Request processing limits.
-    *   `env_vars`: Static environment variable injection.
-    *   **Coreason Agent Protocol (CAP)**: All agents must expose the standard endpoints defined in the [Coreason Agent Protocol (CAP)](interface_contracts.md).
+    *   Specifies *how* the agent is hosted ("Zero-Surprise Deployment").
+    *   `env_vars`: List of `SecretReference`s (key, description, provider hint) required for the agent.
+    *   `resources`: Hardware limits (`cpu_cores`, `memory_mb`, `timeout_seconds`).
+    *   `scaling_strategy`: `serverless` or `dedicated`.
+    *   `concurrency_limit`: Max simultaneous requests.
+    *   See [Runtime Deployment Configuration](runtime_deployment_configuration.md) for details.
 
 8.  **Evaluation (`EvaluationProfile`)**:
     *   **Evaluation-Ready Metadata**: Defines test contracts directly in the manifest.
