@@ -11,9 +11,9 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest import Edge, RecipeManifest
-from coreason_manifest import Topology as GraphTopology
 from coreason_manifest.definitions.topology import AgentNode, HumanNode, LogicNode, StateDefinition
+from coreason_manifest.v1 import Edge, RecipeManifest
+from coreason_manifest.v1 import Topology as GraphTopology
 from coreason_manifest.recipes import RecipeInterface
 
 
