@@ -178,13 +178,11 @@ def test_stream_packet_validation() -> None:
             seq=1,
             op=StreamOpCode.DELTA,
             t=now,
-            p={"foo": "bar"},  # type: ignore
+            p={"foo": "bar"},
         )
 
     # EVENT must not be string
-    with pytest.raises(
-        ValueError, match="Payload must be a PresentationEvent or Dict for EVENT op"
-    ):
+    with pytest.raises(ValueError, match="Payload must be a PresentationEvent or Dict for EVENT op"):
         StreamPacket(
             stream_id=stream_id,
             seq=1,
