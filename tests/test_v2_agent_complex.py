@@ -1,12 +1,20 @@
+from typing import cast
+from uuid import UUID
+
 import pytest
 import yaml
-from uuid import UUID
 from pydantic import ValidationError
 
-from coreason_manifest.v2.spec.definitions import ManifestV2, AgentDefinition, ToolDefinition, GenericDefinition
-from coreason_manifest.v2.adapter import v2_to_recipe
 from coreason_manifest.definitions.agent import AgentDefinition as V1AgentDefinition
 from coreason_manifest.definitions.agent import ToolRequirement
+from coreason_manifest.v2.adapter import v2_to_recipe
+from coreason_manifest.v2.spec.definitions import (
+    AgentDefinition,
+    GenericDefinition,
+    ManifestV2,
+    ToolDefinition,
+)
+
 
 def test_minimal_maximal_agents() -> None:
     yaml_content = """
@@ -162,6 +170,11 @@ definitions:
     assert isinstance(v1_agent, V1AgentDefinition)
     # It should just have a tool ref to mcp://snake
     assert len(v1_agent.dependencies.tools) == 1
-    tool_req = v1_agent.dependencies.tools[0]
-    assert isinstance(tool_req, ToolRequirement)
+
+    # Explicitly check/cast to ToolRequirement to satisfy strict mypy
+    tool = v1_agent.dependencies.tools[0]
+    assert isinstance(tool, ToolRequirement)
+    # Double safety cast for some mypy versions/configs
+    tool_req = cast(ToolRequirement, tool)
+
     assert str(tool_req.uri) == "mcp://snake"
