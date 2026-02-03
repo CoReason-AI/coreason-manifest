@@ -30,7 +30,7 @@
     },
     "AgentCapability": {
       "additionalProperties": false,
-      "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.\n    delivery_mode: The mechanism used to deliver the response.",
+      "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    interface_id: Optional ID of the interface contract this capability implements.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.\n    delivery_mode: The mechanism used to deliver the response.",
       "properties": {
         "name": {
           "description": "Unique name for this capability.",
@@ -46,17 +46,47 @@
           "title": "Description",
           "type": "string"
         },
+        "interface_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional ID of the interface contract this capability implements.",
+          "title": "Interface Id"
+        },
         "inputs": {
-          "additionalProperties": true,
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "Typed arguments the agent accepts (JSON Schema).",
-          "title": "Inputs",
-          "type": "object"
+          "title": "Inputs"
         },
         "outputs": {
-          "additionalProperties": true,
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
           "description": "Typed structure of the result.",
-          "title": "Outputs",
-          "type": "object"
+          "title": "Outputs"
         },
         "delivery_mode": {
           "$ref": "#/$defs/DeliveryMode",
@@ -83,9 +113,7 @@
       "required": [
         "name",
         "type",
-        "description",
-        "inputs",
-        "outputs"
+        "description"
       ],
       "title": "AgentCapability",
       "type": "object"
