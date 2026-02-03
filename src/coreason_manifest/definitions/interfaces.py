@@ -22,6 +22,14 @@ from coreason_manifest.definitions.presentation import (
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import Interaction
 
+__all__ = [
+    "IStreamEmitter",
+    "IResponseHandler",
+    "ISession",
+    "IAgentRuntime",
+    "LifecycleInterface",
+]
+
 
 @runtime_checkable
 class IStreamEmitter(Protocol):
