@@ -11,11 +11,48 @@
 """Defines the behavioral contract (Protocol) for a Coreason Agent."""
 
 from abc import abstractmethod
-from typing import Any, AsyncIterator, Protocol, Union, runtime_checkable
+from typing import Any, Awaitable, Dict, Optional, Protocol, Union, runtime_checkable
 
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.definitions.events import CloudEvent, GraphEvent
 from coreason_manifest.definitions.request import AgentRequest
+
+
+@runtime_checkable
+class EventSink(Protocol):
+    """Protocol for emitting internal side-effects (telemetry, logs, audit)."""
+
+    @abstractmethod
+    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
+        """Ingest any strictly typed event."""
+        ...
+
+    @abstractmethod
+    def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> Awaitable[None]:
+        """Emit a standard log event (which the implementation wraps in a CloudEvent)."""
+        ...
+
+    @abstractmethod
+    def audit(self, actor: str, action: str, resource: str, success: bool) -> Awaitable[None]:
+        """Emit an immutable Audit Log entry."""
+        ...
+
+
+@runtime_checkable
+class ResponseHandler(EventSink, Protocol):
+    """Protocol for handling user-facing communication and system events.
+
+    Inherits from EventSink to allow agents to emit system events (logs, audits)
+    through the same interface used for user responses.
+    """
+
+    @abstractmethod
+    def emit_text_block(self, text: str) -> Awaitable[None]:
+        """Emit a text block to the user UI.
+
+        This is distinct from `log` which emits to system logs (Datadog/Splunk).
+        """
+        ...
 
 
 @runtime_checkable
@@ -29,19 +66,15 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    def assist(self, request: AgentRequest) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
-        """Process a request and yield a stream of events (thoughts, data, artifacts, or final answers).
-
-        Note:
-            This method is defined as a synchronous function returning an AsyncIterator
-            to correctly type-hint async generators in Protocols. Implementations should
-            use `async def` and `yield` (which produces an AsyncGenerator, satisfying AsyncIterator).
+    def assist(self, request: AgentRequest, response: ResponseHandler) -> Awaitable[None]:
+        """Process a request and use the response handler to emit events.
 
         Args:
             request: The strictly typed input envelope.
+            response: The handler for emitting thoughts, data, artifacts, or final answers.
 
         Returns:
-            An async iterator yielding thoughts, data, artifacts, or final answers.
+            None (awaited).
         """
         ...
 
