@@ -88,3 +88,15 @@ By formalizing `SessionState` separate from the raw Agent logic, we achieve:
 1.  **Stateless Runtime:** The execution engine doesn't need to hold state in memory between turns. It just needs the `SessionState` object.
 2.  **Portability:** Sessions can be moved between different workers or regions easily.
 3.  **Auditability:** The history of `Interaction`s provides a complete, immutable audit trail of the conversation.
+
+## Active Memory Interface
+
+While `SessionState` describes the *data* structure, the **[Active Memory Interface](active_memory_interface.md)** (`SessionHandle`) describes how an Agent *interacts* with that state at runtime.
+
+Instead of receiving the entire `SessionState` as a static input, Agents are provided with a handle that allows them to:
+
+*   Lazily fetch history (`session.history()`).
+*   Perform semantic searches (`session.recall()`).
+*   Read/Write persistent variables (`session.get()`, `session.store()`).
+
+This separation allows the Runtime to manage the complexity of storage and retrieval while keeping the Agent logic clean and focused on the task.
