@@ -1,10 +1,25 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.common import CoReasonBaseModel
+
+
+class ClientCapabilities(CoReasonBaseModel):
+    """Defines the rendering capabilities of the client for content negotiation."""
+
+    model_config = ConfigDict(extra="ignore", frozen=True)
+
+    supported_events: List[str] = Field(
+        default_factory=list,
+        description="List of event types the client can render (e.g., 'CITATION_BLOCK', 'MEDIA_CAROUSEL').",
+    )
+    prefers_markdown: bool = Field(default=True, description="Whether the client prefers markdown text.")
+    image_resolution: Optional[str] = Field(
+        default=None, description="Preferred image resolution (e.g., 'low', 'high', 'auto')."
+    )
 
 
 class AgentRequest(CoReasonBaseModel):
@@ -22,6 +37,9 @@ class AgentRequest(CoReasonBaseModel):
     parent_request_id: Optional[UUID] = Field(default=None, description="The ID of the request that triggered this one")
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     payload: Dict[str, Any] = Field(..., description="The actual input arguments for the agent")
+    capabilities: Optional[ClientCapabilities] = Field(
+        None, description="Client rendering capabilities for content negotiation."
+    )
     metadata: Dict[str, Any] = Field(
         default_factory=dict, description="Arbitrary headers or context (e.g., user locale)"
     )

@@ -72,6 +72,7 @@ class ServiceRequest(CoReasonBaseModel):
 
     Allows the engine to strip off authentication/tracing (SessionContext)
     before passing the raw payload (AgentRequest) to the agent logic.
+    Client capabilities for content negotiation should be populated within the payload.
     """
 
     model_config = ConfigDict(frozen=True)

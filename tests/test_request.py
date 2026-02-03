@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.request import AgentRequest
+from coreason_manifest.definitions.request import AgentRequest, ClientCapabilities
 
 
 def test_agent_request_defaults() -> None:
@@ -68,3 +68,35 @@ def test_immutability() -> None:
     # Pydantic v2 frozen models raise ValidationError on assignment
     with pytest.raises(ValidationError):
         req.payload = {"new": "val"}  # type: ignore[misc]
+
+
+def test_client_capabilities_serialization() -> None:
+    session_id = uuid4()
+    capabilities = ClientCapabilities(
+        supported_events=["CITATION_BLOCK", "MEDIA_CAROUSEL"],
+        prefers_markdown=False,
+        image_resolution="high",
+    )
+    req = AgentRequest(
+        session_id=session_id,
+        payload={"input": "test"},
+        capabilities=capabilities,
+    )
+
+    # Serialize
+    json_str = req.to_json()
+    assert "CITATION_BLOCK" in json_str
+    assert "MEDIA_CAROUSEL" in json_str
+    assert "high" in json_str
+
+    # Deserialize
+    data = req.dump()
+    req2 = AgentRequest(**data)
+    assert req2.capabilities is not None
+    assert req2.capabilities.supported_events == ["CITATION_BLOCK", "MEDIA_CAROUSEL"]
+    assert req2.capabilities.prefers_markdown is False
+    assert req2.capabilities.image_resolution == "high"
+
+    # Test defaults
+    req_default = AgentRequest(session_id=session_id, payload={})
+    assert req_default.capabilities is None

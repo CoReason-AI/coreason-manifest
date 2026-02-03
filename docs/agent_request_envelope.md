@@ -23,6 +23,7 @@ request = AgentRequest(
     root_request_id=uuid4(), # The ID of the very first request in the chain
     parent_request_id=uuid4(),# The ID of the request that triggered this one
     payload={"input": "Hello"}, # The actual arguments for the agent
+    capabilities=None,        # Optional client capabilities
     metadata={"user_locale": "en-US"} # Contextual headers
 )
 ```
@@ -37,6 +38,7 @@ request = AgentRequest(
 | `parent_request_id` | `UUID` | The ID of the request that triggered this one (optional). |
 | `timestamp` | `datetime` | Creation time (UTC). Defaults to `now()`. |
 | `payload` | `Dict[str, Any]` | The actual input arguments for the agent. **Required.** |
+| `capabilities` | `ClientCapabilities` | Optional client rendering capabilities for content negotiation. |
 | `metadata` | `Dict[str, Any]` | Arbitrary headers or context. Defaults to `{}`. |
 
 ## Tracing Logic & Validation
