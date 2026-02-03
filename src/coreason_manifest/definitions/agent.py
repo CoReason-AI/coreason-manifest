@@ -40,6 +40,30 @@ from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.evaluation import EvaluationProfile
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
+__all__ = [
+    "AdapterHints",
+    "AgentCapability",
+    "AgentDefinition",
+    "AgentDependencies",
+    "AgentMetadata",
+    "AgentRuntimeConfig",
+    "AgentStatus",
+    "CapabilityType",
+    "DeliveryMode",
+    "EventSchema",
+    "InlineToolDefinition",
+    "ModelConfig",
+    "ObservabilityConfig",
+    "Persona",
+    "PolicyConfig",
+    "StrictUri",
+    "ToolRequirement",
+    "ToolRiskLevel",
+    "TraceLevel",
+    "VersionStr",
+]
+
+
 # SemVer Regex pattern (simplified for standard SemVer)
 # Modified to accept optional 'v' or 'V' prefix (multiple allowed) for input normalization
 SEMVER_REGEX = (

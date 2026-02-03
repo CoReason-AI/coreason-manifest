@@ -14,8 +14,8 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.definitions.agent import VersionStr
 from coreason_manifest.common import CoReasonBaseModel
+from coreason_manifest.definitions.agent import VersionStr
 
 
 class ContractMetadata(CoReasonBaseModel):

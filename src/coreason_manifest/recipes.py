@@ -22,8 +22,9 @@ from typing import Any, Dict, Optional
 
 from pydantic import ConfigDict, Field
 
-from .definitions.agent import VersionStr
 from coreason_manifest.common import CoReasonBaseModel
+
+from .definitions.agent import VersionStr
 from .definitions.topology import GraphTopology, StateDefinition
 
 
