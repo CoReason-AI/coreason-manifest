@@ -162,4 +162,6 @@ definitions:
     assert isinstance(v1_agent, V1AgentDefinition)
     # It should just have a tool ref to mcp://snake
     assert len(v1_agent.dependencies.tools) == 1
-    assert str(v1_agent.dependencies.tools[0].uri) == "mcp://snake"
+    tool_req = v1_agent.dependencies.tools[0]
+    assert isinstance(tool_req, ToolRequirement)
+    assert str(tool_req.uri) == "mcp://snake"
