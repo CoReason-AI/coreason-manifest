@@ -169,10 +169,8 @@ def test_missing_file(manifest_dir: Path) -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
         "metadata": {"name": "Missing Agent"},
-        "definitions": {
-            "missing": {"$ref": "does_not_exist.yaml"}
-        },
-        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}}
+        "definitions": {"missing": {"$ref": "does_not_exist.yaml"}},
+        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}},
     }
     main_path = manifest_dir / "main.yaml"
     with open(main_path, "w") as f:
