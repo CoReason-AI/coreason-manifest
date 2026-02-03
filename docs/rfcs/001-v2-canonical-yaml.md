@@ -1,137 +1,241 @@
-# RFC 001: Coreason Manifest V2 - Canonical YAML
+# RFC 001: Coreason Manifest v2 - Canonical YAML
 
-## Status
-* **Proposed**
-* **Target Version:** 2.0.0
+## 1. Executive Summary
 
-## Summary
-This RFC proposes a "Human-Centric" Canonical YAML format for Coreason Manifests, replacing the current "Machine-First" structure. The goal is to provide a unified source of truth for both the Runtime Engine and the Visual Builder.
+### The Problem
+The Coreason Manifest v1 was designed as a "Machine-First" specification. It relied on verbose, deeply nested JSON structures (via Pydantic v1/v2) that mirrored the internal runtime state of the engine. While strictly typed and robust, it presented significant challenges:
+*   **Authoring Friction:** Writing v1 manifests by hand was error-prone and tedious due to its verbosity.
+*   **Cognitive Load:** The "Edge List" topology required developers to mentally graph connections, rather than thinking in linear steps.
+*   **Lossy Conversion:** UI tools had to "compile down" to v1, losing visual layout data (`x`, `y` coordinates) in the process, making round-tripping between Code and UI impossible.
 
-## Motivation
-Current V1 manifests use nested Pydantic models that are verbose and difficult to author by hand. The new format aims to be:
-*   **Concise:** Easy to read and write.
-*   **Topology-First:** Uses a linked-list style `next` pointer for simple flows, while supporting explicit edges for complex graphs.
-*   **Tool-Agnostic:** Separates UI metadata (`x-design`) from runtime logic.
+### The Solution
+We introduce **Coreason Manifest v2**, a "Human-Centric" **Canonical YAML** format. This format serves as the single source of truth for *both* the Runtime Engine and the Visual Builder.
 
-## Specification
+### The Goal
+**Bidirectional Interchangeability.** A developer should be able to scaffold a workflow in VS Code (YAML), open it in the Visual Builder to rearrange nodes, and save it back to YAML without losing comments, structure, or visual metadata.
 
-### Root Structure
-The root object follows a Kubernetes-style header.
+---
+
+## 2. The v2 Architecture ("The Kubernetes Pattern")
+
+The v2 format adopts the proven Kubernetes-style header structure, ensuring familiarity and extensibility.
+
+### Root Object: `ManifestV2`
 
 ```yaml
 apiVersion: coreason.ai/v2
 kind: Recipe
 metadata:
-  name: "My Workflow"
+  name: "Corporate Research Assistant"
+  version: "2.0.0"
   x-design:
-    x: 0
-    y: 0
+    color: "#4A90E2"
+    icon: "search"
+
 definitions:
-  # Reusable components
-  my-agent:
-    ...
+  # Reusable Component Definitions
+  researcher:
+    type: "agent"
+    name: "Senior Researcher"
+    model: "gpt-4"
+
 workflow:
   start: "step-1"
   steps:
     step-1: ...
 ```
 
-### Steps & Topology
-Steps are defined in a flat dictionary under `workflow.steps`.
-Topological connections are defined implicitly via the `next` field, or explicitly via `SwitchStep` cases.
+*   **`apiVersion`**: Defines the schema version (`coreason.ai/v2`), allowing the engine to route parsing logic correctly.
+*   **`kind`**: Specifies the asset type (`Recipe`, `Agent`, `Evaluation`).
+*   **`metadata`**: Contains descriptive fields (`name`, `version`) and the crucial `x-design` block for UI-level settings.
+*   **`definitions`**: A dictionary of reusable components. Instead of redefining an Agent in every step, you define it once here and reference it by ID. This promotes DRY (Don't Repeat Yourself) principles.
 
-#### Implicit Flow (Linked List)
-Most steps support a `next` field pointing to the ID of the next step.
+---
+
+## 3. "Implicit Flow" Topology
+
+### Concept: Linked List vs. Edge List
+Humans think in steps: *"First do A, then do B."*
+Machines think in graphs: *"Node A connects to Node B."*
+
+Manifest v1 forced the human to write the Graph. Manifest v2 allows the human to write the Steps, and the *Loader* compiles the Graph.
+
+*   **v1 (Machine Model):** Explicit `nodes` list and `edges` list.
+*   **v2 (Human Model):** Steps contain a **`next`** field pointing to the ID of the following step.
+
+### Hybrid Support (The Compiler)
+Under the hood, the Coreason Loader reads the `next` field and generates an explicit `Edge` object. This means the Runtime Engine *still* receives a fully validated Directed Acyclic Graph (DAG), maintaining strict execution guarantees.
+
+### Diagram: Translation Logic
+
+```mermaid
+graph TD
+    subgraph YAML Definition
+    A[Step A: next='B']
+    B[Step B: next='C']
+    C[Step C]
+    end
+
+    subgraph Compiler
+    L[Loader / Parser]
+    end
+
+    subgraph Runtime Graph
+    RA((Node A)) -->|Edge| RB((Node B))
+    RB -->|Edge| RC((Node C))
+    end
+
+    A --> L
+    B --> L
+    L --> RA
+```
+
+---
+
+## 4. Complex Workflow Capabilities
+
+While `next` handles linear flows, v2 fully supports complex control structures like branching, loops, and hybrid execution.
+
+### Loops and Recursion
+Because `next` or `switch` cases can point to *any* step ID, creating loops for quality control or iterative refinement is trivial.
+
+#### Example: Quality Check Loop
+```yaml
+steps:
+  generate:
+    id: "generate"
+    type: "agent"
+    agent: "writer"
+    next: "evaluate"
+
+  evaluate:
+    id: "evaluate"
+    type: "agent"
+    agent: "critic"
+    next: "check_score"
+
+  check_score:
+    id: "check_score"
+    type: "switch"
+    cases:
+      "result.score >= 0.9": "publish"  # Pass
+      "result.score < 0.9": "generate"  # Loop back!
+    default: "generate"
+
+  publish:
+    id: "publish"
+    type: "logic"
+    code: "print('Published!')"
+```
+
+### Hybrid Workflows
+Manifest v2 treats **Logic** (Python code) and **Agents** (LLMs) as first-class citizens. You can seamlessly weave them together.
+
+```yaml
+steps:
+  extract_data:
+    type: "agent"
+    agent: "extractor_agent"
+    next: "sanitize"
+
+  sanitize:
+    type: "logic"
+    code: |
+      # Pure Python execution
+      data = inputs['data']
+      return data.strip().lower()
+    next: "summarize"
+
+  summarize:
+    type: "agent"
+    agent: "summary_agent"
+```
+
+---
+
+## 5. Visual Data Separation (`x-design`)
+
+To achieve bidirectional interchangeability with UI builders, we must persist visual layout data without polluting the runtime logic.
+
+### The `x-design` Field
+We adopt the `x-` vendor extension pattern (common in OpenAPI). The `x-design` field (mapped to `design_metadata` in Python) holds all UI-specific information.
+
+*   **Fields:**
+    *   `x`, `y`: Canvas coordinates (float).
+    *   `icon`: Visual icon identifier.
+    *   `color`: Node color hex code.
+    *   `collapsed`: UI state.
+    *   `label`: Optional display override.
+
+### Round-Tripping Philosophy
+1.  **Engine:** Ignores `x-design` entirely during execution.
+2.  **Visual Builder:** Reads `x-design` to render the graph.
+3.  **Serializer:** Preserves `x-design` when saving back to YAML, ensuring that a developer's manual layout adjustments are never lost.
 
 ```yaml
 step-1:
   type: "agent"
+  # Runtime cares about this:
   agent: "researcher"
   next: "step-2"
-```
-
-#### Branching (Switch)
-The `SwitchStep` replaces `next` with `cases` and `default`.
-
-```yaml
-step-2:
-  type: "switch"
-  cases:
-    "result.score > 0.8": "publish"
-    "result.score <= 0.8": "revise"
-  default: "revise"
-```
-
-### UI Metadata (`x-design`)
-Visual layout information is encapsulated in `x-design` (aliased from `design_metadata` in Python). This ensures separation of concerns.
-
-```yaml
-step-1:
-  type: "agent"
+  # Designer cares about this:
   x-design:
-    x: 100
-    y: 200
-    color: "blue"
-    icon: "robot"
+    x: 120.5
+    y: 400.0
+    color: "#ff0000"
+    icon: "robot-search"
 ```
 
-### Component Types
+---
 
-1.  **AgentStep (`type: agent`)**: Executes an AI Agent.
-2.  **LogicStep (`type: logic`)**: Executes Python code.
-3.  **CouncilStep (`type: council`)**: Aggregates multiple voters.
-4.  **SwitchStep (`type: switch`)**: Routes execution.
+## 6. Composition & Modularity
 
-## Example
+Manifest v2 supports composition through reference.
+
+### The `$ref` Pattern
+Steps can reference components defined in the `definitions` block. This is critical for keeping the `workflow` block clean and readable.
 
 ```yaml
-apiVersion: coreason.ai/v2
-kind: Recipe
-metadata:
-  name: "Document Review"
-  x-design:
-    x: 0
-    y: 0
+definitions:
+  my-custom-agent:
+    id: "agent-007"
+    type: "agent"
+    model: "gpt-4"
+    system_prompt: "You are a spy."
+
 workflow:
-  start: "draft"
+  start: "mission-brief"
   steps:
-    draft:
-      id: "draft"
+    mission-brief:
       type: "agent"
-      agent: "writer-agent"
-      next: "review"
-      x-design:
-        x: 100
-        y: 100
-
-    review:
-      id: "review"
-      type: "council"
-      voters: ["critic-1", "critic-2"]
-      strategy: "consensus"
-      next: "decide"
-      x-design:
-        x: 300
-        y: 100
-
-    decide:
-      id: "decide"
-      type: "switch"
-      cases:
-        "result == 'approved'": "publish"
-      default: "draft"
-      x-design:
-        x: 500
-        y: 100
-
-    publish:
-      id: "publish"
-      type: "logic"
-      code: "print('Published!')"
-      x-design:
-        x: 700
-        y: 100
+      # References the definition above
+      agent: "agent-007"
 ```
 
-## Schema Generation
-The JSON Schema is automatically generated from the Pydantic models in `src/coreason_manifest/v2/spec/definitions.py` using `scripts/generate_v2_schema.py`.
+### Nested Workflows (Future)
+Steps of `type: workflow` (or `recipe`) can reference external Manifest files. This allows for "Sub-Recipes" or hierarchical Standard Operating Procedures (SOPs).
+
+```yaml
+    sub-task-step:
+      type: "recipe"
+      recipe: "./sub-workflows/data-cleaning.yaml"
+      next: "analysis"
+```
+
+---
+
+## 7. Migration & Compatibility
+
+### Non-Destructive Strategy
+The v2 implementation is located in `src/coreason_manifest/v2/`. It does not modify, import, or depend on the existing `src/coreason_manifest/definitions/` (v1) code.
+*   **v1** remains the stable runtime format for now.
+*   **v2** is introduced as an RFC and experimental interface.
+
+### Upgrade Path
+We will provide a CLI utility (`coreason upgrade`) that:
+1.  Parses a v1 `AgentDefinition` or `RecipeManifest`.
+2.  Auto-generates the `next` pointers by traversing the edge list.
+3.  Assigns default `x-design` coordinates (using a graph layout algorithm).
+4.  Outputs valid v2 Canonical YAML.
+
+This ensures that existing assets can be migrated to the new Human-Centric format with zero data loss.
