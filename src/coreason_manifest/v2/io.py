@@ -11,18 +11,63 @@
 """I/O module for loading and dumping V2 Manifests."""
 
 from pathlib import Path
-from typing import Union
+from typing import Any, Dict, Optional, Set, Union
 
 import yaml
 
+from coreason_manifest.v2.resolver import ReferenceResolver
 from coreason_manifest.v2.spec.definitions import ManifestV2
 
 
-def load_from_yaml(path: Union[str, Path]) -> ManifestV2:
+def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[Path]) -> Dict[str, Any]:
+    """
+    Recursively load YAML data, resolving $ref in definitions.
+    """
+    if path in visited_paths:
+        raise RecursionError(f"Circular dependency detected: {path}")
+
+    visited_paths.add(path)
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+    except yaml.YAMLError as e:
+        raise ValueError(f"Invalid YAML in {path}: {e}") from e
+
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected a dictionary in {path}, got {type(data).__name__}")
+
+    # Resolve references in definitions
+    definitions = data.get("definitions", {})
+    if definitions:
+        for key, value in definitions.items():
+            if isinstance(value, dict) and "$ref" in value:
+                ref_path_str = value["$ref"]
+                # Resolve the path
+                abs_path = resolver.resolve(path, ref_path_str)
+
+                # Recursively load
+                loaded_obj = _load_recursive(abs_path, resolver, visited_paths)
+
+                # Merge Strategy:
+                # Replace the $ref dict with the loaded data.
+                definitions[key] = loaded_obj
+
+    visited_paths.remove(path)
+    return data
+
+
+def load_from_yaml(
+    path: Union[str, Path],
+    root_dir: Optional[Union[str, Path]] = None,
+    recursive: bool = True,
+) -> ManifestV2:
     """Load a V2 manifest from a YAML file.
 
     Args:
         path: Path to the YAML file.
+        root_dir: The allowed root directory for references. Defaults to path's parent.
+        recursive: Whether to resolve $ref recursively.
 
     Returns:
         The validated ManifestV2 object.
@@ -31,13 +76,23 @@ def load_from_yaml(path: Union[str, Path]) -> ManifestV2:
         FileNotFoundError: If the file does not exist.
         ValidationError: If the manifest is invalid.
         yaml.YAMLError: If the YAML is invalid.
+        RecursionError: If a cyclic dependency is detected.
+        ValueError: If a security violation occurs or YAML is invalid.
     """
-    p = Path(path)
+    p = Path(path).resolve()
     if not p.exists():
         raise FileNotFoundError(f"Manifest file not found: {path}")
 
-    with p.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    if root_dir is None:
+        root_dir = p.parent
+
+    if recursive:
+        resolver = ReferenceResolver(root_dir)
+        visited_paths: Set[Path] = set()
+        data = _load_recursive(p, resolver, visited_paths)
+    else:
+        with p.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
 
     return ManifestV2.model_validate(data)
 
