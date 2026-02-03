@@ -35,6 +35,12 @@ from .definitions.events import (
     WorkflowError,
     migrate_graph_event_to_cloud_event,
 )
+from .definitions.patterns import (
+    HierarchicalTeamPattern,
+    PatternDefinition,
+    PatternType,
+    SwarmPattern,
+)
 from .definitions.simulation import (
     SimulationMetrics,
     SimulationScenario,
@@ -102,4 +108,8 @@ __all__ = [
     "ComplianceReport",
     "check_compliance",
     "load_from_yaml",
+    "PatternType",
+    "SwarmPattern",
+    "HierarchicalTeamPattern",
+    "PatternDefinition",
 ]
