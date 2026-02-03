@@ -118,5 +118,5 @@ def test_pattern_extra_forbid() -> None:
             participants=[],
             handoff_mode="x",
             max_turns=1,
-            extra_field="fail",
+            extra_field="fail",  # type: ignore[call-arg]
         )

@@ -3,8 +3,9 @@
 import importlib
 from typing import Any, cast
 
-import coreason_manifest
 from pydantic import BaseModel
+
+import coreason_manifest
 
 
 def test_mixed_namespace_usage() -> None:
