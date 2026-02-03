@@ -179,11 +179,13 @@ def test_missing_file(manifest_dir: Path) -> None:
     with pytest.raises(FileNotFoundError, match="Referenced file not found"):
         load_from_yaml(main_path)
 
+
 def test_load_missing_file(manifest_dir: Path) -> None:
     """Test that loading a non-existent file raises FileNotFoundError."""
     missing_path = manifest_dir / "non_existent.yaml"
     with pytest.raises(FileNotFoundError, match="Manifest file not found"):
         load_from_yaml(missing_path)
+
 
 def test_dump_roundtrip(manifest_dir: Path) -> None:
     """Test that we can dump a manifest back to YAML."""
