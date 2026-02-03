@@ -1,6 +1,6 @@
-# Transport-Layer Specification
+# Transport-Layer Specification (CAP Binding)
 
-This document formalizes the **Public API Contract** that any Coreason-compatible engine must expose. It moves the `coreason-manifest` from strictly defining internal data structures to also defining *how* the outside world talks to an agent.
+This document formalizes the **Coreason Agent Protocol (CAP)** that any Coreason-compatible engine must expose. It moves the `coreason-manifest` from strictly defining internal data structures to also defining *how* the outside world talks to an agent.
 
 ## Goal
 

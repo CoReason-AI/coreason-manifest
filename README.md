@@ -16,9 +16,13 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
 
+*   CAM is for **configuration**.
+*   CAP is for **communication**.
+
 ## Features
 
 *   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
+*   **Coreason Agent Protocol (CAP):** Standardized HTTP/SSE runtime contract for invoking agents and streaming results, strictly typed via `ServiceRequest` and `StreamPacket`.
 *   **Behavioral Protocols:** Standard `AgentInterface` and `LifecycleInterface` protocols for runtime interoperability.
 *   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
 *   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like `UUID` and `datetime`.
