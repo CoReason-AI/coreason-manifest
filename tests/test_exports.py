@@ -9,18 +9,36 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import coreason_manifest
-from coreason_manifest.definitions.agent import AgentDefinition, AgentStatus
+from coreason_manifest.v2.spec.definitions import ManifestV2
+from coreason_manifest.v2.io import load_from_yaml, dump_to_yaml
 
 
 def test_top_level_exports() -> None:
-    """Verify that key components are exported from the top-level package."""
-    # Verify AgentStatus export
-    assert hasattr(coreason_manifest, "AgentStatus")
-    assert coreason_manifest.AgentStatus is AgentStatus
+    """Verify that key components are exported from the top-level package (V2)."""
+    # Verify Manifest export
+    assert hasattr(coreason_manifest, "Manifest")
+    assert coreason_manifest.Manifest is ManifestV2
 
-    # Verify AgentDefinition export
-    assert hasattr(coreason_manifest, "AgentDefinition")
-    assert coreason_manifest.AgentDefinition is AgentDefinition
+    # Verify Recipe export (alias)
+    assert hasattr(coreason_manifest, "Recipe")
+    assert coreason_manifest.Recipe is ManifestV2
 
-    # Check __all__ contains AgentStatus
-    assert "AgentStatus" in coreason_manifest.__all__
+    # Verify load/dump
+    assert hasattr(coreason_manifest, "load")
+    assert coreason_manifest.load is load_from_yaml
+    assert hasattr(coreason_manifest, "dump")
+    assert coreason_manifest.dump is dump_to_yaml
+
+    # Verify version
+    assert hasattr(coreason_manifest, "__version__")
+
+    # Check __all__
+    expected = ["Manifest", "Recipe", "load", "dump", "__version__"]
+    for item in expected:
+        assert item in coreason_manifest.__all__
+
+def test_legacy_exports_removed() -> None:
+    """Verify that legacy V1 components are NOT exported from root."""
+    assert not hasattr(coreason_manifest, "AgentStatus")
+    assert not hasattr(coreason_manifest, "AgentDefinition")
+    assert not hasattr(coreason_manifest, "RecipeManifest")

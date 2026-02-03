@@ -8,114 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .definitions.agent import AdapterHints, AgentDefinition, AgentStatus, Persona
-from .definitions.audit import AuditLog
-from .definitions.contracts import InterfaceDefinition
-from .definitions.evaluation import EvaluationProfile, SuccessCriterion
-from .definitions.events import (
-    ArtifactGenerated,
-    CloudEvent,
-    CouncilVote,
-    EdgeTraversed,
-    GraphEvent,
-    GraphEventArtifactGenerated,
-    GraphEventCouncilVote,
-    GraphEventEdgeActive,
-    GraphEventError,
-    GraphEventNodeDone,
-    GraphEventNodeInit,
-    GraphEventNodeRestored,
-    GraphEventNodeSkipped,
-    GraphEventNodeStart,
-    GraphEventNodeStream,
-    NodeCompleted,
-    NodeInit,
-    NodeRestored,
-    NodeSkipped,
-    NodeStarted,
-    NodeStream,
-    WorkflowError,
-    migrate_graph_event_to_cloud_event,
-)
-from .definitions.patterns import (
-    HierarchicalTeamPattern,
-    PatternDefinition,
-    PatternType,
-    SwarmPattern,
-)
-from .definitions.simulation import (
-    SimulationMetrics,
-    SimulationScenario,
-    SimulationStep,
-    SimulationTrace,
-    StepType,
-)
-from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
-from .definitions.topology import (
-    AgentNode,
-    Edge,
-    GraphTopology,
-    Node,
-    StateDefinition,
-    Topology,
-)
-from .dsl import load_from_yaml
-from .governance import ComplianceReport, GovernanceConfig, check_compliance
-from .recipes import RecipeManifest
+from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
+from coreason_manifest.v2.spec.definitions import ManifestV2
 
-__all__ = [
-    "AdapterHints",
-    "AgentDefinition",
-    "AgentStatus",
-    "Persona",
-    "InterfaceDefinition",
-    "EvaluationProfile",
-    "SuccessCriterion",
-    "Topology",
-    "GraphTopology",
-    "Node",
-    "AgentNode",
-    "Edge",
-    "StateDefinition",
-    "GraphEvent",
-    "CloudEvent",
-    "GraphEventNodeInit",
-    "GraphEventNodeStart",
-    "GraphEventNodeDone",
-    "GraphEventNodeStream",
-    "GraphEventNodeSkipped",
-    "GraphEventNodeRestored",
-    "GraphEventEdgeActive",
-    "GraphEventCouncilVote",
-    "GraphEventError",
-    "GraphEventArtifactGenerated",
-    "NodeInit",
-    "NodeStarted",
-    "NodeCompleted",
-    "NodeStream",
-    "NodeSkipped",
-    "NodeRestored",
-    "WorkflowError",
-    "CouncilVote",
-    "ArtifactGenerated",
-    "EdgeTraversed",
-    "migrate_graph_event_to_cloud_event",
-    "SimulationScenario",
-    "SimulationTrace",
-    "SimulationStep",
-    "SimulationMetrics",
-    "StepType",
-    "AdversaryProfile",
-    "ChaosConfig",
-    "SimulationRequest",
-    "AuditLog",
-    "RecipeManifest",
-    "GovernanceConfig",
-    "ComplianceReport",
-    "check_compliance",
-    "load_from_yaml",
-    "PatternType",
-    "SwarmPattern",
-    "HierarchicalTeamPattern",
-    "PatternDefinition",
-]
+__version__ = "0.12.0"
+
+Manifest = ManifestV2
+Recipe = ManifestV2
+load = load_from_yaml
+dump = dump_to_yaml
+
+__all__ = ["Manifest", "Recipe", "load", "dump", "__version__"]

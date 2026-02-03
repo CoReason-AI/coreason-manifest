@@ -10,6 +10,7 @@
 
 from coreason_manifest.definitions.agent import AgentDefinition as Agent
 from coreason_manifest.definitions.topology import GraphTopology as Topology
+from coreason_manifest.recipes import RecipeManifest
 from coreason_manifest.recipes import RecipeManifest as Recipe
 
-__all__ = ["Agent", "Recipe", "Topology"]
+__all__ = ["Agent", "Recipe", "RecipeManifest", "Topology"]
