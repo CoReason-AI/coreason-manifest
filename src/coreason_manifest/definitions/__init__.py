@@ -34,7 +34,13 @@ from .events import (
     WorkflowErrorPayload,
 )
 from .identity import Identity
-from .interfaces import AgentInterface, LifecycleInterface
+from .interfaces import (
+    IAgentRuntime,
+    IResponseHandler,
+    ISession,
+    IStreamEmitter,
+    LifecycleInterface,
+)
 from .presentation import (
     CitationBlock,
     CitationItem,
@@ -56,7 +62,10 @@ __all__ = [
     "DEFAULT_ENDPOINT_PATH",
     "AgentRuntimeConfig",
     "AgentDefinition",
-    "AgentInterface",
+    "IAgentRuntime",
+    "IResponseHandler",
+    "ISession",
+    "IStreamEmitter",
     "LifecycleInterface",
     "Persona",
     "DeploymentConfig",

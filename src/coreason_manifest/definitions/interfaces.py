@@ -11,135 +11,68 @@
 """Defines the behavioral contract (Protocol) for a Coreason Agent."""
 
 from abc import abstractmethod
-from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Awaitable, Dict, List, Optional, Protocol, runtime_checkable
 
 from coreason_manifest.definitions.agent import AgentDefinition
-from coreason_manifest.definitions.events import CloudEvent, GraphEvent
 from coreason_manifest.definitions.identity import Identity
+from coreason_manifest.definitions.presentation import (
+    CitationBlock,
+    PresentationEvent,
+)
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import Interaction
 
 
 @runtime_checkable
-class StreamHandle(Protocol):
-    """Protocol encapsulating the lifecycle of a stream.
-
-    A stream is a first-class citizen with a unique ID, distinct lifecycle,
-    and strict state management.
-    """
-
-    @property
-    @abstractmethod
-    def stream_id(self) -> str:
-        """The unique identifier for this specific stream instance (UUID)."""
-        ...
-
-    @property
-    @abstractmethod
-    def is_active(self) -> bool:
-        """Strictly typed boolean indicating if the stream allows new data."""
-        ...
+class IStreamEmitter(Protocol):
+    """Abstracts the concept of a streaming response (like Sentient's TextStream)."""
 
     @abstractmethod
-    def write(self, chunk: str) -> Awaitable[None]:
-        """Async method to emit a token/chunk.
-
-        Raises:
-            RuntimeError: If the stream is closed.
-        """
+    def emit_chunk(self, content: str) -> Awaitable[None]:
+        """Emit a token/chunk."""
         ...
 
     @abstractmethod
     def close(self) -> Awaitable[None]:
-        """Async method to finalize the stream (seal it)."""
-        ...
-
-    @abstractmethod
-    def abort(self, reason: str) -> Awaitable[None]:
-        """Async method to kill the stream with an error."""
+        """Close the stream."""
         ...
 
 
 @runtime_checkable
-class EventSink(Protocol):
-    """Protocol for emitting internal system events (telemetry, audit, logs).
+class IResponseHandler(Protocol):
+    """Protocol defining how an agent communicates back to the user.
 
-    This serves as the standard interface for emitting GraphEvents and CloudEvents
-    that are not necessarily meant for the user, but for the system.
+    This interface decouples the Agent from the specific Transport (HTTP/WebSocket/SSE).
     """
 
     @abstractmethod
-    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
-        """The core method to ingest any strictly typed event."""
+    def emit_event(self, event: PresentationEvent) -> Awaitable[None]:
+        """Low-level emission of a raw event wrapper."""
         ...
 
     @abstractmethod
-    def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> Awaitable[None]:
-        """A helper to emit a standard log event (which the implementation wraps in a CloudEvent)."""
+    def emit_thought(self, content: str) -> Awaitable[None]:
+        """Helper to emit a THOUGHT_TRACE event."""
         ...
 
     @abstractmethod
-    def audit(self, actor: str, action: str, resource: str, success: bool) -> Awaitable[None]:
-        """A helper to emit an immutable Audit Log entry."""
+    def emit_citation(self, citation: CitationBlock) -> Awaitable[None]:
+        """Helper to emit a CITATION_BLOCK event."""
+        ...
+
+    @abstractmethod
+    def create_text_stream(self, name: str) -> Awaitable[IStreamEmitter]:
+        """Opens a new stream for token-by-token generation."""
+        ...
+
+    @abstractmethod
+    def complete(self) -> Awaitable[None]:
+        """Signals the end of the generation turn."""
         ...
 
 
 @runtime_checkable
-class ResponseHandler(EventSink, Protocol):
-    """Protocol for handling agent responses, decoupling logic from event transport.
-
-    This interface allows agents to emit events and presentation blocks without
-    being tied to a specific transport mechanism (e.g., HTTP, WebSocket).
-    """
-
-    @abstractmethod
-    def thought(self, content: str, status: str = "IN_PROGRESS") -> Awaitable[None]:
-        """Emit a thinking block."""
-        ...
-
-    @abstractmethod
-    def markdown(self, content: str) -> Awaitable[None]:
-        """Emit a markdown block."""
-        ...
-
-    @abstractmethod
-    def data(
-        self,
-        data: Dict[str, Any],
-        title: Optional[str] = None,
-        view_hint: str = "JSON",
-    ) -> Awaitable[None]:
-        """Emit a data block."""
-        ...
-
-    @abstractmethod
-    def error(
-        self,
-        message: str,
-        details: Optional[Dict[str, Any]] = None,
-        recoverable: bool = False,
-    ) -> Awaitable[None]:
-        """Emit an error block."""
-        ...
-
-    @abstractmethod
-    def create_stream(
-        self, title: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None
-    ) -> Awaitable[StreamHandle]:
-        """Create a new stream and return its handle.
-
-        Args:
-            title: Optional title for the stream.
-            metadata: Optional metadata for the stream.
-
-        Returns:
-            A StreamHandle instance to write content to.
-        """
-        ...
-
-
-@runtime_checkable
-class SessionHandle(Protocol):
+class ISession(Protocol):
     """Protocol encapsulating the Active Memory Interface.
 
     Allows agents to lazily pull history, recall information via semantic search,
@@ -165,11 +98,7 @@ class SessionHandle(Protocol):
 
     @abstractmethod
     def recall(self, query: str, limit: int = 5, threshold: float = 0.7) -> Awaitable[List[str]]:
-        """Interface for Semantic Search / Vector DB retrieval.
-
-        This delegates to the Runtime's vector store (Engine), and the Agent does
-        not need to know *which* vector DB is being used.
-        """
+        """Interface for Semantic Search / Vector DB retrieval."""
         ...
 
     @abstractmethod
@@ -184,8 +113,8 @@ class SessionHandle(Protocol):
 
 
 @runtime_checkable
-class AgentInterface(Protocol):
-    """Protocol defining the standard interface for a Coreason Agent."""
+class IAgentRuntime(Protocol):
+    """Protocol defining the strict signature an agent developer must implement."""
 
     @property
     @abstractmethod
@@ -194,13 +123,10 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
+    def assist(self, session: ISession, request: AgentRequest, handler: IResponseHandler) -> Awaitable[None]:
         """Process a request and use the response handler to emit events.
 
-        Args:
-            request: The strictly typed input envelope.
-            session: The active memory interface.
-            response: The handler for emitting results.
+        This strictly matches the sentient signature but uses Coreason types.
         """
         ...
 

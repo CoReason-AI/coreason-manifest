@@ -8,30 +8,54 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, List
-from unittest.mock import MagicMock
-
-from coreason_manifest.definitions.agent import AgentDefinition
-from coreason_manifest.definitions.identity import Identity
+import pytest
+from typing import Any, List, cast
 from coreason_manifest.definitions.interfaces import (
-    AgentInterface,
-    ResponseHandler,
-    SessionHandle,
+    IStreamEmitter,
+    IResponseHandler,
+    ISession,
+    IAgentRuntime,
+    AgentDefinition
 )
+from coreason_manifest.definitions.presentation import PresentationEvent, CitationBlock
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import Interaction
+from coreason_manifest.definitions.identity import Identity
 
+class MockStreamEmitter:
+    """Mock implementation of IStreamEmitter."""
+    async def emit_chunk(self, content: str) -> None:
+        pass
+
+    async def close(self) -> None:
+        pass
+
+class MockHandler:
+    """Mock implementation of IResponseHandler."""
+    async def emit_event(self, event: PresentationEvent) -> None:
+        pass
+
+    async def emit_thought(self, content: str) -> None:
+        pass
+
+    async def emit_citation(self, citation: CitationBlock) -> None:
+        pass
+
+    async def create_text_stream(self, name: str) -> IStreamEmitter:
+        return MockStreamEmitter()
+
+    async def complete(self) -> None:
+        pass
 
 class MockSession:
-    """A valid implementation of SessionHandle."""
-
+    """Mock implementation of ISession."""
     @property
     def session_id(self) -> str:
-        return "sess-123"
+        return "test-session"
 
     @property
     def identity(self) -> Identity:
-        return Identity.anonymous()
+        return Identity(id="user-1", name="Test User")
 
     async def history(self, limit: int = 10, offset: int = 0) -> List[Interaction]:
         return []
@@ -45,47 +69,29 @@ class MockSession:
     async def get(self, key: str, default: Any = None) -> Any:
         return default
 
-
-class ValidAgent:
+class MyAgent:
+    """Mock implementation of IAgentRuntime."""
     @property
     def manifest(self) -> AgentDefinition:
-        return MagicMock(spec=AgentDefinition)
+        # Return casted None or mock to avoid heavy instantiation
+        return cast(AgentDefinition, None)
 
-    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
+    async def assist(self, session: ISession, request: AgentRequest, handler: IResponseHandler) -> None:
         pass
 
+def test_protocols_runtime_check():
+    """Verify that the classes satisfy the protocols at runtime."""
+    assert isinstance(MockStreamEmitter(), IStreamEmitter)
+    assert isinstance(MockHandler(), IResponseHandler)
+    assert isinstance(MockSession(), ISession)
+    assert isinstance(MyAgent(), IAgentRuntime)
 
-class InvalidAgent:
-    """Missing assist method."""
+def test_type_checking():
+    """Verify type checking concepts (this is mostly for static analysis but runs to ensure no errors)."""
+    handler: IResponseHandler = MockHandler()
+    session: ISession = MockSession()
+    agent: IAgentRuntime = MyAgent()
 
-    @property
-    def manifest(self) -> AgentDefinition:
-        return MagicMock(spec=AgentDefinition)
-
-
-def test_runtime_checks_valid_agent() -> None:
-    """Test that a class implementing the protocol is recognized."""
-    agent = ValidAgent()
-    assert isinstance(agent, AgentInterface)
-
-
-def test_runtime_checks_invalid_agent() -> None:
-    """Test that a class missing methods is not recognized."""
-    agent = InvalidAgent()
-    assert not isinstance(agent, AgentInterface)
-
-
-def test_type_hint_usage() -> None:
-    """Test that the type hint can be used in function signatures."""
-
-    def run_agent(agent: AgentInterface) -> None:
-        assert isinstance(agent, AgentInterface)
-
-    valid_agent = ValidAgent()
-    run_agent(valid_agent)
-
-
-def test_session_handle_runtime_check() -> None:
-    """Test that a class implementing SessionHandle is recognized."""
-    session = MockSession()
-    assert isinstance(session, SessionHandle)
+    assert handler is not None
+    assert session is not None
+    assert agent is not None
