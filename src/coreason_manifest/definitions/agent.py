@@ -38,6 +38,7 @@ from coreason_manifest.common import StrictUri, ToolRiskLevel
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.evaluation import EvaluationProfile
+from coreason_manifest.definitions.memory import MemoryConfig
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 __all__ = [
@@ -266,6 +267,7 @@ class AgentRuntimeConfig(CoReasonBaseModel):
     entry_point: Optional[str] = Field(None, description="The ID of the starting node.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
     system_prompt: Optional[str] = Field(None, description="The global system prompt/instruction for the agent.")
+    memory: Optional[MemoryConfig] = Field(None, description="Memory management policy.")
     adapter_hints: Optional[List[AdapterHints]] = Field(
         None, description="Optional list of adapter hints for interoperability."
     )

@@ -17,6 +17,7 @@ from pydantic import ConfigDict, Field
 from coreason_manifest.common import CoReasonBaseModel
 from coreason_manifest.definitions.events import GraphEvent
 from coreason_manifest.definitions.identity import Identity
+from coreason_manifest.definitions.memory import MemoryStrategy
 from coreason_manifest.definitions.message import MultiModalInput
 
 
@@ -109,3 +110,24 @@ class SessionState(CoReasonBaseModel):
                 "last_updated_at": datetime.now(timezone.utc),
             }
         )
+
+    def prune(self, strategy: MemoryStrategy, limit: int) -> "SessionState":
+        """Prunes the session history based on the given strategy and limit.
+
+        Args:
+            strategy: The memory strategy to use.
+            limit: The limit for the strategy.
+
+        Returns:
+            A new SessionState with pruned history.
+        """
+        if strategy == MemoryStrategy.SLIDING_WINDOW:
+            if limit <= 0:
+                new_history = []
+            else:
+                new_history = self.history[-limit:]
+            return self.model_copy(update={"history": new_history})
+        else:
+            raise NotImplementedError(
+                "Kernel only supports SLIDING_WINDOW pruning. Complex strategies require an Engine."
+            )

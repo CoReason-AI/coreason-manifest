@@ -101,6 +101,17 @@ assert len(session.history) == 0      # Original is unchanged
 assert len(new_session.history) == 1  # New instance has the update
 ```
 
+### Memory Pruning
+
+To prevent infinite growth, `SessionState` supports deterministic pruning via the `prune()` method. This is governed by the [Memory Governance](memory_governance.md) configuration.
+
+```python
+from coreason_manifest.definitions.memory import MemoryStrategy
+
+# Keep only the last 10 turns
+pruned_session = session.prune(MemoryStrategy.SLIDING_WINDOW, limit=10)
+```
+
 ## Why this Architecture?
 
 By formalizing `SessionState` separate from the raw Agent logic, we achieve:

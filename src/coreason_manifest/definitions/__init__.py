@@ -35,6 +35,7 @@ from .events import (
 )
 from .identity import Identity
 from .interfaces import AgentInterface, LifecycleInterface
+from .memory import MemoryConfig, MemoryStrategy
 from .presentation import (
     CitationBlock,
     CitationItem,
@@ -60,6 +61,8 @@ __all__ = [
     "AgentDefinition",
     "AgentInterface",
     "LifecycleInterface",
+    "MemoryConfig",
+    "MemoryStrategy",
     "Persona",
     "DeploymentConfig",
     "Protocol",
