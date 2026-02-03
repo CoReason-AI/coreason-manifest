@@ -1,7 +1,8 @@
 # Copyright (c) 2025 CoReason, Inc.
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from coreason_manifest.definitions.topology import (
     AgentNode,
@@ -15,12 +16,11 @@ from coreason_manifest.v2.adapter import v2_to_recipe
 from coreason_manifest.v2.compiler import compile_to_topology
 from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
 from coreason_manifest.v2.spec.definitions import (
-    ManifestV2,
     AgentStep,
-    Workflow,
     ManifestMetadata,
+    ManifestV2,
+    Workflow,
 )
-
 
 SAMPLE_V2_YAML = """
 apiVersion: coreason.ai/v2
@@ -107,7 +107,7 @@ def test_compile_to_topology(tmp_path: Path) -> None:
     # step4 -> None
 
     edges = topology.edges
-    assert len(edges) == 2 # 1 Edge + 1 ConditionalEdge
+    assert len(edges) == 2  # 1 Edge + 1 ConditionalEdge
 
     edge1 = next((e for e in edges if e.source_node_id == "step1"), None)
     assert isinstance(edge1, Edge)
@@ -126,14 +126,8 @@ def test_dangling_pointer() -> None:
         metadata=ManifestMetadata(name="Bad"),
         workflow=Workflow(
             start="step1",
-            steps={
-                "step1": AgentStep(
-                    id="step1",
-                    agent="a",
-                    next="step_non_existent"
-                )
-            }
-        )
+            steps={"step1": AgentStep(id="step1", agent="a", next="step_non_existent")},
+        ),
     )
 
     with pytest.raises(ValueError, match="references non-existent step"):
@@ -156,7 +150,7 @@ def test_dump_to_yaml() -> None:
     manifest = ManifestV2(
         kind="Recipe",
         metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={})
+        workflow=Workflow(start="s1", steps={}),
     )
 
     s = dump_to_yaml(manifest)

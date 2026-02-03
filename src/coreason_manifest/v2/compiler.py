@@ -31,7 +31,7 @@ from coreason_manifest.v2.spec.definitions import (
 )
 
 
-def _convert_visual_metadata(design_metadata: Union[Dict, Any, None]) -> Union[VisualMetadata, None]:
+def _convert_visual_metadata(design_metadata: Union[Dict[str, Any], Any, None]) -> Union[VisualMetadata, None]:
     """Convert V2 design metadata to V1 visual metadata.
 
     Args:
@@ -45,9 +45,7 @@ def _convert_visual_metadata(design_metadata: Union[Dict, Any, None]) -> Union[V
 
     # Handle if it's a Pydantic model (DesignMetadata) or dict
     data = (
-        design_metadata.model_dump(by_alias=True)
-        if hasattr(design_metadata, "model_dump")
-        else dict(design_metadata)
+        design_metadata.model_dump(by_alias=True) if hasattr(design_metadata, "model_dump") else dict(design_metadata)
     )
 
     return VisualMetadata(
@@ -82,6 +80,7 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
 
     for step_id, step in manifest.workflow.steps.items():
         visual = _convert_visual_metadata(step.design_metadata)
+        node: Node
 
         # 1. Convert Nodes
         if isinstance(step, AgentStep):
@@ -162,10 +161,12 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
             # Using a placeholder identity function because we cannot add new dependencies/libs.
             # We assume the runtime has a way to handle this or the user provides the identity util.
             # Here we use 'coreason.lib.router.identity' as the implied identity function.
-            edges.append(ConditionalEdge(
-                source_node_id=step_id,
-                router_logic="coreason.lib.router.identity",
-                mapping=mapping,
-            ))
+            edges.append(
+                ConditionalEdge(
+                    source_node_id=step_id,
+                    router_logic="coreason.lib.router.identity",
+                    mapping=mapping,
+                )
+            )
 
     return GraphTopology(nodes=nodes, edges=edges)

@@ -38,9 +38,7 @@ def v2_to_recipe(manifest: ManifestV2) -> RecipeManifest:
     # We dump to dict to handle potential Pydantic model vs dict
     design_metadata = {}
     if manifest.metadata.design_metadata:
-        design_metadata = manifest.metadata.design_metadata.model_dump(
-            by_alias=True, exclude_none=True
-        )
+        design_metadata = manifest.metadata.design_metadata.model_dump(by_alias=True, exclude_none=True)
 
     # Construct the RecipeManifest
     # Note: State and Interface are populated with defaults as V2 is less strict currently
@@ -50,7 +48,7 @@ def v2_to_recipe(manifest: ManifestV2) -> RecipeManifest:
         name=manifest.metadata.name,
         description=None,
         interface=RecipeInterface(inputs={}, outputs={}),
-        state=StateDefinition(schema={}, persistence="ephemeral"),
+        state=StateDefinition(schema_={}, persistence="ephemeral"),
         parameters=manifest.definitions,
         topology=topology,
         metadata=design_metadata,
