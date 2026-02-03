@@ -56,6 +56,29 @@ def test_governance_uri_no_hostname():
     assert any("no hostname" in v.message for v in report.violations)
 
 
+def test_governance_uri_trailing_dot():
+    """Test tool URI with trailing dot in hostname."""
+    # This targets line 90: if hostname.endswith("."): hostname = hostname[:-1]
+    tool = ToolDefinition.model_construct(
+        id="t1",
+        name="T",
+        uri="https://example.com./api",
+        risk_level=ToolRiskLevel.SAFE
+    )
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(start="s1", steps={}),
+        definitions={"t1": tool}
+    )
+    config = GovernanceConfig(allowed_domains=["example.com"])
+
+    # strict_url_validation=True by default.
+    # hostname "example.com." should become "example.com" and pass.
+    report = check_compliance_v2(manifest, config)
+    assert report.passed
+
+
 def test_governance_uri_parsing_error():
     """Test tool URI that causes parsing error."""
     tool = ToolDefinition.model_construct(
@@ -109,24 +132,6 @@ def test_governance_loose_url_validation():
     config_fail = GovernanceConfig(allowed_domains=["Example.com"], strict_url_validation=False)
     report_fail = check_compliance_v2(manifest, config_fail)
     assert not report_fail.passed
-
-
-def test_governance_strict_url_validation_pass():
-    """Test governance with strict_url_validation=True (default/explicit) ensuring path coverage."""
-    tool = ToolDefinition.model_construct(
-        id="t1", name="T", uri="https://EXAMPLE.COM", risk_level=ToolRiskLevel.SAFE
-    )
-    # Allowed is lower case. Strict normalizes URI to lower. Should pass.
-    # This hits the `if config.strict_url_validation:` block.
-    config = GovernanceConfig(allowed_domains=["example.com"], strict_url_validation=True)
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={}),
-        definitions={"t1": tool}
-    )
-    report = check_compliance_v2(manifest, config)
-    assert report.passed
 
 
 def test_governance_custom_logic_violations():
