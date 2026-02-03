@@ -1,106 +1,144 @@
-# Presentation Schemas: UI-First Artifacts
+# Standardized Presentation Schemas
+
+The `coreason-manifest` library defines a Standardized Presentation Layer to allow agents to emit UI-ready event schemas. This ensures consistent rendering of agent thoughts, citations, progress, and media across different frontend implementations.
 
 ## Overview
 
-The `coreason_manifest.definitions.presentation` module defines a set of standardized "Presentation Blocks." These blocks serve as interim artifacts that allow agents to emit UI-specific events—such as thinking processes, structured data visualizations, rich text, or user-facing errors—independently of the final response.
+The presentation layer is built around the `PresentationEvent` wrapper, which encapsulates specific event types defined by the `PresentationEventType` enum.
 
-These schemas are designed to be "UI-First," meaning they provide hints and structures that frontend applications can directly render without complex parsing logic.
+### Presentation Event Types
 
-## Core Concepts
+| Type | Description |
+| :--- | :--- |
+| `THOUGHT_TRACE` | For inner monologue, reasoning chains, or planning steps. |
+| `CITATION_BLOCK` | For sourcing facts with references to external documents or URLs. |
+| `PROGRESS_INDICATOR` | For displaying status bars, spinners, or progress percentages. |
+| `MEDIA_CAROUSEL` | For displaying collections of images, diagrams, or other media. |
+| `MARKDOWN_BLOCK` | For standard rich text output. |
 
-All presentation blocks inherit from `PresentationBlock`, which provides the following common fields:
+## Schemas
 
-*   **`block_type`**: A discriminator field (`THOUGHT`, `DATA`, `MARKDOWN`, `ERROR`).
-*   **`id`**: A unique identifier for the block (UUID).
-*   **`title`**: An optional title for the block (e.g., "Analyzing Data").
+### PresentationEvent
 
-### 1. ThinkingBlock
+The top-level wrapper for all presentation events.
 
-Represents the agent's internal monologue or planning process. This is useful for showing "work in progress" to the user, increasing transparency and trust.
-
-*   **`block_type`**: `THOUGHT`
-*   **`content`**: The chain-of-thought text.
-*   **`status`**: The current status of the thought process (`IN_PROGRESS` or `COMPLETE`).
-
-**Example:**
 ```python
-from coreason_manifest.definitions.presentation import ThinkingBlock
-
-block = ThinkingBlock(
-    content="Querying the database for recent orders...",
-    status="IN_PROGRESS"
-)
+class PresentationEvent(CoReasonBaseModel):
+    id: UUID
+    timestamp: datetime
+    type: PresentationEventType
+    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, Dict[str, Any]]
 ```
 
-### 2. DataBlock
+### CitationBlock
 
-Represents structured data that should be rendered in a specific way (e.g., a table, a list, or a JSON view).
+A block containing a list of `CitationItem`s.
 
-*   **`block_type`**: `DATA`
-*   **`data`**: A dictionary containing the structured data.
-*   **`view_hint`**: A hint to the UI on how to render the data (`TABLE`, `JSON`, `LIST`, `KEY_VALUE`).
-    *   **`TABLE`**: Expects a list of objects with similar keys.
-    *   **`JSON`**: Renders a code block with syntax highlighting.
-    *   **`LIST`**: Renders a bulleted or numbered list.
-    *   **`KEY_VALUE`**: Renders a property list or definition list.
-
-**Example:**
 ```python
-from coreason_manifest.definitions.presentation import DataBlock
+class CitationItem(CoReasonBaseModel):
+    source_id: str
+    uri: AnyUrl
+    title: str
+    snippet: Optional[str]
+    confidence: float
 
-data = {
-    "columns": ["ID", "Name", "Role"],
-    "rows": [
-        {"ID": 1, "Name": "Alice", "Role": "Admin"},
-        {"ID": 2, "Name": "Bob", "Role": "User"}
+class CitationBlock(CoReasonBaseModel):
+    citations: List[CitationItem]
+```
+
+**JSON Example:**
+
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "timestamp": "2023-10-27T10:00:00Z",
+  "type": "CITATION_BLOCK",
+  "data": {
+    "citations": [
+      {
+        "source_id": "doc-1",
+        "uri": "https://example.com/research.pdf",
+        "title": "Analysis of AI Agents",
+        "snippet": "Agents can autonomously execute tasks...",
+        "confidence": 0.95
+      }
     ]
+  }
 }
-
-block = DataBlock(
-    title="User Directory",
-    data=data,
-    view_hint="TABLE"
-)
 ```
 
-### 3. MarkdownBlock
+### ProgressUpdate
 
-Represents rich text content formatted using Markdown. This is the standard block for general text responses.
+Used to report the status of a long-running operation.
 
-*   **`block_type`**: `MARKDOWN`
-*   **`content`**: The Markdown string.
-
-**Example:**
 ```python
-from coreason_manifest.definitions.presentation import MarkdownBlock
-
-content = """
-# Summary
-
-Based on the analysis, we found **3 critical issues**.
-"""
-
-block = MarkdownBlock(content=content)
+class ProgressUpdate(CoReasonBaseModel):
+    label: str
+    status: Literal["running", "complete", "failed"]
+    progress_percent: Optional[float]
 ```
 
-### 4. UserErrorBlock
+**JSON Example:**
 
-Represents a user-facing error message. Unlike internal exceptions, these are designed to be shown to the end-user with helpful context.
+```json
+{
+  "id": "...",
+  "timestamp": "...",
+  "type": "PROGRESS_INDICATOR",
+  "data": {
+    "label": "Indexing documents...",
+    "status": "running",
+    "progress_percent": 0.45
+  }
+}
+```
 
-*   **`block_type`**: `ERROR`
-*   **`user_message`**: A friendly, human-readable error message.
-*   **`technical_details`**: Optional dictionary containing error codes or stack traces for debugging (hidden by default in most UIs).
-*   **`recoverable`**: Boolean indicating if the user can retry the action.
-*   **`code`**: Optional integer error code (e.g., 404, 429) to allow the UI to show specific icons or help text.
+### MediaCarousel
 
-**Example:**
+Used to display a set of media items.
+
 ```python
-from coreason_manifest.definitions.presentation import UserErrorBlock
+class MediaItem(CoReasonBaseModel):
+    url: AnyUrl
+    mime_type: str
+    alt_text: Optional[str]
 
-block = UserErrorBlock(
-    user_message="Unable to connect to the weather service. Please try again later.",
-    technical_details={"service": "weather-api"},
-    recoverable=True,
-    code=503
-)
+class MediaCarousel(CoReasonBaseModel):
+    items: List[MediaItem]
+```
+
+**JSON Example:**
+
+```json
+{
+  "id": "...",
+  "timestamp": "...",
+  "type": "MEDIA_CAROUSEL",
+  "data": {
+    "items": [
+      {
+        "url": "https://example.com/diagram.png",
+        "mime_type": "image/png",
+        "alt_text": "Architecture Diagram"
+      }
+    ]
+  }
+}
+```
+
+### Thought Trace & Markdown
+
+For simple text or reasoning content, generic dictionaries or specific blocks (like `MARKDOWN_BLOCK`) are used.
+
+**Thought Trace Example:**
+
+```json
+{
+  "id": "...",
+  "timestamp": "...",
+  "type": "THOUGHT_TRACE",
+  "data": {
+    "thought": "I need to query the database for user preferences."
+  }
+}
 ```

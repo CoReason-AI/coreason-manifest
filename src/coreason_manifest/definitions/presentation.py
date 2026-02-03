@@ -8,64 +8,123 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Literal, Optional
-from uuid import uuid4
+from typing import Any, Dict, List, Literal, Optional, Union
+from uuid import UUID
 
-from pydantic import Field
+from pydantic import AnyUrl, ConfigDict
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
 
-class PresentationBlockType(str, Enum):
-    """Enumeration of presentation block types."""
+class PresentationEventType(str, Enum):
+    """Types of presentation events for UI rendering.
 
-    THOUGHT = "THOUGHT"
-    DATA = "DATA"
-    MARKDOWN = "MARKDOWN"
-    ERROR = "ERROR"
+    Values:
+        THOUGHT_TRACE: For inner monologue/reasoning chains.
+        CITATION_BLOCK: For sourcing facts.
+        PROGRESS_INDICATOR: For UI spinners/status bars.
+        MEDIA_CAROUSEL: For images/diagrams.
+        MARKDOWN_BLOCK: For standard text output.
+    """
 
-
-def _generate_uuid() -> str:
-    return str(uuid4())
-
-
-class PresentationBlock(CoReasonBaseModel):
-    """Base model for all presentation blocks."""
-
-    block_type: PresentationBlockType
-    id: str = Field(default_factory=_generate_uuid)
-    title: Optional[str] = None
+    THOUGHT_TRACE = "THOUGHT_TRACE"
+    CITATION_BLOCK = "CITATION_BLOCK"
+    PROGRESS_INDICATOR = "PROGRESS_INDICATOR"
+    MEDIA_CAROUSEL = "MEDIA_CAROUSEL"
+    MARKDOWN_BLOCK = "MARKDOWN_BLOCK"
 
 
-class ThinkingBlock(PresentationBlock):
-    """Presentation block for internal monologue and planning."""
+class CitationItem(CoReasonBaseModel):
+    """An individual citation item sourcing a fact.
 
-    block_type: Literal[PresentationBlockType.THOUGHT] = PresentationBlockType.THOUGHT
-    content: str
-    status: Literal["IN_PROGRESS", "COMPLETE"] = "IN_PROGRESS"
+    Attributes:
+        source_id: Unique identifier for the source.
+        uri: The URI of the source.
+        title: The title of the source.
+        snippet: A relevant snippet from the source (optional).
+        confidence: Confidence score (0.0 to 1.0).
+    """
 
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-class DataBlock(PresentationBlock):
-    """Presentation block for structured data."""
-
-    block_type: Literal[PresentationBlockType.DATA] = PresentationBlockType.DATA
-    data: Dict[str, Any]
-    view_hint: Literal["TABLE", "JSON", "LIST", "KEY_VALUE"] = "JSON"
-
-
-class MarkdownBlock(PresentationBlock):
-    """Presentation block for rich text content."""
-
-    block_type: Literal[PresentationBlockType.MARKDOWN] = PresentationBlockType.MARKDOWN
-    content: str
+    source_id: str
+    uri: AnyUrl
+    title: str
+    snippet: Optional[str] = None
+    confidence: float
 
 
-class UserErrorBlock(PresentationBlock):
-    """Presentation block for user-facing errors."""
+class CitationBlock(CoReasonBaseModel):
+    """A block containing multiple citations.
 
-    block_type: Literal[PresentationBlockType.ERROR] = PresentationBlockType.ERROR
-    user_message: str
-    technical_details: Optional[Dict[str, Any]] = None
-    recoverable: bool = False
-    code: Optional[int] = None
+    Attributes:
+        citations: List of CitationItem objects.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    citations: List[CitationItem]
+
+
+class ProgressUpdate(CoReasonBaseModel):
+    """Status update for a long-running process.
+
+    Attributes:
+        label: Descriptive label for the current task (e.g., "Searching Google...").
+        status: Current status ("running", "complete", "failed").
+        progress_percent: Percentage of completion (0.0 to 1.0, optional).
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    label: str
+    status: Literal["running", "complete", "failed"]
+    progress_percent: Optional[float] = None
+
+
+class MediaItem(CoReasonBaseModel):
+    """A media item like an image or diagram.
+
+    Attributes:
+        url: URL of the media item.
+        mime_type: MIME type of the media (e.g., "image/png").
+        alt_text: Alternative text for accessibility (optional).
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    url: AnyUrl
+    mime_type: str
+    alt_text: Optional[str] = None
+
+
+class MediaCarousel(CoReasonBaseModel):
+    """A collection of media items to be displayed in a carousel.
+
+    Attributes:
+        items: List of MediaItem objects.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    items: List[MediaItem]
+
+
+class PresentationEvent(CoReasonBaseModel):
+    """Wrapper for presentation events to be emitted to the UI.
+
+    Attributes:
+        id: Unique identifier for the event.
+        timestamp: Time when the event was created.
+        type: The type of presentation event.
+        data: The payload data for the event.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: UUID
+    timestamp: datetime
+    type: PresentationEventType
+    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, Dict[str, Any]]
