@@ -58,7 +58,7 @@ Key features:
 *   **Immutable Updates:** State changes via functional updates (e.g., `add_interaction` returns a *new* instance), preventing side effects.
 *   **Session Context:** A strictly defined, immutable `SessionContext` object that carries user identity, distributed tracing info, and permissions. See [Session Context](session_context.md) for details.
 *   **Context Variables:** A "scratchpad" dictionary (`context_variables`) for long-term memory that persists across turns, separate from the message history.
-*   **Identification:** Strictly typed `Identity` objects for processor/user (carrying both ID and display name).
+*   **Identification:** Strictly typed `Identity` objects for processor (carrying both ID and display name).
 
 ```python
 from uuid import uuid4
@@ -89,11 +89,8 @@ context = SessionContext(
 
 # 2. Create a new session with context
 session = SessionState(
-    session_id=context.session_id,
     context=context,
     processor=Identity(id="agent-v1", name="Support Agent", role="assistant"),
-    user=Identity(id="user-123", name="Alice Smith", role="user"),
-    created_at=datetime.now(timezone.utc),
     last_updated_at=datetime.now(timezone.utc),
 )
 

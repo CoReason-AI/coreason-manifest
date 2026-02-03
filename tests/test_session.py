@@ -81,27 +81,21 @@ def test_session_state_creation() -> None:
     now = datetime.now(timezone.utc)
 
     processor = Identity(id="agent-1", name="Agent 1", role="assistant")
-    user = Identity(id="user-1", name="User 1", role="user")
+    # user identity is no longer in SessionState (it is in context.user as UserContext)
 
-    context = create_default_context(session_id, uuid4(), user.id)
+    context = create_default_context(session_id, uuid4(), "user-1")
 
     session = SessionState(
-        session_id=session_id,
         context=context,
         processor=processor,
-        user=user,
-        created_at=now,
         last_updated_at=now,
     )
 
-    assert session.session_id == session_id
+    assert session.context.session_id == session_id
     assert session.context == context
     assert session.context.user.user_id == "user-1"
     assert session.processor == processor
     assert session.processor.id == "agent-1"
-    assert session.user == user
-    assert session.user.id == "user-1"
-    assert session.created_at == now
     assert session.last_updated_at == now
     assert session.history == []
     assert session.context_variables == {}
@@ -116,10 +110,8 @@ def test_session_state_immutability() -> None:
     context = create_default_context(session_id, uuid4())
 
     session = SessionState(
-        session_id=session_id,
         context=context,
         processor=processor,
-        created_at=now,
         last_updated_at=now,
     )
 
@@ -132,10 +124,6 @@ def test_session_state_immutability() -> None:
     with pytest.raises(ValidationError):
         session.history = []  # type: ignore[misc]
 
-    # Better test for frozen:
-    with pytest.raises(ValidationError):
-        session.user = Identity.anonymous()  # type: ignore[misc]
-
 
 def test_add_interaction() -> None:
     """Test add_interaction method."""
@@ -146,10 +134,8 @@ def test_add_interaction() -> None:
     context = create_default_context(session_id, uuid4())
 
     session = SessionState(
-        session_id=session_id,
         context=context,
         processor=processor,
-        created_at=now,
         last_updated_at=now,
     )
 
@@ -168,7 +154,7 @@ def test_add_interaction() -> None:
     assert new_session.last_updated_at >= session.last_updated_at
 
     # Other fields should be preserved
-    assert new_session.session_id == session.session_id
+    assert new_session.context.session_id == session.context.session_id
     assert new_session.context == session.context
     assert new_session.processor == session.processor
 

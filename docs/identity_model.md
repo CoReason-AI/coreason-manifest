@@ -58,11 +58,10 @@ anon = Identity.anonymous()
 
 ## Integration
 
-The `Identity` model is primarily used in `SessionState` to identify the `processor` (the agent) and the `user`.
+The `Identity` model is primarily used in `SessionState` to identify the `processor` (the agent).
 
 ```python
 class SessionState(CoReasonBaseModel):
     processor: Identity
-    user: Optional[Identity]
     # ...
 ```
