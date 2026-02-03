@@ -10,6 +10,8 @@ The module centers around the `check_compliance` function, which validates an `A
 *   **Domain Restriction**: Whitelist specific domains for external tools (e.g., only allow tools from `*.internal.corp`).
 *   **Risk Level Enforcement**: Set a maximum allowed risk level for tools (e.g., `SAFE` only).
 *   **Authentication Mandates**: Ensure that agents using `CRITICAL` tools enforce user authentication.
+*   **Logic Execution Control**: Restrict the usage of arbitrary Python code in `LogicNode`s and conditional Edges.
+*   **Strict URL Validation**: Enforce strict normalization (lower-case, no trailing dots) on tool URIs to prevent bypasses.
 
 ## Configuration: `GovernanceConfig`
 
@@ -27,7 +29,15 @@ config = GovernanceConfig(
     max_risk_level=ToolRiskLevel.STANDARD,
 
     # If an agent uses CRITICAL tools, it MUST have requires_auth=True
-    require_auth_for_critical_tools=True
+    require_auth_for_critical_tools=True,
+
+    # Prevent agents from running arbitrary Python code (Security)
+    # Default: False (Secure by Default)
+    allow_custom_logic=False,
+
+    # Enforce strict URL normalization (strip trailing dots, case-insensitive match)
+    # Default: True (Secure by Default)
+    strict_url_validation=True
 )
 ```
 
@@ -58,7 +68,8 @@ agent: AgentDefinition = ...
 # 2. Define Organizational Rules
 rules = GovernanceConfig(
     allowed_domains=["api.weather.gov"],
-    max_risk_level=ToolRiskLevel.SAFE
+    max_risk_level=ToolRiskLevel.SAFE,
+    allow_custom_logic=False  # Explicitly disallow custom code
 )
 
 # 3. Run Compliance Check
@@ -74,11 +85,19 @@ else:
 
 ## Enforcement Logic
 
+### Custom Logic Checks
+*   **Nodes**: Iterates through `agent.config.nodes`. If `allow_custom_logic` is `False`, any `LogicNode` (which contains arbitrary Python code) is flagged as a violation.
+*   **Edges**: Iterates through `agent.config.edges`. If `allow_custom_logic` is `False`, any Edge with a `condition` (Python expression) is flagged as a violation.
+
 ### Domain Checks
 *   Iterates through `agent.dependencies.tools`.
 *   Parses the URI of each `ToolRequirement`.
-*   Checks if the hostname exists in `allowed_domains`.
-*   *Note: `InlineToolDefinition` items are currently skipped as they do not have URIs.*
+*   **Strict Mode** (`strict_url_validation=True`):
+    *   Normalizes the hostname: converts to lower-case, strips trailing dots (e.g., `example.com.` -> `example.com`).
+    *   Checks if the normalized hostname exists in `allowed_domains` (which are also normalized).
+*   **Legacy Mode** (`strict_url_validation=False`):
+    *   Checks exact string match against `allowed_domains`.
+*   *Note: `InlineToolDefinition` items are checked against `allow_inline_tools`.*
 
 ### Risk Level Checks
 *   Compares the `risk_level` of each tool against `max_risk_level`.
