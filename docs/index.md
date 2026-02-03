@@ -12,7 +12,6 @@ This is the documentation for the `coreason-manifest` project, which defines the
 ## Runtime & Execution
 
 *   **[Runtime Deployment Configuration](runtime_deployment_configuration.md)**: "Zero-Surprise Deployment" specs for hosting agents.
-*   **[V2 Loader Bridge](v2_bridge.md)**: How the engine compiles V2 YAML manifests into V1 Runtime objects.
 *   **[Atomic Agents](atomic_agents.md)**: Deep dive into Atomic (Prompt-based) vs Graph-based topologies.
 *   **[Session Management](session_management.md)**: Decoupling execution from memory with standardized Session and Interaction models.
 *   **[Agent Behavior Protocols](agent_behavior_protocols.md)**: The standard interfaces (`AgentInterface`) for agent implementation.
