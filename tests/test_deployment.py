@@ -91,7 +91,9 @@ def test_deployment_immutability() -> None:
     )
 
     with pytest.raises(ValidationError):
-        config.scaling_strategy = "dedicated"
+        config.scaling_strategy = "dedicated"  # type: ignore[misc]
 
+    # Ensure resources is not None for mypy before attempting assignment
+    assert config.resources is not None
     with pytest.raises(ValidationError):
-        config.resources.cpu_cores = 2.0
+        config.resources.cpu_cores = 2.0  # type: ignore[misc]
