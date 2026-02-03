@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import asyncio
+from datetime import datetime, timezone
 from typing import List, Union
 from uuid import uuid4
 
@@ -100,7 +101,7 @@ async def test_interceptor_failure() -> None:
         user={"user_id": "u1", "tier": "free", "locale": "en-US"},
         trace={"trace_id": uuid4(), "span_id": uuid4()},
         permissions=[],
-        created_at=asyncio.get_event_loop().time(),
+        created_at=datetime.now(timezone.utc),
     )
     request = AgentRequest(session_id=session_id, payload={})
 
@@ -119,7 +120,7 @@ async def test_interceptor_replacement() -> None:
         user={"user_id": "u1", "tier": "free", "locale": "en-US"},
         trace={"trace_id": uuid4(), "span_id": uuid4()},
         permissions=[],
-        created_at=asyncio.get_event_loop().time(),
+        created_at=datetime.now(timezone.utc),
     )
     request = AgentRequest(session_id=session_id, payload={"original": True})
 
@@ -162,7 +163,7 @@ async def test_chained_interceptors() -> None:
         user={"user_id": "u1", "tier": "free", "locale": "en-US"},
         trace={"trace_id": uuid4(), "span_id": uuid4()},
         permissions=[],
-        created_at=asyncio.get_event_loop().time(),
+        created_at=datetime.now(timezone.utc),
     )
     request = AgentRequest(session_id=session_id, payload={})
 
@@ -180,7 +181,7 @@ async def test_async_concurrency() -> None:
     interceptor = StatefulInterceptor()
 
     packets = [
-        StreamPacket(stream_id=uuid4(), seq=i, op=StreamOpCode.DELTA, t=asyncio.get_event_loop().time(), p="test")
+        StreamPacket(stream_id=uuid4(), seq=i, op=StreamOpCode.DELTA, t=datetime.now(timezone.utc), p="test")
         for i in range(100)
     ]
 
