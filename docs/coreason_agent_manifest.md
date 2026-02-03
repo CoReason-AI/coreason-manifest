@@ -63,19 +63,27 @@ An `AgentDefinition` consists of the following sections:
     *   `timeout_seconds`: Request processing limits.
     *   `env_vars`: Static environment variable injection.
 
-8.  **Observability (`ObservabilityConfig`)**:
+8.  **Evaluation (`EvaluationProfile`)**:
+    *   **Evaluation-Ready Metadata**: Defines test contracts directly in the manifest.
+    *   `expected_latency_ms`: SLA for response time.
+    *   `golden_dataset_uri`: Reference to a test dataset.
+    *   `grading_rubric`: List of `SuccessCriterion` for quality checks.
+    *   `evaluator_model`: Model to use for evaluation.
+    *   See [Evaluation-Ready Metadata](evaluation.md) for details.
+
+9.  **Observability (`ObservabilityConfig`)**:
     *   `trace_level`: Controls the granularity of logs (`FULL`, `METADATA_ONLY`, `NONE`).
     *   `retention_policy`: How long logs are kept.
     *   `encryption_key_id`: Optional ID of the key used for log encryption.
 
-9.  **Presentation (`PresentationEvent`)**:
+10.  **Presentation (`PresentationEvent`)**:
     *   Standardized schemas for emitting UI-ready events (`THOUGHT_TRACE`, `CITATION_BLOCK`, `PROGRESS_INDICATOR`, etc.).
     *   See the **[Presentation Schemas](presentation_schemas.md)** documentation for details.
 
-10. **Custom Metadata (`custom_metadata`)**:
+11. **Custom Metadata (`custom_metadata`)**:
     *   Container for arbitrary metadata extensions without breaking validation.
 
-11. **Integrity**:
+12. **Integrity**:
     *   `integrity_hash`: SHA256 hash of the source code (top-level field). Required only when `status` is `published`.
 
 ## Agent Lifecycle: Draft vs. Published

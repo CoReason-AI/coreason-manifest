@@ -496,6 +496,69 @@
       "title": "Edge",
       "type": "object"
     },
+    "EvaluationProfile": {
+      "additionalProperties": false,
+      "description": "The main container for evaluation configuration.\n\nAttributes:\n    expected_latency_ms: SLA for response time in milliseconds.\n    golden_dataset_uri: URI to a reference dataset.\n    grading_rubric: List of criteria for grading.\n    evaluator_model: Model to use for evaluation (e.g., \"gpt-4-turbo\").",
+      "properties": {
+        "expected_latency_ms": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SLA for response time in milliseconds",
+          "title": "Expected Latency Ms"
+        },
+        "golden_dataset_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "URI to a reference dataset",
+          "title": "Golden Dataset Uri"
+        },
+        "grading_rubric": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SuccessCriterion"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "List of criteria for grading",
+          "title": "Grading Rubric"
+        },
+        "evaluator_model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Model to use for evaluation (e.g., 'gpt-4-turbo')",
+          "title": "Evaluator Model"
+        }
+      },
+      "title": "EvaluationProfile",
+      "type": "object"
+    },
     "EventSchema": {
       "additionalProperties": false,
       "description": "Defines the structure of an intermediate event emitted by the agent.",
@@ -995,6 +1058,54 @@
       "title": "RecipeNode",
       "type": "object"
     },
+    "SuccessCriterion": {
+      "additionalProperties": false,
+      "description": "A model defining a single condition for success.\n\nAttributes:\n    name: Name of the criterion (e.g., \"json_schema_validity\").\n    description: Description of the criterion.\n    threshold: Threshold for success (e.g., 0.95 for semantic similarity).\n    strict: Whether the criterion is strict.",
+      "properties": {
+        "name": {
+          "description": "Name of the criterion (e.g., 'json_schema_validity')",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of the criterion",
+          "title": "Description"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Threshold for success (e.g., 0.95 for semantic similarity)",
+          "title": "Threshold"
+        },
+        "strict": {
+          "default": true,
+          "description": "Whether the criterion is strict",
+          "title": "Strict",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "SuccessCriterion",
+      "type": "object"
+    },
     "ToolRequirement": {
       "additionalProperties": false,
       "description": "Requirement for an MCP tool.\n\nAttributes:\n    uri: The MCP endpoint URI.\n    hash: Integrity check for the tool definition (SHA256).\n    scopes: List of permissions required.\n    risk_level: The risk level of the tool.",
@@ -1162,6 +1273,18 @@
       ],
       "default": null,
       "description": "Runtime deployment settings"
+    },
+    "evaluation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvaluationProfile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Evaluation profile for the agent."
     },
     "observability": {
       "anyOf": [
