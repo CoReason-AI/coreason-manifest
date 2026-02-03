@@ -42,7 +42,7 @@ def test_citation_serialization() -> None:
 
     # Test immutability
     with pytest.raises(ValidationError):
-        item.source_id = "2" # type: ignore
+        item.source_id = "2"  # type: ignore
 
 
 def test_progress_update_serialization() -> None:
