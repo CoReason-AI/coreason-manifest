@@ -58,25 +58,49 @@ class StreamHandle(Protocol):
         ...
 
 
-class ResponseHandler(Protocol):
+@runtime_checkable
+class EventSink(Protocol):
+    """Protocol for emitting internal system events (telemetry, audit, logs).
+
+    This serves as the standard interface for emitting GraphEvents and CloudEvents
+    that are not necessarily meant for the user, but for the system.
+    """
+
+    @abstractmethod
+    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
+        """The core method to ingest any strictly typed event."""
+        ...
+
+    @abstractmethod
+    def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> Awaitable[None]:
+        """A helper to emit a standard log event (which the implementation wraps in a CloudEvent)."""
+        ...
+
+    @abstractmethod
+    def audit(self, actor: str, action: str, resource: str, success: bool) -> Awaitable[None]:
+        """A helper to emit an immutable Audit Log entry."""
+        ...
+
+
+@runtime_checkable
+class ResponseHandler(EventSink, Protocol):
     """Protocol for handling agent responses, decoupling logic from event transport.
 
     This interface allows agents to emit events and presentation blocks without
     being tied to a specific transport mechanism (e.g., HTTP, WebSocket).
     """
 
-    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
-        """Emit a raw CloudEvent or GraphEvent."""
-        ...
-
+    @abstractmethod
     def thought(self, content: str, status: str = "IN_PROGRESS") -> Awaitable[None]:
         """Emit a thinking block."""
         ...
 
+    @abstractmethod
     def markdown(self, content: str) -> Awaitable[None]:
         """Emit a markdown block."""
         ...
 
+    @abstractmethod
     def data(
         self,
         data: Dict[str, Any],
@@ -86,6 +110,7 @@ class ResponseHandler(Protocol):
         """Emit a data block."""
         ...
 
+    @abstractmethod
     def error(
         self,
         message: str,
@@ -95,6 +120,7 @@ class ResponseHandler(Protocol):
         """Emit an error block."""
         ...
 
+    @abstractmethod
     def create_stream(
         self, title: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None
     ) -> Awaitable[StreamHandle]:

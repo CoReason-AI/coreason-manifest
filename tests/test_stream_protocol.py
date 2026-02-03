@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Union
 import pytest
 
 from coreason_manifest.definitions.events import CloudEvent, GraphEvent
-from coreason_manifest.definitions.interfaces import StreamHandle
+from coreason_manifest.definitions.interfaces import ResponseHandler, StreamHandle
 
 
 class MockStreamHandle:
@@ -32,6 +32,12 @@ class MockStreamHandle:
 
 class MockResponseHandler:
     async def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> None:
+        pass
+
+    async def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        pass
+
+    async def audit(self, actor: str, action: str, resource: str, success: bool) -> None:
         pass
 
     async def thought(self, content: str, status: str = "IN_PROGRESS") -> None:
@@ -79,7 +85,9 @@ async def test_stream_handle_protocol() -> None:
 @pytest.mark.asyncio
 async def test_response_handler_protocol() -> None:
     handler = MockResponseHandler()
-    # Not runtime checkable, so we just test method invocation
+    # Runtime checkable
+    assert isinstance(handler, ResponseHandler)
+
     stream = await handler.create_stream()
     assert isinstance(stream, StreamHandle)
     await stream.write("hello")

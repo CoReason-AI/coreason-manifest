@@ -40,25 +40,74 @@ class AgentInterface(Protocol):
     *   **Output**: None (events are emitted via `response`).
     *   **Inversion of Control**: Instead of yielding events, the agent calls methods on the provided `ResponseHandler`.
 
-## ResponseHandler
+## EventSink
 
-The `ResponseHandler` Protocol decouples the agent's logic from the event transport (e.g., HTTP, WebSocket, SSE).
+The `EventSink` Protocol defines the standard interface for emitting internal system events, such as telemetry, audit logs, and distributed traces. It serves as the base for `ResponseHandler`.
 
 ### Definition
 
 ```python
-class ResponseHandler(Protocol):
-    async def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> None: ...
+@runtime_checkable
+class EventSink(Protocol):
+    @abstractmethod
+    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
+        """The core method to ingest any strictly typed event."""
+        ...
 
-    async def thought(self, content: str, status: str = "IN_PROGRESS") -> None: ...
+    @abstractmethod
+    def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> Awaitable[None]:
+        """A helper to emit a standard log event."""
+        ...
 
-    async def markdown(self, content: str) -> None: ...
+    @abstractmethod
+    def audit(self, actor: str, action: str, resource: str, success: bool) -> Awaitable[None]:
+        """A helper to emit an immutable Audit Log entry."""
+        ...
+```
 
-    async def data(self, data: Dict[str, Any], title: Optional[str] = None, view_hint: str = "JSON") -> None: ...
+## ResponseHandler
 
-    async def error(self, message: str, details: Optional[Dict[str, Any]] = None, recoverable: bool = False) -> None: ...
+The `ResponseHandler` Protocol decouples the agent's logic from the event transport (e.g., HTTP, WebSocket, SSE). It inherits from `EventSink`, allowing agents to use the same object for both user-facing responses and system logging.
 
-    async def create_stream(self, title: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> StreamHandle:
+### Definition
+
+```python
+@runtime_checkable
+class ResponseHandler(EventSink, Protocol):
+    @abstractmethod
+    def thought(self, content: str, status: str = "IN_PROGRESS") -> Awaitable[None]:
+        """Emit a thinking block."""
+        ...
+
+    @abstractmethod
+    def markdown(self, content: str) -> Awaitable[None]:
+        """Emit a markdown block."""
+        ...
+
+    @abstractmethod
+    def data(
+        self,
+        data: Dict[str, Any],
+        title: Optional[str] = None,
+        view_hint: str = "JSON",
+    ) -> Awaitable[None]:
+        """Emit a data block."""
+        ...
+
+    @abstractmethod
+    def error(
+        self,
+        message: str,
+        details: Optional[Dict[str, Any]] = None,
+        recoverable: bool = False,
+    ) -> Awaitable[None]:
+        """Emit an error block."""
+        ...
+
+    @abstractmethod
+    def create_stream(
+        self, title: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None
+    ) -> Awaitable[StreamHandle]:
         """Create a new stream and return its handle."""
         ...
 ```
