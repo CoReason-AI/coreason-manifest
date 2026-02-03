@@ -65,6 +65,7 @@ An `AgentDefinition` consists of the following sections:
     *   `scaling_min_instances`, `scaling_max_instances`: Horizontal autoscaling bounds.
     *   `timeout_seconds`: Request processing limits.
     *   `env_vars`: Static environment variable injection.
+    *   **Service Contract**: All agents must expose the standard endpoints defined in the [Coreason Agent Protocol (CAP)](interface_contracts.md).
 
 8.  **Evaluation (`EvaluationProfile`)**:
     *   **Evaluation-Ready Metadata**: Defines test contracts directly in the manifest.
