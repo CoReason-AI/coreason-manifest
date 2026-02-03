@@ -1,6 +1,7 @@
 # Copyright (c) 2025 CoReason, Inc.
 
 import importlib
+from typing import Any, cast
 
 import coreason_manifest
 
@@ -79,7 +80,8 @@ def test_v1_v2_name_collision_handling() -> None:
     assert RecipeV2Alias is coreason_manifest.v2.spec.definitions.ManifestV2
     assert RecipeV1Alias is coreason_manifest.recipes.RecipeManifest
 
-    assert RecipeV2Alias is not RecipeV1Alias
+    # Suppress overlap error or use cast
+    assert cast(Any, RecipeV2Alias) is not cast(Any, RecipeV1Alias)
 
 
 def test_manifest_load_consistency() -> None:

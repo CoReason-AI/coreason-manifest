@@ -15,9 +15,13 @@ from coreason_manifest.definitions.topology import (
     ConditionalEdge,
     Edge,
     GraphTopology,
+    HumanNode,
+    LogicNode,
+    MapNode,
+    RecipeNode,
+    StateDefinition,
 )
 from coreason_manifest.definitions.topology import GraphTopology as Topology
-from coreason_manifest.definitions.topology import HumanNode, LogicNode, MapNode, RecipeNode, StateDefinition
 from coreason_manifest.recipes import RecipeManifest
 from coreason_manifest.recipes import RecipeManifest as Recipe
 
