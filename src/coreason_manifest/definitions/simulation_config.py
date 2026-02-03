@@ -14,7 +14,7 @@ from typing import Optional
 from pydantic import Field
 
 from coreason_manifest.definitions.agent import Persona
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 from coreason_manifest.definitions.simulation import SimulationScenario
 
 

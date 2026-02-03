@@ -12,7 +12,7 @@ from typing import Optional
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class Identity(CoReasonBaseModel):

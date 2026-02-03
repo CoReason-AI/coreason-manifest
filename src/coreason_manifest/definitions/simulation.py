@@ -15,7 +15,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class StepType(str, Enum):

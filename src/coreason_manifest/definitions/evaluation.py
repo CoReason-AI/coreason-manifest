@@ -12,7 +12,7 @@ from typing import List, Optional
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class SuccessCriterion(CoReasonBaseModel):

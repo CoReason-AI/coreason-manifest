@@ -13,7 +13,7 @@
 from typing import List
 from urllib.parse import urlparse
 
-from coreason_manifest.definitions.agent import ToolRiskLevel
+from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import (
     ComplianceReport,
     ComplianceViolation,

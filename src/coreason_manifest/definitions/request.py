@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class AgentRequest(CoReasonBaseModel):

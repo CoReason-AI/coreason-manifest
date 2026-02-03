@@ -14,7 +14,7 @@ from typing import List, Literal, Optional, Union
 from pydantic import ConfigDict, Field
 from typing_extensions import Annotated
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class PatternType(str, Enum):

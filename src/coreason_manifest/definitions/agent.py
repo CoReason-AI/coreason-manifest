@@ -26,7 +26,6 @@ from uuid import UUID
 import jsonschema
 from pydantic import (
     AfterValidator,
-    AnyUrl,
     ConfigDict,
     Field,
     PlainSerializer,
@@ -35,6 +34,7 @@ from pydantic import (
 )
 from typing_extensions import Annotated
 
+from coreason_manifest.common import StrictUri, ToolRiskLevel
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.evaluation import EvaluationProfile
@@ -75,13 +75,6 @@ ImmutableDict = Annotated[
     Mapping[str, Any],
     AfterValidator(lambda x: MappingProxyType(x)),
     PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
-]
-
-
-# Strict URI type that serializes to string
-StrictUri = Annotated[
-    AnyUrl,
-    PlainSerializer(lambda x: str(x), return_type=str),
 ]
 
 
@@ -278,14 +271,6 @@ class AgentRuntimeConfig(CoReasonBaseModel):
                 seen.add(x)
             raise ValueError(f"Duplicate node IDs found: {', '.join(dupes)}")
         return v
-
-
-class ToolRiskLevel(str, Enum):
-    """Risk level for the tool."""
-
-    SAFE = "safe"
-    STANDARD = "standard"
-    CRITICAL = "critical"
 
 
 class ToolRequirement(CoReasonBaseModel):

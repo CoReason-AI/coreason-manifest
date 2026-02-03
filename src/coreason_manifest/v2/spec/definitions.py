@@ -2,7 +2,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from coreason_manifest.definitions.agent import StrictUri, ToolRiskLevel
+from coreason_manifest.common import StrictUri, ToolRiskLevel
 
 
 class DesignMetadata(BaseModel):

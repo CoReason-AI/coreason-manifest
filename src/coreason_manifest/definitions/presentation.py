@@ -15,7 +15,7 @@ from uuid import UUID
 
 from pydantic import AnyUrl, ConfigDict, model_validator
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class PresentationEventType(str, Enum):
