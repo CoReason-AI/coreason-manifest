@@ -137,9 +137,7 @@ def test_stream_packet_error_validation_string() -> None:
     stream_id = uuid4()
     now = datetime.now(timezone.utc)
 
-    with pytest.raises(
-        ValueError, match="Payload must be a StreamError or Dict for ERROR op"
-    ):
+    with pytest.raises(ValueError, match="Payload must be a StreamError or Dict for ERROR op"):
         StreamPacket(
             stream_id=stream_id,
             seq=1,
@@ -196,7 +194,7 @@ def test_stream_packet_error_invalid_dict() -> None:
 
     invalid_dict = {
         "code": "missing_severity",
-        "message": "Oops"
+        "message": "Oops",
         # severity missing
     }
 
