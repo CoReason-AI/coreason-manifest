@@ -22,6 +22,9 @@ from coreason_manifest.v2.spec.definitions import ManifestV2
 def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[Path]) -> Dict[str, Any]:
     """
     Recursively load YAML data, resolving $ref in definitions.
+
+    Handles cycle detection to prevent infinite recursion and uses the
+    ReferenceResolver to ensure secure path resolution.
     """
     if path in visited_paths:
         raise RecursionError(f"Circular dependency detected: {path}")
