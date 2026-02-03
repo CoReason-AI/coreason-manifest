@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from uuid import uuid4
-from datetime import datetime, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -19,9 +18,9 @@ from coreason_manifest.definitions.middleware import (
     IRequestInterceptor,
     IResponseInterceptor,
 )
+from coreason_manifest.definitions.presentation import StreamPacket
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import SessionContext
-from coreason_manifest.definitions.presentation import StreamPacket
 
 
 class PIIFilter:
@@ -34,7 +33,7 @@ class ToxicityFilter:
         return packet
 
 
-def test_interceptor_protocols():
+def test_interceptor_protocols() -> None:
     # Verify PIIFilter implements IRequestInterceptor
     pii_filter = PIIFilter()
     assert isinstance(pii_filter, IRequestInterceptor)
@@ -47,7 +46,7 @@ def test_interceptor_protocols():
     assert isinstance(toxicity_filter, IResponseInterceptor)
 
 
-def test_interceptor_context_immutability():
+def test_interceptor_context_immutability() -> None:
     ctx = InterceptorContext(request_id=uuid4())
 
     # Verify default values
@@ -56,4 +55,4 @@ def test_interceptor_context_immutability():
 
     # Verify immutability
     with pytest.raises(ValidationError):
-        ctx.metadata = {"foo": "bar"}
+        ctx.metadata = {"foo": "bar"}  # type: ignore[misc]

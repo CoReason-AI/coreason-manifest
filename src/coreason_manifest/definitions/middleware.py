@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime, timezone
-from typing import Any, Awaitable, Dict, Protocol, runtime_checkable
+from typing import Any, Dict, Protocol, runtime_checkable
 from uuid import UUID
 
 from pydantic import ConfigDict, Field
