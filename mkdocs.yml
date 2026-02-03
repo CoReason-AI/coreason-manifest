@@ -5,7 +5,9 @@ nav:
   - Home: index.md
   - Requirements: requirements.md
   - Usage: usage.md
-  - Simplified DSL: simplified_dsl.md
+  - Coreason Agent Manifest (CAM V2): coreason_agent_manifest.md
+  - Runtime Agent Definition (V1): runtime_agent_definition.md
+  - Runtime Recipe Definition (V1): runtime_recipe_definition.md
+  - Builder SDK: builder_sdk.md
   - Session Management: session_management.md
   - Observability: observability.md
-  - Recipes: recipes.md
