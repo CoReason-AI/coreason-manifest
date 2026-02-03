@@ -18,48 +18,6 @@ from coreason_manifest.definitions.events import CloudEvent, GraphEvent
 from coreason_manifest.definitions.request import AgentRequest
 
 
-class ResponseHandler(Protocol):
-    """Protocol for handling agent responses, decoupling logic from event transport.
-
-    This interface allows agents to emit events and presentation blocks without
-    being tied to a specific transport mechanism (e.g., HTTP, WebSocket).
-    """
-
-    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
-        """Emit a raw CloudEvent or GraphEvent."""
-        ...
-
-    def thought(self, content: str, status: str = "IN_PROGRESS") -> Awaitable[None]:
-        """Emit a thinking block."""
-        ...
-
-    def markdown(self, content: str) -> Awaitable[None]:
-        """Emit a markdown block."""
-        ...
-
-    def data(
-        self,
-        data: Dict[str, Any],
-        title: Optional[str] = None,
-        view_hint: str = "JSON",
-    ) -> Awaitable[None]:
-        """Emit a data block."""
-        ...
-
-    def error(
-        self,
-        message: str,
-        details: Optional[Dict[str, Any]] = None,
-        recoverable: bool = False,
-    ) -> Awaitable[None]:
-        """Emit an error block."""
-        ...
-
-    def stream_token(self, token: str) -> Awaitable[None]:
-        """Emit a token for streaming responses."""
-        ...
-
-
 @runtime_checkable
 class StreamHandle(Protocol):
     """Encapsulates the lifecycle of a response stream.
@@ -142,12 +100,19 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    async def assist(self, request: AgentRequest, response: ResponseHandler) -> None:
-        """Process a request and use the response handler to emit events.
+    def assist(self, request: AgentRequest) -> AsyncIterator[Union[CloudEvent[Any], GraphEvent]]:
+        """Process a request and yield a stream of events (thoughts, data, artifacts, or final answers).
+
+        Note:
+            This method is defined as a synchronous function returning an AsyncIterator
+            to correctly type-hint async generators in Protocols. Implementations should
+            use `async def` and `yield` (which produces an AsyncGenerator, satisfying AsyncIterator).
 
         Args:
             request: The strictly typed input envelope.
-            response: The handler for emitting results.
+
+        Returns:
+            An async iterator yielding thoughts, data, artifacts, or final answers.
         """
         ...
 
