@@ -13,6 +13,15 @@ The bridge consists of three main modules located in `src/coreason_manifest/v2/`
 *   **Adapter** (`adapter.py`): Converts a loaded V2 `ManifestV2` object into a V1 `RecipeManifest` ready for execution, mapping Interface, State, and Policy configurations.
 4.  **Resolver** (`resolver.py`): A helper module used by the loader to securely resolve file paths against a root "Jail" directory.
 
+## State Mapping Logic
+
+The Adapter performs intelligent mapping between V2 and V1 state configurations:
+
+*   **Schema**: The JSON Schema defined in V2 (`state.schema`) is copied directly to the V1 recipe.
+*   **Persistence**: V2 uses a `backend` field (e.g., "memory", "redis"), while V1 uses a binary `persistence` mode ("ephemeral", "persistent").
+    *   `backend: "memory"` or `"ephemeral"` (or `None`) -> `persistence: "ephemeral"`
+    *   Any other value (e.g., `"redis"`, `"sql"`, `"persistent"`) -> `persistence: "persistent"`
+
 ## Usage
 
 ### Loading and Executing a V2 Manifest

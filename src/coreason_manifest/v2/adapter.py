@@ -40,6 +40,11 @@ def v2_to_recipe(manifest: ManifestV2) -> RecipeManifest:
     if manifest.metadata.design_metadata:
         design_metadata = manifest.metadata.design_metadata.model_dump(by_alias=True, exclude_none=True)
 
+    # Determine persistence
+    backend = (manifest.state.backend or "ephemeral").lower()
+    # If explicitly not ephemeral/memory, treat as persistent (e.g., redis, sql)
+    persistence = "persistent" if backend not in ("ephemeral", "memory") else "ephemeral"
+
     # Construct the RecipeManifest
     return RecipeManifest(
         id=recipe_id,
@@ -47,7 +52,7 @@ def v2_to_recipe(manifest: ManifestV2) -> RecipeManifest:
         name=manifest.metadata.name,
         description=None,
         interface=RecipeInterface(inputs=manifest.interface.inputs, outputs=manifest.interface.outputs),
-        state=StateDefinition(schema_={}, persistence="ephemeral"),
+        state=StateDefinition(schema_=manifest.state.schema_, persistence=persistence),
         policy=PolicyConfig(
             max_steps=manifest.policy.max_steps,
             max_retries=manifest.policy.max_retries,
