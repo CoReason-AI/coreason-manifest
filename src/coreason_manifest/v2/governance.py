@@ -51,7 +51,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
     violations: List[ComplianceViolation] = []
 
     # 1. Check Tools in Definitions
-    for def_id, definition in manifest.definitions.items():
+    for _, definition in manifest.definitions.items():
         if isinstance(definition, ToolDefinition):
             # Check Risk Level
             if config.max_risk_level:

@@ -9,9 +9,8 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
 
-from coreason_manifest.definitions.agent import ToolRiskLevel
+from coreason_manifest.definitions.agent import ToolRequirement, ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
 from coreason_manifest.v2.compiler import compile_dependencies, compile_to_topology
 from coreason_manifest.v2.governance import check_compliance_v2
@@ -26,7 +25,7 @@ from coreason_manifest.v2.validator import validate_loose, validate_strict
 
 
 @pytest.fixture
-def basic_manifest():
+def basic_manifest() -> ManifestV2:
     return ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test Agent"),
@@ -41,7 +40,7 @@ def basic_manifest():
     )
 
 
-def test_validation_loose_vs_strict():
+def test_validation_loose_vs_strict() -> None:
     """Test that loose validation ignores dangling pointers while strict catches them."""
     # Create a broken manifest (step1 points to missing step2)
     manifest = ManifestV2(
@@ -68,7 +67,7 @@ def test_validation_loose_vs_strict():
     assert any("step2" in e for e in errors)
 
 
-def test_governance_tool_risk():
+def test_governance_tool_risk() -> None:
     """Test governance policy enforcement on tool risk levels."""
     # Create a manifest with a CRITICAL tool
     tool_def = ToolDefinition(
@@ -95,7 +94,7 @@ def test_governance_tool_risk():
     assert report.violations[0].rule == "risk_level_restriction"
 
 
-def test_governance_allowed_domains():
+def test_governance_allowed_domains() -> None:
     """Test governance policy on allowed domains."""
     tool_def = ToolDefinition(
         id="tool1",
@@ -118,7 +117,7 @@ def test_governance_allowed_domains():
     assert "domain_restriction" == report.violations[0].rule
 
 
-def test_compiler_dependencies():
+def test_compiler_dependencies() -> None:
     """Test extracting dependencies from V2 manifest."""
     tool_def = ToolDefinition(
         id="tool1",
@@ -137,13 +136,17 @@ def test_compiler_dependencies():
     deps = compile_dependencies(manifest)
     assert len(deps.tools) == 1
     tool = deps.tools[0]
+
+    # Assert type to satisfy Mypy that it's not InlineToolDefinition
+    assert isinstance(tool, ToolRequirement)
+
     assert str(tool.uri) == "https://calc.com/api"
     assert tool.risk_level == ToolRiskLevel.SAFE
     assert tool.hash == "0" * 64
     assert tool.scopes == []
 
 
-def test_compiler_strict_validation_integration():
+def test_compiler_strict_validation_integration() -> None:
     """Test that compile_to_topology calls strict validation."""
     # Broken manifest
     manifest = ManifestV2(
