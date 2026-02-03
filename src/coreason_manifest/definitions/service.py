@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+"""Defines the data structures for the Coreason Agent Protocol (CAP)."""
+
 from datetime import datetime
 from typing import Any, Dict, Literal, Optional
 from uuid import UUID
@@ -84,7 +86,7 @@ class HealthCheckResponse(CoReasonBaseModel):
 
 
 class ServiceContract(CoReasonBaseModel):
-    """Generates the OpenAPI specification for the Agent Service."""
+    """Defines the Coreason Agent Protocol (CAP) interface and generates its OpenAPI specification."""
 
     def generate_openapi_path(self) -> Dict[str, Any]:
         """Generates the OpenAPI Path Object for POST /v1/assist.
