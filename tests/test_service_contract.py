@@ -123,14 +123,15 @@ def test_service_request_serialization() -> None:
     # Pydantic v2 might coerce dict to model if strict is not set, but UserContext/SessionContext
     # are regular models. If we pass a dict that matches schema, it *might* convert it depending on config.
     # However, passing a completely invalid dict should fail.
-    # The prompt asked: "Verify strict type checking (e.g., passing a dict instead of SessionContext should fail validation *before* serialization if possible, or ensure the structure is validated)"
+    # The prompt asked: "Verify strict type checking (e.g., passing a dict instead of SessionContext should
+    # fail validation *before* serialization if possible, or ensure the structure is validated)"
     # If Pydantic coerces dict to SessionContext, that is technically valid validation.
     # To test failure, let's pass an invalid object.
 
     with pytest.raises(ValidationError):
         ServiceRequest(
             request_id=uuid4(),
-            context="invalid_context_string",  # type: ignore
+            context="invalid_context_string",
             payload=agent_request,
         )
 
@@ -146,7 +147,7 @@ def test_health_check_response() -> None:
     # Invalid status
     with pytest.raises(ValidationError):
         HealthCheckResponse(
-            status="invalid_status",  # type: ignore
+            status="invalid_status",
             agent_id=agent_id,
             version="1.0.0",
             uptime_seconds=100.5,
