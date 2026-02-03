@@ -24,6 +24,7 @@ class RecipeManifest(CoReasonBaseModel):
 | `description` | `Optional[str]` | Detailed description of the recipe. |
 | `interface` | `RecipeInterface` | Defines the input/output contract for the Recipe. |
 | `state` | `StateDefinition` | Defines the internal state (memory) of the Recipe. |
+| `policy` | `Optional[PolicyConfig]` | Policy configuration. |
 | `parameters` | `Dict[str, Any]` | Dictionary of build-time constants. |
 | `topology` | `GraphTopology` | The topology definition of the workflow. |
 | `integrity_hash` | `Optional[str]` | SHA256 hash of the canonical JSON representation of the topology. |
