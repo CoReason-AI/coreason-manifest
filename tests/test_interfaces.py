@@ -79,9 +79,11 @@ def test_runtime_checks_valid_response_handler() -> None:
 
 def test_runtime_checks_missing_methods_in_handler() -> None:
     """Test that missing methods cause isinstance to fail."""
+
     class IncompleteHandler:
         async def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> None:
             pass
+
         # Missing other methods
 
     handler = IncompleteHandler()
