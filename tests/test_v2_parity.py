@@ -1,7 +1,6 @@
 import os
 import tempfile
 
-from coreason_manifest.v2.adapter import v2_to_recipe
 from coreason_manifest.v2.io import load_from_yaml
 
 
@@ -49,43 +48,3 @@ workflow:
             os.remove(tmp_path)
 
 
-def test_adapter_validation() -> None:
-    yaml_content = """
-apiVersion: coreason.ai/v2
-kind: Recipe
-metadata:
-  name: TestRecipeAdapter
-interface:
-  inputs:
-    query:
-      type: string
-policy:
-  max_retries: 2
-  timeout: 100
-workflow:
-  start: step1
-  steps:
-    step1:
-      type: logic
-      id: step1
-      code: "pass"
-"""
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
-        tmp.write(yaml_content)
-        tmp_path = tmp.name
-
-    try:
-        manifest = load_from_yaml(tmp_path)
-        recipe = v2_to_recipe(manifest)
-
-        # Verify Interface
-        assert recipe.interface.inputs["query"]["type"] == "string"
-
-        # Verify Policy
-        assert recipe.policy is not None
-        assert recipe.policy.max_retries == 2
-        assert recipe.policy.timeout == 100
-        assert recipe.policy.human_in_the_loop is False  # Default check
-    finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)

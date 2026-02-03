@@ -77,17 +77,3 @@ manifest = load("agent.yaml")
 | **Topology** | `coreason_manifest.v1.GraphTopology` | `coreason_manifest.v2.spec.definitions.Workflow` |
 | **Node Types** | `coreason_manifest.v1.AgentNode` | `coreason_manifest.v2.spec.definitions.AgentStep` |
 
-## 4. Bridge Usage
-
-If you need to run a V2 manifest on a V1 engine (like MACO), use the bridge adapter:
-
-```python
-from coreason_manifest import load
-from coreason_manifest.v2.adapter import v2_to_recipe
-
-# 1. Load V2
-v2_obj = load("my_agent.yaml")
-
-# 2. Convert to V1
-v1_recipe = v2_to_recipe(v2_obj)
-```

@@ -10,9 +10,8 @@
 
 import pytest
 
-from coreason_manifest.definitions.agent import ToolRequirement, ToolRiskLevel
+from coreason_manifest.definitions.agent import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
-from coreason_manifest.v2.compiler import compile_dependencies, compile_to_topology
 from coreason_manifest.v2.governance import check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (
     AgentStep,
@@ -115,51 +114,3 @@ def test_governance_allowed_domains() -> None:
     report = check_compliance_v2(manifest, config)
     assert not report.passed
     assert "domain_restriction" == report.violations[0].rule
-
-
-def test_compiler_dependencies() -> None:
-    """Test extracting dependencies from V2 manifest."""
-    tool_def = ToolDefinition(
-        id="tool1",
-        name="Calculator",
-        uri="https://calc.com/api",
-        risk_level=ToolRiskLevel.SAFE,
-    )
-
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Calc Agent"),
-        workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")}),
-        definitions={"tool1": tool_def, "agent1": {}},
-    )
-
-    deps = compile_dependencies(manifest)
-    assert len(deps.tools) == 1
-    tool = deps.tools[0]
-
-    # Assert type to satisfy Mypy that it's not InlineToolDefinition
-    assert isinstance(tool, ToolRequirement)
-
-    assert str(tool.uri) == "https://calc.com/api"
-    assert tool.risk_level == ToolRiskLevel.SAFE
-    assert tool.hash == "0" * 64
-    assert tool.scopes == []
-
-
-def test_compiler_strict_validation_integration() -> None:
-    """Test that compile_to_topology calls strict validation."""
-    # Broken manifest
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Broken Agent"),
-        workflow=Workflow(
-            start="step1",
-            steps={
-                "step1": AgentStep(id="step1", agent="my-agent", next="missing_step"),
-            },
-        ),
-        definitions={"my-agent": {}},
-    )
-
-    with pytest.raises(ValueError, match="Manifest validation failed"):
-        compile_to_topology(manifest)

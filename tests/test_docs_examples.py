@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from coreason_manifest import Manifest, load
-from coreason_manifest.v2.adapter import v2_to_recipe
 from coreason_manifest.v2.spec.contracts import (
     InterfaceDefinition,
     PolicyDefinition,
@@ -62,48 +61,6 @@ def test_usage_guide_mutable_fields() -> None:
     assert manifest.interface.inputs["topic"]["type"] == "integer"
 
 
-def test_v2_bridge_example(tmp_path: Path) -> None:
-    """Replicates 'Loading and Executing a V2 Manifest' from v2_bridge.md."""
-
-    yaml_content = """
-apiVersion: coreason.ai/v2
-kind: Recipe
-metadata:
-  name: My Workflow
-  version: 1.0.0
-interface:
-  inputs: {}
-  outputs: {}
-state:
-  schema: {}
-definitions:
-  gpt-4:
-    type: agent
-    id: gpt-4
-    name: GPT-4
-    role: Assistant
-    goal: Help user
-    model: gpt-4
-workflow:
-  start: step1
-  steps:
-    step1:
-      type: agent
-      id: step1
-      agent: gpt-4
-"""
-    file_path = tmp_path / "my_workflow.v2.yaml"
-    file_path.write_text(yaml_content, encoding="utf-8")
-
-    # 1. Load V2 Manifest (Human Friendly)
-    v2_manifest = load(file_path)
-
-    # 2. Convert to V1 Recipe (Machine Optimized)
-    recipe = v2_to_recipe(v2_manifest)
-
-    # 3. Verify V1 Recipe
-    assert recipe.name == "My Workflow"
-    assert recipe.topology.nodes[0].id == "step1"
 
 
 def test_migration_guide_v1_legacy_import() -> None:
