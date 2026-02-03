@@ -23,16 +23,13 @@ class CommonTestModel(CoReasonBaseModel):
 def test_common_primitives_isolation() -> None:
     """Verify that common.py components work in isolation without other dependencies."""
     # Instantiate using the primitives
-    model = CommonTestModel(
-        uri=AnyUrl("https://example.com/api/v1"),
-        risk=ToolRiskLevel.SAFE
-    )
+    model = CommonTestModel(uri=AnyUrl("https://example.com/api/v1"), risk=ToolRiskLevel.SAFE)
 
     # Verify StrictUri serialization to string
     assert str(model.uri) == "https://example.com/api/v1"
 
     # Verify Enum behavior
-    assert model.risk == "safe"
+    assert model.risk.value == "safe"
     assert model.risk == ToolRiskLevel.SAFE
 
     # Verify serialization via CoReasonBaseModel.dump()
