@@ -10,7 +10,7 @@ The bridge consists of three main modules located in `src/coreason_manifest/v2/`
 
 1.  **Compiler** (`compiler.py`): Transforms the implicit "Linked List" topology of V2 into the explicit "Graph" topology of V1.
 2.  **I/O** (`io.py`): Handles loading and dumping of V2 YAML files. It supports **recursive multi-file composition** (via `$ref`) and enforces secure path resolution.
-*   **Adapter** (`adapter.py`): Converts a loaded V2 `ManifestV2` object into a V1 `RecipeManifest` ready for execution, mapping Interface, State, and Policy configurations.
+3.  **Adapter** (`adapter.py`): Converts a loaded V2 `ManifestV2` object into a V1 `RecipeManifest` ready for execution, mapping Interface, State, Policy, and **Component Definitions**.
 4.  **Resolver** (`resolver.py`): A helper module used by the loader to securely resolve file paths against a root "Jail" directory.
 
 ## Usage
@@ -37,6 +37,22 @@ print(f"Loaded Recipe: {recipe.name} (ID: {recipe.id})")
 print(f"Policy: {recipe.policy.max_retries} retries")
 print(f"Topology has {len(recipe.topology.nodes)} nodes.")
 ```
+
+## Component Mapping (Adapter)
+
+The Adapter transforms V2 components into V1 runtime structures:
+
+### Agent Definitions
+V2 `AgentDefinition` objects are converted into V1 `AgentDefinition` objects (the runtime format).
+*   `v2.role` -> `v1.config.llm_config.persona.name`
+*   `v2.goal` -> `v1.config.llm_config.persona.description`
+*   `v2.backstory` -> `v1.config.system_prompt`
+*   `v2.tools` (IDs) -> `v1.dependencies.tools` (`ToolRequirement` objects).
+
+### Recursive Composition (Agent-as-a-Tool)
+If an Agent refers to another Agent in its `tools` list, the Adapter treats the referenced Agent as an **MCP Tool**.
+*   The ID of the referenced Agent is converted into an MCP URI: `mcp://<agent-id>`.
+*   This allows V1 Agents to "call" other Agents seamlessly using the standard tool interface.
 
 ## Multi-File Composition
 
