@@ -33,6 +33,7 @@ from .events import (
     WorkflowError,
     WorkflowErrorPayload,
 )
+from .identity import Identity
 from .interfaces import AgentInterface, LifecycleInterface
 from .presentation import (
     DataBlock,
@@ -46,6 +47,7 @@ from .service import DEFAULT_ENDPOINT_PATH, ServerSentEvent, ServiceContract
 from .session import Interaction, SessionState
 
 __all__ = [
+    "Identity",
     "AgentRequest",
     "ServerSentEvent",
     "ServiceContract",
