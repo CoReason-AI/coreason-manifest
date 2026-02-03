@@ -2,13 +2,12 @@
 
 
 from pathlib import Path
-from typing import Any, Dict
 
 import pytest
 import yaml
 
 from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
-from coreason_manifest.v2.spec.definitions import ManifestV2, ToolDefinition
+from coreason_manifest.v2.spec.definitions import GenericDefinition, ManifestV2, ToolDefinition
 
 
 @pytest.fixture
@@ -126,10 +125,12 @@ def test_cycles(manifest_dir: Path) -> None:
 def test_recursive_disabled(manifest_dir: Path) -> None:
     """Test that recursive=False does not resolve refs."""
 
-    tool_def = {"id": "t", "name": "T", "uri": "u", "risk_level": "safe"}
+    # 1. Create a tool definition file
+    tool_def_source = {"id": "t", "name": "T", "uri": "u", "risk_level": "safe"}
     with open(manifest_dir / "tool.yaml", "w") as f:
-        yaml.dump(tool_def, f)
+        yaml.dump(tool_def_source, f)
 
+    # 2. Create a main manifest referencing it
     main_manifest = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
@@ -141,22 +142,23 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     with open(main_path, "w") as f:
         yaml.dump(main_manifest, f)
 
-    # Since we are not resolving, the dict value for my_tool will be {"$ref": "tool.yaml"}
+    # 3. Load with recursive=False
+    # Since we are not resolving, the definition remains a reference dict.
+    # Because it lacks a 'type' discriminator matching known models,
+    # it should be parsed as a GenericDefinition (fallback).
     manifest = load_from_yaml(main_path, recursive=False)
-    # It will be parsed as GenericDefinition because it has no known 'type'
-    tool_def = manifest.definitions["my_tool"]
 
-    # Force cast to Dict[str, Any] to avoid bidirectional type inference conflict
-    # where mypy thinks it must be Dict[str, str] due to the assert below.
-    raw_data = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def
+    # 4. Verify
+    # We use a unique variable name to avoid Mypy confusion with previous dict literals.
+    fetched_def = manifest.definitions["my_tool"]
 
-    # Explicitly annotated variable
-    tool_ref_data: Dict[str, Any]
-    tool_ref_data = raw_data  # type: ignore[assignment]
+    # It should be GenericDefinition because it's just {"$ref": ...}
+    assert isinstance(fetched_def, GenericDefinition)
 
-    # Avoid literal comparison to prevent bidirectional type inference issues in mypy
-    assert tool_ref_data.get("$ref") == "tool.yaml"
-    assert len(tool_ref_data) == 1
+    # Verify content
+    # model_dump() returns Dict[str, Any]
+    data = fetched_def.model_dump(exclude_none=True)
+    assert data.get("$ref") == "tool.yaml"
 
 
 def test_invalid_yaml_content(manifest_dir: Path) -> None:
