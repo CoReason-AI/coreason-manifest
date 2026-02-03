@@ -22,11 +22,12 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    async def assist(self, request: AgentRequest, response: ResponseHandler) -> None:
+    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
         """Process a request and use the response handler to emit events.
 
         Args:
             request: The strictly typed input envelope.
+            session: The active memory interface.
             response: The handler for emitting results.
         """
         ...
@@ -37,6 +38,7 @@ class AgentInterface(Protocol):
 1.  **`manifest`**: A property that returns the agent's static configuration (`AgentDefinition`). This allows runtime inspection of the agent's capabilities, inputs, and outputs.
 2.  **`assist`**: The primary entry point for execution.
     *   **Input**: Strictly typed `AgentRequest` envelope.
+    *   **Session**: A `SessionHandle` for [Active Memory](active_memory_interface.md) access (history, RAG, persistence).
     *   **Output**: None (events are emitted via `response`).
     *   **Inversion of Control**: Instead of yielding events, the agent calls methods on the provided `ResponseHandler`.
 
@@ -167,9 +169,12 @@ class EchoAgent:
     def manifest(self) -> AgentDefinition:
         return self._manifest
 
-    async def assist(self, request: AgentRequest, response: ResponseHandler) -> None:
+    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
         # Emit a "thinking" event
         await response.thought("Processing request...")
+
+        # (Optional) Fetch context
+        # history = await session.history(limit=5)
 
         # Create a stream for the output
         stream = await response.create_stream(title="Echo Response")
