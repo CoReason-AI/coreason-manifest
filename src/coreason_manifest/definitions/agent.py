@@ -177,12 +177,8 @@ class AgentCapability(CoReasonBaseModel):
         None, description="Optional ID of the interface contract this capability implements."
     )
 
-    inputs: Optional[ImmutableDict] = Field(
-        None, description="Typed arguments the agent accepts (JSON Schema)."
-    )
-    outputs: Optional[ImmutableDict] = Field(
-        None, description="Typed structure of the result."
-    )
+    inputs: Optional[ImmutableDict] = Field(None, description="Typed arguments the agent accepts (JSON Schema).")
+    outputs: Optional[ImmutableDict] = Field(None, description="Typed structure of the result.")
 
     delivery_mode: DeliveryMode = Field(
         default=DeliveryMode.REQUEST_RESPONSE, description="The mechanism used to deliver the response."

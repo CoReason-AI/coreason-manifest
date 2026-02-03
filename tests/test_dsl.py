@@ -53,12 +53,14 @@ capabilities:
 
     # Schema assertions
     # Inputs
+    assert cap.inputs is not None
     assert cap.inputs["type"] == "object"
     assert cap.inputs["required"] == ["city", "days"]
     assert cap.inputs["properties"]["city"] == {"type": "string"}
     assert cap.inputs["properties"]["days"] == {"type": "integer"}
 
     # Outputs
+    assert cap.outputs is not None
     assert cap.outputs["type"] == "object"
     assert cap.outputs["properties"]["report"] == {"type": "string"}
 
@@ -77,6 +79,7 @@ capabilities:
     agent = load_from_yaml(yaml_content)
     cap = agent.capabilities[0]
 
+    assert cap.inputs is not None
     # List[string] -> {"type": "array", "items": {"type": "string"}}
     tags_schema = cap.inputs["properties"]["tags"]
     assert tags_schema["type"] == "array"
@@ -87,6 +90,7 @@ capabilities:
     assert scores_schema["type"] == "array"
     assert scores_schema["items"] == {"type": "number"}
 
+    assert cap.outputs is not None
     # Any -> {}
     summary_schema = cap.outputs["properties"]["summary"]
     assert summary_schema == {}
@@ -147,6 +151,7 @@ capabilities:
     inputs:
       flag: bool
 """)
+    assert agent.capabilities[0].inputs is not None
     assert agent.capabilities[0].inputs["properties"]["flag"]["type"] == "boolean"
 
     # Test invalid YAML structure (list instead of dict)

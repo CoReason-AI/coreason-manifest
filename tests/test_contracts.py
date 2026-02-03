@@ -1,11 +1,10 @@
 import uuid
-from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.agent import AgentCapability, CapabilityType, AgentDefinition
-from coreason_manifest.definitions.contracts import InterfaceDefinition, ContractMetadata
+from coreason_manifest.definitions.agent import AgentCapability, AgentDefinition, CapabilityType
+from coreason_manifest.definitions.contracts import InterfaceDefinition
 
 
 def test_interface_definition_creation() -> None:

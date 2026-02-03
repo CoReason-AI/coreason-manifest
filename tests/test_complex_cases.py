@@ -59,6 +59,7 @@ def test_deep_immutability_mapping_proxy() -> None:
     agent = AgentDefinition(**data)
 
     # inputs should be read-only
+    assert agent.capabilities[0].inputs is not None
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
         agent.capabilities[0].inputs["param"] = 2  # type: ignore[index]
 
@@ -161,6 +162,7 @@ def test_unicode_handling() -> None:
 
     assert agent.metadata.name == name_unicode
     assert agent.metadata.author == author_unicode
+    assert agent.capabilities[0].inputs is not None
     assert agent.capabilities[0].inputs["key_Ω"] == "val_🤖"
 
 
