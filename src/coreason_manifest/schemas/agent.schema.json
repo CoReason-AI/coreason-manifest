@@ -497,51 +497,55 @@
     },
     "DeploymentConfig": {
       "additionalProperties": false,
-      "description": "Configuration for hosting the agent.",
+      "description": "Runtime deployment settings.\n\nAttributes:\n    env_vars: List of required secrets/vars.\n    resources: Hardware constraints.\n    scaling_strategy: Strategy for scaling (serverless or dedicated).\n    concurrency_limit: Max simultaneous requests.",
       "properties": {
-        "protocol": {
-          "$ref": "#/$defs/Protocol",
-          "default": "http_sse"
+        "env_vars": {
+          "description": "List of required secrets/vars.",
+          "items": {
+            "$ref": "#/$defs/SecretReference"
+          },
+          "title": "Env Vars",
+          "type": "array"
         },
-        "port": {
-          "default": 8000,
-          "description": "The port to bind to.",
-          "title": "Port",
-          "type": "integer"
+        "resources": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceLimits"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hardware constraints."
         },
-        "route_prefix": {
-          "default": "/assist",
-          "description": "URL prefix for the agent endpoints.",
-          "title": "Route Prefix",
+        "scaling_strategy": {
+          "default": "serverless",
+          "description": "Strategy for scaling.",
+          "enum": [
+            "serverless",
+            "dedicated"
+          ],
+          "title": "Scaling Strategy",
           "type": "string"
         },
-        "scaling_min_instances": {
-          "default": 0,
-          "description": "Minimum number of replicas.",
-          "title": "Scaling Min Instances",
-          "type": "integer"
-        },
-        "scaling_max_instances": {
-          "default": 1,
-          "description": "Maximum number of replicas.",
-          "title": "Scaling Max Instances",
-          "type": "integer"
-        },
-        "timeout_seconds": {
-          "default": 60,
-          "description": "Request timeout.",
-          "title": "Timeout Seconds",
-          "type": "integer"
-        },
-        "env_vars": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Static environment variables.",
-          "title": "Env Vars",
-          "type": "object"
+        "concurrency_limit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Max simultaneous requests.",
+          "title": "Concurrency Limit"
         }
       },
+      "required": [
+        "env_vars"
+      ],
       "title": "DeploymentConfig",
       "type": "object"
     },
@@ -1083,16 +1087,6 @@
       "title": "PolicyConfig",
       "type": "object"
     },
-    "Protocol": {
-      "description": "The communication protocol used to serve the agent.",
-      "enum": [
-        "http_sse",
-        "websocket",
-        "grpc"
-      ],
-      "title": "Protocol",
-      "type": "string"
-    },
     "RecipeNode": {
       "additionalProperties": false,
       "description": "A node that executes another Recipe as a sub-graph.\n\nAttributes:\n    type: The type of the node (must be 'recipe').\n    recipe_id: The ID of the recipe to execute.\n    input_mapping: How parent state maps to child inputs (parent_key -> child_key).\n    output_mapping: How child result maps back to parent state (child_key -> parent_key).",
@@ -1182,6 +1176,94 @@
         "output_mapping"
       ],
       "title": "RecipeNode",
+      "type": "object"
+    },
+    "ResourceLimits": {
+      "additionalProperties": false,
+      "description": "Hardware constraints for the deployment.\n\nAttributes:\n    cpu_cores: CPU cores limit.\n    memory_mb: RAM limit in Megabytes.\n    timeout_seconds: Execution time limit.",
+      "properties": {
+        "cpu_cores": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "CPU cores limit, e.g., 0.5 or 2.0.",
+          "title": "Cpu Cores"
+        },
+        "memory_mb": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "RAM in Megabytes.",
+          "title": "Memory Mb"
+        },
+        "timeout_seconds": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 60,
+          "description": "Execution time limit. Default 60.",
+          "title": "Timeout Seconds"
+        }
+      },
+      "title": "ResourceLimits",
+      "type": "object"
+    },
+    "SecretReference": {
+      "additionalProperties": false,
+      "description": "Reference to a required secret/environment variable.\n\nAttributes:\n    key: The environment variable name.\n    description: Human-readable explanation of why this secret is needed.\n    required: Whether the secret is mandatory.\n    provider_hint: Optional hint for the secret provider.",
+      "properties": {
+        "key": {
+          "description": "The environment variable name, e.g., 'OPENAI_API_KEY'.",
+          "title": "Key",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable explanation of why this secret is needed.",
+          "title": "Description",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "description": "Whether the secret is mandatory.",
+          "title": "Required",
+          "type": "boolean"
+        },
+        "provider_hint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional hint for the secret provider, e.g., 'aws-secrets-manager'.",
+          "title": "Provider Hint"
+        }
+      },
+      "required": [
+        "key",
+        "description"
+      ],
+      "title": "SecretReference",
       "type": "object"
     },
     "SuccessCriterion": {
@@ -1398,7 +1480,7 @@
         }
       ],
       "default": null,
-      "description": "Runtime deployment settings"
+      "description": "Runtime deployment settings (secrets, resources)."
     },
     "evaluation": {
       "anyOf": [
