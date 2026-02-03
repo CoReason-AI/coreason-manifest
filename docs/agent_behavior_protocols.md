@@ -4,47 +4,42 @@ The `coreason_manifest` package defines the standard behavioral contracts that a
 
 They are defined in `src/coreason_manifest/definitions/interfaces.py` and are based on Python's `typing.Protocol` for structural subtyping.
 
-## AgentInterface
+## IAgentRuntime
 
-The `AgentInterface` protocol defines the core responsibility of an Agent: to accept a request and use a response handler to emit events.
+The `IAgentRuntime` protocol defines the core responsibility of an Agent: to accept a request and use a response handler to emit events.
 
 ### Definition
 
 ```python
 @runtime_checkable
-class AgentInterface(Protocol):
-    """Protocol defining the standard interface for a Coreason Agent."""
-
-    @property
-    @abstractmethod
-    def manifest(self) -> AgentDefinition:
-        """Accessor for the static configuration/metadata of the agent."""
-        ...
+class IAgentRuntime(Protocol):
+    """Defines the strict signature an agent developer must implement."""
 
     @abstractmethod
-    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
+    def assist(
+        self, session: Session, request: AgentRequest, handler: IResponseHandler
+    ) -> Awaitable[None]:
         """Process a request and use the response handler to emit events.
 
         Args:
+            session: The session context.
             request: The strictly typed input envelope.
-            session: The active memory interface.
-            response: The handler for emitting results.
+            handler: The handler for emitting results.
         """
         ...
 ```
 
 ### Key Components
 
-1.  **`manifest`**: A property that returns the agent's static configuration (`AgentDefinition`). This allows runtime inspection of the agent's capabilities, inputs, and outputs.
-2.  **`assist`**: The primary entry point for execution.
+1.  **`assist`**: The primary entry point for execution.
     *   **Input**: Strictly typed `AgentRequest` envelope.
-    *   **Session**: A `SessionHandle` for [Active Memory](active_memory_interface.md) access (history, RAG, persistence).
-    *   **Output**: None (events are emitted via `response`).
-    *   **Inversion of Control**: Instead of yielding events, the agent calls methods on the provided `ResponseHandler`.
+    *   **Session**: A `Session` (alias for `SessionState`) for [Active Memory](active_memory_interface.md) access (history, RAG, persistence).
+    *   **Output**: None (events are emitted via `handler`).
+    *   **Inversion of Control**: Instead of yielding events, the agent calls methods on the provided `IResponseHandler`.
 
 ## EventSink
 
-The `EventSink` Protocol defines the standard interface for emitting internal system events, such as telemetry, audit logs, and distributed traces. It serves as the base for `ResponseHandler`.
+The `EventSink` Protocol defines the standard interface for emitting internal system events, such as telemetry, audit logs, and distributed traces. It serves as the base for `IResponseHandler`.
 
 ### Definition
 
@@ -67,71 +62,57 @@ class EventSink(Protocol):
         ...
 ```
 
-## ResponseHandler
+## IResponseHandler
 
-The `ResponseHandler` Protocol decouples the agent's logic from the event transport (e.g., HTTP, WebSocket, SSE). It inherits from `EventSink`, allowing agents to use the same object for both user-facing responses and system logging.
+The `IResponseHandler` Protocol decouples the agent's logic from the event transport (e.g., HTTP, WebSocket, SSE). It inherits from `EventSink`, allowing agents to use the same object for both user-facing responses and system logging.
 
 ### Definition
 
 ```python
 @runtime_checkable
-class ResponseHandler(EventSink, Protocol):
+class IResponseHandler(EventSink, Protocol):
     @abstractmethod
-    def thought(self, content: str, status: str = "IN_PROGRESS") -> Awaitable[None]:
-        """Emit a thinking block."""
+    def emit_event(self, event: PresentationEvent) -> Awaitable[None]:
+        """Low-level emission of a raw event wrapper."""
         ...
 
     @abstractmethod
-    def markdown(self, content: str) -> Awaitable[None]:
-        """Emit a markdown block."""
+    def emit_thought(self, content: str) -> Awaitable[None]:
+        """Helper to emit a THOUGHT_TRACE event."""
         ...
 
     @abstractmethod
-    def data(
-        self,
-        data: Dict[str, Any],
-        title: Optional[str] = None,
-        view_hint: str = "JSON",
-    ) -> Awaitable[None]:
-        """Emit a data block."""
+    def emit_citation(self, citation: CitationBlock) -> Awaitable[None]:
+        """Helper to emit a CITATION_BLOCK event."""
         ...
 
     @abstractmethod
-    def error(
-        self,
-        message: str,
-        details: Optional[Dict[str, Any]] = None,
-        recoverable: bool = False,
-    ) -> Awaitable[None]:
-        """Emit an error block."""
+    def create_text_stream(self, name: str) -> Awaitable[IStreamEmitter]:
+        """Opens a new stream for token-by-token generation."""
         ...
 
     @abstractmethod
-    def create_stream(
-        self, title: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None
-    ) -> Awaitable[StreamHandle]:
-        """Create a new stream and return its handle."""
+    def complete(self) -> Awaitable[None]:
+        """Signals the end of the generation turn."""
         ...
 ```
 
-## StreamHandle
+## IStreamEmitter
 
-The `StreamHandle` Protocol encapsulates the lifecycle of a stream (Open -> Emit -> Close). See [Stream Identity and Lifecycle](stream_lifecycle.md) for details.
+The `IStreamEmitter` Protocol encapsulates the lifecycle of a stream (Open -> Emit -> Close). See [Stream Identity and Lifecycle](stream_lifecycle.md) for details.
 
 ```python
 @runtime_checkable
-class StreamHandle(Protocol):
-    @property
-    def stream_id(self) -> str: ...
+class IStreamEmitter(Protocol):
+    @abstractmethod
+    def emit_chunk(self, content: str) -> Awaitable[None]:
+        """Emit a chunk of text."""
+        ...
 
-    @property
-    def is_active(self) -> bool: ...
-
-    async def write(self, chunk: str) -> None: ...
-
-    async def close(self) -> None: ...
-
-    async def abort(self, reason: str) -> None: ...
+    @abstractmethod
+    def close(self) -> Awaitable[None]:
+        """Close the stream."""
+        ...
 ```
 
 ## LifecycleInterface
@@ -157,43 +138,36 @@ class LifecycleInterface(Protocol):
 ```python
 import asyncio
 from typing import Any
-from coreason_manifest import AgentInterface, AgentRequest, ResponseHandler, AgentDefinition
+from coreason_manifest.definitions.interfaces import IAgentRuntime, IResponseHandler, IStreamEmitter
+from coreason_manifest.definitions.request import AgentRequest
+from coreason_manifest.definitions.session import SessionState as Session
 
 class EchoAgent:
-    """A simple agent that strictly implements AgentInterface."""
+    """A simple agent that strictly implements IAgentRuntime."""
 
-    def __init__(self, manifest: AgentDefinition):
-        self._manifest = manifest
-
-    @property
-    def manifest(self) -> AgentDefinition:
-        return self._manifest
-
-    async def assist(self, request: AgentRequest, session: SessionHandle, response: ResponseHandler) -> None:
+    async def assist(self, session: Session, request: AgentRequest, handler: IResponseHandler) -> None:
         # Emit a "thinking" event
-        await response.thought("Processing request...")
-
-        # (Optional) Fetch context
-        # history = await session.history(limit=5)
+        await handler.emit_thought("Processing request...")
 
         # Create a stream for the output
-        stream = await response.create_stream(title="Echo Response")
+        stream: IStreamEmitter = await handler.create_text_stream(name="Echo Response")
 
         try:
             # Simulate streaming chunks
             words = str(request.payload.get("query", "")).split()
             for word in words:
-                await stream.write(word + " ")
+                await stream.emit_chunk(word + " ")
                 await asyncio.sleep(0.1)
 
             # Finalize the stream
             await stream.close()
+            await handler.complete()
 
         except Exception as e:
-            await stream.abort(str(e))
-            await response.error("Failed to stream response")
+            await handler.log("ERROR", f"Failed to stream response: {e}")
+            # Note: IStreamEmitter doesn't expose abort directly, the handler manages errors via log/emit_event
 
 # Runtime Check
-agent = EchoAgent(manifest=...)
-assert isinstance(agent, AgentInterface)  # True
+agent = EchoAgent()
+assert isinstance(agent, IAgentRuntime)  # True
 ```
