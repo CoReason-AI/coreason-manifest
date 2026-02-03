@@ -72,16 +72,12 @@ class EventSink(Protocol):
         ...
 
     @abstractmethod
-    def log(
-        self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None
-    ) -> Awaitable[None]:
+    def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> Awaitable[None]:
         """A helper to emit a standard log event (which the implementation wraps in a CloudEvent)."""
         ...
 
     @abstractmethod
-    def audit(
-        self, actor: str, action: str, resource: str, success: bool
-    ) -> Awaitable[None]:
+    def audit(self, actor: str, action: str, resource: str, success: bool) -> Awaitable[None]:
         """A helper to emit an immutable Audit Log entry."""
         ...
 

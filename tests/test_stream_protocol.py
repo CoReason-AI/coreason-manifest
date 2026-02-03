@@ -34,14 +34,10 @@ class MockResponseHandler:
     async def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> None:
         pass
 
-    async def log(
-        self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None
-    ) -> None:
+    async def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> None:
         pass
 
-    async def audit(
-        self, actor: str, action: str, resource: str, success: bool
-    ) -> None:
+    async def audit(self, actor: str, action: str, resource: str, success: bool) -> None:
         pass
 
     async def thought(self, content: str, status: str = "IN_PROGRESS") -> None:
