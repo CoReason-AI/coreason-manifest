@@ -37,6 +37,7 @@ from typing_extensions import Annotated
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.deployment import DeploymentConfig
+from coreason_manifest.definitions.evaluation import EvaluationProfile
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -376,6 +377,7 @@ class AgentDefinition(CoReasonBaseModel):
     dependencies: AgentDependencies
     policy: Optional[PolicyConfig] = Field(None, description="Governance policy configuration.")
     deployment: Optional[DeploymentConfig] = Field(None, description="Runtime deployment settings")
+    evaluation: Optional[EvaluationProfile] = Field(None, description="Evaluation profile for the agent.")
     observability: Optional[ObservabilityConfig] = Field(None, description="Observability configuration.")
     custom_metadata: Optional[Dict[str, Any]] = Field(
         None, description="Container for arbitrary metadata extensions without breaking validation."

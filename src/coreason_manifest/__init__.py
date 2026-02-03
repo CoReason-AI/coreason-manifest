@@ -10,6 +10,7 @@
 
 from .definitions.agent import AgentDefinition, AgentStatus, Persona
 from .definitions.audit import AuditLog
+from .definitions.evaluation import EvaluationProfile, SuccessCriterion
 from .definitions.events import (
     ArtifactGenerated,
     CloudEvent,
@@ -65,6 +66,8 @@ __all__ = [
     "AgentDefinition",
     "AgentStatus",
     "Persona",
+    "EvaluationProfile",
+    "SuccessCriterion",
     "Topology",
     "GraphTopology",
     "Node",

@@ -13,4 +13,5 @@ This is the documentation for the coreason_manifest project.
 *   [Agent Request Envelope](agent_request_envelope.md): The standard envelope for agent invocations and distributed tracing.
 *   [Request Lineage](request_lineage.md): The unified approach to lineage across requests, traces, and audit logs.
 *   [Identity Model](identity_model.md): The canonical representation of actors (`Identity`) within the ecosystem.
+*   [Evaluation-Ready Metadata](evaluation.md): How to define test contracts and success criteria within your agents.
 *   [Observability](observability.md): Details on tracing, logging, and metrics.

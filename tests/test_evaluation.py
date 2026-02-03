@@ -1,0 +1,115 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+import pytest
+import json
+from uuid import uuid4
+from datetime import datetime, timezone
+from coreason_manifest.definitions.evaluation import EvaluationProfile, SuccessCriterion
+from coreason_manifest.definitions.agent import (
+    AgentDefinition, AgentMetadata, AgentCapability, CapabilityType,
+    AgentRuntimeConfig, ModelConfig, AgentDependencies
+)
+from pydantic import ValidationError
+
+def create_minimal_agent() -> AgentDefinition:
+    """Helper to create a minimal valid AgentDefinition."""
+    return AgentDefinition(
+        metadata=AgentMetadata(
+            id=uuid4(),
+            version="1.0.0",
+            name="TestAgent",
+            author="Tester",
+            created_at=datetime.now(timezone.utc)
+        ),
+        capabilities=[
+            AgentCapability(
+                name="test_cap",
+                type=CapabilityType.ATOMIC,
+                description="test",
+                inputs={"x": {"type": "string"}},
+                outputs={"y": {"type": "string"}}
+            )
+        ],
+        config=AgentRuntimeConfig(
+            model_config=ModelConfig(
+                model="gpt-4",
+                temperature=0.0
+            )
+        ),
+        dependencies=AgentDependencies()
+    )
+
+def test_success_criterion_valid() -> None:
+    """Test valid SuccessCriterion creation."""
+    sc = SuccessCriterion(
+        name="test_criterion",
+        description="A test criterion",
+        threshold=0.9,
+        strict=True
+    )
+    assert sc.name == "test_criterion"
+    assert sc.threshold == 0.9
+    assert sc.strict is True
+
+def test_success_criterion_defaults() -> None:
+    """Test SuccessCriterion defaults."""
+    sc = SuccessCriterion(name="minimal")
+    assert sc.strict is True
+    assert sc.threshold is None
+
+def test_evaluation_profile_valid() -> None:
+    """Test valid EvaluationProfile creation."""
+    sc = SuccessCriterion(name="test")
+    ep = EvaluationProfile(
+        expected_latency_ms=100,
+        golden_dataset_uri="s3://test/data.json",
+        grading_rubric=[sc],
+        evaluator_model="gpt-4"
+    )
+    assert ep.expected_latency_ms == 100
+    assert ep.grading_rubric[0].name == "test"
+    assert ep.evaluator_model == "gpt-4"
+
+def test_evaluation_profile_empty() -> None:
+    """Test empty EvaluationProfile."""
+    ep = EvaluationProfile()
+    assert ep.expected_latency_ms is None
+    assert ep.grading_rubric is None
+
+def test_agent_integration() -> None:
+    """Test integrating EvaluationProfile into AgentDefinition."""
+    # Create an evaluation profile
+    eval_profile = EvaluationProfile(
+        expected_latency_ms=500,
+        grading_rubric=[SuccessCriterion(name="accuracy", threshold=0.99)]
+    )
+
+    # Use helper to create a minimal agent
+    agent_base = create_minimal_agent()
+
+    # Create new agent with evaluation
+    # Since we can't easily mutate frozen models, we recreate it or use model_copy
+    agent = agent_base.model_copy(update={"evaluation": eval_profile})
+
+    assert agent.evaluation is not None
+    assert agent.evaluation.expected_latency_ms == 500
+    assert agent.evaluation.grading_rubric[0].name == "accuracy"
+
+def test_serialization() -> None:
+    """Test serialization of EvaluationProfile."""
+    ep = EvaluationProfile(
+        expected_latency_ms=100,
+        grading_rubric=[SuccessCriterion(name="test")]
+    )
+    json_str = ep.to_json()
+    data = json.loads(json_str)
+    assert data["expected_latency_ms"] == 100
+    assert data["grading_rubric"][0]["name"] == "test"
