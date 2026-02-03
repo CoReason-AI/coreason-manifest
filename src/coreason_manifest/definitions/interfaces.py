@@ -16,8 +16,15 @@ from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union, runtim
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.definitions.events import CloudEvent, GraphEvent
 from coreason_manifest.definitions.identity import Identity
+from coreason_manifest.definitions.presentation import (
+    CitationBlock,
+    MediaCarousel,
+    PresentationEvent,
+    ProgressUpdate,
+)
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import Interaction
+from coreason_manifest.definitions.session import SessionState as Session
 
 
 @runtime_checkable
@@ -215,4 +222,71 @@ class LifecycleInterface(Protocol):
 
     def shutdown(self) -> None:
         """Cleanup resources."""
+        ...
+
+
+@runtime_checkable
+class IStreamEmitter(Protocol):
+    """Abstracts the concept of a streaming response (like Sentient's TextStream)."""
+
+    @abstractmethod
+    def emit_chunk(self, content: str) -> Awaitable[None]:
+        """Emit a chunk of text."""
+        ...
+
+    @abstractmethod
+    def close(self) -> Awaitable[None]:
+        """Close the stream."""
+        ...
+
+
+@runtime_checkable
+class IResponseHandler(Protocol):
+    """Defines how an agent communicates back to the user.
+
+    This interface allows agents to emit events and presentation blocks without
+    being tied to a specific transport mechanism (e.g., HTTP, WebSocket).
+    """
+
+    @abstractmethod
+    def emit_event(self, event: PresentationEvent) -> Awaitable[None]:
+        """Low-level emission of a raw event wrapper."""
+        ...
+
+    @abstractmethod
+    def emit_thought(self, content: str) -> Awaitable[None]:
+        """Helper to emit a THOUGHT_TRACE event."""
+        ...
+
+    @abstractmethod
+    def emit_citation(self, citation: CitationBlock) -> Awaitable[None]:
+        """Helper to emit a CITATION_BLOCK event."""
+        ...
+
+    @abstractmethod
+    def create_text_stream(self, name: str) -> Awaitable[IStreamEmitter]:
+        """Opens a new stream for token-by-token generation."""
+        ...
+
+    @abstractmethod
+    def complete(self) -> Awaitable[None]:
+        """Signals the end of the generation turn."""
+        ...
+
+
+@runtime_checkable
+class IAgentRuntime(Protocol):
+    """Defines the strict signature an agent developer must implement."""
+
+    @abstractmethod
+    def assist(
+        self, session: Session, request: AgentRequest, handler: IResponseHandler
+    ) -> Awaitable[None]:
+        """Process a request and use the response handler to emit events.
+
+        Args:
+            session: The session context (state).
+            request: The agent request envelope.
+            handler: The response handler for output.
+        """
         ...
