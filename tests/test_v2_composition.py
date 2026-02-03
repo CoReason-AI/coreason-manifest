@@ -1,19 +1,23 @@
 # tests/test_v2_composition.py
 
+
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
+
 from coreason_manifest.v2.io import load_from_yaml
 from coreason_manifest.v2.spec.definitions import ManifestV2, ToolDefinition
-from pydantic import ValidationError
+
 
 @pytest.fixture
-def manifest_dir(tmp_path):
+def manifest_dir(tmp_path: Path) -> Path:
     d = tmp_path / "manifests"
     d.mkdir()
     return d
 
-def test_simple_import(manifest_dir):
+
+def test_simple_import(manifest_dir: Path) -> None:
     """Test loading a manifest that references an external tool definition."""
 
     # Create tool definition file
@@ -22,7 +26,7 @@ def test_simple_import(manifest_dir):
         "name": "Weather Tool",
         "uri": "mcp://weather.com",
         "risk_level": "safe",
-        "description": "Get weather info"
+        "description": "Get weather info",
     }
     tool_path = manifest_dir / "tool.yaml"
     with open(tool_path, "w") as f:
@@ -32,22 +36,9 @@ def test_simple_import(manifest_dir):
     main_manifest = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
-        "metadata": {
-            "name": "Weather Agent"
-        },
-        "definitions": {
-            "my_tool": {"$ref": "tool.yaml"}
-        },
-        "workflow": {
-            "start": "step1",
-            "steps": {
-                "step1": {
-                    "type": "agent",
-                    "id": "step1",
-                    "agent": "some-agent"
-                }
-            }
-        }
+        "metadata": {"name": "Weather Agent"},
+        "definitions": {"my_tool": {"$ref": "tool.yaml"}},
+        "workflow": {"start": "step1", "steps": {"step1": {"type": "agent", "id": "step1", "agent": "some-agent"}}},
     }
     main_path = manifest_dir / "main.yaml"
     with open(main_path, "w") as f:
@@ -70,7 +61,8 @@ def test_simple_import(manifest_dir):
         assert tool["id"] == "weather-tool"
         assert tool["name"] == "Weather Tool"
 
-def test_security_jailbreak(manifest_dir):
+
+def test_security_jailbreak(manifest_dir: Path) -> None:
     """Test that referencing a file outside the root directory raises an error."""
 
     # Create file outside root
@@ -85,13 +77,8 @@ def test_security_jailbreak(manifest_dir):
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
         "metadata": {"name": "Hacker Agent"},
-        "definitions": {
-            "hack": {"$ref": "../outside/secret.yaml"}
-        },
-        "workflow": {
-            "start": "step1",
-            "steps": {"step1": {"type": "logic", "id": "step1", "code": "pass"}}
-        }
+        "definitions": {"hack": {"$ref": "../outside/secret.yaml"}},
+        "workflow": {"start": "step1", "steps": {"step1": {"type": "logic", "id": "step1", "code": "pass"}}},
     }
     main_path = manifest_dir / "main.yaml"
     with open(main_path, "w") as f:
@@ -101,7 +88,8 @@ def test_security_jailbreak(manifest_dir):
     with pytest.raises(ValueError, match="Security Error"):
         load_from_yaml(main_path)
 
-def test_cycles(manifest_dir):
+
+def test_cycles(manifest_dir: Path) -> None:
     """Test detection of circular dependencies."""
 
     # a.yaml refs b.yaml
@@ -109,12 +97,8 @@ def test_cycles(manifest_dir):
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "A"},
-        "definitions": {
-            "b": {"$ref": "b.yaml"}
-        },
-        "workflow": {
-            "start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}
-        }
+        "definitions": {"b": {"$ref": "b.yaml"}},
+        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}},
     }
 
     # b.yaml refs a.yaml
@@ -122,12 +106,8 @@ def test_cycles(manifest_dir):
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "B"},
-        "definitions": {
-            "a": {"$ref": "a.yaml"}
-        },
-        "workflow": {
-             "start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}
-        }
+        "definitions": {"a": {"$ref": "a.yaml"}},
+        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}},
     }
 
     with open(manifest_dir / "a.yaml", "w") as f:
@@ -139,7 +119,8 @@ def test_cycles(manifest_dir):
     with pytest.raises(RecursionError, match="Circular dependency"):
         load_from_yaml(manifest_dir / "a.yaml")
 
-def test_recursive_disabled(manifest_dir):
+
+def test_recursive_disabled(manifest_dir: Path) -> None:
     """Test that recursive=False does not resolve refs."""
 
     tool_def = {"id": "t", "name": "T", "uri": "u", "risk_level": "safe"}
@@ -150,12 +131,8 @@ def test_recursive_disabled(manifest_dir):
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
         "metadata": {"name": "Agent"},
-        "definitions": {
-            "my_tool": {"$ref": "tool.yaml"}
-        },
-        "workflow": {
-             "start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}
-        }
+        "definitions": {"my_tool": {"$ref": "tool.yaml"}},
+        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}},
     }
     main_path = manifest_dir / "main.yaml"
     with open(main_path, "w") as f:

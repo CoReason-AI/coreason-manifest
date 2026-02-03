@@ -14,15 +14,12 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set, Union
 
 import yaml
-from pydantic import ValidationError
 
 from coreason_manifest.v2.resolver import ReferenceResolver
 from coreason_manifest.v2.spec.definitions import ManifestV2
 
 
-def _load_recursive(
-    path: Path, resolver: ReferenceResolver, visited_paths: Set[Path]
-) -> Dict[str, Any]:
+def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[Path]) -> Dict[str, Any]:
     """
     Recursively load YAML data, resolving $ref in definitions.
     """
@@ -35,7 +32,10 @@ def _load_recursive(
         with path.open("r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except yaml.YAMLError as e:
-        raise ValueError(f"Invalid YAML in {path}: {e}")
+        raise ValueError(f"Invalid YAML in {path}: {e}") from e
+
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected a dictionary in {path}, got {type(data).__name__}")
 
     # Resolve references in definitions
     definitions = data.get("definitions", {})
