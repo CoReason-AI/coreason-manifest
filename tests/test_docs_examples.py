@@ -59,16 +59,6 @@ def test_usage_guide_mutable_fields() -> None:
     assert manifest.interface.inputs["topic"]["type"] == "integer"
 
 
-def test_migration_guide_v1_legacy_import() -> None:
-    """Verifies that V1 legacy imports work as described in migration guide."""
-    from coreason_manifest.v1 import AgentDefinition, RecipeManifest, Topology
-
-    # Just verify they are the correct classes (implicitly checked by import success)
-    assert RecipeManifest.__name__ == "RecipeManifest"
-    assert AgentDefinition.__name__ == "AgentDefinition"
-    assert Topology.__name__ == "GraphTopology"
-
-
 def test_migration_guide_v2_standard_import() -> None:
     """Verifies V2 standard imports."""
     from coreason_manifest import Manifest, load

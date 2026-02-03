@@ -10,7 +10,7 @@
 
 import pytest
 
-from coreason_manifest.definitions.agent import ToolRiskLevel
+from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
 from coreason_manifest.v2.governance import check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (

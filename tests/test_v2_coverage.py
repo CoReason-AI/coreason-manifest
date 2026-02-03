@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from coreason_manifest.definitions.agent import ToolRiskLevel
+from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
 from coreason_manifest.v2.governance import _risk_score, check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (
