@@ -59,11 +59,15 @@ def test_deep_immutability_mapping_proxy() -> None:
     agent = AgentDefinition(**data)
 
     # inputs should be read-only
-    with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
-        agent.capabilities[0].inputs["param"] = 2  # type: ignore[index]
+    # We must assert inputs is not None for mypy, though we know it is from data
+    inputs = agent.capabilities[0].inputs
+    assert inputs is not None
 
     with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
-        agent.capabilities[0].inputs["new"] = 3  # type: ignore[index]
+        inputs["param"] = 2
+
+    with pytest.raises(TypeError, match="'mappingproxy' object does not support item assignment"):
+        inputs["new"] = 3
 
 
 def test_deep_immutability_tuples() -> None:
@@ -115,11 +119,11 @@ def test_deep_immutability_tuples() -> None:
 
     # Test field immutability (model is frozen)
     with pytest.raises(ValidationError, match="Instance is frozen"):
-        agent.dependencies.libraries = ("a",)  # type: ignore[misc]
+        agent.dependencies.libraries = ("a",)
 
     # Test tools field immutability (model is frozen)
     with pytest.raises(ValidationError, match="Instance is frozen"):
-        agent.dependencies.tools = []  # type: ignore[misc]
+        agent.dependencies.tools = []
 
     # Note: agent.dependencies.tools is a list, so its CONTENTS are mutable,
     # but the field itself cannot be reassigned.
@@ -161,6 +165,7 @@ def test_unicode_handling() -> None:
 
     assert agent.metadata.name == name_unicode
     assert agent.metadata.author == author_unicode
+    assert agent.capabilities[0].inputs is not None
     assert agent.capabilities[0].inputs["key_Ω"] == "val_🤖"
 
 

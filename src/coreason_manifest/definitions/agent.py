@@ -515,7 +515,8 @@ class AgentDefinition(CoReasonBaseModel):
         # 3. If found:
         if target_capability.inputs is None:
             raise ValueError(
-                f"Capability '{capability_name}' uses an external interface. Validation requires resolving the interface."
+                f"Capability '{capability_name}' uses an external interface. "
+                "Validation requires resolving the interface."
             )
 
         # Use jsonschema.validate(instance=payload, schema=target_capability.inputs)

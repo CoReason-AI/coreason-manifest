@@ -7,7 +7,7 @@ from coreason_manifest.definitions.contracts import InterfaceDefinition, Contrac
 from coreason_manifest.definitions.agent import AgentCapability, CapabilityType, DeliveryMode
 
 
-def test_contract_metadata_creation():
+def test_contract_metadata_creation() -> None:
     metadata = ContractMetadata(
         id=uuid4(),
         version="1.0.0",
@@ -18,7 +18,7 @@ def test_contract_metadata_creation():
     assert metadata.name == "Test Interface"
     assert metadata.version == "1.0.0"
 
-def test_interface_definition_creation():
+def test_interface_definition_creation() -> None:
     metadata = ContractMetadata(
         id=uuid4(),
         version="1.0.0",
@@ -37,7 +37,7 @@ def test_interface_definition_creation():
     assert interface.inputs["type"] == "object"
     assert interface.description == "A standard search interface."
 
-def test_agent_capability_validation_inline_schema():
+def test_agent_capability_validation_inline_schema() -> None:
     # Test valid capability with inline schema
     cap = AgentCapability(
         name="search",
@@ -50,7 +50,7 @@ def test_agent_capability_validation_inline_schema():
     assert cap.outputs is not None
     assert cap.interface_id is None
 
-def test_agent_capability_validation_interface_id():
+def test_agent_capability_validation_interface_id() -> None:
     # Test valid capability with interface_id
     cap = AgentCapability(
         name="search",
@@ -62,7 +62,7 @@ def test_agent_capability_validation_interface_id():
     assert cap.inputs is None
     assert cap.outputs is None
 
-def test_agent_capability_validation_both():
+def test_agent_capability_validation_both() -> None:
     # Test valid capability with both (override)
     cap = AgentCapability(
         name="search",
@@ -75,7 +75,7 @@ def test_agent_capability_validation_both():
     assert cap.interface_id is not None
     assert cap.inputs is not None
 
-def test_agent_capability_validation_failure():
+def test_agent_capability_validation_failure() -> None:
     # Test invalid capability (neither)
     with pytest.raises(ValidationError) as excinfo:
         AgentCapability(
@@ -85,7 +85,7 @@ def test_agent_capability_validation_failure():
         )
     assert "AgentCapability must define either 'interface_id' or both 'inputs' and 'outputs'" in str(excinfo.value)
 
-def test_agent_capability_validation_partial_schema():
+def test_agent_capability_validation_partial_schema() -> None:
     # Test invalid capability (only inputs)
     with pytest.raises(ValidationError) as excinfo:
         AgentCapability(

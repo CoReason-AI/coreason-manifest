@@ -85,7 +85,7 @@ def test_builder_set_status() -> None:
     assert builder._status == AgentStatus.DRAFT
 
     builder.set_status(AgentStatus.PUBLISHED)
-    assert builder._status == AgentStatus.PUBLISHED  # type: ignore[comparison-overlap]
+    assert builder._status == AgentStatus.PUBLISHED
 
     builder.set_status(AgentStatus.DRAFT)
     assert builder._status == AgentStatus.DRAFT
