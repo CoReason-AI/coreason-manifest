@@ -42,6 +42,11 @@ from .definitions.patterns import (
     PatternType,
     SwarmPattern,
 )
+from .definitions.resources import (
+    RemoteServiceResource,
+    ResourceRiskLevel,
+    SidecarResource,
+)
 from .definitions.simulation import (
     SimulationMetrics,
     SimulationScenario,
@@ -61,11 +66,6 @@ from .definitions.topology import (
 from .dsl import load_from_yaml
 from .governance import ComplianceReport, GovernanceConfig, check_compliance
 from .recipes import RecipeManifest
-from .definitions.resources import (
-    RemoteServiceResource,
-    ResourceRiskLevel,
-    SidecarResource,
-)
 
 __all__ = [
     "AdapterHints",

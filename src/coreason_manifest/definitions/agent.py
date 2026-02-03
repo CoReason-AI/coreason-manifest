@@ -26,7 +26,6 @@ from uuid import UUID
 import jsonschema
 from pydantic import (
     AfterValidator,
-    AnyUrl,
     ConfigDict,
     Field,
     PlainSerializer,

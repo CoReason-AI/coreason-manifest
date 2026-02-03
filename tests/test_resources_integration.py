@@ -1,20 +1,22 @@
 import pytest
-from coreason_manifest.definitions.agent import AgentDependencies
+from pydantic import ValidationError
+
 from coreason_manifest import (
     RemoteServiceResource,
     ResourceRiskLevel,
     SidecarResource,
 )
-from pydantic import ValidationError
+from coreason_manifest.definitions.agent import AgentDependencies
 
-def test_sidecar_resource():
+
+def test_sidecar_resource() -> None:
     # Test valid sidecar
     sidecar = SidecarResource(
         name="redis-sidecar",
         image="redis:alpine",
         env_vars={"REDIS_PORT": "6379"},
         ports=[6379],
-        command=["redis-server"]
+        command=["redis-server"],
     )
     assert sidecar.name == "redis-sidecar"
     assert sidecar.image == "redis:alpine"
@@ -28,14 +30,15 @@ def test_sidecar_resource():
     assert minimal.ports is None
     assert minimal.command is None
 
-def test_remote_service_resource():
+
+def test_remote_service_resource() -> None:
     # Test valid remote service
     service = RemoteServiceResource(
         name="weather-api",
         uri="https://api.weather.com",
         scopes=["read"],
         connection_secret_env="WEATHER_API_KEY",
-        risk_level=ResourceRiskLevel.SAFE
+        risk_level=ResourceRiskLevel.SAFE,
     )
     assert service.name == "weather-api"
     # Pydantic v2 AnyUrl usually normalizes, let's check basic string match or startswith
@@ -47,21 +50,19 @@ def test_remote_service_resource():
         RemoteServiceResource(
             name="bad-uri",
             uri="not-a-uri",
-            risk_level=ResourceRiskLevel.STANDARD
+            risk_level=ResourceRiskLevel.STANDARD,
         )
 
-def test_agent_dependencies_integration():
+
+def test_agent_dependencies_integration() -> None:
     sidecar = SidecarResource(name="db", image="postgres")
     remote = RemoteServiceResource(
         name="llm",
         uri="https://api.openai.com",
-        risk_level=ResourceRiskLevel.CRITICAL
+        risk_level=ResourceRiskLevel.CRITICAL,
     )
 
-    deps = AgentDependencies(
-        sidecars=[sidecar],
-        remote_services=[remote]
-    )
+    deps = AgentDependencies(sidecars=[sidecar], remote_services=[remote])
 
     assert len(deps.sidecars) == 1
     assert deps.sidecars[0].name == "db"
@@ -70,7 +71,8 @@ def test_agent_dependencies_integration():
     # Check default for tools
     assert deps.tools == []
 
-def test_resource_risk_level_values():
+
+def test_resource_risk_level_values() -> None:
     assert ResourceRiskLevel.SAFE.value == "SAFE"
     assert ResourceRiskLevel.STANDARD.value == "STANDARD"
     assert ResourceRiskLevel.CRITICAL.value == "CRITICAL"

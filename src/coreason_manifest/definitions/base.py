@@ -9,9 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from typing import Any, Dict
-from typing_extensions import Annotated
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, PlainSerializer
+from typing_extensions import Annotated
 
 
 # Strict URI type that serializes to string
