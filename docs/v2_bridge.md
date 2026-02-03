@@ -10,28 +10,28 @@ The bridge consists of three main modules located in `src/coreason_manifest/v2/`
 
 1.  **Compiler** (`compiler.py`): Transforms the implicit "Linked List" topology of V2 into the explicit "Graph" topology of V1.
 2.  **I/O** (`io.py`): Handles loading and dumping of V2 YAML files. It supports **recursive multi-file composition** (via `$ref`) and enforces secure path resolution.
-3.  **Adapter** (`adapter.py`): Converts a loaded V2 `ManifestV2` object into a V1 `RecipeManifest` ready for execution, mapping Interface, State, Policy, and **Component Definitions**.
+3.  **Adapter** (`adapter.py`): Converts a loaded V2 `Manifest` object into a V1 `RecipeManifest` ready for execution, mapping Interface, State, Policy, and **Component Definitions**.
 4.  **Resolver** (`resolver.py`): A helper module used by the loader to securely resolve file paths against a root "Jail" directory.
 
 ## Usage
 
 ### Loading and Executing a V2 Manifest
 
-To run a V2 YAML file, you use the `load_from_yaml` function. This function automatically handles recursive imports and security checks.
+To run a V2 YAML file, you use the `coreason_manifest.load` function. This function automatically handles recursive imports and security checks.
 
 ```python
 from pathlib import Path
-from coreason_manifest.v2.io import load_from_yaml
+from coreason_manifest import load
 from coreason_manifest.v2.adapter import v2_to_recipe
 
 # 1. Load V2 Manifest (Human Friendly)
 # By default, this resolves imports relative to the file's directory.
-v2_manifest = load_from_yaml("my_workflow.v2.yaml")
+v2_manifest = load("my_workflow.v2.yaml")
 
 # 2. Convert to V1 Recipe (Machine Optimized)
 recipe = v2_to_recipe(v2_manifest)
 
-# 3. The 'recipe' object is now a standard RecipeManifest
+# 3. The 'recipe' object is now a standard RecipeManifest (V1)
 # compatible with the coreason-maco engine.
 print(f"Loaded Recipe: {recipe.name} (ID: {recipe.id})")
 print(f"Policy: {recipe.policy.max_retries} retries")
@@ -89,7 +89,7 @@ workflow:
       # ...
 ```
 
-When `load_from_yaml("main.yaml")` is called, the loader recursively resolves `./tools.yaml` and injects its content into `definitions.my_tool`.
+When `load("main.yaml")` is called, the loader recursively resolves `./tools.yaml` and injects its content into `definitions.my_tool`.
 
 ## Security & Safety
 
@@ -105,7 +105,7 @@ You can explicitly set the root directory:
 
 ```python
 # Enforce that all imports must be within /safe/base/dir
-manifest = load_from_yaml(
+manifest = load(
     "project/main.yaml",
     root_dir="/safe/base/dir"
 )
@@ -133,8 +133,8 @@ The compiler performs several transformations:
 You can also programmatically create V2 manifests and dump them to YAML. The dumper ensures that `apiVersion`, `kind`, and `metadata` appear at the top of the file.
 
 ```python
-from coreason_manifest.v2.io import dump_to_yaml
+from coreason_manifest import dump
 
-yaml_str = dump_to_yaml(v2_manifest)
+yaml_str = dump(v2_manifest)
 print(yaml_str)
 ```

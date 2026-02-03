@@ -1,10 +1,10 @@
 # Coreason Agent Manifest (CAM) V2
 
-The **Coreason Agent Manifest (CAM)**, also known as **Manifest V2**, is the "Human-Centric" Canonical YAML format designed for defining Agents and Recipes in the Coreason ecosystem. It serves as the primary interface for developers and the Visual Builder.
+The **Coreason Agent Manifest (CAM)**, also known as **Manifest V2**, is the "Human-Centric" Canonical YAML format designed for defining Agents and Recipes in the Coreason ecosystem. It serves as the **default and primary interface** for developers and the Visual Builder.
 
 > **Note:** The CAM is designed for ease of authoring. At runtime, the Coreason Engine compiles this YAML into strict, machine-optimized Pydantic models. For details on the runtime format, see the [Runtime Agent Definition (V1)](runtime_agent_definition.md) and [Runtime Recipe Definition (V1)](runtime_recipe_definition.md).
 
-## Root Object (`ManifestV2`)
+## Root Object (`Manifest`)
 
 The root of the document follows a "Kubernetes-style" header structure.
 
