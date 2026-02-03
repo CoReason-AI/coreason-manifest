@@ -13,7 +13,7 @@
 from uuid import uuid4
 
 from coreason_manifest.definitions.topology import StateDefinition
-from coreason_manifest.recipes import RecipeInterface, RecipeManifest
+from coreason_manifest.recipes import PolicyConfig, RecipeInterface, RecipeManifest
 from coreason_manifest.v2.compiler import compile_to_topology
 from coreason_manifest.v2.spec.definitions import ManifestV2
 
@@ -41,14 +41,19 @@ def v2_to_recipe(manifest: ManifestV2) -> RecipeManifest:
         design_metadata = manifest.metadata.design_metadata.model_dump(by_alias=True, exclude_none=True)
 
     # Construct the RecipeManifest
-    # Note: State and Interface are populated with defaults as V2 is less strict currently
     return RecipeManifest(
         id=recipe_id,
         version="0.1.0",  # Default version
         name=manifest.metadata.name,
         description=None,
-        interface=RecipeInterface(inputs={}, outputs={}),
+        interface=RecipeInterface(inputs=manifest.interface.inputs, outputs=manifest.interface.outputs),
         state=StateDefinition(schema_={}, persistence="ephemeral"),
+        policy=PolicyConfig(
+            max_steps=manifest.policy.max_steps,
+            max_retries=manifest.policy.max_retries,
+            timeout=manifest.policy.timeout,
+            human_in_the_loop=manifest.policy.human_in_the_loop,
+        ),
         parameters=manifest.definitions,
         topology=topology,
         metadata=design_metadata,

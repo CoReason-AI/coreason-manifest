@@ -44,6 +44,24 @@ class RecipeInterface(CoReasonBaseModel):
     )
 
 
+class PolicyConfig(CoReasonBaseModel):
+    """Configuration for execution policy and governance.
+
+    Attributes:
+        max_steps: Execution limit on number of steps.
+        max_retries: Maximum number of retries.
+        timeout: Timeout in seconds.
+        human_in_the_loop: Whether to require human approval.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    max_steps: Optional[int] = Field(None, description="Execution limit on number of steps.")
+    max_retries: int = Field(3, description="Maximum number of retries.")
+    timeout: Optional[int] = Field(None, description="Timeout in seconds.")
+    human_in_the_loop: bool = Field(False, description="Whether to require human approval.")
+
+
 class RecipeManifest(CoReasonBaseModel):
     """The executable specification for the MACO engine.
 
@@ -54,6 +72,7 @@ class RecipeManifest(CoReasonBaseModel):
         description: Detailed description of the recipe.
         interface: Defines the input/output contract for the Recipe.
         state: Defines the internal state (memory) of the Recipe.
+        policy: Policy configuration.
         parameters: Dictionary of build-time constants.
         topology: The topology definition of the workflow.
         integrity_hash: SHA256 hash of the canonical JSON representation of the topology.
@@ -68,6 +87,7 @@ class RecipeManifest(CoReasonBaseModel):
     description: Optional[str] = Field(None, description="Detailed description of the recipe.")
     interface: RecipeInterface = Field(..., description="Defines the input/output contract for the Recipe.")
     state: StateDefinition = Field(..., description="Defines the internal state (memory) of the Recipe.")
+    policy: Optional[PolicyConfig] = Field(None, description="Policy configuration.")
     parameters: Dict[str, Any] = Field(..., description="Dictionary of build-time constants.")
     topology: GraphTopology = Field(..., description="The topology definition of the workflow.")
     integrity_hash: Optional[str] = Field(
