@@ -44,12 +44,14 @@ The `integrity_hash` field is mandatory. It must be a valid 64-character SHA256 
 
 ## Examples
 
-### Creating an Agent Definition
+### Creating an Agent Definition (Legacy V1)
+
+> **Note:** For V2 (YAML), see `docs/coreason_agent_manifest.md`. For V1 code, import `AgentDefinition` from `coreason_manifest.v1`.
 
 ```python
 import uuid
+from coreason_manifest.v1 import AgentDefinition
 from coreason_manifest.definitions.agent import (
-    AgentDefinition,
     ToolRequirement,
     ToolRiskLevel,
     TraceLevel,

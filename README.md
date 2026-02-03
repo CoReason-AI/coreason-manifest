@@ -54,13 +54,30 @@ pip install coreason-manifest
 
 ## Usage
 
-This library is used to define and validate Agent configurations programmatically.
+### V2 (Default)
+The library now defaults to the **V2 Manifest** (CAM) format.
+
+```python
+import coreason_manifest as cm
+
+# Load a V2 YAML
+manifest = cm.load("my_agent.yaml")
+
+# Access V2 fields
+print(f"Loaded {manifest.kind}: {manifest.metadata.name}")
+
+# Dump back to YAML
+print(cm.dump(manifest))
+```
+
+### V1 (Legacy)
+Legacy V1 objects (`AgentDefinition`, `RecipeManifest`) are available under the `v1` namespace.
 
 ```python
 import uuid
 from datetime import datetime, timezone
+from coreason_manifest.v1 import AgentDefinition
 from coreason_manifest.definitions.agent import (
-    AgentDefinition,
     AgentMetadata,
     AgentCapability,
     CapabilityType,

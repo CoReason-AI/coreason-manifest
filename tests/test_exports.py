@@ -9,8 +9,8 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import coreason_manifest
+from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
 from coreason_manifest.v2.spec.definitions import ManifestV2
-from coreason_manifest.v2.io import load_from_yaml, dump_to_yaml
 
 
 def test_top_level_exports() -> None:
@@ -36,6 +36,7 @@ def test_top_level_exports() -> None:
     expected = ["Manifest", "Recipe", "load", "dump", "__version__"]
     for item in expected:
         assert item in coreason_manifest.__all__
+
 
 def test_legacy_exports_removed() -> None:
     """Verify that legacy V1 components are NOT exported from root."""

@@ -120,8 +120,12 @@ The schema enforces strict validation to prevent runtime errors. Common edge cas
 
 ## Example Usage
 
+### Legacy V1 Usage
+
+> **Note:** As of v0.12.0, `RecipeManifest` must be imported from `coreason_manifest.v1`.
+
 ```python
-from coreason_manifest import (
+from coreason_manifest.v1 import (
     RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
     ConditionalEdge, StateDefinition
 )
