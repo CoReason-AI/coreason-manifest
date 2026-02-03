@@ -160,4 +160,4 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 
 ## Roadmap
 
-*   **RFC 001: Canonical YAML (v2)**: We are working on a new "Human-Centric" YAML format for manifests. See [docs/rfcs/001-v2-canonical-yaml.md](docs/rfcs/001-v2-canonical-yaml.md) for the specification.
+*   **RFC 001: Canonical YAML (v2)**: We have implemented the "Human-Centric" YAML format for manifests. See [docs/rfcs/001-v2-canonical-yaml.md](docs/rfcs/001-v2-canonical-yaml.md) for the specification and [docs/v2_bridge.md](docs/v2_bridge.md) for usage of the Loader Bridge.

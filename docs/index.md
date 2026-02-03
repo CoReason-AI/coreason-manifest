@@ -16,3 +16,4 @@ This is the documentation for the coreason_manifest project.
 *   [Evaluation-Ready Metadata](evaluation.md): How to define test contracts and success criteria within your agents.
 *   [Observability](observability.md): Details on tracing, logging, and metrics.
 *   [Interoperability](interoperability.md): Using "Adapter Hints" to translate agents to frameworks like LangGraph or AutoGen.
+*   [V2 Loader Bridge](v2_bridge.md): Using the Bridge to load V2 YAML manifests into the V1 Runtime.
