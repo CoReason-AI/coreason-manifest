@@ -2,7 +2,7 @@
 
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 import pytest
 import yaml
@@ -145,7 +145,12 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     manifest = load_from_yaml(main_path, recursive=False)
     # It will be parsed as GenericDefinition because it has no known 'type'
     tool_def = manifest.definitions["my_tool"]
-    tool_ref_data: Dict[str, Any] = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def  # type: ignore[assignment]
+
+    # Force cast to Dict[str, Any] to avoid bidirectional type inference conflict
+    # where mypy thinks it must be Dict[str, str] due to the assert below.
+    raw_data = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def
+    tool_ref_data = cast(Dict[str, Any], raw_data)
+
     assert tool_ref_data == {"$ref": "tool.yaml"}
 
 
