@@ -11,11 +11,13 @@
 """Defines the behavioral contract (Protocol) for a Coreason Agent."""
 
 from abc import abstractmethod
-from typing import Any, Awaitable, Dict, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union, runtime_checkable
 
 from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.definitions.events import CloudEvent, GraphEvent
+from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.request import AgentRequest
+from coreason_manifest.definitions.session import Interaction
 
 
 @runtime_checkable
@@ -137,6 +139,51 @@ class ResponseHandler(EventSink, Protocol):
 
 
 @runtime_checkable
+class SessionHandle(Protocol):
+    """Protocol encapsulating the Active Memory Interface.
+
+    Allows agents to lazily pull history, recall information via semantic search,
+    and persist state across sessions.
+    """
+
+    @property
+    @abstractmethod
+    def session_id(self) -> str:
+        """The unique identifier for the conversation."""
+        ...
+
+    @property
+    @abstractmethod
+    def identity(self) -> Identity:
+        """The identity of the user/actor this session belongs to."""
+        ...
+
+    @abstractmethod
+    def history(self, limit: int = 10, offset: int = 0) -> Awaitable[List[Interaction]]:
+        """Async method to fetch recent turns lazily."""
+        ...
+
+    @abstractmethod
+    def recall(self, query: str, limit: int = 5, threshold: float = 0.7) -> Awaitable[List[str]]:
+        """Interface for Semantic Search / Vector DB retrieval.
+
+        This delegates to the Runtime's vector store (Engine), and the Agent does
+        not need to know *which* vector DB is being used.
+        """
+        ...
+
+    @abstractmethod
+    def store(self, key: str, value: Any) -> Awaitable[None]:
+        """Persist a variable across sessions."""
+        ...
+
+    @abstractmethod
+    def get(self, key: str, default: Any = None) -> Awaitable[Any]:
+        """Retrieve a persisted variable."""
+        ...
+
+
+@runtime_checkable
 class AgentInterface(Protocol):
     """Protocol defining the standard interface for a Coreason Agent."""
 
@@ -147,11 +194,14 @@ class AgentInterface(Protocol):
         ...
 
     @abstractmethod
-    async def assist(self, request: AgentRequest, response: ResponseHandler) -> None:
+    async def assist(
+        self, request: AgentRequest, session: SessionHandle, response: ResponseHandler
+    ) -> None:
         """Process a request and use the response handler to emit events.
 
         Args:
             request: The strictly typed input envelope.
+            session: The active memory interface.
             response: The handler for emitting results.
         """
         ...
