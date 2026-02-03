@@ -90,11 +90,8 @@ class SessionState(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    session_id: UUID = Field(..., description="Global identifier for the conversation thread")
     context: SessionContext = Field(..., description="Immutable context for the session")
     processor: Identity = Field(..., description="The agent/graph handling this session")
-    user: Optional[Identity] = Field(None, description="The user participating in the session")
-    created_at: datetime = Field(..., description="When the session was created")
     last_updated_at: datetime = Field(..., description="When the session was last updated")
     history: List[Interaction] = Field(default_factory=list, description="Chronological list of interactions")
     context_variables: Dict[str, Any] = Field(
