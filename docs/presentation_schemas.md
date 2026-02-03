@@ -67,6 +67,10 @@ class CitationBlock(CoReasonBaseModel):
 }
 ```
 
+## Streaming Wire Format
+
+When sending these events over a stream (Server-Sent Events), they are wrapped in a `StreamPacket`. See [SSE Wire Protocol Specification](./sse_wire_protocol.md) for details.
+
 ### ProgressUpdate
 
 Used to report the status of a long-running operation.

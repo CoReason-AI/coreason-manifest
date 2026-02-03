@@ -13,7 +13,7 @@ from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import AnyUrl, ConfigDict
+from pydantic import AnyUrl, ConfigDict, model_validator
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 
@@ -128,3 +128,48 @@ class PresentationEvent(CoReasonBaseModel):
     timestamp: datetime
     type: PresentationEventType
     data: Union[CitationBlock, ProgressUpdate, MediaCarousel, Dict[str, Any]]
+
+
+class StreamOpCode(str, Enum):
+    """Operation codes for server-sent events.
+
+    Values:
+        DELTA: Raw text token.
+        EVENT: A structured PresentationEvent.
+        ERROR: Stream-level error.
+        CLOSE: Graceful termination.
+    """
+
+    DELTA = "DELTA"
+    EVENT = "EVENT"
+    ERROR = "ERROR"
+    CLOSE = "CLOSE"
+
+
+class StreamPacket(CoReasonBaseModel):
+    """Standardized wire format for streaming data.
+
+    Attributes:
+        stream_id: The ID of the stream this packet belongs to.
+        seq: Sequence number, strictly increasing per stream.
+        op: Operation code.
+        t: Timestamp of emission.
+        p: The Payload (Shortened to 'p' to save bandwidth).
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    stream_id: UUID
+    seq: int
+    op: StreamOpCode
+    t: datetime
+    p: Union[str, PresentationEvent, Dict[str, Any]]
+
+    @model_validator(mode="after")
+    def validate_payload(self) -> "StreamPacket":
+        """Validate payload matches operation code."""
+        if self.op == StreamOpCode.DELTA and not isinstance(self.p, str):
+            raise ValueError("Payload must be a string for DELTA op.")
+        if self.op == StreamOpCode.EVENT and isinstance(self.p, str):
+            raise ValueError("Payload must be a PresentationEvent or Dict for EVENT op.")
+        return self
