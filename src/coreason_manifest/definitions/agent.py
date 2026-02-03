@@ -159,6 +159,7 @@ class AgentCapability(CoReasonBaseModel):
         name: Unique name for this capability.
         type: Interaction mode.
         description: What this mode does.
+        interface_id: Optional ID of the interface contract this capability implements.
         inputs: Typed arguments the agent accepts (JSON Schema).
         outputs: Typed structure of the result.
         events: List of intermediate events this agent produces during execution.
@@ -172,8 +173,13 @@ class AgentCapability(CoReasonBaseModel):
     type: CapabilityType = Field(..., description="Interaction mode.")
     description: str = Field(..., description="What this mode does.")
 
-    inputs: ImmutableDict = Field(..., description="Typed arguments the agent accepts (JSON Schema).")
-    outputs: ImmutableDict = Field(..., description="Typed structure of the result.")
+    interface_id: Optional[UUID] = Field(
+        None, description="Optional ID of the interface contract this capability implements."
+    )
+
+    inputs: Optional[ImmutableDict] = Field(None, description="Typed arguments the agent accepts (JSON Schema).")
+    outputs: Optional[ImmutableDict] = Field(None, description="Typed structure of the result.")
+
     delivery_mode: DeliveryMode = Field(
         default=DeliveryMode.REQUEST_RESPONSE, description="The mechanism used to deliver the response."
     )
@@ -181,6 +187,14 @@ class AgentCapability(CoReasonBaseModel):
         default_factory=list, description="List of intermediate events this agent produces during execution."
     )
     injected_params: List[str] = Field(default_factory=list, description="List of parameters injected by the system.")
+
+    @model_validator(mode="after")
+    def validate_schema_definition(self) -> AgentCapability:
+        """Ensure either interface_id OR (inputs and outputs) are set."""
+        if self.interface_id is None:
+            if self.inputs is None or self.outputs is None:
+                raise ValueError("If 'interface_id' is not provided, both 'inputs' and 'outputs' must be defined.")
+        return self
 
 
 class ModelConfig(CoReasonBaseModel):
@@ -495,6 +509,11 @@ class AgentDefinition(CoReasonBaseModel):
             raise ValueError(f"Capability '{capability_name}' not found in agent '{self.metadata.name}'.")
 
         # 3. If found:
+        if target_capability.inputs is None:
+            raise ValueError(
+                f"Capability '{capability_name}' uses an interface definition which cannot be resolved at runtime."
+            )
+
         # Use jsonschema.validate(instance=payload, schema=target_capability.inputs)
         # Note: capability.inputs is an ImmutableDict, so we cast to dict for jsonschema.
         jsonschema.validate(instance=payload, schema=dict(target_capability.inputs))

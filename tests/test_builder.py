@@ -39,11 +39,13 @@ def test_capability_compilation() -> None:
     assert definition.description == "Search the web"
 
     # Check inputs schema
+    assert definition.inputs is not None
     assert "properties" in definition.inputs
     assert "query" in definition.inputs["properties"]
     assert definition.inputs["properties"]["query"]["type"] == "string"
 
     # Check outputs schema
+    assert definition.outputs is not None
     assert "properties" in definition.outputs
     assert "results" in definition.outputs["properties"]
     assert definition.outputs["properties"]["results"]["type"] == "array"
@@ -70,6 +72,7 @@ def test_full_agent_build() -> None:
     # Verify capability is compiled
     compiled_cap = agent.capabilities[0]
     assert compiled_cap.name == "search"
+    assert compiled_cap.inputs is not None
     assert compiled_cap.inputs["properties"]["query"]["type"] == "string"
 
     # Verify config

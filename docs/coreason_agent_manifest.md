@@ -30,8 +30,10 @@ An `AgentDefinition` consists of the following sections:
     *   Defines the modes of interaction for the agent (e.g., "Atomic", "Streaming").
     *   Each capability has a unique `name`, `type`, and `description`.
     *   **Delivery Mode**: `delivery_mode` explicitly declares whether the client should expect a single `REQUEST_RESPONSE` or a stream of `SERVER_SENT_EVENTS`.
-    *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas).
+    *   **Interface Contracts**: Can reference a reusable `InterfaceDefinition` via `interface_id`.
+    *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas). *Note: These are optional if `interface_id` is provided.*
     *   `injected_params` lists system-injected values (e.g., `user_context`).
+    *   See [Interface Contracts](interface_contracts.md) for details.
 
 3.  **Configuration (`AgentRuntimeConfig`)**:
     *   The "brain" of the agent.
