@@ -9,14 +9,37 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime, timezone
-from uuid import uuid4
+from typing import Optional
+from uuid import UUID, uuid4
 
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
 from coreason_manifest.definitions.identity import Identity
-from coreason_manifest.definitions.session import Interaction, SessionState
+from coreason_manifest.definitions.session import (
+    Interaction,
+    SessionContext,
+    SessionState,
+    TraceContext,
+    UserContext,
+)
+
+
+def create_default_context(
+    session_id: UUID, agent_id: UUID, user_id: str = "user-1", trace_id: Optional[UUID] = None
+) -> SessionContext:
+    if trace_id is None:
+        trace_id = uuid4()
+
+    return SessionContext(
+        session_id=session_id,
+        agent_id=agent_id,
+        user=UserContext(user_id=user_id, email="test@example.com", tier="free", locale="en-US"),
+        trace=TraceContext(trace_id=trace_id, span_id=uuid4(), parent_id=None),
+        permissions=["read", "write"],
+        created_at=datetime.now(timezone.utc),
+    )
 
 
 def test_interaction_creation() -> None:
@@ -60,8 +83,11 @@ def test_session_state_creation() -> None:
     processor = Identity(id="agent-1", name="Agent 1", role="assistant")
     user = Identity(id="user-1", name="User 1", role="user")
 
+    context = create_default_context(session_id, uuid4(), user.id)
+
     session = SessionState(
         session_id=session_id,
+        context=context,
         processor=processor,
         user=user,
         created_at=now,
@@ -69,6 +95,8 @@ def test_session_state_creation() -> None:
     )
 
     assert session.session_id == session_id
+    assert session.context == context
+    assert session.context.user.user_id == "user-1"
     assert session.processor == processor
     assert session.processor.id == "agent-1"
     assert session.user == user
@@ -85,9 +113,11 @@ def test_session_state_immutability() -> None:
     now = datetime.now(timezone.utc)
 
     processor = Identity(id="agent-1", name="Agent 1", role="assistant")
+    context = create_default_context(session_id, uuid4())
 
     session = SessionState(
         session_id=session_id,
+        context=context,
         processor=processor,
         created_at=now,
         last_updated_at=now,
@@ -113,9 +143,11 @@ def test_add_interaction() -> None:
     now = datetime.now(timezone.utc)
 
     processor = Identity(id="agent-1", name="Agent 1", role="assistant")
+    context = create_default_context(session_id, uuid4())
 
     session = SessionState(
         session_id=session_id,
+        context=context,
         processor=processor,
         created_at=now,
         last_updated_at=now,
@@ -137,6 +169,7 @@ def test_add_interaction() -> None:
 
     # Other fields should be preserved
     assert new_session.session_id == session.session_id
+    assert new_session.context == session.context
     assert new_session.processor == session.processor
 
 
@@ -147,3 +180,38 @@ def test_serialization() -> None:
     # Check key presence without relying on exact whitespace
     assert '"k":"v"' in json_str.replace(" ", "")
     assert '"x":"y"' in json_str.replace(" ", "")
+
+
+def test_session_context_serialization() -> None:
+    """Test serialization of SessionContext."""
+    session_id = uuid4()
+    agent_id = uuid4()
+    trace_id = uuid4()
+    span_id = uuid4()
+
+    user_context = UserContext(user_id="user-123", email="test@test.com", tier="pro", locale="fr-FR")
+
+    trace_context = TraceContext(trace_id=trace_id, span_id=span_id, parent_id=None)
+
+    now = datetime.now(timezone.utc)
+
+    context = SessionContext(
+        session_id=session_id,
+        agent_id=agent_id,
+        user=user_context,
+        trace=trace_context,
+        permissions=["search:read"],
+        created_at=now,
+    )
+
+    # Test json dump
+    json_str = context.to_json()
+
+    # Verify basic fields
+    assert str(session_id) in json_str
+    assert "user-123" in json_str
+    assert "search:read" in json_str
+    assert "fr-FR" in json_str
+
+    # Verify UUID serialization
+    assert str(trace_id) in json_str

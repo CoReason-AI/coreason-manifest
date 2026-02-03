@@ -20,6 +20,40 @@ from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.message import MultiModalInput
 
 
+class UserContext(CoReasonBaseModel):
+    """Immutable context about the user associated with a session."""
+
+    model_config = ConfigDict(frozen=True)
+
+    user_id: str = Field(..., description="The stable ID of the user")
+    email: Optional[str] = Field(None, description="User email address")
+    tier: str = Field(..., description="User tier (e.g., free, pro)")
+    locale: str = Field(..., description="User locale (e.g., en-US)")
+
+
+class TraceContext(CoReasonBaseModel):
+    """Immutable distributed tracing context."""
+
+    model_config = ConfigDict(frozen=True)
+
+    trace_id: UUID = Field(..., description="Global distributed trace ID")
+    span_id: UUID = Field(..., description="Current span ID")
+    parent_id: Optional[UUID] = Field(None, description="Parent span ID")
+
+
+class SessionContext(CoReasonBaseModel):
+    """Immutable context accompanying a session request."""
+
+    model_config = ConfigDict(frozen=True)
+
+    session_id: UUID = Field(..., description="Unique session identifier")
+    agent_id: UUID = Field(..., description="The specific agent instance being invoked")
+    user: UserContext = Field(..., description="User context")
+    trace: TraceContext = Field(..., description="Tracing context")
+    permissions: List[str] = Field(..., description="Scopes granted for this specific run")
+    created_at: datetime = Field(..., description="When the session context was created")
+
+
 class LineageMetadata(CoReasonBaseModel):
     """Metadata tracking the Chain of Custody for this interaction."""
 
@@ -57,6 +91,7 @@ class SessionState(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     session_id: UUID = Field(..., description="Global identifier for the conversation thread")
+    context: SessionContext = Field(..., description="Immutable context for the session")
     processor: Identity = Field(..., description="The agent/graph handling this session")
     user: Optional[Identity] = Field(None, description="The user participating in the session")
     created_at: datetime = Field(..., description="When the session was created")

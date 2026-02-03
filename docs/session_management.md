@@ -56,25 +56,48 @@ interaction = Interaction(
 Key features:
 
 *   **Immutable Updates:** State changes via functional updates (e.g., `add_interaction` returns a *new* instance), preventing side effects.
+*   **Session Context:** A strictly defined, immutable `SessionContext` object that carries user identity, distributed tracing info, and permissions. See [Session Context](session_context.md) for details.
 *   **Context Variables:** A "scratchpad" dictionary (`context_variables`) for long-term memory that persists across turns, separate from the message history.
-*   **Identification:** Strictly typed UUIDs for sessions and `Identity` objects for processor/user (carrying both ID and display name).
+*   **Identification:** Strictly typed `Identity` objects for processor/user (carrying both ID and display name).
 
 ```python
 from uuid import uuid4
 from datetime import datetime, timezone
-from coreason_manifest.definitions.session import SessionState
+from coreason_manifest.definitions.session import (
+    SessionState, SessionContext, UserContext, TraceContext
+)
 from coreason_manifest.definitions.identity import Identity
 
-# 1. Create a new session
-session = SessionState(
+# 1. Create the immutable context
+context = SessionContext(
     session_id=uuid4(),
+    agent_id=uuid4(),
+    user=UserContext(
+        user_id="user-123",
+        email="alice@example.com",
+        tier="pro",
+        locale="en-US"
+    ),
+    trace=TraceContext(
+        trace_id=uuid4(),
+        span_id=uuid4(),
+        parent_id=None
+    ),
+    permissions=["search:read"],
+    created_at=datetime.now(timezone.utc)
+)
+
+# 2. Create a new session with context
+session = SessionState(
+    session_id=context.session_id,
+    context=context,
     processor=Identity(id="agent-v1", name="Support Agent", role="assistant"),
     user=Identity(id="user-123", name="Alice Smith", role="user"),
     created_at=datetime.now(timezone.utc),
     last_updated_at=datetime.now(timezone.utc),
 )
 
-# 2. Add an interaction (returns a NEW session object)
+# 3. Add an interaction (returns a NEW session object)
 new_session = session.add_interaction(interaction)
 
 assert len(session.history) == 0      # Original is unchanged
@@ -88,6 +111,7 @@ By formalizing `SessionState` separate from the raw Agent logic, we achieve:
 1.  **Stateless Runtime:** The execution engine doesn't need to hold state in memory between turns. It just needs the `SessionState` object.
 2.  **Portability:** Sessions can be moved between different workers or regions easily.
 3.  **Auditability:** The history of `Interaction`s provides a complete, immutable audit trail of the conversation.
+4.  **Security:** Immutable `SessionContext` ensures that critical execution parameters (like permissions and user identity) cannot be tampered with during the session lifecycle.
 
 ## Active Memory Interface
 
