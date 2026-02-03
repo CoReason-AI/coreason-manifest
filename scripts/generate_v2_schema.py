@@ -7,7 +7,8 @@ sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 from coreason_manifest.v2.spec.definitions import ManifestV2
 
-def generate_schema():
+
+def generate_schema() -> None:
     output_path = Path("src/coreason_manifest/schemas/coreason-v2.schema.json")
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -19,6 +20,7 @@ def generate_schema():
         json.dump(schema, f, indent=2)
 
     print(f"Schema generated at {output_path}")
+
 
 if __name__ == "__main__":
     generate_schema()

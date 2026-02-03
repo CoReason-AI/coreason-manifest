@@ -1,13 +1,15 @@
-import yaml
 import sys
 from pathlib import Path
+
+import yaml
 
 # Ensure src is in python path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 from coreason_manifest.v2.spec.definitions import ManifestV2
 
-def validate_sample():
+
+def validate_sample() -> None:
     yaml_path = Path("sample_v2.yaml")
 
     with open(yaml_path, "r") as f:
@@ -20,6 +22,7 @@ def validate_sample():
     except Exception as e:
         print(f"Validation Failed: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     validate_sample()
