@@ -8,8 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from typing import Optional
 
 from coreason_manifest.definitions.interfaces import (
     IAgentRuntime,
@@ -47,9 +45,7 @@ class MockResponseHandler:
 
 
 class MockAgentRuntime:
-    async def assist(
-        self, session: Session, request: AgentRequest, handler: IResponseHandler
-    ) -> None:
+    async def assist(self, session: Session, request: AgentRequest, handler: IResponseHandler) -> None:
         pass
 
 

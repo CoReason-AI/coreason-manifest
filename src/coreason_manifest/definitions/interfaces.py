@@ -18,9 +18,7 @@ from coreason_manifest.definitions.events import CloudEvent, GraphEvent
 from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.presentation import (
     CitationBlock,
-    MediaCarousel,
     PresentationEvent,
-    ProgressUpdate,
 )
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import Interaction
@@ -279,9 +277,7 @@ class IAgentRuntime(Protocol):
     """Defines the strict signature an agent developer must implement."""
 
     @abstractmethod
-    def assist(
-        self, session: Session, request: AgentRequest, handler: IResponseHandler
-    ) -> Awaitable[None]:
+    def assist(self, session: Session, request: AgentRequest, handler: IResponseHandler) -> Awaitable[None]:
         """Process a request and use the response handler to emit events.
 
         Args:
