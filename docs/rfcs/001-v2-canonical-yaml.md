@@ -39,6 +39,13 @@ definitions:
     name: "Senior Researcher"
     model: "gpt-4"
 
+  # External Tool Definitions (RFC 003)
+  calculator:
+    id: "tool-calc"
+    name: "Calculator"
+    uri: "https://api.calc.com/v1"
+    risk_level: "safe"
+
 workflow:
   start: "step-1"
   steps:
