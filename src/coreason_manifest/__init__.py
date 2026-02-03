@@ -61,6 +61,11 @@ from .definitions.topology import (
 from .dsl import load_from_yaml
 from .governance import ComplianceReport, GovernanceConfig, check_compliance
 from .recipes import RecipeManifest
+from .definitions.resources import (
+    RemoteServiceResource,
+    ResourceRiskLevel,
+    SidecarResource,
+)
 
 __all__ = [
     "AdapterHints",
@@ -116,4 +121,7 @@ __all__ = [
     "SwarmPattern",
     "HierarchicalTeamPattern",
     "PatternDefinition",
+    "ResourceRiskLevel",
+    "SidecarResource",
+    "RemoteServiceResource",
 ]

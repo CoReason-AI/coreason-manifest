@@ -35,9 +35,10 @@ from pydantic import (
 )
 from typing_extensions import Annotated
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.base import CoReasonBaseModel, StrictUri
 from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.evaluation import EvaluationProfile
+from coreason_manifest.definitions.resources import RemoteServiceResource, SidecarResource
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
 
 # SemVer Regex pattern (simplified for standard SemVer)
@@ -75,13 +76,6 @@ ImmutableDict = Annotated[
     Mapping[str, Any],
     AfterValidator(lambda x: MappingProxyType(x)),
     PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
-]
-
-
-# Strict URI type that serializes to string
-StrictUri = Annotated[
-    AnyUrl,
-    PlainSerializer(lambda x: str(x), return_type=str),
 ]
 
 
@@ -316,14 +310,23 @@ class AgentDependencies(CoReasonBaseModel):
     """External dependencies for the Agent.
 
     Attributes:
-        tools: List of MCP tool requirements.
+        tools: List of MCP tool requirements. (Deprecated)
+        sidecars: List of Sidecar containers.
+        remote_services: List of Remote API/MCP services.
         libraries: List of Python packages required (if code execution is allowed).
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     tools: List[Union[ToolRequirement, InlineToolDefinition]] = Field(
-        default_factory=list, description="List of MCP tool requirements."
+        default_factory=list,
+        description="List of MCP tool requirements. (Deprecated: Use sidecars/remote_services instead)",
+    )
+    sidecars: List[SidecarResource] = Field(
+        default_factory=list, description="List of Sidecar containers."
+    )
+    remote_services: List[RemoteServiceResource] = Field(
+        default_factory=list, description="List of Remote API/MCP services."
     )
     libraries: Tuple[str, ...] = Field(
         default_factory=tuple, description="List of Python packages required (if code execution is allowed)."
