@@ -57,18 +57,19 @@ Key features:
 
 *   **Immutable Updates:** State changes via functional updates (e.g., `add_interaction` returns a *new* instance), preventing side effects.
 *   **Context Variables:** A "scratchpad" dictionary (`context_variables`) for long-term memory that persists across turns, separate from the message history.
-*   **Identification:** Strictly typed UUIDs for sessions and strings for processor/user IDs.
+*   **Identification:** Strictly typed UUIDs for sessions and `Identity` objects for processor/user (carrying both ID and display name).
 
 ```python
 from uuid import uuid4
 from datetime import datetime, timezone
 from coreason_manifest.definitions.session import SessionState
+from coreason_manifest.definitions.identity import Identity
 
 # 1. Create a new session
 session = SessionState(
     session_id=uuid4(),
-    processor_id="agent-v1",
-    user_id="user-123",
+    processor=Identity(id="agent-v1", name="Support Agent", role="assistant"),
+    user=Identity(id="user-123", name="Alice Smith", role="user"),
     created_at=datetime.now(timezone.utc),
     last_updated_at=datetime.now(timezone.utc),
 )

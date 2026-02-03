@@ -15,6 +15,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.definitions.events import GraphEventNodeInit, NodeInit
+from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.session import Interaction, SessionState
 
 
@@ -56,17 +57,22 @@ def test_session_state_creation() -> None:
     session_id = uuid4()
     now = datetime.now(timezone.utc)
 
+    processor = Identity(id="agent-1", name="Agent 1", role="assistant")
+    user = Identity(id="user-1", name="User 1", role="user")
+
     session = SessionState(
         session_id=session_id,
-        processor_id="agent-1",
-        user_id="user-1",
+        processor=processor,
+        user=user,
         created_at=now,
         last_updated_at=now,
     )
 
     assert session.session_id == session_id
-    assert session.processor_id == "agent-1"
-    assert session.user_id == "user-1"
+    assert session.processor == processor
+    assert session.processor.id == "agent-1"
+    assert session.user == user
+    assert session.user.id == "user-1"
     assert session.created_at == now
     assert session.last_updated_at == now
     assert session.history == []
@@ -78,25 +84,27 @@ def test_session_state_immutability() -> None:
     session_id = uuid4()
     now = datetime.now(timezone.utc)
 
+    processor = Identity(id="agent-1", name="Agent 1", role="assistant")
+
     session = SessionState(
         session_id=session_id,
-        processor_id="agent-1",
+        processor=processor,
         created_at=now,
         last_updated_at=now,
     )
 
     with pytest.raises(ValidationError):  # Pydantic v2 raises ValidationError or TypeError depending on config
-        session.processor_id = "agent-2"  # type: ignore
+        session.processor = Identity(id="agent-2", name="Agent 2")  # type: ignore[misc]
 
     # Note: session.history is a list, so append() works at runtime even if frozen=True.
     # frozen=True only prevents field reassignment.
     # To test frozen properly, we check field reassignment.
     with pytest.raises(ValidationError):
-        session.history = []  # type: ignore
+        session.history = []  # type: ignore[misc]
 
     # Better test for frozen:
     with pytest.raises(ValidationError):
-        session.user_id = "new-user"  # type: ignore
+        session.user = Identity.anonymous()  # type: ignore[misc]
 
 
 def test_add_interaction() -> None:
@@ -104,9 +112,11 @@ def test_add_interaction() -> None:
     session_id = uuid4()
     now = datetime.now(timezone.utc)
 
+    processor = Identity(id="agent-1", name="Agent 1", role="assistant")
+
     session = SessionState(
         session_id=session_id,
-        processor_id="agent-1",
+        processor=processor,
         created_at=now,
         last_updated_at=now,
     )
@@ -127,7 +137,7 @@ def test_add_interaction() -> None:
 
     # Other fields should be preserved
     assert new_session.session_id == session.session_id
-    assert new_session.processor_id == session.processor_id
+    assert new_session.processor == session.processor
 
 
 def test_serialization() -> None:

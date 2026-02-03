@@ -16,6 +16,7 @@ from pydantic import ConfigDict, Field
 
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.events import GraphEvent
+from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.definitions.message import MultiModalInput
 
 
@@ -56,8 +57,8 @@ class SessionState(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     session_id: UUID = Field(..., description="Global identifier for the conversation thread")
-    processor_id: str = Field(..., description="ID of the agent/graph handling this session")
-    user_id: Optional[str] = Field(None, description="The user identifying string")
+    processor: Identity = Field(..., description="The agent/graph handling this session")
+    user: Optional[Identity] = Field(None, description="The user participating in the session")
     created_at: datetime = Field(..., description="When the session was created")
     last_updated_at: datetime = Field(..., description="When the session was last updated")
     history: List[Interaction] = Field(default_factory=list, description="Chronological list of interactions")
