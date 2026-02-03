@@ -24,8 +24,8 @@ from coreason_manifest.definitions.presentation import StreamOpCode, StreamPacke
 from coreason_manifest.definitions.request import AgentRequest
 from coreason_manifest.definitions.session import SessionContext
 
-
 # --- Mock Implementations ---
+
 
 class PIIFilter:
     async def intercept_request(self, context: SessionContext, request: AgentRequest) -> AgentRequest:
@@ -45,11 +45,7 @@ class FailingInterceptor:
 class ReplacementInterceptor:
     async def intercept_request(self, context: SessionContext, request: AgentRequest) -> AgentRequest:
         # Return a completely new request object
-        return AgentRequest(
-            session_id=request.session_id,
-            payload={"replaced": True},
-            metadata=request.metadata
-        )
+        return AgentRequest(session_id=request.session_id, payload={"replaced": True}, metadata=request.metadata)
 
 
 class StatefulInterceptor:
@@ -62,6 +58,7 @@ class StatefulInterceptor:
 
 
 # --- Basic Protocol Tests ---
+
 
 def test_interceptor_protocols() -> None:
     # Verify PIIFilter implements IRequestInterceptor
@@ -90,6 +87,7 @@ def test_interceptor_context_immutability() -> None:
 
 # --- Edge Case Tests ---
 
+
 @pytest.mark.asyncio
 async def test_interceptor_failure() -> None:
     """Test that an interceptor raising an exception propagates it."""
@@ -99,10 +97,10 @@ async def test_interceptor_failure() -> None:
     context = SessionContext(
         session_id=session_id,
         agent_id=uuid4(),
-        user={"user_id": "u1", "tier": "free", "locale": "en-US"},  # type: ignore
-        trace={"trace_id": uuid4(), "span_id": uuid4()},  # type: ignore
+        user={"user_id": "u1", "tier": "free", "locale": "en-US"},
+        trace={"trace_id": uuid4(), "span_id": uuid4()},
         permissions=[],
-        created_at=asyncio.get_event_loop().time()  # type: ignore
+        created_at=asyncio.get_event_loop().time(),
     )
     request = AgentRequest(session_id=session_id, payload={})
 
@@ -118,10 +116,10 @@ async def test_interceptor_replacement() -> None:
     context = SessionContext(
         session_id=session_id,
         agent_id=uuid4(),
-        user={"user_id": "u1", "tier": "free", "locale": "en-US"},  # type: ignore
-        trace={"trace_id": uuid4(), "span_id": uuid4()},  # type: ignore
+        user={"user_id": "u1", "tier": "free", "locale": "en-US"},
+        trace={"trace_id": uuid4(), "span_id": uuid4()},
         permissions=[],
-        created_at=asyncio.get_event_loop().time()  # type: ignore
+        created_at=asyncio.get_event_loop().time(),
     )
     request = AgentRequest(session_id=session_id, payload={"original": True})
 
@@ -131,6 +129,7 @@ async def test_interceptor_replacement() -> None:
 
 
 # --- Complex Scenario Tests ---
+
 
 @pytest.mark.asyncio
 async def test_chained_interceptors() -> None:
@@ -148,22 +147,22 @@ async def test_chained_interceptors() -> None:
                 session_id=request.session_id,
                 payload=new_payload,
                 metadata=request.metadata,
-                root_request_id=request.root_request_id
+                root_request_id=request.root_request_id,
             )
 
     chain: List[Union[IRequestInterceptor, AppendingInterceptor]] = [
         AppendingInterceptor("step1", "done"),
-        AppendingInterceptor("step2", "done")
+        AppendingInterceptor("step2", "done"),
     ]
 
     session_id = uuid4()
     context = SessionContext(
         session_id=session_id,
         agent_id=uuid4(),
-        user={"user_id": "u1", "tier": "free", "locale": "en-US"},  # type: ignore
-        trace={"trace_id": uuid4(), "span_id": uuid4()},  # type: ignore
+        user={"user_id": "u1", "tier": "free", "locale": "en-US"},
+        trace={"trace_id": uuid4(), "span_id": uuid4()},
         permissions=[],
-        created_at=asyncio.get_event_loop().time()  # type: ignore
+        created_at=asyncio.get_event_loop().time(),
     )
     request = AgentRequest(session_id=session_id, payload={})
 
@@ -181,7 +180,7 @@ async def test_async_concurrency() -> None:
     interceptor = StatefulInterceptor()
 
     packets = [
-        StreamPacket(stream_id=uuid4(), seq=i, op=StreamOpCode.DELTA, t=asyncio.get_event_loop().time(), p="test") # type: ignore
+        StreamPacket(stream_id=uuid4(), seq=i, op=StreamOpCode.DELTA, t=asyncio.get_event_loop().time(), p="test")
         for i in range(100)
     ]
 
