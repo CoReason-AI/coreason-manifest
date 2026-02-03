@@ -3,9 +3,11 @@ theme:
   name: material
 nav:
   - Home: index.md
+  - Core Definitions:
+    - Coreason Agent Manifest (CAM): coreason_agent_manifest.md
+    - Runtime Agent Definition: runtime_agent_definition.md
+    - Runtime Recipe Definition: runtime_recipe_definition.md
   - Requirements: requirements.md
   - Usage: usage.md
-  - Simplified DSL: simplified_dsl.md
   - Session Management: session_management.md
   - Observability: observability.md
-  - Recipes: recipes.md

@@ -9,9 +9,12 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 
 ## Overview
 
-`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It contains the canonical Pydantic definitions, schemas, and data structures for Agents, Workflows (Recipes), and Auditing.
+`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It contains the canonical definitions, schemas, and data structures for Agents, Workflows (Recipes), and Auditing.
 
-It provides the **"Blueprint"** that all other services (Builder, Engine, Simulator) rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
+It provides the **"Blueprint"** that all other services (Builder, Engine, Simulator) rely on. It consists of:
+
+1.  **Coreason Agent Manifest (CAM)**: A Human-Centric Canonical YAML format (V2) for authoring Agents and Recipes.
+2.  **Runtime Definitions**: Strict Pydantic models (`AgentDefinition`, `RecipeManifest`) optimized for machine execution.
 
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
@@ -21,7 +24,8 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 
 ## Features
 
-*   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
+*   **Coreason Agent Manifest (CAM):** The primary V2 YAML authoring format for Agents and Recipes.
+*   **Runtime Definitions:** Strict Pydantic models (`AgentDefinition`, `RecipeManifest`) for the execution engine.
 *   **Coreason Agent Protocol (CAP):** Standardized HTTP/SSE runtime contract for invoking agents and streaming results, strictly typed via `ServiceRequest` and `StreamPacket`.
 *   **Behavioral Protocols:** Standard `AgentInterface` and `LifecycleInterface` protocols for runtime interoperability.
 *   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
@@ -54,7 +58,24 @@ pip install coreason-manifest
 
 ## Usage
 
-This library is used to define and validate Agent configurations programmatically.
+This library is used to define and validate Agent configurations.
+
+### 1. Loading from V2 YAML (Recommended)
+
+```python
+from coreason_manifest.v2.io import load_from_yaml
+from coreason_manifest.v2.adapter import v2_to_recipe
+
+# Load a human-friendly V2 manifest
+v2_manifest = load_from_yaml("my_workflow.v2.yaml")
+
+# Compile to Runtime Recipe
+recipe = v2_to_recipe(v2_manifest)
+
+print(f"Loaded Recipe: {recipe.name}")
+```
+
+### 2. Programmatic Definition (Runtime Objects)
 
 ```python
 import uuid
@@ -74,57 +95,7 @@ from coreason_manifest.definitions.agent import (
     TraceLevel
 )
 
-# 1. Define Metadata
-metadata = AgentMetadata(
-    id=uuid.uuid4(),
-    version="1.0.0",  # Strict SemVer
-    name="Research Agent",
-    author="Coreason AI",
-    created_at=datetime.now(timezone.utc)
-)
-
-# 2. Instantiate Agent
-agent = AgentDefinition(
-    metadata=metadata,
-    capabilities=[
-        AgentCapability(
-            name="research",
-            type=CapabilityType.ATOMIC,
-            description="Deep research on a topic.",
-            inputs={"topic": {"type": "string"}},
-            outputs={"summary": {"type": "string"}}
-        )
-    ],
-    config=AgentRuntimeConfig(
-        model_config=ModelConfig(
-            model="gpt-4",
-            temperature=0.0,
-            system_prompt="You are a helpful assistant."
-        )
-    ),
-    dependencies=AgentDependencies(
-        tools=[
-            ToolRequirement(
-                uri="mcp://search-service/google",
-                hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",  # Valid SHA256
-                scopes=["search:read"],
-                risk_level=ToolRiskLevel.STANDARD
-            )
-        ],
-        libraries=("pandas==2.0.0",)
-    ),
-    policy=PolicyConfig(
-        budget_caps={"total_cost": 5.0}
-    ),
-    observability=ObservabilityConfig(
-        trace_level=TraceLevel.FULL,
-        retention_policy="90_days"
-    ),
-    # Mandatory Integrity Hash
-    integrity_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-)
-
-print(f"Agent '{agent.metadata.name}' definition created and validated.")
+# ... (See docs/usage.md for full example)
 ```
 
 For full details, see the [Usage Documentation](docs/usage.md).
@@ -154,6 +125,8 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 
 ## Documentation
 
+*   [Coreason Agent Manifest (CAM)](docs/coreason_agent_manifest.md): The V2 YAML Authoring Format.
+*   [Runtime Agent Definition](docs/runtime_agent_definition.md): The Machine-Optimized Agent Definition.
 *   [Builder SDK](docs/builder_sdk.md): Fluent Python API for defining Agents.
 *   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
 *   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
@@ -161,7 +134,3 @@ See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
 *   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
 *   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
 *   [Governance & Policy Enforcement](docs/governance_policy_enforcement.md): Validating agents against organizational rules.
-
-## Roadmap
-
-*   **RFC 001: Canonical YAML (v2)**: We have implemented the "Human-Centric" YAML format for manifests. See [docs/rfcs/001-v2-canonical-yaml.md](docs/rfcs/001-v2-canonical-yaml.md) for the specification and [docs/v2_bridge.md](docs/v2_bridge.md) for usage of the Loader Bridge.
