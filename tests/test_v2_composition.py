@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from coreason_manifest.v2.io import load_from_yaml
+from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
 from coreason_manifest.v2.spec.definitions import ManifestV2, ToolDefinition
 
 
@@ -178,3 +178,32 @@ def test_missing_file(manifest_dir: Path) -> None:
 
     with pytest.raises(FileNotFoundError, match="Referenced file not found"):
         load_from_yaml(main_path)
+
+def test_load_missing_file(manifest_dir: Path) -> None:
+    """Test that loading a non-existent file raises FileNotFoundError."""
+    missing_path = manifest_dir / "non_existent.yaml"
+    with pytest.raises(FileNotFoundError, match="Manifest file not found"):
+        load_from_yaml(missing_path)
+
+def test_dump_roundtrip(manifest_dir: Path) -> None:
+    """Test that we can dump a manifest back to YAML."""
+    manifest_data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Agent",
+        "metadata": {"name": "Dump Agent"},
+        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}},
+    }
+    path = manifest_dir / "dump.yaml"
+    with open(path, "w") as f:
+        yaml.dump(manifest_data, f)
+
+    manifest = load_from_yaml(path)
+    dumped_yaml = dump_to_yaml(manifest)
+
+    # Simple check that it's valid YAML and contains key fields
+    data = yaml.safe_load(dumped_yaml)
+    assert data["apiVersion"] == "coreason.ai/v2"
+    assert data["kind"] == "Agent"
+    assert data["metadata"]["name"] == "Dump Agent"
+    # Ensure order (check if apiVersion is first in string)
+    assert dumped_yaml.strip().startswith("apiVersion:")

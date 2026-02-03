@@ -15,7 +15,12 @@ from typing import Union
 
 
 class ReferenceResolver:
-    """Resolves file references with security constraints (Jail)."""
+    """
+    Resolves file references with security constraints (Jail).
+
+    This class enforces strict security boundaries to prevent Path Traversal attacks.
+    All resolved paths must be contained within the specified root directory.
+    """
 
     def __init__(self, root_dir: Union[str, Path]):
         """
