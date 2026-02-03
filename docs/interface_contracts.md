@@ -12,7 +12,7 @@ Invoke the agent to process a request.
 **Body:** `ServiceRequest` Schema
 * `request_id`: UUID (Unique ID for this HTTP transaction)
 * `context`: SessionContext (Strict separation of Who is asking from What they are asking)
-* `payload`: AgentRequest (The actual query, files, or multi-modal input)
+* `payload`: AgentRequest (The actual query, files, or multi-modal input; also includes optional `capabilities` for content negotiation)
 
 ### Responses
 
