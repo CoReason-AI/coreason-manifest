@@ -18,16 +18,39 @@ from coreason_manifest.definitions.events import CloudEvent, GraphEvent
 from coreason_manifest.definitions.request import AgentRequest
 
 
-class ResponseHandler(Protocol):
+class EventSink(Protocol):
+    """Protocol for emitting internal side-effects (telemetry, audit logs, traces)."""
+
+    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
+        """Emit a raw CloudEvent or GraphEvent."""
+        ...
+
+    def log(
+        self,
+        level: str,
+        message: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Awaitable[None]:
+        """Emit a standard log event."""
+        ...
+
+    def audit(
+        self,
+        actor: str,
+        action: str,
+        resource: str,
+        success: bool,
+    ) -> Awaitable[None]:
+        """Emit an immutable Audit Log entry."""
+        ...
+
+
+class ResponseHandler(EventSink, Protocol):
     """Protocol for handling agent responses, decoupling logic from event transport.
 
     This interface allows agents to emit events and presentation blocks without
     being tied to a specific transport mechanism (e.g., HTTP, WebSocket).
     """
-
-    def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> Awaitable[None]:
-        """Emit a raw CloudEvent or GraphEvent."""
-        ...
 
     def thought(self, content: str, status: str = "IN_PROGRESS") -> Awaitable[None]:
         """Emit a thinking block."""
