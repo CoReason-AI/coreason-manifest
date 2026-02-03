@@ -75,6 +75,8 @@ On the frontend, the stream allows the UI to route tokens to the correct compone
 *   **Event:** `ai.coreason.stream.chunk` (contains `stream_id`, `chunk`) -> **UI:** Append text to bubble with matching ID.
 *   **Event:** `ai.coreason.stream.end` (contains `stream_id`) -> **UI:** Mark bubble as complete (stop loading spinner).
 
+> **Note:** The actual wire format for these chunks is defined in the [SSE Wire Protocol Specification](./sse_wire_protocol.md). The `StreamPacket` wraps these logical events.
+
 ## Error Handling
 
 Separation of concerns is key:

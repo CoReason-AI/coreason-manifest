@@ -108,6 +108,8 @@ See [Presentation Schemas](./presentation_schemas.md) for detailed documentation
 - `chunk`: The string fragment generated.
 - `visual_cue`: "TEXT_BUBBLE".
 
+> **Note:** When using the new SSE Streaming Protocol, `NODE_STREAM` events are typically replaced by direct `DELTA` packets in the wire format. See [SSE Wire Protocol](./sse_wire_protocol.md).
+
 ### 4. `NODE_DONE`
 **When:** Execution completes successfully.
 **UI Behavior:** Mark node as complete (Green checkmark), stop animations.

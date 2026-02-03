@@ -56,39 +56,32 @@ The response format depends on the `delivery_mode`.
 *   **Content-Type:** `text/event-stream`
 *   **Body:** A stream of `ServerSentEvent` objects.
 
-Each event in the stream corresponds to a `ServerSentEvent` object, which wraps a standard `CloudEvent`.
+Each event in the stream corresponds to a `ServerSentEvent` object. The payload of these events now follows the **Strict Wire Format** defined in `src/coreason_manifest/definitions/presentation.py`.
 
-*   **Schema:** `src/coreason_manifest/definitions/service.py`
+*   **Schema:** `src/coreason_manifest/definitions/presentation.py` (`StreamPacket`)
+*   **Protocol Spec:** [SSE Wire Protocol Specification](./sse_wire_protocol.md)
 
-##### The `ServerSentEvent` Model
+##### The `StreamPacket` Model
 
-The `ServerSentEvent` model defines the strict structure of each chunk in the stream.
-
-**Content-Type Discriminators:** The payload within `data` (the CloudEvent) includes a `datacontenttype` field. Consumers should use this MIME type to determine how to parse or render the event (e.g., `application/vnd.coreason.stream+json` for token streams). See [Event Content-Type Discriminators](event_content_types.md) for details.
+The `StreamPacket` wraps every chunk of data, ensuring deterministic parsing for both text deltas and UI events.
 
 ```python
-class ServerSentEvent(CoReasonBaseModel):
-    event: str          # The event type (e.g., 'ai.coreason.node.started')
-    data: str           # The payload. MUST be a JSON string of the CloudEvent.
-    id: Optional[str]   # The unique ID of the event.
+class StreamPacket(CoReasonBaseModel):
+    stream_id: UUID
+    seq: int
+    op: StreamOpCode
+    t: datetime
+    p: Union[str, PresentationEvent, Dict[str, Any]]
 ```
-
-**Critical Requirement:** The `data` field MUST be a JSON **string**. This is an SSE protocol requirement. The content of this string is the serialized `CloudEvent`.
 
 ##### Example Stream
 
 ```
-event: ai.coreason.node.started
-id: evt-001
-data: {"specversion": "1.0", "type": "ai.coreason.node.started", "source": "urn:node:1", "datacontenttype": "application/json", "data": {"node_id": "1", "status": "RUNNING"}}
+data: {"stream_id": "...", "seq": 1, "op": "DELTA", "t": "...", "p": "Hello"}
 
-event: ai.coreason.node.stream
-id: evt-002
-data: {"specversion": "1.0", "type": "ai.coreason.node.stream", "source": "urn:node:1", "datacontenttype": "application/vnd.coreason.stream+json", "data": {"chunk": "Hello"}}
+data: {"stream_id": "...", "seq": 2, "op": "EVENT", "t": "...", "p": {"type": "CITATION_BLOCK", ...}}
 
-event: ai.coreason.node.completed
-id: evt-003
-data: {"specversion": "1.0", "type": "ai.coreason.node.completed", "source": "urn:node:1", "datacontenttype": "application/json", "data": {"output_summary": "Hello"}}
+data: {"stream_id": "...", "seq": 3, "op": "CLOSE", "t": "...", "p": "Done"}
 ```
 
 ## Service Contract & OpenAPI
