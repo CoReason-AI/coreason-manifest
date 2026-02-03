@@ -8,33 +8,64 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
-from typing import Dict
+from typing import List, Literal, Optional
 
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.common import CoReasonBaseModel
 
 
-class Protocol(str, Enum):
-    """The communication protocol used to serve the agent."""
+class SecretReference(CoReasonBaseModel):
+    """Reference to a required secret/environment variable.
 
-    HTTP_SSE = "http_sse"
-    WEBSOCKET = "websocket"
-    GRPC = "grpc"
-
-
-class DeploymentConfig(CoReasonBaseModel):
-    """Configuration for hosting the agent."""
+    Attributes:
+        key: The environment variable name.
+        description: Human-readable explanation of why this secret is needed.
+        required: Whether the secret is mandatory.
+        provider_hint: Optional hint for the secret provider.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    protocol: Protocol = Field(
-        default=Protocol.HTTP_SSE, description="The communication protocol used to serve the agent."
+    key: str = Field(..., description="The environment variable name, e.g., 'OPENAI_API_KEY'.")
+    description: str = Field(..., description="Human-readable explanation of why this secret is needed.")
+    required: bool = Field(default=True, description="Whether the secret is mandatory.")
+    provider_hint: Optional[str] = Field(
+        None, description="Optional hint for the secret provider, e.g., 'aws-secrets-manager'."
     )
-    port: int = Field(default=8000, description="The port to bind to.")
-    route_prefix: str = Field(default="/assist", description="URL prefix for the agent endpoints.")
-    scaling_min_instances: int = Field(default=0, description="Minimum number of replicas.")
-    scaling_max_instances: int = Field(default=1, description="Maximum number of replicas.")
-    timeout_seconds: int = Field(default=60, description="Request timeout.")
-    env_vars: Dict[str, str] = Field(default_factory=dict, description="Static environment variables.")
+
+
+class ResourceLimits(CoReasonBaseModel):
+    """Hardware constraints for the deployment.
+
+    Attributes:
+        cpu_cores: CPU cores limit.
+        memory_mb: RAM limit in Megabytes.
+        timeout_seconds: Execution time limit.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    cpu_cores: Optional[float] = Field(None, description="CPU cores limit, e.g., 0.5 or 2.0.")
+    memory_mb: Optional[int] = Field(None, description="RAM in Megabytes.")
+    timeout_seconds: Optional[int] = Field(60, description="Execution time limit. Default 60.")
+
+
+class DeploymentConfig(CoReasonBaseModel):
+    """Runtime deployment settings.
+
+    Attributes:
+        env_vars: List of required secrets/vars.
+        resources: Hardware constraints.
+        scaling_strategy: Strategy for scaling (serverless or dedicated).
+        concurrency_limit: Max simultaneous requests.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    env_vars: List[SecretReference] = Field(..., description="List of required secrets/vars.")
+    resources: Optional[ResourceLimits] = Field(None, description="Hardware constraints.")
+    scaling_strategy: Literal["serverless", "dedicated"] = Field(
+        default="serverless", description="Strategy for scaling."
+    )
+    concurrency_limit: Optional[int] = Field(None, description="Max simultaneous requests.")

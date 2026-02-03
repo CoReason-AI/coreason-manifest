@@ -11,113 +11,144 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
+import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.definitions import (
     AgentDefinition,
-    AgentRuntimeConfig,
     DeploymentConfig,
-    Protocol,
-)
-from coreason_manifest.definitions.agent import (
-    AgentCapability,
-    AgentDependencies,
-    AgentMetadata,
-    CapabilityType,
-    ModelConfig,
+    ResourceLimits,
+    SecretReference,
 )
 
 
-def test_deployment_defaults() -> None:
-    config = DeploymentConfig()
-    assert config.protocol == Protocol.HTTP_SSE
-    assert config.port == 8000
-    assert config.route_prefix == "/assist"
-    assert config.scaling_min_instances == 0
-    assert config.scaling_max_instances == 1
-    assert config.timeout_seconds == 60
-    assert config.env_vars == {}
-
-
-def test_deployment_custom_values() -> None:
+def test_deployment_serialization() -> None:
+    """Test serialization of a full DeploymentConfig."""
     config = DeploymentConfig(
-        protocol=Protocol.GRPC,
-        port=9090,
-        route_prefix="/api/v1/agent",
-        scaling_min_instances=2,
-        scaling_max_instances=10,
-        timeout_seconds=120,
-        env_vars={"KEY": "VALUE"},
-    )
-    assert config.protocol == Protocol.GRPC
-    assert config.port == 9090
-    assert config.route_prefix == "/api/v1/agent"
-    assert config.scaling_min_instances == 2
-    assert config.scaling_max_instances == 10
-    assert config.timeout_seconds == 120
-    assert config.env_vars == {"KEY": "VALUE"}
-
-
-def test_agent_definition_with_deployment() -> None:
-    agent = AgentDefinition(
-        metadata=AgentMetadata(
-            id=uuid4(),
-            version="1.0.0",
-            name="Test Agent",
-            author="Tester",
-            created_at=datetime.now(timezone.utc),
-        ),
-        capabilities=[
-            AgentCapability(
-                name="chat",
-                type=CapabilityType.ATOMIC,
-                description="Chat capability",
-                inputs={"type": "object"},
-                outputs={"type": "object"},
-            )
+        env_vars=[
+            SecretReference(key="OPENAI_API_KEY", description="LLM Key"),
+            SecretReference(key="DB_PASS", description="Database Password", required=False, provider_hint="vault"),
         ],
-        config=AgentRuntimeConfig(
-            llm_config=ModelConfig(
-                model="gpt-4",
-                temperature=0.7,
-                system_prompt="You are a helper.",
-            )
-        ),
-        dependencies=AgentDependencies(),
-        integrity_hash="a" * 64,
-        deployment=DeploymentConfig(port=8080),
+        resources=ResourceLimits(cpu_cores=2.0, memory_mb=2048, timeout_seconds=120),
+        scaling_strategy="dedicated",
+        concurrency_limit=50,
     )
 
+    dumped = config.dump()
+    assert dumped["scaling_strategy"] == "dedicated"
+    assert dumped["concurrency_limit"] == 50
+    assert len(dumped["env_vars"]) == 2
+    assert dumped["resources"]["cpu_cores"] == 2.0
+
+
+def test_agent_definition_parsing() -> None:
+    """Verify that AgentDefinition correctly parses the deployment field."""
+    agent_data = {
+        "metadata": {
+            "id": str(uuid4()),
+            "version": "1.0.0",
+            "name": "Test Agent",
+            "author": "Tester",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        },
+        "capabilities": [
+            {
+                "name": "chat",
+                "type": "atomic",
+                "description": "Chat capability",
+                "inputs": {"type": "object"},
+                "outputs": {"type": "object"},
+            }
+        ],
+        "config": {
+            "model_config": {
+                "model": "gpt-4",
+                "temperature": 0.7,
+                "system_prompt": "You are a helper.",
+            }
+        },
+        "dependencies": {},
+        "deployment": {
+            "env_vars": [{"key": "API_KEY", "description": "Key"}],
+            "resources": {"cpu_cores": 1.0, "memory_mb": 512},
+        },
+        "integrity_hash": "a" * 64,
+    }
+
+    agent = AgentDefinition.model_validate(agent_data)
     assert agent.deployment is not None
-    assert agent.deployment.port == 8080
-    assert agent.deployment.protocol == Protocol.HTTP_SSE
+    assert len(agent.deployment.env_vars) == 1
+    assert agent.deployment.env_vars[0].key == "API_KEY"
+    assert agent.deployment.resources is not None
+    assert agent.deployment.resources.cpu_cores == 1.0
 
 
-def test_agent_definition_without_deployment() -> None:
-    agent = AgentDefinition(
-        metadata=AgentMetadata(
-            id=uuid4(),
-            version="1.0.0",
-            name="Test Agent",
-            author="Tester",
-            created_at=datetime.now(timezone.utc),
-        ),
-        capabilities=[
-            AgentCapability(
-                name="chat",
-                type=CapabilityType.ATOMIC,
-                description="Chat capability",
-                inputs={"type": "object"},
-                outputs={"type": "object"},
-            )
-        ],
-        config=AgentRuntimeConfig(
-            llm_config=ModelConfig(
-                model="gpt-4",
-                temperature=0.7,
-                system_prompt="You are a helper.",
-            )
-        ),
-        dependencies=AgentDependencies(),
-        integrity_hash="a" * 64,
+def test_deployment_immutability() -> None:
+    """Verify immutability."""
+    config = DeploymentConfig(
+        env_vars=[SecretReference(key="KEY", description="Desc")],
+        resources=ResourceLimits(cpu_cores=1.0),
     )
 
-    assert agent.deployment is None
+    with pytest.raises(ValidationError):
+        config.scaling_strategy = "dedicated"  # type: ignore[misc]
+
+    # Ensure resources is not None for mypy before attempting assignment
+    assert config.resources is not None
+    with pytest.raises(ValidationError):
+        config.resources.cpu_cores = 2.0  # type: ignore[misc]
+
+
+def test_deployment_edge_cases() -> None:
+    """Test edge cases: empty lists, defaults, and None values."""
+    # 1. Empty env_vars
+    config = DeploymentConfig(env_vars=[])
+    assert config.env_vars == []
+    assert config.resources is None
+    assert config.scaling_strategy == "serverless"  # Default
+    assert config.concurrency_limit is None
+
+    # 2. Resource limits with mixed fields
+    limits = ResourceLimits(timeout_seconds=300)
+    assert limits.cpu_cores is None
+    assert limits.memory_mb is None
+    assert limits.timeout_seconds == 300
+
+    # 3. SecretReference defaults
+    secret = SecretReference(key="TEST_KEY", description="Test Description")
+    assert secret.required is True  # Default
+    assert secret.provider_hint is None
+
+
+def test_deployment_complex() -> None:
+    """Test complex scenarios: maximal nested configuration."""
+    config = DeploymentConfig(
+        env_vars=[
+            SecretReference(key="MANDATORY", description="Must have", required=True),
+            SecretReference(
+                key="OPTIONAL_VAULT", description="Maybe", required=False, provider_hint="aws-secrets-manager"
+            ),
+            SecretReference(key="LEGACY", description="Env var", provider_hint="env"),
+        ],
+        resources=ResourceLimits(
+            cpu_cores=4.5,
+            memory_mb=16384,
+            timeout_seconds=3600,
+        ),
+        scaling_strategy="dedicated",
+        concurrency_limit=1000,
+    )
+
+    # Serialize
+    json_str = config.to_json()
+    assert "MANDATORY" in json_str
+    assert "OPTIONAL_VAULT" in json_str
+    assert "dedicated" in json_str
+    assert "16384" in json_str
+
+    # Deserialize back
+    restored = DeploymentConfig.model_validate_json(json_str)
+    assert restored == config
+    assert len(restored.env_vars) == 3
+    assert restored.resources is not None
+    assert restored.resources.cpu_cores == 4.5
