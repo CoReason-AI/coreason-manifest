@@ -8,8 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any
-
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
