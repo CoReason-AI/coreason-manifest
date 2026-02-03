@@ -42,6 +42,12 @@ from .definitions.simulation import (
     SimulationTrace,
     StepType,
 )
+from .definitions.patterns import (
+    HierarchicalTeamPattern,
+    PatternDefinition,
+    PatternType,
+    SwarmPattern,
+)
 from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
 from .definitions.topology import (
     AgentNode,
@@ -102,4 +108,8 @@ __all__ = [
     "ComplianceReport",
     "check_compliance",
     "load_from_yaml",
+    "PatternType",
+    "SwarmPattern",
+    "HierarchicalTeamPattern",
+    "PatternDefinition",
 ]
