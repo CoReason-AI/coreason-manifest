@@ -231,6 +231,13 @@ The v2 implementation is located in `src/coreason_manifest/v2/`. It does not mod
 *   **v1** remains the stable runtime format for now.
 *   **v2** is introduced as an RFC and experimental interface.
 
+### Implementation Status
+**Status: Implemented (Loader Bridge)**
+
+As of `coreason-manifest` v0.13.0 (estimated), the **V2 Loader Bridge** is available. This bridge allows V2 YAML files to be loaded and compiled into V1 `RecipeManifest` objects at runtime.
+
+The implementation differs slightly from the initial RFC proposal in that it explicitly depends on V1 definitions to perform the translation, acting as a true "Bridge" layer.
+
 ### Upgrade Path
 We will provide a CLI utility (`coreason upgrade`) that:
 1.  Parses a v1 `AgentDefinition` or `RecipeManifest`.
