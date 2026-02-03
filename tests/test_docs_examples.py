@@ -2,12 +2,14 @@ from pathlib import Path
 
 from coreason_manifest import Manifest, load
 from coreason_manifest.v2.adapter import v2_to_recipe
-from coreason_manifest.v2.spec.definitions import (
-    AgentStep,
+from coreason_manifest.v2.spec.contracts import (
     InterfaceDefinition,
-    ManifestMetadata,
     PolicyDefinition,
     StateDefinition,
+)
+from coreason_manifest.v2.spec.definitions import (
+    AgentStep,
+    ManifestMetadata,
     Workflow,
 )
 
