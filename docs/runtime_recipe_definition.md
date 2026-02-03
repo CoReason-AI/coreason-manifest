@@ -2,6 +2,8 @@
 
 The **Runtime Recipe Definition** (often referred to as the V1 Recipe Manifest) is the strict, machine-optimized Pydantic model used by the Coreason Engine (MACO) to execute workflows. Unlike the [Coreason Agent Manifest (CAM V2)](coreason_agent_manifest.md), which is designed for human authoring, this format is designed for runtime validation, integrity, and performance.
 
+> **Note:** V1 components have been moved to the `coreason_manifest.v1` namespace. This document describes the internal runtime format which is typically generated from V2 manifests via the V2 Bridge.
+
 The root of the specification is the `RecipeManifest` class. It serves as the shared contract between the **Engine** (runtime) and the **Builder** (visual editor).
 
 ## Root Object (`RecipeManifest`)
@@ -171,7 +173,8 @@ The schema enforces strict validation to prevent runtime errors. Common edge cas
 Here is how to programmatically define a Recipe using the Runtime SDK:
 
 ```python
-from coreason_manifest import (
+# Import V1 components from the v1 namespace
+from coreason_manifest.v1 import (
     RecipeManifest, GraphTopology, AgentNode, HumanNode, Edge,
     ConditionalEdge, StateDefinition
 )

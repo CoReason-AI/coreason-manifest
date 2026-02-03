@@ -8,19 +8,15 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import coreason_manifest
-from coreason_manifest.definitions.agent import AgentDefinition, AgentStatus
+import coreason_manifest.v1 as v1_manifest
+from coreason_manifest.definitions.agent import AgentDefinition
 
 
-def test_top_level_exports() -> None:
-    """Verify that key components are exported from the top-level package."""
-    # Verify AgentStatus export
-    assert hasattr(coreason_manifest, "AgentStatus")
-    assert coreason_manifest.AgentStatus is AgentStatus
-
+def test_v1_exports() -> None:
+    """Verify that key components are exported from the v1 package."""
     # Verify AgentDefinition export
-    assert hasattr(coreason_manifest, "AgentDefinition")
-    assert coreason_manifest.AgentDefinition is AgentDefinition
+    assert hasattr(v1_manifest, "AgentDefinition")
+    assert v1_manifest.AgentDefinition is AgentDefinition
 
-    # Check __all__ contains AgentStatus
-    assert "AgentStatus" in coreason_manifest.__all__
+    # Check __all__ contains AgentDefinition
+    assert "AgentDefinition" in v1_manifest.__all__

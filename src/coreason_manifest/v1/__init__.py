@@ -8,8 +8,38 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from coreason_manifest.definitions.agent import AgentDefinition
 from coreason_manifest.definitions.agent import AgentDefinition as Agent
-from coreason_manifest.definitions.topology import GraphTopology as Topology
+from coreason_manifest.definitions.topology import (
+    AgentNode,
+    ConditionalEdge,
+    Edge,
+    GraphTopology,
+    HumanNode,
+    LogicNode,
+    MapNode,
+    RecipeNode,
+    StateDefinition,
+)
+from coreason_manifest.definitions.topology import (
+    GraphTopology as Topology,
+)
+from coreason_manifest.recipes import RecipeManifest
 from coreason_manifest.recipes import RecipeManifest as Recipe
 
-__all__ = ["Agent", "Recipe", "Topology"]
+__all__ = [
+    "Agent",
+    "AgentDefinition",
+    "AgentNode",
+    "ConditionalEdge",
+    "Edge",
+    "GraphTopology",
+    "HumanNode",
+    "LogicNode",
+    "MapNode",
+    "Recipe",
+    "RecipeManifest",
+    "RecipeNode",
+    "StateDefinition",
+    "Topology",
+]

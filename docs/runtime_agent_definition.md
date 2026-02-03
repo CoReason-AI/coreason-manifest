@@ -2,7 +2,9 @@
 
 The **Runtime Agent Definition** (often referred to as the V1 Manifest) is the strict, machine-optimized Pydantic model used by the Coreason Engine to execute agents. Unlike the [Coreason Agent Manifest (CAM V2)](coreason_agent_manifest.md), which is designed for human authoring, this format is designed for runtime validation, integrity, and performance.
 
-The root of the runtime specification is the `AgentDefinition` class (located in `src/coreason_manifest/definitions/agent.py`). The **V2 Loader Bridge** automatically converts the V2 YAML format into this runtime object.
+> **Note:** V1 components have been moved to the `coreason_manifest.v1` namespace. This document describes the internal runtime format which is typically generated from V2 manifests via the V2 Bridge.
+
+The root of the runtime specification is the `AgentDefinition` class. The **V2 Loader Bridge** automatically converts the V2 YAML format into this runtime object.
 
 ## Core Components
 
@@ -150,8 +152,9 @@ Here is how to programmatically define an Agent using the Runtime SDK:
 ```python
 import uuid
 from datetime import datetime, timezone
+# Import from V1 namespace
+from coreason_manifest.v1 import AgentDefinition
 from coreason_manifest.definitions.agent import (
-    AgentDefinition,
     AgentMetadata,
     AgentCapability,
     CapabilityType,
