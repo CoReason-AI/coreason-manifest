@@ -34,6 +34,10 @@ metadata:
     x: 100
     y: 200
     icon: "test-icon"
+definitions:
+  coreason.agent.v1:
+    type: "agent"
+    id: "coreason.agent.v1"
 workflow:
   start: "step1"
   steps:
@@ -199,9 +203,10 @@ def test_dangling_pointer() -> None:
             start="step1",
             steps={"step1": AgentStep(id="step1", agent="a", next="step_non_existent")},
         ),
+        definitions={"a": {}},
     )
 
-    with pytest.raises(ValueError, match="references non-existent step"):
+    with pytest.raises(ValueError, match="points to non-existent next step"):
         compile_to_topology(manifest)
 
 
