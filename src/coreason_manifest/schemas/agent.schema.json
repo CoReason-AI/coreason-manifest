@@ -377,6 +377,18 @@
           "description": "The global system prompt/instruction for the agent.",
           "title": "System Prompt"
         },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MemoryConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Memory management policy."
+        },
         "adapter_hints": {
           "anyOf": [
             {
@@ -885,6 +897,48 @@
       ],
       "title": "MapNode",
       "type": "object"
+    },
+    "MemoryConfig": {
+      "description": "Configuration for memory management.\n\nAttributes:\n    strategy: The strategy to use for memory management.\n    limit: The limit for the strategy (e.g., number of turns for SLIDING_WINDOW).\n    summary_prompt: Instructions for the summarizer (if strategy is SUMMARY).",
+      "properties": {
+        "strategy": {
+          "$ref": "#/$defs/MemoryStrategy",
+          "default": "sliding_window",
+          "description": "The strategy to use for memory management."
+        },
+        "limit": {
+          "default": 20,
+          "description": "The limit for the strategy (e.g., number of turns).",
+          "title": "Limit",
+          "type": "integer"
+        },
+        "summary_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Instructions for the summarizer (e.g., 'Focus on user preferences').",
+          "title": "Summary Prompt"
+        }
+      },
+      "title": "MemoryConfig",
+      "type": "object"
+    },
+    "MemoryStrategy": {
+      "description": "Strategy for memory management.",
+      "enum": [
+        "sliding_window",
+        "token_buffer",
+        "summary",
+        "vector_store"
+      ],
+      "title": "MemoryStrategy",
+      "type": "string"
     },
     "ModelConfig": {
       "additionalProperties": false,
