@@ -15,3 +15,4 @@ This is the documentation for the coreason_manifest project.
 *   [Identity Model](identity_model.md): The canonical representation of actors (`Identity`) within the ecosystem.
 *   [Evaluation-Ready Metadata](evaluation.md): How to define test contracts and success criteria within your agents.
 *   [Observability](observability.md): Details on tracing, logging, and metrics.
+*   [Interoperability](interoperability.md): Using "Adapter Hints" to translate agents to frameworks like LangGraph or AutoGen.

@@ -1,5 +1,33 @@
 {
   "$defs": {
+    "AdapterHints": {
+      "additionalProperties": false,
+      "description": "Hints for translating the agent to external frameworks.\n\nAttributes:\n    framework: The target framework (e.g., \"langgraph\", \"autogen\").\n    adapter_type: The specific class or node type in that framework.\n    settings: Framework-specific configuration parameters.",
+      "properties": {
+        "framework": {
+          "description": "The target framework (e.g., 'langgraph', 'autogen').",
+          "title": "Framework",
+          "type": "string"
+        },
+        "adapter_type": {
+          "description": "The specific class or node type in that framework.",
+          "title": "Adapter Type",
+          "type": "string"
+        },
+        "settings": {
+          "additionalProperties": true,
+          "description": "Framework-specific configuration parameters.",
+          "title": "Settings",
+          "type": "object"
+        }
+      },
+      "required": [
+        "framework",
+        "adapter_type"
+      ],
+      "title": "AdapterHints",
+      "type": "object"
+    },
     "AgentCapability": {
       "additionalProperties": false,
       "description": "Defines a specific mode of interaction for the agent.\n\nAttributes:\n    name: Unique name for this capability.\n    type: Interaction mode.\n    description: What this mode does.\n    inputs: Typed arguments the agent accepts (JSON Schema).\n    outputs: Typed structure of the result.\n    events: List of intermediate events this agent produces during execution.\n    injected_params: List of parameters injected by the system.\n    delivery_mode: The mechanism used to deliver the response.",
@@ -246,7 +274,7 @@
     },
     "AgentRuntimeConfig": {
       "additionalProperties": false,
-      "description": "Configuration of the Agent execution.\n\nAttributes:\n    nodes: A collection of execution units (Agents, Tools, Logic).\n    edges: Directed connections defining control flow.\n    entry_point: The ID of the starting node.\n    llm_config: Specific LLM parameters.",
+      "description": "Configuration of the Agent execution.\n\nAttributes:\n    nodes: A collection of execution units (Agents, Tools, Logic).\n    edges: Directed connections defining control flow.\n    entry_point: The ID of the starting node.\n    llm_config: Specific LLM parameters.\n    adapter_hints: Optional list of adapter hints for interoperability.",
       "properties": {
         "nodes": {
           "description": "A collection of execution units.",
@@ -320,6 +348,22 @@
           "default": null,
           "description": "The global system prompt/instruction for the agent.",
           "title": "System Prompt"
+        },
+        "adapter_hints": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/AdapterHints"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional list of adapter hints for interoperability.",
+          "title": "Adapter Hints"
         }
       },
       "required": [

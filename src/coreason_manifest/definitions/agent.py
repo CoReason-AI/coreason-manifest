@@ -201,6 +201,22 @@ class ModelConfig(CoReasonBaseModel):
     persona: Optional[Persona] = Field(None, description="The full persona definition (name, description, directives).")
 
 
+class AdapterHints(CoReasonBaseModel):
+    """Hints for translating the agent to external frameworks.
+
+    Attributes:
+        framework: The target framework (e.g., "langgraph", "autogen").
+        adapter_type: The specific class or node type in that framework.
+        settings: Framework-specific configuration parameters.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    framework: str = Field(..., description="The target framework (e.g., 'langgraph', 'autogen').")
+    adapter_type: str = Field(..., description="The specific class or node type in that framework.")
+    settings: Dict[str, Any] = Field(default_factory=dict, description="Framework-specific configuration parameters.")
+
+
 class AgentRuntimeConfig(CoReasonBaseModel):
     """Configuration of the Agent execution.
 
@@ -209,6 +225,7 @@ class AgentRuntimeConfig(CoReasonBaseModel):
         edges: Directed connections defining control flow.
         entry_point: The ID of the starting node.
         llm_config: Specific LLM parameters.
+        adapter_hints: Optional list of adapter hints for interoperability.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -218,6 +235,9 @@ class AgentRuntimeConfig(CoReasonBaseModel):
     entry_point: Optional[str] = Field(None, description="The ID of the starting node.")
     llm_config: ModelConfig = Field(..., alias="model_config", description="Specific LLM parameters.")
     system_prompt: Optional[str] = Field(None, description="The global system prompt/instruction for the agent.")
+    adapter_hints: Optional[List[AdapterHints]] = Field(
+        None, description="Optional list of adapter hints for interoperability."
+    )
 
     @field_validator("nodes")
     @classmethod
