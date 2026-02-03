@@ -52,7 +52,9 @@ from coreason_manifest.definitions.agent import (
     AgentDefinition,
     ToolRequirement,
     ToolRiskLevel,
-    TraceLevel
+    TraceLevel,
+    MemoryConfig,
+    MemoryStrategy
 )
 
 # 1. Define Metadata
@@ -93,7 +95,11 @@ agent = AgentDefinition(
         "nodes": nodes,
         "edges": edges,
         "entry_point": "start",
-        "model_config": {"model": "gpt-4", "temperature": 0.0}
+        "model_config": {"model": "gpt-4", "temperature": 0.0},
+        "memory": MemoryConfig(
+            strategy=MemoryStrategy.SLIDING_WINDOW,
+            limit=20
+        )
     },
     dependencies={
         "tools": [
