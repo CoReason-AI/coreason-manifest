@@ -1,9 +1,4 @@
-from typing import cast
-from uuid import UUID
-
-import pytest
 import yaml
-from pydantic import ValidationError
 
 from coreason_manifest.definitions.agent import AgentDefinition as V1AgentDefinition
 from coreason_manifest.definitions.agent import ToolRequirement
@@ -52,7 +47,7 @@ definitions:
     assert isinstance(v1_min, V1AgentDefinition)
     assert v1_min.config.llm_config.persona is not None
     assert v1_min.config.llm_config.persona.name == "MinRole"
-    assert v1_min.config.llm_config.model == "gpt-4" # Default
+    assert v1_min.config.llm_config.model == "gpt-4"  # Default
 
     # Check Maximal
     v1_max = recipe.parameters["max_agent"]
@@ -60,6 +55,7 @@ definitions:
     assert v1_max.config.llm_config.persona is not None
     assert v1_max.config.llm_config.model == "claude-3-opus"
     assert v1_max.config.system_prompt == "A long backstory."
+
 
 def test_recursive_composition() -> None:
     """Test 'Agent-as-a-Tool' scenario."""
@@ -101,6 +97,7 @@ definitions:
     assert isinstance(tool_req, ToolRequirement)
     # The adapter logic falls back to mcp://<id> for non-ToolDefinition references (like AgentDefinition)
     assert str(tool_req.uri) == "mcp://writer"
+
 
 def test_mixed_definitions_typo_tolerance() -> None:
     """Test mixing valid types and 'typo' types falling back to Generic."""
@@ -144,6 +141,7 @@ definitions:
     data = generic.model_dump()
     assert data["type"] == "unknown_type"
 
+
 def test_self_reference_circular_tools() -> None:
     """Test an agent referencing itself in tools (Circular)."""
     yaml_content = """
@@ -174,7 +172,5 @@ definitions:
     # Explicitly check/cast to ToolRequirement to satisfy strict mypy
     tool = v1_agent.dependencies.tools[0]
     assert isinstance(tool, ToolRequirement)
-    # Double safety cast for some mypy versions/configs
-    tool_req = cast(ToolRequirement, tool)
 
-    assert str(tool_req.uri) == "mcp://snake"
+    assert str(tool.uri) == "mcp://snake"
