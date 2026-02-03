@@ -149,7 +149,10 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
     # Force cast to Dict[str, Any] to avoid bidirectional type inference conflict
     # where mypy thinks it must be Dict[str, str] due to the assert below.
     raw_data = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def
-    tool_ref_data = cast(Dict[str, Any], raw_data)
+
+    # Explicitly annotated variable
+    tool_ref_data: Dict[str, Any]
+    tool_ref_data = raw_data  # type: ignore[assignment]
 
     assert tool_ref_data == {"$ref": "tool.yaml"}
 
