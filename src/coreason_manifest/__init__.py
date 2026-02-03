@@ -10,6 +10,7 @@
 
 from .definitions.agent import AdapterHints, AgentDefinition, AgentStatus, Persona
 from .definitions.audit import AuditLog
+from .definitions.contracts import InterfaceDefinition
 from .definitions.evaluation import EvaluationProfile, SuccessCriterion
 from .definitions.events import (
     ArtifactGenerated,
@@ -67,6 +68,7 @@ __all__ = [
     "AgentDefinition",
     "AgentStatus",
     "Persona",
+    "InterfaceDefinition",
     "EvaluationProfile",
     "SuccessCriterion",
     "Topology",
