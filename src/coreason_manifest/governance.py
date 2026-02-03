@@ -25,6 +25,7 @@ from coreason_manifest.definitions.agent import (
     ToolRiskLevel,
 )
 from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.definitions.topology import LogicNode
 
 
 class GovernanceConfig(CoReasonBaseModel):
@@ -34,6 +35,9 @@ class GovernanceConfig(CoReasonBaseModel):
         allowed_domains: List of allowed domains for tool URIs.
         max_risk_level: Maximum allowed risk level for tools.
         require_auth_for_critical_tools: Whether authentication is required for agents using CRITICAL tools.
+        allow_inline_tools: Whether to allow inline tool definitions (which lack risk scoring).
+        allow_custom_logic: Whether to allow LogicNodes and conditional Edges with custom code.
+        strict_url_validation: Enforce strict, normalized URL validation.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -51,6 +55,10 @@ class GovernanceConfig(CoReasonBaseModel):
     allow_inline_tools: bool = Field(
         True, description="Whether to allow inline tool definitions (which lack risk scoring)."
     )
+    allow_custom_logic: bool = Field(
+        False, description="Whether to allow LogicNodes and conditional Edges with custom code."
+    )
+    strict_url_validation: bool = Field(True, description="Enforce strict, normalized URL validation.")
 
 
 class ComplianceViolation(CoReasonBaseModel):
@@ -113,8 +121,42 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
     """
     violations: List[ComplianceViolation] = []
 
+    # Check Custom Logic (Nodes)
+    if not config.allow_custom_logic:
+        for node in agent.config.nodes:
+            if isinstance(node, LogicNode):
+                violations.append(
+                    ComplianceViolation(
+                        rule="custom_logic_restriction",
+                        message="LogicNodes containing custom code are not allowed by policy.",
+                        component_id=node.id,
+                    )
+                )
+
+    # Check Custom Logic (Edges)
+    if not config.allow_custom_logic:
+        for edge in agent.config.edges:
+            # Check if edge has a condition that is not None
+            if getattr(edge, "condition", None) is not None:
+                violations.append(
+                    ComplianceViolation(
+                        rule="custom_logic_restriction",
+                        message="Edges with custom conditional logic are not allowed by policy.",
+                        component_id=f"{edge.source_node_id}->{edge.target_node_id}",
+                    )
+                )
+
     # Check Tools
     has_critical_tool = False
+
+    # Normalize allowed domains if strict validation is on
+    allowed_domains_set = set()
+    if config.allowed_domains is not None:
+        if config.strict_url_validation:
+            # Lowercase and strip empty strings
+            allowed_domains_set = {d.lower() for d in config.allowed_domains if d}
+        else:
+            allowed_domains_set = set(config.allowed_domains)
 
     for tool in agent.dependencies.tools:
         if isinstance(tool, InlineToolDefinition):
@@ -138,7 +180,6 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
 
                     if not hostname:
                         # If allowed_domains is set, we require a hostname to validate against it.
-                        # Schemes like file:, mailto:, data: have no hostname and are blocked.
                         violations.append(
                             ComplianceViolation(
                                 rule="domain_restriction",
@@ -149,17 +190,37 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                                 component_id=str(tool.uri),
                             )
                         )
-                    elif hostname not in config.allowed_domains:
-                        violations.append(
-                            ComplianceViolation(
-                                rule="domain_restriction",
-                                message=(
-                                    f"Tool URI '{tool.uri}' (host: {hostname}) is not in allowed domains: "
-                                    f"{config.allowed_domains}"
-                                ),
-                                component_id=str(tool.uri),
-                            )
-                        )
+                    else:
+                        if config.strict_url_validation:
+                            # Normalize hostname: lower case, strip trailing dot
+                            hostname = hostname.lower()
+                            if hostname.endswith("."):
+                                hostname = hostname[:-1]
+
+                            if hostname not in allowed_domains_set:
+                                violations.append(
+                                    ComplianceViolation(
+                                        rule="domain_restriction",
+                                        message=(
+                                            f"Tool URI '{tool.uri}' (normalized host: {hostname}) is not in "
+                                            f"allowed domains: {config.allowed_domains}"
+                                        ),
+                                        component_id=str(tool.uri),
+                                    )
+                                )
+                        else:
+                            # Legacy loose check
+                            if hostname not in config.allowed_domains:
+                                violations.append(
+                                    ComplianceViolation(
+                                        rule="domain_restriction",
+                                        message=(
+                                            f"Tool URI '{tool.uri}' (host: {hostname}) is not in allowed domains: "
+                                            f"{config.allowed_domains}"
+                                        ),
+                                        component_id=str(tool.uri),
+                                    )
+                                )
                 except Exception as e:
                     violations.append(
                         ComplianceViolation(
