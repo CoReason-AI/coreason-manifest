@@ -2,6 +2,8 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from coreason_manifest.definitions.agent import StrictUri, ToolRiskLevel
+
 
 class DesignMetadata(BaseModel):
     """UI-specific metadata for the visual builder."""
@@ -15,6 +17,18 @@ class DesignMetadata(BaseModel):
     label: Optional[str] = Field(None, description="Display label.")
     zoom: Optional[float] = Field(None, description="Zoom level.")
     collapsed: bool = Field(False, description="Whether the node is collapsed in UI.")
+
+
+class ToolDefinition(BaseModel):
+    """Definition of an external tool."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+
+    id: str = Field(..., description="Unique ID for the tool within the manifest.")
+    name: str = Field(..., description="Name of the tool.")
+    uri: StrictUri = Field(..., description="The MCP endpoint URI.")
+    risk_level: ToolRiskLevel = Field(..., description="Risk level (safe, standard, critical).")
+    description: Optional[str] = Field(None, description="Description of the tool.")
 
 
 class BaseStep(BaseModel):
@@ -94,5 +108,7 @@ class ManifestV2(BaseModel):
     apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")
     kind: Literal["Recipe", "Agent"] = Field(..., description="Kind of the object.")
     metadata: ManifestMetadata = Field(..., description="Metadata including name and design info.")
-    definitions: Dict[str, Any] = Field(default_factory=dict, description="Reusable definitions.")
+    definitions: Dict[str, Union[ToolDefinition, Any]] = Field(
+        default_factory=dict, description="Reusable definitions."
+    )
     workflow: Workflow = Field(..., description="The main workflow topology.")
