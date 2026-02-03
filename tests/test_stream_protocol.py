@@ -1,10 +1,13 @@
-import pytest
 from typing import Any, Dict, Optional, Union
-from coreason_manifest.definitions.interfaces import ResponseHandler, StreamHandle
+
+import pytest
+
 from coreason_manifest.definitions.events import CloudEvent, GraphEvent
+from coreason_manifest.definitions.interfaces import StreamHandle
+
 
 class MockStreamHandle:
-    def __init__(self, stream_id: str):
+    def __init__(self, stream_id: str) -> None:
         self._stream_id = stream_id
         self._active = True
 
@@ -25,6 +28,7 @@ class MockStreamHandle:
 
     async def abort(self, reason: str) -> None:
         self._active = False
+
 
 class MockResponseHandler:
     async def emit(self, event: Union[CloudEvent[Any], GraphEvent]) -> None:
@@ -57,8 +61,9 @@ class MockResponseHandler:
     ) -> StreamHandle:
         return MockStreamHandle("test-stream-id")
 
+
 @pytest.mark.asyncio
-async def test_stream_handle_protocol():
+async def test_stream_handle_protocol() -> None:
     handle = MockStreamHandle("id")
     # Runtime checkable
     assert isinstance(handle, StreamHandle)
@@ -70,8 +75,9 @@ async def test_stream_handle_protocol():
     with pytest.raises(RuntimeError):
         await handle.write("chunk")
 
+
 @pytest.mark.asyncio
-async def test_response_handler_protocol():
+async def test_response_handler_protocol() -> None:
     handler = MockResponseHandler()
     # Not runtime checkable, so we just test method invocation
     stream = await handler.create_stream()
