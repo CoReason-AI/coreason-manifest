@@ -36,6 +36,7 @@ from .events import (
 from .identity import Identity
 from .interfaces import AgentInterface, LifecycleInterface
 from .memory import MemoryConfig, MemoryStrategy
+from .middleware import InterceptorContext, IRequestInterceptor, IResponseInterceptor
 from .presentation import (
     CitationBlock,
     CitationItem,
@@ -63,6 +64,9 @@ __all__ = [
     "LifecycleInterface",
     "MemoryConfig",
     "MemoryStrategy",
+    "InterceptorContext",
+    "IRequestInterceptor",
+    "IResponseInterceptor",
     "Persona",
     "DeploymentConfig",
     "ResourceLimits",
