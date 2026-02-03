@@ -51,15 +51,17 @@ def test_simple_import(manifest_dir: Path) -> None:
     assert "my_tool" in manifest.definitions
     tool = manifest.definitions["my_tool"]
 
-    # ManifestV2 definitions is Dict[str, Union[ToolDefinition, Any]]
+    # ManifestV2 definitions is Dict[str, Union[ToolDefinition, AgentDefinition, GenericDefinition]]
     # Pydantic might resolve it as a dict (Any) instead of ToolDefinition model.
     if isinstance(tool, ToolDefinition):
         assert tool.id == "weather-tool"
         assert tool.name == "Weather Tool"
     else:
-        assert isinstance(tool, dict)
-        assert tool["id"] == "weather-tool"
-        assert tool["name"] == "Weather Tool"
+        # Fallback to model_dump for generic comparison to satisfy mypy strictness
+        tool_dict = tool.model_dump() if hasattr(tool, "model_dump") else tool
+        assert isinstance(tool_dict, dict)
+        assert tool_dict["id"] == "weather-tool"
+        assert tool_dict["name"] == "Weather Tool"
 
 
 def test_security_jailbreak(manifest_dir: Path) -> None:
@@ -140,7 +142,10 @@ def test_recursive_disabled(manifest_dir: Path) -> None:
 
     # Since we are not resolving, the dict value for my_tool will be {"$ref": "tool.yaml"}
     manifest = load_from_yaml(main_path, recursive=False)
-    assert manifest.definitions["my_tool"] == {"$ref": "tool.yaml"}
+    # It will be parsed as GenericDefinition because it has no known 'type'
+    tool_def = manifest.definitions["my_tool"]
+    tool_dict = tool_def.model_dump() if hasattr(tool_def, "model_dump") else tool_def
+    assert tool_dict == {"$ref": "tool.yaml"}
 
 
 def test_invalid_yaml_content(manifest_dir: Path) -> None:

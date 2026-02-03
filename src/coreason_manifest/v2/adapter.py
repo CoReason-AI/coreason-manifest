@@ -18,7 +18,6 @@ from uuid import NAMESPACE_DNS, UUID, uuid4, uuid5
 from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.definitions.agent import (
     AgentCapability,
-    AgentDefinition as V1AgentDefinition,
     AgentDependencies,
     AgentMetadata,
     AgentRuntimeConfig,
@@ -29,10 +28,14 @@ from coreason_manifest.definitions.agent import (
     Persona,
     ToolRequirement,
 )
+from coreason_manifest.definitions.agent import (
+    AgentDefinition as V1AgentDefinition,
+)
 from coreason_manifest.definitions.topology import StateDefinition
 from coreason_manifest.recipes import PolicyConfig, RecipeInterface, RecipeManifest
 from coreason_manifest.v2.compiler import compile_to_topology
-from coreason_manifest.v2.spec.definitions import AgentDefinition as V2AgentDefinition, ManifestV2, ToolDefinition
+from coreason_manifest.v2.spec.definitions import AgentDefinition as V2AgentDefinition
+from coreason_manifest.v2.spec.definitions import ManifestV2, ToolDefinition
 
 
 def _convert_tool_ref(tool_ref: str, definitions: Dict[str, Any]) -> ToolRequirement:
@@ -62,9 +65,10 @@ def _convert_tool_ref(tool_ref: str, definitions: Dict[str, Any]) -> ToolRequire
     return ToolRequirement(
         uri=uri,
         hash=tool_hash,
-        scopes=[], # V2 doesn't have scopes yet
-        risk_level=risk_level
+        scopes=[],  # V2 doesn't have scopes yet
+        risk_level=risk_level,
     )
+
 
 def _convert_agent(agent_v2: V2AgentDefinition, definitions: Dict[str, Any]) -> V1AgentDefinition:
     """Convert a V2 AgentDefinition to a V1 AgentDefinition.
@@ -94,7 +98,7 @@ def _convert_agent(agent_v2: V2AgentDefinition, definitions: Dict[str, Any]) -> 
         name=agent_v2.name,
         author="system",
         created_at=datetime.now(timezone.utc),
-        requires_auth=False
+        requires_auth=False,
     )
 
     # Construct Capability (Default Chat)
@@ -105,41 +109,30 @@ def _convert_agent(agent_v2: V2AgentDefinition, definitions: Dict[str, Any]) -> 
             description="Default chat capability",
             inputs={"type": "object", "properties": {"message": {"type": "string"}}},
             outputs={"type": "object", "properties": {"response": {"type": "string"}}},
-            delivery_mode=DeliveryMode.REQUEST_RESPONSE
+            delivery_mode=DeliveryMode.REQUEST_RESPONSE,
         )
     ]
 
     # Construct Config
     persona = Persona(
-        name=agent_v2.role,
-        description=agent_v2.goal,
-        directives=[agent_v2.backstory] if agent_v2.backstory else []
+        name=agent_v2.role, description=agent_v2.goal, directives=[agent_v2.backstory] if agent_v2.backstory else []
     )
 
     model_config = ModelConfig(
-        model=agent_v2.model or "gpt-4",
-        temperature=0.7,
-        system_prompt=agent_v2.backstory,
-        persona=persona
+        model=agent_v2.model or "gpt-4", temperature=0.7, system_prompt=agent_v2.backstory, persona=persona
     )
 
     # V1 requires atomic agents to have system_prompt in config OR llm_config
-    runtime_config = AgentRuntimeConfig(
-        model_config=model_config,
-        system_prompt=agent_v2.backstory
-    )
+    runtime_config = AgentRuntimeConfig(llm_config=model_config, system_prompt=agent_v2.backstory)
 
-    dependencies = AgentDependencies(
-        tools=tools,
-        libraries=()
-    )
+    dependencies = AgentDependencies(tools=tools, libraries=())
 
     return V1AgentDefinition(
         metadata=metadata,
         capabilities=capabilities,
         config=runtime_config,
         dependencies=dependencies,
-        status=AgentStatus.DRAFT
+        status=AgentStatus.DRAFT,
     )
 
 
@@ -172,7 +165,7 @@ def v2_to_recipe(manifest: ManifestV2) -> RecipeManifest:
 
     # Process parameters/definitions
     # We create a new dict to store processed definitions
-    parameters = {}
+    parameters: Dict[str, Any] = {}
     for key, value in manifest.definitions.items():
         if isinstance(value, V2AgentDefinition):
             # Convert V2 Agent to V1 Agent

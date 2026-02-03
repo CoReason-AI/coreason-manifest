@@ -1,13 +1,12 @@
-import pytest
 import yaml
-from uuid import UUID
-from pydantic import ValidationError
 
-from coreason_manifest.v2.spec.definitions import ManifestV2, AgentDefinition, ToolDefinition, GenericDefinition
-from coreason_manifest.v2.adapter import v2_to_recipe
 from coreason_manifest.definitions.agent import AgentDefinition as V1AgentDefinition
+from coreason_manifest.definitions.agent import ToolRequirement
+from coreason_manifest.v2.adapter import v2_to_recipe
+from coreason_manifest.v2.spec.definitions import AgentDefinition, GenericDefinition, ManifestV2, ToolDefinition
 
-def test_polymorphic_parsing():
+
+def test_polymorphic_parsing() -> None:
     yaml_content = """
 apiVersion: coreason.ai/v2
 kind: Agent
@@ -47,7 +46,8 @@ definitions:
     assert manifest.definitions["my_agent"].type == "agent"
     assert manifest.definitions["my_agent"].role == "Research Specialist"
 
-def test_validation_failure():
+
+def test_validation_failure() -> None:
     # Missing 'role' for agent. Should fall back to GenericDefinition.
     yaml_content = """
 apiVersion: coreason.ai/v2
@@ -78,7 +78,8 @@ definitions:
     # Ensure it is NOT AgentDefinition
     assert not isinstance(manifest.definitions["bad_agent"], AgentDefinition)
 
-def test_adapter_conversion():
+
+def test_adapter_conversion() -> None:
     yaml_content = """
 apiVersion: coreason.ai/v2
 kind: Agent
@@ -121,6 +122,7 @@ definitions:
 
     # Check Mappings
     # Role -> Persona.name
+    assert v1_agent.config.llm_config.persona is not None
     assert v1_agent.config.llm_config.persona.name == "Research Specialist"
     # Goal -> Persona.description
     assert v1_agent.config.llm_config.persona.description == "Find comprehensive data"
@@ -130,6 +132,10 @@ definitions:
     # Check Tools
     assert len(v1_agent.dependencies.tools) == 1
     tool_req = v1_agent.dependencies.tools[0]
+
+    # Ensure it is a ToolRequirement (not InlineToolDefinition) to satisfy Mypy
+    assert isinstance(tool_req, ToolRequirement)
+
     assert str(tool_req.uri) == "mcp://search"
     assert tool_req.risk_level == "safe"
     # Hash should be present (SHA256 hex)
