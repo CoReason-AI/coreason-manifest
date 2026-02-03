@@ -9,10 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime
+from typing import List, Optional, Union
 from uuid import uuid4
-from typing import List, Optional
 
-import pytest
 from coreason_manifest.definitions.agent import (
     AgentCapability,
     AgentDefinition,
@@ -20,15 +19,20 @@ from coreason_manifest.definitions.agent import (
     AgentMetadata,
     AgentRuntimeConfig,
     CapabilityType,
+    InlineToolDefinition,
     ModelConfig,
     ToolRequirement,
     ToolRiskLevel,
 )
-from coreason_manifest.definitions.topology import LogicNode, Edge
-from coreason_manifest.governance import GovernanceConfig, check_compliance, ComplianceReport
+from coreason_manifest.definitions.topology import Edge, LogicNode, Node
+from coreason_manifest.governance import GovernanceConfig, check_compliance
 
 
-def create_agent(nodes: List = None, edges: List = None, tools: List = None) -> AgentDefinition:
+def create_agent(
+    nodes: Optional[List[Node]] = None,
+    edges: Optional[List[Edge]] = None,
+    tools: Optional[List[Union[ToolRequirement, InlineToolDefinition]]] = None,
+) -> AgentDefinition:
     metadata = AgentMetadata(
         id=uuid4(),
         version="1.0.0",
@@ -66,7 +70,7 @@ def test_logic_node_security_mitigation() -> None:
     """Mitigation: LogicNodes are now BLOCKED by default."""
     node = LogicNode(id="logic1", code="print('hack')")
     agent = create_agent(nodes=[node])
-    config = GovernanceConfig() # Defaults to allow_custom_logic=False
+    config = GovernanceConfig()  # Defaults to allow_custom_logic=False
     report = check_compliance(agent, config)
 
     assert not report.passed, "LogicNode should be blocked by default"
@@ -113,10 +117,10 @@ def test_edge_condition_security_mitigation() -> None:
 def test_url_normalization_trailing_dot_strict() -> None:
     """Strict normalization handles trailing dots correctly."""
     tool = ToolRequirement(
-        uri="https://example.com./api", # Trailing dot
-        hash="a"*64,
+        uri="https://example.com./api",  # Trailing dot
+        hash="a" * 64,
         scopes=[],
-        risk_level=ToolRiskLevel.SAFE
+        risk_level=ToolRiskLevel.SAFE,
     )
     agent = create_agent(tools=[tool])
     # allowed_domains without trailing dot
@@ -130,10 +134,10 @@ def test_url_normalization_trailing_dot_strict() -> None:
 def test_url_normalization_case_insensitive() -> None:
     """Strict normalization handles case correctly."""
     tool = ToolRequirement(
-        uri="https://Example.com/api", # Mixed case
-        hash="a"*64,
+        uri="https://Example.com/api",  # Mixed case
+        hash="a" * 64,
         scopes=[],
-        risk_level=ToolRiskLevel.SAFE
+        risk_level=ToolRiskLevel.SAFE,
     )
     agent = create_agent(tools=[tool])
     # allowed_domains lower case
@@ -142,13 +146,14 @@ def test_url_normalization_case_insensitive() -> None:
 
     assert report.passed, "Strict normalization should handle case"
 
+
 def test_url_normalization_disabled_legacy() -> None:
     """Legacy behavior (strict=False) fails on trailing dot mismatch."""
     tool = ToolRequirement(
-        uri="https://example.com./api", # Trailing dot
-        hash="a"*64,
+        uri="https://example.com./api",  # Trailing dot
+        hash="a" * 64,
         scopes=[],
-        risk_level=ToolRiskLevel.SAFE
+        risk_level=ToolRiskLevel.SAFE,
     )
     agent = create_agent(tools=[tool])
     # allowed_domains without trailing dot

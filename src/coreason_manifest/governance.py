@@ -204,8 +204,8 @@ def check_compliance(agent: AgentDefinition, config: GovernanceConfig) -> Compli
                                     ComplianceViolation(
                                         rule="domain_restriction",
                                         message=(
-                                            f"Tool URI '{tool.uri}' (normalized host: {hostname}) is not in allowed domains: "
-                                            f"{config.allowed_domains}"
+                                            f"Tool URI '{tool.uri}' (normalized host: {hostname}) is not in "
+                                            f"allowed domains: {config.allowed_domains}"
                                         ),
                                         component_id=str(tool.uri),
                                     )
