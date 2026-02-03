@@ -12,6 +12,7 @@
 
 from typing import Any, Dict, List, Union
 
+from coreason_manifest.definitions.agent import AgentDependencies, ToolRequirement
 from coreason_manifest.definitions.topology import (
     AgentNode,
     ConditionalEdge,
@@ -28,7 +29,9 @@ from coreason_manifest.v2.spec.definitions import (
     LogicStep,
     ManifestV2,
     SwitchStep,
+    ToolDefinition,
 )
+from coreason_manifest.v2.validator import validate_strict
 
 
 def _convert_visual_metadata(design_metadata: Union[Dict[str, Any], Any, None]) -> Union[VisualMetadata, None]:
@@ -55,6 +58,29 @@ def _convert_visual_metadata(design_metadata: Union[Dict[str, Any], Any, None]) 
     )
 
 
+def compile_dependencies(manifest: ManifestV2) -> AgentDependencies:
+    """Extract tool dependencies from V2 manifest.
+
+    Args:
+        manifest: The V2 manifest.
+
+    Returns:
+        The V1 AgentDependencies object.
+    """
+    tools = []
+    for definition in manifest.definitions.values():
+        if isinstance(definition, ToolDefinition):
+            tools.append(
+                ToolRequirement(
+                    uri=definition.uri,
+                    hash="0" * 64,  # Dummy hash for V2 draft compilation
+                    scopes=[],  # Default empty scopes
+                    risk_level=definition.risk_level,
+                )
+            )
+    return AgentDependencies(tools=tools)
+
+
 def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
     """Transform the V2 "Linked List" manifest into the V1 "Graph" topology.
 
@@ -65,18 +91,15 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
         The compiled V1 GraphTopology.
 
     Raises:
-        ValueError: If a dangling pointer (reference to non-existent step) is found.
+        ValueError: If validation fails.
     """
+    # 1. Strict Validation
+    errors = validate_strict(manifest)
+    if errors:
+        raise ValueError("Manifest validation failed:\n" + "\n".join(errors))
+
     nodes: List[Node] = []
     edges: List[Union[Edge, ConditionalEdge]] = []
-
-    # Index of all valid step IDs for validation
-    valid_step_ids = set(manifest.workflow.steps.keys())
-
-    # Helper validation function
-    def validate_target(target_id: str, source_id: str) -> None:
-        if target_id not in valid_step_ids:
-            raise ValueError(f"Step '{source_id}' references non-existent step '{target_id}'.")
 
     for step_id, step in manifest.workflow.steps.items():
         visual = _convert_visual_metadata(step.design_metadata)
@@ -95,7 +118,6 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
 
             # Standard Edge
             if step.next:
-                validate_target(step.next, step_id)
                 edges.append(Edge(source_node_id=step_id, target_node_id=step.next))
 
         elif isinstance(step, LogicStep):
@@ -108,7 +130,6 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
 
             # Standard Edge
             if step.next:
-                validate_target(step.next, step_id)
                 edges.append(Edge(source_node_id=step_id, target_node_id=step.next))
 
         elif isinstance(step, CouncilStep):
@@ -126,7 +147,6 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
 
             # Standard Edge
             if step.next:
-                validate_target(step.next, step_id)
                 edges.append(Edge(source_node_id=step_id, target_node_id=step.next))
 
         elif isinstance(step, SwitchStep):
@@ -135,14 +155,12 @@ def compile_to_topology(manifest: ManifestV2) -> GraphTopology:
             mapping: Dict[str, str] = {}
 
             for i, (condition, target_id) in enumerate(step.cases.items()):
-                validate_target(target_id, step_id)
                 key = f"case_{i}"
                 mapping[key] = target_id
                 lines.append(f"    if {condition}:")
                 lines.append(f"        return '{key}'")
 
             if step.default:
-                validate_target(step.default, step_id)
                 mapping["default"] = step.default
                 lines.append("    return 'default'")
             else:
