@@ -18,13 +18,12 @@ from urllib.parse import urlparse
 
 from pydantic import ConfigDict, Field
 
+from coreason_manifest.common import CoReasonBaseModel, ToolRiskLevel
 from coreason_manifest.definitions.agent import (
     AgentDefinition,
     InlineToolDefinition,
     ToolRequirement,
-    ToolRiskLevel,
 )
-from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.topology import LogicNode
 
 

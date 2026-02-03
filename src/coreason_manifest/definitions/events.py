@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 from coreason_manifest.definitions.topology import RuntimeVisualMetadata
 
 # --- CloudEvents v1.0 Implementation ---

@@ -8,40 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+from coreason_manifest.common import CoReasonBaseModel
 
-from pydantic import BaseModel, ConfigDict
-
-
-class CoReasonBaseModel(BaseModel):
-    """Base model for all CoReason Pydantic models with enhanced serialization.
-
-    This base class addresses JSON serialization challenges in Pydantic v2 (e.g., UUID, datetime)
-    by providing standardized methods (`dump`, `to_json`) with optimal configuration.
-
-    For a detailed rationale, see `docs/coreason_base_model_rationale.md`.
-    """
-
-    model_config = ConfigDict(populate_by_name=True)
-
-    def dump(self, **kwargs: Any) -> Dict[str, Any]:
-        """Serialize the model to a JSON-compatible dictionary.
-
-        Uses mode='json' to ensure types like UUID and datetime are serialized to strings.
-        Defaults to by_alias=True and exclude_none=True.
-        """
-        # Set defaults but allow overrides
-        kwargs.setdefault("mode", "json")
-        kwargs.setdefault("by_alias", True)
-        kwargs.setdefault("exclude_none", True)
-        return self.model_dump(**kwargs)
-
-    def to_json(self, **kwargs: Any) -> str:
-        """Serialize the model to a JSON string.
-
-        Defaults to by_alias=True and exclude_none=True.
-        """
-        # Set defaults but allow overrides
-        kwargs.setdefault("by_alias", True)
-        kwargs.setdefault("exclude_none", True)
-        return self.model_dump_json(**kwargs)
+__all__ = ["CoReasonBaseModel"]

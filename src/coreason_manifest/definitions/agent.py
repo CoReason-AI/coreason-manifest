@@ -26,7 +26,6 @@ from uuid import UUID
 import jsonschema
 from pydantic import (
     AfterValidator,
-    AnyUrl,
     ConfigDict,
     Field,
     PlainSerializer,
@@ -35,10 +34,35 @@ from pydantic import (
 )
 from typing_extensions import Annotated
 
+from coreason_manifest.common import StrictUri, ToolRiskLevel
 from coreason_manifest.definitions.base import CoReasonBaseModel
 from coreason_manifest.definitions.deployment import DeploymentConfig
 from coreason_manifest.definitions.evaluation import EvaluationProfile
 from coreason_manifest.definitions.topology import Edge, Node, validate_edge_integrity
+
+__all__ = [
+    "AdapterHints",
+    "AgentCapability",
+    "AgentDefinition",
+    "AgentDependencies",
+    "AgentMetadata",
+    "AgentRuntimeConfig",
+    "AgentStatus",
+    "CapabilityType",
+    "DeliveryMode",
+    "EventSchema",
+    "InlineToolDefinition",
+    "ModelConfig",
+    "ObservabilityConfig",
+    "Persona",
+    "PolicyConfig",
+    "StrictUri",
+    "ToolRequirement",
+    "ToolRiskLevel",
+    "TraceLevel",
+    "VersionStr",
+]
+
 
 # SemVer Regex pattern (simplified for standard SemVer)
 # Modified to accept optional 'v' or 'V' prefix (multiple allowed) for input normalization
@@ -75,13 +99,6 @@ ImmutableDict = Annotated[
     Mapping[str, Any],
     AfterValidator(lambda x: MappingProxyType(x)),
     PlainSerializer(lambda x: dict(x), return_type=Dict[str, Any]),
-]
-
-
-# Strict URI type that serializes to string
-StrictUri = Annotated[
-    AnyUrl,
-    PlainSerializer(lambda x: str(x), return_type=str),
 ]
 
 
@@ -278,14 +295,6 @@ class AgentRuntimeConfig(CoReasonBaseModel):
                 seen.add(x)
             raise ValueError(f"Duplicate node IDs found: {', '.join(dupes)}")
         return v
-
-
-class ToolRiskLevel(str, Enum):
-    """Risk level for the tool."""
-
-    SAFE = "safe"
-    STANDARD = "standard"
-    CRITICAL = "critical"
 
 
 class ToolRequirement(CoReasonBaseModel):

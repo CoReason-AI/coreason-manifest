@@ -16,7 +16,7 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 from coreason_manifest.definitions.events import CloudEvent
 from coreason_manifest.definitions.presentation import StreamPacket
 from coreason_manifest.definitions.request import AgentRequest

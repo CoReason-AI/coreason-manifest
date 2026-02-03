@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Optional, Protocol, Self, runtime_checkable
 from uuid import uuid4
 
+from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.definitions.agent import (
     AgentCapability,
     AgentDefinition,
@@ -23,7 +24,6 @@ from coreason_manifest.definitions.agent import (
     AgentStatus,
     ModelConfig,
     ToolRequirement,
-    ToolRiskLevel,
 )
 from coreason_manifest.definitions.topology import Edge, Node
 

@@ -23,7 +23,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Unio
 
 from pydantic import ConfigDict, Field, StringConstraints, model_validator
 
-from coreason_manifest.definitions.base import CoReasonBaseModel
+from coreason_manifest.common import CoReasonBaseModel
 
 
 class StateDefinition(CoReasonBaseModel):
