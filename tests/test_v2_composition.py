@@ -161,3 +161,22 @@ def test_non_dict_content(manifest_dir: Path) -> None:
 
     with pytest.raises(ValueError, match="Expected a dictionary"):
         load_from_yaml(list_path)
+
+
+def test_missing_file(manifest_dir: Path) -> None:
+    """Test that referencing a non-existent file raises FileNotFoundError."""
+    main_manifest = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Agent",
+        "metadata": {"name": "Missing Agent"},
+        "definitions": {
+            "missing": {"$ref": "does_not_exist.yaml"}
+        },
+        "workflow": {"start": "s", "steps": {"s": {"type": "logic", "id": "s", "code": "pass"}}}
+    }
+    main_path = manifest_dir / "main.yaml"
+    with open(main_path, "w") as f:
+        yaml.dump(main_manifest, f)
+
+    with pytest.raises(FileNotFoundError, match="Referenced file not found"):
+        load_from_yaml(main_path)
