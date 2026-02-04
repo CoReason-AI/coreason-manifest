@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import json
 from typing import List, Union
 
 import pytest
@@ -18,15 +17,13 @@ from coreason_manifest import (
     ArtifactEvent,
     ChatMessage,
     CitationEvent,
-    PresentationEvent,
-    PresentationEventType,
     Role,
     StreamOpCode,
     StreamPacket,
 )
 
 
-def test_chat_message_edge_cases():
+def test_chat_message_edge_cases() -> None:
     """Test ChatMessage with edge cases."""
     # Empty content
     msg = ChatMessage(role=Role.USER, content="")
@@ -44,7 +41,7 @@ def test_chat_message_edge_cases():
     assert len(msg_long.content) == 10000
 
 
-def test_role_enum_strictness():
+def test_role_enum_strictness() -> None:
     """Test that Role enum is strict."""
     # Valid roles
     assert ChatMessage(role=Role.SYSTEM, content="").role == Role.SYSTEM
@@ -52,10 +49,10 @@ def test_role_enum_strictness():
 
     # Invalid role
     with pytest.raises(ValidationError):
-        ChatMessage(role="admin", content="")  # type: ignore
+        ChatMessage(role="admin", content="")
 
 
-def test_presentation_event_polymorphism_adapter():
+def test_presentation_event_polymorphism_adapter() -> None:
     """Test polymorphic deserialization using TypeAdapter."""
     # Create mixed list of events
     events = [
@@ -73,7 +70,7 @@ def test_presentation_event_polymorphism_adapter():
     assert parsed[1].artifact_id == "art1"
 
 
-def test_stream_packet_with_presentation_event():
+def test_stream_packet_with_presentation_event() -> None:
     """Test embedding presentation events in StreamPacket (conceptually).
 
     Note: StreamPacket.p is strictly typed as Union[str, Dict[str, Any], StreamError, None]
@@ -91,13 +88,9 @@ def test_stream_packet_with_presentation_event():
     assert packet.p["text"] == "Quote"
 
 
-def test_complex_immutability():
+def test_complex_immutability() -> None:
     """Verify deep immutability (to the extent frozen=True supports)."""
-    citation = CitationEvent(
-        uri="http://x",
-        text="y",
-        indices=[10, 20]
-    )
+    citation = CitationEvent(uri="http://x", text="y", indices=[10, 20])
 
     # Direct field assignment fails
     with pytest.raises(ValidationError):
@@ -113,13 +106,13 @@ def test_complex_immutability():
     assert citation.indices == [10, 20]
 
 
-def test_json_roundtrip():
+def test_json_roundtrip() -> None:
     """Test full JSON round-trip ensuring types are preserved."""
     original = ChatMessage(
         role=Role.TOOL,
         content='{"result": 42}',
         tool_call_id="call_123",
-        name="calculator"
+        name="calculator",
     )
 
     json_str = original.to_json()

@@ -20,7 +20,7 @@ from coreason_manifest import (
 )
 
 
-def test_chat_message_serialization():
+def test_chat_message_serialization() -> None:
     """Test ChatMessage serialization with standard ISO timestamp."""
     msg = ChatMessage(role=Role.USER, content="Hello")
     dumped = msg.dump()
@@ -33,13 +33,13 @@ def test_chat_message_serialization():
     assert dumped["timestamp"].endswith("Z")
 
 
-def test_role_validation():
+def test_role_validation() -> None:
     """Test Role validation rejects invalid roles."""
     with pytest.raises(ValidationError):
-        ChatMessage(role="moderator", content="Hello")  # type: ignore
+        ChatMessage(role="moderator", content="Hello")
 
 
-def test_presentation_polymorphism():
+def test_presentation_polymorphism() -> None:
     """Test polymorphism for presentation events."""
     events = [
         CitationEvent(uri="https://example.com", text="Example"),
@@ -56,7 +56,7 @@ def test_presentation_polymorphism():
     assert dumped_artifact["type"] == "artifact"
 
 
-def test_immutability():
+def test_immutability() -> None:
     """Test that models are immutable."""
     msg = ChatMessage(role=Role.USER, content="Hello")
     with pytest.raises(ValidationError):

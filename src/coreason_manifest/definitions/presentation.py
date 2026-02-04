@@ -37,9 +37,7 @@ class CitationEvent(PresentationEvent):
     type: Literal[PresentationEventType.CITATION] = PresentationEventType.CITATION
     uri: str = Field(..., description="The source URI.")
     text: str = Field(..., description="The quoted text.")
-    indices: Optional[List[int]] = Field(
-        None, description="Start and end character indices."
-    )
+    indices: Optional[List[int]] = Field(None, description="Start and end character indices.")
 
 
 class ArtifactEvent(PresentationEvent):
