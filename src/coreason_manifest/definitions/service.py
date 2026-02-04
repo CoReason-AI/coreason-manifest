@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional
+
 from pydantic import ConfigDict
+
 from ..common import CoReasonBaseModel
 from ..spec.cap import ServiceRequest, ServiceResponse
 
@@ -26,9 +28,7 @@ class ServiceContract:
                 "summary": "Invoke Agent",
                 "requestBody": {
                     "content": {
-                        "application/json": {
-                            "schema": ServiceRequest.model_json_schema()
-                        }
+                        "application/json": {"schema": ServiceRequest.model_json_schema()}
                     }
                 },
                 "responses": {
@@ -38,8 +38,8 @@ class ServiceContract:
                             "application/json": {
                                 "schema": ServiceResponse.model_json_schema()
                             }
-                        }
+                        },
                     }
-                }
+                },
             }
         }

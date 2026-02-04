@@ -14,7 +14,7 @@ The standard envelope for sending instructions to an Agent.
 | :--- | :--- | :--- |
 | `request_id` | `UUID` | Unique identifier for the request trace. |
 | `context` | `Dict[str, Any]` | Metadata about the request (User Identity, Auth, Session). Separated from logic to enable consistent security policies. |
-| `payload` | `Dict[str, Any]` | The actual arguments for the Agent's business logic. |
+| `payload` | `Dict[str, Any]` | The actual arguments for the Agent's business logic. Standardized as `AgentRequest`. |
 
 **Example JSON:**
 ```json
@@ -25,10 +25,23 @@ The standard envelope for sending instructions to an Agent.
     "session_id": "sess_abc"
   },
   "payload": {
-    "query": "What is the status of the project?"
+    "query": "What is the status of the project?",
+    "files": [],
+    "conversation_id": "conv_123"
   }
 }
 ```
+
+### AgentRequest
+
+The strict payload schema used within `ServiceRequest`.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `query` | `str` | The user's primary input/instruction. |
+| `files` | `List[str]` | List of file URIs or references (default: `[]`). |
+| `conversation_id` | `Optional[str]` | ID for continuing a session (default: `None`). |
+| `meta` | `Dict[str, Any]` | Extra context like timezone (default: `{}`). |
 
 ### ServiceResponse
 
