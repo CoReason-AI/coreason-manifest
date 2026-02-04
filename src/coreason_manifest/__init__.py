@@ -11,6 +11,13 @@
 from .common import ToolRiskLevel
 from .definitions.identity import Identity
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.cap import (
+    HealthCheckResponse,
+    HealthCheckStatus,
+    ServiceRequest,
+    ServiceResponse,
+    StreamPacket,
+)
 from .v2.io import dump_to_yaml, load_from_yaml
 from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .v2.spec.definitions import (
@@ -26,7 +33,7 @@ from .v2.spec.definitions import (
     Workflow,
 )
 
-__version__ = "0.14.0"
+__version__ = "0.15.0"
 
 Manifest = ManifestV2
 Recipe = ManifestV2
@@ -56,4 +63,9 @@ __all__ = [
     "ComplianceReport",
     "ComplianceViolation",
     "Identity",
+    "HealthCheckResponse",
+    "HealthCheckStatus",
+    "ServiceRequest",
+    "ServiceResponse",
+    "StreamPacket",
 ]
