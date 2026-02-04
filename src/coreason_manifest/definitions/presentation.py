@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 
 from pydantic import ConfigDict, Field
 
@@ -47,3 +47,6 @@ class ArtifactEvent(PresentationEvent):
     artifact_id: str = Field(..., description="Unique ID of the artifact.")
     mime_type: str = Field(..., description="MIME type of the artifact.")
     url: Optional[str] = Field(None, description="Download URL if applicable.")
+
+
+AnyPresentationEvent = Union[CitationEvent, ArtifactEvent]
