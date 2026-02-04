@@ -15,6 +15,7 @@ from typing import Any, Dict, Optional, Set, Union
 
 import yaml
 
+from coreason_manifest.errors import ManifestRecursionError
 from coreason_manifest.v2.resolver import ReferenceResolver
 from coreason_manifest.v2.spec.definitions import ManifestV2
 
@@ -27,7 +28,7 @@ def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[
     ReferenceResolver to ensure secure path resolution.
     """
     if path in visited_paths:
-        raise RecursionError(f"Circular dependency detected: {path}")
+        raise ManifestRecursionError(f"Circular dependency detected: {path}")
 
     visited_paths.add(path)
 
@@ -79,8 +80,9 @@ def load_from_yaml(
         FileNotFoundError: If the file does not exist.
         ValidationError: If the manifest is invalid.
         yaml.YAMLError: If the YAML is invalid.
-        RecursionError: If a cyclic dependency is detected.
-        ValueError: If a security violation occurs or YAML is invalid.
+        ManifestRecursionError: If a cyclic dependency is detected.
+        SecurityViolationError: If a security violation occurs.
+        ValueError: If YAML is invalid.
     """
     p = Path(path).resolve()
     if not p.exists():

@@ -13,6 +13,8 @@
 from pathlib import Path
 from typing import Union
 
+from coreason_manifest.errors import SecurityViolationError
+
 
 class ReferenceResolver:
     """
@@ -43,7 +45,7 @@ class ReferenceResolver:
             The absolute resolved Path.
 
         Raises:
-            ValueError: If the resolved path escapes the root directory.
+            SecurityViolationError: If the resolved path escapes the root directory.
             FileNotFoundError: If the referenced file does not exist.
         """
         # Ensure base_file is absolute
@@ -57,8 +59,8 @@ class ReferenceResolver:
         try:
             target_path.relative_to(self.root_dir)
         except ValueError:
-            raise ValueError(
-                f"Security Error: Reference '{ref_path}' escapes the root directory '{self.root_dir}'."
+            raise SecurityViolationError(
+                f"Security Error: Reference '{ref_path}' escapes the root directory."
             ) from None
 
         if not target_path.exists():

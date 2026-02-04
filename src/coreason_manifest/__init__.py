@@ -10,6 +10,7 @@
 
 from .common import ToolRiskLevel
 from .definitions.identity import Identity
+from .errors import ManifestRecursionError, SecurityViolationError
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     HealthCheckResponse,
@@ -68,4 +69,6 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "StreamPacket",
+    "SecurityViolationError",
+    "ManifestRecursionError",
 ]
