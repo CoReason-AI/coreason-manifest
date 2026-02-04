@@ -32,8 +32,8 @@ class CoReasonBaseModel(BaseModel):
         Uses mode='json' to ensure types like UUID and datetime are serialized to strings.
         Defaults to by_alias=True and exclude_none=True.
         """
-        # Set defaults but allow overrides
-        kwargs.setdefault("mode", "json")
+        # Strict enforcement of json mode for zero-friction serialization
+        kwargs["mode"] = "json"
         kwargs.setdefault("by_alias", True)
         kwargs.setdefault("exclude_none", True)
         return self.model_dump(**kwargs)
