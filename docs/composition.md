@@ -27,7 +27,13 @@ To prevent **Path Traversal Attacks** (e.g., accessing `/etc/passwd` or secrets 
 
 *   **Root Directory:** When you call `load(path)`, the directory containing that file (or a specified `root_dir`) becomes the "Jail".
 *   **Confinement:** All references must resolve to a path *inside* this root directory.
-*   **Enforcement:** Any attempt to reference a file outside the root (e.g., via `../../secret.yaml`) will raise a `ValueError` with a "Security Error" message.
+*   **Enforcement:** Any attempt to reference a file outside the root (e.g., via `../../secret.yaml`, absolute paths, or symlinks) will raise a `ValueError` with a "Security Error" message.
+
+### Protected Vectors
+
+1.  **Relative Path Traversal:** Paths like `dir/../../secret.yaml` are normalized and checked. If they escape the root, they are rejected.
+2.  **Absolute Paths:** Absolute paths (e.g., `/etc/passwd`) are either rejected or, if they accidentally fall within the jail, accepted. If they point outside, they are blocked.
+3.  **Symlinks:** Symlinks are followed during resolution. If a symlink *inside* the jail points to a file *outside* the jail, the final resolved path is checked against the jail root, and the load is rejected. This prevents "Symlink Bypass" attacks.
 
 ### Example
 
