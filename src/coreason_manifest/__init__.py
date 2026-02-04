@@ -8,6 +8,28 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from .common import ToolRiskLevel
+from .definitions.identity import Identity
+from .definitions.message import ChatMessage, Role
+from .definitions.presentation import (
+    AnyPresentationEvent,
+    ArtifactEvent,
+    CitationEvent,
+    PresentationEvent,
+    PresentationEventType,
+)
+from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.cap import (
+    ErrorSeverity,
+    HealthCheckResponse,
+    HealthCheckStatus,
+    ServiceRequest,
+    ServiceResponse,
+    StreamError,
+    StreamOpCode,
+    StreamPacket,
+)
+from .v2.governance import check_compliance_v2
 from .v2.io import dump_to_yaml, load_from_yaml
 from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .v2.spec.definitions import (
@@ -22,8 +44,9 @@ from .v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
+from .v2.validator import validate_integrity, validate_loose
 
-__version__ = "0.13.0"
+__version__ = "0.15.0"
 
 Manifest = ManifestV2
 Recipe = ManifestV2
@@ -48,4 +71,27 @@ __all__ = [
     "InterfaceDefinition",
     "StateDefinition",
     "PolicyDefinition",
+    "ToolRiskLevel",
+    "GovernanceConfig",
+    "ComplianceReport",
+    "ComplianceViolation",
+    "Identity",
+    "Role",
+    "ChatMessage",
+    "PresentationEventType",
+    "PresentationEvent",
+    "AnyPresentationEvent",
+    "CitationEvent",
+    "ArtifactEvent",
+    "HealthCheckResponse",
+    "HealthCheckStatus",
+    "ServiceRequest",
+    "ServiceResponse",
+    "StreamPacket",
+    "StreamError",
+    "StreamOpCode",
+    "ErrorSeverity",
+    "validate_integrity",
+    "validate_loose",
+    "check_compliance_v2",
 ]

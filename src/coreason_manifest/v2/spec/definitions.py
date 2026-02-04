@@ -1,12 +1,12 @@
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field
 
-from coreason_manifest.common import StrictUri, ToolRiskLevel
+from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 
 
-class DesignMetadata(BaseModel):
+class DesignMetadata(CoReasonBaseModel):
     """UI-specific metadata for the visual builder."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -20,7 +20,7 @@ class DesignMetadata(BaseModel):
     collapsed: bool = Field(False, description="Whether the node is collapsed in UI.")
 
 
-class ToolDefinition(BaseModel):
+class ToolDefinition(CoReasonBaseModel):
     """Definition of an external tool."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -33,7 +33,7 @@ class ToolDefinition(BaseModel):
     description: Optional[str] = Field(None, description="Description of the tool.")
 
 
-class AgentDefinition(BaseModel):
+class AgentDefinition(CoReasonBaseModel):
     """Definition of an Agent."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -49,13 +49,13 @@ class AgentDefinition(BaseModel):
     knowledge: List[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
 
 
-class GenericDefinition(BaseModel):
+class GenericDefinition(CoReasonBaseModel):
     """Fallback for unknown definitions."""
 
     model_config = ConfigDict(extra="allow")
 
 
-class BaseStep(BaseModel):
+class BaseStep(CoReasonBaseModel):
     """Base attributes for all steps."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -106,7 +106,7 @@ Step = Annotated[
 ]
 
 
-class Workflow(BaseModel):
+class Workflow(CoReasonBaseModel):
     """Defines the execution topology."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -115,7 +115,7 @@ class Workflow(BaseModel):
     steps: Dict[str, Step] = Field(..., description="Dictionary of all steps indexed by ID.")
 
 
-class ManifestMetadata(BaseModel):
+class ManifestMetadata(CoReasonBaseModel):
     """Metadata for the manifest."""
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
@@ -124,7 +124,7 @@ class ManifestMetadata(BaseModel):
     design_metadata: Optional[DesignMetadata] = Field(None, alias="x-design", description="UI metadata.")
 
 
-class ManifestV2(BaseModel):
+class ManifestV2(CoReasonBaseModel):
     """Root object for Coreason Manifest V2."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -143,54 +143,3 @@ class ManifestV2(BaseModel):
         ],
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
-
-    @model_validator(mode="after")
-    def validate_integrity(self) -> "ManifestV2":
-        """Validate referential integrity of the manifest."""
-        steps = self.workflow.steps
-
-        # 1. Validate Start Step
-        if self.workflow.start not in steps:
-            raise ValueError(f"Start step '{self.workflow.start}' not found in steps.")
-
-        for step in steps.values():
-            # 2. Validate 'next' pointers (AgentStep, LogicStep, CouncilStep)
-            if hasattr(step, "next") and step.next:
-                if step.next not in steps:
-                    raise ValueError(f"Step '{step.id}' references missing next step '{step.next}'.")
-
-            # 3. Validate SwitchStep targets
-            if isinstance(step, SwitchStep):
-                for target in step.cases.values():
-                    if target not in steps:
-                        raise ValueError(f"SwitchStep '{step.id}' references missing step '{target}' in cases.")
-                if step.default and step.default not in steps:
-                    raise ValueError(f"SwitchStep '{step.id}' references missing step '{step.default}' in default.")
-
-            # 4. Validate Definition References
-            if isinstance(step, AgentStep):
-                if step.agent not in self.definitions:
-                    raise ValueError(f"AgentStep '{step.id}' references missing agent '{step.agent}'.")
-
-                # Check type
-                agent_def = self.definitions[step.agent]
-                if not isinstance(agent_def, AgentDefinition):
-                    raise ValueError(
-                        f"AgentStep '{step.id}' references '{step.agent}' which is not an AgentDefinition "
-                        f"(got {type(agent_def).__name__})."
-                    )
-
-            if isinstance(step, CouncilStep):
-                for voter in step.voters:
-                    if voter not in self.definitions:
-                        raise ValueError(f"CouncilStep '{step.id}' references missing voter '{voter}'.")
-
-                    # Check type
-                    agent_def = self.definitions[voter]
-                    if not isinstance(agent_def, AgentDefinition):
-                        raise ValueError(
-                            f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition "
-                            f"(got {type(agent_def).__name__})."
-                        )
-
-        return self

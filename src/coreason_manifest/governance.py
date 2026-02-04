@@ -60,6 +60,7 @@ class ComplianceViolation(CoReasonBaseModel):
         rule: Name of the rule broken.
         message: Human readable details.
         component_id: Name of the tool or component causing the issue.
+        severity: Severity level (e.g., 'error', 'warning').
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -67,6 +68,7 @@ class ComplianceViolation(CoReasonBaseModel):
     rule: str = Field(..., description="Name of the rule broken, e.g., 'domain_restriction'.")
     message: str = Field(..., description="Human readable details.")
     component_id: Optional[str] = Field(None, description="Name of the tool or component causing the issue.")
+    severity: Optional[str] = Field(None, description="Severity level (e.g., 'error', 'warning').")
 
 
 class ComplianceReport(CoReasonBaseModel):
