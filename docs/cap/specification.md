@@ -63,6 +63,16 @@ The `definitions` section is a polymorphic key-value map where you can define re
 *   `backstory`: Detailed instructions or persona background.
 *   `tools`: List of tool IDs (referencing other definitions).
 *   `model`: LLM identifier (e.g., `gpt-4`).
+*   `capabilities`: Feature flags and capabilities.
+
+### Agent Capabilities (`AgentCapabilities`)
+Used within an `AgentDefinition` to declare supported features.
+
+*   `delivery_mode`: List of supported transport mechanisms.
+    *   Values: `sse` (Server-Sent Events), `request_response` (Standard HTTP).
+    *   Default: `['sse']`
+*   `history_support`: Boolean indicating if the agent maintains conversation context.
+    *   Default: `true`
 
 ### Generic Definition
 Fallback for loose dictionaries or references (`$ref`) that haven't been resolved yet.

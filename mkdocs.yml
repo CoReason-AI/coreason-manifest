@@ -3,6 +3,13 @@ theme:
   name: material
 nav:
   - Home: index.md
-  - Usage: usage.md
-  - Specification: cap/specification.md
-  - Governance: governance_policy_enforcement.md
+  - Core Documentation:
+    - Usage Guide: usage.md
+    - Secure Composition: composition.md
+    - Governance & Policy: governance_policy_enforcement.md
+  - Specifications & Protocols:
+    - CAM Specification: cap/specification.md
+    - CAP Wire Protocol: cap/wire_protocol.md
+  - Architecture & Rationale:
+    - Product Requirements: product_requirements.md
+    - Base Model Rationale: coreason_base_model_rationale.md
