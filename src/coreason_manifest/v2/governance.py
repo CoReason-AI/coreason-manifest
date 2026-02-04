@@ -41,6 +41,11 @@ def _risk_score(level: ToolRiskLevel) -> int:
 def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> ComplianceReport:
     """Enforce policy on V2 Manifest before compilation.
 
+    Validates:
+    - Tool risk levels against allowed maximums.
+    - Tool URIs against allowed domains.
+    - Presence of custom logic (LogicStep, complex SwitchStep) if restricted.
+
     Args:
         manifest: The V2 manifest to check.
         config: The governance policy configuration.
