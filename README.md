@@ -90,6 +90,8 @@ For full details, see the [Usage Documentation](docs/usage.md).
 
 ## Documentation
 
+**[Full Documentation Index](docs/index.md)**
+
 *   [Usage Guide](docs/usage.md): How to load and create manifests.
 *   [Governance & Policy Enforcement](docs/governance_policy_enforcement.md): Validating agents against organizational rules.
 *   [Coreason Agent Manifest (CAM)](docs/cap/specification.md): The Canonical YAML Authoring Format.
