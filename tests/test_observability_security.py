@@ -1,8 +1,11 @@
 import pytest
 from uuid import uuid4
+from typing import Any, Dict
+
 from datetime import datetime, timezone
 from pydantic import ValidationError
 from coreason_manifest.definitions.observability import CloudEvent, ReasoningTrace
+
 
 def test_security_massive_payload_dos() -> None:
     """
@@ -10,15 +13,11 @@ def test_security_massive_payload_dos() -> None:
     Pydantic should handle this, but we check for crashes or extreme latency.
     """
     massive_string = "a" * 1_000_000  # 1MB string
-    massive_dict = {f"key_{i}": massive_string for i in range(10)} # 10MB payload
+    massive_dict = {f"key_{i}": massive_string for i in range(10)}  # 10MB payload
 
     start = datetime.now()
     event = CloudEvent(
-        id="dos-test",
-        source="urn:redteam",
-        type="attack.dos",
-        time=datetime.now(timezone.utc),
-        data=massive_dict
+        id="dos-test", source="urn:redteam", type="attack.dos", time=datetime.now(timezone.utc), data=massive_dict
     )
     dumped = event.dump()
     duration = (datetime.now() - start).total_seconds()
@@ -28,12 +27,13 @@ def test_security_massive_payload_dos() -> None:
     # This is a soft check; main goal is no crash.
     assert duration < 5.0
 
+
 def test_security_deep_nesting_recursion() -> None:
     """
     Red Team: Attempt stack overflow via deep recursion in `data`.
     Standard JSON parsers have recursion limits; Pydantic might too.
     """
-    deep_dict = {}
+    deep_dict: Dict[str, Any] = {}
     current = deep_dict
     for _ in range(1000):
         current["next"] = {}
@@ -44,7 +44,7 @@ def test_security_deep_nesting_recursion() -> None:
         source="urn:redteam",
         type="attack.recursion",
         time=datetime.now(timezone.utc),
-        data=deep_dict
+        data=deep_dict,
     )
 
     # Dump should fail with RecursionError or ValueError due to depth
@@ -52,6 +52,7 @@ def test_security_deep_nesting_recursion() -> None:
     # Python raises RecursionError if stack limit hit.
     with pytest.raises((ValueError, RecursionError)):
         event.dump()
+
 
 def test_security_injection_strings() -> None:
     """
@@ -61,7 +62,7 @@ def test_security_injection_strings() -> None:
     malicious_payload = {
         "sqli": "'; DROP TABLE users; --",
         "xss": "<script>alert('xss')</script>",
-        "cmd": "$(rm -rf /)"
+        "cmd": "$(rm -rf /)",
     }
 
     event = CloudEvent(
@@ -69,7 +70,7 @@ def test_security_injection_strings() -> None:
         source="urn:redteam",
         type="attack.injection",
         time=datetime.now(timezone.utc),
-        data=malicious_payload
+        data=malicious_payload,
     )
 
     dumped = event.dump()
@@ -77,6 +78,7 @@ def test_security_injection_strings() -> None:
     # We verify the content remains preserved as data.
     assert dumped["data"]["sqli"] == "'; DROP TABLE users; --"
     assert dumped["data"]["xss"] == "<script>alert('xss')</script>"
+
 
 def test_security_pii_leakage_warning() -> None:
     """
@@ -93,13 +95,14 @@ def test_security_pii_leakage_warning() -> None:
         status="success",
         inputs=secret_payload,
         latency_ms=1.0,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone.utc),
     )
 
     dumped = trace.dump()
     # Confirm secrets are present (i.e., NOT redacted).
     # This confirms the risk: The consumer is responsible for scrubbing.
     assert dumped["inputs"]["api_key"] == "sk-1234567890"
+
 
 def test_security_type_spoofing() -> None:
     """
@@ -114,5 +117,5 @@ def test_security_type_spoofing() -> None:
             type="attack.spoof",
             time=datetime.now(timezone.utc),
             datacontenttype="application/json",
-            data="<xml>not json</xml>" # type: ignore
+            data="<xml>not json</xml>",
         )
