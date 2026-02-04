@@ -10,12 +10,9 @@
 
 """Validation logic for V2 Manifests."""
 
-from typing import List, Set
+from typing import List
 
 from coreason_manifest.v2.spec.definitions import (
-    AgentStep,
-    CouncilStep,
-    LogicStep,
     ManifestV2,
     SwitchStep,
 )
@@ -49,51 +46,3 @@ def validate_loose(manifest: ManifestV2) -> List[str]:
                     warnings.append(f"SwitchStep '{step_id}' has invalid condition: {condition}")
 
     return warnings
-
-
-def validate_strict(manifest: ManifestV2) -> List[str]:
-    """Validate manifest for executable integrity.
-
-    Checks:
-    - Runs validate_loose.
-    - Ensures every 'next' pointer and switch target exists.
-    - Ensures workflow.start exists.
-    - Ensures definitions references exist.
-
-    Args:
-        manifest: The V2 manifest to validate.
-
-    Returns:
-        List of error messages (empty if valid).
-    """
-    errors: List[str] = validate_loose(manifest)
-
-    step_ids: Set[str] = set(manifest.workflow.steps.keys())
-
-    # 1. Entry Point
-    if manifest.workflow.start not in step_ids:
-        errors.append(f"Workflow start step '{manifest.workflow.start}' not found in steps.")
-
-    # 2. Step Integrity
-    for step_id, step in manifest.workflow.steps.items():
-        # Check 'next' pointers
-        if isinstance(step, (AgentStep, LogicStep, CouncilStep)):
-            if step.next and step.next not in step_ids:
-                errors.append(f"Step '{step_id}' points to non-existent next step '{step.next}'.")
-
-        # Check SwitchStep targets
-        elif isinstance(step, SwitchStep):
-            for condition, target_id in step.cases.items():
-                if target_id not in step_ids:
-                    errors.append(
-                        f"SwitchStep '{step_id}' case '{condition}' points to non-existent step '{target_id}'."
-                    )
-            if step.default and step.default not in step_ids:
-                errors.append(f"SwitchStep '{step_id}' default points to non-existent step '{step.default}'.")
-
-        # 3. Definitions References
-        if isinstance(step, AgentStep):
-            if step.agent not in manifest.definitions:
-                errors.append(f"Agent '{step.agent}' referenced in step '{step_id}' not found in definitions.")
-
-    return errors

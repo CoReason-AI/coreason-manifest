@@ -9,22 +9,24 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
 from coreason_manifest.v2.governance import check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (
+    AgentDefinition,
     AgentStep,
     ManifestMetadata,
     ManifestV2,
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_loose, validate_strict
 
 
 @pytest.fixture
 def basic_manifest() -> ManifestV2:
+    agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
     return ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test Agent"),
@@ -35,35 +37,28 @@ def basic_manifest() -> ManifestV2:
                 "step2": AgentStep(id="step2", agent="my-agent"),
             },
         ),
-        definitions={"my-agent": {}},  # Mock definition for strict check
+        definitions={"my-agent": agent_def},
     )
 
 
 def test_validation_loose_vs_strict() -> None:
     """Test that loose validation ignores dangling pointers while strict catches them."""
-    # Create a broken manifest (step1 points to missing step2)
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Broken Agent"),
-        workflow=Workflow(
-            start="step1",
-            steps={
-                "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
-            },
-        ),
-        definitions={"my-agent": {}},
-    )
+    # Now that ManifestV2 enforces strict validation, construction should fail.
 
-    # Loose validation should be clean (or just warnings)
-    warnings = validate_loose(manifest)
-    # validate_loose checks strict structural things like ID match, not pointers.
-    # So it should be empty here.
-    assert len(warnings) == 0
+    agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
 
-    # Strict validation should fail
-    errors = validate_strict(manifest)
-    assert len(errors) > 0
-    assert any("step2" in e for e in errors)
+    with pytest.raises(ValidationError, match="missing next step 'step2'"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Broken Agent"),
+            workflow=Workflow(
+                start="step1",
+                steps={
+                    "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
+                },
+            ),
+            definitions={"my-agent": agent_def},
+        )
 
 
 def test_governance_tool_risk() -> None:
@@ -77,11 +72,13 @@ def test_governance_tool_risk() -> None:
         description="Dangerous tool",
     )
 
+    agent_def = AgentDefinition(id="agent1", name="Agent 1", role="Worker", goal="Work", type="agent")
+
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Risky Agent"),
         workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")}),
-        definitions={"critical-tool": tool_def, "agent1": {}},
+        definitions={"critical-tool": tool_def, "agent1": agent_def},
     )
 
     # Config allowing only STANDARD
@@ -102,11 +99,13 @@ def test_governance_allowed_domains() -> None:
         risk_level=ToolRiskLevel.SAFE,
     )
 
+    agent_def = AgentDefinition(id="agent1", name="Agent 1", role="Worker", goal="Work", type="agent")
+
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Domain Agent"),
         workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")}),
-        definitions={"tool1": tool_def, "agent1": {}},
+        definitions={"tool1": tool_def, "agent1": agent_def},
     )
 
     config = GovernanceConfig(allowed_domains=["good.com"])

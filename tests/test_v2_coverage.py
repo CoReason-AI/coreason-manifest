@@ -2,10 +2,13 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
 from coreason_manifest.v2.governance import _risk_score, check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (
+    AgentDefinition,
     AgentStep,
     LogicStep,
     ManifestMetadata,
@@ -14,7 +17,7 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_loose, validate_strict
+from coreason_manifest.v2.validator import validate_loose
 
 # --- Governance Tests ---
 
@@ -44,7 +47,7 @@ def test_governance_uri_no_hostname() -> None:
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={}),
+        workflow=Workflow(start="s1", steps={"s1": LogicStep(id="s1", code="pass")}),
         definitions={"t1": tool},
     )
     config = GovernanceConfig(allowed_domains=["example.com"])
@@ -67,10 +70,10 @@ def test_governance_uri_trailing_dot() -> None:
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={}),
+        workflow=Workflow(start="s1", steps={"s1": LogicStep(id="s1", code="pass")}),
         definitions={"t1": tool},
     )
-    config = GovernanceConfig(allowed_domains=["example.com"])
+    config = GovernanceConfig(allowed_domains=["example.com"], allow_custom_logic=True)
 
     # strict_url_validation=True by default.
     # hostname "example.com." should become "example.com" and pass.
@@ -89,7 +92,7 @@ def test_governance_uri_parsing_error() -> None:
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={}),
+        workflow=Workflow(start="s1", steps={"s1": LogicStep(id="s1", code="pass")}),
         definitions={"t1": tool},
     )
     config = GovernanceConfig(allowed_domains=["example.com"])
@@ -113,13 +116,13 @@ def test_governance_loose_url_validation() -> None:
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={}),
+        workflow=Workflow(start="s1", steps={"s1": LogicStep(id="s1", code="pass")}),
         definitions={"t1": tool},
     )
 
     # Case mismatch with strict=False (assuming library lowercases hostname anyway, this test might just pass through)
     # But we want to ensure the code path `else: allowed_set = set(...)` is hit.
-    config = GovernanceConfig(allowed_domains=["example.com"], strict_url_validation=False)
+    config = GovernanceConfig(allowed_domains=["example.com"], strict_url_validation=False, allow_custom_logic=True)
     report = check_compliance_v2(manifest, config)
     # If parsing normalizes EXAMPLE.COM -> example.com, and allowed is example.com, it passes.
     assert report.passed
@@ -128,7 +131,9 @@ def test_governance_loose_url_validation() -> None:
     # allowed="Other.com", uri="other.com". strict=False.
     # hostname="other.com". allowed_set={"Other.com"}.
     # "other.com" in {"Other.com"} -> False.
-    config_fail = GovernanceConfig(allowed_domains=["Example.com"], strict_url_validation=False)
+    config_fail = GovernanceConfig(
+        allowed_domains=["Example.com"], strict_url_validation=False, allow_custom_logic=True
+    )
     report_fail = check_compliance_v2(manifest, config_fail)
     assert not report_fail.passed
 
@@ -158,15 +163,22 @@ def test_governance_custom_logic_violations() -> None:
 
 def test_validator_loose_id_mismatch() -> None:
     """Test loose validation catches ID mismatch."""
+    # Since ManifestV2 enforces strict integrity (agent ref), we need to bypass it or provide valid ref.
+    # But validate_integrity does NOT check key/id mismatch.
+    # However, validate_integrity checks if agent 'a' exists.
+
+    agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
+
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
         workflow=Workflow(
-            start="s1",
+            start="key1",  # Point to the key
             steps={
                 "key1": AgentStep(id="id1", agent="a")  # Mismatch
             },
         ),
+        definitions={"a": agent_def},
     )
     warnings = validate_loose(manifest)
     assert any("does not match" in w for w in warnings)
@@ -174,13 +186,15 @@ def test_validator_loose_id_mismatch() -> None:
 
 def test_validator_loose_invalid_switch_condition() -> None:
     """Test loose validation catches empty switch condition."""
+    # Need target 's2' to exist for strict validation
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
         workflow=Workflow(
             start="s1",
             steps={
-                "s1": SwitchStep(id="s1", cases={"": "s2"})  # Empty condition
+                "s1": SwitchStep(id="s1", cases={"": "s2"}),  # Empty condition
+                "s2": LogicStep(id="s2", code="pass"),
             },
         ),
     )
@@ -190,38 +204,44 @@ def test_validator_loose_invalid_switch_condition() -> None:
 
 def test_validator_strict_missing_start() -> None:
     """Test strict validation missing start step."""
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
-        definitions={"a": {}},
-    )
-    errors = validate_strict(manifest)
-    assert any("start step 'missing_start' not found" in e for e in errors)
+    from pydantic import ValidationError
+
+    agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
+
+    with pytest.raises(ValidationError, match="Start step 'missing_start' not found"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Test"),
+            workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
+            definitions={"a": agent_def},
+        )
 
 
 def test_validator_strict_switch_broken_targets() -> None:
     """Test strict validation broken switch targets."""
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(
-            start="s1",
-            steps={"s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")},
-        ),
-    )
-    errors = validate_strict(manifest)
-    assert any("case 'cond' points to non-existent" in e for e in errors)
-    assert any("default points to non-existent" in e for e in errors)
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="references missing step"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Test"),
+            workflow=Workflow(
+                start="s1",
+                steps={
+                    "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
+                },
+            ),
+        )
 
 
 def test_validator_strict_missing_agent_definition() -> None:
     """Test strict validation missing agent definition."""
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
-        definitions={},
-    )
-    errors = validate_strict(manifest)
-    assert any("Agent 'missing_agent' referenced in step 's1' not found" in e for e in errors)
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError, match="references missing agent"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Test"),
+            workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
+            definitions={},
+        )
