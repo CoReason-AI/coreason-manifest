@@ -36,7 +36,7 @@ class ClientCapabilities(CoReasonBaseModel):
 
 | Field | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `supported_events` | `List[str]` | `[]` | A list of [Presentation Schemas](./presentation_schemas.md) the client can render. Examples: `CITATION_BLOCK`, `MEDIA_CAROUSEL`, `PROGRESS_INDICATOR`. |
+| `supported_events` | `List[str]` | `[]` | A list of [Presentation Schemas](presentation_schemas.md) the client can render. Examples: `CITATION_BLOCK`, `MEDIA_CAROUSEL`, `PROGRESS_INDICATOR`. |
 | `prefers_markdown` | `bool` | `True` | If `True`, the agent should emit `MARKDOWN_BLOCK` or markdown-formatted text. If `False`, it should emit plain text. |
 | `image_resolution` | `str` | `None` | Hint for image generation/selection. Values: `low`, `high`, `auto`. |
 

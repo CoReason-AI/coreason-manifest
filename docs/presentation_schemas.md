@@ -100,7 +100,7 @@ class StreamError(CoReasonBaseModel):
 
 ## Streaming Wire Format
 
-When sending these events over a stream (Server-Sent Events), they are wrapped in a `StreamPacket`. See [SSE Wire Protocol Specification](./sse_wire_protocol.md) for details.
+When sending these events over a stream (Server-Sent Events), they are wrapped in a `StreamPacket`. See [SSE Wire Protocol Specification](transport/sse-spec.md) for details.
 
 ### ProgressUpdate
 

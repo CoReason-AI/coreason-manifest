@@ -78,7 +78,7 @@ These blocks are particularly useful for:
 *   **Rich Text**: Displaying formatted answers (`MarkdownBlock`).
 *   **Errors**: showing user-friendly error messages (`UserErrorBlock`).
 
-See [Presentation Schemas](./presentation_schemas.md) for detailed documentation on these types.
+See [Presentation Schemas](presentation_schemas.md) for detailed documentation on these types.
 
 ---
 
@@ -108,7 +108,7 @@ See [Presentation Schemas](./presentation_schemas.md) for detailed documentation
 - `chunk`: The string fragment generated.
 - `visual_cue`: "TEXT_BUBBLE".
 
-> **Note:** When using the new SSE Streaming Protocol, `NODE_STREAM` events are typically replaced by direct `DELTA` packets in the wire format. See [SSE Wire Protocol](./sse_wire_protocol.md).
+> **Note:** When using the new SSE Streaming Protocol, `NODE_STREAM` events are typically replaced by direct `DELTA` packets in the wire format. See [SSE Wire Protocol](transport/sse-spec.md).
 
 ### 4. `NODE_DONE`
 **When:** Execution completes successfully.

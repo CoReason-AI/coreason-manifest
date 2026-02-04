@@ -1,6 +1,6 @@
 # Runtime Agent Definition (V1)
 
-The **Runtime Agent Definition** (often referred to as the V1 Manifest) is the strict, machine-optimized Pydantic model used by the Coreason Engine to execute agents. Unlike the [Coreason Agent Manifest (CAM V2)](coreason_agent_manifest.md), which is designed for human authoring, this format is designed for runtime validation, integrity, and performance.
+The **Runtime Agent Definition** (often referred to as the V1 Manifest) is the strict, machine-optimized Pydantic model used by the Coreason Engine to execute agents. Unlike the [Coreason Agent Manifest (CAM V2)](specification.md), which is designed for human authoring, this format is designed for runtime validation, integrity, and performance.
 
 > **Note:** V1 components have been moved to the `coreason_manifest.v1` namespace. This document describes the internal runtime format which is typically generated from V2 manifests via the V2 Bridge.
 
@@ -23,7 +23,7 @@ An `AgentDefinition` consists of the following sections:
     *   **Interface Contracts**: Can reference a reusable `InterfaceDefinition` via `interface_id`.
     *   `inputs` and `outputs` are defined using immutable dictionaries (representing JSON Schemas). *Note: These are optional if `interface_id` is provided.*
     *   `injected_params` lists system-injected values (e.g., `user_context`).
-    *   See [Interface Contracts](interface_contracts.md) for details.
+    *   See [Interface Contracts](../shared/contracts.md) for details.
 
 3.  **Configuration (`AgentRuntimeConfig`)**:
     *   The "brain" of the agent.
@@ -46,7 +46,7 @@ An `AgentDefinition` consists of the following sections:
     *   `budget_caps`: Limits on cost or tokens.
     *   `human_in_the_loop`: Node IDs that trigger a pause for human approval.
     *   `allowed_domains`: Whitelisting for external access.
-    *   *Note: For external enforcement of organizational rules (e.g., blocking unsafe tools), see the [Governance & Policy Enforcement](governance_policy_enforcement.md) module.*
+    *   *Note: For external enforcement of organizational rules (e.g., blocking unsafe tools), see the [Governance & Policy Enforcement](../governance_policy_enforcement.md) module.*
 
 7.  **Deployment (`DeploymentConfig`)**:
     *   Specifies *how* the agent is hosted ("Zero-Surprise Deployment").
@@ -54,7 +54,7 @@ An `AgentDefinition` consists of the following sections:
     *   `resources`: Hardware limits (`cpu_cores`, `memory_mb`, `timeout_seconds`).
     *   `scaling_strategy`: `serverless` or `dedicated`.
     *   `concurrency_limit`: Max simultaneous requests.
-    *   See [Runtime Deployment Configuration](runtime_deployment_configuration.md) for details.
+    *   See [Runtime Deployment Configuration](../runtime_deployment_configuration.md) for details.
 
 8.  **Evaluation (`EvaluationProfile`)**:
     *   **Evaluation-Ready Metadata**: Defines test contracts directly in the manifest.
@@ -62,7 +62,7 @@ An `AgentDefinition` consists of the following sections:
     *   `golden_dataset_uri`: Reference to a test dataset.
     *   `grading_rubric`: List of `SuccessCriterion` for quality checks.
     *   `evaluator_model`: Model to use for evaluation.
-    *   See [Evaluation-Ready Metadata](evaluation.md) for details.
+    *   See [Evaluation-Ready Metadata](../evaluation.md) for details.
 
 9.  **Observability (`ObservabilityConfig`)**:
     *   `trace_level`: Controls the granularity of logs (`FULL`, `METADATA_ONLY`, `NONE`).
@@ -71,7 +71,7 @@ An `AgentDefinition` consists of the following sections:
 
 10. **Presentation (`PresentationEvent`)**:
     *   Standardized schemas for emitting UI-ready events (`THOUGHT_TRACE`, `CITATION_BLOCK`, `PROGRESS_INDICATOR`, etc.).
-    *   See the **[Presentation Schemas](presentation_schemas.md)** documentation for details.
+    *   See the **[Presentation Schemas](../presentation_schemas.md)** documentation for details.
 
 11. **Custom Metadata (`custom_metadata`)**:
     *   Container for arbitrary metadata extensions without breaking validation.

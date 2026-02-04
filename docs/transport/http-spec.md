@@ -74,7 +74,7 @@ The response format depends on the `delivery_mode`.
 Each event in the stream corresponds to a `StreamPacket` object. The payload of these events follows the **Strict Wire Format** defined in `src/coreason_manifest/definitions/presentation.py`.
 
 *   **Schema:** `src/coreason_manifest/definitions/presentation.py` (`StreamPacket`)
-*   **Protocol Spec:** [SSE Wire Protocol Specification](./sse_wire_protocol.md)
+*   **Protocol Spec:** [SSE Wire Protocol Specification](sse-spec.md)
 
 ##### The `StreamPacket` Model
 

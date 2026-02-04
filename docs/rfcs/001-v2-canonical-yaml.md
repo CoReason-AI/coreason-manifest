@@ -202,7 +202,7 @@ Manifest v2 supports composition through reference.
 ### The `$ref` Pattern
 Steps can reference components defined in the `definitions` block. This is critical for keeping the `workflow` block clean and readable.
 
-> **Update:** See [RFC 005: Secure Recursive Composition](./005-recursive-composition.md) for detailed specifications on file-based references, security boundaries ("Jail"), and cycle detection.
+> **Update:** See [RFC 005: Secure Recursive Composition](005-recursive-composition.md) for detailed specifications on file-based references, security boundaries ("Jail"), and cycle detection.
 
 ```yaml
 definitions:
