@@ -14,7 +14,7 @@ import pytest
 import yaml
 
 from coreason_manifest import Manifest, load
-from coreason_manifest.v2.spec.definitions import ToolDefinition
+from coreason_manifest.v2.spec.definitions import GenericDefinition, ToolDefinition
 
 
 def test_secure_loader_happy_path(tmp_path: Path) -> None:
@@ -94,16 +94,16 @@ def test_secure_loader_diamond_dependency(tmp_path: Path) -> None:
     # C (Leaf)
     # Using Generic definition structure (no type) to allow definitions if needed,
     # but here C is just a value.
-    def_c = {"val": "C"}
-    (tmp_path / "c.yaml").write_text(yaml.dump(def_c), encoding="utf-8")
+    dict_c = {"val": "C"}
+    (tmp_path / "c.yaml").write_text(yaml.dump(dict_c), encoding="utf-8")
 
     # A -> C
-    def_a = {"val": "A", "definitions": {"ref_c": {"$ref": "c.yaml"}}}
-    (tmp_path / "a.yaml").write_text(yaml.dump(def_a), encoding="utf-8")
+    dict_a = {"val": "A", "definitions": {"ref_c": {"$ref": "c.yaml"}}}
+    (tmp_path / "a.yaml").write_text(yaml.dump(dict_a), encoding="utf-8")
 
     # B -> C
-    def_b = {"val": "B", "definitions": {"ref_c": {"$ref": "c.yaml"}}}
-    (tmp_path / "b.yaml").write_text(yaml.dump(def_b), encoding="utf-8")
+    dict_b = {"val": "B", "definitions": {"ref_c": {"$ref": "c.yaml"}}}
+    (tmp_path / "b.yaml").write_text(yaml.dump(dict_b), encoding="utf-8")
 
     # Main -> A, B
     main_manifest = {
@@ -129,6 +129,9 @@ def test_secure_loader_diamond_dependency(tmp_path: Path) -> None:
     # definitions are GenericDefinition
     def_a = manifest.definitions["def_a"]
     def_b = manifest.definitions["def_b"]
+
+    assert isinstance(def_a, GenericDefinition)
+    assert isinstance(def_b, GenericDefinition)
 
     assert def_a.model_extra is not None
     assert def_b.model_extra is not None
