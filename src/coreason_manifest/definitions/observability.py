@@ -41,6 +41,10 @@ class CloudEvent(CoReasonBaseModel):
 class ReasoningTrace(CoReasonBaseModel):
     """
     A structured log entry for audit trails.
+
+    Warning:
+        This model does not automatically redact PII or secrets.
+        Ensure `inputs` and `outputs` are sanitized before logging.
     """
 
     model_config = {"frozen": True}

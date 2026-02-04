@@ -16,8 +16,8 @@ from pydantic import ValidationError
 
 from coreason_manifest.definitions.observability import CloudEvent, ReasoningTrace
 
-
 # --- Unit Tests ---
+
 
 def test_cloud_event_serialization() -> None:
     now = datetime.now(timezone.utc)
@@ -113,15 +113,11 @@ def test_immutability() -> None:
 
 # --- Edge Case Tests ---
 
+
 def test_cloud_event_minimal() -> None:
     """Test CloudEvent with only required fields."""
     now = datetime.now(timezone.utc)
-    event = CloudEvent(
-        id="evt-min",
-        source="urn:min",
-        type="test.min",
-        time=now
-    )
+    event = CloudEvent(id="evt-min", source="urn:min", type="test.min", time=now)
     dumped = event.dump()
     assert dumped["id"] == "evt-min"
     # data is optional and None by default, so exclude_none=True removes it
@@ -132,12 +128,7 @@ def test_cloud_event_minimal() -> None:
 
 def test_cloud_event_data_variations() -> None:
     """Test CloudEvent with different data shapes (None, Empty Dict)."""
-    base_args = {
-        "id": "evt-data",
-        "source": "urn:data",
-        "type": "test.data",
-        "time": datetime.now(timezone.utc)
-    }
+    base_args = {"id": "evt-data", "source": "urn:data", "type": "test.data", "time": datetime.now(timezone.utc)}
 
     # None
     evt_none = CloudEvent(**base_args, data=None)
@@ -162,7 +153,7 @@ def test_reasoning_trace_missing_optional() -> None:
         status="success",
         # inputs/outputs omitted (None)
         latency_ms=10.0,
-        timestamp=now
+        timestamp=now,
     )
 
     dumped = trace.dump()
@@ -176,11 +167,7 @@ def test_validation_failure_missing_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     with pytest.raises(ValidationError):
         # Missing 'id'
-        CloudEvent(
-            source="urn:test",
-            type="test",
-            time=datetime.now(timezone.utc)
-        ) # type: ignore
+        CloudEvent(source="urn:test", type="test", time=datetime.now(timezone.utc))  # type: ignore
 
     with pytest.raises(ValidationError):
         # Missing 'latency_ms'
@@ -189,11 +176,12 @@ def test_validation_failure_missing_fields() -> None:
             root_request_id=uuid4(),
             node_id="test",
             status="ok",
-            timestamp=datetime.now(timezone.utc)
-        ) # type: ignore
+            timestamp=datetime.now(timezone.utc),
+        )  # type: ignore
 
 
 # --- Complex Case Tests ---
+
 
 def test_complex_nested_payloads() -> None:
     """Test serialization of deeply nested complex data structures."""
@@ -202,22 +190,15 @@ def test_complex_nested_payloads() -> None:
             "profile": {
                 "name": "Test User",
                 "roles": ["admin", "editor"],
-                "settings": {"theme": "dark", "notifications": True}
+                "settings": {"theme": "dark", "notifications": True},
             },
-            "history": [
-                {"event": "login", "ts": 123456},
-                {"event": "click", "coords": {"x": 10, "y": 20}}
-            ]
+            "history": [{"event": "login", "ts": 123456}, {"event": "click", "coords": {"x": 10, "y": 20}}],
         },
-        "meta": "top-level"
+        "meta": "top-level",
     }
 
     event = CloudEvent(
-        id="evt-complex",
-        source="urn:complex",
-        type="test.complex",
-        time=datetime.now(timezone.utc),
-        data=complex_data
+        id="evt-complex", source="urn:complex", type="test.complex", time=datetime.now(timezone.utc), data=complex_data
     )
 
     dumped = event.dump()
@@ -241,7 +222,7 @@ def test_trace_chain_simulation() -> None:
         node_id="orchestrator",
         status="running",
         latency_ms=5.0,
-        timestamp=start_time
+        timestamp=start_time,
     )
 
     # 2. Child Trace (Analysis)
@@ -254,7 +235,7 @@ def test_trace_chain_simulation() -> None:
         status="success",
         inputs={"doc": "text"},
         latency_ms=50.0,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone.utc),
     )
 
     # 3. Child Trace (Generation) - child of Analysis (hypothetically, or usually child of root)
@@ -271,7 +252,7 @@ def test_trace_chain_simulation() -> None:
         status="success",
         outputs={"score": 0.9},
         latency_ms=10.0,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone.utc),
     )
 
     # Verification
