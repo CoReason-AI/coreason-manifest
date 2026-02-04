@@ -5,6 +5,7 @@ from coreason_manifest.v2.spec.contracts import (
     StateDefinition,
 )
 from coreason_manifest.v2.spec.definitions import (
+    AgentDefinition,
     AgentStep,
     ManifestMetadata,
     Workflow,
@@ -26,6 +27,11 @@ def test_usage_guide_programmatic_creation() -> None:
         },
     )
 
+    defs = {
+        "gpt-4-researcher": AgentDefinition(id="gpt-4-researcher", name="Researcher", type="agent", role="R", goal="G"),
+        "summarizer": AgentDefinition(id="summarizer", name="Summarizer", type="agent", role="S", goal="S"),
+    }
+
     # 3. Instantiate Manifest
     # Note: 'Recipe' is an alias for ManifestV2 in root
     manifest = Manifest(
@@ -35,6 +41,7 @@ def test_usage_guide_programmatic_creation() -> None:
         state=StateDefinition(),
         policy=PolicyDefinition(max_retries=3),
         workflow=workflow,
+        definitions=defs,
     )
 
     assert manifest.metadata.name == "Research Agent"
@@ -43,12 +50,14 @@ def test_usage_guide_programmatic_creation() -> None:
 
 def test_usage_guide_mutable_fields() -> None:
     """Replicates 'Accessing Fields' example from usage.md."""
+    agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
     manifest = Manifest(
         kind="Recipe",
         metadata=ManifestMetadata(name="Test", version="1.0.0"),
         interface=InterfaceDefinition(inputs={"topic": {"type": "string"}}, outputs={}),
         state=StateDefinition(),
         workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="a")}),
+        definitions={"a": agent_def},
     )
 
     # Reading is allowed

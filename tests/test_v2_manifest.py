@@ -9,6 +9,15 @@ def test_manifest_v2_validation() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Test Workflow", "x-design": {"x": 0, "y": 0}},
+        "definitions": {
+            "test-agent": {
+                "type": "agent",
+                "id": "test-agent",
+                "name": "Test Agent",
+                "role": "Tester",
+                "goal": "Test",
+            }
+        },
         "workflow": {
             "start": "step-1",
             "steps": {

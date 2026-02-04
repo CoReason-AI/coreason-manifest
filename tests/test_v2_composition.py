@@ -38,7 +38,7 @@ def test_simple_import(manifest_dir: Path) -> None:
         "kind": "Agent",
         "metadata": {"name": "Weather Agent"},
         "definitions": {"my_tool": {"$ref": "tool.yaml"}},
-        "workflow": {"start": "step1", "steps": {"step1": {"type": "agent", "id": "step1", "agent": "some-agent"}}},
+        "workflow": {"start": "step1", "steps": {"step1": {"type": "logic", "id": "step1", "code": "pass"}}},
     }
     main_path = manifest_dir / "main.yaml"
     with open(main_path, "w") as f:
