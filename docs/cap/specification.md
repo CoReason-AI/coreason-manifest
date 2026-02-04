@@ -1,8 +1,8 @@
-# Coreason Agent Manifest (CAM) V2
+# Coreason Agent Manifest (CAM)
 
-The **Coreason Agent Manifest (CAM)**, also known as **Manifest V2**, is the "Human-Centric" Canonical YAML format designed for defining Agents and Recipes in the Coreason ecosystem. It serves as the **default and primary interface** for developers and the Visual Builder.
+The **Coreason Agent Manifest (CAM)** is the "Human-Centric" Canonical YAML format designed for defining Agents and Recipes in the Coreason ecosystem. It serves as the **default and primary interface** for developers and the Visual Builder.
 
-> **Note:** The CAM is designed for ease of authoring. At runtime, the Coreason Engine compiles this YAML into strict, machine-optimized Pydantic models. For details on the runtime format, see the [Runtime Agent Definition (V1)](runtime-model.md) and [Runtime Recipe Definition (V1)](../cop/runtime-model.md).
+> **Note:** The CAM is designed for ease of authoring. At runtime, the Coreason Engine compiles this YAML into strict, machine-optimized Pydantic models.
 
 ## Root Object (`Manifest`)
 
@@ -145,7 +145,7 @@ Defines execution limits and governance rules.
 
 ## 5. Workflow (`Workflow`)
 
-Defines the steps and their flow. Unlike V1, which uses an explicit Edge List, V2 uses an implicit "Linked List" via the `next` field in each step.
+Defines the steps and their flow.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |

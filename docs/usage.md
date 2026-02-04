@@ -1,13 +1,13 @@
 # Usage Guide
 
-The `coreason-manifest` package serves as the **Shared Kernel** for the Coreason ecosystem. It provides the canonical Pydantic definitions and schemas for Agents, Workflows (Recipes), and Auditing.
+The `coreason-manifest` package serves as the **Shared Kernel** for the Coreason ecosystem. It provides the canonical Pydantic definitions and schemas for Agents and Workflows (Recipes).
 
 It is designed to be a pure data library, meaning it contains **no execution logic** (no servers, no engines, no policy enforcement engines). Its sole purpose is to define the *structure* and *validation rules* for data.
 
 ## Core Concepts
 
 ### 1. Agent & Recipe Definition
-The `Manifest` (V2) is the source of truth for an AI Agent or Recipe. It includes:
+The `Manifest` is the source of truth for an AI Agent or Recipe. It includes:
 - **Metadata**: Identity, versioning (Strict SemVer), and authorship.
 - **Interface**: Strictly typed modes of interaction (`inputs`, `outputs` as JSON Schema).
 - **Topology**: A graph-based execution flow (`Workflow`) supporting cyclic loops (e.g., for reflection).
@@ -23,7 +23,7 @@ Versions must strictly follow the `X.Y.Z` format (e.g., `1.0.0`). While `v1.0.0`
 
 ## Examples
 
-### Loading a Manifest (V2)
+### Loading a Manifest
 
 The recommended way to work with manifests is using the YAML loader, which handles recursive imports and validation.
 
@@ -39,11 +39,11 @@ print(f"Inputs: {manifest.interface.inputs.keys()}")
 
 ### Creating a Manifest Programmatically
 
-You can also construct the V2 object directly using Python classes.
+You can also construct the object directly using Python classes.
 
 ```python
-from coreason_manifest import Manifest, Recipe
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest import (
+    Recipe,
     ManifestMetadata,
     InterfaceDefinition,
     StateDefinition,
@@ -88,7 +88,7 @@ print(f"Manifest '{manifest.metadata.name}' created successfully.")
 
 ### Modifying Fields
 
-V2 Manifests are mutable to facilitate authoring and builder tools.
+Manifests are mutable to facilitate authoring and builder tools.
 
 ```python
 # Reading
@@ -100,7 +100,4 @@ manifest.interface.inputs["topic"] = {"type": "integer"}
 
 ## Advanced Documentation
 
-*   [Coreason Agent Manifest (V2)](cap/specification.md): The Canonical YAML Authoring Format.
-*   [Runtime Agent Definition (V1)](cap/runtime-model.md): The internal runtime model (legacy/compiled).
-*   [Runtime Recipe Definition (V1)](cop/runtime-model.md): The internal runtime model (legacy/compiled).
-*   [Migration Guide](migration_guide_v2.md): How to migrate from V1 to V2.
+*   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.

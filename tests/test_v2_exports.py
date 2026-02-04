@@ -12,8 +12,8 @@ def test_v2_defaults() -> None:
 
 
 def test_v1_removed_from_root() -> None:
+    # RecipeManifest was V1, should definitely be gone.
     with pytest.raises(AttributeError):
         _ = cm.RecipeManifest  # type: ignore[attr-defined]
 
-    with pytest.raises(AttributeError):
-        _ = cm.AgentDefinition  # type: ignore[attr-defined]
+    # AgentDefinition is now V2 and exported, so we don't check for its absence.

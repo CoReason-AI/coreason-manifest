@@ -9,7 +9,19 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from .v2.io import dump_to_yaml, load_from_yaml
-from .v2.spec.definitions import ManifestV2
+from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
+from .v2.spec.definitions import (
+    AgentDefinition,
+    AgentStep,
+    CouncilStep,
+    LogicStep,
+    ManifestMetadata,
+    ManifestV2,
+    Step,
+    SwitchStep,
+    ToolDefinition,
+    Workflow,
+)
 
 __version__ = "0.12.0"
 
@@ -18,4 +30,22 @@ Recipe = ManifestV2
 load = load_from_yaml
 dump = dump_to_yaml
 
-__all__ = ["Manifest", "Recipe", "load", "dump", "__version__"]
+__all__ = [
+    "Manifest",
+    "Recipe",
+    "load",
+    "dump",
+    "__version__",
+    "ManifestMetadata",
+    "AgentStep",
+    "Workflow",
+    "AgentDefinition",
+    "ToolDefinition",
+    "Step",
+    "LogicStep",
+    "SwitchStep",
+    "CouncilStep",
+    "InterfaceDefinition",
+    "StateDefinition",
+    "PolicyDefinition",
+]
