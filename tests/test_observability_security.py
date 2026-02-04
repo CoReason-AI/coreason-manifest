@@ -1,9 +1,10 @@
-import pytest
-from uuid import uuid4
-from typing import Any, Dict
-
 from datetime import datetime, timezone
+from typing import Any, Dict
+from uuid import uuid4
+
+import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.definitions.observability import CloudEvent, ReasoningTrace
 
 
