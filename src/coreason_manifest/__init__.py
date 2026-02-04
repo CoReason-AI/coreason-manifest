@@ -18,6 +18,7 @@ from .spec.cap import (
     ServiceResponse,
     StreamPacket,
 )
+from .v2.governance import check_compliance_v2
 from .v2.io import dump_to_yaml, load_from_yaml
 from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .v2.spec.definitions import (
@@ -32,6 +33,7 @@ from .v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
+from .v2.validator import validate_integrity, validate_loose
 
 __version__ = "0.15.0"
 
@@ -68,4 +70,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "StreamPacket",
+    "validate_integrity",
+    "validate_loose",
+    "check_compliance_v2",
 ]
