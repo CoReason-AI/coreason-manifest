@@ -48,7 +48,7 @@ from .v2.spec.definitions import (
 )
 from .v2.validator import validate_integrity, validate_loose
 
-__version__ = "0.15.0"
+__version__ = "0.17.0"
 
 Manifest = ManifestV2
 Recipe = ManifestV2
