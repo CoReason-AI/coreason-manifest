@@ -134,6 +134,10 @@ def test_multiple_refs_same_level(tmp_path: Path) -> None:
 
     assert isinstance(d1, GenericDefinition)
     assert isinstance(d2, GenericDefinition)
+
+    assert d1.model_extra is not None
+    assert d2.model_extra is not None
+
     assert d1.model_extra["val"] == "1"
     assert d2.model_extra["val"] == "2"
 
@@ -157,5 +161,7 @@ def test_recursive_false(tmp_path: Path) -> None:
     # Should be a GenericDefinition wrapping the raw dict {"$ref": "sub.yaml"}
     sub = manifest.definitions["sub"]
     assert isinstance(sub, GenericDefinition)
+    assert sub.model_extra is not None
+
     assert sub.model_extra["$ref"] == "sub.yaml"
     assert "val" not in sub.model_extra
