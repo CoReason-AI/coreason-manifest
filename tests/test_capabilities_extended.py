@@ -28,7 +28,7 @@ def test_edge_case_invalid_delivery_mode() -> None:
 def test_strictness_extra_fields() -> None:
     """Test that extra fields are forbidden."""
     with pytest.raises(ValidationError) as exc:
-        AgentCapabilities(extra_field="fail")
+        AgentCapabilities(extra_field="fail")  # type: ignore[call-arg]
     assert "Extra inputs are not permitted" in str(exc.value)
 
 
@@ -36,9 +36,9 @@ def test_immutability_deep() -> None:
     """Test that the model is truly frozen."""
     caps = AgentCapabilities()
 
-    # Direct assignment
+    # Direct assignment - use setattr to bypass mypy read-only check but trigger runtime validation
     with pytest.raises(ValidationError):
-        caps.history_support = False
+        setattr(caps, "history_support", False)  # noqa: B010
 
     # List mutation (since the list itself is mutable python object, but field assignment is blocked)
     # However, caps.delivery_mode is a list, which IS mutable in Python unless using Tuple.
@@ -57,7 +57,7 @@ def test_immutability_deep() -> None:
 
     # Re-assigning the field should fail
     with pytest.raises(ValidationError):
-        caps.delivery_mode = []
+        setattr(caps, "delivery_mode", [])  # noqa: B010
 
 
 def test_manifest_roundtrip_with_capabilities() -> None:
