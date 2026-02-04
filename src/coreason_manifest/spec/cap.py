@@ -8,23 +8,27 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Optional, Union
 from uuid import UUID
-from datetime import datetime
 
 from pydantic import ConfigDict
 
 from coreason_manifest.common import CoReasonBaseModel
 
+
 class HealthCheckStatus(str, Enum):
     """Status of the health check."""
+
     OK = "ok"
     DEGRADED = "degraded"
     MAINTENANCE = "maintenance"
 
+
 class HealthCheckResponse(CoReasonBaseModel):
     """Response for a health check request."""
+
     model_config = ConfigDict(frozen=True)
 
     status: HealthCheckStatus
@@ -32,15 +36,19 @@ class HealthCheckResponse(CoReasonBaseModel):
     version: str
     uptime_seconds: float
 
+
 class StreamPacket(CoReasonBaseModel):
     """A packet of data streaming from an agent."""
+
     model_config = ConfigDict(frozen=True)
 
     event: str
     data: Union[str, Dict[str, Any]]
 
+
 class ServiceResponse(CoReasonBaseModel):
     """Synchronous response from an agent service."""
+
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID
@@ -48,8 +56,10 @@ class ServiceResponse(CoReasonBaseModel):
     output: Dict[str, Any]
     metrics: Optional[Dict[str, Any]] = None
 
+
 class ServiceRequest(CoReasonBaseModel):
     """Request to an agent service."""
+
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID

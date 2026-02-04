@@ -8,35 +8,34 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import json
-from uuid import uuid4, UUID
 from datetime import datetime, timezone
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.cap import (
     HealthCheckResponse,
     HealthCheckStatus,
-    StreamPacket,
-    ServiceResponse,
     ServiceRequest,
+    ServiceResponse,
+    StreamPacket,
 )
 
 # --- Unit Tests ---
 
+
 def test_health_check_response_serialization() -> None:
     agent_id = uuid4()
     response = HealthCheckResponse(
-        status=HealthCheckStatus.OK,
-        agent_id=agent_id,
-        version="1.0.0",
-        uptime_seconds=123.45
+        status=HealthCheckStatus.OK, agent_id=agent_id, version="1.0.0", uptime_seconds=123.45
     )
     dumped = response.dump()
     assert dumped["status"] == "ok"
     assert dumped["agent_id"] == str(agent_id)
     assert dumped["version"] == "1.0.0"
     assert dumped["uptime_seconds"] == 123.45
+
 
 def test_stream_packet_creation() -> None:
     # Test with string data
@@ -46,16 +45,15 @@ def test_stream_packet_creation() -> None:
 
     # Test with dict data
     packet2 = StreamPacket(event="metadata", data={"tokens": 5, "model": "gpt-4"})
+    assert isinstance(packet2.data, dict)
     assert packet2.data["tokens"] == 5
+
 
 def test_service_response_serialization() -> None:
     req_id = uuid4()
     now = datetime.now(timezone.utc)
     response = ServiceResponse(
-        request_id=req_id,
-        created_at=now,
-        output={"result": "success"},
-        metrics={"latency": 100}
+        request_id=req_id, created_at=now, output={"result": "success"}, metrics={"latency": 100}
     )
     dumped = response.dump()
     assert dumped["request_id"] == str(req_id)
@@ -63,82 +61,78 @@ def test_service_response_serialization() -> None:
     assert dumped["created_at"] == now.isoformat().replace("+00:00", "Z")
     assert dumped["output"] == {"result": "success"}
 
+
 def test_service_request_instantiation() -> None:
     req_id = uuid4()
-    req = ServiceRequest(
-        request_id=req_id,
-        context={"user_id": "u123"},
-        payload={"query": "test"}
-    )
+    req = ServiceRequest(request_id=req_id, context={"user_id": "u123"}, payload={"query": "test"})
     assert req.request_id == req_id
     assert req.context["user_id"] == "u123"
 
+
 # --- Edge Case Tests ---
+
 
 def test_invalid_uuid_validation() -> None:
     with pytest.raises(ValidationError) as excinfo:
-        ServiceRequest(
-            request_id="not-a-uuid",  # type: ignore[arg-type]
-            context={},
-            payload={}
+        ServiceRequest.model_validate(
+            {
+                "request_id": "not-a-uuid",
+                "context": {},
+                "payload": {},
+            }
         )
     assert "Input should be a valid UUID" in str(excinfo.value)
 
+
 def test_invalid_enum_status() -> None:
     with pytest.raises(ValidationError) as excinfo:
-        HealthCheckResponse(
-            status="invalid_status",  # type: ignore[arg-type]
-            agent_id=uuid4(),
-            version="1.0.0",
-            uptime_seconds=10.0
+        HealthCheckResponse.model_validate(
+            {
+                "status": "invalid_status",
+                "agent_id": str(uuid4()),
+                "version": "1.0.0",
+                "uptime_seconds": 10.0,
+            }
         )
     # Pydantic v2 error message for enum
     assert "Input should be 'ok', 'degraded' or 'maintenance'" in str(excinfo.value)
+
 
 def test_missing_required_fields() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ServiceRequest(
             request_id=uuid4(),
             # Missing context and payload
-        ) # type: ignore[call-arg]
+        )  # type: ignore[call-arg]
     assert "Field required" in str(excinfo.value)
     assert "context" in str(excinfo.value)
     assert "payload" in str(excinfo.value)
 
+
 def test_stream_packet_invalid_data_type() -> None:
     with pytest.raises(ValidationError):
-        StreamPacket(
-            event="error",
-            data=[1, 2, 3] # type: ignore[arg-type] # List is not allowed, only str or Dict
+        StreamPacket.model_validate(
+            {
+                "event": "error",
+                "data": [1, 2, 3],
+            }
         )
+
 
 # --- Complex Case Tests ---
 
+
 def test_service_request_deep_nesting() -> None:
-    payload = {
-        "level1": {
-            "level2": {
-                "level3": {
-                    "data": "deep",
-                    "list": [1, 2, {"nested": "item"}]
-                }
-            }
-        }
-    }
-    req = ServiceRequest(
-        request_id=uuid4(),
-        context={},
-        payload=payload
-    )
+    payload = {"level1": {"level2": {"level3": {"data": "deep", "list": [1, 2, {"nested": "item"}]}}}}
+    req = ServiceRequest(request_id=uuid4(), context={}, payload=payload)
     dumped = req.dump()
     assert dumped["payload"]["level1"]["level2"]["level3"]["data"] == "deep"
     assert dumped["payload"]["level1"]["level2"]["level3"]["list"][2]["nested"] == "item"
 
+
 def test_round_trip_json_serialization() -> None:
     original_req = ServiceRequest(
-        request_id=uuid4(),
-        context={"session": "s1"},
-        payload={"action": "run", "params": {"x": 10}}
+        request_id=uuid4(), context={"session": "s1"}, payload={"action": "run", "params": {"x": 10}}
     )
 
     # Dump to JSON string
@@ -154,33 +148,22 @@ def test_round_trip_json_serialization() -> None:
     # Ensure deep equality
     assert loaded_req == original_req
 
+
 def test_immutability_frozen() -> None:
-    req = ServiceRequest(
-        request_id=uuid4(),
-        context={},
-        payload={}
-    )
+    req = ServiceRequest(request_id=uuid4(), context={}, payload={})
 
     with pytest.raises(ValidationError) as excinfo:
-        req.context = {"new": "context"} # type: ignore[misc]
+        req.context = {"new": "context"}  # type: ignore[misc]
 
     # Error message for frozen instance assignment
     assert "Instance is frozen" in str(excinfo.value)
 
+
 def test_type_preservation_in_dict() -> None:
-    """Ensure that native types in Dict[str, Any] are preserved and not aggressively coerced to strings if not needed."""
-    payload = {
-        "int_val": 123,
-        "float_val": 45.67,
-        "bool_val": True,
-        "none_val": None,
-        "list_val": [1, "two"]
-    }
-    req = ServiceRequest(
-        request_id=uuid4(),
-        context={},
-        payload=payload
-    )
+    """Ensure that native types in Dict[str, Any] are preserved."""
+    # Ensure they are not aggressively coerced to strings if not needed.
+    payload = {"int_val": 123, "float_val": 45.67, "bool_val": True, "none_val": None, "list_val": [1, "two"]}
+    req = ServiceRequest(request_id=uuid4(), context={}, payload=payload)
 
     # Dump using the CoReasonBaseModel.dump() which sets mode='json'
     dumped = req.dump()
@@ -193,17 +176,13 @@ def test_type_preservation_in_dict() -> None:
     assert dumped["payload"]["none_val"] is None
     assert dumped["payload"]["list_val"] == [1, "two"]
 
+
 def test_extra_fields_behavior() -> None:
     """Verify behavior when extra fields are passed (should be ignored or allowed, but not crash)."""
     # By default, Pydantic ignores extra fields unless configured otherwise.
     # We want to confirm it doesn't raise ValidationError.
 
-    data = {
-        "request_id": str(uuid4()),
-        "context": {},
-        "payload": {},
-        "extra_field": "should_be_ignored"
-    }
+    data = {"request_id": str(uuid4()), "context": {}, "payload": {}, "extra_field": "should_be_ignored"}
 
     # Should not raise
     req = ServiceRequest.model_validate(data)
