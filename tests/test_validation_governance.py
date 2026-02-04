@@ -9,18 +9,20 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+
 from coreason_manifest import (
-    Manifest,
-    Workflow,
     AgentStep,
+    GovernanceConfig,
+    LogicStep,
+    Manifest,
     ToolDefinition,
     ToolRiskLevel,
-    GovernanceConfig,
+    Workflow,
     check_compliance_v2,
     validate_integrity,
     validate_loose,
-    LogicStep
 )
+
 
 def test_draft_mode_loose() -> None:
     """Test that we can create a broken manifest and get warnings."""
@@ -30,8 +32,8 @@ def test_draft_mode_loose() -> None:
         metadata={"name": "Broken Agent"},
         workflow=Workflow(
             start="step1",
-            steps={}  # Missing step1
-        )
+            steps={},  # Missing step1
+        ),
     )
 
     # Assert instantiation succeeded (no crash)
@@ -45,14 +47,7 @@ def test_draft_mode_loose() -> None:
 
 def test_compiler_mode_strict() -> None:
     """Test that strict validation raises ValueError."""
-    manifest = Manifest(
-        kind="Agent",
-        metadata={"name": "Broken Agent"},
-        workflow=Workflow(
-            start="step1",
-            steps={}
-        )
-    )
+    manifest = Manifest(kind="Agent", metadata={"name": "Broken Agent"}, workflow=Workflow(start="step1", steps={}))
 
     with pytest.raises(ValueError, match="Start step 'step1' not found"):
         validate_integrity(manifest)
@@ -60,19 +55,14 @@ def test_compiler_mode_strict() -> None:
 
 def test_governance_risk() -> None:
     """Test governance policy enforcement on tool risk levels."""
-    tool = ToolDefinition(
-        id="nuke",
-        name="Nuke",
-        uri="https://nuke.com",
-        risk_level=ToolRiskLevel.CRITICAL
-    )
+    tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
     # We create a manifest. It can be referentially broken (no agent def),
     # governance check should still work on tools present.
     manifest = Manifest(
         kind="Agent",
         metadata={"name": "Risky Agent"},
         definitions={"nuke": tool},
-        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")})
+        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 
     config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD)
@@ -88,12 +78,7 @@ def test_governance_logic_block() -> None:
     manifest = Manifest(
         kind="Agent",
         metadata={"name": "Logic Agent"},
-        workflow=Workflow(
-            start="logic1",
-            steps={
-                "logic1": LogicStep(id="logic1", code="print('hello')")
-            }
-        )
+        workflow=Workflow(start="logic1", steps={"logic1": LogicStep(id="logic1", code="print('hello')")}),
     )
 
     config = GovernanceConfig(allow_custom_logic=False)
