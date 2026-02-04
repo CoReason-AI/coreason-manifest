@@ -2,11 +2,11 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from coreason_manifest.common import StrictUri, ToolRiskLevel
+from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 
 
-class DesignMetadata(BaseModel):
+class DesignMetadata(CoReasonBaseModel):
     """UI-specific metadata for the visual builder."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
