@@ -105,9 +105,7 @@ def test_agent_step_referencing_tool() -> None:
         },
     }
     manifest = ManifestV2.model_validate(data)
-    with pytest.raises(
-        ValueError, match="AgentStep 'step-1' references 'my-tool' which is not an AgentDefinition"
-    ):
+    with pytest.raises(ValueError, match="AgentStep 'step-1' references 'my-tool' which is not an AgentDefinition"):
         validate_integrity(manifest)
 
 

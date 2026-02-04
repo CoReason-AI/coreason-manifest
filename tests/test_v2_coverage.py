@@ -17,7 +17,7 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_loose, validate_integrity
+from coreason_manifest.v2.validator import validate_integrity, validate_loose
 
 # --- Governance Tests ---
 
@@ -224,9 +224,7 @@ def test_validator_strict_switch_broken_targets() -> None:
         metadata=ManifestMetadata(name="Test"),
         workflow=Workflow(
             start="s1",
-            steps={
-                "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
-            },
+            steps={"s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")},
         ),
     )
 
