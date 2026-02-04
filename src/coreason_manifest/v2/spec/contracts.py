@@ -1,18 +1,20 @@
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.common import CoReasonBaseModel
 
 
-class InterfaceDefinition(BaseModel):
+class InterfaceDefinition(CoReasonBaseModel):
     """Defines the input/output contract."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     inputs: Dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for arguments.")
     outputs: Dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for return values.")
 
 
-class StateDefinition(BaseModel):
+class StateDefinition(CoReasonBaseModel):
     """Defines the conversation memory/context structure."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -23,10 +25,10 @@ class StateDefinition(BaseModel):
     backend: Optional[str] = Field(None, description="Backend storage type (e.g., 'redis', 'memory').")
 
 
-class PolicyDefinition(BaseModel):
+class PolicyDefinition(CoReasonBaseModel):
     """Defines execution policy and governance rules."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     max_steps: Optional[int] = Field(None, description="Execution limit on number of steps.")
     max_retries: int = Field(3, description="Maximum number of retries.")

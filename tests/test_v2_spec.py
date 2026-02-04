@@ -138,3 +138,28 @@ def test_agent_definition_tools_type() -> None:
             goal="Goal",
             tools=bad_tools,
         )
+
+
+def test_manifest_serialization(base_manifest_kwargs: Dict[str, Any]) -> None:
+    """Test that ManifestV2 serializes correctly, especially Enums."""
+    tool = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
+    manifest = ManifestV2(
+        workflow=Workflow(
+            start="step1",
+            steps={"step1": AgentStep(id="step1", agent="agent1")},
+        ),
+        definitions={
+            "tool1": tool,
+            "agent1": AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["tool1"]),
+        },
+        **base_manifest_kwargs,
+    )
+
+    dumped = manifest.dump()
+
+    # Assert risk_level is serialized to string
+    # We must access it via the definitions dict
+    # Note: ManifestV2 definitions values are Union[Union[ToolDefinition, AgentDefinition], GenericDefinition]
+    # But when dumped, it is a dict of dicts.
+    assert dumped["definitions"]["tool1"]["risk_level"] == "safe"
+    assert isinstance(dumped["definitions"]["tool1"]["risk_level"], str)
