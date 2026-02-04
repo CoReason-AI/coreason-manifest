@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from .common import ToolRiskLevel
+from .definitions.identity import Identity
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     HealthCheckResponse,
@@ -61,6 +62,7 @@ __all__ = [
     "GovernanceConfig",
     "ComplianceReport",
     "ComplianceViolation",
+    "Identity",
     "HealthCheckResponse",
     "HealthCheckStatus",
     "ServiceRequest",
