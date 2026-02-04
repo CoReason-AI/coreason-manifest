@@ -1,159 +1,92 @@
 # **AGENTS.md**
 
-**Note to Agent:** This file contains strict rules and context for this repository. Read this before planning or executing tasks.
+**Note to Agent:** This file contains the **Supreme Law** for this repository. It defines the architectural constraints of a "Shared Kernel." Read this before planning or executing *any* task.
 
-# **PRIMARY DIRECTIVE: STRICT DEVELOPMENT PROTOCOL**
+# **PRIMARY DIRECTIVE: THE SHARED KERNEL PROTOCOL**
 
-**You are an advanced coding LLM tasked with implementing changes in this repository. It is imperative that you adhere strictly to this iterative, atomic, and test-driven development protocol. Do not attempt to implement the entire specification at once.**
+**Current Status:** v0.13.0 (Pure Data Library)
+**Role:** Definitive Source of Truth for Schemas and Contracts.
 
-## **The Protocol:**
+## **1. The "No Execution" Directives**
 
-1. **Comprehensive Analysis:** Thoroughly review the user's request and the detailed specifications provided. Examine the current state of the existing codebase to understand the existing architecture and what has already been implemented.
-2. **Decomposition and Planning:** Identify the delta between the current codebase and the specification. Break down all pending work into a list of small, atomic units. An atomic unit must be independently implementable and testable. **You MUST print all pending work as atomic units prior to selecting the first task.**
-3. **Select ONE Atomic Unit (The "One Step" Rule):** Choose one and only one atomic unit from your list to implement in this iteration. Select the smallest possible increment that moves the project toward the goal.
-4. **Implementation:** Build the functionality for this single atomic unit, ensuring it adheres strictly to the architectural patterns defined in this document.
-5. **Rigorous Testing:** Write comprehensive unit tests specifically for the implemented unit. This must include positive tests, negative tests, boundary conditions, and all foreseeable edge cases.
-6. **Validation and Regression Check:** Ensure all newly added tests pass. Crucially, verify that all pre-existing tests still pass. There must be zero regressions.
-   * *Constraint:* If a test fails more than twice after attempted fixes, STOP and re-evaluate the implementation strategy. Do not loop endlessly.
-7. **Commit:** Deliver the complete, high-quality implementation and its corresponding tests, ready for an atomic commit.
+You are strictly forbidden from introducing "Active" or "Runtime" logic into this repository. Adhere to the following architectural laws without exception:
 
-## **1. Project Overview**
+### **Law 1: Passive by Design (The "Import" Rule)**
+* **Constraint:** Importing `coreason_manifest` (or any submodule) MUST NOT trigger side effects.
+* **Forbidden:**
+    * Creating directories (e.g., `os.mkdir("logs")`) on module level.
+    * Configuring global logging sinks (e.g., `logger.add(...)`) on import.
+    * Opening sockets, database connections, or reading files immediately upon import.
+* **Allowed:** Defining classes, variables, and constants.
 
-* **Type:** Python Application / Library
-* **Language:** Python 3.12, 3.13, 3.14 (Latest 3 versions)
-* **Package Manager:** Poetry
-* **License:** Prosperity Public License 3.0 (Proprietary/Dual-licensed)
-* **Project Structure:** src layout (source code resides in src/coreason_manifest)
+### **Law 2: No Runtime Artifacts (The "Library" Rule)**
+* **Constraint:** This project is a **Library** (distributed as a Wheel), NOT a Service.
+* **Forbidden:**
+    * `Dockerfile` or `Containerfile` (Libraries are not deployed as containers).
+    * `docker-compose.yml`.
+    * Server Entry Points (e.g., `uvicorn`, `flask`, `main.py` that starts a loop).
+    * CI workflows that build/push containers (`docker.yml`).
 
-## **2. Environment & Commands**
+### **Law 3: Decoupled Contracts (The "Middleware" Rule)**
+* **Constraint:** The Manifest defines the *shape* of data, not the *method* of execution.
+* **Forbidden:** Dependencies on execution-layer libraries (e.g., `fastapi`, `starlette`, auth middleware, database drivers like `psycopg2`).
+* **Allowed:** Pure data dependencies (`pydantic`, `pyyaml`, `jsonschema`).
 
-The project is managed via Poetry. Do not use pip directly.
+---
 
-* **Install Dependencies:** poetry install
-* **Run Linter (Pre-commit):** poetry run pre-commit run --all-files
-* **Run Tests:** poetry run pytest
-* **Build Docs:** poetry run mkdocs build --strict
-* **Build Package:** poetry build (or python -m build in CI)
+## **2. Development Protocol**
 
-## **3. Development Rules**
+**You MUST follow this iterative process for every task:**
 
-### **Code Style & Quality**
+1.  **Architectural Audit:** Before writing code, ask: *"Does this change introduce a runtime side effect?"* If yes, STOP.
+2.  **Atomic Implementation:** Break tasks into the smallest testable units.
+3.  **Regression Check:** Ensure no re-introduction of "Ghosts" (e.g., do not accidentally re-add a Dockerfile because a generic template suggested it).
+4.  **Test Coverage:** Maintain 100% coverage. Tests must verify *logic*, not just existence.
 
-This project uses **Ruff** for Python linting/formatting and **Mypy** for typing.
+---
 
-* **Formatting:** Do not manually format. Run poetry run ruff format .
-* **Linting:** Fix violations automatically where possible: poetry run ruff check --fix .
-* **Typing:**
-  * Strict static typing is encouraged.
-  * Run checks with: poetry run mypy .
-  * Avoid Any wherever possible.
-* **Logging:** Use the project's centralized logging configuration.
-  * *Good:* from src.utils.logger import logger -> logger.info("...")
-* **Licensing:** Every .py file must start with the standard license header.
+## **3. Technical Standards**
 
-### **Legal & Intellectual Property**
+### **Environment & Package Management**
+* **Manager:** Poetry.
+* **Language:** Python 3.12+.
+* **License:** Prosperity Public License 3.0. Every file must include the license header.
 
-Strict Prohibition on External Code:
-You are strictly forbidden from copying, reproducing, imitating, or drawing from any external codebases, especially GPL, AGPL, or other non-permissive licenses or copy left licenses. All generated logic must be original or derived from permissively licensed (e.g., MIT, Apache 2.0) sources and properly attributed.
+### **Code Style & Typing**
+* **Linting:** `ruff check --fix` (Strict).
+* **Formatting:** `ruff format`.
+* **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. Avoid `dict` or `Any` where a schema can be defined.
 
-### **File Structure**
-
-* **Source Code:** src/coreason_manifest/
-  * main.py: Entry point.
-  * __init__.py: Package definition.
-* **Tests:** tests/
-  * Test files must start with test_.
-  * Use pytest fixtures where appropriate.
-
-### **Testing Guidelines**
-
-**Mandatory Requirement: 100% Test Coverage.**
-
-* **Test Strategy (Redundancy & Depth):**
-  * **Redundant Coverage:** Verify critical logic via multiple vectors (e.g., unit tests for isolation AND integration tests for workflow). Overlap is desired.
-  * **Simple Tests:** Verify happy paths and basic functionality.
-  * **Complex Tests:** Verify multi-step workflows, state mutations, and heavy computation.
-  * **Edge Cases:** Explicitly test boundary values, empty inputs, null states, and error handling.
-  * **Exclusions:** Use # pragma: no cover sparingly and **only** for defensive code that is unreachable in standard execution.
-  * **No Throwaway Scripts:** Never create temporary test files (e.g., temp.py). Always add proper tests to the tests/ directory.
-* **External Services & APIs:**
-  * **Scenario A (Default):** Use mocks (unittest.mock, pytest-mock, or respx) for ALL external calls.
-  * **Scenario B (Credentials Provided):** If the user provides API keys or connection strings:
-    * **DO NOT** remove the mocks.
-    * **ADD** a separate suite of live integration tests marked with @pytest.mark.live.
-    * **Standard Env Vars:** Expect Postgres credentials in PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE.
-* **Safety:** Never hardcode credentials in tests. Use environment variables.
-
-## **4. Architecture & Security**
-
-### **Logging & Observability**
-
-This project enforces a centralized logging architecture using the `loguru` library.
-
-*   **Standard:** `loguru` is the exclusive logging library. Do not use the built-in `logging` module or `print` statements.
-*   **Outputs (Sinks):**
-    *   **Console:** `stderr` (Human-readable text).
-    *   **File:** `logs/app.log` (JSON-formatted, rotated every 500 MB or 1 day, retained for 10 days).
-*   **Usage Example:**
-
+### **Logging (Passive Pattern)**
+* **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.
+* **Consumer Responsibility:** The consuming application (Builder/Engine) will configure sinks, formats, and levels.
+* **Pattern:**
     ```python
-    from src.utils.logger import logger
-
-    # Inside an Agent or Module
-    logger.info("Agent started task", task_id="123")
-    try:
-        ...
-    except Exception:
-        logger.exception("Agent failed to execute task")
+    from coreason_manifest.utils.logger import logger
+    # usage is fine
+    logger.debug("Validating manifest...")
+    # configuration (logger.add) is FORBIDDEN in library code
     ```
 
-### **Configuration Standards (Environment Variables)**
+## **4. File Structure Constraints**
 
-Adhere to 12-Factor App principles. Use these standard variable names:
+* **`src/coreason_manifest/`**:
+    * **`spec/`**: Pure Pydantic models (The "Blueprint").
+    * **`policies/`**: OPA Rego files (if applicable, treated as data).
+    * **`utils/`**: Pure utility functions (no side effects).
+* **Root**:
+    * **NO** `Dockerfile`.
+    * **NO** `app.py` or `server.py`.
 
-* **Core:**
-  * APP_ENV: development, testing, production.
-  * DEBUG: true or false.
-  * SECRET_KEY: For cryptographic signing/sessions.
-* **Logging:**
-  * LOG_LEVEL: DEBUG, INFO, WARNING, ERROR (Configure loguru with this).
-* **Infrastructure (if applicable):**
-  * SSH_PRIVATE_KEY / SSH_USER: If managing remote connections.
-  * AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY: For AWS services.
+## **5. Testing Guidelines**
 
-### **CI/CD Context**
+* **Mock External Interactions:** Since this is a pure library, unit tests should mock *everything* external. There should be no need for integration tests against real databases or APIs within this repo.
+* **Schema Validation Tests:** Focus heavily on testing valid/invalid YAML configurations against the Pydantic models.
+* **"Passive" Tests:** specific tests (like `test_logger_creation.py`) must exist to PROVE that importing the library does not modify the system state.
 
-* **CI Environment:** GitHub Actions (Matrix testing on Ubuntu, Windows, MacOS).
-* **Python Versions:** Tests run against Python 3.12, 3.13, and 3.14.
+## **6. Human-in-the-Loop Triggers**
 
-### **Dependencies**
-
-* **Management:** Always add dependencies via poetry add <package>.
-* **Lock File:** poetry.lock must be committed.
-* **Vulnerability Scanning:** CI uses Trivy. Ensure no Critical/High vulnerabilities are introduced.
-
-## **5. Documentation**
-
-* Documentation is built with **MkDocs Material**.
-* Update docs/index.md or add new markdown files in docs/ when adding features.
-* Ensure all public functions have docstrings (Google or NumPy style).
-
-## **6. Workflow & Debugging Protocol**
-
-If you encounter an error (e.g., test failure, linting error), follow this STRICT sequence:
-
-1. **Read the Logs:** Do not guess. Read the complete error message.
-2. **Isolate:** If multiple tests fail, focus on the simplest failure first.
-3. **Reproduction:** If the error is obscure, create a minimal reproduction case within the test suite (not a temp file).
-4. **Fix:** Apply the fix.
-5. **Verify:** Run the specific test case again.
-
-## **7. Human-in-the-Loop Triggers**
-
-STOP and ASK the user before:
-
-
-* Modifying database migrations or schema files.
-* Deleting any file outside of src/ or tests/.
-* Adding a dependency that requires OS-level libraries (e.g., libpq-dev).
-* Committing any secrets or API keys (even for testing).
+**STOP and ASK the user if:**
+* You feel a feature requires adding a dependency that is not `pydantic` or `yaml`.
+* You are tempted to add a "helper script" that runs a server.
+* You encounter a requirement that seems to violate the "Shared Kernel" philosophy.
