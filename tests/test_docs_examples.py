@@ -74,3 +74,28 @@ def test_migration_guide_v2_standard_import() -> None:
 
     assert Manifest.__name__ == "ManifestV2"
     assert callable(load)
+
+
+def test_vignette_example() -> None:
+    """Replicates the 'In Practice' example from VIGNETTE.md."""
+    from coreason_manifest import AgentDefinition
+
+    # 1. Load Raw Data
+    raw_data = {
+        "type": "agent",
+        "id": "research-agent-001",
+        "name": "Deep Researcher",
+        "role": "Senior Researcher",
+        "goal": "Conduct deep internet research on specified topics.",
+        "backstory": "You are a meticulous researcher who verifies all sources.",
+        "model": "gpt-4-turbo",
+        "tools": ["google-search", "web-scraper"],
+        "knowledge": [],
+    }
+
+    # 2. Validate Structure
+    agent = AgentDefinition(**raw_data)
+
+    # 3. Happy Path
+    assert agent.name == "Deep Researcher"
+    assert len(agent.tools) == 2

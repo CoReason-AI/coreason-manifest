@@ -105,6 +105,22 @@ def test_all_step_types_usage() -> None:
                 },
             },
         },
+        "definitions": {
+            "agent-1": {
+                "type": "agent",
+                "id": "agent-1",
+                "name": "Agent 1",
+                "role": "agent",
+                "goal": "act",
+            },
+            "agent-2": {
+                "type": "agent",
+                "id": "agent-2",
+                "name": "Agent 2",
+                "role": "agent",
+                "goal": "act",
+            },
+        },
     }
     manifest = ManifestV2.model_validate(data)
     assert len(manifest.workflow.steps) == 4

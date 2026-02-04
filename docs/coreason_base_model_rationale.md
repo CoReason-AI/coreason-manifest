@@ -16,7 +16,7 @@ This led to repetitive boilerplate code and potential errors where different par
 
 ## The Solution: CoReasonBaseModel
 
-`CoReasonBaseModel` serves as the single source of truth for serialization logic across the entire Coreason Manifest ecosystem. It encapsulates the optimal Pydantic configuration to ensure consistent, safe, and easy-to-use JSON serialization.
+`CoReasonBaseModel` serves as a source of truth for serialization logic for specific parts of the Coreason Manifest ecosystem. It encapsulates the optimal Pydantic configuration to ensure consistent, safe, and easy-to-use JSON serialization.
 
 ### Key Features
 
@@ -24,38 +24,38 @@ This led to repetitive boilerplate code and potential errors where different par
     *   **Purpose**: Returns a Python dictionary that is **guaranteed to be JSON-serializable**.
     *   **Implementation**: It calls `self.model_dump(mode='json', by_alias=True, exclude_none=True)`.
     *   **Benefit**: Consumers can pass the output of `.dump()` directly to `json.dumps()` or any other JSON-compliant API without worrying about `UUID` or `datetime` serialization errors.
-    *   **DRY Principle**: The specific flags (`mode='json'`, `by_alias=True`, `exclude_none=True`) are defined once, preventing configuration drift across the codebase.
+    *   **DRY Principle**: The specific flags (`mode='json'`, `by_alias=True`, `exclude_none=True`) are defined once, preventing configuration drift.
 
 2.  **`to_json()` Method**:
     *   **Purpose**: Returns a JSON string representation of the model.
     *   **Implementation**: It calls `self.model_dump_json(by_alias=True, exclude_none=True)`.
     *   **Benefit**: Provides a quick, one-line way to get a valid JSON string for logging, storage, or HTTP responses.
 
-### Consistency Across Artifacts
+### Usage in the Ecosystem
 
-By having all "root" level artifacts inherit from `CoReasonBaseModel` (or `pydantic.BaseModel` configured similarly), we ensure uniform behavior:
+While core definitions like `AgentDefinition`, `Recipe`, and `Workflow` inherit directly from `pydantic.BaseModel` to maintain standard Pydantic behavior for maximal compatibility with external tools, shared configuration models used for governance and reporting utilize `CoReasonBaseModel` for its enhanced serialization capabilities.
 
-*   **`AgentDefinition`**
-*   **`Recipe`**
-*   **`Workflow`**
 *   **`GovernanceConfig`**
-
-This consistency simplifies the mental model for developers working with different parts of the Coreason ecosystem.
+*   **`ComplianceViolation`**
+*   **`ComplianceReport`**
 
 ## Usage Example
 
 ```python
-from coreason_manifest import AgentDefinition
-
-# Load an agent (assuming valid data)
-agent = AgentDefinition(...)
-
-# Get a JSON-safe dictionary (UUIDs and datetimes are strings)
-safe_dict = agent.model_dump(mode='json')
+from coreason_manifest.governance import GovernanceConfig, ToolRiskLevel
 import json
+
+# Create a governance config
+config = GovernanceConfig(
+    max_risk_level=ToolRiskLevel.SAFE,
+    strict_url_validation=True
+)
+
+# Get a JSON-safe dictionary (enums are strings)
+safe_dict = config.dump()
 print(json.dumps(safe_dict)) # Works perfectly
 
 # Get a JSON string directly
-json_str = agent.model_dump_json()
+json_str = config.to_json()
 print(json_str)
 ```
