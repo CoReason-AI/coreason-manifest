@@ -99,3 +99,14 @@ def test_vignette_example() -> None:
     # 3. Happy Path
     assert agent.name == "Deep Researcher"
     assert len(agent.tools) == 2
+
+
+def test_agents_md_logger_example() -> None:
+    """Replicates the 'Passive Pattern' example from AGENTS.md."""
+    from coreason_manifest.utils.logger import logger
+
+    # usage is fine
+    logger.debug("Validating manifest...")
+    # configuration (logger.add) is FORBIDDEN in library code
+    # We assert nothing raised and logger exists
+    assert logger is not None
