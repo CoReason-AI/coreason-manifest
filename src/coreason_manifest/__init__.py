@@ -23,6 +23,9 @@ from .v2.spec.definitions import (
     Workflow,
 )
 
+from .common import ToolRiskLevel
+from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+
 __version__ = "0.14.0"
 
 Manifest = ManifestV2
@@ -48,4 +51,8 @@ __all__ = [
     "InterfaceDefinition",
     "StateDefinition",
     "PolicyDefinition",
+    "ToolRiskLevel",
+    "GovernanceConfig",
+    "ComplianceReport",
+    "ComplianceViolation",
 ]
