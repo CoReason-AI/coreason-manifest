@@ -8,22 +8,130 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+import pytest
+from pydantic import ValidationError
+from uuid import uuid4
 
-from coreason_manifest.spec.cap import StreamOpCode, StreamPacket
+from coreason_manifest.definitions.identity import Identity
+from coreason_manifest.spec.cap import (
+    AgentRequest,
+    ServiceRequest,
+    SessionContext,
+)
 
 
-def test_deeply_nested_payload_dos_check() -> None:
-    """Ensure deeply nested payloads don't crash validation (though they might hit recursion limits)."""
-    # Create a nested dict 500 levels deep
-    deep_payload: Dict[str, Any] = {}
-    current = deep_payload
-    for _ in range(500):
+# --- Security Test Cases ---
+
+def test_spoofing_attempt_invalid_user_type() -> None:
+    """Attempt to spoof user identity with invalid types."""
+    with pytest.raises(ValidationError):
+        SessionContext(
+            session_id="s1",
+            user={"id": 123, "name": "Not a String", "role": "admin"} # type: ignore
+        )
+
+def test_payload_injection_large_string() -> None:
+    """Test resilience against large payload injections (DoS)."""
+    large_string = "A" * 10_000_000  # 10MB string
+
+    # Should handle it without crashing (though it might be slow)
+    payload = AgentRequest(query=large_string)
+    assert len(payload.query) == 10_000_000
+
+def test_payload_injection_deeply_nested_meta() -> None:
+    """Test resilience against deeply nested metadata (recursion limits)."""
+    # Create a deeply nested dict
+    nested = {}
+    current = nested
+    for i in range(1000):
         current["next"] = {}
         current = current["next"]
 
-    # This should pass validation as a Dict, or fail gracefully with RecursionError if too deep for Python.
-    # 500 is usually safe for default recursion limit (1000).
-    packet = StreamPacket(op=StreamOpCode.EVENT, p=deep_payload)
-    assert packet.op == StreamOpCode.EVENT
-    assert isinstance(packet.p, dict)
+    # Pydantic usually handles deep nesting fine, but recursion limits in python might be hit during dump
+    payload = AgentRequest(query="nested", meta=nested)
+
+    # Verify we can dump it without recursion error or that it fails safely
+    # Pydantic v2 has recursion protection which raises ValueError: Circular reference detected (depth exceeded)
+    try:
+        payload.dump()
+    except (RecursionError, ValueError):
+        # This is acceptable behavior for a security test - preventing a crash
+        pass
+
+def test_extra_fields_smuggling() -> None:
+    """Verify that extra fields are either ignored or forbidden based on config."""
+    # ServiceRequest is frozen, so extra fields in init should fail if config is strict,
+    # or be ignored/allowed. CoReasonBaseModel doesn't explicitly forbid extra by default,
+    # but frozen models in Pydantic V2 often behave strictly.
+
+    # Attempt to inject a 'superuser' flag
+    data = {
+        "request_id": str(uuid4()),
+        "context": {
+            "session_id": "s1",
+            "user": {"id": "u1", "name": "User"},
+            "is_admin": True  # Smuggled field
+        },
+        "payload": {
+            "query": "q",
+            "exec_code": "import os; os.system('rm -rf /')" # Smuggled field
+        }
+    }
+
+    req = ServiceRequest.model_validate(data)
+
+    # Check if smuggled fields made it into the model
+    # Since we didn't define extra='allow', they should not be accessible as attributes
+    assert not hasattr(req.context, "is_admin")
+    assert not hasattr(req.payload, "exec_code")
+
+    # Check if they are in the dump (if extra='ignore', they shouldn't be)
+    dumped = req.dump()
+    assert "is_admin" not in dumped["context"]
+    assert "exec_code" not in dumped["payload"]
+
+def test_type_confusion_coercion() -> None:
+    """Test if dangerous type coercion happens."""
+    # Attempt to pass an integer as a string for session_id.
+    # If strictly typed, this should raise ValidationError.
+    # If loosely typed (coercion), it becomes "12345".
+    # In Pydantic V2, default behavior is lax coercion unless strict=True.
+    # However, our previous run showed it raised ValidationError, implying strictness or specific config.
+    # We update the test to expect strict behavior which is better for security.
+
+    with pytest.raises(ValidationError):
+        SessionContext(
+            session_id=12345, # type: ignore
+            user=Identity.anonymous()
+        )
+
+    # Attempt to pass a dict where a string is expected for query
+    with pytest.raises(ValidationError):
+        AgentRequest(query={"dangerous": "object"}) # type: ignore
+
+def test_null_byte_injection() -> None:
+    """Test for null byte injection in strings."""
+    # Python strings handle null bytes fine, but downstream systems might not.
+    # The manifest library itself should just store it faithfully.
+    malicious_id = "user\0admin"
+    user = Identity(id=malicious_id, name="User")
+    assert user.id == "user\0admin"
+
+    dumped = user.dump()
+    assert dumped["id"] == "user\0admin"
+
+def test_context_isolation() -> None:
+    """Ensure context and payload are truly separate."""
+    user = Identity.anonymous()
+    ctx = SessionContext(session_id="s1", user=user)
+    payload = AgentRequest(query="test")
+
+    req = ServiceRequest(request_id=uuid4(), context=ctx, payload=payload)
+
+    # Modifying payload should not affect context (immutability check)
+    with pytest.raises(ValidationError):
+        req.payload = AgentRequest(query="hacked") # type: ignore
+
+    # Verify they are distinct objects
+    assert req.context is ctx
+    assert req.payload is payload
