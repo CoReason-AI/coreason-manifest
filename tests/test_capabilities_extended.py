@@ -1,4 +1,3 @@
-
 import pytest
 from pydantic import ValidationError
 
@@ -22,14 +21,14 @@ def test_edge_case_duplicate_delivery_mode() -> None:
 def test_edge_case_invalid_delivery_mode() -> None:
     """Test that invalid strings raise ValidationError."""
     with pytest.raises(ValidationError) as exc:
-        AgentCapabilities(delivery_mode=["invalid_mode"])  # type: ignore
+        AgentCapabilities(delivery_mode=["invalid_mode"])
     assert "Input should be 'request_response' or 'sse'" in str(exc.value)
 
 
 def test_strictness_extra_fields() -> None:
     """Test that extra fields are forbidden."""
     with pytest.raises(ValidationError) as exc:
-        AgentCapabilities(extra_field="fail")  # type: ignore
+        AgentCapabilities(extra_field="fail")
     assert "Extra inputs are not permitted" in str(exc.value)
 
 
@@ -39,7 +38,7 @@ def test_immutability_deep() -> None:
 
     # Direct assignment
     with pytest.raises(ValidationError):
-        caps.history_support = False  # type: ignore
+        caps.history_support = False
 
     # List mutation (since the list itself is mutable python object, but field assignment is blocked)
     # However, caps.delivery_mode is a list, which IS mutable in Python unless using Tuple.
@@ -58,7 +57,7 @@ def test_immutability_deep() -> None:
 
     # Re-assigning the field should fail
     with pytest.raises(ValidationError):
-        caps.delivery_mode = []  # type: ignore
+        caps.delivery_mode = []
 
 
 def test_manifest_roundtrip_with_capabilities() -> None:
