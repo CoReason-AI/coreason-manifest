@@ -1,6 +1,8 @@
-from pydantic import ValidationError
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest import AgentRequest, ServiceContract
+
 
 def test_agent_request_serialization() -> None:
     req = AgentRequest(query="Hello", conversation_id="123")
@@ -9,6 +11,7 @@ def test_agent_request_serialization() -> None:
     assert dump["conversation_id"] == "123"
     assert dump["files"] == []
     assert dump["meta"] == {}
+
 
 def test_service_contract_generation() -> None:
     schema = ServiceContract.generate_openapi()
@@ -32,6 +35,7 @@ def test_service_contract_generation() -> None:
     assert "request_id" in resp_200["properties"]
     assert "output" in resp_200["properties"]
 
+
 def test_agent_request_defaults() -> None:
     """Test that default values are correctly populated."""
     req = AgentRequest(query="Just checking")
@@ -45,6 +49,7 @@ def test_agent_request_defaults() -> None:
     assert "conversation_id" not in dump
     assert dump["meta"] == {}
 
+
 def test_agent_request_immutability() -> None:
     """Test that AgentRequest is frozen/immutable."""
     req = AgentRequest(query="Immutable?")
@@ -53,19 +58,21 @@ def test_agent_request_immutability() -> None:
         # or just suppress the static error if running mypy, but here we run pytest.
         # But python sees it as attribute error if using slots, or validation error if pydantic.
         # Pydantic v2 raises ValidationError.
-        req.query = "Changed" # type: ignore
+        req.query = "Changed"  # type: ignore
+
 
 def test_agent_request_complex_meta() -> None:
     """Test AgentRequest with complex nested metadata."""
     meta = {
         "user_info": {"timezone": "UTC", "role": "admin"},
         "history": [1, 2, 3],
-        "flags": {"experimental": True}
+        "flags": {"experimental": True},
     }
     req = AgentRequest(query="Complex", meta=meta)
     dump = req.dump()
     assert dump["meta"]["user_info"]["timezone"] == "UTC"
     assert dump["meta"]["history"] == [1, 2, 3]
+
 
 def test_agent_request_with_files() -> None:
     """Test AgentRequest with files list."""
@@ -74,6 +81,7 @@ def test_agent_request_with_files() -> None:
     dump = req.dump()
     assert len(dump["files"]) == 2
     assert dump["files"][0] == "s3://bucket/file1.txt"
+
 
 def test_service_contract_schema_details() -> None:
     """Deep check of the generated OpenAPI schema."""

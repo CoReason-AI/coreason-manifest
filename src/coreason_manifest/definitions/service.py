@@ -28,7 +28,9 @@ class ServiceContract:
                 "summary": "Invoke Agent",
                 "requestBody": {
                     "content": {
-                        "application/json": {"schema": ServiceRequest.model_json_schema()}
+                        "application/json": {
+                            "schema": ServiceRequest.model_json_schema()
+                        }
                     }
                 },
                 "responses": {
