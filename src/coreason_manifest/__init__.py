@@ -18,6 +18,7 @@ from .definitions.presentation import (
     PresentationEvent,
     PresentationEventType,
 )
+from .definitions.service import AgentRequest, ServiceContract
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     ErrorSeverity,
@@ -94,4 +95,6 @@ __all__ = [
     "validate_integrity",
     "validate_loose",
     "check_compliance_v2",
+    "AgentRequest",
+    "ServiceContract",
 ]
