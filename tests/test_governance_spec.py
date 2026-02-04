@@ -39,19 +39,14 @@ def test_governance_config_serialization() -> None:
     json_str = config.to_json()
     assert '"max_risk_level":"standard"' in json_str
 
+
 def test_compliance_report_serialization() -> None:
     """Test that ComplianceReport and ComplianceViolation serialize correctly."""
     violation = ComplianceViolation(
-        rule="no_critical_tools",
-        message="Critical tools are forbidden.",
-        component_id="tool-1",
-        severity="error"
+        rule="no_critical_tools", message="Critical tools are forbidden.", component_id="tool-1", severity="error"
     )
 
-    report = ComplianceReport(
-        passed=False,
-        violations=[violation]
-    )
+    report = ComplianceReport(passed=False, violations=[violation])
 
     data = report.dump()
     assert data["passed"] is False
@@ -60,6 +55,7 @@ def test_compliance_report_serialization() -> None:
     assert v_data["rule"] == "no_critical_tools"
     assert v_data["severity"] == "error"
 
+
 def test_governance_config_strictness() -> None:
     """Test that GovernanceConfig forbids extra fields."""
     with pytest.raises(ValidationError) as exc:
@@ -67,12 +63,13 @@ def test_governance_config_strictness() -> None:
 
     assert "Extra inputs are not permitted" in str(exc.value)
 
+
 def test_compliance_violation_strictness() -> None:
     """Test that ComplianceViolation forbids extra fields."""
     with pytest.raises(ValidationError) as exc:
         ComplianceViolation(
             rule="rule",
             message="msg",
-            invalid_field="x"  # type: ignore[call-arg]
+            invalid_field="x",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(exc.value)
