@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coreason_manifest"
-version = "0.10.0"
+version = "0.12.0"
 description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
 authors = ["Gowtham A Rao <gowtham.rao@coreason.ai>"]
 license = "Prosperity-3.0"
@@ -13,6 +13,7 @@ loguru = "^0.7.2"
 pydantic = "^2.12.5"
 pyyaml = "^6.0.3"
 coreason-identity = "^0.4.1"
+jsonschema = "^4.19.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"
@@ -32,7 +33,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "coreason_manifest"
-version = "0.10.0"
+version = "0.12.0"
 description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
 readme = "README.md"
 requires-python = ">=3.12"

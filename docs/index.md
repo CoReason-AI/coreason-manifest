@@ -1,14 +1,9 @@
-# Welcome to coreason_manifest
+# Welcome to Coreason Manifest
 
-This is the documentation for the coreason_manifest project.
+This is the documentation for the `coreason-manifest` project, which defines the standard schemas and protocols for the Coreason AI ecosystem.
 
-## Core Concepts
+## Documentation
 
-*   [Atomic Agents](atomic_agents.md): Understand how to define simple, prompt-based agents without complex topologies.
-*   [Agent Behavior Protocols](agent_behavior_protocols.md): The standard interfaces (`AgentInterface`) for agent implementation.
-*   [Transport-Layer Specification](transport_layer_specification.md): The HTTP/SSE contract for serving agents.
-*   [Recipe Manifests](recipes.md): Learn about defining executable workflows and graphs.
-*   [Session Management](session_management.md): Decoupling execution from memory with standardized Session and Interaction models.
-*   [Agent Request Envelope](agent_request_envelope.md): The standard envelope for agent invocations and distributed tracing.
-*   [Request Lineage](request_lineage.md): The unified approach to lineage across requests, traces, and audit logs.
-*   [Observability](observability.md): Details on tracing, logging, and metrics.
+*   **[Coreason Agent Manifest (CAM)](cap/specification.md)**: The authoritative "Human-Centric" YAML format for defining Agents and Recipes.
+*   **[Usage Guide](usage.md)**: How to define and validate configurations.
+*   **[Governance & Policy](governance_policy_enforcement.md)**: Enforcing organizational rules.

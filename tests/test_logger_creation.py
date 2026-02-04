@@ -11,7 +11,22 @@
 import os
 import subprocess
 import sys
+from importlib import reload
 from pathlib import Path
+
+import coreason_manifest.utils.logger
+
+
+def test_logger_coverage(tmp_path: Path) -> None:
+    """Import logger to ensure coverage."""
+    import os
+
+    # Point to a unique non-existent dir
+    new_log_dir = tmp_path / "coverage_logs"
+    os.environ["COREASON_LOG_DIR"] = str(new_log_dir)
+
+    # This ensures the module-level code runs in the main process
+    reload(coreason_manifest.utils.logger)
 
 
 def test_logger_creates_directory(tmp_path: Path) -> None:

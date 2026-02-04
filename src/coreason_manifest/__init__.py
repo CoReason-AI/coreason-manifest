@@ -8,91 +8,44 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .definitions.agent import AgentDefinition, Persona
-from .definitions.audit import AuditLog
-from .definitions.events import (
-    ArtifactGenerated,
-    CloudEvent,
-    CouncilVote,
-    EdgeTraversed,
-    GraphEvent,
-    GraphEventArtifactGenerated,
-    GraphEventCouncilVote,
-    GraphEventEdgeActive,
-    GraphEventError,
-    GraphEventNodeDone,
-    GraphEventNodeInit,
-    GraphEventNodeRestored,
-    GraphEventNodeSkipped,
-    GraphEventNodeStart,
-    GraphEventNodeStream,
-    NodeCompleted,
-    NodeInit,
-    NodeRestored,
-    NodeSkipped,
-    NodeStarted,
-    NodeStream,
-    WorkflowError,
-    migrate_graph_event_to_cloud_event,
+from .v2.io import dump_to_yaml, load_from_yaml
+from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
+from .v2.spec.definitions import (
+    AgentDefinition,
+    AgentStep,
+    CouncilStep,
+    LogicStep,
+    ManifestMetadata,
+    ManifestV2,
+    Step,
+    SwitchStep,
+    ToolDefinition,
+    Workflow,
 )
-from .definitions.simulation import (
-    SimulationMetrics,
-    SimulationScenario,
-    SimulationStep,
-    SimulationTrace,
-    StepType,
-)
-from .definitions.simulation_config import AdversaryProfile, ChaosConfig, SimulationRequest
-from .definitions.topology import (
-    AgentNode,
-    Edge,
-    GraphTopology,
-    Node,
-    StateDefinition,
-    Topology,
-)
-from .recipes import RecipeManifest
+
+__version__ = "0.12.0"
+
+Manifest = ManifestV2
+Recipe = ManifestV2
+load = load_from_yaml
+dump = dump_to_yaml
 
 __all__ = [
+    "Manifest",
+    "Recipe",
+    "load",
+    "dump",
+    "__version__",
+    "ManifestMetadata",
+    "AgentStep",
+    "Workflow",
     "AgentDefinition",
-    "Persona",
-    "Topology",
-    "GraphTopology",
-    "Node",
-    "AgentNode",
-    "Edge",
+    "ToolDefinition",
+    "Step",
+    "LogicStep",
+    "SwitchStep",
+    "CouncilStep",
+    "InterfaceDefinition",
     "StateDefinition",
-    "GraphEvent",
-    "CloudEvent",
-    "GraphEventNodeInit",
-    "GraphEventNodeStart",
-    "GraphEventNodeDone",
-    "GraphEventNodeStream",
-    "GraphEventNodeSkipped",
-    "GraphEventNodeRestored",
-    "GraphEventEdgeActive",
-    "GraphEventCouncilVote",
-    "GraphEventError",
-    "GraphEventArtifactGenerated",
-    "NodeInit",
-    "NodeStarted",
-    "NodeCompleted",
-    "NodeStream",
-    "NodeSkipped",
-    "NodeRestored",
-    "WorkflowError",
-    "CouncilVote",
-    "ArtifactGenerated",
-    "EdgeTraversed",
-    "migrate_graph_event_to_cloud_event",
-    "SimulationScenario",
-    "SimulationTrace",
-    "SimulationStep",
-    "SimulationMetrics",
-    "StepType",
-    "AdversaryProfile",
-    "ChaosConfig",
-    "SimulationRequest",
-    "AuditLog",
-    "RecipeManifest",
+    "PolicyDefinition",
 ]

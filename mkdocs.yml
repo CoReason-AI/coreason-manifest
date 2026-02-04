@@ -3,8 +3,6 @@ theme:
   name: material
 nav:
   - Home: index.md
-  - Requirements: requirements.md
   - Usage: usage.md
-  - Session Management: session_management.md
-  - Observability: observability.md
-  - Recipes: recipes.md
+  - Specification: cap/specification.md
+  - Governance: governance_policy_enforcement.md
