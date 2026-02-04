@@ -12,6 +12,7 @@ from .common import ToolRiskLevel
 from .definitions.identity import Identity
 from .definitions.message import ChatMessage, Role
 from .definitions.presentation import (
+    AnyPresentationEvent,
     ArtifactEvent,
     CitationEvent,
     PresentationEvent,
@@ -79,6 +80,7 @@ __all__ = [
     "ChatMessage",
     "PresentationEventType",
     "PresentationEvent",
+    "AnyPresentationEvent",
     "CitationEvent",
     "ArtifactEvent",
     "HealthCheckResponse",
