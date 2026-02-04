@@ -81,6 +81,7 @@ def test_immutability() -> None:
     )
 
     with pytest.raises(ValidationError) as excinfo:
-        error.code = "new_code"
+        # Use setattr to bypass static analysis but trigger runtime immutability check
+        setattr(error, "code", "new_code")
 
     assert "Instance is frozen" in str(excinfo.value)
