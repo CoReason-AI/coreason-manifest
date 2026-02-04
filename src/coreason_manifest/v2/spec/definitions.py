@@ -194,7 +194,7 @@ class ManifestV2(CoReasonBaseModel):
                         )
 
         # 5. Validate Agent Tools
-        for def_id, definition in self.definitions.items():
+        for _, definition in self.definitions.items():
             if isinstance(definition, AgentDefinition):
                 for tool_id in definition.tools:
                     if tool_id not in self.definitions:
