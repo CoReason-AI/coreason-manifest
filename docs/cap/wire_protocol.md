@@ -70,7 +70,7 @@ Used for streaming partial results or events during execution. The packet struct
 | Op (`op`) | Payload (`p`) Type | Description |
 | :--- | :--- | :--- |
 | `delta` | `str` | A partial text chunk (token). |
-| `event` | `Dict[str, Any]` | A structured event (e.g., tool usage, state change). |
+| `event` | `Dict[str, Any]` | A structured event (e.g., tool usage, state change). Ideally adheres to `PresentationEvent` schemas. |
 | `error` | `StreamError` | A strict error object. |
 | `close` | `None` | Stream termination signal. |
 
@@ -128,3 +128,39 @@ Standard response for system health probes.
   "uptime_seconds": 3600.5
 }
 ```
+
+## Standard Data Models
+
+The following "Atomic" models are defined to ensure consistency across the ecosystem, particularly for Chat and UI interactions. They are available in `coreason_manifest`.
+
+### ChatMessage
+
+Represents a single message in a conversation history.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `role` | `Role` | `system`, `user`, `assistant`, or `tool`. |
+| `content` | `str` | The text content. |
+| `name` | `Optional[str]` | Author name (for multi-agent scenarios). |
+| `tool_call_id` | `Optional[str]` | ID if responding to a tool call. |
+| `timestamp` | `datetime` | UTC timestamp (ISO 8601). |
+
+### PresentationEvent
+
+Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`).
+
+#### CitationEvent (`type: citation`)
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `uri` | `str` | Source URL or file path. |
+| `text` | `str` | The quoted text snippet. |
+| `indices` | `Optional[List[int]]` | Start/End character indices. |
+
+#### ArtifactEvent (`type: artifact`)
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `artifact_id` | `str` | Unique ID of the generated artifact. |
+| `mime_type` | `str` | Content type (e.g., `image/png`, `text/csv`). |
+| `url` | `Optional[str]` | Download URL. |

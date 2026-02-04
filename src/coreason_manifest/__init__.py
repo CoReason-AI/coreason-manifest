@@ -10,6 +10,13 @@
 
 from .common import ToolRiskLevel
 from .definitions.identity import Identity
+from .definitions.message import ChatMessage, Role
+from .definitions.presentation import (
+    ArtifactEvent,
+    CitationEvent,
+    PresentationEvent,
+    PresentationEventType,
+)
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     ErrorSeverity,
@@ -68,6 +75,12 @@ __all__ = [
     "ComplianceReport",
     "ComplianceViolation",
     "Identity",
+    "Role",
+    "ChatMessage",
+    "PresentationEventType",
+    "PresentationEvent",
+    "CitationEvent",
+    "ArtifactEvent",
     "HealthCheckResponse",
     "HealthCheckStatus",
     "ServiceRequest",
