@@ -129,6 +129,7 @@ def test_agent_definition_tools_type() -> None:
         # If mypy is not complaining locally but CI is complaining about unused ignore, it means environment diff.
         # Let's try casting to Any to bypass Mypy completely, then validation happens at runtime.
         from typing import Any, cast
+
         bad_tools = cast(Any, [123])
         AgentDefinition(
             id="agent1",
