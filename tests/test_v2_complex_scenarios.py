@@ -1,17 +1,17 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.v2.spec.definitions import (
-    ManifestV2,
-    AgentDefinition,
-    ToolDefinition,
-    GenericDefinition,
-    AgentStep,
-    LogicStep,
-    CouncilStep,
-    SwitchStep,
-)
 from coreason_manifest.common import ToolRiskLevel
+from coreason_manifest.v2.spec.definitions import (
+    AgentDefinition,
+    AgentStep,
+    CouncilStep,
+    GenericDefinition,
+    LogicStep,
+    ManifestV2,
+    SwitchStep,
+    ToolDefinition,
+)
 
 
 # Test 1: Complex Workflow with Cycles
@@ -38,7 +38,7 @@ def test_complex_workflow_with_cycles() -> None:
                 "check-result": {
                     "type": "switch",
                     "id": "check-result",
-                    "cases": {"retry": "process-agent"}, # Cycle back
+                    "cases": {"retry": "process-agent"},  # Cycle back
                     "default": "end-logic",
                 },
                 "end-logic": {
@@ -63,7 +63,10 @@ def test_complex_workflow_with_cycles() -> None:
     steps = manifest.workflow.steps
     assert isinstance(steps["start-switch"], SwitchStep)
     assert isinstance(steps["process-agent"], AgentStep)
-    assert steps["check-result"].cases["retry"] == "process-agent"
+
+    check_result = steps["check-result"]
+    assert isinstance(check_result, SwitchStep)
+    assert check_result.cases["retry"] == "process-agent"
 
 
 # Test 2: All Step Types
@@ -240,7 +243,7 @@ def test_generic_definition_fallback() -> None:
         "metadata": {"name": "Generic Fallback"},
         "definitions": {
             "unknown-thing": {
-                "type": "alien-tech", # Not agent or tool
+                "type": "alien-tech",  # Not agent or tool
                 "id": "unknown-1",
                 "properties": {"power": 9000},
             }
@@ -251,16 +254,14 @@ def test_generic_definition_fallback() -> None:
     definition = manifest.definitions["unknown-thing"]
     assert isinstance(definition, GenericDefinition)
     # GenericDefinition allows extra fields
-    # In Pydantic V2 with extra='allow', fields are accessible as attributes if they are valid identifiers.
-    assert getattr(definition, "type") == "alien-tech"
-    assert getattr(definition, "id") == "unknown-1"
-
-    # And they should be in model_extra (or equivalent depending on pydantic version details, usually model_extra is populated)
-    # Note: definition.id works because it is set as an attribute on the instance.
-    assert definition.id == "unknown-1"
+    # In Pydantic V2 with extra='allow', fields are in model_extra
+    assert definition.model_extra is not None
+    assert definition.model_extra["type"] == "alien-tech"
+    assert definition.model_extra["id"] == "unknown-1"
 
 
-# Test 8: Invalid References (Note: Schema validation only checks structure, not referential integrity across IDs usually, unless validator exists)
+# Test 8: Invalid References
+# Note: Schema validation only checks structure, not referential integrity across IDs usually, unless validator exists.
 # If existing validation doesn't check integrity, this test checks if structure is valid at least.
 # Based on current knowledge, I don't see a referential integrity validator in definitions.py.
 # But I can test that invalid structure raises ValidationError.
@@ -297,7 +298,7 @@ def test_invalid_discriminated_union() -> None:
             "start": "s1",
             "steps": {
                 "s1": {
-                    "type": "invalid-type", # Not one of agent, logic, council, switch
+                    "type": "invalid-type",  # Not one of agent, logic, council, switch
                     "id": "s1",
                 }
             },
@@ -315,7 +316,7 @@ def test_large_workflow_scalability() -> None:
     count = 50
     for i in range(count):
         step_id = f"step-{i}"
-        next_id = f"step-{i+1}" if i < count - 1 else None
+        next_id = f"step-{i + 1}" if i < count - 1 else None
         steps[step_id] = {
             "type": "logic",
             "id": step_id,
@@ -335,5 +336,11 @@ def test_large_workflow_scalability() -> None:
 
     manifest = ManifestV2.model_validate(data)
     assert len(manifest.workflow.steps) == count
-    assert manifest.workflow.steps["step-49"].next is None
-    assert manifest.workflow.steps["step-0"].next == "step-1"
+
+    last_step = manifest.workflow.steps["step-49"]
+    assert isinstance(last_step, LogicStep)
+    assert last_step.next is None
+
+    first_step = manifest.workflow.steps["step-0"]
+    assert isinstance(first_step, LogicStep)
+    assert first_step.next == "step-1"
