@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from .common import ToolRiskLevel
+from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .v2.io import dump_to_yaml, load_from_yaml
 from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .v2.spec.definitions import (
@@ -48,4 +50,8 @@ __all__ = [
     "InterfaceDefinition",
     "StateDefinition",
     "PolicyDefinition",
+    "ToolRiskLevel",
+    "GovernanceConfig",
+    "ComplianceReport",
+    "ComplianceViolation",
 ]
