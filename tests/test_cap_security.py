@@ -8,9 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any, Dict
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
-from uuid import uuid4
 
 from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.spec.cap import (
@@ -19,16 +21,17 @@ from coreason_manifest.spec.cap import (
     SessionContext,
 )
 
-
 # --- Security Test Cases ---
+
 
 def test_spoofing_attempt_invalid_user_type() -> None:
     """Attempt to spoof user identity with invalid types."""
     with pytest.raises(ValidationError):
         SessionContext(
             session_id="s1",
-            user={"id": 123, "name": "Not a String", "role": "admin"} # type: ignore
+            user={"id": 123, "name": "Not a String", "role": "admin"},
         )
+
 
 def test_payload_injection_large_string() -> None:
     """Test resilience against large payload injections (DoS)."""
@@ -38,12 +41,13 @@ def test_payload_injection_large_string() -> None:
     payload = AgentRequest(query=large_string)
     assert len(payload.query) == 10_000_000
 
+
 def test_payload_injection_deeply_nested_meta() -> None:
     """Test resilience against deeply nested metadata (recursion limits)."""
     # Create a deeply nested dict
-    nested = {}
+    nested: Dict[str, Any] = {}
     current = nested
-    for i in range(1000):
+    for _ in range(1000):
         current["next"] = {}
         current = current["next"]
 
@@ -58,6 +62,7 @@ def test_payload_injection_deeply_nested_meta() -> None:
         # This is acceptable behavior for a security test - preventing a crash
         pass
 
+
 def test_extra_fields_smuggling() -> None:
     """Verify that extra fields are either ignored or forbidden based on config."""
     # ServiceRequest is frozen, so extra fields in init should fail if config is strict,
@@ -70,12 +75,12 @@ def test_extra_fields_smuggling() -> None:
         "context": {
             "session_id": "s1",
             "user": {"id": "u1", "name": "User"},
-            "is_admin": True  # Smuggled field
+            "is_admin": True,  # Smuggled field
         },
         "payload": {
             "query": "q",
-            "exec_code": "import os; os.system('rm -rf /')" # Smuggled field
-        }
+            "exec_code": "import os; os.system('rm -rf /')",  # Smuggled field
+        },
     }
 
     req = ServiceRequest.model_validate(data)
@@ -90,6 +95,7 @@ def test_extra_fields_smuggling() -> None:
     assert "is_admin" not in dumped["context"]
     assert "exec_code" not in dumped["payload"]
 
+
 def test_type_confusion_coercion() -> None:
     """Test if dangerous type coercion happens."""
     # Attempt to pass an integer as a string for session_id.
@@ -101,13 +107,14 @@ def test_type_confusion_coercion() -> None:
 
     with pytest.raises(ValidationError):
         SessionContext(
-            session_id=12345, # type: ignore
-            user=Identity.anonymous()
+            session_id=12345,
+            user=Identity.anonymous(),
         )
 
     # Attempt to pass a dict where a string is expected for query
     with pytest.raises(ValidationError):
-        AgentRequest(query={"dangerous": "object"}) # type: ignore
+        AgentRequest(query={"dangerous": "object"})
+
 
 def test_null_byte_injection() -> None:
     """Test for null byte injection in strings."""
@@ -120,6 +127,7 @@ def test_null_byte_injection() -> None:
     dumped = user.dump()
     assert dumped["id"] == "user\0admin"
 
+
 def test_context_isolation() -> None:
     """Ensure context and payload are truly separate."""
     user = Identity.anonymous()
@@ -130,7 +138,7 @@ def test_context_isolation() -> None:
 
     # Modifying payload should not affect context (immutability check)
     with pytest.raises(ValidationError):
-        req.payload = AgentRequest(query="hacked") # type: ignore
+        setattr(req, "payload", AgentRequest(query="hacked"))  # noqa: B010
 
     # Verify they are distinct objects
     assert req.context is ctx
