@@ -1,0 +1,41 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Optional
+
+from pydantic import ConfigDict, Field
+
+from ..common import CoReasonBaseModel
+
+
+class Role(str, Enum):
+    """The role of the message sender."""
+
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+    TOOL = "tool"
+
+
+class ChatMessage(CoReasonBaseModel):
+    """A single message in a conversation."""
+
+    model_config = ConfigDict(frozen=True)
+
+    role: Role = Field(..., description="The role of the message sender.")
+    content: str = Field(..., description="The content of the message.")
+    name: Optional[str] = Field(None, description="The name of the author of this message.")
+    tool_call_id: Optional[str] = Field(None, description="The tool call ID this message is responding to.")
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="The timestamp of the message.",
+    )
