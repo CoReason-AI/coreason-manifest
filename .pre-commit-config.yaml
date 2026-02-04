@@ -19,7 +19,3 @@ repos:
       - id: mypy
         additional_dependencies:
           [pydantic>=2.0, pytest, types-PyYAML]
-  - repo: https://github.com/AleksaC/hadolint-py
-    rev: v2.14.0
-    hooks:
-      - id: hadolint

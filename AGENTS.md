@@ -27,7 +27,7 @@
 
 ## **2. Environment & Commands**
 
-The project is managed via Poetry. Do not use pip directly unless inside a Docker build stage.
+The project is managed via Poetry. Do not use pip directly.
 
 * **Install Dependencies:** poetry install
 * **Run Linter (Pre-commit):** poetry run pre-commit run --all-files
@@ -39,11 +39,10 @@ The project is managed via Poetry. Do not use pip directly unless inside a Docke
 
 ### **Code Style & Quality**
 
-This project uses **Ruff** for Python linting/formatting, **Mypy** for typing, and **Hadolint** for Dockerfiles.
+This project uses **Ruff** for Python linting/formatting and **Mypy** for typing.
 
 * **Formatting:** Do not manually format. Run poetry run ruff format .
 * **Linting:** Fix violations automatically where possible: poetry run ruff check --fix .
-* **Docker Linting:** Checked via pre-commit (hadolint).
 * **Typing:**
   * Strict static typing is encouraged.
   * Run checks with: poetry run mypy .
@@ -119,7 +118,6 @@ Adhere to 12-Factor App principles. Use these standard variable names:
 * **Logging:**
   * LOG_LEVEL: DEBUG, INFO, WARNING, ERROR (Configure loguru with this).
 * **Infrastructure (if applicable):**
-  * DOCKER_HOST: If interacting with the Docker engine.
   * SSH_PRIVATE_KEY / SSH_USER: If managing remote connections.
   * AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY: For AWS services.
 
@@ -127,12 +125,6 @@ Adhere to 12-Factor App principles. Use these standard variable names:
 
 * **CI Environment:** GitHub Actions (Matrix testing on Ubuntu, Windows, MacOS).
 * **Python Versions:** Tests run against Python 3.12, 3.13, and 3.14.
-
-### **Docker Strategy**
-
-* **Multi-stage Build:** The Dockerfile has a builder stage and a runtime stage.
-* **User:** The app runs as a non-root user (appuser). **DO NOT** change this to root.
-* **Base Image:** Uses python:3.12-slim.
 
 ### **Dependencies**
 
