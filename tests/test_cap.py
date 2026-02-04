@@ -144,9 +144,7 @@ def test_service_request_deep_nesting() -> None:
 def test_round_trip_json_serialization() -> None:
     context = SessionContext(session_id="s1", user=Identity.anonymous())
     payload = AgentRequest(query="run", meta={"params": {"x": 10}})
-    original_req = ServiceRequest(
-        request_id=uuid4(), context=context, payload=payload
-    )
+    original_req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     # Dump to JSON string
     json_str = original_req.to_json()
@@ -203,7 +201,7 @@ def test_extra_fields_behavior() -> None:
         "request_id": str(uuid4()),
         "context": {"session_id": "s1", "user": {"id": "u1", "name": "User"}},
         "payload": {"query": "q"},
-        "extra_field": "should_be_ignored"
+        "extra_field": "should_be_ignored",
     }
 
     # Should not raise
