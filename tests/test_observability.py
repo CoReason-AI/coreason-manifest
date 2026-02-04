@@ -17,6 +17,8 @@ from pydantic import ValidationError
 from coreason_manifest.definitions.observability import CloudEvent, ReasoningTrace
 
 
+# --- Unit Tests ---
+
 def test_cloud_event_serialization() -> None:
     now = datetime.now(timezone.utc)
     event = CloudEvent(
@@ -107,3 +109,186 @@ def test_immutability() -> None:
         setattr(trace, "status", "failed")  # noqa: B010
 
     assert "Instance is frozen" in str(excinfo.value)
+
+
+# --- Edge Case Tests ---
+
+def test_cloud_event_minimal() -> None:
+    """Test CloudEvent with only required fields."""
+    now = datetime.now(timezone.utc)
+    event = CloudEvent(
+        id="evt-min",
+        source="urn:min",
+        type="test.min",
+        time=now
+    )
+    dumped = event.dump()
+    assert dumped["id"] == "evt-min"
+    # data is optional and None by default, so exclude_none=True removes it
+    assert "data" not in dumped
+    # datacontenttype has a default
+    assert dumped["datacontenttype"] == "application/json"
+
+
+def test_cloud_event_data_variations() -> None:
+    """Test CloudEvent with different data shapes (None, Empty Dict)."""
+    base_args = {
+        "id": "evt-data",
+        "source": "urn:data",
+        "type": "test.data",
+        "time": datetime.now(timezone.utc)
+    }
+
+    # None
+    evt_none = CloudEvent(**base_args, data=None)
+    assert evt_none.data is None
+
+    # Empty Dict
+    evt_empty = CloudEvent(**base_args, data={})
+    assert evt_empty.data == {}
+
+
+def test_reasoning_trace_missing_optional() -> None:
+    """Test ReasoningTrace serialization when optional fields are missing (None)."""
+    req_id = uuid4()
+    root_id = uuid4()
+    now = datetime.now(timezone.utc)
+
+    trace = ReasoningTrace(
+        request_id=req_id,
+        root_request_id=root_id,
+        # parent_request_id omitted (None)
+        node_id="step-1",
+        status="success",
+        # inputs/outputs omitted (None)
+        latency_ms=10.0,
+        timestamp=now
+    )
+
+    dumped = trace.dump()
+    assert dumped["request_id"] == str(req_id)
+    assert "parent_request_id" not in dumped  # exclude_none=True
+    assert "inputs" not in dumped
+    assert "outputs" not in dumped
+
+
+def test_validation_failure_missing_fields() -> None:
+    """Test that missing required fields raises ValidationError."""
+    with pytest.raises(ValidationError):
+        # Missing 'id'
+        CloudEvent(
+            source="urn:test",
+            type="test",
+            time=datetime.now(timezone.utc)
+        ) # type: ignore
+
+    with pytest.raises(ValidationError):
+        # Missing 'latency_ms'
+        ReasoningTrace(
+            request_id=uuid4(),
+            root_request_id=uuid4(),
+            node_id="test",
+            status="ok",
+            timestamp=datetime.now(timezone.utc)
+        ) # type: ignore
+
+
+# --- Complex Case Tests ---
+
+def test_complex_nested_payloads() -> None:
+    """Test serialization of deeply nested complex data structures."""
+    complex_data = {
+        "user": {
+            "profile": {
+                "name": "Test User",
+                "roles": ["admin", "editor"],
+                "settings": {"theme": "dark", "notifications": True}
+            },
+            "history": [
+                {"event": "login", "ts": 123456},
+                {"event": "click", "coords": {"x": 10, "y": 20}}
+            ]
+        },
+        "meta": "top-level"
+    }
+
+    event = CloudEvent(
+        id="evt-complex",
+        source="urn:complex",
+        type="test.complex",
+        time=datetime.now(timezone.utc),
+        data=complex_data
+    )
+
+    dumped = event.dump()
+    assert dumped["data"]["user"]["profile"]["roles"][1] == "editor"
+    assert dumped["data"]["user"]["history"][1]["coords"]["y"] == 20
+
+
+def test_trace_chain_simulation() -> None:
+    """
+    Simulate a chain of traces (Root -> Child A -> Child B) and verify
+    lineage via request_ids.
+    """
+    root_id = uuid4()
+    start_time = datetime.now(timezone.utc)
+
+    # 1. Root Trace
+    trace_root = ReasoningTrace(
+        request_id=root_id,
+        root_request_id=root_id,
+        parent_request_id=None,
+        node_id="orchestrator",
+        status="running",
+        latency_ms=5.0,
+        timestamp=start_time
+    )
+
+    # 2. Child Trace (Analysis)
+    child_a_id = uuid4()
+    trace_child_a = ReasoningTrace(
+        request_id=child_a_id,
+        root_request_id=root_id,
+        parent_request_id=root_id,
+        node_id="analyzer",
+        status="success",
+        inputs={"doc": "text"},
+        latency_ms=50.0,
+        timestamp=datetime.now(timezone.utc)
+    )
+
+    # 3. Child Trace (Generation) - child of Analysis (hypothetically, or usually child of root)
+    # Let's say it's sequential: Root -> Analyzer; Root -> Generator.
+    # Or deeper: Root -> Analyzer -> SubTask.
+    # Let's do deeper: Analyzer calls SubTask.
+
+    subtask_id = uuid4()
+    trace_subtask = ReasoningTrace(
+        request_id=subtask_id,
+        root_request_id=root_id,
+        parent_request_id=child_a_id,
+        node_id="analyzer-sub",
+        status="success",
+        outputs={"score": 0.9},
+        latency_ms=10.0,
+        timestamp=datetime.now(timezone.utc)
+    )
+
+    # Verification
+
+    # Check Root Lineage
+    assert trace_root.root_request_id == root_id
+    assert trace_root.parent_request_id is None
+
+    # Check Child A Lineage
+    assert trace_child_a.root_request_id == root_id
+    assert trace_child_a.parent_request_id == trace_root.request_id
+
+    # Check Subtask Lineage
+    assert trace_subtask.root_request_id == root_id
+    assert trace_subtask.parent_request_id == trace_child_a.request_id
+
+    # Check Dump Consistency
+    dump_sub = trace_subtask.dump()
+    assert dump_sub["root_request_id"] == str(root_id)
+    assert dump_sub["parent_request_id"] == str(child_a_id)
