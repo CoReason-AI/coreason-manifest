@@ -25,17 +25,19 @@ Versions must strictly follow the `X.Y.Z` format (e.g., `1.0.0`). While `v1.0.0`
 
 ### Loading a Manifest
 
-The recommended way to work with manifests is using the YAML loader, which handles recursive imports and validation.
+The recommended way to work with manifests is using the **Secure Recursive Loader**, which handles `$ref` resolution, path security ("Jail"), and validation.
 
 ```python
 from coreason_manifest import load
 
-# Load from file (resolves imports automatically)
+# Load from file (resolves imports automatically and securely)
 manifest = load("my_agent.yaml")
 
 print(f"Loaded {manifest.kind}: {manifest.metadata.name}")
 print(f"Inputs: {manifest.interface.inputs.keys()}")
 ```
+
+For details on composition, security constraints, and referencing syntax, see [Secure Composition](composition.md).
 
 ### Creating a Manifest Programmatically
 
@@ -100,6 +102,7 @@ manifest.interface.inputs["topic"] = {"type": "integer"}
 
 ## Advanced Documentation
 
+*   [Secure Composition](composition.md): Secure Recursive Loader and `$ref` syntax.
 *   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.
 
 ## Shared Primitives
