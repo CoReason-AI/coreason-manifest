@@ -12,10 +12,13 @@ from .common import ToolRiskLevel
 from .definitions.identity import Identity
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
+    ErrorSeverity,
     HealthCheckResponse,
     HealthCheckStatus,
     ServiceRequest,
     ServiceResponse,
+    StreamError,
+    StreamOpCode,
     StreamPacket,
 )
 from .v2.io import dump_to_yaml, load_from_yaml
@@ -68,4 +71,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "StreamPacket",
+    "StreamError",
+    "StreamOpCode",
+    "ErrorSeverity",
 ]

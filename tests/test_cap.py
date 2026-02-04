@@ -39,14 +39,14 @@ def test_health_check_response_serialization() -> None:
 
 def test_stream_packet_creation() -> None:
     # Test with string data
-    packet1 = StreamPacket(event="token", data="hello")
-    assert packet1.event == "token"
-    assert packet1.data == "hello"
+    packet1 = StreamPacket(op="delta", p="hello")
+    assert packet1.op == "delta"
+    assert packet1.p == "hello"
 
     # Test with dict data
-    packet2 = StreamPacket(event="metadata", data={"tokens": 5, "model": "gpt-4"})
-    assert isinstance(packet2.data, dict)
-    assert packet2.data["tokens"] == 5
+    packet2 = StreamPacket(op="event", p={"tokens": 5, "model": "gpt-4"})
+    assert isinstance(packet2.p, dict)
+    assert packet2.p["tokens"] == 5
 
 
 def test_service_response_serialization() -> None:
@@ -113,8 +113,8 @@ def test_stream_packet_invalid_data_type() -> None:
     with pytest.raises(ValidationError):
         StreamPacket.model_validate(
             {
-                "event": "error",
-                "data": [1, 2, 3],
+                "op": "error",
+                "p": [1, 2, 3],
             }
         )
 
