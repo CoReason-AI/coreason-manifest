@@ -90,9 +90,3 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * You feel a feature requires adding a dependency that is not `pydantic` or `yaml`.
 * You are tempted to add a "helper script" that runs a server.
 * You encounter a requirement that seems to violate the "Shared Kernel" philosophy.
-
-## **7. Roadmap**
-
-| Phase | Description | Status |
-| :--- | :--- | :--- |
-| Phase 4 | Final Polish - Unify Base Models | ✅ COMPLETE |
