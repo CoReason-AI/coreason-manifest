@@ -58,10 +58,19 @@ class ServiceResponse(CoReasonBaseModel):
 
 
 class ServiceRequest(CoReasonBaseModel):
-    """Request to an agent service."""
+    """Request to an agent service.
+
+    Attributes:
+        request_id: Unique trace ID for the transaction.
+        context: Metadata about the request (User Identity, Auth, Session).
+                 Separated from logic to enable consistent security policies.
+        payload: The actual arguments for the Agent's execution.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID
+    # TODO: In v0.16.0, strictly type 'context' with a SessionContext model
+    # once the Identity primitive is fully integrated.
     context: Dict[str, Any]
     payload: Dict[str, Any]

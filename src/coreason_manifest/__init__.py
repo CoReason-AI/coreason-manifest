@@ -12,6 +12,7 @@ from .common import ToolRiskLevel
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     HealthCheckResponse,
+    HealthCheckStatus,
     ServiceRequest,
     ServiceResponse,
     StreamPacket,
@@ -61,6 +62,7 @@ __all__ = [
     "ComplianceReport",
     "ComplianceViolation",
     "HealthCheckResponse",
+    "HealthCheckStatus",
     "ServiceRequest",
     "ServiceResponse",
     "StreamPacket",

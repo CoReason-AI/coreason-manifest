@@ -13,8 +13,8 @@ The standard envelope for sending instructions to an Agent.
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `request_id` | `UUID` | Unique identifier for the request trace. |
-| `context` | `Dict[str, Any]` | Runtime context (session ID, user ID, auth tokens). |
-| `payload` | `Dict[str, Any]` | The actual arguments for the Agent or Tool. |
+| `context` | `Dict[str, Any]` | Metadata about the request (User Identity, Auth, Session). Separated from logic to enable consistent security policies. |
+| `payload` | `Dict[str, Any]` | The actual arguments for the Agent's business logic. |
 
 **Example JSON:**
 ```json
