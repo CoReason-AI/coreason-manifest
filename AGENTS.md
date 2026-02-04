@@ -4,7 +4,7 @@
 
 # **PRIMARY DIRECTIVE: THE SHARED KERNEL PROTOCOL**
 
-**Current Status:** v0.13.0 (Pure Data Library)
+**Current Status:** Pure Data Library
 **Role:** Definitive Source of Truth for Schemas and Contracts.
 
 ## **1. The "No Execution" Directives**
