@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError, TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest import Identity
 
@@ -65,6 +65,7 @@ def test_identity_serialization() -> None:
 
 # --- Edge Case Tests ---
 
+
 def test_identity_edge_cases_empty() -> None:
     """Test empty strings."""
     ident = Identity(id="", name="")
@@ -94,10 +95,11 @@ def test_identity_type_validation() -> None:
     # Pydantic V2 often coerces simple types by default unless Strict is used.
     # But passing an object that can't be coerced to string should fail.
     with pytest.raises(ValidationError):
-        Identity(id={}, name="Test")  # type: ignore[arg-type]
+        Identity(id={}, name="Test")
 
 
 # --- Complex Case Tests ---
+
 
 def test_identity_equality() -> None:
     """Test equality and inequality."""
@@ -107,7 +109,7 @@ def test_identity_equality() -> None:
 
     assert i1 == i2
     assert i1 != i3
-    assert i1 != "some string"
+    assert i1 != "some string"  # type: ignore[comparison-overlap]
 
 
 def test_identity_hashing() -> None:
@@ -124,10 +126,7 @@ def test_identity_hashing() -> None:
 
 def test_identity_list_serialization() -> None:
     """Test serialization of a list of identities using TypeAdapter."""
-    ids = [
-        Identity(id="1", name="One"),
-        Identity(id="2", name="Two", role="test")
-    ]
+    ids = [Identity(id="1", name="One"), Identity(id="2", name="Two", role="test")]
 
     adapter = TypeAdapter(list[Identity])
     # Pydantic's dump_python works like model_dump but for adapters
