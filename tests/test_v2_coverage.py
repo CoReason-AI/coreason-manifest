@@ -17,7 +17,7 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_loose
+from coreason_manifest.v2.validator import validate_loose, validate_integrity
 
 # --- Governance Tests ---
 
@@ -204,44 +204,44 @@ def test_validator_loose_invalid_switch_condition() -> None:
 
 def test_validator_strict_missing_start() -> None:
     """Test strict validation missing start step."""
-    from pydantic import ValidationError
-
     agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
 
-    with pytest.raises(ValidationError, match="Start step 'missing_start' not found"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Test"),
-            workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
-            definitions={"a": agent_def},
-        )
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
+        definitions={"a": agent_def},
+    )
+
+    with pytest.raises(ValueError, match="Start step 'missing_start' not found"):
+        validate_integrity(manifest)
 
 
 def test_validator_strict_switch_broken_targets() -> None:
     """Test strict validation broken switch targets."""
-    from pydantic import ValidationError
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(
+            start="s1",
+            steps={
+                "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
+            },
+        ),
+    )
 
-    with pytest.raises(ValidationError, match="references missing step"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Test"),
-            workflow=Workflow(
-                start="s1",
-                steps={
-                    "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
-                },
-            ),
-        )
+    with pytest.raises(ValueError, match="references missing step"):
+        validate_integrity(manifest)
 
 
 def test_validator_strict_missing_agent_definition() -> None:
     """Test strict validation missing agent definition."""
-    from pydantic import ValidationError
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
+        definitions={},
+    )
 
-    with pytest.raises(ValidationError, match="references missing agent"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Test"),
-            workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
-            definitions={},
-        )
+    with pytest.raises(ValueError, match="references missing agent"):
+        validate_integrity(manifest)
