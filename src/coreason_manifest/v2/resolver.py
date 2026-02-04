@@ -57,9 +57,7 @@ class ReferenceResolver:
         try:
             target_path.relative_to(self.root_dir)
         except ValueError:
-            raise ValueError(
-                f"Security Error: Reference '{ref_path}' escapes the root directory."
-            ) from None
+            raise ValueError(f"Security Error: Reference '{ref_path}' escapes the root directory.") from None
 
         if not target_path.exists():
             raise FileNotFoundError(f"Referenced file not found: {target_path}")
