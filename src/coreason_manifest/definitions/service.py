@@ -1,20 +1,6 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
-from pydantic import ConfigDict
-
-from ..common import CoReasonBaseModel
 from ..spec.cap import ServiceRequest, ServiceResponse
-
-
-class AgentRequest(CoReasonBaseModel):
-    """Strictly typed payload inside a ServiceRequest."""
-
-    model_config = ConfigDict(frozen=True)
-
-    query: str
-    files: List[str] = []
-    conversation_id: Optional[str] = None
-    meta: Dict[str, Any] = {}
 
 
 class ServiceContract:

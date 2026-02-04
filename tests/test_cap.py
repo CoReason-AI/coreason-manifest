@@ -14,11 +14,14 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
+from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.spec.cap import (
+    AgentRequest,
     HealthCheckResponse,
     HealthCheckStatus,
     ServiceRequest,
     ServiceResponse,
+    SessionContext,
     StreamPacket,
 )
 
@@ -64,9 +67,13 @@ def test_service_response_serialization() -> None:
 
 def test_service_request_instantiation() -> None:
     req_id = uuid4()
-    req = ServiceRequest(request_id=req_id, context={"user_id": "u123"}, payload={"query": "test"})
+    user = Identity.anonymous()
+    context = SessionContext(session_id="s123", user=user)
+    payload = AgentRequest(query="test")
+    req = ServiceRequest(request_id=req_id, context=context, payload=payload)
     assert req.request_id == req_id
-    assert req.context["user_id"] == "u123"
+    assert req.context.session_id == "s123"
+    assert req.payload.query == "test"
 
 
 # --- Edge Case Tests ---
@@ -77,8 +84,8 @@ def test_invalid_uuid_validation() -> None:
         ServiceRequest.model_validate(
             {
                 "request_id": "not-a-uuid",
-                "context": {},
-                "payload": {},
+                "context": {"session_id": "s1", "user": {"id": "u1", "name": "User"}},
+                "payload": {"query": "q"},
             }
         )
     assert "Input should be a valid UUID" in str(excinfo.value)
@@ -123,17 +130,21 @@ def test_stream_packet_invalid_data_type() -> None:
 
 
 def test_service_request_deep_nesting() -> None:
-    payload = {"level1": {"level2": {"level3": {"data": "deep", "list": [1, 2, {"nested": "item"}]}}}}
-    req = ServiceRequest(request_id=uuid4(), context={}, payload=payload)
+    # Use meta for nested data
+    meta = {"level1": {"level2": {"level3": {"data": "deep", "list": [1, 2, {"nested": "item"}]}}}}
+    payload = AgentRequest(query="test", meta=meta)
+    context = SessionContext(session_id="s1", user=Identity.anonymous())
+    req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
+
     dumped = req.dump()
-    assert dumped["payload"]["level1"]["level2"]["level3"]["data"] == "deep"
-    assert dumped["payload"]["level1"]["level2"]["level3"]["list"][2]["nested"] == "item"
+    assert dumped["payload"]["meta"]["level1"]["level2"]["level3"]["data"] == "deep"
+    assert dumped["payload"]["meta"]["level1"]["level2"]["level3"]["list"][2]["nested"] == "item"
 
 
 def test_round_trip_json_serialization() -> None:
-    original_req = ServiceRequest(
-        request_id=uuid4(), context={"session": "s1"}, payload={"action": "run", "params": {"x": 10}}
-    )
+    context = SessionContext(session_id="s1", user=Identity.anonymous())
+    payload = AgentRequest(query="run", meta={"params": {"x": 10}})
+    original_req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     # Dump to JSON string
     json_str = original_req.to_json()
@@ -150,10 +161,12 @@ def test_round_trip_json_serialization() -> None:
 
 
 def test_immutability_frozen() -> None:
-    req = ServiceRequest(request_id=uuid4(), context={}, payload={})
+    context = SessionContext(session_id="s1", user=Identity.anonymous())
+    payload = AgentRequest(query="test")
+    req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     with pytest.raises(ValidationError) as excinfo:
-        req.context = {"new": "context"}  # type: ignore[misc]
+        req.context = context  # type: ignore[misc]
 
     # Error message for frozen instance assignment
     assert "Instance is frozen" in str(excinfo.value)
@@ -162,19 +175,21 @@ def test_immutability_frozen() -> None:
 def test_type_preservation_in_dict() -> None:
     """Ensure that native types in Dict[str, Any] are preserved."""
     # Ensure they are not aggressively coerced to strings if not needed.
-    payload = {"int_val": 123, "float_val": 45.67, "bool_val": True, "none_val": None, "list_val": [1, "two"]}
-    req = ServiceRequest(request_id=uuid4(), context={}, payload=payload)
+    meta = {"int_val": 123, "float_val": 45.67, "bool_val": True, "none_val": None, "list_val": [1, "two"]}
+    context = SessionContext(session_id="s1", user=Identity.anonymous())
+    payload = AgentRequest(query="test", meta=meta)
+    req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     # Dump using the CoReasonBaseModel.dump() which sets mode='json'
     dumped = req.dump()
 
     # In mode='json', Pydantic might serialize types to their JSON equivalents.
     # int -> int, float -> float, bool -> bool, None -> null
-    assert dumped["payload"]["int_val"] == 123
-    assert dumped["payload"]["float_val"] == 45.67
-    assert dumped["payload"]["bool_val"] is True
-    assert dumped["payload"]["none_val"] is None
-    assert dumped["payload"]["list_val"] == [1, "two"]
+    assert dumped["payload"]["meta"]["int_val"] == 123
+    assert dumped["payload"]["meta"]["float_val"] == 45.67
+    assert dumped["payload"]["meta"]["bool_val"] is True
+    assert dumped["payload"]["meta"]["none_val"] is None
+    assert dumped["payload"]["meta"]["list_val"] == [1, "two"]
 
 
 def test_extra_fields_behavior() -> None:
@@ -182,7 +197,12 @@ def test_extra_fields_behavior() -> None:
     # By default, Pydantic ignores extra fields unless configured otherwise.
     # We want to confirm it doesn't raise ValidationError.
 
-    data = {"request_id": str(uuid4()), "context": {}, "payload": {}, "extra_field": "should_be_ignored"}
+    data = {
+        "request_id": str(uuid4()),
+        "context": {"session_id": "s1", "user": {"id": "u1", "name": "User"}},
+        "payload": {"query": "q"},
+        "extra_field": "should_be_ignored",
+    }
 
     # Should not raise
     req = ServiceRequest.model_validate(data)

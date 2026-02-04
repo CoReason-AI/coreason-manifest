@@ -19,14 +19,16 @@ from .definitions.presentation import (
     PresentationEvent,
     PresentationEventType,
 )
-from .definitions.service import AgentRequest, ServiceContract
+from .definitions.service import ServiceContract
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
+    AgentRequest,
     ErrorSeverity,
     HealthCheckResponse,
     HealthCheckStatus,
     ServiceRequest,
     ServiceResponse,
+    SessionContext,
     StreamError,
     StreamOpCode,
     StreamPacket,
@@ -99,5 +101,6 @@ __all__ = [
     "validate_loose",
     "check_compliance_v2",
     "AgentRequest",
+    "SessionContext",
     "ServiceContract",
 ]

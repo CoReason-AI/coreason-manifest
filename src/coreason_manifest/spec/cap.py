@@ -10,12 +10,13 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.common import CoReasonBaseModel
+from coreason_manifest.definitions.identity import Identity
 
 
 class HealthCheckStatus(str, Enum):
@@ -96,6 +97,27 @@ class ServiceResponse(CoReasonBaseModel):
     metrics: Optional[Dict[str, Any]] = None
 
 
+class AgentRequest(CoReasonBaseModel):
+    """Strictly typed payload inside a ServiceRequest."""
+
+    model_config = ConfigDict(frozen=True)
+
+    query: str
+    files: List[str] = []
+    conversation_id: Optional[str] = None
+    meta: Dict[str, Any] = {}
+
+
+class SessionContext(CoReasonBaseModel):
+    """Strict context containing authentication and session details."""
+
+    model_config = ConfigDict(frozen=True)
+
+    session_id: str
+    user: Identity
+    agent: Optional[Identity] = None
+
+
 class ServiceRequest(CoReasonBaseModel):
     """Request to an agent service.
 
@@ -109,7 +131,5 @@ class ServiceRequest(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID
-    # TODO: In v0.16.0, strictly type 'context' with a SessionContext model
-    # once the Identity primitive is fully integrated.
-    context: Dict[str, Any]
-    payload: Dict[str, Any]
+    context: SessionContext
+    payload: AgentRequest
