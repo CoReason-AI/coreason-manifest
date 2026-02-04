@@ -18,6 +18,7 @@ from coreason_manifest.v2.spec.definitions import GenericDefinition
 
 # --- Edge Cases ---
 
+
 def test_ref_not_found(tmp_path: Path) -> None:
     """Test that referencing a non-existent file raises FileNotFoundError."""
     manifest_dict = {"definitions": {"missing": {"$ref": "ghost.yaml"}}}
@@ -67,6 +68,7 @@ def test_ref_self_loop(tmp_path: Path) -> None:
 
 # --- Complex Cases ---
 
+
 def test_chain_dependency(tmp_path: Path) -> None:
     """Test deep chain A -> B -> C -> D."""
     # D
@@ -90,7 +92,7 @@ def test_chain_dependency(tmp_path: Path) -> None:
         "kind": "Recipe",
         "metadata": {"name": "Chain"},
         "workflow": {"start": "s", "steps": {"s": {"id": "s", "type": "logic", "code": "pass"}}},
-        "definitions": {"root_a": {"$ref": "a.yaml"}}
+        "definitions": {"root_a": {"$ref": "a.yaml"}},
     }
     path = tmp_path / "main.yaml"
     path.write_text(yaml.dump(main), encoding="utf-8")
@@ -120,10 +122,7 @@ def test_multiple_refs_same_level(tmp_path: Path) -> None:
         "kind": "Recipe",
         "metadata": {"name": "Multi"},
         "workflow": {"start": "s", "steps": {"s": {"id": "s", "type": "logic", "code": "pass"}}},
-        "definitions": {
-            "d1": {"$ref": "t1.yaml"},
-            "d2": {"$ref": "t2.yaml"}
-        }
+        "definitions": {"d1": {"$ref": "t1.yaml"}, "d2": {"$ref": "t2.yaml"}},
     }
     path = tmp_path / "main.yaml"
     path.write_text(yaml.dump(main), encoding="utf-8")
@@ -151,9 +150,7 @@ def test_recursive_false(tmp_path: Path) -> None:
         "kind": "Recipe",
         "metadata": {"name": "Raw"},
         "workflow": {"start": "s", "steps": {"s": {"id": "s", "type": "logic", "code": "pass"}}},
-        "definitions": {
-            "sub": {"$ref": "sub.yaml"}
-        }
+        "definitions": {"sub": {"$ref": "sub.yaml"}},
     }
     path = tmp_path / "main.yaml"
     path.write_text(yaml.dump(main), encoding="utf-8")
