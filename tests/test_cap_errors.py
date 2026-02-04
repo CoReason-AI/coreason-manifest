@@ -43,7 +43,7 @@ def test_happy_path_coercion() -> None:
         "severity": "fatal",
     }
     # This relies on Pydantic coercing dict -> StreamError because StreamError is in the Union
-    packet = StreamPacket(op=StreamOpCode.ERROR, p=payload)  # type: ignore[arg-type]
+    packet = StreamPacket(op=StreamOpCode.ERROR, p=payload)
 
     assert isinstance(packet.p, StreamError)
     assert packet.p.code == "auth_failed"
@@ -81,6 +81,6 @@ def test_immutability() -> None:
     )
 
     with pytest.raises(ValidationError) as excinfo:
-        error.code = "new_code"  # type: ignore[misc]
+        error.code = "new_code"
 
     assert "Instance is frozen" in str(excinfo.value)
