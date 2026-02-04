@@ -10,12 +10,9 @@
 
 """Validation logic for V2 Manifests."""
 
-from typing import List, Set
+from typing import List
 
 from coreason_manifest.v2.spec.definitions import (
-    AgentStep,
-    CouncilStep,
-    LogicStep,
     ManifestV2,
     SwitchStep,
 )
@@ -49,5 +46,3 @@ def validate_loose(manifest: ManifestV2) -> List[str]:
                     warnings.append(f"SwitchStep '{step_id}' has invalid condition: {condition}")
 
     return warnings
-
-

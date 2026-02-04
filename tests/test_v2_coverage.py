@@ -1,12 +1,14 @@
 # Copyright (c) 2025 CoReason, Inc.
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
 from coreason_manifest.v2.governance import _risk_score, check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (
+    AgentDefinition,
     AgentStep,
     LogicStep,
     ManifestMetadata,
@@ -14,7 +16,6 @@ from coreason_manifest.v2.spec.definitions import (
     SwitchStep,
     ToolDefinition,
     Workflow,
-    AgentDefinition,
 )
 from coreason_manifest.v2.validator import validate_loose
 
@@ -130,7 +131,9 @@ def test_governance_loose_url_validation() -> None:
     # allowed="Other.com", uri="other.com". strict=False.
     # hostname="other.com". allowed_set={"Other.com"}.
     # "other.com" in {"Other.com"} -> False.
-    config_fail = GovernanceConfig(allowed_domains=["Example.com"], strict_url_validation=False, allow_custom_logic=True)
+    config_fail = GovernanceConfig(
+        allowed_domains=["Example.com"], strict_url_validation=False, allow_custom_logic=True
+    )
     report_fail = check_compliance_v2(manifest, config_fail)
     assert not report_fail.passed
 
@@ -170,12 +173,12 @@ def test_validator_loose_id_mismatch() -> None:
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
         workflow=Workflow(
-            start="key1", # Point to the key
+            start="key1",  # Point to the key
             steps={
                 "key1": AgentStep(id="id1", agent="a")  # Mismatch
             },
         ),
-        definitions={"a": agent_def}
+        definitions={"a": agent_def},
     )
     warnings = validate_loose(manifest)
     assert any("does not match" in w for w in warnings)
@@ -191,7 +194,7 @@ def test_validator_loose_invalid_switch_condition() -> None:
             start="s1",
             steps={
                 "s1": SwitchStep(id="s1", cases={"": "s2"}),  # Empty condition
-                "s2": LogicStep(id="s2", code="pass")
+                "s2": LogicStep(id="s2", code="pass"),
             },
         ),
     )
@@ -202,6 +205,7 @@ def test_validator_loose_invalid_switch_condition() -> None:
 def test_validator_strict_missing_start() -> None:
     """Test strict validation missing start step."""
     from pydantic import ValidationError
+
     agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
 
     with pytest.raises(ValidationError, match="Start step 'missing_start' not found"):
@@ -216,13 +220,16 @@ def test_validator_strict_missing_start() -> None:
 def test_validator_strict_switch_broken_targets() -> None:
     """Test strict validation broken switch targets."""
     from pydantic import ValidationError
+
     with pytest.raises(ValidationError, match="references missing step"):
         ManifestV2(
             kind="Agent",
             metadata=ManifestMetadata(name="Test"),
             workflow=Workflow(
                 start="s1",
-                steps={"s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")},
+                steps={
+                    "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
+                },
             ),
         )
 
@@ -230,6 +237,7 @@ def test_validator_strict_switch_broken_targets() -> None:
 def test_validator_strict_missing_agent_definition() -> None:
     """Test strict validation missing agent definition."""
     from pydantic import ValidationError
+
     with pytest.raises(ValidationError, match="references missing agent"):
         ManifestV2(
             kind="Agent",

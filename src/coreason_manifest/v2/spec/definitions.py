@@ -175,7 +175,10 @@ class ManifestV2(BaseModel):
                 # Check type
                 agent_def = self.definitions[step.agent]
                 if not isinstance(agent_def, AgentDefinition):
-                    raise ValueError(f"AgentStep '{step.id}' references '{step.agent}' which is not an AgentDefinition (got {type(agent_def).__name__}).")
+                    raise ValueError(
+                        f"AgentStep '{step.id}' references '{step.agent}' which is not an AgentDefinition "
+                        f"(got {type(agent_def).__name__})."
+                    )
 
             if isinstance(step, CouncilStep):
                 for voter in step.voters:
@@ -185,6 +188,9 @@ class ManifestV2(BaseModel):
                     # Check type
                     agent_def = self.definitions[voter]
                     if not isinstance(agent_def, AgentDefinition):
-                        raise ValueError(f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition (got {type(agent_def).__name__}).")
+                        raise ValueError(
+                            f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition "
+                            f"(got {type(agent_def).__name__})."
+                        )
 
         return self

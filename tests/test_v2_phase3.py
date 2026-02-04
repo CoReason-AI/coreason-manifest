@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.common import ToolRiskLevel
 from coreason_manifest.governance import GovernanceConfig
@@ -21,15 +22,11 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from pydantic import ValidationError
-from coreason_manifest.v2.validator import validate_loose
 
 
 @pytest.fixture
 def basic_manifest() -> ManifestV2:
-    agent_def = AgentDefinition(
-        id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent"
-    )
+    agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
     return ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Test Agent"),
@@ -48,9 +45,7 @@ def test_validation_loose_vs_strict() -> None:
     """Test that loose validation ignores dangling pointers while strict catches them."""
     # Now that ManifestV2 enforces strict validation, construction should fail.
 
-    agent_def = AgentDefinition(
-        id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent"
-    )
+    agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
 
     with pytest.raises(ValidationError, match="missing next step 'step2'"):
         ManifestV2(
@@ -77,9 +72,7 @@ def test_governance_tool_risk() -> None:
         description="Dangerous tool",
     )
 
-    agent_def = AgentDefinition(
-        id="agent1", name="Agent 1", role="Worker", goal="Work", type="agent"
-    )
+    agent_def = AgentDefinition(id="agent1", name="Agent 1", role="Worker", goal="Work", type="agent")
 
     manifest = ManifestV2(
         kind="Agent",
@@ -106,9 +99,7 @@ def test_governance_allowed_domains() -> None:
         risk_level=ToolRiskLevel.SAFE,
     )
 
-    agent_def = AgentDefinition(
-        id="agent1", name="Agent 1", role="Worker", goal="Work", type="agent"
-    )
+    agent_def = AgentDefinition(id="agent1", name="Agent 1", role="Worker", goal="Work", type="agent")
 
     manifest = ManifestV2(
         kind="Agent",
