@@ -12,9 +12,9 @@ Existing solutions often conflate structure with policy, embedding business rule
 
 The architecture leverages a "best-in-class" stack where each component does exactly one thing well:
 
-*   **`pydantic`**: Powers the **Agent Interface**. It transforms raw data into strict, type-safe Python objects (`AgentDefinition`). It handles the immediate "contract" validity (e.g., UUIDs are valid, versions are SemVer, fields are strictly typed).
+*   **`pydantic`**: Powers the **Agent Interface**. It transforms raw data into strict, type-safe Python objects (`AgentDefinition`). It handles the immediate "contract" validity (e.g., fields are strictly typed, values are validated).
 *   **Shared Kernel**: This library is a **passive** Shared Kernel. It contains no active execution logic, server capabilities, or policy engines. It strictly provides the data structures that downstream services (Builder, Engine, Simulator) rely on.
-*   **Serialization**: All models inherit from `CoReasonBaseModel`, ensuring consistent JSON serialization of complex types like `UUID` and `datetime`.
+*   **Serialization**: Core definitions (like `AgentDefinition`) use standard Pydantic models for maximum compatibility, while shared configuration models (like `GovernanceConfig`) use `CoReasonBaseModel` for enhanced JSON serialization.
 
 ### 3. In Practice (The How)
 
@@ -23,13 +23,20 @@ The usage of `coreason-manifest` is designed to be declarative and synchronous. 
 Here is how the system validates compliance in a clean, Pythonic way:
 
 ```python
-import yaml
-from coreason_manifest.definitions.agent import AgentDefinition
+from coreason_manifest import AgentDefinition
 
 # 1. Load Raw Data
-# In a real scenario, this would come from an agent.yaml file
+# In a real scenario, this would come from an agent.yaml file or API payload
 raw_data = {
-    # ... fully populated dictionary matching the schema ...
+    "type": "agent",
+    "id": "research-agent-001",
+    "name": "Deep Researcher",
+    "role": "Senior Researcher",
+    "goal": "Conduct deep internet research on specified topics.",
+    "backstory": "You are a meticulous researcher who verifies all sources.",
+    "model": "gpt-4-turbo",
+    "tools": ["google-search", "web-scraper"],
+    "knowledge": []
 }
 
 try:
@@ -38,8 +45,8 @@ try:
     agent = AgentDefinition(**raw_data)
 
     # 3. Happy Path: The agent is structurally valid and ready for use
-    print(f"Agent '{agent.metadata.name}' (v{agent.metadata.version}) verified.")
-    print(f"Authorized Tools: {len(agent.dependencies.tools)}")
+    print(f"Agent '{agent.name}' verified.")
+    print(f"Authorized Tools: {len(agent.tools)}")
 
     # Note: Further policy checks (OPA) and integrity verification are performed
     # by the consuming services (Builder, Engine) using this validated object.

@@ -9,7 +9,7 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 
 ## Overview
 
-`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It contains the canonical Pydantic definitions, schemas, and data structures for Agents, Workflows (Recipes), and Auditing.
+`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It contains the canonical Pydantic definitions, schemas, and data structures for Agents and Workflows (Recipes).
 
 It provides the **"Blueprint"** that all other services (Builder, Engine, Simulator) rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
 
@@ -18,27 +18,16 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 
 ## Features
 
-*   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`).
-*   **Behavioral Protocols:** Standard `AgentInterface` and `LifecycleInterface` protocols for runtime interoperability.
-*   **Strict Typing:** Enforces type safety and immutable structures for critical interfaces.
-*   **Enhanced Serialization:** Includes `CoReasonBaseModel` to ensure consistent JSON serialization of complex types like `UUID` and `datetime`.
-*   **Event Protocol:** Defines the `GraphEvent` and `CloudEvent` structures for real-time communication.
-*   **Simulation Schemas:** Provides standard models for `SimulationScenario`, `AdversaryProfile`, and `SimulationTrace`.
-*   **Audit & Compliance:** Defines the `AuditLog` structure for tamper-evident record keeping.
-*   **Ergonomic Factory Methods:** Simplified construction of `ChatMessage` and `GenAIOperation`.
-*   **Token Arithmetic:** Support for `+` and `+=` operators on `GenAITokenUsage`.
-*   **Flexible Tooling:** `ToolCallRequestPart` accepts JSON strings with automatic parsing.
-*   **Enhanced Tracing:** `ReasoningTrace` includes flexible metadata for execution state.
-*   **Builder SDK:** A fluent, strictly-typed Python SDK for defining Agents using Pydantic models.
+*   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`) and Recipes (`Recipe`).
+*   **Strict Typing:** Enforces type safety for critical interfaces.
+*   **Governance & Policy:** Enforce organizational rules (domains, risk levels) on agents via `GovernanceConfig`.
+*   **Ergonomic Factory Methods:** Simplified construction of manifests.
+*   **Flexible Tooling:** Support for external tool definitions (`ToolDefinition`) and risk levels (`ToolRiskLevel`).
+*   **Topology Visualization:** Workflows are defined as graph topologies (`Workflow`).
 
 ## Serialization & Base Model
 
-All core definitions (`AgentDefinition`, `RecipeManifest`, `GraphTopology`, `AuditLog`) inherit from `CoReasonBaseModel`. This provides a consistent interface for serialization, solving common Pydantic v2 issues with `UUID` and `datetime`.
-
-*   Use `.dump()` to get a JSON-compatible dictionary (where UUIDs/datetimes are strings).
-*   Use `.to_json()` to get a JSON string.
-
-For a detailed rationale, see [docs/coreason_base_model_rationale.md](docs/coreason_base_model_rationale.md).
+Core definitions (e.g., `Manifest`, `Workflow`, `AgentDefinition`) inherit from Pydantic's `BaseModel`. Shared configuration models like `GovernanceConfig` inherit from `CoReasonBaseModel` for enhanced serialization capabilities.
 
 ## Installation
 
@@ -51,106 +40,56 @@ pip install coreason-manifest
 This library is used to define and validate Agent configurations programmatically.
 
 ```python
-import uuid
-from datetime import datetime, timezone
-from coreason_manifest.definitions.agent import (
-    AgentDefinition,
-    AgentMetadata,
-    AgentCapability,
-    CapabilityType,
-    AgentRuntimeConfig,
-    ModelConfig,
-    AgentDependencies,
-    ToolRequirement,
-    ToolRiskLevel,
-    PolicyConfig,
-    ObservabilityConfig,
-    TraceLevel
+from coreason_manifest import (
+    Recipe,
+    ManifestMetadata,
+    AgentStep,
+    Workflow,
+    InterfaceDefinition,
+    StateDefinition,
+    PolicyDefinition
 )
 
 # 1. Define Metadata
-metadata = AgentMetadata(
-    id=uuid.uuid4(),
-    version="1.0.0",  # Strict SemVer
+metadata = ManifestMetadata(
     name="Research Agent",
-    author="Coreason AI",
-    created_at=datetime.now(timezone.utc)
+    version="1.0.0"
 )
 
-# 2. Instantiate Agent
-agent = AgentDefinition(
+# 2. Define Workflow
+workflow = Workflow(
+    start="step1",
+    steps={
+        "step1": AgentStep(
+            id="step1",
+            agent="gpt-4-researcher",
+            next="step2"
+        ),
+        # ... define other steps
+    }
+)
+
+# 3. Instantiate Manifest
+manifest = Recipe(
+    apiVersion="coreason.ai/v2",
+    kind="Recipe",
     metadata=metadata,
-    capabilities=[
-        AgentCapability(
-            name="research",
-            type=CapabilityType.ATOMIC,
-            description="Deep research on a topic.",
-            inputs={"topic": {"type": "string"}},
-            outputs={"summary": {"type": "string"}}
-        )
-    ],
-    config=AgentRuntimeConfig(
-        model_config=ModelConfig(
-            model="gpt-4",
-            temperature=0.0,
-            system_prompt="You are a helpful assistant."
-        )
+    interface=InterfaceDefinition(
+        inputs={"topic": {"type": "string"}},
+        outputs={"summary": {"type": "string"}}
     ),
-    dependencies=AgentDependencies(
-        tools=[
-            ToolRequirement(
-                uri="mcp://search-service/google",
-                hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",  # Valid SHA256
-                scopes=["search:read"],
-                risk_level=ToolRiskLevel.STANDARD
-            )
-        ],
-        libraries=("pandas==2.0.0",)
-    ),
-    policy=PolicyConfig(
-        budget_caps={"total_cost": 5.0}
-    ),
-    observability=ObservabilityConfig(
-        trace_level=TraceLevel.FULL,
-        retention_policy="90_days"
-    ),
-    # Mandatory Integrity Hash
-    integrity_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    state=StateDefinition(),
+    policy=PolicyDefinition(max_retries=3),
+    workflow=workflow
 )
 
-print(f"Agent '{agent.metadata.name}' definition created and validated.")
+print(f"Manifest '{manifest.metadata.name}' created successfully.")
 ```
 
 For full details, see the [Usage Documentation](docs/usage.md).
 
-## Builder SDK
-
-The **Builder SDK** offers a developer-friendly way to define agents using standard Python classes instead of raw schemas.
-
-```python
-from coreason_manifest.builder import AgentBuilder, TypedCapability
-from pydantic import BaseModel
-
-class MyInput(BaseModel):
-    query: str
-
-class MyOutput(BaseModel):
-    answer: str
-
-cap = TypedCapability("search", "Search tool", MyInput, MyOutput)
-
-agent = AgentBuilder("MyAgent").with_capability(cap).build()
-```
-
-The Builder also supports **Graph Topologies** (`with_node`, `with_edge`) and **External Tools** (`with_tool_requirement`).
-
-See [docs/builder_sdk.md](docs/builder_sdk.md) for details.
-
 ## Documentation
 
-*   [Builder SDK](docs/builder_sdk.md): Fluent Python API for defining Agents.
-*   [Agent Behavior Protocols](docs/agent_behavior_protocols.md): The standard interfaces for agent implementation.
-*   [Transport-Layer Specification](docs/transport_layer_specification.md): The HTTP/SSE contract for serving agents.
-*   [Frontend Integration](docs/frontend_integration.md): Communicating with the Coreason Engine.
-*   [Simulation Architecture](docs/simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
-*   [Audit & Compliance](docs/audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
+*   [Usage Guide](docs/usage.md): How to load and create manifests.
+*   [Governance & Policy Enforcement](docs/governance_policy_enforcement.md): Validating agents against organizational rules.
+*   [Coreason Agent Manifest (CAM)](docs/cap/specification.md): The Canonical YAML Authoring Format.

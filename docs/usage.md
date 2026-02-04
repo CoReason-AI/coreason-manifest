@@ -1,140 +1,103 @@
 # Usage Guide
 
-The `coreason-manifest` package serves as the **Shared Kernel** for the Coreason ecosystem. It provides the canonical Pydantic definitions and schemas for Agents, Workflows (Recipes), and Auditing.
+The `coreason-manifest` package serves as the **Shared Kernel** for the Coreason ecosystem. It provides the canonical Pydantic definitions and schemas for Agents and Workflows (Recipes).
 
 It is designed to be a pure data library, meaning it contains **no execution logic** (no servers, no engines, no policy enforcement engines). Its sole purpose is to define the *structure* and *validation rules* for data.
 
 ## Core Concepts
 
-### 1. Agent Definition
-The `AgentDefinition` is the source of truth for an AI Agent. It includes:
+### 1. Agent & Recipe Definition
+The `Manifest` is the source of truth for an AI Agent or Recipe. It includes:
 - **Metadata**: Identity, versioning (Strict SemVer), and authorship.
-- **Capabilities**: Strictly typed modes of interaction (`inputs`, `outputs` as JSON Schema).
-- **Topology**: A graph-based execution flow (`GraphTopology`) supporting cyclic loops (e.g., for reflection).
-- **Dependencies**: MCP Tooling requirements (`ToolRequirement`) and Python libraries.
-- **Policy**: Governance rules for budget and human-in-the-loop triggers (`PolicyConfig`).
-- **Observability**: Telemetry configurations (`ObservabilityConfig`).
+- **Interface**: Strictly typed modes of interaction (`inputs`, `outputs` as JSON Schema).
+- **Topology**: A graph-based execution flow (`Workflow`) supporting cyclic loops (e.g., for reflection).
+- **Definitions**: Reusable components like Tools (`ToolDefinition`) and sub-agents.
+- **Policy**: Governance rules for budget and human-in-the-loop triggers (`PolicyDefinition`).
+- **State**: Shared memory schema (`StateDefinition`).
 
-### 2. Strict Constraints
-To ensure reliability and auditability, the library enforces three strict constraints:
+### 2. Constraints
+To ensure reliability and auditability, the library enforces:
 
-#### A. Immutability
-All dictionary and list fields in the capabilities are converted to immutable types (`MappingProxyType`, `tuple`) upon validation. You cannot modify them in place.
-
-**Incorrect:**
-```python
-agent.capabilities[0].inputs["new_param"] = "value"  # Raises TypeError
-```
-
-**Correct:**
-```python
-# Construct the full dictionary first
-inputs = {
-    "query": {"type": "string"},
-    "max_results": {"type": "integer"}
-}
-# Pass it to the constructor
-```
-
-#### B. Strict SemVer
+#### Strict SemVer
 Versions must strictly follow the `X.Y.Z` format (e.g., `1.0.0`). While `v1.0.0` is normalized to `1.0.0`, loose formats like `1.0` or `beta` are rejected.
-
-#### C. Integrity Hash
-The `integrity_hash` field is mandatory. It must be a valid 64-character SHA256 hex string representing the hash of the agent's source code.
 
 ## Examples
 
-### Creating an Agent Definition
+### Loading a Manifest
+
+The recommended way to work with manifests is using the YAML loader, which handles recursive imports and validation.
 
 ```python
-import uuid
-from coreason_manifest.definitions.agent import (
-    AgentDefinition,
-    ToolRequirement,
-    ToolRiskLevel,
-    TraceLevel
+from coreason_manifest import load
+
+# Load from file (resolves imports automatically)
+manifest = load("my_agent.yaml")
+
+print(f"Loaded {manifest.kind}: {manifest.metadata.name}")
+print(f"Inputs: {manifest.interface.inputs.keys()}")
+```
+
+### Creating a Manifest Programmatically
+
+You can also construct the object directly using Python classes.
+
+```python
+from coreason_manifest import (
+    Recipe,
+    ManifestMetadata,
+    InterfaceDefinition,
+    StateDefinition,
+    PolicyDefinition,
+    Workflow,
+    AgentStep
 )
 
 # 1. Define Metadata
-metadata = {
-    "id": uuid.uuid4(),
-    "version": "1.0.0",  # Strict SemVer
-    "name": "Research Agent",
-    "author": "Coreason AI",
-    "created_at": "2023-10-27T10:00:00Z"
-}
-
-# 2. Define Topology (Graph)
-# Using logic nodes for demonstration
-nodes = [
-    {"id": "start", "type": "logic", "code": "print('Starting')"},
-    {"id": "process", "type": "logic", "code": "process_data()"},
-    {"id": "end", "type": "logic", "code": "return result"}
-]
-
-edges = [
-    {"source_node_id": "start", "target_node_id": "process"},
-    {"source_node_id": "process", "target_node_id": "end"}
-]
-
-# 3. Instantiate Agent
-agent = AgentDefinition(
-    metadata=metadata,
-    capabilities=[
-        {
-            "name": "default",
-            "type": "atomic",
-            "description": "Default mode",
-            "inputs": {"topic": {"type": "string"}},
-            "outputs": {"summary": {"type": "string"}}
-        }
-    ],
-    config={
-        "nodes": nodes,
-        "edges": edges,
-        "entry_point": "start",
-        "model_config": {"model": "gpt-4", "temperature": 0.0}
-    },
-    dependencies={
-        "tools": [
-            ToolRequirement(
-                uri="mcp://search-service/google",
-                hash="a" * 64,  # Valid SHA256
-                scopes=["search:read"],
-                risk_level=ToolRiskLevel.STANDARD
-            )
-        ],
-        "libraries": ["pandas==2.0.0"]
-    },
-    policy={
-        "budget_caps": {"total_cost": 5.0},
-        "human_in_the_loop": ["process"]
-    },
-    observability={
-        "trace_level": TraceLevel.FULL,
-        "retention_policy": "90_days"
-    },
-    # Mandatory Integrity Hash
-    integrity_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+metadata = ManifestMetadata(
+    name="Research Agent",
+    version="1.0.0"
 )
 
-print(f"Agent '{agent.metadata.name}' created successfully.")
+# 2. Define Workflow
+workflow = Workflow(
+    start="step1",
+    steps={
+        "step1": AgentStep(
+            id="step1",
+            agent="gpt-4-researcher",
+            next="step2"
+        ),
+        # ... define other steps
+    }
+)
+
+# 3. Instantiate Manifest
+manifest = Recipe(
+    metadata=metadata,
+    interface=InterfaceDefinition(
+        inputs={"topic": {"type": "string"}},
+        outputs={"summary": {"type": "string"}}
+    ),
+    state=StateDefinition(),
+    policy=PolicyDefinition(max_retries=3),
+    workflow=workflow
+)
+
+print(f"Manifest '{manifest.metadata.name}' created successfully.")
 ```
 
-### Accessing Immutable Fields
+### Modifying Fields
+
+Manifests are mutable to facilitate authoring and builder tools.
 
 ```python
-# Reading is allowed
-print(agent.capabilities[0].inputs["topic"])
+# Reading
+print(manifest.interface.inputs["topic"])
 
-# Writing raises TypeError
-try:
-    agent.capabilities[0].inputs["topic"] = "int"
-except TypeError as e:
-    print("Caught expected error:", e)
+# Writing
+manifest.interface.inputs["topic"] = {"type": "integer"}
 ```
 
 ## Advanced Documentation
 
-*   [Simulation Architecture](simulation_architecture.md): Details on ATIF compatibility and GAIA scenarios.
-*   [Audit & Compliance](audit_compliance.md): Details on EU AI Act compliance, Chain of Custody, and Integrity Hashing.
+*   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.
