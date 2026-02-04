@@ -132,7 +132,14 @@ definitions:
     name: Manager
     role: Boss
     goal: Manage
-    tools: ["worker"] # Uses worker as tool
+    tools: ["worker_tool"] # Uses worker as tool via wrapper
+
+  worker_tool:
+    type: tool
+    id: worker_tool
+    name: Worker Tool
+    uri: "agent://worker"
+    risk_level: safe
 
   level_1_director:
     type: agent
@@ -140,7 +147,14 @@ definitions:
     name: Director
     role: Exec
     goal: Direct
-    tools: ["manager"] # Uses manager as tool
+    tools: ["manager_tool"] # Uses manager as tool via wrapper
+
+  manager_tool:
+    type: tool
+    id: manager_tool
+    name: Manager Tool
+    uri: "agent://manager"
+    risk_level: safe
 """
     manifest = ManifestV2(**yaml.safe_load(yaml_content))
 
@@ -152,10 +166,10 @@ definitions:
     assert isinstance(manager_ref, AgentDefinition)
     assert isinstance(worker_ref, AgentDefinition)
 
-    # Director has tool "manager"
-    assert "manager" in director.tools
+    # Director has tool "manager_tool"
+    assert "manager_tool" in director.tools
 
-    # Manager has tool "worker"
-    assert "worker" in manager_ref.tools
+    # Manager has tool "worker_tool"
+    assert "worker_tool" in manager_ref.tools
 
     # We confirm that V2 structure holds this integrity natively.

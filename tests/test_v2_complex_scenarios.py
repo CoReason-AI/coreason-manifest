@@ -214,7 +214,14 @@ def test_agent_definition_full_spec() -> None:
                 "model": "gpt-4-turbo",
                 "tools": ["tool-1"],
                 "knowledge": ["docs/top_secret.pdf"],
-            }
+            },
+            "tool-1": {
+                "type": "tool",
+                "id": "tool-1",
+                "name": "Tool 1",
+                "uri": "https://example.com/tool1",
+                "risk_level": "safe",
+            },
         },
         "workflow": {"start": "s1", "steps": {"s1": {"type": "logic", "id": "s1", "code": "pass"}}},
     }

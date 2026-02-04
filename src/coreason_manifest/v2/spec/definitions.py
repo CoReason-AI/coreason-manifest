@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -20,7 +20,7 @@ class DesignMetadata(CoReasonBaseModel):
     collapsed: bool = Field(False, description="Whether the node is collapsed in UI.")
 
 
-class ToolDefinition(BaseModel):
+class ToolDefinition(CoReasonBaseModel):
     """Definition of an external tool."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -33,7 +33,7 @@ class ToolDefinition(BaseModel):
     description: Optional[str] = Field(None, description="Description of the tool.")
 
 
-class AgentDefinition(BaseModel):
+class AgentDefinition(CoReasonBaseModel):
     """Definition of an Agent."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -49,13 +49,13 @@ class AgentDefinition(BaseModel):
     knowledge: List[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
 
 
-class GenericDefinition(BaseModel):
+class GenericDefinition(CoReasonBaseModel):
     """Fallback for unknown definitions."""
 
     model_config = ConfigDict(extra="allow")
 
 
-class BaseStep(BaseModel):
+class BaseStep(CoReasonBaseModel):
     """Base attributes for all steps."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -106,7 +106,7 @@ Step = Annotated[
 ]
 
 
-class Workflow(BaseModel):
+class Workflow(CoReasonBaseModel):
     """Defines the execution topology."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -115,7 +115,7 @@ class Workflow(BaseModel):
     steps: Dict[str, Step] = Field(..., description="Dictionary of all steps indexed by ID.")
 
 
-class ManifestMetadata(BaseModel):
+class ManifestMetadata(CoReasonBaseModel):
     """Metadata for the manifest."""
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
@@ -124,7 +124,7 @@ class ManifestMetadata(BaseModel):
     design_metadata: Optional[DesignMetadata] = Field(None, alias="x-design", description="UI metadata.")
 
 
-class ManifestV2(BaseModel):
+class ManifestV2(CoReasonBaseModel):
     """Root object for Coreason Manifest V2."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
@@ -191,6 +191,20 @@ class ManifestV2(BaseModel):
                         raise ValueError(
                             f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition "
                             f"(got {type(agent_def).__name__})."
+                        )
+
+        # 5. Validate Agent Tools
+        for def_id, definition in self.definitions.items():
+            if isinstance(definition, AgentDefinition):
+                for tool_id in definition.tools:
+                    if tool_id not in self.definitions:
+                        raise ValueError(f"Agent '{definition.id}' references missing tool '{tool_id}'.")
+
+                    tool_def = self.definitions[tool_id]
+                    if not isinstance(tool_def, ToolDefinition):
+                        raise ValueError(
+                            f"Agent '{definition.id}' references '{tool_id}' which is not a ToolDefinition "
+                            f"(got {type(tool_def).__name__})."
                         )
 
         return self
