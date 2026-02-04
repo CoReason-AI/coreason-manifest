@@ -26,21 +26,11 @@ class ServiceContract:
         return {
             "post": {
                 "summary": "Invoke Agent",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": ServiceRequest.model_json_schema()
-                        }
-                    }
-                },
+                "requestBody": {"content": {"application/json": {"schema": ServiceRequest.model_json_schema()}}},
                 "responses": {
                     "200": {
                         "description": "Successful Response",
-                        "content": {
-                            "application/json": {
-                                "schema": ServiceResponse.model_json_schema()
-                            }
-                        },
+                        "content": {"application/json": {"schema": ServiceResponse.model_json_schema()}},
                     }
                 },
             }
