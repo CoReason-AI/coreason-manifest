@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
 
 from coreason_manifest.spec.cap import (
     ErrorSeverity,
@@ -38,10 +37,11 @@ def test_event_op_complex_payload() -> None:
         "type": "tool_call",
         "tool": "calculator",
         "inputs": {"expression": "2 + 2"},
-        "metadata": {"timestamp": 1234567890, "source": "agent_v1"}
+        "metadata": {"timestamp": 1234567890, "source": "agent_v1"},
     }
     packet = StreamPacket(op=StreamOpCode.EVENT, p=complex_payload)
     assert packet.op == StreamOpCode.EVENT
+    assert isinstance(packet.p, dict)
     assert packet.p["type"] == "tool_call"
     assert packet.p["inputs"]["expression"] == "2 + 2"
 
@@ -104,11 +104,7 @@ def test_round_trip_serialization() -> None:
 def test_ambiguous_payload_coercion() -> None:
     """Test what happens when a Dict payload LOOKS like a StreamError but op is EVENT."""
     # It matches StreamError structure exactly.
-    payload = {
-        "code": "fake_error",
-        "message": "not actually an error op",
-        "severity": "transient"
-    }
+    payload = {"code": "fake_error", "message": "not actually an error op", "severity": "transient"}
 
     # op=EVENT.
     # Union is `StreamError | str | Dict | None`.
@@ -135,14 +131,12 @@ def test_ambiguous_payload_coercion() -> None:
 
 def test_stream_error_details_nested() -> None:
     """Test StreamError with complex nested details."""
-    details = {
-        "trace": ["a", "b", "c"],
-        "meta": {"foo": {"bar": 123}},
-        "timestamp": "2023-01-01"
-    }
+    details = {"trace": ["a", "b", "c"], "meta": {"foo": {"bar": 123}}, "timestamp": "2023-01-01"}
     error = StreamError(code="c", message="m", severity=ErrorSeverity.TRANSIENT, details=details)
     packet = StreamPacket(op=StreamOpCode.ERROR, p=error)
 
+    assert isinstance(packet.p, StreamError)
+    assert packet.p.details is not None
     assert packet.p.details["meta"]["foo"]["bar"] == 123
 
 
@@ -150,4 +144,5 @@ def test_large_payload() -> None:
     """Test a large string payload for DELTA."""
     large_str = "a" * 10_000
     packet = StreamPacket(op=StreamOpCode.DELTA, p=large_str)
+    assert isinstance(packet.p, str)
     assert len(packet.p) == 10_000
