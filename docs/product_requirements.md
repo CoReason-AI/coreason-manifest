@@ -42,24 +42,29 @@ You are strictly forbidden from embedding execution logic or side effects within
 The package acts as the validator for the "Agent Development Lifecycle" (ADLC). It ensures that every "Agent" produced by the factory meets strict GxP and security standards.
 
 #### 2.1 The Coreason Agent Manifest (CAM)
-You must define the strict schema for a CoReason Agent. A valid Agent Manifest (`agent.yaml`) contains:
-*   **Metadata:** `id` (UUID), `version` (SemVer), `name`, `author`, `created_at`.
-*   **Interface:**
-    *   `inputs`: Typed arguments the agent accepts (JSON Schema).
-    *   `outputs`: Typed structure of the result.
-*   **Topology:**
-    *   `nodes`: A collection of execution units (Agents, Tools, Logic).
-    *   `edges`: Directed connections defining control flow.
-    *   `model_config`: Specific LLM parameters (model, temperature).
-*   **Dependencies:**
-    *   `tools`: List of specific external tools (MCP capability URIs) required.
-    *   `libraries`: List of Python packages required (if code execution is allowed).
+You must define the strict schema for a CoReason Agent. A valid Agent Definition (`AgentDefinition`) contains:
+*   **Identity:** `id`, `name`.
+*   **Persona:** `role`, `goal`, `backstory`.
+*   **Capabilities:**
+    *   `tools`: List of specific external tool IDs (referencing definitions).
+    *   `knowledge`: List of knowledge base references.
+*   **Model:** `model` (LLM identifier).
+
+A valid Recipe/Manifest (`ManifestV2`) contains:
+*   **Metadata:** `metadata` (name, design info).
+*   **Interface:** `inputs` and `outputs` schemas.
+*   **Workflow:**
+    *   `start`: Entry point step ID.
+    *   `steps`: A collection of execution units (`AgentStep`, `LogicStep`, `SwitchStep`, `CouncilStep`).
+*   **Definitions:** Dictionary of reusable components (`AgentDefinition`, `ToolDefinition`).
+*   **Policy:** Governance rules (`PolicyDefinition`).
+*   **State:** Shared memory schema (`StateDefinition`).
 
 #### 2.2 The Compliance Guardrails (Schema Support)
 The system must support "Clean Room" rules via data structures.
-*   **Rule 1 (Dependency Pinning):** `AgentDependencies` schema must support explicit version pins.
-*   **Rule 2 (Allowlist Enforcement):** The schema must expose dependencies clearly for external validation against a TBOM.
-*   **Rule 3 (Integrity):** The manifest must include an `integrity_hash` field to allow consumers to verify tampering.
+*   **Rule 1 (Referential Integrity):** The Manifest must validate that all step transitions and definition references are valid.
+*   **Rule 2 (Allowlist Enforcement):** The schema must expose dependencies clearly for external validation.
+*   **Rule 3 (Type Safety):** All fields must be strictly typed using Pydantic.
 
 ### 3. Package Architecture & Components
 The package exposes Pydantic models that validate data structure and format synchronously.
@@ -67,25 +72,32 @@ The package exposes Pydantic models that validate data structure and format sync
 #### Component A: Definitions (The Models)
 *   **Input:** Dictionary or JSON.
 *   **Responsibility:**
-    *   Validate structure against Pydantic models (`AgentDefinition`).
-    *   **Normalization:** Ensure all version strings follow SemVer and all IDs are canonical UUIDs.
-*   **Output:** Validated `AgentDefinition` object or `ValidationError`.
+    *   Validate structure against Pydantic models (`AgentDefinition`, `ManifestV2`).
+    *   **Normalization:** Ensure IDs and references are valid.
+*   **Output:** Validated object or `ValidationError`.
 
 ### 4. Definition of Done (The Output)
 The agent must generate a Python package structure that allows the consuming middleware (`coreason-api`) and the CLI (`adk`) to write code exactly like this:
 
 ```python
-from coreason_manifest.definitions.agent import AgentDefinition
+from coreason_manifest import AgentDefinition
 import yaml
 
 # 1. Load Raw Data
-with open("./agents/researcher/agent.yaml") as f:
-    raw_data = yaml.safe_load(f)
+# (Assuming raw_data is loaded from a YAML file)
+raw_data = {
+    "type": "agent",
+    "id": "researcher",
+    "name": "Researcher",
+    "role": "Senior Researcher",
+    "goal": "Find accurate information",
+    "model": "gpt-4"
+}
 
 # 2. Validate Structure
 try:
     agent = AgentDefinition(**raw_data)
-    print(f"Agent {agent.metadata.name} is structurally valid.")
+    print(f"Agent {agent.name} is structurally valid.")
 
     # Further compliance checks (OPA, Integrity) would be performed
     # by the consuming application using this 'agent' object.

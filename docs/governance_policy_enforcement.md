@@ -10,7 +10,7 @@ The module provides configuration models to define organizational standards (e.g
 *   **Domain Restriction**: Whitelist specific domains for external tools (e.g., only allow tools from `*.internal.corp`).
 *   **Risk Level Enforcement**: Set a maximum allowed risk level for tools (e.g., `SAFE` only).
 *   **Authentication Mandates**: Ensure that agents using `CRITICAL` tools enforce user authentication.
-*   **Logic Execution Control**: Restrict the usage of arbitrary Python code in `LogicNode`s and conditional Edges.
+*   **Logic Execution Control**: Restrict the usage of arbitrary Python code in `LogicStep`s and `SwitchStep`s.
 *   **Strict URL Validation**: Enforce strict normalization (lower-case, no trailing dots) on tool URIs to prevent bypasses.
 
 ## Configuration: `GovernanceConfig`
@@ -32,6 +32,7 @@ config = GovernanceConfig(
     require_auth_for_critical_tools=True,
 
     # Prevent agents from running arbitrary Python code (Security)
+    # Controls usage of LogicStep and custom logic in SwitchStep
     # Default: False (Secure by Default)
     allow_custom_logic=False,
 
