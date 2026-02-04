@@ -16,7 +16,7 @@ class DeliveryMode(str, Enum):
 class AgentCapabilities(CoReasonBaseModel):
     """Feature flags and capabilities for the agent."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     delivery_mode: List[DeliveryMode] = Field(
         default_factory=lambda: [DeliveryMode.SSE],
