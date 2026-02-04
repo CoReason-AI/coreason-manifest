@@ -101,3 +101,23 @@ manifest.interface.inputs["topic"] = {"type": "integer"}
 ## Advanced Documentation
 
 *   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.
+
+## Shared Primitives
+
+### Identity
+The `Identity` class is a standardized, immutable representation of any actor in the system (User, Agent, or System). It replaces raw string IDs to provide context-aware identification.
+
+```python
+from coreason_manifest import Identity
+
+# Creating an identity
+user = Identity(id="user-123", name="Alice", role="admin")
+print(user)  # Output: Alice (user-123)
+
+# Anonymous identity
+anon = Identity.anonymous()
+print(anon.id)  # "anonymous"
+
+# Immutability
+# user.name = "Bob"  # Raises ValidationError
+```
