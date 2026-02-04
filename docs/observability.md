@@ -37,7 +37,7 @@ Distributed tracing starts at the edge. The `AgentRequest` envelope standardizes
 *   **Propagation:** These IDs are mapped to the W3C `traceparent` header in all subsequent `CloudEvent` emissions.
 *   **Visualization:** This lineage allows tools like **Jaeger** or **Arize** to reconstruct the full execution tree, even across asynchronous distributed systems.
 
-See [Agent Request Envelope](agent_request_envelope.md) for implementation details.
+See [Agent Request Envelope](cap/transport-envelope.md) for implementation details.
 
 ## OpenTelemetry GenAI Semantic Conventions
 

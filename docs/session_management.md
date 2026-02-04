@@ -6,7 +6,7 @@ The `coreason-manifest` library defines a standardized protocol for managing age
 
 ### AgentRequest
 
-The entry point for any interaction is the [AgentRequest](agent_request_envelope.md). This envelope carries the `session_id` and the input `payload` that triggers the runtime. The runtime uses this ID to hydrate the correct `SessionState` before execution begins.
+The entry point for any interaction is the [AgentRequest](cap/transport-envelope.md). This envelope carries the `session_id` and the input `payload` that triggers the runtime. The runtime uses this ID to hydrate the correct `SessionState` before execution begins.
 
 ### Interaction
 

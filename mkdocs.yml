@@ -3,11 +3,29 @@ theme:
   name: material
 nav:
   - Home: index.md
-  - Requirements: requirements.md
   - Usage: usage.md
-  - Coreason Agent Manifest (CAM V2): coreason_agent_manifest.md
-  - Runtime Agent Definition (V1): runtime_agent_definition.md
-  - Runtime Recipe Definition (V1): runtime_recipe_definition.md
-  - Builder SDK: builder_sdk.md
-  - Session Management: session_management.md
-  - Observability: observability.md
+  - Protocols:
+    - COP (Orchestration):
+      # - Specification: cop/specification.md
+      # - Concepts: cop/concepts.md
+      - Runtime Model: cop/runtime-model.md
+      - Simulation: cop/simulation.md
+    - CAP (Agents):
+      - Specification: cap/specification.md
+      - Atomic Agents: cap/atomic-agents.md
+      - Behavior: cap/behavior.md
+      - Transport Envelope: cap/transport-envelope.md
+      - Runtime Model: cap/runtime-model.md
+    - Transport:
+      - HTTP Spec: transport/http-spec.md
+      - SSE Spec: transport/sse-spec.md
+    - Shared:
+      - Contracts: shared/contracts.md
+      - Identity: shared/identity.md
+  - RFCs:
+    - V2 Canonical YAML: rfcs/001-v2-canonical-yaml.md
+    - SSE Transport V2: rfcs/002-sse-transport-v2.md
+    - V2 Development Platform: rfcs/003-v2-development-platform.md
+    - CAP Client SDK: rfcs/004-cap-client-sdk.md
+    - Recursive Composition: rfcs/005-recursive-composition.md
+    - Strict Error Protocol: rfcs/005-strict-error-protocol.md

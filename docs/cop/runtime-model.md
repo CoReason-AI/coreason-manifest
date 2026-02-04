@@ -1,6 +1,6 @@
 # Runtime Recipe Definition (V1)
 
-The **Runtime Recipe Definition** (often referred to as the V1 Recipe Manifest) is the strict, machine-optimized Pydantic model used by the Coreason Engine (MACO) to execute workflows. Unlike the [Coreason Agent Manifest (CAM V2)](coreason_agent_manifest.md), which is designed for human authoring, this format is designed for runtime validation, integrity, and performance.
+The **Runtime Recipe Definition** (often referred to as the V1 Recipe Manifest) is the strict, machine-optimized Pydantic model used by the Coreason Engine (MACO) to execute workflows. Unlike the [Coreason Agent Manifest (CAM V2)](../cap/specification.md), which is designed for human authoring, this format is designed for runtime validation, integrity, and performance.
 
 > **Note:** V1 components have been moved to the `coreason_manifest.v1` namespace. This document describes the internal runtime format which is typically generated from V2 manifests via the V2 Bridge.
 

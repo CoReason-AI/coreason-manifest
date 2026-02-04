@@ -33,7 +33,7 @@ class IAgentRuntime(Protocol):
 
 1.  **`assist`**: The primary entry point for execution.
     *   **Input**: Strictly typed `AgentRequest` envelope.
-    *   **Session**: A `Session` (alias for `SessionState`) for [Active Memory](active_memory_interface.md) access (history, RAG, persistence).
+    *   **Session**: A `Session` (alias for `SessionState`) for [Active Memory](../active_memory_interface.md) access (history, RAG, persistence).
     *   **Output**: None (events are emitted via `handler`).
     *   **Inversion of Control**: Instead of yielding events, the agent calls methods on the provided `IResponseHandler`.
 
@@ -99,7 +99,7 @@ class IResponseHandler(EventSink, Protocol):
 
 ## IStreamEmitter
 
-The `IStreamEmitter` Protocol encapsulates the lifecycle of a stream (Open -> Emit -> Close). See [Stream Identity and Lifecycle](stream_lifecycle.md) for details.
+The `IStreamEmitter` Protocol encapsulates the lifecycle of a stream (Open -> Emit -> Close). See [Stream Identity and Lifecycle](../stream_lifecycle.md) for details.
 
 ```python
 @runtime_checkable
