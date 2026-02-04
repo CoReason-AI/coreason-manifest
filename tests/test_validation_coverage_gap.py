@@ -4,8 +4,8 @@ from coreason_manifest import (
     AgentDefinition,
     AgentStep,
     CouncilStep,
+    Manifest,
     ManifestMetadata,
-    ManifestV2,
     SwitchStep,
     ToolDefinition,
     ToolRiskLevel,
@@ -26,7 +26,7 @@ def test_validate_loose_full_coverage() -> None:
 
     agent2_def = AgentDefinition(id="agent2", name="Agent 2", role="Role", goal="Goal")
 
-    manifest = ManifestV2(
+    manifest = Manifest(
         kind="Agent",
         metadata=ManifestMetadata(name="Broken Manifest"),
         definitions={
@@ -39,24 +39,18 @@ def test_validate_loose_full_coverage() -> None:
             steps={
                 # 1. AgentStep next missing
                 "step1": AgentStep(id="step1", agent="agent1", next="missing-next"),
-
                 # 2. SwitchStep missing targets
                 "step2": SwitchStep(
-                    id="step2",
-                    cases={"cond": "missing-case-target"},
-                    default="missing-default-target"
+                    id="step2", cases={"cond": "missing-case-target"}, default="missing-default-target"
                 ),
-
                 # 3. AgentStep referencing missing agent
                 "step3": AgentStep(id="step3", agent="missing-agent"),
-
                 # 4. AgentStep referencing non-Agent (referencing tool1)
                 "step4": AgentStep(id="step4", agent="tool1"),
-
                 # 5. CouncilStep referencing missing voter
                 "step5": CouncilStep(id="step5", voters=["missing-voter", "tool1"]),
-            }
-        )
+            },
+        ),
     )
 
     warnings = validate_loose(manifest)
