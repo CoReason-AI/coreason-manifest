@@ -19,19 +19,13 @@ import coreason_manifest.utils.logger
 
 def test_logger_coverage(tmp_path: Path) -> None:
     """Import logger to ensure coverage."""
-    import os
-
-    # Point to a unique non-existent dir
-    new_log_dir = tmp_path / "coverage_logs"
-    os.environ["COREASON_LOG_DIR"] = str(new_log_dir)
-
     # This ensures the module-level code runs in the main process
     reload(coreason_manifest.utils.logger)
 
 
-def test_logger_creates_directory(tmp_path: Path) -> None:
+def test_logger_is_passive(tmp_path: Path) -> None:
     """
-    Verifies that the logger creates the logs directory if it doesn't exist.
+    Verifies that the logger does NOT create the logs directory.
     We use a custom env var to point to a non-existent directory.
     """
     custom_log_dir = tmp_path / "custom_logs"
@@ -63,8 +57,8 @@ else:
         cwd=str(Path.cwd()),
     )
 
-    if "LOGS_CREATED" not in result.stdout:
+    if "LOGS_NOT_CREATED" not in result.stdout:
         print("Subprocess stdout:", result.stdout)
         print("Subprocess stderr:", result.stderr)
 
-    assert "LOGS_CREATED" in result.stdout
+    assert "LOGS_NOT_CREATED" in result.stdout
