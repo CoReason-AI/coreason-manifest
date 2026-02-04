@@ -12,10 +12,13 @@ from .common import ToolRiskLevel
 from .definitions.identity import Identity
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
+    ErrorSeverity,
     HealthCheckResponse,
     HealthCheckStatus,
     ServiceRequest,
     ServiceResponse,
+    StreamError,
+    StreamOpCode,
     StreamPacket,
 )
 from .v2.governance import check_compliance_v2
@@ -70,6 +73,9 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "StreamPacket",
+    "StreamError",
+    "StreamOpCode",
+    "ErrorSeverity",
     "validate_integrity",
     "validate_loose",
     "check_compliance_v2",

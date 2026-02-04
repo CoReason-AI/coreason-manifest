@@ -13,7 +13,7 @@ from enum import Enum
 from typing import Any, Dict, Optional, Union
 from uuid import UUID
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.common import CoReasonBaseModel
 
@@ -37,13 +37,52 @@ class HealthCheckResponse(CoReasonBaseModel):
     uptime_seconds: float
 
 
+class ErrorSeverity(str, Enum):
+    """Severity of a stream error."""
+
+    TRANSIENT = "transient"
+    FATAL = "fatal"
+
+
+class StreamOpCode(str, Enum):
+    """Operation code for a stream packet."""
+
+    DELTA = "delta"
+    EVENT = "event"
+    ERROR = "error"
+    CLOSE = "close"
+
+
+class StreamError(CoReasonBaseModel):
+    """Strict error model for stream exceptions."""
+
+    model_config = ConfigDict(frozen=True)
+
+    code: str
+    message: str
+    severity: ErrorSeverity
+    details: Optional[Dict[str, Any]] = None
+
+
 class StreamPacket(CoReasonBaseModel):
     """A packet of data streaming from an agent."""
 
     model_config = ConfigDict(frozen=True)
 
-    event: str
-    data: Union[str, Dict[str, Any]]
+    op: StreamOpCode
+    p: Union[StreamError, str, Dict[str, Any], None] = Field(union_mode="left_to_right")
+
+    @model_validator(mode="after")
+    def validate_structure(self) -> "StreamPacket":
+        if self.op == StreamOpCode.ERROR:
+            if not isinstance(self.p, StreamError):
+                raise ValueError("Payload 'p' must be a valid StreamError when op is ERROR.")
+
+        if self.op == StreamOpCode.DELTA:
+            if not isinstance(self.p, str):
+                raise ValueError("Payload 'p' must be a string when op is DELTA.")
+
+        return self
 
 
 class ServiceResponse(CoReasonBaseModel):

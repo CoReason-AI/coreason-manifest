@@ -58,20 +58,55 @@ The synchronous result returned by an Agent service.
 
 ### StreamPacket
 
-Used for streaming partial results or events during execution.
+Used for streaming partial results or events during execution. The packet structure is strictly typed to support deterministic handling of data and errors.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `event` | `str` | Event type (e.g., `token`, `status`, `error`). |
-| `data` | `Union[str, Dict]` | The payload of the event. |
+| `op` | `StreamOpCode` | Operation code: `delta`, `event`, `error`, `close`. |
+| `p` | `Union` | The payload, strictly typed based on `op`. |
 
-**Example JSON:**
+**Ops and Payloads:**
+
+| Op (`op`) | Payload (`p`) Type | Description |
+| :--- | :--- | :--- |
+| `delta` | `str` | A partial text chunk (token). |
+| `event` | `Dict[str, Any]` | A structured event (e.g., tool usage, state change). |
+| `error` | `StreamError` | A strict error object. |
+| `close` | `None` | Stream termination signal. |
+
+**Example JSON (Delta):**
 ```json
 {
-  "event": "token",
-  "data": "The"
+  "op": "delta",
+  "p": "The"
 }
 ```
+
+**Example JSON (Error):**
+```json
+{
+  "op": "error",
+  "p": {
+    "code": "rate_limit_exceeded",
+    "message": "Too many requests",
+    "severity": "transient",
+    "details": {
+      "retry_after": 60
+    }
+  }
+}
+```
+
+### StreamError
+
+Strict error model for stream exceptions.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `code` | `str` | Machine-readable error code. |
+| `message` | `str` | Human-readable description. |
+| `severity` | `ErrorSeverity` | `transient` (retryable) or `fatal`. |
+| `details` | `Optional[Dict]` | Arbitrary context. |
 
 ### HealthCheckResponse
 
