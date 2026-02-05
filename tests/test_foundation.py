@@ -14,7 +14,7 @@ from uuid import UUID, uuid4
 from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
 
 
-class FoundationTestModel(CoReasonBaseModel):
+class TestModel(CoReasonBaseModel):
     id: UUID
     timestamp: datetime
     uri: StrictUri
@@ -23,7 +23,7 @@ class FoundationTestModel(CoReasonBaseModel):
 
 def test_foundation_serialization() -> None:
     """Test that CoReasonBaseModel.dump() serializes complex types to strings."""
-    model = FoundationTestModel(
+    model = TestModel(
         id=uuid4(),
         timestamp=datetime.now(timezone.utc),
         uri="https://example.com",
@@ -49,7 +49,7 @@ def test_foundation_serialization() -> None:
 
 def test_foundation_json() -> None:
     """Test that CoReasonBaseModel.to_json() produces valid JSON string."""
-    model = FoundationTestModel(
+    model = TestModel(
         id=uuid4(),
         timestamp=datetime.now(timezone.utc),
         uri="https://example.com",

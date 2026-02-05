@@ -55,6 +55,12 @@ jobs:
         shell: bash
 
       - name: Run tests
+        env:
+          PGHOST: ${{ secrets.DB_POSTGRES_TEST_HOST}}
+          PGPORT: ${{ secrets.DB_POSTGRES_TEST_PORT }}
+          PGUSER: ${{ secrets.DB_POSTGRES_TEST_USERNAME}}
+          PGPASSWORD: ${{ secrets.DB_POSTGRES_TEST_PASSWORD}}
+          PGDATABASE: ${{ secrets.DB_POSTGRES_TEST_PATIENT_SYNTHETIC_DATA}}
         run: poetry run pytest --cov=src --cov-report=xml
         shell: bash
 
