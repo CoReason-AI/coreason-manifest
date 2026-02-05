@@ -9,8 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
+from typing import Self
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
 from ..common_base import CoReasonBaseModel
 
@@ -30,5 +31,12 @@ class MemoryConfig(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     strategy: MemoryStrategy = Field(default=MemoryStrategy.SLIDING_WINDOW, description="Eviction strategy.")
-    limit: int = Field(..., description="The 'N' parameter (turns or tokens).")
+    limit: int = Field(..., gt=0, description="The 'N' parameter (turns or tokens).")
     summary_prompt: str | None = Field(None, description="Instructions for summarization if strategy is SUMMARY.")
+
+    @model_validator(mode="after")
+    def validate_summary_strategy(self) -> Self:
+        """Ensure summary_prompt is present if strategy is SUMMARY."""
+        if self.strategy == MemoryStrategy.SUMMARY and not self.summary_prompt:
+            raise ValueError("summary_prompt is required when strategy is SUMMARY")
+        return self

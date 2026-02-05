@@ -33,6 +33,7 @@ from .spec.common.graph_events import (
     GraphEventNodeStream,
 )
 from .spec.common.identity import Identity
+from .spec.common.interoperability import AgentRuntimeConfig
 from .spec.common.memory import MemoryConfig, MemoryStrategy
 from .spec.common.message import ChatMessage, Role
 from .spec.common.observability import (
@@ -81,6 +82,7 @@ __all__ = [
     "AgentCapabilities",
     "AgentDefinition",
     "AgentRequest",
+    "AgentRuntimeConfig",
     "AgentStep",
     "AnyPresentationEvent",
     "ArtifactEvent",

@@ -10,6 +10,7 @@ nav:
   - Specifications & Protocols:
     - CAM Specification: cap/specification.md
     - CAP Wire Protocol: cap/wire_protocol.md
+    - Memory Governance: memory_governance.md
   - Architecture & Rationale:
     - Product Requirements: product_requirements.md
     - Base Model Rationale: coreason_base_model_rationale.md

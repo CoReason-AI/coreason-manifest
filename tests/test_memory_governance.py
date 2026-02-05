@@ -11,7 +11,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
+from coreason_manifest import AgentDefinition, AgentRuntimeConfig
 from coreason_manifest.spec.common.memory import MemoryConfig, MemoryStrategy
 
 
@@ -46,12 +46,65 @@ def test_memory_config_immutability() -> None:
         mem.limit = 30  # type: ignore
 
     # Test mutating via AgentRuntimeConfig
-    # Note: Pydantic models are not recursive immutable by default unless they are frozen too.
-    # AgentRuntimeConfig is frozen, MemoryConfig is frozen.
-
-    # However, attempting to set an attribute on a frozen model raises ValidationError.
     with pytest.raises(ValidationError):
         config.memory = MemoryConfig(limit=50)  # type: ignore
 
-    # We should also check if we can mutate the nested object (we can't because we can't assign to it,
-    # but we also can't modify the nested object itself as verified above).
+
+def test_edge_case_limit_validation() -> None:
+    """Test validation for limit field."""
+    # Test limit 0
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
+        MemoryConfig(limit=0)
+
+    # Test negative limit
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
+        MemoryConfig(limit=-1)
+
+
+def test_edge_case_summary_validation() -> None:
+    """Test validation for summary strategy requirements."""
+    # Fail if SUMMARY strategy is used without summary_prompt
+    with pytest.raises(ValidationError, match="summary_prompt is required when strategy is SUMMARY"):
+        MemoryConfig(strategy=MemoryStrategy.SUMMARY, limit=10)
+
+    # Pass if SUMMARY strategy has prompt
+    mem = MemoryConfig(strategy=MemoryStrategy.SUMMARY, limit=10, summary_prompt="Test")
+    assert mem.strategy == MemoryStrategy.SUMMARY
+    assert mem.summary_prompt == "Test"
+
+    # Pass if other strategy has no prompt
+    mem = MemoryConfig(strategy=MemoryStrategy.TOKEN_BUFFER, limit=100)
+    assert mem.summary_prompt is None
+
+
+def test_complex_integration_agent_definition() -> None:
+    """Test MemoryConfig integrated into a full AgentDefinition."""
+    agent = AgentDefinition(
+        id="test-agent",
+        name="Test Agent",
+        role="Tester",
+        goal="Test things",
+        runtime=AgentRuntimeConfig(memory=MemoryConfig(strategy=MemoryStrategy.SLIDING_WINDOW, limit=5)),
+    )
+
+    dumped = agent.model_dump(mode="json")
+    assert dumped["runtime"]["memory"]["strategy"] == "sliding_window"
+    assert dumped["runtime"]["memory"]["limit"] == 5
+
+    # Test round trip
+    restored = AgentDefinition.model_validate(dumped)
+    assert restored.runtime is not None
+    assert restored.runtime.memory is not None
+    assert restored.runtime.memory.limit == 5
+
+
+def test_json_round_trip() -> None:
+    """Test JSON serialization and deserialization."""
+    mem = MemoryConfig(limit=42)
+    json_str = mem.model_dump_json()
+
+    # Check compact JSON format
+    assert '"limit":42' in json_str or '"limit": 42' in json_str
+
+    restored = MemoryConfig.model_validate_json(json_str)
+    assert restored == mem
