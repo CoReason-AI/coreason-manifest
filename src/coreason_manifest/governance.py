@@ -244,7 +244,7 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
         requires_auth = False
         # If 'requires_auth' is a defined field (it isn't in ManifestMetadata currently but might be)
         if hasattr(agent.metadata, "requires_auth"):
-            requires_auth = getattr(agent.metadata, "requires_auth")
+            requires_auth = agent.metadata.requires_auth
         elif agent.metadata.model_extra:
             requires_auth = bool(agent.metadata.model_extra.get("requires_auth", False))
 

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from coreason_manifest import (
     AgentStep,

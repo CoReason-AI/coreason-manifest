@@ -116,7 +116,7 @@ def test_governance_auth_mandate() -> None:
     # Wait, passing kwarg to Pydantic model with extra=allow puts it in model_extra or dict.
     manifest_secure = Manifest(
         kind="Agent",
-        metadata=ManifestMetadata(name="Secure", requires_auth=True),  # type: ignore[call-arg]
+        metadata=ManifestMetadata(name="Secure", requires_auth=True),
         definitions={"nuke": tool},
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
