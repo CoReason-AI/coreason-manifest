@@ -18,6 +18,7 @@ def generate_schema() -> None:
 
     with open(output_path, "w") as f:
         json.dump(schema, f, indent=2)
+        f.write("\n")
 
     print(f"Schema generated at {output_path}")
 
