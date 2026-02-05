@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import Optional
 
 from pydantic import ConfigDict, Field
 
@@ -30,10 +29,6 @@ class MemoryConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    strategy: MemoryStrategy = Field(
-        default=MemoryStrategy.SLIDING_WINDOW, description="Eviction strategy."
-    )
+    strategy: MemoryStrategy = Field(default=MemoryStrategy.SLIDING_WINDOW, description="Eviction strategy.")
     limit: int = Field(..., description="The 'N' parameter (turns or tokens).")
-    summary_prompt: Optional[str] = Field(
-        None, description="Instructions for summarization if strategy is SUMMARY."
-    )
+    summary_prompt: str | None = Field(None, description="Instructions for summarization if strategy is SUMMARY.")

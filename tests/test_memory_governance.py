@@ -15,11 +15,9 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common.memory import MemoryConfig, MemoryStrategy
 
 
-def test_memory_config_serialization():
+def test_memory_config_serialization() -> None:
     """Test that MemoryConfig serializes correctly within AgentRuntimeConfig."""
-    mem = MemoryConfig(
-        strategy=MemoryStrategy.SUMMARY, limit=10, summary_prompt="Compress this."
-    )
+    mem = MemoryConfig(strategy=MemoryStrategy.SUMMARY, limit=10, summary_prompt="Compress this.")
     config = AgentRuntimeConfig(memory=mem)
 
     dumped = config.model_dump(mode="json")
@@ -29,7 +27,7 @@ def test_memory_config_serialization():
     assert dumped["memory"]["summary_prompt"] == "Compress this."
 
 
-def test_memory_config_defaults():
+def test_memory_config_defaults() -> None:
     """Test that MemoryConfig applies correct defaults."""
     mem = MemoryConfig(limit=20)
 
@@ -38,7 +36,7 @@ def test_memory_config_defaults():
     assert mem.limit == 20
 
 
-def test_memory_config_immutability():
+def test_memory_config_immutability() -> None:
     """Test that MemoryConfig is immutable."""
     mem = MemoryConfig(limit=20)
     config = AgentRuntimeConfig(memory=mem)
@@ -53,7 +51,7 @@ def test_memory_config_immutability():
 
     # However, attempting to set an attribute on a frozen model raises ValidationError.
     with pytest.raises(ValidationError):
-        config.memory = MemoryConfig(limit=50) # type: ignore
+        config.memory = MemoryConfig(limit=50)  # type: ignore
 
     # We should also check if we can mutate the nested object (we can't because we can't assign to it,
     # but we also can't modify the nested object itself as verified above).
