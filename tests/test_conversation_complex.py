@@ -13,9 +13,12 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest import (
-    ArtifactEvent,
     ChatMessage,
-    CitationEvent,
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    PresentationEvent,
+    PresentationEventType,
     Role,
     StreamOpCode,
     StreamPacket,
@@ -55,54 +58,65 @@ def test_presentation_event_polymorphism_adapter() -> None:
     """Test polymorphic deserialization using TypeAdapter."""
     # Create mixed list of events
     events = [
-        {"type": "citation", "uri": "doc1", "text": "foo"},
-        {"type": "artifact", "artifact_id": "art1", "mime_type": "image/png"},
+        {
+            "type": "citation_block",
+            "data": {
+                "items": [
+                    {
+                        "source_id": "s1",
+                        "uri": "https://doc1.com",
+                        "title": "foo",
+                    }
+                ]
+            },
+        },
+        {
+            "type": "media_carousel",
+            "data": {"items": [{"url": "https://art1.com", "mime_type": "image/png"}]},
+        },
     ]
 
-    adapter = TypeAdapter(list[CitationEvent | ArtifactEvent])
+    adapter = TypeAdapter(list[PresentationEvent])
     parsed = adapter.validate_python(events)
 
     assert len(parsed) == 2
-    assert isinstance(parsed[0], CitationEvent)
-    assert parsed[0].uri == "doc1"
-    assert isinstance(parsed[1], ArtifactEvent)
-    assert parsed[1].artifact_id == "art1"
+    assert parsed[0].type == PresentationEventType.CITATION_BLOCK
+    assert isinstance(parsed[0].data, CitationBlock)
+    assert str(parsed[0].data.items[0].uri) == "https://doc1.com/"
+    assert parsed[1].type == PresentationEventType.MEDIA_CAROUSEL
+    assert isinstance(parsed[1].data, MediaCarousel)
 
 
 def test_stream_packet_with_presentation_event() -> None:
-    """Test embedding presentation events in StreamPacket (conceptually).
-
-    Note: StreamPacket.p is strictly typed as Union[str, Dict[str, Any], StreamError, None]
-    in the current spec. Ideally, it should support PresentationEvent, but currently
-    it treats 'event' op as Dict. This test verifies we can dump PresentationEvent to that Dict.
-    """
-    citation = CitationEvent(uri="http://source", text="Quote")
+    """Test embedding presentation events in StreamPacket (conceptually)."""
+    citation_event = PresentationEvent(
+        type=PresentationEventType.CITATION_BLOCK,
+        data=CitationBlock(items=[CitationItem(source_id="s1", uri="http://source.com", title="Quote")]),
+    )
 
     # Dump event to dict to fit StreamPacket payload schema
-    packet = StreamPacket(op=StreamOpCode.EVENT, p=citation.dump())
+    packet = StreamPacket(op=StreamOpCode.EVENT, p=citation_event.dump())
 
     assert packet.op == StreamOpCode.EVENT
     assert isinstance(packet.p, dict)
-    assert packet.p["type"] == "citation"
-    assert packet.p["text"] == "Quote"
+    assert packet.p["type"] == "citation_block"
+    assert packet.p["data"]["items"][0]["title"] == "Quote"
 
 
 def test_complex_immutability() -> None:
     """Verify deep immutability (to the extent frozen=True supports)."""
-    citation = CitationEvent(uri="http://x", text="y", indices=[10, 20])
+    event = PresentationEvent(
+        type=PresentationEventType.CITATION_BLOCK,
+        data=CitationBlock(items=[CitationItem(source_id="s1", uri="http://x.com", title="y")]),
+    )
 
     # Direct field assignment fails
     with pytest.raises(ValidationError):
-        setattr(citation, "uri", "http://z")  # noqa: B010
+        setattr(event, "type", PresentationEventType.MEDIA_CAROUSEL)  # noqa: B010
 
-    # Replacing the list (indices) fails
+    # Replacing the data fails
     with pytest.raises(ValidationError):
-        setattr(citation, "indices", [0, 5])  # noqa: B010
-
-    # Note: Pydantic frozen models don't automatically freeze mutable sub-objects (like lists)
-    # unless using FrozenSet or Tuple, but reassigning the field itself is blocked.
-    # Standard Pydantic behavior:
-    assert citation.indices == [10, 20]
+        setattr(event, "data", {})  # noqa: B010
 
 
 def test_json_roundtrip() -> None:
