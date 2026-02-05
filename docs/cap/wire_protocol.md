@@ -226,3 +226,7 @@ Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`).
 | `code` | `Optional[int]` | Semantic integer code (e.g., 400, 503). |
 | `domain` | `ErrorDomain` | Source (`client`, `system`, `llm`, `tool`, `security`). |
 | `retryable` | `bool` | Whether the error is retryable. |
+
+## See Also
+
+*   [CAM Specification](specification.md): The authoring format specification.
