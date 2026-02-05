@@ -11,6 +11,7 @@
 from pydantic import ConfigDict, Field
 
 from ..common_base import CoReasonBaseModel
+from .memory import MemoryConfig
 
 
 class AdapterHints(CoReasonBaseModel):
@@ -30,3 +31,4 @@ class AgentRuntimeConfig(CoReasonBaseModel):
 
     env_vars: dict[str, str] = Field(default_factory=dict, description="Environment variables to set.")
     adapter_hints: AdapterHints | None = Field(None, description="Hints for external adapters.")
+    memory: MemoryConfig | None = Field(None, description="Memory eviction policy for this agent.")
