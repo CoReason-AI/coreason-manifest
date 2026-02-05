@@ -4,7 +4,6 @@ from pydantic import ConfigDict, Field
 
 from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.definitions.capabilities import AgentCapabilities
-from coreason_manifest.definitions.interoperability import AgentRuntimeConfig
 from coreason_manifest.v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 
 
@@ -51,9 +50,6 @@ class AgentDefinition(CoReasonBaseModel):
     knowledge: List[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
-    )
-    runtime: Optional[AgentRuntimeConfig] = Field(
-        default=None, description="Runtime-specific configuration and adapter hints."
     )
 
 

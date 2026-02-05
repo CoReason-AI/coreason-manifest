@@ -11,8 +11,17 @@
 from .common import ToolRiskLevel
 from .definitions.capabilities import AgentCapabilities, DeliveryMode
 from .definitions.error import ErrorDomain
+from .definitions.graph_events import (
+    GraphEvent,
+    GraphEventArtifactGenerated,
+    GraphEventCouncilVote,
+    GraphEventError,
+    GraphEventNodeDone,
+    GraphEventNodeRestored,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
+)
 from .definitions.identity import Identity
-from .definitions.interoperability import AdapterHints, AgentRuntimeConfig
 from .definitions.message import ChatMessage, Role
 from .definitions.observability import (
     AuditLog,
@@ -42,6 +51,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
+from .utils.migration import migrate_graph_event_to_cloud_event
 from .v2.governance import check_compliance_v2
 from .v2.io import dump_to_yaml, load_from_yaml
 from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -93,6 +103,14 @@ __all__ = [
     "Identity",
     "Role",
     "ChatMessage",
+    "GraphEvent",
+    "GraphEventArtifactGenerated",
+    "GraphEventCouncilVote",
+    "GraphEventError",
+    "GraphEventNodeDone",
+    "GraphEventNodeRestored",
+    "GraphEventNodeStart",
+    "GraphEventNodeStream",
     "ErrorDomain",
     "PresentationEventType",
     "PresentationEvent",
@@ -118,6 +136,5 @@ __all__ = [
     "EventContentType",
     "ReasoningTrace",
     "AuditLog",
-    "AdapterHints",
-    "AgentRuntimeConfig",
+    "migrate_graph_event_to_cloud_event",
 ]
