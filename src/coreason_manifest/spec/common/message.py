@@ -9,14 +9,14 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
 from ..common_base import CoReasonBaseModel
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     """The role of the message sender."""
 
     SYSTEM = "system"

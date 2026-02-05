@@ -8,8 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Dict, Optional
-
 from pydantic import ConfigDict, Field
 
 from ..common_base import CoReasonBaseModel
@@ -21,8 +19,8 @@ class AdapterHints(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     target: str = Field(..., description="Target runtime/framework (e.g. 'langchain', 'autogen').")
-    version: Optional[str] = Field(None, description="Target version compatibility.")
-    config: Dict[str, str] = Field(default_factory=dict, description="Adapter-specific configuration.")
+    version: str | None = Field(None, description="Target version compatibility.")
+    config: dict[str, str] = Field(default_factory=dict, description="Adapter-specific configuration.")
 
 
 class AgentRuntimeConfig(CoReasonBaseModel):
@@ -30,5 +28,5 @@ class AgentRuntimeConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    env_vars: Dict[str, str] = Field(default_factory=dict, description="Environment variables to set.")
-    adapter_hints: Optional[AdapterHints] = Field(None, description="Hints for external adapters.")
+    env_vars: dict[str, str] = Field(default_factory=dict, description="Environment variables to set.")
+    adapter_hints: AdapterHints | None = Field(None, description="Hints for external adapters.")

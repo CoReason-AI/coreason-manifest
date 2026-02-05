@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Any
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, PlainSerializer
@@ -23,7 +23,7 @@ class CoReasonBaseModel(BaseModel):
     For a detailed rationale, see `docs/coreason_base_model_rationale.md`.
     """
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, frozen=True)
 
     def dump(self, **kwargs: Any) -> dict[str, Any]:
         """Serialize the model to a JSON-compatible dictionary.
@@ -55,7 +55,7 @@ StrictUri = Annotated[
 ]
 
 
-class ToolRiskLevel(str, Enum):
+class ToolRiskLevel(StrEnum):
     """Risk level for the tool."""
 
     SAFE = "safe"

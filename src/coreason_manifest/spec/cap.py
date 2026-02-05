@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -19,7 +19,7 @@ from coreason_manifest.spec.common.identity import Identity
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
-class HealthCheckStatus(str, Enum):
+class HealthCheckStatus(StrEnum):
     """Status of the health check."""
 
     OK = "ok"
@@ -38,14 +38,14 @@ class HealthCheckResponse(CoReasonBaseModel):
     uptime_seconds: float
 
 
-class ErrorSeverity(str, Enum):
+class ErrorSeverity(StrEnum):
     """Severity of a stream error."""
 
     TRANSIENT = "transient"
     FATAL = "fatal"
 
 
-class StreamOpCode(str, Enum):
+class StreamOpCode(StrEnum):
     """Operation code for a stream packet."""
 
     DELTA = "delta"

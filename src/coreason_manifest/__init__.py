@@ -48,7 +48,6 @@ from .spec.common.presentation import (
     PresentationEventType,
     UserErrorEvent,
 )
-from .spec.common.service import ServiceContract
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -65,6 +64,7 @@ from .spec.v2.definitions import (
     Workflow,
 )
 from .utils.migration import migrate_graph_event_to_cloud_event
+from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.v2.validator import validate_integrity, validate_loose

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -21,7 +21,7 @@ from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefin
 class DesignMetadata(CoReasonBaseModel):
     """UI-specific metadata for the visual builder."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     x: float = Field(..., description="X coordinate on the canvas.")
     y: float = Field(..., description="Y coordinate on the canvas.")
@@ -35,7 +35,7 @@ class DesignMetadata(CoReasonBaseModel):
 class ToolDefinition(CoReasonBaseModel):
     """Definition of an external tool."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     type: Literal["tool"] = "tool"
     id: str = Field(..., description="Unique ID for the tool within the manifest.")
@@ -48,7 +48,7 @@ class ToolDefinition(CoReasonBaseModel):
 class AgentDefinition(CoReasonBaseModel):
     """Definition of an Agent."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     type: Literal["agent"] = "agent"
     id: str = Field(..., description="Unique ID for the agent.")
@@ -62,7 +62,7 @@ class AgentDefinition(CoReasonBaseModel):
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
     )
-    runtime: Optional[AgentRuntimeConfig] = Field(
+    runtime: AgentRuntimeConfig | None = Field(
         None, description="Configuration for the agent runtime environment (e.g. environment variables)."
     )
 
@@ -70,13 +70,13 @@ class AgentDefinition(CoReasonBaseModel):
 class GenericDefinition(CoReasonBaseModel):
     """Fallback for unknown definitions."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow", frozen=True)
 
 
 class BaseStep(CoReasonBaseModel):
     """Base attributes for all steps."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     id: str = Field(..., description="Unique identifier for the step.")
     inputs: dict[str, Any] = Field(default_factory=dict, description="Input arguments for the step.")
@@ -127,7 +127,7 @@ Step = Annotated[
 class Workflow(CoReasonBaseModel):
     """Defines the execution topology."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     start: str = Field(..., description="ID of the starting step.")
     steps: dict[str, Step] = Field(..., description="Dictionary of all steps indexed by ID.")
@@ -136,7 +136,7 @@ class Workflow(CoReasonBaseModel):
 class ManifestMetadata(CoReasonBaseModel):
     """Metadata for the manifest."""
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
@@ -145,7 +145,7 @@ class ManifestMetadata(CoReasonBaseModel):
 class ManifestV2(CoReasonBaseModel):
     """Root object for Coreason Manifest V2."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")
     kind: Literal["Recipe", "Agent"] = Field(..., description="Kind of the object.")

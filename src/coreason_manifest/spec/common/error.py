@@ -8,10 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 
 
-class ErrorDomain(str, Enum):
+class ErrorDomain(StrEnum):
     """Domains where errors can originate."""
 
     CLIENT = "client"

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import ConfigDict, Field
 
@@ -18,7 +18,7 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel
 class InterfaceDefinition(CoReasonBaseModel):
     """Defines the input/output contract."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     inputs: dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for arguments.")
     outputs: dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for return values.")
@@ -27,7 +27,7 @@ class InterfaceDefinition(CoReasonBaseModel):
 class StateDefinition(CoReasonBaseModel):
     """Defines the conversation memory/context structure."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     schema_: dict[str, Any] = Field(
         default_factory=dict, alias="schema", description="The structure of the conversation memory/context."
@@ -38,7 +38,7 @@ class StateDefinition(CoReasonBaseModel):
 class PolicyDefinition(CoReasonBaseModel):
     """Defines execution policy and governance rules."""
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     max_steps: int | None = Field(None, description="Execution limit on number of steps.")
     max_retries: int = Field(3, description="Maximum number of retries.")
