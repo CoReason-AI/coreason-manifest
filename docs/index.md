@@ -21,6 +21,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
 
+*   **[Stream Identity & Lifecycle](cap/stream_lifecycle.md)**
+    *   Protocols and data structures for explicit, multiplexed output streams (`STREAM_START`, `STREAM_END`).
+
 *   **[Observability & Tracing](observability.md)**
     *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
 
