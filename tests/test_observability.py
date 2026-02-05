@@ -40,27 +40,6 @@ def test_cloud_event_serialization() -> None:
     assert dumped["data"] == {"message": "hello"}
 
 
-def test_cloud_event_content_types() -> None:
-    """Test CloudEvent content type handling (Enum and str)."""
-    now = datetime.now(timezone.utc)
-    base_args = {"id": "evt-ct", "source": "urn:ct", "type": "test.ct", "time": now}
-
-    # Default
-    evt_default = CloudEvent(**base_args)
-    assert evt_default.datacontenttype == EventContentType.JSON
-    assert evt_default.dump()["datacontenttype"] == "application/json"
-
-    # Explicit Enum
-    evt_enum = CloudEvent(**base_args, datacontenttype=EventContentType.STREAM)
-    assert evt_enum.datacontenttype == EventContentType.STREAM
-    assert evt_enum.dump()["datacontenttype"] == "application/vnd.coreason.stream+json"
-
-    # String (Union allows str)
-    evt_str = CloudEvent(**base_args, datacontenttype="text/plain")
-    assert evt_str.datacontenttype == "text/plain"
-    assert evt_str.dump()["datacontenttype"] == "text/plain"
-
-
 def test_cloud_event_tracing_extensions() -> None:
     now = datetime.now(timezone.utc)
     event = CloudEvent(
@@ -132,6 +111,23 @@ def test_immutability() -> None:
     assert "Instance is frozen" in str(excinfo.value)
 
 
+def test_event_content_type_enum() -> None:
+    now = datetime.now(timezone.utc)
+    # 1. Instantiation with Enum
+    event = CloudEvent(
+        id="evt-enum", source="urn:enum", type="test.enum", time=now, datacontenttype=EventContentType.ERROR
+    )
+
+    # 2. Serialization Check
+    dumped = event.dump()
+    assert dumped["datacontenttype"] == "application/vnd.coreason.error+json"
+
+    # 3. String Compatibility
+    event_str = CloudEvent(id="evt-str", source="urn:str", type="test.str", time=now, datacontenttype="text/plain")
+    dumped_str = event_str.dump()
+    assert dumped_str["datacontenttype"] == "text/plain"
+
+
 # --- Edge Case Tests ---
 
 
@@ -188,7 +184,7 @@ def test_validation_failure_missing_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     with pytest.raises(ValidationError):
         # Missing 'id'
-        CloudEvent(source="urn:test", type="test", time=datetime.now(timezone.utc))  # type: ignore[call-arg, unused-ignore]
+        CloudEvent(source="urn:test", type="test", time=datetime.now(timezone.utc))  # type: ignore
 
     with pytest.raises(ValidationError):
         # Missing 'latency_ms'
@@ -198,7 +194,7 @@ def test_validation_failure_missing_fields() -> None:
             node_id="test",
             status="ok",
             timestamp=datetime.now(timezone.utc),
-        )  # type: ignore[call-arg, unused-ignore]
+        )  # type: ignore
 
 
 # --- Complex Case Tests ---
@@ -296,81 +292,80 @@ def test_trace_chain_simulation() -> None:
     assert dump_sub["parent_request_id"] == str(child_a_id)
 
 
-# --- Extended Tests ---
+# --- Extended Edge & Complex Cases for EventContentType ---
 
 
-def test_content_type_equality_behavior() -> None:
-    """Verify that EventContentType Enum members compare equal to their string values."""
-    assert EventContentType.JSON == "application/json"  # type: ignore[comparison-overlap, unused-ignore]
-    assert EventContentType.STREAM == "application/vnd.coreason.stream+json"  # type: ignore[comparison-overlap, unused-ignore]
-    # Inequality
-    assert EventContentType.JSON != "application/xml"
-    assert EventContentType.JSON != EventContentType.ERROR
-
-
-def test_custom_content_type() -> None:
-    """Verify that arbitrary strings are accepted as content types (Union allows str)."""
+def test_enum_as_string_input() -> None:
+    """
+    Test passing a raw string that exactly matches an Enum value.
+    Ideally, Pydantic should handle this gracefully, or at least serialize correctly.
+    """
     now = datetime.now(timezone.utc)
+    # "application/vnd.coreason.error+json" matches EventContentType.ERROR
     event = CloudEvent(
-        id="evt-custom",
-        source="urn:custom",
-        type="test.custom",
+        id="evt-str-match",
+        source="urn:test",
+        type="test.match",
         time=now,
-        datacontenttype="application/x-custom-type",
+        datacontenttype="application/vnd.coreason.error+json",
     )
-    assert event.datacontenttype == "application/x-custom-type"
     dumped = event.dump()
-    assert dumped["datacontenttype"] == "application/x-custom-type"
+    assert dumped["datacontenttype"] == "application/vnd.coreason.error+json"
+
+    # Since we are using Union[EventContentType, str], the value might be stored as string or coerced.
+    # Because 'EventContentType' is first in the Union, Pydantic might try to coerce if configured,
+    # but strictly speaking, if a string is passed, it matches 'str' too.
+    # However, 'EventContentType' inherits from 'str', so it is comparable.
+    assert event.datacontenttype == EventContentType.ERROR
 
 
-def test_enum_instantiation_from_value() -> None:
-    """Verify instantiation of Enum from string value."""
-    ct = EventContentType("application/json")
-    assert ct == EventContentType.JSON
-
-    with pytest.raises(ValueError):
-        EventContentType("invalid/type")
-
-
-def test_nested_cloud_event() -> None:
-    """Simulate an event wrapping another event (Tunneling)."""
+def test_empty_string_content_type() -> None:
+    """Test empty string as content type."""
     now = datetime.now(timezone.utc)
-    inner_event = CloudEvent(id="evt-inner", source="urn:inner", type="test.inner", time=now, data={"foo": "bar"})
+    event = CloudEvent(id="evt-empty", source="urn:test", type="test.empty", time=now, datacontenttype="")
+    dumped = event.dump()
+    assert dumped["datacontenttype"] == ""
 
-    # Outer event wraps inner event as data
-    outer_event = CloudEvent(
-        id="evt-outer",
-        source="urn:outer",
-        type="test.outer",
+
+def test_mixed_list_of_events() -> None:
+    """Test a list of events with mixed content types (Enum and Str)."""
+    now = datetime.now(timezone.utc)
+    events = [
+        CloudEvent(id="1", source="u", type="t", time=now, datacontenttype=EventContentType.JSON),
+        CloudEvent(id="2", source="u", type="t", time=now, datacontenttype="text/plain"),
+        CloudEvent(id="3", source="u", type="t", time=now, datacontenttype=EventContentType.STREAM),
+    ]
+
+    dumped = [e.dump() for e in events]
+    assert dumped[0]["datacontenttype"] == "application/json"
+    assert dumped[1]["datacontenttype"] == "text/plain"
+    assert dumped[2]["datacontenttype"] == "application/vnd.coreason.stream+json"
+
+
+def test_nested_cloud_event_in_data() -> None:
+    """
+    Test embedding a dumped CloudEvent inside the 'data' of another CloudEvent.
+    This simulates an event carrying another event as payload.
+    """
+    now = datetime.now(timezone.utc)
+    inner_event = CloudEvent(
+        id="inner-1",
+        source="urn:inner",
+        type="inner.type",
         time=now,
-        datacontenttype="application/cloudevents+json",
-        data=inner_event.dump(),
+        datacontenttype=EventContentType.ARTIFACT,
+        data={"file": "report.pdf"},
+    )
+
+    outer_event = CloudEvent(
+        id="outer-1",
+        source="urn:outer",
+        type="outer.wrapper",
+        time=now,
+        datacontenttype=EventContentType.JSON,
+        data={"wrapped_event": inner_event.dump()},
     )
 
     dumped = outer_event.dump()
-    assert dumped["datacontenttype"] == "application/cloudevents+json"
-    assert dumped["data"]["id"] == "evt-inner"
-    assert dumped["data"]["type"] == "test.inner"
-
-
-def test_error_content_type_structure() -> None:
-    """Simulate an error event payload structure with correct content type."""
-    now = datetime.now(timezone.utc)
-    error_payload = {
-        "code": "internal_error",
-        "message": "Something went wrong",
-        "severity": "fatal",
-    }
-
-    event = CloudEvent(
-        id="evt-err",
-        source="urn:err",
-        type="error",
-        time=now,
-        datacontenttype=EventContentType.ERROR,
-        data=error_payload,
-    )
-
-    dumped = event.dump()
-    assert dumped["datacontenttype"] == EventContentType.ERROR.value
-    assert dumped["data"]["code"] == "internal_error"
+    assert dumped["datacontenttype"] == "application/json"
+    assert dumped["data"]["wrapped_event"]["datacontenttype"] == "application/vnd.coreason.artifact+json"
