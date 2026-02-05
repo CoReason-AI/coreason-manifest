@@ -51,6 +51,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
+from .utils.migration import migrate_graph_event_to_cloud_event
 from .v2.governance import check_compliance_v2
 from .v2.io import dump_to_yaml, load_from_yaml
 from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -67,7 +68,6 @@ from .v2.spec.definitions import (
     Workflow,
 )
 from .v2.validator import validate_integrity, validate_loose
-from .utils.migration import migrate_graph_event_to_cloud_event
 
 __version__ = "0.17.0"
 
