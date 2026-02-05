@@ -1,8 +1,19 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.spec.common.capabilities import AgentCapabilities
+from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 
@@ -50,6 +61,9 @@ class AgentDefinition(CoReasonBaseModel):
     knowledge: List[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
+    )
+    runtime: Optional[AgentRuntimeConfig] = Field(
+        None, description="Configuration for the agent runtime environment (e.g. environment variables)."
     )
 
 
