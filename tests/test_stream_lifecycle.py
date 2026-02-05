@@ -8,59 +8,59 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
+from typing import cast
+
 from pydantic import TypeAdapter
 
 from coreason_manifest import (
-    GraphEventNodeStream,
-    GraphEventStreamStart,
-    GraphEventStreamEnd,
-    IStreamEmitter,
     GraphEvent,
+    GraphEventNodeStream,
+    GraphEventStreamEnd,
+    GraphEventStreamStart,
+    IStreamEmitter,
 )
 
 
 class TestStreamLifecycle:
-    def test_default_stream_compatibility(self):
+    def test_default_stream_compatibility(self) -> None:
         """
         Verify that creating a GraphEventNodeStream without a stream_id
         defaults to "default".
         """
         event = GraphEventNodeStream(
-            run_id="run-1",
-            trace_id="trace-1",
-            node_id="node-1",
-            timestamp=12345.0,
-            chunk="Hello World"
+            run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=12345.0, chunk="Hello World"
         )
         assert event.stream_id == "default"
         assert event.chunk == "Hello World"
 
-    def test_multiplexing_serialization(self):
+    def test_multiplexing_serialization(self) -> None:
         """
         Verify that we can serialize a list of events with different stream IDs.
         """
-        events = [
+        events: list[GraphEvent] = [
             GraphEventStreamStart(
-                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=1.0,
-                stream_id="A", content_type="text/plain"
+                run_id="run-1",
+                trace_id="trace-1",
+                node_id="node-1",
+                timestamp=1.0,
+                stream_id="A",
+                content_type="text/plain",
             ),
             GraphEventStreamStart(
-                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=2.0,
-                stream_id="B", content_type="application/json"
+                run_id="run-1",
+                trace_id="trace-1",
+                node_id="node-1",
+                timestamp=2.0,
+                stream_id="B",
+                content_type="application/json",
             ),
             GraphEventNodeStream(
-                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=3.0,
-                stream_id="A", chunk="Text"
+                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=3.0, stream_id="A", chunk="Text"
             ),
             GraphEventNodeStream(
-                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=4.0,
-                stream_id="B", chunk="Code"
+                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=4.0, stream_id="B", chunk="Code"
             ),
-             GraphEventStreamEnd(
-                run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=5.0,
-                stream_id="A"
-            ),
+            GraphEventStreamEnd(run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=5.0, stream_id="A"),
         ]
 
         adapter = TypeAdapter(list[GraphEvent])
@@ -75,15 +75,26 @@ class TestStreamLifecycle:
         # Round trip
         loaded_events = adapter.validate_json(json_output)
         assert len(loaded_events) == 5
-        assert loaded_events[0].stream_id == "A"
-        assert loaded_events[1].stream_id == "B"
-        assert loaded_events[2].stream_id == "A"
-        assert loaded_events[3].stream_id == "B"
 
-    def test_protocol_verification(self):
+        # Use cast for strict typing in tests to avoid union-attr errors
+        # In a real application, one would likely use isinstance()
+        e0 = cast("GraphEventStreamStart", loaded_events[0])
+        assert e0.stream_id == "A"
+
+        e1 = cast("GraphEventStreamStart", loaded_events[1])
+        assert e1.stream_id == "B"
+
+        e2 = cast("GraphEventNodeStream", loaded_events[2])
+        assert e2.stream_id == "A"
+
+        e3 = cast("GraphEventNodeStream", loaded_events[3])
+        assert e3.stream_id == "B"
+
+    def test_protocol_verification(self) -> None:
         """
         Verify that the IStreamEmitter protocol is runtime checkable.
         """
+
         class MyEmitter:
             async def emit_chunk(self, content: str) -> None:
                 pass
