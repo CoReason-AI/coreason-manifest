@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .interfaces.stream import IStreamEmitter
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -56,6 +55,7 @@ from .spec.common.presentation import (
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.interfaces.stream import IStreamEmitter
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
     AgentDefinition,
