@@ -8,21 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
 from typing import Self
 
 from pydantic import ConfigDict, Field, model_validator
 
 from ..common_base import CoReasonBaseModel
-
-
-class MemoryStrategy(str, Enum):
-    """Strategy for memory eviction."""
-
-    SLIDING_WINDOW = "sliding_window"
-    TOKEN_BUFFER = "token_buffer"
-    SUMMARY = "summary"
-    VECTOR_STORE = "vector_store"
+from .session import MemoryStrategy
 
 
 class MemoryConfig(CoReasonBaseModel):
