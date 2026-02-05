@@ -10,9 +10,11 @@
 
 import pytest
 from pydantic import ValidationError
-from coreason_manifest.spec.cap import AgentRequest
-from coreason_manifest.definitions.session import Interaction, LineageMetadata
+
 from coreason_manifest.definitions.observability import ReasoningTrace
+from coreason_manifest.definitions.session import Interaction, LineageMetadata
+from coreason_manifest.spec.cap import AgentRequest
+
 
 def test_uuid_field_dos_protection() -> None:
     """Verify that passing massive strings to UUID fields is rejected efficiently."""
@@ -20,7 +22,7 @@ def test_uuid_field_dos_protection() -> None:
 
     with pytest.raises(ValidationError) as excinfo:
         # Pydantic should fail fast on length or format for UUID coercion
-        AgentRequest(query="test", request_id=massive_string)  # type: ignore
+        AgentRequest(query="test", request_id=massive_string)
 
     # Ensure it's a value error related to UUID parsing
     assert "uuid" in str(excinfo.value).lower() or "input" in str(excinfo.value).lower()
@@ -48,7 +50,7 @@ def test_lineage_metadata_type_coercion_attack() -> None:
     # or CoReasonBaseModel settings might enforce it.
 
     with pytest.raises(ValidationError):
-        LineageMetadata(root_request_id=12345)  # type: ignore[arg-type]
+        LineageMetadata(root_request_id=12345)
 
 
 def test_reasoning_trace_auto_root_spoofing() -> None:
@@ -58,13 +60,7 @@ def test_reasoning_trace_auto_root_spoofing() -> None:
     uid = "123e4567-e89b-12d3-a456-426614174000"
 
     # Case 1: root_request_id is missing -> auto-root
-    trace = ReasoningTrace(
-        request_id=uid,
-        node_id="test",
-        status="ok",
-        latency_ms=1,
-        timestamp="2024-01-01T00:00:00Z"
-    )
+    trace = ReasoningTrace(request_id=uid, node_id="test", status="ok", latency_ms=1, timestamp="2024-01-01T00:00:00Z")
     assert str(trace.root_request_id) == uid
 
     # Case 2: root_request_id is explicitly None -> auto-root
@@ -74,6 +70,6 @@ def test_reasoning_trace_auto_root_spoofing() -> None:
         node_id="test",
         status="ok",
         latency_ms=1,
-        timestamp="2024-01-01T00:00:00Z"
+        timestamp="2024-01-01T00:00:00Z",
     )
     assert str(trace_none.root_request_id) == uid
