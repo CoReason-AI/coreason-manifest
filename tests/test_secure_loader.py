@@ -14,7 +14,7 @@ import pytest
 import yaml
 
 from coreason_manifest import Manifest, load
-from coreason_manifest.v2.spec.definitions import GenericDefinition, ToolDefinition
+from coreason_manifest.spec.v2.definitions import GenericDefinition, ToolDefinition
 
 
 def test_secure_loader_happy_path(tmp_path: Path) -> None:

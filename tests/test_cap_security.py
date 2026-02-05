@@ -14,12 +14,12 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.spec.cap import (
     AgentRequest,
     ServiceRequest,
     SessionContext,
 )
+from coreason_manifest.spec.common.identity import Identity
 
 # --- Security Test Cases ---
 

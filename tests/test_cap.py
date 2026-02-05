@@ -14,7 +14,6 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.identity import Identity
 from coreason_manifest.spec.cap import (
     AgentRequest,
     HealthCheckResponse,
@@ -24,6 +23,7 @@ from coreason_manifest.spec.cap import (
     SessionContext,
     StreamPacket,
 )
+from coreason_manifest.spec.common.identity import Identity
 
 # --- Unit Tests ---
 

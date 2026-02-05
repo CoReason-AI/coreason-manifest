@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from coreason_manifest.v2.io import dump_to_yaml, load_from_yaml
-from coreason_manifest.v2.spec.definitions import GenericDefinition, ManifestV2, ToolDefinition
+from coreason_manifest.spec.v2.definitions import GenericDefinition, ManifestV2, ToolDefinition
+from coreason_manifest.utils.v2.io import dump_to_yaml, load_from_yaml
 
 
 @pytest.fixture

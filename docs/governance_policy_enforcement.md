@@ -1,6 +1,6 @@
 # Governance & Policy Enforcement
 
-The **Governance / Policy Enforcer** module (`src/coreason_manifest/governance.py`) provides a mechanism for Organizations to define rules for Agent validation.
+The **Governance / Policy Enforcer** module (`src/coreason_manifest/spec/governance.py`) provides a mechanism for Organizations to define rules for Agent validation.
 
 ## Overview
 
@@ -18,8 +18,8 @@ The module provides configuration models to define organizational standards (e.g
 The `GovernanceConfig` model defines the ruleset.
 
 ```python
-from coreason_manifest.governance import GovernanceConfig
-from coreason_manifest.common import ToolRiskLevel
+from coreason_manifest.spec.governance import GovernanceConfig
+from coreason_manifest.spec.common_base import ToolRiskLevel
 
 config = GovernanceConfig(
     # Only allow tools from these domains
@@ -47,7 +47,7 @@ config = GovernanceConfig(
 The module also defines models for reporting compliance violations.
 
 ```python
-from coreason_manifest.governance import ComplianceViolation, ComplianceReport
+from coreason_manifest.spec.governance import ComplianceViolation, ComplianceReport
 
 # Example structure of a violation
 violation = ComplianceViolation(

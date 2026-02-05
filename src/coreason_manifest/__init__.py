@@ -8,37 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from .common import ToolRiskLevel
-from .definitions.capabilities import AgentCapabilities, DeliveryMode
-from .definitions.error import ErrorDomain
-from .definitions.graph_events import (
-    GraphEvent,
-    GraphEventArtifactGenerated,
-    GraphEventCouncilVote,
-    GraphEventError,
-    GraphEventNodeDone,
-    GraphEventNodeRestored,
-    GraphEventNodeStart,
-    GraphEventNodeStream,
-)
-from .definitions.identity import Identity
-from .definitions.message import ChatMessage, Role
-from .definitions.observability import (
-    AuditLog,
-    CloudEvent,
-    EventContentType,
-    ReasoningTrace,
-)
-from .definitions.presentation import (
-    AnyPresentationEvent,
-    ArtifactEvent,
-    CitationEvent,
-    PresentationEvent,
-    PresentationEventType,
-    UserErrorEvent,
-)
-from .definitions.service import ServiceContract
-from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -51,11 +20,39 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
-from .utils.migration import migrate_graph_event_to_cloud_event
-from .v2.governance import check_compliance_v2
-from .v2.io import dump_to_yaml, load_from_yaml
-from .v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
-from .v2.spec.definitions import (
+from .spec.common.capabilities import AgentCapabilities, DeliveryMode
+from .spec.common.error import ErrorDomain
+from .spec.common.graph_events import (
+    GraphEvent,
+    GraphEventArtifactGenerated,
+    GraphEventCouncilVote,
+    GraphEventError,
+    GraphEventNodeDone,
+    GraphEventNodeRestored,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
+)
+from .spec.common.identity import Identity
+from .spec.common.message import ChatMessage, Role
+from .spec.common.observability import (
+    AuditLog,
+    CloudEvent,
+    EventContentType,
+    ReasoningTrace,
+)
+from .spec.common.presentation import (
+    AnyPresentationEvent,
+    ArtifactEvent,
+    CitationEvent,
+    PresentationEvent,
+    PresentationEventType,
+    UserErrorEvent,
+)
+from .spec.common.service import ServiceContract
+from .spec.common_base import ToolRiskLevel
+from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
+from .spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,
@@ -67,7 +64,10 @@ from .v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from .v2.validator import validate_integrity, validate_loose
+from .utils.migration import migrate_graph_event_to_cloud_event
+from .utils.v2.governance import check_compliance_v2
+from .utils.v2.io import dump_to_yaml, load_from_yaml
+from .utils.v2.validator import validate_integrity, validate_loose
 
 __version__ = "0.17.0"
 

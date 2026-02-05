@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.common import ToolRiskLevel
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.common_base import ToolRiskLevel
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,

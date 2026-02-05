@@ -11,9 +11,9 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.observability import ReasoningTrace
-from coreason_manifest.definitions.session import Interaction, LineageMetadata
 from coreason_manifest.spec.cap import AgentRequest
+from coreason_manifest.spec.common.observability import ReasoningTrace
+from coreason_manifest.spec.common.session import Interaction, LineageMetadata
 
 
 def test_uuid_field_dos_protection() -> None:

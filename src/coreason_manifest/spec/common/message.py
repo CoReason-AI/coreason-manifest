@@ -14,7 +14,7 @@ from typing import Optional
 
 from pydantic import ConfigDict, Field
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 
 
 class Role(str, Enum):

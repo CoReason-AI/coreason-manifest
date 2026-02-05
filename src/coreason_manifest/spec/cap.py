@@ -15,8 +15,8 @@ from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.common import CoReasonBaseModel
-from coreason_manifest.definitions.identity import Identity
+from coreason_manifest.spec.common.identity import Identity
+from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
 class HealthCheckStatus(str, Enum):

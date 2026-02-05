@@ -2,9 +2,9 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
-from coreason_manifest.definitions.capabilities import AgentCapabilities
-from coreason_manifest.v2.spec.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
+from coreason_manifest.spec.common.capabilities import AgentCapabilities
+from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
+from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 
 
 class DesignMetadata(CoReasonBaseModel):

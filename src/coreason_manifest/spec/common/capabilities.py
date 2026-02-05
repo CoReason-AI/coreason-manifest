@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import ConfigDict, Field
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 
 
 class DeliveryMode(str, Enum):

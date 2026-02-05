@@ -15,8 +15,8 @@ from typing import Any, Dict, Optional, Set, Union
 
 import yaml
 
-from coreason_manifest.v2.resolver import ReferenceResolver
-from coreason_manifest.v2.spec.definitions import ManifestV2
+from coreason_manifest.spec.v2.definitions import ManifestV2
+from coreason_manifest.utils.v2.resolver import ReferenceResolver
 
 
 def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[Path]) -> Dict[str, Any]:
