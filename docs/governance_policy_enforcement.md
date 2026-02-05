@@ -62,3 +62,23 @@ report = ComplianceReport(
     violations=[violation]
 )
 ```
+
+## Validation Logic Details
+
+### Authentication Mandate Lookup
+When `require_auth_for_critical_tools` is enabled, the validator checks the manifest's metadata for the `requires_auth` flag. It performs a robust lookup:
+1.  **Standard Field**: Checks `manifest.metadata.requires_auth`.
+2.  **Dynamic Fields**: If not found (or False), it checks the `model_extra` dictionary (e.g., `manifest.metadata.model_extra['requires_auth']`). This supports manifests where the metadata model is extensible.
+
+### Strict vs. Loose URL Validation
+The `strict_url_validation` setting controls how Tool URIs are normalized before comparison with `allowed_domains`:
+
+*   **Strict Mode (`True`)**:
+    *   Hostnames are lower-cased.
+    *   Trailing dots (DNS root) are removed (e.g., `example.com.` becomes `example.com`).
+    *   This ensures that `https://Example.COM.` matches an allowed domain of `example.com`.
+
+*   **Loose Mode (`False`)**:
+    *   Hostnames are lower-cased (standard `urlparse` behavior).
+    *   Trailing dots are **preserved**.
+    *   Comparison is exact against the `allowed_domains` list. If your allowed list contains `example.com` but the tool uses `example.com.`, validation will fail in Loose mode but pass in Strict mode.
