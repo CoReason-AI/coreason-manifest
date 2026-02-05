@@ -11,11 +11,9 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-import pytest
-
-from coreason_manifest.spec.cap import AgentRequest
-from coreason_manifest.definitions.observability import ReasoningTrace, AuditLog
+from coreason_manifest.definitions.observability import AuditLog, ReasoningTrace
 from coreason_manifest.definitions.session import Interaction, LineageMetadata
+from coreason_manifest.spec.cap import AgentRequest
 
 
 def test_agent_request_auto_rooting() -> None:
@@ -42,12 +40,7 @@ def test_agent_request_explicit_root() -> None:
     root_id = uuid4()
     child_id = uuid4()
 
-    req = AgentRequest(
-        request_id=child_id,
-        root_request_id=root_id,
-        parent_request_id=root_id,
-        query="test"
-    )
+    req = AgentRequest(request_id=child_id, root_request_id=root_id, parent_request_id=root_id, query="test")
 
     assert req.request_id == child_id
     assert req.root_request_id == root_id
@@ -59,11 +52,7 @@ def test_reasoning_trace_auto_rooting() -> None:
     """Verify that ReasoningTrace auto-roots if root is missing."""
     uid = uuid4()
     trace = ReasoningTrace(
-        request_id=uid,
-        node_id="step-1",
-        status="success",
-        latency_ms=10.5,
-        timestamp=datetime.now(timezone.utc)
+        request_id=uid, node_id="step-1", status="success", latency_ms=10.5, timestamp=datetime.now(timezone.utc)
     )
 
     assert trace.request_id == uid
@@ -80,7 +69,7 @@ def test_reasoning_trace_explicit_root() -> None:
         node_id="step-1",
         status="success",
         latency_ms=10.5,
-        timestamp=datetime.now(timezone.utc)
+        timestamp=datetime.now(timezone.utc),
     )
 
     assert trace.request_id == uid
@@ -101,7 +90,7 @@ def test_audit_log_structure() -> None:
         actor="user:123",
         action="execute",
         outcome="success",
-        integrity_hash="sha256:abc..."
+        integrity_hash="sha256:abc...",
     )
 
     assert log.id == log_id
@@ -119,15 +108,9 @@ def test_interaction_lineage() -> None:
     root = "root-123"
     parent = "inter-456"
 
-    meta = LineageMetadata(
-        root_request_id=root,
-        parent_interaction_id=parent
-    )
+    meta = LineageMetadata(root_request_id=root, parent_interaction_id=parent)
 
-    interaction = Interaction(
-        id="inter-789",
-        lineage=meta
-    )
+    interaction = Interaction(id="inter-789", lineage=meta)
 
     assert interaction.id == "inter-789"
     assert interaction.lineage is not None
