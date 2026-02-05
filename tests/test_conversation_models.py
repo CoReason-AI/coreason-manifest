@@ -9,16 +9,16 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError, AnyUrl
+from pydantic import AnyUrl, ValidationError
 
 from coreason_manifest import (
     ChatMessage,
-    PresentationEvent,
-    PresentationEventType,
     CitationBlock,
     CitationItem,
     MediaCarousel,
     MediaItem,
+    PresentationEvent,
+    PresentationEventType,
     Role,
 )
 
@@ -47,15 +47,15 @@ def test_presentation_polymorphism() -> None:
     events = [
         PresentationEvent(
             type=PresentationEventType.CITATION_BLOCK,
-            data=CitationBlock(items=[
-                CitationItem(source_id="1", uri=AnyUrl("https://example.com"), title="Example", snippet="Example")
-            ])
+            data=CitationBlock(
+                items=[
+                    CitationItem(source_id="1", uri=AnyUrl("https://example.com"), title="Example", snippet="Example")
+                ]
+            ),
         ),
         PresentationEvent(
             type=PresentationEventType.MEDIA_CAROUSEL,
-            data=MediaCarousel(items=[
-                MediaItem(url=AnyUrl("https://example.com/img"), mime_type="image/png")
-            ])
+            data=MediaCarousel(items=[MediaItem(url=AnyUrl("https://example.com/img"), mime_type="image/png")]),
         ),
     ]
 
@@ -76,9 +76,6 @@ def test_immutability() -> None:
         setattr(msg, "content", "New")  # noqa: B010
 
     # Presentation event immutability
-    event = PresentationEvent(
-        type=PresentationEventType.MARKDOWN_BLOCK,
-        data={"content": "foo"}
-    )
+    event = PresentationEvent(type=PresentationEventType.MARKDOWN_BLOCK, data={"content": "foo"})
     with pytest.raises(ValidationError):
         setattr(event, "type", PresentationEventType.USER_ERROR)  # noqa: B010

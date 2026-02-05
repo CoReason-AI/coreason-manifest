@@ -1,8 +1,19 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest import (
     ErrorDomain,
+    MarkdownBlock,
     PresentationEvent,
     PresentationEventType,
 )
@@ -78,8 +89,11 @@ def test_complex_polymorphism_structure() -> None:
     assert loaded[0].type == PresentationEventType.USER_ERROR
     assert loaded[1].type == PresentationEventType.MARKDOWN_BLOCK
 
-    # Check data access
+    # Check data access with type narrowing
+    assert isinstance(loaded[0].data, dict)
     assert loaded[0].data["message"] == "Error 1"
+
+    assert isinstance(loaded[1].data, MarkdownBlock)
     assert loaded[1].data.content == "Some text"  # MarkdownBlock model
 
     dumped = adapter.dump_python(loaded, mode="json")

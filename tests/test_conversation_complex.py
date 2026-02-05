@@ -10,16 +10,15 @@
 
 
 import pytest
-from pydantic import TypeAdapter, ValidationError, AnyUrl
+from pydantic import AnyUrl, TypeAdapter, ValidationError
 
 from coreason_manifest import (
     ChatMessage,
-    PresentationEvent,
-    PresentationEventType,
     CitationBlock,
     CitationItem,
     MediaCarousel,
-    MediaItem,
+    PresentationEvent,
+    PresentationEventType,
     Role,
     StreamOpCode,
     StreamPacket,
@@ -61,16 +60,9 @@ def test_presentation_event_polymorphism_adapter() -> None:
     events = [
         {
             "type": "citation_block",
-            "data": {
-                "items": [{"source_id": "1", "uri": "https://doc1", "title": "Doc 1", "snippet": "foo"}]
-            }
+            "data": {"items": [{"source_id": "1", "uri": "https://doc1", "title": "Doc 1", "snippet": "foo"}]},
         },
-        {
-            "type": "media_carousel",
-            "data": {
-                "items": [{"url": "https://art1", "mime_type": "image/png"}]
-            }
-        },
+        {"type": "media_carousel", "data": {"items": [{"url": "https://art1", "mime_type": "image/png"}]}},
     ]
 
     adapter = TypeAdapter(list[PresentationEvent])
@@ -79,7 +71,7 @@ def test_presentation_event_polymorphism_adapter() -> None:
     assert len(parsed) == 2
     assert parsed[0].type == PresentationEventType.CITATION_BLOCK
     assert isinstance(parsed[0].data, CitationBlock)
-    assert str(parsed[0].data.items[0].uri) == "https://doc1/" # AnyUrl adds trailing slash usually or sanitizes
+    assert str(parsed[0].data.items[0].uri) == "https://doc1/"  # AnyUrl adds trailing slash usually or sanitizes
 
     assert parsed[1].type == PresentationEventType.MEDIA_CAROUSEL
     assert isinstance(parsed[1].data, MediaCarousel)
@@ -88,9 +80,9 @@ def test_presentation_event_polymorphism_adapter() -> None:
 
 def test_stream_packet_with_presentation_event() -> None:
     """Test embedding presentation events in StreamPacket."""
-    citation_block = CitationBlock(items=[
-        CitationItem(source_id="1", uri=AnyUrl("https://source"), title="Title", snippet="Quote")
-    ])
+    citation_block = CitationBlock(
+        items=[CitationItem(source_id="1", uri=AnyUrl("https://source"), title="Title", snippet="Quote")]
+    )
     event = PresentationEvent(type=PresentationEventType.CITATION_BLOCK, data=citation_block)
 
     # Dump event to dict to fit StreamPacket payload schema
@@ -104,9 +96,7 @@ def test_stream_packet_with_presentation_event() -> None:
 
 def test_complex_immutability() -> None:
     """Verify deep immutability (to the extent frozen=True supports)."""
-    citation_block = CitationBlock(items=[
-        CitationItem(source_id="1", uri=AnyUrl("https://x"), title="X", snippet="y")
-    ])
+    citation_block = CitationBlock(items=[CitationItem(source_id="1", uri=AnyUrl("https://x"), title="X", snippet="y")])
     event = PresentationEvent(type=PresentationEventType.CITATION_BLOCK, data=citation_block)
 
     # Direct field assignment fails
@@ -119,7 +109,7 @@ def test_complex_immutability() -> None:
 
     # Check that we can't assign to CitationBlock fields
     with pytest.raises(ValidationError):
-        setattr(citation_block, "items", []) # noqa: B010
+        setattr(citation_block, "items", [])  # noqa: B010
 
     # Standard Pydantic behavior: items list is technically mutable in Python if accessed directly
     # but strictly speaking we shouldn't modify it.

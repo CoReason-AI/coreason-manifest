@@ -80,9 +80,7 @@ def test_memory_protocol() -> None:
         async def history(self, _limit: int = 10, _offset: int = 0) -> list[Interaction]:
             return []
 
-        async def recall(
-            self, _query: str, _limit: int = 5, _threshold: float = 0.7
-        ) -> list[str]:
+        async def recall(self, _query: str, _limit: int = 5, _threshold: float = 0.7) -> list[str]:
             return []
 
         async def store(self, _key: str, value: Any) -> None:

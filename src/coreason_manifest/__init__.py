@@ -20,7 +20,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
-from .spec.common.capabilities import AgentCapabilities, DeliveryMode, CapabilityType
+from .spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from .spec.common.error import ErrorDomain
 from .spec.common.graph_events import (
     GraphEvent,
@@ -47,9 +47,9 @@ from .spec.common.observability import (
 from .spec.common.presentation import (
     CitationBlock,
     CitationItem,
+    MarkdownBlock,
     MediaCarousel,
     MediaItem,
-    MarkdownBlock,
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,

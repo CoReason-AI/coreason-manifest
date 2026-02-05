@@ -9,15 +9,13 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import TypeAdapter, ValidationError, AnyUrl
+from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest import (
     PresentationEvent,
     PresentationEventType,
     CitationBlock,
-    CitationItem,
     MediaCarousel,
-    MediaItem,
     ProgressUpdate,
     SessionHandle,
 )
@@ -48,14 +46,6 @@ def test_presentation_event_malformed_data() -> None:
     event = PresentationEvent.model_validate(payload)
     assert isinstance(event.data, dict)
     assert event.type == PresentationEventType.CITATION_BLOCK
-
-    # Now try to force it via direct instantiation (which doesn't run 'before' validator usually unless configured?)
-    # Pydantic V2 runs model validators on init too usually.
-    # But strict typing on __init__ might catch it.
-
-    # If we pass a dict that fails validation against the specific model, does it stay as dict?
-    # Yes, because of the validator logic:
-    # try: values["data"] = model_map[event_type](**data) except: pass
 
     assert event.data["items"][0]["url"] == "http://x"
 
@@ -151,10 +141,3 @@ def test_session_handle_exceptions() -> None:
     # Check that it still satisfies the protocol statically (if we were using mypy here)
     # runtime check:
     assert isinstance(FaultySession(), SessionHandle)
-
-    # We can write a test that uses it and expects failure, simulating an agent's perspective
-    async def agent_logic(session: SessionHandle) -> None:
-        await session.history()
-
-    # We can't easily run async test without pytest-asyncio loop, but the definition is enough.
-    # The Protocol doesn't enforce *behavior*, only signature.

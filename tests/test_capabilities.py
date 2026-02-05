@@ -1,4 +1,4 @@
-from coreason_manifest.spec.common.capabilities import AgentCapabilities, DeliveryMode, CapabilityType
+from coreason_manifest.spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
@@ -11,9 +11,7 @@ def test_capabilities_default_init() -> None:
 
 def test_capabilities_custom_init() -> None:
     caps = AgentCapabilities(
-        delivery_mode=DeliveryMode.SERVER_SENT_EVENTS,
-        history_support=False,
-        type=CapabilityType.ATOMIC
+        delivery_mode=DeliveryMode.SERVER_SENT_EVENTS, history_support=False, type=CapabilityType.ATOMIC
     )
     assert caps.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
     assert caps.history_support is False
@@ -28,7 +26,7 @@ def test_agent_definition_integration() -> None:
         name="Test Agent",
         role="Tester",
         goal="To test capabilities",
-        capabilities=AgentCapabilities(delivery_mode=DeliveryMode.SERVER_SENT_EVENTS)
+        capabilities=AgentCapabilities(delivery_mode=DeliveryMode.SERVER_SENT_EVENTS),
     )
     assert agent.capabilities.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
     assert agent.capabilities.history_support is True

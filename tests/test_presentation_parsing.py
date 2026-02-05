@@ -12,10 +12,10 @@
 from pydantic import TypeAdapter
 
 from coreason_manifest import (
-    PresentationEvent,
-    PresentationEventType,
     CitationBlock,
     MediaCarousel,
+    PresentationEvent,
+    PresentationEventType,
 )
 
 
@@ -33,19 +33,13 @@ def test_parse_presentation_events() -> None:
                         "snippet": "This is a citation.",
                     }
                 ]
-            }
+            },
         },
         {
             "type": "media_carousel",
             "data": {
-                "items": [
-                    {
-                        "url": "https://example.com/download.png",
-                        "mime_type": "image/png",
-                        "alt_text": "An image"
-                    }
-                ]
-            }
+                "items": [{"url": "https://example.com/download.png", "mime_type": "image/png", "alt_text": "An image"}]
+            },
         },
     ]
 

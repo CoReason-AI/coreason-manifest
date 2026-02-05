@@ -7,7 +7,7 @@ from coreason_manifest import AgentCapabilities, AgentDefinition, DeliveryMode, 
 def test_edge_case_invalid_delivery_mode() -> None:
     """Test that invalid strings raise ValidationError."""
     with pytest.raises(ValidationError) as exc:
-        AgentCapabilities(delivery_mode="invalid_mode")  # type: ignore[arg-type]
+        AgentCapabilities(delivery_mode="invalid_mode")
     assert "Input should be 'request_response' or 'server_sent_events'" in str(exc.value)
 
 

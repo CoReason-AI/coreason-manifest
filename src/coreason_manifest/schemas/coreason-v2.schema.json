@@ -1,0 +1,774 @@
+{
+  "$defs": {
+    "AgentCapabilities": {
+      "additionalProperties": false,
+      "description": "Feature flags and capabilities for the agent.",
+      "properties": {
+        "delivery_mode": {
+          "description": "Supported transport mechanisms.",
+          "items": {
+            "$ref": "#/$defs/DeliveryMode"
+          },
+          "title": "Delivery Mode",
+          "type": "array"
+        },
+        "history_support": {
+          "default": true,
+          "description": "Whether the agent supports conversation history/context.",
+          "title": "History Support",
+          "type": "boolean"
+        }
+      },
+      "title": "AgentCapabilities",
+      "type": "object"
+    },
+    "AgentDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of an Agent.",
+      "properties": {
+        "type": {
+          "const": "agent",
+          "default": "agent",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique ID for the agent.",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the agent.",
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "description": "The persona/job title.",
+          "title": "Role",
+          "type": "string"
+        },
+        "goal": {
+          "description": "Primary objective.",
+          "title": "Goal",
+          "type": "string"
+        },
+        "backstory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Backstory or directives.",
+          "title": "Backstory"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "LLM identifier.",
+          "title": "Model"
+        },
+        "tools": {
+          "description": "List of Tool IDs or URI references.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "knowledge": {
+          "description": "List of file paths or knowledge base IDs.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Knowledge",
+          "type": "array"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/AgentCapabilities"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "role",
+        "goal"
+      ],
+      "title": "AgentDefinition",
+      "type": "object"
+    },
+    "AgentStep": {
+      "additionalProperties": false,
+      "description": "A step that executes an AI Agent.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the step.",
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "description": "Input arguments for the step.",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "x-design": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DesignMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UI metadata."
+        },
+        "type": {
+          "const": "agent",
+          "default": "agent",
+          "title": "Type",
+          "type": "string"
+        },
+        "agent": {
+          "description": "Reference to an Agent definition (by ID or name).",
+          "title": "Agent",
+          "type": "string"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ID of the next step to execute.",
+          "title": "Next"
+        },
+        "system_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional override for system prompt.",
+          "title": "System Prompt"
+        }
+      },
+      "required": [
+        "id",
+        "agent"
+      ],
+      "title": "AgentStep",
+      "type": "object"
+    },
+    "CouncilStep": {
+      "additionalProperties": false,
+      "description": "A step that involves multiple voters/agents.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the step.",
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "description": "Input arguments for the step.",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "x-design": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DesignMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UI metadata."
+        },
+        "type": {
+          "const": "council",
+          "default": "council",
+          "title": "Type",
+          "type": "string"
+        },
+        "voters": {
+          "description": "List of voters (Agent IDs).",
+          "items": {
+            "type": "string"
+          },
+          "title": "Voters",
+          "type": "array"
+        },
+        "strategy": {
+          "default": "consensus",
+          "description": "Voting strategy (e.g., consensus, majority).",
+          "title": "Strategy",
+          "type": "string"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ID of the next step to execute.",
+          "title": "Next"
+        }
+      },
+      "required": [
+        "id",
+        "voters"
+      ],
+      "title": "CouncilStep",
+      "type": "object"
+    },
+    "DeliveryMode": {
+      "description": "Supported transport mechanisms.",
+      "enum": [
+        "request_response",
+        "sse"
+      ],
+      "title": "DeliveryMode",
+      "type": "string"
+    },
+    "DesignMetadata": {
+      "additionalProperties": false,
+      "description": "UI-specific metadata for the visual builder.",
+      "properties": {
+        "x": {
+          "description": "X coordinate on the canvas.",
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "description": "Y coordinate on the canvas.",
+          "title": "Y",
+          "type": "number"
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Icon name or URL.",
+          "title": "Icon"
+        },
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Color code (hex/name).",
+          "title": "Color"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Display label.",
+          "title": "Label"
+        },
+        "zoom": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Zoom level.",
+          "title": "Zoom"
+        },
+        "collapsed": {
+          "default": false,
+          "description": "Whether the node is collapsed in UI.",
+          "title": "Collapsed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "DesignMetadata",
+      "type": "object"
+    },
+    "GenericDefinition": {
+      "additionalProperties": true,
+      "description": "Fallback for unknown definitions.",
+      "properties": {},
+      "title": "GenericDefinition",
+      "type": "object"
+    },
+    "InterfaceDefinition": {
+      "additionalProperties": false,
+      "description": "Defines the input/output contract.",
+      "properties": {
+        "inputs": {
+          "additionalProperties": true,
+          "description": "JSON Schema definitions for arguments.",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": true,
+          "description": "JSON Schema definitions for return values.",
+          "title": "Outputs",
+          "type": "object"
+        }
+      },
+      "title": "InterfaceDefinition",
+      "type": "object"
+    },
+    "LogicStep": {
+      "additionalProperties": false,
+      "description": "A step that executes custom logic.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the step.",
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "description": "Input arguments for the step.",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "x-design": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DesignMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UI metadata."
+        },
+        "type": {
+          "const": "logic",
+          "default": "logic",
+          "title": "Type",
+          "type": "string"
+        },
+        "code": {
+          "description": "Python code or reference to logic to execute.",
+          "title": "Code",
+          "type": "string"
+        },
+        "next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ID of the next step to execute.",
+          "title": "Next"
+        }
+      },
+      "required": [
+        "id",
+        "code"
+      ],
+      "title": "LogicStep",
+      "type": "object"
+    },
+    "ManifestMetadata": {
+      "additionalProperties": true,
+      "description": "Metadata for the manifest.",
+      "properties": {
+        "name": {
+          "description": "Human-readable name of the workflow/agent.",
+          "title": "Name",
+          "type": "string"
+        },
+        "x-design": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DesignMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UI metadata."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ManifestMetadata",
+      "type": "object"
+    },
+    "PolicyDefinition": {
+      "additionalProperties": false,
+      "description": "Defines execution policy and governance rules.",
+      "properties": {
+        "max_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Execution limit on number of steps.",
+          "title": "Max Steps"
+        },
+        "max_retries": {
+          "default": 3,
+          "description": "Maximum number of retries.",
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timeout in seconds.",
+          "title": "Timeout"
+        },
+        "human_in_the_loop": {
+          "default": false,
+          "description": "Whether to require human approval.",
+          "title": "Human In The Loop",
+          "type": "boolean"
+        }
+      },
+      "title": "PolicyDefinition",
+      "type": "object"
+    },
+    "StateDefinition": {
+      "additionalProperties": false,
+      "description": "Defines the conversation memory/context structure.",
+      "properties": {
+        "schema": {
+          "additionalProperties": true,
+          "description": "The structure of the conversation memory/context.",
+          "title": "Schema",
+          "type": "object"
+        },
+        "backend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Backend storage type (e.g., 'redis', 'memory').",
+          "title": "Backend"
+        }
+      },
+      "title": "StateDefinition",
+      "type": "object"
+    },
+    "SwitchStep": {
+      "additionalProperties": false,
+      "description": "A step that routes execution based on conditions.",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the step.",
+          "title": "Id",
+          "type": "string"
+        },
+        "inputs": {
+          "additionalProperties": true,
+          "description": "Input arguments for the step.",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "x-design": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DesignMetadata"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "UI metadata."
+        },
+        "type": {
+          "const": "switch",
+          "default": "switch",
+          "title": "Type",
+          "type": "string"
+        },
+        "cases": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Dictionary of condition expressions to Step IDs.",
+          "title": "Cases",
+          "type": "object"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default Step ID if no cases match.",
+          "title": "Default"
+        }
+      },
+      "required": [
+        "id",
+        "cases"
+      ],
+      "title": "SwitchStep",
+      "type": "object"
+    },
+    "ToolDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of an external tool.",
+      "properties": {
+        "type": {
+          "const": "tool",
+          "default": "tool",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique ID for the tool within the manifest.",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the tool.",
+          "title": "Name",
+          "type": "string"
+        },
+        "uri": {
+          "description": "The MCP endpoint URI.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/ToolRiskLevel",
+          "description": "Risk level (safe, standard, critical)."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of the tool.",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "uri",
+        "risk_level"
+      ],
+      "title": "ToolDefinition",
+      "type": "object"
+    },
+    "ToolRiskLevel": {
+      "description": "Risk level for the tool.",
+      "enum": [
+        "safe",
+        "standard",
+        "critical"
+      ],
+      "title": "ToolRiskLevel",
+      "type": "string"
+    },
+    "Workflow": {
+      "additionalProperties": false,
+      "description": "Defines the execution topology.",
+      "properties": {
+        "start": {
+          "description": "ID of the starting step.",
+          "title": "Start",
+          "type": "string"
+        },
+        "steps": {
+          "additionalProperties": {
+            "description": "Polymorphic step definition.",
+            "discriminator": {
+              "mapping": {
+                "agent": "#/$defs/AgentStep",
+                "council": "#/$defs/CouncilStep",
+                "logic": "#/$defs/LogicStep",
+                "switch": "#/$defs/SwitchStep"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/AgentStep"
+              },
+              {
+                "$ref": "#/$defs/LogicStep"
+              },
+              {
+                "$ref": "#/$defs/CouncilStep"
+              },
+              {
+                "$ref": "#/$defs/SwitchStep"
+              }
+            ]
+          },
+          "description": "Dictionary of all steps indexed by ID.",
+          "title": "Steps",
+          "type": "object"
+        }
+      },
+      "required": [
+        "start",
+        "steps"
+      ],
+      "title": "Workflow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Root object for Coreason Manifest V2.",
+  "properties": {
+    "apiVersion": {
+      "const": "coreason.ai/v2",
+      "default": "coreason.ai/v2",
+      "description": "API Version.",
+      "title": "Apiversion",
+      "type": "string"
+    },
+    "kind": {
+      "description": "Kind of the object.",
+      "enum": [
+        "Recipe",
+        "Agent"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "#/$defs/ManifestMetadata",
+      "description": "Metadata including name and design info."
+    },
+    "interface": {
+      "$ref": "#/$defs/InterfaceDefinition"
+    },
+    "state": {
+      "$ref": "#/$defs/StateDefinition"
+    },
+    "policy": {
+      "$ref": "#/$defs/PolicyDefinition"
+    },
+    "definitions": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "discriminator": {
+              "mapping": {
+                "agent": "#/$defs/AgentDefinition",
+                "tool": "#/$defs/ToolDefinition"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ToolDefinition"
+              },
+              {
+                "$ref": "#/$defs/AgentDefinition"
+              }
+            ]
+          },
+          {
+            "$ref": "#/$defs/GenericDefinition"
+          }
+        ]
+      },
+      "description": "Reusable definitions.",
+      "title": "Definitions",
+      "type": "object"
+    },
+    "workflow": {
+      "$ref": "#/$defs/Workflow",
+      "description": "The main workflow topology."
+    }
+  },
+  "required": [
+    "kind",
+    "metadata",
+    "workflow"
+  ],
+  "title": "ManifestV2",
+  "type": "object"
+}

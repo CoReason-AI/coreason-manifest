@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, List, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from ..common.identity import Identity
 from ..common.session import Interaction
@@ -28,11 +28,11 @@ class SessionHandle(Protocol):
         """The identity associated with the session."""
         ...
 
-    async def history(self, limit: int = 10, offset: int = 0) -> List[Interaction]:
+    async def history(self, limit: int = 10, offset: int = 0) -> list[Interaction]:
         """Retrieve interaction history."""
         ...
 
-    async def recall(self, query: str, limit: int = 5, threshold: float = 0.7) -> List[str]:
+    async def recall(self, query: str, limit: int = 5, threshold: float = 0.7) -> list[str]:
         """Recall relevant information from memory."""
         ...
 
