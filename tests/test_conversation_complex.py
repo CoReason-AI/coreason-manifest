@@ -73,11 +73,7 @@ def test_presentation_event_polymorphism_adapter() -> None:
         },
         {
             "type": "media_carousel",
-            "data": {
-                "items": [
-                    {"url": "https://art1.png", "mime_type": "image/png"}
-                ]
-            },
+            "data": {"items": [{"url": "https://art1.png", "mime_type": "image/png"}]},
         },
     ]
 
@@ -96,14 +92,8 @@ def test_presentation_event_polymorphism_adapter() -> None:
 
 def test_stream_packet_with_presentation_event() -> None:
     """Test embedding presentation events in StreamPacket."""
-    citation_block = CitationBlock(
-        items=[
-            CitationItem(source_id="1", uri="http://source.com", title="Quote")
-        ]
-    )
-    event = PresentationEvent(
-        type=PresentationEventType.CITATION_BLOCK, data=citation_block
-    )
+    citation_block = CitationBlock(items=[CitationItem(source_id="1", uri="http://source.com", title="Quote")])
+    event = PresentationEvent(type=PresentationEventType.CITATION_BLOCK, data=citation_block)
 
     # Dump event to dict to fit StreamPacket payload schema
     packet = StreamPacket(op=StreamOpCode.EVENT, p=event.dump())
@@ -116,11 +106,7 @@ def test_stream_packet_with_presentation_event() -> None:
 
 def test_complex_immutability() -> None:
     """Verify deep immutability (to the extent frozen=True supports)."""
-    citation_block = CitationBlock(
-        items=[
-            CitationItem(source_id="1", uri="http://x.com", title="y")
-        ]
-    )
+    citation_block = CitationBlock(items=[CitationItem(source_id="1", uri="http://x.com", title="y")])
 
     # Direct field assignment fails
     with pytest.raises(ValidationError):

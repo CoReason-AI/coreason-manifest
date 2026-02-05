@@ -56,15 +56,13 @@ def test_progress_validation() -> None:
 
     # Invalid status
     with pytest.raises(ValidationError) as exc:
-        ProgressUpdate(label="Thinking", status="thinking")  # type: ignore[arg-type]
+        ProgressUpdate(label="Thinking", status="thinking")
     assert "Input should be 'running', 'complete' or 'failed'" in str(exc.value)
 
 
 def test_capability_contracts() -> None:
     """Test Case 3: Capability Contracts"""
-    caps = AgentCapabilities(
-        type=CapabilityType.ATOMIC, delivery_mode=DeliveryMode.SERVER_SENT_EVENTS
-    )
+    caps = AgentCapabilities(type=CapabilityType.ATOMIC, delivery_mode=DeliveryMode.SERVER_SENT_EVENTS)
 
     assert caps.type == CapabilityType.ATOMIC
     assert caps.delivery_mode == "server_sent_events"

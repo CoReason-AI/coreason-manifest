@@ -47,21 +47,11 @@ def test_presentation_polymorphism() -> None:
     events = [
         PresentationEvent(
             type=PresentationEventType.CITATION_BLOCK,
-            data=CitationBlock(
-                items=[
-                    CitationItem(
-                        source_id="1", uri="https://example.com", title="Example"
-                    )
-                ]
-            ),
+            data=CitationBlock(items=[CitationItem(source_id="1", uri="https://example.com", title="Example")]),
         ),
         PresentationEvent(
             type=PresentationEventType.MEDIA_CAROUSEL,
-            data=MediaCarousel(
-                items=[
-                    MediaItem(url="https://a.com/b.csv", mime_type="text/csv")
-                ]
-            ),
+            data=MediaCarousel(items=[MediaItem(url="https://a.com/b.csv", mime_type="text/csv")]),
         ),
     ]
 
@@ -81,8 +71,6 @@ def test_immutability() -> None:
     with pytest.raises(ValidationError):
         setattr(msg, "content", "New")  # noqa: B010
 
-    citation = CitationBlock(
-        items=[CitationItem(source_id="1", uri="http://a", title="b")]
-    )
+    citation = CitationBlock(items=[CitationItem(source_id="1", uri="http://a", title="b")])
     with pytest.raises(ValidationError):
         setattr(citation, "items", [])  # noqa: B010

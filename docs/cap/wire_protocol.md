@@ -174,29 +174,25 @@ Represents a single message in a conversation history.
 
 ### PresentationEvent
 
-Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`).
+Polymorphic container for UI rendering events (referenced in `StreamPacket` `op=event`).
 
-#### CitationEvent (`type: citation`)
-
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `uri` | `str` | Source URL or file path. |
-| `text` | `str` | The quoted text snippet. |
-| `indices` | `Optional[List[int]]` | Start/End character indices. |
-
-#### ArtifactEvent (`type: artifact`)
+The `PresentationEvent` model uses a compositional pattern where `type` determines the schema of `data`.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `artifact_id` | `str` | Unique ID of the generated artifact. |
-| `mime_type` | `str` | Content type (e.g., `image/png`, `text/csv`). |
-| `url` | `Optional[str]` | Download URL. |
+| `id` | `UUID` | Unique event identifier. |
+| `timestamp` | `datetime` | Creation time (UTC). |
+| `type` | `PresentationEventType` | The type discriminator (e.g., `citation_block`). |
+| `data` | `Union[Block, Dict]` | The event payload. |
 
-#### UserErrorEvent (`type: user_error`)
+**Supported Types & Payloads:**
 
-| Field | Type | Description |
+See [Presentation Layer Specification](presentation_layer.md) for full details.
+
+| Type (`type`) | Data Schema (`data`) | Description |
 | :--- | :--- | :--- |
-| `message` | `str` | Human-readable message. |
-| `code` | `Optional[int]` | Semantic integer code (e.g., 400, 503). |
-| `domain` | `ErrorDomain` | Source (`client`, `system`, `llm`, `tool`, `security`). |
-| `retryable` | `bool` | Whether the error is retryable. |
+| `citation_block` | `CitationBlock` | List of `CitationItem`s. |
+| `media_carousel` | `MediaCarousel` | List of `MediaItem`s. |
+| `progress_indicator` | `ProgressUpdate` | Status updates (`running`, `complete`, `failed`). |
+| `markdown_block` | `MarkdownBlock` | Raw Markdown content. |
+| `user_error` | `Dict` | Error details (message, code, domain). |

@@ -10,7 +10,7 @@
 
 from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Literal, Union
+from typing import Any, Literal, Union
 from uuid import UUID, uuid4
 
 from pydantic import AnyUrl, ConfigDict, Field
@@ -54,9 +54,7 @@ class ProgressUpdate(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     label: str = Field(..., description="Label for the progress.")
-    status: Literal["running", "complete", "failed"] = Field(
-        ..., description="Status of the progress."
-    )
+    status: Literal["running", "complete", "failed"] = Field(..., description="Status of the progress.")
     progress_percent: float | None = Field(None, description="Percentage of progress completed.")
 
 
@@ -93,9 +91,10 @@ class PresentationEvent(CoReasonBaseModel):
 
     id: UUID = Field(default_factory=uuid4, description="Unique ID of the event.")
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of the event."
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp of the event.",
     )
     type: PresentationEventType = Field(..., description="The type of presentation event.")
-    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict] = Field(
+    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict[str, Any]] = Field(
         ..., description="The event data.", union_mode="left_to_right"
     )

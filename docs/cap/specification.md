@@ -68,9 +68,12 @@ The `definitions` section is a polymorphic key-value map where you can define re
 ### Agent Capabilities (`AgentCapabilities`)
 Used within an `AgentDefinition` to declare supported features.
 
-*   `delivery_mode`: List of supported transport mechanisms.
-    *   Values: `sse` (Server-Sent Events), `request_response` (Standard HTTP).
-    *   Default: `['sse']`
+*   `type`: The structural type of the agent.
+    *   Values: `atomic` (Single step), `graph` (Multi-step/Workflow).
+    *   Default: `graph`
+*   `delivery_mode`: The primary transport mechanism.
+    *   Values: `server_sent_events` (Streaming), `request_response` (Synchronous).
+    *   Default: `request_response`
 *   `history_support`: Boolean indicating if the agent maintains conversation context.
     *   Default: `true`
 
