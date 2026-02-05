@@ -14,7 +14,12 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.observability import CloudEvent, EventContentType, ReasoningTrace
+from coreason_manifest.definitions.observability import (
+    AuditLog,
+    CloudEvent,
+    EventContentType,
+    ReasoningTrace,
+)
 
 # --- Unit Tests ---
 
@@ -369,3 +374,36 @@ def test_nested_cloud_event_in_data() -> None:
     dumped = outer_event.dump()
     assert dumped["datacontenttype"] == "application/json"
     assert dumped["data"]["wrapped_event"]["datacontenttype"] == "application/vnd.coreason.artifact+json"
+
+
+# --- AuditLog Tests ---
+
+
+def test_audit_log_serialization() -> None:
+    now = datetime.now(timezone.utc)
+    log = AuditLog(
+        request_id=uuid4(),
+        root_request_id=uuid4(),
+        timestamp=now,
+        actor="user:123",
+        action="login",
+        outcome="success",
+        integrity_hash="sha256:...",
+    )
+    dumped = log.dump()
+    assert dumped["actor"] == "user:123"
+    assert dumped["integrity_hash"] == "sha256:..."
+    assert dumped["timestamp"] == now.isoformat().replace("+00:00", "Z")
+
+
+def test_audit_log_immutability() -> None:
+    log = AuditLog(
+        request_id=uuid4(),
+        root_request_id=uuid4(),
+        actor="user:123",
+        action="login",
+        outcome="success",
+        integrity_hash="sha256:...",
+    )
+    with pytest.raises(ValidationError):
+        setattr(log, "outcome", "failed")  # noqa: B010

@@ -8,12 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Literal, Optional, Union
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from ..common import CoReasonBaseModel
 
@@ -59,8 +59,8 @@ class ReasoningTrace(CoReasonBaseModel):
 
     model_config = {"frozen": True}
 
-    request_id: UUID
-    root_request_id: UUID = Field(description="The original user request ID (for lineage)")
+    request_id: UUID = Field(default_factory=uuid4)
+    root_request_id: Optional[UUID] = Field(default=None, description="The original user request ID (for lineage)")
     parent_request_id: Optional[UUID] = None
     node_id: str = Field(description="The step name")
     status: str = Field(description='"success" or "failed"')
@@ -68,3 +68,33 @@ class ReasoningTrace(CoReasonBaseModel):
     outputs: Optional[Dict[str, Any]] = None
     latency_ms: float
     timestamp: datetime
+
+    @model_validator(mode="before")
+    @classmethod
+    def _auto_root(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Ensure request_id exists
+            if data.get("request_id") is None:
+                data["request_id"] = uuid4()
+
+            # Ensure root_request_id exists (copy request_id if missing)
+            if data.get("root_request_id") is None:
+                data["root_request_id"] = data["request_id"]
+        return data
+
+
+class AuditLog(CoReasonBaseModel):
+    """
+    Immutable audit log entry for compliance and security auditing.
+    """
+
+    model_config = {"frozen": True}
+
+    id: UUID = Field(default_factory=uuid4)
+    request_id: UUID
+    root_request_id: UUID
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    actor: str
+    action: str
+    outcome: str
+    integrity_hash: str

@@ -19,7 +19,12 @@ from .definitions.message import (
     MultiModalInput,
     Role,
 )
-from .definitions.observability import CloudEvent, EventContentType, ReasoningTrace
+from .definitions.observability import (
+    AuditLog,
+    CloudEvent,
+    EventContentType,
+    ReasoningTrace,
+)
 from .definitions.presentation import (
     AnyPresentationEvent,
     ArtifactEvent,
@@ -122,4 +127,5 @@ __all__ = [
     "CloudEvent",
     "EventContentType",
     "ReasoningTrace",
+    "AuditLog",
 ]
