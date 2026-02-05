@@ -45,7 +45,9 @@ class CitationBlock(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    items: list[CitationItem] = Field(default_factory=list, description="List of citation items.")
+    items: list[CitationItem] = Field(
+        default_factory=list, description="List of citation items."
+    )
 
 
 class ProgressUpdate(CoReasonBaseModel):
@@ -54,8 +56,12 @@ class ProgressUpdate(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     label: str = Field(..., description="Label for the progress.")
-    status: Literal["running", "complete", "failed"] = Field(..., description="Status of the progress.")
-    progress_percent: float | None = Field(None, description="Percentage of progress completed.")
+    status: Literal["running", "complete", "failed"] = Field(
+        ..., description="Status of the progress."
+    )
+    progress_percent: float | None = Field(
+        None, description="Percentage of progress completed."
+    )
 
 
 class MediaItem(CoReasonBaseModel):
@@ -73,7 +79,9 @@ class MediaCarousel(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    items: list[MediaItem] = Field(default_factory=list, description="List of media items.")
+    items: list[MediaItem] = Field(
+        default_factory=list, description="List of media items."
+    )
 
 
 class MarkdownBlock(CoReasonBaseModel):
@@ -94,7 +102,9 @@ class PresentationEvent(CoReasonBaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp of the event.",
     )
-    type: PresentationEventType = Field(..., description="The type of presentation event.")
-    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict[str, Any]] = Field(
-        ..., description="The event data.", union_mode="left_to_right"
+    type: PresentationEventType = Field(
+        ..., description="The type of presentation event."
     )
+    data: Union[
+        CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict[str, Any]
+    ] = Field(..., description="The event data.", union_mode="left_to_right")

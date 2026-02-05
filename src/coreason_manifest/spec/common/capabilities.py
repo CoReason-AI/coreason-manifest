@@ -34,8 +34,12 @@ class AgentCapabilities(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    type: CapabilityType = Field(default=CapabilityType.GRAPH, description="The type of agent.")
-    delivery_mode: DeliveryMode = Field(default=DeliveryMode.REQUEST_RESPONSE, description="The delivery mode.")
+    type: CapabilityType = Field(
+        default=CapabilityType.GRAPH, description="The type of agent."
+    )
+    delivery_mode: DeliveryMode = Field(
+        default=DeliveryMode.REQUEST_RESPONSE, description="The delivery mode."
+    )
     history_support: bool = Field(
         default=True,
         description="Whether the agent supports conversation history/context.",
