@@ -24,6 +24,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Observability & Tracing](observability.md)**
     *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
 
+*   **[Event Content Types](event_content_types.md)**
+    *   Specification of standard MIME types (`EventContentType`) used in CloudEvents for protocol compliance.
+
 ## Architecture & Rationale
 
 *   **[Product Requirements & Philosophy](product_requirements.md)**

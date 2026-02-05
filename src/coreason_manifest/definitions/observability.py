@@ -9,12 +9,20 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional
+from enum import Enum
+from typing import Any, Dict, Literal, Optional, Union
 from uuid import UUID
 
 from pydantic import Field
 
 from ..common import CoReasonBaseModel
+
+
+class EventContentType(str, Enum):
+    JSON = "application/json"
+    STREAM = "application/vnd.coreason.stream+json"
+    ERROR = "application/vnd.coreason.error+json"
+    ARTIFACT = "application/vnd.coreason.artifact+json"
 
 
 class CloudEvent(CoReasonBaseModel):
@@ -30,7 +38,10 @@ class CloudEvent(CoReasonBaseModel):
     source: str = Field(description="URI reference to the producer, e.g., urn:node:step-1")
     type: str = Field(description="Reverse-DNS type, e.g., ai.coreason.node.started")
     time: datetime = Field(description="Timestamp of when the occurrence happened (UTC)")
-    datacontenttype: str = Field(default="application/json")
+    datacontenttype: Union[EventContentType, str] = Field(
+        default=EventContentType.JSON,
+        description="MIME content type of data (e.g. application/json)"
+    )
     data: Optional[Dict[str, Any]] = None
 
     # Extensions for Distributed Tracing (W3C Trace Context)

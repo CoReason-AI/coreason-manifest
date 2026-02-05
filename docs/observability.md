@@ -24,7 +24,7 @@ from coreason_manifest import CloudEvent
 | `source` | `str` | URI reference to the event producer (e.g., `urn:node:step-1`). | Yes | - |
 | `type` | `str` | Reverse-DNS event type (e.g., `ai.coreason.node.started`). | Yes | - |
 | `time` | `datetime` | Timestamp of occurrence (UTC). | Yes | - |
-| `datacontenttype` | `str` | MIME type of the data. | Yes | `"application/json"` |
+| `datacontenttype` | `Union[EventContentType, str]` | MIME type of the data. See [Event Content Types](event_content_types.md). | Yes | `EventContentType.JSON` |
 | `data` | `Optional[Dict[str, Any]]` | The event payload. | No | `None` |
 | `traceparent` | `Optional[str]` | W3C Trace Context parent ID. | No | `None` |
 | `tracestate` | `Optional[str]` | W3C Trace Context state. | No | `None` |
