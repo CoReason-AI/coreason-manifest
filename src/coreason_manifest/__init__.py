@@ -48,6 +48,7 @@ from .spec.common.presentation import (
     PresentationEventType,
     UserErrorEvent,
 )
+from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -110,6 +111,7 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "MemoryStrategy",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
@@ -120,6 +122,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
+    "SessionState",
     "StateDefinition",
     "Step",
     "StreamError",

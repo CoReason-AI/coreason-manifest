@@ -8,7 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List
 from uuid import uuid4
 
 from pydantic import ConfigDict, Field
@@ -33,3 +35,40 @@ class Interaction(CoReasonBaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     input: Any = None
     lineage: LineageMetadata | None = None
+
+
+class MemoryStrategy(str, Enum):
+    ALL = "all"
+    SLIDING_WINDOW = "sliding_window"
+    TOKEN_BUFFER = "token_buffer"
+
+
+class SessionState(CoReasonBaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    agent_id: str
+    user_id: str
+    created_at: datetime
+    updated_at: datetime
+    history: List[Interaction] = Field(default_factory=list)
+    variables: Dict[str, Any] = Field(default_factory=dict)
+
+    def prune(self, strategy: MemoryStrategy, limit: int) -> "SessionState":
+        """Prunes history based on strategy, returning a new instance."""
+        if strategy == MemoryStrategy.ALL:
+            return self
+
+        new_history = self.history
+        if strategy == MemoryStrategy.SLIDING_WINDOW:
+            if limit <= 0:
+                new_history = []
+            else:
+                new_history = self.history[-limit:]
+
+            return self.model_copy(update={
+                "history": new_history,
+                "updated_at": datetime.now(),
+            })
+
+        return self

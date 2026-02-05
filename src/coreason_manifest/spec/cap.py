@@ -109,6 +109,7 @@ class AgentRequest(CoReasonBaseModel):
     query: str
     files: list[str] = Field(default_factory=list)
     conversation_id: str | None = None
+    session_id: str | None = None
     meta: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
