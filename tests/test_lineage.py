@@ -9,7 +9,11 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime, timezone
+from typing import Any
 from uuid import UUID, uuid4
+
+import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.definitions.observability import AuditLog, ReasoningTrace
 from coreason_manifest.definitions.session import Interaction, LineageMetadata
@@ -24,6 +28,32 @@ def test_agent_request_auto_rooting() -> None:
     assert isinstance(req.root_request_id, UUID)
     assert req.root_request_id == req.request_id
     assert req.parent_request_id is None
+
+
+def test_agent_request_explicit_none_root() -> None:
+    """Verify that passing None to root_request_id triggers auto-rooting."""
+    req = AgentRequest(query="test", root_request_id=None)
+
+    assert isinstance(req.root_request_id, UUID)
+    assert req.root_request_id == req.request_id
+
+
+def test_agent_request_with_explicit_request_id_auto_root() -> None:
+    """Verify auto-rooting works when request_id is manually provided."""
+    uid = uuid4()
+    req = AgentRequest(query="test", request_id=uid)
+
+    assert req.request_id == uid
+    assert req.root_request_id == uid
+
+
+def test_agent_request_validation_error() -> None:
+    """Verify validation fails for invalid types."""
+    with pytest.raises(ValidationError):
+        # Mypy might check types before runtime, but Pydantic validates at runtime.
+        # We force a type mismatch to check runtime validation.
+        bad_id: Any = "not-a-uuid"
+        AgentRequest(query="test", request_id=bad_id)
 
 
 def test_agent_request_auto_rooting_with_explicit_id() -> None:
@@ -57,6 +87,48 @@ def test_reasoning_trace_auto_rooting() -> None:
 
     assert trace.request_id == uid
     assert trace.root_request_id == uid
+
+
+def test_reasoning_trace_complex_lineage() -> None:
+    """Verify a chain of lineage in traces."""
+    # Root request
+    root_id = uuid4()
+    trace_root = ReasoningTrace(
+        request_id=root_id,
+        node_id="root-node",
+        status="success",
+        latency_ms=10.0,
+        timestamp=datetime.now(timezone.utc),
+    )
+    assert trace_root.root_request_id == root_id
+
+    # Child request
+    child_id = uuid4()
+    trace_child = ReasoningTrace(
+        request_id=child_id,
+        root_request_id=root_id,
+        parent_request_id=root_id,
+        node_id="child-node",
+        status="success",
+        latency_ms=5.0,
+        timestamp=datetime.now(timezone.utc),
+    )
+    assert trace_child.root_request_id == root_id
+    assert trace_child.parent_request_id == root_id
+
+    # Grandchild request
+    grandchild_id = uuid4()
+    trace_grandchild = ReasoningTrace(
+        request_id=grandchild_id,
+        root_request_id=root_id,
+        parent_request_id=child_id,
+        node_id="grandchild-node",
+        status="success",
+        latency_ms=2.0,
+        timestamp=datetime.now(timezone.utc),
+    )
+    assert trace_grandchild.root_request_id == root_id
+    assert trace_grandchild.parent_request_id == child_id
 
 
 def test_reasoning_trace_explicit_root() -> None:

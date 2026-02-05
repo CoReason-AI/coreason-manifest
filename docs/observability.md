@@ -61,17 +61,17 @@ from coreason_manifest import ReasoningTrace
 
 **Fields:**
 
-| Field | Type | Description | Required |
-| :--- | :--- | :--- | :--- |
-| `request_id` | `UUID` | Unique ID for this specific trace entry. | Yes |
-| `root_request_id` | `UUID` | The original user request ID (preserves lineage). | Yes |
-| `parent_request_id` | `Optional[UUID]` | The ID of the parent span/step. | No |
-| `node_id` | `str` | The name or ID of the step/component. | Yes |
-| `status` | `str` | Execution status (`"success"`, `"failed"`). | Yes |
-| `inputs` | `Optional[Dict]` | Input arguments to the node. | No |
-| `outputs` | `Optional[Dict]` | Output results from the node. | No |
-| `latency_ms` | `float` | Execution duration in milliseconds. | Yes |
-| `timestamp` | `datetime` | Time of log entry. | Yes |
+| Field | Type | Description | Required | Default |
+| :--- | :--- | :--- | :--- | :--- |
+| `request_id` | `UUID` | Unique ID for this specific trace entry. | Yes | - |
+| `root_request_id` | `UUID` | The original user request ID (preserves lineage). Auto-filled if missing. | Yes | `None` (input) |
+| `parent_request_id` | `Optional[UUID]` | The ID of the parent span/step. | No | `None` |
+| `node_id` | `str` | The name or ID of the step/component. | Yes | - |
+| `status` | `str` | Execution status (`"success"`, `"failed"`). | Yes | - |
+| `inputs` | `Optional[Dict]` | Input arguments to the node. | No | `None` |
+| `outputs` | `Optional[Dict]` | Output results from the node. | No | `None` |
+| `latency_ms` | `float` | Execution duration in milliseconds. | Yes | - |
+| `timestamp` | `datetime` | Time of log entry. | Yes | - |
 
 **Example:**
 
@@ -80,9 +80,10 @@ from uuid import uuid4
 from datetime import datetime, timezone
 from coreason_manifest import ReasoningTrace
 
+# Auto-rooting in action: request_id becomes root_request_id
+uid = uuid4()
 trace = ReasoningTrace(
-    request_id=uuid4(),
-    root_request_id=uuid4(),
+    request_id=uid,
     node_id="summarize-text",
     status="success",
     inputs={"text_length": 5000},
@@ -90,4 +91,31 @@ trace = ReasoningTrace(
     latency_ms=1250.5,
     timestamp=datetime.now(timezone.utc)
 )
+assert trace.root_request_id == uid
 ```
+
+---
+
+## Audit Log
+
+Immutable audit record for compliance and security monitoring.
+
+### Model: `AuditLog`
+
+**Import:**
+```python
+from coreason_manifest import AuditLog
+```
+
+**Fields:**
+
+| Field | Type | Description | Required |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | Unique audit record ID. | Yes |
+| `request_id` | `UUID` | The specific operation being logged. | Yes |
+| `root_request_id` | `UUID` | The origin request ID. | Yes |
+| `timestamp` | `datetime` | Time of the audit entry. | Yes |
+| `actor` | `str` | User or Agent ID performing the action. | Yes |
+| `action` | `str` | The action performed (e.g., "file_read"). | Yes |
+| `outcome` | `str` | The outcome (e.g., "success", "denied"). | Yes |
+| `integrity_hash` | `str` | SHA-256 hash of critical fields. | Yes |
