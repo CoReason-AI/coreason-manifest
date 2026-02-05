@@ -9,13 +9,16 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import ValidationError
+from pydantic import ValidationError, AnyUrl
 
 from coreason_manifest import (
-    ArtifactEvent,
     ChatMessage,
-    CitationEvent,
+    PresentationEvent,
     PresentationEventType,
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    MediaItem,
     Role,
 )
 
@@ -42,18 +45,28 @@ def test_role_validation() -> None:
 def test_presentation_polymorphism() -> None:
     """Test polymorphism for presentation events."""
     events = [
-        CitationEvent(uri="https://example.com", text="Example"),
-        ArtifactEvent(artifact_id="123", mime_type="text/csv"),
+        PresentationEvent(
+            type=PresentationEventType.CITATION_BLOCK,
+            data=CitationBlock(items=[
+                CitationItem(source_id="1", uri=AnyUrl("https://example.com"), title="Example", snippet="Example")
+            ])
+        ),
+        PresentationEvent(
+            type=PresentationEventType.MEDIA_CAROUSEL,
+            data=MediaCarousel(items=[
+                MediaItem(url=AnyUrl("https://example.com/img"), mime_type="image/png")
+            ])
+        ),
     ]
 
-    assert events[0].type == PresentationEventType.CITATION
-    assert events[1].type == PresentationEventType.ARTIFACT
+    assert events[0].type == PresentationEventType.CITATION_BLOCK
+    assert events[1].type == PresentationEventType.MEDIA_CAROUSEL
 
     dumped_citation = events[0].dump()
     dumped_artifact = events[1].dump()
 
-    assert dumped_citation["type"] == "citation"
-    assert dumped_artifact["type"] == "artifact"
+    assert dumped_citation["type"] == "citation_block"
+    assert dumped_artifact["type"] == "media_carousel"
 
 
 def test_immutability() -> None:
@@ -62,6 +75,10 @@ def test_immutability() -> None:
     with pytest.raises(ValidationError):
         setattr(msg, "content", "New")  # noqa: B010
 
-    citation = CitationEvent(uri="http://a", text="b")
+    # Presentation event immutability
+    event = PresentationEvent(
+        type=PresentationEventType.MARKDOWN_BLOCK,
+        data={"content": "foo"}
+    )
     with pytest.raises(ValidationError):
-        setattr(citation, "text", "c")  # noqa: B010
+        setattr(event, "type", PresentationEventType.USER_ERROR)  # noqa: B010

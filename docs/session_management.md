@@ -63,3 +63,13 @@ class AgentRequest(CoReasonBaseModel):
 3.  **Update:** A new `SessionState` is created with the appended history.
 4.  **Prune:** If a memory policy is active, `.prune()` is called on the new state.
 5.  **Save:** The final `SessionState` is persisted.
+
+## Active Memory Interface
+
+Agents can actively interact with memory via the `SessionHandle` protocol (defined in `coreason_manifest.spec.interfaces.session`). This allows for:
+
+*   **Explicit Storage:** Storing and retrieving variables (`store`, `get`).
+*   **Recall:** Performing semantic search over the conversation or external knowledge base (`recall`).
+*   **History Access:** Reading past interactions programmatically (`history`).
+
+See [Runtime Interfaces](runtime_interfaces.md) for the protocol definition.

@@ -8,12 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+import contextlib
+from datetime import UTC, datetime
 from enum import StrEnum
-from typing import List, Literal, Union, Any, Optional
+from typing import Any, Literal
 from uuid import UUID, uuid4
 
-from pydantic import ConfigDict, Field, AnyUrl, model_validator
+from pydantic import AnyUrl, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
@@ -37,7 +38,7 @@ class CitationItem(CoReasonBaseModel):
     source_id: str
     uri: AnyUrl
     title: str
-    snippet: Optional[str] = None
+    snippet: str | None = None
 
 
 class CitationBlock(CoReasonBaseModel):
@@ -45,7 +46,7 @@ class CitationBlock(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    items: List[CitationItem]
+    items: list[CitationItem]
 
 
 class ProgressUpdate(CoReasonBaseModel):
@@ -55,7 +56,7 @@ class ProgressUpdate(CoReasonBaseModel):
 
     label: str
     status: Literal["running", "complete", "failed"]
-    progress_percent: Optional[float] = None
+    progress_percent: float | None = None
 
 
 class MediaItem(CoReasonBaseModel):
@@ -65,7 +66,7 @@ class MediaItem(CoReasonBaseModel):
 
     url: AnyUrl
     mime_type: str
-    alt_text: Optional[str] = None
+    alt_text: str | None = None
 
 
 class MediaCarousel(CoReasonBaseModel):
@@ -73,7 +74,7 @@ class MediaCarousel(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    items: List[MediaItem]
+    items: list[MediaItem]
 
 
 class MarkdownBlock(CoReasonBaseModel):
@@ -90,9 +91,9 @@ class PresentationEvent(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     type: PresentationEventType
-    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict]
+    data: CitationBlock | ProgressUpdate | MediaCarousel | MarkdownBlock | dict[str, Any]
 
     @model_validator(mode="before")
     @classmethod
@@ -116,10 +117,7 @@ class PresentationEvent(CoReasonBaseModel):
         }
 
         if event_type in model_map:
-            try:
+            with contextlib.suppress(Exception):
                 values["data"] = model_map[event_type](**data)
-            except Exception:
-                # If validation fails, let Pydantic handle the error or fallback to dict if allowed
-                pass
 
         return values

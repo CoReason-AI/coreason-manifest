@@ -16,6 +16,7 @@ nav:
     - Request Lineage Implementation: request_lineage_implementation.md
     - Observability & Tracing: observability.md
     - Frontend Integration & Graph Events: frontend_integration.md
+    - Runtime Interfaces: runtime_interfaces.md
     - Event Content Types: event_content_types.md
     - Semantic Error Handling: error_handling_standards.md
   - Architecture & Rationale:

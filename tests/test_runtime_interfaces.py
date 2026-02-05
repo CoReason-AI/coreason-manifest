@@ -28,7 +28,7 @@ from coreason_manifest.spec.common.session import Interaction
 from coreason_manifest.spec.interfaces.session import SessionHandle
 
 
-def test_presentation_serialization_media_carousel():
+def test_presentation_serialization_media_carousel() -> None:
     media_item = MediaItem(
         url=AnyUrl("https://example.com/image.png"),
         mime_type="image/png",
@@ -60,14 +60,14 @@ def test_presentation_serialization_media_carousel():
     assert event_from_dict.data.items[0].mime_type == "image/png"
 
 
-def test_capabilities_defaults():
+def test_capabilities_defaults() -> None:
     caps = AgentCapabilities()
     assert caps.type == CapabilityType.GRAPH
     assert caps.delivery_mode == DeliveryMode.REQUEST_RESPONSE
     assert caps.history_support is True
 
 
-def test_memory_protocol():
+def test_memory_protocol() -> None:
     class MockSession:
         @property
         def session_id(self) -> str:
@@ -77,18 +77,18 @@ def test_memory_protocol():
         def identity(self) -> Identity:
             return Identity.anonymous()
 
-        async def history(self, limit: int = 10, offset: int = 0) -> list[Interaction]:
+        async def history(self, _limit: int = 10, _offset: int = 0) -> list[Interaction]:
             return []
 
         async def recall(
-            self, query: str, limit: int = 5, threshold: float = 0.7
+            self, _query: str, _limit: int = 5, _threshold: float = 0.7
         ) -> list[str]:
             return []
 
-        async def store(self, key: str, value: Any) -> None:
+        async def store(self, _key: str, value: Any) -> None:
             pass
 
-        async def get(self, key: str, default: Any = None) -> Any:
+        async def get(self, _key: str, default: Any = None) -> Any:
             return default
 
     # Verify runtime checkable

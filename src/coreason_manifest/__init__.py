@@ -20,7 +20,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
-from .spec.common.capabilities import AgentCapabilities, DeliveryMode
+from .spec.common.capabilities import AgentCapabilities, DeliveryMode, CapabilityType
 from .spec.common.error import ErrorDomain
 from .spec.common.graph_events import (
     GraphEvent,
@@ -46,7 +46,10 @@ from .spec.common.observability import (
 )
 from .spec.common.presentation import (
     CitationBlock,
+    CitationItem,
     MediaCarousel,
+    MediaItem,
+    MarkdownBlock,
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,
@@ -90,8 +93,10 @@ __all__ = [
     "AgentRuntimeConfig",
     "AgentStep",
     "AuditLog",
+    "CapabilityType",
     "ChatMessage",
     "CitationBlock",
+    "CitationItem",
     "CloudEvent",
     "ComplianceReport",
     "ComplianceViolation",
@@ -119,7 +124,9 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "MarkdownBlock",
     "MediaCarousel",
+    "MediaItem",
     "MemoryConfig",
     "MemoryStrategy",
     "PolicyDefinition",
