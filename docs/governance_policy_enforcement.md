@@ -9,7 +9,7 @@ The module provides configuration models to define organizational standards (e.g
 ### Key Features
 *   **Domain Restriction**: Whitelist specific domains for external tools (e.g., only allow tools from `*.internal.corp`).
 *   **Risk Level Enforcement**: Set a maximum allowed risk level for tools (e.g., `SAFE` only).
-*   **Authentication Mandates**: Ensure that agents using `CRITICAL` tools enforce user authentication.
+*   **Authentication Mandates**: Ensure that agents using `CRITICAL` tools enforce user authentication. If `require_auth_for_critical_tools` is enabled (default), any manifest defining a `CRITICAL` tool must explicitly set `requires_auth: true` in its metadata.
 *   **Logic Execution Control**: Restrict the usage of arbitrary Python code in `LogicStep`s and `SwitchStep`s.
 *   **Strict URL Validation**: Enforce strict normalization (lower-case, no trailing dots) on tool URIs to prevent bypasses.
 
