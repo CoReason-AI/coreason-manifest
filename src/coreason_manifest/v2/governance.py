@@ -126,14 +126,9 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                     )
 
     if config.require_auth_for_critical_tools and has_critical_tools:
-        # Check if auth is required in metadata
-        requires_auth = False
-        # Try direct attribute access first (if it were defined in schema)
-        if getattr(manifest.metadata, "requires_auth", False):
-            requires_auth = True
-        # Try model_extra for dynamic fields
-        elif manifest.metadata.model_extra and manifest.metadata.model_extra.get("requires_auth"):
-            requires_auth = True
+        # Check if auth is required in metadata.
+        # Pydantic V2 allows accessing extra fields via getattr if extra='allow'.
+        requires_auth = getattr(manifest.metadata, "requires_auth", False)
 
         if not requires_auth:
             violations.append(
