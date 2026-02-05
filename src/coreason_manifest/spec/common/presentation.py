@@ -8,57 +8,118 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Literal
+from typing import List, Literal, Union, Any, Optional
+from uuid import UUID, uuid4
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, AnyUrl, model_validator
 
-from ..common_base import CoReasonBaseModel
-from .error import ErrorDomain
+from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
 class PresentationEventType(StrEnum):
     """Types of presentation events."""
 
-    CITATION = "citation"
-    ARTIFACT = "artifact"
+    THOUGHT_TRACE = "thought_trace"
+    CITATION_BLOCK = "citation_block"
+    PROGRESS_INDICATOR = "progress_indicator"
+    MEDIA_CAROUSEL = "media_carousel"
+    MARKDOWN_BLOCK = "markdown_block"
     USER_ERROR = "user_error"
 
 
-class PresentationEvent(CoReasonBaseModel):
-    """Base class for presentation events."""
+class CitationItem(CoReasonBaseModel):
+    """A single citation item."""
 
     model_config = ConfigDict(frozen=True)
 
-    type: PresentationEventType = Field(..., description="The type of presentation event.")
+    source_id: str
+    uri: AnyUrl
+    title: str
+    snippet: Optional[str] = None
 
 
-class CitationEvent(PresentationEvent):
-    """An event representing a citation."""
+class CitationBlock(CoReasonBaseModel):
+    """A block of citations."""
 
-    type: Literal[PresentationEventType.CITATION] = PresentationEventType.CITATION
-    uri: str = Field(..., description="The source URI.")
-    text: str = Field(..., description="The quoted text.")
-    indices: list[int] | None = Field(None, description="Start and end character indices.")
+    model_config = ConfigDict(frozen=True)
 
-
-class ArtifactEvent(PresentationEvent):
-    """An event representing a generated artifact."""
-
-    type: Literal[PresentationEventType.ARTIFACT] = PresentationEventType.ARTIFACT
-    artifact_id: str = Field(..., description="Unique ID of the artifact.")
-    mime_type: str = Field(..., description="MIME type of the artifact.")
-    url: str | None = Field(None, description="Download URL if applicable.")
+    items: List[CitationItem]
 
 
-class UserErrorEvent(PresentationEvent):
-    """An event representing a user-facing error."""
+class ProgressUpdate(CoReasonBaseModel):
+    """A progress update event."""
 
-    type: Literal[PresentationEventType.USER_ERROR] = PresentationEventType.USER_ERROR
-    message: str = Field(..., description="The human-readable message.")
-    code: int | None = Field(None, description="Semantic integer code, e.g. 400, 503.")
-    domain: ErrorDomain = Field(ErrorDomain.SYSTEM, description="The domain of the error.")
-    retryable: bool = Field(False, description="Whether the error is retryable.")
+    model_config = ConfigDict(frozen=True)
+
+    label: str
+    status: Literal["running", "complete", "failed"]
+    progress_percent: Optional[float] = None
 
 
-AnyPresentationEvent = CitationEvent | ArtifactEvent | UserErrorEvent
+class MediaItem(CoReasonBaseModel):
+    """A single media item."""
+
+    model_config = ConfigDict(frozen=True)
+
+    url: AnyUrl
+    mime_type: str
+    alt_text: Optional[str] = None
+
+
+class MediaCarousel(CoReasonBaseModel):
+    """A carousel of media items."""
+
+    model_config = ConfigDict(frozen=True)
+
+    items: List[MediaItem]
+
+
+class MarkdownBlock(CoReasonBaseModel):
+    """A block of markdown content."""
+
+    model_config = ConfigDict(frozen=True)
+
+    content: str
+
+
+class PresentationEvent(CoReasonBaseModel):
+    """Container for presentation events."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: UUID = Field(default_factory=uuid4)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    type: PresentationEventType
+    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict]
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_data_payload(cls, values: Any) -> Any:
+        """Validate and cast the data payload based on the event type."""
+        if not isinstance(values, dict):
+            return values
+
+        event_type = values.get("type")
+        data = values.get("data")
+
+        if not event_type or not isinstance(data, dict):
+            return values
+
+        # Map types to models
+        model_map = {
+            PresentationEventType.CITATION_BLOCK: CitationBlock,
+            PresentationEventType.PROGRESS_INDICATOR: ProgressUpdate,
+            PresentationEventType.MEDIA_CAROUSEL: MediaCarousel,
+            PresentationEventType.MARKDOWN_BLOCK: MarkdownBlock,
+        }
+
+        if event_type in model_map:
+            try:
+                values["data"] = model_map[event_type](**data)
+            except Exception:
+                # If validation fails, let Pydantic handle the error or fallback to dict if allowed
+                pass
+
+        return values

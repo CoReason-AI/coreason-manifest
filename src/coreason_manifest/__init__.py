@@ -45,17 +45,17 @@ from .spec.common.observability import (
     ReasoningTrace,
 )
 from .spec.common.presentation import (
-    AnyPresentationEvent,
-    ArtifactEvent,
-    CitationEvent,
+    CitationBlock,
+    MediaCarousel,
     PresentationEvent,
     PresentationEventType,
-    UserErrorEvent,
+    ProgressUpdate,
 )
 from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.interfaces.session import SessionHandle
 from .spec.interfaces.stream import IStreamEmitter
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
@@ -89,11 +89,9 @@ __all__ = [
     "AgentRequest",
     "AgentRuntimeConfig",
     "AgentStep",
-    "AnyPresentationEvent",
-    "ArtifactEvent",
     "AuditLog",
     "ChatMessage",
-    "CitationEvent",
+    "CitationBlock",
     "CloudEvent",
     "ComplianceReport",
     "ComplianceViolation",
@@ -121,11 +119,13 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "MediaCarousel",
     "MemoryConfig",
     "MemoryStrategy",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
+    "ProgressUpdate",
     "ReasoningTrace",
     "Recipe",
     "Role",
@@ -133,6 +133,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
+    "SessionHandle",
     "SessionState",
     "StateDefinition",
     "Step",
@@ -144,7 +145,6 @@ __all__ = [
     "SwitchStep",
     "ToolDefinition",
     "ToolRiskLevel",
-    "UserErrorEvent",
     "Workflow",
     "__version__",
     "check_compliance_v2",
