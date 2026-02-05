@@ -93,13 +93,12 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                             )
                         )
                     else:
-                        # Normalize hostname
-                        hostname = hostname.lower()
-                        if hostname.endswith("."):
-                            hostname = hostname[:-1]
-
                         # Prepare allowed set
                         if config.strict_url_validation:
+                            # Normalize hostname
+                            hostname = hostname.lower()
+                            if hostname.endswith("."):
+                                hostname = hostname[:-1]
                             allowed_set = {d.lower() for d in config.allowed_domains if d}
                         else:
                             allowed_set = set(config.allowed_domains)
@@ -128,6 +127,9 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
         # Check if auth is required in metadata.
         # Pydantic V2 allows accessing extra fields via getattr if extra='allow'.
         requires_auth = getattr(manifest.metadata, "requires_auth", False)
+        # Fallback for Pydantic v2 model_extra if needed
+        if not requires_auth and manifest.metadata.model_extra:
+            requires_auth = manifest.metadata.model_extra.get("requires_auth", False)
 
         if not requires_auth:
             violations.append(
