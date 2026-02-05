@@ -34,6 +34,7 @@ class GovernanceConfig(CoReasonBaseModel):
         allowed_domains: List of allowed domains for tool URIs.
         allow_custom_logic: Whether to allow LogicNodes and conditional Edges with custom code.
         max_risk_level: Maximum allowed risk level for tools.
+        require_auth_for_critical_tools: Whether authentication is required for agents using CRITICAL tools.
         strict_url_validation: Enforce strict, normalized URL validation.
     """
 
@@ -47,6 +48,10 @@ class GovernanceConfig(CoReasonBaseModel):
     )
     max_risk_level: ToolRiskLevel = Field(
         ToolRiskLevel.SAFE, description="If provided, no tool can exceed this risk level."
+    )
+    require_auth_for_critical_tools: bool = Field(
+        True,
+        description="If an agent uses a CRITICAL tool, agent.metadata.requires_auth must be True.",
     )
     strict_url_validation: bool = Field(True, description="Enforce strict, normalized URL validation.")
 
@@ -98,6 +103,23 @@ def _risk_score(level: ToolRiskLevel) -> int:
     return 3  # Unknown is highest risk
 
 
+def _normalize_domain(domain: str) -> str:
+    """Normalize domain for comparison: strip trailing dot, lowercase, and encode to ASCII (Punycode)."""
+    # 1. Strip trailing dot
+    if domain.endswith("."):
+        domain = domain[:-1]
+
+    # 2. Lowercase
+    domain = domain.lower()
+
+    # 3. IDNA Encoding (Unicode -> Punycode/ASCII)
+    try:
+        return domain.encode("idna").decode("ascii")
+    except UnicodeError:
+        # If encoding fails, return the original string (best effort)
+        return domain
+
+
 def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceReport:
     """Check if the agent complies with the governance policy.
 
@@ -109,6 +131,7 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
         A ComplianceReport indicating compliance status and listing violations.
     """
     violations: List[ComplianceViolation] = []
+    has_critical_tools = False
 
     # 1. Logic Check: Iterate agent.workflow.steps
     if not config.allow_custom_logic:
@@ -129,12 +152,17 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
     allowed_set = set()
     if config.allowed_domains:
         if config.strict_url_validation:
-            allowed_set = {d.lower() for d in config.allowed_domains}
+            # Normalize all allowed domains
+            allowed_set = {_normalize_domain(d) for d in config.allowed_domains}
         else:
             allowed_set = set(config.allowed_domains)
 
     for _, definition in agent.definitions.items():
         if isinstance(definition, ToolDefinition):
+            # Track Critical Tools
+            if definition.risk_level == ToolRiskLevel.CRITICAL:
+                has_critical_tools = True
+
             # Risk Level Check
             tool_risk_score = _risk_score(definition.risk_level)
 
@@ -167,10 +195,15 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
                             )
                         )
                     else:
-                        # Normalize hostname
-                        normalized_hostname = hostname.lower()
-                        if normalized_hostname.endswith("."):
-                            normalized_hostname = normalized_hostname[:-1]
+                        # Normalize tool hostname
+                        if config.strict_url_validation:
+                            normalized_hostname = _normalize_domain(hostname)
+                        else:
+                            # Basic normalization for loose validation if needed, or raw
+                            normalized_hostname = hostname
+                            if normalized_hostname.endswith("."):
+                                normalized_hostname = normalized_hostname[:-1]
+                            normalized_hostname = normalized_hostname.lower()
 
                         # Check if hostname matches or is subdomain of any allowed domain.
                         # Strict matching: hostname == allowed OR hostname.endswith("." + allowed)
@@ -204,6 +237,28 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
                             severity="error",
                         )
                     )
+
+    # 3. Auth Mandate Check
+    if config.require_auth_for_critical_tools and has_critical_tools:
+        # Check metadata. Pydantic V2 stores extra fields in model_extra if not in schema
+        requires_auth = False
+        # If 'requires_auth' is a defined field (it isn't in ManifestMetadata currently but might be)
+        if hasattr(agent.metadata, "requires_auth"):
+            requires_auth = getattr(agent.metadata, "requires_auth")
+        elif agent.metadata.model_extra:
+            requires_auth = bool(agent.metadata.model_extra.get("requires_auth", False))
+
+        if not requires_auth:
+            violations.append(
+                ComplianceViolation(
+                    rule="auth_mandate_missing",
+                    message=(
+                        "Agent uses CRITICAL tools but does not enforce authentication (metadata.requires_auth=True)."
+                    ),
+                    component_id="metadata",
+                    severity="error",
+                )
+            )
 
     return ComplianceReport(
         compliant=(len(violations) == 0),

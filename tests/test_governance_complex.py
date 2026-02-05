@@ -26,6 +26,7 @@ def test_complex_multiple_violations() -> None:
         allowed_domains=["good.com"],
         max_risk_level=ToolRiskLevel.SAFE,
         allow_custom_logic=False,
+        require_auth_for_critical_tools=False,
     )
 
     # 1. Logic Step Violation

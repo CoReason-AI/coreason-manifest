@@ -9,8 +9,9 @@ The module provides configuration models to define organizational standards (e.g
 ### Key Features
 *   **Domain Restriction**: Whitelist specific domains for external tools (e.g., only allow tools from `*.internal.corp`).
 *   **Risk Level Enforcement**: Set a maximum allowed risk level for tools (e.g., `SAFE` only).
+*   **Authentication Mandates**: Ensure that agents using `CRITICAL` tools enforce user authentication.
 *   **Logic Execution Control**: Restrict the usage of arbitrary Python code in `LogicStep`s.
-*   **Strict URL Validation**: Enforce strict normalization (lower-case, no trailing dots) on tool URIs to prevent bypasses.
+*   **Strict URL Validation**: Enforce strict normalization (lower-case, no trailing dots, punycode encoding) on tool URIs to prevent bypasses.
 
 ## Configuration: `GovernanceConfig`
 
@@ -27,6 +28,10 @@ config = GovernanceConfig(
 
     # Block any tool with risk level > STANDARD
     max_risk_level=ToolRiskLevel.STANDARD,
+
+    # If an agent uses CRITICAL tools, it MUST have requires_auth=True in metadata
+    # Default: True (Secure by Default)
+    require_auth_for_critical_tools=True,
 
     # Prevent agents from running arbitrary Python code (Security)
     # Controls usage of LogicStep

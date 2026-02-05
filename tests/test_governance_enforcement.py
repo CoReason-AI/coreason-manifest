@@ -120,7 +120,7 @@ def test_risk_level_hierarchy() -> None:
 
     manifest = Manifest(
         kind="Agent",
-        metadata={"name": "Risk Agent"},
+        metadata={"name": "Risk Agent", "requires_auth": True},  # Added auth to avoid mandate violation
         definitions={
             "critical": critical_tool,
             "safe": safe_tool,
@@ -170,3 +170,36 @@ def test_clean_report() -> None:
     assert report.compliant is True
     assert len(report.violations) == 0
     assert report.checked_at is not None
+
+
+def test_governance_auth_mandate() -> None:
+    """Test that CRITICAL tools require auth if policy demands it."""
+    tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
+
+    # Manifest WITHOUT auth (default)
+    manifest = Manifest(
+        kind="Agent",
+        metadata={"name": "Risky", "requires_auth": False},
+        definitions={"nuke": tool},
+        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
+    )
+
+    # Allow CRITICAL risks so we only test auth mandate
+    config = GovernanceConfig(
+        require_auth_for_critical_tools=True,
+        max_risk_level=ToolRiskLevel.CRITICAL
+    )
+    report = check_compliance(manifest, config)
+
+    assert report.compliant is False
+    assert any(v.rule == "auth_mandate_missing" for v in report.violations)
+
+    # Manifest WITH auth
+    manifest_auth = Manifest(
+        kind="Agent",
+        metadata={"name": "Risky but Authed", "requires_auth": True},
+        definitions={"nuke": tool},
+        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
+    )
+    report_auth = check_compliance(manifest_auth, config)
+    assert report_auth.compliant is True

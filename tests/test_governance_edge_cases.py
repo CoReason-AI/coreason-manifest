@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from unittest.mock import MagicMock, patch
+
 from coreason_manifest import (
     AgentStep,
     GovernanceConfig,
@@ -167,3 +169,68 @@ def test_strict_url_validation_false() -> None:
     # Mismatch.
 
     # This confirms strict=True is better.
+
+
+def test_unicode_error() -> None:
+    """Test that UnicodeError during normalization is handled gracefully."""
+    # Mock str.encode to raise UnicodeError
+    # We need to mock encode on the specific string instance used in _normalize_domain
+    # Easier to mock the method on string class context or pass a string that fails idna?
+    # IDNA failure: "xn--..." that is invalid?
+    # Or strict check?
+
+    # Just mock the _normalize_domain helper or internal call?
+    # Let's try to pass a string that fails IDNA encoding.
+    # Long strings (>63 chars per label) usually fail IDNA.
+
+    long_label = "a" * 70
+    bad_domain = f"{long_label}.com"
+
+    # If we use strict validation, this triggers _normalize_domain
+    config = GovernanceConfig(allowed_domains=[bad_domain], strict_url_validation=True)
+
+    # This should NOT crash, but fallback to original string.
+    # The coverage we want is the "except UnicodeError: return domain" block.
+
+    # To be sure, let's spy/mock?
+    # But IDNA encoding "a"*70 should definitely raise UnicodeError ("label too long").
+
+    # We don't really care about the report result here, just that it doesn't crash and covers the line.
+
+    # But wait, checking if it covered line requires running coverage.
+    # Let's verify behavior: if it returns original, then allowed_set has the long string.
+
+    tool = ToolDefinition(id="t1", name="T", uri=f"https://{bad_domain}", risk_level=ToolRiskLevel.SAFE)
+    manifest = Manifest(
+        kind="Agent",
+        metadata={"name": "Test"},
+        definitions={"t1": tool},
+        workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="a")}),
+    )
+
+    report = check_compliance(manifest, config)
+    # Should pass if the fallback works (both are normalized to same long string)
+    # actually hostname parsing might fail or truncate?
+    # Urlparse handles long hostnames fine.
+
+    assert report.compliant
+
+
+def test_tool_parsing_exception() -> None:
+    """Test exception handling during tool parsing in check_compliance."""
+    config = GovernanceConfig(allowed_domains=["good.com"])
+
+    tool = ToolDefinition(id="t1", name="T", uri="https://good.com", risk_level=ToolRiskLevel.SAFE)
+    manifest = Manifest(
+        kind="Agent",
+        metadata={"name": "Test"},
+        definitions={"t1": tool},
+        workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="a")}),
+    )
+
+    # Patch urlparse in governance module to raise Exception
+    with patch("coreason_manifest.governance.urlparse", side_effect=Exception("Parsing failed")):
+        report = check_compliance(manifest, config)
+
+    assert not report.compliant
+    assert any("Failed to parse tool URI" in v.message for v in report.violations)

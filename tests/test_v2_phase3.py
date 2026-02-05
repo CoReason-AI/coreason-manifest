@@ -84,7 +84,7 @@ def test_governance_tool_risk() -> None:
     )
 
     # Config allowing only STANDARD
-    config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD)
+    config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD, require_auth_for_critical_tools=False)
 
     report = check_compliance_v2(manifest, config)
     assert not report.compliant

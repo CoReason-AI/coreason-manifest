@@ -65,7 +65,7 @@ def test_governance_risk() -> None:
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 
-    config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD)
+    config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD, require_auth_for_critical_tools=False)
     report = check_compliance_v2(manifest, config)
 
     assert report.compliant is False
