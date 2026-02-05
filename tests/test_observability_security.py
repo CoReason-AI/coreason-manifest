@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.observability import CloudEvent, ReasoningTrace
+from coreason_manifest.definitions.observability import CloudEvent, EventContentType, ReasoningTrace
 
 
 def test_security_massive_payload_dos() -> None:
@@ -118,5 +118,88 @@ def test_security_type_spoofing() -> None:
             type="attack.spoof",
             time=datetime.now(timezone.utc),
             datacontenttype="application/json",
-            data="<xml>not json</xml>",
+            data="<xml>not json</xml>",  # type: ignore
         )
+
+
+def test_security_datacontenttype_manipulation() -> None:
+    """
+    Red Team: Fuzzing datacontenttype field with dangerous strings.
+    """
+    now = datetime.now(timezone.utc)
+
+    # 1. Null Byte Injection
+    # Pydantic/Python should allow null bytes in strings, but JSON might escape them.
+    # We want to ensure it doesn't crash.
+    event_null = CloudEvent(
+        id="null-test",
+        source="urn:redteam",
+        type="attack.null",
+        time=now,
+        datacontenttype="application/json\0",
+    )
+    dumped = event_null.dump()
+    assert dumped["datacontenttype"] == "application/json\0"
+
+    # 2. XSS Payload in Content Type
+    # Should be preserved literally, relying on consumer to escape.
+    xss_type = 'application/json"><script>alert(1)</script>'
+    event_xss = CloudEvent(
+        id="xss-test",
+        source="urn:redteam",
+        type="attack.xss",
+        time=now,
+        datacontenttype=xss_type,
+    )
+    dumped_xss = event_xss.dump()
+    assert dumped_xss["datacontenttype"] == xss_type
+
+    # 3. Massive Content Type String (DoS)
+    # Should not crash.
+    massive_type = "application/" + "a" * 1_000_000
+    start = datetime.now()
+    event_massive = CloudEvent(
+        id="massive-type",
+        source="urn:redteam",
+        type="attack.massive",
+        time=now,
+        datacontenttype=massive_type,
+    )
+    dumped_massive = event_massive.dump()
+    duration = (datetime.now() - start).total_seconds()
+
+    assert len(dumped_massive["datacontenttype"]) > 1_000_000
+    assert duration < 2.0  # Should be fast since it's just a string copy/ref
+
+
+def test_security_enum_confusion() -> None:
+    """
+    Red Team: Attempt to confuse strict typing with Enum vs String.
+    """
+    now = datetime.now(timezone.utc)
+
+    # 1. Using a string that looks like an Enum name but isn't the value
+    # EventContentType.JSON is "application/json".
+    # What if we pass "JSON"? It should be treated as a raw string "JSON".
+    event_name = CloudEvent(
+        id="name-test",
+        source="urn:redteam",
+        type="attack.confusion",
+        time=now,
+        datacontenttype="JSON",
+    )
+    assert event_name.datacontenttype == "JSON"
+    assert event_name.datacontenttype != EventContentType.JSON
+
+    # 2. Case sensitivity
+    # "Application/Json" vs "application/json"
+    event_case = CloudEvent(
+        id="case-test",
+        source="urn:redteam",
+        type="attack.case",
+        time=now,
+        datacontenttype="Application/Json",
+    )
+    # It should NOT coerce to the Enum because Enums are value-based and exact string match.
+    assert event_case.datacontenttype == "Application/Json"
+    assert event_case.datacontenttype != EventContentType.JSON
