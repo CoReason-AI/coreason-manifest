@@ -47,9 +47,7 @@ class AttachedFile(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     id: str = Field(..., description="The unique file ID/UUID.")
-    mime_type: Optional[str] = Field(
-        None, description="The MIME type of the file (e.g., 'application/pdf')."
-    )
+    mime_type: Optional[str] = Field(None, description="The MIME type of the file (e.g., 'application/pdf').")
 
 
 class ContentPart(CoReasonBaseModel):
@@ -58,9 +56,7 @@ class ContentPart(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     text: Optional[str] = Field(None, description="The textual instruction.")
-    attachments: List[AttachedFile] = Field(
-        default_factory=list, description="List of attached files."
-    )
+    attachments: List[AttachedFile] = Field(default_factory=list, description="List of attached files.")
 
 
 class MultiModalInput(CoReasonBaseModel):
