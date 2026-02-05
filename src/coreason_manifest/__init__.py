@@ -12,7 +12,13 @@ from .common import ToolRiskLevel
 from .definitions.capabilities import AgentCapabilities, DeliveryMode
 from .definitions.error import ErrorDomain
 from .definitions.identity import Identity
-from .definitions.message import ChatMessage, Role
+from .definitions.message import (
+    AttachedFile,
+    ChatMessage,
+    ContentPart,
+    MultiModalInput,
+    Role,
+)
 from .definitions.observability import CloudEvent, EventContentType, ReasoningTrace
 from .definitions.presentation import (
     AnyPresentationEvent,
@@ -23,6 +29,7 @@ from .definitions.presentation import (
     UserErrorEvent,
 )
 from .definitions.service import ServiceContract
+from .definitions.session import Interaction
 from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.cap import (
     AgentRequest,
@@ -87,6 +94,10 @@ __all__ = [
     "Identity",
     "Role",
     "ChatMessage",
+    "AttachedFile",
+    "ContentPart",
+    "MultiModalInput",
+    "Interaction",
     "ErrorDomain",
     "PresentationEventType",
     "PresentationEvent",

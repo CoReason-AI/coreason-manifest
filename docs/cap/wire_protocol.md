@@ -57,6 +57,32 @@ The strict payload schema used within `ServiceRequest`.
 | `conversation_id` | `Optional[str]` | ID for continuing a session (default: `None`). |
 | `meta` | `Dict[str, Any]` | Extra context like timezone (default: `{}`). |
 
+### MultiModalInput
+
+Container for rich user turns (text interleaved with files).
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `parts` | `List[ContentPart]` | Ordered list of content parts. |
+
+### ContentPart
+
+A discrete unit of input.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `text` | `Optional[str]` | The textual instruction. |
+| `attachments` | `List[AttachedFile]` | List of attached files. |
+
+### AttachedFile
+
+Reference to an uploaded file.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `str` | Unique file ID. |
+| `mime_type` | `Optional[str]` | MIME type (e.g. `application/pdf`). |
+
 ### ServiceResponse
 
 The synchronous result returned by an Agent service.
