@@ -8,9 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+from typing import Any
 
-from ..cap import ServiceRequest, ServiceResponse
+from ..spec.cap import ServiceRequest, ServiceResponse
 
 
 class ServiceContract:
