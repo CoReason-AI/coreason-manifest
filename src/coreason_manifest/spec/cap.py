@@ -120,11 +120,10 @@ class AgentRequest(CoReasonBaseModel):
                 data["request_id"] = uuid4()
 
             # Check for Broken Chain FIRST
-            if data.get("parent_request_id") is not None:
-                if data.get("root_request_id") is None:
-                    raise ValueError(
-                        "Broken Lineage: 'root_request_id' is required when 'parent_request_id' is present."
-                    )
+            if data.get("parent_request_id") is not None and data.get("root_request_id") is None:
+                raise ValueError(
+                    "Broken Lineage: 'root_request_id' is required when 'parent_request_id' is present."
+                )
 
             # Auto-rooting (Only if no parent)
             if data.get("root_request_id") is None:

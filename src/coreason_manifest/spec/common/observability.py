@@ -74,11 +74,10 @@ class ReasoningTrace(CoReasonBaseModel):
     def enforce_lineage(cls, data: Any) -> Any:
         if isinstance(data, dict):
             # Check for Broken Chain FIRST
-            if data.get("parent_request_id") is not None:
-                if data.get("root_request_id") is None:
-                    raise ValueError(
-                        "Broken Lineage: 'root_request_id' is required when 'parent_request_id' is present."
-                    )
+            if data.get("parent_request_id") is not None and data.get("root_request_id") is None:
+                raise ValueError(
+                    "Broken Lineage: 'root_request_id' is required when 'parent_request_id' is present."
+                )
 
             if (data.get("root_request_id") is None) and ("request_id" in data):
                 # Auto-rooting: If root is missing, it is the root (derived from request_id)
