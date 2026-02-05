@@ -10,7 +10,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any
 from uuid import uuid4
 
 from pydantic import ConfigDict, Field
@@ -51,8 +51,8 @@ class SessionState(CoReasonBaseModel):
     user_id: str
     created_at: datetime
     updated_at: datetime
-    history: List[Interaction] = Field(default_factory=list)
-    variables: Dict[str, Any] = Field(default_factory=dict)
+    history: list[Interaction] = Field(default_factory=list)
+    variables: dict[str, Any] = Field(default_factory=dict)
 
     def prune(self, strategy: MemoryStrategy, limit: int) -> "SessionState":
         """Prunes history based on strategy, returning a new instance."""
@@ -61,10 +61,7 @@ class SessionState(CoReasonBaseModel):
 
         new_history = self.history
         if strategy == MemoryStrategy.SLIDING_WINDOW:
-            if limit <= 0:
-                new_history = []
-            else:
-                new_history = self.history[-limit:]
+            new_history = [] if limit <= 0 else self.history[-limit:]
 
             return self.model_copy(update={
                 "history": new_history,
