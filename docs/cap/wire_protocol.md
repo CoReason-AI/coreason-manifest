@@ -191,3 +191,12 @@ Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`).
 | `artifact_id` | `str` | Unique ID of the generated artifact. |
 | `mime_type` | `str` | Content type (e.g., `image/png`, `text/csv`). |
 | `url` | `Optional[str]` | Download URL. |
+
+#### UserErrorEvent (`type: user_error`)
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `message` | `str` | Human-readable message. |
+| `code` | `Optional[int]` | Semantic integer code (e.g., 400, 503). |
+| `domain` | `ErrorDomain` | Source (`client`, `system`, `llm`, `tool`, `security`). |
+| `retryable` | `bool` | Whether the error is retryable. |

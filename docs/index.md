@@ -24,6 +24,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Observability & Tracing](observability.md)**
     *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
 
+*   **[Semantic Error Handling](error_handling_standards.md)**
+    *   Defines standard Error Domains and the `UserErrorEvent` for structured, user-friendly error reporting.
+
 ## Architecture & Rationale
 
 *   **[Product Requirements & Philosophy](product_requirements.md)**
