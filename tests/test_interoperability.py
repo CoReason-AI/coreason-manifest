@@ -14,7 +14,7 @@ from pydantic import ValidationError
 from coreason_manifest import AdapterHints, AgentDefinition, AgentRuntimeConfig
 
 
-def test_adapter_hint_serialization():
+def test_adapter_hint_serialization() -> None:
     """Test that AdapterHints correctly serializes settings."""
     settings = {"recursion_limit": 50, "experimental": True}
     hint = AdapterHints(framework="langgraph", adapter_type="ReActNode", settings=settings)
@@ -25,11 +25,9 @@ def test_adapter_hint_serialization():
     assert dumped["settings"] == settings
 
 
-def test_runtime_config_integration():
+def test_runtime_config_integration() -> None:
     """Test integration of AgentRuntimeConfig with AgentDefinition."""
-    langgraph_hint = AdapterHints(
-        framework="langgraph", adapter_type="ReActNode", settings={"recursion_limit": 50}
-    )
+    langgraph_hint = AdapterHints(framework="langgraph", adapter_type="ReActNode", settings={"recursion_limit": 50})
     autogen_hint = AdapterHints(
         framework="autogen", adapter_type="AssistantAgent", settings={"llm_config": {"seed": 42}}
     )
@@ -50,7 +48,7 @@ def test_runtime_config_integration():
     assert agent.runtime.adapters[1].framework == "autogen"
 
 
-def test_immutability():
+def test_immutability() -> None:
     """Test that models are immutable."""
     hint = AdapterHints(framework="langgraph", adapter_type="ReActNode")
 
