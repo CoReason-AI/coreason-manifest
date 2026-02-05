@@ -8,19 +8,17 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import time
-from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
 from coreason_manifest import (
+    EventContentType,
     GraphEvent,
-    GraphEventNodeStart,
-    GraphEventNodeStream,
-    GraphEventNodeDone,
     GraphEventArtifactGenerated,
     GraphEventCouncilVote,
+    GraphEventNodeDone,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
     migrate_graph_event_to_cloud_event,
-    EventContentType
 )
 
 
@@ -32,13 +30,7 @@ def test_payload_recursion() -> None:
         current["next"] = {"level": i + 1}
         current = current["next"]
 
-    event = GraphEventNodeStart(
-        run_id="r1",
-        trace_id="t1",
-        node_id="n1",
-        timestamp=100.0,
-        payload=recursive_data
-    )
+    event = GraphEventNodeStart(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, payload=recursive_data)
 
     # Should serialize fine (Python default depth is usually 1000)
     # CloudEvent dump checks JSON serialization
@@ -52,13 +44,7 @@ def test_payload_recursion() -> None:
 def test_special_characters() -> None:
     """Edge Case: Unicode/Emoji/Control chars."""
     special_str = "Hello \u0000 World 🌍 🚀 \n \t"
-    event = GraphEventNodeStream(
-        run_id="r1",
-        trace_id="t1",
-        node_id="n1",
-        timestamp=100.0,
-        chunk=special_str
-    )
+    event = GraphEventNodeStream(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, chunk=special_str)
 
     ce = migrate_graph_event_to_cloud_event(event)
     assert ce.data is not None
@@ -77,7 +63,7 @@ def test_empty_fields() -> None:
         timestamp=100.0,
         output={},  # Empty output
         sequence_id=None,
-        visual_cue=None
+        visual_cue=None,
     )
 
     ce = migrate_graph_event_to_cloud_event(event)
@@ -91,13 +77,7 @@ def test_empty_fields() -> None:
 def test_large_payload() -> None:
     """Edge Case: Large payload."""
     large_str = "a" * 100_000  # 100KB
-    event = GraphEventNodeStream(
-        run_id="r1",
-        trace_id="t1",
-        node_id="n1",
-        timestamp=100.0,
-        chunk=large_str
-    )
+    event = GraphEventNodeStream(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, chunk=large_str)
 
     ce = migrate_graph_event_to_cloud_event(event)
     assert ce.data is not None
@@ -109,29 +89,57 @@ def test_full_node_lifecycle() -> None:
     events: list[GraphEvent] = []
 
     # Start
-    events.append(GraphEventNodeStart(
-        run_id="run-1", trace_id="trace-1", node_id="step-A", timestamp=100.0,
-        payload={"query": "Why?"}, sequence_id=0, visual_cue="start"
-    ))
+    events.append(
+        GraphEventNodeStart(
+            run_id="run-1",
+            trace_id="trace-1",
+            node_id="step-A",
+            timestamp=100.0,
+            payload={"query": "Why?"},
+            sequence_id=0,
+            visual_cue="start",
+        )
+    )
 
     # Stream x3
     for i, char in enumerate(["Because", " ", "Science"]):
-        events.append(GraphEventNodeStream(
-            run_id="run-1", trace_id="trace-1", node_id="step-A", timestamp=100.1 + i,
-            chunk=char, sequence_id=1 + i, visual_cue="typing"
-        ))
+        events.append(
+            GraphEventNodeStream(
+                run_id="run-1",
+                trace_id="trace-1",
+                node_id="step-A",
+                timestamp=100.1 + i,
+                chunk=char,
+                sequence_id=1 + i,
+                visual_cue="typing",
+            )
+        )
 
     # Artifact
-    events.append(GraphEventArtifactGenerated(
-        run_id="run-1", trace_id="trace-1", node_id="step-A", timestamp=105.0,
-        artifact_type="text/plain", url="s3://bucket/log.txt", sequence_id=4
-    ))
+    events.append(
+        GraphEventArtifactGenerated(
+            run_id="run-1",
+            trace_id="trace-1",
+            node_id="step-A",
+            timestamp=105.0,
+            artifact_type="text/plain",
+            url="s3://bucket/log.txt",
+            sequence_id=4,
+        )
+    )
 
     # Done
-    events.append(GraphEventNodeDone(
-        run_id="run-1", trace_id="trace-1", node_id="step-A", timestamp=106.0,
-        output={"answer": "Because Science"}, sequence_id=5, visual_cue="done"
-    ))
+    events.append(
+        GraphEventNodeDone(
+            run_id="run-1",
+            trace_id="trace-1",
+            node_id="step-A",
+            timestamp=106.0,
+            output={"answer": "Because Science"},
+            sequence_id=5,
+            visual_cue="done",
+        )
+    )
 
     # Migration Check
     cloud_events = [migrate_graph_event_to_cloud_event(e) for e in events]
@@ -166,15 +174,12 @@ def test_complex_council_vote() -> None:
         "results": {
             "security_bot": {"vote": "APPROVE", "reason": "Safe"},
             "legal_bot": {"vote": "REJECT", "reason": "Too risky", "citations": ["Policy 7"]},
-            "ethics_bot": {"vote": "ABSTAIN", "reason": "Insufficient data"}
+            "ethics_bot": {"vote": "ABSTAIN", "reason": "Insufficient data"},
         },
-        "final_decision": "REJECT"
+        "final_decision": "REJECT",
     }
 
-    event = GraphEventCouncilVote(
-        run_id="r1", trace_id="t1", node_id="council-1", timestamp=100.0,
-        votes=votes_data
-    )
+    event = GraphEventCouncilVote(run_id="r1", trace_id="t1", node_id="council-1", timestamp=100.0, votes=votes_data)
 
     ce = migrate_graph_event_to_cloud_event(event)
 
