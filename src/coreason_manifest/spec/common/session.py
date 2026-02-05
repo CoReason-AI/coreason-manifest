@@ -63,9 +63,11 @@ class SessionState(CoReasonBaseModel):
         if strategy == MemoryStrategy.SLIDING_WINDOW:
             new_history = [] if limit <= 0 else self.history[-limit:]
 
-            return self.model_copy(update={
-                "history": new_history,
-                "updated_at": datetime.now(),
-            })
+            return self.model_copy(
+                update={
+                    "history": new_history,
+                    "updated_at": datetime.now(),
+                }
+            )
 
         return self

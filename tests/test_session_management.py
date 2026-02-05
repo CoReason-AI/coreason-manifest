@@ -18,11 +18,7 @@ def test_immutability_and_functional_update() -> None:
     interactions = [Interaction(input=f"input_{i}") for i in range(5)]
 
     state = SessionState(
-        agent_id="agent-1",
-        user_id="user-1",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        history=interactions
+        agent_id="agent-1", user_id="user-1", created_at=datetime.now(), updated_at=datetime.now(), history=interactions
     )
 
     assert len(state.history) == 5
@@ -43,13 +39,14 @@ def test_immutability_and_functional_update() -> None:
     # (assuming fast execution, strict inequality might fail if too fast? No, datetime.now() usually differs)
     assert new_state.updated_at >= state.updated_at
 
+
 def test_serialization() -> None:
     state = SessionState(
         agent_id="agent-1",
         user_id="user-1",
         created_at=datetime.now(),
         updated_at=datetime.now(),
-        variables={"foo": "bar", "num": 123}
+        variables={"foo": "bar", "num": 123},
     )
 
     # Dump to JSON
@@ -64,19 +61,11 @@ def test_serialization() -> None:
     assert loaded.variables["num"] == 123
     assert loaded.agent_id == "agent-1"
 
+
 def test_variable_storage() -> None:
-    vars = {
-        "string": "test",
-        "int": 42,
-        "dict": {"nested": True},
-        "list": [1, 2, 3]
-    }
+    vars = {"string": "test", "int": 42, "dict": {"nested": True}, "list": [1, 2, 3]}
     state = SessionState(
-        agent_id="agent-1",
-        user_id="user-1",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        variables=vars
+        agent_id="agent-1", user_id="user-1", created_at=datetime.now(), updated_at=datetime.now(), variables=vars
     )
 
     assert state.variables["string"] == "test"
@@ -90,28 +79,22 @@ def test_variable_storage() -> None:
     assert "new_key" in new_state.variables
     assert "new_key" not in state.variables
 
+
 def test_prune_all() -> None:
     interactions = [Interaction(input=f"input_{i}") for i in range(5)]
     state = SessionState(
-        agent_id="agent-1",
-        user_id="user-1",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        history=interactions
+        agent_id="agent-1", user_id="user-1", created_at=datetime.now(), updated_at=datetime.now(), history=interactions
     )
 
     new_state = state.prune(MemoryStrategy.ALL, limit=2)
     assert len(new_state.history) == 5
-    assert new_state is state # Should return self
+    assert new_state is state  # Should return self
+
 
 def test_prune_limit_zero_or_negative() -> None:
     interactions = [Interaction(input=f"input_{i}") for i in range(5)]
     state = SessionState(
-        agent_id="agent-1",
-        user_id="user-1",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        history=interactions
+        agent_id="agent-1", user_id="user-1", created_at=datetime.now(), updated_at=datetime.now(), history=interactions
     )
 
     new_state = state.prune(MemoryStrategy.SLIDING_WINDOW, limit=0)
@@ -120,29 +103,23 @@ def test_prune_limit_zero_or_negative() -> None:
     new_state = state.prune(MemoryStrategy.SLIDING_WINDOW, limit=-1)
     assert len(new_state.history) == 0
 
+
 def test_prune_limit_exceeds_length() -> None:
     interactions = [Interaction(input=f"input_{i}") for i in range(3)]
     state = SessionState(
-        agent_id="agent-1",
-        user_id="user-1",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        history=interactions
+        agent_id="agent-1", user_id="user-1", created_at=datetime.now(), updated_at=datetime.now(), history=interactions
     )
 
     new_state = state.prune(MemoryStrategy.SLIDING_WINDOW, limit=10)
     assert len(new_state.history) == 3
     assert new_state.history == interactions
 
+
 def test_prune_token_buffer() -> None:
     # Currently behaves like ALL/Default (returns self)
     interactions = [Interaction(input=f"input_{i}") for i in range(5)]
     state = SessionState(
-        agent_id="agent-1",
-        user_id="user-1",
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        history=interactions
+        agent_id="agent-1", user_id="user-1", created_at=datetime.now(), updated_at=datetime.now(), history=interactions
     )
 
     new_state = state.prune(MemoryStrategy.TOKEN_BUFFER, limit=10)
