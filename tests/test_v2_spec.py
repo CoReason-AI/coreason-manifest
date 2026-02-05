@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -26,7 +26,7 @@ from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture
-def base_manifest_kwargs() -> Dict[str, Any]:
+def base_manifest_kwargs() -> dict[str, Any]:
     return {
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
@@ -34,7 +34,7 @@ def base_manifest_kwargs() -> Dict[str, Any]:
     }
 
 
-def test_integrity_valid(base_manifest_kwargs: Dict[str, Any]) -> None:
+def test_integrity_valid(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test a perfectly valid manifest."""
     tool = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
     agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["tool1"])
@@ -50,7 +50,7 @@ def test_integrity_valid(base_manifest_kwargs: Dict[str, Any]) -> None:
     validate_integrity(manifest)
 
 
-def test_integrity_failure_missing_tool(base_manifest_kwargs: Dict[str, Any]) -> None:
+def test_integrity_failure_missing_tool(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test integrity failure when an Agent references a non-existent Tool ID."""
     agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["missing-tool"])
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
@@ -61,7 +61,7 @@ def test_integrity_failure_missing_tool(base_manifest_kwargs: Dict[str, Any]) ->
         validate_integrity(manifest)
 
 
-def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: Dict[str, Any]) -> None:
+def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test integrity failure when an Agent references a definition that is not a Tool."""
     agent1 = AgentDefinition(
         id="agent1",
@@ -79,7 +79,7 @@ def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: Dict[str, Any])
         validate_integrity(manifest)
 
 
-def test_integrity_failure_missing_next_step(base_manifest_kwargs: Dict[str, Any]) -> None:
+def test_integrity_failure_missing_next_step(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test integrity failure when a Step references a non-existent next ID."""
     agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal")
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1", next="missing-step")})
@@ -90,7 +90,7 @@ def test_integrity_failure_missing_next_step(base_manifest_kwargs: Dict[str, Any
         validate_integrity(manifest)
 
 
-def test_integrity_failure_missing_switch_target(base_manifest_kwargs: Dict[str, Any]) -> None:
+def test_integrity_failure_missing_switch_target(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test integrity failure when a SwitchStep references a non-existent step."""
     workflow = Workflow(
         start="switch1",
@@ -132,15 +132,16 @@ def test_strictness_unknown_field_agent_definition() -> None:
 
 def test_agent_definition_tools_type() -> None:
     """Test that tools must be a list of strings."""
-    with pytest.raises(ValidationError):
-        # We need to construct this such that mypy is happy but Pydantic runtime fails
-        # Mypy checks list contents, but casting can bypass it if needed
-        # However, here we are testing runtime behavior.
-        # If mypy is not complaining locally but CI is complaining about unused ignore, it means environment diff.
-        # Let's try casting to Any to bypass Mypy completely, then validation happens at runtime.
-        from typing import Any, cast
+    # We need to construct this such that mypy is happy but Pydantic runtime fails
+    # Mypy checks list contents, but casting can bypass it if needed
+    # However, here we are testing runtime behavior.
+    # If mypy is not complaining locally but CI is complaining about unused ignore, it means environment diff.
+    # Let's try casting to Any to bypass Mypy completely, then validation happens at runtime.
+    from typing import cast
 
-        bad_tools = cast(Any, [123])
+    bad_tools = cast("Any", [123])
+
+    with pytest.raises(ValidationError):
         AgentDefinition(
             id="agent1",
             name="Agent",
@@ -150,7 +151,7 @@ def test_agent_definition_tools_type() -> None:
         )
 
 
-def test_manifest_serialization(base_manifest_kwargs: Dict[str, Any]) -> None:
+def test_manifest_serialization(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test that ManifestV2 serializes correctly, especially Enums."""
     tool = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
     manifest = ManifestV2(

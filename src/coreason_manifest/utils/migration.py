@@ -8,8 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 from ..spec.common.graph_events import GraphEvent
@@ -22,7 +22,7 @@ class ExtendedCloudEvent(CloudEvent):
     This ensures that when dumped, the extra fields are included.
     """
 
-    com_coreason_ui_cue: Optional[str] = None
+    com_coreason_ui_cue: str | None = None
 
 
 def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent:
@@ -39,7 +39,7 @@ def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent:
 
     # 3. Map Content Type and Data
     content_type = EventContentType.JSON
-    data: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
 
     if event.event_type == "NODE_STREAM":
         content_type = EventContentType.STREAM
@@ -73,7 +73,7 @@ def migrate_graph_event_to_cloud_event(event: GraphEvent) -> CloudEvent:
         id=event_id,
         source=source,
         type=ce_type,
-        time=datetime.fromtimestamp(event.timestamp, tz=timezone.utc),
+        time=datetime.fromtimestamp(event.timestamp, tz=UTC),
         datacontenttype=content_type,
         data=data,
         traceparent=event.trace_id,

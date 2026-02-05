@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 from pydantic import ConfigDict, Field
@@ -22,7 +22,7 @@ class LineageMetadata(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     root_request_id: str
-    parent_interaction_id: Optional[str] = None
+    parent_interaction_id: str | None = None
 
 
 class Interaction(CoReasonBaseModel):
@@ -32,4 +32,4 @@ class Interaction(CoReasonBaseModel):
 
     id: str = Field(default_factory=lambda: str(uuid4()))
     input: Any = None
-    lineage: Optional[LineageMetadata] = None
+    lineage: LineageMetadata | None = None

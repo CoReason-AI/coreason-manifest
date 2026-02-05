@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import List, Literal, Optional, Union
+from typing import Literal
 
 from pydantic import ConfigDict, Field
 
@@ -39,7 +39,7 @@ class CitationEvent(PresentationEvent):
     type: Literal[PresentationEventType.CITATION] = PresentationEventType.CITATION
     uri: str = Field(..., description="The source URI.")
     text: str = Field(..., description="The quoted text.")
-    indices: Optional[List[int]] = Field(None, description="Start and end character indices.")
+    indices: list[int] | None = Field(None, description="Start and end character indices.")
 
 
 class ArtifactEvent(PresentationEvent):
@@ -48,7 +48,7 @@ class ArtifactEvent(PresentationEvent):
     type: Literal[PresentationEventType.ARTIFACT] = PresentationEventType.ARTIFACT
     artifact_id: str = Field(..., description="Unique ID of the artifact.")
     mime_type: str = Field(..., description="MIME type of the artifact.")
-    url: Optional[str] = Field(None, description="Download URL if applicable.")
+    url: str | None = Field(None, description="Download URL if applicable.")
 
 
 class UserErrorEvent(PresentationEvent):
@@ -56,9 +56,9 @@ class UserErrorEvent(PresentationEvent):
 
     type: Literal[PresentationEventType.USER_ERROR] = PresentationEventType.USER_ERROR
     message: str = Field(..., description="The human-readable message.")
-    code: Optional[int] = Field(None, description="Semantic integer code, e.g. 400, 503.")
+    code: int | None = Field(None, description="Semantic integer code, e.g. 400, 503.")
     domain: ErrorDomain = Field(ErrorDomain.SYSTEM, description="The domain of the error.")
     retryable: bool = Field(False, description="Whether the error is retryable.")
 
 
-AnyPresentationEvent = Union[CitationEvent, ArtifactEvent, UserErrorEvent]
+AnyPresentationEvent = CitationEvent | ArtifactEvent | UserErrorEvent

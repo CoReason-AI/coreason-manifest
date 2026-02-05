@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+from typing import Any
 
 from coreason_manifest import (
     EventContentType,
@@ -24,7 +24,7 @@ from coreason_manifest import (
 
 def test_payload_recursion() -> None:
     """Edge Case: Deeply nested dictionary in payload."""
-    recursive_data: Dict[str, Any] = {"level": 0}
+    recursive_data: dict[str, Any] = {"level": 0}
     current = recursive_data
     # Reducing recursion depth to 50 to avoid Pydantic/JSON serialization limits in CI environments
     for i in range(50):

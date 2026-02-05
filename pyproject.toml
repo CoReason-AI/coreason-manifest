@@ -56,7 +56,7 @@ line-length = 120
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "I"]
+select = ["E", "F", "B", "I", "UP", "SIM", "RUF", "ARG", "C4", "PT", "TCH", "PIE", "RET"]
 ignore = []
 
 [tool.ruff.lint.isort]
@@ -65,7 +65,9 @@ known-first-party = ["coreason_manifest"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]

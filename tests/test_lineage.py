@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -49,10 +49,10 @@ def test_agent_request_with_explicit_request_id_auto_root() -> None:
 
 def test_agent_request_validation_error() -> None:
     """Verify validation fails for invalid types."""
+    # Mypy might check types before runtime, but Pydantic validates at runtime.
+    # We force a type mismatch to check runtime validation.
+    bad_id: Any = "not-a-uuid"
     with pytest.raises(ValidationError):
-        # Mypy might check types before runtime, but Pydantic validates at runtime.
-        # We force a type mismatch to check runtime validation.
-        bad_id: Any = "not-a-uuid"
         AgentRequest(query="test", request_id=bad_id)
 
 
@@ -82,7 +82,7 @@ def test_reasoning_trace_auto_rooting() -> None:
     """Verify that ReasoningTrace auto-roots if root is missing."""
     uid = uuid4()
     trace = ReasoningTrace(
-        request_id=uid, node_id="step-1", status="success", latency_ms=10.5, timestamp=datetime.now(timezone.utc)
+        request_id=uid, node_id="step-1", status="success", latency_ms=10.5, timestamp=datetime.now(UTC)
     )
 
     assert trace.request_id == uid
@@ -98,7 +98,7 @@ def test_reasoning_trace_complex_lineage() -> None:
         node_id="root-node",
         status="success",
         latency_ms=10.0,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
     assert trace_root.root_request_id == root_id
 
@@ -111,7 +111,7 @@ def test_reasoning_trace_complex_lineage() -> None:
         node_id="child-node",
         status="success",
         latency_ms=5.0,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
     assert trace_child.root_request_id == root_id
     assert trace_child.parent_request_id == root_id
@@ -125,7 +125,7 @@ def test_reasoning_trace_complex_lineage() -> None:
         node_id="grandchild-node",
         status="success",
         latency_ms=2.0,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
     assert trace_grandchild.root_request_id == root_id
     assert trace_grandchild.parent_request_id == child_id
@@ -141,7 +141,7 @@ def test_reasoning_trace_explicit_root() -> None:
         node_id="step-1",
         status="success",
         latency_ms=10.5,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
     assert trace.request_id == uid
@@ -158,7 +158,7 @@ def test_audit_log_structure() -> None:
         id=log_id,
         request_id=uid,
         root_request_id=root,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         actor="user:123",
         action="execute",
         outcome="success",

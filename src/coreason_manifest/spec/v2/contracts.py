@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from pydantic import ConfigDict, Field
 
@@ -10,8 +10,8 @@ class InterfaceDefinition(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    inputs: Dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for arguments.")
-    outputs: Dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for return values.")
+    inputs: dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for arguments.")
+    outputs: dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for return values.")
 
 
 class StateDefinition(CoReasonBaseModel):
@@ -19,10 +19,10 @@ class StateDefinition(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    schema_: Dict[str, Any] = Field(
+    schema_: dict[str, Any] = Field(
         default_factory=dict, alias="schema", description="The structure of the conversation memory/context."
     )
-    backend: Optional[str] = Field(None, description="Backend storage type (e.g., 'redis', 'memory').")
+    backend: str | None = Field(None, description="Backend storage type (e.g., 'redis', 'memory').")
 
 
 class PolicyDefinition(CoReasonBaseModel):
@@ -30,7 +30,7 @@ class PolicyDefinition(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
-    max_steps: Optional[int] = Field(None, description="Execution limit on number of steps.")
+    max_steps: int | None = Field(None, description="Execution limit on number of steps.")
     max_retries: int = Field(3, description="Maximum number of retries.")
-    timeout: Optional[int] = Field(None, description="Timeout in seconds.")
+    timeout: int | None = Field(None, description="Timeout in seconds.")
     human_in_the_loop: bool = Field(False, description="Whether to require human approval.")

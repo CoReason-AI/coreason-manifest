@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from ..cap import ServiceRequest, ServiceResponse
 
@@ -7,7 +7,7 @@ class ServiceContract:
     """Utility class to generate the OpenAPI specification."""
 
     @staticmethod
-    def generate_openapi() -> Dict[str, Any]:
+    def generate_openapi() -> dict[str, Any]:
         """Generate the OpenAPI 3.1 Path Item Object for the agent service."""
         return {
             "post": {

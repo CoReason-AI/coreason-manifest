@@ -11,7 +11,7 @@
 """I/O module for loading and dumping V2 Manifests."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any
 
 import yaml
 
@@ -19,7 +19,7 @@ from coreason_manifest.spec.v2.definitions import ManifestV2
 from coreason_manifest.utils.v2.resolver import ReferenceResolver
 
 
-def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[Path]) -> Dict[str, Any]:
+def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: set[Path]) -> dict[str, Any]:
     """
     Recursively load YAML data, resolving $ref in definitions.
 
@@ -61,8 +61,8 @@ def _load_recursive(path: Path, resolver: ReferenceResolver, visited_paths: Set[
 
 
 def load_from_yaml(
-    path: Union[str, Path],
-    root_dir: Optional[Union[str, Path]] = None,
+    path: str | Path,
+    root_dir: str | Path | None = None,
     recursive: bool = True,
 ) -> ManifestV2:
     """Load a V2 manifest from a YAML file.
@@ -91,7 +91,7 @@ def load_from_yaml(
 
     if recursive:
         resolver = ReferenceResolver(root_dir)
-        visited_paths: Set[Path] = set()
+        visited_paths: set[Path] = set()
         data = _load_recursive(p, resolver, visited_paths)
     else:
         with p.open("r", encoding="utf-8") as f:

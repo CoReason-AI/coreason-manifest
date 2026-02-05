@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -54,7 +54,7 @@ def test_stream_packet_creation() -> None:
 
 def test_service_response_serialization() -> None:
     req_id = uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     response = ServiceResponse(
         request_id=req_id, created_at=now, output={"result": "success"}, metrics={"latency": 100}
     )

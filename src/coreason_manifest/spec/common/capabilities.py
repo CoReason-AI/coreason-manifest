@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 from pydantic import ConfigDict, Field
 
@@ -18,7 +17,7 @@ class AgentCapabilities(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    delivery_mode: List[DeliveryMode] = Field(
+    delivery_mode: list[DeliveryMode] = Field(
         default_factory=lambda: [DeliveryMode.SSE],
         description="Supported transport mechanisms.",
     )

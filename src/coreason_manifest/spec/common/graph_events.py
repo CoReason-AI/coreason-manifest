@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import ConfigDict
 
@@ -22,13 +22,13 @@ class GraphEventBase(CoReasonBaseModel):
     trace_id: str
     node_id: str
     timestamp: float
-    sequence_id: Optional[int] = None
-    visual_cue: Optional[str] = None
+    sequence_id: int | None = None
+    visual_cue: str | None = None
 
 
 class GraphEventNodeStart(GraphEventBase):
     event_type: Literal["NODE_START"] = "NODE_START"
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
 
 class GraphEventNodeStream(GraphEventBase):
@@ -38,18 +38,18 @@ class GraphEventNodeStream(GraphEventBase):
 
 class GraphEventNodeDone(GraphEventBase):
     event_type: Literal["NODE_DONE"] = "NODE_DONE"
-    output: Dict[str, Any]
+    output: dict[str, Any]
 
 
 class GraphEventError(GraphEventBase):
     event_type: Literal["ERROR"] = "ERROR"
     error_message: str
-    stack_trace: Optional[str] = None
+    stack_trace: str | None = None
 
 
 class GraphEventCouncilVote(GraphEventBase):
     event_type: Literal["COUNCIL_VOTE"] = "COUNCIL_VOTE"
-    votes: Dict[str, Any]
+    votes: dict[str, Any]
 
 
 class GraphEventNodeRestored(GraphEventBase):
@@ -63,12 +63,12 @@ class GraphEventArtifactGenerated(GraphEventBase):
     url: str
 
 
-GraphEvent = Union[
-    GraphEventNodeStart,
-    GraphEventNodeStream,
-    GraphEventNodeDone,
-    GraphEventError,
-    GraphEventCouncilVote,
-    GraphEventNodeRestored,
-    GraphEventArtifactGenerated,
-]
+GraphEvent = (
+    GraphEventNodeStart
+    | GraphEventNodeStream
+    | GraphEventNodeDone
+    | GraphEventError
+    | GraphEventCouncilVote
+    | GraphEventNodeRestored
+    | GraphEventArtifactGenerated
+)
