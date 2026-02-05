@@ -56,8 +56,13 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
     violations: List[ComplianceViolation] = []
 
     # 1. Check Tools in Definitions
+    has_critical_tools = False
+
     for _, definition in manifest.definitions.items():
         if isinstance(definition, ToolDefinition):
+            if definition.risk_level == ToolRiskLevel.CRITICAL:
+                has_critical_tools = True
+
             # Check Risk Level
             if config.max_risk_level:
                 tool_score = _risk_score(definition.risk_level)
@@ -119,6 +124,25 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                             component_id=definition.id,
                         )
                     )
+
+    if config.require_auth_for_critical_tools and has_critical_tools:
+        # Check if auth is required in metadata
+        requires_auth = False
+        # Try direct attribute access first (if it were defined in schema)
+        if getattr(manifest.metadata, "requires_auth", False):
+            requires_auth = True
+        # Try model_extra for dynamic fields
+        elif manifest.metadata.model_extra and manifest.metadata.model_extra.get("requires_auth"):
+            requires_auth = True
+
+        if not requires_auth:
+            violations.append(
+                ComplianceViolation(
+                    rule="auth_mandate_missing",
+                    message="Agent uses CRITICAL tools but does not enforce authentication (metadata.requires_auth=True).",
+                    component_id="metadata",
+                )
+            )
 
     # 2. Check Workflow Steps for Custom Logic
     if not config.allow_custom_logic:
