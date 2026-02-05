@@ -42,24 +42,13 @@ def test_reasoning_trace_auto_rooting() -> None:
     now = datetime.now(timezone.utc)
 
     # 1. Provide request_id (via auto-gen or explicit) but no root
-    trace = ReasoningTrace(
-        node_id="test",
-        status="ok",
-        latency_ms=1.0,
-        timestamp=now
-    )
+    trace = ReasoningTrace(node_id="test", status="ok", latency_ms=1.0, timestamp=now)
     assert trace.request_id is not None
     assert trace.root_request_id == trace.request_id
 
     # 2. Provide request_id explicit
     rid = uuid4()
-    trace2 = ReasoningTrace(
-        request_id=rid,
-        node_id="test",
-        status="ok",
-        latency_ms=1.0,
-        timestamp=now
-    )
+    trace2 = ReasoningTrace(request_id=rid, node_id="test", status="ok", latency_ms=1.0, timestamp=now)
     assert trace2.request_id == rid
     assert trace2.root_request_id == rid
 
@@ -67,12 +56,7 @@ def test_reasoning_trace_auto_rooting() -> None:
     rid = uuid4()
     root = uuid4()
     trace3 = ReasoningTrace(
-        request_id=rid,
-        root_request_id=root,
-        node_id="test",
-        status="ok",
-        latency_ms=1.0,
-        timestamp=now
+        request_id=rid, root_request_id=root, node_id="test", status="ok", latency_ms=1.0, timestamp=now
     )
     assert trace3.request_id == rid
     assert trace3.root_request_id == root
