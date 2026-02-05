@@ -60,7 +60,9 @@ class ReasoningTrace(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID
-    root_request_id: UUID = Field(description="The original user request ID (for lineage)")
+    root_request_id: Optional[UUID] = Field(
+        default=None, description="The original user request ID (for lineage)"
+    )
     parent_request_id: Optional[UUID] = None
     node_id: str = Field(description="The step name")
     status: str = Field(description='"success" or "failed"')

@@ -103,7 +103,9 @@ class AgentRequest(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID = Field(default_factory=uuid4)
-    root_request_id: UUID = Field(description="The ID of the original user request. Must always be present.")
+    root_request_id: Optional[UUID] = Field(
+        default=None, description="The ID of the original user request. Must always be present."
+    )
     parent_request_id: Optional[UUID] = Field(default=None, description="The ID of the immediate caller.")
 
     query: str
