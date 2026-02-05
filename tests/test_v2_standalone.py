@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import importlib
+
 import pytest
 import yaml
 
@@ -24,10 +26,10 @@ def test_bridge_is_gone() -> None:
     This ensures no one accidentally relies on 'dead code'.
     """
     with pytest.raises(ModuleNotFoundError):
-        import coreason_manifest.v2.adapter  # type: ignore
+        importlib.import_module("coreason_manifest.v2.adapter")
 
     with pytest.raises(ModuleNotFoundError):
-        import coreason_manifest.v2.compiler  # type: ignore  # noqa: F401
+        importlib.import_module("coreason_manifest.v2.compiler")
 
 
 def test_vestigial_bridge_fields() -> None:
