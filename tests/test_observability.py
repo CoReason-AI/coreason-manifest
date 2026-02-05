@@ -188,7 +188,7 @@ def test_validation_failure_missing_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     with pytest.raises(ValidationError):
         # Missing 'id'
-        CloudEvent(source="urn:test", type="test", time=datetime.now(timezone.utc))  # type: ignore
+        CloudEvent(source="urn:test", type="test", time=datetime.now(timezone.utc))  # type: ignore[call-arg, unused-ignore]
 
     with pytest.raises(ValidationError):
         # Missing 'latency_ms'
@@ -198,7 +198,7 @@ def test_validation_failure_missing_fields() -> None:
             node_id="test",
             status="ok",
             timestamp=datetime.now(timezone.utc),
-        )  # type: ignore
+        )  # type: ignore[call-arg, unused-ignore]
 
 
 # --- Complex Case Tests ---
@@ -301,8 +301,8 @@ def test_trace_chain_simulation() -> None:
 
 def test_content_type_equality_behavior() -> None:
     """Verify that EventContentType Enum members compare equal to their string values."""
-    assert EventContentType.JSON == "application/json"
-    assert EventContentType.STREAM == "application/vnd.coreason.stream+json"
+    assert EventContentType.JSON == "application/json"  # type: ignore[comparison-overlap, unused-ignore]
+    assert EventContentType.STREAM == "application/vnd.coreason.stream+json"  # type: ignore[comparison-overlap, unused-ignore]
     # Inequality
     assert EventContentType.JSON != "application/xml"
     assert EventContentType.JSON != EventContentType.ERROR
@@ -335,9 +335,7 @@ def test_enum_instantiation_from_value() -> None:
 def test_nested_cloud_event() -> None:
     """Simulate an event wrapping another event (Tunneling)."""
     now = datetime.now(timezone.utc)
-    inner_event = CloudEvent(
-        id="evt-inner", source="urn:inner", type="test.inner", time=now, data={"foo": "bar"}
-    )
+    inner_event = CloudEvent(id="evt-inner", source="urn:inner", type="test.inner", time=now, data={"foo": "bar"})
 
     # Outer event wraps inner event as data
     outer_event = CloudEvent(
