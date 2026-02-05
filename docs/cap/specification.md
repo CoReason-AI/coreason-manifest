@@ -229,7 +229,3 @@ workflow:
       agent: "gpt-4-turbo" # Can reference model directly if simple
       system_prompt: "Summarize the findings."
 ```
-
-## See Also
-
-*   [CAP Wire Protocol](wire_protocol.md): The runtime wire format specification.

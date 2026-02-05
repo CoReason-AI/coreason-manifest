@@ -8,25 +8,28 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional
+from uuid import uuid4
 
 from pydantic import ConfigDict, Field
 
-from ..common import CoReasonBaseModel
-from .message import ChatMessage, MultiModalInput
+from coreason_manifest.common import CoReasonBaseModel
 
 
-class Interaction(CoReasonBaseModel):
-    """Represents a single 'User Request -> Assistant Response' cycle."""
+class LineageMetadata(CoReasonBaseModel):
+    """Metadata for tracking request lineage across boundaries."""
 
     model_config = ConfigDict(frozen=True)
 
-    input: Union[MultiModalInput, str, Dict[str, Any]] = Field(
-        ..., description="The user input (strict, string, or legacy dict)."
-    )
-    output: Optional[ChatMessage] = Field(None, description="The assistant's response.")
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        description="The timestamp of the interaction.",
-    )
+    root_request_id: str
+    parent_interaction_id: Optional[str] = None
+
+
+class Interaction(CoReasonBaseModel):
+    """External boundary interaction model."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    input: Any = None
+    lineage: Optional[LineageMetadata] = None

@@ -10,9 +10,6 @@ nav:
   - Specifications & Protocols:
     - CAM Specification: cap/specification.md
     - CAP Wire Protocol: cap/wire_protocol.md
-    - Observability & Tracing: observability.md
-    - Semantic Error Handling: error_handling_standards.md
-    - Event Content Types: event_content_types.md
   - Architecture & Rationale:
     - Product Requirements: product_requirements.md
     - Base Model Rationale: coreason_base_model_rationale.md
