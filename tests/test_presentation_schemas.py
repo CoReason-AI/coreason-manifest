@@ -12,7 +12,7 @@ from coreason_manifest import (
 )
 
 
-def test_polymorphic_serialization():
+def test_polymorphic_serialization() -> None:
     """Verify polymorphic serialization with MediaCarousel."""
     payload = MediaCarousel(
         items=[
@@ -31,17 +31,17 @@ def test_polymorphic_serialization():
     assert dumped["data"]["items"][1]["mime_type"] == "image/png"
 
 
-def test_validation_logic():
+def test_validation_logic() -> None:
     """Verify validation fails for invalid status in ProgressUpdate."""
     with pytest.raises(ValidationError) as excinfo:
-        ProgressUpdate(label="Thinking", status="thinking")  # "thinking" is not allowed
+        ProgressUpdate(label="Thinking", status="thinking")  # "thinking" is not allowed  # type: ignore
 
     assert "status" in str(excinfo.value)
     # Also verify valid statuses work
     assert ProgressUpdate(label="Running", status="running").status == "running"
 
 
-def test_deserialization():
+def test_deserialization() -> None:
     """Verify deserialization from raw dictionary."""
     raw_dict = {
         "type": "citation_block",
@@ -68,15 +68,17 @@ def test_deserialization():
     assert item.title == "Reference Title"
 
 
-def test_immutability():
+def test_immutability() -> None:
     """Verify immutability of the models."""
     progress = ProgressUpdate(label="Loading", status="running", progress_percent=0.5)
     event = PresentationEvent(type=PresentationEventType.PROGRESS_INDICATOR, data=progress)
 
     # Try to modify nested data
+    # We must assert the type for MyPy before accessing fields, or use type ignore if we are intentionally breaking it
+    assert isinstance(event.data, ProgressUpdate)
     with pytest.raises(ValidationError):
-        event.data.label = "New Label"
+        event.data.label = "New Label"  # type: ignore[misc, unused-ignore]
 
     # Try to modify event field
     with pytest.raises(ValidationError):
-        event.type = PresentationEventType.MARKDOWN_BLOCK
+        event.type = PresentationEventType.MARKDOWN_BLOCK  # type: ignore[misc, unused-ignore]

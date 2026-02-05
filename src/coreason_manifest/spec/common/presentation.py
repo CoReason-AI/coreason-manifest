@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import UUID, uuid4
@@ -90,7 +90,7 @@ class PresentationEvent(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))  # noqa: UP017
     type: PresentationEventType
     data: CitationBlock | ProgressUpdate | MediaCarousel | MarkdownBlock | dict[str, Any]
 
@@ -103,17 +103,13 @@ class PresentationEvent(CoReasonBaseModel):
             d = values.get("data")
 
             if t and d and isinstance(d, dict):
-                # Try to coerce to specific model if applicable
-                try:
-                    if t == PresentationEventType.CITATION_BLOCK:
-                        values["data"] = CitationBlock.model_validate(d)
-                    elif t == PresentationEventType.PROGRESS_INDICATOR:
-                        values["data"] = ProgressUpdate.model_validate(d)
-                    elif t == PresentationEventType.MEDIA_CAROUSEL:
-                        values["data"] = MediaCarousel.model_validate(d)
-                    elif t == PresentationEventType.MARKDOWN_BLOCK:
-                        values["data"] = MarkdownBlock.model_validate(d)
-                except Exception:
-                    # Let standard validation handle failure
-                    pass
+                # Coerce to specific model if applicable
+                if t == PresentationEventType.CITATION_BLOCK:
+                    values["data"] = CitationBlock.model_validate(d)
+                elif t == PresentationEventType.PROGRESS_INDICATOR:
+                    values["data"] = ProgressUpdate.model_validate(d)
+                elif t == PresentationEventType.MEDIA_CAROUSEL:
+                    values["data"] = MediaCarousel.model_validate(d)
+                elif t == PresentationEventType.MARKDOWN_BLOCK:
+                    values["data"] = MarkdownBlock.model_validate(d)
         return values

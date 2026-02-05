@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+
 from pydantic import TypeAdapter
 
 from coreason_manifest import (
@@ -54,6 +55,8 @@ def test_user_error_event_parsing() -> None:
     event = PresentationEvent.model_validate(payload)
 
     assert event.type == PresentationEventType.USER_ERROR
+    # We must assume data is a dict here since we passed a dict payload and UserError isn't a strict model in the union
+    assert isinstance(event.data, dict)
     assert event.data["message"] == "Rate limit exceeded"
     assert event.data["code"] == 429
     assert event.data["retryable"] is True
@@ -66,6 +69,7 @@ def test_edge_case_empty_strings() -> None:
         type=PresentationEventType.USER_ERROR,
         data={"message": "", "domain": ErrorDomain.SYSTEM},
     )
+    assert isinstance(event.data, dict)
     assert event.data["message"] == ""
     dumped = event.model_dump(mode="json")
     assert dumped["data"]["message"] == ""
@@ -78,6 +82,7 @@ def test_edge_case_numeric_limits() -> None:
         type=PresentationEventType.USER_ERROR,
         data={"message": "Negative", "code": -1},
     )
+    assert isinstance(event.data, dict)
     assert event.data["code"] == -1
 
     # Large code
@@ -85,6 +90,7 @@ def test_edge_case_numeric_limits() -> None:
         type=PresentationEventType.USER_ERROR,
         data={"message": "Large", "code": 999999},
     )
+    assert isinstance(event.data, dict)
     assert event.data["code"] == 999999
 
 
