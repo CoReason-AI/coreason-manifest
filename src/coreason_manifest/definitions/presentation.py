@@ -14,6 +14,7 @@ from typing import List, Literal, Optional, Union
 from pydantic import ConfigDict, Field
 
 from ..common import CoReasonBaseModel
+from .error import ErrorDomain
 
 
 class PresentationEventType(str, Enum):
@@ -21,6 +22,7 @@ class PresentationEventType(str, Enum):
 
     CITATION = "citation"
     ARTIFACT = "artifact"
+    USER_ERROR = "user_error"
 
 
 class PresentationEvent(CoReasonBaseModel):
@@ -49,4 +51,14 @@ class ArtifactEvent(PresentationEvent):
     url: Optional[str] = Field(None, description="Download URL if applicable.")
 
 
-AnyPresentationEvent = Union[CitationEvent, ArtifactEvent]
+class UserErrorEvent(PresentationEvent):
+    """An event representing a user-facing error."""
+
+    type: Literal[PresentationEventType.USER_ERROR] = PresentationEventType.USER_ERROR
+    message: str = Field(..., description="The human-readable message.")
+    code: Optional[int] = Field(None, description="Semantic integer code, e.g. 400, 503.")
+    domain: ErrorDomain = Field(ErrorDomain.SYSTEM, description="The domain of the error.")
+    retryable: bool = Field(False, description="Whether the error is retryable.")
+
+
+AnyPresentationEvent = Union[CitationEvent, ArtifactEvent, UserErrorEvent]
