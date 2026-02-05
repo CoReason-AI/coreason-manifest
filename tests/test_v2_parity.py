@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from coreason_manifest.v2.io import load_from_yaml
+from coreason_manifest.utils.v2.io import load_from_yaml
 
 
 def test_full_definition() -> None:

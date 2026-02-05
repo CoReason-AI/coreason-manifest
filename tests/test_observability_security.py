@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.observability import CloudEvent, EventContentType, ReasoningTrace
+from coreason_manifest.spec.common.observability import CloudEvent, EventContentType, ReasoningTrace
 
 
 def test_security_massive_payload_dos() -> None:

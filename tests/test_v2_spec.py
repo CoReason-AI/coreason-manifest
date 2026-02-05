@@ -13,8 +13,8 @@ from typing import Any, Dict
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.common import ToolRiskLevel
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.common_base import ToolRiskLevel
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     ManifestV2,
@@ -22,7 +22,7 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_integrity
+from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture

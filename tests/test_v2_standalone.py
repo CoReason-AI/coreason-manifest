@@ -11,7 +11,7 @@
 import pytest
 import yaml
 
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     GenericDefinition,
     ManifestV2,

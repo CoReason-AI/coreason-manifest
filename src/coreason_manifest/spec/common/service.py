@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from ..spec.cap import ServiceRequest, ServiceResponse
+from ..cap import ServiceRequest, ServiceResponse
 
 
 class ServiceContract:

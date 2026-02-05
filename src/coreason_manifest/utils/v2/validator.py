@@ -12,7 +12,7 @@
 
 from typing import List
 
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,

@@ -13,13 +13,13 @@
 from typing import List
 from urllib.parse import urlparse
 
-from coreason_manifest.common import ToolRiskLevel
-from coreason_manifest.governance import (
+from coreason_manifest.spec.common_base import ToolRiskLevel
+from coreason_manifest.spec.governance import (
     ComplianceReport,
     ComplianceViolation,
     GovernanceConfig,
 )
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.v2.definitions import (
     LogicStep,
     ManifestV2,
     SwitchStep,

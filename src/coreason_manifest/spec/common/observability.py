@@ -15,7 +15,7 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field, model_validator
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 
 
 class EventContentType(str, Enum):

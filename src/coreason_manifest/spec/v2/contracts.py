@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.common import CoReasonBaseModel
+from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
 class InterfaceDefinition(CoReasonBaseModel):

@@ -1,5 +1,5 @@
-from coreason_manifest.definitions.capabilities import AgentCapabilities, DeliveryMode
-from coreason_manifest.v2.spec.definitions import AgentDefinition
+from coreason_manifest.spec.common.capabilities import AgentCapabilities, DeliveryMode
+from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
 def test_capabilities_default_init() -> None:

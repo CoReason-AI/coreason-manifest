@@ -1,5 +1,112 @@
 {
   "$defs": {
+    "AgentCapabilities": {
+      "additionalProperties": false,
+      "description": "Feature flags and capabilities for the agent.",
+      "properties": {
+        "delivery_mode": {
+          "description": "Supported transport mechanisms.",
+          "items": {
+            "$ref": "#/$defs/DeliveryMode"
+          },
+          "title": "Delivery Mode",
+          "type": "array"
+        },
+        "history_support": {
+          "default": true,
+          "description": "Whether the agent supports conversation history/context.",
+          "title": "History Support",
+          "type": "boolean"
+        }
+      },
+      "title": "AgentCapabilities",
+      "type": "object"
+    },
+    "AgentDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of an Agent.",
+      "properties": {
+        "type": {
+          "const": "agent",
+          "default": "agent",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique ID for the agent.",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the agent.",
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "description": "The persona/job title.",
+          "title": "Role",
+          "type": "string"
+        },
+        "goal": {
+          "description": "Primary objective.",
+          "title": "Goal",
+          "type": "string"
+        },
+        "backstory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Backstory or directives.",
+          "title": "Backstory"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "LLM identifier.",
+          "title": "Model"
+        },
+        "tools": {
+          "description": "List of Tool IDs or URI references.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "knowledge": {
+          "description": "List of file paths or knowledge base IDs.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Knowledge",
+          "type": "array"
+        },
+        "capabilities": {
+          "$ref": "#/$defs/AgentCapabilities"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "role",
+        "goal"
+      ],
+      "title": "AgentDefinition",
+      "type": "object"
+    },
     "AgentStep": {
       "additionalProperties": false,
       "description": "A step that executes an AI Agent.",
@@ -140,6 +247,15 @@
       "title": "CouncilStep",
       "type": "object"
     },
+    "DeliveryMode": {
+      "description": "Supported transport mechanisms.",
+      "enum": [
+        "request_response",
+        "sse"
+      ],
+      "title": "DeliveryMode",
+      "type": "string"
+    },
     "DesignMetadata": {
       "additionalProperties": false,
       "description": "UI-specific metadata for the visual builder.",
@@ -218,6 +334,33 @@
         "y"
       ],
       "title": "DesignMetadata",
+      "type": "object"
+    },
+    "GenericDefinition": {
+      "additionalProperties": true,
+      "description": "Fallback for unknown definitions.",
+      "properties": {},
+      "title": "GenericDefinition",
+      "type": "object"
+    },
+    "InterfaceDefinition": {
+      "additionalProperties": false,
+      "description": "Defines the input/output contract.",
+      "properties": {
+        "inputs": {
+          "additionalProperties": true,
+          "description": "JSON Schema definitions for arguments.",
+          "title": "Inputs",
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": true,
+          "description": "JSON Schema definitions for return values.",
+          "title": "Outputs",
+          "type": "object"
+        }
+      },
+      "title": "InterfaceDefinition",
       "type": "object"
     },
     "LogicStep": {
@@ -307,6 +450,79 @@
       "title": "ManifestMetadata",
       "type": "object"
     },
+    "PolicyDefinition": {
+      "additionalProperties": false,
+      "description": "Defines execution policy and governance rules.",
+      "properties": {
+        "max_steps": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Execution limit on number of steps.",
+          "title": "Max Steps"
+        },
+        "max_retries": {
+          "default": 3,
+          "description": "Maximum number of retries.",
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timeout in seconds.",
+          "title": "Timeout"
+        },
+        "human_in_the_loop": {
+          "default": false,
+          "description": "Whether to require human approval.",
+          "title": "Human In The Loop",
+          "type": "boolean"
+        }
+      },
+      "title": "PolicyDefinition",
+      "type": "object"
+    },
+    "StateDefinition": {
+      "additionalProperties": false,
+      "description": "Defines the conversation memory/context structure.",
+      "properties": {
+        "schema": {
+          "additionalProperties": true,
+          "description": "The structure of the conversation memory/context.",
+          "title": "Schema",
+          "type": "object"
+        },
+        "backend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Backend storage type (e.g., 'redis', 'memory').",
+          "title": "Backend"
+        }
+      },
+      "title": "StateDefinition",
+      "type": "object"
+    },
     "SwitchStep": {
       "additionalProperties": false,
       "description": "A step that routes execution based on conditions.",
@@ -368,6 +584,70 @@
       ],
       "title": "SwitchStep",
       "type": "object"
+    },
+    "ToolDefinition": {
+      "additionalProperties": false,
+      "description": "Definition of an external tool.",
+      "properties": {
+        "type": {
+          "const": "tool",
+          "default": "tool",
+          "title": "Type",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique ID for the tool within the manifest.",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the tool.",
+          "title": "Name",
+          "type": "string"
+        },
+        "uri": {
+          "description": "The MCP endpoint URI.",
+          "format": "uri",
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/ToolRiskLevel",
+          "description": "Risk level (safe, standard, critical)."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Description of the tool.",
+          "title": "Description"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "uri",
+        "risk_level"
+      ],
+      "title": "ToolDefinition",
+      "type": "object"
+    },
+    "ToolRiskLevel": {
+      "description": "Risk level for the tool.",
+      "enum": [
+        "safe",
+        "standard",
+        "critical"
+      ],
+      "title": "ToolRiskLevel",
+      "type": "string"
     },
     "Workflow": {
       "additionalProperties": false,
@@ -441,8 +721,40 @@
       "$ref": "#/$defs/ManifestMetadata",
       "description": "Metadata including name and design info."
     },
+    "interface": {
+      "$ref": "#/$defs/InterfaceDefinition"
+    },
+    "state": {
+      "$ref": "#/$defs/StateDefinition"
+    },
+    "policy": {
+      "$ref": "#/$defs/PolicyDefinition"
+    },
     "definitions": {
-      "additionalProperties": true,
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "discriminator": {
+              "mapping": {
+                "agent": "#/$defs/AgentDefinition",
+                "tool": "#/$defs/ToolDefinition"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ToolDefinition"
+              },
+              {
+                "$ref": "#/$defs/AgentDefinition"
+              }
+            ]
+          },
+          {
+            "$ref": "#/$defs/GenericDefinition"
+          }
+        ]
+      },
       "description": "Reusable definitions.",
       "title": "Definitions",
       "type": "object"

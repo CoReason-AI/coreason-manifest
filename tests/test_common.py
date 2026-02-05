@@ -10,7 +10,7 @@
 
 from pydantic import AnyUrl
 
-from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
+from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 
 
 class CommonTestModel(CoReasonBaseModel):

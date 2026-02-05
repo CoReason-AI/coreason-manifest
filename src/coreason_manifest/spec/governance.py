@@ -17,7 +17,7 @@ from typing import List, Optional
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.common import CoReasonBaseModel, ToolRiskLevel
+from coreason_manifest.spec.common_base import CoReasonBaseModel, ToolRiskLevel
 
 
 class GovernanceConfig(CoReasonBaseModel):

@@ -11,7 +11,7 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from coreason_manifest.common import CoReasonBaseModel, StrictUri, ToolRiskLevel
+from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 
 
 class TestModel(CoReasonBaseModel):

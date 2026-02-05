@@ -12,8 +12,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 from uuid import uuid4
 
-from ..definitions.graph_events import GraphEvent
-from ..definitions.observability import CloudEvent, EventContentType
+from ..spec.common.graph_events import GraphEvent
+from ..spec.common.observability import CloudEvent, EventContentType
 
 
 class ExtendedCloudEvent(CloudEvent):

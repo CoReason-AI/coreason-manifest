@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.common import CoReasonBaseModel
+from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
 class LineageMetadata(CoReasonBaseModel):

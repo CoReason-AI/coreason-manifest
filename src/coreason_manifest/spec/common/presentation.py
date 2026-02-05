@@ -13,7 +13,7 @@ from typing import List, Literal, Optional, Union
 
 from pydantic import ConfigDict, Field
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 from .error import ErrorDomain
 
 

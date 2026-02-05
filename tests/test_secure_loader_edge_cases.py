@@ -14,7 +14,7 @@ import pytest
 import yaml
 
 from coreason_manifest import load
-from coreason_manifest.v2.spec.definitions import GenericDefinition
+from coreason_manifest.spec.v2.definitions import GenericDefinition
 
 # --- Edge Cases ---
 

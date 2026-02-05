@@ -12,7 +12,7 @@ from typing import Any, Dict, Literal, Optional, Union
 
 from pydantic import ConfigDict
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 
 
 class GraphEventBase(CoReasonBaseModel):

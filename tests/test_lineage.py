@@ -15,9 +15,9 @@ from uuid import UUID, uuid4
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.observability import AuditLog, ReasoningTrace
-from coreason_manifest.definitions.session import Interaction, LineageMetadata
 from coreason_manifest.spec.cap import AgentRequest
+from coreason_manifest.spec.common.observability import AuditLog, ReasoningTrace
+from coreason_manifest.spec.common.session import Interaction, LineageMetadata
 
 
 def test_agent_request_auto_rooting() -> None:
