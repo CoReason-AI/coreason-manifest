@@ -71,9 +71,7 @@ def test_error_coercion_failure_missing_fields() -> None:
     # It checks `isinstance(self.p, StreamError)`. It is a Dict.
     # So it raises ValueError.
 
-    with pytest.raises(
-        ValueError, match="Payload 'p' must be a valid StreamError when op is ERROR"
-    ):
+    with pytest.raises(ValueError, match="Payload 'p' must be a valid StreamError when op is ERROR"):
         StreamPacket(op=StreamOpCode.ERROR, p=invalid_payload)
 
 

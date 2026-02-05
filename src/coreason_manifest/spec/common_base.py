@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Any
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, PlainSerializer
@@ -55,7 +55,7 @@ StrictUri = Annotated[
 ]
 
 
-class ToolRiskLevel(str, Enum):
+class ToolRiskLevel(StrEnum):
     """Risk level for the tool."""
 
     SAFE = "safe"

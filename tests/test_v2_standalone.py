@@ -24,10 +24,10 @@ def test_bridge_is_gone() -> None:
     This ensures no one accidentally relies on 'dead code'.
     """
     with pytest.raises(ModuleNotFoundError):
-        import coreason_manifest.v2.adapter  # type: ignore
+        import coreason_manifest.v2.adapter
 
     with pytest.raises(ModuleNotFoundError):
-        import coreason_manifest.v2.compiler  # type: ignore # noqa: F401
+        import coreason_manifest.v2.compiler  # noqa: F401
 
 
 def test_vestigial_bridge_fields() -> None:

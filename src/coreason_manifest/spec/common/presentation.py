@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import ConfigDict, Field
@@ -17,7 +17,7 @@ from ..common_base import CoReasonBaseModel
 from .error import ErrorDomain
 
 
-class PresentationEventType(str, Enum):
+class PresentationEventType(StrEnum):
     """Types of presentation events."""
 
     CITATION = "citation"

@@ -8,14 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
 from ..common_base import CoReasonBaseModel
 
 
-class DeliveryMode(str, Enum):
+class DeliveryMode(StrEnum):
     """Supported transport mechanisms."""
 
     REQUEST_RESPONSE = "request_response"

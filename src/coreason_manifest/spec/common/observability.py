@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 from uuid import UUID
 
@@ -18,7 +18,7 @@ from pydantic import ConfigDict, Field, model_validator
 from ..common_base import CoReasonBaseModel
 
 
-class EventContentType(str, Enum):
+class EventContentType(StrEnum):
     JSON = "application/json"
     STREAM = "application/vnd.coreason.stream+json"
     ERROR = "application/vnd.coreason.error+json"

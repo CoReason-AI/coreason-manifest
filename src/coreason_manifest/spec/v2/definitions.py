@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -62,7 +62,7 @@ class AgentDefinition(CoReasonBaseModel):
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
     )
-    runtime: Optional[AgentRuntimeConfig] = Field(
+    runtime: AgentRuntimeConfig | None = Field(
         None, description="Configuration for the agent runtime environment (e.g. environment variables)."
     )
 

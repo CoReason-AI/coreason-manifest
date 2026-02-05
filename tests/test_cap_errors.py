@@ -52,9 +52,7 @@ def test_happy_path_coercion() -> None:
 
 def test_violation_string_error() -> None:
     """Attempt to create a packet with op=ERROR and p='Simple string error'."""
-    with pytest.raises(
-        ValueError, match="Payload 'p' must be a valid StreamError when op is ERROR"
-    ):
+    with pytest.raises(ValueError, match="Payload 'p' must be a valid StreamError when op is ERROR"):
         StreamPacket(op=StreamOpCode.ERROR, p="Simple string error")
 
 
