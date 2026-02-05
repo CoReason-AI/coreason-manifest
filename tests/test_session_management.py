@@ -8,15 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
 import json
-from uuid import uuid4
+from datetime import UTC, datetime
 
-from coreason_manifest import SessionState, MemoryStrategy
+from coreason_manifest import MemoryStrategy, SessionState
 from coreason_manifest.spec.common.session import Interaction
 
 
-def test_session_state_immutability_and_pruning():
+def test_session_state_immutability_and_pruning() -> None:
     """Test that SessionState is immutable and prune returns a new instance."""
     # Create 5 interactions
     history = [Interaction(input=f"message {i}") for i in range(5)]
@@ -24,10 +23,10 @@ def test_session_state_immutability_and_pruning():
     state = SessionState(
         agent_id="test_agent",
         user_id="test_user",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
         history=history,
-        variables={"foo": "bar"}
+        variables={"foo": "bar"},
     )
 
     assert len(state.history) == 5
@@ -55,7 +54,7 @@ def test_session_state_immutability_and_pruning():
     assert same_state is state  # Should return self if optimized, or equal
 
 
-def test_session_serialization():
+def test_session_serialization() -> None:
     """Test serialization of SessionState."""
     history = [Interaction(input="test")]
     variables = {"key": "value", "number": 42, "nested": {"a": 1}}
@@ -63,10 +62,10 @@ def test_session_serialization():
     state = SessionState(
         agent_id="agent-1",
         user_id="user-1",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
         history=history,
-        variables=variables
+        variables=variables,
     )
 
     json_str = state.model_dump_json()
@@ -81,23 +80,16 @@ def test_session_serialization():
     assert data["variables"]["nested"]["a"] == 1
 
 
-def test_variable_storage():
+def test_variable_storage() -> None:
     """Verify variables can store arbitrary JSON-serializable data."""
-    complex_vars = {
-        "string": "s",
-        "int": 10,
-        "float": 3.14,
-        "bool": True,
-        "list": [1, 2, 3],
-        "dict": {"x": "y"}
-    }
+    complex_vars = {"string": "s", "int": 10, "float": 3.14, "bool": True, "list": [1, 2, 3], "dict": {"x": "y"}}
 
     state = SessionState(
         agent_id="agent",
         user_id="user",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
-        variables=complex_vars
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+        variables=complex_vars,
     )
 
     assert state.variables["list"] == [1, 2, 3]
@@ -107,27 +99,27 @@ def test_variable_storage():
     dumped = state.model_dump()
     assert dumped["variables"] == complex_vars
 
-def test_prune_unsupported_strategy():
+
+def test_prune_unsupported_strategy() -> None:
     """Test pruning with unsupported strategy returns self."""
     state = SessionState(
         agent_id="agent",
         user_id="user",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
-        history=[Interaction(input="msg")]
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+        history=[Interaction(input="msg")],
     )
 
     # Token buffer not implemented here
     new_state = state.prune(MemoryStrategy.TOKEN_BUFFER, limit=10)
     assert new_state is state
 
-def test_sliding_window_zero_limit():
+
+def test_sliding_window_zero_limit() -> None:
     """Test sliding window with limit <= 0 clears history."""
     history = [Interaction(input="msg") for _ in range(3)]
     state = SessionState(
-        agent_id="a", user_id="u",
-        created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc),
-        history=history
+        agent_id="a", user_id="u", created_at=datetime.now(UTC), updated_at=datetime.now(UTC), history=history
     )
 
     new_state = state.prune(MemoryStrategy.SLIDING_WINDOW, limit=0)

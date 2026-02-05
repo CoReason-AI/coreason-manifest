@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 from uuid import uuid4
@@ -67,14 +67,8 @@ class SessionState(CoReasonBaseModel):
             return self
 
         if strategy == MemoryStrategy.SLIDING_WINDOW:
-            if limit > 0:
-                new_history = self.history[-limit:]
-            else:
-                new_history = []
+            new_history = self.history[-limit:] if limit > 0 else []
 
-            return self.model_copy(update={
-                "history": new_history,
-                "updated_at": datetime.now(timezone.utc)
-            })
+            return self.model_copy(update={"history": new_history, "updated_at": datetime.now(UTC)})
 
         return self
