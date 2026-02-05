@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from .interfaces.stream import IStreamEmitter
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -31,6 +32,8 @@ from .spec.common.graph_events import (
     GraphEventNodeRestored,
     GraphEventNodeStart,
     GraphEventNodeStream,
+    GraphEventStreamEnd,
+    GraphEventStreamStart,
 )
 from .spec.common.identity import Identity
 from .spec.common.message import ChatMessage, Role
@@ -48,6 +51,7 @@ from .spec.common.presentation import (
     PresentationEventType,
     UserErrorEvent,
 )
+from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -103,8 +107,11 @@ __all__ = [
     "GraphEventNodeRestored",
     "GraphEventNodeStart",
     "GraphEventNodeStream",
+    "GraphEventStreamEnd",
+    "GraphEventStreamStart",
     "HealthCheckResponse",
     "HealthCheckStatus",
+    "IStreamEmitter",
     "Identity",
     "InterfaceDefinition",
     "LogicStep",
@@ -125,6 +132,8 @@ __all__ = [
     "StreamError",
     "StreamOpCode",
     "StreamPacket",
+    "StreamReference",
+    "StreamState",
     "SwitchStep",
     "ToolDefinition",
     "ToolRiskLevel",
