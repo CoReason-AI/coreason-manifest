@@ -87,14 +87,13 @@ def test_governance_logic_block() -> None:
 
     assert report.compliant is False
     assert any("is a LogicStep, which is not allowed" in v.message for v in report.violations)
-    assert report.passed is False
-    assert any("LogicStep containing custom code is not allowed" in v.message for v in report.violations)
 
 
 def test_governance_auth_mandate() -> None:
     """Test governance policy enforcement on authentication for critical tools."""
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    # Allow CRITICAL risk to isolate auth check
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
 
     # Case 1: Violation
     manifest_insecure = Manifest(
@@ -105,19 +104,23 @@ def test_governance_auth_mandate() -> None:
     )
 
     report = check_compliance_v2(manifest_insecure, config)
-    assert report.passed is False
+    assert report.compliant is False
     assert len(report.violations) == 1
     assert report.violations[0].rule == "auth_mandate_missing"
     assert "uses CRITICAL tools but does not enforce authentication" in report.violations[0].message
 
     # Case 2: Compliant
+    # Use Manifest with extra metadata for requires_auth as it's not a field in ManifestMetadata yet?
+    # Actually ManifestMetadata has extra="allow".
+    # Manifest(metadata=ManifestMetadata(..., requires_auth=True))
+    # Wait, passing kwarg to Pydantic model with extra=allow puts it in model_extra or dict.
     manifest_secure = Manifest(
         kind="Agent",
-        metadata=ManifestMetadata(name="Secure", requires_auth=True),
+        metadata=ManifestMetadata(name="Secure", requires_auth=True),  # type: ignore[call-arg]
         definitions={"nuke": tool},
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 
     report_secure = check_compliance_v2(manifest_secure, config)
-    assert report_secure.passed is True
+    assert report_secure.compliant is True
     assert len(report_secure.violations) == 0

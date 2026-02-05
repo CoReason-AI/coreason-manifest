@@ -30,7 +30,7 @@ def base_workflow() -> Workflow:
 def test_auth_mandate_explicit_false(base_workflow: Workflow) -> None:
     """Case 1: Manifest with CRITICAL tool but requires_auth=False explicitly."""
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
 
     manifest = Manifest(
         kind="Agent",
@@ -40,7 +40,7 @@ def test_auth_mandate_explicit_false(base_workflow: Workflow) -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is False
+    assert report.compliant is False
     assert len(report.violations) == 1
     assert report.violations[0].rule == "auth_mandate_missing"
 
@@ -48,7 +48,7 @@ def test_auth_mandate_explicit_false(base_workflow: Workflow) -> None:
 def test_auth_mandate_none_default(base_workflow: Workflow) -> None:
     """Case 2: Manifest with CRITICAL tool and requires_auth=None (default)."""
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
 
     manifest = Manifest(
         kind="Agent",
@@ -58,7 +58,8 @@ def test_auth_mandate_none_default(base_workflow: Workflow) -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is False
+    assert report.compliant is False
+    assert report.compliant is False
     assert len(report.violations) == 1
     assert report.violations[0].rule == "auth_mandate_missing"
 
@@ -72,7 +73,7 @@ def test_auth_mandate_mixed_tools(base_workflow: Workflow) -> None:
         "std_tool": ToolDefinition(id="std", name="Std", uri="https://std.com", risk_level=ToolRiskLevel.STANDARD),
         "crit_tool": ToolDefinition(id="crit", name="Crit", uri="https://crit.com", risk_level=ToolRiskLevel.CRITICAL),
     }
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
 
     manifest = Manifest(
         kind="Agent",
@@ -82,7 +83,7 @@ def test_auth_mandate_mixed_tools(base_workflow: Workflow) -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is False
+    assert report.compliant is False
     assert len(report.violations) == 1
     assert report.violations[0].rule == "auth_mandate_missing"
 
@@ -92,7 +93,7 @@ def test_auth_mandate_config_disabled(base_workflow: Workflow) -> None:
     Manifest has critical tools but no auth. Should PASS.
     """
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    config = GovernanceConfig(require_auth_for_critical_tools=False)
+    config = GovernanceConfig(require_auth_for_critical_tools=False, max_risk_level=ToolRiskLevel.CRITICAL)
 
     manifest = Manifest(
         kind="Agent",
@@ -102,7 +103,7 @@ def test_auth_mandate_config_disabled(base_workflow: Workflow) -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is True
+    assert report.compliant is True
 
 
 def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
@@ -112,7 +113,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     We need to ensure that whatever is passed, our check handles it reasonably.
     """
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
 
     # "false" string -> effectively truthy in Python unless we parse it.
     # However, since this is a metadata field for documentation/config,
@@ -128,7 +129,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
         workflow=base_workflow,
     )
     report = check_compliance_v2(manifest_str_false, config)
-    assert report.passed is True  # "false" is truthy
+    assert report.compliant is True  # "false" is truthy
 
     # "true" string -> Truthy -> Pass
     manifest_str_true = Manifest(
@@ -138,7 +139,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
         workflow=base_workflow,
     )
     report_true = check_compliance_v2(manifest_str_true, config)
-    assert report_true.passed is True
+    assert report_true.compliant is True
 
     # 0 integer -> Falsy -> Fail
     manifest_int_0 = Manifest(
@@ -148,8 +149,9 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
         workflow=base_workflow,
     )
     report_int = check_compliance_v2(manifest_int_0, config)
-    assert report_int.passed is False
-    assert len(report.violations) == 0
+    assert report_int.compliant is False
+    # Expect 1 violation
+    assert len(report_int.violations) == 1
 
 
 def test_auth_mandate_dynamic_extra_field(base_workflow: Workflow) -> None:
@@ -157,7 +159,7 @@ def test_auth_mandate_dynamic_extra_field(base_workflow: Workflow) -> None:
     (Simulating loading from YAML where field isn't in schema but allowed).
     """
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
 
     # Creating metadata with extra field directly via constructor if allowed,
     # or by forcing it into model_extra.
@@ -172,4 +174,4 @@ def test_auth_mandate_dynamic_extra_field(base_workflow: Workflow) -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is True
+    assert report.compliant is True

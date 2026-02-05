@@ -40,7 +40,7 @@ def test_complex_large_manifest_many_tools() -> None:
             id=f"std_{i}", name=f"Std {i}", uri=f"https://std{i}.com", risk_level=ToolRiskLevel.STANDARD
         )
 
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
     manifest = Manifest(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Manifest"),
@@ -49,7 +49,7 @@ def test_complex_large_manifest_many_tools() -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is False
+    assert report.compliant is False
     assert len(report.violations) == 1
     assert report.violations[0].rule == "auth_mandate_missing"
 
@@ -61,7 +61,7 @@ def test_complex_compliant_large_manifest() -> None:
         id="hidden_critical", name="Critical", uri="https://crit.com", risk_level=ToolRiskLevel.CRITICAL
     )
 
-    config = GovernanceConfig(require_auth_for_critical_tools=True)
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
     manifest = Manifest(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Compliant", requires_auth=True),
@@ -70,4 +70,4 @@ def test_complex_compliant_large_manifest() -> None:
     )
 
     report = check_compliance_v2(manifest, config)
-    assert report.passed is True
+    assert report.compliant is True

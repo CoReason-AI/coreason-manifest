@@ -185,10 +185,7 @@ def test_governance_auth_mandate() -> None:
     )
 
     # Allow CRITICAL risks so we only test auth mandate
-    config = GovernanceConfig(
-        require_auth_for_critical_tools=True,
-        max_risk_level=ToolRiskLevel.CRITICAL
-    )
+    config = GovernanceConfig(require_auth_for_critical_tools=True, max_risk_level=ToolRiskLevel.CRITICAL)
     report = check_compliance(manifest, config)
 
     assert report.compliant is False
