@@ -5,7 +5,7 @@ from pathlib import Path
 # Ensure src is in python path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
-from coreason_manifest.v2.spec.definitions import ManifestV2
+from coreason_manifest.spec.v2.definitions import ManifestV2
 
 
 def generate_schema() -> None:
@@ -18,6 +18,7 @@ def generate_schema() -> None:
 
     with open(output_path, "w") as f:
         json.dump(schema, f, indent=2)
+        f.write("\n")
 
     print(f"Schema generated at {output_path}")
 

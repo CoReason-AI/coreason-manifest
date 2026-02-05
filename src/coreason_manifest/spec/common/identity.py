@@ -8,11 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Optional
 
 from pydantic import ConfigDict, Field
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 
 
 class Identity(CoReasonBaseModel):
@@ -22,7 +21,7 @@ class Identity(CoReasonBaseModel):
 
     id: str = Field(..., description="Unique identifier for the actor (e.g., UUID, slug).")
     name: str = Field(..., description="Human-readable display name.")
-    role: Optional[str] = Field(None, description="Contextual role (e.g., 'user', 'assistant', 'system').")
+    role: str | None = Field(None, description="Contextual role (e.g., 'user', 'assistant', 'system').")
 
     def __str__(self) -> str:
         return f"{self.name} ({self.id})"

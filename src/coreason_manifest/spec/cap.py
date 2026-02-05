@@ -9,16 +9,17 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime
-from enum import Enum
-from typing import Any, Dict, Optional, Union
-from uuid import UUID
+from enum import StrEnum
+from typing import Any
+from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.common import CoReasonBaseModel
+from coreason_manifest.spec.common.identity import Identity
+from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
-class HealthCheckStatus(str, Enum):
+class HealthCheckStatus(StrEnum):
     """Status of the health check."""
 
     OK = "ok"
@@ -37,14 +38,14 @@ class HealthCheckResponse(CoReasonBaseModel):
     uptime_seconds: float
 
 
-class ErrorSeverity(str, Enum):
+class ErrorSeverity(StrEnum):
     """Severity of a stream error."""
 
     TRANSIENT = "transient"
     FATAL = "fatal"
 
 
-class StreamOpCode(str, Enum):
+class StreamOpCode(StrEnum):
     """Operation code for a stream packet."""
 
     DELTA = "delta"
@@ -61,7 +62,7 @@ class StreamError(CoReasonBaseModel):
     code: str
     message: str
     severity: ErrorSeverity
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 
 class StreamPacket(CoReasonBaseModel):
@@ -70,17 +71,15 @@ class StreamPacket(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     op: StreamOpCode
-    p: Union[StreamError, str, Dict[str, Any], None] = Field(union_mode="left_to_right")
+    p: StreamError | str | dict[str, Any] | None = Field(union_mode="left_to_right")
 
     @model_validator(mode="after")
     def validate_structure(self) -> "StreamPacket":
-        if self.op == StreamOpCode.ERROR:
-            if not isinstance(self.p, StreamError):
-                raise ValueError("Payload 'p' must be a valid StreamError when op is ERROR.")
+        if self.op == StreamOpCode.ERROR and not isinstance(self.p, StreamError):
+            raise ValueError("Payload 'p' must be a valid StreamError when op is ERROR.")
 
-        if self.op == StreamOpCode.DELTA:
-            if not isinstance(self.p, str):
-                raise ValueError("Payload 'p' must be a string when op is DELTA.")
+        if self.op == StreamOpCode.DELTA and not isinstance(self.p, str):
+            raise ValueError("Payload 'p' must be a string when op is DELTA.")
 
         return self
 
@@ -92,8 +91,48 @@ class ServiceResponse(CoReasonBaseModel):
 
     request_id: UUID
     created_at: datetime
-    output: Dict[str, Any]
-    metrics: Optional[Dict[str, Any]] = None
+    output: dict[str, Any]
+    metrics: dict[str, Any] | None = None
+
+
+class AgentRequest(CoReasonBaseModel):
+    """Strictly typed payload inside a ServiceRequest."""
+
+    model_config = ConfigDict(frozen=True)
+
+    request_id: UUID = Field(default_factory=uuid4)
+    root_request_id: UUID | None = Field(
+        default=None, description="The ID of the original user request. Must always be present."
+    )
+    parent_request_id: UUID | None = Field(default=None, description="The ID of the immediate caller.")
+
+    query: str
+    files: list[str] = Field(default_factory=list)
+    conversation_id: str | None = None
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def enforce_lineage(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Ensure request_id is present (needed for auto-rooting)
+            if "request_id" not in data:
+                data["request_id"] = uuid4()
+
+            # Auto-rooting: If root is missing, it is the root
+            if "root_request_id" not in data or data["root_request_id"] is None:
+                data["root_request_id"] = data["request_id"]
+        return data
+
+
+class SessionContext(CoReasonBaseModel):
+    """Strict context containing authentication and session details."""
+
+    model_config = ConfigDict(frozen=True)
+
+    session_id: str
+    user: Identity
+    agent: Identity | None = None
 
 
 class ServiceRequest(CoReasonBaseModel):
@@ -109,7 +148,5 @@ class ServiceRequest(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID
-    # TODO: In v0.16.0, strictly type 'context' with a SessionContext model
-    # once the Identity primitive is fully integrated.
-    context: Dict[str, Any]
-    payload: Dict[str, Any]
+    context: SessionContext
+    payload: AgentRequest

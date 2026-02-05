@@ -42,7 +42,7 @@ While core definitions like `AgentDefinition`, `Recipe`, and `Workflow` inherit 
 ## Usage Example
 
 ```python
-from coreason_manifest.governance import GovernanceConfig, ToolRiskLevel
+from coreason_manifest.spec.governance import GovernanceConfig, ToolRiskLevel
 import json
 
 # Create a governance config

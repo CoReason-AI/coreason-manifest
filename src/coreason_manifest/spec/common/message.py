@@ -8,16 +8,15 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Optional
+from datetime import UTC, datetime
+from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from ..common import CoReasonBaseModel
+from ..common_base import CoReasonBaseModel
 
 
-class Role(str, Enum):
+class Role(StrEnum):
     """The role of the message sender."""
 
     SYSTEM = "system"
@@ -33,9 +32,9 @@ class ChatMessage(CoReasonBaseModel):
 
     role: Role = Field(..., description="The role of the message sender.")
     content: str = Field(..., description="The content of the message.")
-    name: Optional[str] = Field(None, description="The name of the author of this message.")
-    tool_call_id: Optional[str] = Field(None, description="The tool call ID this message is responding to.")
+    name: str | None = Field(None, description="The name of the author of this message.")
+    tool_call_id: str | None = Field(None, description="The tool call ID this message is responding to.")
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.now(UTC),
         description="The timestamp of the message.",
     )

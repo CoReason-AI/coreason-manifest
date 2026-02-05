@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import List, Union
 
 import pytest
 from pydantic import TypeAdapter, ValidationError
@@ -60,7 +59,7 @@ def test_presentation_event_polymorphism_adapter() -> None:
         {"type": "artifact", "artifact_id": "art1", "mime_type": "image/png"},
     ]
 
-    adapter = TypeAdapter(List[Union[CitationEvent, ArtifactEvent]])
+    adapter = TypeAdapter(list[CitationEvent | ArtifactEvent])
     parsed = adapter.validate_python(events)
 
     assert len(parsed) == 2

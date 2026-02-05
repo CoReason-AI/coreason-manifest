@@ -1,8 +1,8 @@
 import pytest
 
 import coreason_manifest as cm
-from coreason_manifest.v2.io import load_from_yaml
-from coreason_manifest.v2.spec.definitions import ManifestV2
+from coreason_manifest.spec.v2.definitions import ManifestV2
+from coreason_manifest.utils.v2.io import load_from_yaml
 
 
 def test_v2_defaults() -> None:
