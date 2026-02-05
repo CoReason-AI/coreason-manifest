@@ -12,7 +12,7 @@ from .common import ToolRiskLevel
 from .definitions.capabilities import AgentCapabilities, DeliveryMode
 from .definitions.identity import Identity
 from .definitions.message import ChatMessage, Role
-from .definitions.observability import CloudEvent, ReasoningTrace
+from .definitions.observability import CloudEvent, EventContentType, ReasoningTrace
 from .definitions.presentation import (
     AnyPresentationEvent,
     ArtifactEvent,
@@ -105,5 +105,6 @@ __all__ = [
     "SessionContext",
     "ServiceContract",
     "CloudEvent",
+    "EventContentType",
     "ReasoningTrace",
 ]

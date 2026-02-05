@@ -24,16 +24,23 @@ from coreason_manifest import CloudEvent
 | `source` | `str` | URI reference to the event producer (e.g., `urn:node:step-1`). | Yes | - |
 | `type` | `str` | Reverse-DNS event type (e.g., `ai.coreason.node.started`). | Yes | - |
 | `time` | `datetime` | Timestamp of occurrence (UTC). | Yes | - |
-| `datacontenttype` | `str` | MIME type of the data. | Yes | `"application/json"` |
+| `datacontenttype` | `Union[EventContentType, str]` | MIME type of the data. | Yes | `"application/json"` |
 | `data` | `Optional[Dict[str, Any]]` | The event payload. | No | `None` |
 | `traceparent` | `Optional[str]` | W3C Trace Context parent ID. | No | `None` |
 | `tracestate` | `Optional[str]` | W3C Trace Context state. | No | `None` |
+
+**Content Types (`EventContentType`):**
+
+*   `JSON` = `"application/json"`
+*   `STREAM` = `"application/vnd.coreason.stream+json"`
+*   `ERROR` = `"application/vnd.coreason.error+json"`
+*   `ARTIFACT` = `"application/vnd.coreason.artifact+json"`
 
 **Example:**
 
 ```python
 from datetime import datetime, timezone
-from coreason_manifest import CloudEvent
+from coreason_manifest import CloudEvent, EventContentType
 
 event = CloudEvent(
     id="evt-123",
