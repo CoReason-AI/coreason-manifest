@@ -21,9 +21,6 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
 
-*   **[Interoperability](interoperability.md)**
-    *   Describes the "Rosetta Stone" layer (`AdapterHints`, `AgentRuntimeConfig`) for transpiling manifests to external frameworks like LangGraph and AutoGen.
-
 *   **[Observability & Tracing](observability.md)**
     *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
 
