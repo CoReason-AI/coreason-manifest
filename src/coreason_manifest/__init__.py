@@ -12,6 +12,7 @@ from .common import ToolRiskLevel
 from .definitions.capabilities import AgentCapabilities, DeliveryMode
 from .definitions.error import ErrorDomain
 from .definitions.identity import Identity
+from .definitions.interoperability import AdapterHints, AgentRuntimeConfig
 from .definitions.message import ChatMessage, Role
 from .definitions.observability import (
     AuditLog,
@@ -117,4 +118,6 @@ __all__ = [
     "EventContentType",
     "ReasoningTrace",
     "AuditLog",
+    "AdapterHints",
+    "AgentRuntimeConfig",
 ]
