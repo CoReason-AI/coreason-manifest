@@ -24,8 +24,17 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Stream Identity & Lifecycle](cap/stream_lifecycle.md)**
     *   Protocols and data structures for explicit, multiplexed output streams (`STREAM_START`, `STREAM_END`).
 
+*   **[Memory Governance](memory_governance.md)**
+    *   Declarative configuration for agent memory eviction policies (Sliding Window, Summary, etc.) and `MemoryConfig` models.
+
+*   **[Request Lineage Implementation](request_lineage_implementation.md)**
+    *   Details the tracking of cryptographic causality, distributed tracing IDs (`request_id`, `root_request_id`), and auto-rooting logic.
+
 *   **[Observability & Tracing](observability.md)**
     *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
+
+*   **[Frontend Integration & Graph Events](frontend_integration.md)**
+    *   Defines the strict `GraphEvent` hierarchy for internal engine state and the migration strategy to standard `CloudEvent` formats.
 
 *   **[Event Content Types](event_content_types.md)**
     *   Specification of standard MIME types (`EventContentType`) used in CloudEvents for protocol compliance.
@@ -37,6 +46,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Product Requirements & Philosophy](product_requirements.md)**
     *   Outlines the "Shared Kernel" philosophy, architectural standards, and the role of `coreason-manifest` as the definitive source of truth ("The Blueprint").
+
+*   **[Package Structure & Architecture](package_structure.md)**
+    *   Explains the physical structure of the package (`spec/` vs `utils/`) and the strict separation of Pure Data Specifications from Utility Logic.
 
 *   **[CoReasonBaseModel Rationale](coreason_base_model_rationale.md)**
     *   Explains the architectural decision to use `CoReasonBaseModel` for solving JSON serialization challenges with UUIDs and Datetimes.
