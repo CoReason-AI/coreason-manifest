@@ -8,8 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-
 from coreason_manifest import (
     AgentStep,
     GovernanceConfig,
