@@ -36,7 +36,7 @@ from .spec.common.graph_events import (
 )
 from .spec.common.identity import Identity
 from .spec.common.interoperability import AgentRuntimeConfig
-from .spec.common.memory import MemoryConfig, MemoryStrategy
+from .spec.common.memory import MemoryConfig
 from .spec.common.message import ChatMessage, Role
 from .spec.common.observability import (
     AuditLog,
@@ -52,6 +52,7 @@ from .spec.common.presentation import (
     PresentationEventType,
     UserErrorEvent,
 )
+from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
@@ -132,6 +133,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
+    "SessionState",
     "StateDefinition",
     "Step",
     "StreamError",
