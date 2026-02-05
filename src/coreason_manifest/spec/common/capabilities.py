@@ -15,11 +15,18 @@ from pydantic import ConfigDict, Field
 from ..common_base import CoReasonBaseModel
 
 
+class CapabilityType(StrEnum):
+    """Type of agent capability."""
+
+    ATOMIC = "atomic"
+    GRAPH = "graph"
+
+
 class DeliveryMode(StrEnum):
     """Supported transport mechanisms."""
 
     REQUEST_RESPONSE = "request_response"
-    SSE = "sse"
+    SERVER_SENT_EVENTS = "server_sent_events"
 
 
 class AgentCapabilities(CoReasonBaseModel):
@@ -27,9 +34,11 @@ class AgentCapabilities(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    delivery_mode: list[DeliveryMode] = Field(
-        default_factory=lambda: [DeliveryMode.SSE],
-        description="Supported transport mechanisms.",
+    type: CapabilityType = Field(
+        default=CapabilityType.GRAPH, description="The type of agent."
+    )
+    delivery_mode: DeliveryMode = Field(
+        default=DeliveryMode.REQUEST_RESPONSE, description="The delivery mode."
     )
     history_support: bool = Field(
         default=True,

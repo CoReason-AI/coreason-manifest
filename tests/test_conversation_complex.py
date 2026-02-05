@@ -13,9 +13,13 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest import (
-    ArtifactEvent,
     ChatMessage,
-    CitationEvent,
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    MediaItem,
+    PresentationEvent,
+    PresentationEventType,
     Role,
     StreamOpCode,
     StreamPacket,
@@ -55,54 +59,77 @@ def test_presentation_event_polymorphism_adapter() -> None:
     """Test polymorphic deserialization using TypeAdapter."""
     # Create mixed list of events
     events = [
-        {"type": "citation", "uri": "doc1", "text": "foo"},
-        {"type": "artifact", "artifact_id": "art1", "mime_type": "image/png"},
+        {
+            "type": "citation_block",
+            "data": {
+                "items": [
+                    {
+                        "source_id": "1",
+                        "uri": "https://doc1.com",
+                        "title": "Doc 1",
+                    }
+                ]
+            },
+        },
+        {
+            "type": "media_carousel",
+            "data": {
+                "items": [
+                    {"url": "https://art1.png", "mime_type": "image/png"}
+                ]
+            },
+        },
     ]
 
-    adapter = TypeAdapter(list[CitationEvent | ArtifactEvent])
+    adapter = TypeAdapter(list[PresentationEvent])
     parsed = adapter.validate_python(events)
 
     assert len(parsed) == 2
-    assert isinstance(parsed[0], CitationEvent)
-    assert parsed[0].uri == "doc1"
-    assert isinstance(parsed[1], ArtifactEvent)
-    assert parsed[1].artifact_id == "art1"
+    assert parsed[0].type == PresentationEventType.CITATION_BLOCK
+    assert isinstance(parsed[0].data, CitationBlock)
+    assert parsed[0].data.items[0].source_id == "1"
+
+    assert parsed[1].type == PresentationEventType.MEDIA_CAROUSEL
+    assert isinstance(parsed[1].data, MediaCarousel)
+    assert str(parsed[1].data.items[0].url) == "https://art1.png/"
 
 
 def test_stream_packet_with_presentation_event() -> None:
-    """Test embedding presentation events in StreamPacket (conceptually).
-
-    Note: StreamPacket.p is strictly typed as Union[str, Dict[str, Any], StreamError, None]
-    in the current spec. Ideally, it should support PresentationEvent, but currently
-    it treats 'event' op as Dict. This test verifies we can dump PresentationEvent to that Dict.
-    """
-    citation = CitationEvent(uri="http://source", text="Quote")
+    """Test embedding presentation events in StreamPacket."""
+    citation_block = CitationBlock(
+        items=[
+            CitationItem(source_id="1", uri="http://source.com", title="Quote")
+        ]
+    )
+    event = PresentationEvent(
+        type=PresentationEventType.CITATION_BLOCK, data=citation_block
+    )
 
     # Dump event to dict to fit StreamPacket payload schema
-    packet = StreamPacket(op=StreamOpCode.EVENT, p=citation.dump())
+    packet = StreamPacket(op=StreamOpCode.EVENT, p=event.dump())
 
     assert packet.op == StreamOpCode.EVENT
     assert isinstance(packet.p, dict)
-    assert packet.p["type"] == "citation"
-    assert packet.p["text"] == "Quote"
+    assert packet.p["type"] == "citation_block"
+    assert packet.p["data"]["items"][0]["title"] == "Quote"
 
 
 def test_complex_immutability() -> None:
     """Verify deep immutability (to the extent frozen=True supports)."""
-    citation = CitationEvent(uri="http://x", text="y", indices=[10, 20])
+    citation_block = CitationBlock(
+        items=[
+            CitationItem(source_id="1", uri="http://x.com", title="y")
+        ]
+    )
 
     # Direct field assignment fails
     with pytest.raises(ValidationError):
-        setattr(citation, "uri", "http://z")  # noqa: B010
-
-    # Replacing the list (indices) fails
-    with pytest.raises(ValidationError):
-        setattr(citation, "indices", [0, 5])  # noqa: B010
+        setattr(citation_block, "items", [])  # noqa: B010
 
     # Note: Pydantic frozen models don't automatically freeze mutable sub-objects (like lists)
     # unless using FrozenSet or Tuple, but reassigning the field itself is blocked.
     # Standard Pydantic behavior:
-    assert citation.indices == [10, 20]
+    assert len(citation_block.items) == 1
 
 
 def test_json_roundtrip() -> None:

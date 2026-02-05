@@ -12,41 +12,56 @@
 from pydantic import TypeAdapter
 
 from coreason_manifest import (
-    AnyPresentationEvent,
-    ArtifactEvent,
-    CitationEvent,
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    MediaItem,
+    PresentationEvent,
     PresentationEventType,
 )
 
 
-def test_parse_any_presentation_event() -> None:
-    """Test parsing a list of mixed presentation events using AnyPresentationEvent."""
+def test_parse_presentation_event_list() -> None:
+    """Test parsing a list of mixed presentation events."""
     data = [
         {
-            "type": "citation",
-            "uri": "https://example.com/ref",
-            "text": "This is a citation.",
-            "indices": [0, 10],
+            "type": "citation_block",
+            "data": {
+                "items": [
+                    {
+                        "source_id": "1",
+                        "uri": "https://example.com/ref",
+                        "title": "Reference",
+                        "snippet": "This is a citation.",
+                    }
+                ]
+            },
         },
         {
-            "type": "artifact",
-            "artifact_id": "art-123",
-            "mime_type": "text/markdown",
-            "url": "https://example.com/download",
+            "type": "media_carousel",
+            "data": {
+                "items": [
+                    {
+                        "url": "https://example.com/download",
+                        "mime_type": "text/markdown",
+                        "alt_text": "artifact",
+                    }
+                ]
+            },
         },
     ]
 
-    adapter = TypeAdapter(list[AnyPresentationEvent])
+    adapter = TypeAdapter(list[PresentationEvent])
     parsed_events = adapter.validate_python(data)
 
     assert len(parsed_events) == 2
 
     # Check first event
-    assert isinstance(parsed_events[0], CitationEvent)
-    assert parsed_events[0].type == PresentationEventType.CITATION
-    assert parsed_events[0].uri == "https://example.com/ref"
+    assert parsed_events[0].type == PresentationEventType.CITATION_BLOCK
+    assert isinstance(parsed_events[0].data, CitationBlock)
+    assert str(parsed_events[0].data.items[0].uri) == "https://example.com/ref"
 
     # Check second event
-    assert isinstance(parsed_events[1], ArtifactEvent)
-    assert parsed_events[1].type == PresentationEventType.ARTIFACT
-    assert parsed_events[1].artifact_id == "art-123"
+    assert parsed_events[1].type == PresentationEventType.MEDIA_CAROUSEL
+    assert isinstance(parsed_events[1].data, MediaCarousel)
+    assert parsed_events[1].data.items[0].mime_type == "text/markdown"

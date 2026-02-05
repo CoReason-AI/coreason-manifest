@@ -8,57 +8,94 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Literal
+from typing import Literal, Union
+from uuid import UUID, uuid4
 
-from pydantic import ConfigDict, Field
+from pydantic import AnyUrl, ConfigDict, Field
 
 from ..common_base import CoReasonBaseModel
-from .error import ErrorDomain
 
 
 class PresentationEventType(StrEnum):
     """Types of presentation events."""
 
-    CITATION = "citation"
-    ARTIFACT = "artifact"
+    THOUGHT_TRACE = "thought_trace"
+    CITATION_BLOCK = "citation_block"
+    PROGRESS_INDICATOR = "progress_indicator"
+    MEDIA_CAROUSEL = "media_carousel"
+    MARKDOWN_BLOCK = "markdown_block"
     USER_ERROR = "user_error"
 
 
+class CitationItem(CoReasonBaseModel):
+    """A single citation item."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    source_id: str = Field(..., description="The ID of the source.")
+    uri: AnyUrl = Field(..., description="The URI of the source.")
+    title: str = Field(..., description="The title of the source.")
+    snippet: str | None = Field(None, description="A snippet from the source.")
+
+
+class CitationBlock(CoReasonBaseModel):
+    """A block of citations."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    items: list[CitationItem] = Field(default_factory=list, description="List of citation items.")
+
+
+class ProgressUpdate(CoReasonBaseModel):
+    """A progress update event."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    label: str = Field(..., description="Label for the progress.")
+    status: Literal["running", "complete", "failed"] = Field(
+        ..., description="Status of the progress."
+    )
+    progress_percent: float | None = Field(None, description="Percentage of progress completed.")
+
+
+class MediaItem(CoReasonBaseModel):
+    """A single media item."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    url: AnyUrl = Field(..., description="URL of the media.")
+    mime_type: str = Field(..., description="MIME type of the media.")
+    alt_text: str | None = Field(None, description="Alt text for the media.")
+
+
+class MediaCarousel(CoReasonBaseModel):
+    """A carousel of media items."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    items: list[MediaItem] = Field(default_factory=list, description="List of media items.")
+
+
+class MarkdownBlock(CoReasonBaseModel):
+    """A block of markdown content."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    content: str = Field(..., description="Markdown content.")
+
+
 class PresentationEvent(CoReasonBaseModel):
-    """Base class for presentation events."""
+    """Container for presentation events."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
+    id: UUID = Field(default_factory=uuid4, description="Unique ID of the event.")
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of the event."
+    )
     type: PresentationEventType = Field(..., description="The type of presentation event.")
-
-
-class CitationEvent(PresentationEvent):
-    """An event representing a citation."""
-
-    type: Literal[PresentationEventType.CITATION] = PresentationEventType.CITATION
-    uri: str = Field(..., description="The source URI.")
-    text: str = Field(..., description="The quoted text.")
-    indices: list[int] | None = Field(None, description="Start and end character indices.")
-
-
-class ArtifactEvent(PresentationEvent):
-    """An event representing a generated artifact."""
-
-    type: Literal[PresentationEventType.ARTIFACT] = PresentationEventType.ARTIFACT
-    artifact_id: str = Field(..., description="Unique ID of the artifact.")
-    mime_type: str = Field(..., description="MIME type of the artifact.")
-    url: str | None = Field(None, description="Download URL if applicable.")
-
-
-class UserErrorEvent(PresentationEvent):
-    """An event representing a user-facing error."""
-
-    type: Literal[PresentationEventType.USER_ERROR] = PresentationEventType.USER_ERROR
-    message: str = Field(..., description="The human-readable message.")
-    code: int | None = Field(None, description="Semantic integer code, e.g. 400, 503.")
-    domain: ErrorDomain = Field(ErrorDomain.SYSTEM, description="The domain of the error.")
-    retryable: bool = Field(False, description="Whether the error is retryable.")
-
-
-AnyPresentationEvent = CitationEvent | ArtifactEvent | UserErrorEvent
+    data: Union[CitationBlock, ProgressUpdate, MediaCarousel, MarkdownBlock, dict] = Field(
+        ..., description="The event data.", union_mode="left_to_right"
+    )

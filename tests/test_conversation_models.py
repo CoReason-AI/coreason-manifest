@@ -12,9 +12,12 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import (
-    ArtifactEvent,
     ChatMessage,
-    CitationEvent,
+    CitationBlock,
+    CitationItem,
+    MediaCarousel,
+    MediaItem,
+    PresentationEvent,
     PresentationEventType,
     Role,
 )
@@ -42,18 +45,34 @@ def test_role_validation() -> None:
 def test_presentation_polymorphism() -> None:
     """Test polymorphism for presentation events."""
     events = [
-        CitationEvent(uri="https://example.com", text="Example"),
-        ArtifactEvent(artifact_id="123", mime_type="text/csv"),
+        PresentationEvent(
+            type=PresentationEventType.CITATION_BLOCK,
+            data=CitationBlock(
+                items=[
+                    CitationItem(
+                        source_id="1", uri="https://example.com", title="Example"
+                    )
+                ]
+            ),
+        ),
+        PresentationEvent(
+            type=PresentationEventType.MEDIA_CAROUSEL,
+            data=MediaCarousel(
+                items=[
+                    MediaItem(url="https://a.com/b.csv", mime_type="text/csv")
+                ]
+            ),
+        ),
     ]
 
-    assert events[0].type == PresentationEventType.CITATION
-    assert events[1].type == PresentationEventType.ARTIFACT
+    assert events[0].type == PresentationEventType.CITATION_BLOCK
+    assert events[1].type == PresentationEventType.MEDIA_CAROUSEL
 
     dumped_citation = events[0].dump()
-    dumped_artifact = events[1].dump()
+    dumped_media = events[1].dump()
 
-    assert dumped_citation["type"] == "citation"
-    assert dumped_artifact["type"] == "artifact"
+    assert dumped_citation["type"] == "citation_block"
+    assert dumped_media["type"] == "media_carousel"
 
 
 def test_immutability() -> None:
@@ -62,6 +81,8 @@ def test_immutability() -> None:
     with pytest.raises(ValidationError):
         setattr(msg, "content", "New")  # noqa: B010
 
-    citation = CitationEvent(uri="http://a", text="b")
+    citation = CitationBlock(
+        items=[CitationItem(source_id="1", uri="http://a", title="b")]
+    )
     with pytest.raises(ValidationError):
-        setattr(citation, "text", "c")  # noqa: B010
+        setattr(citation, "items", [])  # noqa: B010

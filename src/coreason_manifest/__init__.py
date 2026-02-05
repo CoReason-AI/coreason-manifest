@@ -20,7 +20,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
-from .spec.common.capabilities import AgentCapabilities, DeliveryMode
+from .spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from .spec.common.error import ErrorDomain
 from .spec.common.graph_events import (
     GraphEvent,
@@ -45,12 +45,14 @@ from .spec.common.observability import (
     ReasoningTrace,
 )
 from .spec.common.presentation import (
-    AnyPresentationEvent,
-    ArtifactEvent,
-    CitationEvent,
+    CitationBlock,
+    CitationItem,
+    MarkdownBlock,
+    MediaCarousel,
+    MediaItem,
     PresentationEvent,
     PresentationEventType,
-    UserErrorEvent,
+    ProgressUpdate,
 )
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
@@ -88,11 +90,11 @@ __all__ = [
     "AgentRequest",
     "AgentRuntimeConfig",
     "AgentStep",
-    "AnyPresentationEvent",
-    "ArtifactEvent",
     "AuditLog",
+    "CapabilityType",
     "ChatMessage",
-    "CitationEvent",
+    "CitationBlock",
+    "CitationItem",
     "CloudEvent",
     "ComplianceReport",
     "ComplianceViolation",
@@ -120,11 +122,15 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "MarkdownBlock",
+    "MediaCarousel",
+    "MediaItem",
     "MemoryConfig",
     "MemoryStrategy",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
+    "ProgressUpdate",
     "ReasoningTrace",
     "Recipe",
     "Role",
@@ -142,7 +148,6 @@ __all__ = [
     "SwitchStep",
     "ToolDefinition",
     "ToolRiskLevel",
-    "UserErrorEvent",
     "Workflow",
     "__version__",
     "check_compliance_v2",
