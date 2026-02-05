@@ -10,7 +10,7 @@
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import ConfigDict, Field
 
@@ -39,3 +39,33 @@ class ChatMessage(CoReasonBaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
         description="The timestamp of the message.",
     )
+
+
+class AttachedFile(CoReasonBaseModel):
+    """Represents a reference to a file uploaded to the blob storage."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(..., description="The unique file ID/UUID.")
+    mime_type: Optional[str] = Field(
+        None, description="The MIME type of the file (e.g., 'application/pdf')."
+    )
+
+
+class ContentPart(CoReasonBaseModel):
+    """A discrete unit of input that can contain text, attachments, or both."""
+
+    model_config = ConfigDict(frozen=True)
+
+    text: Optional[str] = Field(None, description="The textual instruction.")
+    attachments: List[AttachedFile] = Field(
+        default_factory=list, description="List of attached files."
+    )
+
+
+class MultiModalInput(CoReasonBaseModel):
+    """The container for a rich user turn."""
+
+    model_config = ConfigDict(frozen=True)
+
+    parts: List[ContentPart] = Field(..., description="List of content parts.")
