@@ -139,7 +139,9 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
             violations.append(
                 ComplianceViolation(
                     rule="auth_mandate_missing",
-                    message="Agent uses CRITICAL tools but does not enforce authentication (metadata.requires_auth=True).",
+                    message=(
+                        "Agent uses CRITICAL tools but does not enforce authentication (metadata.requires_auth=True)."
+                    ),
                     component_id="metadata",
                 )
             )
