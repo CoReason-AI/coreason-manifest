@@ -1,0 +1,52 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 11 items
+
+tests/test_session_management.py ...........
+ERROR: Coverage failure: total of 67 is less than fail-under=100
+                                                                         [100%]
+
+=============================== warnings summary ===============================
+../home/jules/.pyenv/versions/3.12.12/lib/python3.12/site-packages/_pytest/config/__init__.py:1428
+  /home/jules/.pyenv/versions/3.12.12/lib/python3.12/site-packages/_pytest/config/__init__.py:1428: PytestConfigWarning: Unknown config option: asyncio_mode
+
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.12-final-0 _______________
+
+Name                                                    Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------------------
+src/coreason_manifest/__init__.py                          24      0   100%
+src/coreason_manifest/schemas/__init__.py                   0      0   100%
+src/coreason_manifest/spec/cap.py                          77     11    86%   78-84, 118-126
+src/coreason_manifest/spec/common/capabilities.py          10      0   100%
+src/coreason_manifest/spec/common/error.py                  7      0   100%
+src/coreason_manifest/spec/common/graph_events.py          35      0   100%
+src/coreason_manifest/spec/common/identity.py              12      2    83%   27, 32
+src/coreason_manifest/spec/common/interoperability.py      11      0   100%
+src/coreason_manifest/spec/common/message.py               16      0   100%
+src/coreason_manifest/spec/common/observability.py         49      3    94%   75-82
+src/coreason_manifest/spec/common/presentation.py          29      0   100%
+src/coreason_manifest/spec/common/session.py               36      0   100%
+src/coreason_manifest/spec/common_base.py                  19      7    63%   35-38, 46-48
+src/coreason_manifest/spec/governance.py                   20      0   100%
+src/coreason_manifest/spec/v2/__init__.py                   0      0   100%
+src/coreason_manifest/spec/v2/contracts.py                 17      0   100%
+src/coreason_manifest/spec/v2/definitions.py               80      0   100%
+src/coreason_manifest/utils/__init__.py                     0      0   100%
+src/coreason_manifest/utils/logger.py                       2      2     0%   11-13
+src/coreason_manifest/utils/migration.py                   32     24    25%   34-72
+src/coreason_manifest/utils/service.py                      6      1    83%   22
+src/coreason_manifest/utils/v2/governance.py               55     49    11%   31-37, 55-171
+src/coreason_manifest/utils/v2/io.py                       48     40    17%   29-60, 85-100, 115-132
+src/coreason_manifest/utils/v2/resolver.py                 14     10    29%   31, 49-64
+src/coreason_manifest/utils/v2/validator.py                80     77     4%   43-102, 119-191
+-------------------------------------------------------------------------------------
+TOTAL                                                     679    226    67%
+FAIL Required test coverage of 100% not reached. Total coverage: 66.72%
+======================== 11 passed, 1 warning in 0.99s =========================

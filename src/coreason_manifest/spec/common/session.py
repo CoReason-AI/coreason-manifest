@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 from uuid import uuid4
@@ -66,7 +66,7 @@ class SessionState(CoReasonBaseModel):
             return self.model_copy(
                 update={
                     "history": new_history,
-                    "updated_at": datetime.now(),
+                    "updated_at": datetime.now(UTC),
                 }
             )
 

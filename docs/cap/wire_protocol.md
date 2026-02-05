@@ -55,6 +55,7 @@ The strict payload schema used within `ServiceRequest`.
 | `query` | `str` | The user's primary input/instruction. |
 | `files` | `List[str]` | List of file URIs or references (default: `[]`). |
 | `conversation_id` | `Optional[str]` | ID for continuing a session (default: `None`). |
+| `session_id` | `Optional[str]` | ID of the current session state (default: `None`). |
 | `meta` | `Dict[str, Any]` | Extra context like timezone (default: `{}`). |
 
 ### ServiceResponse

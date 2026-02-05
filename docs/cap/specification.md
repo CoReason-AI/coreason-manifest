@@ -64,6 +64,7 @@ The `definitions` section is a polymorphic key-value map where you can define re
 *   `tools`: List of tool IDs (referencing other definitions).
 *   `model`: LLM identifier (e.g., `gpt-4`).
 *   `capabilities`: Feature flags and capabilities.
+*   `session_management`: Optional configuration for `SessionState` and `MemoryStrategy`.
 
 ### Agent Capabilities (`AgentCapabilities`)
 Used within an `AgentDefinition` to declare supported features.
