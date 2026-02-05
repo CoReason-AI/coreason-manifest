@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import cast
+from typing import Any, cast
 
 from pydantic import TypeAdapter
 
@@ -78,16 +78,16 @@ class TestStreamLifecycle:
 
         # Use cast for strict typing in tests to avoid union-attr errors
         # In a real application, one would likely use isinstance()
-        e0 = cast(GraphEventStreamStart, loaded_events[0])
+        e0 = cast("GraphEventStreamStart", loaded_events[0])
         assert e0.stream_id == "A"
 
-        e1 = cast(GraphEventStreamStart, loaded_events[1])
+        e1 = cast("GraphEventStreamStart", loaded_events[1])
         assert e1.stream_id == "B"
 
-        e2 = cast(GraphEventNodeStream, loaded_events[2])
+        e2 = cast("GraphEventNodeStream", loaded_events[2])
         assert e2.stream_id == "A"
 
-        e3 = cast(GraphEventNodeStream, loaded_events[3])
+        e3 = cast("GraphEventNodeStream", loaded_events[3])
         assert e3.stream_id == "B"
 
     def test_protocol_verification(self) -> None:
@@ -142,9 +142,9 @@ class TestStreamLifecycle:
             event = GraphEventStreamStart(
                 run_id="r", trace_id="t", node_id="n", timestamp=0.0, stream_id=sid, content_type="text/plain"
             )
-            adapter = TypeAdapter(GraphEvent)
+            adapter: TypeAdapter[Any] = TypeAdapter(GraphEvent)
             dumped = adapter.dump_json(event)
-            loaded = cast(GraphEventStreamStart, adapter.validate_json(dumped))
+            loaded = cast("GraphEventStreamStart", adapter.validate_json(dumped))
             assert loaded.stream_id == sid
 
     def test_lifecycle_violations_structure(self) -> None:
@@ -231,35 +231,18 @@ class TestStreamLifecycle:
         Complex Case: Ensure that standard GraphEventError can co-exist with streams,
         even though it doesn't carry a stream ID (it fails the node).
         """
-        events: list[GraphEvent] = [
-             GraphEventStreamStart(
-                run_id="r", trace_id="t", node_id="n", timestamp=1, stream_id="A", content_type="text/plain"
-            ),
-            GraphEventNodeStream(run_id="r", trace_id="t", node_id="n", timestamp=2, stream_id="A", chunk="ok"),
-            # Global error occurs
-            # Note: GraphEventError does NOT have stream_id.
-            # This tests that it's a valid member of the union alongside stream events.
-            cast(GraphEvent, cast(any, {
-                 "event_type": "ERROR",
-                 "run_id": "r", "trace_id": "t", "node_id": "n", "timestamp": 3,
-                 "error_message": "Something blew up"
-            }))
-        ]
-
         # Use Pydantic to validate the dict injection above works as a proper class
-        adapter = TypeAdapter(list[GraphEvent])
+        adapter: TypeAdapter[Any] = TypeAdapter(list[GraphEvent])
         # We need to pass actual objects or dicts. Let's pass objects.
 
         from coreason_manifest import GraphEventError
 
         events_obj: list[GraphEvent] = [
-             GraphEventStreamStart(
+            GraphEventStreamStart(
                 run_id="r", trace_id="t", node_id="n", timestamp=1, stream_id="A", content_type="text/plain"
             ),
-             GraphEventNodeStream(run_id="r", trace_id="t", node_id="n", timestamp=2, stream_id="A", chunk="ok"),
-             GraphEventError(
-                 run_id="r", trace_id="t", node_id="n", timestamp=3, error_message="Fatal Error"
-             )
+            GraphEventNodeStream(run_id="r", trace_id="t", node_id="n", timestamp=2, stream_id="A", chunk="ok"),
+            GraphEventError(run_id="r", trace_id="t", node_id="n", timestamp=3, error_message="Fatal Error"),
         ]
 
         json_output = adapter.dump_json(events_obj)
