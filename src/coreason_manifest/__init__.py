@@ -28,7 +28,12 @@ from .definitions.presentation import (
     UserErrorEvent,
 )
 from .definitions.service import ServiceContract
-from .governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .governance import (
+    ComplianceReport,
+    ComplianceViolation,
+    GovernanceConfig,
+    check_compliance,
+)
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -109,6 +114,7 @@ __all__ = [
     "ErrorSeverity",
     "validate_integrity",
     "validate_loose",
+    "check_compliance",
     "check_compliance_v2",
     "AgentRequest",
     "SessionContext",

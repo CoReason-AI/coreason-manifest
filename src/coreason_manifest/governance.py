@@ -13,11 +13,18 @@
 This module provides tools to validate an AgentDefinition against a set of organizational rules.
 """
 
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import List, Optional, Union
+from urllib.parse import urlparse
 
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.common import CoReasonBaseModel, ToolRiskLevel
+from coreason_manifest.v2.spec.definitions import (
+    LogicStep,
+    ManifestV2,
+    ToolDefinition,
+)
 
 
 class GovernanceConfig(CoReasonBaseModel):
@@ -25,30 +32,21 @@ class GovernanceConfig(CoReasonBaseModel):
 
     Attributes:
         allowed_domains: List of allowed domains for tool URIs.
-        max_risk_level: Maximum allowed risk level for tools.
-        require_auth_for_critical_tools: Whether authentication is required for agents using CRITICAL tools.
-        allow_inline_tools: Whether to allow inline tool definitions (which lack risk scoring).
         allow_custom_logic: Whether to allow LogicNodes and conditional Edges with custom code.
+        max_risk_level: Maximum allowed risk level for tools.
         strict_url_validation: Enforce strict, normalized URL validation.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    allowed_domains: Optional[List[str]] = Field(
-        None, description="If provided, all Tool URIs must match one of these domains."
-    )
-    max_risk_level: Optional[ToolRiskLevel] = Field(
-        None, description="If provided, no tool can exceed this risk level."
-    )
-    require_auth_for_critical_tools: bool = Field(
-        True,
-        description="If an agent uses a CRITICAL tool, agent.metadata.requires_auth must be True.",
-    )
-    allow_inline_tools: bool = Field(
-        True, description="Whether to allow inline tool definitions (which lack risk scoring)."
+    allowed_domains: List[str] = Field(
+        default_factory=list, description="If provided, all Tool URIs must match one of these domains."
     )
     allow_custom_logic: bool = Field(
         False, description="Whether to allow LogicNodes and conditional Edges with custom code."
+    )
+    max_risk_level: ToolRiskLevel = Field(
+        ToolRiskLevel.SAFE, description="If provided, no tool can exceed this risk level."
     )
     strict_url_validation: bool = Field(True, description="Enforce strict, normalized URL validation.")
 
@@ -68,18 +66,172 @@ class ComplianceViolation(CoReasonBaseModel):
     rule: str = Field(..., description="Name of the rule broken, e.g., 'domain_restriction'.")
     message: str = Field(..., description="Human readable details.")
     component_id: Optional[str] = Field(None, description="Name of the tool or component causing the issue.")
-    severity: Optional[str] = Field(None, description="Severity level (e.g., 'error', 'warning').")
+    severity: str = Field("error", description="Severity level (e.g., 'error', 'warning').")
 
 
 class ComplianceReport(CoReasonBaseModel):
     """Report of compliance checks.
 
     Attributes:
-        passed: Whether the agent passed all checks.
+        compliant: Whether the agent passed all checks.
         violations: List of violations found.
+        checked_at: Timestamp of the check.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    passed: bool = Field(..., description="Whether the agent passed all checks.")
+    compliant: bool = Field(..., description="Whether the agent passed all checks.")
     violations: List[ComplianceViolation] = Field(default_factory=list, description="List of violations found.")
+    checked_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), description="Timestamp of the check."
+    )
+
+
+def _risk_score(level: ToolRiskLevel) -> int:
+    """Convert risk level to integer score for comparison."""
+    if level == ToolRiskLevel.SAFE:
+        return 0
+    if level == ToolRiskLevel.STANDARD:
+        return 1
+    if level == ToolRiskLevel.CRITICAL:
+        return 2
+    return 3  # Unknown is highest risk
+
+
+def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceReport:
+    """Check if the agent complies with the governance policy.
+
+    Args:
+        agent: The Agent Manifest (V2) to check.
+        config: The Governance Configuration.
+
+    Returns:
+        A ComplianceReport indicating compliance status and listing violations.
+    """
+    violations: List[ComplianceViolation] = []
+
+    # 1. Logic Check: Iterate agent.workflow.steps
+    if not config.allow_custom_logic:
+        for step_id, step in agent.workflow.steps.items():
+            if isinstance(step, LogicStep):
+                violations.append(
+                    ComplianceViolation(
+                        rule="no_custom_logic",
+                        message=f"Step '{step_id}' is a LogicStep, which is not allowed by policy.",
+                        component_id=step_id,
+                    )
+                )
+
+    # 2. Tool Checks: Iterate agent.definitions
+    # Note: 'agent.dependencies' in requirements maps to tools in 'agent.definitions'
+    max_risk_score = _risk_score(config.max_risk_level)
+
+    allowed_set = set()
+    if config.allowed_domains:
+        if config.strict_url_validation:
+            allowed_set = {d.lower() for d in config.allowed_domains}
+        else:
+            allowed_set = set(config.allowed_domains)
+
+    for definition_id, definition in agent.definitions.items():
+        if isinstance(definition, ToolDefinition):
+            # Risk Level Check
+            tool_risk_score = _risk_score(definition.risk_level)
+
+            if tool_risk_score > max_risk_score:
+                violations.append(
+                    ComplianceViolation(
+                        rule="risk_level",
+                        message=(
+                            f"Tool '{definition.name}' risk level '{definition.risk_level.value}' "
+                            f"exceeds allowed maximum '{config.max_risk_level.value}'."
+                        ),
+                        component_id=definition.id,
+                        severity="error",
+                    )
+                )
+
+            # Domain Check
+            if config.allowed_domains:
+                try:
+                    parsed_uri = urlparse(str(definition.uri))
+                    hostname = parsed_uri.hostname
+
+                    if not hostname:
+                        violations.append(
+                            ComplianceViolation(
+                                rule="domain_restriction",
+                                message=f"Tool '{definition.name}' URI '{definition.uri}' has no hostname.",
+                                component_id=definition.id,
+                                severity="error",
+                            )
+                        )
+                    else:
+                        # Normalize hostname
+                        normalized_hostname = hostname.lower()
+                        if normalized_hostname.endswith("."):
+                            normalized_hostname = normalized_hostname[:-1]
+
+                        is_allowed = False
+                        for allowed_domain in allowed_set:
+                            # Strict match or subdomain match depending on requirements?
+                            # User says: "Check if host ends with any of `config.allowed_domains`."
+                            # e.g. "api.good.com" ends with "good.com".
+                            if normalized_hostname == allowed_domain or normalized_hostname.endswith(
+                                "." + allowed_domain
+                            ):
+                                is_allowed = True
+                                break
+                            # Handle case where allowed_domain IS the hostname (covered by ==)
+                            # Handle trailing dot normalization in allowed_domains if needed?
+                            # User instruction: "Normalize host (lowercase, strip trailing dot)."
+                            # "Check if host ends with any of `config.allowed_domains`."
+
+                        # Wait, what if allowed_domain is ".good.com"? Usually allow "good.com" implies "*.good.com"
+                        # Or if allowed_domain is "good.com", does it match "api.good.com"?
+                        # Usually "ends with" implies suffix match.
+                        # But strict check means hostname must match EXACTLY or be subdomain?
+                        # User example: Tool A: `https://api.good.com` (Should Pass). Config: `allowed_domains=["good.com"]`.
+                        # So "api.good.com" ends with "good.com".
+                        # But "evilgood.com" also ends with "good.com".
+                        # Usually we check for dot boundary.
+                        # The user instruction literally says: "Check if host ends with any of `config.allowed_domains`."
+                        # BUT also "Normalize URL validation must be robust".
+                        # If I just do endswith, "evilgood.com" passes for "good.com".
+                        # I should probably enforce dot boundary.
+                        # However, user instruction is specific: "Check if host ends with any of `config.allowed_domains`."
+                        # I will implement strictly as requested but consider dot boundary safety if ambiguous.
+                        # "Tool A: `https://api.good.com` (Should Pass)."
+                        # "Tool B: `https://evil.com/api` (Should Fail)."
+                        # "Tool C: `https://good.com.` (Trailing dot - Should Pass if normalized)."
+
+                        if not any(
+                            normalized_hostname == d or normalized_hostname.endswith("." + d) for d in allowed_set
+                        ):
+                             violations.append(
+                                ComplianceViolation(
+                                    rule="domain_restriction",
+                                    message=(
+                                        f"Tool '{definition.name}' URI host '{hostname}' "
+                                        f"is not in allowed domains: {config.allowed_domains}"
+                                    ),
+                                    component_id=definition.id,
+                                    severity="error",
+                                )
+                            )
+
+                except Exception as e:
+                     violations.append(
+                        ComplianceViolation(
+                            rule="domain_restriction",
+                            message=f"Failed to parse tool URI '{definition.uri}': {e}",
+                            component_id=definition.id,
+                            severity="error",
+                        )
+                    )
+
+    return ComplianceReport(
+        compliant=(len(violations) == 0),
+        violations=violations,
+        checked_at=datetime.now(timezone.utc),
+    )

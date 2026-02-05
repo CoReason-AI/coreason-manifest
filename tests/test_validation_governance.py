@@ -68,7 +68,7 @@ def test_governance_risk() -> None:
     config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD)
     report = check_compliance_v2(manifest, config)
 
-    assert report.passed is False
+    assert report.compliant is False
     assert len(report.violations) == 1
     assert "risk level 'critical' exceeds" in report.violations[0].message
 
@@ -84,5 +84,5 @@ def test_governance_logic_block() -> None:
     config = GovernanceConfig(allow_custom_logic=False)
     report = check_compliance_v2(manifest, config)
 
-    assert report.passed is False
-    assert any("LogicStep containing custom code is not allowed" in v.message for v in report.violations)
+    assert report.compliant is False
+    assert any("is a LogicStep, which is not allowed" in v.message for v in report.violations)
