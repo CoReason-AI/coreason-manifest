@@ -1,5 +1,41 @@
 {
   "$defs": {
+    "AdapterHints": {
+      "description": "Metadata for external transpilers/adapters.",
+      "properties": {
+        "target": {
+          "description": "Target runtime/framework (e.g. 'langchain', 'autogen').",
+          "title": "Target",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Target version compatibility.",
+          "title": "Version"
+        },
+        "config": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Adapter-specific configuration.",
+          "title": "Config",
+          "type": "object"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "title": "AdapterHints",
+      "type": "object"
+    },
     "AgentCapabilities": {
       "additionalProperties": false,
       "description": "Feature flags and capabilities for the agent.",
@@ -96,6 +132,18 @@
         },
         "capabilities": {
           "$ref": "#/$defs/AgentCapabilities"
+        },
+        "runtime": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentRuntimeConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Configuration for the agent runtime environment (e.g. environment variables)."
         }
       },
       "required": [
@@ -105,6 +153,45 @@
         "goal"
       ],
       "title": "AgentDefinition",
+      "type": "object"
+    },
+    "AgentRuntimeConfig": {
+      "description": "Configuration for the agent runtime environment.",
+      "properties": {
+        "env_vars": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables to set.",
+          "title": "Env Vars",
+          "type": "object"
+        },
+        "adapter_hints": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdapterHints"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Hints for external adapters."
+        },
+        "memory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MemoryConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Memory eviction policy for this agent."
+        }
+      },
+      "title": "AgentRuntimeConfig",
       "type": "object"
     },
     "AgentStep": {
@@ -449,6 +536,51 @@
       ],
       "title": "ManifestMetadata",
       "type": "object"
+    },
+    "MemoryConfig": {
+      "description": "Configuration for agent memory and eviction policies.",
+      "properties": {
+        "strategy": {
+          "$ref": "#/$defs/MemoryStrategy",
+          "default": "sliding_window",
+          "description": "Eviction strategy."
+        },
+        "limit": {
+          "description": "The 'N' parameter (turns or tokens).",
+          "exclusiveMinimum": 0,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "summary_prompt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Instructions for summarization if strategy is SUMMARY.",
+          "title": "Summary Prompt"
+        }
+      },
+      "required": [
+        "limit"
+      ],
+      "title": "MemoryConfig",
+      "type": "object"
+    },
+    "MemoryStrategy": {
+      "description": "Strategy for memory eviction.",
+      "enum": [
+        "sliding_window",
+        "token_buffer",
+        "summary",
+        "vector_store"
+      ],
+      "title": "MemoryStrategy",
+      "type": "string"
     },
     "PolicyDefinition": {
       "additionalProperties": false,
