@@ -47,7 +47,7 @@ def test_security_recursion_depth() -> None:
     to handle recursive dictionaries in `Any` fields without crashing immediately during validation,
     unless serialization is attempted.
     """
-    recursive_dict = {}
+    recursive_dict: dict[str, object] = {}
     recursive_dict["self"] = recursive_dict
 
     # This should NOT raise RecursionError during instantiation.
