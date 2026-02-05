@@ -13,16 +13,20 @@ The standard envelope for sending instructions to an Agent.
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `request_id` | `UUID` | Unique identifier for the request trace. |
-| `context` | `Dict[str, Any]` | Metadata about the request (User Identity, Auth, Session). Separated from logic to enable consistent security policies. |
-| `payload` | `Dict[str, Any]` | The actual arguments for the Agent's business logic. Standardized as `AgentRequest`. |
+| `context` | `SessionContext` | Metadata about the request (User Identity, Auth, Session). Separated from logic to enable consistent security policies. |
+| `payload` | `AgentRequest` | The actual arguments for the Agent's business logic. |
 
 **Example JSON:**
 ```json
 {
   "request_id": "550e8400-e29b-41d4-a716-446655440000",
   "context": {
-    "user_id": "user_123",
-    "session_id": "sess_abc"
+    "session_id": "sess_abc",
+    "user": {
+      "id": "user_123",
+      "name": "Alice",
+      "role": "user"
+    }
   },
   "payload": {
     "query": "What is the status of the project?",
@@ -31,6 +35,16 @@ The standard envelope for sending instructions to an Agent.
   }
 }
 ```
+
+### SessionContext
+
+Strict context containing authentication and session details.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `session_id` | `str` | Unique identifier for the session. |
+| `user` | `Identity` | The authenticated user making the request. |
+| `agent` | `Optional[Identity]` | The target agent (if applicable). |
 
 ### AgentRequest
 
@@ -177,3 +191,12 @@ Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`).
 | `artifact_id` | `str` | Unique ID of the generated artifact. |
 | `mime_type` | `str` | Content type (e.g., `image/png`, `text/csv`). |
 | `url` | `Optional[str]` | Download URL. |
+
+#### UserErrorEvent (`type: user_error`)
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `message` | `str` | Human-readable message. |
+| `code` | `Optional[int]` | Semantic integer code (e.g., 400, 503). |
+| `domain` | `ErrorDomain` | Source (`client`, `system`, `llm`, `tool`, `security`). |
+| `retryable` | `bool` | Whether the error is retryable. |

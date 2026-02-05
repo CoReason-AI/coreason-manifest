@@ -11,7 +11,6 @@
 """Resolver module for secure file reference handling."""
 
 from pathlib import Path
-from typing import Union
 
 
 class ReferenceResolver:
@@ -22,7 +21,7 @@ class ReferenceResolver:
     All resolved paths must be contained within the specified root directory.
     """
 
-    def __init__(self, root_dir: Union[str, Path]):
+    def __init__(self, root_dir: str | Path):
         """
         Initialize the resolver with a root directory.
 

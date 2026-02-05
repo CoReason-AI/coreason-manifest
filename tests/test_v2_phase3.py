@@ -10,10 +10,9 @@
 
 import pytest
 
-from coreason_manifest.common import ToolRiskLevel
-from coreason_manifest.governance import GovernanceConfig
-from coreason_manifest.v2.governance import check_compliance_v2
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.common_base import ToolRiskLevel
+from coreason_manifest.spec.governance import GovernanceConfig
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     ManifestMetadata,
@@ -21,7 +20,8 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_integrity
+from coreason_manifest.utils.v2.governance import check_compliance_v2
+from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ def test_governance_tool_risk() -> None:
     )
 
     # Config allowing only STANDARD
-    config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD)
+    config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD, require_auth_for_critical_tools=False)
 
     report = check_compliance_v2(manifest, config)
     assert not report.passed
@@ -114,4 +114,4 @@ def test_governance_allowed_domains() -> None:
 
     report = check_compliance_v2(manifest, config)
     assert not report.passed
-    assert "domain_restriction" == report.violations[0].rule
+    assert report.violations[0].rule == "domain_restriction"

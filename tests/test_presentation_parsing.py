@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import List
 
 from pydantic import TypeAdapter
 
@@ -37,7 +36,7 @@ def test_parse_any_presentation_event() -> None:
         },
     ]
 
-    adapter = TypeAdapter(List[AnyPresentationEvent])
+    adapter = TypeAdapter(list[AnyPresentationEvent])
     parsed_events = adapter.validate_python(data)
 
     assert len(parsed_events) == 2

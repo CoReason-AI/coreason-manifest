@@ -52,11 +52,8 @@ def test_happy_path_coercion() -> None:
 
 def test_violation_string_error() -> None:
     """Attempt to create a packet with op=ERROR and p='Simple string error'."""
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Payload 'p' must be a valid StreamError when op is ERROR"):
         StreamPacket(op=StreamOpCode.ERROR, p="Simple string error")
-
-    # The validator raises ValueError
-    assert "Payload 'p' must be a valid StreamError when op is ERROR" in str(excinfo.value)
 
 
 def test_violation_delta_type() -> None:
@@ -66,10 +63,8 @@ def test_violation_delta_type() -> None:
         message="oops",
         severity=ErrorSeverity.TRANSIENT,
     )
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Payload 'p' must be a string when op is DELTA"):
         StreamPacket(op=StreamOpCode.DELTA, p=error)
-
-    assert "Payload 'p' must be a string when op is DELTA" in str(excinfo.value)
 
 
 def test_immutability() -> None:

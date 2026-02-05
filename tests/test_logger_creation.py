@@ -17,7 +17,7 @@ from pathlib import Path
 import coreason_manifest.utils.logger
 
 
-def test_logger_coverage(tmp_path: Path) -> None:
+def test_logger_coverage() -> None:
     """Import logger to ensure coverage."""
     # This ensures the module-level code runs in the main process
     reload(coreason_manifest.utils.logger)

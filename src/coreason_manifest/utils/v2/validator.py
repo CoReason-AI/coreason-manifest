@@ -10,9 +10,7 @@
 
 """Validation logic for V2 Manifests."""
 
-from typing import List
-
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,
@@ -50,9 +48,8 @@ def validate_integrity(manifest: ManifestV2) -> ManifestV2:
 
     for step in steps.values():
         # 2. Validate 'next' pointers (AgentStep, LogicStep, CouncilStep)
-        if hasattr(step, "next") and step.next:
-            if step.next not in steps:
-                raise ValueError(f"Step '{step.id}' references missing next step '{step.next}'.")
+        if hasattr(step, "next") and step.next and step.next not in steps:
+            raise ValueError(f"Step '{step.id}' references missing next step '{step.next}'.")
 
         # 3. Validate SwitchStep targets
         if isinstance(step, SwitchStep):
@@ -105,7 +102,7 @@ def validate_integrity(manifest: ManifestV2) -> ManifestV2:
     return manifest
 
 
-def validate_loose(manifest: ManifestV2) -> List[str]:
+def validate_loose(manifest: ManifestV2) -> list[str]:
     """Validate "Draft" manifests for structural sanity only.
 
     Checks:
@@ -119,7 +116,7 @@ def validate_loose(manifest: ManifestV2) -> List[str]:
     Returns:
         List of warning messages (empty if clean).
     """
-    warnings: List[str] = []
+    warnings: list[str] = []
 
     # 1. Check unique Step IDs
     for step_id, step in manifest.workflow.steps.items():
@@ -129,7 +126,7 @@ def validate_loose(manifest: ManifestV2) -> List[str]:
     # 2. Check SwitchStep cases syntax
     for step_id, step in manifest.workflow.steps.items():
         if isinstance(step, SwitchStep):
-            for condition in step.cases.keys():
+            for condition in step.cases:
                 if not isinstance(condition, str) or not condition.strip():
                     warnings.append(f"SwitchStep '{step_id}' has invalid condition: {condition}")
 
@@ -142,9 +139,8 @@ def validate_loose(manifest: ManifestV2) -> List[str]:
 
     for step in steps.values():
         # 'next' pointers
-        if hasattr(step, "next") and step.next:
-            if step.next not in steps:
-                warnings.append(f"Step '{step.id}' references missing next step '{step.next}'.")
+        if hasattr(step, "next") and step.next and step.next not in steps:
+            warnings.append(f"Step '{step.id}' references missing next step '{step.next}'.")
 
         # SwitchStep targets
         if isinstance(step, SwitchStep):

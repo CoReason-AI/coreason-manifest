@@ -1,6 +1,6 @@
 import yaml
 
-from coreason_manifest.v2.spec.definitions import AgentDefinition, GenericDefinition, ManifestV2, ToolDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition, GenericDefinition, ManifestV2, ToolDefinition
 
 
 def test_polymorphic_parsing() -> None:

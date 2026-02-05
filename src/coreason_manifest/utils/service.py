@@ -1,27 +1,23 @@
-from typing import Any, Dict, List, Optional
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from pydantic import ConfigDict
+from typing import Any
 
-from ..common import CoReasonBaseModel
 from ..spec.cap import ServiceRequest, ServiceResponse
-
-
-class AgentRequest(CoReasonBaseModel):
-    """Strictly typed payload inside a ServiceRequest."""
-
-    model_config = ConfigDict(frozen=True)
-
-    query: str
-    files: List[str] = []
-    conversation_id: Optional[str] = None
-    meta: Dict[str, Any] = {}
 
 
 class ServiceContract:
     """Utility class to generate the OpenAPI specification."""
 
     @staticmethod
-    def generate_openapi() -> Dict[str, Any]:
+    def generate_openapi() -> dict[str, Any]:
         """Generate the OpenAPI 3.1 Path Item Object for the agent service."""
         return {
             "post": {

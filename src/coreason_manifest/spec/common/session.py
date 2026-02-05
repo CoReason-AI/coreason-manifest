@@ -1,0 +1,35 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+from typing import Any
+from uuid import uuid4
+
+from pydantic import ConfigDict, Field
+
+from coreason_manifest.spec.common_base import CoReasonBaseModel
+
+
+class LineageMetadata(CoReasonBaseModel):
+    """Metadata for tracking request lineage across boundaries."""
+
+    model_config = ConfigDict(frozen=True)
+
+    root_request_id: str
+    parent_interaction_id: str | None = None
+
+
+class Interaction(CoReasonBaseModel):
+    """External boundary interaction model."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    input: Any = None
+    lineage: LineageMetadata | None = None

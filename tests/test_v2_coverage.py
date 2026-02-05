@@ -4,10 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from coreason_manifest.common import ToolRiskLevel
-from coreason_manifest.governance import GovernanceConfig
-from coreason_manifest.v2.governance import _risk_score, check_compliance_v2
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.common_base import ToolRiskLevel
+from coreason_manifest.spec.governance import GovernanceConfig
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     LogicStep,
@@ -17,7 +16,8 @@ from coreason_manifest.v2.spec.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.v2.validator import validate_integrity, validate_loose
+from coreason_manifest.utils.v2.governance import _risk_score, check_compliance_v2
+from coreason_manifest.utils.v2.validator import validate_integrity, validate_loose
 
 # --- Governance Tests ---
 
@@ -98,7 +98,7 @@ def test_governance_uri_parsing_error() -> None:
     config = GovernanceConfig(allowed_domains=["example.com"])
 
     # Mock urlparse to raise exception
-    with patch("coreason_manifest.v2.governance.urlparse", side_effect=ValueError("Boom")):
+    with patch("coreason_manifest.utils.v2.governance.urlparse", side_effect=ValueError("Boom")):
         report = check_compliance_v2(manifest, config)
 
     assert not report.passed

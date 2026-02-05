@@ -11,7 +11,7 @@
 import pytest
 import yaml
 
-from coreason_manifest.v2.spec.definitions import (
+from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     GenericDefinition,
     ManifestV2,
@@ -24,7 +24,7 @@ def test_bridge_is_gone() -> None:
     This ensures no one accidentally relies on 'dead code'.
     """
     with pytest.raises(ModuleNotFoundError):
-        import coreason_manifest.v2.adapter  # noqa: F401
+        import coreason_manifest.v2.adapter
 
     with pytest.raises(ModuleNotFoundError):
         import coreason_manifest.v2.compiler  # noqa: F401

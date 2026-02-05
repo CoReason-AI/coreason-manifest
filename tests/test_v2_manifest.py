@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.v2.spec.definitions import AgentStep, ManifestV2
+from coreason_manifest.spec.v2.definitions import AgentStep, ManifestV2
 
 
 def test_manifest_v2_validation() -> None:

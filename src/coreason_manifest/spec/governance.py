@@ -13,11 +13,9 @@
 This module provides tools to validate an AgentDefinition against a set of organizational rules.
 """
 
-from typing import List, Optional
-
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.common import CoReasonBaseModel, ToolRiskLevel
+from coreason_manifest.spec.common_base import CoReasonBaseModel, ToolRiskLevel
 
 
 class GovernanceConfig(CoReasonBaseModel):
@@ -34,12 +32,10 @@ class GovernanceConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    allowed_domains: Optional[List[str]] = Field(
+    allowed_domains: list[str] | None = Field(
         None, description="If provided, all Tool URIs must match one of these domains."
     )
-    max_risk_level: Optional[ToolRiskLevel] = Field(
-        None, description="If provided, no tool can exceed this risk level."
-    )
+    max_risk_level: ToolRiskLevel | None = Field(None, description="If provided, no tool can exceed this risk level.")
     require_auth_for_critical_tools: bool = Field(
         True,
         description="If an agent uses a CRITICAL tool, agent.metadata.requires_auth must be True.",
@@ -67,8 +63,8 @@ class ComplianceViolation(CoReasonBaseModel):
 
     rule: str = Field(..., description="Name of the rule broken, e.g., 'domain_restriction'.")
     message: str = Field(..., description="Human readable details.")
-    component_id: Optional[str] = Field(None, description="Name of the tool or component causing the issue.")
-    severity: Optional[str] = Field(None, description="Severity level (e.g., 'error', 'warning').")
+    component_id: str | None = Field(None, description="Name of the tool or component causing the issue.")
+    severity: str | None = Field(None, description="Severity level (e.g., 'error', 'warning').")
 
 
 class ComplianceReport(CoReasonBaseModel):
@@ -82,4 +78,4 @@ class ComplianceReport(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     passed: bool = Field(..., description="Whether the agent passed all checks.")
-    violations: List[ComplianceViolation] = Field(default_factory=list, description="List of violations found.")
+    violations: list[ComplianceViolation] = Field(default_factory=list, description="List of violations found.")

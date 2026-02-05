@@ -1,1 +1,0 @@
-# Coreason Manifest V2

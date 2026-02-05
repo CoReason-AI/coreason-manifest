@@ -6,13 +6,13 @@ import yaml
 # Ensure src is in python path
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
-from coreason_manifest.v2.spec.definitions import ManifestV2
+from coreason_manifest.spec.v2.definitions import ManifestV2
 
 
 def validate_sample() -> None:
     yaml_path = Path("sample_v2.yaml")
 
-    with open(yaml_path, "r") as f:
+    with open(yaml_path) as f:
         data = yaml.safe_load(f)
 
     try:
