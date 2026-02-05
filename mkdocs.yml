@@ -12,6 +12,7 @@ nav:
     - CAP Wire Protocol: cap/wire_protocol.md
     - Stream Identity & Lifecycle: cap/stream_lifecycle.md
     - Memory Governance: memory_governance.md
+    - Session Management: session_management.md
     - Request Lineage Implementation: request_lineage_implementation.md
     - Observability & Tracing: observability.md
     - Frontend Integration & Graph Events: frontend_integration.md

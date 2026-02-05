@@ -27,6 +27,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Memory Governance](memory_governance.md)**
     *   Declarative configuration for agent memory eviction policies (Sliding Window, Summary, etc.) and `MemoryConfig` models.
 
+*   **[Session Management](session_management.md)**
+    *   Architecture for strict, immutable, and stateless management of conversational memory (`SessionState`, `MemoryStrategy`).
+
 *   **[Request Lineage Implementation](request_lineage_implementation.md)**
     *   Details the tracking of cryptographic causality, distributed tracing IDs (`request_id`, `root_request_id`), and auto-rooting logic.
 
