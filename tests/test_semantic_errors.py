@@ -132,8 +132,10 @@ def test_redundant_validation_scenarios() -> None:
 
     # Invalid domain string
     with pytest.raises(ValidationError):
-        UserErrorEvent.model_validate({
-            "type": "user_error",
-            "message": "Fail",
-            "domain": "invalid_domain"
-        })
+        UserErrorEvent.model_validate(
+            {
+                "type": "user_error",
+                "message": "Fail",
+                "domain": "invalid_domain",
+            }
+        )
