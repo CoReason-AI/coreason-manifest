@@ -120,6 +120,7 @@ def test_governance_auth_mandate() -> None:
     assert report_secure.passed is True
     assert len(report_secure.violations) == 0
 
+
 def test_governance_domain_restriction() -> None:
     """Test governance policy enforcement on domain restrictions."""
     # Strict validation
@@ -128,8 +129,10 @@ def test_governance_domain_restriction() -> None:
     # Case 1: Allowed (normalized match)
     tool_ok = ToolDefinition(id="t1", name="T1", uri="https://Example.COM/foo", risk_level=ToolRiskLevel.SAFE)
     manifest_ok = Manifest(
-        kind="Agent", metadata=ManifestMetadata(name="OK"), definitions={"t1": tool_ok},
-        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")})
+        kind="Agent",
+        metadata=ManifestMetadata(name="OK"),
+        definitions={"t1": tool_ok},
+        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
     report = check_compliance_v2(manifest_ok, config_strict)
     assert report.passed is True
@@ -137,8 +140,10 @@ def test_governance_domain_restriction() -> None:
     # Case 2: Blocked
     tool_bad = ToolDefinition(id="t2", name="T2", uri="https://evil.com/foo", risk_level=ToolRiskLevel.SAFE)
     manifest_bad = Manifest(
-        kind="Agent", metadata=ManifestMetadata(name="Bad"), definitions={"t2": tool_bad},
-        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")})
+        kind="Agent",
+        metadata=ManifestMetadata(name="Bad"),
+        definitions={"t2": tool_bad},
+        workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
     report_bad = check_compliance_v2(manifest_bad, config_strict)
     assert report_bad.passed is False
