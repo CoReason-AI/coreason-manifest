@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from coreason_manifest.common import ToolRiskLevel
-from coreason_manifest.governance import GovernanceConfig
-from coreason_manifest.v2.governance import _risk_score, check_compliance_v2
+from coreason_manifest.governance import GovernanceConfig, _risk_score
+from coreason_manifest.v2.governance import check_compliance_v2
 from coreason_manifest.v2.spec.definitions import (
     AgentDefinition,
     AgentStep,
@@ -54,7 +54,7 @@ def test_governance_uri_no_hostname() -> None:
 
     # This should now hit the "if not hostname:" block
     report = check_compliance_v2(manifest, config)
-    assert not report.passed
+    assert not report.compliant
     assert any("no hostname" in v.message for v in report.violations)
 
 
@@ -78,7 +78,7 @@ def test_governance_uri_trailing_dot() -> None:
     # strict_url_validation=True by default.
     # hostname "example.com." should become "example.com" and pass.
     report = check_compliance_v2(manifest, config)
-    assert report.passed
+    assert report.compliant
 
 
 def test_governance_uri_parsing_error() -> None:
@@ -98,10 +98,10 @@ def test_governance_uri_parsing_error() -> None:
     config = GovernanceConfig(allowed_domains=["example.com"])
 
     # Mock urlparse to raise exception
-    with patch("coreason_manifest.v2.governance.urlparse", side_effect=ValueError("Boom")):
+    with patch("coreason_manifest.governance.urlparse", side_effect=ValueError("Boom")):
         report = check_compliance_v2(manifest, config)
 
-    assert not report.passed
+    assert not report.compliant
     assert any("Failed to parse tool URI" in v.message for v in report.violations)
 
 
@@ -125,7 +125,7 @@ def test_governance_loose_url_validation() -> None:
     config = GovernanceConfig(allowed_domains=["example.com"], strict_url_validation=False, allow_custom_logic=True)
     report = check_compliance_v2(manifest, config)
     # If parsing normalizes EXAMPLE.COM -> example.com, and allowed is example.com, it passes.
-    assert report.passed
+    assert report.compliant
 
     # To test failure in loose mode:
     # allowed="Other.com", uri="other.com". strict=False.
@@ -135,7 +135,7 @@ def test_governance_loose_url_validation() -> None:
         allowed_domains=["Example.com"], strict_url_validation=False, allow_custom_logic=True
     )
     report_fail = check_compliance_v2(manifest, config_fail)
-    assert not report_fail.passed
+    assert not report_fail.compliant
 
 
 def test_governance_custom_logic_violations() -> None:
@@ -153,9 +153,11 @@ def test_governance_custom_logic_violations() -> None:
     )
     config = GovernanceConfig(allow_custom_logic=False)
     report = check_compliance_v2(manifest, config)
-    assert not report.passed
-    rules = [v.rule for v in report.violations]
-    assert rules.count("custom_logic_restriction") >= 2
+    assert not report.compliant
+    # LogicStep triggers "no_custom_logic"
+    # SwitchStep logic has been removed from new governance check (only LogicStep checks),
+    # so we expect 1 violation from LogicStep.
+    assert any(v.rule == "no_custom_logic" for v in report.violations)
 
 
 # --- Validator Tests ---

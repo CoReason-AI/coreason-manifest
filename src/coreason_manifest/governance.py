@@ -14,7 +14,7 @@ This module provides tools to validate an AgentDefinition against a set of organ
 """
 
 from datetime import datetime, timezone
-from typing import List, Optional, Union
+from typing import List, Optional
 from urllib.parse import urlparse
 
 from pydantic import ConfigDict, Field
@@ -133,7 +133,7 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
         else:
             allowed_set = set(config.allowed_domains)
 
-    for definition_id, definition in agent.definitions.items():
+    for _, definition in agent.definitions.items():
         if isinstance(definition, ToolDefinition):
             # Risk Level Check
             tool_risk_score = _risk_score(definition.risk_level)
@@ -172,43 +172,18 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
                         if normalized_hostname.endswith("."):
                             normalized_hostname = normalized_hostname[:-1]
 
-                        is_allowed = False
+                        # Check if hostname matches or is subdomain of any allowed domain.
+                        # Strict matching: hostname == allowed OR hostname.endswith("." + allowed)
+                        is_compliant_domain = False
                         for allowed_domain in allowed_set:
-                            # Strict match or subdomain match depending on requirements?
-                            # User says: "Check if host ends with any of `config.allowed_domains`."
-                            # e.g. "api.good.com" ends with "good.com".
                             if normalized_hostname == allowed_domain or normalized_hostname.endswith(
                                 "." + allowed_domain
                             ):
-                                is_allowed = True
+                                is_compliant_domain = True
                                 break
-                            # Handle case where allowed_domain IS the hostname (covered by ==)
-                            # Handle trailing dot normalization in allowed_domains if needed?
-                            # User instruction: "Normalize host (lowercase, strip trailing dot)."
-                            # "Check if host ends with any of `config.allowed_domains`."
 
-                        # Wait, what if allowed_domain is ".good.com"? Usually allow "good.com" implies "*.good.com"
-                        # Or if allowed_domain is "good.com", does it match "api.good.com"?
-                        # Usually "ends with" implies suffix match.
-                        # But strict check means hostname must match EXACTLY or be subdomain?
-                        # User example: Tool A: `https://api.good.com` (Should Pass). Config: `allowed_domains=["good.com"]`.
-                        # So "api.good.com" ends with "good.com".
-                        # But "evilgood.com" also ends with "good.com".
-                        # Usually we check for dot boundary.
-                        # The user instruction literally says: "Check if host ends with any of `config.allowed_domains`."
-                        # BUT also "Normalize URL validation must be robust".
-                        # If I just do endswith, "evilgood.com" passes for "good.com".
-                        # I should probably enforce dot boundary.
-                        # However, user instruction is specific: "Check if host ends with any of `config.allowed_domains`."
-                        # I will implement strictly as requested but consider dot boundary safety if ambiguous.
-                        # "Tool A: `https://api.good.com` (Should Pass)."
-                        # "Tool B: `https://evil.com/api` (Should Fail)."
-                        # "Tool C: `https://good.com.` (Trailing dot - Should Pass if normalized)."
-
-                        if not any(
-                            normalized_hostname == d or normalized_hostname.endswith("." + d) for d in allowed_set
-                        ):
-                             violations.append(
+                        if not is_compliant_domain:
+                            violations.append(
                                 ComplianceViolation(
                                     rule="domain_restriction",
                                     message=(
@@ -221,7 +196,7 @@ def check_compliance(agent: ManifestV2, config: GovernanceConfig) -> ComplianceR
                             )
 
                 except Exception as e:
-                     violations.append(
+                    violations.append(
                         ComplianceViolation(
                             rule="domain_restriction",
                             message=f"Failed to parse tool URI '{definition.uri}': {e}",

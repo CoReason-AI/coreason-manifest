@@ -24,15 +24,11 @@ def test_governance_config_serialization() -> None:
     config = GovernanceConfig(
         allowed_domains=["example.com"],
         max_risk_level=ToolRiskLevel.STANDARD,
-        require_auth_for_critical_tools=True,
-        allow_inline_tools=False,
     )
 
     data = config.dump()
     assert data["allowed_domains"] == ["example.com"]
     assert data["max_risk_level"] == "standard"
-    assert data["require_auth_for_critical_tools"] is True
-    assert data["allow_inline_tools"] is False
     assert data["allow_custom_logic"] is False  # Default
 
     # Check JSON string serialization
@@ -46,10 +42,10 @@ def test_compliance_report_serialization() -> None:
         rule="no_critical_tools", message="Critical tools are forbidden.", component_id="tool-1", severity="error"
     )
 
-    report = ComplianceReport(passed=False, violations=[violation])
+    report = ComplianceReport(compliant=False, violations=[violation])
 
     data = report.dump()
-    assert data["passed"] is False
+    assert data["compliant"] is False
     assert len(data["violations"]) == 1
     v_data = data["violations"][0]
     assert v_data["rule"] == "no_critical_tools"

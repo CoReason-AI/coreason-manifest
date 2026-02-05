@@ -87,9 +87,9 @@ def test_governance_tool_risk() -> None:
     config = GovernanceConfig(max_risk_level=ToolRiskLevel.STANDARD)
 
     report = check_compliance_v2(manifest, config)
-    assert not report.passed
+    assert not report.compliant
     assert len(report.violations) == 1
-    assert report.violations[0].rule == "risk_level_restriction"
+    assert report.violations[0].rule == "risk_level"
 
 
 def test_governance_allowed_domains() -> None:
@@ -113,5 +113,5 @@ def test_governance_allowed_domains() -> None:
     config = GovernanceConfig(allowed_domains=["good.com"])
 
     report = check_compliance_v2(manifest, config)
-    assert not report.passed
+    assert not report.compliant
     assert "domain_restriction" == report.violations[0].rule
