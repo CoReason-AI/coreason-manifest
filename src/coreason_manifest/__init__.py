@@ -13,7 +13,12 @@ from .definitions.capabilities import AgentCapabilities, DeliveryMode
 from .definitions.error import ErrorDomain
 from .definitions.identity import Identity
 from .definitions.message import ChatMessage, Role
-from .definitions.observability import CloudEvent, EventContentType, ReasoningTrace
+from .definitions.observability import (
+    AuditLog,
+    CloudEvent,
+    EventContentType,
+    ReasoningTrace,
+)
 from .definitions.presentation import (
     AnyPresentationEvent,
     ArtifactEvent,
@@ -111,4 +116,5 @@ __all__ = [
     "CloudEvent",
     "EventContentType",
     "ReasoningTrace",
+    "AuditLog",
 ]

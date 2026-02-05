@@ -11,7 +11,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
 
@@ -102,10 +102,27 @@ class AgentRequest(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True)
 
+    request_id: UUID = Field(default_factory=uuid4)
+    root_request_id: UUID = Field(description="The ID of the original user request. Must always be present.")
+    parent_request_id: Optional[UUID] = Field(default=None, description="The ID of the immediate caller.")
+
     query: str
     files: List[str] = []
     conversation_id: Optional[str] = None
     meta: Dict[str, Any] = {}
+
+    @model_validator(mode="before")
+    @classmethod
+    def enforce_lineage(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Ensure request_id is present (needed for auto-rooting)
+            if "request_id" not in data:
+                data["request_id"] = uuid4()
+
+            # Auto-rooting: If root is missing, it is the root
+            if "root_request_id" not in data or data["root_request_id"] is None:
+                data["root_request_id"] = data["request_id"]
+        return data
 
 
 class SessionContext(CoReasonBaseModel):

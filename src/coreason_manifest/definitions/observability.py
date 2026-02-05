@@ -13,7 +13,7 @@ from enum import Enum
 from typing import Any, Dict, Literal, Optional, Union
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import ConfigDict, Field, model_validator
 
 from ..common import CoReasonBaseModel
 
@@ -57,7 +57,7 @@ class ReasoningTrace(CoReasonBaseModel):
         Ensure `inputs` and `outputs` are sanitized before logging.
     """
 
-    model_config = {"frozen": True}
+    model_config = ConfigDict(frozen=True)
 
     request_id: UUID
     root_request_id: UUID = Field(description="The original user request ID (for lineage)")
@@ -68,3 +68,28 @@ class ReasoningTrace(CoReasonBaseModel):
     outputs: Optional[Dict[str, Any]] = None
     latency_ms: float
     timestamp: datetime
+
+    @model_validator(mode="before")
+    @classmethod
+    def enforce_lineage(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Auto-rooting: If root is missing, it is the root (derived from request_id)
+            if "root_request_id" not in data or data["root_request_id"] is None:
+                if "request_id" in data:
+                    data["root_request_id"] = data["request_id"]
+        return data
+
+
+class AuditLog(CoReasonBaseModel):
+    """Immutable audit record for compliance and security monitoring."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: UUID
+    request_id: UUID
+    root_request_id: UUID
+    timestamp: datetime
+    actor: str
+    action: str
+    outcome: str
+    integrity_hash: str = Field(description="SHA-256 hash of the critical fields")
