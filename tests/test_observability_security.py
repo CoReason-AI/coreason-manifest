@@ -118,7 +118,7 @@ def test_security_type_spoofing() -> None:
             type="attack.spoof",
             time=datetime.now(timezone.utc),
             datacontenttype="application/json",
-            data="<xml>not json</xml>",  # type: ignore
+            data="<xml>not json</xml>",
         )
 
 
