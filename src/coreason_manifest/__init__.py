@@ -22,6 +22,7 @@ from .definitions.graph_events import (
     GraphEventNodeStream,
 )
 from .definitions.identity import Identity
+from .definitions.interoperability import AdapterHints, AgentRuntimeConfig
 from .definitions.message import ChatMessage, Role
 from .definitions.observability import (
     AuditLog,
@@ -137,4 +138,6 @@ __all__ = [
     "ReasoningTrace",
     "AuditLog",
     "migrate_graph_event_to_cloud_event",
+    "AdapterHints",
+    "AgentRuntimeConfig",
 ]
