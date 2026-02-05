@@ -92,10 +92,7 @@ def test_complex_mixed_risk_and_domain() -> None:
     # Tool fails both
     definitions = {
         "double_bad": ToolDefinition(
-            id="double_bad",
-            name="Double Bad",
-            uri="https://evil.com/api",
-            risk_level=ToolRiskLevel.CRITICAL
+            id="double_bad", name="Double Bad", uri="https://evil.com/api", risk_level=ToolRiskLevel.CRITICAL
         )
     }
 

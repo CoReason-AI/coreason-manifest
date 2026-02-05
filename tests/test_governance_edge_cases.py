@@ -23,9 +23,7 @@ def test_allowed_domains_empty() -> None:
     """Test that empty allowed_domains list means NO restrictions."""
     config = GovernanceConfig(allowed_domains=[])  # Empty list
 
-    tool = ToolDefinition(
-        id="t1", name="T", uri="https://evil.com/api", risk_level=ToolRiskLevel.SAFE
-    )
+    tool = ToolDefinition(id="t1", name="T", uri="https://evil.com/api", risk_level=ToolRiskLevel.SAFE)
     manifest = Manifest(
         kind="Agent",
         metadata={"name": "Test"},
@@ -72,9 +70,7 @@ def test_case_normalization() -> None:
     # Config is Mixed Case, Tool is different case
     config = GovernanceConfig(allowed_domains=["Good.CoM"])
 
-    tool = ToolDefinition(
-        id="t1", name="T", uri="https://API.GOOD.COM/v1", risk_level=ToolRiskLevel.SAFE
-    )
+    tool = ToolDefinition(id="t1", name="T", uri="https://API.GOOD.COM/v1", risk_level=ToolRiskLevel.SAFE)
 
     manifest = Manifest(
         kind="Agent",
@@ -92,9 +88,7 @@ def test_trailing_dot_normalization() -> None:
     config = GovernanceConfig(allowed_domains=["good.com"])
 
     # Tool has trailing dot
-    tool = ToolDefinition(
-        id="t1", name="T", uri="https://good.com./api", risk_level=ToolRiskLevel.SAFE
-    )
+    tool = ToolDefinition(id="t1", name="T", uri="https://good.com./api", risk_level=ToolRiskLevel.SAFE)
 
     manifest = Manifest(
         kind="Agent",
@@ -115,9 +109,7 @@ def test_no_hostname() -> None:
     # But ToolDefinition uses StrictUri which forces string.
     # A valid URI might be "file:///etc/passwd" (hostname is empty string or None)
 
-    tool = ToolDefinition(
-        id="t1", name="T", uri="file:///etc/passwd", risk_level=ToolRiskLevel.SAFE
-    )
+    tool = ToolDefinition(id="t1", name="T", uri="file:///etc/passwd", risk_level=ToolRiskLevel.SAFE)
 
     manifest = Manifest(
         kind="Agent",
@@ -139,19 +131,12 @@ def test_strict_url_validation_false() -> None:
     # else: allowed_set = raw
     # Logic iterates allowed_set.
 
-    config = GovernanceConfig(
-        allowed_domains=["Good.com"],
-        strict_url_validation=False
-    )
+    config = GovernanceConfig(allowed_domains=["Good.com"], strict_url_validation=False)
 
     # Tool matches case exactly
-    tool_exact = ToolDefinition(
-        id="t1", name="T", uri="https://Good.com/api", risk_level=ToolRiskLevel.SAFE
-    )
+    tool_exact = ToolDefinition(id="t1", name="T", uri="https://Good.com/api", risk_level=ToolRiskLevel.SAFE)
     # Tool mismatch case
-    tool_mismatch = ToolDefinition(
-        id="t2", name="T", uri="https://good.com/api", risk_level=ToolRiskLevel.SAFE
-    )
+    tool_mismatch = ToolDefinition(id="t2", name="T", uri="https://good.com/api", risk_level=ToolRiskLevel.SAFE)
 
     manifest = Manifest(
         kind="Agent",
