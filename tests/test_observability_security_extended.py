@@ -9,12 +9,15 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime, timezone
+from typing import Any, Dict, Union
+
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.definitions.observability import CloudEvent, EventContentType
+from coreason_manifest.definitions.observability import CloudEvent
 
 # --- Red Team / Security Tests ---
+
 
 def test_mime_type_spoofing_vectors() -> None:
     """
@@ -33,17 +36,12 @@ def test_mime_type_spoofing_vectors() -> None:
     ]
 
     for vector in vectors:
-        event = CloudEvent(
-            id="sec-1",
-            source="urn:sec",
-            type="sec.test",
-            time=now,
-            datacontenttype=vector
-        )
+        event = CloudEvent(id="sec-1", source="urn:sec", type="sec.test", time=now, datacontenttype=vector)
         # Should persist safely as a string
         assert event.datacontenttype == vector
         dumped = event.dump()
         assert dumped["datacontenttype"] == vector
+
 
 def test_recursion_dos_protection() -> None:
     """
@@ -57,7 +55,7 @@ def test_recursion_dos_protection() -> None:
 
     # 1. Create a deep chain
     depth = 500
-    last_payload = {"msg": "bottom"}
+    last_payload: Union[Dict[str, Any], CloudEvent] = {"msg": "bottom"}
 
     for i in range(depth):
         try:
@@ -66,7 +64,7 @@ def test_recursion_dos_protection() -> None:
                 source="urn:nested",
                 type="nested.event",
                 time=now,
-                data=last_payload if isinstance(last_payload, dict) else last_payload.dump()
+                data=last_payload if isinstance(last_payload, dict) else last_payload.dump(),
             )
         except ValueError as e:
             # Pydantic V2 raises ValueError("Circular reference detected (depth exceeded)")
@@ -77,13 +75,15 @@ def test_recursion_dos_protection() -> None:
     # 2. Attempt serialization of the massive chain
     # This might be slow, but shouldn't crash.
     try:
-        dumped = last_payload.dump()
-        assert dumped["id"] == f"nested-{depth-1}"
+        if isinstance(last_payload, CloudEvent):
+            dumped = last_payload.dump()
+            assert dumped["id"] == f"nested-{depth - 1}"
     except (RecursionError, ValueError):
         # Accepting RecursionError is fine; crashing is not.
         pass
     except Exception as e:
         pytest.fail(f"Unexpected exception type: {type(e)}")
+
 
 def test_large_payload_handling() -> None:
     """
@@ -93,15 +93,11 @@ def test_large_payload_handling() -> None:
     now = datetime.now(timezone.utc)
     large_data = {"blob": "x" * (10 * 1024 * 1024)}  # 10MB
 
-    event = CloudEvent(
-        id="large-1",
-        source="urn:large",
-        type="large.test",
-        time=now,
-        data=large_data
-    )
+    event = CloudEvent(id="large-1", source="urn:large", type="large.test", time=now, data=large_data)
 
+    assert event.data is not None
     assert len(event.data["blob"]) == 10 * 1024 * 1024
+
 
 def test_type_confusion_enum_injection() -> None:
     """
@@ -110,26 +106,21 @@ def test_type_confusion_enum_injection() -> None:
     a non-matching Enum should be coerced to string or rejected if strict.
     """
     from enum import Enum
+
     class FakeEnum(str, Enum):
         FAKE = "application/fake"
 
     now = datetime.now(timezone.utc)
 
     # 1. Pass a different Enum member (should be treated as its value (str))
-    event = CloudEvent(
-        id="conf-1",
-        source="urn:conf",
-        type="conf.test",
-        time=now,
-        datacontenttype=FakeEnum.FAKE
-    )
+    event = CloudEvent(id="conf-1", source="urn:conf", type="conf.test", time=now, datacontenttype=FakeEnum.FAKE)
 
     # It matches the string value
     assert event.datacontenttype == "application/fake"
 
     # 2. Pass an object that str()s to a valid content type
     class SneakyStr:
-        def __str__(self):
+        def __str__(self) -> str:
             return "application/json"
 
     # Pydantic V2 is strict on types; it should REJECT objects that just have __str__
@@ -140,9 +131,10 @@ def test_type_confusion_enum_injection() -> None:
             source="urn:conf",
             type="conf.test",
             time=now,
-            datacontenttype=SneakyStr() # type: ignore
+            datacontenttype=SneakyStr(),  # type: ignore[arg-type, unused-ignore]
         )
     assert "Input should be a valid string" in str(excinfo.value)
+
 
 def test_payload_none_serialization_security() -> None:
     """
