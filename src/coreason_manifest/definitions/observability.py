@@ -19,10 +19,6 @@ from ..common import CoReasonBaseModel
 
 
 class EventContentType(str, Enum):
-    """
-    Strict MIME-type discriminators for Coreason events.
-    """
-
     JSON = "application/json"
     STREAM = "application/vnd.coreason.stream+json"
     ERROR = "application/vnd.coreason.error+json"

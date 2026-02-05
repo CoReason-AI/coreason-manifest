@@ -29,18 +29,11 @@ from coreason_manifest import CloudEvent
 | `traceparent` | `Optional[str]` | W3C Trace Context parent ID. | No | `None` |
 | `tracestate` | `Optional[str]` | W3C Trace Context state. | No | `None` |
 
-**Content Types (`EventContentType`):**
-
-*   `JSON` = `"application/json"`
-*   `STREAM` = `"application/vnd.coreason.stream+json"`
-*   `ERROR` = `"application/vnd.coreason.error+json"`
-*   `ARTIFACT` = `"application/vnd.coreason.artifact+json"`
-
 **Example:**
 
 ```python
 from datetime import datetime, timezone
-from coreason_manifest import CloudEvent, EventContentType
+from coreason_manifest import CloudEvent
 
 event = CloudEvent(
     id="evt-123",
