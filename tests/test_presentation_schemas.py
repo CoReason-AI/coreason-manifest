@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from coreason_manifest import (
     CitationBlock,
     CitationItem,
+    MarkdownBlock,
     MediaCarousel,
     MediaItem,
     PresentationEvent,
@@ -41,8 +42,8 @@ def test_validation_logic() -> None:
     assert ProgressUpdate(label="Running", status="running").status == "running"
 
 
-def test_deserialization() -> None:
-    """Verify deserialization from raw dictionary."""
+def test_deserialization_citation() -> None:
+    """Verify deserialization from raw dictionary for CitationBlock."""
     raw_dict = {
         "type": "citation_block",
         "data": {
@@ -66,6 +67,64 @@ def test_deserialization() -> None:
     assert isinstance(item, CitationItem)
     assert str(item.uri) == "https://example.com/ref"
     assert item.title == "Reference Title"
+
+
+def test_deserialization_progress() -> None:
+    """Verify deserialization from raw dictionary for ProgressUpdate."""
+    raw_dict = {
+        "type": "progress_indicator",
+        "data": {
+            "label": "Processing...",
+            "status": "running",
+            "progress_percent": 0.75,
+        },
+    }
+
+    event = PresentationEvent.model_validate(raw_dict)
+
+    assert event.type == PresentationEventType.PROGRESS_INDICATOR
+    assert isinstance(event.data, ProgressUpdate)
+    assert event.data.label == "Processing..."
+    assert event.data.status == "running"
+    assert event.data.progress_percent == 0.75
+
+
+def test_deserialization_media() -> None:
+    """Verify deserialization from raw dictionary for MediaCarousel."""
+    raw_dict = {
+        "type": "media_carousel",
+        "data": {
+            "items": [
+                {
+                    "url": "https://example.com/img.png",
+                    "mime_type": "image/png",
+                }
+            ]
+        },
+    }
+
+    event = PresentationEvent.model_validate(raw_dict)
+
+    assert event.type == PresentationEventType.MEDIA_CAROUSEL
+    assert isinstance(event.data, MediaCarousel)
+    assert len(event.data.items) == 1
+    assert str(event.data.items[0].url) == "https://example.com/img.png"
+
+
+def test_deserialization_markdown() -> None:
+    """Verify deserialization from raw dictionary for MarkdownBlock."""
+    raw_dict = {
+        "type": "markdown_block",
+        "data": {
+            "content": "# Hello World\n\nThis is markdown.",
+        },
+    }
+
+    event = PresentationEvent.model_validate(raw_dict)
+
+    assert event.type == PresentationEventType.MARKDOWN_BLOCK
+    assert isinstance(event.data, MarkdownBlock)
+    assert event.data.content == "# Hello World\n\nThis is markdown."
 
 
 def test_immutability() -> None:

@@ -47,6 +47,7 @@ from .spec.common.observability import (
 from .spec.common.presentation import (
     CitationBlock,
     CitationItem,
+    MarkdownBlock,
     MediaCarousel,
     MediaItem,
     PresentationEvent,
@@ -120,6 +121,7 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "MarkdownBlock",
     "MediaCarousel",
     "MediaItem",
     "MemoryConfig",
