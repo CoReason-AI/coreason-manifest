@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import List
 
 from pydantic import TypeAdapter
 
@@ -50,7 +49,7 @@ def test_graph_event_polymorphism() -> None:
         },
     ]
 
-    adapter = TypeAdapter(List[GraphEvent])
+    adapter = TypeAdapter(list[GraphEvent])
     events = adapter.validate_python(data)
 
     assert len(events) == 3

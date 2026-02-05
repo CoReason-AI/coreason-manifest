@@ -114,4 +114,4 @@ def test_governance_allowed_domains() -> None:
 
     report = check_compliance_v2(manifest, config)
     assert not report.passed
-    assert "domain_restriction" == report.violations[0].rule
+    assert report.violations[0].rule == "domain_restriction"

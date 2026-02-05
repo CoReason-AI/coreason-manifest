@@ -10,7 +10,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import ConfigDict, Field, model_validator
@@ -31,21 +31,21 @@ class CloudEvent(CoReasonBaseModel):
     https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md
     """
 
-    model_config = {"frozen": True}
+    model_config = ConfigDict(frozen=True)
 
     specversion: Literal["1.0"] = "1.0"
     id: str = Field(description="Unique event ID")
     source: str = Field(description="URI reference to the producer, e.g., urn:node:step-1")
     type: str = Field(description="Reverse-DNS type, e.g., ai.coreason.node.started")
     time: datetime = Field(description="Timestamp of when the occurrence happened (UTC)")
-    datacontenttype: Union[EventContentType, str] = Field(
+    datacontenttype: EventContentType | str = Field(
         default=EventContentType.JSON, description="MIME content type of data (e.g. application/json)"
     )
-    data: Optional[Dict[str, Any]] = None
+    data: dict[str, Any] | None = None
 
     # Extensions for Distributed Tracing (W3C Trace Context)
-    traceparent: Optional[str] = None
-    tracestate: Optional[str] = None
+    traceparent: str | None = None
+    tracestate: str | None = None
 
 
 class ReasoningTrace(CoReasonBaseModel):
@@ -60,23 +60,25 @@ class ReasoningTrace(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID
-    root_request_id: Optional[UUID] = Field(default=None, description="The original user request ID (for lineage)")
-    parent_request_id: Optional[UUID] = None
+    root_request_id: UUID | None = Field(default=None, description="The original user request ID (for lineage)")
+    parent_request_id: UUID | None = None
     node_id: str = Field(description="The step name")
     status: str = Field(description='"success" or "failed"')
-    inputs: Optional[Dict[str, Any]] = None
-    outputs: Optional[Dict[str, Any]] = None
+    inputs: dict[str, Any] | None = None
+    outputs: dict[str, Any] | None = None
     latency_ms: float
     timestamp: datetime
 
     @model_validator(mode="before")
     @classmethod
     def enforce_lineage(cls, data: Any) -> Any:
-        if isinstance(data, dict):
+        if (
+            isinstance(data, dict)
+            and ("root_request_id" not in data or data["root_request_id"] is None)
+            and "request_id" in data
+        ):
             # Auto-rooting: If root is missing, it is the root (derived from request_id)
-            if "root_request_id" not in data or data["root_request_id"] is None:
-                if "request_id" in data:
-                    data["root_request_id"] = data["request_id"]
+            data["root_request_id"] = data["request_id"]
         return data
 
 

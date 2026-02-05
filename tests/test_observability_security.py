@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -18,7 +18,7 @@ def test_security_massive_payload_dos() -> None:
 
     start = datetime.now()
     event = CloudEvent(
-        id="dos-test", source="urn:redteam", type="attack.dos", time=datetime.now(timezone.utc), data=massive_dict
+        id="dos-test", source="urn:redteam", type="attack.dos", time=datetime.now(UTC), data=massive_dict
     )
     dumped = event.dump()
     duration = (datetime.now() - start).total_seconds()
@@ -34,7 +34,7 @@ def test_security_deep_nesting_recursion() -> None:
     Red Team: Attempt stack overflow via deep recursion in `data`.
     Standard JSON parsers have recursion limits; Pydantic might too.
     """
-    deep_dict: Dict[str, Any] = {}
+    deep_dict: dict[str, Any] = {}
     current = deep_dict
     for _ in range(1000):
         current["next"] = {}
@@ -44,7 +44,7 @@ def test_security_deep_nesting_recursion() -> None:
         id="recursion-test",
         source="urn:redteam",
         type="attack.recursion",
-        time=datetime.now(timezone.utc),
+        time=datetime.now(UTC),
         data=deep_dict,
     )
 
@@ -70,7 +70,7 @@ def test_security_injection_strings() -> None:
         id="injection-test",
         source="urn:redteam",
         type="attack.injection",
-        time=datetime.now(timezone.utc),
+        time=datetime.now(UTC),
         data=malicious_payload,
     )
 
@@ -96,7 +96,7 @@ def test_security_pii_leakage_warning() -> None:
         status="success",
         inputs=secret_payload,
         latency_ms=1.0,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
     dumped = trace.dump()
@@ -116,7 +116,7 @@ def test_security_type_spoofing() -> None:
             id="spoof-test",
             source="urn:redteam",
             type="attack.spoof",
-            time=datetime.now(timezone.utc),
+            time=datetime.now(UTC),
             datacontenttype="application/json",
             data="<xml>not json</xml>",
         )
@@ -126,7 +126,7 @@ def test_security_datacontenttype_manipulation() -> None:
     """
     Red Team: Fuzzing datacontenttype field with dangerous strings.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # 1. Null Byte Injection
     # Pydantic/Python should allow null bytes in strings, but JSON might escape them.
@@ -176,7 +176,7 @@ def test_security_enum_confusion() -> None:
     """
     Red Team: Attempt to confuse strict typing with Enum vs String.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     # 1. Using a string that looks like an Enum name but isn't the value
     # EventContentType.JSON is "application/json".

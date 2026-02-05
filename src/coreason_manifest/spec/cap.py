@@ -10,7 +10,7 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
@@ -62,7 +62,7 @@ class StreamError(CoReasonBaseModel):
     code: str
     message: str
     severity: ErrorSeverity
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 
 class StreamPacket(CoReasonBaseModel):
@@ -71,17 +71,15 @@ class StreamPacket(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     op: StreamOpCode
-    p: Union[StreamError, str, Dict[str, Any], None] = Field(union_mode="left_to_right")
+    p: StreamError | str | dict[str, Any] | None = Field(union_mode="left_to_right")
 
     @model_validator(mode="after")
     def validate_structure(self) -> "StreamPacket":
-        if self.op == StreamOpCode.ERROR:
-            if not isinstance(self.p, StreamError):
-                raise ValueError("Payload 'p' must be a valid StreamError when op is ERROR.")
+        if self.op == StreamOpCode.ERROR and not isinstance(self.p, StreamError):
+            raise ValueError("Payload 'p' must be a valid StreamError when op is ERROR.")
 
-        if self.op == StreamOpCode.DELTA:
-            if not isinstance(self.p, str):
-                raise ValueError("Payload 'p' must be a string when op is DELTA.")
+        if self.op == StreamOpCode.DELTA and not isinstance(self.p, str):
+            raise ValueError("Payload 'p' must be a string when op is DELTA.")
 
         return self
 
@@ -93,8 +91,8 @@ class ServiceResponse(CoReasonBaseModel):
 
     request_id: UUID
     created_at: datetime
-    output: Dict[str, Any]
-    metrics: Optional[Dict[str, Any]] = None
+    output: dict[str, Any]
+    metrics: dict[str, Any] | None = None
 
 
 class AgentRequest(CoReasonBaseModel):
@@ -103,15 +101,15 @@ class AgentRequest(CoReasonBaseModel):
     model_config = ConfigDict(frozen=True)
 
     request_id: UUID = Field(default_factory=uuid4)
-    root_request_id: Optional[UUID] = Field(
+    root_request_id: UUID | None = Field(
         default=None, description="The ID of the original user request. Must always be present."
     )
-    parent_request_id: Optional[UUID] = Field(default=None, description="The ID of the immediate caller.")
+    parent_request_id: UUID | None = Field(default=None, description="The ID of the immediate caller.")
 
     query: str
-    files: List[str] = []
-    conversation_id: Optional[str] = None
-    meta: Dict[str, Any] = {}
+    files: list[str] = Field(default_factory=list)
+    conversation_id: str | None = None
+    meta: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -134,7 +132,7 @@ class SessionContext(CoReasonBaseModel):
 
     session_id: str
     user: Identity
-    agent: Optional[Identity] = None
+    agent: Identity | None = None
 
 
 class ServiceRequest(CoReasonBaseModel):

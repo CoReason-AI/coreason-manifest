@@ -10,7 +10,6 @@
 
 """Governance logic for V2 Manifests."""
 
-from typing import List
 from urllib.parse import urlparse
 
 from coreason_manifest.spec.common_base import ToolRiskLevel
@@ -53,7 +52,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
     Returns:
         A ComplianceReport detailing violations.
     """
-    violations: List[ComplianceViolation] = []
+    violations: list[ComplianceViolation] = []
 
     # 1. Check Tools in Definitions
     has_critical_tools = False
@@ -154,7 +153,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                 )
             elif isinstance(step, SwitchStep):
                 # Flag complex conditions (function calls, imports, internals) as custom logic.
-                for condition in step.cases.keys():
+                for condition in step.cases:
                     if "(" in condition or "import " in condition or "__" in condition:
                         violations.append(
                             ComplianceViolation(

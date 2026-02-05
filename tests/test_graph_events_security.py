@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -25,7 +25,7 @@ from coreason_manifest import (
 def test_red_team_large_payload_dos() -> None:
     """DoS Attempt: Massive string payload."""
     massive_string = "A" * 1_000_000  # 1MB
-    payload: Dict[str, Any] = {"data": massive_string}
+    payload: dict[str, Any] = {"data": massive_string}
 
     event = GraphEventNodeStart(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, payload=payload)
 

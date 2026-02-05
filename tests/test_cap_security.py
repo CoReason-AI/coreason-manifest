@@ -8,7 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict
+import contextlib
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -45,7 +46,7 @@ def test_payload_injection_large_string() -> None:
 def test_payload_injection_deeply_nested_meta() -> None:
     """Test resilience against deeply nested metadata (recursion limits)."""
     # Create a deeply nested dict
-    nested: Dict[str, Any] = {}
+    nested: dict[str, Any] = {}
     current = nested
     for _ in range(1000):
         current["next"] = {}
@@ -56,11 +57,8 @@ def test_payload_injection_deeply_nested_meta() -> None:
 
     # Verify we can dump it without recursion error or that it fails safely
     # Pydantic v2 has recursion protection which raises ValueError: Circular reference detected (depth exceeded)
-    try:
+    with contextlib.suppress(RecursionError, ValueError):
         payload.dump()
-    except (RecursionError, ValueError):
-        # This is acceptable behavior for a security test - preventing a crash
-        pass
 
 
 def test_extra_fields_smuggling() -> None:

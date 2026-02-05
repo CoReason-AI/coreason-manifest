@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -20,7 +20,7 @@ from coreason_manifest.spec.common.observability import CloudEvent, EventContent
 
 
 def test_cloud_event_serialization() -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     event = CloudEvent(
         id="evt-1",
         source="urn:node:step-1",
@@ -41,7 +41,7 @@ def test_cloud_event_serialization() -> None:
 
 
 def test_cloud_event_tracing_extensions() -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     event = CloudEvent(
         id="evt-2",
         source="urn:node:step-2",
@@ -58,7 +58,7 @@ def test_cloud_event_tracing_extensions() -> None:
 def test_reasoning_trace_serialization() -> None:
     req_id = uuid4()
     root_id = uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     trace = ReasoningTrace(
         request_id=req_id,
@@ -83,7 +83,7 @@ def test_reasoning_trace_serialization() -> None:
 
 
 def test_immutability() -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     event = CloudEvent(
         id="evt-3",
         source="urn:node:step-3",
@@ -112,7 +112,7 @@ def test_immutability() -> None:
 
 
 def test_event_content_type_enum() -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     # 1. Instantiation with Enum
     event = CloudEvent(
         id="evt-enum", source="urn:enum", type="test.enum", time=now, datacontenttype=EventContentType.ERROR
@@ -133,7 +133,7 @@ def test_event_content_type_enum() -> None:
 
 def test_cloud_event_minimal() -> None:
     """Test CloudEvent with only required fields."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     event = CloudEvent(id="evt-min", source="urn:min", type="test.min", time=now)
     dumped = event.dump()
     assert dumped["id"] == "evt-min"
@@ -145,7 +145,7 @@ def test_cloud_event_minimal() -> None:
 
 def test_cloud_event_data_variations() -> None:
     """Test CloudEvent with different data shapes (None, Empty Dict)."""
-    base_args = {"id": "evt-data", "source": "urn:data", "type": "test.data", "time": datetime.now(timezone.utc)}
+    base_args = {"id": "evt-data", "source": "urn:data", "type": "test.data", "time": datetime.now(UTC)}
 
     # None
     evt_none = CloudEvent(**base_args, data=None)
@@ -160,7 +160,7 @@ def test_reasoning_trace_missing_optional() -> None:
     """Test ReasoningTrace serialization when optional fields are missing (None)."""
     req_id = uuid4()
     root_id = uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     trace = ReasoningTrace(
         request_id=req_id,
@@ -184,7 +184,7 @@ def test_validation_failure_missing_fields() -> None:
     """Test that missing required fields raises ValidationError."""
     with pytest.raises(ValidationError):
         # Missing 'id'
-        CloudEvent(source="urn:test", type="test", time=datetime.now(timezone.utc))  # type: ignore
+        CloudEvent(source="urn:test", type="test", time=datetime.now(UTC))  # type: ignore
 
     with pytest.raises(ValidationError):
         # Missing 'latency_ms'
@@ -193,7 +193,7 @@ def test_validation_failure_missing_fields() -> None:
             root_request_id=uuid4(),
             node_id="test",
             status="ok",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )  # type: ignore
 
 
@@ -215,7 +215,7 @@ def test_complex_nested_payloads() -> None:
     }
 
     event = CloudEvent(
-        id="evt-complex", source="urn:complex", type="test.complex", time=datetime.now(timezone.utc), data=complex_data
+        id="evt-complex", source="urn:complex", type="test.complex", time=datetime.now(UTC), data=complex_data
     )
 
     dumped = event.dump()
@@ -229,7 +229,7 @@ def test_trace_chain_simulation() -> None:
     lineage via request_ids.
     """
     root_id = uuid4()
-    start_time = datetime.now(timezone.utc)
+    start_time = datetime.now(UTC)
 
     # 1. Root Trace
     trace_root = ReasoningTrace(
@@ -252,7 +252,7 @@ def test_trace_chain_simulation() -> None:
         status="success",
         inputs={"doc": "text"},
         latency_ms=50.0,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
     # 3. Child Trace (Generation) - child of Analysis (hypothetically, or usually child of root)
@@ -269,7 +269,7 @@ def test_trace_chain_simulation() -> None:
         status="success",
         outputs={"score": 0.9},
         latency_ms=10.0,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
     )
 
     # Verification
@@ -300,7 +300,7 @@ def test_enum_as_string_input() -> None:
     Test passing a raw string that exactly matches an Enum value.
     Ideally, Pydantic should handle this gracefully, or at least serialize correctly.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     # "application/vnd.coreason.error+json" matches EventContentType.ERROR
     event = CloudEvent(
         id="evt-str-match",
@@ -321,7 +321,7 @@ def test_enum_as_string_input() -> None:
 
 def test_empty_string_content_type() -> None:
     """Test empty string as content type."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     event = CloudEvent(id="evt-empty", source="urn:test", type="test.empty", time=now, datacontenttype="")
     dumped = event.dump()
     assert dumped["datacontenttype"] == ""
@@ -329,7 +329,7 @@ def test_empty_string_content_type() -> None:
 
 def test_mixed_list_of_events() -> None:
     """Test a list of events with mixed content types (Enum and Str)."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     events = [
         CloudEvent(id="1", source="u", type="t", time=now, datacontenttype=EventContentType.JSON),
         CloudEvent(id="2", source="u", type="t", time=now, datacontenttype="text/plain"),
@@ -347,7 +347,7 @@ def test_nested_cloud_event_in_data() -> None:
     Test embedding a dumped CloudEvent inside the 'data' of another CloudEvent.
     This simulates an event carrying another event as payload.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     inner_event = CloudEvent(
         id="inner-1",
         source="urn:inner",

@@ -25,10 +25,10 @@ class DesignMetadata(CoReasonBaseModel):
 
     x: float = Field(..., description="X coordinate on the canvas.")
     y: float = Field(..., description="Y coordinate on the canvas.")
-    icon: Optional[str] = Field(None, description="Icon name or URL.")
-    color: Optional[str] = Field(None, description="Color code (hex/name).")
-    label: Optional[str] = Field(None, description="Display label.")
-    zoom: Optional[float] = Field(None, description="Zoom level.")
+    icon: str | None = Field(None, description="Icon name or URL.")
+    color: str | None = Field(None, description="Color code (hex/name).")
+    label: str | None = Field(None, description="Display label.")
+    zoom: float | None = Field(None, description="Zoom level.")
     collapsed: bool = Field(False, description="Whether the node is collapsed in UI.")
 
 
@@ -42,7 +42,7 @@ class ToolDefinition(CoReasonBaseModel):
     name: str = Field(..., description="Name of the tool.")
     uri: StrictUri = Field(..., description="The MCP endpoint URI.")
     risk_level: ToolRiskLevel = Field(..., description="Risk level (safe, standard, critical).")
-    description: Optional[str] = Field(None, description="Description of the tool.")
+    description: str | None = Field(None, description="Description of the tool.")
 
 
 class AgentDefinition(CoReasonBaseModel):
@@ -55,10 +55,10 @@ class AgentDefinition(CoReasonBaseModel):
     name: str = Field(..., description="Name of the agent.")
     role: str = Field(..., description="The persona/job title.")
     goal: str = Field(..., description="Primary objective.")
-    backstory: Optional[str] = Field(None, description="Backstory or directives.")
-    model: Optional[str] = Field(None, description="LLM identifier.")
-    tools: List[str] = Field(default_factory=list, description="List of Tool IDs or URI references.")
-    knowledge: List[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+    backstory: str | None = Field(None, description="Backstory or directives.")
+    model: str | None = Field(None, description="LLM identifier.")
+    tools: list[str] = Field(default_factory=list, description="List of Tool IDs or URI references.")
+    knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
     )
@@ -79,8 +79,8 @@ class BaseStep(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     id: str = Field(..., description="Unique identifier for the step.")
-    inputs: Dict[str, Any] = Field(default_factory=dict, description="Input arguments for the step.")
-    design_metadata: Optional[DesignMetadata] = Field(None, alias="x-design", description="UI metadata.")
+    inputs: dict[str, Any] = Field(default_factory=dict, description="Input arguments for the step.")
+    design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
 
 
 class AgentStep(BaseStep):
@@ -88,8 +88,8 @@ class AgentStep(BaseStep):
 
     type: Literal["agent"] = "agent"
     agent: str = Field(..., description="Reference to an Agent definition (by ID or name).")
-    next: Optional[str] = Field(None, description="ID of the next step to execute.")
-    system_prompt: Optional[str] = Field(None, description="Optional override for system prompt.")
+    next: str | None = Field(None, description="ID of the next step to execute.")
+    system_prompt: str | None = Field(None, description="Optional override for system prompt.")
 
 
 class LogicStep(BaseStep):
@@ -97,29 +97,29 @@ class LogicStep(BaseStep):
 
     type: Literal["logic"] = "logic"
     code: str = Field(..., description="Python code or reference to logic to execute.")
-    next: Optional[str] = Field(None, description="ID of the next step to execute.")
+    next: str | None = Field(None, description="ID of the next step to execute.")
 
 
 class CouncilStep(BaseStep):
     """A step that involves multiple voters/agents."""
 
     type: Literal["council"] = "council"
-    voters: List[str] = Field(..., description="List of voters (Agent IDs).")
+    voters: list[str] = Field(..., description="List of voters (Agent IDs).")
     strategy: str = Field("consensus", description="Voting strategy (e.g., consensus, majority).")
-    next: Optional[str] = Field(None, description="ID of the next step to execute.")
+    next: str | None = Field(None, description="ID of the next step to execute.")
 
 
 class SwitchStep(BaseStep):
     """A step that routes execution based on conditions."""
 
     type: Literal["switch"] = "switch"
-    cases: Dict[str, str] = Field(..., description="Dictionary of condition expressions to Step IDs.")
-    default: Optional[str] = Field(None, description="Default Step ID if no cases match.")
+    cases: dict[str, str] = Field(..., description="Dictionary of condition expressions to Step IDs.")
+    default: str | None = Field(None, description="Default Step ID if no cases match.")
     # Note: 'next' is deliberately excluded for SwitchStep in favor of cases/default.
 
 
 Step = Annotated[
-    Union[AgentStep, LogicStep, CouncilStep, SwitchStep],
+    AgentStep | LogicStep | CouncilStep | SwitchStep,
     Field(discriminator="type", description="Polymorphic step definition."),
 ]
 
@@ -130,7 +130,7 @@ class Workflow(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     start: str = Field(..., description="ID of the starting step.")
-    steps: Dict[str, Step] = Field(..., description="Dictionary of all steps indexed by ID.")
+    steps: dict[str, Step] = Field(..., description="Dictionary of all steps indexed by ID.")
 
 
 class ManifestMetadata(CoReasonBaseModel):
@@ -139,7 +139,7 @@ class ManifestMetadata(CoReasonBaseModel):
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
-    design_metadata: Optional[DesignMetadata] = Field(None, alias="x-design", description="UI metadata.")
+    design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
 
 
 class ManifestV2(CoReasonBaseModel):
@@ -153,11 +153,8 @@ class ManifestV2(CoReasonBaseModel):
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition)
     state: StateDefinition = Field(default_factory=StateDefinition)
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
-    definitions: Dict[
+    definitions: dict[
         str,
-        Union[
-            Annotated[Union[ToolDefinition, AgentDefinition], Field(discriminator="type")],
-            GenericDefinition,
-        ],
+        Annotated[ToolDefinition | AgentDefinition, Field(discriminator="type")] | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")

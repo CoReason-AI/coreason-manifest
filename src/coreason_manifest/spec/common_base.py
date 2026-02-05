@@ -9,10 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import Any, Dict
+from typing import Annotated, Any
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, PlainSerializer
-from typing_extensions import Annotated
 
 
 class CoReasonBaseModel(BaseModel):
@@ -26,7 +25,7 @@ class CoReasonBaseModel(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    def dump(self, **kwargs: Any) -> Dict[str, Any]:
+    def dump(self, **kwargs: Any) -> dict[str, Any]:
         """Serialize the model to a JSON-compatible dictionary.
 
         Uses mode='json' to ensure types like UUID and datetime are serialized to strings.

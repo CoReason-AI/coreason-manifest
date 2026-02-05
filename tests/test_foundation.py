@@ -8,13 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 
 
-class TestModel(CoReasonBaseModel):
+class FoundationTestModel(CoReasonBaseModel):
     id: UUID
     timestamp: datetime
     uri: StrictUri
@@ -23,9 +23,9 @@ class TestModel(CoReasonBaseModel):
 
 def test_foundation_serialization() -> None:
     """Test that CoReasonBaseModel.dump() serializes complex types to strings."""
-    model = TestModel(
+    model = FoundationTestModel(
         id=uuid4(),
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         uri="https://example.com",
         risk=ToolRiskLevel.SAFE,
     )
@@ -49,9 +49,9 @@ def test_foundation_serialization() -> None:
 
 def test_foundation_json() -> None:
     """Test that CoReasonBaseModel.to_json() produces valid JSON string."""
-    model = TestModel(
+    model = FoundationTestModel(
         id=uuid4(),
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         uri="https://example.com",
         risk=ToolRiskLevel.SAFE,
     )
