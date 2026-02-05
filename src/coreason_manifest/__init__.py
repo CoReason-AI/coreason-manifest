@@ -11,6 +11,16 @@
 from .common import ToolRiskLevel
 from .definitions.capabilities import AgentCapabilities, DeliveryMode
 from .definitions.error import ErrorDomain
+from .definitions.graph_events import (
+    GraphEvent,
+    GraphEventArtifactGenerated,
+    GraphEventCouncilVote,
+    GraphEventError,
+    GraphEventNodeDone,
+    GraphEventNodeRestored,
+    GraphEventNodeStart,
+    GraphEventNodeStream,
+)
 from .definitions.identity import Identity
 from .definitions.message import ChatMessage, Role
 from .definitions.observability import (
@@ -57,6 +67,7 @@ from .v2.spec.definitions import (
     Workflow,
 )
 from .v2.validator import validate_integrity, validate_loose
+from .utils.migration import migrate_graph_event_to_cloud_event
 
 __version__ = "0.17.0"
 
@@ -92,6 +103,14 @@ __all__ = [
     "Identity",
     "Role",
     "ChatMessage",
+    "GraphEvent",
+    "GraphEventArtifactGenerated",
+    "GraphEventCouncilVote",
+    "GraphEventError",
+    "GraphEventNodeDone",
+    "GraphEventNodeRestored",
+    "GraphEventNodeStart",
+    "GraphEventNodeStream",
     "ErrorDomain",
     "PresentationEventType",
     "PresentationEvent",
@@ -117,4 +136,5 @@ __all__ = [
     "EventContentType",
     "ReasoningTrace",
     "AuditLog",
+    "migrate_graph_event_to_cloud_event",
 ]
