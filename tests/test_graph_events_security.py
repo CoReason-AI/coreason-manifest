@@ -8,16 +8,17 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any, Dict
+
 import pytest
-from typing import Dict, Any
 from pydantic import ValidationError
 
 from coreason_manifest import (
+    EventContentType,
+    GraphEventError,
     GraphEventNodeStart,
     GraphEventNodeStream,
-    GraphEventError,
     migrate_graph_event_to_cloud_event,
-    EventContentType
 )
 
 
@@ -26,10 +27,7 @@ def test_red_team_large_payload_dos() -> None:
     massive_string = "A" * 1_000_000  # 1MB
     payload: Dict[str, Any] = {"data": massive_string}
 
-    event = GraphEventNodeStart(
-        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0,
-        payload=payload
-    )
+    event = GraphEventNodeStart(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, payload=payload)
 
     # Should handle without crashing
     ce = migrate_graph_event_to_cloud_event(event)
@@ -45,10 +43,7 @@ def test_red_team_malformed_unicode() -> None:
     """Fuzzing: Control characters and null bytes."""
     bad_chunk = "Control chars: \x00 \x1f \u2028 \u2029"
 
-    event = GraphEventNodeStream(
-        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0,
-        chunk=bad_chunk
-    )
+    event = GraphEventNodeStream(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, chunk=bad_chunk)
 
     ce = migrate_graph_event_to_cloud_event(event)
     assert ce.data is not None
@@ -62,17 +57,9 @@ def test_red_team_malformed_unicode() -> None:
 def test_red_team_field_injection_via_payload() -> None:
     """Injection: Attempt to overwrite CloudEvent fields via payload."""
     # CloudEvent has fields like 'source', 'type', 'id'
-    malicious_payload = {
-        "source": "spoofed-source",
-        "type": "spoofed.type",
-        "id": "spoofed-id",
-        "specversion": "0.9"
-    }
+    malicious_payload = {"source": "spoofed-source", "type": "spoofed.type", "id": "spoofed-id", "specversion": "0.9"}
 
-    event = GraphEventNodeStart(
-        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0,
-        payload=malicious_payload
-    )
+    event = GraphEventNodeStart(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, payload=malicious_payload)
 
     ce = migrate_graph_event_to_cloud_event(event)
 
@@ -91,9 +78,7 @@ def test_red_team_extension_spoofing() -> None:
     payload = {"com_coreason_ui_cue": "spoofed-cue"}
 
     event = GraphEventNodeStart(
-        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0,
-        payload=payload,
-        visual_cue="legit-cue"
+        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, payload=payload, visual_cue="legit-cue"
     )
 
     ce = migrate_graph_event_to_cloud_event(event)
@@ -111,8 +96,11 @@ def test_red_team_type_confusion() -> None:
     """Type Confusion: Pass list instead of dict for payload."""
     with pytest.raises(ValidationError):
         GraphEventNodeStart(
-            run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0,
-            payload=["not", "a", "dict"]  # type: ignore
+            run_id="r1",
+            trace_id="t1",
+            node_id="n1",
+            timestamp=100.0,
+            payload=["not", "a", "dict"],
         )
 
 
@@ -121,9 +109,7 @@ def test_red_team_error_stack_trace_info_disclosure() -> None:
     sensitive_trace = "File '/etc/passwd', line 1, in <module>\nroot:x:0:0:root:/root:/bin/bash"
 
     event = GraphEventError(
-        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0,
-        error_message="Error",
-        stack_trace=sensitive_trace
+        run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, error_message="Error", stack_trace=sensitive_trace
     )
 
     ce = migrate_graph_event_to_cloud_event(event)
