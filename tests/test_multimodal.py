@@ -4,8 +4,8 @@ from pydantic import ValidationError
 from coreason_manifest import (
     AttachedFile,
     ContentPart,
-    MultiModalInput,
     Interaction,
+    MultiModalInput,
 )
 
 
