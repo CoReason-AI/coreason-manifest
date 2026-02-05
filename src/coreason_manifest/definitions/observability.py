@@ -39,8 +39,7 @@ class CloudEvent(CoReasonBaseModel):
     type: str = Field(description="Reverse-DNS type, e.g., ai.coreason.node.started")
     time: datetime = Field(description="Timestamp of when the occurrence happened (UTC)")
     datacontenttype: Union[EventContentType, str] = Field(
-        default=EventContentType.JSON,
-        description="MIME content type of data (e.g. application/json)"
+        default=EventContentType.JSON, description="MIME content type of data (e.g. application/json)"
     )
     data: Optional[Dict[str, Any]] = None
 

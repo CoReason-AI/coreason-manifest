@@ -115,11 +115,7 @@ def test_event_content_type_enum() -> None:
     now = datetime.now(timezone.utc)
     # 1. Instantiation with Enum
     event = CloudEvent(
-        id="evt-enum",
-        source="urn:enum",
-        type="test.enum",
-        time=now,
-        datacontenttype=EventContentType.ERROR
+        id="evt-enum", source="urn:enum", type="test.enum", time=now, datacontenttype=EventContentType.ERROR
     )
 
     # 2. Serialization Check
@@ -127,13 +123,7 @@ def test_event_content_type_enum() -> None:
     assert dumped["datacontenttype"] == "application/vnd.coreason.error+json"
 
     # 3. String Compatibility
-    event_str = CloudEvent(
-        id="evt-str",
-        source="urn:str",
-        type="test.str",
-        time=now,
-        datacontenttype="text/plain"
-    )
+    event_str = CloudEvent(id="evt-str", source="urn:str", type="test.str", time=now, datacontenttype="text/plain")
     dumped_str = event_str.dump()
     assert dumped_str["datacontenttype"] == "text/plain"
 
@@ -301,7 +291,9 @@ def test_trace_chain_simulation() -> None:
     assert dump_sub["root_request_id"] == str(root_id)
     assert dump_sub["parent_request_id"] == str(child_a_id)
 
+
 # --- Extended Edge & Complex Cases for EventContentType ---
+
 
 def test_enum_as_string_input() -> None:
     """
@@ -315,7 +307,7 @@ def test_enum_as_string_input() -> None:
         source="urn:test",
         type="test.match",
         time=now,
-        datacontenttype="application/vnd.coreason.error+json"
+        datacontenttype="application/vnd.coreason.error+json",
     )
     dumped = event.dump()
     assert dumped["datacontenttype"] == "application/vnd.coreason.error+json"
@@ -326,18 +318,14 @@ def test_enum_as_string_input() -> None:
     # However, 'EventContentType' inherits from 'str', so it is comparable.
     assert event.datacontenttype == EventContentType.ERROR
 
+
 def test_empty_string_content_type() -> None:
     """Test empty string as content type."""
     now = datetime.now(timezone.utc)
-    event = CloudEvent(
-        id="evt-empty",
-        source="urn:test",
-        type="test.empty",
-        time=now,
-        datacontenttype=""
-    )
+    event = CloudEvent(id="evt-empty", source="urn:test", type="test.empty", time=now, datacontenttype="")
     dumped = event.dump()
     assert dumped["datacontenttype"] == ""
+
 
 def test_mixed_list_of_events() -> None:
     """Test a list of events with mixed content types (Enum and Str)."""
@@ -353,6 +341,7 @@ def test_mixed_list_of_events() -> None:
     assert dumped[1]["datacontenttype"] == "text/plain"
     assert dumped[2]["datacontenttype"] == "application/vnd.coreason.stream+json"
 
+
 def test_nested_cloud_event_in_data() -> None:
     """
     Test embedding a dumped CloudEvent inside the 'data' of another CloudEvent.
@@ -365,7 +354,7 @@ def test_nested_cloud_event_in_data() -> None:
         type="inner.type",
         time=now,
         datacontenttype=EventContentType.ARTIFACT,
-        data={"file": "report.pdf"}
+        data={"file": "report.pdf"},
     )
 
     outer_event = CloudEvent(
@@ -374,7 +363,7 @@ def test_nested_cloud_event_in_data() -> None:
         type="outer.wrapper",
         time=now,
         datacontenttype=EventContentType.JSON,
-        data={"wrapped_event": inner_event.dump()}
+        data={"wrapped_event": inner_event.dump()},
     )
 
     dumped = outer_event.dump()
