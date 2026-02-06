@@ -20,7 +20,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
-from .spec.common.capabilities import AgentCapabilities, DeliveryMode
+from .spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from .spec.common.error import ErrorDomain
 from .spec.common.graph_events import (
     GraphEvent,
@@ -92,6 +92,7 @@ __all__ = [
     "AgentRuntimeConfig",
     "AgentStep",
     "AuditLog",
+    "CapabilityType",
     "ChatMessage",
     "CitationBlock",
     "CitationItem",
