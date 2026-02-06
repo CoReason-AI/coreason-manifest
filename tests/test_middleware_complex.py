@@ -17,6 +17,7 @@ import pytest
 from coreason_manifest.spec.cap import AgentRequest, StreamOpCode, StreamPacket
 from coreason_manifest.spec.interfaces.middleware import (
     InterceptorContext,
+    IRequestInterceptor,
 )
 
 
@@ -45,7 +46,10 @@ class AppendSuffixInterceptor:
 @pytest.mark.asyncio
 async def test_chained_interceptors() -> None:
     """Verify that multiple interceptors can be chained."""
-    interceptors = [UppercaseInterceptor(), AppendSuffixInterceptor()]
+    interceptors: list[IRequestInterceptor] = [
+        UppercaseInterceptor(),
+        AppendSuffixInterceptor(),
+    ]
     context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC))
     request = AgentRequest(query="hello world")
 
@@ -77,7 +81,9 @@ async def test_interceptor_crash_in_stream() -> None:
 def test_metadata_immutability_depth() -> None:
     """Verify that metadata dict content is mutable but container is frozen."""
     metadata = {"key": "value", "nested": {"a": 1}}
-    context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata=metadata)
+    context = InterceptorContext(
+        request_id=uuid4(), start_time=datetime.now(UTC), metadata=metadata
+    )
 
     # The container (metadata field) cannot be reassigned
     # context.metadata = {}  # Raises ValidationError (tested elsewhere)
@@ -110,7 +116,9 @@ async def test_concurrent_interceptors() -> None:
     requests = [AgentRequest(query=f"req-{i}") for i in range(10)]
 
     # process all concurrently
-    results = await asyncio.gather(*(interceptor.intercept_request(context, req) for req in requests))
+    results = await asyncio.gather(
+        *(interceptor.intercept_request(context, req) for req in requests)
+    )
 
     assert len(results) == 10
     for i, res in enumerate(results):
