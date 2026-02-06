@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from .builder import AgentBuilder, TypedCapability
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -20,7 +21,7 @@ from .spec.cap import (
     StreamOpCode,
     StreamPacket,
 )
-from .spec.common.capabilities import AgentCapabilities, DeliveryMode
+from .spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from .spec.common.error import ErrorDomain
 from .spec.common.graph_events import (
     GraphEvent,
@@ -31,8 +32,12 @@ from .spec.common.graph_events import (
     GraphEventNodeRestored,
     GraphEventNodeStart,
     GraphEventNodeStream,
+    GraphEventStreamEnd,
+    GraphEventStreamStart,
 )
 from .spec.common.identity import Identity
+from .spec.common.interoperability import AgentRuntimeConfig
+from .spec.common.memory import MemoryConfig
 from .spec.common.message import ChatMessage, Role
 from .spec.common.observability import (
     AuditLog,
@@ -41,15 +46,26 @@ from .spec.common.observability import (
     ReasoningTrace,
 )
 from .spec.common.presentation import (
-    AnyPresentationEvent,
-    ArtifactEvent,
-    CitationEvent,
+    CitationBlock,
+    CitationItem,
+    MarkdownBlock,
+    MediaCarousel,
+    MediaItem,
     PresentationEvent,
     PresentationEventType,
-    UserErrorEvent,
+    ProgressUpdate,
 )
+from .spec.common.session import MemoryStrategy, SessionState
+from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.interfaces.middleware import (
+    InterceptorContext,
+    IRequestInterceptor,
+    IResponseInterceptor,
+)
+from .spec.interfaces.session import SessionHandle
+from .spec.interfaces.stream import IStreamEmitter
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
     AgentDefinition,
@@ -63,6 +79,8 @@ from .spec.v2.definitions import (
     ToolDefinition,
     Workflow,
 )
+from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
+from .utils.audit import compute_audit_hash, verify_chain
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
@@ -77,15 +95,17 @@ load = load_from_yaml
 dump = dump_to_yaml
 
 __all__ = [
+    "AgentBuilder",
     "AgentCapabilities",
     "AgentDefinition",
     "AgentRequest",
+    "AgentRuntimeConfig",
     "AgentStep",
-    "AnyPresentationEvent",
-    "ArtifactEvent",
     "AuditLog",
+    "CapabilityType",
     "ChatMessage",
-    "CitationEvent",
+    "CitationBlock",
+    "CitationItem",
     "CloudEvent",
     "ComplianceReport",
     "ComplianceViolation",
@@ -93,6 +113,7 @@ __all__ = [
     "DeliveryMode",
     "ErrorDomain",
     "ErrorSeverity",
+    "EvaluationProfile",
     "EventContentType",
     "GovernanceConfig",
     "GraphEvent",
@@ -103,16 +124,28 @@ __all__ = [
     "GraphEventNodeRestored",
     "GraphEventNodeStart",
     "GraphEventNodeStream",
+    "GraphEventStreamEnd",
+    "GraphEventStreamStart",
     "HealthCheckResponse",
     "HealthCheckStatus",
+    "IRequestInterceptor",
+    "IResponseInterceptor",
+    "IStreamEmitter",
     "Identity",
+    "InterceptorContext",
     "InterfaceDefinition",
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "MarkdownBlock",
+    "MediaCarousel",
+    "MediaItem",
+    "MemoryConfig",
+    "MemoryStrategy",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
+    "ProgressUpdate",
     "ReasoningTrace",
     "Recipe",
     "Role",
@@ -120,21 +153,28 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
+    "SessionHandle",
+    "SessionState",
     "StateDefinition",
     "Step",
     "StreamError",
     "StreamOpCode",
     "StreamPacket",
+    "StreamReference",
+    "StreamState",
+    "SuccessCriterion",
     "SwitchStep",
     "ToolDefinition",
     "ToolRiskLevel",
-    "UserErrorEvent",
+    "TypedCapability",
     "Workflow",
     "__version__",
     "check_compliance_v2",
+    "compute_audit_hash",
     "dump",
     "load",
     "migrate_graph_event_to_cloud_event",
     "validate_integrity",
     "validate_loose",
+    "verify_chain",
 ]
