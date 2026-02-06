@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import random
+import secrets
 import string
 import uuid
 from datetime import UTC, datetime
@@ -19,7 +20,13 @@ from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 class MockGenerator:
     def __init__(self, seed: int | None = None, definitions: dict[str, Any] | None = None):
-        self.rng = random.Random(seed)
+        # Use secrets.SystemRandom for cryptographic strength by default.
+        # Fallback to random.Random only if a seed is explicitly provided for determinism.
+        if seed is not None:
+            self.rng = random.Random(seed)
+        else:
+            self.rng = secrets.SystemRandom()
+
         self.definitions = definitions or {}
         self.recursion_depth = 0
         self.max_depth = 10
@@ -37,9 +44,34 @@ class MockGenerator:
     def _random_bool(self) -> bool:
         return self.rng.choice([True, False])
 
+    def _get_safe_default(self, schema: dict[str, Any]) -> Any:
+        """Returns a safe default value based on the schema type."""
+        t = schema.get("type")
+
+        # Handle union types (prioritize non-null)
+        if isinstance(t, list):
+            non_null = [x for x in t if x != "null"]
+            t = non_null[0] if non_null else "object"
+
+        if t == "string":
+            return ""
+        if t == "integer":
+            return 0
+        if t == "number":
+            return 0.0
+        if t == "boolean":
+            return False
+        if t == "array":
+            return []
+        if t == "object":
+            return {}
+
+        # Fallback
+        return {}
+
     def _generate_value(self, schema: dict[str, Any]) -> Any:
         if self.recursion_depth > self.max_depth:
-            return None
+            return self._get_safe_default(schema)
 
         # Handle $ref
         if "$ref" in schema:
@@ -48,9 +80,10 @@ class MockGenerator:
             ref_name = ref.split("/")[-1]
             if ref_name in self.definitions:
                 self.recursion_depth += 1
-                val = self._generate_value(self.definitions[ref_name])
-                self.recursion_depth -= 1
-                return val
+                try:
+                    return self._generate_value(self.definitions[ref_name])
+                finally:
+                    self.recursion_depth -= 1
             # Fallback if not found
             return {}
 
@@ -111,7 +144,13 @@ class MockGenerator:
                             combined["properties"].update(v)
                         else:
                             combined[k] = v
-                return self._generate_value(combined)
+
+                # Increment recursion depth to prevent infinite loops from cyclic allOf structures
+                self.recursion_depth += 1
+                try:
+                    return self._generate_value(combined)
+                finally:
+                    self.recursion_depth -= 1
 
         if "anyOf" in schema or "oneOf" in schema:
             options = schema.get("anyOf") or schema.get("oneOf")
