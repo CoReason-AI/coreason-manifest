@@ -46,6 +46,8 @@ class CoreasonMCPServer:
     An MCP Server adapter that exposes a Coreason Agent as an MCP Tool.
     """
 
+    _server: Any
+
     def __init__(self, agent: AgentDefinition, runner_callback: Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]):
         """
         Initialize the MCP Server.
@@ -71,7 +73,7 @@ class CoreasonMCPServer:
         # Initialize Server
         self._server = Server(f"coreason-agent-{self.tool_def['name']}")
 
-        @self._server.list_tools()
+        @self._server.list_tools()  # type: ignore[misc]
         async def handle_list_tools() -> list[types.Tool]:
             return [
                 types.Tool(
@@ -81,7 +83,7 @@ class CoreasonMCPServer:
                 )
             ]
 
-        @self._server.call_tool()
+        @self._server.call_tool()  # type: ignore[misc]
         async def handle_call_tool(
             name: str, arguments: dict[str, Any] | None
         ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
@@ -92,11 +94,7 @@ class CoreasonMCPServer:
             result = await self.runner_callback(args)
 
             # Convert result to string representation for TextContent
-            text = (
-                json.dumps(result, ensure_ascii=False, indent=2)
-                if isinstance(result, (dict, list))
-                else str(result)
-            )
+            text = json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, (dict, list)) else str(result)
 
             return [types.TextContent(type="text", text=text)]
 
