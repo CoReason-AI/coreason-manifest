@@ -11,7 +11,7 @@
 import random
 import string
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition
@@ -68,9 +68,9 @@ class MockGenerator:
                 # But we can generate a random timestamp.
                 # However, requirements: "If 'date-time', return ISO string."
                 # I'll use a fixed time + random delta based on RNG to be deterministic.
-                base_time = datetime(2024, 1, 1, tzinfo=timezone.utc).timestamp()
+                base_time = datetime(2024, 1, 1, tzinfo=UTC).timestamp()
                 random_offset = self.rng.uniform(0, 365 * 24 * 3600)
-                return datetime.fromtimestamp(base_time + random_offset, tz=timezone.utc).isoformat()
+                return datetime.fromtimestamp(base_time + random_offset, tz=UTC).isoformat()
             if format_ == "uuid":
                 return str(uuid.UUID(int=self.rng.getrandbits(128)))
             return self._random_string()

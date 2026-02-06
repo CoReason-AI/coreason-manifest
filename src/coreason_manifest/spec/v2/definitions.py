@@ -15,7 +15,11 @@ from pydantic import ConfigDict, Field
 from coreason_manifest.spec.common.capabilities import AgentCapabilities
 from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
-from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
+from coreason_manifest.spec.v2.contracts import (
+    InterfaceDefinition,
+    PolicyDefinition,
+    StateDefinition,
+)
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.resources import ModelProfile
 

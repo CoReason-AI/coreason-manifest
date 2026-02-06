@@ -8,9 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from coreason_manifest.spec.v2.definitions import AgentDefinition
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition
 from coreason_manifest.utils.mock import generate_mock_output
 
 
@@ -22,7 +21,7 @@ def test_scalar_generation() -> None:
             "age": {"type": "integer"},
             "active": {"type": "boolean"},
             "score": {"type": "number"},
-        }
+        },
     }
 
     agent = AgentDefinition(
@@ -30,7 +29,7 @@ def test_scalar_generation() -> None:
         name="Test Agent",
         role="Tester",
         goal="Test things",
-        interface=InterfaceDefinition(outputs=schema)
+        interface=InterfaceDefinition(outputs=schema),
     )
 
     output = generate_mock_output(agent)
@@ -42,19 +41,14 @@ def test_scalar_generation() -> None:
 
 
 def test_determinism() -> None:
-    schema = {
-        "type": "object",
-        "properties": {
-            "random_val": {"type": "integer"}
-        }
-    }
+    schema = {"type": "object", "properties": {"random_val": {"type": "integer"}}}
 
     agent = AgentDefinition(
         id="test-agent",
         name="Test Agent",
         role="Tester",
         goal="Test things",
-        interface=InterfaceDefinition(outputs=schema)
+        interface=InterfaceDefinition(outputs=schema),
     )
 
     out1 = generate_mock_output(agent, seed=42)
@@ -68,19 +62,10 @@ def test_determinism() -> None:
 def test_complex_nesting_and_refs() -> None:
     schema = {
         "$defs": {
-            "Address": {
-                "type": "object",
-                "properties": {
-                    "city": {"type": "string"},
-                    "zip": {"type": "integer"}
-                }
-            }
+            "Address": {"type": "object", "properties": {"city": {"type": "string"}, "zip": {"type": "integer"}}}
         },
         "type": "object",
-        "properties": {
-            "employee": {"type": "string"},
-            "address": {"$ref": "#/$defs/Address"}
-        }
+        "properties": {"employee": {"type": "string"}, "address": {"$ref": "#/$defs/Address"}},
     }
 
     agent = AgentDefinition(
@@ -88,7 +73,7 @@ def test_complex_nesting_and_refs() -> None:
         name="Test Agent",
         role="Tester",
         goal="Test things",
-        interface=InterfaceDefinition(outputs=schema)
+        interface=InterfaceDefinition(outputs=schema),
     )
 
     output = generate_mock_output(agent, seed=123)
@@ -104,8 +89,8 @@ def test_enum_constraints() -> None:
         "type": "object",
         "properties": {
             "status": {"type": "string", "enum": ["OPEN", "CLOSED"]},
-            "priority": {"type": "integer", "enum": [1, 2, 3]}
-        }
+            "priority": {"type": "integer", "enum": [1, 2, 3]},
+        },
     }
 
     agent = AgentDefinition(
@@ -113,7 +98,7 @@ def test_enum_constraints() -> None:
         name="Test Agent",
         role="Tester",
         goal="Test things",
-        interface=InterfaceDefinition(outputs=schema)
+        interface=InterfaceDefinition(outputs=schema),
     )
 
     # Check multiple times to ensure coverage (probabilistic but good enough with fixed seed)
@@ -128,8 +113,8 @@ def test_special_formats() -> None:
         "type": "object",
         "properties": {
             "id": {"type": "string", "format": "uuid"},
-            "created_at": {"type": "string", "format": "date-time"}
-        }
+            "created_at": {"type": "string", "format": "date-time"},
+        },
     }
 
     agent = AgentDefinition(
@@ -137,7 +122,7 @@ def test_special_formats() -> None:
         name="Test Agent",
         role="Tester",
         goal="Test things",
-        interface=InterfaceDefinition(outputs=schema)
+        interface=InterfaceDefinition(outputs=schema),
     )
 
     output = generate_mock_output(agent, seed=101)
@@ -149,5 +134,6 @@ def test_special_formats() -> None:
     # Verify ISO format
     # Will throw ValueError if not ISO format
     from datetime import datetime
+
     dt = datetime.fromisoformat(output["created_at"])
     assert dt is not None
