@@ -10,11 +10,17 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Builder SDK](builder_sdk.md)**
     *   Documentation for the fluent Builder API (`AgentBuilder`, `TypedCapability`) to simplify Agent creation.
 
+*   **[Visualization Tools](visualization.md)**
+    *   Guide for generating Mermaid.js flowcharts to visualize complex Agent workflows and routing logic.
+
 *   **[Secure Composition](composition.md)**
     *   Explains the Secure Recursive Loader, the `$ref` syntax for modular composition, the "Jail" security model, and cycle detection mechanisms.
 
 *   **[Governance & Policy Enforcement](governance_policy_enforcement.md)**
     *   Details the Governance module for defining and enforcing organizational rules, risk levels, and compliance policies on agents and tools.
+
+*   **[Agent Card Generator](agent_card_generator.md)**
+    *   Guide for using the automated documentation utility to generate standardized "Agent Cards" from Manifest definitions.
 
 ## Specifications & Protocols
 
