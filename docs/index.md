@@ -24,6 +24,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
 
+*   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
+    *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
+
 *   **[Stream Identity & Lifecycle](cap/stream_lifecycle.md)**
     *   Protocols and data structures for explicit, multiplexed output streams (`STREAM_START`, `STREAM_END`).
 
@@ -47,6 +50,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Audit Hashing & Integrity](audit_hashing.md)**
     *   Specifications for the "Tamper-Evident" audit logging system, including the `AuditLog` model and SHA-256 chain verification algorithms.
+
+*   **[Standardized Presentation Schemas](presentation_schemas.md)**
+    *   Enforces strictly typed Pydantic models for UI events (`PresentationEvent`) like citations, progress indicators, and media carousels.
 
 *   **[Frontend Integration & Graph Events](frontend_integration.md)**
     *   Defines the strict `GraphEvent` hierarchy for internal engine state and the migration strategy to standard `CloudEvent` formats.
