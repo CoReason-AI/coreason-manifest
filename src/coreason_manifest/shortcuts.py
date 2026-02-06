@@ -64,6 +64,6 @@ def simple_agent(
         if "type" in outputs and isinstance(outputs["type"], str):
             builder.interface_outputs = outputs
         else:
-            builder.interface_outputs["properties"] = outputs  # pragma: no cover
+            builder.interface_outputs["properties"] = outputs
 
     return builder.build()

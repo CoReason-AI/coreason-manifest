@@ -1,6 +1,6 @@
+import pytest
 from coreason_manifest import simple_agent
-from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2
-
+from coreason_manifest.spec.v2.definitions import ManifestV2, AgentDefinition
 
 def test_simple_agent_minimal() -> None:
     manifest = simple_agent(name="TestAgent")
@@ -10,8 +10,7 @@ def test_simple_agent_minimal() -> None:
     agent = manifest.definitions["TestAgent"]
     assert isinstance(agent, AgentDefinition)
     assert agent.id == "TestAgent"
-    assert agent.goal == "Help the user"  # default from AgentBuilder
-
+    assert agent.goal == "Help the user" # default from AgentBuilder
 
 def test_simple_agent_full_options() -> None:
     manifest = simple_agent(
@@ -40,13 +39,28 @@ def test_simple_agent_full_options() -> None:
     assert manifest.interface.outputs["type"] == "object"
     assert "report" in manifest.interface.outputs["properties"]
 
-
 def test_simple_agent_raw_schema() -> None:
     # Pass full schema with "type": "object"
-    schema = {"type": "object", "properties": {"foo": {"type": "integer"}}, "required": ["foo"]}
+    schema = {
+        "type": "object",
+        "properties": {"foo": {"type": "integer"}},
+        "required": ["foo"]
+    }
     manifest = simple_agent(name="SchemaAgent", inputs=schema)
 
     # Should use the schema directly
     assert manifest.interface.inputs == schema
     assert manifest.interface.inputs["type"] == "object"
     assert manifest.interface.inputs["required"] == ["foo"]
+
+def test_simple_agent_raw_output_schema() -> None:
+    # Pass full schema for outputs with "type": "object"
+    # This should hit the IF branch: if "type" in outputs...
+    schema = {
+        "type": "object",
+        "properties": {"bar": {"type": "string"}},
+    }
+    manifest = simple_agent(name="OutputSchemaAgent", outputs=schema)
+
+    assert manifest.interface.outputs == schema
+    assert manifest.interface.outputs["type"] == "object"
