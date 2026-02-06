@@ -8,11 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from __future__ import annotations
+from .mcp import CoreasonMCPServer, create_mcp_tool_definition
 
-import logging
-
-logger = logging.getLogger("coreason_manifest")
-logger.addHandler(logging.NullHandler())
-
-__all__ = ["logger"]
+__all__ = ["CoreasonMCPServer", "create_mcp_tool_definition"]

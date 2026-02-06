@@ -11,6 +11,7 @@
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
 from .shortcuts import simple_agent
+from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -122,6 +123,7 @@ __all__ = [
     "CloudEvent",
     "ComplianceReport",
     "ComplianceViolation",
+    "CoreasonMCPServer",
     "CouncilStep",
     "DeliveryMode",
     "DiffReport",
@@ -191,6 +193,7 @@ __all__ = [
     "check_compliance_v2",
     "compare_agents",
     "compute_audit_hash",
+    "create_mcp_tool_definition",
     "dump",
     "generate_mermaid_graph",
     "generate_mock_output",
