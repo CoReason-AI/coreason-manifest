@@ -5,6 +5,7 @@ nav:
   - Home: index.md
   - Core Documentation:
     - Usage Guide: usage.md
+    - Builder SDK: builder_sdk.md
     - Secure Composition: composition.md
     - Governance & Policy: governance_policy_enforcement.md
   - Specifications & Protocols:
