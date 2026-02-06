@@ -39,6 +39,7 @@ manifest = (
     .with_system_prompt("You are a helpful researcher.")
     .with_capability(search_cap)
     .with_tool("mcp-browser")
+    .with_knowledge("s3://bucket/docs/manual.pdf")
     .build()
 )
 

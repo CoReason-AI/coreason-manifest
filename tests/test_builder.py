@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from coreason_manifest.builder import AgentBuilder, TypedCapability
 from coreason_manifest.spec.common.capabilities import CapabilityType, DeliveryMode
@@ -183,3 +183,71 @@ def test_nested_model_defs() -> None:
     # Verify SearchInput is in $defs
     # Note: Pydantic might name it 'SearchInput' or similar
     assert "SearchInput" in agent.interface.inputs["$defs"]
+
+
+class AliasModel(BaseModel):
+    my_field: str = Field(..., alias="real_field_name")
+
+
+def test_pydantic_aliases() -> None:
+    cap = TypedCapability(
+        name="AliasCap",
+        description="Alias",
+        input_model=AliasModel,
+        output_model=EmptyModel,
+    )
+    agent = AgentBuilder("AliasAgent").with_capability(cap).build()
+
+    props = agent.interface.inputs["properties"]
+    # Pydantic JSON schema uses the alias by default
+    assert "real_field_name" in props
+    assert "my_field" not in props
+
+
+def test_kitchen_sink_full_composition() -> None:
+    """Complex case mixing tools, knowledge, prompt, model, and multiple capabilities."""
+    cap1 = TypedCapability(
+        name="Search",
+        description="Search",
+        input_model=SearchInput,
+        output_model=SearchOutput,
+    )
+    cap2 = TypedCapability(
+        name="Alias",
+        description="Alias",
+        input_model=AliasModel,
+        output_model=EmptyModel,
+        delivery_mode=DeliveryMode.SERVER_SENT_EVENTS,
+        type=CapabilityType.ATOMIC,
+    )
+
+    agent = (
+        AgentBuilder("KitchenSink")
+        .with_model("claude-3-opus")
+        .with_system_prompt("System Prompt")
+        .with_tool("tool-search")
+        .with_tool("tool-calculator")
+        .with_knowledge("s3://data/kb.pdf")
+        .with_capability(cap1)
+        .with_capability(cap2)
+        .build()
+    )
+
+    agent_def = agent.definitions["KitchenSink"]
+    assert isinstance(agent_def, AgentDefinition)
+
+    # Verify Basics
+    assert agent_def.model == "claude-3-opus"
+    assert agent_def.backstory == "System Prompt"
+    assert agent_def.tools == ["tool-search", "tool-calculator"]
+    assert agent_def.knowledge == ["s3://data/kb.pdf"]
+
+    # Verify Capability Logic (SSE wins, ATOMIC wins because it was last)
+    assert agent_def.capabilities.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
+    assert agent_def.capabilities.type == CapabilityType.ATOMIC
+
+    # Verify Interface Merging
+    inputs = agent.interface.inputs["properties"]
+    assert "query" in inputs  # from SearchInput
+    assert "real_field_name" in inputs  # from AliasModel
+    assert "results" in agent.interface.outputs["properties"]  # from SearchOutput
