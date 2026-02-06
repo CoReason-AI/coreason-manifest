@@ -24,6 +24,7 @@ from coreason_manifest.spec.v2.definitions import (
     SwitchStep,
     ToolDefinition,
 )
+from coreason_manifest.utils.logger import logger
 
 
 def _risk_score(level: ToolRiskLevel) -> int:
@@ -115,6 +116,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                                 )
                             )
                 except Exception as e:
+                    logger.exception(f"Failed to parse tool URI '{definition.uri}'")
                     violations.append(
                         ComplianceViolation(
                             rule="domain_restriction",
