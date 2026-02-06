@@ -9,17 +9,17 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
-from pydantic import BaseModel
+
 from coreason_manifest.builder import AgentBuilder, ManifestBuilder
+from coreason_manifest.spec.common_base import StrictUri
+from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
-    LogicStep,
-    SwitchStep,
-    ToolDefinition,
     GenericDefinition,
+    LogicStep,
+    ToolDefinition,
 )
-from coreason_manifest.spec.v2.contracts import PolicyDefinition, StateDefinition, InterfaceDefinition
-from coreason_manifest.spec.common_base import StrictUri
+
 
 def test_manifest_builder_simple() -> None:
     # Build a simple agent definition using AgentBuilder
@@ -39,6 +39,7 @@ def test_manifest_builder_simple() -> None:
     assert manifest.workflow.start == "step1"
     assert "step1" in manifest.workflow.steps
 
+
 def test_manifest_builder_complex_workflow() -> None:
     agent1 = AgentBuilder("Agent1").build_definition()
     agent2 = AgentBuilder("Agent2").build_definition()
@@ -56,7 +57,12 @@ def test_manifest_builder_complex_workflow() -> None:
 
     assert len(manifest.definitions) == 2
     assert len(manifest.workflow.steps) == 3
-    assert manifest.workflow.steps["step1"].next == "step2"
+
+    # Assert type specific attributes
+    step1 = manifest.workflow.steps["step1"]
+    assert isinstance(step1, AgentStep)
+    assert step1.next == "step2"
+
 
 def test_manifest_builder_policy_state() -> None:
     policy = PolicyDefinition(max_steps=10, human_in_the_loop=True)
@@ -74,24 +80,25 @@ def test_manifest_builder_policy_state() -> None:
     assert manifest.policy.human_in_the_loop is True
     assert manifest.state.backend == "redis"
 
+
 def test_manifest_builder_tools() -> None:
     tool = ToolDefinition(
         id="tool1",
         name="Search",
         uri=StrictUri("https://example.com/mcp"),
         risk_level="safe",
-        description="Search tool"
+        description="Search tool",
     )
 
-    manifest = (
-        ManifestBuilder("ToolManifest")
-        .add_tool(tool)
-        .add_step(LogicStep(id="main", code="pass"))
-        .build()
-    )
+    manifest = ManifestBuilder("ToolManifest").add_tool(tool).add_step(LogicStep(id="main", code="pass")).build()
 
     assert "tool1" in manifest.definitions
-    assert manifest.definitions["tool1"].uri == StrictUri("https://example.com/mcp")
+
+    # Assert type specific attributes
+    tool_def = manifest.definitions["tool1"]
+    assert isinstance(tool_def, ToolDefinition)
+    assert tool_def.uri == StrictUri("https://example.com/mcp")
+
 
 def test_manifest_builder_generic_def() -> None:
     generic = GenericDefinition(some_field="value")
@@ -107,17 +114,17 @@ def test_manifest_builder_generic_def() -> None:
     # Accessing dynamic fields on Pydantic models usually works if configured properly,
     # but GenericDefinition has model_config(extra="allow").
     # Pydantic v2 access for extra fields:
-    assert manifest.definitions["my_generic"].some_field == "value" # type: ignore
+    generic_def = manifest.definitions["my_generic"]
+    assert isinstance(generic_def, GenericDefinition)
+    assert generic_def.some_field == "value"  # type: ignore
+
 
 def test_manifest_builder_implicit_start_step() -> None:
     # If only one step, it should be auto-selected as start
-    manifest = (
-        ManifestBuilder("ImplicitStart")
-        .add_step(LogicStep(id="only_step", code="pass"))
-        .build()
-    )
+    manifest = ManifestBuilder("ImplicitStart").add_step(LogicStep(id="only_step", code="pass")).build()
 
     assert manifest.workflow.start == "only_step"
+
 
 def test_manifest_builder_interface_metadata_error() -> None:
     # Test set_interface

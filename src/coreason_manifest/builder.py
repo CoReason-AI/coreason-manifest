@@ -33,7 +33,7 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 
-__all__ = ["AgentBuilder", "ManifestBuilder", "CapabilityType", "DeliveryMode", "TypedCapability"]
+__all__ = ["AgentBuilder", "CapabilityType", "DeliveryMode", "ManifestBuilder", "TypedCapability"]
 
 
 class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
