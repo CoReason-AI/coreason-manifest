@@ -8,9 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-"""Governance and Policy Enforcement module for Coreason Agents.
+"""Governance Configuration Definitions (DTOs).
 
-This module provides tools to validate an AgentDefinition against a set of organizational rules.
+This module defines the data structures (`GovernanceConfig`, `ComplianceReport`) used to configure
+and report on governance policies.
+
+NOTE: This module contains PURE DATA only. The actual enforcement logic is located in
+`coreason_manifest.utils.v2.governance`.
 """
 
 from pydantic import ConfigDict, Field
