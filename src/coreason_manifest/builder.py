@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -17,16 +17,23 @@ from coreason_manifest.spec.common.capabilities import (
     CapabilityType,
     DeliveryMode,
 )
-from coreason_manifest.spec.v2.contracts import InterfaceDefinition
-
-__all__ = ["AgentBuilder", "CapabilityType", "DeliveryMode", "TypedCapability"]
+from coreason_manifest.spec.v2.contracts import (
+    InterfaceDefinition,
+    PolicyDefinition,
+    StateDefinition,
+)
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
+    GenericDefinition,
     ManifestMetadata,
     ManifestV2,
+    Step,
+    ToolDefinition,
     Workflow,
 )
+
+__all__ = ["AgentBuilder", "CapabilityType", "DeliveryMode", "ManifestBuilder", "TypedCapability"]
 
 
 class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
@@ -142,27 +149,21 @@ class AgentBuilder:
         if "$defs" in source:
             target.setdefault("$defs", {}).update(source["$defs"])
 
-    def build(self) -> ManifestV2:
+    def build_definition(self) -> AgentDefinition:
         """
-        Build the final ManifestV2 object.
-
-        Constructs the ManifestMetadata, InterfaceDefinition, AgentCapabilities,
-        AgentDefinition, and a default Workflow.
+        Build the AgentDefinition object.
         """
-        # 1. Construct ManifestMetadata
-        metadata = ManifestMetadata(name=self.name, version=self.version)
-
-        # 2. Construct InterfaceDefinition
+        # Construct InterfaceDefinition
         interface = InterfaceDefinition(inputs=self.interface_inputs, outputs=self.interface_outputs)
 
-        # 3. Construct AgentCapabilities
+        # Construct AgentCapabilities
         capabilities = AgentCapabilities(
             type=self._cap_type,
             delivery_mode=self._cap_delivery_mode,
         )
 
-        # 4. Construct AgentDefinition
-        agent_def = AgentDefinition(
+        # Construct AgentDefinition
+        return AgentDefinition(
             id=self.name,
             name=self.name,
             role="Assistant",
@@ -175,13 +176,115 @@ class AgentBuilder:
             interface=interface,
         )
 
-        # 5. Workflow
+    def build(self) -> ManifestV2:
+        """
+        Build the final ManifestV2 object.
+
+        Constructs the ManifestMetadata, InterfaceDefinition, AgentCapabilities,
+        AgentDefinition, and a default Workflow.
+        """
+        # 1. Construct ManifestMetadata
+        metadata = ManifestMetadata(name=self.name, version=self.version)
+
+        # 2. Get Agent Definition
+        agent_def = self.build_definition()
+
+        # 3. Workflow
         workflow = Workflow(start="main", steps={"main": AgentStep(id="main", agent=self.name)})
 
         return ManifestV2(
             kind="Agent",
             metadata=metadata,
-            interface=interface,
+            interface=agent_def.interface,
             definitions={self.name: agent_def},
+            workflow=workflow,
+        )
+
+
+class ManifestBuilder:
+    """
+    Builder for constructing complex ManifestV2 objects.
+
+    Allows assembling multiple agents, tools, complex workflows, policies, and state
+    definitions into a unified manifest.
+    """
+
+    def __init__(self, name: str, version: str = "0.1.0", kind: Literal["Recipe", "Agent"] = "Recipe"):
+        self.name = name
+        self.version = version
+        self.kind = kind
+        self.definitions: dict[str, ToolDefinition | AgentDefinition | GenericDefinition] = {}
+        self.steps: dict[str, Step] = {}
+        self.start_step_id: str | None = None
+        self.interface = InterfaceDefinition()
+        self.state = StateDefinition()
+        self.policy = PolicyDefinition()
+        self._metadata_extras: dict[str, Any] = {}
+
+    def add_agent(self, agent: AgentDefinition) -> "ManifestBuilder":
+        """Add an AgentDefinition to the manifest."""
+        self.definitions[agent.id] = agent
+        return self
+
+    def add_tool(self, tool: ToolDefinition) -> "ManifestBuilder":
+        """Add a ToolDefinition to the manifest."""
+        self.definitions[tool.id] = tool
+        return self
+
+    def add_generic_definition(self, key: str, definition: GenericDefinition) -> "ManifestBuilder":
+        """Add a generic definition to the manifest."""
+        self.definitions[key] = definition
+        return self
+
+    def add_step(self, step: Step) -> "ManifestBuilder":
+        """Add a workflow step."""
+        self.steps[step.id] = step
+        return self
+
+    def set_start_step(self, step_id: str) -> "ManifestBuilder":
+        """Set the ID of the starting step."""
+        self.start_step_id = step_id
+        return self
+
+    def set_interface(self, interface: InterfaceDefinition) -> "ManifestBuilder":
+        """Set the input/output interface for the manifest."""
+        self.interface = interface
+        return self
+
+    def set_state(self, state: StateDefinition) -> "ManifestBuilder":
+        """Set the state definition."""
+        self.state = state
+        return self
+
+    def set_policy(self, policy: PolicyDefinition) -> "ManifestBuilder":
+        """Set the policy definition."""
+        self.policy = policy
+        return self
+
+    def set_metadata(self, key: str, value: Any) -> "ManifestBuilder":
+        """Set extra metadata fields."""
+        self._metadata_extras[key] = value
+        return self
+
+    def build(self) -> ManifestV2:
+        """Build the final ManifestV2 object."""
+        metadata = ManifestMetadata(name=self.name, version=self.version, **self._metadata_extras)
+
+        if not self.start_step_id:
+            if len(self.steps) == 1:
+                self.start_step_id = next(iter(self.steps))
+            else:
+                raise ValueError("Start step must be specified for ManifestV2.")
+
+        workflow = Workflow(start=self.start_step_id, steps=self.steps)
+
+        return ManifestV2(
+            apiVersion="coreason.ai/v2",
+            kind=self.kind,
+            metadata=metadata,
+            interface=self.interface,
+            state=self.state,
+            policy=self.policy,
+            definitions=self.definitions,
             workflow=workflow,
         )

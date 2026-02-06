@@ -58,6 +58,26 @@ except Exception as e:
 
 In this snippet, the library ensures that the data structure is sound and strictly typed. If a field is missing or an ID is invalid, it fails fast before the data enters the system.
 
+### 4. Builder Pattern for Complex Manifests (New in v0.17)
+
+As agent systems grow into complex "God Objects" (ManifestV2) involving Workflows, Policy, and State, hand-writing YAML becomes error-prone and tedious.
+
+The `ManifestBuilder` solves this developer experience friction:
+
+```python
+from coreason_manifest.builder import ManifestBuilder, AgentBuilder
+
+# Fluent interface for creating complex objects
+manifest = (
+    ManifestBuilder("ComplexSystem")
+    .add_agent(AgentBuilder("Analyst").with_model("gpt-4").build_definition())
+    .set_policy(PolicyDefinition(max_steps=50))
+    .build()
+)
+```
+
+This approach ensures type safety at compile time rather than validation errors at runtime.
+
 ### Further Reading
 
 For detailed technical specifications and usage instructions, please refer to the [Documentation Index](docs/index.md).
