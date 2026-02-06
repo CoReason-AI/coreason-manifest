@@ -6,6 +6,7 @@ nav:
   - Core Documentation:
     - Usage Guide: usage.md
     - Builder SDK: builder_sdk.md
+    - Visualization Tools: visualization.md
     - Secure Composition: composition.md
     - Governance & Policy: governance_policy_enforcement.md
     - Agent Card Generator: agent_card_generator.md
