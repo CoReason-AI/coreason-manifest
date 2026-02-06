@@ -34,12 +34,35 @@ def test_polymorphic_serialization() -> None:
 
 def test_validation_logic() -> None:
     """Verify validation fails for invalid status in ProgressUpdate."""
+    # Invalid status
     with pytest.raises(ValidationError) as excinfo:
         ProgressUpdate(label="Thinking", status="thinking")  # "thinking" is not allowed  # type: ignore
 
     assert "status" in str(excinfo.value)
-    # Also verify valid statuses work
+
+    # Invalid progress_percent (> 1.0)
+    with pytest.raises(ValidationError) as excinfo:
+        ProgressUpdate(label="Thinking", status="running", progress_percent=1.5)
+
+    assert "progress_percent" in str(excinfo.value)
+    assert "less than or equal to 1" in str(excinfo.value)
+
+    # Valid statuses work
     assert ProgressUpdate(label="Running", status="running").status == "running"
+    assert ProgressUpdate(label="Done", status="complete").status == "complete"
+    assert ProgressUpdate(label="Failed", status="failed").status == "failed"
+
+
+def test_url_validation() -> None:
+    """Verify validation fails for invalid URL in CitationItem."""
+    with pytest.raises(ValidationError) as excinfo:
+        CitationItem(
+            source_id="src1",
+            uri="invalid-url",
+            title="Title"
+        )
+
+    assert "uri" in str(excinfo.value)
 
 
 def test_deserialization_citation() -> None:
@@ -133,11 +156,10 @@ def test_immutability() -> None:
     event = PresentationEvent(type=PresentationEventType.PROGRESS_INDICATOR, data=progress)
 
     # Try to modify nested data
-    # We must assert the type for MyPy before accessing fields, or use type ignore if we are intentionally breaking it
     assert isinstance(event.data, ProgressUpdate)
     with pytest.raises(ValidationError):
-        event.data.label = "New Label"  # type: ignore[misc, unused-ignore]
+        event.data.label = "New Label"  # type: ignore[misc]
 
     # Try to modify event field
     with pytest.raises(ValidationError):
-        event.type = PresentationEventType.MARKDOWN_BLOCK  # type: ignore[misc, unused-ignore]
+        event.type = PresentationEventType.MARKDOWN_BLOCK  # type: ignore[misc]
