@@ -22,6 +22,7 @@ from coreason_manifest import (
     RateCard,
     ResourceConstraints,
     SuccessCriterion,
+    ToolDefinition,
     Workflow,
     render_agent_card,
 )
@@ -333,3 +334,85 @@ def test_render_pricing_unit_other() -> None:
 
     # Should contain "REQUEST" directly
     assert "$0.05 / REQUEST Input" in card
+
+
+def test_edge_case_empty_schema() -> None:
+    """Test that empty input/output schemas render without errors."""
+    interface = InterfaceDefinition(
+        inputs={},  # Empty dict
+        outputs={"type": "object"},  # Valid type but no properties
+    )
+
+    manifest = Manifest(
+        kind="Agent",
+        metadata=ManifestMetadata(name="EmptySchema"),
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="EmptySchema")}),
+        definitions={"EmptySchema": AgentDefinition(id="es", name="EmptySchema", role="None", goal="None")},
+        interface=interface,
+    )
+
+    card = render_agent_card(manifest)
+
+    assert "_No fields defined._" in card
+    # Should appear twice (once for inputs, once for outputs)
+    assert card.count("_No fields defined._") == 2
+
+
+def test_edge_case_markdown_injection() -> None:
+    """Test robustness against Markdown characters in fields."""
+    agent_def = AgentDefinition(
+        id="injector",
+        name="**Bold**|Table",
+        role="Injector",
+        goal="Inject",
+        backstory="# I am header\n* list",
+    )
+
+    interface = InterfaceDefinition(
+        inputs={
+            "properties": {
+                "field|pipe": {"type": "string", "description": "**BoldDesc** | Pipe"},
+            }
+        }
+    )
+
+    manifest = Manifest(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Injector"),
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="Injector")}),
+        definitions={"Injector": agent_def},
+        interface=interface,
+    )
+
+    card = render_agent_card(manifest)
+
+    # Verify things are rendered (even if markup is broken, it shouldn't crash)
+    assert "> # I am header" in card
+    assert "`field|pipe`" in card
+    assert "**BoldDesc** | Pipe" in card
+
+
+def test_complex_multi_agent_manifest() -> None:
+    """Test manifest with multiple definitions (Tools, multiple Agents)."""
+    agent1 = AgentDefinition(id="a1", name="AgentOne", role="Role1", goal="Goal1")
+    agent2 = AgentDefinition(id="a2", name="AgentTwo", role="Role2", goal="Goal2")
+    tool = ToolDefinition(id="t1", name="ToolOne", uri="http://example.com", risk_level="safe")
+
+    # Name matches AgentTwo
+    manifest = Manifest(
+        kind="Agent",
+        metadata=ManifestMetadata(name="AgentTwo"),
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="AgentTwo")}),
+        definitions={
+            "AgentOne": agent1,
+            "ToolOne": tool,
+            "AgentTwo": agent2,
+        },
+    )
+
+    card = render_agent_card(manifest)
+
+    # Should select AgentTwo based on name match
+    assert "# AgentTwo" in card
+    assert "**Role:** Role2" in card
+    assert "Role1" not in card
