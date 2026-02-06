@@ -63,6 +63,7 @@ from .spec.interfaces.middleware import (
     IRequestInterceptor,
     IResponseInterceptor,
 )
+from .spec.interfaces.session import SessionHandle
 from .spec.interfaces.stream import IStreamEmitter
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
@@ -147,6 +148,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
+    "SessionHandle",
     "SessionState",
     "StateDefinition",
     "Step",
