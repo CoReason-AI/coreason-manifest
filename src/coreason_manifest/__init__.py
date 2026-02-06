@@ -73,6 +73,7 @@ from .spec.v2.definitions import (
     ToolDefinition,
     Workflow,
 )
+from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
@@ -104,6 +105,7 @@ __all__ = [
     "DeliveryMode",
     "ErrorDomain",
     "ErrorSeverity",
+    "EvaluationProfile",
     "EventContentType",
     "GovernanceConfig",
     "GraphEvent",
@@ -149,6 +151,7 @@ __all__ = [
     "StreamPacket",
     "StreamReference",
     "StreamState",
+    "SuccessCriterion",
     "SwitchStep",
     "ToolDefinition",
     "ToolRiskLevel",
