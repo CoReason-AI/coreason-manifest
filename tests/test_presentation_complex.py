@@ -8,14 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any, cast
+
 from pydantic import TypeAdapter
 
 from coreason_manifest import (
     CitationBlock,
     CitationItem,
     MarkdownBlock,
-    MediaCarousel,
-    MediaItem,
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,
@@ -27,22 +27,24 @@ def test_mixed_polymorphic_list() -> None:
     events = [
         PresentationEvent(
             type=PresentationEventType.MARKDOWN_BLOCK,
-            data=MarkdownBlock(content="# Header")
+            data=MarkdownBlock(content="# Header"),
         ),
         PresentationEvent(
             type=PresentationEventType.CITATION_BLOCK,
-            data=CitationBlock(items=[
-                CitationItem(source_id="1", uri="http://a.com", title="A"),  # type: ignore
-            ])
+            data=CitationBlock(
+                items=[
+                    CitationItem(source_id="1", uri="http://a.com", title="A"),
+                ]
+            ),
         ),
         PresentationEvent(
             type=PresentationEventType.PROGRESS_INDICATOR,
-            data=ProgressUpdate(label="Loading", status="running", progress_percent=0.5)
+            data=ProgressUpdate(label="Loading", status="running", progress_percent=0.5),
         ),
         PresentationEvent(
             type=PresentationEventType.USER_ERROR,
-            data={"error": "Something went wrong"}
-        )
+            data={"error": "Something went wrong"},
+        ),
     ]
 
     # Serialize list
@@ -76,19 +78,18 @@ def test_nested_complex_structure() -> None:
             "level2": {
                 "level3": [
                     {"id": 1, "val": "a"},
-                    {"id": 2, "val": "b"}
+                    {"id": 2, "val": "b"},
                 ]
             }
         },
-        "meta": [1, 2, 3]
+        "meta": [1, 2, 3],
     }
 
-    event = PresentationEvent(
-        type=PresentationEventType.USER_ERROR,
-        data=complex_data
-    )
+    event = PresentationEvent(type=PresentationEventType.USER_ERROR, data=complex_data)
 
     dumped = event.model_dump(mode="json")
     restored = PresentationEvent.model_validate(dumped)
 
-    assert restored.data["level1"]["level2"]["level3"][1]["val"] == "b"
+    # Use explicit casting to satisfy MyPy
+    data = cast("dict[str, Any]", restored.data)
+    assert data["level1"]["level2"]["level3"][1]["val"] == "b"

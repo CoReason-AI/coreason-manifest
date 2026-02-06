@@ -118,17 +118,17 @@ def test_complex_urls() -> None:
     """Test CitationItem with complex URLs."""
     # Query parameters and fragments
     url = "https://example.com/path/to/resource?query=param&other=123#fragment"
-    item = CitationItem(source_id="src1", uri=url, title="Complex URL")  # type: ignore
+    item = CitationItem(source_id="src1", uri=url, title="Complex URL")
     assert str(item.uri) == url
 
     # IP address URL
     url_ip = "http://192.168.1.1:8080/resource"
-    item_ip = CitationItem(source_id="src2", uri=url_ip, title="IP URL")  # type: ignore
+    item_ip = CitationItem(source_id="src2", uri=url_ip, title="IP URL")
     assert str(item_ip.uri) == url_ip
 
     # Localhost
     url_local = "http://localhost:3000"
-    item_local = CitationItem(source_id="src3", uri=url_local, title="Localhost")  # type: ignore
+    item_local = CitationItem(source_id="src3", uri=url_local, title="Localhost")
     assert str(item_local.uri) == f"{url_local}/"
 
 
@@ -149,13 +149,10 @@ def test_user_error_payload() -> None:
         "code": 404,
         "message": "Not Found",
         "details": {"resource": "user-123"},
-        "timestamp": "2023-01-01T00:00:00Z"
+        "timestamp": "2023-01-01T00:00:00Z",
     }
 
-    event = PresentationEvent(
-        type=PresentationEventType.USER_ERROR,
-        data=error_data
-    )
+    event = PresentationEvent(type=PresentationEventType.USER_ERROR, data=error_data)
 
     assert event.type == PresentationEventType.USER_ERROR
     assert isinstance(event.data, dict)
