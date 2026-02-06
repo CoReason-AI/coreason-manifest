@@ -174,6 +174,32 @@ def test_inputs_schema_change_type() -> None:
     assert change.category == ChangeCategory.PATCH
 
 
+def test_inputs_replaced_by_string() -> None:
+    """Inputs block replaced by a string (invalid but possible in loose comparison)."""
+    agent1 = create_base_manifest()
+    d = agent1.model_dump(by_alias=True)
+    d["interface"]["inputs"] = "invalid_string"
+    agent2 = ManifestV2.model_construct(**d)
+
+    report = compare_agents(agent1, agent2)
+    change = next(c for c in report.changes if c.path == "interface.inputs")
+    # Should fall through to BREAKING
+    assert change.category == ChangeCategory.BREAKING
+
+
+def test_metadata_change() -> None:
+    """Change in metadata fields."""
+    agent1 = create_base_manifest()
+    agent2 = agent1.model_copy(deep=True)
+    # Update metadata name
+    new_meta = agent2.metadata.model_copy(update={"name": "new-name"})
+    agent2 = agent2.model_copy(update={"metadata": new_meta})
+
+    report = compare_agents(agent1, agent2)
+    change = next(c for c in report.changes if "metadata.name" in c.path)
+    assert change.category == ChangeCategory.PATCH
+
+
 def test_complex_overhaul() -> None:
     """Multiple simultaneous changes."""
     agent1 = create_base_manifest()
