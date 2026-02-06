@@ -56,9 +56,7 @@ class DiffReport(CoReasonBaseModel):
         return any(c.category == ChangeCategory.GOVERNANCE for c in self.changes)
 
 
-def compare_agents(
-    old: ManifestV2 | AgentDefinition, new: ManifestV2 | AgentDefinition
-) -> DiffReport:
+def compare_agents(old: ManifestV2 | AgentDefinition, new: ManifestV2 | AgentDefinition) -> DiffReport:
     """
     Compare two agent definitions and return a semantic difference report.
 
@@ -72,15 +70,13 @@ def compare_agents(
     old_dict = old.model_dump(mode="json", by_alias=True)
     new_dict = new.model_dump(mode="json", by_alias=True)
 
-    changes = []
+    changes: list[DiffChange] = []
     _walk_diff("", old_dict, new_dict, changes)
 
     return DiffReport(changes=changes)
 
 
-def _walk_diff(
-    path: str, old: Any, new: Any, changes: list[DiffChange]
-) -> None:
+def _walk_diff(path: str, old: Any, new: Any, changes: list[DiffChange]) -> None:
     """Recursively walk and compare two objects."""
     if old == new:
         return
@@ -168,7 +164,7 @@ def _categorize_change(path: str, old: Any, new: Any) -> ChangeCategory:
             inputs_idx = -1
 
         if inputs_idx != -1:
-            rest = parts[inputs_idx+1:]
+            rest = parts[inputs_idx + 1 :]
 
             if "properties" in rest:
                 # Removing a property is BREAKING
@@ -179,19 +175,19 @@ def _categorize_change(path: str, old: Any, new: Any) -> ChangeCategory:
                     return ChangeCategory.FEATURE
 
             if "required" in rest:
-                 if old is None and new is not None:
+                if old is None and new is not None:
                     return ChangeCategory.BREAKING
-                 if new is None:
+                if new is None:
                     return ChangeCategory.FEATURE
 
             # If we are strictly at interface.inputs level (or just below without hitting properties/required)
             # e.g. replacing the whole schema
             if not rest:
                 # Whole inputs block replaced
-                 if new is None:
-                     return ChangeCategory.BREAKING
-                 # Generally changing the whole input schema is BREAKING unless verified otherwise
-                 return ChangeCategory.BREAKING
+                if new is None:
+                    return ChangeCategory.BREAKING
+                # Generally changing the whole input schema is BREAKING unless verified otherwise
+                return ChangeCategory.BREAKING
 
     # 4. Tools Changes
     if "tools" in parts:

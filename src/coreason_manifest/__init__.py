@@ -147,6 +147,7 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "ManifestV2",
     "MarkdownBlock",
     "MediaCarousel",
     "MediaItem",

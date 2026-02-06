@@ -137,9 +137,7 @@ def test_resource_modification() -> None:
 
         # Create ModelProfile with Pricing
         resources = ModelProfile(
-            provider="openai",
-            model_id="gpt-4",
-            pricing=RateCard(input_cost=cost, output_cost=0.0)
+            provider="openai", model_id="gpt-4", pricing=RateCard(input_cost=cost, output_cost=0.0)
         )
 
         new_agent_def = agent_def.model_copy(update={"resources": resources})
@@ -172,7 +170,7 @@ def test_tools_modification() -> None:
         return manifest.model_copy(update={"definitions": defs})
 
     agent1 = set_tools(agent1, ["tool_a", "tool_b"])
-    agent2 = set_tools(agent1, ["tool_a"]) # Removed tool_b
+    agent2 = set_tools(agent1, ["tool_a"])  # Removed tool_b
 
     report = compare_agents(agent1, agent2)
     assert report.has_breaking
@@ -202,7 +200,9 @@ def test_patch_metadata() -> None:
     change = next(c for c in report.changes if "goal" in c.path)
     assert change.category == ChangeCategory.PATCH
 
+
 # --- New Tests for Fix Verification ---
+
 
 def test_remove_policy_block() -> None:
     """Test removing the whole policy block (if it was optional, which it is not really, but logically).
@@ -221,9 +221,7 @@ def test_remove_policy_block() -> None:
     defs = agent1.definitions.copy()
     agent_def = defs["test-agent"]
     assert isinstance(agent_def, AgentDefinition)
-    resources = ModelProfile(
-        provider="openai", model_id="gpt-4", pricing=RateCard(input_cost=0.01, output_cost=0.0)
-    )
+    resources = ModelProfile(provider="openai", model_id="gpt-4", pricing=RateCard(input_cost=0.01, output_cost=0.0))
     agent_def_with_res = agent_def.model_copy(update={"resources": resources})
     defs["test-agent"] = agent_def_with_res
     agent1_res = agent1.model_copy(update={"definitions": defs})
@@ -248,14 +246,12 @@ def test_remove_policy_block() -> None:
 
 def test_add_resources_categorization() -> None:
     """Test adding resources block matches category."""
-    agent1 = create_base_manifest() # No resources
+    agent1 = create_base_manifest()  # No resources
 
     defs = agent1.definitions.copy()
     agent_def = defs["test-agent"]
     assert isinstance(agent_def, AgentDefinition)
-    resources = ModelProfile(
-        provider="openai", model_id="gpt-4"
-    )
+    resources = ModelProfile(provider="openai", model_id="gpt-4")
     agent_def_with_res = agent_def.model_copy(update={"resources": resources})
     defs["test-agent"] = agent_def_with_res
     agent2 = agent1.model_copy(update={"definitions": defs})
@@ -265,6 +261,7 @@ def test_add_resources_categorization() -> None:
     assert change.category == ChangeCategory.RESOURCE
     assert change.old_value is None
     assert change.new_value is not None
+
 
 def test_inputs_type_change() -> None:
     """Test changing the type of an input."""
