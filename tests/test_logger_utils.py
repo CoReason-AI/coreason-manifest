@@ -8,8 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
 from typing import Any
+
+import pytest
 from loguru import logger
 
 from coreason_manifest.utils.logger import bind_context, trace, trace_scope
