@@ -109,6 +109,7 @@ class AgentRequest(CoReasonBaseModel):
     query: str
     files: list[str] = Field(default_factory=list)
     conversation_id: str | None = None
+    session_id: str | None = None
     meta: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
@@ -119,8 +120,12 @@ class AgentRequest(CoReasonBaseModel):
             if "request_id" not in data:
                 data["request_id"] = uuid4()
 
-            # Auto-rooting: If root is missing, it is the root
-            if "root_request_id" not in data or data["root_request_id"] is None:
+            # Check for Broken Chain FIRST
+            if data.get("parent_request_id") is not None and data.get("root_request_id") is None:
+                raise ValueError("Broken Lineage: 'root_request_id' is required when 'parent_request_id' is present.")
+
+            # Auto-rooting (Only if no parent)
+            if data.get("root_request_id") is None:
                 data["root_request_id"] = data["request_id"]
         return data
 

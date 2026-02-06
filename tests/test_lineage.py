@@ -188,3 +188,33 @@ def test_interaction_lineage() -> None:
     assert interaction.lineage is not None
     assert interaction.lineage.root_request_id == root
     assert interaction.lineage.parent_interaction_id == parent
+
+
+def test_broken_chain_prevention() -> None:
+    """Verify that providing a parent without a root raises an error."""
+    parent_id = uuid4()
+
+    # AgentRequest: Parent provided, Root missing -> Error
+    with pytest.raises(ValueError, match="Broken Lineage"):
+        AgentRequest(query="test", parent_request_id=parent_id)
+
+    # ReasoningTrace: Parent provided, Root missing -> Error
+    with pytest.raises(ValueError, match="Broken Lineage"):
+        ReasoningTrace(
+            request_id=uuid4(),
+            parent_request_id=parent_id,
+            node_id="step-1",
+            status="success",
+            latency_ms=10.0,
+            timestamp=datetime.now(UTC),
+        )
+
+    # AgentRequest: Valid case (Parent + Root) -> Success
+    root_id = uuid4()
+    req = AgentRequest(query="test", root_request_id=root_id, parent_request_id=parent_id)
+    assert req.root_request_id == root_id
+    assert req.parent_request_id == parent_id
+
+    # AgentRequest: Valid case (No Parent, No Root) -> Auto-root
+    req_auto = AgentRequest(query="test")
+    assert req_auto.root_request_id == req_auto.request_id

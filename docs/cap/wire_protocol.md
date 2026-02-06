@@ -174,29 +174,68 @@ Represents a single message in a conversation history.
 
 ### PresentationEvent
 
-Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`).
-
-#### CitationEvent (`type: citation`)
+Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`). This is a single container with a `type` discriminator and polymorphic `data` payload.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `uri` | `str` | Source URL or file path. |
-| `text` | `str` | The quoted text snippet. |
-| `indices` | `Optional[List[int]]` | Start/End character indices. |
+| `id` | `UUID` | Unique ID for the event. |
+| `timestamp` | `datetime` | UTC timestamp (ISO 8601). |
+| `type` | `PresentationEventType` | `citation_block`, `progress_indicator`, `media_carousel`, `markdown_block`, `user_error`, `thought_trace`. |
+| `data` | `Union` | The specific payload for the event type. |
 
-#### ArtifactEvent (`type: artifact`)
+#### CitationBlock (`type: citation_block`)
 
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `artifact_id` | `str` | Unique ID of the generated artifact. |
-| `mime_type` | `str` | Content type (e.g., `image/png`, `text/csv`). |
-| `url` | `Optional[str]` | Download URL. |
-
-#### UserErrorEvent (`type: user_error`)
+Payload is a `CitationBlock` object containing a list of `CitationItem`s.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `message` | `str` | Human-readable message. |
-| `code` | `Optional[int]` | Semantic integer code (e.g., 400, 503). |
-| `domain` | `ErrorDomain` | Source (`client`, `system`, `llm`, `tool`, `security`). |
-| `retryable` | `bool` | Whether the error is retryable. |
+| `items` | `List[CitationItem]` | List of citations. |
+
+**CitationItem:**
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `source_id` | `str` | ID of the source. |
+| `uri` | `AnyUrl` | Source URI. |
+| `title` | `str` | Title of the source. |
+| `snippet` | `Optional[str]` | Relevant text snippet. |
+
+#### MediaCarousel (`type: media_carousel`)
+
+Payload is a `MediaCarousel` object containing a list of `MediaItem`s.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `items` | `List[MediaItem]` | List of media items. |
+
+**MediaItem:**
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `url` | `AnyUrl` | Media URL. |
+| `mime_type` | `str` | MIME type (e.g., `image/png`). |
+| `alt_text` | `Optional[str]` | Alt text. |
+
+#### ProgressUpdate (`type: progress_indicator`)
+
+Payload is a `ProgressUpdate` object.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `label` | `str` | Progress label. |
+| `status` | `Literal` | `running`, `complete`, `failed`. |
+| `progress_percent` | `Optional[float]` | 0.0 to 1.0. |
+
+#### MarkdownBlock (`type: markdown_block`)
+
+Payload is a `MarkdownBlock` object.
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `content` | `str` | Markdown text. |
+
+#### User Error (`type: user_error`)
+
+Payload is a dictionary (see Semantic Error Handling for standard fields).
+
+#### Thought Trace (`type: thought_trace`)
+
+Payload is a dictionary containing reasoning steps.

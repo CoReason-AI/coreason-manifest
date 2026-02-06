@@ -10,7 +10,7 @@
 
 from typing import Any, Literal
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field
 
 from ..common_base import CoReasonBaseModel
 
@@ -34,6 +34,19 @@ class GraphEventNodeStart(GraphEventBase):
 class GraphEventNodeStream(GraphEventBase):
     event_type: Literal["NODE_STREAM"] = "NODE_STREAM"
     chunk: str
+    stream_id: str = Field("default", description="The logical stream ID.")
+
+
+class GraphEventStreamStart(GraphEventBase):
+    event_type: Literal["STREAM_START"] = "STREAM_START"
+    stream_id: str
+    name: str | None = None
+    content_type: str
+
+
+class GraphEventStreamEnd(GraphEventBase):
+    event_type: Literal["STREAM_END"] = "STREAM_END"
+    stream_id: str
 
 
 class GraphEventNodeDone(GraphEventBase):
@@ -66,6 +79,8 @@ class GraphEventArtifactGenerated(GraphEventBase):
 GraphEvent = (
     GraphEventNodeStart
     | GraphEventNodeStream
+    | GraphEventStreamStart
+    | GraphEventStreamEnd
     | GraphEventNodeDone
     | GraphEventError
     | GraphEventCouncilVote

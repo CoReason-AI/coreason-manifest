@@ -9,7 +9,7 @@ from coreason_manifest.spec.v2.definitions import ManifestV2
 
 
 def generate_schema() -> None:
-    output_path = Path("src/coreason_manifest/schemas/coreason-v2.schema.json")
+    output_path = Path("src/coreason_manifest/spec/schemas/coreason-v2.schema.json")
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Generate schema
