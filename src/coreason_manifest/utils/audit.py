@@ -70,7 +70,8 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     # Serialize to JSON bytes
     # ensure_ascii=False to support Unicode characters in names/actions
     # sort_keys=True for determinism
-    json_bytes = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    # default=str to handle non-serializable objects (like sets or custom classes) safely
+    json_bytes = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
 
     return hashlib.sha256(json_bytes).hexdigest()
 
