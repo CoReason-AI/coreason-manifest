@@ -30,6 +30,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Session Management](session_management.md)**
     *   Architecture for strict, immutable, and stateless management of conversational memory (`SessionState`, `MemoryStrategy`).
 
+*   **[Evaluation Metadata](evaluation_metadata.md)**
+    *   Specifications for embedding testing requirements (`EvaluationProfile`) and quality criteria (`SuccessCriterion`) directly into Agent Definitions.
+
 *   **[Active Memory Interface](active_memory_interface.md)**
     *   Protocol (`SessionHandle`) for active agent interactions with storage (history, recall, persistent variables).
 

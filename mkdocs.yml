@@ -14,6 +14,7 @@ nav:
     - Stream Identity & Lifecycle: cap/stream_lifecycle.md
     - Memory Governance: memory_governance.md
     - Session Management: session_management.md
+    - Evaluation Metadata: evaluation_metadata.md
     - Request Lineage Implementation: request_lineage_implementation.md
     - Observability & Tracing: observability.md
     - Frontend Integration & Graph Events: frontend_integration.md
