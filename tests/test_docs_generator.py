@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from typing import ClassVar
+from unittest.mock import Mock
 
 from coreason_manifest import (
     AgentDefinition,
@@ -188,3 +189,113 @@ def test_governance_render() -> None:
     assert "## 🛡️ Governance & Safety" in card
     assert "**Risk Level:** standard" in card
     assert "- No rude language" in card
+
+
+def test_render_fallback_lookup() -> None:
+    """Test finding AgentDefinition when name doesn't match."""
+    agent_def = AgentDefinition(
+        id="hidden",
+        name="HiddenAgent",
+        role="Ninja",
+        goal="Hide",
+    )
+
+    # Metadata name "PublicFace" does not match definition key "HiddenAgent"
+    manifest = Manifest(
+        kind="Agent",
+        metadata=ManifestMetadata(name="PublicFace"),
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="HiddenAgent")}),
+        definitions={"HiddenAgent": agent_def},
+    )
+
+    card = render_agent_card(manifest)
+
+    assert "# PublicFace" in card
+    assert "**Role:** Ninja" in card
+
+
+def test_render_metadata_variants() -> None:
+    """Test version conversion, created date, and description fallback."""
+    # We use a Mock object that passes isinstance(x, AgentDefinition) check by manual patching
+    # or by simply injecting it if render_agent_card uses duck typing.
+    # However, render_agent_card uses isinstance.
+    # To bypass Pydantic extra fields restriction, we can't easily subclass.
+    # But we can use unittest.mock to simulate the object structure.
+
+    # We create a mock that behaves like an AgentDefinition but has a description
+    # Since render_agent_card checks isinstance(x, AgentDefinition), we need a way to trick it.
+    # OR we assume the intent was duck typing and fix the implementation?
+    # The implementation explicitly checks isinstance.
+    # Given we can't change implementation now (freeze), we must create a valid AgentDefinition
+    # OR acknowledge that the 'description' fallback branch is dead code for AgentDefinition
+    # unless it's a subclass.
+
+    # Let's try to create a subclass that allows extra fields.
+    from pydantic import ConfigDict
+
+    class ExtendedAgentDefinition(AgentDefinition):
+        model_config = ConfigDict(extra="allow") # type: ignore
+
+    agent_def = ExtendedAgentDefinition(
+        id="describer",
+        name="Describer",
+        role="Scribe",
+        goal="Write",
+        description="I describe things.", # This is now allowed
+    )
+
+    metadata = ManifestMetadata(
+        name="Describer",
+        version=2.5,  # Float version to trigger str() conversion
+        created="2025-01-01",  # Extra field
+    )
+
+    manifest = Manifest(
+        kind="Agent",
+        metadata=metadata,
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="Describer")}),
+        definitions={"Describer": agent_def},
+    )
+
+    card = render_agent_card(manifest)
+
+    assert "# Describer (v2.5)" in card
+    assert "**Created:** 2025-01-01" in card
+    # Should not be quoted
+    assert "\nI describe things." in card
+    assert "> I describe things." not in card
+
+
+def test_render_pricing_units() -> None:
+    """Test different pricing units."""
+    resources = ModelProfile(
+        provider="test",
+        model_id="cheap",
+        pricing=RateCard(
+            unit=PricingUnit.TOKEN_1K,  # Trigger "1k" logic
+            input_cost=0.01,
+            output_cost=0.02,
+            currency="USD",
+        ),
+        constraints=ResourceConstraints(context_window_size=1000),
+    )
+
+    agent_def = AgentDefinition(
+        id="cheap_agent",
+        name="Cheap",
+        role="Saver",
+        goal="Save money",
+        resources=resources,
+    )
+
+    manifest = Manifest(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Cheap"),
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="Cheap")}),
+        definitions={"Cheap": agent_def},
+    )
+
+    card = render_agent_card(manifest)
+
+    assert "$0.01 / 1k Input" in card
+    assert "$0.02 / 1k Output" in card
