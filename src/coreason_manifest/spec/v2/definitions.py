@@ -61,6 +61,7 @@ class AgentDefinition(CoReasonBaseModel):
     model: str | None = Field(None, description="LLM identifier.")
     tools: list[str] = Field(default_factory=list, description="List of Tool IDs or URI references.")
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+    interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition, description="Input/Output contract.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
     )
