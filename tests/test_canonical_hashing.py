@@ -1,8 +1,9 @@
-import json
 import hashlib
-import pytest
+import json
+
+from coreason_manifest.spec.common_base import ToolRiskLevel
 from coreason_manifest.spec.v2.definitions import ToolDefinition
-from coreason_manifest.spec.common_base import ToolRiskLevel, CoReasonBaseModel
+
 
 class TestCanonicalHashing:
     def test_determinism(self) -> None:
@@ -12,14 +13,14 @@ class TestCanonicalHashing:
             name="My Tool",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="A test tool"
+            description="A test tool",
         )
         tool2 = ToolDefinition(
             id="tool-1",
             name="My Tool",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="A test tool"
+            description="A test tool",
         )
         assert tool1.compute_hash() == tool2.compute_hash()
 
@@ -30,14 +31,14 @@ class TestCanonicalHashing:
             name="My Tool",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="A test tool"
+            description="A test tool",
         )
         tool2 = ToolDefinition(
             id="tool-1",
             name="My Tool Changed",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="A test tool"
+            description="A test tool",
         )
         assert tool1.compute_hash() != tool2.compute_hash()
 
@@ -48,14 +49,14 @@ class TestCanonicalHashing:
             name="My Tool",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="A test tool"
+            description="A test tool",
         )
         tool2 = ToolDefinition(
             id="tool-1",
             name="My Tool",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="Different description"
+            description="Different description",
         )
 
         # Hashes should differ normally
@@ -71,7 +72,7 @@ class TestCanonicalHashing:
             name="My Tool",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="A test tool"
+            description="A test tool",
         )
 
         hash1 = tool.compute_hash()
@@ -93,7 +94,7 @@ class TestCanonicalHashing:
             name="My Tool 🚀",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="Test with unicode: \u00e9"
+            description="Test with unicode: \u00e9",
         )
 
         # Should not raise
@@ -107,6 +108,6 @@ class TestCanonicalHashing:
             name="My Tool 🚀",
             uri="https://example.com/tool",
             risk_level=ToolRiskLevel.SAFE,
-            description="Test with unicode: \u00e9"
+            description="Test with unicode: \u00e9",
         )
         assert h == tool2.compute_hash()
