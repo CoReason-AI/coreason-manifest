@@ -397,3 +397,46 @@ def test_invalid_constraints_correction() -> None:
     out_float = generate_mock_output(agent)
     assert isinstance(out_float, float)
     assert out_float >= 150.0
+
+
+def test_fallback_safe_default_unknown_type() -> None:
+    # Coverage for _get_safe_default with unknown type (strict=False)
+    gen = MockGenerator(strict=False)
+    default = gen._get_safe_default({"type": "unknown-type"})
+    assert default == {}
+
+
+def test_strict_fallback_safe_default_unknown_type() -> None:
+    # Coverage for _get_safe_default with unknown type (strict=True)
+    # This might be redundant with test_strict_recursion_fallback but let's be explicit
+    # to target the specific line in _get_safe_default
+    gen = MockGenerator(strict=True)
+    with pytest.raises(ValueError, match="Cannot determine safe default"):
+        gen._get_safe_default({"type": "unknown-type"})
+
+
+def test_heuristic_object_type() -> None:
+    # Coverage for heuristic: properties -> object
+    schema = {"properties": {"a": {"type": "string"}}}
+    agent = create_agent(schema)
+    output = generate_mock_output(agent)
+    assert isinstance(output, dict)
+    assert "a" in output
+    assert isinstance(output["a"], str)
+
+
+def test_heuristic_array_type() -> None:
+    # Coverage for heuristic: items -> array
+    schema = {"items": {"type": "string"}}
+    agent = create_agent(schema)
+    output = generate_mock_output(agent)
+    assert isinstance(output, list)
+    if output:
+        assert isinstance(output[0], str)
+
+
+def test_safe_default_null_type() -> None:
+    # Coverage for _get_safe_default with type="null"
+    gen = MockGenerator(strict=False)
+    default = gen._get_safe_default({"type": "null"})
+    assert default is None

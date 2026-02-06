@@ -47,9 +47,6 @@ class MockGenerator:
     def _random_int(self, min_val: int = 0, max_val: int = 100) -> int:
         return self.rng.randint(min_val, max_val)
 
-    def _random_float(self) -> float:
-        return self.rng.random() * 100.0
-
     def _random_bool(self) -> bool:
         return self.rng.choice([True, False])
 
