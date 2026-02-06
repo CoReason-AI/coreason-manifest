@@ -144,6 +144,35 @@ def test_remove_inputs_block() -> None:
     # If I can't hit it with Pydantic models, maybe I can't hit it at all in normal usage.
     # BUT, `_walk_diff` is generic.
 
+    # Use model_construct to bypass validation and force None
+    agent2 = agent1.model_copy(deep=True)
+    # Hack to set inputs to None in the dict representation that model_construct uses
+    # But model_copy calls init.
+    # Let's use construct.
+    d = agent2.model_dump(by_alias=True)
+    d["interface"]["inputs"] = None
+    agent2_broken = ManifestV2.model_construct(**d)
+
+    report = compare_agents(agent1, agent2_broken)
+    change = next(c for c in report.changes if c.path == "interface.inputs")
+    assert change.category == ChangeCategory.BREAKING
+
+
+def test_inputs_schema_change_type() -> None:
+    """Changing schema type (e.g. object to string)."""
+    agent1 = create_base_manifest()
+    inputs1 = {"type": "object"}
+    agent1 = agent1.model_copy(update={"interface": InterfaceDefinition(inputs=inputs1)})
+
+    agent2 = agent1.model_copy(deep=True)
+    inputs2 = {"type": "string"}
+    agent2 = agent2.model_copy(update={"interface": InterfaceDefinition(inputs=inputs2)})
+
+    report = compare_agents(agent1, agent2)
+    change = next(c for c in report.changes if "interface.inputs.type" in c.path)
+    # Falls through to default
+    assert change.category == ChangeCategory.PATCH
+
 
 def test_complex_overhaul() -> None:
     """Multiple simultaneous changes."""
