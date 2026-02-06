@@ -13,10 +13,10 @@ from coreason_manifest import (
     ManifestV2,
     PolicyDefinition,
 )
-from coreason_manifest.utils.diff import ChangeCategory, compare_agents
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 from coreason_manifest.spec.v2.resources import ModelProfile, RateCard
+from coreason_manifest.utils.diff import ChangeCategory, compare_agents
 
 
 def create_base_manifest() -> ManifestV2:
