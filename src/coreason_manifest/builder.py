@@ -19,7 +19,7 @@ from coreason_manifest.spec.common.capabilities import (
 )
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 
-__all__ = ["AgentBuilder", "TypedCapability", "CapabilityType", "DeliveryMode"]
+__all__ = ["AgentBuilder", "CapabilityType", "DeliveryMode", "TypedCapability"]
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,

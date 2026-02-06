@@ -208,7 +208,7 @@ def simulate_execution(agent: ManifestV2, inputs: dict[str, Any]) -> None:
             print(f"   i️ Non-Agent Step Type: {step.type}")
 
         # Move to next step
-        current_step_id = step.next if hasattr(step, "next") else None  # type: ignore
+        current_step_id = step.next if hasattr(step, "next") else None
 
     print(f"\n🏁 Execution Complete. Cost Estimate: ${total_cost:.4f}")
 

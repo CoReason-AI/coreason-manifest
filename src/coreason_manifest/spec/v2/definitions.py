@@ -20,20 +20,20 @@ from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.resources import ModelProfile
 
 __all__ = [
-    "DesignMetadata",
-    "ToolDefinition",
     "AgentDefinition",
-    "GenericDefinition",
-    "BaseStep",
     "AgentStep",
-    "LogicStep",
+    "BaseStep",
     "CouncilStep",
-    "SwitchStep",
-    "Step",
-    "Workflow",
+    "DesignMetadata",
+    "GenericDefinition",
+    "InterfaceDefinition",
+    "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
-    "InterfaceDefinition",
+    "Step",
+    "SwitchStep",
+    "ToolDefinition",
+    "Workflow",
 ]
 
 
