@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -26,11 +26,8 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 
-InputT = TypeVar("InputT", bound=BaseModel)
-OutputT = TypeVar("OutputT", bound=BaseModel)
 
-
-class TypedCapability(Generic[InputT, OutputT]):
+class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
     """
     A strictly typed capability definition that wraps Pydantic models.
 
