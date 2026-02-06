@@ -10,6 +10,9 @@
 
 from __future__ import annotations
 
-from loguru import logger
+import logging
+
+logger = logging.getLogger("coreason_manifest")
+logger.addHandler(logging.NullHandler())
 
 __all__ = ["logger"]
