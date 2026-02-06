@@ -7,3 +7,7 @@
 # Commercial use beyond a 30-day trial requires a separate license.
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+from .mcp import CoreasonMCPServer, create_mcp_tool_definition
+
+__all__ = ["CoreasonMCPServer", "create_mcp_tool_definition"]
