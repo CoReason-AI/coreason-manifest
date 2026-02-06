@@ -42,6 +42,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Observability & Tracing](observability.md)**
     *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
 
+*   **[Audit Hashing & Integrity](audit_hashing.md)**
+    *   Specifications for the "Tamper-Evident" audit logging system, including the `AuditLog` model and SHA-256 chain verification algorithms.
+
 *   **[Frontend Integration & Graph Events](frontend_integration.md)**
     *   Defines the strict `GraphEvent` hierarchy for internal engine state and the migration strategy to standard `CloudEvent` formats.
 
