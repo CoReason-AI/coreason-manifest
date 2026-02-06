@@ -88,6 +88,7 @@ from .spec.v2.resources import (
     ResourceConstraints,
 )
 from .utils.audit import compute_audit_hash, verify_chain
+from .utils.docs import render_agent_card
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
@@ -185,6 +186,7 @@ __all__ = [
     "dump",
     "load",
     "migrate_graph_event_to_cloud_event",
+    "render_agent_card",
     "validate_integrity",
     "validate_loose",
     "verify_chain",
