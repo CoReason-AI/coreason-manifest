@@ -117,12 +117,7 @@ def test_with_tool() -> None:
 
 def test_with_role_and_goal() -> None:
     """Test setting role and goal explicitly."""
-    manifest = (
-        AgentBuilder("RoleAgent")
-        .with_role("Researcher")
-        .with_goal("Find information")
-        .build()
-    )
+    manifest = AgentBuilder("RoleAgent").with_role("Researcher").with_goal("Find information").build()
     agent_def = manifest.definitions["RoleAgent"]
 
     assert isinstance(agent_def, AgentDefinition)
