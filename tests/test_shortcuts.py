@@ -31,6 +31,7 @@ def test_simple_agent_defaults() -> None:
     assert isinstance(step, AgentStep)
     assert step.agent == "TestAgent"
 
+
 def test_simple_agent_full() -> None:
     manifest = simple_agent(
         name="ResearchAgent",
