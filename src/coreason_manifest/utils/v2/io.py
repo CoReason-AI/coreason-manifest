@@ -112,7 +112,8 @@ def dump_to_yaml(manifest: ManifestV2) -> str:
         The YAML string representation.
     """
     # Serialize to dict, using aliases (e.g., x-design) and excluding None
-    data = manifest.model_dump(by_alias=True, exclude_none=True)
+    # Use mode='json' to ensure Enums and other types are serialized to primitives
+    data = manifest.model_dump(by_alias=True, exclude_none=True, mode="json")
 
     # Reorder keys to ensure human readability
     # Priority keys: apiVersion, kind, metadata

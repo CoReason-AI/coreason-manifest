@@ -41,7 +41,23 @@ For details on composition, security constraints, and referencing syntax, see [S
 
 ### Creating a Manifest Programmatically
 
-You can also construct the object directly using Python classes.
+#### Simplified Creation (Recommended for simple agents)
+
+For basic use cases, use the `simple_agent` shortcut to reduce boilerplate. See the [Quick Start](quickstart.md) for more.
+
+```python
+from coreason_manifest import simple_agent
+
+manifest = simple_agent(
+    name="MyAgent",
+    prompt="You are a helper.",
+    model="gpt-4"
+)
+```
+
+#### Manual Construction (Advanced)
+
+For full control over every field, you can construct the object directly using Python classes.
 
 ```python
 from coreason_manifest import (

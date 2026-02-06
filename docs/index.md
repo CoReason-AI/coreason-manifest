@@ -4,6 +4,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 ## Core Documentation
 
+*   **[Quick Start](quickstart.md)**
+    *   Get up and running in seconds with the simplified `simple_agent` API.
+
 *   **[Usage Guide](usage.md)**
     *   A comprehensive guide on how to use `coreason-manifest` to define agents, recipes, and work with the library's core concepts programmatically.
 
