@@ -95,5 +95,6 @@ class AuditLog(CoReasonBaseModel):
     actor: str
     action: str
     outcome: str
+    safety_metadata: dict[str, Any] | None = Field(default=None, description="Security context and policy decision metadata.")
     previous_hash: str | None = Field(None, description="Hash of the preceding log entry for tamper-evidence.")
     integrity_hash: str = Field(description="SHA-256 hash of this record.")
