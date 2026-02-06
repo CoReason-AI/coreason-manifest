@@ -56,11 +56,7 @@ def test_validation_logic() -> None:
 def test_url_validation() -> None:
     """Verify validation fails for invalid URL in CitationItem."""
     with pytest.raises(ValidationError) as excinfo:
-        CitationItem(
-            source_id="src1",
-            uri="invalid-url",
-            title="Title"
-        )
+        CitationItem(source_id="src1", uri="invalid-url", title="Title")
 
     assert "uri" in str(excinfo.value)
 
