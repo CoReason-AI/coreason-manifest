@@ -22,6 +22,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Agent Card Generator](agent_card_generator.md)**
     *   Guide for using the automated documentation utility to generate standardized "Agent Cards" from Manifest definitions.
 
+*   **[Mock Data Factory](mock_factory.md)**
+    *   Utility for generating deterministic, schema-compliant synthetic data for Agent outputs and testing.
+
 ## Specifications & Protocols
 
 *   **[Coreason Agent Manifest (CAM) Specification](cap/specification.md)**
