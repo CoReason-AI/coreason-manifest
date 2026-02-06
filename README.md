@@ -16,6 +16,15 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
 
+## Architecture & Boundaries
+
+To avoid the "Distributed Monolith" trap, this library strictly separates **Data** from **Logic**:
+
+*   **`coreason_manifest.spec` (The Kernel):** Contains **pure Pydantic models (DTOs)**. It has zero dependencies on business logic and is safe to import anywhere.
+*   **`coreason_manifest.utils` (The Toolbelt):** Contains **optional reference implementations** for Visualization, Audit Hashing, and Governance Enforcement.
+
+These components are co-located for developer convenience but are architecturally decoupled. The Core Spec **never** imports from Utils. See [ADR-001](docs/architecture/ADR-001-shared-kernel-boundaries.md) and [Package Structure](docs/package_structure.md) for details.
+
 ## Features
 
 *   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`) and Recipes (`Recipe`).
