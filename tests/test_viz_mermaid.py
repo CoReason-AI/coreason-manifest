@@ -167,3 +167,125 @@ def test_mermaid_invalid_start_step() -> None:
 
     # Should fallback to linking Inputs to End
     assert "INPUTS --> END" in chart
+
+
+def test_mermaid_cyclic_workflow() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Cyclic"},
+        "workflow": {
+            "start": "A",
+            "steps": {
+                "A": {"type": "agent", "id": "A", "agent": "worker", "next": "B"},
+                "B": {"type": "agent", "id": "B", "agent": "worker", "next": "A"},  # Loop back
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    assert "STEP_A --> STEP_B" in chart
+    assert "STEP_B --> STEP_A" in chart
+
+
+def test_mermaid_disconnected_nodes() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Disconnected"},
+        "workflow": {
+            "start": "main",
+            "steps": {
+                "main": {"type": "logic", "id": "main", "code": "pass", "next": None},
+                "orphan": {"type": "logic", "id": "orphan", "code": "pass"},  # Not linked
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Orphan node should still be defined
+    assert 'STEP_orphan["orphan<br/>(Call: Logic)"]:::step' in chart
+    # But likely not connected from anywhere (unless Inputs connected it, but Start->Inputs->main)
+    # Just checking existence validates it's visualized.
+
+
+def test_mermaid_complex_switch_routing() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Complex Switch"},
+        "workflow": {
+            "start": "root",
+            "steps": {
+                "root": {
+                    "type": "switch",
+                    "id": "root",
+                    "cases": {
+                        "c1": "target_a",
+                        "c2": "target_a",  # Multi-path to same node
+                    },
+                    "default": "root",  # Self-loop default
+                },
+                "target_a": {"type": "logic", "id": "target_a", "code": "pass"},
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    assert 'STEP_root -- "c1" --> STEP_target_a' in chart
+    assert 'STEP_root -- "c2" --> STEP_target_a' in chart
+    assert 'STEP_root -- "default" --> STEP_root' in chart
+
+
+def test_mermaid_special_characters_heavy() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Special Chars"},
+        "workflow": {
+            "start": "start@node",
+            "steps": {
+                "start@node": {
+                    "type": "agent",
+                    "id": "start@node",
+                    "agent": "tool/v1",
+                    "next": "end w/ space & symbol!",
+                },
+                "end w/ space & symbol!": {
+                    "type": "logic",
+                    "id": "end w/ space & symbol!",
+                    "code": "pass",
+                },
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Verify ID sanitization
+    assert "STEP_start_node" in chart
+    assert "STEP_end_w__space___symbol_" in chart
+    # Verify Labels preserved
+    assert '["start@node<br/>' in chart
+    assert '["end w/ space & symbol!<br/>' in chart
+
+
+def test_mermaid_empty_inputs() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Agent",
+        "metadata": {"name": "No Inputs"},
+        "interface": {"inputs": {}},  # Empty inputs
+        "workflow": {
+            "start": "s1",
+            "steps": {"s1": {"type": "logic", "id": "s1", "code": "pass"}},
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Should just be "Inputs" without bullet points
+    assert 'INPUTS["Inputs"]:::input' in chart
