@@ -58,6 +58,7 @@ from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.interfaces.session import SessionHandle
 from .spec.interfaces.stream import IStreamEmitter
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
@@ -139,6 +140,7 @@ __all__ = [
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
+    "SessionHandle",
     "SessionState",
     "StateDefinition",
     "Step",

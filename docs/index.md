@@ -30,6 +30,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Session Management](session_management.md)**
     *   Architecture for strict, immutable, and stateless management of conversational memory (`SessionState`, `MemoryStrategy`).
 
+*   **[Active Memory Interface](active_memory_interface.md)**
+    *   Protocol (`SessionHandle`) for active agent interactions with storage (history, recall, persistent variables).
+
 *   **[Request Lineage Implementation](request_lineage_implementation.md)**
     *   Details the tracking of cryptographic causality, distributed tracing IDs (`request_id`, `root_request_id`), and auto-rooting logic.
 
