@@ -8,14 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from uuid import uuid4
-import sys
 
-from coreason_manifest.utils.mock import MockGenerator
 from coreason_manifest.utils.audit import compute_audit_hash
-from coreason_manifest.spec.common.observability import AuditLog
+from coreason_manifest.utils.mock import MockGenerator
+
 
 def test_mock_recursion_dos_fix() -> None:
     """
@@ -24,18 +22,8 @@ def test_mock_recursion_dos_fix() -> None:
     """
     # Schema with allOf loop: A -> B -> A
     definitions = {
-        "A": {
-            "allOf": [
-                {"$ref": "#/$defs/B"},
-                {"properties": {"a": {"type": "string"}}}
-            ]
-        },
-        "B": {
-            "allOf": [
-                {"$ref": "#/$defs/A"},
-                {"properties": {"b": {"type": "integer"}}}
-            ]
-        }
+        "A": {"allOf": [{"$ref": "#/$defs/B"}, {"properties": {"a": {"type": "string"}}}]},
+        "B": {"allOf": [{"$ref": "#/$defs/A"}, {"properties": {"b": {"type": "integer"}}}]},
     }
 
     schema = {"$ref": "#/$defs/A"}
@@ -50,6 +38,7 @@ def test_mock_recursion_dos_fix() -> None:
     # We don't strictly assert the content because it's truncated by recursion limit,
     # but it should return a valid python object.
 
+
 def test_audit_hash_robustness_fix() -> None:
     """
     Verifies that compute_audit_hash handles non-serializable objects in safety_metadata
@@ -62,15 +51,16 @@ def test_audit_hash_robustness_fix() -> None:
         "action": "login",
         "outcome": "success",
         "safety_metadata": {
-            "bad_obj": {1, 2, 3} # Sets are not JSON serializable
-        }
+            "bad_obj": {1, 2, 3}  # Sets are not JSON serializable
+        },
     }
 
     # This should not raise TypeError
     hash_val = compute_audit_hash(entry)
 
     assert isinstance(hash_val, str)
-    assert len(hash_val) == 64 # SHA-256 hex digest length
+    assert len(hash_val) == 64  # SHA-256 hex digest length
+
 
 def test_mock_safe_defaults() -> None:
     """
