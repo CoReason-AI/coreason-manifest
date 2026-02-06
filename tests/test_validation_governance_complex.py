@@ -16,8 +16,8 @@ from coreason_manifest import (
     ToolDefinition,
     ToolRiskLevel,
     Workflow,
-    check_compliance_v2,
 )
+from coreason_manifest.utils.v2.governance import check_compliance_v2
 
 
 def test_complex_large_manifest_many_tools() -> None:

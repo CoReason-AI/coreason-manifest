@@ -10,10 +10,9 @@
 
 from coreason_manifest import (
     AgentBuilder,
-    ChangeCategory,
     ManifestV2,
-    compare_agents,
 )
+from coreason_manifest.utils.diff import ChangeCategory, compare_agents
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 from coreason_manifest.spec.v2.resources import ModelProfile

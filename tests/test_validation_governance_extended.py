@@ -18,8 +18,8 @@ from coreason_manifest import (
     ToolDefinition,
     ToolRiskLevel,
     Workflow,
-    check_compliance_v2,
 )
+from coreason_manifest.utils.v2.governance import check_compliance_v2
 
 
 def test_governance_auth_edge_cases() -> None:

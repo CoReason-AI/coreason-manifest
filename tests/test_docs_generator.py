@@ -24,8 +24,8 @@ from coreason_manifest import (
     SuccessCriterion,
     ToolDefinition,
     Workflow,
-    render_agent_card,
 )
+from coreason_manifest.utils.docs import render_agent_card
 
 
 def test_render_full_agent() -> None:

@@ -19,10 +19,10 @@ from coreason_manifest import (
     ToolDefinition,
     ToolRiskLevel,
     Workflow,
-    check_compliance_v2,
     validate_integrity,
     validate_loose,
 )
+from coreason_manifest.utils.v2.governance import check_compliance_v2
 
 
 def test_draft_mode_loose() -> None:

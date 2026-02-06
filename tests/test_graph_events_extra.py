@@ -18,8 +18,8 @@ from coreason_manifest import (
     GraphEventNodeDone,
     GraphEventNodeStart,
     GraphEventNodeStream,
-    migrate_graph_event_to_cloud_event,
 )
+from coreason_manifest.utils.migration import migrate_graph_event_to_cloud_event
 
 
 def test_payload_recursion() -> None:

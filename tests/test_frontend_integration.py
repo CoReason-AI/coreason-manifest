@@ -17,8 +17,8 @@ from coreason_manifest import (
     GraphEventError,
     GraphEventNodeStart,
     GraphEventNodeStream,
-    migrate_graph_event_to_cloud_event,
 )
+from coreason_manifest.utils.migration import migrate_graph_event_to_cloud_event
 
 
 def test_graph_event_polymorphism() -> None:
