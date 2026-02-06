@@ -183,3 +183,35 @@ def test_manifest_builder_duplicate_ids() -> None:
     t_def = manifest.definitions["t1"]
     assert isinstance(t_def, ToolDefinition)
     assert t_def.risk_level == "critical"
+
+
+def test_manifest_builder_empty_steps_error() -> None:
+    """Verify error when attempting to build a manifest with no steps."""
+    builder = ManifestBuilder("EmptySteps")
+
+    with pytest.raises(ValueError, match="Start step must be specified"):
+        builder.build()
+
+
+def test_manifest_builder_overlapping_ids() -> None:
+    """Verify behavior when different definition types share an ID."""
+    # Note: The ManifestV2 schema stores all definitions in a single dictionary.
+    # So an Agent and a Tool cannot share an ID. Last one wins.
+    agent = AgentBuilder("common_id").build_definition()
+    tool = ToolDefinition(id="common_id", name="Tool", uri=StrictUri("http://a.com"), risk_level="safe")
+
+    manifest = (
+        ManifestBuilder("OverlapTest").add_agent(agent).add_tool(tool).add_step(LogicStep(id="s1", code="pass")).build()
+    )
+
+    assert len(manifest.definitions) == 1
+    # Tool was added last
+    assert isinstance(manifest.definitions["common_id"], ToolDefinition)
+
+
+def test_manifest_builder_metadata_collision_error() -> None:
+    """Verify TypeError when overriding core metadata fields via set_metadata."""
+    builder = ManifestBuilder("CollisionTest").set_metadata("name", "NewName").add_step(LogicStep(id="s1", code="pass"))
+
+    with pytest.raises(TypeError, match="multiple values for keyword argument 'name'"):
+        builder.build()
