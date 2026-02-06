@@ -298,3 +298,38 @@ def test_render_pricing_units() -> None:
 
     assert "$0.01 / 1k Input" in card
     assert "$0.02 / 1k Output" in card
+
+
+def test_render_pricing_unit_other() -> None:
+    """Test pricing unit that is neither TOKEN_1M nor TOKEN_1K."""
+    resources = ModelProfile(
+        provider="test",
+        model_id="per_request",
+        pricing=RateCard(
+            unit=PricingUnit.REQUEST,  # Trigger fallback logic
+            input_cost=0.05,
+            output_cost=0.0,
+            currency="USD",
+        ),
+        constraints=ResourceConstraints(context_window_size=1000),
+    )
+
+    agent_def = AgentDefinition(
+        id="request_agent",
+        name="RequestBased",
+        role="Worker",
+        goal="Work",
+        resources=resources,
+    )
+
+    manifest = Manifest(
+        kind="Agent",
+        metadata=ManifestMetadata(name="RequestBased"),
+        workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="RequestBased")}),
+        definitions={"RequestBased": agent_def},
+    )
+
+    card = render_agent_card(manifest)
+
+    # Should contain "REQUEST" directly
+    assert "$0.05 / REQUEST Input" in card
