@@ -123,3 +123,47 @@ def test_mermaid_switch_case() -> None:
     # 'status == "ok"' -> 'status == 'ok''
     assert "STEP_decide -- \"status == 'ok'\" --> STEP_step_ok" in chart
     assert 'STEP_decide -- "default" --> STEP_step_default' in chart
+
+
+def test_mermaid_council_step() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Council Test"},
+        "workflow": {
+            "start": "vote",
+            "steps": {
+                "vote": {
+                    "type": "council",
+                    "id": "vote",
+                    "voters": ["agent1", "agent2"],
+                    "strategy": "consensus",
+                    "next": None,
+                }
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    assert "(Call: Council)" in chart
+    assert "STEP_vote --> END" in chart
+
+
+def test_mermaid_invalid_start_step() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Invalid Start Test"},
+        "workflow": {
+            "start": "non_existent_step",
+            "steps": {
+                "step1": {"type": "logic", "id": "step1", "code": "pass"},
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Should fallback to linking Inputs to End
+    assert "INPUTS --> END" in chart
