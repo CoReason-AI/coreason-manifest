@@ -10,9 +10,11 @@
 
 from typing import Any
 
+import pytest
+
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import AgentDefinition
-from coreason_manifest.utils.mock import generate_mock_output
+from coreason_manifest.utils.mock import generate_mock_output, MockGenerator
 
 
 def create_agent(outputs_schema: dict[str, Any]) -> AgentDefinition:
@@ -249,3 +251,144 @@ def test_all_of_mixed_props() -> None:
     agent = create_agent(schema)
     output = generate_mock_output(agent)
     assert isinstance(output["a"], int)
+
+
+def test_strict_mode_unknown_type() -> None:
+    schema = {"type": "unknown"}
+    agent = create_agent(schema)
+    with pytest.raises(ValueError, match="Unknown type"):
+        generate_mock_output(agent, strict=True)
+
+
+def test_strict_mode_missing_ref() -> None:
+    schema = {"$ref": "#/missing"}
+    agent = create_agent(schema)
+    with pytest.raises(ValueError, match="Missing definition"):
+        generate_mock_output(agent, strict=True)
+
+
+def test_strict_mode_valid() -> None:
+    schema = {"type": "string"}
+    agent = create_agent(schema)
+    output = generate_mock_output(agent, strict=True)
+    assert isinstance(output, str)
+
+
+def test_deep_merge_direct() -> None:
+    gen = MockGenerator()
+    base = {"required": ["a"], "properties": {"x": {"type": "integer"}}, "other": {"foo": 1}}
+    update = {"required": ["b"], "properties": {"y": {"type": "string"}}, "other": {"bar": 2}}
+    merged = gen._deep_merge(base, update)
+
+    assert set(merged["required"]) == {"a", "b"}
+    assert "x" in merged["properties"]
+    assert "y" in merged["properties"]
+    assert merged["other"]["foo"] == 1
+    assert merged["other"]["bar"] == 2
+
+
+def test_recursion_limit_array() -> None:
+    schema = {
+        "$defs": {
+            "List": {
+                "type": "array",
+                "items": {"$ref": "#/$defs/List"},
+            }
+        },
+        "$ref": "#/$defs/List",
+    }
+    agent = create_agent(schema)
+    output = generate_mock_output(agent)
+    assert isinstance(output, list)
+    # The list may contain other lists, but eventually it should bottom out to []
+    # due to recursion limit in _generate_value calls.
+
+
+def test_recursion_limit_scalar_with_ref() -> None:
+    # Test reaching recursion limit for scalar types via cyclic refs to hit _get_safe_default branches
+    types = [
+        ("string", str, ""),
+        ("integer", int, 0),
+        ("number", float, 0.0),
+        ("boolean", bool, False),
+    ]
+
+    for type_name, py_type, expected_default in types:
+        schema = {
+            "$defs": {
+                "Rec": {
+                    "type": type_name,
+                    "$ref": "#/$defs/Rec"
+                }
+            },
+            "$ref": "#/$defs/Rec"
+        }
+
+        agent = create_agent(schema)
+        output = generate_mock_output(agent)
+        assert isinstance(output, py_type)
+        assert output == expected_default
+
+
+def test_strict_recursion_fallback() -> None:
+    schema = {
+        "$defs": {
+            "Rec": {
+                "type": "unknown",
+                "$ref": "#/$defs/Rec"
+            }
+        },
+        "$ref": "#/$defs/Rec"
+    }
+
+    agent = create_agent(schema)
+    with pytest.raises(ValueError, match="Cannot determine safe default"):
+        generate_mock_output(agent, strict=True)
+
+
+def test_recursion_limit_union() -> None:
+    # Recursion with union types to hit _get_safe_default union branch
+    schema = {
+        "$defs": {
+            "RecUnion": {
+                "type": ["string", "null"],
+                "$ref": "#/$defs/RecUnion"
+            }
+        },
+        "$ref": "#/$defs/RecUnion"
+    }
+    agent = create_agent(schema)
+    # Should resolve to string or None, but safe default prefers string ("")
+    # or if it picks null (unlikely due to prioritize non-null), None.
+    # _get_safe_default(union) -> picks non-null -> "string" -> ""
+    output = generate_mock_output(agent)
+    assert output == "" or output is None
+
+
+def test_deep_merge_nested_properties() -> None:
+    gen = MockGenerator()
+    base = {"properties": {"nest": {"properties": {"a": {"type": "int"}}}}}
+    update = {"properties": {"nest": {"properties": {"b": {"type": "str"}}}}}
+    merged = gen._deep_merge(base, update)
+    assert "a" in merged["properties"]["nest"]["properties"]
+    assert "b" in merged["properties"]["nest"]["properties"]
+
+
+def test_invalid_constraints_correction() -> None:
+    # Test string: maxLength < minLength
+    schema_str = {"type": "string", "minLength": 25} # Default maxLength is 20
+    agent = create_agent(schema_str)
+    out_str = generate_mock_output(agent)
+    assert len(out_str) >= 25
+
+    # Test int: maximum < minimum
+    schema_int = {"type": "integer", "minimum": 150} # Default maximum is 100
+    agent = create_agent(schema_int)
+    out_int = generate_mock_output(agent)
+    assert out_int >= 150
+
+    # Test float: maximum < minimum
+    schema_float = {"type": "number", "minimum": 150.0} # Default maximum is 100.0
+    agent = create_agent(schema_float)
+    out_float = generate_mock_output(agent)
+    assert out_float >= 150.0

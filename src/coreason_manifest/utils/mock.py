@@ -13,13 +13,21 @@ import secrets
 import string
 import uuid
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, TypeAlias
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 
+JsonValue: TypeAlias = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
+JsonSchema: TypeAlias = dict[str, Any]
+
 
 class MockGenerator:
-    def __init__(self, seed: int | None = None, definitions: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        seed: int | None = None,
+        definitions: JsonSchema | None = None,
+        strict: bool = False,
+    ):
         # Use secrets.SystemRandom for cryptographic strength by default.
         # Fallback to random.Random only if a seed is explicitly provided for determinism.
         if seed is not None:
@@ -30,6 +38,7 @@ class MockGenerator:
         self.definitions = definitions or {}
         self.recursion_depth = 0
         self.max_depth = 10
+        self.strict = strict
 
     def _random_string(self, min_len: int = 5, max_len: int = 20) -> str:
         length = self.rng.randint(min_len, max_len)
@@ -38,13 +47,10 @@ class MockGenerator:
     def _random_int(self, min_val: int = 0, max_val: int = 100) -> int:
         return self.rng.randint(min_val, max_val)
 
-    def _random_float(self) -> float:
-        return self.rng.random() * 100.0
-
     def _random_bool(self) -> bool:
         return self.rng.choice([True, False])
 
-    def _get_safe_default(self, schema: dict[str, Any]) -> Any:
+    def _get_safe_default(self, schema: JsonSchema) -> JsonValue:
         """Returns a safe default value based on the schema type."""
         t = schema.get("type")
 
@@ -65,27 +71,48 @@ class MockGenerator:
             return []
         if t == "object":
             return {}
+        if t == "null":
+            return None
 
         # Fallback
+        if self.strict:
+            raise ValueError(f"Cannot determine safe default for schema: {schema}")
         return {}
 
-    def _generate_value(self, schema: dict[str, Any]) -> Any:
+    def _deep_merge(self, base: JsonSchema, update: JsonSchema) -> JsonSchema:
+        """Deep merge two schemas."""
+        merged = base.copy()
+        for k, v in update.items():
+            if k == "properties" and isinstance(v, dict) and "properties" in merged and isinstance(merged["properties"], dict):
+                merged["properties"] = self._deep_merge(merged["properties"], v)
+            elif k == "required" and isinstance(v, list) and "required" in merged and isinstance(merged["required"], list):
+                merged["required"] = list(set(merged["required"] + v))
+            elif isinstance(v, dict) and k in merged and isinstance(merged[k], dict):
+                merged[k] = self._deep_merge(merged[k], v)
+            else:
+                merged[k] = v
+        return merged
+
+    def _resolve_ref(self, ref: str) -> JsonSchema:
+        ref_name = ref.split("/")[-1]
+        if ref_name in self.definitions:
+            return self.definitions[ref_name]
+        if self.strict:
+            raise ValueError(f"Missing definition for reference: {ref}")
+        return {}
+
+    def _generate_value(self, schema: JsonSchema) -> JsonValue:
         if self.recursion_depth > self.max_depth:
             return self._get_safe_default(schema)
 
         # Handle $ref
         if "$ref" in schema:
-            ref = schema["$ref"]
-            # Typically refs are like "#/$defs/MyModel" or "#/definitions/MyModel"
-            ref_name = ref.split("/")[-1]
-            if ref_name in self.definitions:
-                self.recursion_depth += 1
-                try:
-                    return self._generate_value(self.definitions[ref_name])
-                finally:
-                    self.recursion_depth -= 1
-            # Fallback if not found
-            return {}
+            self.recursion_depth += 1
+            try:
+                ref_schema = self._resolve_ref(schema["$ref"])
+                return self._generate_value(ref_schema)
+            finally:
+                self.recursion_depth -= 1
 
         # Handle enum
         if "enum" in schema:
@@ -95,10 +122,40 @@ class MockGenerator:
         if "const" in schema:
             return schema["const"]
 
-        # Handle types
+        # Handle composite keywords (allOf)
+        if "allOf" in schema:
+            merged: JsonSchema = {}
+            for s in schema["allOf"]:
+                sub_schema = s
+                if "$ref" in s:
+                    sub_schema = self._resolve_ref(s["$ref"])
+                merged = self._deep_merge(merged, sub_schema)
+
+            # Merge the original schema into it (except allOf)
+            combined = merged.copy()
+            for k, v in schema.items():
+                if k != "allOf":
+                    if k == "properties" and isinstance(v, dict) and "properties" in combined:
+                         combined["properties"] = self._deep_merge(combined["properties"], v)
+                    else:
+                        combined[k] = v
+
+            self.recursion_depth += 1
+            try:
+                return self._generate_value(combined)
+            finally:
+                self.recursion_depth -= 1
+
+        # Handle anyOf / oneOf
+        if "anyOf" in schema or "oneOf" in schema:
+            options = schema.get("anyOf") or schema.get("oneOf")
+            if options:
+                choice = self.rng.choice(options)
+                return self._generate_value(choice)
+
         t = schema.get("type")
 
-        # Handle union types (e.g. ["string", "null"])
+        # Handle union types
         if isinstance(t, list):
             non_null = [x for x in t if x != "null"]
             if non_null:
@@ -106,117 +163,97 @@ class MockGenerator:
             else:
                 return None
 
-        # Handle composite keywords if type is missing or to augment type
-        if "allOf" in schema:
-            merged: dict[str, Any] = {}
-            for s in schema["allOf"]:
-                # If we have refs in allOf, we should probably resolve them,
-                # but for simple mock gen, let's just merge properties.
-                # A proper merge is complex.
-                # Let's assume s is a schema dict.
-                # If it's a ref, we should resolve it first.
-                sub_schema = s
-                if "$ref" in s:
-                    ref_name = s["$ref"].split("/")[-1]
-                    sub_schema = self.definitions.get(ref_name, {})
-
-                # Deep merge properties
-                for k, v in sub_schema.items():
-                    if k == "properties" and isinstance(v, dict):
-                        if "properties" not in merged:
-                            merged["properties"] = {}
-                        merged["properties"].update(v)
-                    else:
-                        merged[k] = v
-
-            # If the merged schema has a type, recurse with that.
-            # If not, and we have properties, assume object.
-            # We must be careful not to infinite loop if allOf is the only thing.
-            if merged and merged != schema:
-                # Merge the original schema into it (except allOf) to keep other constraints
-                combined = merged.copy()
-                for k, v in schema.items():
-                    if k != "allOf":
-                        # If properties, we should merge those too
-                        if k == "properties" and isinstance(v, dict):
-                            if "properties" not in combined:
-                                combined["properties"] = {}
-                            combined["properties"].update(v)
-                        else:
-                            combined[k] = v
-
-                # Increment recursion depth to prevent infinite loops from cyclic allOf structures
-                self.recursion_depth += 1
-                try:
-                    return self._generate_value(combined)
-                finally:
-                    self.recursion_depth -= 1
-
-        if "anyOf" in schema or "oneOf" in schema:
-            options = schema.get("anyOf") or schema.get("oneOf")
-            if options:
-                choice = self.rng.choice(options)
-                return self._generate_value(choice)
+        if t is None:
+             # Heuristics for missing type
+            if "properties" in schema:
+                t = "object"
+            elif "items" in schema:
+                t = "array"
 
         if t == "string":
-            fmt = schema.get("format")
-            if fmt == "date-time":
-                # Deterministic time range
-                ts = self.rng.randint(1600000000, 1700000000)
-                dt = datetime.fromtimestamp(ts, tz=UTC)
-                return dt.isoformat().replace("+00:00", "Z")
-            if fmt == "uuid":
-                return str(uuid.UUID(int=self.rng.getrandbits(128)))
-            return self._random_string()
-
+            return self._generate_string(schema)
         if t == "integer":
-            return self._random_int()
-
+            return self._generate_int(schema)
         if t == "number":
-            return self._random_float()
-
+            return self._generate_float(schema)
         if t == "boolean":
-            return self._random_bool()
-
+            return self._generate_bool(schema)
         if t == "array":
-            items_schema = schema.get("items", {})
-            length = self.rng.randint(1, 3)
-            return [self._generate_value(items_schema) for _ in range(length)]
-
+            return self._generate_array(schema)
         if t == "object":
-            props = schema.get("properties", {})
-            output = {}
-            for k, v in props.items():
-                output[k] = self._generate_value(v)
-            return output
-
+            return self._generate_object(schema)
         if t == "null":
             return None
 
         # Fallback
+        if self.strict:
+            raise ValueError(f"Unknown type: {t} in schema: {schema}")
         return {}
 
+    def _generate_string(self, schema: JsonSchema) -> str:
+        fmt = schema.get("format")
+        if fmt == "date-time":
+            ts = self.rng.randint(1600000000, 1700000000)
+            dt = datetime.fromtimestamp(ts, tz=UTC)
+            return dt.isoformat().replace("+00:00", "Z")
+        if fmt == "uuid":
+            return str(uuid.UUID(int=self.rng.getrandbits(128)))
 
-def generate_mock_output(agent: AgentDefinition, seed: int | None = None) -> Any:
+        min_len = schema.get("minLength", 5)
+        max_len = schema.get("maxLength", 20)
+
+        if max_len < min_len:
+            max_len = min_len + 10
+
+        return self._random_string(min_len, max_len)
+
+    def _generate_int(self, schema: JsonSchema) -> int:
+        min_val = schema.get("minimum", 0)
+        max_val = schema.get("maximum", 100)
+
+        if max_val < min_val:
+            max_val = min_val + 100
+
+        return self._random_int(min_val, max_val)
+
+    def _generate_float(self, schema: JsonSchema) -> float:
+        min_val = schema.get("minimum", 0.0)
+        max_val = schema.get("maximum", 100.0)
+
+        if max_val < min_val:
+            max_val = min_val + 100.0
+
+        return self.rng.uniform(min_val, max_val)
+
+    def _generate_bool(self, schema: JsonSchema) -> bool:
+        return self._random_bool()
+
+    def _generate_array(self, schema: JsonSchema) -> list[JsonValue]:
+        items_schema = schema.get("items", {})
+        min_items = schema.get("minItems", 1)
+        max_items = schema.get("maxItems", 3)
+        length = self.rng.randint(min_items, max_items)
+        return [self._generate_value(items_schema) for _ in range(length)]
+
+    def _generate_object(self, schema: JsonSchema) -> dict[str, JsonValue]:
+        props = schema.get("properties", {})
+        output = {}
+        for k, v in props.items():
+            output[k] = self._generate_value(v)
+
+        # Handle additionalProperties if strict?
+        # For now, just properties is fine.
+        return output
+
+
+def generate_mock_output(agent: AgentDefinition, seed: int | None = None, strict: bool = False) -> JsonValue:
     """
     Generates a valid dictionary matching the agent's output schema.
     """
-    # 1. Extract definitions if available
     outputs_schema = agent.interface.outputs
     defs = outputs_schema.get("$defs") or outputs_schema.get("definitions") or {}
 
-    # 2. Initialize MockGenerator
-    generator = MockGenerator(seed=seed, definitions=defs)
-
-    # 3. Call generator
+    generator = MockGenerator(seed=seed, definitions=defs, strict=strict)
     result = generator._generate_value(outputs_schema)
-
-    # 4. Ensure result is a dict (since output schema usually describes an object)
-    if not isinstance(result, dict):
-        # If the schema described a non-object (unlikely for outputs), wrap or return as is?
-        # The prompt says "return a dictionary".
-        # If interface.outputs is e.g. {"type": "string"}, the result is a string.
-        # But usually interface.outputs is expected to be the schema of the output object.
-        pass
 
     return result
