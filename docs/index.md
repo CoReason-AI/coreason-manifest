@@ -7,6 +7,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Usage Guide](usage.md)**
     *   A comprehensive guide on how to use `coreason-manifest` to define agents, recipes, and work with the library's core concepts programmatically.
 
+*   **[Builder SDK](builder_sdk.md)**
+    *   Documentation for the fluent Builder API (`AgentBuilder`, `TypedCapability`) to simplify Agent creation.
+
 *   **[Secure Composition](composition.md)**
     *   Explains the Secure Recursive Loader, the `$ref` syntax for modular composition, the "Jail" security model, and cycle detection mechanisms.
 
