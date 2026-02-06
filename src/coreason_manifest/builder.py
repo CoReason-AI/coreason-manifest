@@ -170,6 +170,7 @@ class AgentBuilder:
             tools=self.tools,
             knowledge=self.knowledge,
             capabilities=capabilities,
+            interface=interface,
         )
 
         # 5. Workflow
