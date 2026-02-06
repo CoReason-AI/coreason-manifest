@@ -66,9 +66,7 @@ class AgentDefinition(CoReasonBaseModel):
     runtime: AgentRuntimeConfig | None = Field(
         None, description="Configuration for the agent runtime environment (e.g. environment variables)."
     )
-    evaluation: EvaluationProfile | None = Field(
-        None, description="Quality assurance and testing metadata."
-    )
+    evaluation: EvaluationProfile | None = Field(None, description="Quality assurance and testing metadata.")
 
 
 class GenericDefinition(CoReasonBaseModel):
