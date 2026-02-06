@@ -28,6 +28,13 @@ from coreason_manifest.spec.v2.definitions import (
 
 
 class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
+    """
+    A strictly typed capability definition that wraps Pydantic models.
+
+    This class handles the generation of JSON Schema for the input and output
+    contracts of an agent capability.
+    """
+
     def __init__(
         self,
         name: str,
@@ -45,13 +52,22 @@ class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
         self.delivery_mode = delivery_mode
 
     def get_input_schema(self) -> dict[str, Any]:
+        """Generate the JSON Schema for the input model."""
         return self.input_model.model_json_schema()
 
     def get_output_schema(self) -> dict[str, Any]:
+        """Generate the JSON Schema for the output model."""
         return self.output_model.model_json_schema()
 
 
 class AgentBuilder:
+    """
+    Fluent builder for constructing AgentDefinition and ManifestV2 objects.
+
+    Provides a clean API for defining agents, capabilities, tools, and knowledge,
+    abstracting away the complexity of the underlying Pydantic models.
+    """
+
     def __init__(self, name: str, version: str = "0.1.0"):
         self.name = name
         self.version = version
@@ -69,22 +85,32 @@ class AgentBuilder:
         self._cap_delivery_mode = DeliveryMode.REQUEST_RESPONSE
 
     def with_system_prompt(self, prompt: str) -> "AgentBuilder":
+        """Set the system prompt (backstory) for the agent."""
         self.system_prompt = prompt
         return self
 
     def with_model(self, model: str) -> "AgentBuilder":
+        """Set the LLM model ID."""
         self.model = model
         return self
 
     def with_tool(self, tool_id: str) -> "AgentBuilder":
+        """Add a tool ID to the agent's toolset."""
         self.tools.append(tool_id)
         return self
 
     def with_knowledge(self, uri: str) -> "AgentBuilder":
+        """Add a knowledge source URI."""
         self.knowledge.append(uri)
         return self
 
     def with_capability(self, cap: TypedCapability[Any, Any]) -> "AgentBuilder":
+        """
+        Add a capability to the agent.
+
+        Merges the capability's input/output schemas into the agent's interface
+        and updates capability flags (e.g., delivery mode).
+        """
         # Merge input schema
         cap_input = cap.get_input_schema()
         self._merge_schema(self.interface_inputs, cap_input)
@@ -102,6 +128,7 @@ class AgentBuilder:
         return self
 
     def _merge_schema(self, target: dict[str, Any], source: dict[str, Any]) -> None:
+        """Helper to merge JSON Schemas (properties, required, $defs)."""
         if "properties" in source:
             target.setdefault("properties", {}).update(source["properties"])
 
@@ -114,6 +141,12 @@ class AgentBuilder:
             target.setdefault("$defs", {}).update(source["$defs"])
 
     def build(self) -> ManifestV2:
+        """
+        Build the final ManifestV2 object.
+
+        Constructs the ManifestMetadata, InterfaceDefinition, AgentCapabilities,
+        AgentDefinition, and a default Workflow.
+        """
         # 1. Construct ManifestMetadata
         metadata = ManifestMetadata(name=self.name, version=self.version)
 

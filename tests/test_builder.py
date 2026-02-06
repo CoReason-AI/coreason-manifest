@@ -8,6 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+"""
+Test suite for the Builder SDK (AgentBuilder and TypedCapability).
+"""
+
 from pydantic import BaseModel, Field
 
 from coreason_manifest.builder import AgentBuilder, TypedCapability
