@@ -100,18 +100,6 @@ print(manifest.interface.inputs["topic"])
 manifest.interface.inputs["topic"] = {"type": "integer"}
 ```
 
-### Visualizing Workflows
-
-Complex workflows can be hard to understand as raw JSON/YAML. You can visualize the execution flow using the built-in Mermaid.js generator.
-
-```python
-from coreason_manifest import generate_mermaid_graph
-
-print(generate_mermaid_graph(manifest))
-```
-
-For more details, see [Visualization Tools](visualization.md).
-
 ## Advanced Documentation
 
 *   [Secure Composition](composition.md): Secure Recursive Loader and `$ref` syntax.
