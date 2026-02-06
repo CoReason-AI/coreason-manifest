@@ -115,6 +115,21 @@ def test_with_tool() -> None:
     assert "search-tool" in agent_def.tools
 
 
+def test_with_role_and_goal() -> None:
+    """Test setting role and goal explicitly."""
+    manifest = (
+        AgentBuilder("RoleAgent")
+        .with_role("Researcher")
+        .with_goal("Find information")
+        .build()
+    )
+    agent_def = manifest.definitions["RoleAgent"]
+
+    assert isinstance(agent_def, AgentDefinition)
+    assert agent_def.role == "Researcher"
+    assert agent_def.goal == "Find information"
+
+
 # --- Edge Case Tests ---
 
 
