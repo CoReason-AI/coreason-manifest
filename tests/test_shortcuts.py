@@ -1,8 +1,8 @@
-import pytest
 from coreason_manifest import simple_agent
-from coreason_manifest.spec.v2.definitions import ManifestV2, AgentDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2
 
-def test_simple_agent_minimal():
+
+def test_simple_agent_minimal() -> None:
     manifest = simple_agent(name="TestAgent")
     assert isinstance(manifest, ManifestV2)
     assert manifest.metadata.name == "TestAgent"
@@ -10,9 +10,10 @@ def test_simple_agent_minimal():
     agent = manifest.definitions["TestAgent"]
     assert isinstance(agent, AgentDefinition)
     assert agent.id == "TestAgent"
-    assert agent.goal == "Help the user" # default from AgentBuilder
+    assert agent.goal == "Help the user"  # default from AgentBuilder
 
-def test_simple_agent_full_options():
+
+def test_simple_agent_full_options() -> None:
     manifest = simple_agent(
         name="Researcher",
         prompt="You are a research assistant.",
@@ -24,6 +25,7 @@ def test_simple_agent_full_options():
     )
 
     agent = manifest.definitions["Researcher"]
+    assert isinstance(agent, AgentDefinition)
     assert agent.backstory == "You are a research assistant."
     assert agent.model == "gpt-4"
     assert agent.tools == ["search-tool"]
@@ -38,13 +40,10 @@ def test_simple_agent_full_options():
     assert manifest.interface.outputs["type"] == "object"
     assert "report" in manifest.interface.outputs["properties"]
 
-def test_simple_agent_raw_schema():
+
+def test_simple_agent_raw_schema() -> None:
     # Pass full schema with "type": "object"
-    schema = {
-        "type": "object",
-        "properties": {"foo": {"type": "integer"}},
-        "required": ["foo"]
-    }
+    schema = {"type": "object", "properties": {"foo": {"type": "integer"}}, "required": ["foo"]}
     manifest = simple_agent(name="SchemaAgent", inputs=schema)
 
     # Should use the schema directly
