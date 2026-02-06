@@ -95,7 +95,5 @@ class AuditLog(CoReasonBaseModel):
     actor: str
     action: str
     outcome: str
-    previous_hash: str | None = Field(
-        None, description="Hash of the preceding log entry for tamper-evidence."
-    )
+    previous_hash: str | None = Field(None, description="Hash of the preceding log entry for tamper-evidence.")
     integrity_hash: str = Field(description="SHA-256 hash of this record.")

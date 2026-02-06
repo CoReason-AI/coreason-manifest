@@ -52,11 +52,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     payload: dict[str, Any] = {}
 
     for field in fields:
-        val: Any = None
-        if isinstance(entry, dict):
-            val = entry.get(field)
-        else:
-            val = getattr(entry, field, None)
+        val: Any = entry.get(field) if isinstance(entry, dict) else getattr(entry, field, None)
 
         if val is None:
             continue
@@ -66,10 +62,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
         elif isinstance(val, datetime):
             # Ensure UTC and ISO format
             dt = val
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=UTC)
-            else:
-                dt = dt.astimezone(UTC)
+            dt = dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt.astimezone(UTC)
             payload[field] = dt.isoformat()
         else:
             payload[field] = val

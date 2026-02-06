@@ -4,7 +4,6 @@ import random
 import uuid
 from datetime import UTC, datetime, timedelta, timezone
 
-import pytest
 from coreason_manifest.spec.common.observability import AuditLog
 from coreason_manifest.utils.audit import compute_audit_hash, verify_chain
 
@@ -39,7 +38,7 @@ def test_edge_null_vs_missing() -> None:
         "action": "login",
         "outcome": "success",
         "previous_hash": None,
-        "safety_metadata": None
+        "safety_metadata": None,
     }
 
     hash1 = compute_audit_hash(data_missing)
@@ -62,7 +61,7 @@ def test_edge_timezone_conversion() -> None:
     est = timezone(timedelta(hours=-5))
     dt_est = datetime(2023, 10, 27, 7, 0, 0, tzinfo=est)
 
-    assert dt_utc == dt_est # Python equality check
+    assert dt_utc == dt_est  # Python equality check
 
     data_utc = {
         "id": uid,
@@ -106,15 +105,11 @@ def test_complex_mixed_metadata() -> None:
             "flags": [True, False, True],
         },
         "annotations": {
-            "reviewer": None, # Should be ignored
-            "tags": ["alpha", "beta", "gamma"], # List order matters in JSON
-            "nested": {
-                "deep": {
-                    "val": 100
-                }
-            }
+            "reviewer": None,  # Should be ignored
+            "tags": ["alpha", "beta", "gamma"],  # List order matters in JSON
+            "nested": {"deep": {"val": 100}},
         },
-        "user_id": 12345
+        "user_id": 12345,
     }
 
     data1 = {
@@ -126,7 +121,7 @@ def test_complex_mixed_metadata() -> None:
         "action": "complex_op",
         "outcome": "success",
         "previous_hash": None,
-        "safety_metadata": complex_metadata
+        "safety_metadata": complex_metadata,
     }
 
     hash1 = compute_audit_hash(data1)
@@ -134,16 +129,8 @@ def test_complex_mixed_metadata() -> None:
     # Create a logically identical structure but constructed differently
     complex_metadata2 = {
         "user_id": 12345,
-        "annotations": {
-            "nested": { "deep": {"val": 100} },
-            "tags": ["alpha", "beta", "gamma"],
-            "reviewer": None
-        },
-        "metrics": {
-            "flags": [True, False, True],
-            "tokens": 42,
-            "latency": 0.123
-        }
+        "annotations": {"nested": {"deep": {"val": 100}}, "tags": ["alpha", "beta", "gamma"], "reviewer": None},
+        "metrics": {"flags": [True, False, True], "tokens": 42, "latency": 0.123},
     }
 
     data2 = data1.copy()
@@ -174,7 +161,7 @@ def test_complex_large_chain_random_tamper() -> None:
             "actor": f"user-{i}",
             "action": f"step-{i}",
             "outcome": "success",
-            "previous_hash": prev_hash
+            "previous_hash": prev_hash,
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -198,10 +185,10 @@ def test_complex_large_chain_random_tamper() -> None:
             root_request_id=original.root_request_id,
             timestamp=original.timestamp,
             actor=original.actor,
-            action="TAMPERED", # changed
+            action="TAMPERED",  # changed
             outcome=original.outcome,
             previous_hash=original.previous_hash,
-            integrity_hash=original.integrity_hash # old hash
+            integrity_hash=original.integrity_hash,  # old hash
         )
         chain[idx] = tampered
 
@@ -223,7 +210,7 @@ def test_edge_single_item_chain() -> None:
         "actor": "system",
         "action": "solo",
         "outcome": "success",
-        "previous_hash": None
+        "previous_hash": None,
     }
     integrity = compute_audit_hash(entry_data)
     log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -232,7 +219,7 @@ def test_edge_single_item_chain() -> None:
 
     # Tamper single item
     tampered = AuditLog(
-        **{**entry_data, "action": "BAD"}, # type: ignore
-        integrity_hash=integrity
+        **{**entry_data, "action": "BAD"},
+        integrity_hash=integrity,
     )
     assert verify_chain([tampered]) is False

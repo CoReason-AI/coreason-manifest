@@ -3,7 +3,6 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 
-import pytest
 from coreason_manifest.spec.common.observability import AuditLog
 from coreason_manifest.utils.audit import compute_audit_hash, verify_chain
 
@@ -24,7 +23,7 @@ def test_deterministic_hashing() -> None:
         "action": "login",
         "outcome": "success",
         "previous_hash": None,
-        "safety_metadata": {"score": 0.9}
+        "safety_metadata": {"score": 0.9},
     }
 
     data2 = {
@@ -121,17 +120,14 @@ def test_verify_chain_valid() -> None:
             "actor": "system",
             "action": f"step-{i}",
             "outcome": "success",
-            "previous_hash": prev_hash
+            "previous_hash": prev_hash,
         }
 
         # Compute hash
         integrity = compute_audit_hash(entry_data)
 
         # Create object
-        log = AuditLog(
-            **entry_data,
-            integrity_hash=integrity
-        )
+        log = AuditLog(**entry_data, integrity_hash=integrity)
         chain.append(log)
         prev_hash = integrity
 
@@ -153,7 +149,7 @@ def test_verify_chain_broken_content() -> None:
             "actor": "system",
             "action": f"step-{i}",
             "outcome": "success",
-            "previous_hash": prev_hash
+            "previous_hash": prev_hash,
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -169,10 +165,10 @@ def test_verify_chain_broken_content() -> None:
         root_request_id=original_log.root_request_id,
         timestamp=original_log.timestamp,
         actor=original_log.actor,
-        action="tampered_action", # Changed
+        action="tampered_action",  # Changed
         outcome=original_log.outcome,
         previous_hash=original_log.previous_hash,
-        integrity_hash=original_log.integrity_hash # Kept old hash
+        integrity_hash=original_log.integrity_hash,  # Kept old hash
     )
     chain[1] = tampered_log
 
@@ -194,7 +190,7 @@ def test_verify_chain_broken_link() -> None:
             "actor": "system",
             "action": f"step-{i}",
             "outcome": "success",
-            "previous_hash": prev_hash
+            "previous_hash": prev_hash,
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -212,17 +208,19 @@ def test_verify_chain_broken_link() -> None:
         actor=original_log.actor,
         action=original_log.action,
         outcome=original_log.outcome,
-        previous_hash="wrong_hash", # Broken link
-        integrity_hash=compute_audit_hash({
-             "id": original_log.id,
-            "request_id": original_log.request_id,
-            "root_request_id": original_log.root_request_id,
-            "timestamp": original_log.timestamp,
-            "actor": original_log.actor,
-            "action": original_log.action,
-            "outcome": original_log.outcome,
-            "previous_hash": "wrong_hash",
-        })
+        previous_hash="wrong_hash",  # Broken link
+        integrity_hash=compute_audit_hash(
+            {
+                "id": original_log.id,
+                "request_id": original_log.request_id,
+                "root_request_id": original_log.root_request_id,
+                "timestamp": original_log.timestamp,
+                "actor": original_log.actor,
+                "action": original_log.action,
+                "outcome": original_log.outcome,
+                "previous_hash": "wrong_hash",
+            }
+        ),
     )
 
     chain[2] = broken_link_log
@@ -273,9 +271,9 @@ def test_unicode_consistency() -> None:
         "timestamp": now,
         "actor": "user-🚀",
         "action": "acción_crítica",
-        "outcome": "成功", # Success in Chinese
+        "outcome": "成功",  # Success in Chinese
         "previous_hash": None,
-        "safety_metadata": None
+        "safety_metadata": None,
     }
 
     hash1 = compute_audit_hash(data)
@@ -293,13 +291,7 @@ def test_nested_safety_metadata() -> None:
     root_id = uuid.uuid4()
     now = datetime.now(UTC)
 
-    metadata = {
-        "policy": {
-            "name": "PII",
-            "checks": ["email", "phone"]
-        },
-        "score": 0.05
-    }
+    metadata = {"policy": {"name": "PII", "checks": ["email", "phone"]}, "score": 0.05}
 
     data = {
         "id": uid,
@@ -310,19 +302,13 @@ def test_nested_safety_metadata() -> None:
         "action": "scan",
         "outcome": "success",
         "previous_hash": None,
-        "safety_metadata": metadata
+        "safety_metadata": metadata,
     }
 
     hash1 = compute_audit_hash(data)
 
     # Create copy with different key order in nested dict
-    metadata2 = {
-        "score": 0.05,
-        "policy": {
-            "checks": ["email", "phone"],
-            "name": "PII"
-        }
-    }
+    metadata2 = {"score": 0.05, "policy": {"checks": ["email", "phone"], "name": "PII"}}
 
     data2 = data.copy()
     data2["safety_metadata"] = metadata2
@@ -348,7 +334,7 @@ def test_long_chain_verification() -> None:
             "actor": "system",
             "action": f"step-{i}",
             "outcome": "success",
-            "previous_hash": prev_hash
+            "previous_hash": prev_hash,
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -376,7 +362,7 @@ def test_chain_domino_effect() -> None:
             "actor": "system",
             "action": f"step-{i}",
             "outcome": "success",
-            "previous_hash": prev_hash
+            "previous_hash": prev_hash,
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -394,10 +380,10 @@ def test_chain_domino_effect() -> None:
         "root_request_id": original_log.root_request_id,
         "timestamp": original_log.timestamp,
         "actor": original_log.actor,
-        "action": "MALICIOUS_ACTION", # Changed
+        "action": "MALICIOUS_ACTION",  # Changed
         "outcome": original_log.outcome,
-        "previous_hash": original_log.previous_hash, # Valid link to previous
-        "safety_metadata": None
+        "previous_hash": original_log.previous_hash,  # Valid link to previous
+        "safety_metadata": None,
     }
 
     new_integrity = compute_audit_hash(tampered_data)
@@ -415,4 +401,4 @@ def test_chain_domino_effect() -> None:
 
     # Verify manually that the break is where we expect
     assert compute_audit_hash(chain[target_idx]) == chain[target_idx].integrity_hash
-    assert chain[target_idx+1].previous_hash != chain[target_idx].integrity_hash
+    assert chain[target_idx + 1].previous_hash != chain[target_idx].integrity_hash
