@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.v2.evaluation import EvaluationProfile, SuccessCriterion
 from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2
+from coreason_manifest.spec.v2.evaluation import EvaluationProfile, SuccessCriterion
 
 # --- Basic Tests ---
 
@@ -238,9 +238,11 @@ def test_complex_multiple_agents_varying_profiles() -> None:
 
 
 def test_complex_partial_update_attempt() -> None:
-    """Test that we cannot partially update the frozen model via copy or similar standard methods if they were mutable."""
+    """Test that we cannot partially update the frozen model via copy or similar standard methods if they were mutable.
+
+    This ensures that the model correctly supports Pydantic's functional update pattern while remaining immutable.
+    """
     # Since it's frozen, model_copy(update={...}) is the way to 'change' it by creating a new one.
-    # This tests that the model correctly supports Pydantic's functional update pattern.
 
     criterion = SuccessCriterion(name="old", description="old", threshold=0.1)
 
