@@ -1,0 +1,16 @@
+graph TD
+classDef input fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+classDef tool fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+classDef step fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
+classDef term fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,rx:10,ry:10;
+START((Start)):::term
+INPUTS["Inputs<br/>- type<br/>- properties<br/>- required"]:::input
+STEP_step_fetch["step_fetch<br/>(Call: FetcherAgent)"]:::step
+STEP_step_analyze["step_analyze<br/>(Call: AnalyzerAgent)"]:::step
+STEP_step_write["step_write<br/>(Call: WriterAgent)"]:::step
+END((End)):::term
+START --> INPUTS
+INPUTS --> STEP_step_fetch
+STEP_step_fetch --> STEP_step_analyze
+STEP_step_analyze --> STEP_step_write
+STEP_step_write --> END

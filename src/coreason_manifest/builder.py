@@ -18,6 +18,8 @@ from coreason_manifest.spec.common.capabilities import (
     DeliveryMode,
 )
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
+
+__all__ = ["AgentBuilder", "CapabilityType", "DeliveryMode", "TypedCapability"]
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -170,6 +172,7 @@ class AgentBuilder:
             tools=self.tools,
             knowledge=self.knowledge,
             capabilities=capabilities,
+            interface=interface,
         )
 
         # 5. Workflow
