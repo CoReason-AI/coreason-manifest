@@ -140,10 +140,7 @@ class AgentBuilder:
         )
 
         # 5. Workflow
-        workflow = Workflow(
-            start="main",
-            steps={"main": AgentStep(id="main", agent=self.name)}
-        )
+        workflow = Workflow(start="main", steps={"main": AgentStep(id="main", agent=self.name)})
 
         return ManifestV2(
             kind="Agent",
