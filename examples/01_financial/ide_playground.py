@@ -77,6 +77,7 @@ def build_financial_analyst() -> ManifestV2:
     )
     # Extract the definition
     fetcher_def = fetcher_builder.build().definitions["FetcherAgent"]
+    assert isinstance(fetcher_def, AgentDefinition)
 
     # -- Step 2: Analyzer Agent (LLM with Resources & Governance) --
     analyzer_builder = AgentBuilder(name="AnalyzerAgent")
@@ -95,6 +96,7 @@ def build_financial_analyst() -> ManifestV2:
     )
     # Extract definition
     analyzer_def = analyzer_builder.build().definitions["AnalyzerAgent"]
+    assert isinstance(analyzer_def, AgentDefinition)
 
     # Add Resources (RateCard) to Analyzer
     # Note: AgentBuilder doesn't expose resources directly yet, so we modify the definition.
@@ -120,6 +122,7 @@ def build_financial_analyst() -> ManifestV2:
         )
     )
     writer_def = writer_builder.build().definitions["WriterAgent"]
+    assert isinstance(writer_def, AgentDefinition)
 
     # -- Step 4: Construct the Master Manifest (The Recipe) --
 
@@ -205,7 +208,10 @@ def simulate_execution(agent: ManifestV2, inputs: dict[str, Any]) -> None:
             print(f"   i️ Non-Agent Step Type: {step.type}")
 
         # Move to next step
-        current_step_id = step.next
+        if hasattr(step, "next"):
+            current_step_id = step.next  # type: ignore
+        else:
+            current_step_id = None
 
     print(f"\n🏁 Execution Complete. Cost Estimate: ${total_cost:.4f}")
 
