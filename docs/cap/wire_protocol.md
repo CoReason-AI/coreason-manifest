@@ -239,3 +239,23 @@ Payload is a dictionary (see Semantic Error Handling for standard fields).
 #### Thought Trace (`type: thought_trace`)
 
 Payload is a dictionary containing reasoning steps.
+
+## OpenAPI Generation
+
+The `coreason_manifest` package provides a utility to generate an OpenAPI 3.1 Path Item Object that strictly adheres to the Service Request/Response contracts defined above.
+
+This is useful for exposing Agents as standard REST APIs.
+
+### Usage
+
+```python
+import json
+from coreason_manifest import ServiceContract
+
+# Generate the OpenAPI Path Item
+openapi_spec = ServiceContract.generate_openapi()
+
+print(json.dumps(openapi_spec, indent=2))
+```
+
+This generates a definition for a `POST` operation that accepts a `ServiceRequest` and returns a `ServiceResponse`.
