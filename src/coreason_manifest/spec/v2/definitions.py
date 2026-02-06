@@ -17,6 +17,7 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.resources import ModelProfile
 
 
 class DesignMetadata(CoReasonBaseModel):
@@ -67,6 +68,9 @@ class AgentDefinition(CoReasonBaseModel):
         None, description="Configuration for the agent runtime environment (e.g. environment variables)."
     )
     evaluation: EvaluationProfile | None = Field(None, description="Quality assurance and testing metadata.")
+    resources: ModelProfile | None = Field(
+        None, description="Hardware, pricing, and operational constraints for this agent."
+    )
 
 
 class GenericDefinition(CoReasonBaseModel):
