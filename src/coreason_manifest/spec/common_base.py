@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import hashlib
+import json
 from enum import StrEnum
 from typing import Annotated, Any
 
@@ -46,6 +48,34 @@ class CoReasonBaseModel(BaseModel):
         kwargs.setdefault("by_alias", True)
         kwargs.setdefault("exclude_none", True)
         return self.model_dump_json(**kwargs)
+
+    def compute_hash(self, exclude: set[str] | None = None) -> str:
+        """
+        Compute a deterministic SHA-256 hash of the model.
+
+        Args:
+            exclude: A set of field names to exclude from the hash.
+                     Useful for excluding self-referential hashes or timestamps.
+
+        Returns:
+            The SHA-256 hex digest of the canonical JSON representation.
+        """
+        # 1. Get dictionary via self.dump()
+        data = self.dump()
+
+        # 2. If exclude provided, remove keys from dict
+        if exclude:
+            for field in exclude:
+                data.pop(field, None)
+
+        # 3. Dump to JSON string (sort_keys=True, ensure_ascii=False)
+        json_str = json.dumps(data, sort_keys=True, ensure_ascii=False)
+
+        # 4. Encode to bytes (utf-8)
+        json_bytes = json_str.encode("utf-8")
+
+        # 5. Return hashlib.sha256(...).hexdigest()
+        return hashlib.sha256(json_bytes).hexdigest()
 
 
 # Strict URI type that serializes to string
