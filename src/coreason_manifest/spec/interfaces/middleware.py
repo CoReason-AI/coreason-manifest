@@ -14,7 +14,7 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.cap import AgentRequest, SessionContext, StreamPacket
+from coreason_manifest.spec.cap import AgentRequest, StreamPacket
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
@@ -34,7 +34,7 @@ class IRequestInterceptor(Protocol):
 
     async def intercept_request(
         self,
-        context: SessionContext,
+        context: InterceptorContext,
         request: AgentRequest,
     ) -> AgentRequest:
         """Modify or validate the request before the agent sees it."""
