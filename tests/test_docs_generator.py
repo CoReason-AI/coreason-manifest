@@ -15,8 +15,8 @@ from coreason_manifest import (
     AgentStep,
     EvaluationProfile,
     InterfaceDefinition,
+    Manifest,
     ManifestMetadata,
-    ManifestV2,
     ModelProfile,
     PricingUnit,
     RateCard,
@@ -86,7 +86,7 @@ def test_render_full_agent() -> None:
         },
     )
 
-    manifest = ManifestV2(
+    manifest = Manifest(
         kind="Agent",
         metadata=metadata,
         interface=interface,
@@ -124,7 +124,7 @@ def test_render_minimal_agent() -> None:
         goal="Do little",
     )
 
-    manifest = ManifestV2(
+    manifest = Manifest(
         kind="Agent",
         metadata=ManifestMetadata(name="Minimal"),
         workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="Minimal")}),
@@ -153,7 +153,7 @@ def test_schema_parsing() -> None:
         }
     )
 
-    manifest = ManifestV2(
+    manifest = Manifest(
         kind="Agent",
         metadata=ManifestMetadata(name="SchemaTest"),
         workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="SchemaTest")}),
