@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from typing import ClassVar
-from unittest.mock import Mock
 
 from coreason_manifest import (
     AgentDefinition,
@@ -234,14 +233,14 @@ def test_render_metadata_variants() -> None:
     from pydantic import ConfigDict
 
     class ExtendedAgentDefinition(AgentDefinition):
-        model_config = ConfigDict(extra="allow") # type: ignore
+        model_config = ConfigDict(extra="allow")
 
     agent_def = ExtendedAgentDefinition(
         id="describer",
         name="Describer",
         role="Scribe",
         goal="Write",
-        description="I describe things.", # This is now allowed
+        description="I describe things.",  # This is now allowed
     )
 
     metadata = ManifestMetadata(
