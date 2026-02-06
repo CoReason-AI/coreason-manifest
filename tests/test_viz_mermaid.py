@@ -289,3 +289,162 @@ def test_mermaid_empty_inputs() -> None:
 
     # Should just be "Inputs" without bullet points
     assert 'INPUTS["Inputs"]:::input' in chart
+
+
+def test_mermaid_switch_no_default() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Switch No Default"},
+        "workflow": {
+            "start": "root",
+            "steps": {
+                "root": {
+                    "type": "switch",
+                    "id": "root",
+                    "cases": {"c1": "end_step"},
+                    "default": None,
+                },
+                "end_step": {"type": "logic", "id": "end_step", "code": "pass"},
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Ensure only the case edge exists, no default edge
+    assert 'STEP_root -- "c1" --> STEP_end_step' in chart
+    assert "default" not in chart
+
+
+def test_mermaid_council_with_next() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Council Next"},
+        "workflow": {
+            "start": "vote",
+            "steps": {
+                "vote": {
+                    "type": "council",
+                    "id": "vote",
+                    "voters": ["a1"],
+                    "next": "process",
+                },
+                "process": {"type": "logic", "id": "process", "code": "pass"},
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    assert "STEP_vote --> STEP_process" in chart
+
+
+def test_mermaid_linear_chain() -> None:
+    # A -> B -> C -> D -> E
+    steps = {}
+    chain = ["A", "B", "C", "D", "E"]
+    for i, step_id in enumerate(chain):
+        next_step = chain[i + 1] if i < len(chain) - 1 else None
+        steps[step_id] = {
+            "type": "logic",
+            "id": step_id,
+            "code": "pass",
+            "next": next_step,
+        }
+
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Chain"},
+        "workflow": {"start": "A", "steps": steps},
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    assert "STEP_A --> STEP_B" in chart
+    assert "STEP_B --> STEP_C" in chart
+    assert "STEP_C --> STEP_D" in chart
+    assert "STEP_D --> STEP_E" in chart
+    assert "STEP_E --> END" in chart
+
+
+def test_mermaid_node_with_design_metadata() -> None:
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Design"},
+        "workflow": {
+            "start": "s1",
+            "steps": {
+                "s1": {
+                    "type": "logic",
+                    "id": "s1",
+                    "code": "pass",
+                    "x-design": {"x": 100, "y": 200, "label": "Visual Label"},
+                }
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Design metadata should be ignored in the graph generation (for now)
+    # Just verify it parses and generates the node
+    assert 'STEP_s1["s1<br/>(Call: Logic)"]:::step' in chart
+
+
+def test_mermaid_kitchen_sink() -> None:
+    # A complex workflow combining:
+    # - Inputs
+    # - Agent Step
+    # - Switch (branching)
+    # - Loop (cycle)
+    # - Council
+    # - Disconnected node
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Kitchen Sink"},
+        "interface": {"inputs": {"query": {"type": "string"}}},
+        "workflow": {
+            "start": "research",
+            "steps": {
+                "research": {
+                    "type": "agent",
+                    "id": "research",
+                    "agent": "searcher",
+                    "next": "check_quality",
+                },
+                "check_quality": {
+                    "type": "switch",
+                    "id": "check_quality",
+                    "cases": {"quality < 0.5": "research"},  # Loop back
+                    "default": "approve",
+                },
+                "approve": {
+                    "type": "council",
+                    "id": "approve",
+                    "voters": ["admin"],
+                    "next": "finalize",
+                },
+                "finalize": {"type": "logic", "id": "finalize", "code": "save", "next": None},
+                "hidden_feature": {  # Disconnected
+                    "type": "logic",
+                    "id": "hidden_feature",
+                    "code": "easter_egg",
+                },
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    chart = generate_mermaid_graph(manifest)
+
+    # Check key structural elements
+    assert "STEP_research --> STEP_check_quality" in chart
+    assert 'STEP_check_quality -- "quality < 0.5" --> STEP_research' in chart  # Loop
+    assert 'STEP_check_quality -- "default" --> STEP_approve' in chart
+    assert "STEP_approve --> STEP_finalize" in chart
+    assert "STEP_finalize --> END" in chart
+    assert "STEP_hidden_feature" in chart  # Exists but logic checks connections manually
