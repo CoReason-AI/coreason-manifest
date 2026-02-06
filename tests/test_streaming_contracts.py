@@ -1,6 +1,8 @@
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
+
 
 def test_streaming_contracts_defaults() -> None:
     """Verify default values for streaming contracts."""
@@ -9,31 +11,28 @@ def test_streaming_contracts_defaults() -> None:
     assert caps.delivery_mode == DeliveryMode.REQUEST_RESPONSE
     assert caps.history_support is True
 
+
 def test_streaming_contracts_explicit_configuration() -> None:
     """Verify explicit configuration of streaming contracts."""
-    caps = AgentCapabilities(
-        type=CapabilityType.ATOMIC,
-        delivery_mode=DeliveryMode.SERVER_SENT_EVENTS
-    )
+    caps = AgentCapabilities(type=CapabilityType.ATOMIC, delivery_mode=DeliveryMode.SERVER_SENT_EVENTS)
     assert caps.type == CapabilityType.ATOMIC
     assert caps.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
+
 
 def test_streaming_contracts_immutability() -> None:
     """Verify that AgentCapabilities is immutable."""
     caps = AgentCapabilities()
 
     with pytest.raises(ValidationError):
-        caps.delivery_mode = DeliveryMode.SERVER_SENT_EVENTS
+        setattr(caps, "delivery_mode", DeliveryMode.SERVER_SENT_EVENTS)  # noqa: B010
 
     with pytest.raises(ValidationError):
-        caps.type = CapabilityType.ATOMIC
+        setattr(caps, "type", CapabilityType.ATOMIC)  # noqa: B010
+
 
 def test_streaming_contracts_serialization() -> None:
     """Verify JSON serialization of streaming contracts."""
-    caps = AgentCapabilities(
-        type=CapabilityType.ATOMIC,
-        delivery_mode=DeliveryMode.SERVER_SENT_EVENTS
-    )
+    caps = AgentCapabilities(type=CapabilityType.ATOMIC, delivery_mode=DeliveryMode.SERVER_SENT_EVENTS)
     json_output = caps.model_dump_json()
     assert '"atomic"' in json_output
     assert '"server_sent_events"' in json_output

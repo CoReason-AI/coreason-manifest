@@ -34,9 +34,7 @@ class AgentCapabilities(CoReasonBaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    type: CapabilityType = Field(
-        default=CapabilityType.GRAPH, description="The architectural complexity of the agent."
-    )
+    type: CapabilityType = Field(default=CapabilityType.GRAPH, description="The architectural complexity of the agent.")
     delivery_mode: DeliveryMode = Field(
         default=DeliveryMode.REQUEST_RESPONSE, description="The primary transport mechanism."
     )
