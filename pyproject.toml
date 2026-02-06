@@ -80,6 +80,7 @@ plugins = ["pydantic.mypy"]
 addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
 
 [tool.coverage.run]
 omit = ["tests/*", "/tmp/*"]
