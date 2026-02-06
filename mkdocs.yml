@@ -9,6 +9,7 @@ nav:
     - Visualization Tools: visualization.md
     - Secure Composition: composition.md
     - Governance & Policy: governance_policy_enforcement.md
+    - Semantic Diffing: semantic_diffing.md
     - Agent Card Generator: agent_card_generator.md
   - Specifications & Protocols:
     - CAM Specification: cap/specification.md
