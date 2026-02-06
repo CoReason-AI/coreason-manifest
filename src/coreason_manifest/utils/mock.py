@@ -18,9 +18,12 @@ from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
 class MockGenerator:
-    def __init__(self, seed: int | None = None, definitions: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self, seed: int | None = None, definitions: dict[str, Any] | None = None, max_depth: int = 10
+    ) -> None:
         self.rng = random.Random(seed)
         self.definitions = definitions or {}
+        self.max_depth = max_depth
 
     def _random_string(self, min_len: int = 5, max_len: int = 20) -> str:
         length = self.rng.randint(min_len, max_len)
@@ -36,9 +39,17 @@ class MockGenerator:
     def _random_bool(self) -> bool:
         return self.rng.choice([True, False])
 
-    def _generate_value(self, schema: dict[str, Any]) -> Any:
+    def _generate_value(self, schema: dict[str, Any], depth: int = 0) -> Any:
         if not schema:
             return {}
+
+        if depth > self.max_depth:
+            # Stop recursion
+            return None
+
+        # Handle const
+        if "const" in schema:
+            return schema["const"]
 
         # Handle $ref
         if "$ref" in schema:
@@ -48,7 +59,7 @@ class MockGenerator:
             parts = ref.split("/")
             ref_name = parts[-1]
             if ref_name in self.definitions:
-                return self._generate_value(self.definitions[ref_name])
+                return self._generate_value(self.definitions[ref_name], depth + 1)
             # Fallback if not found
             return {}
 
@@ -59,15 +70,19 @@ class MockGenerator:
         # Handle type
         type_ = schema.get("type")
 
+        # Handle list of types (e.g. ["string", "null"])
+        if isinstance(type_, list):
+            # Prefer non-null types if available
+            valid_types = [t for t in type_ if t != "null"]
+            if valid_types:
+                type_ = self.rng.choice(valid_types)
+            else:
+                type_ = "null"
+
         if type_ == "string":
             format_ = schema.get("format")
             if format_ == "date-time":
-                # Deterministic time if seed is provided?
-                # The prompt asks for determinism if seed is provided.
-                # random.Random doesn't affect datetime.now().
-                # But we can generate a random timestamp.
-                # However, requirements: "If 'date-time', return ISO string."
-                # I'll use a fixed time + random delta based on RNG to be deterministic.
+                # Deterministic time if seed is provided
                 base_time = datetime(2024, 1, 1, tzinfo=UTC).timestamp()
                 random_offset = self.rng.uniform(0, 365 * 24 * 3600)
                 return datetime.fromtimestamp(base_time + random_offset, tz=UTC).isoformat()
@@ -84,16 +99,19 @@ class MockGenerator:
         if type_ == "boolean":
             return self._random_bool()
 
+        if type_ == "null":
+            return None
+
         if type_ == "array":
             items_schema = schema.get("items", {})
             length = self.rng.randint(1, 3)
-            return [self._generate_value(items_schema) for _ in range(length)]
+            return [self._generate_value(items_schema, depth + 1) for _ in range(length)]
 
         if type_ == "object":
             properties = schema.get("properties", {})
             result = {}
             for key, prop_schema in properties.items():
-                result[key] = self._generate_value(prop_schema)
+                result[key] = self._generate_value(prop_schema, depth + 1)
             return result
 
         # Fallback for unknown type
