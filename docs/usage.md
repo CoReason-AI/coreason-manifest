@@ -75,6 +75,7 @@ workflow = Workflow(
 
 # 3. Instantiate Manifest
 manifest = Recipe(
+    kind="Recipe",
     metadata=metadata,
     interface=InterfaceDefinition(
         inputs={"topic": {"type": "string"}},
