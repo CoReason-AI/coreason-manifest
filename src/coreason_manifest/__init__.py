@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+# Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
 from .spec.cap import (
     AgentRequest,
