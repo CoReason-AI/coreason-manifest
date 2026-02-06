@@ -46,13 +46,13 @@ Implement this protocol to intercept incoming requests. Common use cases include
 
 ```python
 from typing import Protocol, runtime_checkable
-from coreason_manifest import AgentRequest, SessionContext
+from coreason_manifest import AgentRequest, InterceptorContext
 
 @runtime_checkable
 class IRequestInterceptor(Protocol):
     async def intercept_request(
         self,
-        context: SessionContext,
+        context: InterceptorContext,
         request: AgentRequest
     ) -> AgentRequest:
         """Modify or validate the request before the agent sees it."""
@@ -65,7 +65,7 @@ class IRequestInterceptor(Protocol):
 class PIIRedactor:
     async def intercept_request(
         self,
-        context: SessionContext,
+        context: InterceptorContext,
         request: AgentRequest
     ) -> AgentRequest:
         # Simple example: Redact generic credit card numbers in query
