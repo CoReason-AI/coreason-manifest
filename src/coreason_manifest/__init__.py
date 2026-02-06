@@ -88,8 +88,6 @@ from .spec.v2.resources import (
     ResourceConstraints,
 )
 from .utils.audit import compute_audit_hash, verify_chain
-from .utils.diff import ChangeCategory, DiffReport, compare_agents
-from .utils.docs import render_agent_card
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
@@ -113,7 +111,6 @@ __all__ = [
     "AgentStep",
     "AuditLog",
     "CapabilityType",
-    "ChangeCategory",
     "ChatMessage",
     "CitationBlock",
     "CitationItem",
@@ -122,7 +119,6 @@ __all__ = [
     "ComplianceViolation",
     "CouncilStep",
     "DeliveryMode",
-    "DiffReport",
     "ErrorDomain",
     "ErrorSeverity",
     "EvaluationProfile",
@@ -149,7 +145,6 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
-    "ManifestV2",
     "MarkdownBlock",
     "MediaCarousel",
     "MediaItem",
@@ -187,7 +182,6 @@ __all__ = [
     "Workflow",
     "__version__",
     "check_compliance_v2",
-    "compare_agents",
     "compute_audit_hash",
     "dump",
     "generate_mock_output",
