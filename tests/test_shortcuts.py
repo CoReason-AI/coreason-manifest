@@ -62,7 +62,7 @@ def test_simple_agent_edge_cases() -> None:
         name="EdgeCaseAgent",
         prompt="",  # Empty string prompt
         model=None,  # Explicit None model
-        tools=[],   # Explicit empty list
+        tools=[],  # Explicit empty list
     )
 
     agent_def = manifest.definitions["EdgeCaseAgent"]
@@ -82,24 +82,22 @@ def test_simple_agent_complex_modification() -> None:
 
     # Update the first step to point to the second
     first_step = manifest.workflow.steps["main"]
-    assert isinstance(first_step, AgentStep) # for mypy
+    assert isinstance(first_step, AgentStep)  # for mypy
     # Note: Pydantic models are frozen by default in this repo, so we can't mutate directly.
     # We must use model_copy with update.
     updated_first_step = first_step.model_copy(update={"next": "step2"})
     manifest.workflow.steps["main"] = updated_first_step
 
-    assert manifest.workflow.steps["main"].next == "step2"
+    final_first_step = manifest.workflow.steps["main"]
+    assert isinstance(final_first_step, AgentStep)
+    assert final_first_step.next == "step2"
     assert "step2" in manifest.workflow.steps
     assert manifest.workflow.steps["step2"].id == "step2"
 
 
 def test_simple_agent_round_trip() -> None:
     """Test that the generated manifest can be serialized and deserialized correctly."""
-    original = simple_agent(
-        name="RoundTripAgent",
-        prompt="Testing serialization",
-        tools=["tool1", "tool2"]
-    )
+    original = simple_agent(name="RoundTripAgent", prompt="Testing serialization", tools=["tool1", "tool2"])
 
     # 1. Dump to YAML string
     yaml_str = dump(original)
