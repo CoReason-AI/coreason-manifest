@@ -48,6 +48,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Semantic Error Handling](error_handling_standards.md)**
     *   Defines standard Error Domains and the `UserErrorEvent` for structured, user-friendly error reporting.
 
+*   **[Middleware Extension Interfaces](middleware_extension_interfaces.md)**
+    *   Defines the protocols (`IRequestInterceptor`, `IResponseInterceptor`) and context models for injecting cross-cutting logic like PII redaction and rate limiting.
+
 ## Architecture & Rationale
 
 *   **[Product Requirements & Philosophy](product_requirements.md)**

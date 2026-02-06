@@ -59,6 +59,11 @@ from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.interfaces.middleware import (
+    InterceptorContext,
+    IRequestInterceptor,
+    IResponseInterceptor,
+)
 from .spec.interfaces.session import SessionHandle
 from .spec.interfaces.stream import IStreamEmitter
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
@@ -120,8 +125,11 @@ __all__ = [
     "GraphEventStreamStart",
     "HealthCheckResponse",
     "HealthCheckStatus",
+    "IRequestInterceptor",
+    "IResponseInterceptor",
     "IStreamEmitter",
     "Identity",
+    "InterceptorContext",
     "InterfaceDefinition",
     "LogicStep",
     "Manifest",
