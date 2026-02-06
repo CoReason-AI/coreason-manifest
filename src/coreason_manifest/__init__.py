@@ -10,6 +10,7 @@
 
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
+from .shortcuts import simple_agent
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -196,6 +197,7 @@ __all__ = [
     "load",
     "migrate_graph_event_to_cloud_event",
     "render_agent_card",
+    "simple_agent",
     "validate_integrity",
     "validate_loose",
     "verify_chain",

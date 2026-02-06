@@ -37,6 +37,26 @@ pip install coreason-manifest
 
 ## Usage
 
+### Quick Start (Simple Agent)
+
+Create a fully compliant manifest in just a few lines:
+
+```python
+from coreason_manifest import simple_agent, dump
+
+# Create a "Hello World" agent
+manifest = simple_agent(
+    name="HelloAgent",
+    prompt="You are a helpful assistant.",
+    model="gpt-4",
+)
+
+# Export to YAML
+print(dump(manifest))
+```
+
+### Advanced Usage (Custom Workflow)
+
 This library is used to define and validate Agent configurations programmatically.
 
 ```python
