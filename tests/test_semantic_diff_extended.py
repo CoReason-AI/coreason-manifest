@@ -16,7 +16,7 @@ from coreason_manifest import (
 )
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import AgentDefinition
-from coreason_manifest.spec.v2.resources import ModelProfile, RateCard
+from coreason_manifest.spec.v2.resources import ModelProfile
 
 
 def create_base_manifest() -> ManifestV2:
@@ -132,7 +132,8 @@ def test_remove_inputs_block() -> None:
     # Coverage for line 201 `if not rest: ... if new is None:` requires `path` to end at `inputs`
     # AND `new` value to be None.
     # This implies the key `inputs` was removed or set to None.
-    # Since `InterfaceDefinition` has it as a field, it's hard to remove it completely from the model dump unless we exclude it.
+    # Since `InterfaceDefinition` has it as a field, it's hard to remove it completely from the
+    # model dump unless we exclude it.
 
     # Wait, `InterfaceDefinition` fields:
     # inputs: dict
@@ -142,7 +143,6 @@ def test_remove_inputs_block() -> None:
     # Maybe `inputs` in `InterfaceDefinition` can be None? Type hint says `dict`.
     # If I can't hit it with Pydantic models, maybe I can't hit it at all in normal usage.
     # BUT, `_walk_diff` is generic.
-    pass
 
 
 def test_complex_overhaul() -> None:
