@@ -8,6 +8,7 @@ nav:
     - Builder SDK: builder_sdk.md
     - Secure Composition: composition.md
     - Governance & Policy: governance_policy_enforcement.md
+    - Semantic Diffing: semantic_diffing.md
   - Specifications & Protocols:
     - CAM Specification: cap/specification.md
     - CAP Wire Protocol: cap/wire_protocol.md

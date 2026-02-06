@@ -158,36 +158,31 @@ def _categorize_change(path: str, old: Any, new: Any) -> ChangeCategory:
     # path examples: interface.inputs.properties.arg_name, interface.inputs.required.0
     if "interface" in parts and "inputs" in parts:
         # Check relative location
-        try:
-            inputs_idx = parts.index("inputs")
-        except ValueError:
-            inputs_idx = -1
+        inputs_idx = parts.index("inputs")
+        rest = parts[inputs_idx + 1 :]
 
-        if inputs_idx != -1:
-            rest = parts[inputs_idx + 1 :]
-
-            if "properties" in rest:
-                # Removing a property is BREAKING
-                if new is None:
-                    return ChangeCategory.BREAKING
-                # Adding a property is FEATURE (unless required, see below)
-                if old is None:
-                    return ChangeCategory.FEATURE
-
-            if "required" in rest:
-                if old is None and new is not None:
-                    return ChangeCategory.BREAKING
-                if new is None:
-                    return ChangeCategory.FEATURE
-
-            # If we are strictly at interface.inputs level (or just below without hitting properties/required)
-            # e.g. replacing the whole schema
-            if not rest:
-                # Whole inputs block replaced
-                if new is None:
-                    return ChangeCategory.BREAKING
-                # Generally changing the whole input schema is BREAKING unless verified otherwise
+        if "properties" in rest:
+            # Removing a property is BREAKING
+            if new is None:
                 return ChangeCategory.BREAKING
+            # Adding a property is FEATURE (unless required, see below)
+            if old is None:
+                return ChangeCategory.FEATURE
+
+        if "required" in rest:
+            if old is None and new is not None:
+                return ChangeCategory.BREAKING
+            if new is None:
+                return ChangeCategory.FEATURE
+
+        # If we are strictly at interface.inputs level (or just below without hitting properties/required)
+        # e.g. replacing the whole schema
+        if not rest:
+            # Whole inputs block replaced
+            if new is None:
+                return ChangeCategory.BREAKING
+            # Generally changing the whole input schema is BREAKING unless verified otherwise
+            return ChangeCategory.BREAKING
 
     # 4. Tools Changes
     if "tools" in parts:
