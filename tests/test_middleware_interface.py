@@ -117,7 +117,7 @@ def test_protocol_compliance() -> None:
     """Verify classes implement protocols correctly as requested."""
 
     class PIIFilter:
-        async def intercept_request(self, context: InterceptorContext, request: AgentRequest) -> AgentRequest:
+        async def intercept_request(self, _context: InterceptorContext, request: AgentRequest) -> AgentRequest:
             return request
 
     assert isinstance(PIIFilter(), IRequestInterceptor)
