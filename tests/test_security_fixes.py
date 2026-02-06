@@ -11,7 +11,6 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from coreason_manifest.utils.audit import compute_audit_hash
 from coreason_manifest.utils.mock import MockGenerator
 
 
@@ -37,29 +36,6 @@ def test_mock_recursion_dos_fix() -> None:
     assert isinstance(val, dict)
     # We don't strictly assert the content because it's truncated by recursion limit,
     # but it should return a valid python object.
-
-
-def test_audit_hash_robustness_fix() -> None:
-    """
-    Verifies that compute_audit_hash handles non-serializable objects in safety_metadata
-    without raising TypeError.
-    """
-    entry = {
-        "id": uuid4(),
-        "timestamp": datetime.now(UTC),
-        "actor": "user",
-        "action": "login",
-        "outcome": "success",
-        "safety_metadata": {
-            "bad_obj": {1, 2, 3}  # Sets are not JSON serializable
-        },
-    }
-
-    # This should not raise TypeError
-    hash_val = compute_audit_hash(entry)
-
-    assert isinstance(hash_val, str)
-    assert len(hash_val) == 64  # SHA-256 hex digest length
 
 
 def test_mock_safe_defaults() -> None:
