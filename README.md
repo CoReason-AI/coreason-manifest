@@ -28,6 +28,7 @@ These components are co-located for developer convenience but are architecturall
 ## Features
 
 *   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`) and Recipes (`Recipe`).
+*   **ManifestBuilder (New in v0.17):** A fluent API for constructing complex `ManifestV2` objects without manual YAML.
 *   **Strict Typing:** Enforces type safety for critical interfaces.
 *   **Governance & Policy:** Enforce organizational rules (domains, risk levels) on agents via `GovernanceConfig`.
 *   **Ergonomic Factory Methods:** Simplified construction of manifests.
@@ -63,6 +64,52 @@ manifest = simple_agent(
 )
 
 print(f"Agent '{manifest.metadata.name}' created successfully!")
+```
+
+### ManifestV2 Construction (Recommended)
+
+The `ManifestV2` schema is powerful but complex (supporting nested Policies, State, Workflows, and Definitions). Instead of hand-writing error-prone YAML or instantiating deep Pydantic structures manually, use the `ManifestBuilder`.
+
+**Developer Experience Improvements:**
+*   **Fluent API:** Chain methods to build up your manifest step-by-step.
+*   **Type Safety:** Let your IDE guide you with autocomplete and type checking.
+*   **Abstraction:** Forget about the underlying JSON structure; focus on *logic*, *tools*, and *flow*.
+
+```python
+from coreason_manifest.builder import ManifestBuilder, AgentBuilder
+from coreason_manifest.spec.v2.definitions import AgentStep, LogicStep, ToolDefinition
+from coreason_manifest.spec.common_base import StrictUri
+
+# 1. Build reusable Agent Definitions
+researcher = AgentBuilder("Researcher") \
+    .with_system_prompt("You are a diligent researcher.") \
+    .with_model("gpt-4-turbo") \
+    .build_definition()
+
+writer = AgentBuilder("Writer") \
+    .with_system_prompt("You are a creative writer.") \
+    .with_model("claude-3-opus") \
+    .build_definition()
+
+# 2. Build the Manifest
+manifest = (
+    ManifestBuilder("ResearchReportWorkflow", kind="Recipe")
+    .add_agent(researcher)
+    .add_agent(writer)
+    .add_tool(ToolDefinition(
+        id="web-search",
+        name="Web Search",
+        uri=StrictUri("https://search.api/v1"),
+        risk_level="safe",
+        description="Search the web."
+    ))
+    .add_step(AgentStep(id="research", agent="Researcher", next="write"))
+    .add_step(AgentStep(id="write", agent="Writer", next=None))
+    .set_start_step("research")
+    .build()
+)
+
+print(manifest.model_dump_json(indent=2))
 ```
 
 ### Advanced Usage (Manual Construction)
