@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, TypeVar
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -26,19 +26,14 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 
-TInput = TypeVar("TInput", bound=BaseModel)
-TOutput = TypeVar("TOutput", bound=BaseModel)
 
-
-class TypedCapability[TInput: BaseModel, TOutput: BaseModel]:
-    """A strongly-typed capability definition."""
-
+class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
     def __init__(
         self,
         name: str,
         description: str,
-        input_model: type[TInput],
-        output_model: type[TOutput],
+        input_model: type[InputT],
+        output_model: type[OutputT],
         type: CapabilityType = CapabilityType.GRAPH,
         delivery_mode: DeliveryMode = DeliveryMode.REQUEST_RESPONSE,
     ):
@@ -49,126 +44,108 @@ class TypedCapability[TInput: BaseModel, TOutput: BaseModel]:
         self.type = type
         self.delivery_mode = delivery_mode
 
-    def to_interface(self) -> dict[str, dict[str, Any]]:
-        """Generate JSON Schema for inputs and outputs."""
-        return {
-            "inputs": self.input_model.model_json_schema(),
-            "outputs": self.output_model.model_json_schema(),
-        }
+    def get_input_schema(self) -> dict[str, Any]:
+        return self.input_model.model_json_schema()
+
+    def get_output_schema(self) -> dict[str, Any]:
+        return self.output_model.model_json_schema()
 
 
 class AgentBuilder:
-    """Builder for defining Agents with a fluent interface."""
+    def __init__(self, name: str, version: str = "0.1.0"):
+        self.name = name
+        self.version = version
+        self.tools: list[str] = []
+        self.knowledge: list[str] = []
+        self.system_prompt: str | None = None
+        self.model: str | None = None
 
-    def __init__(self, name: str, version: str = "0.1.0", description: str | None = None):
-        self._name = name
-        self._version = version
-        self._description = description
-        self._system_prompt: str | None = None
-        self._model: str | None = None
-        self._tools: list[str] = []
-        self._capabilities: list[TypedCapability[Any, Any]] = []
+        # Internal state for capabilities
+        self.interface_inputs: dict[str, Any] = {"type": "object", "properties": {}, "required": []}
+        self.interface_outputs: dict[str, Any] = {"type": "object", "properties": {}, "required": []}
 
-        # Defaults for required AgentDefinition fields
-        self._role: str = "General Assistant"
-        self._goal: str = "Help the user"
+        # Capability flags defaults
+        self._cap_type = CapabilityType.GRAPH
+        self._cap_delivery_mode = DeliveryMode.REQUEST_RESPONSE
 
     def with_system_prompt(self, prompt: str) -> "AgentBuilder":
-        self._system_prompt = prompt
+        self.system_prompt = prompt
         return self
 
     def with_model(self, model: str) -> "AgentBuilder":
-        self._model = model
+        self.model = model
         return self
 
     def with_tool(self, tool_id: str) -> "AgentBuilder":
-        self._tools.append(tool_id)
+        self.tools.append(tool_id)
+        return self
+
+    def with_knowledge(self, uri: str) -> "AgentBuilder":
+        self.knowledge.append(uri)
         return self
 
     def with_capability(self, cap: TypedCapability[Any, Any]) -> "AgentBuilder":
-        self._capabilities.append(cap)
+        # Merge input schema
+        cap_input = cap.get_input_schema()
+        self._merge_schema(self.interface_inputs, cap_input)
+
+        # Merge output schema
+        cap_output = cap.get_output_schema()
+        self._merge_schema(self.interface_outputs, cap_output)
+
+        # Update capability settings
+        if cap.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS:
+            self._cap_delivery_mode = DeliveryMode.SERVER_SENT_EVENTS
+
+        self._cap_type = cap.type
+
         return self
 
-    def with_role(self, role: str) -> "AgentBuilder":
-        self._role = role
-        return self
+    def _merge_schema(self, target: dict[str, Any], source: dict[str, Any]) -> None:
+        if "properties" in source:
+            target.setdefault("properties", {}).update(source["properties"])
 
-    def with_goal(self, goal: str) -> "AgentBuilder":
-        self._goal = goal
-        return self
+        if "required" in source:
+            current_req = set(target.get("required", []))
+            current_req.update(source["required"])
+            target["required"] = list(current_req)
+
+        if "$defs" in source:
+            target.setdefault("$defs", {}).update(source["$defs"])
 
     def build(self) -> ManifestV2:
-        """Build the Agent Manifest."""
         # 1. Construct ManifestMetadata
-        metadata = ManifestMetadata(
-            name=self._name,
-        )
+        metadata = ManifestMetadata(name=self.name, version=self.version)
 
         # 2. Construct InterfaceDefinition
-        # Merge schemas from capabilities
-        input_schema: dict[str, Any] = {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        }
-        output_schema: dict[str, Any] = {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        }
-
-        for cap in self._capabilities:
-            iface = cap.to_interface()
-            # Merge inputs
-            cap_input = iface["inputs"]
-            if "properties" in cap_input:
-                input_schema["properties"].update(cap_input["properties"])
-            if "required" in cap_input:
-                # Merge required lists, avoid duplicates
-                current_required = set(input_schema.get("required", []))
-                current_required.update(cap_input.get("required", []))
-                input_schema["required"] = list(current_required)
-
-            # Merge outputs
-            cap_output = iface["outputs"]
-            if "properties" in cap_output:
-                output_schema["properties"].update(cap_output["properties"])
-            if "required" in cap_output:
-                current_required_out = set(output_schema.get("required", []))
-                current_required_out.update(cap_output.get("required", []))
-                output_schema["required"] = list(current_required_out)
+        interface = InterfaceDefinition(inputs=self.interface_inputs, outputs=self.interface_outputs)
 
         # 3. Construct AgentCapabilities
-        # Determine flags based on added capabilities.
-        # If any capability requires SSE, we set SSE.
-        delivery_mode = DeliveryMode.REQUEST_RESPONSE
-        for cap in self._capabilities:
-            if cap.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS:
-                delivery_mode = DeliveryMode.SERVER_SENT_EVENTS
-                break
-
-        agent_caps = AgentCapabilities(delivery_mode=delivery_mode)
+        capabilities = AgentCapabilities(
+            type=self._cap_type,
+            delivery_mode=self._cap_delivery_mode,
+        )
 
         # 4. Construct AgentDefinition
         agent_def = AgentDefinition(
-            id=self._name,  # Using name as ID for simplicity
-            name=self._name,
-            role=self._role,
-            goal=self._goal,
-            backstory=self._system_prompt,
-            model=self._model,
-            tools=self._tools,
-            capabilities=agent_caps,
+            id=self.name,
+            name=self.name,
+            role="Assistant",
+            goal="Help the user",
+            backstory=self.system_prompt,
+            model=self.model,
+            tools=self.tools,
+            knowledge=self.knowledge,
+            capabilities=capabilities,
         )
 
-        # 5. Construct Workflow
-        # Simple default workflow
-        workflow = Workflow(start="main", steps={"main": AgentStep(id="main", agent=self._name)})
+        # 5. Workflow
+        workflow = Workflow(start="main", steps={"main": AgentStep(id="main", agent=self.name)})
 
         return ManifestV2(
             kind="Agent",
             metadata=metadata,
-            interface=InterfaceDefinition(inputs=input_schema, outputs=output_schema),
-            definitions={self._name: agent_def},
+            interface=interface,
+            definitions={self.name: agent_def},
             workflow=workflow,
         )
