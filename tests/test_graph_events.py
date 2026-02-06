@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import datetime
+
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
@@ -18,8 +19,8 @@ from coreason_manifest.spec.common.graph_events import (
     GraphEventNodeStart,
     GraphEventNodeStream,
 )
-from coreason_manifest.utils.migration import migrate_graph_event_to_cloud_event
 from coreason_manifest.spec.common.observability import EventContentType
+from coreason_manifest.utils.migration import migrate_graph_event_to_cloud_event
 
 
 def test_polymorphic_serialization() -> None:
@@ -34,27 +35,14 @@ def test_polymorphic_serialization() -> None:
 
     events: list[GraphEvent] = [
         GraphEventNodeStart(
-            run_id="run-1",
-            trace_id="trace-1",
-            node_id="node-1",
-            timestamp=now,
-            payload={"input": "test"}
+            run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=now, payload={"input": "test"}
         ),
         GraphEventNodeStream(
-            run_id="run-1",
-            trace_id="trace-1",
-            node_id="node-1",
-            timestamp=now + 1,
-            chunk="Hello",
-            stream_id="default"
+            run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=now + 1, chunk="Hello", stream_id="default"
         ),
         GraphEventNodeDone(
-            run_id="run-1",
-            trace_id="trace-1",
-            node_id="node-1",
-            timestamp=now + 2,
-            output={"result": "Hello World"}
-        )
+            run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=now + 2, output={"result": "Hello World"}
+        ),
     ]
 
     # Serialize
@@ -85,12 +73,7 @@ def test_migration_logic() -> None:
     """
     now = datetime.now().timestamp()
     event = GraphEventNodeStream(
-        run_id="run-1",
-        trace_id="trace-1",
-        node_id="step-x",
-        timestamp=now,
-        chunk=" partial",
-        visual_cue="typing"
+        run_id="run-1", trace_id="trace-1", node_id="step-x", timestamp=now, chunk=" partial", visual_cue="typing"
     )
 
     cloud_event = migrate_graph_event_to_cloud_event(event)
@@ -119,13 +102,7 @@ def test_immutability() -> None:
     * Assert: ValidationError.
     """
     now = datetime.now().timestamp()
-    event = GraphEventNodeStream(
-        run_id="run-1",
-        trace_id="trace-1",
-        node_id="node-1",
-        timestamp=now,
-        chunk="Hello"
-    )
+    event = GraphEventNodeStream(run_id="run-1", trace_id="trace-1", node_id="node-1", timestamp=now, chunk="Hello")
 
     with pytest.raises(ValidationError):
         event.chunk = "Modified"  # type: ignore
