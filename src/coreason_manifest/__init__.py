@@ -184,7 +184,6 @@ __all__ = [
     "TypedCapability",
     "Workflow",
     "__version__",
-    "ChangeCategory",
     "check_compliance_v2",
     "compare_agents",
     "compute_audit_hash",
