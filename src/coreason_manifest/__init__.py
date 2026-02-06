@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from .builder import AgentBuilder, TypedCapability
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -87,6 +88,7 @@ load = load_from_yaml
 dump = dump_to_yaml
 
 __all__ = [
+    "AgentBuilder",
     "AgentCapabilities",
     "AgentDefinition",
     "AgentRequest",
@@ -152,6 +154,7 @@ __all__ = [
     "SwitchStep",
     "ToolDefinition",
     "ToolRiskLevel",
+    "TypedCapability",
     "Workflow",
     "__version__",
     "check_compliance_v2",
