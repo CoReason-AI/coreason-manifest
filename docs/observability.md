@@ -118,4 +118,7 @@ from coreason_manifest import AuditLog
 | `actor` | `str` | User or Agent ID performing the action. | Yes |
 | `action` | `str` | The action performed (e.g., "file_read"). | Yes |
 | `outcome` | `str` | The outcome (e.g., "success", "denied"). | Yes |
+| `previous_hash` | `Optional[str]` | Hash of the preceding log entry for tamper-evidence. | No |
 | `integrity_hash` | `str` | SHA-256 hash of critical fields. | Yes |
+
+For details on how hashes are computed and verified, see [Audit Hashing & Integrity](audit_hashing.md).
