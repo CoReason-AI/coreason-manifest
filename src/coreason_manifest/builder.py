@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Generic, Type, TypeVar
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -23,21 +23,17 @@ from coreason_manifest.spec.v2.definitions import (
     AgentStep,
     ManifestMetadata,
     ManifestV2,
-    ToolDefinition,
     Workflow,
 )
 
-InputT = TypeVar("InputT", bound=BaseModel)
-OutputT = TypeVar("OutputT", bound=BaseModel)
 
-
-class TypedCapability(Generic[InputT, OutputT]):
+class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
     def __init__(
         self,
         name: str,
         description: str,
-        input_model: Type[InputT],
-        output_model: Type[OutputT],
+        input_model: type[InputT],
+        output_model: type[OutputT],
         type: CapabilityType = CapabilityType.GRAPH,
         delivery_mode: DeliveryMode = DeliveryMode.REQUEST_RESPONSE,
     ):

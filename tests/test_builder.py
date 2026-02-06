@@ -8,11 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
 from pydantic import BaseModel
 
 from coreason_manifest.builder import AgentBuilder, TypedCapability
 from coreason_manifest.spec.common.capabilities import CapabilityType, DeliveryMode
+from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
 class SearchInput(BaseModel):
@@ -31,7 +31,7 @@ class ConflictInput(BaseModel):
     query: int  # Different type from SearchInput (integer vs string)
 
 
-def test_schema_auto_generation():
+def test_schema_auto_generation() -> None:
     search_cap = TypedCapability(
         name="WebSearch",
         description="Search",
@@ -50,7 +50,7 @@ def test_schema_auto_generation():
     assert outputs["properties"]["results"]["type"] == "array"
 
 
-def test_fluent_chaining():
+def test_fluent_chaining() -> None:
     agent = (
         AgentBuilder("TestAgent")
         .with_model("gpt-4")
@@ -65,16 +65,18 @@ def test_fluent_chaining():
 
     # Check AgentDefinition
     agent_def = agent.definitions["TestAgent"]
+    assert isinstance(agent_def, AgentDefinition)
     assert agent_def.model == "gpt-4"
     assert agent_def.backstory == "Be helpful"
     assert "tool-1" in agent_def.tools
     assert "s3://bucket/doc.pdf" in agent_def.knowledge
 
 
-def test_capability_configuration():
+def test_capability_configuration() -> None:
     # Default is REQUEST_RESPONSE and GRAPH
     agent = AgentBuilder("DefaultAgent").build()
     agent_def = agent.definitions["DefaultAgent"]
+    assert isinstance(agent_def, AgentDefinition)
     assert agent_def.capabilities.type == CapabilityType.GRAPH
     assert agent_def.capabilities.delivery_mode == DeliveryMode.REQUEST_RESPONSE
 
@@ -90,13 +92,14 @@ def test_capability_configuration():
 
     agent_sse = AgentBuilder("SSEAgent").with_capability(cap).build()
     agent_def_sse = agent_sse.definitions["SSEAgent"]
+    assert isinstance(agent_def_sse, AgentDefinition)
 
     # Last capability type wins in my implementation
     assert agent_def_sse.capabilities.type == CapabilityType.ATOMIC
     assert agent_def_sse.capabilities.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
 
 
-def test_edge_empty_model():
+def test_edge_empty_model() -> None:
     cap = TypedCapability(
         name="EmptyCap",
         description="Empty",
@@ -111,7 +114,7 @@ def test_edge_empty_model():
     assert agent.interface.outputs.get("properties") == {}
 
 
-def test_edge_overlapping_properties():
+def test_edge_overlapping_properties() -> None:
     # Last writer wins
     cap1 = TypedCapability(
         name="Cap1",
@@ -126,19 +129,14 @@ def test_edge_overlapping_properties():
         output_model=SearchOutput,
     )
 
-    agent = (
-        AgentBuilder("ConflictAgent")
-        .with_capability(cap1)
-        .with_capability(cap2)
-        .build()
-    )
+    agent = AgentBuilder("ConflictAgent").with_capability(cap1).with_capability(cap2).build()
 
     # cap2 should win
     query_prop = agent.interface.inputs["properties"]["query"]
     assert query_prop["type"] == "integer"
 
 
-def test_complex_capability_delivery_mode_precedence():
+def test_complex_capability_delivery_mode_precedence() -> None:
     # If one cap is SSE, the whole agent is marked as SSE (as per logic)
     cap_req = TypedCapability(
         name="ReqCap",
@@ -156,35 +154,23 @@ def test_complex_capability_delivery_mode_precedence():
     )
 
     # Order: Req then SSE
-    agent1 = (
-        AgentBuilder("Agent1")
-        .with_capability(cap_req)
-        .with_capability(cap_sse)
-        .build()
-    )
-    assert (
-        agent1.definitions["Agent1"].capabilities.delivery_mode
-        == DeliveryMode.SERVER_SENT_EVENTS
-    )
+    agent1 = AgentBuilder("Agent1").with_capability(cap_req).with_capability(cap_sse).build()
+    agent1_def = agent1.definitions["Agent1"]
+    assert isinstance(agent1_def, AgentDefinition)
+    assert agent1_def.capabilities.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
 
     # Order: SSE then Req (SSE should stick if logic is "if ANY is sse")
-    agent2 = (
-        AgentBuilder("Agent2")
-        .with_capability(cap_sse)
-        .with_capability(cap_req)
-        .build()
-    )
-    assert (
-        agent2.definitions["Agent2"].capabilities.delivery_mode
-        == DeliveryMode.SERVER_SENT_EVENTS
-    )
+    agent2 = AgentBuilder("Agent2").with_capability(cap_sse).with_capability(cap_req).build()
+    agent2_def = agent2.definitions["Agent2"]
+    assert isinstance(agent2_def, AgentDefinition)
+    assert agent2_def.capabilities.delivery_mode == DeliveryMode.SERVER_SENT_EVENTS
 
 
 class NestedModel(BaseModel):
     child: SearchInput
 
 
-def test_nested_model_defs():
+def test_nested_model_defs() -> None:
     cap = TypedCapability(
         name="Nested",
         description="Nested",
