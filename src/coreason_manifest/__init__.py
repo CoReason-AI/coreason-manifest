@@ -89,6 +89,7 @@ from .spec.v2.resources import (
 )
 from .utils.audit import compute_audit_hash, verify_chain
 from .utils.migration import migrate_graph_event_to_cloud_event
+from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
@@ -183,6 +184,7 @@ __all__ = [
     "check_compliance_v2",
     "compute_audit_hash",
     "dump",
+    "generate_mock_output",
     "load",
     "migrate_graph_event_to_cloud_event",
     "validate_integrity",
