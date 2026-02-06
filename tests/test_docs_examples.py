@@ -107,6 +107,6 @@ def test_agents_md_logger_example() -> None:
 
     # usage is fine
     logger.debug("Validating manifest...")
-    # configuration (logger.add) is FORBIDDEN in library code
+    # configuration (adding handlers) is FORBIDDEN in library code
     # We assert nothing raised and logger exists
     assert logger is not None

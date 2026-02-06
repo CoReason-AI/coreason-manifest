@@ -58,14 +58,14 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. Avoid `dict` or `Any` where a schema can be defined.
 
 ### **Logging (Passive Pattern)**
-* **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.
-* **Consumer Responsibility:** The consuming application (Builder/Engine) will configure sinks, formats, and levels.
+* **Library Responsibility:** Expose a standard logger object (`logging.getLogger("coreason_manifest")`) but **DO NOT** configure handlers (except `NullHandler`).
+* **Consumer Responsibility:** The consuming application (Builder/Engine) will configure handlers, formats, and levels.
 * **Pattern:**
     ```python
     from coreason_manifest.utils.logger import logger
     # usage is fine
     logger.debug("Validating manifest...")
-    # configuration (logger.add) is FORBIDDEN in library code
+    # configuration (adding handlers) is FORBIDDEN in library code
     ```
 
 ## **4. File Structure Constraints**

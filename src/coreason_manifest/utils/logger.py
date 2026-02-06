@@ -8,8 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from __future__ import annotations
-
-from loguru import logger
+import logging
 
 __all__ = ["logger"]
+
+logger = logging.getLogger("coreason_manifest")
+logger.addHandler(logging.NullHandler())
