@@ -10,15 +10,16 @@
 
 import json
 import re
-from typing import Any, Awaitable, Callable, TYPE_CHECKING
+from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 if TYPE_CHECKING:
-    try:
-        from mcp.server import Server
-    except ImportError:
-        pass
+    import contextlib
+
+    with contextlib.suppress(ImportError):
+        from mcp.server import Server  # noqa: F401
 
 
 def create_mcp_tool_definition(agent: AgentDefinition) -> dict[str, Any]:
@@ -27,8 +28,8 @@ def create_mcp_tool_definition(agent: AgentDefinition) -> dict[str, Any]:
     Returns a dictionary compatible with MCP's 'Tool' type.
     """
     # Sanitize name: lowercase, replace non-alphanumeric with _, collapse _, strip _
-    name = re.sub(r'[^a-zA-Z0-9_-]', '_', agent.name).lower()
-    name = re.sub(r'_+', '_', name).strip('_')
+    name = re.sub(r"[^a-zA-Z0-9_-]", "_", agent.name).lower()
+    name = re.sub(r"_+", "_", name).strip("_")
 
     # Description: use backstory or goal or generic fallback
     description = agent.backstory or agent.goal or f"Agent {agent.name}"
@@ -37,11 +38,7 @@ def create_mcp_tool_definition(agent: AgentDefinition) -> dict[str, Any]:
     # We assume agent.interface.inputs is a valid JSON Schema object.
     input_schema = agent.interface.inputs
 
-    return {
-        "name": name,
-        "description": description,
-        "inputSchema": input_schema
-    }
+    return {"name": name, "description": description, "inputSchema": input_schema}
 
 
 class CoreasonMCPServer:
@@ -59,10 +56,13 @@ class CoreasonMCPServer:
                              Receives arguments dict, returns result dict.
         """
         try:
-            from mcp.server import Server
             import mcp.types as types
+            from mcp.server import Server
         except ImportError:
-             raise ImportError("The 'mcp' package is required to use CoreasonMCPServer. Install it with `pip install coreason-manifest[mcp]`.")
+            raise ImportError(
+                "The 'mcp' package is required to use CoreasonMCPServer. "
+                "Install it with `pip install coreason-manifest[mcp]`."
+            ) from None
 
         self.agent = agent
         self.runner_callback = runner_callback
@@ -77,12 +77,14 @@ class CoreasonMCPServer:
                 types.Tool(
                     name=self.tool_def["name"],
                     description=self.tool_def["description"],
-                    inputSchema=self.tool_def["inputSchema"]
+                    inputSchema=self.tool_def["inputSchema"],
                 )
             ]
 
         @self._server.call_tool()
-        async def handle_call_tool(name: str, arguments: dict | None) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        async def handle_call_tool(
+            name: str, arguments: dict[str, Any] | None
+        ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
             if name != self.tool_def["name"]:
                 raise ValueError(f"Unknown tool: {name}")
 
@@ -90,10 +92,11 @@ class CoreasonMCPServer:
             result = await self.runner_callback(args)
 
             # Convert result to string representation for TextContent
-            if isinstance(result, (dict, list)):
-                text = json.dumps(result, ensure_ascii=False, indent=2)
-            else:
-                text = str(result)
+            text = (
+                json.dumps(result, ensure_ascii=False, indent=2)
+                if isinstance(result, (dict, list))
+                else str(result)
+            )
 
             return [types.TextContent(type="text", text=text)]
 

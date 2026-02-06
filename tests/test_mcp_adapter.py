@@ -9,13 +9,13 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import sys
-import json
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
-from coreason_manifest.spec.v2.definitions import AgentDefinition
+from coreason_manifest.interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
-from coreason_manifest.interop.mcp import create_mcp_tool_definition, CoreasonMCPServer
+from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
 def test_schema_projection() -> None:
@@ -26,12 +26,8 @@ def test_schema_projection() -> None:
         role="Tester",
         goal="Testing",
         interface=InterfaceDefinition(
-            inputs={
-                "type": "object",
-                "properties": {"query": {"type": "string"}},
-                "required": ["query"]
-            }
-        )
+            inputs={"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]},
+        ),
     )
 
     tool_def = create_mcp_tool_definition(agent)
@@ -48,13 +44,69 @@ def test_sanitization() -> None:
         name="Research Assistant (v2)",
         role="Researcher",
         goal="Research",
-        backstory="A detailed backstory."
+        backstory="A detailed backstory.",
     )
 
     tool_def = create_mcp_tool_definition(agent)
 
     assert tool_def["name"] == "research_assistant_v2"
     assert tool_def["description"] == "A detailed backstory."
+
+
+def test_sanitization_edge_cases() -> None:
+    """Test more aggressive name sanitization edge cases."""
+    cases = [
+        ("My... Agent!!!", "my_agent"),
+        ("  Spaces  Here  ", "spaces_here"),
+        ("___Underscores___", "underscores"),
+        ("123 Start Number", "123_start_number"),
+        ("Mixed-Case_And.Dots", "mixed-case_and_dots"),
+        ("!@#$%^&*()", ""),  # Should result in empty string, handled by fallback?
+        # If empty, MCP might reject, but our logic just strips.
+        # Let's check regex behavior: sub non-alnum -> _, collapse _, strip _.
+        # if all non-alnum, it becomes empty string.
+        # The MCP SDK might fail, but for now we test our logic.
+    ]
+
+    for name, expected in cases:
+        agent = AgentDefinition(id="x", name=name, role="R", goal="G")
+        tool_def = create_mcp_tool_definition(agent)
+        assert tool_def["name"] == expected, f"Failed for {name}"
+
+
+def test_minimal_agent() -> None:
+    """Test projection of a minimal agent without optional fields."""
+    agent = AgentDefinition(id="min", name="MinAgent", role="Min", goal="Minimize")
+
+    tool_def = create_mcp_tool_definition(agent)
+
+    assert tool_def["name"] == "minagent"
+    assert tool_def["description"] == "Minimize"  # Fallback to goal
+    assert tool_def["inputSchema"] == {}  # Default dict
+
+
+def test_complex_input_schema() -> None:
+    """Test handling of complex/nested input schemas."""
+    schema = {
+        "type": "object",
+        "properties": {
+            "user": {
+                "type": "object",
+                "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+                "required": ["name"],
+            },
+            "tags": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["user"],
+    }
+
+    agent = AgentDefinition(
+        id="complex", name="Complex Agent", role="Dev", goal="Code", interface=InterfaceDefinition(inputs=schema)
+    )
+
+    tool_def = create_mcp_tool_definition(agent)
+    assert tool_def["inputSchema"] == schema
+    assert tool_def["inputSchema"]["properties"]["user"]["required"] == ["name"]
 
 
 def test_dependency_guard() -> None:
@@ -65,6 +117,42 @@ def test_dependency_guard() -> None:
 
         with pytest.raises(ImportError, match="pip install coreason-manifest\\[mcp\\]"):
             CoreasonMCPServer(agent, AsyncMock())
+
+
+@pytest.mark.asyncio
+async def test_server_list_tools() -> None:
+    """Test that list_tools handler returns the correct tool definition."""
+    mock_mcp = MagicMock(name="mock_mcp")
+    mock_server_cls = MagicMock(name="mock_server_cls")
+    mock_server_instance = MagicMock(name="mock_server_instance")
+    mock_server_cls.return_value = mock_server_instance
+    mock_types = MagicMock(name="mock_types")
+    mock_mcp.types = mock_types
+
+    agent = AgentDefinition(id="a", name="MyAgent", role="R", goal="G")
+    callback = AsyncMock()
+
+    with patch.dict(
+        sys.modules, {"mcp": mock_mcp, "mcp.server": MagicMock(Server=mock_server_cls), "mcp.types": mock_types}
+    ):
+        _ = CoreasonMCPServer(agent, callback)
+
+        # Verify list_tools decorator was called
+        mock_server_instance.list_tools.assert_called_once()
+
+        # Get the handler function
+        decorator_mock = mock_server_instance.list_tools.return_value
+        handler_func = decorator_mock.call_args[0][0]
+
+        # Execute handler
+        tools = await handler_func()
+
+        assert len(tools) == 1
+        # In mock, tools[0] is result of mock_types.Tool(...)
+        mock_types.Tool.assert_called()
+        call_kwargs = mock_types.Tool.call_args[1]
+        assert call_kwargs["name"] == "myagent"
+        assert call_kwargs["description"] == "G"
 
 
 @pytest.mark.asyncio
@@ -89,11 +177,9 @@ async def test_server_execution() -> None:
     callback = AsyncMock(return_value={"result": "ok"})
 
     # Patch imports used inside CoreasonMCPServer.__init__
-    with patch.dict(sys.modules, {
-        "mcp": mock_mcp,
-        "mcp.server": MagicMock(Server=mock_server_cls),
-        "mcp.types": mock_types
-    }):
+    with patch.dict(
+        sys.modules, {"mcp": mock_mcp, "mcp.server": MagicMock(Server=mock_server_cls), "mcp.types": mock_types}
+    ):
         server = CoreasonMCPServer(agent, callback)
 
         # Verify server initialized with correct name
@@ -121,3 +207,57 @@ async def test_server_execution() -> None:
 
         # Check result
         assert res == ["ContentObj"]
+
+        # Access the server property to avoid F841 and verify it returns the instance
+        assert server.server == mock_server_instance
+
+
+@pytest.mark.asyncio
+async def test_execution_callback_failure() -> None:
+    """Test behavior when the runner callback raises an exception."""
+    mock_mcp = MagicMock(name="mock_mcp")
+    mock_server_cls = MagicMock(name="mock_server_cls")
+    mock_server_instance = MagicMock(name="mock_server_instance")
+    mock_server_cls.return_value = mock_server_instance
+    mock_types = MagicMock(name="mock_types")
+    mock_mcp.types = mock_types
+
+    agent = AgentDefinition(id="a", name="ErrAgent", role="R", goal="G")
+    # Callback raises error
+    callback = AsyncMock(side_effect=ValueError("Execution failed"))
+
+    with patch.dict(
+        sys.modules, {"mcp": mock_mcp, "mcp.server": MagicMock(Server=mock_server_cls), "mcp.types": mock_types}
+    ):
+        _ = CoreasonMCPServer(agent, callback)
+
+        decorator_mock = mock_server_instance.call_tool.return_value
+        handler_func = decorator_mock.call_args[0][0]
+
+        # The handler should propagate the exception (or handle it? Implementation doesn't handle it, so it propagates)
+        with pytest.raises(ValueError, match="Execution failed"):
+            await handler_func("erragent", {})
+
+
+@pytest.mark.asyncio
+async def test_execution_wrong_tool_name() -> None:
+    """Test calling the handler with the wrong tool name."""
+    mock_mcp = MagicMock()
+    mock_server_cls = MagicMock()
+    mock_server_instance = MagicMock()
+    mock_server_cls.return_value = mock_server_instance
+    mock_types = MagicMock()
+
+    agent = AgentDefinition(id="a", name="MyAgent", role="R", goal="G")
+    callback = AsyncMock()
+
+    with patch.dict(
+        sys.modules, {"mcp": mock_mcp, "mcp.server": MagicMock(Server=mock_server_cls), "mcp.types": mock_types}
+    ):
+        _ = CoreasonMCPServer(agent, callback)
+        decorator_mock = mock_server_instance.call_tool.return_value
+        handler_func = decorator_mock.call_args[0][0]
+
+        # Call with wrong name
+        with pytest.raises(ValueError, match="Unknown tool: wrong_name"):
+            await handler_func("wrong_name", {})
