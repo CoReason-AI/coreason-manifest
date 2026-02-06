@@ -8,11 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import textwrap
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2
-from coreason_manifest.spec.v2.resources import ModelProfile
+
+if TYPE_CHECKING:
+    from coreason_manifest.spec.v2.resources import ModelProfile
 
 
 def render_agent_card(agent: ManifestV2) -> str:
@@ -93,7 +94,9 @@ def render_agent_card(agent: ManifestV2) -> str:
             else:
                 display_unit = unit_str
 
-            output.append(f"- **Pricing:** ${p.input_cost} / {display_unit} Input | ${p.output_cost} / {display_unit} Output")
+            output.append(
+                f"- **Pricing:** ${p.input_cost} / {display_unit} Input | ${p.output_cost} / {display_unit} Output"
+            )
 
         if res.constraints:
             output.append(f"- **Context Window:** {res.constraints.context_window_size} tokens")

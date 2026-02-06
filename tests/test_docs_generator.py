@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import ClassVar
+
 from coreason_manifest import (
     AgentDefinition,
     AgentStep,
@@ -165,8 +167,8 @@ def test_schema_parsing() -> None:
 
 
 class MockGovernance:
-    risk_level = "standard"
-    policies = ["No rude language"]
+    risk_level: ClassVar[str] = "standard"
+    policies: ClassVar[list[str]] = ["No rude language"]
 
 
 class MockManifest:
