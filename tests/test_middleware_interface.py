@@ -114,12 +114,19 @@ async def test_response_interceptor() -> None:
 
 
 def test_protocol_compliance() -> None:
-    """Verify classes implement protocols correctly."""
-    assert isinstance(PIIRedactionInterceptor(), IRequestInterceptor)
-    assert isinstance(ResponseCensorInterceptor(), IResponseInterceptor)
+    """Verify classes implement protocols correctly as requested."""
 
-    # Verify invalid implementation doesn't pass
-    class InvalidInterceptor:
+    class PIIFilter:
+        async def intercept_request(self, context: InterceptorContext, request: AgentRequest) -> AgentRequest:
+            return request
+
+    assert isinstance(PIIFilter(), IRequestInterceptor)
+
+    class BadFilter:
         pass
 
-    assert not isinstance(InvalidInterceptor(), IRequestInterceptor)
+    assert not isinstance(BadFilter(), IRequestInterceptor)
+
+    # Also verify existing implementations
+    assert isinstance(PIIRedactionInterceptor(), IRequestInterceptor)
+    assert isinstance(ResponseCensorInterceptor(), IResponseInterceptor)
