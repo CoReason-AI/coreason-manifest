@@ -18,9 +18,7 @@ from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
 class MockGenerator:
-    def __init__(
-        self, seed: int | None = None, definitions: dict[str, Any] | None = None, max_depth: int = 10
-    ) -> None:
+    def __init__(self, seed: int | None = None, definitions: dict[str, Any] | None = None, max_depth: int = 10) -> None:
         self.rng = random.Random(seed)
         self.definitions = definitions or {}
         self.max_depth = max_depth
@@ -74,10 +72,7 @@ class MockGenerator:
         if isinstance(type_, list):
             # Prefer non-null types if available
             valid_types = [t for t in type_ if t != "null"]
-            if valid_types:
-                type_ = self.rng.choice(valid_types)
-            else:
-                type_ = "null"
+            type_ = self.rng.choice(valid_types) if valid_types else "null"
 
         if type_ == "string":
             format_ = schema.get("format")
