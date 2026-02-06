@@ -10,6 +10,7 @@
 
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
+from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -95,7 +96,6 @@ from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
-from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
