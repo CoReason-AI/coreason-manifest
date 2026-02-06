@@ -15,8 +15,10 @@ from coreason_manifest.spec.common_base import StrictUri
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
+    CouncilStep,
     GenericDefinition,
     LogicStep,
+    SwitchStep,
     ToolDefinition,
 )
 
@@ -149,3 +151,35 @@ def test_manifest_builder_interface_metadata_error() -> None:
     assert manifest.interface.inputs["type"] == "object"
     # Pydantic V2 allows accessing extra fields as attributes if not colliding
     assert getattr(manifest.metadata, "extra_field", None) == "extra_value"
+
+
+def test_manifest_builder_switch_and_council_steps() -> None:
+    """Test building complex steps like Switch and Council."""
+    switch = SwitchStep(id="router", cases={"condition1": "step_a", "condition2": "step_b"}, default="step_default")
+
+    council = CouncilStep(id="council1", voters=["agent1", "agent2"], strategy="consensus", next="next_step")
+
+    manifest = ManifestBuilder("ComplexSteps").add_step(switch).add_step(council).set_start_step("router").build()
+
+    s_step = manifest.workflow.steps["router"]
+    assert isinstance(s_step, SwitchStep)
+    assert s_step.cases["condition1"] == "step_a"
+
+    c_step = manifest.workflow.steps["council1"]
+    assert isinstance(c_step, CouncilStep)
+    assert c_step.voters == ["agent1", "agent2"]
+
+
+def test_manifest_builder_duplicate_ids() -> None:
+    """Verify that adding items with duplicate IDs overwrites the previous one."""
+    tool1 = ToolDefinition(id="t1", name="Tool 1", uri=StrictUri("https://a.com"), risk_level="safe")
+    tool2 = ToolDefinition(id="t1", name="Tool 1 Updated", uri=StrictUri("https://b.com"), risk_level="critical")
+
+    manifest = (
+        ManifestBuilder("DupTest").add_tool(tool1).add_tool(tool2).add_step(LogicStep(id="main", code="pass")).build()
+    )
+
+    assert len(manifest.definitions) == 1
+    t_def = manifest.definitions["t1"]
+    assert isinstance(t_def, ToolDefinition)
+    assert t_def.risk_level == "critical"
