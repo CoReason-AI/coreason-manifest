@@ -8,13 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from coreason_manifest.spec.v2.definitions import AgentDefinition
+from typing import Any
+
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition
 from coreason_manifest.utils.mock import generate_mock_output
 
 
-def create_agent(outputs_schema: dict) -> AgentDefinition:
+def create_agent(outputs_schema: dict[str, Any]) -> AgentDefinition:
     return AgentDefinition(
         id="test-agent",
         name="Test Agent",
@@ -24,7 +25,7 @@ def create_agent(outputs_schema: dict) -> AgentDefinition:
     )
 
 
-def test_scalar_generation():
+def test_scalar_generation() -> None:
     schema = {
         "type": "object",
         "properties": {
@@ -45,7 +46,7 @@ def test_scalar_generation():
     assert isinstance(output["score"], float)
 
 
-def test_determinism():
+def test_determinism() -> None:
     schema = {
         "type": "object",
         "properties": {"val": {"type": "string"}},
@@ -60,7 +61,7 @@ def test_determinism():
     assert out1 != out3
 
 
-def test_nested_refs():
+def test_nested_refs() -> None:
     schema = {
         "$defs": {
             "Address": {
@@ -85,7 +86,7 @@ def test_nested_refs():
     assert isinstance(output["address"]["zip"], int)
 
 
-def test_enum_constraints():
+def test_enum_constraints() -> None:
     schema = {
         "type": "object",
         "properties": {"status": {"type": "string", "enum": ["OPEN", "CLOSED"]}},
@@ -95,7 +96,7 @@ def test_enum_constraints():
     assert output["status"] in ["OPEN", "CLOSED"]
 
 
-def test_formats():
+def test_formats() -> None:
     schema = {
         "type": "object",
         "properties": {
@@ -108,10 +109,11 @@ def test_formats():
     # Basic check if it looks right
     assert isinstance(output["id"], str)
     assert len(output["id"]) > 30  # UUID length
-    assert "T" in output["created_at"] and "Z" in output["created_at"]
+    assert "T" in output["created_at"]
+    assert "Z" in output["created_at"]
 
 
-def test_arrays():
+def test_arrays() -> None:
     schema = {
         "type": "object",
         "properties": {"tags": {"type": "array", "items": {"type": "string"}}},
@@ -123,7 +125,7 @@ def test_arrays():
         assert isinstance(output["tags"][0], str)
 
 
-def test_nullable_union():
+def test_nullable_union() -> None:
     schema = {
         "type": "object",
         "properties": {"opt": {"type": ["string", "null"]}},
@@ -135,7 +137,7 @@ def test_nullable_union():
     assert output["opt"] is None or isinstance(output["opt"], str)
 
 
-def test_const():
+def test_const() -> None:
     schema = {
         "type": "object",
         "properties": {"c": {"const": "fixed"}},
@@ -145,19 +147,17 @@ def test_const():
     assert output["c"] == "fixed"
 
 
-def test_any_of():
+def test_any_of() -> None:
     schema = {
         "type": "object",
-        "properties": {
-            "choice": {"anyOf": [{"type": "string"}, {"type": "integer"}]}
-        },
+        "properties": {"choice": {"anyOf": [{"type": "string"}, {"type": "integer"}]}},
     }
     agent = create_agent(schema)
     output = generate_mock_output(agent)
     assert isinstance(output["choice"], (str, int))
 
 
-def test_all_of():
+def test_all_of() -> None:
     schema = {
         "type": "object",
         "allOf": [
@@ -171,7 +171,7 @@ def test_all_of():
     assert isinstance(output.get("b"), str)
 
 
-def test_recursion_limit():
+def test_recursion_limit() -> None:
     schema = {
         "$defs": {
             "Node": {
@@ -188,14 +188,14 @@ def test_recursion_limit():
     assert isinstance(output, dict)
 
 
-def test_missing_ref():
+def test_missing_ref() -> None:
     schema = {"$ref": "#/missing"}
     agent = create_agent(schema)
     output = generate_mock_output(agent)
     assert output == {}
 
 
-def test_definitions_fallback():
+def test_definitions_fallback() -> None:
     # Test definitions key instead of $defs
     schema = {
         "definitions": {"MyType": {"type": "string"}},
@@ -206,7 +206,7 @@ def test_definitions_fallback():
     assert isinstance(output, str)
 
 
-def test_unknown_type_and_fallback():
+def test_unknown_type_and_fallback() -> None:
     schema = {"type": "unknown"}
     agent = create_agent(schema)
     output = generate_mock_output(agent)
@@ -223,21 +223,12 @@ def test_unknown_type_and_fallback():
     assert output3 is None
 
 
-def test_all_of_with_ref_and_top_properties():
+def test_all_of_with_ref_and_top_properties() -> None:
     schema = {
-        "$defs": {
-             "Base": {
-                 "properties": {"base_prop": {"type": "string"}}
-             }
-        },
+        "$defs": {"Base": {"properties": {"base_prop": {"type": "string"}}}},
         "type": "object",
-        "properties": {
-             "top_prop": {"type": "integer"}
-        },
-        "allOf": [
-             {"$ref": "#/$defs/Base"},
-             {"properties": {"other_prop": {"type": "boolean"}}}
-        ]
+        "properties": {"top_prop": {"type": "integer"}},
+        "allOf": [{"$ref": "#/$defs/Base"}, {"properties": {"other_prop": {"type": "boolean"}}}],
     }
     agent = create_agent(schema)
     output = generate_mock_output(agent)
@@ -245,28 +236,16 @@ def test_all_of_with_ref_and_top_properties():
     assert isinstance(output["top_prop"], int)
     assert isinstance(output["other_prop"], bool)
 
-def test_all_of_no_props_in_allof():
-    schema = {
-        "type": "object",
-        "allOf": [
-            {"required": ["a"]}
-        ],
-        "properties": {
-            "a": {"type": "string"}
-        }
-    }
+
+def test_all_of_no_props_in_allof() -> None:
+    schema = {"type": "object", "allOf": [{"required": ["a"]}], "properties": {"a": {"type": "string"}}}
     agent = create_agent(schema)
     output = generate_mock_output(agent)
     assert isinstance(output["a"], str)
 
-def test_all_of_mixed_props():
-    schema = {
-        "type": "object",
-        "allOf": [
-            {"required": ["a"]},
-            {"properties": {"a": {"type": "integer"}}}
-        ]
-    }
+
+def test_all_of_mixed_props() -> None:
+    schema = {"type": "object", "allOf": [{"required": ["a"]}, {"properties": {"a": {"type": "integer"}}}]}
     agent = create_agent(schema)
     output = generate_mock_output(agent)
     assert isinstance(output["a"], int)

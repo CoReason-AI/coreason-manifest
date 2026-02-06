@@ -11,7 +11,7 @@
 import random
 import string
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition
@@ -26,9 +26,7 @@ class MockGenerator:
 
     def _random_string(self, min_len: int = 5, max_len: int = 20) -> str:
         length = self.rng.randint(min_len, max_len)
-        return "".join(
-            self.rng.choices(string.ascii_letters + string.digits + " ", k=length)
-        ).strip()
+        return "".join(self.rng.choices(string.ascii_letters + string.digits + " ", k=length)).strip()
 
     def _random_int(self, min_val: int = 0, max_val: int = 100) -> int:
         return self.rng.randint(min_val, max_val)
@@ -77,7 +75,7 @@ class MockGenerator:
 
         # Handle composite keywords if type is missing or to augment type
         if "allOf" in schema:
-            merged = {}
+            merged: dict[str, Any] = {}
             for s in schema["allOf"]:
                 # If we have refs in allOf, we should probably resolve them,
                 # but for simple mock gen, let's just merge properties.
@@ -126,7 +124,7 @@ class MockGenerator:
             if fmt == "date-time":
                 # Deterministic time range
                 ts = self.rng.randint(1600000000, 1700000000)
-                dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+                dt = datetime.fromtimestamp(ts, tz=UTC)
                 return dt.isoformat().replace("+00:00", "Z")
             if fmt == "uuid":
                 return str(uuid.UUID(int=self.rng.getrandbits(128)))
