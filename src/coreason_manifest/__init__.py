@@ -81,6 +81,12 @@ from .spec.v2.definitions import (
     Workflow,
 )
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
+from .spec.v2.resources import (
+    ModelProfile,
+    PricingUnit,
+    RateCard,
+    ResourceConstraints,
+)
 from .utils.audit import compute_audit_hash, verify_chain
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.service import ServiceContract
@@ -143,12 +149,16 @@ __all__ = [
     "MediaItem",
     "MemoryConfig",
     "MemoryStrategy",
+    "ModelProfile",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
+    "PricingUnit",
     "ProgressUpdate",
+    "RateCard",
     "ReasoningTrace",
     "Recipe",
+    "ResourceConstraints",
     "Role",
     "ServiceContract",
     "ServiceRequest",
