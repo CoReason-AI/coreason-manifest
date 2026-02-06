@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from coreason_manifest.spec.common.observability import AuditLog
 from coreason_manifest.utils.audit import compute_audit_hash, verify_chain
@@ -42,6 +43,43 @@ def test_deterministic_hashing() -> None:
     hash2 = compute_audit_hash(data2)
 
     assert hash1 == hash2
+
+
+def test_timezone_normalization() -> None:
+    """Verify that equivalent times in different zones hash identically."""
+    uid = uuid.uuid4()
+    req_id = uuid.uuid4()
+    root_id = uuid.uuid4()
+
+    # Create UTC time
+    dt_utc = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+    # Create same time in EST (UTC-5)
+    # 12:00 UTC is 07:00 EST
+    dt_est = datetime(2023, 1, 1, 7, 0, 0, tzinfo=ZoneInfo("US/Eastern"))
+
+    # Sanity check that they represent the same instant
+    assert dt_utc == dt_est
+
+    data_utc = {
+        "id": uid,
+        "request_id": req_id,
+        "root_request_id": root_id,
+        "timestamp": dt_utc,
+        "actor": "user",
+        "action": "test",
+        "outcome": "success",
+        "previous_hash": None,
+        "safety_metadata": None,
+    }
+
+    data_est = data_utc.copy()
+    data_est["timestamp"] = dt_est
+
+    hash_utc = compute_audit_hash(data_utc)
+    hash_est = compute_audit_hash(data_est)
+
+    assert hash_utc == hash_est
 
 
 def test_tamper_detection() -> None:
