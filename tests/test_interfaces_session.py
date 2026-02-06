@@ -124,8 +124,10 @@ class MissingPropertySession:
 
 # --- Complex Inheritance Cases ---
 
+
 class BaseSession:
     """Base class providing common functionality."""
+
     @property
     def session_id(self) -> str:
         return "sess_base"
@@ -137,6 +139,7 @@ class BaseSession:
 
 class StorageMixin:
     """Mixin providing storage capabilities."""
+
     async def store(self, key: str, value: Any) -> None:
         _ = (key, value)
 
@@ -150,6 +153,7 @@ class ComplexSession(BaseSession, StorageMixin):
     Inherits properties from BaseSession and storage from StorageMixin.
     Implements history/recall itself.
     """
+
     async def history(self, limit: int = 10, offset: int = 0) -> list[Interaction]:
         _ = (limit, offset)
         return []
