@@ -19,6 +19,23 @@ from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefin
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.resources import ModelProfile
 
+__all__ = [
+    "DesignMetadata",
+    "ToolDefinition",
+    "AgentDefinition",
+    "GenericDefinition",
+    "BaseStep",
+    "AgentStep",
+    "LogicStep",
+    "CouncilStep",
+    "SwitchStep",
+    "Step",
+    "Workflow",
+    "ManifestMetadata",
+    "ManifestV2",
+    "InterfaceDefinition",
+]
+
 
 class DesignMetadata(CoReasonBaseModel):
     """UI-specific metadata for the visual builder."""
