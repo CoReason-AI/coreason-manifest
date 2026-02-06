@@ -1,17 +1,25 @@
-# Governance & Policy Enforcement
+# Governance & Policy Validation
 
-The **Governance / Policy Enforcer** module (`src/coreason_manifest/spec/governance.py`) provides a mechanism for Organizations to define rules for Agent validation.
+The **Governance / Policy Validation** module (`src/coreason_manifest/spec/governance.py`) provides a mechanism for Organizations to define rules for Agent validation.
+
+## Scope & Security Model
+
+**Important:** This library performs **Static Analysis** on the Agent Manifest. It validates that the *structure* and *declared intent* of an agent comply with organizational policies.
+
+*   **Not Runtime Enforcement:** This library does **not** act as a firewall, proxy, or identity provider. It cannot prevent a malicious agent from attempting to bypass restrictions at runtime if the Execution Engine does not enforce them.
+*   **The "Contract":** The `GovernanceConfig` defines a contract. The library ensures the Manifest *claims* compliance (e.g., "I require auth"). The **Execution Engine** is responsible for honoring that contract (e.g., actually challenging the user for credentials).
+*   **Risk Metadata:** Labels like `ToolRiskLevel` are metadata signals. They are meaningless unless the runtime environment (e.g., the Agent Runner) is configured to treat them differently (e.g., running `CRITICAL` tools in a sandboxed environment).
 
 ## Overview
 
-The module provides configuration models to define organizational standards (e.g., security, allowed domains, risk levels).
+The module provides configuration models to define organizational standards (e.g., security requirements, allowed domains, risk levels).
 
 ### Key Features
-*   **Domain Restriction**: Whitelist specific domains for external tools (e.g., only allow tools from `*.internal.corp`).
-*   **Risk Level Enforcement**: Set a maximum allowed risk level for tools (e.g., `SAFE` only).
-*   **Authentication Mandates**: Ensure that agents using `CRITICAL` tools enforce user authentication. If `require_auth_for_critical_tools` is enabled (default), any manifest defining a `CRITICAL` tool must explicitly set `requires_auth: true` in its metadata.
-*   **Logic Execution Control**: Restrict the usage of arbitrary Python code in `LogicStep`s and `SwitchStep`s.
-*   **Strict URL Validation**: Enforce strict normalization (lower-case, no trailing dots) on tool URIs to prevent bypasses.
+*   **Domain Policy Compliance**: Validates that external tools declare URIs belonging to whitelisted domains (e.g., only allowing tools from `*.internal.corp`).
+*   **Risk Level Validation**: Ensures tools do not exceed a maximum allowed risk level (e.g., `SAFE` only).
+*   **Authentication Mandates**: Validates that agents using `CRITICAL` tools correctly declare an authentication requirement (`requires_auth: true`) in their metadata.
+*   **Logic Execution Control**: Checks for the usage of arbitrary Python code in `LogicStep`s and `SwitchStep`s to enforce "No Code" policies.
+*   **URL Compliance Matching**: standardized normalization (lower-case, no trailing dots) on tool URIs to ensure they match the allowed domains list robustly.
 
 ## Configuration: `GovernanceConfig`
 
@@ -37,7 +45,8 @@ config = GovernanceConfig(
     allow_custom_logic=False,
 
     # Enforce strict URL normalization (strip trailing dots, case-insensitive match)
-    # Default: True (Secure by Default)
+    # for matching against allowed_domains.
+    # Default: True
     strict_url_validation=True
 )
 ```
@@ -70,8 +79,8 @@ When `require_auth_for_critical_tools` is enabled, the validator checks the mani
 1.  **Standard Field**: Checks `manifest.metadata.requires_auth`.
 2.  **Dynamic Fields**: If not found (or False), it checks the `model_extra` dictionary (e.g., `manifest.metadata.model_extra['requires_auth']`). This supports manifests where the metadata model is extensible.
 
-### Strict vs. Loose URL Validation
-The `strict_url_validation` setting controls how Tool URIs are normalized before comparison with `allowed_domains`:
+### URL Compliance Matching (Strict vs. Loose)
+The `strict_url_validation` setting controls how Tool URIs are normalized **before comparison** with `allowed_domains`. This is for policy consistency, not network security.
 
 *   **Strict Mode (`True`)**:
     *   Hostnames are lower-cased.
