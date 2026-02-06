@@ -8,27 +8,23 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from uuid import uuid4
-from typing import Any
 
 import pytest
 from pydantic import ValidationError
 
+from coreason_manifest.spec.cap import AgentRequest, StreamOpCode, StreamPacket
 from coreason_manifest.spec.interfaces.middleware import (
     InterceptorContext,
     IRequestInterceptor,
     IResponseInterceptor,
 )
-from coreason_manifest.spec.cap import AgentRequest, StreamPacket, StreamOpCode
+
 
 def test_interceptor_context_immutability() -> None:
     """Verify InterceptorContext is frozen."""
-    context = InterceptorContext(
-        request_id=uuid4(),
-        start_time=datetime.now(UTC),
-        metadata={"token": "abc"}
-    )
+    context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"token": "abc"})
 
     # Attempt to modify request_id
     with pytest.raises(ValidationError):
@@ -44,7 +40,7 @@ class PIIRedactionInterceptor:
 
     async def intercept_request(
         self,
-        context: InterceptorContext,
+        _context: InterceptorContext,
         request: AgentRequest,
     ) -> AgentRequest:
         if "secret" in request.query:
@@ -58,11 +54,7 @@ class PIIRedactionInterceptor:
 async def test_pii_redaction_interceptor() -> None:
     """Test modification of request data."""
     interceptor = PIIRedactionInterceptor()
-    context = InterceptorContext(
-        request_id=uuid4(),
-        start_time=datetime.now(UTC),
-        metadata={}
-    )
+    context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={})
     request = AgentRequest(query="This is a secret message.")
 
     processed_request = await interceptor.intercept_request(context, request)
@@ -91,19 +83,11 @@ async def test_policy_rejection_interceptor() -> None:
     request = AgentRequest(query="Hello")
 
     # Allowed
-    context_allowed = InterceptorContext(
-        request_id=uuid4(),
-        start_time=datetime.now(UTC),
-        metadata={"block": False}
-    )
+    context_allowed = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"block": False})
     assert await interceptor.intercept_request(context_allowed, request) == request
 
     # Blocked
-    context_blocked = InterceptorContext(
-        request_id=uuid4(),
-        start_time=datetime.now(UTC),
-        metadata={"block": True}
-    )
+    context_blocked = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"block": True})
     with pytest.raises(ValueError, match="Blocked by policy"):
         await interceptor.intercept_request(context_blocked, request)
 
@@ -112,10 +96,9 @@ class ResponseCensorInterceptor:
     """Interceptor that censors 'bad' words in stream."""
 
     async def intercept_stream(self, packet: StreamPacket) -> StreamPacket:
-        if packet.op == StreamOpCode.DELTA and isinstance(packet.p, str):
-            if "bad" in packet.p:
-                new_payload = packet.p.replace("bad", "***")
-                return packet.model_copy(update={"p": new_payload})
+        if packet.op == StreamOpCode.DELTA and isinstance(packet.p, str) and "bad" in packet.p:
+            new_payload = packet.p.replace("bad", "***")
+            return packet.model_copy(update={"p": new_payload})
         return packet
 
 
