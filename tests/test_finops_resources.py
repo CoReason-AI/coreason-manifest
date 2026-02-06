@@ -38,11 +38,7 @@ def test_cost_calculation_simulation() -> None:
     input_units = input_tokens / 1_000_000
     output_units = output_tokens / 1_000_000
 
-    expected_cost = (
-        (input_units * card.input_cost)
-        + (output_units * card.output_cost)
-        + card.fixed_cost_per_request
-    )
+    expected_cost = (input_units * card.input_cost) + (output_units * card.output_cost) + card.fixed_cost_per_request
 
     # 1.5 * 10 + 0.5 * 30 + 0.01 = 15 + 15 + 0.01 = 30.01
     assert expected_cost == 30.01
@@ -57,18 +53,10 @@ def test_serialization() -> None:
             input_cost=10.0,
             output_cost=30.0,
         ),
-        constraints=ResourceConstraints(
-            context_window_size=128000
-        )
+        constraints=ResourceConstraints(context_window_size=128000),
     )
 
-    agent = AgentDefinition(
-        id="agent-1",
-        name="FinOps Agent",
-        role="Accountant",
-        goal="Save money",
-        resources=profile
-    )
+    agent = AgentDefinition(id="agent-1", name="FinOps Agent", role="Accountant", goal="Save money", resources=profile)
 
     data = agent.dump()
 
@@ -80,21 +68,13 @@ def test_serialization() -> None:
 def test_validation_constraints() -> None:
     """Verify ResourceConstraints raises ValidationError for negative values."""
     with pytest.raises(ValidationError):
-        ResourceConstraints(
-            context_window_size=-100
-        )
+        ResourceConstraints(context_window_size=-100)
 
     with pytest.raises(ValidationError):
-        ResourceConstraints(
-            context_window_size=1000,
-            max_output_tokens=-1
-        )
+        ResourceConstraints(context_window_size=1000, max_output_tokens=-1)
 
     with pytest.raises(ValidationError):
-        ResourceConstraints(
-            context_window_size=1000,
-            rate_limit_rpm=-5
-        )
+        ResourceConstraints(context_window_size=1000, rate_limit_rpm=-5)
 
 
 def test_immutability() -> None:
