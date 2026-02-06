@@ -46,7 +46,28 @@ pip install coreason-manifest
 
 ## Usage
 
-This library is used to define and validate Agent configurations programmatically.
+### Quick Start
+
+Create a fully compliant agent manifest in just a few lines of code:
+
+```python
+from coreason_manifest import simple_agent
+
+# Create a "Hello World" agent
+manifest = simple_agent(
+    name="HelloAgent",
+    prompt="You are a helpful assistant.",
+    model="gpt-4o",
+    inputs={"user_message": {"type": "string"}},
+    outputs={"reply": {"type": "string"}}
+)
+
+print(f"Agent '{manifest.metadata.name}' created successfully!")
+```
+
+### Advanced Usage (Manual Construction)
+
+For granular control, you can instantiate the strict Pydantic models directly:
 
 ```python
 from coreason_manifest import (
