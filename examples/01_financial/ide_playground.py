@@ -165,7 +165,7 @@ def simulate_execution(agent: ManifestV2, inputs: dict[str, Any]) -> None:
     print(f"\n🚀 Starting Agent: {agent.metadata.name}...")
     print(f"📥 Inputs: {json.dumps(inputs, indent=2)}")
 
-    current_step_id = agent.workflow.start
+    current_step_id: str | None = agent.workflow.start
     total_cost = 0.0
 
     while current_step_id:
@@ -208,10 +208,7 @@ def simulate_execution(agent: ManifestV2, inputs: dict[str, Any]) -> None:
             print(f"   i️ Non-Agent Step Type: {step.type}")
 
         # Move to next step
-        if hasattr(step, "next"):
-            current_step_id = step.next  # type: ignore
-        else:
-            current_step_id = None
+        current_step_id = step.next if hasattr(step, "next") else None  # type: ignore
 
     print(f"\n🏁 Execution Complete. Cost Estimate: ${total_cost:.4f}")
 
