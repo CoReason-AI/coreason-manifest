@@ -17,6 +17,7 @@ nav:
     - Evaluation Metadata: evaluation_metadata.md
     - Request Lineage Implementation: request_lineage_implementation.md
     - Observability & Tracing: observability.md
+    - Audit Hashing & Integrity: audit_hashing.md
     - Frontend Integration & Graph Events: frontend_integration.md
     - Event Content Types: event_content_types.md
     - Semantic Error Handling: error_handling_standards.md

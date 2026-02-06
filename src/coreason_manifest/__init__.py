@@ -80,6 +80,7 @@ from .spec.v2.definitions import (
     Workflow,
 )
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
+from .utils.audit import compute_audit_hash, verify_chain
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
@@ -169,9 +170,11 @@ __all__ = [
     "Workflow",
     "__version__",
     "check_compliance_v2",
+    "compute_audit_hash",
     "dump",
     "load",
     "migrate_graph_event_to_cloud_event",
     "validate_integrity",
     "validate_loose",
+    "verify_chain",
 ]
