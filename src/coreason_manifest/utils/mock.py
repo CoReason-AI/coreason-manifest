@@ -13,12 +13,12 @@ import secrets
 import string
 import uuid
 from datetime import UTC, datetime
-from typing import Any, TypeAlias
+from typing import Any, cast
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 
-JsonValue: TypeAlias = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
-JsonSchema: TypeAlias = dict[str, Any]
+type JsonValue = dict[str, "JsonValue"] | list["JsonValue"] | str | int | float | bool | None
+type JsonSchema = dict[str, Any]
 
 
 class MockGenerator:
@@ -46,6 +46,9 @@ class MockGenerator:
 
     def _random_int(self, min_val: int = 0, max_val: int = 100) -> int:
         return self.rng.randint(min_val, max_val)
+
+    def _random_float(self) -> float:
+        return self.rng.random() * 100.0
 
     def _random_bool(self) -> bool:
         return self.rng.choice([True, False])
@@ -83,9 +86,19 @@ class MockGenerator:
         """Deep merge two schemas."""
         merged = base.copy()
         for k, v in update.items():
-            if k == "properties" and isinstance(v, dict) and "properties" in merged and isinstance(merged["properties"], dict):
+            if (
+                k == "properties"
+                and isinstance(v, dict)
+                and "properties" in merged
+                and isinstance(merged["properties"], dict)
+            ):
                 merged["properties"] = self._deep_merge(merged["properties"], v)
-            elif k == "required" and isinstance(v, list) and "required" in merged and isinstance(merged["required"], list):
+            elif (
+                k == "required"
+                and isinstance(v, list)
+                and "required" in merged
+                and isinstance(merged["required"], list)
+            ):
                 merged["required"] = list(set(merged["required"] + v))
             elif isinstance(v, dict) and k in merged and isinstance(merged[k], dict):
                 merged[k] = self._deep_merge(merged[k], v)
@@ -96,7 +109,7 @@ class MockGenerator:
     def _resolve_ref(self, ref: str) -> JsonSchema:
         ref_name = ref.split("/")[-1]
         if ref_name in self.definitions:
-            return self.definitions[ref_name]
+            return cast("JsonSchema", self.definitions[ref_name])
         if self.strict:
             raise ValueError(f"Missing definition for reference: {ref}")
         return {}
@@ -116,11 +129,11 @@ class MockGenerator:
 
         # Handle enum
         if "enum" in schema:
-            return self.rng.choice(schema["enum"])
+            return cast("JsonValue", self.rng.choice(schema["enum"]))
 
         # Handle const
         if "const" in schema:
-            return schema["const"]
+            return cast("JsonValue", schema["const"])
 
         # Handle composite keywords (allOf)
         if "allOf" in schema:
@@ -136,7 +149,7 @@ class MockGenerator:
             for k, v in schema.items():
                 if k != "allOf":
                     if k == "properties" and isinstance(v, dict) and "properties" in combined:
-                         combined["properties"] = self._deep_merge(combined["properties"], v)
+                        combined["properties"] = self._deep_merge(combined["properties"], v)
                     else:
                         combined[k] = v
 
@@ -164,7 +177,7 @@ class MockGenerator:
                 return None
 
         if t is None:
-             # Heuristics for missing type
+            # Heuristics for missing type
             if "properties" in schema:
                 t = "object"
             elif "items" in schema:
@@ -225,7 +238,7 @@ class MockGenerator:
 
         return self.rng.uniform(min_val, max_val)
 
-    def _generate_bool(self, schema: JsonSchema) -> bool:
+    def _generate_bool(self, _schema: JsonSchema) -> bool:
         return self._random_bool()
 
     def _generate_array(self, schema: JsonSchema) -> list[JsonValue]:
@@ -254,6 +267,4 @@ def generate_mock_output(agent: AgentDefinition, seed: int | None = None, strict
     defs = outputs_schema.get("$defs") or outputs_schema.get("definitions") or {}
 
     generator = MockGenerator(seed=seed, definitions=defs, strict=strict)
-    result = generator._generate_value(outputs_schema)
-
-    return result
+    return generator._generate_value(outputs_schema)
