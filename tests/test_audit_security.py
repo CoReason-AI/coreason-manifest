@@ -1,9 +1,10 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.common.observability import AuditLog
 from coreason_manifest.utils.audit import compute_audit_hash, verify_chain
+
 
 def test_audit_log_safety_metadata_roundtrip() -> None:
     """
@@ -18,22 +19,19 @@ def test_audit_log_safety_metadata_roundtrip() -> None:
         "id": log_id,
         "request_id": req_id,
         "root_request_id": req_id,
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(UTC),
         "actor": "admin",
         "action": "override_policy",
         "outcome": "success",
         "safety_metadata": {"reason": "emergency", "approved_by": "CISO"},
-        "previous_hash": None
+        "previous_hash": None,
     }
 
     # 1. Compute hash from raw data (simulating storage/transport)
     expected_hash = compute_audit_hash(data)
 
     # 2. Load into AuditLog model (simulating verification)
-    log = AuditLog(
-        **data,
-        integrity_hash=expected_hash
-    )
+    log = AuditLog(**data, integrity_hash=expected_hash)
 
     # 3. Verify that the model retained the metadata
     assert log.safety_metadata == data["safety_metadata"]
@@ -45,6 +43,7 @@ def test_audit_log_safety_metadata_roundtrip() -> None:
     # 5. Verify chain validation passes
     assert verify_chain([log]) is True
 
+
 def test_audit_log_safety_metadata_tamper() -> None:
     """Verify that modifying safety_metadata invalidates the hash."""
     log_id = uuid.uuid4()
@@ -54,12 +53,12 @@ def test_audit_log_safety_metadata_tamper() -> None:
         "id": log_id,
         "request_id": req_id,
         "root_request_id": req_id,
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(UTC),
         "actor": "admin",
         "action": "override_policy",
         "outcome": "success",
         "safety_metadata": {"reason": "valid"},
-        "previous_hash": None
+        "previous_hash": None,
     }
 
     initial_hash = compute_audit_hash(data)
@@ -75,8 +74,8 @@ def test_audit_log_safety_metadata_tamper() -> None:
         action=log.action,
         outcome=log.outcome,
         previous_hash=log.previous_hash,
-        safety_metadata={"reason": "malicious"}, # Tampered
-        integrity_hash=log.integrity_hash
+        safety_metadata={"reason": "malicious"},  # Tampered
+        integrity_hash=log.integrity_hash,
     )
 
     # Verify chain should fail
