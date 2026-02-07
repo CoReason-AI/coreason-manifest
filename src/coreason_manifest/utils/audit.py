@@ -24,7 +24,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     Computes a deterministic SHA-256 hash of the audit entry.
 
     The hash is computed over all fields present in the entry, except `integrity_hash`.
-    This uses introspection (v2 logic) to ensure all current and future fields are
+    This uses introspection to ensure all current and future fields are
     automatically included in the integrity check.
 
     Fields are canonicalized (UUID -> str, datetime -> ISO 8601 UTC) and
