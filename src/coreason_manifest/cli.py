@@ -14,6 +14,9 @@ import sys
 import textwrap
 from pathlib import Path
 
+import yaml
+from pydantic import ValidationError
+
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -176,6 +179,43 @@ def handle_init(args: argparse.Namespace) -> None:
     print("   3. Open 'agent.py' and press F5 to run!")
 
 
+def handle_validate(args: argparse.Namespace) -> None:
+    file_path = Path(args.file)
+    if not file_path.exists():
+        print(f"❌ Error: File '{args.file}' not found.")
+        sys.exit(1)
+
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        if file_path.suffix.lower() in [".yaml", ".yml"]:
+            data = yaml.safe_load(content)
+        elif file_path.suffix.lower() == ".json":
+            data = json.loads(content)
+        else:
+            print(f"❌ Error: Unsupported file extension '{file_path.suffix}'. Use .json, .yaml, or .yml.")
+            sys.exit(1)
+    except (json.JSONDecodeError, yaml.YAMLError) as e:
+        print(f"❌ Error: Malformed file: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error reading file: {e}")
+        sys.exit(1)
+
+    try:
+        agent = AgentDefinition.model_validate(data)
+        if args.json:
+            print(json.dumps({"status": "valid", "name": agent.name}))
+        else:
+            print(f"✅ Valid Agent: {agent.name}")
+    except ValidationError as e:
+        print("❌ Validation Failed:")
+        for err in e.errors():
+            loc = " -> ".join(str(part) for part in err["loc"])
+            msg = err["msg"]
+            print(f"  • {loc}: {msg}")
+        sys.exit(1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="coreason", description="CoReason Manifest CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -204,11 +244,19 @@ def main() -> None:
     init_parser = subparsers.add_parser("init", help="Initialize a new CoReason agent project")
     init_parser.add_argument("name", help="Name of the agent/directory (e.g., my_first_agent)")
 
+    # Validate
+    validate_parser = subparsers.add_parser("validate", help="Validate a static agent definition file")
+    validate_parser.add_argument("file", help="Path to the .yaml or .json file")
+    validate_parser.add_argument("--json", action="store_true", help="Output validation result as JSON")
+
     args = parser.parse_args()
 
     if args.command == "init":
         handle_init(args)
-        # handle_init calls sys.exit(0) so we don't need return here, but for safety:
+        return
+
+    if args.command == "validate":
+        handle_validate(args)
         return
 
     try:
