@@ -37,20 +37,8 @@ def test_validate_manifest_v2_success(tmp_path: Path, capsys: pytest.CaptureFixt
     agent_data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
-        "metadata": {
-            "name": "Manifest Agent",
-            "version": "1.0.0"
-        },
-        "workflow": {
-            "start": "step1",
-            "steps": {
-                "step1": {
-                    "type": "logic",
-                    "id": "step1",
-                    "code": "print('hello')"
-                }
-            }
-        }
+        "metadata": {"name": "Manifest Agent", "version": "1.0.0"},
+        "workflow": {"start": "step1", "steps": {"step1": {"type": "logic", "id": "step1", "code": "print('hello')"}}},
     }
     agent_file.write_text(yaml.dump(agent_data))
 
@@ -67,19 +55,8 @@ def test_validate_manifest_v2_no_version(tmp_path: Path, capsys: pytest.CaptureF
     agent_data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Agent",
-        "metadata": {
-            "name": "Manifest Agent NoVer"
-        },
-        "workflow": {
-            "start": "step1",
-            "steps": {
-                "step1": {
-                    "type": "logic",
-                    "id": "step1",
-                    "code": "print('hello')"
-                }
-            }
-        }
+        "metadata": {"name": "Manifest Agent NoVer"},
+        "workflow": {"start": "step1", "steps": {"step1": {"type": "logic", "id": "step1", "code": "print('hello')"}}},
     }
     agent_file.write_text(yaml.dump(agent_data))
 

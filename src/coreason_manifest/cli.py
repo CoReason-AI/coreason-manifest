@@ -187,6 +187,7 @@ def handle_validate(args: argparse.Namespace) -> None:
     yaml_module = None
     try:
         import yaml
+
         yaml_module = yaml
     except ImportError:
         pass
@@ -219,7 +220,7 @@ def handle_validate(args: argparse.Namespace) -> None:
     try:
         name = "Unknown"
         version = "Unknown"
-        agent_obj = None
+        agent_obj: ManifestV2 | AgentDefinition
 
         if isinstance(data, dict) and "apiVersion" in data:
             agent_obj = ManifestV2.model_validate(data)
