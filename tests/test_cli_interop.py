@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -20,10 +19,8 @@ from _pytest.capture import CaptureFixture
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.cli import main
 from coreason_manifest.spec.v2.definitions import (
-    AgentDefinition,
     AgentStep,
     CouncilStep,
-    InterfaceDefinition,
     LogicStep,
     ManifestMetadata,
     ManifestV2,
