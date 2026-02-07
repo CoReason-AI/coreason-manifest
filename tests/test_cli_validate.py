@@ -22,9 +22,7 @@ def test_validate_json_success(tmp_path: Path, capsys: pytest.CaptureFixture[str
     agent_file.write_text(json.dumps(agent_data))
 
     with patch.object(sys, "argv", ["coreason", "validate", str(agent_file), "--json"]):
-        with pytest.raises(SystemExit) as exc:
-            main()
-        assert exc.value.code == 0
+        main()
 
     captured = capsys.readouterr()
     output = json.loads(captured.out)
@@ -45,9 +43,7 @@ def test_validate_yaml_success(tmp_path: Path, capsys: pytest.CaptureFixture[str
     agent_file.write_text(yaml.dump(agent_data))
 
     with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
-        with pytest.raises(SystemExit) as exc:
-            main()
-        assert exc.value.code == 0
+        main()
 
     captured = capsys.readouterr()
     assert "✅ Valid Agent: Test Agent YAML" in captured.out
@@ -113,3 +109,18 @@ def test_validate_unsupported_extension(tmp_path: Path, capsys: pytest.CaptureFi
 
     captured = capsys.readouterr()
     assert "❌ Error: Unsupported file extension" in captured.out
+
+
+def test_validate_read_error(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation when file reading fails (generic exception)."""
+    agent_file = tmp_path / "read_error.json"
+    agent_file.write_text("{}")
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with patch("pathlib.Path.read_text", side_effect=PermissionError("Boom")):
+            with pytest.raises(SystemExit) as exc:
+                main()
+            assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error reading file: Boom" in captured.out

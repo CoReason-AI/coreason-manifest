@@ -207,7 +207,6 @@ def handle_validate(args: argparse.Namespace) -> None:
             print(json.dumps({"status": "valid", "name": agent.name}))
         else:
             print(f"✅ Valid Agent: {agent.name}")
-        sys.exit(0)
     except ValidationError as e:
         print("❌ Validation Failed:")
         for err in e.errors():
