@@ -234,7 +234,6 @@ class ManifestMetadata(CoReasonBaseModel):
 
 
 # Import ToolPackDefinition after definitions are declared to avoid circular import
-from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
 
 # Update forward references for ToolPackDefinition using the local namespace
 ToolPackDefinition.model_rebuild(

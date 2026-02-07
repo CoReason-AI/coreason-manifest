@@ -76,6 +76,6 @@ class ToolPackDefinition(CoReasonBaseModel):
     metadata: PackMetadata = Field(..., description="Metadata.")
 
     agents: list[Union["AgentDefinition", str]] = Field(default_factory=list, description="List of Agents or IDs.")
-    skills: list[Union[SkillDefinition, str]] = Field(default_factory=list, description="List of Skills or IDs.")
+    skills: list[SkillDefinition | str] = Field(default_factory=list, description="List of Skills or IDs.")
     tools: list[Union["ToolDefinition", str]] = Field(default_factory=list, description="List of Tools or IDs.")
     mcp_servers: list[MCPServerDefinition] = Field(default_factory=list, description="List of MCP Servers.")
