@@ -174,7 +174,6 @@ def handle_init(args: argparse.Namespace) -> None:
     print(f"   1. cd {args.name}")
     print("   2. code .  (Open in VS Code)")
     print("   3. Open 'agent.py' and press F5 to run!")
-    sys.exit(0)
 
 
 def main() -> None:
