@@ -2,7 +2,6 @@
 
 import json
 from datetime import UTC, datetime
-from typing import Any
 from uuid import UUID
 
 import pytest
@@ -164,7 +163,7 @@ def test_edge_cases_enum_validation() -> None:
     """Test that invalid enum values raise validation errors."""
     with pytest.raises(ValidationError):
         SimulationStep(
-            type="invalid_type",  # type: ignore
+            type="invalid_type",
             node_id="fail_node",
         )
 
@@ -173,7 +172,7 @@ def test_edge_cases_enum_validation() -> None:
             id="bad_scenario",
             description="fail",
             inputs={},
-            validation_logic="random_logic",  # type: ignore
+            validation_logic="random_logic",
         )
 
 
