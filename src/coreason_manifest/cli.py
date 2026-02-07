@@ -211,7 +211,7 @@ def handle_validate(args: argparse.Namespace) -> None:
     except ValidationError as e:
         print("❌ Validation Failed:")
         for err in e.errors():
-            loc = " -> ".join(str(l) for l in err["loc"])
+            loc = " -> ".join(str(part) for part in err["loc"])
             msg = err["msg"]
             print(f"  • {loc}: {msg}")
         sys.exit(1)
