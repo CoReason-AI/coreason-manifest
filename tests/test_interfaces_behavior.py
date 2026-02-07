@@ -157,6 +157,7 @@ class TestBehaviorProtocols:
         Edge Case: A class that defines the method but raises NotImplementedError
         is structurally compliant (it has the method).
         """
+
         class AbstractAgent:
             async def assist(self, session: Any, request: Any, handler: Any) -> None:
                 raise NotImplementedError
@@ -174,11 +175,13 @@ class TestBehaviorProtocols:
         A property returning a coroutine function might pass strict instance check if it's
         just checking attribute presence.
         """
+
         class PropertyAgent:
             @property
             def assist(self) -> Any:
                 async def _func(session: Any, request: Any, handler: Any) -> None:
                     pass
+
                 return _func
 
             async def shutdown(self) -> None:
