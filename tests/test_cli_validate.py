@@ -207,3 +207,41 @@ def test_validate_generic_error(tmp_path: Path, capsys: pytest.CaptureFixture[st
 
     captured = capsys.readouterr()
     assert "❌ Error:" in captured.out
+
+
+def test_validate_empty_file(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    f = tmp_path / "empty.yaml"
+    f.touch()
+
+    with patch("sys.argv", ["coreason", "validate", str(f)]), pytest.raises(SystemExit) as e:
+        main()
+    assert e.value.code == 1
+
+    captured = capsys.readouterr()
+    # Pydantic validation error for None input or generic error
+    assert "Validation Failed" in captured.out
+
+
+def test_validate_list_root(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    f = tmp_path / "list.json"
+    f.write_text("[]")
+
+    with patch("sys.argv", ["coreason", "validate", str(f)]), pytest.raises(SystemExit) as e:
+        main()
+    assert e.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "Validation Failed" in captured.out
+
+
+def test_validate_malformed_yaml(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    f = tmp_path / "bad.yaml"
+    f.write_text("key: : value")  # Invalid YAML
+
+    with patch("sys.argv", ["coreason", "validate", str(f)]), pytest.raises(SystemExit) as e:
+        main()
+    assert e.value.code == 1
+
+    captured = capsys.readouterr()
+    # Should be caught by generic exception handler
+    assert "❌ Error:" in captured.out

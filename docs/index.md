@@ -28,6 +28,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[CLI & Interop Layer](cli_interop.md)**
     *   Documentation for the `coreason` CLI tool (`inspect`, `viz`, `run`) and dynamic loader utility.
 
+*   **[CLI Validation Command](cli_validation.md)**
+    *   Documentation for the `coreason validate` command for static analysis of manifest files.
+
 ## Specifications & Protocols
 
 *   **[Coreason Agent Manifest (CAM) Specification](cap/specification.md)**
