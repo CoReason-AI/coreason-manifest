@@ -98,5 +98,6 @@ class AuditLog(CoReasonBaseModel):
     safety_metadata: dict[str, Any] | None = Field(
         default=None, description="Security context and policy decision metadata."
     )
+    hash_algorithm: int = Field(default=1, description="1=Fixed fields (legacy), 2=Introspection (secure)")
     previous_hash: str | None = Field(None, description="Hash of the preceding log entry for tamper-evidence.")
     integrity_hash: str = Field(description="SHA-256 hash of this record.")

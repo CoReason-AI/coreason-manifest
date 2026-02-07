@@ -14,40 +14,59 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
+from pydantic import BaseModel
+
 from ..spec.common.observability import AuditLog
+
+
+# Legacy fields for v1 hash algorithm
+V1_FIELDS = [
+    "id",
+    "request_id",
+    "root_request_id",
+    "timestamp",
+    "actor",
+    "action",
+    "outcome",
+    "previous_hash",
+    "safety_metadata",
+]
 
 
 def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     """
     Computes a deterministic SHA-256 hash of the audit entry.
 
-    The hash is computed over the following fields (if present):
-    - id
-    - request_id
-    - root_request_id
-    - timestamp
-    - actor
-    - action
-    - outcome
-    - previous_hash
-    - safety_metadata
+    Supports multiple hashing algorithms via `hash_algorithm` field:
+    - v1 (default): Fixed list of fields. Preserves legacy behavior.
+    - v2: Introspection of all fields (except `integrity_hash`). Secure against new fields.
 
     Fields are canonicalized (UUID -> str, datetime -> ISO 8601 UTC) and
     serialized to JSON with sorted keys. `integrity_hash` is explicitly excluded.
     None values are excluded from the payload.
     """
+    # Determine algorithm version
+    if isinstance(entry, dict):
+        algo = entry.get("hash_algorithm", 1)
+    else:
+        algo = getattr(entry, "hash_algorithm", 1)
+
     # Fields to extract
-    fields = [
-        "id",
-        "request_id",
-        "root_request_id",
-        "timestamp",
-        "actor",
-        "action",
-        "outcome",
-        "previous_hash",
-        "safety_metadata",
-    ]
+    if algo == 1:
+        fields = list(V1_FIELDS)
+    elif algo == 2:
+        if isinstance(entry, BaseModel):
+            # Use introspection to get all fields defined in the model
+            fields = list(type(entry).model_fields.keys())
+        else:
+            # Assuming dict, use keys
+            fields = list(entry.keys())
+    else:
+        raise ValueError(f"Unsupported hash_algorithm: {algo}")
+
+    # Explicitly exclude integrity_hash (relevant for v2)
+    if "integrity_hash" in fields:
+        fields.remove("integrity_hash")
 
     payload: dict[str, Any] = {}
 
