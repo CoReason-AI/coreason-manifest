@@ -1,0 +1,115 @@
+import json
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+import yaml
+
+from coreason_manifest.cli import main
+
+
+def test_validate_json_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of a valid AgentDefinition in JSON format."""
+    agent_file = tmp_path / "valid_agent.json"
+    agent_data = {
+        "type": "agent",
+        "id": "test-agent",
+        "name": "Test Agent",
+        "role": "Tester",
+        "goal": "Test things",
+    }
+    agent_file.write_text(json.dumps(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file), "--json"]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
+
+    captured = capsys.readouterr()
+    output = json.loads(captured.out)
+    assert output["status"] == "valid"
+    assert output["name"] == "Test Agent"
+
+
+def test_validate_yaml_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of a valid AgentDefinition in YAML format."""
+    agent_file = tmp_path / "valid_agent.yaml"
+    agent_data = {
+        "type": "agent",
+        "id": "test-agent-yaml",
+        "name": "Test Agent YAML",
+        "role": "Tester",
+        "goal": "Test YAML",
+    }
+    agent_file.write_text(yaml.dump(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
+
+    captured = capsys.readouterr()
+    assert "✅ Valid Agent: Test Agent YAML" in captured.out
+
+
+def test_validate_yaml_failure(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation failure for an invalid AgentDefinition."""
+    agent_file = tmp_path / "invalid_agent.yaml"
+    agent_data = {
+        "type": "agent",
+        "id": "test-agent",
+        # Missing 'name', 'role', 'goal'
+    }
+    agent_file.write_text(yaml.dump(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Validation Failed:" in captured.out
+    assert "name" in captured.out
+    assert "Field required" in captured.out
+
+
+def test_validate_file_not_found(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation on non-existent file."""
+    agent_file = tmp_path / "non_existent.yaml"
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert f"❌ Error: File '{agent_file}' not found." in captured.out
+
+
+def test_validate_malformed_json(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation on malformed JSON file."""
+    agent_file = tmp_path / "malformed.json"
+    agent_file.write_text("{ incomplete json")
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error: Malformed file" in captured.out
+
+
+def test_validate_unsupported_extension(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation on unsupported file extension."""
+    agent_file = tmp_path / "agent.txt"
+    agent_file.write_text("{}")
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error: Unsupported file extension" in captured.out
