@@ -43,10 +43,12 @@ class PIIRedactionInterceptor:
         _context: InterceptorContext,
         request: AgentRequest,
     ) -> AgentRequest:
-        if "secret" in request.query:
-            new_query = request.query.replace("secret", "******")
+        query = str(request.payload.get("query", ""))
+        if "secret" in query:
+            new_payload = request.payload.copy()
+            new_payload["query"] = query.replace("secret", "******")
             # Create new request as AgentRequest is frozen
-            return request.model_copy(update={"query": new_query})
+            return request.model_copy(update={"payload": new_payload})
         return request
 
 
@@ -55,11 +57,11 @@ async def test_pii_redaction_interceptor() -> None:
     """Test modification of request data."""
     interceptor = PIIRedactionInterceptor()
     context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={})
-    request = AgentRequest(query="This is a secret message.")
+    request = AgentRequest(session_id=uuid4(), payload={"query": "This is a secret message."})
 
     processed_request = await interceptor.intercept_request(context, request)
 
-    assert processed_request.query == "This is a ****** message."
+    assert processed_request.payload["query"] == "This is a ****** message."
     assert processed_request.request_id == request.request_id
 
 
@@ -80,7 +82,7 @@ class PolicyInterceptor:
 async def test_policy_rejection_interceptor() -> None:
     """Test blocking of requests."""
     interceptor = PolicyInterceptor()
-    request = AgentRequest(query="Hello")
+    request = AgentRequest(session_id=uuid4(), payload={"query": "Hello"})
 
     # Allowed
     context_allowed = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"block": False})

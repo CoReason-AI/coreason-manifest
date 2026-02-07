@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
 
@@ -22,7 +24,7 @@ def test_uuid_field_dos_protection() -> None:
 
     with pytest.raises(ValidationError) as excinfo:
         # Pydantic should fail fast on length or format for UUID coercion
-        AgentRequest(query="test", request_id=massive_string)
+        AgentRequest(session_id=uuid4(), payload={"query": "test"}, request_id=massive_string)
 
     # Ensure it's a value error related to UUID parsing
     assert "uuid" in str(excinfo.value).lower() or "input" in str(excinfo.value).lower()

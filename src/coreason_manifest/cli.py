@@ -14,7 +14,6 @@ import sys
 import textwrap
 from pathlib import Path
 
-import yaml
 from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import (
@@ -185,28 +184,61 @@ def handle_validate(args: argparse.Namespace) -> None:
         print(f"❌ Error: File '{args.file}' not found.")
         sys.exit(1)
 
+    yaml_module = None
+    try:
+        import yaml
+
+        yaml_module = yaml
+    except ImportError:
+        pass
+
+    if file_path.suffix.lower() in [".yaml", ".yml"] and yaml_module is None:
+        print("❌ Error: PyYAML is not installed. Please install it to validate YAML files.")
+        print("  pip install PyYAML")
+        sys.exit(1)
+
     try:
         content = file_path.read_text(encoding="utf-8")
         if file_path.suffix.lower() in [".yaml", ".yml"]:
-            data = yaml.safe_load(content)
+            # We already checked yaml_module is not None if extension is yaml
+            data = yaml_module.safe_load(content)  # type: ignore
         elif file_path.suffix.lower() == ".json":
             data = json.loads(content)
         else:
             print(f"❌ Error: Unsupported file extension '{file_path.suffix}'. Use .json, .yaml, or .yml.")
             sys.exit(1)
-    except (json.JSONDecodeError, yaml.YAMLError) as e:
-        print(f"❌ Error: Malformed file: {e}")
+    except json.JSONDecodeError as e:
+        print(f"❌ Error: Malformed JSON file: {e}")
         sys.exit(1)
     except Exception as e:
+        if yaml_module and isinstance(e, yaml_module.YAMLError):
+            print(f"❌ Error: Malformed YAML file: {e}")
+            sys.exit(1)
         print(f"❌ Error reading file: {e}")
         sys.exit(1)
 
     try:
-        agent = AgentDefinition.model_validate(data)
-        if args.json:
-            print(json.dumps({"status": "valid", "name": agent.name}))
+        name = "Unknown"
+        version = "Unknown"
+        agent_obj: ManifestV2 | AgentDefinition
+
+        if isinstance(data, dict) and "apiVersion" in data:
+            agent_obj = ManifestV2.model_validate(data)
+            name = agent_obj.metadata.name
+            # Try to get version from metadata (it allows extra fields)
+            # We use getattr because it's dynamic
+            version = getattr(agent_obj.metadata, "version", "Unknown")
         else:
-            print(f"✅ Valid Agent: {agent.name}")
+            agent_obj = AgentDefinition.model_validate(data)
+            name = agent_obj.name
+            version = "Unknown"
+
+        if args.json:
+            # Output full JSON representation
+            print(agent_obj.model_dump_json(indent=2))
+        else:
+            print(f"✅ Valid Agent: {name} (v{version})")
+
     except ValidationError as e:
         print("❌ Validation Failed:")
         for err in e.errors():

@@ -39,6 +39,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
 
+*   **[Graph Recipes (Work Package JJ)](graph_recipes.md)**
+    *   Describes the system for non-linear, cyclic graph execution using `RecipeDefinition` and `GraphTopology`.
+
 *   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
     *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
 
