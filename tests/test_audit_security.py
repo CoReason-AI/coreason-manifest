@@ -25,6 +25,7 @@ def test_audit_log_safety_metadata_roundtrip() -> None:
         "outcome": "success",
         "safety_metadata": {"reason": "emergency", "approved_by": "CISO"},
         "previous_hash": None,
+        "hash_algorithm": "v2",
     }
 
     # 1. Compute hash from raw data (simulating storage/transport)
@@ -59,6 +60,7 @@ def test_audit_log_safety_metadata_tamper() -> None:
         "outcome": "success",
         "safety_metadata": {"reason": "valid"},
         "previous_hash": None,
+        "hash_algorithm": "v2",
     }
 
     initial_hash = compute_audit_hash(data)

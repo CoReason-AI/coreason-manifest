@@ -159,6 +159,7 @@ def test_verify_chain_valid() -> None:
             "action": f"step-{i}",
             "outcome": "success",
             "previous_hash": prev_hash,
+            "hash_algorithm": "v2",
         }
 
         # Compute hash
@@ -188,6 +189,7 @@ def test_verify_chain_broken_content() -> None:
             "action": f"step-{i}",
             "outcome": "success",
             "previous_hash": prev_hash,
+            "hash_algorithm": "v2",
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -229,6 +231,7 @@ def test_verify_chain_broken_link() -> None:
             "action": f"step-{i}",
             "outcome": "success",
             "previous_hash": prev_hash,
+            "hash_algorithm": "v2",
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -257,6 +260,7 @@ def test_verify_chain_broken_link() -> None:
                 "action": original_log.action,
                 "outcome": original_log.outcome,
                 "previous_hash": "wrong_hash",
+                "hash_algorithm": "v2",
             }
         ),
     )
@@ -373,6 +377,7 @@ def test_long_chain_verification() -> None:
             "action": f"step-{i}",
             "outcome": "success",
             "previous_hash": prev_hash,
+            "hash_algorithm": "v2",
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -401,6 +406,7 @@ def test_chain_domino_effect() -> None:
             "action": f"step-{i}",
             "outcome": "success",
             "previous_hash": prev_hash,
+            "hash_algorithm": "v2",
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -422,6 +428,7 @@ def test_chain_domino_effect() -> None:
         "outcome": original_log.outcome,
         "previous_hash": original_log.previous_hash,  # Valid link to previous
         "safety_metadata": None,
+        "hash_algorithm": "v2",
     }
 
     new_integrity = compute_audit_hash(tampered_data)

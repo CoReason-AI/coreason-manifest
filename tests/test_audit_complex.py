@@ -162,6 +162,7 @@ def test_complex_large_chain_random_tamper() -> None:
             "action": f"step-{i}",
             "outcome": "success",
             "previous_hash": prev_hash,
+            "hash_algorithm": "v2",
         }
         integrity = compute_audit_hash(entry_data)
         log = AuditLog(**entry_data, integrity_hash=integrity)
@@ -211,6 +212,7 @@ def test_edge_single_item_chain() -> None:
         "action": "solo",
         "outcome": "success",
         "previous_hash": None,
+        "hash_algorithm": "v2",
     }
     integrity = compute_audit_hash(entry_data)
     log = AuditLog(**entry_data, integrity_hash=integrity)

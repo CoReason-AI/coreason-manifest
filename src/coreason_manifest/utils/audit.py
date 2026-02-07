@@ -36,8 +36,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     serialized to JSON with sorted keys. `integrity_hash` is explicitly excluded.
     None values are excluded from the payload.
     """
-    # Fields to extract
-    fields = [
+    V1_FIELDS = [
         "id",
         "request_id",
         "root_request_id",
@@ -48,6 +47,29 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
         "previous_hash",
         "safety_metadata",
     ]
+
+    # Determine version
+    version: str
+    if isinstance(entry, dict):
+        version = str(entry.get("hash_algorithm", "v2"))
+    else:
+        version = str(getattr(entry, "hash_algorithm", "v2"))
+
+    fields: list[str]
+    if version == "v1":
+        fields = V1_FIELDS
+    else:
+        # v2: Introspection
+        if isinstance(entry, dict):
+            fields = list(entry.keys())
+        else:
+            # Pydantic model
+            fields = list(type(entry).model_fields.keys())
+
+        # Exclude technical fields
+        # Note: hash_algorithm IS included in the payload for v2 to prevent version downgrade attacks
+        if "integrity_hash" in fields:
+            fields.remove("integrity_hash")
 
     payload: dict[str, Any] = {}
 
