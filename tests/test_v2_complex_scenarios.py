@@ -230,7 +230,10 @@ def test_agent_definition_full_spec() -> None:
     assert isinstance(agent, AgentDefinition)
     assert agent.role == "Secret Agent"
     assert agent.knowledge == ["docs/top_secret.pdf"]
-    assert agent.tools == ["tool-1"]
+    # tools is now list[ToolRequirement | InlineToolDefinition]
+    assert len(agent.tools) == 1
+    assert hasattr(agent.tools[0], "uri")
+    assert agent.tools[0].uri == "tool-1"
 
 
 # Test 6: Tool Definition Spec

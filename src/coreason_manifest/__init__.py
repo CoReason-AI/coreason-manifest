@@ -53,6 +53,7 @@ from .spec.common.presentation import (
     MarkdownBlock,
     MediaCarousel,
     MediaItem,
+    NodePresentation,
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,
@@ -84,12 +85,14 @@ from .spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,
+    InlineToolDefinition,
     LogicStep,
     ManifestMetadata,
     ManifestV2,
     Step,
     SwitchStep,
     ToolDefinition,
+    ToolRequirement,
     Workflow,
 )
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
@@ -117,7 +120,7 @@ from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
-__version__ = "0.19.0"
+__version__ = "0.20.0"
 
 Manifest = ManifestV2
 Recipe = RecipeDefinition
@@ -170,6 +173,7 @@ __all__ = [
     "IResponseInterceptor",
     "IStreamEmitter",
     "Identity",
+    "InlineToolDefinition",
     "InterceptorContext",
     "InterfaceDefinition",
     "LogicStep",
@@ -182,6 +186,7 @@ __all__ = [
     "MemoryConfig",
     "MemoryStrategy",
     "ModelProfile",
+    "NodePresentation",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
@@ -215,6 +220,7 @@ __all__ = [
     "SuccessCriterion",
     "SwitchStep",
     "ToolDefinition",
+    "ToolRequirement",
     "ToolRiskLevel",
     "TypedCapability",
     "ValidationLogic",
