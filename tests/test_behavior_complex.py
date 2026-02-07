@@ -26,6 +26,7 @@ from coreason_manifest.spec.interfaces.behavior import (
 
 # --- Mock Implementations for Testing ---
 
+
 class MockStreamEmitter:
     def __init__(self, name: str):
         self.name = name
@@ -80,16 +81,17 @@ class ComplexAgent(IAgentRuntime):
 
 class PartialAgent:
     """Implements assist but missing shutdown."""
+
     async def assist(self, session: SessionState, request: AgentRequest, handler: IResponseHandler) -> None:
         pass
 
 
 class InheritedAgent(ComplexAgent):
     """Inherits from a valid agent."""
-    pass
 
 
 # --- Tests ---
+
 
 def test_edge_case_runtime_checkable_partial_implementation() -> None:
     """
@@ -148,6 +150,7 @@ def test_mixin_composition() -> None:
     """
     Edge Case: Verify that an agent composed of mixins can satisfy the protocol.
     """
+
     class AssistMixin:
         async def assist(self, session: SessionState, request: AgentRequest, handler: IResponseHandler) -> None:
             pass
