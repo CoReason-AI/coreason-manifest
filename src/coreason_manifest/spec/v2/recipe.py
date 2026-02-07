@@ -31,9 +31,7 @@ class AgentNode(RecipeNode):
     type: Literal["agent"] = "agent"
     agent_ref: str = Field(..., description="The ID or URI of the Agent Definition to execute.")
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
-    inputs_map: dict[str, str] = Field(
-        default_factory=dict, description="Mapping parent outputs to agent inputs."
-    )
+    inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
 
 
 class HumanNode(RecipeNode):
@@ -78,9 +76,15 @@ class GraphTopology(CoReasonBaseModel):
     @model_validator(mode="after")
     def validate_integrity(self) -> "GraphTopology":
         """Verify graph integrity (entry point exists, no dangling edges)."""
-        valid_ids = {node.id for node in self.nodes}
+        # 1. Check for duplicate IDs
+        ids = [node.id for node in self.nodes]
+        if len(ids) != len(set(ids)):
+            duplicates = {id_ for id_ in ids if ids.count(id_) > 1}
+            raise ValueError(f"Duplicate node IDs found: {duplicates}")
 
-        # 1. Check entry point
+        valid_ids = set(ids)
+
+        # 2. Check entry point
         if self.entry_point not in valid_ids:
             raise ValueError(f"Entry point '{self.entry_point}' not found in nodes: {valid_ids}")
 

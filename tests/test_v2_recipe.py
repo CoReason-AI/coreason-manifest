@@ -158,3 +158,94 @@ def test_full_manifest_roundtrip() -> None:
     dumped = loaded.dump()
     assert dumped["kind"] == "Recipe"
     assert dumped["apiVersion"] == "coreason.ai/v2"
+
+
+def test_edge_case_self_loop() -> None:
+    """Test that a node pointing to itself (self-loop) is valid."""
+    data = {
+        "nodes": [
+            {"type": "agent", "id": "A", "agent_ref": "ref-a"},
+        ],
+        "edges": [{"source": "A", "target": "A"}],
+        "entry_point": "A",
+    }
+    # Should not raise
+    topology = GraphTopology.model_validate(data)
+    assert len(topology.edges) == 1
+    assert topology.edges[0].source == "A"
+    assert topology.edges[0].target == "A"
+
+
+def test_edge_case_cycle() -> None:
+    """Test that a cycle (A -> B -> A) is valid."""
+    data = {
+        "nodes": [
+            {"type": "agent", "id": "A", "agent_ref": "ref-a"},
+            {"type": "agent", "id": "B", "agent_ref": "ref-b"},
+        ],
+        "edges": [
+            {"source": "A", "target": "B"},
+            {"source": "B", "target": "A"},
+        ],
+        "entry_point": "A",
+    }
+    # Should not raise
+    topology = GraphTopology.model_validate(data)
+    assert len(topology.edges) == 2
+
+
+def test_edge_case_disconnected_node() -> None:
+    """Test that unreachable nodes are permitted (though technically 'dangling' in graph theory, they are valid definitions)."""
+    data = {
+        "nodes": [
+            {"type": "agent", "id": "A", "agent_ref": "ref-a"},
+            {"type": "agent", "id": "B", "agent_ref": "ref-b"},
+        ],
+        "edges": [],
+        "entry_point": "A",
+    }
+    # Should not raise, even though B is unreachable from A
+    topology = GraphTopology.model_validate(data)
+    assert len(topology.nodes) == 2
+
+
+def test_complex_workflow() -> None:
+    """Test a complex scenario with branching and joining."""
+    # A -> B -> C -> D
+    #      |
+    #      -> E -> D
+    data = {
+        "nodes": [
+            {"type": "agent", "id": "A", "agent_ref": "start"},
+            {"type": "router", "id": "B", "input_key": "x", "routes": {}, "default_route": "C"},
+            {"type": "agent", "id": "C", "agent_ref": "path-1"},
+            {"type": "agent", "id": "D", "agent_ref": "end"},
+            {"type": "agent", "id": "E", "agent_ref": "path-2"},
+        ],
+        "edges": [
+            {"source": "A", "target": "B"},
+            {"source": "B", "target": "C"},
+            {"source": "C", "target": "D"},
+            {"source": "B", "target": "E"},
+            {"source": "E", "target": "D"},
+        ],
+        "entry_point": "A",
+    }
+    topology = GraphTopology.model_validate(data)
+    assert len(topology.edges) == 5
+
+
+def test_duplicate_node_ids() -> None:
+    """Test that validation fails if duplicate node IDs are present."""
+    data = {
+        "nodes": [
+            {"type": "agent", "id": "A", "agent_ref": "ref-a"},
+            {"type": "agent", "id": "A", "agent_ref": "ref-b"},
+        ],
+        "edges": [],
+        "entry_point": "A",
+    }
+    with pytest.raises(ValidationError) as excinfo:
+        GraphTopology.model_validate(data)
+
+    assert "Duplicate node IDs found" in str(excinfo.value)

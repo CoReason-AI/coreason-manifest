@@ -2,12 +2,13 @@ import pytest
 
 import coreason_manifest as cm
 from coreason_manifest.spec.v2.definitions import ManifestV2
+from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.v2.io import load_from_yaml
 
 
 def test_v2_defaults() -> None:
     assert cm.Manifest is ManifestV2
-    assert cm.Recipe is ManifestV2
+    assert cm.Recipe is RecipeDefinition
     assert cm.load is load_from_yaml
 
 
