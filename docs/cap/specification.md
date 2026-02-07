@@ -66,7 +66,7 @@ The `definitions` section is a polymorphic key-value map where you can define re
 *   `capabilities`: Feature flags and capabilities.
 
 ### Agent Capabilities (`AgentCapabilities`)
-Used within an `AgentDefinition` to declare supported features.
+Used within an `AgentDefinition` to declare supported features. See [Explicit Streaming Contracts](streaming_contracts.md) for detailed definitions.
 
 *   `type`: The architectural complexity of the agent.
     *   Values: `atomic` (Simple, linear), `graph` (Complex workflow).

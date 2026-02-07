@@ -8,13 +8,20 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+"""
+Middleware Extension Interfaces.
+
+This module defines the protocols and data models for the Coreason Interoperability Layer,
+allowing third-party plugins to intercept and modify requests and responses.
+"""
+
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 from uuid import UUID
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.cap import AgentRequest, SessionContext, StreamPacket
+from coreason_manifest.spec.cap import AgentRequest, StreamPacket
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
@@ -34,7 +41,7 @@ class IRequestInterceptor(Protocol):
 
     async def intercept_request(
         self,
-        context: SessionContext,
+        context: InterceptorContext,
         request: AgentRequest,
     ) -> AgentRequest:
         """Modify or validate the request before the agent sees it."""

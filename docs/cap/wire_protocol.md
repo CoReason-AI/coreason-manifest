@@ -97,7 +97,7 @@ Used for streaming partial results or events during execution. The packet struct
 | Op (`op`) | Payload (`p`) Type | Description |
 | :--- | :--- | :--- |
 | `delta` | `str` | A partial text chunk (token). |
-| `event` | `Dict[str, Any]` | A structured event (e.g., tool usage, state change). Ideally adheres to `PresentationEvent` schemas. |
+| `event` | `Dict[str, Any]` | A structured event (e.g., tool usage, state change). Ideally adheres to [PresentationEvent schemas](../presentation_schemas.md). |
 | `error` | `StreamError` | A strict error object. |
 | `close` | `None` | Stream termination signal. |
 
@@ -174,7 +174,7 @@ Represents a single message in a conversation history.
 
 ### PresentationEvent
 
-Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`). This is a single container with a `type` discriminator and polymorphic `data` payload.
+Polymorphic events for UI rendering (referenced in `StreamPacket` `op=event`). This is a single container with a `type` discriminator and polymorphic `data` payload. See [Standardized Presentation Schemas](../presentation_schemas.md) for full details.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
@@ -239,3 +239,23 @@ Payload is a dictionary (see Semantic Error Handling for standard fields).
 #### Thought Trace (`type: thought_trace`)
 
 Payload is a dictionary containing reasoning steps.
+
+## OpenAPI Generation
+
+The `coreason_manifest` package provides a utility to generate an OpenAPI 3.1 Path Item Object that strictly adheres to the Service Request/Response contracts defined above.
+
+This is useful for exposing Agents as standard REST APIs.
+
+### Usage
+
+```python
+import json
+from coreason_manifest import ServiceContract
+
+# Generate the OpenAPI Path Item
+openapi_spec = ServiceContract.generate_openapi()
+
+print(json.dumps(openapi_spec, indent=2))
+```
+
+This generates a definition for a `POST` operation that accepts a `ServiceRequest` and returns a `ServiceResponse`.

@@ -5,7 +5,7 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint
 [![License: Prosperity 3.0](https://img.shields.io/badge/license-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason-manifest)
 [![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Documentation](https://img.shields.io/badge/docs-product_requirements-informational)](docs/product_requirements.md)
+[![Documentation](https://img.shields.io/badge/docs-home-informational)](docs/index.md)
 
 ## Overview
 
@@ -16,9 +16,19 @@ It provides the **"Blueprint"** that all other services (Builder, Engine, Simula
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
 
+## Architecture & Boundaries
+
+To avoid the "Distributed Monolith" trap, this library strictly separates **Data** from **Logic**:
+
+*   **`coreason_manifest.spec` (The Kernel):** Contains **pure Pydantic models (DTOs)**. It has zero dependencies on business logic and is safe to import anywhere.
+*   **`coreason_manifest.utils` (The Toolbelt):** Contains **optional reference implementations** for Visualization, Audit Hashing, and Governance Enforcement.
+
+These components are co-located for developer convenience but are architecturally decoupled. The Core Spec **never** imports from Utils. See [ADR-001](docs/architecture/ADR-001-shared-kernel-boundaries.md) and [Package Structure](docs/package_structure.md) for details.
+
 ## Features
 
 *   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`) and Recipes (`Recipe`).
+*   **ManifestBuilder (New in v0.17):** A fluent API for constructing complex `ManifestV2` objects without manual YAML.
 *   **Strict Typing:** Enforces type safety for critical interfaces.
 *   **Governance & Policy:** Enforce organizational rules (domains, risk levels) on agents via `GovernanceConfig`.
 *   **Ergonomic Factory Methods:** Simplified construction of manifests.
@@ -37,7 +47,74 @@ pip install coreason-manifest
 
 ## Usage
 
-This library is used to define and validate Agent configurations programmatically.
+### Quick Start
+
+Create a fully compliant agent manifest in just a few lines of code:
+
+```python
+from coreason_manifest import simple_agent
+
+# Create a "Hello World" agent
+manifest = simple_agent(
+    name="HelloAgent",
+    prompt="You are a helpful assistant.",
+    model="gpt-4o",
+    inputs={"user_message": {"type": "string"}},
+    outputs={"reply": {"type": "string"}}
+)
+
+print(f"Agent '{manifest.metadata.name}' created successfully!")
+```
+
+### ManifestV2 Construction (Recommended)
+
+The `ManifestV2` schema is powerful but complex (supporting nested Policies, State, Workflows, and Definitions). Instead of hand-writing error-prone YAML or instantiating deep Pydantic structures manually, use the `ManifestBuilder`.
+
+**Developer Experience Improvements:**
+*   **Fluent API:** Chain methods to build up your manifest step-by-step.
+*   **Type Safety:** Let your IDE guide you with autocomplete and type checking.
+*   **Abstraction:** Forget about the underlying JSON structure; focus on *logic*, *tools*, and *flow*.
+
+```python
+from coreason_manifest.builder import ManifestBuilder, AgentBuilder
+from coreason_manifest.spec.v2.definitions import AgentStep, LogicStep, ToolDefinition
+from coreason_manifest.spec.common_base import StrictUri
+
+# 1. Build reusable Agent Definitions
+researcher = AgentBuilder("Researcher") \
+    .with_system_prompt("You are a diligent researcher.") \
+    .with_model("gpt-4-turbo") \
+    .build_definition()
+
+writer = AgentBuilder("Writer") \
+    .with_system_prompt("You are a creative writer.") \
+    .with_model("claude-3-opus") \
+    .build_definition()
+
+# 2. Build the Manifest
+manifest = (
+    ManifestBuilder("ResearchReportWorkflow", kind="Recipe")
+    .add_agent(researcher)
+    .add_agent(writer)
+    .add_tool(ToolDefinition(
+        id="web-search",
+        name="Web Search",
+        uri=StrictUri("https://search.api/v1"),
+        risk_level="safe",
+        description="Search the web."
+    ))
+    .add_step(AgentStep(id="research", agent="Researcher", next="write"))
+    .add_step(AgentStep(id="write", agent="Writer", next=None))
+    .set_start_step("research")
+    .build()
+)
+
+print(manifest.model_dump_json(indent=2))
+```
+
+### Advanced Usage (Manual Construction)
+
+For granular control, you can instantiate the strict Pydantic models directly:
 
 ```python
 from coreason_manifest import (

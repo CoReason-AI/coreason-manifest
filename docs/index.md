@@ -10,11 +10,26 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Builder SDK](builder_sdk.md)**
     *   Documentation for the fluent Builder API (`AgentBuilder`, `TypedCapability`) to simplify Agent creation.
 
+*   **[Visualization Tools](visualization.md)**
+    *   Guide for generating Mermaid.js flowcharts to visualize complex Agent workflows and routing logic.
+
 *   **[Secure Composition](composition.md)**
     *   Explains the Secure Recursive Loader, the `$ref` syntax for modular composition, the "Jail" security model, and cycle detection mechanisms.
 
 *   **[Governance & Policy Enforcement](governance_policy_enforcement.md)**
     *   Details the Governance module for defining and enforcing organizational rules, risk levels, and compliance policies on agents and tools.
+
+*   **[Agent Card Generator](agent_card_generator.md)**
+    *   Guide for using the automated documentation utility to generate standardized "Agent Cards" from Manifest definitions.
+
+*   **[Mock Data Factory](mock_factory.md)**
+    *   Utility for generating deterministic, schema-compliant synthetic data for Agent outputs and testing.
+
+*   **[CLI Reference](cli.md)**
+    *   Complete documentation for the `coreason` CLI, including the `init` command for project scaffolding.
+
+*   **[Interop Layer](cli_interop.md)**
+    *   Documentation for the dynamic loader utility and interoperability features.
 
 ## Specifications & Protocols
 
@@ -23,6 +38,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
+
+*   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
+    *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
 
 *   **[Stream Identity & Lifecycle](cap/stream_lifecycle.md)**
     *   Protocols and data structures for explicit, multiplexed output streams (`STREAM_START`, `STREAM_END`).
@@ -47,6 +65,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Audit Hashing & Integrity](audit_hashing.md)**
     *   Specifications for the "Tamper-Evident" audit logging system, including the `AuditLog` model and SHA-256 chain verification algorithms.
+
+*   **[Standardized Presentation Schemas](presentation_schemas.md)**
+    *   Enforces strictly typed Pydantic models for UI events (`PresentationEvent`) like citations, progress indicators, and media carousels.
 
 *   **[Frontend Integration & Graph Events](frontend_integration.md)**
     *   Defines the strict `GraphEvent` hierarchy for internal engine state and the migration strategy to standard `CloudEvent` formats.

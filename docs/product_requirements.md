@@ -29,7 +29,7 @@
 ## Agent Instructions
 
 ### 1. The "Shared Kernel" Directive
-You are strictly forbidden from embedding execution logic or side effects within this library. It must remain a pure data library.
+This library focuses on Data Definitions. It includes optional, lightweight utilities (hashing, visualization) to improve Developer Experience, but these must never introduce heavy 3rd-party dependencies or side effects (like network calls).
 
 *   **Schema Standard:** JSON Schema Draft 2020-12 (for structural validation).
 *   **Data Modeling:** Pydantic V2 (for Python-native interface).

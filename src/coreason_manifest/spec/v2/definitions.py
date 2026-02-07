@@ -17,6 +17,24 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.resources import ModelProfile
+
+__all__ = [
+    "AgentDefinition",
+    "AgentStep",
+    "BaseStep",
+    "CouncilStep",
+    "DesignMetadata",
+    "GenericDefinition",
+    "InterfaceDefinition",
+    "LogicStep",
+    "ManifestMetadata",
+    "ManifestV2",
+    "Step",
+    "SwitchStep",
+    "ToolDefinition",
+    "Workflow",
+]
 
 
 class DesignMetadata(CoReasonBaseModel):
@@ -60,6 +78,7 @@ class AgentDefinition(CoReasonBaseModel):
     model: str | None = Field(None, description="LLM identifier.")
     tools: list[str] = Field(default_factory=list, description="List of Tool IDs or URI references.")
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+    interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition, description="Input/Output contract.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
     )
@@ -67,6 +86,9 @@ class AgentDefinition(CoReasonBaseModel):
         None, description="Configuration for the agent runtime environment (e.g. environment variables)."
     )
     evaluation: EvaluationProfile | None = Field(None, description="Quality assurance and testing metadata.")
+    resources: ModelProfile | None = Field(
+        None, description="Hardware, pricing, and operational constraints for this agent."
+    )
 
 
 class GenericDefinition(CoReasonBaseModel):

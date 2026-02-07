@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
@@ -18,7 +18,7 @@ from pydantic import ConfigDict, Field
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
-class MemoryStrategy(str, Enum):
+class MemoryStrategy(StrEnum):
     """Strategy for memory eviction."""
 
     ALL = "all"

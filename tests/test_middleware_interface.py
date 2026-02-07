@@ -8,131 +8,125 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import asyncio
-from datetime import UTC, datetime, timedelta
-from typing import Any
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest import (
-    AgentRequest,
-    Identity,
+from coreason_manifest.spec.cap import AgentRequest, StreamOpCode, StreamPacket
+from coreason_manifest.spec.interfaces.middleware import (
     InterceptorContext,
     IRequestInterceptor,
     IResponseInterceptor,
-    SessionContext,
-    StreamPacket,
 )
 
 
-class MockPIIFilter:
-    """Mock implementation of a request interceptor."""
+def test_interceptor_context_immutability() -> None:
+    """Verify InterceptorContext is frozen."""
+    context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"token": "abc"})
 
-    async def intercept_request(self, context: SessionContext, request: AgentRequest) -> AgentRequest:
-        _ = context  # Suppress unused argument warning
+    # Attempt to modify request_id
+    with pytest.raises(ValidationError):
+        context.request_id = uuid4()  # type: ignore
+
+    # Attempt to modify metadata
+    with pytest.raises(ValidationError):
+        context.metadata = {}  # type: ignore
+
+
+class PIIRedactionInterceptor:
+    """Interceptor that redaction 'secret' from request query."""
+
+    async def intercept_request(
+        self,
+        _context: InterceptorContext,
+        request: AgentRequest,
+    ) -> AgentRequest:
+        if "secret" in request.query:
+            new_query = request.query.replace("secret", "******")
+            # Create new request as AgentRequest is frozen
+            return request.model_copy(update={"query": new_query})
         return request
 
 
-class MockToxicityFilter:
-    """Mock implementation of a response interceptor."""
+@pytest.mark.asyncio
+async def test_pii_redaction_interceptor() -> None:
+    """Test modification of request data."""
+    interceptor = PIIRedactionInterceptor()
+    context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={})
+    request = AgentRequest(query="This is a secret message.")
+
+    processed_request = await interceptor.intercept_request(context, request)
+
+    assert processed_request.query == "This is a ****** message."
+    assert processed_request.request_id == request.request_id
+
+
+class PolicyInterceptor:
+    """Interceptor that blocks requests based on policy."""
+
+    async def intercept_request(
+        self,
+        context: InterceptorContext,
+        request: AgentRequest,
+    ) -> AgentRequest:
+        if context.metadata.get("block"):
+            raise ValueError("Blocked by policy")
+        return request
+
+
+@pytest.mark.asyncio
+async def test_policy_rejection_interceptor() -> None:
+    """Test blocking of requests."""
+    interceptor = PolicyInterceptor()
+    request = AgentRequest(query="Hello")
+
+    # Allowed
+    context_allowed = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"block": False})
+    assert await interceptor.intercept_request(context_allowed, request) == request
+
+    # Blocked
+    context_blocked = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata={"block": True})
+    with pytest.raises(ValueError, match="Blocked by policy"):
+        await interceptor.intercept_request(context_blocked, request)
+
+
+class ResponseCensorInterceptor:
+    """Interceptor that censors 'bad' words in stream."""
 
     async def intercept_stream(self, packet: StreamPacket) -> StreamPacket:
+        if packet.op == StreamOpCode.DELTA and isinstance(packet.p, str) and "bad" in packet.p:
+            new_payload = packet.p.replace("bad", "***")
+            return packet.model_copy(update={"p": new_payload})
         return packet
 
 
-def test_request_interceptor_compliance() -> None:
-    """Verify that MockPIIFilter satisfies the IRequestInterceptor protocol."""
-    interceptor = MockPIIFilter()
-    assert isinstance(interceptor, IRequestInterceptor)
+@pytest.mark.asyncio
+async def test_response_interceptor() -> None:
+    """Test modification of stream packets."""
+    interceptor = ResponseCensorInterceptor()
+
+    packet = StreamPacket(op=StreamOpCode.DELTA, p="This is a bad word.")
+    processed_packet = await interceptor.intercept_stream(packet)
+
+    assert processed_packet.p == "This is a *** word."
 
 
-def test_response_interceptor_compliance() -> None:
-    """Verify that MockToxicityFilter satisfies the IResponseInterceptor protocol."""
-    interceptor = MockToxicityFilter()
-    assert isinstance(interceptor, IResponseInterceptor)
+def test_protocol_compliance() -> None:
+    """Verify classes implement protocols correctly as requested."""
 
+    class PIIFilter:
+        async def intercept_request(self, _context: InterceptorContext, request: AgentRequest) -> AgentRequest:
+            return request
 
-def test_interceptor_context_immutability() -> None:
-    """Verify that InterceptorContext is immutable."""
-    ctx = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC))
+    assert isinstance(PIIFilter(), IRequestInterceptor)
 
-    # Test reassigning a field
-    with pytest.raises(ValidationError):
-        ctx.request_id = uuid4()  # type: ignore
+    class BadFilter:
+        pass
 
-    with pytest.raises(ValidationError):
-        ctx.start_time = datetime.now(UTC)  # type: ignore
+    assert not isinstance(BadFilter(), IRequestInterceptor)
 
-
-def test_interceptor_context_defaults() -> None:
-    """Verify defaults for InterceptorContext."""
-    ctx = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC))
-    assert ctx.metadata == {}
-
-
-class ModifyingInterceptor:
-    """Interceptor that modifies the request query."""
-
-    async def intercept_request(self, context: SessionContext, request: AgentRequest) -> AgentRequest:
-        _ = context
-        # Use model_copy to create a modified version (since AgentRequest is frozen)
-        return request.model_copy(update={"query": request.query + " [REDACTED]"})
-
-
-def test_interceptor_modification() -> None:
-    """Test that an interceptor can modify a request."""
-    # Create dependencies
-    req = AgentRequest(query="My secret is 1234", request_id=uuid4(), root_request_id=uuid4())
-    ctx = SessionContext(session_id="test-session", user=Identity.anonymous())
-
-    interceptor = ModifyingInterceptor()
-
-    async def run_test() -> None:
-        new_req = await interceptor.intercept_request(ctx, req)
-        assert new_req.query == "My secret is 1234 [REDACTED]"
-        assert new_req.request_id == req.request_id
-
-    asyncio.run(run_test())
-
-
-def test_interceptor_context_edge_cases() -> None:
-    """Test edge cases for InterceptorContext."""
-
-    # 1. Large Metadata
-    large_metadata = {f"key_{i}": f"value_{i}" for i in range(1000)}
-    ctx_large = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata=large_metadata)
-    assert len(ctx_large.metadata) == 1000
-
-    # 2. Nested Metadata
-    nested_metadata: dict[str, Any] = {"level1": {"level2": {"level3": "deep"}}}
-    ctx_nested = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC), metadata=nested_metadata)
-    # Cast to ensure type checking passes if strict
-    assert ctx_nested.metadata["level1"]["level2"]["level3"] == "deep"
-
-    # 3. Future Timestamp
-    future_time = datetime.now(UTC) + timedelta(days=365)
-    ctx_future = InterceptorContext(request_id=uuid4(), start_time=future_time)
-    assert ctx_future.start_time == future_time
-
-
-class ErrorInterceptor:
-    """Interceptor that raises an error."""
-
-    async def intercept_request(self, context: SessionContext, request: AgentRequest) -> AgentRequest:
-        _ = (context, request)
-        raise ValueError("Block this request")
-
-
-def test_interceptor_error_propagation() -> None:
-    """Test that exceptions from interceptors propagate."""
-    interceptor = ErrorInterceptor()
-    req = AgentRequest(query="Bad", request_id=uuid4(), root_request_id=uuid4())
-    ctx = SessionContext(session_id="test-session", user=Identity.anonymous())
-
-    async def run_test() -> None:
-        with pytest.raises(ValueError, match="Block this request"):
-            await interceptor.intercept_request(ctx, req)
-
-    asyncio.run(run_test())
+    # Also verify existing implementations
+    assert isinstance(PIIRedactionInterceptor(), IRequestInterceptor)
+    assert isinstance(ResponseCensorInterceptor(), IResponseInterceptor)

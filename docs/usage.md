@@ -75,6 +75,7 @@ workflow = Workflow(
 
 # 3. Instantiate Manifest
 manifest = Recipe(
+    kind="Recipe",
     metadata=metadata,
     interface=InterfaceDefinition(
         inputs={"topic": {"type": "string"}},
@@ -99,6 +100,32 @@ print(manifest.interface.inputs["topic"])
 # Writing
 manifest.interface.inputs["topic"] = {"type": "integer"}
 ```
+
+### Visualizing Workflows
+
+Complex workflows can be hard to understand as raw JSON/YAML. You can visualize the execution flow using the built-in Mermaid.js generator.
+
+```python
+from coreason_manifest import generate_mermaid_graph
+
+print(generate_mermaid_graph(manifest))
+```
+
+For more details, see [Visualization Tools](visualization.md).
+
+### Using the CLI
+
+The `coreason` CLI allows you to inspect, visualize, and simulate agents without writing Python scripts.
+
+```bash
+# Visualize an agent defined in a Python file
+coreason viz examples/my_agent.py:agent
+
+# Run a simulation
+coreason run examples/my_agent.py:agent --inputs '{"query": "hello"}' --mock
+```
+
+For full documentation, see [CLI Reference](cli.md).
 
 ## Advanced Documentation
 
