@@ -109,3 +109,33 @@ def test_legacy_string_list_compatibility() -> None:
     assert isinstance(t2, ToolRequirement)
     assert t2.type == "remote"
     assert t2.uri == "mcp://legacy"
+
+
+def test_tools_validation_non_list() -> None:
+    """Verify validation when tools is not a list (covers 'normalize_tools' branch)."""
+    data = {
+        "id": "agent-6",
+        "name": "Invalid Tools Agent",
+        "role": "Worker",
+        "goal": "Work",
+        "tools": "not-a-list",  # This should trigger the early return in normalize_tools
+    }
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition.model_validate(data)
+    # The validator returns the string, then Pydantic checks if it's a list and raises error
+    assert "Input should be a valid list" in str(exc.value)
+
+
+def test_tools_validation_invalid_item() -> None:
+    """Verify validation when tools contains an invalid item (not str/dict)."""
+    data = {
+        "id": "agent-7",
+        "name": "Invalid Item Agent",
+        "role": "Worker",
+        "goal": "Work",
+        "tools": [123],  # Invalid item type
+    }
+    with pytest.raises(ValidationError) as exc:
+        AgentDefinition.model_validate(data)
+    # The validator passes 123 through, Pydantic raises validation error for the item
+    assert "Input should be a valid dictionary" in str(exc.value)
