@@ -62,9 +62,7 @@ class MockResponseHandler:
 
 
 class ComplexAgent(IAgentRuntime):
-    async def assist(
-        self, session: SessionState, request: AgentRequest, handler: IResponseHandler
-    ) -> None:
+    async def assist(self, session: SessionState, request: AgentRequest, handler: IResponseHandler) -> None:
         _ = session  # Unused
         await handler.log("info", "Starting complex task", {"query": request.query})
         await handler.emit_thought("Thinking about the problem...")
@@ -120,10 +118,7 @@ async def test_complex_interaction_flow() -> None:
     agent = ComplexAgent()
 
     session = SessionState(
-        agent_id="agent-123",
-        user_id="user-456",
-        created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC),
+        agent_id="agent-123", user_id="user-456", created_at=datetime.now(UTC), updated_at=datetime.now(UTC)
     )
 
     request = AgentRequest(query="Solve world hunger", session_id=session.id)
@@ -182,6 +177,6 @@ def test_agent_request_broken_lineage_validation() -> None:
         AgentRequest(
             query="test",
             parent_request_id=uuid4(),
-            root_request_id=None # explicitly passing None, or omitting it if default is None
+            root_request_id=None,  # explicitly passing None, or omitting it if default is None
         )
     assert "Broken Lineage" in str(excinfo.value)
