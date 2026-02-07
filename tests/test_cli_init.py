@@ -116,7 +116,9 @@ def test_init_complex_verification(tmp_path: Path) -> None:
     assert isinstance(defn, AgentDefinition)
 
     # 2. Verify Tools
-    assert "hello_world_tool" in defn.tools
+    # tools is now list[ToolRequirement | InlineToolDefinition]
+    tools = [t.uri for t in defn.tools if hasattr(t, "uri")]
+    assert "hello_world_tool" in tools
 
     # 3. Verify Capabilities
     # The builder merges capabilities into the interface.

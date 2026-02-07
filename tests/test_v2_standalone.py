@@ -169,9 +169,12 @@ definitions:
     assert isinstance(worker_ref, AgentDefinition)
 
     # Director has tool "manager_tool"
-    assert "manager_tool" in director.tools
+    # tools is now list[ToolRequirement | InlineToolDefinition]
+    director_tools = [t.uri for t in director.tools if hasattr(t, "uri")]
+    assert "manager_tool" in director_tools
 
     # Manager has tool "worker_tool"
-    assert "worker_tool" in manager_ref.tools
+    manager_tools = [t.uri for t in manager_ref.tools if hasattr(t, "uri")]
+    assert "worker_tool" in manager_tools
 
     # We confirm that V2 structure holds this integrity natively.

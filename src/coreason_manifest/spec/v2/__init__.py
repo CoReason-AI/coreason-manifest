@@ -9,3 +9,40 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 # Coreason Manifest V2 Spec Definitions
+from .definitions import (
+    AgentDefinition,
+    AgentStep,
+    BaseStep,
+    CouncilStep,
+    DesignMetadata,
+    GenericDefinition,
+    InlineToolDefinition,
+    InterfaceDefinition,
+    LogicStep,
+    ManifestMetadata,
+    ManifestV2,
+    Step,
+    SwitchStep,
+    ToolDefinition,
+    ToolRequirement,
+    Workflow,
+)
+
+__all__ = [
+    "AgentDefinition",
+    "AgentStep",
+    "BaseStep",
+    "CouncilStep",
+    "DesignMetadata",
+    "GenericDefinition",
+    "InlineToolDefinition",
+    "InterfaceDefinition",
+    "LogicStep",
+    "ManifestMetadata",
+    "ManifestV2",
+    "Step",
+    "SwitchStep",
+    "ToolDefinition",
+    "ToolRequirement",
+    "Workflow",
+]

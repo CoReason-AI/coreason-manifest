@@ -72,7 +72,9 @@ def test_fluent_chaining() -> None:
     assert isinstance(agent_def, AgentDefinition)
     assert agent_def.model == "gpt-4"
     assert agent_def.backstory == "Be helpful"
-    assert "tool-1" in agent_def.tools
+    # tools is now list[ToolRequirement | InlineToolDefinition]
+    tools = [t.uri for t in agent_def.tools if hasattr(t, "uri")]
+    assert "tool-1" in tools
     assert "s3://bucket/doc.pdf" in agent_def.knowledge
 
 
@@ -243,7 +245,9 @@ def test_kitchen_sink_full_composition() -> None:
     # Verify Basics
     assert agent_def.model == "claude-3-opus"
     assert agent_def.backstory == "System Prompt"
-    assert agent_def.tools == ["tool-search", "tool-calculator"]
+    # tools is now list[ToolRequirement | InlineToolDefinition]
+    tools = [t.uri for t in agent_def.tools if hasattr(t, "uri")]
+    assert tools == ["tool-search", "tool-calculator"]
     assert agent_def.knowledge == ["s3://data/kb.pdf"]
 
     # Verify Capability Logic (SSE wins, ATOMIC wins because it was last)
