@@ -28,6 +28,15 @@ To enable robust Enterprise Agentic Systems, this library implements four critic
 | **🤖 Behavior** | **Protocols (`IAgentRuntime`)** | Hexagonal architecture interfaces for portable agents. Defines the Input/Output contract. |
 | **🧪 Simulation** | **ATIF (`SimulationTrace`)** | The "Flight Recorder" schema for auditing, red-teaming, and evaluation scenarios. |
 
+### Shared Kernel Boundaries
+
+To avoid the "Distributed Monolith" trap, this library strictly separates **Data** from **Logic**:
+
+*   **`coreason_manifest.spec` (The Kernel):** Contains **pure Pydantic models (DTOs)**. It has zero dependencies on business logic and is safe to import anywhere.
+*   **`coreason_manifest.utils` (The Toolbelt):** Contains **optional reference implementations** for Visualization, Audit Hashing, and Governance Enforcement.
+
+These components are co-located for developer convenience but are architecturally decoupled. The Core Spec **never** imports from Utils. See [Package Structure](docs/package_structure.md) for details.
+
 ## Installation
 
 ```bash
@@ -103,6 +112,20 @@ child_request = root_request.create_child(
 print(f"Child Parent ID: {child_request.parent_request_id} (Should match Root Request ID)")
 print(f"Child Root ID:   {child_request.root_request_id}   (Should match Root Request ID)")
 ```
+
+### 3. Builder SDK (Optional)
+
+For a fluent, Pythonic API to construct manifests (especially useful for tooling), use the `ManifestBuilder`.
+
+```python
+from coreason_manifest.builder import AgentBuilder
+
+agent = AgentBuilder("ResearchAgent") \
+    .with_model("gpt-4-turbo") \
+    .with_system_prompt("You are a helpful researcher.") \
+    .build_definition()
+```
+See [Builder SDK](docs/builder_sdk.md) for details.
 
 ## CLI
 

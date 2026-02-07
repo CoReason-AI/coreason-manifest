@@ -1,25 +1,29 @@
-# Inline Tools: Serverless Agents
+# Tools: Inline & Remote
 
-Coreason V2 introduces **Inline Tool Definitions**, enabling the creation of "Serverless Agents." These agents define their tool schemas directly within the manifest, allowing the runtime to inject implementation logic (e.g., via Code Interpreter or local functions) without requiring a separate MCP (Model Context Protocol) server.
+Coreason Manifest V2 supports a flexible tool definition system, allowing agents to use both "Serverless" inline tools and remote MCP (Model Context Protocol) servers.
 
-## Concept: Serverless Capabilities
+## Tool Types
 
-Traditionally, tools required a running MCP server. With Inline Tools, you can define the *interface* (JSON Schema) of a tool, and let the runtime handle the *implementation*. This is perfect for:
-*   **Simple Logic**: Math, formatting, string manipulation.
-*   **Ad-hoc Tasks**: One-off data transformations.
-*   **Code Interpretation**: Defining functions that the LLM generates code for.
+The `tools` field in an `AgentDefinition` supports three distinct reference types:
 
-## Schema Definition
+1.  **Inline Definitions**: Full tool schema embedded directly in the agent (Serverless).
+2.  **Remote Requirements**: Direct reference to an external MCP server via URI.
+3.  **ID References**: Reference to a shared `ToolDefinition` block defined elsewhere in the manifest.
 
+---
+
+## 1. Inline Tools (Serverless)
+
+**Inline Tool Definitions** allow you to define the *interface* (JSON Schema) of a tool directly within the manifest. This enables the runtime to inject implementation logic (e.g., via Code Interpreter or local functions) without requiring a separate MCP server.
+
+### Schema
 An `InlineToolDefinition` requires:
 *   **`type`**: Must be `"inline"`.
 *   **`name`**: The function name (e.g., `calculate_sum`).
 *   **`description`**: What the tool does.
 *   **`parameters`**: A valid JSON Schema object defining the arguments.
 
-### Example: The Calculator Agent
-
-Here is an `AgentDefinition` that possesses a built-in calculator tool. It does not need to connect to any external service to perform math.
+### Example: Calculator
 
 ```python
 from coreason_manifest.spec.v2.definitions import AgentDefinition, InlineToolDefinition
@@ -46,16 +50,55 @@ agent = AgentDefinition(
         )
     ]
 )
-
-print(f"Agent '{agent.name}' has {len(agent.tools)} tool(s).")
 ```
 
-## Mixed Mode: Inline + Remote
+---
 
-Agents can mix and match Inline Tools with traditional Remote Tools (MCP).
+## 2. Remote Requirements (MCP)
+
+For standard MCP servers, you can reference them directly by URI.
 
 ```yaml
-# yaml-language-server: $schema=../schema.json
+tools:
+  - type: remote
+    uri: "mcp://google-search/v1"
+```
+
+*Shorthand:* You can also just provide the string URI, and the parser will auto-convert it.
+```yaml
+tools:
+  - "mcp://google-search/v1"
+```
+
+---
+
+## 3. ID References (Shared Definitions)
+
+If multiple agents share the same tool configuration (e.g., specific risk levels), you can define it once in the `definitions` block and reference it by ID.
+
+```yaml
+definitions:
+  # Shared Definition
+  web-search:
+    type: tool
+    id: web-search-tool
+    name: Google Search
+    uri: mcp://google
+    risk_level: critical  # Enforce strict policy
+
+  researcher:
+    type: agent
+    tools:
+      - "web-search-tool" # References the ID above
+```
+
+---
+
+## Mixed Mode Example
+
+Agents can mix and match all three types.
+
+```yaml
 apiVersion: coreason.ai/v2
 kind: Agent
 metadata:
@@ -65,19 +108,17 @@ definitions:
   hybrid_agent:
     type: agent
     id: hybrid-agent
-    name: Hybrid Worker
-    role: Assistant
-    goal: Help the user
     tools:
-      # 1. Inline Tool (Local)
+      # 1. Inline (Local)
       - type: inline
-        name: get_current_time
-        description: "Returns the current UTC time."
-        parameters:
-          type: object
-          properties: {}
+        name: get_time
+        description: "Get current time"
+        parameters: {type: object, properties: {}}
 
-      # 2. Remote Tool (MCP Server)
+      # 2. Remote (External)
       - type: remote
-        uri: "mcp://google-search/v1"
+        uri: "mcp://weather-service"
+
+      # 3. Reference (Shared)
+      - "corporate-knowledge-base"
 ```

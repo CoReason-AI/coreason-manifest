@@ -13,6 +13,46 @@ A Topology is a collection of **Nodes** connected by **Edges**.
 
 This structure allows for **Cycles** (loops), enabling agents to self-correct or retry tasks until a condition is met.
 
+## Recipe Components
+
+A `RecipeDefinition` is composed of four key layers:
+
+1.  **Interface (Contract)**: Defines inputs and outputs.
+2.  **State (Memory)**: Defines shared variables.
+3.  **Policy (Governance)**: Defines execution limits.
+4.  **Topology (Logic)**: Defines the graph structure.
+
+### 1. The Interface Layer
+Defines the input/output contract for the Recipe using JSON Schema.
+
+```python
+interface=InterfaceDefinition(
+    inputs={"user_input": {"type": "string"}},
+    outputs={"final_report": {"type": "string"}}
+)
+```
+
+### 2. The State Layer (Blackboard)
+Defines the shared memory structure and persistence strategy.
+
+```python
+state=StateDefinition(
+    properties={"draft": {"type": "string"}},
+    persistence="ephemeral" # or "redis", "postgres"
+)
+```
+
+### 3. The Policy Layer
+Sets execution limits and error handling strategies.
+
+```python
+policy=PolicyConfig(
+    max_retries=3,
+    timeout_seconds=3600,
+    execution_mode="sequential"
+)
+```
+
 ## The Graph Topology Schema
 
 The `GraphTopology` enforces structural integrity. It requires a list of `nodes`, a list of `edges`, and a valid `entry_point`.

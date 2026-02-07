@@ -16,3 +16,30 @@ nav:
       - "Middleware": middleware_extension_interfaces.md
   - Architecture:
       - "Shared Kernel": architecture/ADR-001-shared-kernel-boundaries.md
+      - "Package Structure": package_structure.md
+      - "Base Model Rationale": coreason_base_model_rationale.md
+      - "Product Requirements": product_requirements.md
+  - Advanced / Reference:
+      - "Builder SDK": builder_sdk.md
+      - "CLI Reference": cli.md
+      - "Governance & Policy": governance_policy_enforcement.md
+      - "Active Memory Interface": active_memory_interface.md
+      - "Audit Hashing": audit_hashing.md
+      - "Semantic Diffing": semantic_diffing.md
+      - "Memory Governance": memory_governance.md
+      - "Session Management": session_management.md
+      - "Observability": observability.md
+      - "Mock Factory": mock_factory.md
+      - "Error Handling": error_handling_standards.md
+      - "Evaluation Metadata": evaluation_metadata.md
+      - "Event Content Types": event_content_types.md
+      - "Frontend Integration": frontend_integration.md
+      - "Request Lineage (Impl)": request_lineage_implementation.md
+      - "Agent Card Generator": agent_card_generator.md
+      - "Composition": composition.md
+      - "CLI Interop": cli_interop.md
+      - "Visualization (Reference)": visualization.md
+      - "CAP Wire Protocol": cap/wire_protocol.md
+      - "Stream Lifecycle": cap/stream_lifecycle.md
+      - "Streaming Contracts": cap/streaming_contracts.md
+      - "MCP Adapter": interop/mcp_adapter.md
