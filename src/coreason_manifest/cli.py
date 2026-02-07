@@ -22,7 +22,6 @@ from coreason_manifest.spec.v2.definitions import (
     ManifestV2,
     SwitchStep,
 )
-from coreason_manifest.utils.diff import ChangeCategory, DiffReport, compare_agents
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
 from coreason_manifest.utils.viz import generate_mermaid_graph
@@ -182,10 +181,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="coreason", description="CoReason Manifest CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Init
-    init_parser = subparsers.add_parser("init", help="Initialize a new CoReason agent project")
-    init_parser.add_argument("name", help="Name of the agent/directory (e.g., my_first_agent)")
-
     # Inspect
     inspect_parser = subparsers.add_parser("inspect", help="Inspect an agent definition")
     inspect_parser.add_argument("ref", help="Reference to the agent (path/to/file.py:var)")
@@ -201,37 +196,17 @@ def main() -> None:
     run_parser.add_argument("ref", help="Reference to the agent")
     run_parser.add_argument("--inputs", default="{}", help="JSON string inputs")
     run_parser.add_argument("--mock", action="store_true", help="Use mock outputs")
-
-    # The prompt says "All commands must support a --json flag".
-    # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
     run_parser.add_argument("--json", action="store_true", help="Output JSON events")
+
+    # Init
+    init_parser = subparsers.add_parser("init", help="Initialize a new CoReason agent project")
+    init_parser.add_argument("name", help="Name of the agent/directory (e.g., my_first_agent)")
 
     args = parser.parse_args()
 
     if args.command == "init":
         handle_init(args)
         return
-    # Hash
-    hash_parser = subparsers.add_parser("hash", help="Calculate the canonical hash of an agent definition")
-    hash_parser.add_argument("ref", help="Reference to the agent (e.g. examples/agent.py:agent)")
-    hash_parser.add_argument("--json", action="store_true", help="Output in JSON format")
-    # Validate
-    validate_parser = subparsers.add_parser("validate", help="Validate a static agent definition file")
-    validate_parser.add_argument("file", help="Path to the .yaml or .json file")
-    validate_parser.add_argument("--json", action="store_true", help="Output JSON structure on success")
-    # Diff
-    diff_parser = subparsers.add_parser("diff", help="Compare two agent definitions semantically")
-    diff_parser.add_argument("base", help="Reference to the original agent (e.g. master:agent.py)")
-    diff_parser.add_argument("head", help="Reference to the new agent (e.g. local:agent.py)")
-    diff_parser.add_argument(
-        "--fail-on-breaking", action="store_true", help="Exit with code 2 if BREAKING changes are detected"
-    )
-    diff_parser.add_argument("--json", action="store_true", help="Output JSON format")
-
-    args = parser.parse_args()
-
-    if args.command == "diff":
-        _handle_diff(args.base, args.head, args.json, args.fail_on_breaking)
 
     try:
         agent = load_agent_from_ref(args.ref)
@@ -259,61 +234,6 @@ def main() -> None:
             sys.exit(1)
 
         _run_simulation(agent, args.mock)
-
-    elif args.command == "hash":
-        if not hasattr(agent, "compute_hash"):
-            sys.stderr.write("Error: Agent definition does not support canonical hashing.\n")
-            sys.exit(1)
-
-        raw_hash = agent.compute_hash()
-        # Ensure proper format
-        final_hash = f"sha256:{raw_hash}"
-
-        if args.json:
-            print(json.dumps({"hash": final_hash, "algorithm": "sha256"}))
-        else:
-            print(final_hash)
-
-
-def _handle_diff(base_ref: str, head_ref: str, json_output: bool, fail_on_breaking: bool) -> None:
-    """
-    Compare two agent definitions and print a difference report.
-    """
-    try:
-        old_def = load_agent_from_ref(base_ref)
-        new_def = load_agent_from_ref(head_ref)
-    except Exception as e:
-        sys.stderr.write(f"Error loading agent: {e}\n")
-        sys.exit(1)
-
-    report: DiffReport = compare_agents(old_def, new_def)
-
-    if json_output:
-        print(report.model_dump_json(indent=2))
-        sys.exit(0)
-
-    # Text Mode
-    if not report.changes:
-        print("✅ No semantic changes detected.")
-        sys.exit(0)
-
-    category_icons = {
-        ChangeCategory.BREAKING: "🚨 **BREAKING**",
-        ChangeCategory.GOVERNANCE: "🛡️ **GOVERNANCE**",
-        ChangeCategory.RESOURCE: "💰 **RESOURCE**",
-        ChangeCategory.FEATURE: "✨ **FEATURE**",
-        ChangeCategory.PATCH: "🔧 **PATCH**",
-    }
-
-    for change in report.changes:
-        icon = category_icons.get(change.category, "🔧 **PATCH**")
-        print(f"[{icon}] {change.path}: {change.old_value} -> {change.new_value}")
-
-    if fail_on_breaking and report.has_breaking:
-        sys.stderr.write("❌ Blocking CI due to breaking changes.\n")
-        sys.exit(2)
-
-    sys.exit(0)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:

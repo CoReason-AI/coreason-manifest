@@ -55,14 +55,6 @@ hash_val = compute_audit_hash(data)
 print(f"SHA-256: {hash_val}")
 ```
 
-## CLI Verification
-
-The `coreason` CLI provides a `hash` command to compute the canonical hash of agent definitions, leveraging the same underlying integrity principles. This is primarily used for verifying agent identity in CI/CD pipelines.
-
-```bash
-coreason hash agent.py:agent
-```
-
 ## Chain Verification
 
 The `verify_chain` utility validates a sequence of `AuditLog` entries to detect tampering.
