@@ -6,6 +6,10 @@
 
 We use the [CloudEvents 1.0 JSON Format](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md) for all system notifications and asynchronous events.
 
+## Transport Layer
+
+For distributed tracing and request context propagation across the agent graph, see the **[Transport Layer](transport_layer.md)** documentation. It details the `AgentRequest` model which enforces strict lineage (Root/Parent IDs).
+
 ### Model: `CloudEvent`
 
 A strict Pydantic model representing a CloudEvent.

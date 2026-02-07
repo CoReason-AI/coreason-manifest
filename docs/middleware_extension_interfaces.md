@@ -69,11 +69,15 @@ class PIIRedactor:
         request: AgentRequest
     ) -> AgentRequest:
         # Simple example: Redact generic credit card numbers in query
-        if "4000-1234" in request.query:
+        # Access payload dictionary
+        query = str(request.payload.get("query", ""))
+
+        if "4000-1234" in query:
+            new_payload = request.payload.copy()
+            new_payload["query"] = query.replace("4000-1234", "XXXX-XXXX")
+
             # Create a modified copy (AgentRequest is immutable)
-            return request.model_copy(
-                update={"query": request.query.replace("4000-1234", "XXXX-XXXX")}
-            )
+            return request.model_copy(update={"payload": new_payload})
         return request
 ```
 
