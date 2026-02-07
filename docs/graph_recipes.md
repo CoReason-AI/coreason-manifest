@@ -161,18 +161,15 @@ topology:
       agent_ref: "publisher-v1"
 ```
 
-## Integrity Validation
+## Integrity Validation & Draft Mode
 
-The `coreason-manifest` library performs strict validation on the graph topology to prevent runtime errors.
+The `coreason-manifest` library performs strict validation on the graph topology to prevent runtime errors. However, for AI Agents generating workflows (or human "work-in-progress" saves), we support a **Draft Mode**.
 
-### 1. Dangling Edge Check
-Every `source` and `target` in the `edges` list must correspond to a valid Node ID. If you try to connect to a node that doesn't exist, the validator will raise a `ValueError`.
-
-### 2. Entry Point Check
-The `entry_point` ID must exist in the `nodes` list. You cannot start a graph at a non-existent node.
-
-### 3. Duplicate ID Check
-All Node IDs must be unique within the topology.
+### 1. Strict Validation (Default)
+By default (`status="valid"`), the topology enforces:
+*   **Entry Point Existence**: The `entry_point` ID must exist in the `nodes` list.
+*   **Dangling Edge Check**: Every `source` and `target` must correspond to a valid Node ID.
+*   **Duplicate ID Check**: All Node IDs must be unique.
 
 ```python
 from coreason_manifest.spec.v2.recipe import GraphTopology, AgentNode, GraphEdge
@@ -187,6 +184,25 @@ try:
 except ValueError as e:
     print(f"Validation Error: {e}")
     # Output: Dangling edge target: node-1 -> phantom-node
+```
+
+### 2. Draft Mode (`status="draft"`)
+To support partial or incomplete graphs (e.g., during generation or editing), you can set `status="draft"`. This **skips** the Entry Point and Dangling Edge checks, allowing the object to be instantiated and saved.
+
+**Note:** Duplicate Node IDs are *never* allowed, even in draft mode, as they break the internal graph structure.
+
+```python
+# This IS valid in Draft Mode
+draft_topology = GraphTopology(
+    status="draft",
+    entry_point="missing-node", # Allowed
+    nodes=[AgentNode(id="node-1", agent_ref="agent-a")],
+    edges=[GraphEdge(source="node-1", target="phantom-node")] # Allowed
+)
+
+# Check if it's ready for promotion
+is_ready = draft_topology.verify_completeness()
+# Output: False
 ```
 
 ## Runtime Execution

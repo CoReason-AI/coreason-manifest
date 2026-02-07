@@ -144,6 +144,7 @@ class GraphTopology(CoReasonBaseModel):
     )
     edges: list[GraphEdge] = Field(..., description="List of directed edges.")
     entry_point: str = Field(..., description="ID of the start node.")
+    status: Literal["draft", "valid"] = Field("valid", description="Validation status of the topology.")
 
     @model_validator(mode="after")
     def validate_integrity(self) -> "GraphTopology":
@@ -154,20 +155,35 @@ class GraphTopology(CoReasonBaseModel):
             duplicates = {id_ for id_ in ids if ids.count(id_) > 1}
             raise ValueError(f"Duplicate node IDs found: {duplicates}")
 
-        valid_ids = set(ids)
+        # If status is draft, skip semantic checks
+        if self.status == "draft":
+            return self
+
+        self._validate_completeness()
+        return self
+
+    def verify_completeness(self) -> bool:
+        """Check if the graph is semantically complete (valid entry point and edges)."""
+        try:
+            self._validate_completeness()
+            return True
+        except ValueError:
+            return False
+
+    def _validate_completeness(self) -> None:
+        """Internal validation logic for entry point and edges."""
+        valid_ids = {node.id for node in self.nodes}
 
         # 2. Check entry point
         if self.entry_point not in valid_ids:
             raise ValueError(f"Entry point '{self.entry_point}' not found in nodes: {valid_ids}")
 
-        # 2. Check edges
+        # 3. Check edges
         for edge in self.edges:
             if edge.source not in valid_ids:
                 raise ValueError(f"Dangling edge source: {edge.source} -> {edge.target}")
             if edge.target not in valid_ids:
                 raise ValueError(f"Dangling edge target: {edge.source} -> {edge.target}")
-
-        return self
 
 
 class RecipeDefinition(CoReasonBaseModel):
