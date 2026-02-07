@@ -8,10 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from coreason_manifest.utils.openai_adapter import convert_to_openai_assistant
-from coreason_manifest.utils.langchain_adapter import convert_to_langchain_kwargs
 from coreason_manifest.spec.v2.definitions import AgentDefinition
+from coreason_manifest.utils.langchain_adapter import convert_to_langchain_kwargs
+from coreason_manifest.utils.openai_adapter import convert_to_openai_assistant
+
 
 def test_openai_conversion_with_backstory() -> None:
     """Test conversion to OpenAI format including backstory."""
@@ -26,6 +26,7 @@ def test_openai_conversion_with_backstory() -> None:
     result = convert_to_openai_assistant(agent)
 
     assert "Backstory: Once upon a time..." in result["instructions"]
+
 
 def test_langchain_conversion_with_backstory() -> None:
     """Test conversion to LangChain format including backstory."""

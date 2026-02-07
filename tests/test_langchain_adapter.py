@@ -8,9 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from coreason_manifest.utils.langchain_adapter import convert_to_langchain_kwargs
 from coreason_manifest.spec.v2.definitions import AgentDefinition, InlineToolDefinition, ToolRequirement
+from coreason_manifest.utils.langchain_adapter import convert_to_langchain_kwargs
 
 
 def test_langchain_conversion_minimal() -> None:

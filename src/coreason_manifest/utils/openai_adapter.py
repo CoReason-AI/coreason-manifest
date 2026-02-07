@@ -52,7 +52,7 @@ def convert_to_openai_assistant(agent: AgentDefinition) -> dict[str, Any]:
             # Remote tools (ToolRequirement) are skipped as their schema is not available locally.
             continue
 
-    assistant_config = {
+    return {
         "name": agent.name,
         "instructions": instructions,
         "tools": tools,
@@ -62,5 +62,3 @@ def convert_to_openai_assistant(agent: AgentDefinition) -> dict[str, Any]:
             "coreason_agent_role": agent.role,
         },
     }
-
-    return assistant_config

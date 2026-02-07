@@ -8,9 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from coreason_manifest.utils.openai_adapter import convert_to_openai_assistant
 from coreason_manifest.spec.v2.definitions import AgentDefinition, InlineToolDefinition, ToolRequirement
+from coreason_manifest.utils.openai_adapter import convert_to_openai_assistant
 
 
 def test_openai_conversion_minimal() -> None:
