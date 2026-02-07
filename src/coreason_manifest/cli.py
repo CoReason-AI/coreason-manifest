@@ -49,6 +49,11 @@ def main() -> None:
     # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
     run_parser.add_argument("--json", action="store_true", help="Output JSON events")
 
+    # Hash
+    hash_parser = subparsers.add_parser("hash", help="Calculate the canonical hash of an agent definition")
+    hash_parser.add_argument("ref", help="Reference to the agent (e.g. examples/agent.py:agent)")
+    hash_parser.add_argument("--json", action="store_true", help="Output in JSON format")
+
     args = parser.parse_args()
 
     try:
@@ -77,6 +82,20 @@ def main() -> None:
             sys.exit(1)
 
         _run_simulation(agent, args.mock)
+
+    elif args.command == "hash":
+        if not hasattr(agent, "compute_hash"):
+            sys.stderr.write("Error: Agent definition does not support canonical hashing.\n")
+            sys.exit(1)
+
+        raw_hash = agent.compute_hash()
+        # Ensure proper format
+        final_hash = f"sha256:{raw_hash}"
+
+        if args.json:
+            print(json.dumps({"hash": final_hash, "algorithm": "sha256"}))
+        else:
+            print(final_hash)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:
