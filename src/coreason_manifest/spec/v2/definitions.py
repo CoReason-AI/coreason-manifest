@@ -113,9 +113,7 @@ class AgentDefinition(CoReasonBaseModel):
         default_factory=list, description="List of Tool Requirements or Inline Definitions."
     )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
-    skills: list[str] = Field(
-        default_factory=list, description="List of Skill IDs to equip this agent with."
-    )
+    skills: list[str] = Field(default_factory=list, description="List of Skill IDs to equip this agent with.")
 
     @field_validator("tools", mode="before")
     @classmethod
@@ -241,9 +239,6 @@ class ManifestV2(CoReasonBaseModel):
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: dict[
         str,
-        Annotated[
-            ToolDefinition | AgentDefinition | SkillDefinition, Field(discriminator="type")
-        ]
-        | GenericDefinition,
+        Annotated[ToolDefinition | AgentDefinition | SkillDefinition, Field(discriminator="type")] | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")

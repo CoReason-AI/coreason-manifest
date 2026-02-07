@@ -55,17 +55,13 @@ class SkillDefinition(CoReasonBaseModel):
     instructions_uri: str | None = Field(None, description="Path to external SKILL.md file.")
 
     # Execution
-    scripts: dict[str, str] = Field(
-        default_factory=dict, description="Map of script names to file paths."
-    )
+    scripts: dict[str, str] = Field(default_factory=dict, description="Map of script names to file paths.")
     dependencies: list[SkillDependency] = Field(
         default_factory=list, description="List of dependencies required by the skill."
     )
 
     # Lifecycle
-    load_strategy: LoadStrategy = Field(
-        LoadStrategy.LAZY, description="Strategy for loading the skill instructions."
-    )
+    load_strategy: LoadStrategy = Field(LoadStrategy.LAZY, description="Strategy for loading the skill instructions.")
 
     @model_validator(mode="after")
     def validate_consistency(self) -> "SkillDefinition":

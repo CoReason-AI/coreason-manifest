@@ -39,9 +39,7 @@ def test_skill_definition_valid_lazy() -> None:
         trigger_intent="User asks for lazy things.",
         instructions_uri="./skills/lazy.md",
         scripts={"run": "./scripts/run.py"},
-        dependencies=[
-            SkillDependency(ecosystem="python", package="requests", version_constraint=">=2.0.0")
-        ],
+        dependencies=[SkillDependency(ecosystem="python", package="requests", version_constraint=">=2.0.0")],
     )
     assert skill.load_strategy == LoadStrategy.LAZY
     assert skill.trigger_intent == "User asks for lazy things."
@@ -171,9 +169,7 @@ def test_skill_edge_cases() -> None:
         description="Weird version",
         load_strategy=LoadStrategy.EAGER,
         instructions="Simple.",
-        dependencies=[
-            SkillDependency(ecosystem="python", package="pkg", version_constraint="<3.0.0,!=2.5.0")
-        ],
+        dependencies=[SkillDependency(ecosystem="python", package="pkg", version_constraint="<3.0.0,!=2.5.0")],
     )
     assert skill_weird_dep.dependencies[0].version_constraint == "<3.0.0,!=2.5.0"
 
@@ -241,4 +237,5 @@ def test_complex_manifest_scenario() -> None:
 
     # Check if ToolDefinition is properly instantiated
     from coreason_manifest.spec.v2.definitions import ToolDefinition
+
     assert isinstance(manifest.definitions["tool-1"], ToolDefinition)
