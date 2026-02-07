@@ -19,18 +19,17 @@ from coreason_manifest.spec.v2.definitions import ManifestMetadata
 # 1. Configuration Schemas (New)
 # ==========================================
 
+
 class RecipeInterface(CoReasonBaseModel):
     """Defines the Input/Output contract for the Recipe using JSON Schema."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     inputs: dict[str, Any] = Field(
-        default_factory=dict,
-        description="JSON Schema defining the expected input arguments."
+        default_factory=dict, description="JSON Schema defining the expected input arguments."
     )
     outputs: dict[str, Any] = Field(
-        default_factory=dict,
-        description="JSON Schema defining the structure of the final result."
+        default_factory=dict, description="JSON Schema defining the structure of the final result."
     )
 
 
@@ -39,13 +38,9 @@ class StateDefinition(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    properties: dict[str, Any] = Field(
-        ...,
-        description="JSON Schema properties for the shared state variables."
-    )
+    properties: dict[str, Any] = Field(..., description="JSON Schema properties for the shared state variables.")
     persistence: Literal["ephemeral", "redis", "postgres"] = Field(
-        "ephemeral",
-        description="How the state should be stored across steps."
+        "ephemeral", description="How the state should be stored across steps."
     )
 
 
@@ -57,14 +52,14 @@ class PolicyConfig(CoReasonBaseModel):
     max_retries: int = Field(0, description="Global retry limit for failed steps.")
     timeout_seconds: int | None = Field(None, description="Global execution timeout.")
     execution_mode: Literal["sequential", "parallel"] = Field(
-        "sequential",
-        description="Default execution strategy for independent branches."
+        "sequential", description="Default execution strategy for independent branches."
     )
 
 
 # ==========================================
 # 2. Node Definitions
 # ==========================================
+
 
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""

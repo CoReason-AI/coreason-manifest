@@ -23,10 +23,7 @@ def test_recipe_interface_defaults() -> None:
 
 def test_recipe_interface_validation() -> None:
     """Test RecipeInterface validation."""
-    interface = RecipeInterface(
-        inputs={"arg": {"type": "string"}},
-        outputs={"result": {"type": "integer"}}
-    )
+    interface = RecipeInterface(inputs={"arg": {"type": "string"}}, outputs={"result": {"type": "integer"}})
     assert interface.inputs["arg"]["type"] == "string"
     assert interface.outputs["result"]["type"] == "integer"
 
@@ -38,10 +35,7 @@ def test_recipe_interface_validation() -> None:
 def test_state_definition_validation() -> None:
     """Test StateDefinition validation."""
     # Test valid
-    state = StateDefinition(
-        properties={"count": {"type": "integer"}},
-        persistence="redis"
-    )
+    state = StateDefinition(properties={"count": {"type": "integer"}}, persistence="redis")
     assert state.persistence == "redis"
     assert state.properties["count"]["type"] == "integer"
 
@@ -68,11 +62,7 @@ def test_policy_config_defaults() -> None:
 
 def test_policy_config_validation() -> None:
     """Test PolicyConfig validation."""
-    policy = PolicyConfig(
-        max_retries=5,
-        timeout_seconds=30,
-        execution_mode="parallel"
-    )
+    policy = PolicyConfig(max_retries=5, timeout_seconds=30, execution_mode="parallel")
     assert policy.max_retries == 5
     assert policy.timeout_seconds == 30
     assert policy.execution_mode == "parallel"
@@ -86,18 +76,9 @@ def test_full_recipe_with_extensions() -> None:
     """Test RecipeDefinition with all new components."""
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="Extended Recipe"),
-        interface=RecipeInterface(
-            inputs={"query": {"type": "string"}},
-            outputs={"answer": {"type": "string"}}
-        ),
-        state=StateDefinition(
-            properties={"memory": {"type": "array"}},
-            persistence="postgres"
-        ),
-        policy=PolicyConfig(
-            max_retries=3,
-            timeout_seconds=60
-        ),
+        interface=RecipeInterface(inputs={"query": {"type": "string"}}, outputs={"answer": {"type": "string"}}),
+        state=StateDefinition(properties={"memory": {"type": "array"}}, persistence="postgres"),
+        policy=PolicyConfig(max_retries=3, timeout_seconds=60),
         topology=GraphTopology(
             nodes=[
                 AgentNode(id="start", agent_ref="agent-1"),
