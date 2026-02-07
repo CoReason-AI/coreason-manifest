@@ -16,6 +16,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from coreason_manifest.runtime.executor import GraphExecutor
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -25,7 +26,6 @@ from coreason_manifest.spec.v2.definitions import (
     SwitchStep,
 )
 from coreason_manifest.spec.v2.recipe import RecipeDefinition
-from coreason_manifest.runtime.executor import GraphExecutor
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
 from coreason_manifest.utils.viz import generate_mermaid_graph
@@ -305,6 +305,11 @@ def main() -> None:
         print(agent.model_dump_json(indent=2, by_alias=True, exclude_none=True))
 
     elif args.command == "viz":
+        if isinstance(agent, RecipeDefinition):
+            # TODO: Implement visualization for RecipeDefinition
+            sys.stderr.write("Visualization not yet implemented for RecipeDefinition.\n")
+            sys.exit(1)
+
         mermaid = generate_mermaid_graph(agent)
         if args.json:
             print(json.dumps({"mermaid": mermaid}))
@@ -329,11 +334,17 @@ def main() -> None:
                 trace = asyncio.run(executor.run())
 
                 # Print result
-                print(json.dumps({
-                    "trace_id": str(trace.trace_id),
-                    "final_state": executor.context,
-                    "steps_count": len(trace.steps)
-                }, indent=2, default=str))
+                print(
+                    json.dumps(
+                        {
+                            "trace_id": str(trace.trace_id),
+                            "final_state": executor.context,
+                            "steps_count": len(trace.steps),
+                        },
+                        indent=2,
+                        default=str,
+                    )
+                )
             except Exception as e:
                 sys.stderr.write(f"Error running graph executor: {e}\n")
                 sys.exit(1)

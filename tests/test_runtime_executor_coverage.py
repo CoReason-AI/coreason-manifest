@@ -1,51 +1,50 @@
 # Copyright (c) 2025 CoReason, Inc.
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from coreason_manifest.runtime.executor import GraphExecutor
+from coreason_manifest.spec.common.presentation import NodePresentation
+from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
+    GraphEdge,
+    GraphTopology,
+    HumanNode,
     RecipeDefinition,
     RecipeInterface,
-    GraphTopology,
-    AgentNode,
-    HumanNode,
+    RecipeNode,
     RouterNode,
-    GraphEdge,
 )
-from coreason_manifest.spec.v2.definitions import ManifestMetadata
-from coreason_manifest.spec.common.presentation import NodePresentation
+
 
 # Helper
-def create_recipe(nodes, edges, entry_point, name="CoverageTest"):
+def create_recipe(
+    nodes: list[RecipeNode], edges: list[GraphEdge], entry_point: str, name: str = "CoverageTest"
+) -> RecipeDefinition:
     # We use model_construct to bypass validation if needed for edge cases
     return RecipeDefinition.model_construct(
         apiVersion="coreason.ai/v2",
         kind="Recipe",
         metadata=ManifestMetadata(name=name),
         interface=RecipeInterface(),
-        topology=GraphTopology.model_construct(
-            nodes=nodes,
-            edges=edges,
-            entry_point=entry_point
-        )
+        topology=GraphTopology.model_construct(nodes=nodes, edges=edges, entry_point=entry_point),  # type: ignore[arg-type]
     )
 
+
 @pytest.mark.asyncio
-async def test_missing_node_runtime_error():
+async def test_missing_node_runtime_error() -> None:
     # Test line 51: Node not found in topology
     # We construct a topology where entry_point points to a non-existent node
-    recipe = create_recipe(
-        nodes=[],
-        edges=[],
-        entry_point="phantom"
-    )
+    recipe = create_recipe(nodes=[], edges=[], entry_point="phantom")
     executor = GraphExecutor(recipe, {})
 
     with pytest.raises(ValueError, match="Node phantom not found in topology"):
         await executor.run()
 
+
 @pytest.mark.asyncio
-async def test_resolve_next_invalid_node():
+async def test_resolve_next_invalid_node() -> None:
     # Test line 137: _resolve_next with invalid node
     recipe = create_recipe(nodes=[], edges=[], entry_point="start")
     executor = GraphExecutor(recipe, {})
@@ -54,8 +53,9 @@ async def test_resolve_next_invalid_node():
     result = executor._resolve_next("phantom")
     assert result is None
 
+
 @pytest.mark.asyncio
-async def test_human_input_eof_error():
+async def test_human_input_eof_error() -> None:
     # Test lines 102-105: input() raises EOFError
     node = HumanNode(id="H", prompt="Ask", presentation=NodePresentation(x=0, y=0))
     recipe = create_recipe(nodes=[node], edges=[], entry_point="H")
@@ -69,17 +69,14 @@ async def test_human_input_eof_error():
 
     assert executor.context.get("response") == "Mocked Input"
 
+
 @pytest.mark.asyncio
-async def test_resolve_next_router_fallback():
+async def test_resolve_next_router_fallback() -> None:
     # Test lines 146-149: _resolve_next fallback logic for Router
     # We call _resolve_next WITHOUT a last_step
 
     node = RouterNode(
-        id="R",
-        input_key="key",
-        routes={"A": "NodeA"},
-        default_route="NodeB",
-        presentation=NodePresentation(x=0, y=0)
+        id="R", input_key="key", routes={"A": "NodeA"}, default_route="NodeB", presentation=NodePresentation(x=0, y=0)
     )
     recipe = create_recipe(nodes=[node], edges=[], entry_point="R")
     executor = GraphExecutor(recipe, {"key": "A"})

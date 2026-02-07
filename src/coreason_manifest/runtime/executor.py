@@ -33,10 +33,7 @@ class GraphExecutor:
 
         # Initialize trace
         self.trace = SimulationTrace(
-            agent_id=self.recipe.metadata.name,
-            agent_version="v2",
-            steps=[],
-            metadata={"recipe_kind": self.recipe.kind}
+            agent_id=self.recipe.metadata.name, agent_version="v2", steps=[], metadata={"recipe_kind": self.recipe.kind}
         )
         self.max_steps = 50
 
@@ -96,13 +93,12 @@ class GraphExecutor:
             try:
                 # Use built-in input for CLI interaction
                 # We use a flush to ensure prompt is visible
-                import sys
                 print(f"{node.prompt} > ", end="", flush=True)
                 user_response = input()
             except (EOFError, OSError):
                 # Handle cases where input is closed or piped
                 user_response = "Mocked Input"
-                print("Mocked Input") # Echo for clarity in logs
+                print("Mocked Input")  # Echo for clarity in logs
 
             observation = {"response": user_response}
             self.context.update(observation)
@@ -111,14 +107,15 @@ class GraphExecutor:
             step_type = StepType.REASONING
             # Read input key
             input_val = self.context.get(node.input_key)
-            inputs = {node.input_key: input_val}
+            inputs = {str(node.input_key): input_val}
 
             # Determine route (for observation purposes)
             target = node.default_route
             if input_val is not None and str(input_val) in node.routes:
                 target = node.routes[str(input_val)]
 
-            observation = {"decision": target, "value": input_val}
+            # Mypy gets confused by Any | None in dict value vs declaration
+            observation = {"decision": target, "value": input_val}  # type: ignore[dict-item]
             thought = f"Router decision based on {node.input_key}={input_val}: Go to {target}"
 
         return SimulationStep(
@@ -128,7 +125,7 @@ class GraphExecutor:
             thought=thought,
             action=action,
             observation=observation,
-            snapshot=self.context.copy()
+            snapshot=self.context.copy(),
         )
 
     def _resolve_next(self, current_node_id: str, last_step: SimulationStep | None = None) -> str | None:
@@ -140,7 +137,10 @@ class GraphExecutor:
         if isinstance(node, RouterNode):
             # Use the decision from the step observation if available, otherwise recompute
             if last_step and last_step.observation and "decision" in last_step.observation:
-                return last_step.observation["decision"]
+                decision = last_step.observation["decision"]
+                if isinstance(decision, str):
+                    return decision
+                return str(decision)
 
             # Recompute if needed (fallback)
             input_val = self.context.get(node.input_key)
