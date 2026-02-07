@@ -39,8 +39,8 @@ def test_payload_injection_large_string() -> None:
     large_string = "A" * 10_000_000  # 10MB string
 
     # Should handle it without crashing (though it might be slow)
-    payload = AgentRequest(query=large_string)
-    assert len(payload.query) == 10_000_000
+    req = AgentRequest(payload={"query": large_string}, session_id=uuid4())
+    assert len(req.payload["query"]) == 10_000_000
 
 
 def test_payload_injection_deeply_nested_meta() -> None:
@@ -53,7 +53,7 @@ def test_payload_injection_deeply_nested_meta() -> None:
         current = current["next"]
 
     # Pydantic usually handles deep nesting fine, but recursion limits in python might be hit during dump
-    payload = AgentRequest(query="nested", meta=nested)
+    payload = AgentRequest(payload={"query": "nested"}, metadata=nested, session_id=uuid4())
 
     # Verify we can dump it without recursion error or that it fails safely
     # Pydantic v2 has recursion protection which raises ValueError: Circular reference detected (depth exceeded)
@@ -68,6 +68,7 @@ def test_extra_fields_smuggling() -> None:
     # but frozen models in Pydantic V2 often behave strictly.
 
     # Attempt to inject a 'superuser' flag
+    sid = uuid4()
     data = {
         "request_id": str(uuid4()),
         "context": {
@@ -76,7 +77,8 @@ def test_extra_fields_smuggling() -> None:
             "is_admin": True,  # Smuggled field
         },
         "payload": {
-            "query": "q",
+            "payload": {"query": "q"},
+            "session_id": str(sid),
             "exec_code": "import os; os.system('rm -rf /')",  # Smuggled field
         },
     }
@@ -109,9 +111,9 @@ def test_type_confusion_coercion() -> None:
             user=Identity.anonymous(),
         )
 
-    # Attempt to pass a dict where a string is expected for query
+    # Attempt to pass a string where a dict is expected for payload
     with pytest.raises(ValidationError):
-        AgentRequest(query={"dangerous": "object"})
+        AgentRequest(payload="dangerous", session_id=uuid4())
 
 
 def test_null_byte_injection() -> None:
@@ -130,13 +132,13 @@ def test_context_isolation() -> None:
     """Ensure context and payload are truly separate."""
     user = Identity.anonymous()
     ctx = SessionContext(session_id="s1", user=user)
-    payload = AgentRequest(query="test")
+    payload = AgentRequest(payload={"query": "test"}, session_id=uuid4())
 
     req = ServiceRequest(request_id=uuid4(), context=ctx, payload=payload)
 
     # Modifying payload should not affect context (immutability check)
     with pytest.raises(ValidationError):
-        setattr(req, "payload", AgentRequest(query="hacked"))  # noqa: B010
+        setattr(req, "payload", AgentRequest(payload={"query": "hacked"}, session_id=uuid4()))  # noqa: B010
 
     # Verify they are distinct objects
     assert req.context is ctx

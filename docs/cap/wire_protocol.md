@@ -29,9 +29,16 @@ The standard envelope for sending instructions to an Agent.
     }
   },
   "payload": {
-    "query": "What is the status of the project?",
-    "files": [],
-    "conversation_id": "conv_123"
+    "request_id": "550e8400-e29b-41d4-a716-446655440000",
+    "session_id": "sess_abc",
+    "root_request_id": "550e8400-e29b-41d4-a716-446655440000",
+    "parent_request_id": null,
+    "payload": {
+        "query": "What is the status of the project?"
+    },
+    "metadata": {
+        "user_locale": "en-US"
+    }
   }
 }
 ```
@@ -48,14 +55,16 @@ Strict context containing authentication and session details.
 
 ### AgentRequest
 
-The strict payload schema used within `ServiceRequest`.
+The strict transport envelope used for all interactions.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `query` | `str` | The user's primary input/instruction. |
-| `files` | `List[str]` | List of file URIs or references (default: `[]`). |
-| `conversation_id` | `Optional[str]` | ID for continuing a session (default: `None`). |
-| `meta` | `Dict[str, Any]` | Extra context like timezone (default: `{}`). |
+| `request_id` | `UUID` | Unique operation ID. |
+| `session_id` | `UUID` | Mandatory session ID. |
+| `root_request_id` | `UUID` | Start of the trace (auto-filled). |
+| `parent_request_id` | `UUID?` | Immediate caller (optional). |
+| `payload` | `Dict[str, Any]` | The actual business logic arguments. |
+| `metadata` | `Dict[str, Any]` | Extra context like locale, auth scope (default: `{}`). |
 
 ### ServiceResponse
 

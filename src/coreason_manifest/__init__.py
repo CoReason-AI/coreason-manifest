@@ -13,7 +13,6 @@ from .builder import AgentBuilder, TypedCapability
 from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .shortcuts import simple_agent
 from .spec.cap import (
-    AgentRequest,
     ErrorSeverity,
     HealthCheckResponse,
     HealthCheckStatus,
@@ -48,6 +47,7 @@ from .spec.common.observability import (
     EventContentType,
     ReasoningTrace,
 )
+from .spec.common.request import AgentRequest
 from .spec.common.presentation import (
     CitationBlock,
     CitationItem,

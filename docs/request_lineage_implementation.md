@@ -27,8 +27,10 @@ The primary payload for agent services.
 ```python
 class AgentRequest(CoReasonBaseModel):
     request_id: UUID = Field(default_factory=uuid4)
+    session_id: UUID  # Mandatory
     root_request_id: Optional[UUID] = None  # Auto-filled if None
     parent_request_id: Optional[UUID] = None
+    payload: Dict[str, Any]
     ...
 ```
 

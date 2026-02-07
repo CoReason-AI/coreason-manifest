@@ -22,7 +22,7 @@ from coreason_manifest.spec.common.session import Interaction, LineageMetadata
 
 def test_agent_request_auto_rooting() -> None:
     """Verify that an AgentRequest without a root becomes its own root."""
-    req = AgentRequest(query="test")  # request_id auto-generated
+    req = AgentRequest(payload={"query": "test"}, session_id=uuid4())  # request_id auto-generated
 
     assert isinstance(req.request_id, UUID)
     assert isinstance(req.root_request_id, UUID)
@@ -32,7 +32,7 @@ def test_agent_request_auto_rooting() -> None:
 
 def test_agent_request_explicit_none_root() -> None:
     """Verify that passing None to root_request_id triggers auto-rooting."""
-    req = AgentRequest(query="test", root_request_id=None)
+    req = AgentRequest(payload={"query": "test"}, session_id=uuid4(), root_request_id=None)
 
     assert isinstance(req.root_request_id, UUID)
     assert req.root_request_id == req.request_id
@@ -41,7 +41,7 @@ def test_agent_request_explicit_none_root() -> None:
 def test_agent_request_with_explicit_request_id_auto_root() -> None:
     """Verify auto-rooting works when request_id is manually provided."""
     uid = uuid4()
-    req = AgentRequest(query="test", request_id=uid)
+    req = AgentRequest(payload={"query": "test"}, session_id=uuid4(), request_id=uid)
 
     assert req.request_id == uid
     assert req.root_request_id == uid
@@ -53,13 +53,13 @@ def test_agent_request_validation_error() -> None:
     # We force a type mismatch to check runtime validation.
     bad_id: Any = "not-a-uuid"
     with pytest.raises(ValidationError):
-        AgentRequest(query="test", request_id=bad_id)
+        AgentRequest(payload={"query": "test"}, session_id=uuid4(), request_id=bad_id)
 
 
 def test_agent_request_auto_rooting_with_explicit_id() -> None:
     """Verify that auto-rooting works when request_id is provided."""
     uid = uuid4()
-    req = AgentRequest(request_id=uid, query="test")
+    req = AgentRequest(request_id=uid, payload={"query": "test"}, session_id=uuid4())
 
     assert req.request_id == uid
     assert req.root_request_id == uid
@@ -70,7 +70,13 @@ def test_agent_request_explicit_root() -> None:
     root_id = uuid4()
     child_id = uuid4()
 
-    req = AgentRequest(request_id=child_id, root_request_id=root_id, parent_request_id=root_id, query="test")
+    req = AgentRequest(
+        request_id=child_id,
+        root_request_id=root_id,
+        parent_request_id=root_id,
+        payload={"query": "test"},
+        session_id=uuid4()
+    )
 
     assert req.request_id == child_id
     assert req.root_request_id == root_id
@@ -195,8 +201,8 @@ def test_broken_chain_prevention() -> None:
     parent_id = uuid4()
 
     # AgentRequest: Parent provided, Root missing -> Error
-    with pytest.raises(ValueError, match="Broken Lineage"):
-        AgentRequest(query="test", parent_request_id=parent_id)
+    with pytest.raises(ValueError, match="Broken Trace"):
+        AgentRequest(payload={"query": "test"}, session_id=uuid4(), parent_request_id=parent_id)
 
     # ReasoningTrace: Parent provided, Root missing -> Error
     with pytest.raises(ValueError, match="Broken Lineage"):
@@ -211,10 +217,15 @@ def test_broken_chain_prevention() -> None:
 
     # AgentRequest: Valid case (Parent + Root) -> Success
     root_id = uuid4()
-    req = AgentRequest(query="test", root_request_id=root_id, parent_request_id=parent_id)
+    req = AgentRequest(
+        payload={"query": "test"},
+        session_id=uuid4(),
+        root_request_id=root_id,
+        parent_request_id=parent_id
+    )
     assert req.root_request_id == root_id
     assert req.parent_request_id == parent_id
 
     # AgentRequest: Valid case (No Parent, No Root) -> Auto-root
-    req_auto = AgentRequest(query="test")
+    req_auto = AgentRequest(payload={"query": "test"}, session_id=uuid4())
     assert req_auto.root_request_id == req_auto.request_id

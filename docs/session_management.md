@@ -48,12 +48,12 @@ save_session(new_state)
 ## Integration
 
 ### Agent Request
-The `AgentRequest` envelope includes an optional `session_id` field to correlate stateless requests with their persistent session context.
+The `AgentRequest` envelope includes a mandatory `session_id` field to correlate stateless requests with their persistent session context.
 
 ```python
 class AgentRequest(CoReasonBaseModel):
-    query: str
-    session_id: str | None = None
+    session_id: UUID
+    payload: Dict[str, Any]
     # ...
 ```
 
