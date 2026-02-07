@@ -1,18 +1,18 @@
 # Coreason Agent Manifest (CAM)
 
-The **Coreason Agent Manifest (CAM)** is the "Human-Centric" Canonical YAML format designed for defining Agents and Recipes in the Coreason ecosystem. It serves as the **default and primary interface** for developers and the Visual Builder.
+The **Coreason Agent Manifest (CAM)** is the "Human-Centric" Canonical YAML format designed for defining Agents and Linear Workflows in the Coreason ecosystem. It serves as the primary interface for defining individual agents and simple, sequential recipes.
 
-> **Note:** The CAM is designed for ease of authoring. At runtime, the Coreason Engine compiles this YAML into strict, machine-optimized Pydantic models.
+> **Note:** For complex, non-linear orchestration (loops, branching), see [Graph Recipes](../graph_recipes.md).
 
-## Root Object (`Manifest`)
+## Root Object (`ManifestV2`)
 
 The root of the document follows a "Kubernetes-style" header structure.
 
 ```yaml
 apiVersion: coreason.ai/v2
-kind: Recipe  # or 'Agent'
+kind: Agent  # or 'Recipe' for linear workflows
 metadata:
-  name: "My Workflow"
+  name: "My Agent"
   version: "1.0.0"
   x-design:
     color: "#4A90E2"
@@ -40,12 +40,19 @@ workflow:
 | `interface` | `InterfaceDefinition` | Defines the Input/Output contract. |
 | `state` | `StateDefinition` | Defines the internal memory schema. |
 | `policy` | `PolicyDefinition` | Governance and execution policy. |
-| `definitions` | `Dict[str, Any]` | Reusable component definitions (Tools, Agents, etc.). |
-| `workflow` | `Workflow` | The main execution topology. |
+| `definitions` | `Dict[str, Any]` | Reusable component definitions (Tools, Agents, Skills, etc.). |
+| `workflow` | `Workflow` | The main execution topology (Linear/Steps). |
 
 ## 1. Definitions Section
 
 The `definitions` section is a polymorphic key-value map where you can define reusable components. These components can then be referenced by ID within the workflow.
+
+Supported definitions include:
+*   `AgentDefinition`
+*   `ToolDefinition`
+*   `SkillDefinition`
+*   `MCPResourceDefinition`
+*   `ToolPackDefinition`
 
 ### Tool Definition (`ToolDefinition`)
 *   `type`: `tool`
@@ -53,6 +60,7 @@ The `definitions` section is a polymorphic key-value map where you can define re
 *   `name`: Human-readable name.
 *   `uri`: The MCP endpoint URI.
 *   `risk_level`: `safe`, `standard`, or `critical`.
+*   `description`: Description of the tool.
 
 ### Agent Definition (`AgentDefinition`)
 *   `type`: `agent`
@@ -61,24 +69,25 @@ The `definitions` section is a polymorphic key-value map where you can define re
 *   `role`: The persona/job title.
 *   `goal`: The primary objective.
 *   `backstory`: Detailed instructions or persona background.
+*   `model`: LLM identifier (e.g., `gpt-4`).
 *   `tools`: List of tools. Supports:
     *   **ID Reference**: String pointing to a `ToolDefinition`.
-    *   **Remote Tool**: Object with `type: remote` and `uri`.
-    *   **Inline Tool**: Object with `type: inline`, `name`, and `parameters` (JSON Schema).
-*   `model`: LLM identifier (e.g., `gpt-4`).
+    *   **Remote Tool (`ToolRequirement`)**: Object with `type: remote`, `uri`, and optional `hash`.
+    *   **Inline Tool (`InlineToolDefinition`)**: Object with `type: inline`, `name`, `description`, `parameters` (JSON Schema), and optional `code_hash`.
+*   `skills`: List of Skill IDs to equip this agent with.
+*   `knowledge`: List of file paths or knowledge base IDs.
+*   `context_strategy`: `full`, `compressed`, or `hybrid` (Default: `hybrid`).
 *   `capabilities`: Feature flags and capabilities.
+*   `runtime`: Configuration for the agent runtime environment (e.g. environment variables).
+*   `evaluation`: Quality assurance and testing metadata (`EvaluationProfile`).
+*   `resources`: Hardware, pricing, and operational constraints (`ModelProfile`).
 
 ### Agent Capabilities (`AgentCapabilities`)
 Used within an `AgentDefinition` to declare supported features. See [Explicit Streaming Contracts](streaming_contracts.md) for detailed definitions.
 
-*   `type`: The architectural complexity of the agent.
-    *   Values: `atomic` (Simple, linear), `graph` (Complex workflow).
-    *   Default: `graph`
-*   `delivery_mode`: Primary transport mechanism.
-    *   Values: `server_sent_events` (Streaming CloudEvents), `request_response` (Standard HTTP).
-    *   Default: `request_response`
+*   `type`: The architectural complexity of the agent (`atomic`, `graph`).
+*   `delivery_mode`: Primary transport mechanism (`server_sent_events`, `request_response`).
 *   `history_support`: Boolean indicating if the agent maintains conversation context.
-    *   Default: `true`
 
 ### Generic Definition
 Fallback for loose dictionaries or references (`$ref`) that haven't been resolved yet.
@@ -93,6 +102,7 @@ definitions:
     name: Google Search
     uri: mcp://google-search
     risk_level: safe
+    description: "Search the web for information."
 
   # Define a Native Agent
   writer_agent:
@@ -103,7 +113,9 @@ definitions:
     goal: Summarize research into a blog post.
     backstory: You are an expert editor with a focus on clarity.
     tools: ["search"] # References the tool ID above
+    skills: ["writing-skill"]
     model: "gpt-4"
+    context_strategy: "compressed"
 ```
 
 ## 2. Interface (`InterfaceDefinition`)
@@ -137,17 +149,6 @@ Defines the shared memory available to the workflow.
 | `schema` | `Dict[str, Any]` | JSON Schema of the keys available in the shared memory. |
 | `backend` | `Optional[str]` | Backend storage type (e.g., `redis`, `memory`). |
 
-**Example:**
-```yaml
-state:
-  schema:
-    messages:
-      type: array
-      items:
-        type: string
-  backend: "redis"
-```
-
 ## 4. Policy (`PolicyDefinition`)
 
 Defines execution limits and governance rules.
@@ -161,7 +162,7 @@ Defines execution limits and governance rules.
 
 ## 5. Workflow (`Workflow`)
 
-Defines the steps and their flow.
+Defines the linear execution topology. For graph-based topology (loops, branches), use `RecipeDefinition`.
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
@@ -170,16 +171,19 @@ Defines the steps and their flow.
 
 ### Step Types
 
-All steps include `id`, `inputs`, and `next` (except `switch`).
+All steps include `id`, `inputs`, and `design_metadata` (alias `x-design`).
 
 #### Agent Step (`type: agent`)
 Executes an AI Agent.
 - `agent`: Reference to an Agent definition (by ID or name).
-- `system_prompt`: Optional override.
+- `next`: ID of the next step to execute.
+- `system_prompt`: Optional override for system prompt.
+- `temporary_skills`: List of skills injected into the agent ONLY for this specific step.
 
 #### Logic Step (`type: logic`)
 Executes Python code.
-- `code`: The Python code to execute.
+- `code`: The Python code or reference to logic to execute.
+- `next`: ID of the next step to execute.
 
 #### Switch Step (`type: switch`)
 Routes execution based on conditions.
@@ -190,9 +194,10 @@ Routes execution based on conditions.
 #### Council Step (`type: council`)
 Involves multiple voters/agents.
 - `voters`: List of Agent IDs.
-- `strategy`: Voting strategy (e.g., `consensus`).
+- `strategy`: Voting strategy (e.g., `consensus`, `majority`).
+- `next`: ID of the next step to execute.
 
-## Complete Example Manifest
+## Complete Example Manifest (Linear Recipe)
 
 ```yaml
 apiVersion: coreason.ai/v2
@@ -211,6 +216,7 @@ definitions:
     id: google_search
     uri: mcp://google
     risk_level: safe
+    description: "Search engine."
 
   researcher:
     type: agent

@@ -4,7 +4,7 @@ Coreason V2 introduces **Graph Recipes**, replacing linear workflows with a robu
 
 ## Concept: Graphs, Not Lists
 
-In V1, workflows were simple lists of steps. In V2, a `RecipeDefinition` contains a `GraphTopology`.
+In V1 (and `ManifestV2`), workflows were simple lists of steps. In V2 Graph Recipes, a `RecipeDefinition` contains a `GraphTopology`.
 A Topology is a collection of **Nodes** connected by **Edges**.
 
 *   **Nodes**: The "Workers" (Agents, Humans, Routers).
@@ -22,18 +22,18 @@ A `RecipeDefinition` is composed of four key layers:
 3.  **Policy (Governance)**: Defines execution limits.
 4.  **Topology (Logic)**: Defines the graph structure.
 
-### 1. The Interface Layer
+### 1. The Interface Layer (`RecipeInterface`)
 Defines the input/output contract for the Recipe using JSON Schema.
 
 ```python
-interface=InterfaceDefinition(
+interface=RecipeInterface(
     inputs={"user_input": {"type": "string"}},
     outputs={"final_report": {"type": "string"}}
 )
 ```
 
-### 2. The State Layer (Blackboard)
-Defines the shared memory structure and persistence strategy.
+### 2. The State Layer (`StateDefinition`)
+Defines the shared memory structure (Blackboard) and persistence strategy.
 
 ```python
 state=StateDefinition(
@@ -42,18 +42,18 @@ state=StateDefinition(
 )
 ```
 
-### 3. The Policy Layer
+### 3. The Policy Layer (`PolicyConfig`)
 Sets execution limits and error handling strategies.
 
 ```python
 policy=PolicyConfig(
     max_retries=3,
     timeout_seconds=3600,
-    execution_mode="sequential"
+    execution_mode="sequential" # or "parallel"
 )
 ```
 
-## The Graph Topology Schema
+## The Graph Topology Schema (`GraphTopology`)
 
 The `GraphTopology` enforces structural integrity. It requires a list of `nodes`, a list of `edges`, and a valid `entry_point`.
 
@@ -93,10 +93,32 @@ Here is a raw JSON example of a topology where an AI Agent performs a task, and 
 
 ### Node Types
 
-1.  **`AgentNode`**: Executes an AI Agent.
-2.  **`HumanNode`**: Suspends execution until a human provides input or approval.
-3.  **`RouterNode`**: Evaluates a variable and branches execution to different target nodes.
-4.  **`EvaluatorNode`**: Executes an LLM-as-a-Judge evaluation loop, providing scores and critiques to optimize content.
+All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `presentation` (UI layout).
+
+1.  **`AgentNode`** (`type: agent`): Executes an AI Agent.
+    - `agent_ref`: The ID or URI of the Agent Definition to execute.
+    - `system_prompt_override`: Context-specific instructions (optional).
+    - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
+
+2.  **`HumanNode`** (`type: human`): Suspends execution until a human provides input or approval.
+    - `prompt`: Instruction for the human user.
+    - `timeout_seconds`: SLA for approval (optional).
+    - `required_role`: Role required to approve (e.g., manager) (optional).
+
+3.  **`RouterNode`** (`type: router`): Evaluates a variable and branches execution to different target nodes.
+    - `input_key`: The variable to evaluate (e.g., 'classification').
+    - `routes`: Map of value -> target_node_id.
+    - `default_route`: Fallback target_node_id.
+
+4.  **`EvaluatorNode`** (`type: evaluator`): Executes an LLM-as-a-Judge evaluation loop, providing scores and critiques to optimize content.
+    - `target_variable`: The key in the shared state/blackboard containing the content to evaluate.
+    - `evaluator_agent_ref`: Reference to the Agent Definition ID that will act as the judge.
+    - `evaluation_profile`: Inline criteria definition or a reference to a preset profile.
+    - `pass_threshold`: The score (0.0-1.0) required to proceed.
+    - `max_refinements`: Maximum number of loops allowed before forcing a generic fail/fallback.
+    - `pass_route`: Node ID to go to if score >= threshold.
+    - `fail_route`: Node ID to go to if score < threshold.
+    - `feedback_variable`: The key in the state where the critique/reasoning will be written.
 
 ## Evaluator-Optimizer Workflow
 
