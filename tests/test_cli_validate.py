@@ -1,4 +1,3 @@
-
 import json
 import sys
 from pathlib import Path
@@ -6,7 +5,9 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+
 from coreason_manifest.cli import main
+
 
 def test_validate_manifest_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     manifest_content = """
@@ -39,6 +40,7 @@ workflow:
     captured = capsys.readouterr()
     assert "✅ Valid Agent: Test Agent (v?)" in captured.out
 
+
 def test_validate_manifest_with_version(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     manifest_content = """
 apiVersion: coreason.ai/v2
@@ -66,6 +68,7 @@ workflow:
     captured = capsys.readouterr()
     assert "✅ Valid Agent: Test Agent (v1.0.0)" in captured.out
 
+
 def test_validate_agent_definition_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     agent_def = {
         "type": "agent",
@@ -78,7 +81,7 @@ def test_validate_agent_definition_success(tmp_path: Path, capsys: pytest.Captur
         "tools": [],
         "knowledge": [],
         "interface": {},
-        "capabilities": {}
+        "capabilities": {},
     }
     f = tmp_path / "valid_agent.json"
     f.write_text(json.dumps(agent_def))
@@ -88,6 +91,7 @@ def test_validate_agent_definition_success(tmp_path: Path, capsys: pytest.Captur
 
     captured = capsys.readouterr()
     assert "✅ Valid Agent: My Agent (v?)" in captured.out
+
 
 def test_validate_failure(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     manifest_content = """
@@ -118,6 +122,7 @@ workflow:
     # Pydantic error message might vary slightly
     assert "Input tag 'unknown_type' found using 'type' does not match any of the expected tags" in captured.out
 
+
 def test_file_not_found(capsys: pytest.CaptureFixture[str]) -> None:
     with patch("sys.argv", ["coreason", "validate", "non_existent.yaml"]), pytest.raises(SystemExit) as e:
         main()
@@ -125,6 +130,7 @@ def test_file_not_found(capsys: pytest.CaptureFixture[str]) -> None:
 
     captured = capsys.readouterr()
     assert "Error: File not found" in captured.err
+
 
 def test_invalid_extension(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     f = tmp_path / "test.txt"
@@ -138,12 +144,14 @@ def test_invalid_extension(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -
     captured = capsys.readouterr()
     assert "Error: Unsupported file extension: .txt" in captured.err
 
+
 def test_missing_pyyaml(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     f = tmp_path / "test.yaml"
     f.touch()
 
     # Mock import failure
     import builtins
+
     original_import = builtins.__import__
 
     def mock_import(name: str, *args: Any, **kwargs: Any) -> Any:
