@@ -25,7 +25,6 @@ from .spec.cap import (
 )
 from .spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from .spec.common.error import ErrorDomain
-from .spec.common.request import AgentRequest
 from .spec.common.graph_events import (
     GraphEvent,
     GraphEventArtifactGenerated,
@@ -58,6 +57,7 @@ from .spec.common.presentation import (
     PresentationEventType,
     ProgressUpdate,
 )
+from .spec.common.request import AgentRequest
 from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
@@ -158,8 +158,8 @@ __all__ = [
     "HealthCheckStatus",
     "IAgentRuntime",
     "IRequestInterceptor",
-    "IResponseInterceptor",
     "IResponseHandler",
+    "IResponseInterceptor",
     "IStreamEmitter",
     "Identity",
     "InterceptorContext",
