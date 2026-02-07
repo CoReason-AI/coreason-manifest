@@ -25,7 +25,7 @@ from coreason_manifest.spec.v2.packs import (
 from coreason_manifest.spec.v2.skills import LoadStrategy, SkillDefinition
 
 
-def test_tool_pack_structure():
+def test_tool_pack_structure() -> None:
     pack = ToolPackDefinition(
         id="feature-dev-v1",
         namespace="feature_dev",
@@ -72,7 +72,7 @@ def test_tool_pack_structure():
     assert pack.mcp_servers[0].name == "my-server"
 
 
-def test_manifest_integration():
+def test_manifest_integration() -> None:
     manifest = ManifestV2(
         kind="Recipe",
         metadata={"name": "Test Manifest"},
@@ -97,7 +97,7 @@ def test_manifest_integration():
     assert pack.agents[0] == "agent-ref"
 
 
-def test_mcp_resource_definition():
+def test_mcp_resource_definition() -> None:
     resource = MCPResourceDefinition(
         uri="http://example.com/resource",
         name="Example Resource",
@@ -106,7 +106,7 @@ def test_mcp_resource_definition():
     assert str(resource.uri) == "http://example.com/resource"
 
 
-def test_pack_invalid_names():
+def test_pack_invalid_names() -> None:
     # Test invalid pack name (must be kebab-case)
     with pytest.raises(ValidationError) as excinfo:
         PackMetadata(
@@ -125,7 +125,7 @@ def test_pack_invalid_names():
     assert metadata.name == "valid-pack-name"
 
 
-def test_pack_missing_metadata_fields():
+def test_pack_missing_metadata_fields() -> None:
     # Missing required 'description'
     with pytest.raises(ValidationError):
         PackMetadata(
@@ -141,7 +141,7 @@ def test_pack_missing_metadata_fields():
         ) # type: ignore[call-arg]
 
 
-def test_pack_mixed_definitions():
+def test_pack_mixed_definitions() -> None:
     # Test a pack with mixed inline and referenced definitions
     agent_inline = AgentDefinition(
         id="inline-agent",
@@ -178,7 +178,7 @@ def test_pack_mixed_definitions():
     assert isinstance(pack.tools[1], ToolDefinition)
 
 
-def test_pack_invalid_mcp_server():
+def test_pack_invalid_mcp_server() -> None:
     # Missing command
     with pytest.raises(ValidationError):
         MCPServerDefinition(
@@ -186,7 +186,7 @@ def test_pack_invalid_mcp_server():
         ) # type: ignore[call-arg]
 
 
-def test_complex_nested_structure_in_manifest():
+def test_complex_nested_structure_in_manifest() -> None:
     # Verify a complex manifest with multiple packs and resources
     manifest = ManifestV2(
         kind="Recipe",
@@ -223,7 +223,7 @@ def test_complex_nested_structure_in_manifest():
     assert pack.agents == ["agent1"]
 
 
-def test_pack_author_object():
+def test_pack_author_object() -> None:
     # Test author as an object
     metadata = PackMetadata(
         name="author-object-pack",
@@ -234,7 +234,11 @@ def test_pack_author_object():
     # But currently 'author' field is defined as `str | PackAuthor`.
     # Pydantic V2 handles dict -> Model conversion automatically if Union allows it.
 
-    assert isinstance(metadata.author, PackMetadata.model_fields['author'].annotation.__args__[1]) # Check if it's PackAuthor
+    author_field = PackMetadata.model_fields["author"]
+    assert author_field.annotation is not None
+    assert isinstance(
+        metadata.author, author_field.annotation.__args__[1]  # type: ignore[attr-defined]
+    )  # Check if it's PackAuthor
     # Or simply access attributes if it converted correctly
     # Wait, strict checking might prevent implicit conversion if not handled carefully,
     # but Pydantic generally allows dict -> Model.
