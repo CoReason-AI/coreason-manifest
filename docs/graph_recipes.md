@@ -96,6 +96,48 @@ Here is a raw JSON example of a topology where an AI Agent performs a task, and 
 1.  **`AgentNode`**: Executes an AI Agent.
 2.  **`HumanNode`**: Suspends execution until a human provides input or approval.
 3.  **`RouterNode`**: Evaluates a variable and branches execution to different target nodes.
+4.  **`EvaluatorNode`**: Executes an LLM-as-a-Judge evaluation loop, providing scores and critiques to optimize content.
+
+## Evaluator-Optimizer Workflow
+
+Coreason V2 natively supports the **Evaluator-Optimizer** pattern (popularized by Anthropic's Claude Cookbook). This pattern uses a dedicated `EvaluatorNode` to critique the output of a Generator agent and loop back for refinements until a quality threshold is met.
+
+### Example: Writer + Editor Loop
+
+```yaml
+topology:
+  nodes:
+    # 1. The Generator
+    - type: agent
+      id: "writer"
+      agent_ref: "copywriter-v1"
+      inputs_map:
+        topic: "user_topic"
+        critique: "critique_history"  # Receives feedback from the Evaluator
+
+    # 2. The Evaluator-Optimizer
+    - type: evaluator
+      id: "editor-check"
+      target_variable: "writer_output" # The content to grade
+      evaluator_agent_ref: "editor-llm" # The judge
+      evaluation_profile: "standard-critique" # The criteria
+
+      # Logic
+      pass_threshold: 0.9
+      max_refinements: 3
+
+      # Feedback Output
+      feedback_variable: "critique_history"
+
+      # Control Flow
+      pass_route: "publish"
+      fail_route: "writer" # Loops back to Generator for refinement
+
+    # 3. Success State
+    - type: agent
+      id: "publish"
+      agent_ref: "publisher-v1"
+```
 
 ## Integrity Validation
 
