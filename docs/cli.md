@@ -91,10 +91,46 @@ coreason inspect agent.py:agent
 
 ### `validate`
 
-Validates a manifest file (YAML/JSON) against the schema.
+Validates a static agent definition file (YAML or JSON) against the strict CoReason schema.
+
+This command is crucial for CI/CD pipelines to ensure that manifest files committed to the repository are structurally correct and adhere to the policy before they are deployed or run.
 
 ```bash
-coreason validate <path_to_file>
+coreason validate <path_to_file> [--json]
+```
+
+**Arguments:**
+* `<path_to_file>`: Path to the `.yaml`, `.yml`, or `.json` file to validate.
+* `--json`: If the file is valid, output the full validated JSON model to stdout. This is useful for canonicalizing input (e.g., converting YAML to JSON) or piping to other tools.
+
+**Supported Schemas:**
+*   **ManifestV2:** Detected automatically if the file contains `apiVersion: coreason.ai/v2`. This validates the entire recipe, including metadata, definitions, and workflows.
+*   **AgentDefinition:** Fallback if no `apiVersion` is present. Validates a single Agent object.
+
+**Output:**
+*   **Success:** Prints `✅ Valid Agent: <Name> (v<Version>)` and exits with code 0.
+*   **Failure:** Prints `❌ Validation Failed:` followed by a detailed list of errors (Field Path -> Error Message) and exits with code 1.
+
+**Examples:**
+
+*Validate a YAML file:*
+```bash
+coreason validate agent.yaml
+# Output: ✅ Valid Agent: ResearchBot (v1.0.0)
+```
+
+*Validate and export as canonical JSON:*
+```bash
+coreason validate agent.yaml --json > agent.json
+```
+
+*Validation Failure:*
+```bash
+coreason validate invalid.json
+# Output:
+# ❌ Validation Failed:
+#   • metadata -> name: Field required
+#   • workflow -> start: Input should be a valid string
 ```
 
 ---

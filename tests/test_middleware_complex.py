@@ -29,7 +29,9 @@ class UppercaseInterceptor:
         _context: InterceptorContext,
         request: AgentRequest,
     ) -> AgentRequest:
-        return request.model_copy(update={"query": request.query.upper()})
+        new_payload = request.payload.copy()
+        new_payload["query"] = str(new_payload.get("query", "")).upper()
+        return request.model_copy(update={"payload": new_payload})
 
 
 class AppendSuffixInterceptor:
@@ -40,7 +42,9 @@ class AppendSuffixInterceptor:
         _context: InterceptorContext,
         request: AgentRequest,
     ) -> AgentRequest:
-        return request.model_copy(update={"query": request.query + " [CHECKED]"})
+        new_payload = request.payload.copy()
+        new_payload["query"] = str(new_payload.get("query", "")) + " [CHECKED]"
+        return request.model_copy(update={"payload": new_payload})
 
 
 @pytest.mark.asyncio
@@ -51,12 +55,12 @@ async def test_chained_interceptors() -> None:
         AppendSuffixInterceptor(),
     ]
     context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC))
-    request = AgentRequest(query="hello world")
+    request = AgentRequest(session_id=uuid4(), payload={"query": "hello world"})
 
     for interceptor in interceptors:
         request = await interceptor.intercept_request(context, request)
 
-    assert request.query == "HELLO WORLD [CHECKED]"
+    assert request.payload["query"] == "HELLO WORLD [CHECKED]"
 
 
 class CrashingInterceptor:
@@ -111,11 +115,11 @@ async def test_concurrent_interceptors() -> None:
     """Verify async concurrency."""
     interceptor = SlowInterceptor()
     context = InterceptorContext(request_id=uuid4(), start_time=datetime.now(UTC))
-    requests = [AgentRequest(query=f"req-{i}") for i in range(10)]
+    requests = [AgentRequest(session_id=uuid4(), payload={"query": f"req-{i}"}) for i in range(10)]
 
     # process all concurrently
     results = await asyncio.gather(*(interceptor.intercept_request(context, req) for req in requests))
 
     assert len(results) == 10
     for i, res in enumerate(results):
-        assert res.query == f"req-{i}"
+        assert res.payload["query"] == f"req-{i}"

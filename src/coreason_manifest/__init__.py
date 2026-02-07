@@ -13,7 +13,6 @@ from .builder import AgentBuilder, TypedCapability
 from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .shortcuts import simple_agent
 from .spec.cap import (
-    AgentRequest,
     ErrorSeverity,
     HealthCheckResponse,
     HealthCheckStatus,
@@ -58,6 +57,7 @@ from .spec.common.presentation import (
     PresentationEventType,
     ProgressUpdate,
 )
+from .spec.common.request import AgentRequest
 from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
@@ -69,6 +69,16 @@ from .spec.interfaces.middleware import (
 )
 from .spec.interfaces.session import SessionHandle
 from .spec.interfaces.stream import IStreamEmitter
+from .spec.simulation import (
+    AdversaryProfile,
+    ChaosConfig,
+    SimulationRequest,
+    SimulationScenario,
+    SimulationStep,
+    SimulationTrace,
+    StepType,
+    ValidationLogic,
+)
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
     AgentDefinition,
@@ -83,6 +93,13 @@ from .spec.v2.definitions import (
     Workflow,
 )
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
+from .spec.v2.recipe import (
+    AgentNode,
+    GraphTopology,
+    HumanNode,
+    RecipeDefinition,
+    RouterNode,
+)
 from .spec.v2.resources import (
     ModelProfile,
     PricingUnit,
@@ -100,23 +117,26 @@ from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
-__version__ = "0.17.0"
+__version__ = "0.19.0"
 
 Manifest = ManifestV2
-Recipe = ManifestV2
+Recipe = RecipeDefinition
 load = load_from_yaml
 dump = dump_to_yaml
 
 __all__ = [
+    "AdversaryProfile",
     "AgentBuilder",
     "AgentCapabilities",
     "AgentDefinition",
+    "AgentNode",
     "AgentRequest",
     "AgentRuntimeConfig",
     "AgentStep",
     "AuditLog",
     "CapabilityType",
     "ChangeCategory",
+    "ChaosConfig",
     "ChatMessage",
     "CitationBlock",
     "CitationItem",
@@ -142,8 +162,10 @@ __all__ = [
     "GraphEventNodeStream",
     "GraphEventStreamEnd",
     "GraphEventStreamStart",
+    "GraphTopology",
     "HealthCheckResponse",
     "HealthCheckStatus",
+    "HumanNode",
     "IRequestInterceptor",
     "IResponseInterceptor",
     "IStreamEmitter",
@@ -168,16 +190,23 @@ __all__ = [
     "RateCard",
     "ReasoningTrace",
     "Recipe",
+    "RecipeDefinition",
     "ResourceConstraints",
     "Role",
+    "RouterNode",
     "ServiceContract",
     "ServiceRequest",
     "ServiceResponse",
     "SessionContext",
     "SessionHandle",
     "SessionState",
+    "SimulationRequest",
+    "SimulationScenario",
+    "SimulationStep",
+    "SimulationTrace",
     "StateDefinition",
     "Step",
+    "StepType",
     "StreamError",
     "StreamOpCode",
     "StreamPacket",
@@ -188,6 +217,7 @@ __all__ = [
     "ToolDefinition",
     "ToolRiskLevel",
     "TypedCapability",
+    "ValidationLogic",
     "Workflow",
     "__version__",
     "check_compliance_v2",
