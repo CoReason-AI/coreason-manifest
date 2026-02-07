@@ -9,19 +9,20 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import json
+from datetime import UTC, datetime
 from uuid import UUID
-from datetime import datetime, timezone
 
 from coreason_manifest.spec.simulation import (
-    SimulationTrace,
-    SimulationStep,
-    StepType,
-    SimulationRequest,
-    SimulationScenario,
     AdversaryProfile,
     ChaosConfig,
+    SimulationRequest,
+    SimulationScenario,
+    SimulationStep,
+    SimulationTrace,
+    StepType,
     ValidationLogic,
 )
+
 
 def test_simulation_defaults() -> None:
     """Ensure UUIDs and Timestamps are auto-generated."""
@@ -33,7 +34,7 @@ def test_simulation_defaults() -> None:
     )
     assert isinstance(step.step_id, UUID)
     assert isinstance(step.timestamp, datetime)
-    assert step.timestamp.tzinfo == timezone.utc
+    assert step.timestamp.tzinfo == UTC
 
     trace = SimulationTrace(
         agent_id="agent-007",
@@ -78,7 +79,7 @@ def test_simulation_serialization() -> None:
         score=0.95,
     )
 
-    json_str = trace.to_json()
+    json_str = trace.model_dump_json()
     data = json.loads(json_str)
 
     assert data["agent_id"] == "test-agent"
@@ -116,7 +117,7 @@ def test_simulation_nesting() -> None:
         chaos_config=chaos,
     )
 
-    data = request.dump()
+    data = request.model_dump()
     assert data["scenario"]["id"] == "scen-1"
     assert data["profile"]["name"] == "The Joker"
     assert data["chaos_config"]["latency_ms"] == 100
@@ -139,7 +140,7 @@ def test_simulation_round_trip() -> None:
         metadata={"tags": ["test"]},
     )
 
-    json_str = original_trace.to_json()
+    json_str = original_trace.model_dump_json()
     restored_trace = SimulationTrace.model_validate_json(json_str)
 
     assert restored_trace.trace_id == original_trace.trace_id

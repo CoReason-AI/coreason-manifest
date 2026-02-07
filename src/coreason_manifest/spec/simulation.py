@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
@@ -37,7 +37,7 @@ class SimulationStep(CoReasonBaseModel):
     """The atomic unit of execution history."""
 
     step_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     type: StepType
     node_id: str
     inputs: dict[str, Any]
@@ -53,7 +53,7 @@ class SimulationTrace(CoReasonBaseModel):
     trace_id: UUID = Field(default_factory=uuid4)
     agent_id: str
     agent_version: str
-    steps: list[SimulationStep] = []
+    steps: list[SimulationStep] = Field(default_factory=list)
     outcome: dict[str, Any] | None = None
     score: float | None = Field(None, ge=0.0, le=1.0)
     metadata: dict[str, Any]
