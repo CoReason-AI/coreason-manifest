@@ -95,6 +95,42 @@ The `run` command emits Newline Delimited JSON (NDJSON) events to `stdout`.
 
 Consumers should read `stdout` line-by-line.
 
+#### 4. Canonical Hashing (`hash`)
+
+Calculates the canonical hash of an agent definition. This ensures that the agent's identity can be verified across different systems and environments.
+
+**Options:**
+- `--json`: Output a JSON object containing the hash and algorithm metadata.
+
+**Example:**
+
+```bash
+# Default (text output)
+coreason hash examples/my_agent.py:agent
+# Output: sha256:8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4
+
+# JSON output
+coreason hash examples/my_agent.py:agent --json
+# Output: {"hash": "sha256:...", "algorithm": "sha256"}
+```
+
+**Behavior:**
+- **Strict Canonicalization:** The command loads the agent definition and computes the hash using the kernel's native `compute_hash()` method, ensuring consistency with internal validation logic.
+- **Verification:** Useful for CI/CD pipelines to verify that an agent has not been tampered with before deployment.
+#### 4. Semantic Diff (`diff`)
+
+Compares two agent definitions and detects semantic changes (Breaking, Feature, Governance, Resource).
+
+```bash
+coreason diff base_version.py:agent new_version.py:agent --fail-on-breaking
+```
+
+**Output:**
+- Human-readable text report by default.
+- JSON report if `--json` is passed.
+
+See [Semantic Diffing Utility](semantic_diffing.md) for full details.
+
 ## Edge Cases & Limitations
 
 - **File Paths:** The loader adds the file's directory to `sys.path` to support relative imports within the module.
