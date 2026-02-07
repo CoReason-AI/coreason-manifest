@@ -170,3 +170,40 @@ def test_missing_pyyaml(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> N
 
     captured = capsys.readouterr()
     assert "Error: PyYAML is required" in captured.err
+
+
+def test_validate_json_output(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    agent_def = {
+        "type": "agent",
+        "id": "agent-1",
+        "name": "My Agent",
+        "role": "Assistant",
+        "goal": "Help user",
+        "backstory": "I am helpful",
+        "model": "gpt-4",
+        "tools": [],
+        "knowledge": [],
+        "interface": {},
+        "capabilities": {},
+    }
+    f = tmp_path / "valid_agent.json"
+    f.write_text(json.dumps(agent_def))
+
+    with patch("sys.argv", ["coreason", "validate", str(f), "--json"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "✅ Valid Agent: My Agent (v?)" in captured.out
+    assert '"id": "agent-1"' in captured.out
+
+
+def test_validate_generic_error(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    f = tmp_path / "corrupt.json"
+    f.write_text("{ invalid json")
+
+    with patch("sys.argv", ["coreason", "validate", str(f)]), pytest.raises(SystemExit) as e:
+        main()
+    assert e.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error:" in captured.out
