@@ -107,7 +107,9 @@ class EvaluatorNode(RecipeNode):
     target_variable: str = Field(
         ..., description="The key in the shared state/blackboard containing the content to evaluate."
     )
-    evaluator_agent_ref: str = Field(..., description="Reference to the Agent Definition ID that will act as the judge.")
+    evaluator_agent_ref: str = Field(
+        ..., description="Reference to the Agent Definition ID that will act as the judge."
+    )
     evaluation_profile: EvaluationProfile | str = Field(
         ..., description="Inline criteria definition or a reference to a preset profile."
     )
@@ -137,9 +139,9 @@ class GraphTopology(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    nodes: list[
-        Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]
-    ] = Field(..., description="List of nodes in the graph.")
+    nodes: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]] = Field(
+        ..., description="List of nodes in the graph."
+    )
     edges: list[GraphEdge] = Field(..., description="List of directed edges.")
     entry_point: str = Field(..., description="ID of the start node.")
 
