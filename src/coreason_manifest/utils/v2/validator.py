@@ -14,7 +14,6 @@ from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,
-    InlineToolDefinition,
     ManifestV2,
     SwitchStep,
     ToolDefinition,
@@ -92,18 +91,17 @@ def validate_integrity(manifest: ManifestV2) -> ManifestV2:
         if isinstance(definition, AgentDefinition):
             for tool_ref in definition.tools:
                 # Handle ToolRequirement (remote tools)
-                if isinstance(tool_ref, ToolRequirement):
-                    # Only validate references if it's an ID reference, not a full URI
-                    # Assuming for now that URIs starting with 'mcp://' or similar might be direct,
-                    # but if it matches a definition ID, we check it.
-                    # Or simpler: check if the URI matches a known tool ID in definitions.
-                    if tool_ref.uri in manifest.definitions:
-                        tool_def = manifest.definitions[tool_ref.uri]
-                        if not isinstance(tool_def, ToolDefinition):
-                            raise ValueError(
-                                f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
-                                f"(got {type(tool_def).__name__})."
-                            )
+                # Only validate references if it's an ID reference, not a full URI
+                # Assuming for now that URIs starting with 'mcp://' or similar might be direct,
+                # but if it matches a definition ID, we check it.
+                # Or simpler: check if the URI matches a known tool ID in definitions.
+                if isinstance(tool_ref, ToolRequirement) and tool_ref.uri in manifest.definitions:
+                    tool_def = manifest.definitions[tool_ref.uri]
+                    if not isinstance(tool_def, ToolDefinition):
+                        raise ValueError(
+                            f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
+                            f"(got {type(tool_def).__name__})."
+                        )
                     # Note: We don't error if it's NOT in definitions, as it might be an external URI.
 
                 # InlineToolDefinition needs no referential validation as it is self-contained.
@@ -187,14 +185,13 @@ def validate_loose(manifest: ManifestV2) -> list[str]:
     for _, definition in manifest.definitions.items():
         if isinstance(definition, AgentDefinition):
             for tool_ref in definition.tools:
-                if isinstance(tool_ref, ToolRequirement):
-                    if tool_ref.uri in manifest.definitions:
-                        tool_def = manifest.definitions[tool_ref.uri]
-                        if not isinstance(tool_def, ToolDefinition):
-                            warnings.append(
-                                f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
-                                f"(got {type(tool_def).__name__})."
-                            )
+                if isinstance(tool_ref, ToolRequirement) and tool_ref.uri in manifest.definitions:
+                    tool_def = manifest.definitions[tool_ref.uri]
+                    if not isinstance(tool_def, ToolDefinition):
+                        warnings.append(
+                            f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
+                            f"(got {type(tool_def).__name__})."
+                        )
                     # In loose mode, we might warn if it looks like an ID but is missing,
                     # but distinguishing external URIs from internal IDs is ambiguous without a schema.
                     # For now, we only validate if it resolves.
