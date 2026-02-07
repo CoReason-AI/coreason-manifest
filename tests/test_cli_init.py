@@ -16,7 +16,9 @@ def test_init_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> Non
 
     # Simulate CLI execution
     with patch.object(sys, "argv", ["coreason", "init", str(project_dir)]):
-        main()
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
 
     # Verify directory structure
     assert project_dir.exists()
@@ -79,7 +81,9 @@ def test_init_existing_empty_dir(tmp_path: Path) -> None:
     project_dir.mkdir()
 
     with patch.object(sys, "argv", ["coreason", "init", str(project_dir)]):
-        main()
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
 
     assert (project_dir / "agent.py").exists()
 
@@ -89,7 +93,9 @@ def test_init_nested_structure(tmp_path: Path) -> None:
     nested_dir = tmp_path / "deep" / "nested" / "project"
 
     with patch.object(sys, "argv", ["coreason", "init", str(nested_dir)]):
-        main()
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
 
     assert nested_dir.exists()
     assert (nested_dir / "agent.py").exists()
@@ -105,7 +111,9 @@ def test_init_complex_verification(tmp_path: Path) -> None:
     """
     project_dir = tmp_path / "complex_agent"
     with patch.object(sys, "argv", ["coreason", "init", str(project_dir)]):
-        main()
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
 
     ref = f"{project_dir}/agent.py:agent"
     agent = load_agent_from_ref(ref)

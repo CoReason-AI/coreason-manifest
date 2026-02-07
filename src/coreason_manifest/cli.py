@@ -14,8 +14,6 @@ import sys
 import textwrap
 from pathlib import Path
 
-from pydantic import ValidationError
-
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -176,6 +174,7 @@ def handle_init(args: argparse.Namespace) -> None:
     print(f"   1. cd {args.name}")
     print("   2. code .  (Open in VS Code)")
     print("   3. Open 'agent.py' and press F5 to run!")
+    sys.exit(0)
 
 
 def main() -> None:
@@ -206,17 +205,10 @@ def main() -> None:
     # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
     run_parser.add_argument("--json", action="store_true", help="Output JSON events")
 
-    # Validate
-    validate_parser = subparsers.add_parser("validate", help="Validate a static agent definition file")
-    validate_parser.add_argument("file", help="Path to the .yaml or .json file")
-    validate_parser.add_argument("--json", action="store_true", help="Output JSON structure on success")
-
     args = parser.parse_args()
 
     if args.command == "init":
         handle_init(args)
-    if args.command == "validate":
-        handle_validate(args)
         return
 
     try:
@@ -245,67 +237,6 @@ def main() -> None:
             sys.exit(1)
 
         _run_simulation(agent, args.mock)
-
-
-def handle_validate(args: argparse.Namespace) -> None:
-    file_path = Path(args.file)
-    if not file_path.exists():
-        sys.stderr.write(f"Error: File not found: {file_path}\n")
-        sys.exit(1)
-
-    # Lazy import yaml
-    try:
-        import yaml
-    except ImportError:
-        sys.stderr.write("Error: PyYAML is required for validation. Please install it with 'pip install PyYAML'.\n")
-        sys.exit(1)
-
-    try:
-        with file_path.open("r", encoding="utf-8") as f:
-            if file_path.suffix.lower() == ".json":
-                data = json.load(f)
-            elif file_path.suffix.lower() in [".yaml", ".yml"]:
-                data = yaml.safe_load(f)
-            else:
-                sys.stderr.write(f"Error: Unsupported file extension: {file_path.suffix}\n")
-                sys.exit(1)
-
-        # Validation Logic
-        agent: ManifestV2 | AgentDefinition
-
-        if isinstance(data, dict) and "apiVersion" in data:
-            # It's likely a ManifestV2
-            agent = ManifestV2.model_validate(data)
-        else:
-            # Fallback to AgentDefinition
-            agent = AgentDefinition.model_validate(data)
-
-        # Success Output
-        name = "Unknown"
-        version = "?"
-
-        if isinstance(agent, ManifestV2):
-            # ManifestV2 has metadata which has name
-            name = agent.metadata.name
-            # Try to get version from metadata extra fields
-            if agent.metadata.model_extra and "version" in agent.metadata.model_extra:
-                version = str(agent.metadata.model_extra["version"])
-        elif isinstance(agent, AgentDefinition):
-            name = agent.name
-
-        print(f"✅ Valid Agent: {name} (v{version})")
-        if args.json:
-            print(agent.model_dump_json(indent=2, by_alias=True, exclude_none=True))
-
-    except ValidationError as e:
-        print("❌ Validation Failed:")
-        for err in e.errors():
-            loc = " -> ".join(str(loc_part) for loc_part in err["loc"])
-            print(f"  • {loc}: {err['msg']}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"❌ Error: {e!s}")
-        sys.exit(1)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:

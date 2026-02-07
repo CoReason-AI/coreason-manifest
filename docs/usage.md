@@ -125,7 +125,7 @@ coreason viz examples/my_agent.py:agent
 coreason run examples/my_agent.py:agent --inputs '{"query": "hello"}' --mock
 ```
 
-For full documentation, see [CLI & Interop Layer](cli_interop.md).
+For full documentation, see [CLI Reference](cli.md).
 
 ## Advanced Documentation
 
