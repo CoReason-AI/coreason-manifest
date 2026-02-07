@@ -232,6 +232,16 @@ class ManifestMetadata(CoReasonBaseModel):
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
 
 
+# Import ToolPackDefinition after definitions are declared to avoid circular import
+from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
+
+# Update forward references for ToolPackDefinition using the local namespace
+ToolPackDefinition.model_rebuild(_types_namespace={
+    "AgentDefinition": AgentDefinition,
+    "ToolDefinition": ToolDefinition
+})
+
+
 class ManifestV2(CoReasonBaseModel):
     """Root object for Coreason Manifest V2."""
 
@@ -245,6 +255,14 @@ class ManifestV2(CoReasonBaseModel):
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: dict[
         str,
-        Annotated[ToolDefinition | AgentDefinition | SkillDefinition, Field(discriminator="type")] | GenericDefinition,
+        Annotated[
+            ToolDefinition
+            | AgentDefinition
+            | SkillDefinition
+            | MCPResourceDefinition
+            | ToolPackDefinition,
+            Field(discriminator="type"),
+        ]
+        | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
