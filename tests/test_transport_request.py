@@ -73,7 +73,7 @@ def test_broken_trace_prevention() -> None:
         AgentRequest(
             session_id=uuid4(),
             payload={},
-            parent_request_id=parent_id
+            parent_request_id=parent_id,
             # root_request_id missing -> defaults to None initially, validator catches it
         )
 

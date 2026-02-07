@@ -47,7 +47,6 @@ from .spec.common.observability import (
     EventContentType,
     ReasoningTrace,
 )
-from .spec.common.request import AgentRequest
 from .spec.common.presentation import (
     CitationBlock,
     CitationItem,
@@ -58,6 +57,7 @@ from .spec.common.presentation import (
     PresentationEventType,
     ProgressUpdate,
 )
+from .spec.common.request import AgentRequest
 from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
