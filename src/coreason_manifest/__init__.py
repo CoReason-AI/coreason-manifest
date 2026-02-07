@@ -8,7 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+# Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
+from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
+from .shortcuts import simple_agent
 from .spec.cap import (
     AgentRequest,
     ErrorSeverity,
@@ -80,12 +83,22 @@ from .spec.v2.definitions import (
     Workflow,
 )
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
+from .spec.v2.resources import (
+    ModelProfile,
+    PricingUnit,
+    RateCard,
+    ResourceConstraints,
+)
 from .utils.audit import compute_audit_hash, verify_chain
+from .utils.diff import ChangeCategory, DiffReport, compare_agents
+from .utils.docs import render_agent_card
 from .utils.migration import migrate_graph_event_to_cloud_event
+from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.v2.validator import validate_integrity, validate_loose
+from .utils.viz import generate_mermaid_graph
 
 __version__ = "0.17.0"
 
@@ -103,14 +116,17 @@ __all__ = [
     "AgentStep",
     "AuditLog",
     "CapabilityType",
+    "ChangeCategory",
     "ChatMessage",
     "CitationBlock",
     "CitationItem",
     "CloudEvent",
     "ComplianceReport",
     "ComplianceViolation",
+    "CoreasonMCPServer",
     "CouncilStep",
     "DeliveryMode",
+    "DiffReport",
     "ErrorDomain",
     "ErrorSeverity",
     "EvaluationProfile",
@@ -137,17 +153,22 @@ __all__ = [
     "LogicStep",
     "Manifest",
     "ManifestMetadata",
+    "ManifestV2",
     "MarkdownBlock",
     "MediaCarousel",
     "MediaItem",
     "MemoryConfig",
     "MemoryStrategy",
+    "ModelProfile",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
+    "PricingUnit",
     "ProgressUpdate",
+    "RateCard",
     "ReasoningTrace",
     "Recipe",
+    "ResourceConstraints",
     "Role",
     "ServiceContract",
     "ServiceRequest",
@@ -170,10 +191,16 @@ __all__ = [
     "Workflow",
     "__version__",
     "check_compliance_v2",
+    "compare_agents",
     "compute_audit_hash",
+    "create_mcp_tool_definition",
     "dump",
+    "generate_mermaid_graph",
+    "generate_mock_output",
     "load",
     "migrate_graph_event_to_cloud_event",
+    "render_agent_card",
+    "simple_agent",
     "validate_integrity",
     "validate_loose",
     "verify_chain",

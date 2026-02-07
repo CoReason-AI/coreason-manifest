@@ -8,6 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+"""
+Middleware Extension Interfaces.
+
+This module defines the protocols and data models for the Coreason Interoperability Layer,
+allowing third-party plugins to intercept and modify requests and responses.
+"""
+
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 from uuid import UUID

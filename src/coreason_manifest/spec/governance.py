@@ -8,9 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-"""Governance and Policy Enforcement module for Coreason Agents.
+"""Governance Configuration Definitions (DTOs).
 
-This module provides tools to validate an AgentDefinition against a set of organizational rules.
+This module defines the data structures (`GovernanceConfig`, `ComplianceReport`) used to configure
+and report on governance policies.
+
+NOTE: This module contains PURE DATA only. The actual enforcement logic is located in
+`coreason_manifest.utils.v2.governance`.
 """
 
 from pydantic import ConfigDict, Field
@@ -21,13 +25,18 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel, ToolRiskLevel
 class GovernanceConfig(CoReasonBaseModel):
     """Configuration for governance rules.
 
+    NOTE: This configuration defines policies for STATIC validation of the Manifest.
+    It ensures that the agent's definition claims compliance with these rules.
+    It does NOT provide runtime enforcement (e.g., firewalling, auth challenges),
+    which is the responsibility of the Execution Engine.
+
     Attributes:
         allowed_domains: List of allowed domains for tool URIs.
         max_risk_level: Maximum allowed risk level for tools.
         require_auth_for_critical_tools: Whether authentication is required for agents using CRITICAL tools.
         allow_inline_tools: Whether to allow inline tool definitions (which lack risk scoring).
         allow_custom_logic: Whether to allow LogicNodes and conditional Edges with custom code.
-        strict_url_validation: Enforce strict, normalized URL validation.
+        strict_url_validation: Enforce strict, normalized URL matching.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -46,7 +55,10 @@ class GovernanceConfig(CoReasonBaseModel):
     allow_custom_logic: bool = Field(
         False, description="Whether to allow LogicNodes and conditional Edges with custom code."
     )
-    strict_url_validation: bool = Field(True, description="Enforce strict, normalized URL validation.")
+    strict_url_validation: bool = Field(
+        True,
+        description="Enforce strict, normalized URL matching against allowed_domains (not a network security control).",
+    )
 
 
 class ComplianceViolation(CoReasonBaseModel):

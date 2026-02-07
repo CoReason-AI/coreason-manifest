@@ -46,7 +46,13 @@ manifest = (
 # Export to YAML
 from coreason_manifest import dump
 print(dump(manifest))
+
+# Visualize
+from coreason_manifest import generate_mermaid_graph
+print(generate_mermaid_graph(manifest))
 ```
+
+For more details on visualization, see [Visualization Tools](visualization.md).
 
 ## Features
 
