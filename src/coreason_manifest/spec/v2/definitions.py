@@ -18,6 +18,7 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, Too
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.resources import ModelProfile
+from coreason_manifest.spec.v2.skills import SkillDefinition
 
 __all__ = [
     "AgentDefinition",
@@ -31,6 +32,7 @@ __all__ = [
     "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
+    "SkillDefinition",
     "Step",
     "SwitchStep",
     "ToolDefinition",
@@ -111,6 +113,9 @@ class AgentDefinition(CoReasonBaseModel):
         default_factory=list, description="List of Tool Requirements or Inline Definitions."
     )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+    skills: list[str] = Field(
+        default_factory=list, description="List of Skill IDs to equip this agent with."
+    )
 
     @field_validator("tools", mode="before")
     @classmethod
@@ -236,6 +241,9 @@ class ManifestV2(CoReasonBaseModel):
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: dict[
         str,
-        Annotated[ToolDefinition | AgentDefinition, Field(discriminator="type")] | GenericDefinition,
+        Annotated[
+            ToolDefinition | AgentDefinition | SkillDefinition, Field(discriminator="type")
+        ]
+        | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
