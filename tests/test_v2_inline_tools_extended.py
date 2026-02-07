@@ -1,4 +1,3 @@
-import pytest
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     InlineToolDefinition,
@@ -30,8 +29,8 @@ def test_duplicate_tools() -> None:
     }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 2
-    assert agent.tools[0].uri == "tool-1"  # type: ignore[attr-defined]
-    assert agent.tools[1].uri == "tool-1"  # type: ignore[attr-defined]
+    assert agent.tools[0].uri == "tool-1"  # type: ignore[union-attr]
+    assert agent.tools[1].uri == "tool-1"  # type: ignore[union-attr]
 
 
 def test_complex_mixed_usage() -> None:
@@ -91,16 +90,11 @@ def test_deeply_nested_inline_schema() -> None:
                             "properties": {
                                 "level2": {
                                     "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "level3": {"type": "string"}
-                                        }
-                                    }
+                                    "items": {"type": "object", "properties": {"level3": {"type": "string"}}},
                                 }
-                            }
+                            },
                         }
-                    }
+                    },
                 },
             }
         ],
@@ -109,4 +103,7 @@ def test_deeply_nested_inline_schema() -> None:
     tool = agent.tools[0]
     assert isinstance(tool, InlineToolDefinition)
     # Verify deep access
-    assert tool.parameters["properties"]["level1"]["properties"]["level2"]["items"]["properties"]["level3"]["type"] == "string"
+    assert (
+        tool.parameters["properties"]["level1"]["properties"]["level2"]["items"]["properties"]["level3"]["type"]
+        == "string"
+    )
