@@ -57,6 +57,9 @@ Homepage = "https://github.com/CoReason-AI/coreason_manifest"
 Repository = "https://github.com/CoReason-AI/coreason_manifest"
 Documentation = "https://github.com/CoReason-AI/coreason_manifest"
 
+[project.scripts]
+coreason = "coreason_manifest.cli:main"
+
 [tool.ruff]
 line-length = 120
 target-version = "py312"

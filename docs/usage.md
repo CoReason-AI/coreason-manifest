@@ -113,6 +113,20 @@ print(generate_mermaid_graph(manifest))
 
 For more details, see [Visualization Tools](visualization.md).
 
+### Using the CLI
+
+The `coreason` CLI allows you to inspect, visualize, and simulate agents without writing Python scripts.
+
+```bash
+# Visualize an agent defined in a Python file
+coreason viz examples/my_agent.py:agent
+
+# Run a simulation
+coreason run examples/my_agent.py:agent --inputs '{"query": "hello"}' --mock
+```
+
+For full documentation, see [CLI & Interop Layer](cli_interop.md).
+
 ## Advanced Documentation
 
 *   [Secure Composition](composition.md): Secure Recursive Loader and `$ref` syntax.
