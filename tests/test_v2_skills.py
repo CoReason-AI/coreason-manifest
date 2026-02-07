@@ -416,6 +416,7 @@ def test_complex_scenarios_extended() -> None:
     step2 = manifest_flow.workflow.steps["step-2"]
     assert step2.inputs["data"] == "{{ step-1.output }}"
 
+
 def test_sota_agent_fields() -> None:
     """Test SOTA enhancements for AgentDefinition and AgentStep."""
     # 1. AgentDefinition with context_strategy
