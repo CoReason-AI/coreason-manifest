@@ -10,7 +10,7 @@
 
 from typing import Annotated, Any, Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, field_validator
 
 from coreason_manifest.spec.common.capabilities import AgentCapabilities
 from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
@@ -26,6 +26,7 @@ __all__ = [
     "CouncilStep",
     "DesignMetadata",
     "GenericDefinition",
+    "InlineToolDefinition",
     "InterfaceDefinition",
     "LogicStep",
     "ManifestMetadata",
@@ -33,6 +34,7 @@ __all__ = [
     "Step",
     "SwitchStep",
     "ToolDefinition",
+    "ToolRequirement",
     "Workflow",
 ]
 
@@ -64,6 +66,35 @@ class ToolDefinition(CoReasonBaseModel):
     description: str | None = Field(None, description="Description of the tool.")
 
 
+class ToolRequirement(CoReasonBaseModel):
+    """A requirement for a remote tool."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    type: Literal["remote"] = "remote"
+    uri: str = Field(..., description="The URI of the tool or reference ID.")
+    hash: str | None = Field(None, description="Optional integrity hash.")
+
+
+class InlineToolDefinition(CoReasonBaseModel):
+    """A tool defined directly within the manifest (Serverless/Local)."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    type: Literal["inline"] = "inline"
+    name: str = Field(..., pattern=r"^[a-zA-Z0-9_-]+$", description="Name of the tool.")
+    description: str = Field(..., description="Description of what the tool does.")
+    parameters: dict[str, Any] = Field(..., description="JSON Schema for arguments.")
+    code_hash: str | None = Field(None, description="Optional integrity check for implementation code.")
+
+    @field_validator("parameters")
+    @classmethod
+    def validate_schema(cls, v: dict[str, Any]) -> dict[str, Any]:
+        if v.get("type") != "object":
+            raise ValueError("Tool parameters must be a JSON Schema object.")
+        return v
+
+
 class AgentDefinition(CoReasonBaseModel):
     """Definition of an Agent."""
 
@@ -76,8 +107,34 @@ class AgentDefinition(CoReasonBaseModel):
     goal: str = Field(..., description="Primary objective.")
     backstory: str | None = Field(None, description="Backstory or directives.")
     model: str | None = Field(None, description="LLM identifier.")
-    tools: list[str] = Field(default_factory=list, description="List of Tool IDs or URI references.")
+    tools: list[Annotated[ToolRequirement | InlineToolDefinition, Field(discriminator="type")]] = Field(
+        default_factory=list, description="List of Tool Requirements or Inline Definitions."
+    )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+
+    @field_validator("tools", mode="before")
+    @classmethod
+    def normalize_tools(cls, v: Any) -> Any:
+        if not isinstance(v, list):
+            return v
+
+        normalized = []
+        for item in v:
+            if isinstance(item, str):
+                normalized.append({"type": "remote", "uri": item})
+            elif isinstance(item, dict):
+                # If type is missing, assume remote if uri is present, or error out later
+                if "type" not in item:
+                    # Default to remote for backward compatibility if it looks like one
+                    # But InlineToolDefinition has mandatory fields that remote doesn't.
+                    # Remote has mandatory 'uri'.
+                    if "uri" in item:
+                        item = item.copy()
+                        item["type"] = "remote"
+                normalized.append(item)
+            else:
+                normalized.append(item)
+        return normalized
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition, description="Input/Output contract.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
