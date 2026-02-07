@@ -9,5 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from .mcp import CoreasonMCPServer, create_mcp_tool_definition
+from .openai import convert_to_openai_assistant
 
-__all__ = ["CoreasonMCPServer", "create_mcp_tool_definition"]
+__all__ = ["CoreasonMCPServer", "convert_to_openai_assistant", "create_mcp_tool_definition"]
