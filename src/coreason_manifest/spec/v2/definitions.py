@@ -237,10 +237,9 @@ class ManifestMetadata(CoReasonBaseModel):
 from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
 
 # Update forward references for ToolPackDefinition using the local namespace
-ToolPackDefinition.model_rebuild(_types_namespace={
-    "AgentDefinition": AgentDefinition,
-    "ToolDefinition": ToolDefinition
-})
+ToolPackDefinition.model_rebuild(
+    _types_namespace={"AgentDefinition": AgentDefinition, "ToolDefinition": ToolDefinition}
+)
 
 
 class ManifestV2(CoReasonBaseModel):
@@ -257,11 +256,7 @@ class ManifestV2(CoReasonBaseModel):
     definitions: dict[
         str,
         Annotated[
-            ToolDefinition
-            | AgentDefinition
-            | SkillDefinition
-            | MCPResourceDefinition
-            | ToolPackDefinition,
+            ToolDefinition | AgentDefinition | SkillDefinition | MCPResourceDefinition | ToolPackDefinition,
             Field(discriminator="type"),
         ]
         | GenericDefinition,

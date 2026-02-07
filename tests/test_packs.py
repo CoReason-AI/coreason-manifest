@@ -55,9 +55,7 @@ def test_tool_pack_structure() -> None:
             ),
         ],
         tools=[],
-        mcp_servers=[
-            MCPServerDefinition(name="my-server", command="node", args=["server.js"])
-        ],
+        mcp_servers=[MCPServerDefinition(name="my-server", command="node", args=["server.js"])],
     )
 
     assert pack.id == "feature-dev-v1"
@@ -83,9 +81,7 @@ def test_manifest_integration() -> None:
         definitions={
             "feature-dev-pack": ToolPackDefinition(
                 id="feature-dev-v1",
-                metadata=PackMetadata(
-                    name="feature-dev", description="Test Pack", author="Test Author"
-                ),
+                metadata=PackMetadata(name="feature-dev", description="Test Pack", author="Test Author"),
                 agents=["agent-ref"],
                 mcp_servers=[],
             )
@@ -109,64 +105,36 @@ def test_mcp_resource_definition() -> None:
 def test_pack_invalid_names() -> None:
     # Test invalid pack name (must be kebab-case)
     with pytest.raises(ValidationError) as excinfo:
-        PackMetadata(
-            name="Invalid Pack Name",
-            description="Bad name",
-            author="Me"
-        )
+        PackMetadata(name="Invalid Pack Name", description="Bad name", author="Me")
     assert "string_pattern_mismatch" in str(excinfo.value)
 
     # Test valid name
-    metadata = PackMetadata(
-        name="valid-pack-name",
-        description="Good name",
-        author="Me"
-    )
+    metadata = PackMetadata(name="valid-pack-name", description="Good name", author="Me")
     assert metadata.name == "valid-pack-name"
 
 
 def test_pack_missing_metadata_fields() -> None:
     # Missing required 'description'
     with pytest.raises(ValidationError):
-        PackMetadata(
-            name="my-pack",
-            author="Me"
-        ) # type: ignore[call-arg]
+        PackMetadata(name="my-pack", author="Me")  # type: ignore[call-arg]
 
     # Missing required 'author'
     with pytest.raises(ValidationError):
-        PackMetadata(
-            name="my-pack",
-            description="desc"
-        ) # type: ignore[call-arg]
+        PackMetadata(name="my-pack", description="desc")  # type: ignore[call-arg]
 
 
 def test_pack_mixed_definitions() -> None:
     # Test a pack with mixed inline and referenced definitions
-    agent_inline = AgentDefinition(
-        id="inline-agent",
-        name="Inline",
-        role="Helper",
-        goal="Help"
-    )
+    agent_inline = AgentDefinition(id="inline-agent", name="Inline", role="Helper", goal="Help")
 
-    tool_inline = ToolDefinition(
-        id="inline-tool",
-        name="InlineTool",
-        uri="http://example.com/tool",
-        risk_level="safe"
-    )
+    tool_inline = ToolDefinition(id="inline-tool", name="InlineTool", uri="http://example.com/tool", risk_level="safe")
 
     pack = ToolPackDefinition(
         id="mixed-pack",
-        metadata=PackMetadata(
-            name="mixed-pack",
-            description="Mixed definitions",
-            author="Tester"
-        ),
+        metadata=PackMetadata(name="mixed-pack", description="Mixed definitions", author="Tester"),
         agents=[agent_inline, "ref-agent-id"],
         tools=["ref-tool-id", tool_inline],
-        skills=[]
+        skills=[],
     )
 
     assert len(pack.agents) == 2
@@ -181,9 +149,7 @@ def test_pack_mixed_definitions() -> None:
 def test_pack_invalid_mcp_server() -> None:
     # Missing command
     with pytest.raises(ValidationError):
-        MCPServerDefinition(
-            name="broken-server"
-        ) # type: ignore[call-arg]
+        MCPServerDefinition(name="broken-server")  # type: ignore[call-arg]
 
 
 def test_complex_nested_structure_in_manifest() -> None:
@@ -191,27 +157,14 @@ def test_complex_nested_structure_in_manifest() -> None:
     manifest = ManifestV2(
         kind="Recipe",
         metadata={"name": "Complex Manifest"},
-        workflow={
-            "start": "step1",
-            "steps": {"step1": {"type": "logic", "id": "step1", "code": "pass"}}
-        },
+        workflow={"start": "step1", "steps": {"step1": {"type": "logic", "id": "step1", "code": "pass"}}},
         definitions={
             "pack1": ToolPackDefinition(
-                id="pack-1",
-                metadata=PackMetadata(name="pack-1", description="P1", author="A1"),
-                agents=["agent1"]
+                id="pack-1", metadata=PackMetadata(name="pack-1", description="P1", author="A1"), agents=["agent1"]
             ),
-            "resource1": MCPResourceDefinition(
-                uri="data://resource1",
-                name="Resource 1"
-            ),
-            "agent1": AgentDefinition(
-                id="agent1",
-                name="Agent 1",
-                role="Worker",
-                goal="Work"
-            )
-        }
+            "resource1": MCPResourceDefinition(uri="data://resource1", name="Resource 1"),
+            "agent1": AgentDefinition(id="agent1", name="Agent 1", role="Worker", goal="Work"),
+        },
     )
 
     assert "pack1" in manifest.definitions
@@ -228,7 +181,7 @@ def test_pack_author_object() -> None:
     metadata = PackMetadata(
         name="author-object-pack",
         description="Testing author object",
-        author={"name": "Jane Doe", "email": "jane@example.com", "url": "https://example.com"}
+        author={"name": "Jane Doe", "email": "jane@example.com", "url": "https://example.com"},
     )
     # Pydantic should parse the dict into PackAuthor
     # But currently 'author' field is defined as `str | PackAuthor`.
@@ -237,7 +190,8 @@ def test_pack_author_object() -> None:
     author_field = PackMetadata.model_fields["author"]
     assert author_field.annotation is not None
     assert isinstance(
-        metadata.author, author_field.annotation.__args__[1]  # type: ignore[attr-defined]
+        metadata.author,
+        author_field.annotation.__args__[1],
     )  # Check if it's PackAuthor
     # Or simply access attributes if it converted correctly
     # Wait, strict checking might prevent implicit conversion if not handled carefully,
