@@ -8,8 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import TYPE_CHECKING, Any, Awaitable, Dict, Optional, Protocol, runtime_checkable
 from abc import abstractmethod
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.common.request import AgentRequest
@@ -46,12 +46,12 @@ class IResponseHandler(Protocol):
         ...
 
     @abstractmethod
-    async def log(self, level: str, message: str, metadata: Optional[Dict] = None) -> None:
+    async def log(self, level: str, message: str, metadata: dict[str, Any] | None = None) -> None:
         """Structured logging."""
         ...
 
     @abstractmethod
-    async def complete(self, outputs: Optional[Dict[str, Any]] = None) -> None:
+    async def complete(self, outputs: dict[str, Any] | None = None) -> None:
         """Finalize the execution, optionally passing final structured output."""
         ...
 

@@ -8,8 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Dict, Optional
+from typing import Any
+
 from coreason_manifest.spec.interfaces.behavior import IAgentRuntime, IResponseHandler, IStreamEmitter
+
 
 class TestBehaviorProtocols:
     def test_structural_subtyping_check(self) -> None:
@@ -17,6 +19,7 @@ class TestBehaviorProtocols:
         Verify that a concrete class implementing `assist` and `shutdown`
         satisfies the IAgentRuntime protocol.
         """
+
         class MockAgent:
             async def assist(self, session: Any, request: Any, handler: Any) -> None:
                 pass
@@ -30,9 +33,11 @@ class TestBehaviorProtocols:
         """
         Verify that a class missing a required method does not satisfy the protocol.
         """
+
         class BadAgent:
             async def assist(self, session: Any, request: Any, handler: Any) -> None:
                 pass
+
             # missing shutdown
 
         assert not isinstance(BadAgent(), IAgentRuntime)
@@ -41,17 +46,19 @@ class TestBehaviorProtocols:
         """
         Verify IResponseHandler protocol structure.
         """
+
         class MockHandler:
             async def emit_thought(self, content: str, source: str = "agent") -> None:
                 pass
 
             async def create_text_stream(self, name: str) -> Any:
+                _ = name  # suppress unused argument warning
                 return None
 
-            async def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+            async def log(self, level: str, message: str, metadata: dict[str, Any] | None = None) -> None:
                 pass
 
-            async def complete(self, outputs: Optional[Dict[str, Any]] = None) -> None:
+            async def complete(self, outputs: dict[str, Any] | None = None) -> None:
                 pass
 
         assert isinstance(MockHandler(), IResponseHandler)
@@ -60,6 +67,7 @@ class TestBehaviorProtocols:
         """
         Verify IStreamEmitter protocol structure.
         """
+
         class MockEmitter:
             async def emit_chunk(self, content: str) -> None:
                 pass
