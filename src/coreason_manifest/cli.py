@@ -186,10 +186,6 @@ def main() -> None:
     inspect_parser.add_argument("ref", help="Reference to the agent (path/to/file.py:var)")
     inspect_parser.add_argument("--json", action="store_true", help="Output JSON (default)")
 
-    # Init
-    init_parser = subparsers.add_parser("init", help="Initialize a new CoReason agent project")
-    init_parser.add_argument("name", help="Name of the agent/directory (e.g., my_first_agent)")
-
     # Viz
     viz_parser = subparsers.add_parser("viz", help="Visualize an agent workflow")
     viz_parser.add_argument("ref", help="Reference to the agent")
@@ -204,6 +200,10 @@ def main() -> None:
     # The prompt says "All commands must support a --json flag".
     # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
     run_parser.add_argument("--json", action="store_true", help="Output JSON events")
+
+    # Init
+    init_parser = subparsers.add_parser("init", help="Initialize a new CoReason agent project")
+    init_parser.add_argument("name", help="Name of the agent/directory (e.g., my_first_agent)")
 
     args = parser.parse_args()
 
