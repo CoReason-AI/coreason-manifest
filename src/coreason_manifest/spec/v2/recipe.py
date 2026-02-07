@@ -15,6 +15,7 @@ from pydantic import ConfigDict, Field, model_validator
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 
 # ==========================================
 # 1. Configuration Schemas (New)
@@ -99,6 +100,28 @@ class RouterNode(RecipeNode):
     default_route: str = Field(..., description="Fallback target_node_id.")
 
 
+class EvaluatorNode(RecipeNode):
+    """A node that evaluates a target variable using an LLM judge."""
+
+    type: Literal["evaluator"] = "evaluator"
+    target_variable: str = Field(
+        ..., description="The key in the shared state/blackboard containing the content to evaluate."
+    )
+    evaluator_agent_ref: str = Field(..., description="Reference to the Agent Definition ID that will act as the judge.")
+    evaluation_profile: EvaluationProfile | str = Field(
+        ..., description="Inline criteria definition or a reference to a preset profile."
+    )
+    pass_threshold: float = Field(..., description="The score, 0.0-1.0, required to proceed.")
+    max_refinements: int = Field(
+        ..., description="Maximum number of loops allowed before forcing a generic fail/fallback."
+    )
+    pass_route: str = Field(..., description="Node ID to go to if score >= threshold.")
+    fail_route: str = Field(..., description="Node ID to go to if score < threshold.")
+    feedback_variable: str = Field(
+        ..., description="The key in the state where the critique/reasoning will be written."
+    )
+
+
 class GraphEdge(CoReasonBaseModel):
     """A directed edge between two nodes."""
 
@@ -114,9 +137,9 @@ class GraphTopology(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    nodes: list[Annotated[AgentNode | HumanNode | RouterNode, Field(discriminator="type")]] = Field(
-        ..., description="List of nodes in the graph."
-    )
+    nodes: list[
+        Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]
+    ] = Field(..., description="List of nodes in the graph.")
     edges: list[GraphEdge] = Field(..., description="List of directed edges.")
     entry_point: str = Field(..., description="ID of the start node.")
 
