@@ -69,6 +69,16 @@ from .spec.interfaces.middleware import (
 )
 from .spec.interfaces.session import SessionHandle
 from .spec.interfaces.stream import IStreamEmitter
+from .spec.simulation import (
+    AdversaryProfile,
+    ChaosConfig,
+    SimulationRequest,
+    SimulationScenario,
+    SimulationStep,
+    SimulationTrace,
+    StepType,
+    ValidationLogic,
+)
 from .spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from .spec.v2.definitions import (
     AgentDefinition,
@@ -108,6 +118,7 @@ load = load_from_yaml
 dump = dump_to_yaml
 
 __all__ = [
+    "AdversaryProfile",
     "AgentBuilder",
     "AgentCapabilities",
     "AgentDefinition",
@@ -117,6 +128,7 @@ __all__ = [
     "AuditLog",
     "CapabilityType",
     "ChangeCategory",
+    "ChaosConfig",
     "ChatMessage",
     "CitationBlock",
     "CitationItem",
@@ -176,8 +188,13 @@ __all__ = [
     "SessionContext",
     "SessionHandle",
     "SessionState",
+    "SimulationRequest",
+    "SimulationScenario",
+    "SimulationStep",
+    "SimulationTrace",
     "StateDefinition",
     "Step",
+    "StepType",
     "StreamError",
     "StreamOpCode",
     "StreamPacket",
@@ -188,6 +205,7 @@ __all__ = [
     "ToolDefinition",
     "ToolRiskLevel",
     "TypedCapability",
+    "ValidationLogic",
     "Workflow",
     "__version__",
     "check_compliance_v2",
