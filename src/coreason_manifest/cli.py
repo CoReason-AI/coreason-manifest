@@ -63,7 +63,6 @@ def main() -> None:
 
     if args.command == "diff":
         _handle_diff(args.base, args.head, args.json, args.fail_on_breaking)
-        return
 
     try:
         agent = load_agent_from_ref(args.ref)
