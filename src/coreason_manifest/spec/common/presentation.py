@@ -8,14 +8,35 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import re
 from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
-from pydantic import AnyUrl, ConfigDict, Field, model_validator
+from pydantic import AnyUrl, ConfigDict, Field, field_validator, model_validator
 
 from ..common_base import CoReasonBaseModel
+
+
+class NodePresentation(CoReasonBaseModel):
+    """Visual presentation metadata for a graph node."""
+
+    model_config = ConfigDict(frozen=True)
+
+    x: float = Field(..., description="X coordinate on the canvas")
+    y: float = Field(..., description="Y coordinate on the canvas")
+    label: str | None = Field(None, description="Human-readable label override")
+    color: str | None = Field(None, description="Hex color code")
+    icon: str | None = Field(None, description="Icon name (e.g. 'lucide:brain')")
+    z_index: int = Field(0, description="Z-index for rendering order")
+
+    @field_validator("color")
+    @classmethod
+    def validate_hex_color(cls, v: str | None) -> str | None:
+        if v is not None and not re.match(r"^#[0-9a-fA-F]{6}$", v):
+            raise ValueError("Color must be a valid 6-char hex code (e.g. #FF0000)")
+        return v
 
 
 class PresentationEventType(StrEnum):
