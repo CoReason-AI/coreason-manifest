@@ -17,7 +17,7 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
-from coreason_manifest.spec.v2.mcp_defs import MCPResourceDefinition
+from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
 from coreason_manifest.spec.v2.resources import ModelProfile
 from coreason_manifest.spec.v2.skills import SkillDefinition
 
@@ -31,7 +31,6 @@ __all__ = [
     "InlineToolDefinition",
     "InterfaceDefinition",
     "LogicStep",
-    "MCPResourceDefinition",
     "ManifestMetadata",
     "ManifestV2",
     "SkillDefinition",
@@ -116,10 +115,6 @@ class AgentDefinition(CoReasonBaseModel):
     )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
     skills: list[str] = Field(default_factory=list, description="List of Skill IDs to equip this agent with.")
-    exposed_mcp_resources: list[MCPResourceDefinition] = Field(
-        default_factory=list,
-        description="List of passive data resources (logs, files, streams) this agent exposes to the MCP host.",
-    )
     context_strategy: Literal["full", "compressed", "hybrid"] = Field(
         "hybrid", description="Context optimization strategy for skills."
     )
@@ -238,6 +233,14 @@ class ManifestMetadata(CoReasonBaseModel):
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
 
 
+# Import ToolPackDefinition after definitions are declared to avoid circular import
+
+# Update forward references for ToolPackDefinition using the local namespace
+ToolPackDefinition.model_rebuild(
+    _types_namespace={"AgentDefinition": AgentDefinition, "ToolDefinition": ToolDefinition}
+)
+
+
 class ManifestV2(CoReasonBaseModel):
     """Root object for Coreason Manifest V2."""
 
@@ -252,7 +255,8 @@ class ManifestV2(CoReasonBaseModel):
     definitions: dict[
         str,
         Annotated[
-            ToolDefinition | AgentDefinition | SkillDefinition | MCPResourceDefinition, Field(discriminator="type")
+            ToolDefinition | AgentDefinition | SkillDefinition | MCPResourceDefinition | ToolPackDefinition,
+            Field(discriminator="type"),
         ]
         | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")

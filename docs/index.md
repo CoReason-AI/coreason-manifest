@@ -45,8 +45,8 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Agent Skills System](skills.md)**
     *   Documentation for defining and using procedural knowledge ("Skills") with `SkillDefinition` and `LoadStrategy`.
 
-*   **[MCP Resources](mcp_resources.md)**
-    *   Documentation for defining and using MCP Resources (`MCPResourceDefinition`) to expose passive data streams.
+*   **[Tool Packs (Plugins)](tool_packs.md)**
+    *   Documentation for the Tool Pack architecture, enabling reusable bundles of Agents, Skills, and Tools.
 
 *   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
     *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
