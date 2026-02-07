@@ -82,3 +82,56 @@ def test_init_existing_empty_dir(tmp_path: Path) -> None:
         main()
 
     assert (project_dir / "agent.py").exists()
+
+
+def test_init_nested_structure(tmp_path: Path) -> None:
+    """Test creating an agent in a nested directory structure."""
+    nested_dir = tmp_path / "deep" / "nested" / "project"
+
+    with patch.object(sys, "argv", ["coreason", "init", str(nested_dir)]):
+        main()
+
+    assert nested_dir.exists()
+    assert (nested_dir / "agent.py").exists()
+    assert (nested_dir / ".vscode").exists()
+
+
+def test_init_complex_verification(tmp_path: Path) -> None:
+    """
+    Complex test:
+    1. Initialize agent.
+    2. Load it.
+    3. Verify deep structure (tools, pricing, capabilities).
+    """
+    project_dir = tmp_path / "complex_agent"
+    with patch.object(sys, "argv", ["coreason", "init", str(project_dir)]):
+        main()
+
+    ref = f"{project_dir}/agent.py:agent"
+    agent = load_agent_from_ref(ref)
+
+    # 1. Verify Definitions
+    assert "GreeterAgent" in agent.definitions
+    defn = agent.definitions["GreeterAgent"]
+    assert isinstance(defn, AgentDefinition)
+
+    # 2. Verify Tools
+    assert "hello_world_tool" in defn.tools
+
+    # 3. Verify Capabilities
+    # The builder merges capabilities into the interface.
+    # The default capability 'greet_user' implies strict input/output schemas.
+    inputs = defn.interface.inputs
+    outputs = defn.interface.outputs
+
+    # Check input schema
+    assert inputs.get("properties", {}).get("name", {}).get("type") == "string"
+
+    # Check output schema
+    assert outputs.get("properties", {}).get("message", {}).get("type") == "string"
+
+    # 4. Verify Pricing (RateCard)
+    assert defn.resources is not None
+    assert defn.resources.pricing is not None
+    assert defn.resources.pricing.input_cost == 0.03
+    assert defn.resources.pricing.output_cost == 0.06
