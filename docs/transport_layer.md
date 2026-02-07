@@ -1,14 +1,36 @@
-# Transport Layer
+# Transport Layer: Distributed Tracing
 
 The **Transport Layer** defines the fundamental envelope for all communication within the CoReason ecosystem. It ensures that every interaction—whether a user request, an inter-agent call, or a system event—carries the necessary context for **Distributed Tracing**, **Session Management**, and **Audit Logging**.
 
-## The Transport Envelope: `AgentRequest`
+## Concept: The Request Lineage
+
+In a multi-agent system, a single user request often triggers a cascade of sub-requests. To debug and audit these complex flows, we use a lineage model compatible with OpenTelemetry.
+
+### Lineage Diagram
+
+```mermaid
+graph TD
+    A[Root Request] -->|spawns| B[Child Request 1]
+    A -->|spawns| C[Child Request 2]
+    B -->|spawns| D[Grandchild Request]
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+    style D fill:#efe,stroke:#333,stroke-width:2px
+```
+
+*   **Root Request**: The original user interaction.
+*   **Parent Request**: The immediate caller.
+*   **Child Request**: The resulting action.
+
+## The Envelope: `AgentRequest`
 
 The core model is `AgentRequest`, which acts as a strictly typed, immutable envelope.
 
 **Import:**
 ```python
-from coreason_manifest import AgentRequest
+from coreason_manifest.spec.common.request import AgentRequest
 ```
 
 ### Fields
@@ -20,64 +42,37 @@ from coreason_manifest import AgentRequest
 | `root_request_id` | `UUID` | The ID of the original request that started the trace. | Yes | `request_id` (Auto-rooting) |
 | `parent_request_id` | `Optional[UUID]` | The ID of the immediate caller (for nested traces). | No | `None` |
 | `payload` | `Dict[str, Any]` | The actual business logic arguments (e.g., `{"query": "hello"}`). | Yes | - |
-| `metadata` | `Dict[str, Any]` | Contextual metadata (e.g., locale, auth scope). | No | `{}` |
-| `created_at` | `datetime` | Creation timestamp (UTC). | Yes | `now()` |
 
-### Key Features
+### Usage: Preserving Lineage
 
-#### 1. Auto-Rooting (Trace Initiation)
-When a new request is created without a `root_request_id`, the system automatically assigns the current `request_id` as the root. This marks the start of a new trace.
+To propagate context, **always** use the `create_child()` method. This ensures lineage integrity by setting the parent and root IDs correctly.
 
 ```python
 from uuid import uuid4
-from coreason_manifest import AgentRequest
+from coreason_manifest.spec.common.request import AgentRequest
 
-# Start a new trace
-req = AgentRequest(
+# 1. Incoming Request (Root)
+root_req = AgentRequest(
     session_id=uuid4(),
-    payload={"query": "Start process"}
+    payload={"task": "Plan a trip"}
 )
 
-assert req.root_request_id == req.request_id  # Auto-rooted
-assert req.parent_request_id is None
-```
+print(f"Trace Started: {root_req.root_request_id}")
 
-#### 2. Trace Continuity (Child Creation)
-To propagate context, use the `create_child()` method. This ensures lineage integrity by setting the parent and root IDs correctly.
-
-```python
-# Create a child request (e.g., Agent A calls Agent B)
-child_req = req.create_child(
-    payload={"task": "sub-task"}
+# 2. Agent A calls Agent B (Child)
+# Automatically inherits session_id and sets parent pointers
+child_req = root_req.create_child(
+    payload={"subtask": "Book flight"}
 )
 
-assert child_req.root_request_id == req.root_request_id  # Same trace
-assert child_req.parent_request_id == req.request_id     # Parent link established
-assert child_req.session_id == req.session_id            # Session preserved
+# 3. Validation
+assert child_req.root_request_id == root_req.request_id  # Same trace
+assert child_req.parent_request_id == root_req.request_id # Parent link established
+assert child_req.session_id == root_req.session_id       # Session preserved
 ```
 
-#### 3. Lineage Validation
-The model enforces strict validation to prevent broken traces. You cannot provide a `parent_request_id` without a `root_request_id`.
+## Integrity Rules
 
-```python
-# This raises ValueError: Broken Trace
-try:
-    AgentRequest(
-        session_id=uuid4(),
-        payload={},
-        parent_request_id=uuid4()  # Missing root!
-    )
-except ValueError as e:
-    print(e)
-```
-
-#### 4. Immutability
-`AgentRequest` instances are frozen. To modify data (e.g., in middleware), use `model_copy`.
-
-```python
-# Middleware example: Redact PII
-new_payload = req.payload.copy()
-new_payload["query"] = "***"
-
-safe_req = req.model_copy(update={"payload": new_payload})
-```
+1.  **Auto-Rooting**: If `root_request_id` is missing, the system automatically assigns the current `request_id` as the root.
+2.  **Broken Trace Prevention**: You cannot provide a `parent_request_id` without a `root_request_id`. The validator will raise a `ValueError`.
+3.  **Immutability**: `AgentRequest` instances are frozen. To modify data (e.g., in middleware), use `model_copy`.
