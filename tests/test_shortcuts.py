@@ -28,7 +28,10 @@ def test_simple_agent_full_options() -> None:
     assert isinstance(agent, AgentDefinition)
     assert agent.backstory == "You are a research assistant."
     assert agent.model == "gpt-4"
-    assert agent.tools == ["search-tool"]
+    # tools is now list[ToolRequirement | InlineToolDefinition]
+    assert len(agent.tools) == 1
+    assert hasattr(agent.tools[0], "uri")
+    assert agent.tools[0].uri == "search-tool"
     assert agent.knowledge == ["docs/info.txt"]
 
     # Check interface inputs - it should be wrapped in object/properties because we passed a dict without "type"

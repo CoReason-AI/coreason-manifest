@@ -61,7 +61,10 @@ The `definitions` section is a polymorphic key-value map where you can define re
 *   `role`: The persona/job title.
 *   `goal`: The primary objective.
 *   `backstory`: Detailed instructions or persona background.
-*   `tools`: List of tool IDs (referencing other definitions).
+*   `tools`: List of tools. Supports:
+    *   **ID Reference**: String pointing to a `ToolDefinition`.
+    *   **Remote Tool**: Object with `type: remote` and `uri`.
+    *   **Inline Tool**: Object with `type: inline`, `name`, and `parameters` (JSON Schema).
 *   `model`: LLM identifier (e.g., `gpt-4`).
 *   `capabilities`: Feature flags and capabilities.
 
