@@ -36,7 +36,7 @@ workflow:
 | :--- | :--- | :--- |
 | `apiVersion` | `Literal["coreason.ai/v2"]` | Must be `coreason.ai/v2`. |
 | `kind` | `Literal["Recipe", "Agent"]` | The type of asset being defined. |
-| `metadata` | `ManifestMetadata` | Metadata including name, version, design, and provenance info. |
+| `metadata` | `ManifestMetadata` | Metadata: `name`, `version`, `provenance`, and design info. |
 | `interface` | `InterfaceDefinition` | Defines the Input/Output contract. |
 | `state` | `StateDefinition` | Defines the internal memory schema. |
 | `policy` | `PolicyDefinition` | Governance and execution policy. |
