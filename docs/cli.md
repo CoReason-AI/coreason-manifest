@@ -142,3 +142,39 @@ Computes the canonical hash of an agent for audit and integrity purposes.
 ```bash
 coreason hash <reference>
 ```
+
+---
+
+### `serve-mcp`
+
+Serves a Coreason Agent as a **Model Context Protocol (MCP)** server over stdio.
+
+This command is intended for **interoperability testing** and **contract verification**. It projects the agent's interface (inputs/outputs) as an MCP Tool and serves a mock implementation that generates valid outputs based on the schema, allowing other MCP-compliant tools (like Claude Desktop or other agents) to consume and validate the integration contract without running the full agent logic.
+
+**Prerequisites:**
+You must install the optional `mcp` dependency:
+```bash
+pip install coreason-manifest[mcp]
+```
+
+**Usage:**
+```bash
+coreason serve-mcp <reference>
+```
+
+**Arguments:**
+* `<reference>`: Path to the agent object (e.g., `agent.py:agent`).
+
+**Example:**
+```bash
+# Serve the agent defined in agent.py
+coreason serve-mcp agent.py:agent
+```
+
+**How it works:**
+1.  Loads the Agent Definition.
+2.  Projects the agent as an MCP Tool named after the agent (sanitized).
+3.  Starts an MCP Server over stdio.
+4.  When the tool is called, it returns a **mocked response** generated from the agent's output schema using `coreason_manifest.utils.mock`.
+
+**Note:** This does *not* execute the agent's actual logic or LLM calls. It is strictly for verifying that the agent's interface contract is compatible with the consumer.

@@ -303,3 +303,62 @@ async def test_run_stdio() -> None:
 
         # Verify init options creation
         mock_server_instance.create_initialization_options.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_run_stdio_missing_dependency() -> None:
+    """Test run_stdio raises ImportError when mcp.server.stdio is missing."""
+    mock_mcp = MagicMock(name="mock_mcp")
+    mock_server_cls = MagicMock(name="mock_server_cls")
+    mock_server_instance = MagicMock(name="mock_server_instance")
+    mock_server_cls.return_value = mock_server_instance
+    mock_types = MagicMock(name="mock_types")
+
+    # We only mock up to mcp.types and mcp.server, but ensure mcp.server.stdio is missing
+    # Since we are mocking sys.modules, if we don't provide mcp.server.stdio, importing it might fail if not careful.
+    # But wait, 'from mcp.server.stdio import stdio_server'.
+    # We need to simulate that specific import failure.
+
+    with patch.dict(
+        sys.modules,
+        {
+            "mcp": mock_mcp,
+            "mcp.server": MagicMock(Server=mock_server_cls),
+            "mcp.types": mock_types,
+            # We explicitly ensure mcp.server.stdio is NOT in sys.modules
+            # And accessing it via import raises ImportError.
+        },
+    ):
+        # We need to make sure the import statement fails.
+        # Ideally we wrap the import mechanism, but simplest is to just not provide it
+        # AND ensure the parent package doesn't automatically provide it.
+        # But 'from mcp.server.stdio' requires 'mcp.server.stdio' module.
+
+        # Let's try to patch builtins.__import__ or simpler: just assume if we don't put it in sys.modules
+        # and we mocked the parent, it might fail? No, MagicMock usually creates children.
+        pass
+
+    # Better approach: Patch sys.modules with a side_effect for that specific module?
+    # Or just use patch.dict and ensure 'mcp.server.stdio' maps to None?
+    # No, mapping to None usually indicates "module not found" in Python import system (for relative imports etc).
+
+    with patch.dict(sys.modules, {"mcp.server.stdio": None}):
+        agent = AgentDefinition(id="a", name="My Agent", role="R", goal="G")
+        # We need __init__ to succeed, so we need mcp, mcp.server, mcp.types
+        # But run_stdio does the import.
+
+        # We need to ensure __init__ works.
+        # If we patch sys.modules with mcp, mcp.server, mcp.types, but map mcp.server.stdio to None.
+
+        with patch.dict(
+            sys.modules,
+            {
+                "mcp": mock_mcp,
+                "mcp.server": MagicMock(Server=mock_server_cls),
+                "mcp.types": mock_types,
+                "mcp.server.stdio": None,
+            },
+        ):
+            server = CoreasonMCPServer(agent, AsyncMock())
+            with pytest.raises(ImportError, match="pip install coreason-manifest\\[mcp\\]"):
+                await server.run_stdio()
