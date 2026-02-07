@@ -197,11 +197,10 @@ def coerce_topology(v: Any) -> Any:
         return TaskSequence(steps=v).to_graph()
 
     # 2. If topology is a dict
-    if isinstance(v, dict):
+    if isinstance(v, dict) and "steps" in v and "nodes" not in v:
         # If it has "steps", treat as TaskSequence
-        if "steps" in v and "nodes" not in v:
-            return TaskSequence.model_validate(v).to_graph()
-        # Otherwise assume it's GraphTopology structure, let Pydantic handle it
+        return TaskSequence.model_validate(v).to_graph()
+    # Otherwise assume it's GraphTopology structure, let Pydantic handle it
 
     return v
 

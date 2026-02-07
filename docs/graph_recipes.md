@@ -13,6 +13,37 @@ A Topology is a collection of **Nodes** connected by **Edges**.
 
 This structure allows for **Cycles** (loops), enabling agents to self-correct or retry tasks until a condition is met.
 
+## Syntactic Sugar: Task Sequences (New in 0.22.0)
+
+While Graphs are powerful, they can be verbose for simple linear workflows. To simplify this, `RecipeDefinition` supports **Task Sequences**.
+
+You can pass a simple list of nodes (or a dictionary with a `"steps"` key) to the `topology` field, and the library will automatically:
+1.  Set the first node as the `entry_point`.
+2.  Create linear edges connecting each node to the next (A -> B -> C).
+3.  Compile it into a full `GraphTopology` object.
+
+### Example: Linear Sequence
+
+```python
+from coreason_manifest.spec.v2.recipe import RecipeDefinition, AgentNode, HumanNode
+
+# Define nodes linearly
+step1 = AgentNode(id="research", agent_ref="researcher")
+step2 = HumanNode(id="approve", prompt="Approve?")
+step3 = AgentNode(id="publish", agent_ref="publisher")
+
+# Pass as a list
+recipe = RecipeDefinition(
+    ...
+    topology=[step1, step2, step3]  # Automatically converts to GraphTopology
+)
+
+# Resulting Topology:
+# Nodes: [research, approve, publish]
+# Edges: research -> approve, approve -> publish
+# Entry Point: research
+```
+
 ## Recipe Components
 
 A `RecipeDefinition` is composed of four key layers:

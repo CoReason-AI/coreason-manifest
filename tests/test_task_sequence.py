@@ -29,7 +29,7 @@ def test_topology_coercion_from_list() -> None:
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="test-recipe", version="1.0.0"),
         interface=RecipeInterface(),
-        topology=steps,  # type: ignore[arg-type] # Explicitly testing coercion
+        topology=steps,
     )
 
     assert isinstance(recipe.topology, GraphTopology)
@@ -57,7 +57,7 @@ def test_topology_coercion_from_dict_steps() -> None:
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="test-recipe", version="1.0.0"),
         interface=RecipeInterface(),
-        topology=topology_dict,  # type: ignore[arg-type]
+        topology=topology_dict,
     )
 
     assert isinstance(recipe.topology, GraphTopology)
@@ -72,11 +72,7 @@ def test_topology_direct_graph_topology() -> None:
     step1 = AgentNode(id="step1", agent_ref="agent-1")
 
     # Manual graph construction
-    graph = GraphTopology(
-        nodes=[step1],
-        edges=[],
-        entry_point="step1"
-    )
+    graph = GraphTopology(nodes=[step1], edges=[], entry_point="step1")
 
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="test-recipe", version="1.0.0"),
@@ -92,13 +88,13 @@ def test_topology_dict_passthrough() -> None:
     topo_data = {
         "nodes": [{"type": "agent", "id": "step1", "agent_ref": "agent-1"}],
         "edges": [],
-        "entry_point": "step1"
+        "entry_point": "step1",
     }
 
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="test-recipe", version="1.0.0"),
         interface=RecipeInterface(),
-        topology=topo_data,  # type: ignore[arg-type]
+        topology=topo_data,
     )
 
     assert isinstance(recipe.topology, GraphTopology)
