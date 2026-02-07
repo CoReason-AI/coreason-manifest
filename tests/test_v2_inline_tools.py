@@ -10,13 +10,7 @@ from coreason_manifest.spec.v2.definitions import (
 
 def test_remote_tool_compatibility() -> None:
     """Validate remote tool compatibility (type defaults to 'remote')."""
-    data = {
-        "id": "agent-1",
-        "name": "My Agent",
-        "role": "Worker",
-        "goal": "Work",
-        "tools": [{"uri": "mcp://foo"}]
-    }
+    data = {"id": "agent-1", "name": "My Agent", "role": "Worker", "goal": "Work", "tools": [{"uri": "mcp://foo"}]}
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 1
     tool = agent.tools[0]
@@ -32,12 +26,14 @@ def test_inline_tool_parsing() -> None:
         "name": "My Agent",
         "role": "Worker",
         "goal": "Work",
-        "tools": [{
-            "type": "inline",
-            "name": "calculator",
-            "description": "Add numbers",
-            "parameters": {"type": "object", "properties": {}}
-        }]
+        "tools": [
+            {
+                "type": "inline",
+                "name": "calculator",
+                "description": "Add numbers",
+                "parameters": {"type": "object", "properties": {}},
+            }
+        ],
     }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 1
@@ -55,12 +51,14 @@ def test_validation_error_invalid_schema() -> None:
         "name": "My Agent",
         "role": "Worker",
         "goal": "Work",
-        "tools": [{
-            "type": "inline",
-            "name": "bad_tool",
-            "description": "Bad Schema",
-            "parameters": {"type": "string"} # Invalid, must be object
-        }]
+        "tools": [
+            {
+                "type": "inline",
+                "name": "bad_tool",
+                "description": "Bad Schema",
+                "parameters": {"type": "string"},  # Invalid, must be object
+            }
+        ],
     }
     with pytest.raises(ValidationError) as exc:
         AgentDefinition.model_validate(data)
@@ -78,13 +76,8 @@ def test_mixed_list() -> None:
         "goal": "Work",
         "tools": [
             {"uri": "mcp://remote"},
-            {
-                "type": "inline",
-                "name": "local_tool",
-                "description": "Local",
-                "parameters": {"type": "object"}
-            }
-        ]
+            {"type": "inline", "name": "local_tool", "description": "Local", "parameters": {"type": "object"}},
+        ],
     }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 2
@@ -102,7 +95,7 @@ def test_legacy_string_list_compatibility() -> None:
         "name": "Legacy Agent",
         "role": "Worker",
         "goal": "Work",
-        "tools": ["tool-1", "mcp://legacy"]
+        "tools": ["tool-1", "mcp://legacy"],
     }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 2

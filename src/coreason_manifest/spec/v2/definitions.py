@@ -124,17 +124,17 @@ class AgentDefinition(CoReasonBaseModel):
                 normalized.append({"type": "remote", "uri": item})
             elif isinstance(item, dict):
                 # If type is missing, assume remote if uri is present, or error out later
-                if "type" not in item:
+                if "type" not in item and "uri" in item:
                     # Default to remote for backward compatibility if it looks like one
                     # But InlineToolDefinition has mandatory fields that remote doesn't.
                     # Remote has mandatory 'uri'.
-                    if "uri" in item:
-                        item = item.copy()
-                        item["type"] = "remote"
+                    item = item.copy()
+                    item["type"] = "remote"
                 normalized.append(item)
             else:
                 normalized.append(item)
         return normalized
+
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition, description="Input/Output contract.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
