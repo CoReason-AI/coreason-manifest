@@ -1,12 +1,14 @@
 
 import json
 import sys
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from typing import Any
+from unittest.mock import patch
+
+import pytest
 from coreason_manifest.cli import main
 
-def test_validate_manifest_success(tmp_path, capsys):
+def test_validate_manifest_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     manifest_content = """
 apiVersion: coreason.ai/v2
 kind: Recipe
@@ -37,7 +39,7 @@ workflow:
     captured = capsys.readouterr()
     assert "✅ Valid Agent: Test Agent (v?)" in captured.out
 
-def test_validate_manifest_with_version(tmp_path, capsys):
+def test_validate_manifest_with_version(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     manifest_content = """
 apiVersion: coreason.ai/v2
 kind: Recipe
@@ -64,7 +66,7 @@ workflow:
     captured = capsys.readouterr()
     assert "✅ Valid Agent: Test Agent (v1.0.0)" in captured.out
 
-def test_validate_agent_definition_success(tmp_path, capsys):
+def test_validate_agent_definition_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     agent_def = {
         "type": "agent",
         "id": "agent-1",
@@ -87,7 +89,7 @@ def test_validate_agent_definition_success(tmp_path, capsys):
     captured = capsys.readouterr()
     assert "✅ Valid Agent: My Agent (v?)" in captured.out
 
-def test_validate_failure(tmp_path, capsys):
+def test_validate_failure(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     manifest_content = """
 apiVersion: coreason.ai/v2
 kind: Recipe
@@ -116,16 +118,15 @@ workflow:
     # Pydantic error message might vary slightly
     assert "Input tag 'unknown_type' found using 'type' does not match any of the expected tags" in captured.out
 
-def test_file_not_found(capsys):
-    with patch("sys.argv", ["coreason", "validate", "non_existent.yaml"]):
-        with pytest.raises(SystemExit) as e:
-            main()
-        assert e.value.code == 1
+def test_file_not_found(capsys: pytest.CaptureFixture[str]) -> None:
+    with patch("sys.argv", ["coreason", "validate", "non_existent.yaml"]), pytest.raises(SystemExit) as e:
+        main()
+    assert e.value.code == 1
 
     captured = capsys.readouterr()
     assert "Error: File not found" in captured.err
 
-def test_invalid_extension(tmp_path, capsys):
+def test_invalid_extension(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     f = tmp_path / "test.txt"
     f.write_text("content")
 
@@ -137,7 +138,7 @@ def test_invalid_extension(tmp_path, capsys):
     captured = capsys.readouterr()
     assert "Error: Unsupported file extension: .txt" in captured.err
 
-def test_missing_pyyaml(tmp_path, capsys):
+def test_missing_pyyaml(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     f = tmp_path / "test.yaml"
     f.touch()
 
@@ -145,21 +146,19 @@ def test_missing_pyyaml(tmp_path, capsys):
     import builtins
     original_import = builtins.__import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name: str, *args: Any, **kwargs: Any) -> Any:
         if name == "yaml":
             raise ImportError("No module named 'yaml'")
         return original_import(name, *args, **kwargs)
 
-    with patch("builtins.__import__", side_effect=mock_import):
-        # We also need to patch sys.modules to remove yaml if it's already there
-        with patch.dict("sys.modules"):
-            if "yaml" in sys.modules:
-                del sys.modules["yaml"]
+    # Combined with statements
+    with patch("builtins.__import__", side_effect=mock_import), patch.dict("sys.modules"):
+        if "yaml" in sys.modules:
+            del sys.modules["yaml"]
 
-            with patch("sys.argv", ["coreason", "validate", str(f)]):
-                with pytest.raises(SystemExit) as e:
-                    main()
-                assert e.value.code == 1
+        with patch("sys.argv", ["coreason", "validate", str(f)]), pytest.raises(SystemExit) as e:
+            main()
+        assert e.value.code == 1
 
     captured = capsys.readouterr()
     assert "Error: PyYAML is required" in captured.err

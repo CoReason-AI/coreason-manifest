@@ -115,27 +115,27 @@ def handle_validate(args: argparse.Namespace) -> None:
                 sys.exit(1)
 
         # Validation Logic
-        agent = None
-        is_manifest = False
+        agent: ManifestV2 | AgentDefinition
 
         if isinstance(data, dict) and "apiVersion" in data:
             # It's likely a ManifestV2
             agent = ManifestV2.model_validate(data)
-            is_manifest = True
         else:
             # Fallback to AgentDefinition
             agent = AgentDefinition.model_validate(data)
 
         # Success Output
-        name = getattr(agent, "name", "Unknown")
+        name = "Unknown"
         version = "?"
-        if is_manifest:
-            # agent is ManifestV2
+
+        if isinstance(agent, ManifestV2):
             # ManifestV2 has metadata which has name
-            name = agent.metadata.name  # type: ignore # Pydantic model
+            name = agent.metadata.name
             # Try to get version from metadata extra fields
             if agent.metadata.model_extra and "version" in agent.metadata.model_extra:
                 version = str(agent.metadata.model_extra["version"])
+        elif isinstance(agent, AgentDefinition):
+            name = agent.name
 
         print(f"✅ Valid Agent: {name} (v{version})")
         if args.json:
@@ -144,11 +144,11 @@ def handle_validate(args: argparse.Namespace) -> None:
     except ValidationError as e:
         print("❌ Validation Failed:")
         for err in e.errors():
-            loc = " -> ".join(str(l) for l in err['loc'])
+            loc = " -> ".join(str(loc_part) for loc_part in err["loc"])
             print(f"  • {loc}: {err['msg']}")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"❌ Error: {e!s}")
         sys.exit(1)
 
 
