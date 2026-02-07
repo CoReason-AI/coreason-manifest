@@ -12,7 +12,6 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.recipe import EvaluatorNode, GraphTopology
-from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 
 
 def test_edge_case_zero_max_refinements() -> None:
@@ -219,7 +218,7 @@ def test_invalid_evaluation_profile_type() -> None:
             id="bad-profile",
             target_variable="content",
             evaluator_agent_ref="judge",
-            evaluation_profile=123, # type: ignore[arg-type]
+            evaluation_profile=123,
             pass_threshold=0.9,
             max_refinements=3,
             pass_route="end",
