@@ -104,13 +104,8 @@ def test_recipe_node_integration_full() -> None:
         agent_ref="agent-v1",
         metadata={"custom_key": "custom_value", "version": 1},
         presentation=NodePresentation(
-            x=123.45,
-            y=678.90,
-            label="My Node",
-            color="#00FF00",
-            icon="lucide:cpu",
-            z_index=5
-        )
+            x=123.45, y=678.90, label="My Node", color="#00FF00", icon="lucide:cpu", z_index=5
+        ),
     )
 
     dumped = node.model_dump(mode="json")
