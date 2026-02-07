@@ -8,15 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import asyncio
 from datetime import UTC, datetime
-from typing import Any, Dict, Optional
+from typing import Any
 from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.common.identity import Identity
 from coreason_manifest.spec.common.request import AgentRequest
 from coreason_manifest.spec.common.session import SessionState
 from coreason_manifest.spec.interfaces.behavior import (
@@ -44,9 +42,9 @@ class MockStreamEmitter:
 class MockResponseHandler:
     def __init__(self) -> None:
         self.thoughts: list[str] = []
-        self.logs: list[tuple[str, str, Dict[str, Any] | None]] = []
+        self.logs: list[tuple[str, str, dict[str, Any] | None]] = []
         self.streams: dict[str, MockStreamEmitter] = {}
-        self.completed_output: Dict[str, Any] | None = None
+        self.completed_output: dict[str, Any] | None = None
 
     async def emit_thought(self, content: str, source: str = "agent") -> None:
         self.thoughts.append(f"[{source}] {content}")
@@ -56,15 +54,18 @@ class MockResponseHandler:
         self.streams[name] = emitter
         return emitter
 
-    async def log(self, level: str, message: str, metadata: Dict[str, Any] | None = None) -> None:
+    async def log(self, level: str, message: str, metadata: dict[str, Any] | None = None) -> None:
         self.logs.append((level, message, metadata))
 
-    async def complete(self, outputs: Dict[str, Any] | None = None) -> None:
+    async def complete(self, outputs: dict[str, Any] | None = None) -> None:
         self.completed_output = outputs
 
 
 class ComplexAgent(IAgentRuntime):
-    async def assist(self, session: SessionState, request: AgentRequest, handler: IResponseHandler) -> None:
+    async def assist(
+        self, session: SessionState, request: AgentRequest, handler: IResponseHandler
+    ) -> None:
+        _ = session  # Unused
         await handler.log("info", "Starting complex task", {"query": request.query})
         await handler.emit_thought("Thinking about the problem...")
 
@@ -122,13 +123,10 @@ async def test_complex_interaction_flow() -> None:
         agent_id="agent-123",
         user_id="user-456",
         created_at=datetime.now(UTC),
-        updated_at=datetime.now(UTC)
+        updated_at=datetime.now(UTC),
     )
 
-    request = AgentRequest(
-        query="Solve world hunger",
-        session_id=session.id
-    )
+    request = AgentRequest(query="Solve world hunger", session_id=session.id)
 
     # Execute
     await agent.assist(session, request, handler)
