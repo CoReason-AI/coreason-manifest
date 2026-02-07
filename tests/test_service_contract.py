@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 from pydantic import ValidationError
 
@@ -5,12 +7,11 @@ from coreason_manifest import AgentRequest, ServiceContract
 
 
 def test_agent_request_serialization() -> None:
-    req = AgentRequest(query="Hello", conversation_id="123")
+    req = AgentRequest(session_id=uuid4(), payload={"query": "Hello", "conversation_id": "123"})
     dump = req.dump()
-    assert dump["query"] == "Hello"
-    assert dump["conversation_id"] == "123"
-    assert dump["files"] == []
-    assert dump["meta"] == {}
+    assert dump["payload"]["query"] == "Hello"
+    assert dump["payload"]["conversation_id"] == "123"
+    assert dump["metadata"] == {}
 
 
 def test_service_contract_generation() -> None:
@@ -38,27 +39,22 @@ def test_service_contract_generation() -> None:
 
 def test_agent_request_defaults() -> None:
     """Test that default values are correctly populated."""
-    req = AgentRequest(query="Just checking")
-    assert req.files == []
-    assert req.conversation_id is None
-    assert req.meta == {}
+    req = AgentRequest(session_id=uuid4(), payload={"query": "Just checking"})
+    assert req.metadata == {}
 
     dump = req.dump()
-    assert dump["files"] == []
-    # None fields are excluded by CoReasonBaseModel.dump(exclude_none=True)
-    assert "conversation_id" not in dump
-    assert dump["meta"] == {}
+    assert dump["metadata"] == {}
 
 
 def test_agent_request_immutability() -> None:
     """Test that AgentRequest is frozen/immutable."""
-    req = AgentRequest(query="Immutable?")
+    req = AgentRequest(session_id=uuid4(), payload={"query": "Immutable?"})
     with pytest.raises(ValidationError):
         # Mypy will complain about assignment to frozen field, so we use setattr
         # or just suppress the static error if running mypy, but here we run pytest.
         # But python sees it as attribute error if using slots, or validation error if pydantic.
         # Pydantic v2 raises ValidationError.
-        req.query = "Changed"  # type: ignore
+        req.payload = {"query": "Changed"}  # type: ignore
 
 
 def test_agent_request_complex_meta() -> None:
@@ -68,19 +64,19 @@ def test_agent_request_complex_meta() -> None:
         "history": [1, 2, 3],
         "flags": {"experimental": True},
     }
-    req = AgentRequest(query="Complex", meta=meta)
+    req = AgentRequest(session_id=uuid4(), payload={"query": "Complex"}, metadata=meta)
     dump = req.dump()
-    assert dump["meta"]["user_info"]["timezone"] == "UTC"
-    assert dump["meta"]["history"] == [1, 2, 3]
+    assert dump["metadata"]["user_info"]["timezone"] == "UTC"
+    assert dump["metadata"]["history"] == [1, 2, 3]
 
 
 def test_agent_request_with_files() -> None:
     """Test AgentRequest with files list."""
     files = ["s3://bucket/file1.txt", "http://example.com/image.png"]
-    req = AgentRequest(query="Analyze this", files=files)
+    req = AgentRequest(session_id=uuid4(), payload={"query": "Analyze this", "files": files})
     dump = req.dump()
-    assert len(dump["files"]) == 2
-    assert dump["files"][0] == "s3://bucket/file1.txt"
+    assert len(dump["payload"]["files"]) == 2
+    assert dump["payload"]["files"][0] == "s3://bucket/file1.txt"
 
 
 def test_service_contract_schema_details() -> None:
