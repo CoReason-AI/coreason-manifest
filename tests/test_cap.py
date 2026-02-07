@@ -69,11 +69,11 @@ def test_service_request_instantiation() -> None:
     req_id = uuid4()
     user = Identity.anonymous()
     context = SessionContext(session_id="s123", user=user)
-    payload = AgentRequest(query="test")
+    payload = AgentRequest(session_id=uuid4(), payload={"query": "test"})
     req = ServiceRequest(request_id=req_id, context=context, payload=payload)
     assert req.request_id == req_id
     assert req.context.session_id == "s123"
-    assert req.payload.query == "test"
+    assert req.payload.payload["query"] == "test"
 
 
 # --- Edge Case Tests ---
@@ -85,7 +85,7 @@ def test_invalid_uuid_validation() -> None:
             {
                 "request_id": "not-a-uuid",
                 "context": {"session_id": "s1", "user": {"id": "u1", "name": "User"}},
-                "payload": {"query": "q"},
+                "payload": {"session_id": str(uuid4()), "payload": {"query": "q"}},
             }
         )
     assert "Input should be a valid UUID" in str(excinfo.value)
@@ -132,18 +132,18 @@ def test_stream_packet_invalid_data_type() -> None:
 def test_service_request_deep_nesting() -> None:
     # Use meta for nested data
     meta = {"level1": {"level2": {"level3": {"data": "deep", "list": [1, 2, {"nested": "item"}]}}}}
-    payload = AgentRequest(query="test", meta=meta)
+    payload = AgentRequest(session_id=uuid4(), payload={"query": "test"}, metadata=meta)
     context = SessionContext(session_id="s1", user=Identity.anonymous())
     req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     dumped = req.dump()
-    assert dumped["payload"]["meta"]["level1"]["level2"]["level3"]["data"] == "deep"
-    assert dumped["payload"]["meta"]["level1"]["level2"]["level3"]["list"][2]["nested"] == "item"
+    assert dumped["payload"]["metadata"]["level1"]["level2"]["level3"]["data"] == "deep"
+    assert dumped["payload"]["metadata"]["level1"]["level2"]["level3"]["list"][2]["nested"] == "item"
 
 
 def test_round_trip_json_serialization() -> None:
     context = SessionContext(session_id="s1", user=Identity.anonymous())
-    payload = AgentRequest(query="run", meta={"params": {"x": 10}})
+    payload = AgentRequest(session_id=uuid4(), payload={"query": "run"}, metadata={"params": {"x": 10}})
     original_req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     # Dump to JSON string
@@ -162,7 +162,7 @@ def test_round_trip_json_serialization() -> None:
 
 def test_immutability_frozen() -> None:
     context = SessionContext(session_id="s1", user=Identity.anonymous())
-    payload = AgentRequest(query="test")
+    payload = AgentRequest(session_id=uuid4(), payload={"query": "test"})
     req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     with pytest.raises(ValidationError) as excinfo:
@@ -177,7 +177,7 @@ def test_type_preservation_in_dict() -> None:
     # Ensure they are not aggressively coerced to strings if not needed.
     meta = {"int_val": 123, "float_val": 45.67, "bool_val": True, "none_val": None, "list_val": [1, "two"]}
     context = SessionContext(session_id="s1", user=Identity.anonymous())
-    payload = AgentRequest(query="test", meta=meta)
+    payload = AgentRequest(session_id=uuid4(), payload={"query": "test"}, metadata=meta)
     req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     # Dump using the CoReasonBaseModel.dump() which sets mode='json'
@@ -185,11 +185,11 @@ def test_type_preservation_in_dict() -> None:
 
     # In mode='json', Pydantic might serialize types to their JSON equivalents.
     # int -> int, float -> float, bool -> bool, None -> null
-    assert dumped["payload"]["meta"]["int_val"] == 123
-    assert dumped["payload"]["meta"]["float_val"] == 45.67
-    assert dumped["payload"]["meta"]["bool_val"] is True
-    assert dumped["payload"]["meta"]["none_val"] is None
-    assert dumped["payload"]["meta"]["list_val"] == [1, "two"]
+    assert dumped["payload"]["metadata"]["int_val"] == 123
+    assert dumped["payload"]["metadata"]["float_val"] == 45.67
+    assert dumped["payload"]["metadata"]["bool_val"] is True
+    assert dumped["payload"]["metadata"]["none_val"] is None
+    assert dumped["payload"]["metadata"]["list_val"] == [1, "two"]
 
 
 def test_extra_fields_behavior() -> None:
@@ -200,7 +200,7 @@ def test_extra_fields_behavior() -> None:
     data = {
         "request_id": str(uuid4()),
         "context": {"session_id": "s1", "user": {"id": "u1", "name": "User"}},
-        "payload": {"query": "q"},
+        "payload": {"session_id": str(uuid4()), "payload": {"query": "q"}},
         "extra_field": "should_be_ignored",
     }
 
