@@ -32,11 +32,13 @@ from coreason_manifest.utils.loader import load_agent_from_ref
 
 # --- Edge Cases ---
 
+
 @pytest.fixture
 def edge_case_dir(tmp_path: Path) -> Path:
     d = tmp_path / "edge_cases"
     d.mkdir()
     return d
+
 
 def test_loader_sys_path_modification(edge_case_dir: Path) -> None:
     """Verify that the loader adds the directory to sys.path correctly."""
@@ -53,6 +55,7 @@ agent = AgentBuilder(name="PathTest").build()
     # Check if directory is in sys.path
     assert str(edge_case_dir) in sys.path
 
+
 def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
     """Test loading a variable that is not an agent or builder."""
     p = edge_case_dir / "string_var.py"
@@ -60,6 +63,7 @@ def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
 
     with pytest.raises(ValueError, match="is not a ManifestV2"):
         load_agent_from_ref(str(p))
+
 
 def test_loader_syntax_error(edge_case_dir: Path) -> None:
     """Test loading a file with Python syntax errors."""
@@ -69,17 +73,21 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
     with pytest.raises(ValueError, match="Error loading module"):
         load_agent_from_ref(str(p))
 
+
 def test_cli_run_empty_inputs(capsys: CaptureFixture[str]) -> None:
     """Test running with empty JSON object inputs."""
     builder = AgentBuilder(name="EmptyInputAgent")
     agent = builder.build()
 
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent), \
-         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", "{}"]):
+    with (
+        patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent),
+        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", "{}"]),
+    ):
         main()
 
     captured = capsys.readouterr()
     assert "step_start" in captured.out
+
 
 def test_cli_run_nested_json_inputs(capsys: CaptureFixture[str]) -> None:
     """Test running with deeply nested JSON inputs."""
@@ -88,14 +96,18 @@ def test_cli_run_nested_json_inputs(capsys: CaptureFixture[str]) -> None:
 
     inputs = json.dumps({"a": {"b": {"c": [1, 2, 3]}}})
 
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent), \
-         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", inputs]):
+    with (
+        patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent),
+        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", inputs]),
+    ):
         main()
 
     captured = capsys.readouterr()
     assert "step_start" in captured.out
 
+
 # --- Complex Cases ---
+
 
 @pytest.fixture
 def complex_workflow_agent() -> ManifestV2:
@@ -131,14 +143,17 @@ def complex_workflow_agent() -> ManifestV2:
         definitions={"AgentA": agent_a_def, "AgentB": agent_b_def},
     )
 
+
 def test_cli_run_complex_workflow(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     """
     Verify that 'run' iterates all steps in a complex workflow and emits correct events.
     Note: The CLI iteration logic simply iterates keys in definitions, not graph traversal.
     """
 
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent), \
-         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
+    with (
+        patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent),
+        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]),
+    ):
         main()
 
     captured = capsys.readouterr()
@@ -161,6 +176,7 @@ def test_cli_run_complex_workflow(complex_workflow_agent: ManifestV2, capsys: Ca
     assert capabilities["step_agent_a"] == "AgentA"
     assert capabilities["step_agent_b"] == "AgentB"
 
+
 def test_cli_run_mock_complex(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     """
     Verify --mock behavior for complex workflow.
@@ -168,9 +184,11 @@ def test_cli_run_mock_complex(complex_workflow_agent: ManifestV2, capsys: Captur
     """
     mock_output = {"mocked_data": "test"}
 
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent), \
-         patch("coreason_manifest.cli.generate_mock_output", return_value=mock_output), \
-         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
+    with (
+        patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent),
+        patch("coreason_manifest.cli.generate_mock_output", return_value=mock_output),
+        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]),
+    ):
         main()
 
     captured = capsys.readouterr()
@@ -189,6 +207,7 @@ def test_cli_run_mock_complex(complex_workflow_agent: ManifestV2, capsys: Captur
     assert outputs["step_switch"] is None
     assert outputs["step_council"] is None
 
+
 def test_loader_cyclic_import_simulation(edge_case_dir: Path) -> None:
     """
     Simulate a case where the imported module might raise a RecursionError during import.
@@ -203,10 +222,13 @@ raise RecursionError("Cyclic import detected")
     with pytest.raises(ValueError, match="Error loading module"):
         load_agent_from_ref(str(p))
 
+
 def test_cli_inspect_complex(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     """Verify inspect output for complex agent."""
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent), \
-         patch.object(sys, "argv", ["coreason", "inspect", "dummy.py"]):
+    with (
+        patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent),
+        patch.object(sys, "argv", ["coreason", "inspect", "dummy.py"]),
+    ):
         main()
 
     captured = capsys.readouterr()

@@ -74,9 +74,6 @@ def load_agent_from_ref(reference: str) -> ManifestV2:
 
     # Validate type
     if not isinstance(agent_obj, ManifestV2):
-        raise ValueError(
-            f"Object '{var_name}' is not a ManifestV2 or AgentBuilder. "
-            f"Got: {type(agent_obj).__name__}"
-        )
+        raise ValueError(f"Object '{var_name}' is not a ManifestV2 or AgentBuilder. Got: {type(agent_obj).__name__}")
 
     return agent_obj

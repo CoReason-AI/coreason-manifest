@@ -98,11 +98,7 @@ def _run_simulation(agent: ManifestV2, mock: bool) -> None:
             capability = "Switch"
 
         # Emit step_start
-        print(json.dumps({
-            "type": "step_start",
-            "step_id": step_id,
-            "capability": capability
-        }))
+        print(json.dumps({"type": "step_start", "step_id": step_id, "capability": capability}))
         sys.stdout.flush()
 
         result = None
@@ -115,14 +111,10 @@ def _run_simulation(agent: ManifestV2, mock: bool) -> None:
                 except Exception as e:
                     sys.stderr.write(f"Error generating mock for {step.agent}: {e}\n")
             else:
-                 sys.stderr.write(f"Definition for {step.agent} not found or not an Agent.\n")
+                sys.stderr.write(f"Definition for {step.agent} not found or not an Agent.\n")
 
         # Emit step_output
-        print(json.dumps({
-            "type": "step_output",
-            "step_id": step_id,
-            "output": result
-        }))
+        print(json.dumps({"type": "step_output", "step_id": step_id, "output": result}))
         sys.stdout.flush()
 
 
