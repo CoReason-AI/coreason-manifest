@@ -10,7 +10,6 @@
 
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
-from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .shortcuts import simple_agent
 from .spec.cap import (
     ErrorSeverity,
@@ -112,6 +111,7 @@ from .spec.v2.resources import (
 from .utils.audit import compute_audit_hash, verify_chain
 from .utils.diff import ChangeCategory, DiffReport, compare_agents
 from .utils.docs import render_agent_card
+from .utils.mcp_adapter import CoreasonMCPServer, create_mcp_tool_definition
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
