@@ -11,9 +11,6 @@
 import argparse
 import json
 import sys
-from pathlib import Path
-
-from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
@@ -23,6 +20,7 @@ from coreason_manifest.spec.v2.definitions import (
     ManifestV2,
     SwitchStep,
 )
+from coreason_manifest.utils.diff import ChangeCategory, DiffReport, compare_agents
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
 from coreason_manifest.utils.viz import generate_mermaid_graph
@@ -60,12 +58,19 @@ def main() -> None:
     validate_parser = subparsers.add_parser("validate", help="Validate a static agent definition file")
     validate_parser.add_argument("file", help="Path to the .yaml or .json file")
     validate_parser.add_argument("--json", action="store_true", help="Output JSON structure on success")
+    # Diff
+    diff_parser = subparsers.add_parser("diff", help="Compare two agent definitions semantically")
+    diff_parser.add_argument("base", help="Reference to the original agent (e.g. master:agent.py)")
+    diff_parser.add_argument("head", help="Reference to the new agent (e.g. local:agent.py)")
+    diff_parser.add_argument(
+        "--fail-on-breaking", action="store_true", help="Exit with code 2 if BREAKING changes are detected"
+    )
+    diff_parser.add_argument("--json", action="store_true", help="Output JSON format")
 
     args = parser.parse_args()
 
-    if args.command == "validate":
-        handle_validate(args)
-        return
+    if args.command == "diff":
+        _handle_diff(args.base, args.head, args.json, args.fail_on_breaking)
 
     try:
         agent = load_agent_from_ref(args.ref)
@@ -109,65 +114,45 @@ def main() -> None:
             print(final_hash)
 
 
-def handle_validate(args: argparse.Namespace) -> None:
-    file_path = Path(args.file)
-    if not file_path.exists():
-        sys.stderr.write(f"Error: File not found: {file_path}\n")
-        sys.exit(1)
-
-    # Lazy import yaml
+def _handle_diff(base_ref: str, head_ref: str, json_output: bool, fail_on_breaking: bool) -> None:
+    """
+    Compare two agent definitions and print a difference report.
+    """
     try:
-        import yaml
-    except ImportError:
-        sys.stderr.write("Error: PyYAML is required for validation. Please install it with 'pip install PyYAML'.\n")
-        sys.exit(1)
-
-    try:
-        with file_path.open("r", encoding="utf-8") as f:
-            if file_path.suffix.lower() == ".json":
-                data = json.load(f)
-            elif file_path.suffix.lower() in [".yaml", ".yml"]:
-                data = yaml.safe_load(f)
-            else:
-                sys.stderr.write(f"Error: Unsupported file extension: {file_path.suffix}\n")
-                sys.exit(1)
-
-        # Validation Logic
-        agent: ManifestV2 | AgentDefinition
-
-        if isinstance(data, dict) and "apiVersion" in data:
-            # It's likely a ManifestV2
-            agent = ManifestV2.model_validate(data)
-        else:
-            # Fallback to AgentDefinition
-            agent = AgentDefinition.model_validate(data)
-
-        # Success Output
-        name = "Unknown"
-        version = "?"
-
-        if isinstance(agent, ManifestV2):
-            # ManifestV2 has metadata which has name
-            name = agent.metadata.name
-            # Try to get version from metadata extra fields
-            if agent.metadata.model_extra and "version" in agent.metadata.model_extra:
-                version = str(agent.metadata.model_extra["version"])
-        elif isinstance(agent, AgentDefinition):
-            name = agent.name
-
-        print(f"✅ Valid Agent: {name} (v{version})")
-        if args.json:
-            print(agent.model_dump_json(indent=2, by_alias=True, exclude_none=True))
-
-    except ValidationError as e:
-        print("❌ Validation Failed:")
-        for err in e.errors():
-            loc = " -> ".join(str(loc_part) for loc_part in err["loc"])
-            print(f"  • {loc}: {err['msg']}")
-        sys.exit(1)
+        old_def = load_agent_from_ref(base_ref)
+        new_def = load_agent_from_ref(head_ref)
     except Exception as e:
-        print(f"❌ Error: {e!s}")
+        sys.stderr.write(f"Error loading agent: {e}\n")
         sys.exit(1)
+
+    report: DiffReport = compare_agents(old_def, new_def)
+
+    if json_output:
+        print(report.model_dump_json(indent=2))
+        sys.exit(0)
+
+    # Text Mode
+    if not report.changes:
+        print("✅ No semantic changes detected.")
+        sys.exit(0)
+
+    category_icons = {
+        ChangeCategory.BREAKING: "🚨 **BREAKING**",
+        ChangeCategory.GOVERNANCE: "🛡️ **GOVERNANCE**",
+        ChangeCategory.RESOURCE: "💰 **RESOURCE**",
+        ChangeCategory.FEATURE: "✨ **FEATURE**",
+        ChangeCategory.PATCH: "🔧 **PATCH**",
+    }
+
+    for change in report.changes:
+        icon = category_icons.get(change.category, "🔧 **PATCH**")
+        print(f"[{icon}] {change.path}: {change.old_value} -> {change.new_value}")
+
+    if fail_on_breaking and report.has_breaking:
+        sys.stderr.write("❌ Blocking CI due to breaking changes.\n")
+        sys.exit(2)
+
+    sys.exit(0)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:

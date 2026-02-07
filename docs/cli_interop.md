@@ -117,6 +117,19 @@ coreason hash examples/my_agent.py:agent --json
 **Behavior:**
 - **Strict Canonicalization:** The command loads the agent definition and computes the hash using the kernel's native `compute_hash()` method, ensuring consistency with internal validation logic.
 - **Verification:** Useful for CI/CD pipelines to verify that an agent has not been tampered with before deployment.
+#### 4. Semantic Diff (`diff`)
+
+Compares two agent definitions and detects semantic changes (Breaking, Feature, Governance, Resource).
+
+```bash
+coreason diff base_version.py:agent new_version.py:agent --fail-on-breaking
+```
+
+**Output:**
+- Human-readable text report by default.
+- JSON report if `--json` is passed.
+
+See [Semantic Diffing Utility](semantic_diffing.md) for full details.
 
 ## Edge Cases & Limitations
 
