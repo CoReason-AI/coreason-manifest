@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from uuid import UUID
 
 import pytest
@@ -282,5 +282,7 @@ def test_simulation_adversarial_config() -> None:
         chaos_config=chaos,
     )
 
+    assert req.profile is not None
+    assert req.chaos_config is not None
     assert req.profile.persona["skills"][0] == "sql-injection"
     assert req.chaos_config.error_rate == 0.99
