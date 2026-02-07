@@ -10,8 +10,8 @@
 
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
-from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .shortcuts import simple_agent
+from .utils.mcp_adapter import CoreasonMCPServer, create_mcp_tool_definition
 from .spec.cap import (
     ErrorSeverity,
     HealthCheckResponse,

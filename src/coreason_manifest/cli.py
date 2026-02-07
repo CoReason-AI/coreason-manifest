@@ -16,7 +16,6 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from coreason_manifest.runtime.executor import GraphExecutor
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -28,6 +27,7 @@ from coreason_manifest.spec.v2.definitions import (
 from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
+from coreason_manifest.utils.simulation_executor import GraphExecutor
 from coreason_manifest.utils.viz import generate_mermaid_graph
 
 

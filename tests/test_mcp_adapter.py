@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from coreason_manifest.interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
+from coreason_manifest.utils.mcp_adapter import CoreasonMCPServer, create_mcp_tool_definition
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 

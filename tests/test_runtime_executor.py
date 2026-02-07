@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from coreason_manifest.runtime.executor import GraphExecutor
+from coreason_manifest.utils.simulation_executor import GraphExecutor
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
