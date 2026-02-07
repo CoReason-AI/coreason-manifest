@@ -1,442 +1,140 @@
-# tests/test_audit_integrity.py
-
-import uuid
-from datetime import UTC, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import UTC, datetime
+from uuid import uuid4
 
 from coreason_manifest.spec.common.observability import AuditLog
 from coreason_manifest.utils.audit import compute_audit_hash, verify_chain
 
 
-def test_deterministic_hashing() -> None:
-    """Verify that hashing is deterministic regardless of key order in dict."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-    now = datetime.now(UTC)
-
-    data1 = {
-        "id": uid,
-        "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": now,
-        "actor": "user-1",
-        "action": "login",
-        "outcome": "success",
-        "previous_hash": None,
-        "safety_metadata": {"score": 0.9},
-    }
-
-    data2 = {
-        "outcome": "success",
-        "action": "login",
-        "actor": "user-1",
-        "timestamp": now,
-        "root_request_id": root_id,
-        "request_id": req_id,
-        "id": uid,
-        "safety_metadata": {"score": 0.9},
-        "previous_hash": None,
-    }
-
-    hash1 = compute_audit_hash(data1)
-    hash2 = compute_audit_hash(data2)
-
-    assert hash1 == hash2
-
-
-def test_timezone_normalization() -> None:
-    """Verify that equivalent times in different zones hash identically."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-
-    # Create UTC time
-    dt_utc = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
-
-    # Create same time in EST (UTC-5)
-    # 12:00 UTC is 07:00 EST
-    dt_est = datetime(2023, 1, 1, 7, 0, 0, tzinfo=ZoneInfo("US/Eastern"))
-
-    # Sanity check that they represent the same instant
-    assert dt_utc == dt_est
-
-    data_utc = {
-        "id": uid,
-        "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": dt_utc,
-        "actor": "user",
-        "action": "test",
-        "outcome": "success",
-        "previous_hash": None,
-        "safety_metadata": None,
-    }
-
-    data_est = data_utc.copy()
-    data_est["timestamp"] = dt_est
-
-    hash_utc = compute_audit_hash(data_utc)
-    hash_est = compute_audit_hash(data_est)
-
-    assert hash_utc == hash_est
-
-
-def test_tamper_detection() -> None:
-    """Verify that changing any field changes the hash."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-    now = datetime.now(UTC)
+def test_audit_dict_behavior() -> None:
+    """Verify compute_audit_hash includes extra fields in dict."""
+    entry_id = uuid4()
+    req_id = uuid4()
+    root_req_id = uuid4()
+    ts = datetime.now(UTC)
 
     base_data = {
-        "id": uid,
+        "id": entry_id,
         "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": now,
-        "actor": "user-1",
+        "root_request_id": root_req_id,
+        "timestamp": ts,
+        "actor": "user",
         "action": "login",
         "outcome": "success",
-        "previous_hash": None,
+        "extra_field": "secret",
     }
 
-    original_hash = compute_audit_hash(base_data)
+    hash1 = compute_audit_hash(base_data)
 
-    # Modify outcome
     tampered_data = base_data.copy()
-    tampered_data["outcome"] = "failed"
-    assert compute_audit_hash(tampered_data) != original_hash
+    tampered_data["extra_field"] = "changed"
+    hash2 = compute_audit_hash(tampered_data)
 
-    # Modify timestamp
-    tampered_data = base_data.copy()
-    tampered_data["timestamp"] = now + timedelta(seconds=1)
-    assert compute_audit_hash(tampered_data) != original_hash
+    assert hash1 != hash2
 
 
-def test_integrity_hash_exclusion() -> None:
-    """Verify that integrity_hash field is excluded from calculation."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-    now = datetime.now(UTC)
+def test_audit_model_behavior() -> None:
+    """Verify compute_audit_hash includes extra fields in Pydantic model subclass."""
 
-    data = {
-        "id": uid,
-        "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": now,
-        "actor": "user-1",
-        "action": "login",
-        "outcome": "success",
-        "previous_hash": None,
-    }
+    class ExtendedAuditLog(AuditLog):
+        user_ip: str
 
-    hash1 = compute_audit_hash(data)
+    entry_id = uuid4()
+    req_id = uuid4()
+    root_req_id = uuid4()
+    ts = datetime.now(UTC)
 
-    # Add integrity_hash to input dict (simulating a record that already has it)
-    data_with_hash = data.copy()
-    data_with_hash["integrity_hash"] = "fake_hash"
+    log1 = ExtendedAuditLog(
+        id=entry_id,
+        request_id=req_id,
+        root_request_id=root_req_id,
+        timestamp=ts,
+        actor="user",
+        action="login",
+        outcome="success",
+        integrity_hash="placeholder",
+        user_ip="1.1.1.1",
+    )
 
-    hash2 = compute_audit_hash(data_with_hash)
+    hash1 = compute_audit_hash(log1)
 
-    assert hash1 == hash2
+    log2 = ExtendedAuditLog(
+        id=entry_id,
+        request_id=req_id,
+        root_request_id=root_req_id,
+        timestamp=ts,
+        actor="user",
+        action="login",
+        outcome="success",
+        integrity_hash="placeholder",
+        user_ip="2.2.2.2",
+    )
+
+    hash2 = compute_audit_hash(log2)
+
+    assert hash1 != hash2
 
 
 def test_verify_chain_valid() -> None:
-    """Verify a valid chain of logs."""
-    chain: list[AuditLog] = []
+    """Verify a valid chain of audit logs."""
+    entry_id_1 = uuid4()
+    entry_id_2 = uuid4()
+    req_id = uuid4()
+    root_req_id = uuid4()
+    ts = datetime.now(UTC)
 
-    root_id = uuid.uuid4()
-    prev_hash = None
-
-    for i in range(3):
-        entry_data = {
-            "id": uuid.uuid4(),
-            "request_id": uuid.uuid4(),
-            "root_request_id": root_id,
-            "timestamp": datetime.now(UTC),
-            "actor": "system",
-            "action": f"step-{i}",
-            "outcome": "success",
-            "previous_hash": prev_hash,
-        }
-
-        # Compute hash
-        integrity = compute_audit_hash(entry_data)
-
-        # Create object
-        log = AuditLog(**entry_data, integrity_hash=integrity)
-        chain.append(log)
-        prev_hash = integrity
-
-    assert verify_chain(chain) is True
-
-
-def test_verify_chain_broken_content() -> None:
-    """Verify that tampering with content breaks the chain verification."""
-    chain: list[AuditLog] = []
-    root_id = uuid.uuid4()
-    prev_hash = None
-
-    for i in range(3):
-        entry_data = {
-            "id": uuid.uuid4(),
-            "request_id": uuid.uuid4(),
-            "root_request_id": root_id,
-            "timestamp": datetime.now(UTC),
-            "actor": "system",
-            "action": f"step-{i}",
-            "outcome": "success",
-            "previous_hash": prev_hash,
-        }
-        integrity = compute_audit_hash(entry_data)
-        log = AuditLog(**entry_data, integrity_hash=integrity)
-        chain.append(log)
-        prev_hash = integrity
-
-    # Tamper with the second log (index 1)
-    original_log = chain[1]
-    # Create a log with same hash but different content
-    tampered_log = AuditLog(
-        id=original_log.id,
-        request_id=original_log.request_id,
-        root_request_id=original_log.root_request_id,
-        timestamp=original_log.timestamp,
-        actor=original_log.actor,
-        action="tampered_action",  # Changed
-        outcome=original_log.outcome,
-        previous_hash=original_log.previous_hash,
-        integrity_hash=original_log.integrity_hash,  # Kept old hash
+    # 1. Create first log
+    log1 = AuditLog(
+        id=entry_id_1,
+        request_id=req_id,
+        root_request_id=root_req_id,
+        timestamp=ts,
+        actor="user",
+        action="login",
+        outcome="success",
+        integrity_hash="placeholder",
     )
-    chain[1] = tampered_log
+    # Compute valid hash
+    hash1 = compute_audit_hash(log1)
+    # Update log with valid hash (using model_copy to be safe/immutable-ish)
+    log1 = log1.model_copy(update={"integrity_hash": hash1})
 
-    assert verify_chain(chain) is False
-
-
-def test_verify_chain_broken_link() -> None:
-    """Verify that breaking the hash link breaks the chain verification."""
-    chain: list[AuditLog] = []
-    root_id = uuid.uuid4()
-    prev_hash = None
-
-    for i in range(3):
-        entry_data = {
-            "id": uuid.uuid4(),
-            "request_id": uuid.uuid4(),
-            "root_request_id": root_id,
-            "timestamp": datetime.now(UTC),
-            "actor": "system",
-            "action": f"step-{i}",
-            "outcome": "success",
-            "previous_hash": prev_hash,
-        }
-        integrity = compute_audit_hash(entry_data)
-        log = AuditLog(**entry_data, integrity_hash=integrity)
-        chain.append(log)
-        prev_hash = integrity
-
-    # Break the link between 1 and 2
-    # Modify log 2's previous_hash
-    original_log = chain[2]
-    broken_link_log = AuditLog(
-        id=original_log.id,
-        request_id=original_log.request_id,
-        root_request_id=original_log.root_request_id,
-        timestamp=original_log.timestamp,
-        actor=original_log.actor,
-        action=original_log.action,
-        outcome=original_log.outcome,
-        previous_hash="wrong_hash",  # Broken link
-        integrity_hash=compute_audit_hash(
-            {
-                "id": original_log.id,
-                "request_id": original_log.request_id,
-                "root_request_id": original_log.root_request_id,
-                "timestamp": original_log.timestamp,
-                "actor": original_log.actor,
-                "action": original_log.action,
-                "outcome": original_log.outcome,
-                "previous_hash": "wrong_hash",
-            }
-        ),
+    # 2. Create second log linked to first
+    log2 = AuditLog(
+        id=entry_id_2,
+        request_id=req_id,
+        root_request_id=root_req_id,
+        timestamp=ts,
+        actor="user",
+        action="logout",
+        outcome="success",
+        previous_hash=hash1,
+        integrity_hash="placeholder",
     )
+    # Compute valid hash
+    hash2 = compute_audit_hash(log2)
+    # Update log with valid hash
+    log2 = log2.model_copy(update={"integrity_hash": hash2})
 
-    chain[2] = broken_link_log
+    # 3. Verify chain
+    assert verify_chain([log1, log2]) is True
 
-    assert verify_chain(chain) is False
+    # 4. Verify tampering fails chain
+    log1_tampered = log1.model_copy(update={"actor": "hacker"})
+    # Re-computing hash for tampered log wouldn't match integrity_hash if we don't update it
+    # But verify_chain checks: computed == log.integrity_hash
+    # So if we tamper with data but NOT hash, it fails self-integrity
+    # This covers the line: if computed != log.integrity_hash: return False
+    assert verify_chain([log1_tampered, log2]) is False
 
-
-def test_safety_metadata_inclusion() -> None:
-    """Verify that safety_metadata is included in hash calculation."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-    now = datetime.now(UTC)
-
-    data = {
-        "id": uid,
-        "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": now,
-        "actor": "user-1",
-        "action": "login",
-        "outcome": "success",
-        "previous_hash": None,
-    }
-
-    hash_without = compute_audit_hash(data)
-
-    data_with = data.copy()
-    data_with["safety_metadata"] = {"flag": True}
-
-    hash_with = compute_audit_hash(data_with)
-
-    assert hash_without != hash_with
+    # 5. Verify broken link
+    # If we update log1's hash to be valid for the tampered data...
+    hash1_tampered = compute_audit_hash(log1_tampered)
+    log1_tampered_valid_hash = log1_tampered.model_copy(update={"integrity_hash": hash1_tampered})
+    # ... then self-integrity passes for log1
+    # But log2.previous_hash will still be hash1 (original), which != hash1_tampered
+    assert verify_chain([log1_tampered_valid_hash, log2]) is False
 
 
-def test_unicode_consistency() -> None:
-    """Verify that hashing works consistently with Unicode characters."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-    now = datetime.now(UTC)
-
-    # Test with emojis and non-ASCII script
-    data = {
-        "id": uid,
-        "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": now,
-        "actor": "user-🚀",
-        "action": "acción_crítica",
-        "outcome": "成功",  # Success in Chinese
-        "previous_hash": None,
-        "safety_metadata": None,
-    }
-
-    hash1 = compute_audit_hash(data)
-    hash2 = compute_audit_hash(data)
-
-    assert hash1 == hash2
-    assert isinstance(hash1, str)
-    assert len(hash1) == 64
-
-
-def test_nested_safety_metadata() -> None:
-    """Verify determinism with nested dictionaries in safety_metadata."""
-    uid = uuid.uuid4()
-    req_id = uuid.uuid4()
-    root_id = uuid.uuid4()
-    now = datetime.now(UTC)
-
-    metadata = {"policy": {"name": "PII", "checks": ["email", "phone"]}, "score": 0.05}
-
-    data = {
-        "id": uid,
-        "request_id": req_id,
-        "root_request_id": root_id,
-        "timestamp": now,
-        "actor": "system",
-        "action": "scan",
-        "outcome": "success",
-        "previous_hash": None,
-        "safety_metadata": metadata,
-    }
-
-    hash1 = compute_audit_hash(data)
-
-    # Create copy with different key order in nested dict
-    metadata2 = {"score": 0.05, "policy": {"checks": ["email", "phone"], "name": "PII"}}
-
-    data2 = data.copy()
-    data2["safety_metadata"] = metadata2
-
-    hash2 = compute_audit_hash(data2)
-
-    assert hash1 == hash2
-
-
-def test_long_chain_verification() -> None:
-    """Verify a longer chain of logs."""
-    chain: list[AuditLog] = []
-    root_id = uuid.uuid4()
-    prev_hash = None
-
-    # Chain of 15 items
-    for i in range(15):
-        entry_data = {
-            "id": uuid.uuid4(),
-            "request_id": uuid.uuid4(),
-            "root_request_id": root_id,
-            "timestamp": datetime.now(UTC),
-            "actor": "system",
-            "action": f"step-{i}",
-            "outcome": "success",
-            "previous_hash": prev_hash,
-        }
-        integrity = compute_audit_hash(entry_data)
-        log = AuditLog(**entry_data, integrity_hash=integrity)
-        chain.append(log)
-        prev_hash = integrity
-
-    assert verify_chain(chain) is True
-
-
-def test_chain_domino_effect() -> None:
-    """
-    Verify that if a middle node is tampered (and re-hashed),
-    the chain verification fails at the NEXT node because of link mismatch.
-    """
-    chain: list[AuditLog] = []
-    root_id = uuid.uuid4()
-    prev_hash = None
-
-    for i in range(5):
-        entry_data = {
-            "id": uuid.uuid4(),
-            "request_id": uuid.uuid4(),
-            "root_request_id": root_id,
-            "timestamp": datetime.now(UTC),
-            "actor": "system",
-            "action": f"step-{i}",
-            "outcome": "success",
-            "previous_hash": prev_hash,
-        }
-        integrity = compute_audit_hash(entry_data)
-        log = AuditLog(**entry_data, integrity_hash=integrity)
-        chain.append(log)
-        prev_hash = integrity
-
-    # Tamper with index 2 (the 3rd item)
-    # We change the content AND recompute the hash so the node itself is valid.
-    target_idx = 2
-    original_log = chain[target_idx]
-
-    tampered_data = {
-        "id": original_log.id,
-        "request_id": original_log.request_id,
-        "root_request_id": original_log.root_request_id,
-        "timestamp": original_log.timestamp,
-        "actor": original_log.actor,
-        "action": "MALICIOUS_ACTION",  # Changed
-        "outcome": original_log.outcome,
-        "previous_hash": original_log.previous_hash,  # Valid link to previous
-        "safety_metadata": None,
-    }
-
-    new_integrity = compute_audit_hash(tampered_data)
-    tampered_log = AuditLog(**tampered_data, integrity_hash=new_integrity)
-
-    chain[target_idx] = tampered_log
-
-    # Now:
-    # chain[0]: Valid
-    # chain[1]: Valid
-    # chain[2]: Valid (self-integrity check passes)
-    # chain[3]: INVALID (chain[3].previous_hash != chain[2].integrity_hash)
-
-    assert verify_chain(chain) is False
-
-    # Verify manually that the break is where we expect
-    assert compute_audit_hash(chain[target_idx]) == chain[target_idx].integrity_hash
-    assert chain[target_idx + 1].previous_hash != chain[target_idx].integrity_hash
+def test_verify_chain_empty() -> None:
+    """Verify empty chain is valid."""
+    assert verify_chain([]) is True

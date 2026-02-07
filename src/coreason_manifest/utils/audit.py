@@ -14,6 +14,8 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
+from pydantic import BaseModel
+
 from ..spec.common.observability import AuditLog
 
 
@@ -21,33 +23,20 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     """
     Computes a deterministic SHA-256 hash of the audit entry.
 
-    The hash is computed over the following fields (if present):
-    - id
-    - request_id
-    - root_request_id
-    - timestamp
-    - actor
-    - action
-    - outcome
-    - previous_hash
-    - safety_metadata
+    The hash is computed over all fields present in the entry, except `integrity_hash`.
+    This uses introspection to ensure all current and future fields are
+    automatically included in the integrity check.
 
     Fields are canonicalized (UUID -> str, datetime -> ISO 8601 UTC) and
     serialized to JSON with sorted keys. `integrity_hash` is explicitly excluded.
     None values are excluded from the payload.
     """
-    # Fields to extract
-    fields = [
-        "id",
-        "request_id",
-        "root_request_id",
-        "timestamp",
-        "actor",
-        "action",
-        "outcome",
-        "previous_hash",
-        "safety_metadata",
-    ]
+    # Fields to extract: Use introspection to get all fields
+    fields = list(type(entry).model_fields.keys()) if isinstance(entry, BaseModel) else list(entry.keys())
+
+    # Explicitly exclude integrity_hash
+    if "integrity_hash" in fields:
+        fields.remove("integrity_hash")
 
     payload: dict[str, Any] = {}
 
