@@ -67,6 +67,11 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
 
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
+
+        # SECURITY WARNING: This executes arbitrary code from the file.
+        sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
+        sys.stderr.flush()
+
         spec.loader.exec_module(module)
     except Exception as e:
         raise ValueError(f"Error loading module {file_path}: {e}") from e
