@@ -11,13 +11,16 @@
 import importlib.util
 import json
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from _pytest.capture import CaptureFixture
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.cli import main
 from coreason_manifest.spec.v2.definitions import (
+    AgentDefinition,
     AgentStep,
     CouncilStep,
     InterfaceDefinition,
@@ -32,13 +35,15 @@ from coreason_manifest.utils.loader import load_agent_from_ref
 
 # Helper to create temporary python file
 @pytest.fixture
-def temp_agent_file(tmp_path):
+def temp_agent_file(tmp_path: Path) -> Path:
     d = tmp_path / "agents"
     d.mkdir()
     p = d / "my_agent.py"
     p.write_text("""
 from coreason_manifest.builder import AgentBuilder
-from coreason_manifest.spec.v2.definitions import ManifestV2, AgentDefinition, Workflow, AgentStep, InterfaceDefinition, ManifestMetadata
+from coreason_manifest.spec.v2.definitions import (
+    ManifestV2, AgentDefinition, Workflow, AgentStep, InterfaceDefinition, ManifestMetadata
+)
 
 # 1. AgentBuilder instance
 builder = AgentBuilder(name="BuilderAgent")
@@ -67,21 +72,21 @@ broken_builder = BrokenBuilder(name="Broken")
     return p
 
 
-def test_loader_manifest(temp_agent_file):
+def test_loader_manifest(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:manifest"
     agent = load_agent_from_ref(ref)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "ManifestAgent"
 
 
-def test_loader_builder(temp_agent_file):
+def test_loader_builder(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:builder_agent"
     agent = load_agent_from_ref(ref)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "BuilderAgent"
 
 
-def test_loader_default_var(temp_agent_file):
+def test_loader_default_var(temp_agent_file: Path) -> None:
     # Create file with 'agent' variable
     p = temp_agent_file.parent / "default_agent.py"
     p.write_text("""
@@ -93,7 +98,7 @@ agent = AgentBuilder(name="DefaultAgent").build()
     assert loaded.metadata.name == "DefaultAgent"
 
 
-def test_loader_errors(temp_agent_file):
+def test_loader_errors(temp_agent_file: Path) -> None:
     # File not found
     with pytest.raises(ValueError, match="File not found"):
         load_agent_from_ref("non_existent.py")
@@ -116,23 +121,23 @@ def test_loader_errors(temp_agent_file):
     with pytest.raises(ValueError, match="Error building agent"):
         load_agent_from_ref(f"{temp_agent_file}:broken_builder")
 
-def test_loader_spec_error(temp_agent_file):
-    with patch("importlib.util.spec_from_file_location", return_value=None):
-        with pytest.raises(ValueError, match="Could not load spec"):
-            load_agent_from_ref(str(temp_agent_file))
+def test_loader_spec_error(temp_agent_file: Path) -> None:
+    with patch("importlib.util.spec_from_file_location", return_value=None), \
+         pytest.raises(ValueError, match="Could not load spec"):
+        load_agent_from_ref(str(temp_agent_file))
 
 # CLI Tests
 
 @pytest.fixture
-def mock_agent():
+def mock_agent() -> ManifestV2:
     builder = AgentBuilder(name="TestAgent")
     return builder.build()
 
 
-def test_cli_inspect(mock_agent, capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        with patch.object(sys, "argv", ["coreason", "inspect", "dummy.py"]):
-            main()
+def test_cli_inspect(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch.object(sys, "argv", ["coreason", "inspect", "dummy.py"]):
+        main()
 
     captured = capsys.readouterr()
     output = json.loads(captured.out)
@@ -142,32 +147,32 @@ def test_cli_inspect(mock_agent, capsys):
     assert "workflow" in output
 
 
-def test_cli_viz(mock_agent, capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        with patch.object(sys, "argv", ["coreason", "viz", "dummy.py"]):
-            main()
+def test_cli_viz(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch.object(sys, "argv", ["coreason", "viz", "dummy.py"]):
+        main()
 
     captured = capsys.readouterr()
     assert "graph TD" in captured.out
 
 
-def test_cli_viz_json(mock_agent, capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        with patch.object(sys, "argv", ["coreason", "viz", "dummy.py", "--json"]):
-            main()
+def test_cli_viz_json(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch.object(sys, "argv", ["coreason", "viz", "dummy.py", "--json"]):
+        main()
 
     captured = capsys.readouterr()
     output = json.loads(captured.out)
     assert "graph TD" in output["mermaid"]
 
 
-def test_cli_run_simple(mock_agent, capsys):
+def test_cli_run_simple(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     # Add a step to mock agent
     # AgentBuilder.build() creates a default workflow with 'main' step
 
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        with patch.object(sys, "argv", ["coreason", "run", "dummy.py"]):
-            main()
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch.object(sys, "argv", ["coreason", "run", "dummy.py"]):
+        main()
 
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
@@ -180,12 +185,11 @@ def test_cli_run_simple(mock_agent, capsys):
     assert events[1]["output"] is None
 
 
-def test_cli_run_mock(mock_agent, capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        # We need to mock generate_mock_output to control result
-        with patch("coreason_manifest.cli.generate_mock_output", return_value={"mocked": True}):
-            with patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
-                main()
+def test_cli_run_mock(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch("coreason_manifest.cli.generate_mock_output", return_value={"mocked": True}), \
+         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
+        main()
 
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
@@ -195,28 +199,28 @@ def test_cli_run_mock(mock_agent, capsys):
     assert output_event["output"] == {"mocked": True}
 
 
-def test_cli_run_bad_inputs(mock_agent, capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        with patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", "{bad json"]):
-            with pytest.raises(SystemExit):
-                main()
+def test_cli_run_bad_inputs(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", "{bad json"]), \
+         pytest.raises(SystemExit):
+        main()
 
     captured = capsys.readouterr()
     assert "Error parsing inputs" in captured.err
 
 
-def test_cli_load_error(capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", side_effect=ValueError("Load failed")):
-        with patch.object(sys, "argv", ["coreason", "inspect", "bad.py"]):
-            with pytest.raises(SystemExit):
-                main()
+def test_cli_load_error(capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", side_effect=ValueError("Load failed")), \
+         patch.object(sys, "argv", ["coreason", "inspect", "bad.py"]), \
+         pytest.raises(SystemExit):
+        main()
 
     captured = capsys.readouterr()
     assert "Error loading agent: Load failed" in captured.err
 
 
 # Branch coverage for run loop capabilities
-def test_cli_run_capabilities(capsys):
+def test_cli_run_capabilities(capsys: CaptureFixture[str]) -> None:
     # Construct manifest with different step types
     w = Workflow(
         start="s1",
@@ -234,9 +238,9 @@ def test_cli_run_capabilities(capsys):
         definitions={}
     )
 
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent):
-        with patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
-            main()
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent), \
+         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
+        main()
 
     captured = capsys.readouterr()
     lines = captured.out.strip().split("\n")
@@ -251,11 +255,11 @@ def test_cli_run_capabilities(capsys):
     assert "Definition for MissingAgent not found" in captured.err
 
 
-def test_cli_run_mock_error(mock_agent, capsys):
-    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent):
-        with patch("coreason_manifest.cli.generate_mock_output", side_effect=Exception("Mock fail")):
-            with patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
-                main()
+def test_cli_run_mock_error(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
+    with patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent), \
+         patch("coreason_manifest.cli.generate_mock_output", side_effect=Exception("Mock fail")), \
+         patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]):
+        main()
 
     captured = capsys.readouterr()
     assert "Error generating mock" in captured.err

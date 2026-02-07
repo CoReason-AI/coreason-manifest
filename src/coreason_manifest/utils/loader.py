@@ -62,8 +62,8 @@ def load_agent_from_ref(reference: str) -> ManifestV2:
     # Extract variable
     try:
         agent_obj = getattr(module, var_name)
-    except AttributeError:
-        raise ValueError(f"Variable '{var_name}' not found in {file_path}")
+    except AttributeError as e:
+        raise ValueError(f"Variable '{var_name}' not found in {file_path}") from e
 
     # Handle Builder
     if isinstance(agent_obj, AgentBuilder):

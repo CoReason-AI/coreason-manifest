@@ -11,7 +11,6 @@
 import argparse
 import json
 import sys
-from typing import Any
 
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
@@ -72,15 +71,15 @@ def main() -> None:
 
     elif args.command == "run":
         try:
-            inputs = json.loads(args.inputs)
+            json.loads(args.inputs)
         except json.JSONDecodeError as e:
             sys.stderr.write(f"Error parsing inputs: {e}\n")
             sys.exit(1)
 
-        _run_simulation(agent, inputs, args.mock)
+        _run_simulation(agent, args.mock)
 
 
-def _run_simulation(agent: ManifestV2, inputs: dict[str, Any], mock: bool) -> None:
+def _run_simulation(agent: ManifestV2, mock: bool) -> None:
     """
     Runs a simulation of the agent workflow.
     Iterates through all steps defined in the workflow (not graph traversal)
