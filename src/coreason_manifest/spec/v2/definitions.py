@@ -17,6 +17,7 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.mcp_defs import MCPResourceDefinition
 from coreason_manifest.spec.v2.resources import ModelProfile
 from coreason_manifest.spec.v2.skills import SkillDefinition
 
@@ -32,6 +33,7 @@ __all__ = [
     "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
+    "MCPResourceDefinition",
     "SkillDefinition",
     "Step",
     "SwitchStep",
@@ -114,6 +116,10 @@ class AgentDefinition(CoReasonBaseModel):
     )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
     skills: list[str] = Field(default_factory=list, description="List of Skill IDs to equip this agent with.")
+    exposed_mcp_resources: list[MCPResourceDefinition] = Field(
+        default_factory=list,
+        description="List of passive data resources (logs, files, streams) this agent exposes to the MCP host.",
+    )
     context_strategy: Literal["full", "compressed", "hybrid"] = Field(
         "hybrid", description="Context optimization strategy for skills."
     )
@@ -245,6 +251,9 @@ class ManifestV2(CoReasonBaseModel):
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: dict[
         str,
-        Annotated[ToolDefinition | AgentDefinition | SkillDefinition, Field(discriminator="type")] | GenericDefinition,
+        Annotated[
+            ToolDefinition | AgentDefinition | SkillDefinition | MCPResourceDefinition, Field(discriminator="type")
+        ]
+        | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
