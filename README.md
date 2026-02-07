@@ -45,6 +45,19 @@ Core definitions (e.g., `Manifest`, `Workflow`, `AgentDefinition`) inherit from 
 pip install coreason-manifest
 ```
 
+## CLI
+
+The `coreason` CLI is your primary tool for managing agent manifests.
+
+*   `init`: Scaffold a new project.
+*   `run`: Simulate execution locally.
+*   `viz`: Visualize workflow topology.
+*   `validate`: Statically validate JSON/YAML files against the schema.
+*   `inspect`: View full canonical JSON.
+*   `hash`: Compute integrity hashes.
+
+See [CLI Documentation](docs/cli.md) for full details.
+
 ## Usage
 
 ### Quick Start

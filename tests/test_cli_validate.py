@@ -196,3 +196,141 @@ def test_validate_missing_pyyaml(tmp_path: Path, capsys: pytest.CaptureFixture[s
 
     captured = capsys.readouterr()
     assert "❌ Error: PyYAML is not installed" in captured.out
+
+
+def test_validate_empty_file(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of an empty file."""
+    agent_file = tmp_path / "empty.json"
+    agent_file.write_text("")
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error: Malformed JSON file" in captured.out
+
+
+def test_validate_list_root(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation when root element is a list (valid JSON but invalid Agent)."""
+    agent_file = tmp_path / "list_root.json"
+    agent_file.write_text("[]")
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Validation Failed" in captured.out
+    assert "Input should be a valid dictionary" in captured.out
+
+
+def test_validate_extra_fields_manifest(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation failure for extra fields in ManifestV2 (strict validation)."""
+    agent_file = tmp_path / "extra_fields.yaml"
+    agent_data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Agent",
+        "metadata": {"name": "Strict Agent"},
+        "workflow": {"start": "s1", "steps": {"s1": {"type": "logic", "id": "s1", "code": "pass"}}},
+        "extra_field": "should fail",
+    }
+    agent_file.write_text(yaml.dump(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Validation Failed" in captured.out
+    assert "extra_field" in captured.out
+    assert "Extra inputs are not permitted" in captured.out
+
+
+def test_validate_complex_manifest(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of a complex ManifestV2 with multiple definitions and steps."""
+    agent_file = tmp_path / "complex_manifest.yaml"
+    agent_data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Complex Workflow", "version": "2.0.0"},
+        "definitions": {
+            "web_search": {
+                "type": "tool",
+                "id": "web_search",
+                "name": "Web Search",
+                "uri": "https://api.search.com/v1",
+                "risk_level": "safe",
+            },
+            "researcher": {
+                "type": "agent",
+                "id": "researcher",
+                "name": "Researcher",
+                "role": "Researcher",
+                "goal": "Find info",
+                "tools": ["web_search"],
+            },
+        },
+        "workflow": {
+            "start": "step1",
+            "steps": {
+                "step1": {
+                    "type": "agent",
+                    "id": "step1",
+                    "agent": "researcher",
+                    "next": "step2",
+                },
+                "step2": {
+                    "type": "switch",
+                    "id": "step2",
+                    "cases": {"found": "step3"},
+                    "default": "step1",
+                },
+                "step3": {
+                    "type": "council",
+                    "id": "step3",
+                    "voters": ["researcher"],
+                    "strategy": "majority",
+                },
+            },
+        },
+    }
+    agent_file.write_text(yaml.dump(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "✅ Valid Agent: Complex Workflow (v2.0.0)" in captured.out
+
+
+def test_validate_agent_with_resources(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of an AgentDefinition with nested resource configurations."""
+    agent_file = tmp_path / "agent_resources.json"
+    agent_data = {
+        "type": "agent",
+        "id": "finops-agent",
+        "name": "FinOps Agent",
+        "role": "Accountant",
+        "goal": "Save money",
+        "resources": {
+            "provider": "openai",
+            "model_id": "gpt-4",
+            "pricing": {
+                "unit": "TOKEN_1K",
+                "currency": "USD",
+                "input_cost": 0.03,
+                "output_cost": 0.06,
+            },
+        },
+    }
+    agent_file.write_text(json.dumps(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "✅ Valid Agent: FinOps Agent" in captured.out
