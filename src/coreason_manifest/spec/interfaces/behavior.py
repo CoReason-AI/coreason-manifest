@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from abc import abstractmethod
-from typing import Any, Dict, Optional, Protocol, TYPE_CHECKING, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.common.request import AgentRequest
@@ -46,12 +46,12 @@ class IResponseHandler(Protocol):
         ...
 
     @abstractmethod
-    async def log(self, level: str, message: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+    async def log(self, level: str, message: str, metadata: dict[str, Any] | None = None) -> None:
         """Structured logging."""
         ...
 
     @abstractmethod
-    async def complete(self, outputs: Optional[Dict[str, Any]] = None) -> None:
+    async def complete(self, outputs: dict[str, Any] | None = None) -> None:
         """Signal execution success and provide final structured data."""
         ...
 

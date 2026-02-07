@@ -16,7 +16,7 @@ from uuid import UUID, uuid4
 from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.identity import Identity
-from coreason_manifest.spec.common.request import AgentRequest
+from coreason_manifest.spec.common.request import AgentRequest as AgentRequest
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
