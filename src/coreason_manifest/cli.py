@@ -54,7 +54,9 @@ def main() -> None:
     diff_parser = subparsers.add_parser("diff", help="Compare two agent definitions semantically")
     diff_parser.add_argument("base", help="Reference to the original agent (e.g. master:agent.py)")
     diff_parser.add_argument("head", help="Reference to the new agent (e.g. local:agent.py)")
-    diff_parser.add_argument("--fail-on-breaking", action="store_true", help="Exit with code 2 if BREAKING changes are detected")
+    diff_parser.add_argument(
+        "--fail-on-breaking", action="store_true", help="Exit with code 2 if BREAKING changes are detected"
+    )
     diff_parser.add_argument("--json", action="store_true", help="Output JSON format")
 
     args = parser.parse_args()

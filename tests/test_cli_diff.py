@@ -7,7 +7,6 @@ import pytest
 from _pytest.capture import CaptureFixture
 
 from coreason_manifest.cli import main
-from coreason_manifest.spec.v2.definitions import ManifestV2
 
 
 @pytest.fixture
