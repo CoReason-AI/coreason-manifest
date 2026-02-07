@@ -1,48 +1,107 @@
-# Coreason Manifest
+# Coreason Manifest: The Shared Kernel for Autonomous Agents
 
-The definitive source of truth for CoReason-AI Asset definitions. "The Blueprint."
+The definitive source of truth for CoReason-AI Asset definitions. "The Contract."
 
 [![License: Prosperity 3.0](https://img.shields.io/badge/license-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason-manifest)
 [![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Documentation](https://img.shields.io/badge/docs-home-informational)](docs/index.md)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/coreason-manifest/)
 
 ## Overview
 
-`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It contains the canonical Pydantic definitions, schemas, and data structures for Agents and Workflows (Recipes).
+`coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It is not just a schema library; it is the **Contract** between the Builder (UI), the Engine (Runtime), and the Analyst (Eval).
 
-It provides the **"Blueprint"** that all other services (Builder, Engine, Simulator) rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
+It provides the **"Blueprint"** that all other services rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
 
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
 
-## Architecture & Boundaries
+## Architecture: The "Holy Trinity" + 1
 
-To avoid the "Distributed Monolith" trap, this library strictly separates **Data** from **Logic**:
+To enable robust Enterprise Agentic Systems, this library implements four critical layers:
 
-*   **`coreason_manifest.spec` (The Kernel):** Contains **pure Pydantic models (DTOs)**. It has zero dependencies on business logic and is safe to import anywhere.
-*   **`coreason_manifest.utils` (The Toolbelt):** Contains **optional reference implementations** for Visualization, Audit Hashing, and Governance Enforcement.
-
-These components are co-located for developer convenience but are architecturally decoupled. The Core Spec **never** imports from Utils. See [ADR-001](docs/architecture/ADR-001-shared-kernel-boundaries.md) and [Package Structure](docs/package_structure.md) for details.
-
-## Features
-
-*   **Coreason Agent Manifest (CAM):** Strict Pydantic models for Agent definitions (`AgentDefinition`) and Recipes (`Recipe`).
-*   **ManifestBuilder (New in v0.17):** A fluent API for constructing complex `ManifestV2` objects without manual YAML.
-*   **Strict Typing:** Enforces type safety for critical interfaces.
-*   **Governance & Policy:** Enforce organizational rules (domains, risk levels) on agents via `GovernanceConfig`.
-*   **Ergonomic Factory Methods:** Simplified construction of manifests.
-*   **Flexible Tooling:** Support for external tool definitions (`ToolDefinition`) and risk levels (`ToolRiskLevel`).
-*   **Topology Visualization:** Workflows are defined as graph topologies (`Workflow`).
-
-## Serialization & Base Model
-
-Core definitions (e.g., `Manifest`, `Workflow`, `AgentDefinition`) inherit from Pydantic's `BaseModel`. Shared configuration models like `GovernanceConfig` inherit from `CoReasonBaseModel` for enhanced serialization capabilities.
+| Layer | Component | Description |
+| :--- | :--- | :--- |
+| **🧭 Orchestration** | **Recipes (`GraphTopology`)** | Directed Cyclic Graphs supporting loops, branching, and Human-in-the-Loop workflows. Replaces linear chains. |
+| **📡 Transport** | **Tracing (`AgentRequest`)** | Distributed tracing envelopes compatible with OpenTelemetry. Ensures full lineage from Root -> Parent -> Child. |
+| **🤖 Behavior** | **Protocols (`IAgentRuntime`)** | Hexagonal architecture interfaces for portable agents. Defines the Input/Output contract. |
+| **🧪 Simulation** | **ATIF (`SimulationTrace`)** | The "Flight Recorder" schema for auditing, red-teaming, and evaluation scenarios. |
 
 ## Installation
 
 ```bash
 pip install coreason-manifest
+```
+
+## Usage
+
+### 1. Defining a Graph Recipe (Orchestration)
+
+Recipes are now graphs, allowing for complex orchestration logic.
+
+```python
+from coreason_manifest.spec.v2.recipe import RecipeDefinition, GraphTopology, AgentNode, HumanNode, GraphEdge
+from coreason_manifest.spec.v2.definitions import ManifestMetadata, InterfaceDefinition
+
+# Define the nodes
+research_node = AgentNode(
+    id="research-agent",
+    agent_ref="researcher-v1",
+    inputs_map={"topic": "user_input"}
+)
+
+approval_node = HumanNode(
+    id="manager-approval",
+    prompt="Approve the research plan?",
+    timeout_seconds=3600
+)
+
+# Define the topology (The Graph)
+topology = GraphTopology(
+    entry_point="research-agent",
+    nodes=[research_node, approval_node],
+    edges=[
+        GraphEdge(source="research-agent", target="manager-approval")
+    ]
+)
+
+# Create the Recipe
+recipe = RecipeDefinition(
+    metadata=ManifestMetadata(name="Research & Approve Workflow"),
+    interface=InterfaceDefinition(
+        inputs={"user_input": {"type": "string"}},
+        outputs={"approval_status": {"type": "string"}}
+    ),
+    topology=topology
+)
+
+print(f"Recipe '{recipe.metadata.name}' is valid!")
+```
+
+### 2. Distributed Tracing (Transport)
+
+The `AgentRequest` envelope ensures that every action is traceable back to its origin.
+
+```python
+from coreason_manifest.spec.common.request import AgentRequest
+from uuid import uuid4
+
+# 1. Incoming Request (Root)
+root_request = AgentRequest(
+    session_id=uuid4(),
+    payload={"task": "Write a poem"}
+)
+print(f"Root Trace ID: {root_request.root_request_id}")
+
+# 2. Child Request (e.g., Sub-agent call)
+# Automatically inherits session_id and sets parent pointers
+child_request = root_request.create_child(
+    payload={"subtask": "Find rhyming words"}
+)
+
+print(f"Child Parent ID: {child_request.parent_request_id} (Should match Root Request ID)")
+print(f"Child Root ID:   {child_request.root_request_id}   (Should match Root Request ID)")
 ```
 
 ## CLI
@@ -58,130 +117,12 @@ The `coreason` CLI is your primary tool for managing agent manifests.
 
 See [CLI Documentation](docs/cli.md) for full details.
 
-## Usage
-
-### Quick Start
-
-Create a fully compliant agent manifest in just a few lines of code:
-
-```python
-from coreason_manifest import simple_agent
-
-# Create a "Hello World" agent
-manifest = simple_agent(
-    name="HelloAgent",
-    prompt="You are a helpful assistant.",
-    model="gpt-4o",
-    inputs={"user_message": {"type": "string"}},
-    outputs={"reply": {"type": "string"}}
-)
-
-print(f"Agent '{manifest.metadata.name}' created successfully!")
-```
-
-### ManifestV2 Construction (Recommended)
-
-The `ManifestV2` schema is powerful but complex (supporting nested Policies, State, Workflows, and Definitions). Instead of hand-writing error-prone YAML or instantiating deep Pydantic structures manually, use the `ManifestBuilder`.
-
-**Developer Experience Improvements:**
-*   **Fluent API:** Chain methods to build up your manifest step-by-step.
-*   **Type Safety:** Let your IDE guide you with autocomplete and type checking.
-*   **Abstraction:** Forget about the underlying JSON structure; focus on *logic*, *tools*, and *flow*.
-
-```python
-from coreason_manifest.builder import ManifestBuilder, AgentBuilder
-from coreason_manifest.spec.v2.definitions import AgentStep, LogicStep, ToolDefinition
-from coreason_manifest.spec.common_base import StrictUri
-
-# 1. Build reusable Agent Definitions
-researcher = AgentBuilder("Researcher") \
-    .with_system_prompt("You are a diligent researcher.") \
-    .with_model("gpt-4-turbo") \
-    .build_definition()
-
-writer = AgentBuilder("Writer") \
-    .with_system_prompt("You are a creative writer.") \
-    .with_model("claude-3-opus") \
-    .build_definition()
-
-# 2. Build the Manifest
-manifest = (
-    ManifestBuilder("ResearchReportWorkflow", kind="Recipe")
-    .add_agent(researcher)
-    .add_agent(writer)
-    .add_tool(ToolDefinition(
-        id="web-search",
-        name="Web Search",
-        uri=StrictUri("https://search.api/v1"),
-        risk_level="safe",
-        description="Search the web."
-    ))
-    .add_step(AgentStep(id="research", agent="Researcher", next="write"))
-    .add_step(AgentStep(id="write", agent="Writer", next=None))
-    .set_start_step("research")
-    .build()
-)
-
-print(manifest.model_dump_json(indent=2))
-```
-
-### Advanced Usage (Manual Construction)
-
-For granular control, you can instantiate the strict Pydantic models directly:
-
-```python
-from coreason_manifest import (
-    Recipe,
-    ManifestMetadata,
-    AgentStep,
-    Workflow,
-    InterfaceDefinition,
-    StateDefinition,
-    PolicyDefinition
-)
-
-# 1. Define Metadata
-metadata = ManifestMetadata(
-    name="Research Agent",
-    version="1.0.0"
-)
-
-# 2. Define Workflow
-workflow = Workflow(
-    start="step1",
-    steps={
-        "step1": AgentStep(
-            id="step1",
-            agent="gpt-4-researcher",
-            next="step2"
-        ),
-        # ... define other steps
-    }
-)
-
-# 3. Instantiate Manifest
-manifest = Recipe(
-    apiVersion="coreason.ai/v2",
-    kind="Recipe",
-    metadata=metadata,
-    interface=InterfaceDefinition(
-        inputs={"topic": {"type": "string"}},
-        outputs={"summary": {"type": "string"}}
-    ),
-    state=StateDefinition(),
-    policy=PolicyDefinition(max_retries=3),
-    workflow=workflow
-)
-
-print(f"Manifest '{manifest.metadata.name}' created successfully.")
-```
-
-For full details, see the [Usage Documentation](docs/usage.md).
-
 ## Documentation
 
 **[Full Documentation Index](docs/index.md)**
 
-*   [Usage Guide](docs/usage.md): How to load and create manifests.
-*   [Governance & Policy Enforcement](docs/governance_policy_enforcement.md): Validating agents against organizational rules.
-*   [Coreason Agent Manifest (CAM)](docs/cap/specification.md): The Canonical YAML Authoring Format.
+*   [**Orchestration**](docs/graph_recipes.md): Building Graph Recipes.
+*   [**Transport**](docs/transport_layer.md): Distributed Tracing & Lineage.
+*   [**Inline Tools**](docs/inline_tools.md): Serverless/Local Tool Definitions.
+*   [**Visualization**](docs/presentation_schemas.md): Controlling the UI Layout.
+*   [**Simulation**](docs/simulation.md): ATIF and Evaluation.
