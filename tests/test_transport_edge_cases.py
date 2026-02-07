@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import contextlib
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -28,8 +29,8 @@ def test_circular_lineage() -> None:
         request_id=req_id,
         session_id=uuid4(),
         root_request_id=req_id,  # Valid: root can be self
-        parent_request_id=req_id, # Valid: parent can technically be self in a graph cycle
-        payload={}
+        parent_request_id=req_id,  # Valid: parent can technically be self in a graph cycle
+        payload={},
     )
 
     assert req.request_id == req.parent_request_id
@@ -62,15 +63,15 @@ def test_payload_complex_types() -> None:
 
     # Dump should handle sets/tuples (convert to list)
     dump = req.dump()
-    assert set(dump["payload"]["tags"]) == {"a", "b", "c"} # serialized as list
-    assert dump["payload"]["tuple"] == [1, 2] # serialized as list
+    assert set(dump["payload"]["tags"]) == {"a", "b", "c"}  # serialized as list
+    assert dump["payload"]["tuple"] == [1, 2]  # serialized as list
 
 
 def test_deep_recursion_payload() -> None:
     """Verify deep recursion in payload doesn't crash validation, though serialization might fail."""
-    deep_dict = {}
+    deep_dict: dict[str, Any] = {}
     curr = deep_dict
-    for _ in range(2000): # Exceeds default recursion limit usually
+    for _ in range(2000):  # Exceeds default recursion limit usually
         curr["n"] = {}
         curr = curr["n"]
 
@@ -107,9 +108,9 @@ def test_invalid_payload_keys() -> None:
     # Pydantic Dict[str, Any] expects string keys.
     # If we pass int keys, Pydantic coercion might convert them to strings or fail.
 
-    payload = {123: "value"} # type: ignore
+    payload = {123: "value"}
 
     # CoReasonBaseModel / Pydantic V2 often coerces keys to strings for Dict[str, Any]
     # But it seems strict validation rejects int keys here.
     with pytest.raises(ValidationError):
-        AgentRequest(session_id=uuid4(), payload=payload) # type: ignore
+        AgentRequest(session_id=uuid4(), payload=payload)

@@ -68,18 +68,11 @@ def test_nested_envelope_interop() -> None:
     inner_req = AgentRequest(session_id=uuid4(), payload={"msg": "inner"})
 
     # Wrap in another request (as payload data)
-    outer_req = AgentRequest(
-        session_id=inner_req.session_id,
-        payload={"wrapped_request": inner_req.model_dump()}
-    )
+    outer_req = AgentRequest(session_id=inner_req.session_id, payload={"wrapped_request": inner_req.model_dump()})
 
     # Wrap in ServiceRequest
     ctx = SessionContext(session_id="s1", user=Identity.anonymous())
-    svc_req = ServiceRequest(
-        request_id=uuid4(),
-        context=ctx,
-        payload=outer_req
-    )
+    svc_req = ServiceRequest(request_id=uuid4(), context=ctx, payload=outer_req)
 
     # Verify nesting structure
     dump = svc_req.dump()
@@ -95,16 +88,12 @@ def test_metadata_merge_conflict_resolution() -> None:
     # Default behavior is usually shallow copy or overwrite.
     # create_child takes kwargs.
 
-    root = AgentRequest(
-        session_id=uuid4(),
-        payload={},
-        metadata={"a": 1, "b": 2}
-    )
+    root = AgentRequest(session_id=uuid4(), payload={}, metadata={"a": 1, "b": 2})
 
     # Override 'b', add 'c'
     child = root.create_child(
         payload={},
-        metadata={"b": 99, "c": 3} # This fully replaces metadata unless create_child merges
+        metadata={"b": 99, "c": 3},  # This fully replaces metadata unless create_child merges
     )
 
     # Current implementation in create_child:
@@ -118,8 +107,5 @@ def test_metadata_merge_conflict_resolution() -> None:
     merged_meta = root.metadata.copy()
     merged_meta.update({"b": 99, "c": 3})
 
-    child_merged = root.create_child(
-        payload={},
-        metadata=merged_meta
-    )
+    child_merged = root.create_child(payload={}, metadata=merged_meta)
     assert child_merged.metadata == {"a": 1, "b": 99, "c": 3}
