@@ -7,3 +7,12 @@
 # Commercial use beyond a 30-day trial requires a separate license.
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+from typing import Protocol, runtime_checkable
+
+
+@runtime_checkable
+class IStreamEmitter(Protocol):
+    async def emit_chunk(self, content: str) -> None: ...
+
+    async def close(self) -> None: ...

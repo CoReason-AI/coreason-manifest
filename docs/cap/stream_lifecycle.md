@@ -85,24 +85,14 @@ Signals the normal closure of a stream.
 
 ## Runtime Interface (`IStreamEmitter`)
 
-The `IStreamEmitter` protocol defines the contract for runtime components that generate streams. It is part of the **Behavioral Protocols** suite defined in `coreason_manifest.spec.interfaces.behavior`.
+The `IStreamEmitter` protocol defines the contract for runtime components that generate streams.
 
 ```python
-from typing import Protocol, runtime_checkable
-from abc import abstractmethod
-
-@runtime_checkable
 class IStreamEmitter(Protocol):
-    """Represents an open channel for streaming token chunks back to the client."""
-
-    @abstractmethod
     async def emit_chunk(self, content: str) -> None:
-        """Send a text fragment."""
         ...
 
-    @abstractmethod
     async def close(self) -> None:
-        """Signal the stream is finished."""
         ...
 ```
 

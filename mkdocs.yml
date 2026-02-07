@@ -30,6 +30,7 @@ nav:
     - Event Content Types: event_content_types.md
     - Semantic Error Handling: error_handling_standards.md
     - Middleware Extension Interfaces: middleware_extension_interfaces.md
+    - Simulation & Evaluation Schemas: simulation.md
   - Architecture & Rationale:
     - Product Requirements: product_requirements.md
     - Package Structure & Architecture: package_structure.md
