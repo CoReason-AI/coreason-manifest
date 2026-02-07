@@ -57,7 +57,7 @@ def test_task_sequence_invalid_types_fails() -> None:
         RecipeDefinition(
             metadata=ManifestMetadata(name="invalid-recipe", version="1.0.0"),
             interface=RecipeInterface(),
-            topology=[{"invalid": "object"}],  # type: ignore[list-item]
+            topology=[{"invalid": "object"}],
         )
     # Pydantic V2 error for discriminated union mismatch
     # The actual error message is: "Unable to extract tag using discriminator 'type'"
@@ -75,8 +75,8 @@ def test_task_sequence_mixed_node_types() -> None:
     step3 = RouterNode(
         id="router1",
         input_key="decision",
-        routes={"yes": "agent1"}, # Circular ref just for valid schema
-        default_route="agent1"
+        routes={"yes": "agent1"},  # Circular ref just for valid schema
+        default_route="agent1",
     )
 
     recipe = RecipeDefinition(
@@ -104,7 +104,7 @@ def test_task_sequence_dict_extra_fields() -> None:
         RecipeDefinition(
             metadata=ManifestMetadata(name="extra-recipe", version="1.0.0"),
             interface=RecipeInterface(),
-            topology={"steps": [step1], "extra_field": "should_fail"},  # type: ignore[arg-type]
+            topology={"steps": [step1], "extra_field": "should_fail"},
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
@@ -132,9 +132,9 @@ def test_complex_evaluator_sequence() -> None:
         evaluation_profile="strict",
         pass_threshold=0.8,
         max_refinements=3,
-        pass_route="publisher", # Points to next step
-        fail_route="generator", # Loops back
-        feedback_variable="critique"
+        pass_route="publisher",  # Points to next step
+        fail_route="generator",  # Loops back
+        feedback_variable="critique",
     )
 
     step3 = AgentNode(id="publisher", agent_ref="pub-ref")
@@ -166,5 +166,5 @@ def test_topology_dict_no_steps_no_nodes_fails() -> None:
         RecipeDefinition(
             metadata=ManifestMetadata(name="bad-recipe", version="1.0.0"),
             interface=RecipeInterface(),
-            topology={"something": "else"},  # type: ignore[arg-type]
+            topology={"something": "else"},
         )
