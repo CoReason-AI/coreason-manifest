@@ -23,7 +23,6 @@ from coreason_manifest.spec.interfaces.behavior import (
     IStreamEmitter,
 )
 
-
 # --- Mock Implementations for Testing ---
 
 
