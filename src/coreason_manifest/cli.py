@@ -50,6 +50,14 @@ def main() -> None:
     # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
     run_parser.add_argument("--json", action="store_true", help="Output JSON events")
 
+    # Hash
+    hash_parser = subparsers.add_parser("hash", help="Calculate the canonical hash of an agent definition")
+    hash_parser.add_argument("ref", help="Reference to the agent (e.g. examples/agent.py:agent)")
+    hash_parser.add_argument("--json", action="store_true", help="Output in JSON format")
+    # Validate
+    validate_parser = subparsers.add_parser("validate", help="Validate a static agent definition file")
+    validate_parser.add_argument("file", help="Path to the .yaml or .json file")
+    validate_parser.add_argument("--json", action="store_true", help="Output JSON structure on success")
     # Diff
     diff_parser = subparsers.add_parser("diff", help="Compare two agent definitions semantically")
     diff_parser.add_argument("base", help="Reference to the original agent (e.g. master:agent.py)")
@@ -90,6 +98,20 @@ def main() -> None:
             sys.exit(1)
 
         _run_simulation(agent, args.mock)
+
+    elif args.command == "hash":
+        if not hasattr(agent, "compute_hash"):
+            sys.stderr.write("Error: Agent definition does not support canonical hashing.\n")
+            sys.exit(1)
+
+        raw_hash = agent.compute_hash()
+        # Ensure proper format
+        final_hash = f"sha256:{raw_hash}"
+
+        if args.json:
+            print(json.dumps({"hash": final_hash, "algorithm": "sha256"}))
+        else:
+            print(final_hash)
 
 
 def _handle_diff(base_ref: str, head_ref: str, json_output: bool, fail_on_breaking: bool) -> None:
