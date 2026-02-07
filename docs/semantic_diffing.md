@@ -11,41 +11,7 @@ CI/CD pipelines and Governance systems use this utility to answer critical quest
 *   **Does it increase cost?** (RESOURCE changes)
 *   **Does it weaken security?** (GOVERNANCE changes like removing a policy)
 
-## CLI Usage
-
-The semantic diff utility is exposed via the `coreason` CLI, enabling easy integration into CI/CD pipelines.
-
-```bash
-coreason diff <base_ref> <head_ref> [options]
-```
-
-### Arguments
-*   `base_ref`: Reference to the original agent (e.g. `master:agent.py` or just `old_agent.py`).
-*   `head_ref`: Reference to the new agent (e.g. `local:agent.py` or `new_agent.py`).
-
-### Options
-*   `--fail-on-breaking`: Exit with code `2` if **BREAKING** changes are detected. Useful for blocking builds.
-*   `--json`: Output the diff report in machine-readable JSON format instead of the default text report.
-
-### Examples
-
-**1. Compare two versions and check for breaking changes:**
-```bash
-coreason diff v1_agent.py v2_agent.py --fail-on-breaking
-```
-
-**Output (Text):**
-```text
-[🚨 **BREAKING**] interface.inputs.properties.user_id: {'type': 'string'} -> None
-[✨ **FEATURE**] tools.2: None -> 'tool_search'
-```
-
-**2. Generate a JSON report for downstream tools:**
-```bash
-coreason diff base_agent.py head_agent.py --json > diff_report.json
-```
-
-## Programmatic Usage
+## Usage
 
 ```python
 from coreason_manifest import compare_agents, ManifestV2
