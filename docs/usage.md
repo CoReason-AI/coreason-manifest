@@ -51,12 +51,19 @@ from coreason_manifest import (
     StateDefinition,
     PolicyConfig,
     GraphTopology,
-    AgentNode
+    AgentNode,
+    ProvenanceData
 )
 
 # 1. Define Metadata
 metadata = ManifestMetadata(
-    name="Research Recipe"
+    name="Research Recipe",
+    version="1.0.0",
+    provenance=ProvenanceData(
+        type="ai",
+        generated_by="coreason-strategist-v1",
+        confidence_score=0.95
+    )
 )
 
 # 2. Define Topology

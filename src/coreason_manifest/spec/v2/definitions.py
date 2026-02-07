@@ -18,6 +18,7 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, Too
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
+from coreason_manifest.spec.v2.provenance import ProvenanceData
 from coreason_manifest.spec.v2.resources import ModelProfile
 from coreason_manifest.spec.v2.skills import SkillDefinition
 
@@ -230,6 +231,8 @@ class ManifestMetadata(CoReasonBaseModel):
     model_config = ConfigDict(extra="allow", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
+    version: str = Field("0.1.0", description="Semantic version of the workflow/agent.")
+    provenance: ProvenanceData | None = Field(None, description="Provenance details (AI or Human).")
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
 
 
