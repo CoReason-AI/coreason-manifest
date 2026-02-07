@@ -26,8 +26,68 @@ def test_validate_json_success(tmp_path: Path, capsys: pytest.CaptureFixture[str
 
     captured = capsys.readouterr()
     output = json.loads(captured.out)
-    assert output["status"] == "valid"
+    assert output["type"] == "agent"
+    assert output["id"] == "test-agent"
     assert output["name"] == "Test Agent"
+
+
+def test_validate_manifest_v2_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of a valid ManifestV2 in YAML format."""
+    agent_file = tmp_path / "valid_manifest_v2.yaml"
+    agent_data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Agent",
+        "metadata": {
+            "name": "Manifest Agent",
+            "version": "1.0.0"
+        },
+        "workflow": {
+            "start": "step1",
+            "steps": {
+                "step1": {
+                    "type": "logic",
+                    "id": "step1",
+                    "code": "print('hello')"
+                }
+            }
+        }
+    }
+    agent_file.write_text(yaml.dump(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "✅ Valid Agent: Manifest Agent (v1.0.0)" in captured.out
+
+
+def test_validate_manifest_v2_no_version(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of a valid ManifestV2 without version."""
+    agent_file = tmp_path / "valid_manifest_v2_no_ver.yaml"
+    agent_data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Agent",
+        "metadata": {
+            "name": "Manifest Agent NoVer"
+        },
+        "workflow": {
+            "start": "step1",
+            "steps": {
+                "step1": {
+                    "type": "logic",
+                    "id": "step1",
+                    "code": "print('hello')"
+                }
+            }
+        }
+    }
+    agent_file.write_text(yaml.dump(agent_data))
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "✅ Valid Agent: Manifest Agent NoVer (vUnknown)" in captured.out
 
 
 def test_validate_yaml_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -46,7 +106,7 @@ def test_validate_yaml_success(tmp_path: Path, capsys: pytest.CaptureFixture[str
         main()
 
     captured = capsys.readouterr()
-    assert "✅ Valid Agent: Test Agent YAML" in captured.out
+    assert "✅ Valid Agent: Test Agent YAML (vUnknown)" in captured.out
 
 
 def test_validate_yaml_failure(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -94,7 +154,7 @@ def test_validate_malformed_json(tmp_path: Path, capsys: pytest.CaptureFixture[s
         assert exc.value.code == 1
 
     captured = capsys.readouterr()
-    assert "❌ Error: Malformed file" in captured.out
+    assert "❌ Error: Malformed JSON file" in captured.out
 
 
 def test_validate_unsupported_extension(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
