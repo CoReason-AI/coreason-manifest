@@ -230,6 +230,18 @@ class ManifestMetadata(CoReasonBaseModel):
     model_config = ConfigDict(extra="allow", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
+    generation_rationale: str | None = Field(
+        None, description="Reasoning behind the creation or selection of this workflow."
+    )
+    confidence_score: float | None = Field(
+        None, ge=0.0, le=1.0, description="A score (0.0 - 1.0) indicating the system's confidence in this workflow."
+    )
+    original_user_intent: str | None = Field(
+        None, description="The original user prompt or goal that resulted in this workflow."
+    )
+    generated_by: str | None = Field(
+        None, description="The model or system ID that generated this manifest (e.g., 'coreason-strategist-v1')."
+    )
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
 
 
