@@ -10,7 +10,7 @@
 
 from typing import Annotated, Any, Literal
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
@@ -170,6 +170,42 @@ class GraphTopology(CoReasonBaseModel):
         return self
 
 
+class TaskSequence(CoReasonBaseModel):
+    """A linear sequence of tasks that simplifies graph creation."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    steps: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]] = Field(
+        ..., min_length=1, description="Ordered list of steps to execute."
+    )
+
+    def to_graph(self) -> GraphTopology:
+        """Compiles the sequence into a GraphTopology."""
+        nodes = self.steps
+        edges = []
+
+        for i in range(len(nodes) - 1):
+            edges.append(GraphEdge(source=nodes[i].id, target=nodes[i + 1].id))
+
+        return GraphTopology(nodes=nodes, edges=edges, entry_point=nodes[0].id)
+
+
+def coerce_topology(v: Any) -> Any:
+    """Coerce linear lists or TaskSequence dicts into GraphTopology."""
+    # 1. If topology is a list (simplification), treat as steps
+    if isinstance(v, list):
+        return TaskSequence(steps=v).to_graph()
+
+    # 2. If topology is a dict
+    if isinstance(v, dict):
+        # If it has "steps", treat as TaskSequence
+        if "steps" in v and "nodes" not in v:
+            return TaskSequence.model_validate(v).to_graph()
+        # Otherwise assume it's GraphTopology structure, let Pydantic handle it
+
+    return v
+
+
 class RecipeDefinition(CoReasonBaseModel):
     """Definition of a Recipe (Graph-based Workflow)."""
 
@@ -186,4 +222,6 @@ class RecipeDefinition(CoReasonBaseModel):
     policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")
     # ----------------------
 
-    topology: GraphTopology = Field(..., description="The execution graph topology.")
+    topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
+        ..., description="The execution graph topology."
+    )
