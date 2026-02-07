@@ -10,9 +10,48 @@ Recipes upgrade the system from simple linear lists of steps to executing comple
 
 ## Architecture
 
-A `RecipeDefinition` is a specialized Manifest type (`kind: Recipe`) that contains a `GraphTopology`.
+A `RecipeDefinition` is a specialized Manifest type (`kind: Recipe`) that contains a `GraphTopology` along with other key components:
 
-### Graph Topology
+### 1. The Interface Layer (Contract)
+
+Defines the input/output contract for the Recipe using JSON Schema.
+
+```yaml
+interface:
+  inputs:
+    topic:
+      type: string
+  outputs:
+    summary:
+      type: string
+```
+
+### 2. The State Layer (Memory)
+
+Defines the shared memory (Blackboard) schema and persistence strategy.
+
+```yaml
+state:
+  properties:
+    draft_content:
+      type: string
+    vote_count:
+      type: integer
+  persistence: "redis" # Options: ephemeral, redis, postgres
+```
+
+### 3. The Policy Layer (Governance)
+
+Sets execution limits and error handling strategies.
+
+```yaml
+policy:
+  max_retries: 5
+  timeout_seconds: 3600
+  execution_mode: "parallel" # Options: sequential, parallel
+```
+
+### 4. Graph Topology
 
 The topology consists of:
 *   **Nodes**: Units of work (Agents, Humans, Routers).
@@ -66,13 +105,30 @@ default_route: "manual-review"
 
 ## Example Recipe
 
-Here is a complete example of a Recipe that includes a loop and human approval.
+Here is a complete example of a Recipe that includes a loop, human approval, state, and policy.
 
 ```yaml
 apiVersion: coreason.ai/v2
 kind: Recipe
 metadata:
   name: "Blog Post Workflow"
+
+interface:
+  inputs:
+    topic: {type: string}
+  outputs:
+    final_post: {type: string}
+
+state:
+  properties:
+    draft: {type: string}
+    status: {type: string}
+  persistence: "ephemeral"
+
+policy:
+  max_retries: 2
+  timeout_seconds: 600
+
 topology:
   entry_point: "draft"
   nodes:

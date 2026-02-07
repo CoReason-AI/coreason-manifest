@@ -45,45 +45,47 @@ You can also construct the object directly using Python classes.
 
 ```python
 from coreason_manifest import (
-    Recipe,
+    RecipeDefinition,
     ManifestMetadata,
-    InterfaceDefinition,
+    RecipeInterface,
     StateDefinition,
-    PolicyDefinition,
-    Workflow,
-    AgentStep
+    PolicyConfig,
+    GraphTopology,
+    AgentNode
 )
 
 # 1. Define Metadata
 metadata = ManifestMetadata(
-    name="Research Agent",
-    version="1.0.0"
+    name="Research Recipe"
 )
 
-# 2. Define Workflow
-workflow = Workflow(
-    start="step1",
-    steps={
-        "step1": AgentStep(
+# 2. Define Topology
+topology = GraphTopology(
+    entry_point="step1",
+    nodes=[
+        AgentNode(
             id="step1",
-            agent="gpt-4-researcher",
-            next="step2"
+            agent_ref="researcher-agent",
         ),
-        # ... define other steps
-    }
+        # ... define other nodes
+    ],
+    edges=[]
 )
 
 # 3. Instantiate Manifest
-manifest = Recipe(
+manifest = RecipeDefinition(
     kind="Recipe",
     metadata=metadata,
-    interface=InterfaceDefinition(
+    interface=RecipeInterface(
         inputs={"topic": {"type": "string"}},
         outputs={"summary": {"type": "string"}}
     ),
-    state=StateDefinition(),
-    policy=PolicyDefinition(max_retries=3),
-    workflow=workflow
+    state=StateDefinition(
+        properties={"notes": {"type": "string"}},
+        persistence="redis"
+    ),
+    policy=PolicyConfig(max_retries=3),
+    topology=topology
 )
 
 print(f"Manifest '{manifest.metadata.name}' created successfully.")
