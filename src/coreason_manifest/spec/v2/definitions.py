@@ -17,6 +17,7 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.mcp_defs import MCPResourceDefinition
 from coreason_manifest.spec.v2.resources import ModelProfile
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
+    "MCPResourceDefinition",
     "Step",
     "SwitchStep",
     "ToolDefinition",
@@ -146,6 +148,10 @@ class AgentDefinition(CoReasonBaseModel):
     resources: ModelProfile | None = Field(
         None, description="Hardware, pricing, and operational constraints for this agent."
     )
+    exposed_mcp_resources: list[MCPResourceDefinition] = Field(
+        default_factory=list,
+        description="List of passive data resources (logs, files, streams) this agent exposes to the MCP host.",
+    )
 
 
 class GenericDefinition(CoReasonBaseModel):
@@ -236,6 +242,7 @@ class ManifestV2(CoReasonBaseModel):
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: dict[
         str,
-        Annotated[ToolDefinition | AgentDefinition, Field(discriminator="type")] | GenericDefinition,
+        Annotated[ToolDefinition | AgentDefinition | MCPResourceDefinition, Field(discriminator="type")]
+        | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
