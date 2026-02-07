@@ -93,6 +93,13 @@ from .spec.v2.definitions import (
     Workflow,
 )
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
+from .spec.v2.recipe import (
+    AgentNode,
+    GraphTopology,
+    HumanNode,
+    RecipeDefinition,
+    RouterNode,
+)
 from .spec.v2.resources import (
     ModelProfile,
     PricingUnit,
@@ -113,7 +120,7 @@ from .utils.viz import generate_mermaid_graph
 __version__ = "0.19.0"
 
 Manifest = ManifestV2
-Recipe = ManifestV2
+Recipe = RecipeDefinition
 load = load_from_yaml
 dump = dump_to_yaml
 
@@ -122,6 +129,7 @@ __all__ = [
     "AgentBuilder",
     "AgentCapabilities",
     "AgentDefinition",
+    "AgentNode",
     "AgentRequest",
     "AgentRuntimeConfig",
     "AgentStep",
@@ -154,8 +162,10 @@ __all__ = [
     "GraphEventNodeStream",
     "GraphEventStreamEnd",
     "GraphEventStreamStart",
+    "GraphTopology",
     "HealthCheckResponse",
     "HealthCheckStatus",
+    "HumanNode",
     "IRequestInterceptor",
     "IResponseInterceptor",
     "IStreamEmitter",
@@ -180,8 +190,10 @@ __all__ = [
     "RateCard",
     "ReasoningTrace",
     "Recipe",
+    "RecipeDefinition",
     "ResourceConstraints",
     "Role",
+    "RouterNode",
     "ServiceContract",
     "ServiceRequest",
     "ServiceResponse",
