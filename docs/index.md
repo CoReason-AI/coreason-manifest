@@ -47,6 +47,8 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Tool Packs (Plugins)](tool_packs.md)**
     *   Documentation for the Tool Pack architecture, enabling reusable bundles of Agents, Skills, and Tools.
+*   **[MCP Resources](mcp_resources.md)**
+    *   Documentation for defining and using MCP Resources (`MCPResourceDefinition`) to expose passive data streams.
 
 *   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
     *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
