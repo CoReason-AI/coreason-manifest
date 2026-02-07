@@ -31,10 +31,21 @@ def load_agent_from_ref(reference: str) -> ManifestV2:
         ValueError: If the file does not exist, the variable is missing,
                     or the object is not a valid AgentBuilder or ManifestV2.
     """
+    # Default assumptions
+    file_path_str = reference
+    var_name = "agent"
+
     if ":" in reference:
-        file_path_str, var_name = reference.rsplit(":", 1)
-    else:
-        file_path_str, var_name = reference, "agent"
+        # Potential split: separate path from variable name
+        possible_path, possible_var = reference.rsplit(":", 1)
+
+        # Heuristic for Windows paths:
+        # If the part after the last colon contains path separators ('/' or '\'),
+        # it is likely part of the file path (e.g., 'C:\path\to\file.py') rather than a variable name.
+        # This prevents splitting 'C:\file.py' into 'C' and '\file.py'.
+        if not any(sep in possible_var for sep in ["/", "\\"]):
+            file_path_str = possible_path
+            var_name = possible_var
 
     # Resolve file path
     file_path = Path(file_path_str).resolve()
