@@ -11,6 +11,10 @@
 import argparse
 import json
 import sys
+from pathlib import Path
+from typing import Any
+
+from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
@@ -49,7 +53,15 @@ def main() -> None:
     # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
     run_parser.add_argument("--json", action="store_true", help="Output JSON events")
 
+    # Validate
+    validate_parser = subparsers.add_parser("validate", help="Validate a static agent definition file")
+    validate_parser.add_argument("file", help="Path to the .yaml or .json file")
+
     args = parser.parse_args()
+
+    if args.command == "validate":
+        handle_validate(args.file)
+        return
 
     try:
         agent = load_agent_from_ref(args.ref)
@@ -77,6 +89,63 @@ def main() -> None:
             sys.exit(1)
 
         _run_simulation(agent, args.mock)
+
+
+def handle_validate(file_path: str) -> None:
+    """
+    Validates a static agent definition file (JSON or YAML) against the AgentDefinition schema.
+    """
+    path = Path(file_path)
+    if not path.exists():
+        sys.stderr.write(f"❌ Error: File not found: {file_path}\n")
+        sys.exit(1)
+
+    data: Any = None
+    if path.suffix.lower() == ".json":
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            sys.stderr.write(f"❌ Error: Invalid JSON: {e}\n")
+            sys.exit(1)
+        except Exception as e:
+            sys.stderr.write(f"❌ Error reading file: {e}\n")
+            sys.exit(1)
+    elif path.suffix.lower() in [".yaml", ".yml"]:
+        try:
+            import yaml
+        except ImportError:
+            sys.stderr.write("❌ Error: PyYAML is not installed. Please install it to validate YAML files.\n")
+            sys.exit(1)
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            sys.stderr.write(f"❌ Error: Invalid YAML: {e}\n")
+            sys.exit(1)
+        except Exception as e:
+            sys.stderr.write(f"❌ Error reading file: {e}\n")
+            sys.exit(1)
+    else:
+        sys.stderr.write(f"❌ Error: Unsupported file extension: {path.suffix}\n")
+        sys.exit(1)
+
+    try:
+        agent = AgentDefinition.model_validate(data)
+        # Version is not present in AgentDefinition schema, so we default to 'Unknown'
+        version = getattr(agent, "version", "Unknown")
+        print(f"✅ Valid Agent: {agent.name} (v{version})")
+    except ValidationError as e:
+        print("❌ Validation Failed:")
+        for err in e.errors():
+            # loc is a tuple of (string | int)
+            loc = " -> ".join(str(l) for l in err["loc"])
+            print(f"  • {loc}: {err['msg']}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        sys.exit(1)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:
