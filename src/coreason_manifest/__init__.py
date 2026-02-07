@@ -100,7 +100,7 @@ from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
-__version__ = "0.17.0"
+__version__ = "0.19.0"
 
 Manifest = ManifestV2
 Recipe = ManifestV2
