@@ -15,6 +15,56 @@ from pydantic import ConfigDict, Field, model_validator
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 
+# ==========================================
+# 1. Configuration Schemas (New)
+# ==========================================
+
+class RecipeInterface(CoReasonBaseModel):
+    """Defines the Input/Output contract for the Recipe using JSON Schema."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    inputs: dict[str, Any] = Field(
+        default_factory=dict,
+        description="JSON Schema defining the expected input arguments."
+    )
+    outputs: dict[str, Any] = Field(
+        default_factory=dict,
+        description="JSON Schema defining the structure of the final result."
+    )
+
+
+class StateDefinition(CoReasonBaseModel):
+    """Defines the shared memory (Blackboard) structure and persistence."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    properties: dict[str, Any] = Field(
+        ...,
+        description="JSON Schema properties for the shared state variables."
+    )
+    persistence: Literal["ephemeral", "redis", "postgres"] = Field(
+        "ephemeral",
+        description="How the state should be stored across steps."
+    )
+
+
+class PolicyConfig(CoReasonBaseModel):
+    """Governance rules for execution limits and error handling."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    max_retries: int = Field(0, description="Global retry limit for failed steps.")
+    timeout_seconds: int | None = Field(None, description="Global execution timeout.")
+    execution_mode: Literal["sequential", "parallel"] = Field(
+        "sequential",
+        description="Default execution strategy for independent branches."
+    )
+
+
+# ==========================================
+# 2. Node Definitions
+# ==========================================
 
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
@@ -105,5 +155,13 @@ class RecipeDefinition(CoReasonBaseModel):
 
     apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")
     kind: Literal["Recipe"] = Field("Recipe", description="Kind of the object.")
+
     metadata: ManifestMetadata = Field(..., description="Metadata including name and design info.")
+
+    # --- New Components ---
+    interface: RecipeInterface = Field(..., description="Input/Output contract.")
+    state: StateDefinition | None = Field(None, description="Internal state schema.")
+    policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")
+    # ----------------------
+
     topology: GraphTopology = Field(..., description="The execution graph topology.")
