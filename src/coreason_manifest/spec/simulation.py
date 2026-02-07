@@ -8,9 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import Field
@@ -41,14 +41,14 @@ class SimulationStep(CoReasonBaseModel):
     """The atomic unit of execution history."""
 
     step_id: UUID = Field(default_factory=uuid4)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     type: StepType
     node_id: str
-    inputs: Dict[str, Any] = Field(default_factory=dict)
-    thought: Optional[str] = None
-    action: Optional[Dict[str, Any]] = None
-    observation: Optional[Dict[str, Any]] = None
-    snapshot: Dict[str, Any] = Field(default_factory=dict)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    thought: str | None = None
+    action: dict[str, Any] | None = None
+    observation: dict[str, Any] | None = None
+    snapshot: dict[str, Any] = Field(default_factory=dict)
 
 
 class SimulationTrace(CoReasonBaseModel):
@@ -57,10 +57,10 @@ class SimulationTrace(CoReasonBaseModel):
     trace_id: UUID = Field(default_factory=uuid4)
     agent_id: str
     agent_version: str
-    steps: List[SimulationStep] = Field(default_factory=list)
-    outcome: Optional[Dict[str, Any]] = None
-    score: Optional[float] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    steps: list[SimulationStep] = Field(default_factory=list)
+    outcome: dict[str, Any] | None = None
+    score: float | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AdversaryProfile(CoReasonBaseModel):
@@ -70,7 +70,7 @@ class AdversaryProfile(CoReasonBaseModel):
     goal: str
     strategy_model: str
     attack_model: str
-    persona: Optional[Dict[str, Any]] = None
+    persona: dict[str, Any] | None = None
 
 
 class ChaosConfig(CoReasonBaseModel):
@@ -86,8 +86,8 @@ class SimulationScenario(CoReasonBaseModel):
 
     id: str
     description: str
-    inputs: Dict[str, Any]
-    expected_output: Optional[Dict[str, Any]] = None
+    inputs: dict[str, Any]
+    expected_output: dict[str, Any] | None = None
     validation_logic: ValidationLogic
 
 
@@ -95,5 +95,5 @@ class SimulationRequest(CoReasonBaseModel):
     """The trigger payload sent to the runner."""
 
     scenario: SimulationScenario
-    profile: Optional[AdversaryProfile] = None
-    chaos_config: Optional[ChaosConfig] = None
+    profile: AdversaryProfile | None = None
+    chaos_config: ChaosConfig | None = None
