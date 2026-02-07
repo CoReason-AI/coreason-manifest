@@ -25,6 +25,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Mock Data Factory](mock_factory.md)**
     *   Utility for generating deterministic, schema-compliant synthetic data for Agent outputs and testing.
 
+*   **[CLI & Interop Layer](cli_interop.md)**
+    *   Documentation for the `coreason` CLI tool (`inspect`, `viz`, `run`) and dynamic loader utility.
+
 ## Specifications & Protocols
 
 *   **[Coreason Agent Manifest (CAM) Specification](cap/specification.md)**
