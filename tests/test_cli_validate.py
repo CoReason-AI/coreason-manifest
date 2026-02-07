@@ -116,11 +116,13 @@ def test_validate_read_error(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     agent_file = tmp_path / "read_error.json"
     agent_file.write_text("{}")
 
-    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
-        with patch("pathlib.Path.read_text", side_effect=PermissionError("Boom")):
-            with pytest.raises(SystemExit) as exc:
-                main()
-            assert exc.value.code == 1
+    with (
+        patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]),
+        patch("pathlib.Path.read_text", side_effect=PermissionError("Boom")),
+    ):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
 
     captured = capsys.readouterr()
     assert "❌ Error reading file: Boom" in captured.out
