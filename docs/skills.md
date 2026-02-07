@@ -44,12 +44,25 @@ Skills can declare dependencies on external packages or system tools, ensuring t
 
 ### `AgentDefinition` Update
 
-Agents now possess a `skills` field:
+Agents now possess a `skills` field and a `context_strategy`:
 
 ```python
 class AgentDefinition(CoReasonBaseModel):
     # ...
     skills: list[str] = Field(..., description="List of Skill IDs to equip this agent with.")
+    context_strategy: Literal["full", "compressed", "hybrid"] = Field(
+        "hybrid", description="Context optimization strategy for skills."
+    )
+```
+
+### `AgentStep` Update
+
+Skills can be injected temporarily for a specific step in the workflow:
+
+```python
+class AgentStep(BaseStep):
+    # ...
+    temporary_skills: list[str] = Field(..., description="Skills injected into the agent ONLY for this specific step.")
 ```
 
 ## Example Usage

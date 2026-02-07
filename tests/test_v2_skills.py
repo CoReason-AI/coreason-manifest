@@ -11,7 +11,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2, SkillDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition, AgentStep, ManifestV2, SkillDefinition
 from coreason_manifest.spec.v2.skills import LoadStrategy, SkillDependency
 
 
@@ -415,3 +415,25 @@ def test_complex_scenarios_extended() -> None:
     manifest_flow = ManifestV2.model_validate(workflow_data)
     step2 = manifest_flow.workflow.steps["step-2"]
     assert step2.inputs["data"] == "{{ step-1.output }}"
+
+def test_sota_agent_fields() -> None:
+    """Test SOTA enhancements for AgentDefinition and AgentStep."""
+    # 1. AgentDefinition with context_strategy
+    agent = AgentDefinition(
+        id="sota-agent",
+        name="SOTA Agent",
+        role="SOTA",
+        goal="SOTA",
+        skills=["skill-1"],
+        context_strategy="compressed",
+    )
+    assert agent.context_strategy == "compressed"
+    assert agent.skills == ["skill-1"]
+
+    # 2. AgentStep with temporary_skills
+    step = AgentStep(
+        id="step-1",
+        agent="sota-agent",
+        temporary_skills=["temp-skill"],
+    )
+    assert step.temporary_skills == ["temp-skill"]

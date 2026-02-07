@@ -114,6 +114,9 @@ class AgentDefinition(CoReasonBaseModel):
     )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
     skills: list[str] = Field(default_factory=list, description="List of Skill IDs to equip this agent with.")
+    context_strategy: Literal["full", "compressed", "hybrid"] = Field(
+        "hybrid", description="Context optimization strategy for skills."
+    )
 
     @field_validator("tools", mode="before")
     @classmethod
@@ -174,6 +177,9 @@ class AgentStep(BaseStep):
     agent: str = Field(..., description="Reference to an Agent definition (by ID or name).")
     next: str | None = Field(None, description="ID of the next step to execute.")
     system_prompt: str | None = Field(None, description="Optional override for system prompt.")
+    temporary_skills: list[str] = Field(
+        default_factory=list, description="Skills injected into the agent ONLY for this specific step."
+    )
 
 
 class LogicStep(BaseStep):
