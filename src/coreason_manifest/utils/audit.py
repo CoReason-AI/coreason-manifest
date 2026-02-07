@@ -60,11 +60,11 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
         fields = V1_FIELDS
     else:
         # v2: Introspection
-        if isinstance(entry, dict):
-            fields = list(entry.keys())
-        else:
-            # Pydantic model
-            fields = list(type(entry).model_fields.keys())
+        fields = (
+            list(entry.keys())
+            if isinstance(entry, dict)
+            else list(type(entry).model_fields.keys())
+        )
 
         # Exclude technical fields
         # Note: hash_algorithm IS included in the payload for v2 to prevent version downgrade attacks
