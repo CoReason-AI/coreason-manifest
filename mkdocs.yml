@@ -3,35 +3,43 @@ theme:
   name: material
 nav:
   - Home: index.md
-  - Core Documentation:
-    - Usage Guide: usage.md
-    - Builder SDK: builder_sdk.md
-    - Visualization Tools: visualization.md
-    - Secure Composition: composition.md
-    - Governance & Policy: governance_policy_enforcement.md
-    - Semantic Diffing: semantic_diffing.md
-    - Agent Card Generator: agent_card_generator.md
-    - Mock Data Factory: mock_factory.md
-    - MCP Adapter: interop/mcp_adapter.md
-  - Specifications & Protocols:
-    - Agent Trajectory (ATIF): simulation.md
-    - CAM Specification: cap/specification.md
-    - CAP Wire Protocol: cap/wire_protocol.md
-    - Explicit Streaming Contracts: cap/streaming_contracts.md
-    - Stream Identity & Lifecycle: cap/stream_lifecycle.md
-    - Memory Governance: memory_governance.md
-    - Session Management: session_management.md
-    - Active Memory Interface: active_memory_interface.md
-    - Evaluation Metadata: evaluation_metadata.md
-    - Request Lineage Implementation: request_lineage_implementation.md
-    - Observability & Tracing: observability.md
-    - Audit Hashing & Integrity: audit_hashing.md
-    - Standardized Presentation Schemas: presentation_schemas.md
-    - Frontend Integration & Graph Events: frontend_integration.md
-    - Event Content Types: event_content_types.md
-    - Semantic Error Handling: error_handling_standards.md
-    - Middleware Extension Interfaces: middleware_extension_interfaces.md
-  - Architecture & Rationale:
-    - Product Requirements: product_requirements.md
-    - Package Structure & Architecture: package_structure.md
-    - Base Model Rationale: coreason_base_model_rationale.md
+  - Usage: usage.md
+  - Specifications:
+      - "Orchestration (Recipes)": graph_recipes.md
+      - "Agent Definitions (V2)": cap/specification.md
+      - "Inline Tools": inline_tools.md
+      - "Transport & Tracing": transport_layer.md
+      - "Simulation & Eval": simulation.md
+      - "Visualization (UI)": presentation_schemas.md
+  - Interfaces:
+      - "Runtime Protocol": behavior.md
+      - "Middleware": middleware_extension_interfaces.md
+  - Architecture:
+      - "Shared Kernel": architecture/ADR-001-shared-kernel-boundaries.md
+      - "Package Structure": package_structure.md
+      - "Base Model Rationale": coreason_base_model_rationale.md
+      - "Product Requirements": product_requirements.md
+  - Advanced / Reference:
+      - "Builder SDK": builder_sdk.md
+      - "CLI Reference": cli.md
+      - "Governance & Policy": governance_policy_enforcement.md
+      - "Active Memory Interface": active_memory_interface.md
+      - "Audit Hashing": audit_hashing.md
+      - "Semantic Diffing": semantic_diffing.md
+      - "Memory Governance": memory_governance.md
+      - "Session Management": session_management.md
+      - "Observability": observability.md
+      - "Mock Factory": mock_factory.md
+      - "Error Handling": error_handling_standards.md
+      - "Evaluation Metadata": evaluation_metadata.md
+      - "Event Content Types": event_content_types.md
+      - "Frontend Integration": frontend_integration.md
+      - "Request Lineage (Impl)": request_lineage_implementation.md
+      - "Agent Card Generator": agent_card_generator.md
+      - "Composition": composition.md
+      - "CLI Interop": cli_interop.md
+      - "Visualization (Reference)": visualization.md
+      - "CAP Wire Protocol": cap/wire_protocol.md
+      - "Stream Lifecycle": cap/stream_lifecycle.md
+      - "Streaming Contracts": cap/streaming_contracts.md
+      - "MCP Adapter": interop/mcp_adapter.md

@@ -17,6 +17,7 @@ from coreason_manifest.spec.v2.recipe import (
     GraphTopology,
     HumanNode,
     RecipeDefinition,
+    RecipeInterface,
     RouterNode,
 )
 
@@ -133,6 +134,7 @@ def test_full_manifest_roundtrip() -> None:
             name="Test Recipe",
             x_design=None,
         ),
+        interface=RecipeInterface(),
         topology=GraphTopology(
             nodes=[
                 AgentNode(id="start", agent_ref="agent-1"),

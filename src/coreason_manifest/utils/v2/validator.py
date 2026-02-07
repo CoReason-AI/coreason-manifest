@@ -17,6 +17,7 @@ from coreason_manifest.spec.v2.definitions import (
     ManifestV2,
     SwitchStep,
     ToolDefinition,
+    ToolRequirement,
 )
 
 
@@ -88,16 +89,21 @@ def validate_integrity(manifest: ManifestV2) -> ManifestV2:
     # 5. Validate Agent Tools
     for _, definition in manifest.definitions.items():
         if isinstance(definition, AgentDefinition):
-            for tool_id in definition.tools:
-                if tool_id not in manifest.definitions:
-                    raise ValueError(f"Agent '{definition.id}' references missing tool '{tool_id}'.")
+            for tool_ref in definition.tools:
+                # Handle ToolRequirement (remote tools)
+                if isinstance(tool_ref, ToolRequirement):
+                    if tool_ref.uri in manifest.definitions:
+                        tool_def = manifest.definitions[tool_ref.uri]
+                        if not isinstance(tool_def, ToolDefinition):
+                            raise ValueError(
+                                f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
+                                f"(got {type(tool_def).__name__})."
+                            )
+                    elif "://" not in tool_ref.uri:
+                        # If it's not a valid URI (no scheme) and not in definitions, assume broken ID reference
+                        raise ValueError(f"Agent '{definition.id}' references missing tool '{tool_ref.uri}'.")
 
-                tool_def = manifest.definitions[tool_id]
-                if not isinstance(tool_def, ToolDefinition):
-                    raise ValueError(
-                        f"Agent '{definition.id}' references '{tool_id}' which is not a ToolDefinition "
-                        f"(got {type(tool_def).__name__})."
-                    )
+                # InlineToolDefinition needs no referential validation as it is self-contained.
 
     return manifest
 
@@ -177,15 +183,16 @@ def validate_loose(manifest: ManifestV2) -> list[str]:
     # Agent Tools
     for _, definition in manifest.definitions.items():
         if isinstance(definition, AgentDefinition):
-            for tool_id in definition.tools:
-                if tool_id not in manifest.definitions:
-                    warnings.append(f"Agent '{definition.id}' references missing tool '{tool_id}'.")
-                else:
-                    tool_def = manifest.definitions[tool_id]
-                    if not isinstance(tool_def, ToolDefinition):
-                        warnings.append(
-                            f"Agent '{definition.id}' references '{tool_id}' which is not a ToolDefinition "
-                            f"(got {type(tool_def).__name__})."
-                        )
+            for tool_ref in definition.tools:
+                if isinstance(tool_ref, ToolRequirement):
+                    if tool_ref.uri in manifest.definitions:
+                        tool_def = manifest.definitions[tool_ref.uri]
+                        if not isinstance(tool_def, ToolDefinition):
+                            warnings.append(
+                                f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
+                                f"(got {type(tool_def).__name__})."
+                            )
+                    elif "://" not in tool_ref.uri:
+                        warnings.append(f"Agent '{definition.id}' references missing tool '{tool_ref.uri}'.")
 
     return warnings
