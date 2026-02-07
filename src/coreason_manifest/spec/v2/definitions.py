@@ -231,6 +231,9 @@ class ManifestMetadata(CoReasonBaseModel):
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
+    tested_models: list[str] = Field(
+        default_factory=list, description="List of LLM identifiers this manifest has been tested on."
+    )
 
 
 # Import ToolPackDefinition after definitions are declared to avoid circular import
