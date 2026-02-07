@@ -17,7 +17,7 @@ builder = AgentBuilder(name="{name}")
 builder.with_system_prompt("{description}")
 agent = builder.build()
 """
-    path.write_text(content)
+    path.write_text(content, encoding="utf-8")
     return path
 
 

@@ -9,7 +9,7 @@ from coreason_manifest.cli import main
 
 # Helper to create an agent file manually
 def create_complex_agent_file(path: Path, code: str) -> Path:
-    path.write_text(code)
+    path.write_text(code, encoding="utf-8")
     return path
 
 
