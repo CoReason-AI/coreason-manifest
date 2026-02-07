@@ -186,11 +186,13 @@ def test_validate_missing_pyyaml(tmp_path: Path, capsys: pytest.CaptureFixture[s
     agent_file.touch()
 
     # Simulate missing yaml module
-    with patch.dict(sys.modules, {"yaml": None}):
-        with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
-            with pytest.raises(SystemExit) as exc:
-                main()
-            assert exc.value.code == 1
+    with (
+        patch.dict(sys.modules, {"yaml": None}),
+        patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]),
+    ):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
 
     captured = capsys.readouterr()
     assert "❌ Error: PyYAML is not installed" in captured.out
