@@ -95,6 +95,20 @@ The `run` command emits Newline Delimited JSON (NDJSON) events to `stdout`.
 
 Consumers should read `stdout` line-by-line.
 
+#### 4. Semantic Diff (`diff`)
+
+Compares two agent definitions and detects semantic changes (Breaking, Feature, Governance, Resource).
+
+```bash
+coreason diff base_version.py:agent new_version.py:agent --fail-on-breaking
+```
+
+**Output:**
+- Human-readable text report by default.
+- JSON report if `--json` is passed.
+
+See [Semantic Diffing Utility](semantic_diffing.md) for full details.
+
 ## Edge Cases & Limitations
 
 - **File Paths:** The loader adds the file's directory to `sys.path` to support relative imports within the module.
