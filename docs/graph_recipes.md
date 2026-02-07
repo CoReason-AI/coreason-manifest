@@ -115,6 +115,53 @@ topology:
       target: "publish"
 ```
 
+## Advanced Patterns
+
+### Self-Refining Loop (Recursive)
+
+A common pattern is an agent that critiques and improves its own work until a quality threshold is met.
+
+```yaml
+topology:
+  entry_point: "generate"
+  nodes:
+    - type: agent
+      id: "generate"
+      agent_ref: "coder-agent"
+      # Agent takes 'feedback' as input; on first run it might be empty
+      inputs_map:
+        feedback: "critique_output"
+
+    - type: agent
+      id: "evaluate"
+      agent_ref: "qa-agent"
+      inputs_map:
+        code: "generate_output"
+
+    - type: router
+      id: "check-score"
+      input_key: "quality_score"
+      routes:
+        pass: "deploy"
+      default_route: "generate" # Recursive loop back to start
+
+    - type: agent
+      id: "deploy"
+      agent_ref: "ops-agent"
+
+  edges:
+    - source: "generate"
+      target: "evaluate"
+    - source: "evaluate"
+      target: "check-score"
+    - source: "check-score"
+      target: "generate"
+      condition: "fail (loop)"
+    - source: "check-score"
+      target: "deploy"
+      condition: "pass"
+```
+
 ## Validation
 
 The `coreason-manifest` library includes strict Pydantic validation for Recipes.

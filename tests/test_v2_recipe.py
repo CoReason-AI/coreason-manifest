@@ -195,7 +195,10 @@ def test_edge_case_cycle() -> None:
 
 
 def test_edge_case_disconnected_node() -> None:
-    """Test that unreachable nodes are permitted (though technically 'dangling' in graph theory, they are valid definitions)."""
+    """Test that unreachable nodes are permitted.
+
+    Though technically 'dangling' in graph theory, they are valid definitions.
+    """
     data = {
         "nodes": [
             {"type": "agent", "id": "A", "agent_ref": "ref-a"},
