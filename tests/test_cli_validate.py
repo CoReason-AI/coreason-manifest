@@ -134,6 +134,21 @@ def test_validate_malformed_json(tmp_path: Path, capsys: pytest.CaptureFixture[s
     assert "❌ Error: Malformed JSON file" in captured.out
 
 
+def test_validate_malformed_yaml(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation on malformed YAML file."""
+    agent_file = tmp_path / "malformed.yaml"
+    # Invalid YAML syntax
+    agent_file.write_text("key: : value")
+
+    with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error: Malformed YAML file" in captured.out
+
+
 def test_validate_unsupported_extension(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Test validation on unsupported file extension."""
     agent_file = tmp_path / "agent.txt"
@@ -163,3 +178,19 @@ def test_validate_read_error(tmp_path: Path, capsys: pytest.CaptureFixture[str])
 
     captured = capsys.readouterr()
     assert "❌ Error reading file: Boom" in captured.out
+
+
+def test_validate_missing_pyyaml(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    """Test validation of YAML file when PyYAML is not installed."""
+    agent_file = tmp_path / "agent.yaml"
+    agent_file.touch()
+
+    # Simulate missing yaml module
+    with patch.dict(sys.modules, {"yaml": None}):
+        with patch.object(sys, "argv", ["coreason", "validate", str(agent_file)]):
+            with pytest.raises(SystemExit) as exc:
+                main()
+            assert exc.value.code == 1
+
+    captured = capsys.readouterr()
+    assert "❌ Error: PyYAML is not installed" in captured.out
