@@ -9,13 +9,16 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import argparse
+import asyncio
 import json
 import sys
 import textwrap
 from pathlib import Path
+from typing import Any
 
 from pydantic import ValidationError
 
+from coreason_manifest.interop.mcp import CoreasonMCPServer
 from coreason_manifest.runtime.executor import GraphExecutor
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
@@ -250,6 +253,59 @@ def handle_validate(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def handle_serve_mcp(args: argparse.Namespace) -> None:
+    try:
+        import contextlib  # noqa: F401
+        import mcp  # noqa: F401
+    except ImportError:
+        print("❌ Error: 'mcp' package is not installed.")
+        print("  pip install coreason-manifest[mcp]")
+        sys.exit(1)
+
+    try:
+        agent = load_agent_from_ref(args.ref)
+    except Exception as e:
+        sys.stderr.write(f"Error loading agent: {e}\n")
+        sys.exit(1)
+
+    agent_def: AgentDefinition
+    if isinstance(agent, ManifestV2):
+        agents = [d for d in agent.definitions.values() if isinstance(d, AgentDefinition)]
+        if len(agents) == 1:
+            agent_def = agents[0]
+        else:
+            matching = [a for a in agents if a.name == agent.metadata.name]
+            if len(matching) == 1:
+                agent_def = matching[0]
+            else:
+                sys.stderr.write("Error: Could not determine which AgentDefinition to serve from ManifestV2.\n")
+                sys.stderr.write(
+                    "Please ensure the manifest contains exactly one agent or the agent name matches manifest name.\n"
+                )
+                sys.exit(1)
+    elif isinstance(agent, AgentDefinition):
+        agent_def = agent
+    else:
+        sys.stderr.write(f"Error: The reference '{args.ref}' is not an AgentDefinition.\n")
+        sys.exit(1)
+
+    async def runner_callback(arguments: dict[str, Any]) -> dict[str, Any]:
+        result = generate_mock_output(agent_def)
+        if isinstance(result, dict):
+            return result
+        return {"output": result}
+
+    try:
+        server = CoreasonMCPServer(agent_def, runner_callback)
+        asyncio.run(server.run_stdio())
+    except ImportError as e:
+        sys.stderr.write(f"Error: {e}\n")
+        sys.exit(1)
+    except Exception as e:
+        sys.stderr.write(f"Error running MCP server: {e}\n")
+        sys.exit(1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="coreason", description="CoReason Manifest CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -283,6 +339,10 @@ def main() -> None:
     validate_parser.add_argument("file", help="Path to the .yaml or .json file")
     validate_parser.add_argument("--json", action="store_true", help="Output validation result as JSON")
 
+    # Serve MCP
+    serve_parser = subparsers.add_parser("serve-mcp", help="Serve an agent as an MCP server")
+    serve_parser.add_argument("ref", help="Reference to the agent (path/to/file.py:var)")
+
     args = parser.parse_args()
 
     if args.command == "init":
@@ -291,6 +351,10 @@ def main() -> None:
 
     if args.command == "validate":
         handle_validate(args)
+        return
+
+    if args.command == "serve-mcp":
+        handle_serve_mcp(args)
         return
 
     try:
@@ -324,8 +388,6 @@ def main() -> None:
             sys.exit(1)
 
         if isinstance(agent, RecipeDefinition):
-            import asyncio
-
             # Instantiate executor
             executor = GraphExecutor(agent, inputs)
 

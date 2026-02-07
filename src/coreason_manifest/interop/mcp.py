@@ -102,3 +102,20 @@ class CoreasonMCPServer:
     def server(self) -> Any:
         """Returns the underlying MCP Server instance."""
         return self._server
+
+    async def run_stdio(self) -> None:
+        """Runs the MCP server using stdio transport."""
+        try:
+            from mcp.server.stdio import stdio_server
+        except ImportError:
+            raise ImportError(
+                "The 'mcp' package is required to use CoreasonMCPServer. "
+                "Install it with `pip install coreason-manifest[mcp]`."
+            ) from None
+
+        async with stdio_server() as (read_stream, write_stream):
+            await self._server.run(
+                read_stream,
+                write_stream,
+                self._server.create_initialization_options(),
+            )

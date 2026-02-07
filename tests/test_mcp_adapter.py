@@ -261,3 +261,45 @@ async def test_execution_wrong_tool_name() -> None:
         # Call with wrong name
         with pytest.raises(ValueError, match="Unknown tool: wrong_name"):
             await handler_func("wrong_name", {})
+
+
+@pytest.mark.asyncio
+async def test_run_stdio() -> None:
+    """Test running server via stdio transport."""
+    mock_mcp = MagicMock(name="mock_mcp")
+    mock_server_cls = MagicMock(name="mock_server_cls")
+    mock_server_instance = MagicMock(name="mock_server_instance")
+    mock_server_instance.run = AsyncMock()
+    mock_server_cls.return_value = mock_server_instance
+    mock_types = MagicMock(name="mock_types")
+
+    mock_stdio = MagicMock(name="mock_stdio")
+    mock_stdio_server = MagicMock(name="stdio_server")
+    mock_stdio_server.return_value.__aenter__.return_value = ("read", "write")
+    mock_stdio.stdio_server = mock_stdio_server
+
+    agent = AgentDefinition(id="a", name="My Agent", role="R", goal="G")
+    callback = AsyncMock()
+
+    with patch.dict(
+        sys.modules, {
+            "mcp": mock_mcp,
+            "mcp.server": MagicMock(Server=mock_server_cls),
+            "mcp.types": mock_types,
+            "mcp.server.stdio": mock_stdio
+        }
+    ):
+        server = CoreasonMCPServer(agent, callback)
+        await server.run_stdio()
+
+        # Verify stdio_server context manager usage
+        mock_stdio_server.assert_called_once()
+
+        # Verify server.run called with correct args
+        mock_server_instance.run.assert_awaited_once()
+        args, _ = mock_server_instance.run.call_args
+        assert args[0] == "read"
+        assert args[1] == "write"
+
+        # Verify init options creation
+        mock_server_instance.create_initialization_options.assert_called_once()
