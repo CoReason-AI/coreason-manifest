@@ -21,7 +21,8 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.cap import AgentRequest, StreamPacket
+from coreason_manifest.spec.cap import StreamPacket
+from coreason_manifest.spec.common.request import AgentRequest
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 

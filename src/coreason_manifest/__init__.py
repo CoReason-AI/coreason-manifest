@@ -13,7 +13,6 @@ from .builder import AgentBuilder, TypedCapability
 from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .shortcuts import simple_agent
 from .spec.cap import (
-    AgentRequest,
     ErrorSeverity,
     HealthCheckResponse,
     HealthCheckStatus,
@@ -26,6 +25,7 @@ from .spec.cap import (
 )
 from .spec.common.capabilities import AgentCapabilities, CapabilityType, DeliveryMode
 from .spec.common.error import ErrorDomain
+from .spec.common.request import AgentRequest
 from .spec.common.graph_events import (
     GraphEvent,
     GraphEventArtifactGenerated,
@@ -62,13 +62,13 @@ from .spec.common.session import MemoryStrategy, SessionState
 from .spec.common.stream import StreamReference, StreamState
 from .spec.common_base import ToolRiskLevel
 from .spec.governance import ComplianceReport, ComplianceViolation, GovernanceConfig
+from .spec.interfaces.behavior import IAgentRuntime, IResponseHandler, IStreamEmitter
 from .spec.interfaces.middleware import (
     InterceptorContext,
     IRequestInterceptor,
     IResponseInterceptor,
 )
 from .spec.interfaces.session import SessionHandle
-from .spec.interfaces.stream import IStreamEmitter
 from .spec.simulation import (
     AdversaryProfile,
     ChaosConfig,
@@ -156,8 +156,10 @@ __all__ = [
     "GraphEventStreamStart",
     "HealthCheckResponse",
     "HealthCheckStatus",
+    "IAgentRuntime",
     "IRequestInterceptor",
     "IResponseInterceptor",
+    "IResponseHandler",
     "IStreamEmitter",
     "Identity",
     "InterceptorContext",

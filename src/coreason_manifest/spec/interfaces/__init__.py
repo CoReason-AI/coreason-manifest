@@ -7,3 +7,7 @@
 # Commercial use beyond a 30-day trial requires a separate license.
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+from .behavior import IAgentRuntime, IResponseHandler, IStreamEmitter
+
+__all__ = ["IAgentRuntime", "IResponseHandler", "IStreamEmitter"]
