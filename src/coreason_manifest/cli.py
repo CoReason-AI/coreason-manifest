@@ -103,7 +103,7 @@ def handle_validate(file_path: str) -> None:
     data: Any = None
     if path.suffix.lower() == ".json":
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = json.load(f)
         except json.JSONDecodeError as e:
             sys.stderr.write(f"❌ Error: Invalid JSON: {e}\n")
@@ -119,7 +119,7 @@ def handle_validate(file_path: str) -> None:
             sys.exit(1)
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
         except yaml.YAMLError as e:
             sys.stderr.write(f"❌ Error: Invalid YAML: {e}\n")
@@ -140,11 +140,11 @@ def handle_validate(file_path: str) -> None:
         print("❌ Validation Failed:")
         for err in e.errors():
             # loc is a tuple of (string | int)
-            loc = " -> ".join(str(l) for l in err["loc"])
+            loc = " -> ".join(str(part) for part in err["loc"])
             print(f"  • {loc}: {err['msg']}")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"❌ Error: {e!s}")
         sys.exit(1)
 
 

@@ -9,10 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import json
-import os
 import sys
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from typing import Any
+from unittest.mock import patch
 
 import pytest
 
@@ -41,21 +40,23 @@ INVALID_AGENT = {
 
 
 @pytest.fixture
-def temp_agent_file(tmp_path):
-    def _create(content, ext=".json"):
+def temp_agent_file(tmp_path: Any) -> Any:
+    def _create(content: dict[str, Any], ext: str = ".json") -> str:
         p = tmp_path / f"agent{ext}"
         if ext == ".json":
             with open(p, "w") as f:
                 json.dump(content, f)
         else:
             import yaml
+
             with open(p, "w") as f:
                 yaml.dump(content, f)
         return str(p)
+
     return _create
 
 
-def test_validate_valid_json(temp_agent_file, capsys):
+def test_validate_valid_json(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(VALID_AGENT, ".json")
 
     with patch.object(sys, "argv", ["coreason", "validate", fpath]):
@@ -65,7 +66,7 @@ def test_validate_valid_json(temp_agent_file, capsys):
     assert "✅ Valid Agent: Test Agent (vUnknown)" in captured.out
 
 
-def test_validate_valid_yaml(temp_agent_file, capsys):
+def test_validate_valid_yaml(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(VALID_AGENT, ".yaml")
 
     with patch.object(sys, "argv", ["coreason", "validate", fpath]):
@@ -75,7 +76,7 @@ def test_validate_valid_yaml(temp_agent_file, capsys):
     assert "✅ Valid Agent: Test Agent (vUnknown)" in captured.out
 
 
-def test_validate_invalid_yaml(temp_agent_file, capsys):
+def test_validate_invalid_yaml(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(INVALID_AGENT, ".yaml")
 
     with patch.object(sys, "argv", ["coreason", "validate", fpath]):
@@ -89,7 +90,7 @@ def test_validate_invalid_yaml(temp_agent_file, capsys):
     assert "goal" in captured.out
 
 
-def test_validate_file_not_found(capsys):
+def test_validate_file_not_found(capsys: Any) -> None:
     with patch.object(sys, "argv", ["coreason", "validate", "non_existent.json"]):
         with pytest.raises(SystemExit) as e:
             main()
@@ -99,7 +100,7 @@ def test_validate_file_not_found(capsys):
     assert "❌ Error: File not found" in captured.err
 
 
-def test_validate_invalid_json_syntax(tmp_path, capsys):
+def test_validate_invalid_json_syntax(tmp_path: Any, capsys: Any) -> None:
     p = tmp_path / "broken.json"
     p.write_text("{ broken }")
 
@@ -112,64 +113,72 @@ def test_validate_invalid_json_syntax(tmp_path, capsys):
     assert "❌ Error: Invalid JSON" in captured.err
 
 
-def test_validate_pyyaml_missing(temp_agent_file, capsys):
+def test_validate_pyyaml_missing(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(VALID_AGENT, ".yaml")
 
     # Mock ImportError for yaml
-    with patch.dict(sys.modules, {"yaml": None}):
-        with patch.object(sys, "argv", ["coreason", "validate", fpath]):
-            with pytest.raises(SystemExit) as e:
-                main()
-            assert e.value.code == 1
+    with (
+        patch.dict(sys.modules, {"yaml": None}),
+        patch.object(sys, "argv", ["coreason", "validate", fpath]),
+    ):
+        with pytest.raises(SystemExit) as e:
+            main()
+        assert e.value.code == 1
 
     captured = capsys.readouterr()
     assert "PyYAML is not installed" in captured.err
 
 
-def test_validate_json_read_error(temp_agent_file, capsys):
+def test_validate_json_read_error(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(VALID_AGENT, ".json")
 
-    with patch("builtins.open", side_effect=OSError("Read error")):
-        with patch.object(sys, "argv", ["coreason", "validate", fpath]):
-            with pytest.raises(SystemExit) as e:
-                main()
-            assert e.value.code == 1
+    with (
+        patch("builtins.open", side_effect=OSError("Read error")),
+        patch.object(sys, "argv", ["coreason", "validate", fpath]),
+    ):
+        with pytest.raises(SystemExit) as e:
+            main()
+        assert e.value.code == 1
 
     captured = capsys.readouterr()
     assert "❌ Error reading file: Read error" in captured.err
 
 
-def test_validate_yaml_read_error(temp_agent_file, capsys):
+def test_validate_yaml_read_error(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(VALID_AGENT, ".yaml")
 
     # We need to ensure open is patched, but we also need to allow import yaml.
     # The builtins.open patch affects everything.
     # But temp_agent_file created the file before the patch.
 
-    with patch("builtins.open", side_effect=OSError("Read error")):
-        with patch.object(sys, "argv", ["coreason", "validate", fpath]):
-            with pytest.raises(SystemExit) as e:
-                main()
-            assert e.value.code == 1
+    with (
+        patch("builtins.open", side_effect=OSError("Read error")),
+        patch.object(sys, "argv", ["coreason", "validate", fpath]),
+    ):
+        with pytest.raises(SystemExit) as e:
+            main()
+        assert e.value.code == 1
 
     captured = capsys.readouterr()
     assert "❌ Error reading file: Read error" in captured.err
 
 
-def test_validate_generic_exception(temp_agent_file, capsys):
+def test_validate_generic_exception(temp_agent_file: Any, capsys: Any) -> None:
     fpath = temp_agent_file(VALID_AGENT, ".json")
 
-    with patch.object(AgentDefinition, "model_validate", side_effect=Exception("Unexpected boom")):
-        with patch.object(sys, "argv", ["coreason", "validate", fpath]):
-            with pytest.raises(SystemExit) as e:
-                main()
-            assert e.value.code == 1
+    with (
+        patch.object(AgentDefinition, "model_validate", side_effect=Exception("Unexpected boom")),
+        patch.object(sys, "argv", ["coreason", "validate", fpath]),
+    ):
+        with pytest.raises(SystemExit) as e:
+            main()
+        assert e.value.code == 1
 
     captured = capsys.readouterr()
     assert "❌ Error: Unexpected boom" in captured.out
 
 
-def test_validate_unsupported_extension(tmp_path, capsys):
+def test_validate_unsupported_extension(tmp_path: Any, capsys: Any) -> None:
     p = tmp_path / "agent.txt"
     p.touch()
 
@@ -182,7 +191,7 @@ def test_validate_unsupported_extension(tmp_path, capsys):
     assert "❌ Error: Unsupported file extension: .txt" in captured.err
 
 
-def test_validate_invalid_yaml_syntax(tmp_path, capsys):
+def test_validate_invalid_yaml_syntax(tmp_path: Any, capsys: Any) -> None:
     p = tmp_path / "broken.yaml"
     p.write_text("broken: [")
 
