@@ -137,10 +137,7 @@ class GraphExecutor:
         if isinstance(node, RouterNode):
             # Use the decision from the step observation if available, otherwise recompute
             if last_step and last_step.observation and "decision" in last_step.observation:
-                decision = last_step.observation["decision"]
-                if isinstance(decision, str):
-                    return decision
-                return str(decision)
+                return str(last_step.observation["decision"])
 
             # Recompute if needed (fallback)
             input_val = self.context.get(node.input_key)
