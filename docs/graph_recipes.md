@@ -124,3 +124,26 @@ except ValueError as e:
     print(f"Validation Error: {e}")
     # Output: Dangling edge target: node-1 -> phantom-node
 ```
+
+## Runtime Execution
+
+The `GraphExecutor` is responsible for traversing the `RecipeDefinition` and executing nodes.
+
+### The Blackboard Architecture
+
+Execution state is maintained in a shared **Blackboard** (`context`).
+*   **Inputs Mapping**: When entering a node, data is mapped from the Blackboard to the Node's inputs using `inputs_map`.
+*   **Output Merging**: When a node completes, its output is merged back into the Blackboard.
+
+### Routing Logic
+
+*   **Standard Edges**: If a node has a single outgoing edge matching its ID, execution proceeds to the target.
+*   **Router Nodes**: `RouterNode` explicitly inspects a variable in the Blackboard (`input_key`) and selects the next node based on the `routes` map. If no match is found, it uses the `default_route`.
+
+### Execution Limits
+
+To prevent infinite loops in malformed graphs, the executor enforces a `max_steps` limit (default: 50). If the limit is reached, execution halts to protect resources.
+
+### Trace Generation
+
+The executor generates a `SimulationTrace` containing a list of `SimulationStep` objects, providing a full audit trail of the execution path, including inputs, outputs, and routing decisions.

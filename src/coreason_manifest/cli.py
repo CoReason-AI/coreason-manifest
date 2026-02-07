@@ -24,6 +24,8 @@ from coreason_manifest.spec.v2.definitions import (
     ManifestV2,
     SwitchStep,
 )
+from coreason_manifest.spec.v2.recipe import RecipeDefinition
+from coreason_manifest.runtime.executor import GraphExecutor
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
 from coreason_manifest.utils.viz import generate_mermaid_graph
@@ -311,12 +313,32 @@ def main() -> None:
 
     elif args.command == "run":
         try:
-            json.loads(args.inputs)
+            inputs = json.loads(args.inputs)
         except json.JSONDecodeError as e:
             sys.stderr.write(f"Error parsing inputs: {e}\n")
             sys.exit(1)
 
-        _run_simulation(agent, args.mock)
+        if isinstance(agent, RecipeDefinition):
+            import asyncio
+
+            # Instantiate executor
+            executor = GraphExecutor(agent, inputs)
+
+            # Run simulation
+            try:
+                trace = asyncio.run(executor.run())
+
+                # Print result
+                print(json.dumps({
+                    "trace_id": str(trace.trace_id),
+                    "final_state": executor.context,
+                    "steps_count": len(trace.steps)
+                }, indent=2, default=str))
+            except Exception as e:
+                sys.stderr.write(f"Error running graph executor: {e}\n")
+                sys.exit(1)
+        else:
+            _run_simulation(agent, args.mock)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:
