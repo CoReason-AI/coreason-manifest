@@ -47,6 +47,41 @@ class PackMetadata(CoReasonBaseModel):
     homepage: StrictUri | None
 ```
 
+### PackAuthor
+
+```python
+class PackAuthor(CoReasonBaseModel):
+    name: str | None
+    email: str | None
+    url: StrictUri | None
+```
+
+### MCPServerDefinition
+
+Defines a Model Context Protocol server process that provides tools or resources.
+
+```python
+class MCPServerDefinition(CoReasonBaseModel):
+    type: Literal["mcp_server"] = "mcp_server"
+    name: str  # Name of the server
+    command: str  # Command to execute
+    args: list[str]  # Arguments for the command
+    env: dict[str, str]  # Environment variables
+```
+
+### MCPResourceDefinition
+
+Defines a passive data stream or resource exposed via MCP.
+
+```python
+class MCPResourceDefinition(CoReasonBaseModel):
+    type: Literal["resource"] = "resource"
+    uri: StrictUri  # URI of the resource
+    name: str  # Name of the resource
+    mime_type: str | None  # MIME type (optional)
+    description: str | None  # Description (optional)
+```
+
 ## Usage Example
 
 Here is an example of how to define a reusable "Feature Dev Pack" and use it within a Manifest.
@@ -62,7 +97,10 @@ definitions:
       name: "feature-dev"
       version: "1.0.0"
       description: "Comprehensive feature development workflow."
-      author: "CoReason"
+      author:
+        name: "CoReason"
+        email: "support@coreason.ai"
+        url: "https://coreason.ai"
 
     # The Pack bundles specific agents and skills
     agents:
@@ -81,6 +119,14 @@ definitions:
         load_strategy: lazy
         trigger_intent: "Analyze requirements"
         instructions: "..."
+
+    mcp_servers:
+      - type: mcp_server
+        name: "filesystem"
+        command: "npx"
+        args: ["-y", "@modelcontextprotocol/server-filesystem", "/users/src"]
+        env:
+            NODE_ENV: "production"
 
   # The main agent uses the Pack (future runtime implementation)
   lead-engineer:

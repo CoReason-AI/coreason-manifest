@@ -34,6 +34,7 @@ Skills can declare dependencies on external packages or system tools, ensuring t
 | `type` | `Literal["skill"]` | Discriminator field. |
 | `id` | `str` | Unique identifier for the skill. |
 | `name` | `str` | Human-readable name. |
+| `version` | `str` | Semantic version (default: `1.0.0`). |
 | `description` | `str` | Summary for humans. |
 | `trigger_intent` | `str` | **Critical.** Semantic description for vector routing. Required if `load_strategy` is `LAZY`. |
 | `instructions` | `str` | Inline system prompt. (XOR with `instructions_uri`) |
@@ -41,6 +42,14 @@ Skills can declare dependencies on external packages or system tools, ensuring t
 | `scripts` | `dict[str, str]` | Map of script names to file paths. |
 | `dependencies` | `list[SkillDependency]` | List of required packages. |
 | `load_strategy` | `LoadStrategy` | `eager`, `lazy`, or `user`. Defaults to `lazy`. |
+
+### `SkillDependency`
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `ecosystem` | `Literal["python", "node", "system", "mcp"]` | The ecosystem of the dependency. |
+| `package` | `str` | The package name or command. |
+| `version_constraint` | `str` | Optional version constraint (e.g., `>=3.0.0`). |
 
 ### `AgentDefinition` Update
 
