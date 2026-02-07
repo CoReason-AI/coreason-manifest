@@ -1,7 +1,11 @@
 # tests/test_simulation_schemas.py
 
 import json
+from datetime import UTC, datetime
 from uuid import UUID
+
+import pytest
+from pydantic import ValidationError
 
 from coreason_manifest import (
     AdversaryProfile,
@@ -27,6 +31,7 @@ def test_simulation_step_serialization() -> None:
     # Verify defaults
     assert isinstance(step.step_id, UUID)
     assert step.timestamp is not None
+    assert step.timestamp.tzinfo == UTC
     assert step.snapshot == {}
 
     # Verify serialization
@@ -120,3 +125,127 @@ def test_nesting_simulation_request() -> None:
     assert restored.profile.name == "RedTeamer"
     assert restored.chaos_config is not None
     assert restored.chaos_config.latency_ms == 100
+
+
+def test_edge_cases_empty_inputs() -> None:
+    """Test edge case with empty inputs and outputs."""
+    step = SimulationStep(
+        type=StepType.INTERACTION,
+        node_id="empty_node",
+        inputs={},
+        observation={},
+    )
+    assert step.inputs == {}
+    assert step.observation == {}
+
+    trace = SimulationTrace(
+        agent_id="empty-agent",
+        agent_version="0.0.0",
+        steps=[],
+    )
+    assert trace.steps == []
+    assert trace.outcome is None
+
+
+def test_edge_cases_timestamps() -> None:
+    """Test explicit timestamp handling."""
+    custom_time = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+    step = SimulationStep(
+        type=StepType.SYSTEM_EVENT,
+        node_id="time_node",
+        timestamp=custom_time,
+    )
+    assert step.timestamp == custom_time
+    assert step.timestamp.tzinfo == UTC
+
+
+def test_edge_cases_enum_validation() -> None:
+    """Test that invalid enum values raise validation errors."""
+    with pytest.raises(ValidationError):
+        SimulationStep(
+            type="invalid_type",
+            node_id="fail_node",
+        )
+
+    with pytest.raises(ValidationError):
+        SimulationScenario(
+            id="bad_scenario",
+            description="fail",
+            inputs={},
+            validation_logic="random_logic",
+        )
+
+
+def test_complex_trace_serialization() -> None:
+    """Test a complex trace with mixed step types and nested data."""
+    steps = [
+        SimulationStep(
+            type=StepType.SYSTEM_EVENT,
+            node_id="boot",
+            inputs={"config": {"debug": True}},
+        ),
+        SimulationStep(
+            type=StepType.INTERACTION,
+            node_id="user_input",
+            inputs={"query": "Calculate complex math"},
+        ),
+        SimulationStep(
+            type=StepType.REASONING,
+            node_id="cot",
+            thought="I need to use python for this.\nStep 1: import math...",
+        ),
+        SimulationStep(
+            type=StepType.TOOL_EXECUTION,
+            node_id="exec_python",
+            action={
+                "tool_name": "python_repl",
+                "code": "import math\nprint(math.pi ** 2)",
+            },
+            observation={"stdout": "9.869604401089358"},
+        ),
+    ]
+
+    trace = SimulationTrace(
+        agent_id="complex-agent",
+        agent_version="2.0.0-beta",
+        steps=steps,
+        outcome={"result": 9.8696},
+        score=0.95,
+        metadata={
+            "run_id": "12345",
+            "env": "prod",
+            "tags": ["math", "complex"],
+        },
+    )
+
+    # Round trip
+    json_str = trace.model_dump_json()
+    restored = SimulationTrace.model_validate_json(json_str)
+
+    assert len(restored.steps) == 4
+    assert restored.steps[3].type == StepType.TOOL_EXECUTION
+    # Use explicit type casting/checking for nested dict access to satisfy type checkers
+    action = restored.steps[3].action
+    assert action is not None
+    assert action["tool_name"] == "python_repl"
+    assert restored.metadata["tags"] == ["math", "complex"]
+
+
+def test_optional_fields_none() -> None:
+    """Test that optional fields correctly handle None."""
+    req = SimulationRequest(
+        scenario=SimulationScenario(
+            id="minimal",
+            description="min",
+            inputs={},
+            validation_logic=ValidationLogic.FUZZY,
+        ),
+        profile=None,
+        chaos_config=None,
+    )
+    assert req.profile is None
+    assert req.chaos_config is None
+
+    dumped = req.model_dump(exclude_none=True)
+    assert "profile" not in dumped
+    assert "chaos_config" not in dumped

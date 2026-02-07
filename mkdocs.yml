@@ -14,6 +14,7 @@ nav:
     - Mock Data Factory: mock_factory.md
     - MCP Adapter: interop/mcp_adapter.md
   - Specifications & Protocols:
+    - Agent Trajectory (ATIF): simulation.md
     - CAM Specification: cap/specification.md
     - CAP Wire Protocol: cap/wire_protocol.md
     - Explicit Streaming Contracts: cap/streaming_contracts.md
