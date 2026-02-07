@@ -239,3 +239,179 @@ def test_complex_manifest_scenario() -> None:
     from coreason_manifest.spec.v2.definitions import ToolDefinition
 
     assert isinstance(manifest.definitions["tool-1"], ToolDefinition)
+
+
+def test_skill_edge_cases_extended() -> None:
+    """Test extended edge cases for SkillDefinition."""
+    # 1. Extremely long strings
+    long_string = "a" * 10000
+    skill_long = SkillDefinition(
+        id="long-skill",
+        name="Long Skill",
+        description=long_string,
+        load_strategy=LoadStrategy.EAGER,
+        instructions=long_string,
+        trigger_intent=long_string,
+    )
+    assert len(skill_long.description) == 10000
+    assert skill_long.instructions is not None
+    assert len(skill_long.instructions) == 10000
+
+    # 2. Extra forbidden fields (should raise ValidationError)
+    with pytest.raises(ValidationError) as exc:
+        SkillDefinition(
+            id="extra-fields",
+            name="Extra",
+            description="Extra fields",
+            load_strategy=LoadStrategy.EAGER,
+            instructions="Simple.",
+            extra_field="forbidden",  # type: ignore[call-arg]
+        )
+    assert "Extra inputs are not permitted" in str(exc.value)
+
+    # 3. Scripts with empty values (valid schema, runtime concern)
+    skill_empty_script = SkillDefinition(
+        id="empty-script",
+        name="Empty Script",
+        description="Empty script path",
+        load_strategy=LoadStrategy.EAGER,
+        instructions="Simple.",
+        scripts={"run": ""},
+    )
+    assert skill_empty_script.scripts["run"] == ""
+
+    # 4. Dependencies with empty fields
+    # Package is required, but empty string is technically a string (unless min_length is set, which isn't)
+    # Let's check if we can pass empty strings
+    skill_empty_dep = SkillDefinition(
+        id="empty-dep",
+        name="Empty Dep",
+        description="Empty dep package",
+        load_strategy=LoadStrategy.EAGER,
+        instructions="Simple.",
+        dependencies=[SkillDependency(ecosystem="python", package="")],
+    )
+    assert skill_empty_dep.dependencies[0].package == ""
+
+
+def test_complex_scenarios_extended() -> None:
+    """Test extended complex scenarios for SkillDefinition."""
+    # 1. Mixed Load Strategies in one Manifest
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Mixed Strategies"},
+        "definitions": {
+            "skill-eager": {
+                "type": "skill",
+                "id": "skill-eager",
+                "name": "Eager",
+                "description": "Eager",
+                "load_strategy": "eager",
+                "instructions": "Eager instructions",
+            },
+            "skill-lazy": {
+                "type": "skill",
+                "id": "skill-lazy",
+                "name": "Lazy",
+                "description": "Lazy",
+                "load_strategy": "lazy",
+                "trigger_intent": "Lazy trigger",
+                "instructions_uri": "./lazy.md",
+            },
+            "skill-user": {
+                "type": "skill",
+                "id": "skill-user",
+                "name": "User",
+                "description": "User",
+                "load_strategy": "user",
+                "instructions": "User instructions",
+            },
+            "mega-agent": {
+                "type": "agent",
+                "id": "mega-agent",
+                "name": "Mega Agent",
+                "role": "Mega",
+                "goal": "All",
+                "skills": ["skill-eager", "skill-lazy", "skill-user"],
+            },
+        },
+        "workflow": {
+            "start": "step-1",
+            "steps": {
+                "step-1": {"type": "agent", "id": "step-1", "agent": "mega-agent"},
+            },
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    agent = manifest.definitions["mega-agent"]
+    assert isinstance(agent, AgentDefinition)
+    assert len(agent.skills) == 3
+
+    # 2. Shared Dependencies across Skills
+    skill_a = SkillDefinition(
+        id="skill-a",
+        name="A",
+        description="A",
+        load_strategy=LoadStrategy.EAGER,
+        instructions="A",
+        dependencies=[SkillDependency(ecosystem="python", package="pandas", version_constraint=">=2.0")],
+    )
+    skill_b = SkillDefinition(
+        id="skill-b",
+        name="B",
+        description="B",
+        load_strategy=LoadStrategy.EAGER,
+        instructions="B",
+        dependencies=[SkillDependency(ecosystem="python", package="pandas", version_constraint=">=2.1")],
+    )
+    # This is valid at schema level, runtime must resolve conflict
+    assert skill_a.dependencies[0].package == skill_b.dependencies[0].package
+
+    # 3. Workflow Data Passing (Simulated)
+    # This just ensures ManifestV2 structure supports inputs/outputs in steps even with skills involved
+    workflow_data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Data Flow"},
+        "definitions": {
+            "skill-extract": {
+                "type": "skill",
+                "id": "skill-extract",
+                "name": "Extract",
+                "description": "Extracts data",
+                "load_strategy": "eager",
+                "instructions": "Extract data.",
+            },
+            "extractor-agent": {
+                "type": "agent",
+                "id": "extractor-agent",
+                "name": "Extractor",
+                "role": "Extractor",
+                "goal": "Extract",
+                "skills": ["skill-extract"],
+            },
+            "processor-agent": {
+                "type": "agent",
+                "id": "processor-agent",
+                "name": "Processor",
+                "role": "Processor",
+                "goal": "Process",
+            },
+        },
+        "workflow": {
+            "start": "step-1",
+            "steps": {
+                "step-1": {"type": "agent", "id": "step-1", "agent": "extractor-agent", "next": "step-2"},
+                "step-2": {
+                    "type": "agent",
+                    "id": "step-2",
+                    "agent": "processor-agent",
+                    "inputs": {"data": "{{ step-1.output }}"},
+                },
+            },
+        },
+    }
+    manifest_flow = ManifestV2.model_validate(workflow_data)
+    step2 = manifest_flow.workflow.steps["step-2"]
+    assert step2.inputs["data"] == "{{ step-1.output }}"
