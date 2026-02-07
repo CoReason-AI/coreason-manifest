@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from coreason_manifest.cli import main
-from coreason_manifest.spec.v2.definitions import AgentDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2
 from coreason_manifest.utils.loader import load_agent_from_ref
 
 
@@ -40,6 +40,7 @@ def test_init_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> Non
     # It dynamically imports, so it should work if the file exists.
     agent = load_agent_from_ref(ref)
 
+    assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "GreeterAgent"
     assert "GreeterAgent" in agent.definitions
 
@@ -110,6 +111,7 @@ def test_init_complex_verification(tmp_path: Path) -> None:
     ref = f"{project_dir}/agent.py:agent"
     agent = load_agent_from_ref(ref)
 
+    assert isinstance(agent, ManifestV2)
     # 1. Verify Definitions
     assert "GreeterAgent" in agent.definitions
     defn = agent.definitions["GreeterAgent"]

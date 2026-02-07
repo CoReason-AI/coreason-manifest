@@ -42,6 +42,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Graph Recipes (Work Package JJ)](graph_recipes.md)**
     *   Describes the system for non-linear, cyclic graph execution using `RecipeDefinition` and `GraphTopology`.
 
+*   **[Agent Skills System](skills.md)**
+    *   Documentation for defining and using procedural knowledge ("Skills") with `SkillDefinition` and `LoadStrategy`.
+
 *   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
     *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
 

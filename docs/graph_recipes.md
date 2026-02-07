@@ -96,6 +96,48 @@ Here is a raw JSON example of a topology where an AI Agent performs a task, and 
 1.  **`AgentNode`**: Executes an AI Agent.
 2.  **`HumanNode`**: Suspends execution until a human provides input or approval.
 3.  **`RouterNode`**: Evaluates a variable and branches execution to different target nodes.
+4.  **`EvaluatorNode`**: Executes an LLM-as-a-Judge evaluation loop, providing scores and critiques to optimize content.
+
+## Evaluator-Optimizer Workflow
+
+Coreason V2 natively supports the **Evaluator-Optimizer** pattern (popularized by Anthropic's Claude Cookbook). This pattern uses a dedicated `EvaluatorNode` to critique the output of a Generator agent and loop back for refinements until a quality threshold is met.
+
+### Example: Writer + Editor Loop
+
+```yaml
+topology:
+  nodes:
+    # 1. The Generator
+    - type: agent
+      id: "writer"
+      agent_ref: "copywriter-v1"
+      inputs_map:
+        topic: "user_topic"
+        critique: "critique_history"  # Receives feedback from the Evaluator
+
+    # 2. The Evaluator-Optimizer
+    - type: evaluator
+      id: "editor-check"
+      target_variable: "writer_output" # The content to grade
+      evaluator_agent_ref: "editor-llm" # The judge
+      evaluation_profile: "standard-critique" # The criteria
+
+      # Logic
+      pass_threshold: 0.9
+      max_refinements: 3
+
+      # Feedback Output
+      feedback_variable: "critique_history"
+
+      # Control Flow
+      pass_route: "publish"
+      fail_route: "writer" # Loops back to Generator for refinement
+
+    # 3. Success State
+    - type: agent
+      id: "publish"
+      agent_ref: "publisher-v1"
+```
 
 ## Integrity Validation
 
@@ -124,3 +166,26 @@ except ValueError as e:
     print(f"Validation Error: {e}")
     # Output: Dangling edge target: node-1 -> phantom-node
 ```
+
+## Runtime Execution
+
+The `GraphExecutor` is responsible for traversing the `RecipeDefinition` and executing nodes.
+
+### The Blackboard Architecture
+
+Execution state is maintained in a shared **Blackboard** (`context`).
+*   **Inputs Mapping**: When entering a node, data is mapped from the Blackboard to the Node's inputs using `inputs_map`.
+*   **Output Merging**: When a node completes, its output is merged back into the Blackboard.
+
+### Routing Logic
+
+*   **Standard Edges**: If a node has a single outgoing edge matching its ID, execution proceeds to the target.
+*   **Router Nodes**: `RouterNode` explicitly inspects a variable in the Blackboard (`input_key`) and selects the next node based on the `routes` map. If no match is found, it uses the `default_route`.
+
+### Execution Limits
+
+To prevent infinite loops in malformed graphs, the executor enforces a `max_steps` limit (default: 50). If the limit is reached, execution halts to protect resources.
+
+### Trace Generation
+
+The executor generates a `SimulationTrace` containing a list of `SimulationStep` objects, providing a full audit trail of the execution path, including inputs, outputs, and routing decisions.
