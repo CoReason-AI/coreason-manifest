@@ -67,15 +67,10 @@ def test_manifest_metadata_tested_models() -> None:
     data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
-        "metadata": {
-            "name": "Test Workflow",
-            "tested_models": ["gpt-4", "claude-3-opus"]
-        },
+        "metadata": {"name": "Test Workflow", "tested_models": ["gpt-4", "claude-3-opus"]},
         "workflow": {
             "start": "step-1",
-            "steps": {
-                "step-1": {"type": "logic", "id": "step-1", "code": "pass"}
-            },
+            "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
         },
     }
     manifest = ManifestV2.model_validate(data)
