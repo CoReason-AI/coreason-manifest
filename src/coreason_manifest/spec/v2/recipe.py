@@ -12,6 +12,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 
@@ -67,7 +68,8 @@ class RecipeNode(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     id: str = Field(..., description="Unique identifier within the graph.")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="UI layout metadata (x, y coordinates).")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Custom metadata (not for UI layout).")
+    presentation: NodePresentation | None = Field(None, description="Visual layout and styling metadata.")
 
 
 class AgentNode(RecipeNode):

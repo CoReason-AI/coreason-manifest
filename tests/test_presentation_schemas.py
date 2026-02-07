@@ -7,6 +7,7 @@ from coreason_manifest import (
     MarkdownBlock,
     MediaCarousel,
     MediaItem,
+    NodePresentation,
     PresentationEvent,
     PresentationEventType,
     ProgressUpdate,
@@ -159,3 +160,53 @@ def test_immutability() -> None:
     # Try to modify event field
     with pytest.raises(ValidationError):
         event.type = PresentationEventType.MARKDOWN_BLOCK  # type: ignore[misc]
+
+
+def test_node_presentation_valid() -> None:
+    """Verify NodePresentation with valid inputs."""
+    presentation = NodePresentation(x=100.5, y=200.0)
+    assert presentation.x == 100.5
+    assert presentation.y == 200.0
+    assert presentation.color is None
+    assert presentation.z_index == 0
+
+    presentation = NodePresentation(x=0, y=0, color="#FF5733", label="Start", z_index=10)
+    assert presentation.color == "#FF5733"
+    assert presentation.label == "Start"
+    assert presentation.z_index == 10
+
+
+def test_node_presentation_color_validation() -> None:
+    """Verify NodePresentation color validation."""
+    # Valid colors
+    assert NodePresentation(x=0, y=0, color="#000000").color == "#000000"
+    assert NodePresentation(x=0, y=0, color="#ffffff").color == "#ffffff"
+    assert NodePresentation(x=0, y=0, color="#ABCDEF").color == "#ABCDEF"
+
+    # Invalid colors
+    invalid_colors = ["red", "#123", "#GGGGGG", "123456", "#12345"]
+    for color in invalid_colors:
+        with pytest.raises(ValidationError) as excinfo:
+            NodePresentation(x=0, y=0, color=color)
+        assert "valid 6-char hex code" in str(excinfo.value)
+
+
+def test_node_presentation_integration() -> None:
+    """Verify integration of NodePresentation in RecipeNode."""
+    from coreason_manifest import AgentNode
+
+    # Create a node with presentation
+    node = AgentNode(
+        id="node-1",
+        agent_ref="agent-v1",
+        presentation=NodePresentation(x=150, y=300, color="#00FF00"),
+    )
+
+    dumped = node.model_dump(mode="json")
+    assert dumped["presentation"]["x"] == 150.0
+    assert dumped["presentation"]["y"] == 300.0
+    assert dumped["presentation"]["color"] == "#00FF00"
+
+    # Create a node without presentation
+    node_no_pres = AgentNode(id="node-2", agent_ref="agent-v1")
+    assert node_no_pres.presentation is None

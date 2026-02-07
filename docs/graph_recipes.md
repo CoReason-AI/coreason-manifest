@@ -103,6 +103,28 @@ routes:
 default_route: "manual-review"
 ```
 
+## Visual Presentation
+
+Every node supports a strictly typed `presentation` field for controlling its layout and appearance in the Visual Builder.
+
+```yaml
+type: agent
+id: "research-step"
+agent_ref: "researcher-agent-v1"
+presentation:
+  x: 100.5
+  y: 200.0
+  label: "Deep Research"
+  color: "#FF5733"
+  icon: "lucide:search"
+  z_index: 10
+```
+
+*   **x, y**: Mandatory coordinates.
+*   **color**: Optional 6-character hex code (e.g. `#FF0000`).
+*   **icon**: Optional icon identifier.
+*   **z_index**: Optional rendering order (default 0).
+
 ## Example Recipe
 
 Here is a complete example of a Recipe that includes a loop, human approval, state, and policy.
