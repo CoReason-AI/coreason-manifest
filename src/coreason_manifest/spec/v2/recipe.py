@@ -34,12 +34,36 @@ class RecipeStatus(StrEnum):
     ARCHIVED = "archived"
 
 
+class RecipeRecommendation(CoReasonBaseModel):
+    """Stores search results from the catalog."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    ref: str = Field(..., description="ID of the candidate.")
+    score: float = Field(..., description="0.0 - 1.0 score.")
+    rationale: str = Field(..., description="Rationale for the recommendation.")
+    warnings: list[str] = Field(default_factory=list, description="Warnings if any.")
+
+
+class OptimizationIntent(CoReasonBaseModel):
+    """Directives for 'Fork & Improve' workflows."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    base_ref: str = Field(..., description="Parent ID to fork.")
+    improvement_goal: str = Field(..., description="Prompt for the optimizer.")
+    strategy: Literal["atomic", "parallel"] = Field("parallel", description="Strategy for improvement.")
+
+
 class SemanticRef(CoReasonBaseModel):
     """A semantic reference (placeholder) for an agent or tool."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     intent: str = Field(..., description="The intent description for this placeholder.")
+    constraints: list[str] = Field(default_factory=list, description="Hard requirements.")
+    candidates: list[RecipeRecommendation] = Field(default_factory=list, description="AI suggestions.")
+    optimization: OptimizationIntent | None = Field(None, description="Optional directive.")
 
 
 class RecipeInterface(CoReasonBaseModel):
@@ -328,12 +352,16 @@ class RecipeDefinition(CoReasonBaseModel):
         """
         if self.status == RecipeStatus.PUBLISHED:
             # 1. Enforce Concrete Resolution
+            abstract_nodes = []
             for node in self.topology.nodes:
                 if isinstance(node, AgentNode) and isinstance(node.agent_ref, SemanticRef):
-                    raise ValueError(
-                        f"Lifecycle Error: Node '{node.id}' is still abstract. "
-                        "Resolve all SemanticRefs to concrete IDs before publishing."
-                    )
+                    abstract_nodes.append(node.id)
+
+            if abstract_nodes:
+                raise ValueError(
+                    f"Lifecycle Error: Nodes {abstract_nodes} are still abstract. "
+                    "Resolve all SemanticRefs to concrete IDs before publishing."
+                )
 
             # 2. Enforce Graph Integrity
             if not self.topology.verify_completeness():

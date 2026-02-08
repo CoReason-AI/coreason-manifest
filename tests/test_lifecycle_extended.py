@@ -67,7 +67,12 @@ def test_semantic_ref_serialization() -> None:
 
     # Dump to dict
     data = node.model_dump(mode="json")
-    assert data["agent_ref"] == {"intent": "analyze data"}
+    assert data["agent_ref"] == {
+        "intent": "analyze data",
+        "candidates": [],
+        "constraints": [],
+        "optimization": None,
+    }
 
     # Load back
     loaded_node = AgentNode.model_validate(data)
