@@ -5,12 +5,12 @@ from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
     GraphTopology,
+    OptimizationIntent,
     RecipeDefinition,
     RecipeInterface,
     RecipeRecommendation,
     RecipeStatus,
     SemanticRef,
-    OptimizationIntent,
 )
 
 
@@ -24,21 +24,24 @@ def test_mixed_references_in_draft() -> None:
         interface=RecipeInterface(),
         status=RecipeStatus.DRAFT,
         topology=GraphTopology(
-            nodes=[concrete, abstract],
-            edges=[{"source": "concrete", "target": "abstract"}],
-            entry_point="concrete"
-        )
+            nodes=[concrete, abstract], edges=[{"source": "concrete", "target": "abstract"}], entry_point="concrete"
+        ),
     )
 
     assert recipe.status == RecipeStatus.DRAFT
     # Check nodes
     nodes = {n.id: n for n in recipe.topology.nodes}
-    assert isinstance(nodes["concrete"].agent_ref, str)
-    assert isinstance(nodes["abstract"].agent_ref, SemanticRef)
+    concrete_node = nodes["concrete"]
+    abstract_node = nodes["abstract"]
+
+    assert isinstance(concrete_node, AgentNode)
+    assert isinstance(abstract_node, AgentNode)
+    assert isinstance(concrete_node.agent_ref, str)
+    assert isinstance(abstract_node.agent_ref, SemanticRef)
 
 
 def test_complex_semantic_ref_serialization() -> None:
-    """Verify full serialization/deserialization of a `SemanticRef` with multiple `candidates` and `optimization` strategy."""
+    """Verify full serialization/deserialization of a `SemanticRef` with rich metadata."""
     rec1 = RecipeRecommendation(ref="cand-1", score=0.9, rationale="Good", warnings=[])
     rec2 = RecipeRecommendation(ref="cand-2", score=0.8, rationale="Cheap", warnings=["Slow"])
     opt = OptimizationIntent(base_ref="base-v1", improvement_goal="Speed up", strategy="atomic")
@@ -47,7 +50,7 @@ def test_complex_semantic_ref_serialization() -> None:
         intent="Optimize DB",
         constraints=["latency < 10ms"],
         candidates=[rec1, rec2],
-        optimization=opt
+        optimization=opt,
     )
 
     node = AgentNode(id="opt-task", agent_ref=sem_ref)
@@ -59,6 +62,7 @@ def test_complex_semantic_ref_serialization() -> None:
     assert isinstance(loaded_node.agent_ref, SemanticRef)
     assert len(loaded_node.agent_ref.candidates) == 2
     assert loaded_node.agent_ref.candidates[1].warnings == ["Slow"]
+    assert loaded_node.agent_ref.optimization is not None
     assert loaded_node.agent_ref.optimization.strategy == "atomic"
 
 
@@ -77,12 +81,19 @@ def test_edge_case_empty_lists_semantic_ref() -> None:
 def test_edge_case_optimization_strategy_enum() -> None:
     """Verify valid vs invalid `strategy` literals in `OptimizationIntent`."""
     # Valid
-    opt1 = OptimizationIntent(base_ref="b", improvement_goal="g", strategy="atomic")
-    opt2 = OptimizationIntent(base_ref="b", improvement_goal="g", strategy="parallel")
+    _ = OptimizationIntent(base_ref="b", improvement_goal="g", strategy="atomic")
+    _ = OptimizationIntent(base_ref="b", improvement_goal="g", strategy="parallel")
 
     # Invalid
     with pytest.raises(ValidationError) as excinfo:
-        OptimizationIntent(base_ref="b", improvement_goal="g", strategy="invalid_strategy")
+        # We pass an invalid string to test validation, but cast it to Any to satisfy MyPy
+        OptimizationIntent.model_validate(
+            {
+                "base_ref": "b",
+                "improvement_goal": "g",
+                "strategy": "invalid_strategy",
+            }
+        )
 
     assert "Input should be 'atomic' or 'parallel'" in str(excinfo.value)
 
@@ -98,10 +109,8 @@ def test_lifecycle_mixed_publish_failure() -> None:
             interface=RecipeInterface(),
             status=RecipeStatus.PUBLISHED,
             topology=GraphTopology(
-                nodes=[concrete, abstract],
-                edges=[{"source": "concrete", "target": "abstract"}],
-                entry_point="concrete"
-            )
+                nodes=[concrete, abstract], edges=[{"source": "concrete", "target": "abstract"}], entry_point="concrete"
+            ),
         )
 
     err_msg = str(excinfo.value)
@@ -127,8 +136,8 @@ def test_lifecycle_multiple_abstract_nodes_failure() -> None:
             topology=GraphTopology(
                 nodes=[n1, n2, n3],
                 edges=[{"source": "n1", "target": "n2"}, {"source": "n2", "target": "n3"}],
-                entry_point="n1"
-            )
+                entry_point="n1",
+            ),
         )
 
     err_msg = str(excinfo.value)
