@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -18,7 +18,7 @@ from pydantic import Field
 from .common_base import CoReasonBaseModel
 
 
-class StepType(str, Enum):
+class StepType(StrEnum):
     """Enumeration of step types in a simulation trace."""
 
     INTERACTION = "interaction"
@@ -28,7 +28,7 @@ class StepType(str, Enum):
     ERROR = "error"
 
 
-class ValidationLogic(str, Enum):
+class ValidationLogic(StrEnum):
     """Enumeration of validation logic types for simulation scenarios."""
 
     EXACT_MATCH = "exact_match"
