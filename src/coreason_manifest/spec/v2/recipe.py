@@ -277,9 +277,7 @@ class RecoveryConfig(CoReasonBaseModel):
     max_retries: int | None = Field(None, description="Override global retry limit.")
     retry_delay_seconds: float = Field(1.0, description="Backoff start.")
 
-    behavior: FailureBehavior = Field(
-        FailureBehavior.FAIL_WORKFLOW, description="Strategy on final failure."
-    )
+    behavior: FailureBehavior = Field(FailureBehavior.FAIL_WORKFLOW, description="Strategy on final failure.")
 
     fallback_node_id: str | None = Field(
         None,
