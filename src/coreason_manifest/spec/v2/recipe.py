@@ -273,11 +273,29 @@ class SolverConfig(CoReasonBaseModel):
 
     strategy: SolverStrategy = Field(SolverStrategy.STANDARD, description="The planning strategy to use.")
     depth_limit: int = Field(3, ge=1, description="Hard limit on recursion depth.")
-    n_samples: int = Field(1, ge=1, description="For SPIO: How many distinct plans to generate in parallel.")
+    # --- Ensemble / Council Configuration (Harvested) ---
+    n_samples: int = Field(1, ge=1, description="Council size: How many plans to generate.")
+
+    diversity_threshold: float | None = Field(
+        0.3,
+        ge=0.0,
+        le=1.0,
+        description="For Ensemble: Minimum Jaccard distance required between generated plans.",
+    )
+
+    enable_dissenter: bool = Field(
+        False, description="If True, an adversarial agent will critique plans before voting."
+    )
+
+    consensus_threshold: float | None = Field(
+        0.6, ge=0.0, le=1.0, description="Percentage of votes required to ratify a plan."
+    )
+
+    # --- Tree Search Configuration ---
     beam_width: int = Field(1, ge=1, description="For LATS: How many children to expand per node.")
     max_iterations: int = Field(10, ge=1, description="For LATS: The 'Search Budget' (total simulations).")
     aggregation_method: Literal["best_of_n", "majority_vote", "weighted_merge"] | None = Field(
-        None, description="How to combine results if n_samples > 1 (SPIO-E logic)."
+        None, description="How to combine results if n_samples > 1."
     )
 
 
