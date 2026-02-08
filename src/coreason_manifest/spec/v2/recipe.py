@@ -17,6 +17,7 @@ from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
+from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 
@@ -114,6 +115,10 @@ class PolicyConfig(CoReasonBaseModel):
     # --- New Harvesting Fields ---
     budget_cap_usd: float | None = Field(
         None, description="Hard limit for estimated token + tool costs. Execution halts if exceeded."
+    )
+    token_budget: int | None = Field(
+        None,
+        description="Max tokens for the assembled prompt. Low-priority contexts will be pruned if exceeded.",
     )
     sensitive_tools: list[str] = Field(
         default_factory=list,
@@ -225,8 +230,16 @@ class AgentNode(RecipeNode):
     """A node that executes an AI Agent."""
 
     type: Literal["agent"] = "agent"
-    agent_ref: str | SemanticRef = Field(
-        ..., description="The ID or URI of the Agent Definition, or a Semantic Reference."
+
+    # New Field: Inline Definition
+    # If provided, this overrides 'agent_ref' lookup.
+    construct: CognitiveProfile | None = Field(  # type: ignore[assignment]
+        None,
+        description="Inline definition of the agent's cognitive architecture (for the Weaver).",
+    )
+
+    agent_ref: str | SemanticRef | None = Field(
+        None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
     )
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
