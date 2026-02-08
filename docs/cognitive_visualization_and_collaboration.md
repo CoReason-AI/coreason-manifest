@@ -29,7 +29,7 @@ from coreason_manifest.spec.v2.recipe import AgentNode, PresentationHints, Visua
 node = AgentNode(
     id="writer",
     agent_ref="writer-agent",
-    presentation=PresentationHints(
+    visualization=PresentationHints(
         style=VisualizationStyle.DOCUMENT,
         display_title="Drafting Article",
         icon="lucide:file-text",
