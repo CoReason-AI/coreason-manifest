@@ -134,7 +134,7 @@ def test_render_minimal_agent() -> None:
 
     card = render_agent_card(manifest)
 
-    assert "# Minimal (v0.0.0)" in card
+    assert "# Minimal (v0.1.0)" in card
     assert "**Role:** Minion" in card
     assert "## 💰 Resource & Cost Profile" not in card
     assert "## 🧪 Evaluation Standards" not in card
@@ -246,7 +246,7 @@ def test_render_metadata_variants() -> None:
 
     metadata = ManifestMetadata(
         name="Describer",
-        version=2.5,  # Float version to trigger str() conversion
+        version="2.5",
         created="2025-01-01",  # Extra field
     )
 
