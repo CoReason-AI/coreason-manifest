@@ -11,15 +11,17 @@
 import pytest
 from pydantic import ValidationError
 
+from coreason_manifest.spec.v2.compliance import (
+    AuditLevel,
+    ComplianceConfig,
+    RetentionPolicy,
+)
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
-    AuditLevel,
-    ComplianceConfig,
     GraphTopology,
     RecipeDefinition,
     RecipeInterface,
-    RetentionPolicy,
 )
 
 

@@ -13,13 +13,16 @@ The `ComplianceConfig` schema standardizes these requirements within the manifes
 
 ## Configuration Reference
 
-The `ComplianceConfig` model is located at `src/coreason_manifest/spec/v2/recipe.py`.
+The `ComplianceConfig` model is located at `src/coreason_manifest/spec/v2/compliance.py`.
 
 ```python
-from coreason_manifest.spec.v2.recipe import (
+from coreason_manifest.spec.v2.compliance import (
     ComplianceConfig,
     AuditLevel,
-    RetentionPolicy
+    RetentionPolicy,
+    IntegrityConfig,
+    AuditContentMode,
+    IntegrityLevel
 )
 
 config = ComplianceConfig(
@@ -28,7 +31,13 @@ config = ComplianceConfig(
     generate_aibom=False,
     generate_pdf_report=False,
     require_signature=False,
-    mask_pii=True
+    mask_pii=True,
+    # New in V2 (Veritas Harvest)
+    integrity=IntegrityConfig(
+        input_mode=AuditContentMode.FULL_PAYLOAD,
+        output_mode=AuditContentMode.REFERENCE_ONLY,
+        integrity_level=IntegrityLevel.CHECKSUM
+    )
 )
 ```
 
@@ -67,6 +76,32 @@ Controls *how long* the audit artifacts must be retained by the storage backend.
 *   `mask_pii` (bool, default `True`): If `True`, the Auditor will attempt to scrub Personally Identifiable Information (PII) from logs before archiving.
 *   **Important:** For GxP or Clinical use cases, you often set this to `False` because the patient context is critical for the audit trail and is protected by other means (HIPAA-compliant storage).
 
+### 5. Data Integrity & Zero-Copy Auditing (`IntegrityConfig`)
+
+Harvested from Coreason-Veritas, these settings control payload storage and verification.
+
+#### Audit Content Mode (`AuditContentMode`)
+
+Controls how the input/output payloads are stored in the log.
+
+| Mode | Value | Description | Use Case |
+| :--- | :--- | :--- | :--- |
+| **FULL PAYLOAD** | `"full_payload"` | Store the actual JSON content (Standard). | Standard Debugging. |
+| **REDACTED** | `"redacted"` | Store content, but run PII scrubbers first. | Privacy Compliance. |
+| **REFERENCE ONLY** | `"reference_only"` | **ZERO-COPY:** Store only a hash/pointer to external storage. | High Volume / High Security. |
+| **OFF** | `"off"` | Do not audit this payload (Metadata only). | Ephemeral data. |
+
+#### Integrity Level (`IntegrityLevel`)
+
+Controls the cryptographic strength of the audit trail.
+
+| Level | Value | Description | Use Case |
+| :--- | :--- | :--- | :--- |
+| **NONE** | `"none"` | No cryptographic verification. | Standard logging. |
+| **CHECKSUM** | `"checksum"` | SHA-256 hashing of payloads. | Data Integrity checks. |
+| **DIGITAL SIGNATURE** | `"signature"` | Asymmetric Key Signing (Non-repudiation). | Legal/Contracts. |
+| **BLOCKCHAIN ANCHOR** | `"anchor"` | Immutable public/private ledger anchoring. | GxP / Financial Audits. |
+
 ## Examples
 
 ### Scenario A: Casual Chatbot
@@ -103,6 +138,9 @@ compliance = ComplianceConfig(
     retention=RetentionPolicy.SEVEN_YEARS,
     generate_aibom=True,
     generate_pdf_report=True,
-    mask_pii=False # Keep clinical data intact
+    mask_pii=False, # Keep clinical data intact
+    integrity=IntegrityConfig(
+        integrity_level=IntegrityLevel.BLOCKCHAIN_ANCHOR
+    )
 )
 ```
