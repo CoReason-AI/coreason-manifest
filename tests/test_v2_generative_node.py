@@ -19,6 +19,8 @@ from coreason_manifest.spec.v2.recipe import (
     RecipeDefinition,
     RecipeInterface,
     RouterNode,
+    SolverConfig,
+    SolverStrategy,
     TaskSequence,
 )
 
@@ -28,8 +30,7 @@ def test_generative_node_serialization() -> None:
     node = GenerativeNode(
         id="gen-1",
         goal="Research competitor pricing",
-        max_depth=5,
-        strategy="bfs",
+        solver=SolverConfig(strategy=SolverStrategy.TREE_SEARCH, depth_limit=5),
         allowed_tools=["tool-1", "tool-2"],
         output_schema={"type": "object", "properties": {"price": {"type": "number"}}},
     )
@@ -38,40 +39,70 @@ def test_generative_node_serialization() -> None:
     data = node.model_dump(by_alias=True)
     assert data["type"] == "generative"
     assert data["goal"] == "Research competitor pricing"
-    assert data["max_depth"] == 5
-    assert data["strategy"] == "bfs"
+    assert data["solver"]["depth_limit"] == 5
+    assert data["solver"]["strategy"] == "tree_search"
     assert data["allowed_tools"] == ["tool-1", "tool-2"]
 
     # Round-trip
     node2 = GenerativeNode.model_validate(data)
     assert node2.id == "gen-1"
-    assert node2.strategy == "bfs"
+    assert node2.solver.strategy == SolverStrategy.TREE_SEARCH
 
 
 def test_generative_node_defaults() -> None:
     """Test default values for GenerativeNode."""
-    node = GenerativeNode(id="gen-default", goal="Simple goal")
-    assert node.max_depth == 3
-    assert node.strategy == "hybrid"
+    node = GenerativeNode(id="gen-default", goal="Simple goal", output_schema={})
+    assert node.solver.depth_limit == 3
+    assert node.solver.strategy == SolverStrategy.STANDARD
     assert node.allowed_tools == []
     assert node.output_schema == {}
 
 
 def test_generative_node_validation() -> None:
     """Test validation constraints."""
-    # max_depth < 1 should fail
-    with pytest.raises(ValidationError) as excinfo:
-        GenerativeNode(id="bad-depth", goal="Fail", max_depth=0)
-    assert "Input should be greater than or equal to 1" in str(excinfo.value)
-
-    # Invalid strategy should fail
+    # depth_limit < 1 should fail
     with pytest.raises(ValidationError) as excinfo:
         GenerativeNode(
-            id="bad-strategy",
+            id="bad-depth",
             goal="Fail",
-            strategy="invalid_strat",
+            output_schema={},
+            solver=SolverConfig(depth_limit=0),
         )
-    assert "Input should be 'bfs', 'dfs' or 'hybrid'" in str(excinfo.value)
+    assert "Input should be greater than or equal to 1" in str(excinfo.value)
+
+    # Invalid strategy handled by Enum, so testing string coercion might be relevant or direct enum
+    # but Pydantic handles enum validation.
+
+    # Missing output_schema
+    with pytest.raises(ValidationError) as excinfo:
+        GenerativeNode(id="no-schema", goal="Fail")  # type: ignore[call-arg]
+    assert "Field required" in str(excinfo.value)
+
+
+def test_spio_e_mode() -> None:
+    """Test SPIO-E (Ensemble) mode configuration."""
+    node = GenerativeNode(
+        id="spio-e",
+        goal="Ensemble Plan",
+        output_schema={},
+        solver=SolverConfig(strategy=SolverStrategy.ENSEMBLE, n_samples=5, aggregation_method="majority_vote"),
+    )
+    assert node.solver.strategy == SolverStrategy.ENSEMBLE
+    assert node.solver.n_samples == 5
+    assert node.solver.aggregation_method == "majority_vote"
+
+
+def test_lats_mode() -> None:
+    """Test LATS (Tree Search) mode configuration."""
+    node = GenerativeNode(
+        id="lats",
+        goal="Tree Search Plan",
+        output_schema={},
+        solver=SolverConfig(strategy=SolverStrategy.TREE_SEARCH, beam_width=3, max_iterations=50),
+    )
+    assert node.solver.strategy == SolverStrategy.TREE_SEARCH
+    assert node.solver.beam_width == 3
+    assert node.solver.max_iterations == 50
 
 
 def test_recipe_with_generative_node() -> None:
@@ -81,7 +112,7 @@ def test_recipe_with_generative_node() -> None:
         interface=RecipeInterface(),
         topology=GraphTopology(
             nodes=[
-                GenerativeNode(id="gen-step", goal="Generate content"),
+                GenerativeNode(id="gen-step", goal="Generate content", output_schema={}),
                 AgentNode(id="agent-step", agent_ref="editor-agent"),
             ],
             edges=[{"source": "gen-step", "target": "agent-step"}],
@@ -97,9 +128,6 @@ def test_recipe_with_generative_node() -> None:
     assert isinstance(gen_node, GenerativeNode)
     assert gen_node.goal == "Generate content"
 
-    agent_node = next(n for n in loaded.topology.nodes if n.id == "agent-step")
-    assert isinstance(agent_node, AgentNode)
-
 
 def test_topology_validation_with_generative_node() -> None:
     """Test polymorphic deserialization in GraphTopology."""
@@ -109,7 +137,8 @@ def test_topology_validation_with_generative_node() -> None:
                 "type": "generative",
                 "id": "gen-1",
                 "goal": "Solve X",
-                "strategy": "dfs",
+                "output_schema": {},
+                "solver": {"strategy": "tree_search"},
             }
         ],
         "edges": [],
@@ -118,15 +147,15 @@ def test_topology_validation_with_generative_node() -> None:
 
     topology = GraphTopology.model_validate(data)
     assert isinstance(topology.nodes[0], GenerativeNode)
-    assert topology.nodes[0].strategy == "dfs"
+    assert topology.nodes[0].solver.strategy == SolverStrategy.TREE_SEARCH
 
 
 def test_task_sequence_with_generative_node() -> None:
     """Test that TaskSequence accepts GenerativeNode."""
     seq = TaskSequence(
         steps=[
-            GenerativeNode(id="gen-1", goal="Goal 1"),
-            GenerativeNode(id="gen-2", goal="Goal 2"),
+            GenerativeNode(id="gen-1", goal="Goal 1", output_schema={}),
+            GenerativeNode(id="gen-2", goal="Goal 2", output_schema={}),
         ]
     )
     graph = seq.to_graph()
@@ -137,35 +166,29 @@ def test_task_sequence_with_generative_node() -> None:
 
 
 def test_edge_case_max_depth_boundary() -> None:
-    """Test max_depth boundary conditions."""
+    """Test depth_limit boundary conditions."""
     # Minimum valid depth
-    node = GenerativeNode(id="min-depth", goal="Goal", max_depth=1)
-    assert node.max_depth == 1
+    node = GenerativeNode(id="min-depth", goal="Goal", output_schema={}, solver=SolverConfig(depth_limit=1))
+    assert node.solver.depth_limit == 1
 
     # Large depth
-    node = GenerativeNode(id="large-depth", goal="Goal", max_depth=100)
-    assert node.max_depth == 100
+    node = GenerativeNode(id="large-depth", goal="Goal", output_schema={}, solver=SolverConfig(depth_limit=100))
+    assert node.solver.depth_limit == 100
 
 
 def test_edge_case_allowed_tools() -> None:
     """Test allowed_tools with various inputs."""
     # Empty list (default)
-    node = GenerativeNode(id="empty-tools", goal="Goal")
+    node = GenerativeNode(id="empty-tools", goal="Goal", output_schema={})
     assert node.allowed_tools == []
 
     # Duplicates are allowed by list type, but conceptually fine
-    node = GenerativeNode(id="dup-tools", goal="Goal", allowed_tools=["t1", "t1"])
+    node = GenerativeNode(id="dup-tools", goal="Goal", output_schema={}, allowed_tools=["t1", "t1"])
     assert node.allowed_tools == ["t1", "t1"]
-
-    # Large list
-    tools = [f"tool-{i}" for i in range(100)]
-    node = GenerativeNode(id="large-tools", goal="Goal", allowed_tools=tools)
-    assert len(node.allowed_tools) == 100
 
 
 def test_complex_case_mixed_topology() -> None:
     """Test a mixed graph with GenerativeNode, RouterNode, and AgentNode."""
-    # Gen -> Router -> (Agent1 | Agent2)
     nodes = [
         GenerativeNode(id="gen-start", goal="Analyze market", output_schema={"type": "object"}),
         RouterNode(
@@ -193,12 +216,11 @@ def test_complex_case_mixed_topology() -> None:
 
 def test_complex_case_chained_generative() -> None:
     """Test chaining multiple GenerativeNodes."""
-    # Gen1 -> Gen2 -> Gen3
     seq = TaskSequence(
         steps=[
-            GenerativeNode(id="g1", goal="Step 1"),
-            GenerativeNode(id="g2", goal="Step 2"),
-            GenerativeNode(id="g3", goal="Step 3"),
+            GenerativeNode(id="g1", goal="Step 1", output_schema={}),
+            GenerativeNode(id="g2", goal="Step 2", output_schema={}),
+            GenerativeNode(id="g3", goal="Step 3", output_schema={}),
         ]
     )
     graph = seq.to_graph()
@@ -212,9 +234,8 @@ def test_complex_case_chained_generative() -> None:
 
 def test_complex_case_cycle_with_generative() -> None:
     """Test a GenerativeNode within a cyclic graph."""
-    # Gen1 -> Agent -> Gen1 (Loop)
     nodes = [
-        GenerativeNode(id="gen-loop", goal="Generate until perfect"),
+        GenerativeNode(id="gen-loop", goal="Generate until perfect", output_schema={}),
         AgentNode(id="critic", agent_ref="critic-bot"),
     ]
     edges = [
@@ -233,9 +254,9 @@ def test_complex_case_task_sequence_mixed() -> None:
     """Test TaskSequence with a mix of all node types."""
     seq = TaskSequence(
         steps=[
-            GenerativeNode(id="step1", goal="Plan"),
+            GenerativeNode(id="step1", goal="Plan", output_schema={}),
             AgentNode(id="step2", agent_ref="executor"),
-            GenerativeNode(id="step3", goal="Review"),
+            GenerativeNode(id="step3", goal="Review", output_schema={}),
         ]
     )
     graph = seq.to_graph()

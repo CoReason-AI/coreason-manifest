@@ -128,19 +128,42 @@ class AgentNode(RecipeNode):
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
 
 
+class SolverStrategy(StrEnum):
+    """Defines the algorithmic approach for the Generative Node."""
+
+    STANDARD = "standard"  # Simple Depth-First Decomposition (ROMA)
+    TREE_SEARCH = "tree_search"  # MCTS / LATS (Backtracking & Simulation)
+    ENSEMBLE = "ensemble"  # SPIO (Parallel generation + Voting)
+
+
+class SolverConfig(CoReasonBaseModel):
+    """Configuration for the autonomous planning capabilities."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    strategy: SolverStrategy = Field(SolverStrategy.STANDARD, description="The planning strategy to use.")
+    depth_limit: int = Field(3, ge=1, description="Hard limit on recursion depth.")
+    n_samples: int = Field(1, ge=1, description="For SPIO: How many distinct plans to generate in parallel.")
+    beam_width: int = Field(1, ge=1, description="For LATS: How many children to expand per node.")
+    max_iterations: int = Field(10, ge=1, description="For LATS: The 'Search Budget' (total simulations).")
+    aggregation_method: Literal["best_of_n", "majority_vote", "weighted_merge"] | None = Field(
+        None, description="How to combine results if n_samples > 1 (SPIO-E logic)."
+    )
+
+
 class GenerativeNode(RecipeNode):
     """A node that acts as an interface definition for dynamic solvers."""
 
     type: Literal["generative"] = "generative"
-    goal: str = Field(..., description="The high-level objective to be solved recursively.")
-    max_depth: int = Field(3, ge=1, description="Recursion limit for sub-tasks.")
-    strategy: Literal["bfs", "dfs", "hybrid"] = Field("hybrid", description="Traversal strategy hint for the solver.")
+    goal: str = Field(..., description="The high-level objective.")
+    solver: SolverConfig = Field(
+        default_factory=SolverConfig,
+        description="Configuration for the autonomous planning capabilities.",
+    )
     allowed_tools: list[str] = Field(
         default_factory=list, description="Whitelist of Tool IDs the solver is permitted to use."
     )
-    output_schema: dict[str, Any] = Field(
-        default_factory=dict, description="JSON Schema defining the expected structure of the final answer."
-    )
+    output_schema: dict[str, Any] = Field(..., description="The contract for the result.")
 
 
 class HumanNode(RecipeNode):
