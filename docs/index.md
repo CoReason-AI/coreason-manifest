@@ -63,6 +63,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Evaluation Metadata](evaluation_metadata.md)**
     *   Specifications for embedding testing requirements (`EvaluationProfile`) and quality criteria (`SuccessCriterion`) directly into Agent Definitions.
 
+*   **[Episteme: Meta-Cognition & Reasoning](episteme_reasoning.md)**
+    *   Details the meta-cognitive layer (`ReasoningConfig`) for self-correction, adversarial review, and knowledge gap scanning.
+
 *   **[Active Memory Interface](active_memory_interface.md)**
     *   Protocol (`SessionHandle`) for active agent interactions with storage (history, recall, persistent variables).
 

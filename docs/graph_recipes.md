@@ -154,7 +154,9 @@ Here is a raw JSON example of a topology where an AI Agent performs a task, and 
 
 ### Node Types
 
-All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `presentation` (UI layout).
+All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, `presentation` (UI layout), and the new **`reasoning`** field (Episteme).
+
+See [Episteme: Meta-Cognition & Reasoning](episteme_reasoning.md) for details on self-correction and adversarial review.
 
 1.  **`AgentNode`** (`type: agent`): Executes an AI Agent.
     - `agent_ref`: The ID or URI of the Agent Definition to execute.
