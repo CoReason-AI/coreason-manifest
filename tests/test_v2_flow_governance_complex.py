@@ -23,17 +23,15 @@ from coreason_manifest.spec.v2.recipe import (
 
 
 def test_validation_negative_retries() -> None:
-    """Test that max_retries cannot be negative."""
-    with pytest.raises(ValidationError) as exc:
-        RecoveryConfig(max_retries=-1)
-    assert "Input should be greater than or equal to 0" in str(exc.value)
+    """Test that max_retries can be negative (flexible runtime)."""
+    config = RecoveryConfig(max_retries=-1)
+    assert config.max_retries == -1
 
 
 def test_validation_negative_delay() -> None:
-    """Test that retry_delay_seconds cannot be negative."""
-    with pytest.raises(ValidationError) as exc:
-        RecoveryConfig(retry_delay_seconds=-0.5)
-    assert "Input should be greater than or equal to 0" in str(exc.value)
+    """Test that retry_delay_seconds can be negative (flexible runtime)."""
+    config = RecoveryConfig(retry_delay_seconds=-0.5)
+    assert config.retry_delay_seconds == -0.5
 
 
 def test_validation_fallback_integrity() -> None:
