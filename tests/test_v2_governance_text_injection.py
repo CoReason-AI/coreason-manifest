@@ -109,7 +109,11 @@ def test_complex_case_inheritance_simulation() -> None:
 
     Scenario: A parent policy exists, and a child recipe wants to override only the disclaimer.
     """
-    parent_policy = PolicyConfig(safety_preamble="Parent Safety", legal_disclaimer="Parent Disclaimer", max_retries=3)
+    parent_policy = PolicyConfig(
+        safety_preamble="Parent Safety",
+        legal_disclaimer="Parent Disclaimer",
+        max_retries=3
+    )
 
     # Child overrides disclaimer but keeps safety
     child_overrides = {"legal_disclaimer": "Child Disclaimer"}
