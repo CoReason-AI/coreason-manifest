@@ -42,9 +42,7 @@ def test_high_integrity_configuration() -> None:
     """Test Case 2: High Integrity Configuration."""
     config = ComplianceConfig(
         audit_level=AuditLevel.GXP_COMPLIANT,
-        integrity=IntegrityConfig(
-            integrity_level=IntegrityLevel.BLOCKCHAIN_ANCHOR
-        )
+        integrity=IntegrityConfig(integrity_level=IntegrityLevel.BLOCKCHAIN_ANCHOR),
     )
 
     assert config.audit_level == AuditLevel.GXP_COMPLIANT
@@ -69,9 +67,7 @@ def test_serialization() -> None:
         integrity_level=IntegrityLevel.DIGITAL_SIGNATURE,
     )
 
-    compliance_config = ComplianceConfig(
-        integrity=integrity_config
-    )
+    compliance_config = ComplianceConfig(integrity=integrity_config)
 
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="Veritas Harvest Test"),

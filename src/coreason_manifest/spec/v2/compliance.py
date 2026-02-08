@@ -21,10 +21,10 @@ class AuditContentMode(StrEnum):
     Harvested from Coreason-Veritas 'Zero-Copy' logic.
     """
 
-    FULL_PAYLOAD = "full_payload"       # Store the actual JSON content (Standard)
-    REDACTED = "redacted"               # Store content, but run PII scrubbers first
-    REFERENCE_ONLY = "reference_only"   # ZERO-COPY: Store only the hash/pointer to external storage
-    OFF = "off"                         # Do not audit this payload (Metadata only)
+    FULL_PAYLOAD = "full_payload"  # Store the actual JSON content (Standard)
+    REDACTED = "redacted"  # Store content, but run PII scrubbers first
+    REFERENCE_ONLY = "reference_only"  # ZERO-COPY: Store only the hash/pointer to external storage
+    OFF = "off"  # Do not audit this payload (Metadata only)
 
 
 class IntegrityLevel(StrEnum):
@@ -33,10 +33,10 @@ class IntegrityLevel(StrEnum):
     Harvested from Coreason-Veritas 'Anchoring' logic.
     """
 
-    NONE = "none"                       # No cryptographic verification
-    CHECKSUM = "checksum"               # Standard SHA-256 hashing of payloads
-    DIGITAL_SIGNATURE = "signature"     # Asymmetric Key Signing (Non-repudiation)
-    BLOCKCHAIN_ANCHOR = "anchor"        # Immutable public/private ledger anchoring
+    NONE = "none"  # No cryptographic verification
+    CHECKSUM = "checksum"  # Standard SHA-256 hashing of payloads
+    DIGITAL_SIGNATURE = "signature"  # Asymmetric Key Signing (Non-repudiation)
+    BLOCKCHAIN_ANCHOR = "anchor"  # Immutable public/private ledger anchoring
 
 
 class AuditLevel(StrEnum):
@@ -64,24 +64,20 @@ class IntegrityConfig(CoReasonBaseModel):
 
     # Granular control for inputs vs outputs
     input_mode: AuditContentMode = Field(
-        AuditContentMode.FULL_PAYLOAD,
-        description="How to handle user/system inputs in the audit log."
+        AuditContentMode.FULL_PAYLOAD, description="How to handle user/system inputs in the audit log."
     )
     output_mode: AuditContentMode = Field(
-        AuditContentMode.FULL_PAYLOAD,
-        description="How to handle agent outputs in the audit log."
+        AuditContentMode.FULL_PAYLOAD, description="How to handle agent outputs in the audit log."
     )
 
     # Verification Requirements
     integrity_level: IntegrityLevel = Field(
-        IntegrityLevel.NONE,
-        description="Cryptographic proof requirement for the execution trace."
+        IntegrityLevel.NONE, description="Cryptographic proof requirement for the execution trace."
     )
 
     # Technical settings
     hash_algorithm: str = Field(
-        "sha256",
-        description="Algorithm used for generating payload references (if mode is reference_only)."
+        "sha256", description="Algorithm used for generating payload references (if mode is reference_only)."
     )
 
 
@@ -104,5 +100,5 @@ class ComplianceConfig(CoReasonBaseModel):
     # --- New Field for Veritas Harvesting ---
     integrity: IntegrityConfig = Field(
         default_factory=IntegrityConfig,
-        description="Configuration for Zero-Copy auditing and data integrity verification."
+        description="Configuration for Zero-Copy auditing and data integrity verification.",
     )
