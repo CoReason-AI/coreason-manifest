@@ -69,3 +69,80 @@ def test_solver_config_advanced_council() -> None:
 
     # We can check if the error message mentions the field
     assert "consensus_threshold" in str(excinfo.value)
+
+
+def test_solver_config_edge_cases() -> None:
+    """
+    Test Case 3: Edge Cases
+    - Threshold boundaries (0.0, 1.0).
+    - Logical oddity: n_samples=1 with dissenter (should be valid schema-wise).
+    - Slightly out of bounds values.
+    """
+    # 1. Boundary Values
+    config_boundaries = SolverConfig(
+        strategy=SolverStrategy.ENSEMBLE,
+        diversity_threshold=0.0,  # Min
+        consensus_threshold=1.0,  # Max
+        enable_dissenter=False,
+    )
+    assert config_boundaries.diversity_threshold == 0.0
+    assert config_boundaries.consensus_threshold == 1.0
+
+    # 2. Logical Oddity (Valid Schema)
+    # A single agent council with a dissenter is weird but valid Pydantic
+    config_weird = SolverConfig(
+        strategy=SolverStrategy.ENSEMBLE,
+        n_samples=1,
+        enable_dissenter=True,
+    )
+    assert config_weird.n_samples == 1
+    assert config_weird.enable_dissenter is True
+
+    # 3. Slightly Out of Bounds (Fail)
+    with pytest.raises(ValidationError):
+        SolverConfig(consensus_threshold=1.000001)
+
+    with pytest.raises(ValidationError):
+        SolverConfig(diversity_threshold=-0.000001)
+
+
+def test_solver_config_complex_cases() -> None:
+    """
+    Test Case 4: Complex Cases
+    - Hybrid Config (Tree Search + Ensemble fields set together).
+    - Full Round Trip Serialization.
+    """
+    # 1. Hybrid Config
+    # Setting both LATS (beam_width) and Council (diversity) fields
+    # This is valid because SolverConfig is a single model covering all strategies
+    hybrid_config = SolverConfig(
+        strategy=SolverStrategy.TREE_SEARCH,  # Strategy says Tree
+        beam_width=5,                         # LATS param
+        max_iterations=20,                    # LATS param
+        diversity_threshold=0.8,              # Council param (should be ignored by logic but valid in schema)
+        enable_dissenter=True,                # Council param
+    )
+
+    assert hybrid_config.strategy == SolverStrategy.TREE_SEARCH
+    assert hybrid_config.beam_width == 5
+    assert hybrid_config.diversity_threshold == 0.8
+
+    # 2. Full Round Trip
+    node_original = GenerativeNode(
+        id="round_trip_node",
+        goal="Testing persistence",
+        output_schema={"type": "string"},
+        solver=hybrid_config,
+    )
+
+    # Serialize to dict (JSON-like)
+    node_dict = node_original.model_dump(mode="json")
+
+    # Deserialize back to object
+    node_restored = GenerativeNode.model_validate(node_dict)
+
+    # Verify equality
+    assert node_restored.id == node_original.id
+    assert node_restored.solver.strategy == node_original.solver.strategy
+    assert node_restored.solver.diversity_threshold == node_original.solver.diversity_threshold
+    assert node_restored.solver.beam_width == node_original.solver.beam_width
