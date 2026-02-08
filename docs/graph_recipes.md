@@ -104,7 +104,7 @@ state=StateDefinition(
 ```
 
 ### 4. The Policy Layer (`PolicyConfig`)
-Sets execution limits and error handling strategies.
+Sets execution limits and error handling strategies, including **MCP Governance**.
 
 ```python
 policy=PolicyConfig(
@@ -113,11 +113,28 @@ policy=PolicyConfig(
     execution_mode="sequential", # or "parallel"
     # New Harvesting Fields
     budget_cap_usd=50.0,
-    sensitive_tools=["buy_stock", "delete_db"]
+    sensitive_tools=["buy_stock", "delete_db"],
+    allowed_mcp_servers=["github", "brave-search"]
 )
 ```
 
-### 5. The Test Layer (`SimulationScenario`)
+### 5. The Environment Layer (`RuntimeEnvironment`)
+
+New in 0.22.0, the `environment` field allows recipes to declare their **MCP Infrastructure Requirements**.
+
+```python
+from coreason_manifest.spec.v2.resources import RuntimeEnvironment, McpServerRequirement
+
+environment=RuntimeEnvironment(
+    mcp_servers=[
+        McpServerRequirement(name="github", required_tools=["create_issue"])
+    ]
+)
+```
+
+See [MCP Runtime & Governance](mcp_runtime.md) for full details.
+
+### 6. The Test Layer (`SimulationScenario`)
 
 Recipes can now embed self-contained test scenarios (harvested from Simulacrum) for validation.
 

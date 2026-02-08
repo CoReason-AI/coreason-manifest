@@ -19,6 +19,7 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.resources import RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +119,10 @@ class PolicyConfig(CoReasonBaseModel):
     sensitive_tools: list[str] = Field(
         default_factory=list,
         description="List of tool names that ALWAYS require human confirmation (InteractionConfig override).",
+    )
+    allowed_mcp_servers: list[str] = Field(
+        default_factory=list,
+        description="Whitelist of MCP server names this recipe is allowed to access.",
     )
 
 
@@ -476,6 +481,7 @@ class RecipeDefinition(CoReasonBaseModel):
 
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
+    environment: RuntimeEnvironment | None = Field(None, description="The infrastructure requirements for the recipe.")
 
     # --- New Harvesting Field ---
     tests: list[SimulationScenario] = Field(
