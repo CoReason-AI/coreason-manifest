@@ -10,18 +10,17 @@
 
 from typing import Literal
 
-import pytest
 from pydantic import Field
 
 # We import from the package where we expect these to be defined.
 # Note: These will fail import until we implement them in the next step.
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
+    CollaborationConfig,
+    CollaborationMode,
+    PresentationHints,
     RecipeNode,
     VisualizationStyle,
-    PresentationHints,
-    CollaborationMode,
-    CollaborationConfig,
 )
 
 

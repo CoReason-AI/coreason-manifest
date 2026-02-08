@@ -39,12 +39,8 @@ async def test_branching_workflow() -> None:
         routes={"Left": "C", "Right": "D"},
         default_route="D",
     )
-    node_c = AgentNode(
-        id="C", agent_ref="agent_left", inputs_map={"input": "response"}
-    )
-    node_d = AgentNode(
-        id="D", agent_ref="agent_right", inputs_map={"input": "response"}
-    )
+    node_c = AgentNode(id="C", agent_ref="agent_left", inputs_map={"input": "response"})
+    node_d = AgentNode(id="D", agent_ref="agent_right", inputs_map={"input": "response"})
 
     # Define Edges
     # Edge A -> B
@@ -94,9 +90,7 @@ async def test_infinite_loop_protection() -> None:
 @pytest.mark.asyncio
 async def test_router_missing_key_fallback() -> None:
     # Router needs key "choice", but it's not in context. Should go to default.
-    node_a = RouterNode(
-        id="A", input_key="choice", routes={"yes": "B"}, default_route="C"
-    )
+    node_a = RouterNode(id="A", input_key="choice", routes={"yes": "B"}, default_route="C")
     node_b = AgentNode(id="B", agent_ref="agent_yes")
     node_c = AgentNode(id="C", agent_ref="agent_default")
 
@@ -113,9 +107,7 @@ async def test_router_missing_key_fallback() -> None:
 @pytest.mark.asyncio
 async def test_router_no_match_fallback() -> None:
     # Router has key, but value doesn't match routes.
-    node_a = RouterNode(
-        id="A", input_key="choice", routes={"yes": "B"}, default_route="C"
-    )
+    node_a = RouterNode(id="A", input_key="choice", routes={"yes": "B"}, default_route="C")
     node_b = AgentNode(id="B", agent_ref="agent_yes")
     node_c = AgentNode(id="C", agent_ref="agent_default")
 

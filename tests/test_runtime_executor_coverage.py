@@ -74,9 +74,7 @@ async def test_resolve_next_router_fallback() -> None:
     # Test lines 146-149: _resolve_next fallback logic for Router
     # We call _resolve_next WITHOUT a last_step
 
-    node = RouterNode(
-        id="R", input_key="key", routes={"A": "NodeA"}, default_route="NodeB"
-    )
+    node = RouterNode(id="R", input_key="key", routes={"A": "NodeA"}, default_route="NodeB")
     recipe = create_recipe(nodes=[node], edges=[], entry_point="R")
     executor = GraphExecutor(recipe, {"key": "A"})
 

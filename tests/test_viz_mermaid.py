@@ -11,11 +11,11 @@
 from coreason_manifest.spec.v2.definitions import ManifestMetadata, ManifestV2
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
-    PresentationHints,
     EvaluatorNode,
     GraphEdge,
     GraphTopology,
     HumanNode,
+    PresentationHints,
     RecipeDefinition,
     RecipeInterface,
     RouterNode,
@@ -474,7 +474,6 @@ def test_recipe_visualization_topology() -> None:
         AgentNode(
             id="finance_agent",
             agent_ref="finance_ref",
-            # presentation=NodePresentation(x=100, y=100, color="#ff0000"), # Color not supported in PresentationHints yet
         ),
         AgentNode(
             id="support_agent",
