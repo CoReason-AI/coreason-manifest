@@ -222,49 +222,58 @@ topology:
       agent_ref: "publisher-v1"
 ```
 
-## Integrity Validation & Draft Mode
+## Lifecycle Governance (Draft vs. Published)
 
-The `coreason-manifest` library performs strict validation on the graph topology to prevent runtime errors. However, for AI Agents generating workflows (or human "work-in-progress" saves), we support a **Draft Mode**.
+The `RecipeDefinition` enforces a strict lifecycle to distinguish between "work-in-progress" (Intent-based) and "execution-ready" (Concrete) states. This is controlled by the `status` field.
 
-### 1. Strict Validation (Default)
-By default (`status="valid"`), the topology enforces:
-*   **Entry Point Existence**: The `entry_point` ID must exist in the `nodes` list.
-*   **Dangling Edge Check**: Every `source` and `target` must correspond to a valid Node ID.
-*   **Duplicate ID Check**: All Node IDs must be unique.
+### 1. Status: `DRAFT` (Default)
+A recipe in `DRAFT` mode is permissive. It allows:
+*   **Semantic References**: Using `SemanticRef` (intent descriptions) instead of concrete Agent IDs.
+*   **Incomplete Topology**: Missing entry points or dangling edges (if `topology.status="draft"`).
+*   **Partial Configuration**: Useful for AI-generated plans or initial human sketches.
 
-```python
-from coreason_manifest.spec.v2.recipe import GraphTopology, AgentNode, GraphEdge
-
-try:
-    # This will fail because 'phantom-node' does not exist
-    topology = GraphTopology(
-        entry_point="node-1",
-        nodes=[AgentNode(id="node-1", agent_ref="agent-a")],
-        edges=[GraphEdge(source="node-1", target="phantom-node")]
-    )
-except ValueError as e:
-    print(f"Validation Error: {e}")
-    # Output: Dangling edge target: node-1 -> phantom-node
-```
-
-### 2. Draft Mode (`status="draft"`)
-To support partial or incomplete graphs (e.g., during generation or editing), you can set `status="draft"`. This **skips** the Entry Point and Dangling Edge checks, allowing the object to be instantiated and saved.
-
-**Note:** Duplicate Node IDs are *never* allowed, even in draft mode, as they break the internal graph structure.
+#### Intent-Based Planning (`SemanticRef`)
+In Draft mode, you can use `SemanticRef` to describe *what* an agent should do without selecting a specific tool or model yet.
 
 ```python
-# This IS valid in Draft Mode
-draft_topology = GraphTopology(
-    status="draft",
-    entry_point="missing-node", # Allowed
-    nodes=[AgentNode(id="node-1", agent_ref="agent-a")],
-    edges=[GraphEdge(source="node-1", target="phantom-node")] # Allowed
+from coreason_manifest.spec.v2.recipe import AgentNode, SemanticRef, RecipeStatus
+
+# An abstract step: "Find flight prices"
+node = AgentNode(
+    id="step-1",
+    agent_ref=SemanticRef(intent="Find cheapest flights to Tokyo")
 )
 
-# Check if it's ready for promotion
-is_ready = draft_topology.verify_completeness()
-# Output: False
+# Valid in DRAFT mode
+recipe = RecipeDefinition(
+    ...,
+    status=RecipeStatus.DRAFT,
+    topology=GraphTopology(nodes=[node], ...)
+)
 ```
+
+### 2. Status: `PUBLISHED`
+A recipe in `PUBLISHED` mode is strict. It enforces:
+*   **Concrete IDs Only**: All `SemanticRef` placeholders MUST be resolved to concrete Agent Definition IDs (`str`).
+*   **Structural Integrity**: The `topology` MUST be complete (valid entry point, no dangling edges).
+*   **Execution Ready**: Guarantees the runtime can execute the graph without ambiguity.
+
+Attempting to set `status="published"` on an invalid recipe will raise a `ValidationError`.
+
+```python
+# This will RAISE ValidationError because agent_ref is still semantic
+try:
+    recipe = RecipeDefinition(
+        ...,
+        status=RecipeStatus.PUBLISHED,
+        topology=GraphTopology(nodes=[node], ...)
+    )
+except ValidationError as e:
+    print("Lifecycle Error: Node 'step-1' is still abstract.")
+```
+
+### 3. Status: `ARCHIVED`
+Behaves similarly to `DRAFT` but indicates the recipe is deprecated or read-only.
 
 ## Runtime Execution
 
