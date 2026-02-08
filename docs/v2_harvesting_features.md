@@ -60,6 +60,7 @@ The `PolicyConfig` class, part of the top-level `RecipeDefinition`, now includes
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `budget_cap_usd` | `float \| None` | Hard limit for estimated token + tool costs. Execution halts if exceeded. |
+| `token_budget` | `int \| None` | Max tokens for the assembled prompt. Low-priority contexts will be pruned if exceeded. |
 | `sensitive_tools` | `list[str]` | List of tool names that ALWAYS require human confirmation, overriding node-level interaction configs. |
 
 ### Example
@@ -68,6 +69,7 @@ The `PolicyConfig` class, part of the top-level `RecipeDefinition`, now includes
 policy = PolicyConfig(
     max_retries=3,
     budget_cap_usd=50.00,
+    token_budget=8000,
     sensitive_tools=["delete_database", "refund_payment"]
 )
 ```
@@ -101,3 +103,7 @@ recipe = RecipeDefinition(
     tests=tests
 )
 ```
+
+## 5. Cognitive Profile (Harvested from Weaver)
+
+The `AgentNode` now supports an inline `CognitiveProfile` (`construct` field) to configure the agent's identity, mode, environment, and task directly. This pattern is documented in [The Assembler Pattern](assembler_pattern.md).
