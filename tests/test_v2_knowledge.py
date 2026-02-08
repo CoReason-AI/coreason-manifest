@@ -21,18 +21,18 @@ from coreason_manifest.spec.v2.knowledge import (
 
 def test_retrieval_strategy_enum() -> None:
     """Ensure RetrievalStrategy values are correct."""
-    assert RetrievalStrategy.DENSE == "dense"
-    assert RetrievalStrategy.SPARSE == "sparse"
-    assert RetrievalStrategy.HYBRID == "hybrid"
-    assert RetrievalStrategy.GRAPH == "graph"
-    assert RetrievalStrategy.GRAPH_RAG == "graph_rag"
+    assert RetrievalStrategy.DENSE.value == "dense"
+    assert RetrievalStrategy.SPARSE.value == "sparse"
+    assert RetrievalStrategy.HYBRID.value == "hybrid"
+    assert RetrievalStrategy.GRAPH.value == "graph"
+    assert RetrievalStrategy.GRAPH_RAG.value == "graph_rag"
 
 
 def test_knowledge_scope_enum() -> None:
     """Ensure KnowledgeScope values are correct."""
-    assert KnowledgeScope.SHARED == "shared"
-    assert KnowledgeScope.USER == "user"
-    assert KnowledgeScope.SESSION == "session"
+    assert KnowledgeScope.SHARED.value == "shared"
+    assert KnowledgeScope.USER.value == "user"
+    assert KnowledgeScope.SESSION.value == "session"
 
 
 def test_retrieval_config_defaults() -> None:
@@ -79,11 +79,28 @@ def test_retrieval_config_validation() -> None:
     assert "Input should be less than or equal to 1" in str(exc.value)
 
 
+def test_retrieval_config_edge_cases() -> None:
+    """Test boundary values for RetrievalConfig."""
+    # Test boundary score_threshold = 0.0
+    config_low = RetrievalConfig(collection_name="test", score_threshold=0.0)
+    assert config_low.score_threshold == 0.0
+
+    # Test boundary score_threshold = 1.0
+    config_high = RetrievalConfig(collection_name="test", score_threshold=1.0)
+    assert config_high.score_threshold == 1.0
+
+    # Test top_k = 1
+    config_k1 = RetrievalConfig(collection_name="test", top_k=1)
+    assert config_k1.top_k == 1
+
+    # Test very large top_k
+    config_k_large = RetrievalConfig(collection_name="test", top_k=10000)
+    assert config_k_large.top_k == 10000
+
+
 def test_cognitive_profile_with_memory() -> None:
     """Test integration of RetrievalConfig into CognitiveProfile."""
-    memory_config = RetrievalConfig(
-        strategy=RetrievalStrategy.DENSE, collection_name="history"
-    )
+    memory_config = RetrievalConfig(strategy=RetrievalStrategy.DENSE, collection_name="history")
     profile = CognitiveProfile(
         role="archivist",
         memory=[memory_config],
@@ -91,6 +108,53 @@ def test_cognitive_profile_with_memory() -> None:
     assert len(profile.memory) == 1
     assert profile.memory[0].collection_name == "history"
     assert profile.memory[0].strategy == RetrievalStrategy.DENSE
+
+
+def test_cognitive_profile_complex_memory() -> None:
+    """Test multiple memory configurations with different strategies/scopes."""
+    memory_configs = [
+        RetrievalConfig(
+            strategy=RetrievalStrategy.DENSE,
+            collection_name="global_knowledge",
+            scope=KnowledgeScope.SHARED,
+            top_k=5,
+        ),
+        RetrievalConfig(
+            strategy=RetrievalStrategy.SPARSE,
+            collection_name="user_notes",
+            scope=KnowledgeScope.USER,
+            top_k=10,
+            score_threshold=0.5,
+        ),
+        RetrievalConfig(
+            strategy=RetrievalStrategy.GRAPH,
+            collection_name="ontology",
+            scope=KnowledgeScope.SHARED,
+        ),
+    ]
+
+    profile = CognitiveProfile(
+        role="researcher",
+        memory=memory_configs,
+    )
+
+    assert len(profile.memory) == 3
+    assert profile.memory[0].strategy == RetrievalStrategy.DENSE
+    assert profile.memory[1].scope == KnowledgeScope.USER
+    assert profile.memory[2].strategy == RetrievalStrategy.GRAPH
+    assert profile.memory[1].score_threshold == 0.5
+
+
+def test_cognitive_profile_redundant_memory() -> None:
+    """Test adding the same configuration multiple times (should be allowed)."""
+    # While logically redundant, the schema shouldn't block it.
+    config = RetrievalConfig(collection_name="test")
+    profile = CognitiveProfile(
+        role="tester",
+        memory=[config, config],
+    )
+    assert len(profile.memory) == 2
+    assert profile.memory[0] == profile.memory[1]
 
 
 def test_serialization() -> None:

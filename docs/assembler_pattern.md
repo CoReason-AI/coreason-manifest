@@ -12,7 +12,7 @@ The `CognitiveProfile` consists of four key components:
 
 1.  **Identity (Who)**: The role or persona (e.g., `safety_scientist`).
 2.  **Mode (How)**: The reasoning style (e.g., `standard`, `six_hats`, `socratic`).
-3.  **Environment (Where)**: Dynamic context modules (`knowledge_contexts`) to inject.
+3.  **Environment (Where)**: Dynamic context modules (`knowledge_contexts`) and Long-Term Memory (`memory`) to inject.
 4.  **Task (What)**: The logic primitive to apply (`task_primitive`, e.g., `extract`, `classify`).
 
 ## Usage in `AgentNode`
@@ -26,6 +26,7 @@ from coreason_manifest.spec.v2.agent import (
     ContextDependency,
     ComponentPriority
 )
+from coreason_manifest.spec.v2.knowledge import RetrievalConfig, RetrievalStrategy
 
 # Define an inline agent
 profile = CognitiveProfile(
@@ -40,6 +41,14 @@ profile = CognitiveProfile(
             name="recent_articles",
             priority=ComponentPriority.LOW,
             parameters={"limit": 5}
+        )
+    ],
+    # Access long-term memory
+    memory=[
+        RetrievalConfig(
+            strategy=RetrievalStrategy.DENSE,
+            collection_name="past_editorials",
+            top_k=3
         )
     ],
     task_primitive="review_and_edit"
