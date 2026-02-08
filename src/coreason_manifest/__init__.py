@@ -98,9 +98,13 @@ from .spec.v2.definitions import (
 from .spec.v2.evaluation import EvaluationProfile, SuccessCriterion
 from .spec.v2.recipe import (
     AgentNode,
+    EvaluatorNode,
+    GraphEdge,
     GraphTopology,
     HumanNode,
+    PolicyConfig,
     RecipeDefinition,
+    RecipeInterface,
     RouterNode,
 )
 from .spec.v2.resources import (
@@ -154,8 +158,10 @@ __all__ = [
     "ErrorDomain",
     "ErrorSeverity",
     "EvaluationProfile",
+    "EvaluatorNode",
     "EventContentType",
     "GovernanceConfig",
+    "GraphEdge",
     "GraphEvent",
     "GraphEventArtifactGenerated",
     "GraphEventCouncilVote",
@@ -188,6 +194,7 @@ __all__ = [
     "MemoryStrategy",
     "ModelProfile",
     "NodePresentation",
+    "PolicyConfig",
     "PolicyDefinition",
     "PresentationEvent",
     "PresentationEventType",
@@ -198,6 +205,7 @@ __all__ = [
     "ReasoningTrace",
     "Recipe",
     "RecipeDefinition",
+    "RecipeInterface",
     "ResourceConstraints",
     "Role",
     "RouterNode",
