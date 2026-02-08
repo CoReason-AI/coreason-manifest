@@ -42,16 +42,14 @@ def test_validation_fallback_integrity() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"
-        ),
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"),
     )
 
-    with pytest.raises(
-        ValidationError, match="Invalid fallback_node_id 'B' in node 'A'"
-    ):
+    with pytest.raises(ValidationError, match="Invalid fallback_node_id 'B' in node 'A'"):
         GraphTopology(
-            nodes=[node_a], edges=[], entry_point="A"  # No node B
+            nodes=[node_a],
+            edges=[],
+            entry_point="A",  # No node B
         )
 
 
@@ -60,9 +58,7 @@ def test_validation_fallback_integrity_valid() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"
-        ),
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"),
     )
     node_b = AgentNode(id="B", agent_ref="agent-b")
 
@@ -80,16 +76,12 @@ def test_complex_fallback_chain() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"
-        ),
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"),
     )
     node_b = AgentNode(
         id="B",
         agent_ref="agent-b",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="C"
-        ),
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="C"),
     )
     node_c = AgentNode(
         id="C",
@@ -100,9 +92,7 @@ def test_complex_fallback_chain() -> None:
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="Chain Test"),
         interface=RecipeInterface(),
-        topology=GraphTopology(
-            nodes=[node_a, node_b, node_c], edges=[], entry_point="A"
-        ),
+        topology=GraphTopology(nodes=[node_a, node_b, node_c], edges=[], entry_point="A"),
     )
     # Just ensuring it validates successfully
     assert recipe.topology.verify_completeness()
@@ -113,9 +103,7 @@ def test_self_fallback_validation() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="A"
-        ),
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="A"),
     )
     # Should be valid structurally
     GraphTopology(nodes=[node_a], edges=[], entry_point="A")
@@ -130,9 +118,7 @@ def test_fallback_missing_but_behavior_ignore() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.IGNORE, fallback_node_id="B"
-        ),
+        recovery=RecoveryConfig(behavior=FailureBehavior.IGNORE, fallback_node_id="B"),
     )
     # This should pass because the validator only checks if behavior is ROUTE_TO_FALLBACK
     GraphTopology(nodes=[node_a], edges=[], entry_point="A")
