@@ -64,7 +64,7 @@ def test_validate_manifest_v2_no_version(tmp_path: Path, capsys: pytest.CaptureF
         main()
 
     captured = capsys.readouterr()
-    assert "✅ Valid Agent: Manifest Agent NoVer (vUnknown)" in captured.out
+    assert "✅ Valid Agent: Manifest Agent NoVer (v0.1.0)" in captured.out
 
 
 def test_validate_yaml_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
