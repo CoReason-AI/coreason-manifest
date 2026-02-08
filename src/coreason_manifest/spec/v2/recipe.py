@@ -300,7 +300,7 @@ class RecipeNode(CoReasonBaseModel):
     # --- New Field: Flow Governance ---
     recovery: RecoveryConfig | None = Field(None, description="Error handling and resilience settings.")
 
-    # --- New Field for Episteme Support ---
+    # --- New Field for Episteme ---
     reasoning: ReasoningConfig | None = Field(
         None,
         description="Meta-cognition settings: Review loops, gap scanning, and validation strategies.",

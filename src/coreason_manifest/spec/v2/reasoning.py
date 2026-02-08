@@ -1,7 +1,15 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 from enum import StrEnum
-
 from pydantic import ConfigDict, Field
-
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
@@ -12,7 +20,7 @@ class ReviewStrategy(StrEnum):
     BASIC = "basic"  # Simple self-correction
     ADVERSARIAL = "adversarial"  # Devil's Advocate persona
     CAUSAL = "causal"  # Check logical consistency/fallacies
-    CONSENSUS = "consensus"  # Multi-model agreement (Harvested from Council)
+    CONSENSUS = "consensus"  # Multi-model agreement
 
 
 class AdversarialConfig(CoReasonBaseModel):

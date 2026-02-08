@@ -430,6 +430,14 @@ To prevent infinite loops in malformed graphs, the executor enforces a `max_step
 
 The executor generates a `SimulationTrace` containing a list of `SimulationStep` objects, providing a full audit trail of the execution path, including inputs, outputs, and routing decisions.
 
+## Episteme: Meta-Cognition (New in 0.22.0)
+
+Coreason V2 introduces **Episteme**, a framework for meta-cognition that enables agents to critique their own work, detect knowledge gaps, and reason about their reasoning.
+
+This is configured via the `reasoning` field on any `RecipeNode`.
+
+See [Episteme: Meta-Cognition & Reasoning](episteme_reasoning.md) for detailed configuration patterns.
+
 ## Flow Governance & Resilience (New in 0.23.0)
 
 Coreason V2 introduces **Flow Governance**, transforming the Recipe from a static DAG into a resilient State Machine.
