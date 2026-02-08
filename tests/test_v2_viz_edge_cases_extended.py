@@ -40,9 +40,7 @@ def test_partial_updates_simulation() -> None:
     assert node.visualization is None
 
     # Simulate adding visualization (recreating node as pydantic models are immutable/frozen)
-    node_updated = node.model_copy(
-        update={"visualization": PresentationHints(style=VisualizationStyle.TREE)}
-    )
+    node_updated = node.model_copy(update={"visualization": PresentationHints(style=VisualizationStyle.TREE)})
     assert node_updated.presentation is not None
     assert node_updated.presentation.x == 10
     assert node_updated.visualization is not None
@@ -52,10 +50,10 @@ def test_partial_updates_simulation() -> None:
 def test_invalid_enum_boundary() -> None:
     """Test boundary conditions for enum validation."""
     with pytest.raises(ValidationError):
-        PresentationHints(style="INVALID_STYLE_123")  # type: ignore
+        PresentationHints(style="INVALID_STYLE_123")
 
     # Valid string input that matches enum value should work (case sensitive)
-    hints = PresentationHints(style="TREE")  # type: ignore
+    hints = PresentationHints(style="TREE")
     assert hints.style == VisualizationStyle.TREE
 
 
@@ -71,8 +69,10 @@ def test_inheritance_chain_override() -> None:
     new_hints = PresentationHints(style=VisualizationStyle.KANBAN)
     derived = original.model_copy(update={"visualization": new_hints})
 
+    assert derived.visualization is not None
     assert derived.visualization.style == VisualizationStyle.KANBAN
     # Ensure original is untouched
+    assert original.visualization is not None
     assert original.visualization.style == VisualizationStyle.CHAT
 
 

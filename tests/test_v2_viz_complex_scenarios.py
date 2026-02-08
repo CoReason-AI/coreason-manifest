@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
 
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
@@ -120,23 +119,31 @@ def test_complex_full_stack_recipe() -> None:
     node_map = {node.id: node for node in reloaded.topology.nodes}
 
     # Router
+    assert node_map["router"].presentation is not None
     assert node_map["router"].presentation.color == "#FFCC00"
+    assert node_map["router"].visualization is not None
     assert node_map["router"].visualization.display_title == "Intent Router"
 
     # Researcher
+    assert node_map["researcher"].visualization is not None
     assert node_map["researcher"].visualization.style == VisualizationStyle.TREE
+    assert node_map["researcher"].collaboration is not None
     assert node_map["researcher"].collaboration.mode == CollaborationMode.INTERACTIVE
 
     # Writer
+    assert node_map["writer"].visualization is not None
     assert node_map["writer"].visualization.style == VisualizationStyle.DOCUMENT
+    assert node_map["writer"].collaboration is not None
     assert node_map["writer"].collaboration.mode == CollaborationMode.CO_EDIT
 
     # Reviewer
+    assert node_map["reviewer"].presentation is not None
     assert node_map["reviewer"].presentation.color == "#FF00FF"
     assert node_map["reviewer"].visualization is None  # Was not set
 
     # Evaluator
     assert node_map["scorer"].presentation is None  # Was not set
+    assert node_map["scorer"].visualization is not None
     assert node_map["scorer"].visualization.display_title == "Quality Gate"
 
 
@@ -150,23 +157,19 @@ def test_complex_mermaid_generation() -> None:
         id="n1",
         agent_ref="a1",
         presentation=NodePresentation(x=0, y=0, color="#FF0000"),
-        visualization=PresentationHints(display_title="Red Node")
+        visualization=PresentationHints(display_title="Red Node"),
     )
     node2 = AgentNode(
         id="n2",
         agent_ref="a2",
         presentation=NodePresentation(x=10, y=10, color="#00FF00"),
-        visualization=PresentationHints(display_title="Green Node")
+        visualization=PresentationHints(display_title="Green Node"),
     )
 
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="VizTest"),
         interface=RecipeInterface(),
-        topology=GraphTopology(
-            nodes=[node1, node2],
-            edges=[GraphEdge(source="n1", target="n2")],
-            entry_point="n1"
-        )
+        topology=GraphTopology(nodes=[node1, node2], edges=[GraphEdge(source="n1", target="n2")], entry_point="n1"),
     )
 
     mermaid = generate_recipe_mermaid(recipe)
