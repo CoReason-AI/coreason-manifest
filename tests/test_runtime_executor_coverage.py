@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import pytest
 
-from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     GraphEdge,
@@ -57,7 +56,7 @@ async def test_resolve_next_invalid_node() -> None:
 @pytest.mark.asyncio
 async def test_human_input_eof_error() -> None:
     # Test lines 102-105: input() raises EOFError
-    node = HumanNode(id="H", prompt="Ask", presentation=NodePresentation(x=0, y=0))
+    node = HumanNode(id="H", prompt="Ask")
     recipe = create_recipe(nodes=[node], edges=[], entry_point="H")
 
     executor = GraphExecutor(recipe, {})
@@ -76,7 +75,7 @@ async def test_resolve_next_router_fallback() -> None:
     # We call _resolve_next WITHOUT a last_step
 
     node = RouterNode(
-        id="R", input_key="key", routes={"A": "NodeA"}, default_route="NodeB", presentation=NodePresentation(x=0, y=0)
+        id="R", input_key="key", routes={"A": "NodeA"}, default_route="NodeB"
     )
     recipe = create_recipe(nodes=[node], edges=[], entry_point="R")
     executor = GraphExecutor(recipe, {"key": "A"})

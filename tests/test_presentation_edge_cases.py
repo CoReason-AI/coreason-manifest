@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest import AgentNode, NodePresentation
+from coreason_manifest.spec.v2.recipe import PresentationHints, VisualizationStyle
 
 
 def test_node_presentation_coordinates() -> None:
@@ -103,25 +104,23 @@ def test_recipe_node_integration_full() -> None:
         id="complex-node",
         agent_ref="agent-v1",
         metadata={"custom_key": "custom_value", "version": 1},
-        presentation=NodePresentation(
-            x=123.45, y=678.90, label="My Node", color="#00FF00", icon="lucide:cpu", z_index=5
+        presentation=PresentationHints(
+            style=VisualizationStyle.TREE,
+            display_title="My Node",
+            icon="lucide:cpu",
         ),
     )
 
     dumped = node.model_dump(mode="json")
 
     # Check Presentation
-    assert dumped["presentation"]["x"] == 123.45
-    assert dumped["presentation"]["y"] == 678.90
-    assert dumped["presentation"]["label"] == "My Node"
-    assert dumped["presentation"]["color"] == "#00FF00"
+    assert dumped["presentation"]["style"] == "TREE"
+    assert dumped["presentation"]["display_title"] == "My Node"
     assert dumped["presentation"]["icon"] == "lucide:cpu"
-    assert dumped["presentation"]["z_index"] == 5
 
     # Check Metadata
     assert dumped["metadata"]["custom_key"] == "custom_value"
     assert dumped["metadata"]["version"] == 1
 
     # Ensure separation
-    assert "x" not in dumped["metadata"]
-    assert "y" not in dumped["metadata"]
+    assert "style" not in dumped["metadata"]

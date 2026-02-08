@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import pytest
 
-from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
@@ -33,19 +32,18 @@ def create_recipe(
 @pytest.mark.asyncio
 async def test_branching_workflow() -> None:
     # Define Nodes
-    node_a = HumanNode(id="A", prompt="Go Left or Right?", presentation=NodePresentation(x=0, y=0))
+    node_a = HumanNode(id="A", prompt="Go Left or Right?")
     node_b = RouterNode(
         id="B",
         input_key="response",
         routes={"Left": "C", "Right": "D"},
         default_route="D",
-        presentation=NodePresentation(x=0, y=0),
     )
     node_c = AgentNode(
-        id="C", agent_ref="agent_left", inputs_map={"input": "response"}, presentation=NodePresentation(x=0, y=0)
+        id="C", agent_ref="agent_left", inputs_map={"input": "response"}
     )
     node_d = AgentNode(
-        id="D", agent_ref="agent_right", inputs_map={"input": "response"}, presentation=NodePresentation(x=0, y=0)
+        id="D", agent_ref="agent_right", inputs_map={"input": "response"}
     )
 
     # Define Edges
@@ -75,8 +73,8 @@ async def test_branching_workflow() -> None:
 @pytest.mark.asyncio
 async def test_infinite_loop_protection() -> None:
     # Node A -> Node B -> Node A
-    node_a = AgentNode(id="A", agent_ref="agent_a", presentation=NodePresentation(x=0, y=0))
-    node_b = AgentNode(id="B", agent_ref="agent_b", presentation=NodePresentation(x=0, y=0))
+    node_a = AgentNode(id="A", agent_ref="agent_a")
+    node_b = AgentNode(id="B", agent_ref="agent_b")
 
     edges = [GraphEdge(source="A", target="B"), GraphEdge(source="B", target="A")]
 
@@ -97,10 +95,10 @@ async def test_infinite_loop_protection() -> None:
 async def test_router_missing_key_fallback() -> None:
     # Router needs key "choice", but it's not in context. Should go to default.
     node_a = RouterNode(
-        id="A", input_key="choice", routes={"yes": "B"}, default_route="C", presentation=NodePresentation(x=0, y=0)
+        id="A", input_key="choice", routes={"yes": "B"}, default_route="C"
     )
-    node_b = AgentNode(id="B", agent_ref="agent_yes", presentation=NodePresentation(x=0, y=0))
-    node_c = AgentNode(id="C", agent_ref="agent_default", presentation=NodePresentation(x=0, y=0))
+    node_b = AgentNode(id="B", agent_ref="agent_yes")
+    node_c = AgentNode(id="C", agent_ref="agent_default")
 
     recipe = create_recipe(nodes=[node_a, node_b, node_c], edges=[], entry_point="A")
 
@@ -116,10 +114,10 @@ async def test_router_missing_key_fallback() -> None:
 async def test_router_no_match_fallback() -> None:
     # Router has key, but value doesn't match routes.
     node_a = RouterNode(
-        id="A", input_key="choice", routes={"yes": "B"}, default_route="C", presentation=NodePresentation(x=0, y=0)
+        id="A", input_key="choice", routes={"yes": "B"}, default_route="C"
     )
-    node_b = AgentNode(id="B", agent_ref="agent_yes", presentation=NodePresentation(x=0, y=0))
-    node_c = AgentNode(id="C", agent_ref="agent_default", presentation=NodePresentation(x=0, y=0))
+    node_b = AgentNode(id="B", agent_ref="agent_yes")
+    node_c = AgentNode(id="C", agent_ref="agent_default")
 
     recipe = create_recipe(nodes=[node_a, node_b, node_c], edges=[], entry_point="A")
 
@@ -141,11 +139,10 @@ async def test_diamond_workflow() -> None:
         input_key="path",
         routes={"upper": "B", "lower": "C"},
         default_route="C",
-        presentation=NodePresentation(x=0, y=0),
     )
-    node_b = AgentNode(id="B", agent_ref="agent_b", presentation=NodePresentation(x=0, y=0))
-    node_c = AgentNode(id="C", agent_ref="agent_c", presentation=NodePresentation(x=0, y=0))
-    node_d = AgentNode(id="D", agent_ref="agent_d", presentation=NodePresentation(x=0, y=0))
+    node_b = AgentNode(id="B", agent_ref="agent_b")
+    node_c = AgentNode(id="C", agent_ref="agent_c")
+    node_d = AgentNode(id="D", agent_ref="agent_d")
 
     edges = [GraphEdge(source="B", target="D"), GraphEdge(source="C", target="D")]
 
@@ -170,16 +167,15 @@ async def test_ping_pong_loop() -> None:
 
     # Let's use max_steps to break it, but ensure sequence is A-B-C-A-B-C...
 
-    node_a = AgentNode(id="A", agent_ref="ping", presentation=NodePresentation(x=0, y=0))
-    node_b = AgentNode(id="B", agent_ref="pong", presentation=NodePresentation(x=0, y=0))
+    node_a = AgentNode(id="A", agent_ref="ping")
+    node_b = AgentNode(id="B", agent_ref="pong")
     node_c = RouterNode(
         id="C",
         input_key="counter",
         routes={"stop": "D"},
         default_route="A",  # Loop back to A
-        presentation=NodePresentation(x=0, y=0),
     )
-    node_d = AgentNode(id="D", agent_ref="end", presentation=NodePresentation(x=0, y=0))
+    node_d = AgentNode(id="D", agent_ref="end")
 
     edges = [
         GraphEdge(source="A", target="B"),

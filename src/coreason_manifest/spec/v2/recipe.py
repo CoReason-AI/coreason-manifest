@@ -9,11 +9,11 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
@@ -66,6 +66,47 @@ class PolicyConfig(CoReasonBaseModel):
 # ==========================================
 
 
+class VisualizationStyle(StrEnum):
+    """How the node's internal state should be rendered."""
+
+    CHAT = "CHAT"
+    TREE = "TREE"
+    KANBAN = "KANBAN"
+    DOCUMENT = "DOCUMENT"
+
+
+class PresentationHints(CoReasonBaseModel):
+    """UI directives for rendering the node's internal state."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    style: VisualizationStyle = Field(VisualizationStyle.CHAT, description="Rendering style.")
+    display_title: str | None = Field(None, description="Human-friendly label override.")
+    icon: str | None = Field(None, description="Icon name/emoji.")
+    hidden_fields: list[str] = Field(default_factory=list, description="Internal variables to hide.")
+    progress_indicator: str | None = Field(None, description="Field name to watch for % completion.")
+
+
+class CollaborationMode(StrEnum):
+    """Protocol for human engagement."""
+
+    COMPLETION = "COMPLETION"
+    INTERACTIVE = "INTERACTIVE"
+    CO_EDIT = "CO_EDIT"
+
+
+class CollaborationConfig(CoReasonBaseModel):
+    """Rules for human-agent engagement."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
+    feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
+    supported_commands: list[str] = Field(
+        default_factory=list, description="Slash commands allowed during interaction."
+    )
+
+
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -73,7 +114,8 @@ class RecipeNode(CoReasonBaseModel):
 
     id: str = Field(..., description="Unique identifier within the graph.")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Custom metadata (not for UI layout).")
-    presentation: NodePresentation | None = Field(None, description="Visual layout and styling metadata.")
+    presentation: PresentationHints | None = Field(None, description="Visual layout and styling metadata.")
+    collaboration: CollaborationConfig | None = Field(None, description="Rules for human-agent engagement.")
 
 
 class AgentNode(RecipeNode):
