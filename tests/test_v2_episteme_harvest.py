@@ -10,13 +10,14 @@
 
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.spec.v2.reasoning import (
-    ReviewStrategy,
-    ReasoningConfig,
     AdversarialConfig,
     GapScanConfig,
+    ReasoningConfig,
+    ReviewStrategy,
 )
-from coreason_manifest.spec.v2.recipe import RecipeNode, AgentNode
+from coreason_manifest.spec.v2.recipe import AgentNode, RecipeNode
 
 
 def test_episteme_defaults() -> None:
@@ -49,9 +50,7 @@ def test_adversarial_configuration() -> None:
 
 def test_gap_scan_toggle() -> None:
     """Verify knowledge gap scanning toggle."""
-    config = ReasoningConfig(
-        gap_scan=GapScanConfig(enabled=True, confidence_threshold=0.9)
-    )
+    config = ReasoningConfig(gap_scan=GapScanConfig(enabled=True, confidence_threshold=0.9))
     assert config.gap_scan is not None
     assert config.gap_scan.enabled is True
     assert config.gap_scan.confidence_threshold == 0.9
@@ -77,21 +76,16 @@ def test_agent_node_integration() -> None:
     This validates the documentation example.
     """
     reasoning = ReasoningConfig(
-        strategy=ReviewStrategy.ADVERSARIAL,
-        max_revisions=3,
-        adversarial=AdversarialConfig(persona="critic")
+        strategy=ReviewStrategy.ADVERSARIAL, max_revisions=3, adversarial=AdversarialConfig(persona="critic")
     )
 
-    node = AgentNode(
-        id="writer",
-        agent_ref="copywriter-v1",
-        reasoning=reasoning
-    )
+    node = AgentNode(id="writer", agent_ref="copywriter-v1", reasoning=reasoning)
 
     assert node.id == "writer"
     assert node.agent_ref == "copywriter-v1"
     assert node.reasoning is not None
     assert node.reasoning.strategy == ReviewStrategy.ADVERSARIAL
+    assert node.reasoning.adversarial is not None
     assert node.reasoning.adversarial.persona == "critic"
 
 
@@ -116,15 +110,10 @@ def test_complex_case_mixed_strategies() -> None:
     reasoning = ReasoningConfig(
         strategy=ReviewStrategy.ADVERSARIAL,
         max_revisions=5,
-        gap_scan=GapScanConfig(
-            enabled=True,
-            confidence_threshold=0.75
-        ),
+        gap_scan=GapScanConfig(enabled=True, confidence_threshold=0.75),
         adversarial=AdversarialConfig(
-            persona="harshest_critic",
-            attack_vectors=["logic", "style", "completeness"],
-            temperature=1.0
-        )
+            persona="harshest_critic", attack_vectors=["logic", "style", "completeness"], temperature=1.0
+        ),
     )
 
     assert reasoning.strategy == ReviewStrategy.ADVERSARIAL
@@ -141,20 +130,12 @@ def test_forbidden_extra_fields() -> None:
     because extra='forbid' is set in ConfigDict.
     """
     with pytest.raises(ValidationError) as excinfo:
-        AdversarialConfig.model_validate({
-            "persona": "tester",
-            "temperature": 0.5,
-            "extra_field": "should_fail"
-        })
+        AdversarialConfig.model_validate({"persona": "tester", "temperature": 0.5, "extra_field": "should_fail"})
     assert "extra_field" in str(excinfo.value)
 
 
 def test_explicit_none_assignment() -> None:
     """Verify that optional fields can be explicitly set to None."""
-    config = ReasoningConfig(
-        strategy=ReviewStrategy.NONE,
-        adversarial=None,
-        gap_scan=None
-    )
+    config = ReasoningConfig(strategy=ReviewStrategy.NONE, adversarial=None, gap_scan=None)
     assert config.adversarial is None
     assert config.gap_scan is None

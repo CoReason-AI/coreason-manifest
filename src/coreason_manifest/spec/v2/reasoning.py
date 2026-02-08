@@ -9,7 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import StrEnum
+
 from pydantic import ConfigDict, Field
+
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
