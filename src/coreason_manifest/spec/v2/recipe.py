@@ -107,6 +107,38 @@ class PolicyConfig(CoReasonBaseModel):
 # ==========================================
 
 
+class TransparencyLevel(StrEnum):
+    """How much internal reasoning is exposed."""
+
+    OPAQUE = "opaque"
+    OBSERVABLE = "observable"
+    INTERACTIVE = "interactive"
+
+
+class InterventionTrigger(StrEnum):
+    """Lifecycle hooks where the engine MUST pause."""
+
+    ON_START = "on_start"
+    ON_PLAN_GENERATION = "on_plan_generation"
+    ON_FAILURE = "on_failure"
+    ON_COMPLETION = "on_completion"
+
+
+class InteractionConfig(CoReasonBaseModel):
+    """Configuration for Human-in-the-Loop observability and steering."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    transparency: TransparencyLevel = Field(TransparencyLevel.OPAQUE, description="Visibility level.")
+    triggers: list[InterventionTrigger] = Field(
+        default_factory=list, description="Lifecycle hooks where the engine MUST pause."
+    )
+    editable_fields: list[str] = Field(
+        default_factory=list, description="Whitelist of fields the user is allowed to modify during intervention."
+    )
+    guidance_hint: str | None = Field(None, description="Static instructions for the human on what to verify.")
+
+
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -115,6 +147,7 @@ class RecipeNode(CoReasonBaseModel):
     id: str = Field(..., description="Unique identifier within the graph.")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Custom metadata (not for UI layout).")
     presentation: NodePresentation | None = Field(None, description="Visual layout and styling metadata.")
+    interaction: InteractionConfig | None = Field(None, description="Policies for transparency and human intervention.")
 
 
 class AgentNode(RecipeNode):

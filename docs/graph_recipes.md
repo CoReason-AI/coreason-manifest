@@ -161,6 +161,8 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `system_prompt_override`: Context-specific instructions (optional).
     - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
 
+    **New in 0.22.0**: All nodes support `interaction` configuration for "Glass Box" steering. See [Interactive Control Plane](interactive_control_plane.md).
+
 2.  **`HumanNode`** (`type: human`): Suspends execution until a human provides input or approval.
     - `prompt`: Instruction for the human user.
     - `timeout_seconds`: SLA for approval (optional).
