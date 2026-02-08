@@ -170,6 +170,28 @@ compliance=ComplianceConfig(
 )
 ```
 
+### 8. The Guardrails Layer (`GuardrailsConfig`)
+
+New in 0.23.0, the `guardrails` field configures **Active Defense** mechanisms like Circuit Breakers, Drift Detection, and Quality Assurance sampling.
+
+See [Active Defense](active_defense.md) for full details.
+
+```python
+from coreason_manifest.spec.v2.guardrails import (
+    GuardrailsConfig,
+    CircuitBreakerConfig,
+    BreakerScope
+)
+
+guardrails=GuardrailsConfig(
+    circuit_breaker=CircuitBreakerConfig(
+        failure_rate_threshold=0.5,
+        scope=BreakerScope.RECIPE
+    ),
+    spot_check_rate=0.05
+)
+```
+
 ## The Graph Topology Schema (`GraphTopology`)
 
 The `GraphTopology` enforces structural integrity. It requires a list of `nodes`, a list of `edges`, and a valid `entry_point`.
