@@ -18,6 +18,7 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, Too
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
+from coreason_manifest.spec.v2.provenance import ProvenanceData
 from coreason_manifest.spec.v2.resources import ModelProfile
 from coreason_manifest.spec.v2.skills import SkillDefinition
 
@@ -243,6 +244,7 @@ class ManifestMetadata(CoReasonBaseModel):
         None, description="The model or system ID that generated this manifest (e.g., 'coreason-strategist-v1')."
     )
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
+    provenance: ProvenanceData | None = Field(None, description="Provenance metadata.")
     tested_models: list[str] = Field(
         default_factory=list, description="List of LLM identifiers this manifest has been tested on."
     )
