@@ -43,3 +43,27 @@ class RetrievalConfig(CoReasonBaseModel):
     top_k: int = Field(5, ge=1, description="Number of chunks to retrieve.")
     score_threshold: float | None = Field(0.7, ge=0.0, le=1.0, description="Minimum similarity score.")
     scope: KnowledgeScope = Field(KnowledgeScope.SHARED, description="Access control scope.")
+
+
+class ConsolidationStrategy(StrEnum):
+    """How short-term context is moved to long-term memory (Harvested from Cortex)."""
+
+    NONE = "none"  # Forget everything after session
+    SUMMARY_WINDOW = "summary_window"  # Summarize every N turns
+    SEMANTIC_CLUSTER = "semantic_cluster"  # Group related turns by topic
+    SESSION_CLOSE = "session_close"  # Crystallize only when session ends
+
+
+class MemoryWriteConfig(CoReasonBaseModel):
+    """Configuration for the Cortex Crystallizer (Memory Writer)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    strategy: ConsolidationStrategy = Field(
+        ConsolidationStrategy.SESSION_CLOSE, description="When to persist memories."
+    )
+    frequency_turns: int = Field(10, description="If strategy is SUMMARY_WINDOW, how many turns trigger a write.")
+    destination_collection: str | None = Field(
+        None,
+        description="Target vector store collection. If None, uses the primary retrieval collection.",
+    )

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import ConfigDict, Field, model_validator
@@ -16,7 +16,7 @@ from pydantic import ConfigDict, Field, model_validator
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
-class LoadStrategy(str, Enum):
+class LoadStrategy(StrEnum):
     """Strategy for loading the skill."""
 
     EAGER = "eager"

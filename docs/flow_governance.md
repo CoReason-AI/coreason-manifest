@@ -99,4 +99,5 @@ The `RecipeDefinition` strictly validates Flow Governance configurations:
 *   `max_retries` must be non-negative.
 *   `retry_delay_seconds` must be non-negative.
 *   If `behavior` is `route_to_fallback`, `fallback_node_id` MUST be provided and MUST exist in the graph.
+    *   **Note:** Referential integrity for `fallback_node_id` is enforced strictly upon instantiation of the `RecipeDefinition`, regardless of whether the recipe status is `DRAFT` or `PUBLISHED`.
 *   If `behavior` is `continue_with_default`, `default_output` generally should be provided (though `None` is valid).

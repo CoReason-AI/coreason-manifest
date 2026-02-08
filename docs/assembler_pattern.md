@@ -8,12 +8,18 @@ Instead of referencing a pre-built agent by ID (`agent_ref`), you can now define
 
 ### The `CognitiveProfile`
 
-The `CognitiveProfile` consists of four key components:
+The `CognitiveProfile` consists of key components:
 
 1.  **Identity (Who)**: The role or persona (e.g., `safety_scientist`).
 2.  **Mode (How)**: The reasoning style (e.g., `standard`, `six_hats`, `socratic`).
-3.  **Environment (Where)**: Dynamic context modules (`knowledge_contexts`) and Long-Term Memory (`memory`) to inject.
-4.  **Task (What)**: The logic primitive to apply (`task_primitive`, e.g., `extract`, `classify`).
+3.  **Environment (Where)**:
+    *   Dynamic context modules (`knowledge_contexts`).
+    *   **Memory (Read)**: Sources to fetch context from (`memory_read` / `memory`).
+    *   **Memory (Write)**: Rules for saving memories (`memory_write`).
+4.  **Cognition (Think)**:
+    *   **Reflex (System 1)**: Fast-path execution (`reflex`).
+    *   **Reasoning (System 2)**: Deep thinking and self-correction (`reasoning`).
+5.  **Task (What)**: The logic primitive to apply (`task_primitive`, e.g., `extract`, `classify`).
 
 ## Usage in `AgentNode`
 
@@ -26,24 +32,26 @@ from coreason_manifest.spec.v2.agent import (
     ContextDependency,
     ComponentPriority
 )
-from coreason_manifest.spec.v2.knowledge import RetrievalConfig, RetrievalStrategy
+from coreason_manifest.spec.v2.knowledge import (
+    RetrievalConfig, RetrievalStrategy,
+    MemoryWriteConfig, ConsolidationStrategy
+)
+from coreason_manifest.spec.v2.reasoning import ReflexConfig, ReasoningConfig
 
-# Define an inline agent
+# Define an inline agent with advanced cognitive capabilities
 profile = CognitiveProfile(
     role="senior_editor",
     reasoning_mode="critique",
+
+    # 1. Context Dependencies
     knowledge_contexts=[
         ContextDependency(
             name="brand_guidelines",
             priority=ComponentPriority.CRITICAL
-        ),
-        ContextDependency(
-            name="recent_articles",
-            priority=ComponentPriority.LOW,
-            parameters={"limit": 5}
         )
     ],
-    # Access long-term memory
+
+    # 2. Memory Access (RAG)
     memory=[
         RetrievalConfig(
             strategy=RetrievalStrategy.DENSE,
@@ -51,6 +59,25 @@ profile = CognitiveProfile(
             top_k=3
         )
     ],
+
+    # 3. Memory Consolidation
+    memory_write=MemoryWriteConfig(
+        strategy=ConsolidationStrategy.SUMMARY_WINDOW,
+        frequency_turns=5
+    ),
+
+    # 4. Fast Thinking (System 1)
+    reflex=ReflexConfig(
+        enabled=True,
+        confidence_threshold=0.9,
+        allowed_tools=["grammar_check"]
+    ),
+
+    # 5. Deep Reasoning (System 2)
+    reasoning=ReasoningConfig(
+        max_revisions=2
+    ),
+
     task_primitive="review_and_edit"
 )
 
