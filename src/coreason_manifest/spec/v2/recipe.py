@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import logging
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -16,6 +17,8 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # 1. Configuration Schemas (New)
@@ -221,6 +224,57 @@ def coerce_topology(v: Any) -> Any:
     return v
 
 
+class Constraint(CoReasonBaseModel):
+    """Represents a feasibility constraint for a Recipe."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    variable: str = Field(..., description="The context variable path to check (e.g., 'data.row_count').")
+    operator: Literal["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains"] = Field(
+        ..., description="Comparison operator."
+    )
+    value: Any = Field(..., description="The threshold or reference value.")
+    required: bool = Field(True, description="If True, failure halts execution. If False, it's a warning.")
+    error_message: str | None = Field(None, description="Custom error message to display on failure.")
+
+    def evaluate(self, context: dict[str, Any]) -> bool:
+        """Evaluate the constraint against the given context."""
+        # 1. Resolve Path
+        current = context
+        for part in self.variable.split("."):
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                # Path not found
+                return False
+
+        resolved_value = current
+
+        # 2. Compare
+        try:
+            if self.operator == "eq":
+                return bool(resolved_value == self.value)
+            if self.operator == "neq":
+                return bool(resolved_value != self.value)
+            if self.operator == "gt":
+                return bool(resolved_value > self.value)
+            if self.operator == "gte":
+                return bool(resolved_value >= self.value)
+            if self.operator == "lt":
+                return bool(resolved_value < self.value)
+            if self.operator == "lte":
+                return bool(resolved_value <= self.value)
+            if self.operator == "in":
+                return bool(resolved_value in self.value)
+            if self.operator == "contains":
+                return bool(self.value in resolved_value)
+
+            return False  # pragma: no cover
+        except TypeError:
+            # Type mismatch (e.g., comparing str > int)
+            return False
+
+
 class RecipeDefinition(CoReasonBaseModel):
     """Definition of a Recipe (Graph-based Workflow)."""
 
@@ -233,6 +287,7 @@ class RecipeDefinition(CoReasonBaseModel):
 
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
+    requirements: list[Constraint] = Field(default_factory=list, description="List of feasibility constraints.")
     state: StateDefinition | None = Field(None, description="Internal state schema.")
     policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")
     # ----------------------
@@ -240,3 +295,22 @@ class RecipeDefinition(CoReasonBaseModel):
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
         ..., description="The execution graph topology."
     )
+
+    def check_feasibility(self, context: dict[str, Any]) -> tuple[bool, list[str]]:
+        """Check if all required constraints are satisfied."""
+        errors = []
+        is_feasible = True
+
+        for constraint in self.requirements:
+            if not constraint.evaluate(context):
+                msg = (
+                    constraint.error_message
+                    or f"Constraint failed: {constraint.variable} {constraint.operator} {constraint.value}"
+                )
+                if constraint.required:
+                    is_feasible = False
+                    errors.append(msg)
+                else:
+                    logger.warning(f"Optional constraint warning: {msg}")
+
+        return is_feasible, errors
