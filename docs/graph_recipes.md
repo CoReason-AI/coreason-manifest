@@ -195,6 +195,7 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
 
 1.  **`AgentNode`** (`type: agent`): Executes an AI Agent.
     - `agent_ref`: The ID or URI of the Agent Definition to execute.
+    - `construct`: (Optional) Inline definition of the agent's cognitive architecture (Assembler Pattern). See [The Assembler Pattern](assembler_pattern.md).
     - `system_prompt_override`: Context-specific instructions (optional).
     - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
 

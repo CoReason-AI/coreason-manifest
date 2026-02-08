@@ -17,6 +17,7 @@ from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
+from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.resources import RuntimeEnvironment
@@ -115,6 +116,10 @@ class PolicyConfig(CoReasonBaseModel):
     # --- New Harvesting Fields ---
     budget_cap_usd: float | None = Field(
         None, description="Hard limit for estimated token + tool costs. Execution halts if exceeded."
+    )
+    token_budget: int | None = Field(
+        None,
+        description="Max tokens for the assembled prompt. Low-priority contexts will be pruned if exceeded.",
     )
     sensitive_tools: list[str] = Field(
         default_factory=list,
@@ -230,8 +235,16 @@ class AgentNode(RecipeNode):
     """A node that executes an AI Agent."""
 
     type: Literal["agent"] = "agent"
-    agent_ref: str | SemanticRef = Field(
-        ..., description="The ID or URI of the Agent Definition, or a Semantic Reference."
+
+    # New Field: Inline Definition
+    # If provided, this overrides 'agent_ref' lookup.
+    construct: CognitiveProfile | None = Field(  # type: ignore[assignment]
+        None,
+        description="Inline definition of the agent's cognitive architecture (for the Weaver).",
+    )
+
+    agent_ref: str | SemanticRef | None = Field(
+        None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
     )
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
@@ -524,16 +537,26 @@ class RecipeDefinition(CoReasonBaseModel):
         - PUBLISHED: Requires concrete IDs and valid graph.
         """
         if self.status == RecipeStatus.PUBLISHED:
-            # 1. Enforce Concrete Resolution
+            # 1. Enforce Concrete Resolution and Complete Definition
             abstract_nodes = []
+            incomplete_nodes = []
             for node in self.topology.nodes:
-                if isinstance(node, AgentNode) and isinstance(node.agent_ref, SemanticRef):
-                    abstract_nodes.append(node.id)
+                if isinstance(node, AgentNode):
+                    if isinstance(node.agent_ref, SemanticRef):
+                        abstract_nodes.append(node.id)
+                    elif not node.agent_ref and not node.construct:
+                        incomplete_nodes.append(node.id)
 
             if abstract_nodes:
                 raise ValueError(
                     f"Lifecycle Error: Nodes {abstract_nodes} are still abstract. "
                     "Resolve all SemanticRefs to concrete IDs before publishing."
+                )
+
+            if incomplete_nodes:
+                raise ValueError(
+                    f"Lifecycle Error: Nodes {incomplete_nodes} are incomplete. "
+                    "Must provide either 'agent_ref' or 'construct' before publishing."
                 )
 
             # 2. Enforce Graph Integrity
