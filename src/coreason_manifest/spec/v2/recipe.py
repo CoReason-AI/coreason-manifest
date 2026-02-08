@@ -104,6 +104,23 @@ class AgentNode(RecipeNode):
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
 
 
+class GenerativeNode(RecipeNode):
+    """A node that acts as an interface definition for dynamic solvers."""
+
+    type: Literal["generative"] = "generative"
+    goal: str = Field(..., description="The high-level objective to be solved recursively.")
+    max_depth: int = Field(3, ge=1, description="Recursion limit for sub-tasks.")
+    strategy: Literal["bfs", "dfs", "hybrid"] = Field(
+        "hybrid", description="Traversal strategy hint for the solver."
+    )
+    allowed_tools: list[str] = Field(
+        default_factory=list, description="Whitelist of Tool IDs the solver is permitted to use."
+    )
+    output_schema: dict[str, Any] = Field(
+        default_factory=dict, description="JSON Schema defining the expected structure of the final answer."
+    )
+
+
 class HumanNode(RecipeNode):
     """A node that pauses execution for human input/approval."""
 
@@ -161,7 +178,7 @@ class GraphTopology(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    nodes: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]] = Field(
+    nodes: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode, Field(discriminator="type")]] = Field(
         ..., description="List of nodes in the graph."
     )
     edges: list[GraphEdge] = Field(..., description="List of directed edges.")
@@ -213,7 +230,7 @@ class TaskSequence(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    steps: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]] = Field(
+    steps: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode, Field(discriminator="type")]] = Field(
         ..., min_length=1, description="Ordered list of steps to execute."
     )
 
