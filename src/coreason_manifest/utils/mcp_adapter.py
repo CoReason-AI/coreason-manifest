@@ -73,7 +73,7 @@ class CoreasonMCPServer:
         # Initialize Server
         self._server = Server(f"coreason-agent-{self.tool_def['name']}")
 
-        @self._server.list_tools()  # type: ignore[misc]
+        @self._server.list_tools()  # type: ignore[untyped-decorator]
         async def handle_list_tools() -> list[types.Tool]:
             return [
                 types.Tool(
@@ -83,7 +83,7 @@ class CoreasonMCPServer:
                 )
             ]
 
-        @self._server.call_tool()  # type: ignore[misc]
+        @self._server.call_tool()  # type: ignore[untyped-decorator]
         async def handle_call_tool(
             name: str, arguments: dict[str, Any] | None
         ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
