@@ -21,6 +21,7 @@ from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.constitution import Constitution
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -131,21 +132,14 @@ class PolicyConfig(CoReasonBaseModel):
         description="Whitelist of MCP server names this recipe is allowed to access.",
     )
 
-    # --- Governance Text Injection (Harvested) ---
+    # --- New Harvesting Fields from Coreason-Protocol ---
     safety_preamble: str | None = Field(
-        None,
-        description="Optional safety instructions injected into the system prompt. Overridden by Constitution if present.",  # noqa: E501
-    )
-    legal_disclaimer: str | None = Field(
-        None,
-        description="Optional legal disclaimer appended to the output.",
+        None, description="Mandatory safety instruction injected into the system prompt."
     )
 
-    # --- New Field: Structured Constitution ---
-    constitution: Constitution | None = Field(
-        None,
-        description="Structured definition of laws and rules for Constitutional AI workflows.",
-    )
+    legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
+
+    constitution: Constitution | None = Field(None, description="Structured Governance laws.")
 
 
 class AuditLevel(StrEnum):
@@ -592,6 +586,12 @@ class RecipeDefinition(CoReasonBaseModel):
     # --- New Field for Auditor Support ---
     compliance: ComplianceConfig | None = Field(
         None, description="Directives for the Auditor worker (logging, retention, signing)."
+    )
+
+    # --- New Field for Sentinel ---
+    guardrails: GuardrailsConfig | None = Field(
+        None,
+        description="Active defense rules (Circuit Breakers, Drift, Spot Checks).",
     )
 
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(

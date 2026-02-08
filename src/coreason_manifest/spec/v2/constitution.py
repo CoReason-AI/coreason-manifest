@@ -18,46 +18,46 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel
 class LawCategory(StrEnum):
     """Classification of the law."""
 
-    UNIVERSAL = "Universal"  # e.g. "No hate speech"
-    DOMAIN = "Domain"  # e.g. "GxP Compliance"
-    TENANT = "Tenant"  # e.g. "Acme Corp Policy"
+    UNIVERSAL = "universal"  # Applies to all agents (e.g., "Do not be racist")
+    DOMAIN = "domain"  # Specific to the business domain (e.g., "Do not give medical advice")
+    TENANT = "tenant"  # Specific to the customer/tenant
 
 
 class LawSeverity(StrEnum):
-    """Impact of violating the law."""
+    """The impact level if this law is broken."""
 
-    LOW = "Low"
-    MEDIUM = "Medium"
-    HIGH = "High"
-    CRITICAL = "Critical"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
 
 class Law(CoReasonBaseModel):
-    """A specific rule or principle the AI must follow."""
+    """A semantic rule that the agent must follow."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    id: str = Field(..., min_length=1, description="Unique identifier (e.g., 'GCP.4').")
-    category: LawCategory = Field(LawCategory.DOMAIN, description="Category of the law.")
-    text: str = Field(..., min_length=1, description="The content of the law/principle.")
-    severity: LawSeverity = Field(LawSeverity.MEDIUM, description="Consequence of violation.")
-    reference_url: str | None = Field(None, description="Source of truth (e.g. FDA citation).")
+    id: str = Field(..., description="Unique identifier for the law.")
+    text: str = Field(..., description="The natural language rule.")
+    category: LawCategory = Field(LawCategory.DOMAIN, description="Scope of the law.")
+    severity: LawSeverity = Field(LawSeverity.HIGH, description="Impact of violation.")
+    reference_url: str | None = Field(None, description="Link to policy document.")
 
 
 class SentinelRule(CoReasonBaseModel):
-    """A hard Regex pattern for immediate blocking (Red Line)."""
+    """A hard regex pattern that triggers an immediate block."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    id: str = Field(..., description="Rule ID.")
+    id: str = Field(..., description="Unique identifier.")
     pattern: str = Field(..., description="Regex pattern to match.")
     description: str = Field(..., description="Why this pattern is blocked.")
 
 
 class Constitution(CoReasonBaseModel):
-    """A collection of laws that govern an agent's behavior."""
+    """Structured Governance configuration."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    laws: list[Law] = Field(default_factory=list, description="Principles for semantic critique.")
-    sentinel_rules: list[SentinelRule] = Field(default_factory=list, description="Patterns for hard filtering.")
+    laws: list[Law] = Field(default_factory=list, description="Semantic laws for the LLM Judge.")
+    sentinel_rules: list[SentinelRule] = Field(default_factory=list, description="Hard regex rules for the Sentinel.")
