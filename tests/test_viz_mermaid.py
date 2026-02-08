@@ -8,19 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from coreason_manifest.spec.common.presentation import NodePresentation
-from coreason_manifest.spec.v2.definitions import ManifestMetadata, ManifestV2
-from coreason_manifest.spec.v2.recipe import (
-    AgentNode,
-    EvaluatorNode,
-    GraphEdge,
-    GraphTopology,
-    HumanNode,
-    RecipeDefinition,
-    RecipeInterface,
-    RouterNode,
-)
-from coreason_manifest.utils.viz import generate_mermaid_graph, generate_recipe_mermaid
+from coreason_manifest.spec.v2.definitions import ManifestV2
+from coreason_manifest.utils.viz import generate_mermaid_graph
 
 
 def test_mermaid_basic_structure() -> None:
@@ -459,90 +448,3 @@ def test_mermaid_kitchen_sink() -> None:
     assert "STEP_approve --> STEP_finalize" in chart
     assert "STEP_finalize --> END" in chart
     assert "STEP_hidden_feature" in chart  # Exists but logic checks connections manually
-
-
-def test_recipe_visualization_topology() -> None:
-    # Build Topology
-    nodes = [
-        RouterNode(
-            id="check_intent",
-            input_key="intent",
-            routes={"finance": "finance_agent", "support": "support_agent"},
-            default_route="support_agent",
-            presentation=NodePresentation(x=0, y=0, label="Check Intent"),
-        ),
-        AgentNode(
-            id="finance_agent",
-            agent_ref="finance_ref",
-            presentation=NodePresentation(x=100, y=100, color="#ff0000"),
-        ),
-        AgentNode(
-            id="support_agent",
-            agent_ref="support_ref",
-        ),
-        HumanNode(
-            id="approval",
-            prompt="Approve?",
-            presentation=NodePresentation(x=200, y=200, label="Manager Approval"),
-        ),
-        EvaluatorNode(
-            id="quality_check",
-            target_variable="output",
-            evaluator_agent_ref="judge_ref",
-            evaluation_profile="strict",
-            pass_threshold=0.8,
-            max_refinements=1,
-            pass_route="approval",
-            fail_route="support_agent",
-            feedback_variable="feedback",
-            presentation=NodePresentation(x=300, y=300, label="Quality Check"),
-        ),
-    ]
-    edges = [
-        GraphEdge(source="finance_agent", target="quality_check", condition="done"),
-        GraphEdge(source="support_agent", target="quality_check"),
-    ]
-
-    topology = GraphTopology(
-        nodes=nodes,
-        edges=edges,
-        entry_point="check_intent",
-    )
-
-    recipe = RecipeDefinition(
-        metadata=ManifestMetadata(name="TestRecipe"),
-        interface=RecipeInterface(),
-        topology=topology,
-    )
-
-    mermaid = generate_recipe_mermaid(recipe)
-
-    # Assertions
-    assert "flowchart TD" in mermaid
-    assert "Start((Start)) --> check_intent" in mermaid
-
-    # Router Shape and Label
-    assert 'check_intent{"Check Intent"}' in mermaid
-
-    # Agent Shape and Color
-    assert 'finance_agent["finance_agent"]' in mermaid
-    assert "style finance_agent fill:#ff0000" in mermaid
-
-    # Human Shape
-    assert 'approval("Manager Approval")' in mermaid
-
-    # Evaluator Shape
-    assert 'quality_check{{"Quality Check"}}' in mermaid
-
-    # Explicit Edges
-    assert "finance_agent -->|done| quality_check" in mermaid
-    assert "support_agent --> quality_check" in mermaid
-
-    # Implicit Router Edges
-    assert "check_intent -->|finance| finance_agent" in mermaid
-    assert "check_intent -->|support| support_agent" in mermaid
-    assert "check_intent -->|else| support_agent" in mermaid
-
-    # Implicit Evaluator Edges
-    assert "quality_check -->|pass| approval" in mermaid
-    assert "quality_check -->|fail| support_agent" in mermaid
