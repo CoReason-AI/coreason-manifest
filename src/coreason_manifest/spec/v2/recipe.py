@@ -18,6 +18,7 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
+from coreason_manifest.spec.v2.constitution import Constitution
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
@@ -130,12 +131,21 @@ class PolicyConfig(CoReasonBaseModel):
         description="Whitelist of MCP server names this recipe is allowed to access.",
     )
 
-    # --- New Harvesting Fields from Coreason-Protocol ---
+    # --- Governance Text Injection (Harvested) ---
     safety_preamble: str | None = Field(
-        None, description="Mandatory safety instruction injected into the system prompt."
+        None,
+        description="Optional safety instructions injected into the system prompt. Overridden by Constitution if present.",  # noqa: E501
+    )
+    legal_disclaimer: str | None = Field(
+        None,
+        description="Optional legal disclaimer appended to the output.",
     )
 
-    legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
+    # --- New Field: Structured Constitution ---
+    constitution: Constitution | None = Field(
+        None,
+        description="Structured definition of laws and rules for Constitutional AI workflows.",
+    )
 
 
 class AuditLevel(StrEnum):
