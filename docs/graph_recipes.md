@@ -175,7 +175,7 @@ compliance=ComplianceConfig(
 
 ### 8. The Identity Layer (`IdentityRequirement`)
 
-New in 0.23.0, the `identity` field allows a Recipe to strictly declare its **Access Control** requirements (RBAC) and **Context Injection** needs. This enables the runtime to act as a security Gatekeeper.
+The `identity` field allows a Recipe to strictly declare its **Access Control** requirements (RBAC) and **Context Injection** needs. This enables the runtime to act as a security Gatekeeper.
 
 See [Identity & Access Management (IAM)](identity_access_management.md) for full details.
 
@@ -187,6 +187,25 @@ identity=IdentityRequirement(
     required_roles=["finance_admin"],
     inject_user_profile=True,
     anonymize_pii=False
+### 9. The Guardrails Layer (`GuardrailsConfig`)
+
+The `guardrails` field configures **Active Defense** mechanisms like Circuit Breakers, Drift Detection, and Quality Assurance sampling.
+
+See [Active Defense](active_defense.md) for full details.
+
+```python
+from coreason_manifest.spec.v2.guardrails import (
+    GuardrailsConfig,
+    CircuitBreakerConfig,
+    BreakerScope
+)
+
+guardrails=GuardrailsConfig(
+    circuit_breaker=CircuitBreakerConfig(
+        failure_rate_threshold=0.5,
+        scope=BreakerScope.RECIPE
+    ),
+    spot_check_rate=0.05
 )
 ```
 

@@ -18,9 +18,11 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
+from coreason_manifest.spec.v2.constitution import Constitution
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.identity import IdentityRequirement
+from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -137,6 +139,8 @@ class PolicyConfig(CoReasonBaseModel):
     )
 
     legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
+
+    constitution: Constitution | None = Field(None, description="Structured Governance laws.")
 
 
 class AuditLevel(StrEnum):
@@ -589,6 +593,10 @@ class RecipeDefinition(CoReasonBaseModel):
     identity: IdentityRequirement | None = Field(
         None,
         description="Access control and user context injection rules.",
+    # --- New Field for Sentinel ---
+    guardrails: GuardrailsConfig | None = Field(
+        None,
+        description="Active defense rules (Circuit Breakers, Drift, Spot Checks).",
     )
 
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
