@@ -25,19 +25,20 @@ def create_dummy_recipe() -> RecipeDefinition:
     )
 
 
-def test_viz_recipe_success(capsys: pytest.CaptureFixture[str]) -> None:
-    """Test that 'viz' command works for RecipeDefinition."""
+def test_viz_recipe_not_implemented(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test that 'viz' command fails for RecipeDefinition."""
     recipe = create_dummy_recipe()
 
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", return_value=recipe),
         patch.object(sys, "argv", ["coreason", "viz", "dummy:recipe"]),
     ):
-        main()
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 1
 
     captured = capsys.readouterr()
-    assert "flowchart TD" in captured.out
-    assert "Start((Start)) --> start" in captured.out
+    assert "Visualization not yet implemented for RecipeDefinition" in captured.err
 
 
 def test_run_recipe_success(capsys: pytest.CaptureFixture[str]) -> None:

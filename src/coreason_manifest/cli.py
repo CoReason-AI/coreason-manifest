@@ -28,7 +28,7 @@ from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
 from coreason_manifest.utils.simulation_executor import GraphExecutor
-from coreason_manifest.utils.viz import generate_mermaid_graph, generate_recipe_mermaid
+from coreason_manifest.utils.viz import generate_mermaid_graph
 
 
 def handle_init(args: argparse.Namespace) -> None:
@@ -306,10 +306,11 @@ def main() -> None:
 
     elif args.command == "viz":
         if isinstance(agent, RecipeDefinition):
-            mermaid = generate_recipe_mermaid(agent)
-        else:
-            mermaid = generate_mermaid_graph(agent)
+            # TODO: Implement visualization for RecipeDefinition
+            sys.stderr.write("Visualization not yet implemented for RecipeDefinition.\n")
+            sys.exit(1)
 
+        mermaid = generate_mermaid_graph(agent)
         if args.json:
             print(json.dumps({"mermaid": mermaid}))
         else:

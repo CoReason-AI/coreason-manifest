@@ -1,70 +1,52 @@
-from datetime import datetime
-
 import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
-from coreason_manifest.spec.v2.provenance import ProvenanceData
 
 
 def test_manifest_metadata_provenance_valid() -> None:
     """Test valid provenance fields."""
-    provenance = ProvenanceData(
-        type="ai",
-        confidence_score=0.95,
-        rationale="AI generated reasoning",
-        original_intent="User want a workflow",
-        generated_by="coreason-strategist-v1",
-    )
     metadata = ManifestMetadata(
         name="Test Workflow",
-        version="1.0.0",
-        provenance=provenance,
+        confidence_score=0.95,
+        generation_rationale="AI generated reasoning",
+        original_user_intent="User want a workflow",
+        generated_by="coreason-strategist-v1",
     )
     assert metadata.name == "Test Workflow"
-    assert metadata.version == "1.0.0"
-    assert metadata.provenance is not None
-    assert metadata.provenance.confidence_score == 0.95
-    assert metadata.provenance.rationale == "AI generated reasoning"
-    assert metadata.provenance.original_intent == "User want a workflow"
-    assert metadata.provenance.generated_by == "coreason-strategist-v1"
+    assert metadata.confidence_score == 0.95
+    assert metadata.generation_rationale == "AI generated reasoning"
+    assert metadata.original_user_intent == "User want a workflow"
+    assert metadata.generated_by == "coreason-strategist-v1"
 
 
-def test_provenance_confidence_score_validation() -> None:
-    """Test confidence_score validation in ProvenanceData."""
+def test_manifest_metadata_confidence_score_validation() -> None:
+    """Test confidence_score validation."""
     # Test valid score
-    p1 = ProvenanceData(type="ai", confidence_score=0.0)
-    assert p1.confidence_score == 0.0
+    m1 = ManifestMetadata(name="Valid", confidence_score=0.0)
+    assert m1.confidence_score == 0.0
 
-    p2 = ProvenanceData(type="ai", confidence_score=1.0)
-    assert p2.confidence_score == 1.0
+    m2 = ManifestMetadata(name="Valid", confidence_score=1.0)
+    assert m2.confidence_score == 1.0
 
     # Test invalid score > 1.0
     with pytest.raises(ValidationError) as excinfo:
-        ProvenanceData(type="ai", confidence_score=1.5)
+        ManifestMetadata(name="Invalid", confidence_score=1.5)
+    # Pydantic v2 message may say '1' or '1.0'
     assert "less than or equal to 1" in str(excinfo.value)
 
     # Test invalid score < 0.0
     with pytest.raises(ValidationError) as excinfo:
-        ProvenanceData(type="ai", confidence_score=-0.1)
+        ManifestMetadata(name="Invalid", confidence_score=-0.1)
+    # Pydantic v2 message may say '0' or '0.0'
     assert "greater than or equal to 0" in str(excinfo.value)
 
 
-def test_provenance_type_validation() -> None:
-    """Test type field validation."""
-    # Valid types
-    assert ProvenanceData(type="ai").type == "ai"
-    assert ProvenanceData(type="human").type == "human"
-    assert ProvenanceData(type="hybrid").type == "hybrid"
-
-    # Invalid type
-    with pytest.raises(ValidationError) as excinfo:
-        ProvenanceData(type="alien")
-    assert "Input should be 'ai', 'human' or 'hybrid'" in str(excinfo.value)
-
-
 def test_manifest_metadata_extra_fields() -> None:
-    """Test that extra fields are still allowed on ManifestMetadata."""
+    """Test that extra fields are still allowed."""
+    # Pydantic V2 with extra='allow' stores in model_extra
+    # Access via attribute depends on __getattr__ implementation in base class
+    # but we can definitely check via dictionary access or model_dump
     metadata = ManifestMetadata(name="Test Extra", unknown_field="some value")
     assert metadata.name == "Test Extra"
 
@@ -72,27 +54,76 @@ def test_manifest_metadata_extra_fields() -> None:
     dump = metadata.model_dump()
     assert dump["unknown_field"] == "some value"
 
-
-def test_provenance_extra_forbid() -> None:
-    """Test that ProvenanceData forbids extra fields."""
-    with pytest.raises(ValidationError) as excinfo:
-        ProvenanceData(type="ai", extra_field="forbidden")  # type: ignore[call-arg]
-    assert "Extra inputs are not permitted" in str(excinfo.value)
+    # Check via direct attribute access (if supported by Pydantic V2 ConfigDict)
+    # Based on local test, it seems supported
+    assert getattr(metadata, "unknown_field", None) == "some value"
 
 
-def test_provenance_serialization() -> None:
-    """Test full serialization roundtrip."""
-    provenance = ProvenanceData(
-        type="hybrid",
-        generated_date=datetime(2025, 1, 1, 12, 0, 0),
-        methodology="human-review",
+def test_manifest_metadata_edge_cases() -> None:
+    """Test edge cases for provenance fields."""
+    # Empty strings
+    m = ManifestMetadata(name="Empty Strings", generation_rationale="", original_user_intent="", generated_by="")
+    assert m.generation_rationale == ""
+    assert m.original_user_intent == ""
+    assert m.generated_by == ""
+
+    # None values
+    m_none = ManifestMetadata(
+        name="None Values",
+        confidence_score=None,
+        generation_rationale=None,
+        original_user_intent=None,
+        generated_by=None,
     )
-    metadata = ManifestMetadata(name="Roundtrip", provenance=provenance)
+    assert m_none.confidence_score is None
 
-    json_str = metadata.model_dump_json()
+    # Precision for float
+    m_prec = ManifestMetadata(name="Precision", confidence_score=0.999999999)
+    assert m_prec.confidence_score == 0.999999999
+
+    # Minimal epsilon above 0
+    m_min = ManifestMetadata(name="Min", confidence_score=0.000000001)
+    assert m_min.confidence_score == 0.000000001
+
+
+def test_manifest_metadata_complex_roundtrip() -> None:
+    """Test full serialization roundtrip."""
+    data = {
+        "name": "Complex Case",
+        "confidence_score": 0.88,
+        "generation_rationale": "Complex rationale with \n newlines and symbols !@#$",
+        "original_user_intent": "Make it so.",
+        "generated_by": "the-architect",
+        "extra_data": 123,
+    }
+
+    # Create from dict
+    m = ManifestMetadata(**data)
+
+    # Verify
+    assert m.confidence_score == 0.88
+    assert m.generation_rationale == data["generation_rationale"]
+
+    # Serialize
+    json_str = m.model_dump_json()
+
+    # Deserialize
     m2 = ManifestMetadata.model_validate_json(json_str)
 
-    assert m2.provenance is not None
-    assert m2.provenance.type == "hybrid"
-    assert m2.provenance.generated_date == datetime(2025, 1, 1, 12, 0, 0)
-    assert m2.provenance.methodology == "human-review"
+    # Verify equality
+    assert m2.name == m.name
+    assert m2.confidence_score == m.confidence_score
+    assert m2.generated_by == m.generated_by
+    # Extra fields should be preserved in roundtrip
+    assert getattr(m2, "extra_data", None) == 123
+
+
+def test_manifest_metadata_type_coercion_failure() -> None:
+    """Test strict typing where applicable."""
+    # Pydantic will try to coerce strings to floats
+    m = ManifestMetadata(name="Coercion", confidence_score="0.5")
+    assert m.confidence_score == 0.5
+
+    # Fail on invalid string for float
+    with pytest.raises(ValidationError):
+        ManifestMetadata(name="Fail", confidence_score="not-a-float")

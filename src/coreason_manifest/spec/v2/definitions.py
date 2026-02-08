@@ -18,7 +18,6 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, Too
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
-from coreason_manifest.spec.v2.provenance import ProvenanceData
 from coreason_manifest.spec.v2.resources import ModelProfile
 from coreason_manifest.spec.v2.skills import SkillDefinition
 
@@ -34,7 +33,6 @@ __all__ = [
     "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
-    "ProvenanceData",
     "SkillDefinition",
     "Step",
     "SwitchStep",
@@ -232,8 +230,18 @@ class ManifestMetadata(CoReasonBaseModel):
     model_config = ConfigDict(extra="allow", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
-    version: str = Field("0.1.0", description="Semantic version of the manifest.")
-    provenance: ProvenanceData | None = Field(None, description="Lineage and authorship information.")
+    generation_rationale: str | None = Field(
+        None, description="Reasoning behind the creation or selection of this workflow."
+    )
+    confidence_score: float | None = Field(
+        None, ge=0.0, le=1.0, description="A score (0.0 - 1.0) indicating the system's confidence in this workflow."
+    )
+    original_user_intent: str | None = Field(
+        None, description="The original user prompt or goal that resulted in this workflow."
+    )
+    generated_by: str | None = Field(
+        None, description="The model or system ID that generated this manifest (e.g., 'coreason-strategist-v1')."
+    )
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
     tested_models: list[str] = Field(
         default_factory=list, description="List of LLM identifiers this manifest has been tested on."

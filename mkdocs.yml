@@ -6,7 +6,6 @@ nav:
   - Usage: usage.md
   - Specifications:
       - "Graph Recipes (Orchestration)": graph_recipes.md
-      - "Evaluator-Optimizer Pattern": evaluator_optimizer.md
       - "Agent Manifest (CAM) & Linear Workflows": cap/specification.md
       - "Agent Skills System": skills.md
       - "Tool Packs (Plugins)": tool_packs.md
@@ -35,7 +34,6 @@ nav:
       - "Mock Factory": mock_factory.md
       - "Error Handling": error_handling_standards.md
       - "Evaluation Metadata": evaluation_metadata.md
-      - "Provenance Metadata": provenance_metadata.md
       - "Event Content Types": event_content_types.md
       - "Frontend Integration": frontend_integration.md
       - "Request Lineage (Impl)": request_lineage_implementation.md

@@ -93,3 +93,23 @@ def test_constraint_large_scale() -> None:
     feasible, errors = recipe.check_feasibility(context)
     assert feasible is False
     assert len(errors) == 1
+
+
+def test_constraint_deep_nesting_and_mixed_types() -> None:
+    """Test deeply nested paths and non-JSON standard types."""
+    # Deep nesting
+    context = {"l1": {"l2": {"l3": {"l4": {"val": "found"}}}}}
+    assert Constraint(variable="l1.l2.l3.l4.val", operator="eq", value="found").evaluate(context) is True
+    assert Constraint(variable="l1.l2.missing.val", operator="eq", value="found").evaluate(context) is False
+
+    # Mixed types (set, tuple)
+    # Note: JSON serialization usually doesn't handle these, but the context is a raw python dict
+    context_mixed = {"set_val": {1, 2, 3}, "tuple_val": (1, 2)}
+
+    # Set contains
+    assert Constraint(variable="set_val", operator="contains", value=2).evaluate(context_mixed) is True
+    assert Constraint(variable="set_val", operator="contains", value=4).evaluate(context_mixed) is False
+
+    # Tuple comparison
+    assert Constraint(variable="tuple_val", operator="eq", value=(1, 2)).evaluate(context_mixed) is True
+    assert Constraint(variable="tuple_val", operator="in", value=[(1, 2), (3, 4)]).evaluate(context_mixed) is True
