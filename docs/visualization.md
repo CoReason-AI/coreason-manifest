@@ -79,3 +79,16 @@ The visualizer supports:
 *   **Switch Steps**: Branches are labeled with their conditions.
 *   **Loops**: Cyclic dependencies are rendered naturally by Mermaid.
 *   **Disconnected Nodes**: Steps defined in the workflow but not linked are still rendered, helping identify orphaned logic.
+
+## 3. Cognitive Visualization and Collaboration
+
+The `coreason-manifest` library supports advanced visualization and collaboration capabilities, enabling "Glass Box" reasoning and "Magentic-UI" experiences. These features are configured directly within `RecipeNode` definitions via the `presentation` and `collaboration` fields.
+
+*   **Glass Box Visualization (`PresentationHints`)**: Control how the node's execution is visualized (e.g., `CHAT`, `TREE`, `KANBAN`, `DOCUMENT`).
+*   **Co-Pilot Collaboration (`CollaborationConfig`)**: Define the protocol for human engagement (e.g., `COMPLETION`, `INTERACTIVE`, `CO_EDIT`).
+
+For detailed documentation on these features, see [Cognitive Visualization and Collaboration Protocols](cognitive_visualization_and_collaboration.md).
+
+### Presentation Hints Support in `generate_recipe_mermaid`
+
+The `generate_recipe_mermaid` function now supports `PresentationHints` on `RecipeNode` objects. It will use the `display_title` hint as the node label if provided, falling back to the node ID.
