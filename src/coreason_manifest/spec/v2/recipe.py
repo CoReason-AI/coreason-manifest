@@ -64,9 +64,7 @@ class OptimizationIntent(CoReasonBaseModel):
         None,
         description="ID of a stronger model to use for bootstrapping synthetic training data (e.g., 'gpt-4-turbo').",
     )
-    max_demonstrations: int = Field(
-        5, ge=0, description="Maximum number of few-shot examples to learn and inject."
-    )
+    max_demonstrations: int = Field(5, ge=0, description="Maximum number of few-shot examples to learn and inject.")
 
 
 class SemanticRef(CoReasonBaseModel):
@@ -111,9 +109,7 @@ class PolicyConfig(CoReasonBaseModel):
 
     max_retries: int = Field(0, description="Global retry limit for failed steps.")
     timeout_seconds: int | None = Field(None, description="Global execution timeout.")
-    execution_mode: Literal["sequential", "parallel"] = Field(
-        "sequential", description="Default execution strategy."
-    )
+    execution_mode: Literal["sequential", "parallel"] = Field("sequential", description="Default execution strategy.")
 
     # --- New Harvesting Fields ---
     budget_cap_usd: float | None = Field(
@@ -197,9 +193,7 @@ class CollaborationConfig(CoReasonBaseModel):
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
     feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
-    supported_commands: list[str] = Field(
-        default_factory=list, description="Slash commands the agent understands."
-    )
+    supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
 
     # --- New Harvesting Fields ---
     channels: list[str] = Field(
