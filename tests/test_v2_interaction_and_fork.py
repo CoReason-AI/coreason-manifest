@@ -1,4 +1,5 @@
-import pytest
+from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.provenance import ProvenanceData, ProvenanceType
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
     GenerativeNode,
@@ -6,11 +7,9 @@ from coreason_manifest.spec.v2.recipe import (
     InterventionTrigger,
     TransparencyLevel,
 )
-from coreason_manifest.spec.v2.definitions import ManifestMetadata
-from coreason_manifest.spec.v2.provenance import ProvenanceData, ProvenanceType
 
 
-def test_interaction_config_serialization():
+def test_interaction_config_serialization() -> None:
     """Verify InteractionConfig serializes correctly with defaults and custom values."""
     # Default
     config = InteractionConfig()
@@ -26,7 +25,7 @@ def test_interaction_config_serialization():
         triggers=[InterventionTrigger.ON_FAILURE, InterventionTrigger.ON_COMPLETION],
         editable_fields=["inputs", "system_prompt_override"],
         enforce_contract=False,
-        guidance_hint="Please review carefully."
+        guidance_hint="Please review carefully.",
     )
     assert config.transparency == "interactive"
     assert InterventionTrigger.ON_FAILURE in config.triggers
@@ -34,43 +33,33 @@ def test_interaction_config_serialization():
     assert config.guidance_hint == "Please review carefully."
 
 
-def test_universal_inheritance():
+def test_universal_inheritance() -> None:
     """Verify AgentNode and GenerativeNode accept interaction config."""
     interaction = InteractionConfig(transparency=TransparencyLevel.OBSERVABLE)
 
     # AgentNode
-    agent_node = AgentNode(
-        id="agent-1",
-        agent_ref="agent-v1",
-        interaction=interaction
-    )
+    agent_node = AgentNode(id="agent-1", agent_ref="agent-v1", interaction=interaction)
     assert agent_node.interaction is not None
     assert agent_node.interaction.transparency == TransparencyLevel.OBSERVABLE
 
     # GenerativeNode
     gen_node = GenerativeNode(
-        id="gen-1",
-        goal="Solve world hunger",
-        output_schema={"type": "string"},
-        interaction=interaction
+        id="gen-1", goal="Solve world hunger", output_schema={"type": "string"}, interaction=interaction
     )
     assert gen_node.interaction is not None
     assert gen_node.interaction.transparency == TransparencyLevel.OBSERVABLE
 
 
-def test_provenance_fork_lineage():
+def test_provenance_fork_lineage() -> None:
     """Verify ManifestMetadata with ProvenanceData for a steered fork."""
     provenance = ProvenanceData(
         type=ProvenanceType.HUMAN,
         derived_from="recipe-v1-published",
         modifications=["Changed input on step-3"],
-        original_intent="Optimize for speed"
+        original_intent="Optimize for speed",
     )
 
-    metadata = ManifestMetadata(
-        name="Forked Recipe",
-        provenance=provenance
-    )
+    metadata = ManifestMetadata(name="Forked Recipe", provenance=provenance)
 
     assert metadata.provenance is not None
     assert metadata.provenance.type == "human"
@@ -79,13 +68,9 @@ def test_provenance_fork_lineage():
     assert metadata.provenance.original_intent == "Optimize for speed"
 
 
-def test_provenance_serialization():
+def test_provenance_serialization() -> None:
     """Verify ProvenanceData dumps correctly."""
-    provenance = ProvenanceData(
-        type=ProvenanceType.AI,
-        generated_by="coreason-strategist-v1",
-        confidence_score=0.95
-    )
+    provenance = ProvenanceData(type=ProvenanceType.AI, generated_by="coreason-strategist-v1", confidence_score=0.95)
     data = provenance.dump()
     assert data["type"] == "ai"
     assert data["generated_by"] == "coreason-strategist-v1"
