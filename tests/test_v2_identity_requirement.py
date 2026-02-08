@@ -249,7 +249,7 @@ def test_complex_max_constraints_scenario() -> None:
         required_permissions=["system:reset", "system:wipe", "audit:delete"],
         inject_user_profile=True,
         inject_locale_info=False,
-        anonymize_pii=False
+        anonymize_pii=False,
     )
 
     dumped = identity.dump()

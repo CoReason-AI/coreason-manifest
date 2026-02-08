@@ -21,8 +21,8 @@ from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
-from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 from coreason_manifest.spec.v2.identity import IdentityRequirement
+from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -672,7 +672,7 @@ class RecipeDefinition(CoReasonBaseModel):
     )
 
     # --- New Field for Sentinel ---
-    guardrails: Any | None = Field(
+    guardrails: GuardrailsConfig | None = Field(
         None,
         description="Active defense rules (Circuit Breakers, Drift, Spot Checks).",
     )
