@@ -18,6 +18,7 @@ from coreason_manifest.spec.v2.recipe import (
     GraphTopology,
     RecipeDefinition,
     RecipeInterface,
+    RouterNode,
     TaskSequence,
 )
 
@@ -68,7 +69,7 @@ def test_generative_node_validation() -> None:
         GenerativeNode(
             id="bad-strategy",
             goal="Fail",
-            strategy="invalid_strat"  # type: ignore
+            strategy="invalid_strat",
         )
     assert "Input should be 'bfs', 'dfs' or 'hybrid'" in str(excinfo.value)
 
@@ -133,3 +134,112 @@ def test_task_sequence_with_generative_node() -> None:
     assert len(graph.edges) == 1
     assert graph.edges[0].source == "gen-1"
     assert graph.edges[0].target == "gen-2"
+
+
+def test_edge_case_max_depth_boundary() -> None:
+    """Test max_depth boundary conditions."""
+    # Minimum valid depth
+    node = GenerativeNode(id="min-depth", goal="Goal", max_depth=1)
+    assert node.max_depth == 1
+
+    # Large depth
+    node = GenerativeNode(id="large-depth", goal="Goal", max_depth=100)
+    assert node.max_depth == 100
+
+
+def test_edge_case_allowed_tools() -> None:
+    """Test allowed_tools with various inputs."""
+    # Empty list (default)
+    node = GenerativeNode(id="empty-tools", goal="Goal")
+    assert node.allowed_tools == []
+
+    # Duplicates are allowed by list type, but conceptually fine
+    node = GenerativeNode(id="dup-tools", goal="Goal", allowed_tools=["t1", "t1"])
+    assert node.allowed_tools == ["t1", "t1"]
+
+    # Large list
+    tools = [f"tool-{i}" for i in range(100)]
+    node = GenerativeNode(id="large-tools", goal="Goal", allowed_tools=tools)
+    assert len(node.allowed_tools) == 100
+
+
+def test_complex_case_mixed_topology() -> None:
+    """Test a mixed graph with GenerativeNode, RouterNode, and AgentNode."""
+    # Gen -> Router -> (Agent1 | Agent2)
+    nodes = [
+        GenerativeNode(id="gen-start", goal="Analyze market", output_schema={"type": "object"}),
+        RouterNode(
+            id="router",
+            input_key="market_sentiment",
+            routes={"positive": "agent-buy", "negative": "agent-sell"},
+            default_route="agent-hold",
+        ),
+        AgentNode(id="agent-buy", agent_ref="buyer-bot"),
+        AgentNode(id="agent-sell", agent_ref="seller-bot"),
+        AgentNode(id="agent-hold", agent_ref="holder-bot"),
+    ]
+    edges = [
+        {"source": "gen-start", "target": "router"},
+        {"source": "router", "target": "agent-buy"},
+        {"source": "router", "target": "agent-sell"},
+        {"source": "router", "target": "agent-hold"},
+    ]
+
+    topology = GraphTopology(nodes=nodes, edges=edges, entry_point="gen-start")
+    assert len(topology.nodes) == 5
+    assert len(topology.edges) == 4
+    assert topology.verify_completeness() is True
+
+
+def test_complex_case_chained_generative() -> None:
+    """Test chaining multiple GenerativeNodes."""
+    # Gen1 -> Gen2 -> Gen3
+    seq = TaskSequence(
+        steps=[
+            GenerativeNode(id="g1", goal="Step 1"),
+            GenerativeNode(id="g2", goal="Step 2"),
+            GenerativeNode(id="g3", goal="Step 3"),
+        ]
+    )
+    graph = seq.to_graph()
+    assert len(graph.nodes) == 3
+    assert len(graph.edges) == 2
+    assert graph.edges[0].source == "g1"
+    assert graph.edges[0].target == "g2"
+    assert graph.edges[1].source == "g2"
+    assert graph.edges[1].target == "g3"
+
+
+def test_complex_case_cycle_with_generative() -> None:
+    """Test a GenerativeNode within a cyclic graph."""
+    # Gen1 -> Agent -> Gen1 (Loop)
+    nodes = [
+        GenerativeNode(id="gen-loop", goal="Generate until perfect"),
+        AgentNode(id="critic", agent_ref="critic-bot"),
+    ]
+    edges = [
+        {"source": "gen-loop", "target": "critic"},
+        {"source": "critic", "target": "gen-loop"},
+    ]
+    topology = GraphTopology(nodes=nodes, edges=edges, entry_point="gen-loop")
+    assert topology.verify_completeness() is True
+
+    # Verify structure
+    assert topology.edges[0].source == "gen-loop"
+    assert topology.edges[1].target == "gen-loop"
+
+
+def test_complex_case_task_sequence_mixed() -> None:
+    """Test TaskSequence with a mix of all node types."""
+    seq = TaskSequence(
+        steps=[
+            GenerativeNode(id="step1", goal="Plan"),
+            AgentNode(id="step2", agent_ref="executor"),
+            GenerativeNode(id="step3", goal="Review"),
+        ]
+    )
+    graph = seq.to_graph()
+    assert len(graph.nodes) == 3
+    assert isinstance(graph.nodes[0], GenerativeNode)
+    assert isinstance(graph.nodes[1], AgentNode)
+    assert isinstance(graph.nodes[2], GenerativeNode)

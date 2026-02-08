@@ -110,9 +110,7 @@ class GenerativeNode(RecipeNode):
     type: Literal["generative"] = "generative"
     goal: str = Field(..., description="The high-level objective to be solved recursively.")
     max_depth: int = Field(3, ge=1, description="Recursion limit for sub-tasks.")
-    strategy: Literal["bfs", "dfs", "hybrid"] = Field(
-        "hybrid", description="Traversal strategy hint for the solver."
-    )
+    strategy: Literal["bfs", "dfs", "hybrid"] = Field("hybrid", description="Traversal strategy hint for the solver.")
     allowed_tools: list[str] = Field(
         default_factory=list, description="Whitelist of Tool IDs the solver is permitted to use."
     )
@@ -178,9 +176,9 @@ class GraphTopology(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    nodes: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode, Field(discriminator="type")]] = Field(
-        ..., description="List of nodes in the graph."
-    )
+    nodes: list[
+        Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode, Field(discriminator="type")]
+    ] = Field(..., description="List of nodes in the graph.")
     edges: list[GraphEdge] = Field(..., description="List of directed edges.")
     entry_point: str = Field(..., description="ID of the start node.")
     status: Literal["draft", "valid"] = Field("valid", description="Validation status of the topology.")
@@ -230,9 +228,9 @@ class TaskSequence(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    steps: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode, Field(discriminator="type")]] = Field(
-        ..., min_length=1, description="Ordered list of steps to execute."
-    )
+    steps: list[
+        Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode, Field(discriminator="type")]
+    ] = Field(..., min_length=1, description="Ordered list of steps to execute.")
 
     def to_graph(self) -> GraphTopology:
         """Compiles the sequence into a GraphTopology."""
