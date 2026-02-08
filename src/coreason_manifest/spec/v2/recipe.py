@@ -78,8 +78,7 @@ class RecipeNode(CoReasonBaseModel):
 
     # --- New Field for Episteme ---
     reasoning: ReasoningConfig | None = Field(
-        None,
-        description="Meta-cognition settings: Review loops, gap scanning, and validation strategies."
+        None, description="Meta-cognition settings: Review loops, gap scanning, and validation strategies."
     )
 
 
