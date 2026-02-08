@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -18,11 +18,11 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
-from coreason_manifest.spec.v2.constitution import Constitution
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
 from coreason_manifest.spec.v2.reasoning import ReasoningConfig
+from coreason_manifest.spec.v2.identity import IdentityRequirement
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -107,6 +107,16 @@ class StateDefinition(CoReasonBaseModel):
     )
 
 
+class ExecutionPriority(IntEnum):
+    """Traffic priority for the AI Gateway (Load Shedding)."""
+
+    CRITICAL = 10  # Real-time user interaction (CEO bot)
+    HIGH = 8  # Standard synchronous flows
+    NORMAL = 5  # Default
+    LOW = 2  # Background tasks / Bulk processing
+    BATCH = 1  # Overnight jobs
+
+
 class PolicyConfig(CoReasonBaseModel):
     """Governance rules for execution limits (harvested from Connect)."""
 
@@ -115,6 +125,23 @@ class PolicyConfig(CoReasonBaseModel):
     max_retries: int = Field(0, description="Global retry limit for failed steps.")
     timeout_seconds: int | None = Field(None, description="Global execution timeout.")
     execution_mode: Literal["sequential", "parallel"] = Field("sequential", description="Default execution strategy.")
+
+    # --- New QoS Fields for AI Gateway ---
+    priority: ExecutionPriority = Field(
+        ExecutionPriority.NORMAL,
+        description="Traffic priority. Low priority requests may be queued or dropped during high load.",
+    )
+
+    rate_limit_rpm: int | None = Field(
+        None, ge=0, description="Max requests per minute allowed for this recipe execution."
+    )
+
+    rate_limit_tpm: int | None = Field(None, ge=0, description="Max tokens per minute allowed (input + output).")
+
+    caching_enabled: bool = Field(
+        True,
+        description="Allow the Gateway to serve cached responses for identical inputs (Semantic Caching).",
+    )
 
     # --- New Harvesting Fields ---
     budget_cap_usd: float | None = Field(
@@ -139,8 +166,6 @@ class PolicyConfig(CoReasonBaseModel):
     )
 
     legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
-
-    constitution: Constitution | None = Field(None, description="Structured Governance laws.")
 
 
 class AuditLevel(StrEnum):
@@ -640,8 +665,14 @@ class RecipeDefinition(CoReasonBaseModel):
         None, description="Directives for the Auditor worker (logging, retention, signing)."
     )
 
+    # --- New Field for Identity ---
+    identity: IdentityRequirement | None = Field(
+        None,
+        description="Access control and user context injection rules.",
+    )
+
     # --- New Field for Sentinel ---
-    guardrails: GuardrailsConfig | None = Field(
+    guardrails: Any | None = Field(
         None,
         description="Active defense rules (Circuit Breakers, Drift, Spot Checks).",
     )
