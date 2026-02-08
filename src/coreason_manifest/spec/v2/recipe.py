@@ -17,6 +17,7 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,12 @@ class RecipeNode(CoReasonBaseModel):
     id: str = Field(..., description="Unique identifier within the graph.")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Custom metadata (not for UI layout).")
     presentation: NodePresentation | None = Field(None, description="Visual layout and styling metadata.")
+
+    # --- New Field for Episteme ---
+    reasoning: ReasoningConfig | None = Field(
+        None,
+        description="Meta-cognition settings: Review loops, gap scanning, and validation strategies."
+    )
 
 
 class AgentNode(RecipeNode):
