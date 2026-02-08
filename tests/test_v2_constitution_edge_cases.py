@@ -24,12 +24,12 @@ def test_law_validation_failures() -> None:
     """Test that Law validation fails for invalid inputs."""
     # 1. Empty ID
     with pytest.raises(ValidationError) as exc:
-        Law(id="", text="Valid text")  # type: ignore
+        Law(id="", text="Valid text")
     assert "String should have at least 1 character" in str(exc.value)
 
     # 2. Empty Text
     with pytest.raises(ValidationError) as exc:
-        Law(id="L1", text="")  # type: ignore
+        Law(id="L1", text="")
     assert "String should have at least 1 character" in str(exc.value)
 
     # 3. Missing Required Fields

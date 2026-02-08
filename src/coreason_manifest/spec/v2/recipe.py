@@ -134,7 +134,7 @@ class PolicyConfig(CoReasonBaseModel):
     # --- Governance Text Injection (Harvested) ---
     safety_preamble: str | None = Field(
         None,
-        description="Optional safety instructions injected into the system prompt. Overridden by Constitution if present.",
+        description="Optional safety instructions injected into the system prompt. Overridden by Constitution if present.",  # noqa: E501
     )
     legal_disclaimer: str | None = Field(
         None,
