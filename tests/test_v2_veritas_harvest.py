@@ -120,12 +120,12 @@ def test_edge_case_invalid_enum() -> None:
     Edge Case: Invalid enum values should raise ValidationError.
     """
     with pytest.raises(ValidationError) as excinfo:
-        IntegrityConfig(input_mode="INVALID_MODE")  # type: ignore
+        IntegrityConfig(input_mode="INVALID_MODE")
 
     assert "Input should be 'full_payload', 'redacted', 'reference_only' or 'off'" in str(excinfo.value)
 
     with pytest.raises(ValidationError) as excinfo:
-        IntegrityConfig(integrity_level="SuperSecureBlockChain")  # type: ignore
+        IntegrityConfig(integrity_level="SuperSecureBlockChain")
 
     assert "Input should be 'none', 'checksum', 'signature' or 'anchor'" in str(excinfo.value)
 
