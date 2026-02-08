@@ -10,84 +10,76 @@
 
 import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.spec.v2.reasoning import (
-    ReviewStrategy,
-    ReasoningConfig,
     AdversarialConfig,
-    GapScanConfig
+    GapScanConfig,
+    ReasoningConfig,
+    ReviewStrategy,
 )
 from coreason_manifest.spec.v2.recipe import AgentNode
 
-def test_episteme_explicit_none():
+
+def test_episteme_explicit_none() -> None:
     """Verify handling of explicit None values."""
-    config = ReasoningConfig(
-        strategy=ReviewStrategy.NONE,
-        adversarial=None,
-        gap_scan=None,
-        max_revisions=1
-    )
+    config = ReasoningConfig(strategy=ReviewStrategy.NONE, adversarial=None, gap_scan=None, max_revisions=1)
     assert config.strategy == ReviewStrategy.NONE
     assert config.adversarial is None
     assert config.gap_scan is None
 
-def test_adversarial_empty_vectors():
+
+def test_adversarial_empty_vectors() -> None:
     """Verify adversarial config with empty attack vectors."""
-    adv_config = AdversarialConfig(
-        persona="critic",
-        attack_vectors=[],
-        temperature=0.7
-    )
+    adv_config = AdversarialConfig(persona="critic", attack_vectors=[], temperature=0.7)
     assert adv_config.attack_vectors == []
 
-def test_gap_scan_defaults():
+
+def test_gap_scan_defaults() -> None:
     """Verify gap scan defaults when instantiated partially."""
     gap_config = GapScanConfig()
     assert gap_config.enabled is False
     assert gap_config.confidence_threshold == 0.8  # Default
 
-def test_max_revisions_zero():
+
+def test_max_revisions_zero() -> None:
     """Verify max_revisions can be 0 (no loops)."""
     config = ReasoningConfig(max_revisions=0)
     assert config.max_revisions == 0
 
-def test_complex_nesting_serialization():
+
+def test_complex_nesting_serialization() -> None:
     """Verify serialization of a fully populated node."""
     node = AgentNode(
         id="complex_node",
         agent_ref="agent-x",
         reasoning=ReasoningConfig(
             strategy=ReviewStrategy.ADVERSARIAL,
-            adversarial=AdversarialConfig(
-                persona="devil",
-                attack_vectors=["bias", "logic"],
-                temperature=0.9
-            ),
-            gap_scan=GapScanConfig(
-                enabled=True,
-                confidence_threshold=0.95
-            ),
-            max_revisions=5
-        )
+            adversarial=AdversarialConfig(persona="devil", attack_vectors=["bias", "logic"], temperature=0.9),
+            gap_scan=GapScanConfig(enabled=True, confidence_threshold=0.95),
+            max_revisions=5,
+        ),
     )
 
-    data = node.model_dump(mode='json')
-    assert data['reasoning']['strategy'] == 'adversarial'
-    assert data['reasoning']['adversarial']['persona'] == 'devil'
-    assert data['reasoning']['gap_scan']['enabled'] is True
-    assert data['reasoning']['max_revisions'] == 5
+    data = node.model_dump(mode="json")
+    assert data["reasoning"]["strategy"] == "adversarial"
+    assert data["reasoning"]["adversarial"]["persona"] == "devil"
+    assert data["reasoning"]["gap_scan"]["enabled"] is True
+    assert data["reasoning"]["max_revisions"] == 5
 
-def test_strategy_string_coercion():
+
+def test_strategy_string_coercion() -> None:
     """Verify string input for strategy enum."""
-    config = ReasoningConfig(strategy="adversarial")
+    config = ReasoningConfig(strategy="adversarial")  # type: ignore[arg-type]
     assert config.strategy == ReviewStrategy.ADVERSARIAL
 
-def test_extra_fields_forbidden():
+
+def test_extra_fields_forbidden() -> None:
     """Verify that extra fields raise ValidationError."""
     with pytest.raises(ValidationError):
-        ReasoningConfig(extra_field="invalid")
+        ReasoningConfig(**{"extra_field": "invalid"})  # type: ignore[arg-type]
 
     with pytest.raises(ValidationError):
-        AdversarialConfig(extra_field="invalid")
+        AdversarialConfig(**{"extra_field": "invalid"})  # type: ignore[arg-type]
 
     with pytest.raises(ValidationError):
-        GapScanConfig(extra_field="invalid")
+        GapScanConfig(**{"extra_field": "invalid"})  # type: ignore[arg-type]
