@@ -20,6 +20,7 @@ from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.identity import IdentityRequirement
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -582,6 +583,12 @@ class RecipeDefinition(CoReasonBaseModel):
     # --- New Field for Auditor Support ---
     compliance: ComplianceConfig | None = Field(
         None, description="Directives for the Auditor worker (logging, retention, signing)."
+    )
+
+    # --- New Field for Identity ---
+    identity: IdentityRequirement | None = Field(
+        None,
+        description="Access control and user context injection rules.",
     )
 
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
