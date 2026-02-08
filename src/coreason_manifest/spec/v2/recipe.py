@@ -134,9 +134,7 @@ class PolicyConfig(CoReasonBaseModel):
         None, ge=0, description="Max requests per minute allowed for this recipe execution."
     )
 
-    rate_limit_tpm: int | None = Field(
-        None, ge=0, description="Max tokens per minute allowed (input + output)."
-    )
+    rate_limit_tpm: int | None = Field(None, ge=0, description="Max tokens per minute allowed (input + output).")
 
     caching_enabled: bool = Field(
         True,

@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
     ExecutionPriority,
@@ -11,10 +12,9 @@ from coreason_manifest.spec.v2.recipe import (
     RecipeDefinition,
     RecipeInterface,
 )
-from coreason_manifest.spec.v2.definitions import ManifestMetadata
 
 
-def test_policy_config_instantiation():
+def test_policy_config_instantiation() -> None:
     """Test standard instantiation of PolicyConfig."""
     policy = PolicyConfig(
         priority=ExecutionPriority.BATCH,
@@ -29,7 +29,7 @@ def test_policy_config_instantiation():
     assert policy.caching_enabled is False
 
 
-def test_policy_config_defaults():
+def test_policy_config_defaults() -> None:
     """Test default values of PolicyConfig."""
     policy = PolicyConfig()
 
@@ -39,7 +39,7 @@ def test_policy_config_defaults():
     assert policy.caching_enabled is True
 
 
-def test_policy_config_validation_negative_rpm():
+def test_policy_config_validation_negative_rpm() -> None:
     """Test that rate_limit_rpm rejects negative numbers."""
     with pytest.raises(ValidationError) as excinfo:
         PolicyConfig(rate_limit_rpm=-1)
@@ -47,7 +47,7 @@ def test_policy_config_validation_negative_rpm():
     assert "Input should be greater than or equal to 0" in str(excinfo.value)
 
 
-def test_policy_config_validation_negative_tpm():
+def test_policy_config_validation_negative_tpm() -> None:
     """Test that rate_limit_tpm rejects negative numbers."""
     with pytest.raises(ValidationError) as excinfo:
         PolicyConfig(rate_limit_tpm=-100)
@@ -55,7 +55,7 @@ def test_policy_config_validation_negative_tpm():
     assert "Input should be greater than or equal to 0" in str(excinfo.value)
 
 
-def test_recipe_definition_with_qos_policy():
+def test_recipe_definition_with_qos_policy() -> None:
     """Test integration of QoS-enhanced PolicyConfig within a RecipeDefinition."""
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(
