@@ -139,6 +139,8 @@ class PolicyConfig(CoReasonBaseModel):
 
     legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
 
+    constitution: Constitution | None = Field(None, description="Structured Governance laws.")
+
 
 class AuditLevel(StrEnum):
     """The depth of the audit trail required."""
