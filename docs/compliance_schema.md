@@ -106,3 +106,12 @@ compliance = ComplianceConfig(
     mask_pii=False # Keep clinical data intact
 )
 ```
+
+## Data Integrity & Zero-Copy Auditing
+
+For advanced GxP and high-volume use cases, `ComplianceConfig` includes an `integrity` field (`IntegrityConfig`). This allows granular control over:
+
+*   **Zero-Copy Auditing:** Storing references instead of full payloads (`AuditContentMode`).
+*   **Cryptographic Anchoring:** Verifying the chain of custody (`IntegrityLevel`).
+
+See [Data Integrity & Zero-Copy Auditing](data_integrity.md) for full details.
