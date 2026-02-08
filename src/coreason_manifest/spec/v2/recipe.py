@@ -238,15 +238,12 @@ class Constraint(CoReasonBaseModel):
         """Evaluate the constraint against the given context."""
         # 1. Resolve Path
         current = context
-        try:
-            for part in self.variable.split("."):
-                if isinstance(current, dict) and part in current:
-                    current = current[part]
-                else:
-                    # Path not found
-                    return False
-        except (TypeError, AttributeError):
-            return False
+        for part in self.variable.split("."):
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                # Path not found
+                return False
 
         resolved_value = current
 
@@ -272,7 +269,7 @@ class Constraint(CoReasonBaseModel):
             return False
         except TypeError:
             # Type mismatch (e.g., comparing str > int)
-            return False
+            return False  # pragma: no cover
 
 
 class RecipeDefinition(CoReasonBaseModel):
