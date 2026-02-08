@@ -392,3 +392,26 @@ node = AgentNode(
     *   `editable_fields`: `list[str]` (Default: `[]`). Whitelist of fields the user can modify during a pause.
     *   `enforce_contract`: `bool` (Default: `True`). If True, the runtime MUST validate the steered output against the original output_schema.
     *   `guidance_hint`: `str | None`. Optional instruction for the operator.
+
+## Cognitive Visualization & Collaboration (New in 0.23.0)
+
+Coreason V2 now supports **Human-on-the-Loop (HOTL)** and **Magentic-UI** capabilities directly in the manifest.
+
+### 1. Visualization (`PresentationHints`)
+
+The `visualization` field allows you to hint at how the node's internal reasoning should be rendered (e.g., as a Tree of Thoughts or a Kanban board).
+
+*   `style`: `VisualizationStyle` (`CHAT`, `TREE`, `KANBAN`, `DOCUMENT`).
+*   `display_title`: Friendly label.
+*   `hidden_fields`: Whitelist of internal variables to hide.
+*   `progress_indicator`: Context variable to watch for % completion.
+
+### 2. Collaboration (`CollaborationConfig`)
+
+The `collaboration` field defines the protocol for human engagement (e.g., Co-Editing a document with an agent).
+
+*   `mode`: `CollaborationMode` (`COMPLETION`, `INTERACTIVE`, `CO_EDIT`).
+*   `feedback_schema`: JSON Schema for structured feedback.
+*   `supported_commands`: Slash commands the agent understands (e.g., `/refine`).
+
+See [UX & Collaboration: Human-on-the-Loop](ux_collaboration.md) for detailed configuration examples.
