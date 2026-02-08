@@ -10,7 +10,7 @@
 
 import logging
 from enum import IntEnum, StrEnum
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 
@@ -646,6 +646,36 @@ class RecipeDefinition(CoReasonBaseModel):
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
         ..., description="The execution graph topology."
     )
+
+    @model_validator(mode="after")
+    def validate_topology_integrity(self) -> Self:
+        """
+        Harvested from coreason-validator.
+        Ensures all node references (e.g. recovery fallbacks) point to existing Node IDs.
+        """
+        # 1. Collect all valid Node IDs
+        if not self.topology.nodes:
+            return self
+
+        valid_node_ids = {node.id for node in self.topology.nodes}
+
+        # 2. Iterate through all nodes to check their outgoing references
+        errors = []
+        for node in self.topology.nodes:
+            # Check Recovery Fallback existence
+            if node.recovery and node.recovery.fallback_node_id:
+                target_id = node.recovery.fallback_node_id
+                if target_id not in valid_node_ids:
+                    errors.append(
+                        f"Node '{node.id}' defines fallback_node_id='{target_id}', but '{target_id}' does not exist in the recipe."
+                    )
+
+            # Future proofing: If you add explicit 'next_step' fields later, add checks here.
+
+        if errors:
+            raise ValueError(f"Topology Integrity Error: {'; '.join(errors)}")
+
+        return self
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "RecipeDefinition":
