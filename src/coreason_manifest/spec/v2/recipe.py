@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import logging
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -16,6 +17,8 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # 1. Configuration Schemas (New)
@@ -269,7 +272,7 @@ class Constraint(CoReasonBaseModel):
             return False
         except TypeError:
             # Type mismatch (e.g., comparing str > int)
-            return False  # pragma: no cover
+            return False
 
 
 class RecipeDefinition(CoReasonBaseModel):
@@ -299,14 +302,15 @@ class RecipeDefinition(CoReasonBaseModel):
         is_feasible = True
 
         for constraint in self.requirements:
-            if not constraint.evaluate(context) and constraint.required:
-                is_feasible = False
+            if not constraint.evaluate(context):
                 msg = (
                     constraint.error_message
                     or f"Constraint failed: {constraint.variable} {constraint.operator} {constraint.value}"
                 )
-                errors.append(msg)
-            # If not required, we just log/ignore for now as per spec "If False, it's a warning."
-            # The method returns feasibility based on required constraints.
+                if constraint.required:
+                    is_feasible = False
+                    errors.append(msg)
+                else:
+                    logger.warning(f"Optional constraint warning: {msg}")
 
         return is_feasible, errors
