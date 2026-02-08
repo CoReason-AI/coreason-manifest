@@ -281,8 +281,16 @@ class AgentNode(RecipeNode):
     agent_ref: str | SemanticRef | None = Field(
         None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
     )
+
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
+
+    @model_validator(mode="after")
+    def validate_agent_definition(self) -> "AgentNode":
+        """Ensure the node has a definition source."""
+        if not self.agent_ref and not self.construct:
+            raise ValueError("AgentNode must provide either 'agent_ref' (catalog) or 'construct' (inline).")
+        return self
 
 
 class SolverStrategy(StrEnum):
@@ -577,26 +585,16 @@ class RecipeDefinition(CoReasonBaseModel):
         - PUBLISHED: Requires concrete IDs and valid graph.
         """
         if self.status == RecipeStatus.PUBLISHED:
-            # 1. Enforce Concrete Resolution and Complete Definition
+            # 1. Enforce Concrete Resolution
             abstract_nodes = []
-            incomplete_nodes = []
             for node in self.topology.nodes:
-                if isinstance(node, AgentNode):
-                    if isinstance(node.agent_ref, SemanticRef):
-                        abstract_nodes.append(node.id)
-                    elif not node.agent_ref and not node.construct:
-                        incomplete_nodes.append(node.id)
+                if isinstance(node, AgentNode) and isinstance(node.agent_ref, SemanticRef):
+                    abstract_nodes.append(node.id)
 
             if abstract_nodes:
                 raise ValueError(
                     f"Lifecycle Error: Nodes {abstract_nodes} are still abstract. "
                     "Resolve all SemanticRefs to concrete IDs before publishing."
-                )
-
-            if incomplete_nodes:
-                raise ValueError(
-                    f"Lifecycle Error: Nodes {incomplete_nodes} are incomplete. "
-                    "Must provide either 'agent_ref' or 'construct' before publishing."
                 )
 
             # 2. Enforce Graph Integrity
