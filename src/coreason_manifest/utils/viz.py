@@ -143,9 +143,6 @@ def generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
         elif isinstance(node, EvaluatorNode):
             # Hexagon: {{Label}} (Use double braces for hexagon shape in Mermaid)
             lines.append(f'{node_id}{{{{"{label}"}}}}')
-        else:
-            # Fallback
-            lines.append(f'{node_id}["{label}"]')
 
     # 2. Define Entry Point
     entry_point = _sanitize_id(recipe.topology.entry_point)
