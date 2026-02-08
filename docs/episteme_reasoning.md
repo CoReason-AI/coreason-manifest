@@ -1,86 +1,74 @@
 # Episteme: Meta-Cognition & Reasoning
 
-The **Episteme Schema** (`coreason_manifest.spec.v2.reasoning`) defines the "System 2" capabilities of an agent. It allows a `Recipe` to configure advanced meta-cognitive loops, such as self-correction, adversarial review, and knowledge gap scanning.
+Coreason V2 introduces **Episteme**, a framework for meta-cognition that enables agents to critique their own work, detect knowledge gaps, and reason about their reasoning.
 
-Additionally, this schema includes the "System 1" **Reflex** configuration for fast-path execution.
+This is configured via the `reasoning` field on any `RecipeNode`.
 
-## Core Concepts
+## Concepts
 
-### 1. Reasoning Configuration (System 2)
+Episteme provides two main capabilities:
 
-The `ReasoningConfig` model governs the depth of thought applied *before* or *after* a response is generated.
+1.  **Review Strategies**: How the node output is critiqued (Self-Correction, Devil's Advocate).
+2.  **Gap Scanning**: Pre-execution checks for missing prerequisites (Knowledge Gaps).
 
-#### Review Strategy
-
-The `ReviewStrategy` defines how the output is critiqued.
-
-*   `NONE` (`"none"`): No critique step. Default.
-*   `BASIC` (`"basic"`): Simple self-correction loop where the model reviews its own output.
-*   `ADVERSARIAL` (`"adversarial"`): A "Devil's Advocate" reviewer challenges the output.
-*   `CAUSAL` (`"causal"`): Checks for logical consistency and fallacies.
-*   `CONSENSUS` (`"consensus"`): Uses multi-model agreement (see Council features).
-
-#### Adversarial Review
-
-If `strategy="adversarial"`, the `AdversarialConfig` controls the critic:
-
-| Field | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `persona` | `str` | `"skeptic"` | The persona of the critic (e.g., "security_auditor"). |
-| `attack_vectors` | `list[str]` | `[]` | Specific angles of critique (e.g., "pii_leakage"). |
-| `temperature` | `float` | `0.7` | Creativity level of the critique. |
-
-#### Knowledge Gap Scanning
-
-The `GapScanConfig` enables pre-execution validation:
-
-| Field | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `enabled` | `bool` | `False` | Scans context for missing prerequisites. |
-| `confidence_threshold` | `float` | `0.8` | Min confidence to proceed without asking clarifying questions. |
-
-### 2. Reflex Configuration (System 1)
-
-The `ReflexConfig` enables fast-path execution, bypassing deep reasoning for simple, high-confidence queries.
-
-| Field | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `enabled` | `bool` | `True` | Allow fast-path responses. |
-| `confidence_threshold` | `float` | `0.9` | Minimum confidence required to skip the solver loop. |
-| `allowed_tools` | `list[str]` | `[]` | Read-only tools permissible in Reflex mode (e.g., "get_time"). |
-
-## Integration with Cognitive Profile
-
-The `CognitiveProfile` (in `coreason_manifest.spec.v2.agent`) includes both `reasoning` and `reflex` fields.
+## Configuration (`ReasoningConfig`)
 
 ```python
-from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.reasoning import (
     ReasoningConfig,
-    ReflexConfig,
     ReviewStrategy,
-    AdversarialConfig
+    AdversarialConfig,
+    GapScanConfig
 )
 
-# Define a robust agent with fast and slow thinking
-profile = CognitiveProfile(
-    role="security_analyst",
+# Define meta-cognition settings
+reasoning = ReasoningConfig(
+    strategy=ReviewStrategy.ADVERSARIAL, # "Devil's Advocate"
+    max_revisions=3, # Allow up to 3 self-correction loops
 
-    # System 1: Handle simple checks instantly
-    reflex=ReflexConfig(
-        enabled=True,
-        confidence_threshold=0.95,
-        allowed_tools=["lookup_ip_reputation"]
+    # Strategy-specific config
+    adversarial=AdversarialConfig(
+        persona="security_auditor",
+        attack_vectors=["pii_leakage", "prompt_injection"],
+        temperature=0.7
     ),
 
-    # System 2: Deep review for complex analysis
-    reasoning=ReasoningConfig(
-        strategy=ReviewStrategy.ADVERSARIAL,
-        adversarial=AdversarialConfig(
-            persona="red_team_lead",
-            attack_vectors=["false_negative_risk"]
-        ),
-        max_revisions=2
+    # Pre-execution knowledge check
+    gap_scan=GapScanConfig(
+        enabled=True,
+        confidence_threshold=0.9
     )
 )
+
+# Attach to a node
+node = AgentNode(
+    id="writer",
+    agent_ref="copywriter-v1",
+    reasoning=reasoning
+)
 ```
+
+### 1. Review Strategies (`ReviewStrategy`)
+
+The `strategy` field determines how the node's output is critiqued before being finalized.
+
+*   `NONE`: No review (Default).
+*   `BASIC`: Simple self-correction prompt ("Review your work and correct errors").
+*   `ADVERSARIAL`: A distinct "Devil's Advocate" persona critiques the output.
+*   `CAUSAL`: Checks for logical consistency and fallacies.
+*   `CONSENSUS`: Multi-model agreement (requires Council features).
+
+### 2. Adversarial Review (`AdversarialConfig`)
+
+When `strategy="adversarial"`, you can configure the critic's persona.
+
+*   `persona`: The role adopted by the reviewer (e.g., "skeptic", "security_auditor").
+*   `attack_vectors`: Specific angles of critique (e.g., "hallucination", "bias").
+*   `temperature`: Creativity level of the critique (default: 0.7).
+
+### 3. Gap Scanning (`GapScanConfig`)
+
+Episteme can scan the context *before* execution to ensure all prerequisites are met.
+
+*   `enabled`: If True, runs a check before the agent starts.
+*   `confidence_threshold`: Minimum confidence (0.0-1.0) required to proceed without asking clarifying questions.
