@@ -4,28 +4,27 @@ from pydantic import ValidationError
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
     GenerativeNode,
-    GraphTopology,
     InteractionConfig,
     InterventionTrigger,
     RecipeNode,
-    TransparencyLevel,
     TaskSequence,
+    TransparencyLevel,
 )
 
 
-def test_interaction_primitives_exist():
+def test_interaction_primitives_exist() -> None:
     """Verify that interaction primitives are importable and defined correctly."""
-    assert TransparencyLevel.OPAQUE == "opaque"
-    assert TransparencyLevel.OBSERVABLE == "observable"
-    assert TransparencyLevel.INTERACTIVE == "interactive"
+    assert str(TransparencyLevel.OPAQUE) == "opaque"
+    assert str(TransparencyLevel.OBSERVABLE) == "observable"
+    assert str(TransparencyLevel.INTERACTIVE) == "interactive"
 
-    assert InterventionTrigger.ON_START == "on_start"
-    assert InterventionTrigger.ON_PLAN_GENERATION == "on_plan_generation"
-    assert InterventionTrigger.ON_FAILURE == "on_failure"
-    assert InterventionTrigger.ON_COMPLETION == "on_completion"
+    assert str(InterventionTrigger.ON_START) == "on_start"
+    assert str(InterventionTrigger.ON_PLAN_GENERATION) == "on_plan_generation"
+    assert str(InterventionTrigger.ON_FAILURE) == "on_failure"
+    assert str(InterventionTrigger.ON_COMPLETION) == "on_completion"
 
 
-def test_interaction_config_defaults():
+def test_interaction_config_defaults() -> None:
     """Verify default values for InteractionConfig."""
     config = InteractionConfig()
     assert config.transparency == TransparencyLevel.OPAQUE
@@ -34,20 +33,16 @@ def test_interaction_config_defaults():
     assert config.guidance_hint is None
 
 
-def test_agent_node_interaction_support():
+def test_agent_node_interaction_support() -> None:
     """Verify AgentNode supports interaction configuration."""
     interaction = InteractionConfig(
         transparency=TransparencyLevel.INTERACTIVE,
         triggers=[InterventionTrigger.ON_START, InterventionTrigger.ON_FAILURE],
         editable_fields=["inputs", "system_prompt_override"],
-        guidance_hint="Review the inputs carefully."
+        guidance_hint="Review the inputs carefully.",
     )
 
-    node = AgentNode(
-        id="agent_1",
-        agent_ref="agent/v1/summarizer",
-        interaction=interaction
-    )
+    node = AgentNode(id="agent_1", agent_ref="agent/v1/summarizer", interaction=interaction)
 
     assert node.interaction is not None
     assert node.interaction.transparency == TransparencyLevel.INTERACTIVE
@@ -56,20 +51,17 @@ def test_agent_node_interaction_support():
     assert node.interaction.guidance_hint == "Review the inputs carefully."
 
 
-def test_generative_node_interaction_support():
+def test_generative_node_interaction_support() -> None:
     """Verify GenerativeNode supports interaction configuration."""
     interaction = InteractionConfig(
         transparency=TransparencyLevel.OBSERVABLE,
         triggers=[InterventionTrigger.ON_PLAN_GENERATION],
         editable_fields=["goal", "solver.n_samples"],
-        guidance_hint="Check if the plan covers all edge cases."
+        guidance_hint="Check if the plan covers all edge cases.",
     )
 
     node = GenerativeNode(
-        id="gen_1",
-        goal="Generate a report",
-        output_schema={"type": "object"},
-        interaction=interaction
+        id="gen_1", goal="Generate a report", output_schema={"type": "object"}, interaction=interaction
     )
 
     assert node.interaction is not None
@@ -78,18 +70,13 @@ def test_generative_node_interaction_support():
     assert "solver.n_samples" in node.interaction.editable_fields
 
 
-def test_serialization():
+def test_serialization() -> None:
     """Verify that interaction config serializes correctly."""
     interaction = InteractionConfig(
-        transparency=TransparencyLevel.INTERACTIVE,
-        triggers=[InterventionTrigger.ON_COMPLETION]
+        transparency=TransparencyLevel.INTERACTIVE, triggers=[InterventionTrigger.ON_COMPLETION]
     )
 
-    node = AgentNode(
-        id="agent_1",
-        agent_ref="agent/v1/test",
-        interaction=interaction
-    )
+    node = AgentNode(id="agent_1", agent_ref="agent/v1/test", interaction=interaction)
 
     dumped = node.dump()
     assert "interaction" in dumped
@@ -97,17 +84,26 @@ def test_serialization():
     assert dumped["interaction"]["triggers"] == ["on_completion"]
 
 
-def test_validation_rejects_invalid_enums():
+def test_validation_rejects_invalid_enums() -> None:
     """Verify validation fails for invalid enum values."""
+    # We cast to Any here to bypass mypy checking the literal value,
+    # because we want to test runtime validation of invalid values.
+    # The 'type: ignore' is not needed if we cast, but if we pass it directly mypy complains.
+    # Let's try passing it as Any.
+    from typing import Any
+
+    invalid_level: Any = "invalid_level"
     with pytest.raises(ValidationError) as excinfo:
-        InteractionConfig(transparency="invalid_level") # type: ignore
+        InteractionConfig(transparency=invalid_level)
     assert "Input should be 'opaque', 'observable' or 'interactive'" in str(excinfo.value)
 
+    invalid_trigger: Any = "invalid_trigger"
     with pytest.raises(ValidationError) as excinfo:
-        InteractionConfig(triggers=["invalid_trigger"]) # type: ignore
+        InteractionConfig(triggers=[invalid_trigger])
     assert "Input should be 'on_start', 'on_plan_generation', 'on_failure' or 'on_completion'" in str(excinfo.value)
 
-def test_inheritance_check():
+
+def test_inheritance_check() -> None:
     """Verify that interaction field is inherited from RecipeNode."""
     # This is implicitly tested by AgentNode and GenerativeNode usage,
     # but we can explicitly check isinstance if we really want, or just rely on the above tests.
@@ -116,39 +112,38 @@ def test_inheritance_check():
     assert hasattr(node, "interaction")
     assert node.interaction is None
 
+
 # --- Edge Case Tests ---
 
-def test_edge_case_empty_values():
+
+def test_edge_case_empty_values() -> None:
     """Verify that empty lists and strings are handled correctly."""
-    interaction = InteractionConfig(
-        triggers=[],
-        editable_fields=[],
-        guidance_hint=""
-    )
+    interaction = InteractionConfig(triggers=[], editable_fields=[], guidance_hint="")
     assert interaction.triggers == []
     assert interaction.editable_fields == []
     assert interaction.guidance_hint == ""
 
-def test_edge_case_nested_editable_fields():
+
+def test_edge_case_nested_editable_fields() -> None:
     """Verify that nested field paths are accepted (they are just strings)."""
-    interaction = InteractionConfig(
-        editable_fields=["solver.n_samples", "metadata.version", "deeply.nested.field"]
-    )
+    interaction = InteractionConfig(editable_fields=["solver.n_samples", "metadata.version", "deeply.nested.field"])
     assert "deeply.nested.field" in interaction.editable_fields
 
-def test_edge_case_all_triggers():
+
+def test_edge_case_all_triggers() -> None:
     """Verify that all triggers can be active simultaneously."""
     triggers = [
         InterventionTrigger.ON_START,
         InterventionTrigger.ON_PLAN_GENERATION,
         InterventionTrigger.ON_FAILURE,
-        InterventionTrigger.ON_COMPLETION
+        InterventionTrigger.ON_COMPLETION,
     ]
     interaction = InteractionConfig(triggers=triggers)
     assert len(interaction.triggers) == 4
     assert set(interaction.triggers) == set(triggers)
 
-def test_edge_case_duplicate_triggers():
+
+def test_edge_case_duplicate_triggers() -> None:
     """Verify behavior with duplicate triggers (should be allowed by list, though redundant)."""
     # Pydantic doesn't deduplicate lists by default unless using set, but our schema says list.
     triggers = [InterventionTrigger.ON_START, InterventionTrigger.ON_START]
@@ -156,9 +151,11 @@ def test_edge_case_duplicate_triggers():
     assert len(interaction.triggers) == 2
     assert interaction.triggers[0] == InterventionTrigger.ON_START
 
+
 # --- Complex Case Tests ---
 
-def test_complex_graph_mixed_interactions():
+
+def test_complex_graph_mixed_interactions() -> None:
     """Verify a topology with nodes having different interaction configurations."""
 
     # Node 1: Interactive Agent
@@ -166,9 +163,8 @@ def test_complex_graph_mixed_interactions():
         id="agent_1",
         agent_ref="ref_1",
         interaction=InteractionConfig(
-            transparency=TransparencyLevel.INTERACTIVE,
-            triggers=[InterventionTrigger.ON_FAILURE]
-        )
+            transparency=TransparencyLevel.INTERACTIVE, triggers=[InterventionTrigger.ON_FAILURE]
+        ),
     )
 
     # Node 2: Observable Generative Node
@@ -177,15 +173,14 @@ def test_complex_graph_mixed_interactions():
         goal="Solve X",
         output_schema={},
         interaction=InteractionConfig(
-            transparency=TransparencyLevel.OBSERVABLE,
-            triggers=[InterventionTrigger.ON_PLAN_GENERATION]
-        )
+            transparency=TransparencyLevel.OBSERVABLE, triggers=[InterventionTrigger.ON_PLAN_GENERATION]
+        ),
     )
 
     # Node 3: Opaque Agent (Default)
     opaque_node = AgentNode(
         id="agent_2",
-        agent_ref="ref_2"
+        agent_ref="ref_2",
         # interaction is None
     )
 
@@ -196,18 +191,21 @@ def test_complex_graph_mixed_interactions():
 
     # Verify Node 1
     n1 = next(n for n in topology.nodes if n.id == "agent_1")
+    assert n1.interaction is not None
     assert n1.interaction.transparency == TransparencyLevel.INTERACTIVE
 
     # Verify Node 2
     n2 = next(n for n in topology.nodes if n.id == "gen_1")
+    assert n2.interaction is not None
     assert n2.interaction.transparency == TransparencyLevel.OBSERVABLE
 
     # Verify Node 3
     n3 = next(n for n in topology.nodes if n.id == "agent_2")
     assert n3.interaction is None
 
-def test_complex_interaction_modification_immutability():
+
+def test_complex_interaction_modification_immutability() -> None:
     """Verify that InteractionConfig is frozen (immutable)."""
     interaction = InteractionConfig(transparency=TransparencyLevel.OPAQUE)
     with pytest.raises(ValidationError):
-        interaction.transparency = TransparencyLevel.INTERACTIVE # type: ignore
+        interaction.transparency = TransparencyLevel.INTERACTIVE  # type: ignore[misc]
