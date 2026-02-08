@@ -173,6 +173,23 @@ compliance=ComplianceConfig(
 )
 ```
 
+### 8. The Identity Layer (`IdentityRequirement`)
+
+New in 0.23.0, the `identity` field allows a Recipe to strictly declare its **Access Control** requirements (RBAC) and **Context Injection** needs. This enables the runtime to act as a security Gatekeeper.
+
+See [Identity & Access Management (IAM)](identity_access_management.md) for full details.
+
+```python
+from coreason_manifest.spec.v2.identity import IdentityRequirement, AccessScope
+
+identity=IdentityRequirement(
+    min_scope=AccessScope.INTERNAL,
+    required_roles=["finance_admin"],
+    inject_user_profile=True,
+    anonymize_pii=False
+)
+```
+
 ## The Graph Topology Schema (`GraphTopology`)
 
 The `GraphTopology` enforces structural integrity. It requires a list of `nodes`, a list of `edges`, and a valid `entry_point`.

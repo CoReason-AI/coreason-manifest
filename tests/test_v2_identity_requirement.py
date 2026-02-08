@@ -104,3 +104,114 @@ def test_recipe_definition_without_identity() -> None:
     recipe = RecipeDefinition(metadata=metadata, interface=interface, topology=topology, status=RecipeStatus.DRAFT)
 
     assert recipe.identity is None
+
+
+# --- Edge Case Tests ---
+
+
+def test_identity_edge_cases_empty_lists() -> None:
+    """Test empty lists for roles and permissions (Edge Case 1)."""
+    req = IdentityRequirement(
+        required_roles=[],
+        required_permissions=[],
+    )
+    assert req.required_roles == []
+    assert req.required_permissions == []
+
+
+def test_identity_edge_cases_boolean_flags() -> None:
+    """Test all boolean combinations (Edge Case 2)."""
+    # All True
+    req_true = IdentityRequirement(
+        inject_user_profile=True,
+        inject_locale_info=True,
+        anonymize_pii=True,
+    )
+    assert req_true.inject_user_profile is True
+    assert req_true.inject_locale_info is True
+    assert req_true.anonymize_pii is True
+
+    # All False
+    req_false = IdentityRequirement(
+        inject_user_profile=False,
+        inject_locale_info=False,
+        anonymize_pii=False,
+    )
+    assert req_false.inject_user_profile is False
+    assert req_false.inject_locale_info is False
+    assert req_false.anonymize_pii is False
+
+
+def test_identity_edge_cases_invalid_enum() -> None:
+    """Test validation error for invalid enum value (Edge Case 3)."""
+    with pytest.raises(ValidationError):
+        IdentityRequirement(min_scope="invalid_scope")  # type: ignore[arg-type]
+
+
+# --- Complex Case Tests ---
+
+
+def test_complex_finance_admin_scenario() -> None:
+    """Test a complex 'Finance Admin' scenario with specific permissions (Complex Case 1)."""
+    identity = IdentityRequirement(
+        min_scope=AccessScope.ADMIN,
+        required_roles=["finance_admin", "cfo"],
+        required_permissions=["read:financials", "generate:report", "approve:budget"],
+        inject_user_profile=True,
+        inject_locale_info=True,
+        anonymize_pii=False,  # Need real name for signatures
+    )
+
+    assert identity.min_scope == AccessScope.ADMIN
+    assert "finance_admin" in identity.required_roles
+    assert "cfo" in identity.required_roles
+    assert len(identity.required_permissions) == 3
+    assert identity.anonymize_pii is False
+
+
+def test_complex_public_bot_scenario() -> None:
+    """Test a minimal 'Public Bot' scenario (Complex Case 2)."""
+    identity = IdentityRequirement(
+        min_scope=AccessScope.PUBLIC,
+        required_roles=[],
+        required_permissions=[],
+        inject_user_profile=False,
+        inject_locale_info=True,  # Still need locale for language
+        anonymize_pii=True,
+    )
+
+    assert identity.min_scope == AccessScope.PUBLIC
+    assert not identity.required_roles
+    assert not identity.required_permissions
+    assert identity.inject_user_profile is False
+    assert identity.inject_locale_info is True
+
+
+def test_complex_recipe_integration() -> None:
+    """Test full integration of a complex identity into a Recipe (Complex Case 3)."""
+    metadata = ManifestMetadata(name="Secure Workflow", version="2.0.0")
+
+    identity = IdentityRequirement(
+        min_scope=AccessScope.INTERNAL,
+        required_roles=["engineer", "security_champion"],
+        required_permissions=["deploy:prod"],
+        inject_user_profile=True,
+    )
+
+    interface = RecipeInterface(inputs={"target": {"type": "string"}}, outputs={"status": {"type": "string"}})
+
+    topology = TaskSequence(steps=[AgentNode(id="deployer", agent_ref="deploy-bot")]).to_graph()
+
+    recipe = RecipeDefinition(
+        metadata=metadata,
+        interface=interface,
+        topology=topology,
+        identity=identity,
+        status=RecipeStatus.PUBLISHED,  # Ensure it works with PUBLISHED status too
+    )
+
+    assert recipe.identity is not None
+    assert recipe.identity.min_scope == AccessScope.INTERNAL
+    assert recipe.identity.required_permissions == ["deploy:prod"]
+    # Verify defaults didn't change unexpectedly
+    assert recipe.identity.anonymize_pii is True
