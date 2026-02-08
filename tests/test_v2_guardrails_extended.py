@@ -18,16 +18,14 @@ from coreason_manifest.spec.v2.guardrails import (
     DriftConfig,
     GuardrailsConfig,
 )
+from coreason_manifest.spec.v2.compliance import AuditLevel, ComplianceConfig, RetentionPolicy
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
-    AuditLevel,
-    ComplianceConfig,
     GraphTopology,
     PolicyConfig,
     RecipeDefinition,
     RecipeInterface,
     RecipeStatus,
-    RetentionPolicy,
 )
 
 
