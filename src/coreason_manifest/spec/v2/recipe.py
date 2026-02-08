@@ -232,12 +232,8 @@ class ContextDependency(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="The registry name of the context component.")
-    priority: ComponentPriority = Field(
-        ComponentPriority.MEDIUM, description="Token optimization priority."
-    )
-    parameters: dict[str, Any] = Field(
-        default_factory=dict, description="Variables to inject into the context."
-    )
+    priority: ComponentPriority = Field(ComponentPriority.MEDIUM, description="Token optimization priority.")
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Variables to inject into the context.")
 
 
 class CognitiveProfile(CoReasonBaseModel):
@@ -249,9 +245,7 @@ class CognitiveProfile(CoReasonBaseModel):
     role: str = Field(..., description="The specific Role/Persona (e.g., 'safety_scientist').")
 
     # 2. Mode (How)
-    reasoning_mode: str | None = Field(
-        "standard", description="The thinking style (e.g., 'six_hats', 'socratic')."
-    )
+    reasoning_mode: str | None = Field("standard", description="The thinking style (e.g., 'six_hats', 'socratic').")
 
     # 3. Environment (Where)
     knowledge_contexts: list[ContextDependency] = Field(
@@ -303,9 +297,7 @@ class AgentNode(RecipeNode):
     def validate_agent_definition(self) -> "AgentNode":
         """Ensure the node has a definition source."""
         if not self.agent_ref and not self.construct:
-            raise ValueError(
-                "AgentNode must provide either 'agent_ref' (catalog) or 'construct' (inline)."
-            )
+            raise ValueError("AgentNode must provide either 'agent_ref' (catalog) or 'construct' (inline).")
         return self
 
 
