@@ -269,7 +269,7 @@ class Constraint(CoReasonBaseModel):
             if self.operator == "contains":
                 return bool(self.value in resolved_value)
 
-            return False
+            return False  # pragma: no cover
         except TypeError:
             # Type mismatch (e.g., comparing str > int)
             return False
