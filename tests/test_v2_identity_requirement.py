@@ -86,11 +86,7 @@ def test_recipe_definition_with_identity() -> None:
     topology = TaskSequence(steps=[AgentNode(id="step1", agent_ref="agent-1")]).to_graph()
 
     recipe = RecipeDefinition(
-        metadata=metadata,
-        interface=interface,
-        topology=topology,
-        identity=identity,
-        status=RecipeStatus.DRAFT
+        metadata=metadata, interface=interface, topology=topology, identity=identity, status=RecipeStatus.DRAFT
     )
 
     assert recipe.identity is not None
@@ -105,11 +101,6 @@ def test_recipe_definition_without_identity() -> None:
     interface = RecipeInterface()
     topology = TaskSequence(steps=[AgentNode(id="step1", agent_ref="agent-1")]).to_graph()
 
-    recipe = RecipeDefinition(
-        metadata=metadata,
-        interface=interface,
-        topology=topology,
-        status=RecipeStatus.DRAFT
-    )
+    recipe = RecipeDefinition(metadata=metadata, interface=interface, topology=topology, status=RecipeStatus.DRAFT)
 
     assert recipe.identity is None

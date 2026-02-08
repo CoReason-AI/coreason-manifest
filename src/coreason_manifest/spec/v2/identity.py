@@ -43,12 +43,8 @@ class IdentityRequirement(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     # 1. Access Control (Who can run this?)
-    min_scope: AccessScope = Field(
-        AccessScope.AUTHENTICATED, description="Minimum auth level required."
-    )
-    required_roles: list[str] = Field(
-        default_factory=list, description="List of mandatory roles (OR logic)."
-    )
+    min_scope: AccessScope = Field(AccessScope.AUTHENTICATED, description="Minimum auth level required.")
+    required_roles: list[str] = Field(default_factory=list, description="List of mandatory roles (OR logic).")
     required_permissions: list[str] = Field(
         default_factory=list,
         description="List of specific permission strings (AND logic).",
@@ -56,12 +52,8 @@ class IdentityRequirement(CoReasonBaseModel):
 
     # 2. Context Injection (What does the agent see?)
     # If True, the runtime injects these values into the System Prompt preamble.
-    inject_user_profile: bool = Field(
-        False, description="Inject name, email, and ID."
-    )
-    inject_locale_info: bool = Field(
-        True, description="Inject timezone and locale/language."
-    )
+    inject_user_profile: bool = Field(False, description="Inject name, email, and ID.")
+    inject_locale_info: bool = Field(True, description="Inject timezone and locale/language.")
 
     # 3. Privacy
     anonymize_pii: bool = Field(
