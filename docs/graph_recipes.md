@@ -154,7 +154,11 @@ Here is a raw JSON example of a topology where an AI Agent performs a task, and 
 
 ### Node Types
 
-All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `presentation` (UI layout).
+All nodes inherit from `RecipeNode`, which includes:
+-   `id`: Unique identifier within the graph.
+-   `metadata`: Custom metadata (not for UI layout).
+-   `presentation`: `PresentationHints | None`. Visual layout and styling metadata (e.g., style, icon, display title).
+-   `collaboration`: `CollaborationConfig | None`. Rules for human-agent engagement (e.g., mode, supported commands).
 
 1.  **`AgentNode`** (`type: agent`): Executes an AI Agent.
     - `agent_ref`: The ID or URI of the Agent Definition to execute.

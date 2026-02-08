@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from coreason_manifest.cli import main
-from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
@@ -17,7 +16,7 @@ from coreason_manifest.spec.v2.recipe import (
 
 # Helper to create a dummy recipe
 def create_dummy_recipe() -> RecipeDefinition:
-    start_node = AgentNode(id="start", agent_ref="some-agent", presentation=NodePresentation(x=0, y=0))
+    start_node = AgentNode(id="start", agent_ref="some-agent")
     return RecipeDefinition(
         metadata=ManifestMetadata(name="DummyRecipe"),
         interface=RecipeInterface(),

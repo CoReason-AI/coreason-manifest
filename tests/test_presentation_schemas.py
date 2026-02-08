@@ -192,20 +192,20 @@ def test_node_presentation_color_validation() -> None:
 
 
 def test_node_presentation_integration() -> None:
-    """Verify integration of NodePresentation in RecipeNode."""
+    """Verify integration of PresentationHints in RecipeNode."""
     from coreason_manifest import AgentNode
+    from coreason_manifest.spec.v2.recipe import PresentationHints, VisualizationStyle
 
     # Create a node with presentation
     node = AgentNode(
         id="node-1",
         agent_ref="agent-v1",
-        presentation=NodePresentation(x=150, y=300, color="#00FF00"),
+        presentation=PresentationHints(style=VisualizationStyle.TREE, display_title="My Node"),
     )
 
     dumped = node.model_dump(mode="json")
-    assert dumped["presentation"]["x"] == 150.0
-    assert dumped["presentation"]["y"] == 300.0
-    assert dumped["presentation"]["color"] == "#00FF00"
+    assert dumped["presentation"]["style"] == "TREE"
+    assert dumped["presentation"]["display_title"] == "My Node"
 
     # Create a node without presentation
     node_no_pres = AgentNode(id="node-2", agent_ref="agent-v1")
