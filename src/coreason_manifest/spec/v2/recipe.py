@@ -131,18 +131,21 @@ class PolicyConfig(CoReasonBaseModel):
         description="Whitelist of MCP server names this recipe is allowed to access.",
     )
 
+    # --- Governance Text Injection (Harvested) ---
+    safety_preamble: str | None = Field(
+        None,
+        description="Optional safety instructions injected into the system prompt. Overridden by Constitution if present.",
+    )
+    legal_disclaimer: str | None = Field(
+        None,
+        description="Optional legal disclaimer appended to the output.",
+    )
+
     # --- New Field: Structured Constitution ---
     constitution: Constitution | None = Field(
         None,
         description="Structured definition of laws and rules for Constitutional AI workflows.",
     )
-
-    # --- New Harvesting Fields from Coreason-Protocol ---
-    safety_preamble: str | None = Field(
-        None, description="Mandatory safety instruction injected into the system prompt."
-    )
-
-    legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
 
 
 class AuditLevel(StrEnum):
