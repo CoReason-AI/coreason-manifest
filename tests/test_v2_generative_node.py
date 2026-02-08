@@ -19,9 +19,9 @@ from coreason_manifest.spec.v2.recipe import (
     RecipeDefinition,
     RecipeInterface,
     RouterNode,
-    TaskSequence,
     SolverConfig,
     SolverStrategy,
+    TaskSequence,
 )
 
 
@@ -30,10 +30,7 @@ def test_generative_node_serialization() -> None:
     node = GenerativeNode(
         id="gen-1",
         goal="Research competitor pricing",
-        solver=SolverConfig(
-            strategy=SolverStrategy.TREE_SEARCH,
-            depth_limit=5
-        ),
+        solver=SolverConfig(strategy=SolverStrategy.TREE_SEARCH, depth_limit=5),
         allowed_tools=["tool-1", "tool-2"],
         output_schema={"type": "object", "properties": {"price": {"type": "number"}}},
     )
@@ -69,7 +66,7 @@ def test_generative_node_validation() -> None:
             id="bad-depth",
             goal="Fail",
             output_schema={},
-            solver=SolverConfig(depth_limit=0)
+            solver=SolverConfig(depth_limit=0),
         )
     assert "Input should be greater than or equal to 1" in str(excinfo.value)
 
@@ -78,7 +75,7 @@ def test_generative_node_validation() -> None:
 
     # Missing output_schema
     with pytest.raises(ValidationError) as excinfo:
-        GenerativeNode(id="no-schema", goal="Fail")
+        GenerativeNode(id="no-schema", goal="Fail")  # type: ignore[call-arg]
     assert "Field required" in str(excinfo.value)
 
 
@@ -88,11 +85,7 @@ def test_spio_e_mode() -> None:
         id="spio-e",
         goal="Ensemble Plan",
         output_schema={},
-        solver=SolverConfig(
-            strategy=SolverStrategy.ENSEMBLE,
-            n_samples=5,
-            aggregation_method="majority_vote"
-        )
+        solver=SolverConfig(strategy=SolverStrategy.ENSEMBLE, n_samples=5, aggregation_method="majority_vote"),
     )
     assert node.solver.strategy == SolverStrategy.ENSEMBLE
     assert node.solver.n_samples == 5
@@ -105,11 +98,7 @@ def test_lats_mode() -> None:
         id="lats",
         goal="Tree Search Plan",
         output_schema={},
-        solver=SolverConfig(
-            strategy=SolverStrategy.TREE_SEARCH,
-            beam_width=3,
-            max_iterations=50
-        )
+        solver=SolverConfig(strategy=SolverStrategy.TREE_SEARCH, beam_width=3, max_iterations=50),
     )
     assert node.solver.strategy == SolverStrategy.TREE_SEARCH
     assert node.solver.beam_width == 3
@@ -149,9 +138,7 @@ def test_topology_validation_with_generative_node() -> None:
                 "id": "gen-1",
                 "goal": "Solve X",
                 "output_schema": {},
-                "solver": {
-                    "strategy": "tree_search"
-                }
+                "solver": {"strategy": "tree_search"},
             }
         ],
         "edges": [],
@@ -181,21 +168,11 @@ def test_task_sequence_with_generative_node() -> None:
 def test_edge_case_max_depth_boundary() -> None:
     """Test depth_limit boundary conditions."""
     # Minimum valid depth
-    node = GenerativeNode(
-        id="min-depth",
-        goal="Goal",
-        output_schema={},
-        solver=SolverConfig(depth_limit=1)
-    )
+    node = GenerativeNode(id="min-depth", goal="Goal", output_schema={}, solver=SolverConfig(depth_limit=1))
     assert node.solver.depth_limit == 1
 
     # Large depth
-    node = GenerativeNode(
-        id="large-depth",
-        goal="Goal",
-        output_schema={},
-        solver=SolverConfig(depth_limit=100)
-    )
+    node = GenerativeNode(id="large-depth", goal="Goal", output_schema={}, solver=SolverConfig(depth_limit=100))
     assert node.solver.depth_limit == 100
 
 
