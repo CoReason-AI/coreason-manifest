@@ -6,8 +6,13 @@ Use the latest version of `coreason-manifest` to ensure you have the latest secu
 
 | Version | Supported |
 | ------- | ------------------ |
+<<<<<<< HEAD
 | 0.22.x  | :white_check_mark: |
 | < 0.22.0| :x:                |
+=======
+| 0.21.x  | :white_check_mark: |
+| < 0.21.0| :x:                |
+>>>>>>> 80a9ebdf3e3efdad8958e7f246bfa0d3e2bc7d6c
 
 ## Reporting a Vulnerability
 

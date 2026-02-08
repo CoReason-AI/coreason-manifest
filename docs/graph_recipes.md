@@ -161,8 +161,11 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `system_prompt_override`: Context-specific instructions (optional).
     - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
 
+<<<<<<< HEAD
     **New in 0.22.0**: All nodes support `interaction` configuration for "Glass Box" steering. See [Interactive Control Plane](interactive_control_plane.md).
 
+=======
+>>>>>>> 80a9ebdf3e3efdad8958e7f246bfa0d3e2bc7d6c
 2.  **`HumanNode`** (`type: human`): Suspends execution until a human provides input or approval.
     - `prompt`: Instruction for the human user.
     - `timeout_seconds`: SLA for approval (optional).
@@ -183,6 +186,7 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `fail_route`: Node ID to go to if score < threshold.
     - `feedback_variable`: The key in the state where the critique/reasoning will be written.
 
+<<<<<<< HEAD
 5.  **`GenerativeNode`** (`type: generative`): Acts as an interface definition for dynamic solvers (like ROMA) to solve a high-level goal recursively.
     - `goal`: The high-level objective to be solved (e.g., "Research competitor pricing").
     - `max_depth`: Recursion limit for sub-tasks (default: 3).
@@ -190,6 +194,8 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `allowed_tools`: Whitelist of Tool IDs the solver is permitted to use.
     - `output_schema`: JSON Schema defining the expected structure of the final answer.
 
+=======
+>>>>>>> 80a9ebdf3e3efdad8958e7f246bfa0d3e2bc7d6c
 ## Evaluator-Optimizer Workflow
 
 Coreason V2 natively supports the **Evaluator-Optimizer** pattern (popularized by Anthropic's Claude Cookbook). This pattern uses a dedicated `EvaluatorNode` to critique the output of a Generator agent and loop back for refinements until a quality threshold is met.
@@ -231,6 +237,7 @@ topology:
       agent_ref: "publisher-v1"
 ```
 
+<<<<<<< HEAD
 ## Lifecycle Governance (Draft vs. Published)
 
 The `RecipeDefinition` enforces a strict lifecycle to distinguish between "work-in-progress" (Intent-based) and "execution-ready" (Concrete) states. This is controlled by the `status` field.
@@ -309,6 +316,51 @@ except ValidationError as e:
 
 ### 3. Status: `ARCHIVED`
 Behaves similarly to `DRAFT` but indicates the recipe is deprecated or read-only.
+=======
+## Integrity Validation & Draft Mode
+
+The `coreason-manifest` library performs strict validation on the graph topology to prevent runtime errors. However, for AI Agents generating workflows (or human "work-in-progress" saves), we support a **Draft Mode**.
+
+### 1. Strict Validation (Default)
+By default (`status="valid"`), the topology enforces:
+*   **Entry Point Existence**: The `entry_point` ID must exist in the `nodes` list.
+*   **Dangling Edge Check**: Every `source` and `target` must correspond to a valid Node ID.
+*   **Duplicate ID Check**: All Node IDs must be unique.
+
+```python
+from coreason_manifest.spec.v2.recipe import GraphTopology, AgentNode, GraphEdge
+
+try:
+    # This will fail because 'phantom-node' does not exist
+    topology = GraphTopology(
+        entry_point="node-1",
+        nodes=[AgentNode(id="node-1", agent_ref="agent-a")],
+        edges=[GraphEdge(source="node-1", target="phantom-node")]
+    )
+except ValueError as e:
+    print(f"Validation Error: {e}")
+    # Output: Dangling edge target: node-1 -> phantom-node
+```
+
+### 2. Draft Mode (`status="draft"`)
+To support partial or incomplete graphs (e.g., during generation or editing), you can set `status="draft"`. This **skips** the Entry Point and Dangling Edge checks, allowing the object to be instantiated and saved.
+
+**Note:** Duplicate Node IDs are *never* allowed, even in draft mode, as they break the internal graph structure.
+
+```python
+# This IS valid in Draft Mode
+draft_topology = GraphTopology(
+    status="draft",
+    entry_point="missing-node", # Allowed
+    nodes=[AgentNode(id="node-1", agent_ref="agent-a")],
+    edges=[GraphEdge(source="node-1", target="phantom-node")] # Allowed
+)
+
+# Check if it's ready for promotion
+is_ready = draft_topology.verify_completeness()
+# Output: False
+```
+>>>>>>> 80a9ebdf3e3efdad8958e7f246bfa0d3e2bc7d6c
 
 ## Runtime Execution
 
