@@ -129,15 +129,11 @@ class InteractionConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    transparency: TransparencyLevel = Field(
-        TransparencyLevel.OPAQUE, description="Visibility level."
-    )
-    triggers: list[InterventionTrigger] = Field(
-        default_factory=list, description="Events that pause execution."
-    )
+    transparency: TransparencyLevel = Field(TransparencyLevel.OPAQUE, description="Visibility level.")
+    triggers: list[InterventionTrigger] = Field(default_factory=list, description="Events that pause execution.")
     editable_fields: list[str] = Field(
         default_factory=list,
-        description="Whitelist of fields the user can modify during a pause (e.g., 'inputs', 'system_prompt_override').",
+        description="Whitelist of fields the user can modify during a pause (e.g., 'inputs', 'system_prompt_override').",  # noqa: E501
     )
     enforce_contract: bool = Field(
         True,
