@@ -16,6 +16,7 @@ from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 
@@ -46,13 +47,24 @@ class RecipeRecommendation(CoReasonBaseModel):
 
 
 class OptimizationIntent(CoReasonBaseModel):
-    """Directives for 'Fork & Improve' workflows."""
+    """Directives for 'Fork & Improve' workflows (harvested from Foundry)."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     base_ref: str = Field(..., description="Parent ID to fork.")
-    improvement_goal: str = Field(..., description="Prompt for the optimizer.")
-    strategy: Literal["atomic", "parallel"] = Field("parallel", description="Strategy for improvement.")
+    improvement_goal: str = Field(..., description="Prompt for the optimizer (e.g., 'Reduce hallucinations').")
+    strategy: Literal["atomic", "parallel"] = Field("parallel", description="Optimization strategy.")
+
+    # --- New Harvesting Fields ---
+    metric_name: str = Field(
+        "exact_match",
+        description="The grading function to optimize against (e.g., 'faithfulness', 'json_validity').",
+    )
+    teacher_model: str | None = Field(
+        None,
+        description="ID of a stronger model to use for bootstrapping synthetic training data (e.g., 'gpt-4-turbo').",
+    )
+    max_demonstrations: int = Field(5, ge=0, description="Maximum number of few-shot examples to learn and inject.")
 
 
 class SemanticRef(CoReasonBaseModel):
@@ -91,14 +103,21 @@ class StateDefinition(CoReasonBaseModel):
 
 
 class PolicyConfig(CoReasonBaseModel):
-    """Governance rules for execution limits and error handling."""
+    """Governance rules for execution limits (harvested from Connect)."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     max_retries: int = Field(0, description="Global retry limit for failed steps.")
     timeout_seconds: int | None = Field(None, description="Global execution timeout.")
-    execution_mode: Literal["sequential", "parallel"] = Field(
-        "sequential", description="Default execution strategy for independent branches."
+    execution_mode: Literal["sequential", "parallel"] = Field("sequential", description="Default execution strategy.")
+
+    # --- New Harvesting Fields ---
+    budget_cap_usd: float | None = Field(
+        None, description="Hard limit for estimated token + tool costs. Execution halts if exceeded."
+    )
+    sensitive_tools: list[str] = Field(
+        default_factory=list,
+        description="List of tool names that ALWAYS require human confirmation (InteractionConfig override).",
     )
 
 
@@ -168,13 +187,25 @@ class CollaborationMode(StrEnum):
 
 
 class CollaborationConfig(CoReasonBaseModel):
-    """Rules for human-agent engagement."""
+    """Rules for human-agent engagement (harvested from Human-Layer)."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
     feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
     supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
+
+    # --- New Harvesting Fields ---
+    channels: list[str] = Field(
+        default_factory=list,
+        description="Communication channels to notify (e.g., ['slack', 'email', 'mobile_push']).",
+    )
+    timeout_seconds: int | None = Field(
+        None, description="How long to wait for human input before triggering fallback."
+    )
+    fallback_behavior: Literal["fail", "proceed_with_default", "escalate"] = Field(
+        "fail", description="Action to take if the timeout is exceeded."
+    )
 
 
 class RecipeNode(CoReasonBaseModel):
@@ -445,6 +476,13 @@ class RecipeDefinition(CoReasonBaseModel):
 
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
+
+    # --- New Harvesting Field ---
+    tests: list[SimulationScenario] = Field(
+        default_factory=list,
+        description="Self-contained test scenarios (harvested from Simulacrum) to validate this recipe.",
+    )
+
     requirements: list[Constraint] = Field(default_factory=list, description="List of feasibility constraints.")
     state: StateDefinition | None = Field(None, description="Internal state schema.")
     policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")

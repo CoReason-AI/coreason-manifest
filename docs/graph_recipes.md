@@ -110,8 +110,28 @@ Sets execution limits and error handling strategies.
 policy=PolicyConfig(
     max_retries=3,
     timeout_seconds=3600,
-    execution_mode="sequential" # or "parallel"
+    execution_mode="sequential", # or "parallel"
+    # New Harvesting Fields
+    budget_cap_usd=50.0,
+    sensitive_tools=["buy_stock", "delete_db"]
 )
+```
+
+### 5. The Test Layer (`SimulationScenario`)
+
+Recipes can now embed self-contained test scenarios (harvested from Simulacrum) for validation.
+
+```python
+from coreason_manifest.spec.simulation import SimulationScenario, ValidationLogic
+
+tests=[
+    SimulationScenario(
+        id="happy-path",
+        description="Verify basic functionality",
+        inputs={"q": "hello"},
+        validation_logic=ValidationLogic.EXACT_MATCH
+    )
+]
 ```
 
 ## The Graph Topology Schema (`GraphTopology`)
@@ -266,11 +286,15 @@ rec = RecipeRecommendation(
     warnings=["Requires API key"]
 )
 
-# 2. Directives for Improvement
+# 2. Directives for Improvement (Harvested from Foundry)
 opt = OptimizationIntent(
     base_ref="generic-agent",
     improvement_goal="Minimize latency",
-    strategy="parallel"
+    strategy="parallel",
+    # Advanced Tuning
+    metric_name="faithfulness",
+    teacher_model="gpt-4-turbo",
+    max_demonstrations=5
 )
 
 # 3. An Abstract Step with Metadata

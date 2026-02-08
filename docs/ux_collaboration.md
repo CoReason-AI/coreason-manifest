@@ -66,6 +66,11 @@ class CollaborationConfig(CoReasonBaseModel):
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, ...)
     feedback_schema: dict[str, Any] | None = Field(None, ...)
     supported_commands: list[str] = Field(default=[], ...)
+
+    # Harvesting Fields (Human-Layer)
+    channels: list[str] = Field(default=[], ...)
+    timeout_seconds: int | None = Field(None, ...)
+    fallback_behavior: Literal["fail", "proceed_with_default", "escalate"] = Field("fail", ...)
 ```
 
 ### Collaboration Modes (`CollaborationMode`)
