@@ -36,7 +36,9 @@ class GapScanConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    enabled: bool = Field(False, description="If True, scans context for missing prerequisites before execution.")
+    enabled: bool = Field(
+        False, description="If True, scans context for missing prerequisites before execution."
+    )
     confidence_threshold: float = Field(
         0.8,
         description="Minimum confidence to proceed without asking clarifying questions.",
@@ -54,7 +56,13 @@ class ReasoningConfig(CoReasonBaseModel):
     )
 
     # Strategy-specific configs
-    adversarial: AdversarialConfig | None = Field(None, description="Config if strategy is ADVERSARIAL.")
-    gap_scan: GapScanConfig | None = Field(None, description="Config for pre-execution knowledge scanning.")
+    adversarial: AdversarialConfig | None = Field(
+        None, description="Config if strategy is ADVERSARIAL."
+    )
+    gap_scan: GapScanConfig | None = Field(
+        None, description="Config for pre-execution knowledge scanning."
+    )
 
-    max_revisions: int = Field(1, description="Maximum self-correction loops allowed if critique fails.")
+    max_revisions: int = Field(
+        1, description="Maximum self-correction loops allowed if critique fails."
+    )
