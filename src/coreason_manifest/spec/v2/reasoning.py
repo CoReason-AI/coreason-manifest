@@ -58,3 +58,16 @@ class ReasoningConfig(CoReasonBaseModel):
     gap_scan: GapScanConfig | None = Field(None, description="Config for pre-execution knowledge scanning.")
 
     max_revisions: int = Field(1, description="Maximum self-correction loops allowed if critique fails.")
+
+
+class ReflexConfig(CoReasonBaseModel):
+    """Configuration for 'System 1' fast thinking (Cortex Reflex)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    enabled: bool = Field(True, description="Allow fast-path responses without deep reasoning chains.")
+    confidence_threshold: float = Field(0.9, description="Minimum confidence required to bypass the solver loop.")
+    allowed_tools: list[str] = Field(
+        default_factory=list,
+        description="List of read-only tools that can be called in Reflex mode (e.g., 'search', 'get_time').",
+    )

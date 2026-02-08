@@ -22,7 +22,7 @@ The `KnowledgeScope` defines the boundary of memory access, ensuring data privac
 *   `USER` (`"user"`): User-specific private memory (e.g., personal documents).
 *   `SESSION` (`"session"`): Ephemeral context limited to the current conversation/session.
 
-### 3. Retrieval Configuration
+### 3. Retrieval Configuration (Read)
 
 The `RetrievalConfig` model encapsulates the RAG parameters.
 
@@ -34,25 +34,49 @@ The `RetrievalConfig` model encapsulates the RAG parameters.
 | `score_threshold` | `float` | `0.7` | Minimum similarity score (0.0 - 1.0) to consider a match. |
 | `scope` | `KnowledgeScope` | `SHARED` | Access control boundary. |
 
+### 4. Memory Consolidation (Write)
+
+The `MemoryWriteConfig` defines how short-term conversation history is summarized and written to long-term vector storage (Crystallization).
+
+#### Consolidation Strategy
+
+*   `NONE` (`"none"`): Forget everything after session.
+*   `SUMMARY_WINDOW` (`"summary_window"`): Summarize every N turns.
+*   `SEMANTIC_CLUSTER` (`"semantic_cluster"`): Group related turns by topic.
+*   `SESSION_CLOSE` (`"session_close"`): Crystallize only when session ends.
+
+#### Write Configuration
+
+| Field | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `strategy` | `ConsolidationStrategy` | `SESSION_CLOSE` | When to persist memories. |
+| `frequency_turns` | `int` | `10` | Turns trigger for `SUMMARY_WINDOW`. |
+| `destination_collection` | `str` | `None` | Target collection. If `None`, uses primary read collection. |
+
 ## Integration with Cognitive Profile
 
-The `CognitiveProfile` (in `coreason_manifest.spec.v2.agent`) now includes a `memory` field, which is a list of `RetrievalConfig` objects. This allows an agent to query multiple knowledge sources simultaneously.
+The `CognitiveProfile` (in `coreason_manifest.spec.v2.agent`) includes:
+*   `memory_read` (aliased as `memory`): A list of `RetrievalConfig` objects.
+*   `memory_write`: A `MemoryWriteConfig` object.
 
-### Example: Hybrid RAG Setup
+### Example: Hybrid RAG & Consolidation
 
 ```python
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.knowledge import (
     RetrievalConfig,
     RetrievalStrategy,
-    KnowledgeScope
+    KnowledgeScope,
+    MemoryWriteConfig,
+    ConsolidationStrategy
 )
 
 # Define an agent with access to legal precedents and user notes
 legal_expert = CognitiveProfile(
     role="legal_analyst",
+
+    # Read from multiple sources
     memory=[
-        # 1. Access Shared Legal Precedents (Vector Search)
         RetrievalConfig(
             strategy=RetrievalStrategy.DENSE,
             collection_name="supreme_court_cases",
@@ -60,18 +84,18 @@ legal_expert = CognitiveProfile(
             score_threshold=0.85,
             scope=KnowledgeScope.SHARED
         ),
-        # 2. Access Private Case Notes (Keyword Search)
         RetrievalConfig(
             strategy=RetrievalStrategy.SPARSE,
             collection_name="case_notes",
             top_k=5,
             scope=KnowledgeScope.USER
         )
-    ]
+    ],
+
+    # Write summary back to user notes at session end
+    memory_write=MemoryWriteConfig(
+        strategy=ConsolidationStrategy.SESSION_CLOSE,
+        destination_collection="case_notes"
+    )
 )
 ```
-
-This configuration tells the runtime to:
-1.  Perform a vector search on the "supreme_court_cases" collection.
-2.  Perform a keyword search on the user's "case_notes".
-3.  Combine and inject the retrieved context into the agent's prompt.
