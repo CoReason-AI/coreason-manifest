@@ -11,17 +11,18 @@ from coreason_manifest.spec.v2.agent import (
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
+    GraphEdge,
+    GraphTopology,
     PolicyConfig,
     RecipeDefinition,
-    GraphTopology,
     RecipeInterface,
-    GraphEdge,
     RecipeStatus,
 )
 
 # ==========================================
 # Edge Cases
 # ==========================================
+
 
 def test_agent_node_no_ref_no_construct() -> None:
     """
@@ -39,23 +40,23 @@ def test_cognitive_profile_minimal() -> None:
     profile = CognitiveProfile(role="observer")
     assert profile.role == "observer"
     assert profile.reasoning_mode == "standard"  # Default
-    assert profile.knowledge_contexts == []      # Default
-    assert profile.task_primitive is None        # Default
+    assert profile.knowledge_contexts == []  # Default
+    assert profile.task_primitive is None  # Default
 
 
 def test_context_dependency_minimal() -> None:
     """Test ContextDependency with defaults."""
     dep = ContextDependency(name="basic_context")
     assert dep.name == "basic_context"
-    assert dep.priority == ComponentPriority.MEDIUM # Default
-    assert dep.parameters == {}                     # Default
+    assert dep.priority == ComponentPriority.MEDIUM  # Default
+    assert dep.parameters == {}  # Default
 
 
 def test_policy_config_extreme_values() -> None:
     """Test PolicyConfig with extreme/boundary values."""
     policy = PolicyConfig(
-        token_budget=0,             # Zero budget
-        budget_cap_usd=999999.99,   # Large budget
+        token_budget=0,  # Zero budget
+        budget_cap_usd=999999.99,  # Large budget
     )
     assert policy.token_budget == 0
     assert policy.budget_cap_usd == 999999.99
@@ -68,6 +69,7 @@ def test_policy_config_extreme_values() -> None:
 # Complex Cases
 # ==========================================
 
+
 def test_hybrid_recipe_topology() -> None:
     """
     Test a graph that mixes:
@@ -76,34 +78,23 @@ def test_hybrid_recipe_topology() -> None:
     3. Agent with concrete reference.
     """
     # 1. Inline Agent
-    node_inline = AgentNode(
-        id="step-1-inline",
-        construct=CognitiveProfile(
-            role="analyst",
-            task_primitive="analyze"
-        )
-    )
+    node_inline = AgentNode(id="step-1-inline", construct=CognitiveProfile(role="analyst", task_primitive="analyze"))
 
     # 2. Concrete Agent
-    node_concrete = AgentNode(
-        id="step-2-concrete",
-        agent_ref="summarizer-v1"
-    )
+    node_concrete = AgentNode(id="step-2-concrete", agent_ref="summarizer-v1")
 
     # 3. Hybrid (Both - construct takes precedence logic wise, but both exist in model)
     node_hybrid = AgentNode(
-        id="step-3-hybrid",
-        construct=CognitiveProfile(role="reviewer"),
-        agent_ref="reviewer-base-v1"
+        id="step-3-hybrid", construct=CognitiveProfile(role="reviewer"), agent_ref="reviewer-base-v1"
     )
 
     topology = GraphTopology(
         nodes=[node_inline, node_concrete, node_hybrid],
         edges=[
             GraphEdge(source="step-1-inline", target="step-2-concrete"),
-            GraphEdge(source="step-2-concrete", target="step-3-hybrid")
+            GraphEdge(source="step-2-concrete", target="step-3-hybrid"),
         ],
-        entry_point="step-1-inline"
+        entry_point="step-1-inline",
     )
 
     assert len(topology.nodes) == 3
@@ -116,9 +107,17 @@ def test_complex_context_dependencies() -> None:
         role="legal_expert",
         knowledge_contexts=[
             ContextDependency(name="constitution", priority=ComponentPriority.CRITICAL),
-            ContextDependency(name="case_law_2024", priority=ComponentPriority.HIGH, parameters={"year": 2024, "region": "US"}),
-            ContextDependency(name="internal_memos", priority=ComponentPriority.LOW, parameters={"tags": ["confidential"]}),
-        ]
+            ContextDependency(
+                name="case_law_2024",
+                priority=ComponentPriority.HIGH,
+                parameters={"year": 2024, "region": "US"},
+            ),
+            ContextDependency(
+                name="internal_memos",
+                priority=ComponentPriority.LOW,
+                parameters={"tags": ["confidential"]},
+            ),
+        ],
     )
 
     assert len(profile.knowledge_contexts) == 3
@@ -133,10 +132,7 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="Complex Assembler Recipe"),
         interface=RecipeInterface(),
-        policy=PolicyConfig(
-            token_budget=128000,
-            sensitive_tools=["exec_code"]
-        ),
+        policy=PolicyConfig(token_budget=128000, sensitive_tools=["exec_code"]),
         topology=GraphTopology(
             nodes=[
                 AgentNode(
@@ -144,19 +140,14 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
                     construct=CognitiveProfile(
                         role="orchestrator",
                         reasoning_mode="six_hats",
-                        knowledge_contexts=[
-                            ContextDependency(name="project_specs", priority=ComponentPriority.HIGH)
-                        ]
-                    )
+                        knowledge_contexts=[ContextDependency(name="project_specs", priority=ComponentPriority.HIGH)],
+                    ),
                 ),
-                AgentNode(
-                    id="end",
-                    agent_ref="finalizer"
-                )
+                AgentNode(id="end", agent_ref="finalizer"),
             ],
             edges=[GraphEdge(source="start", target="end")],
-            entry_point="start"
-        )
+            entry_point="start",
+        ),
     )
 
     # Dump
@@ -174,6 +165,7 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
     assert start_node.construct is not None
     assert start_node.construct.reasoning_mode == "six_hats"
 
+
 def test_lifecycle_validation_incomplete_node() -> None:
     """Test that PUBLISHED status rejects nodes without agent_ref or construct."""
     data = {
@@ -184,11 +176,11 @@ def test_lifecycle_validation_incomplete_node() -> None:
         "status": RecipeStatus.PUBLISHED,
         "topology": {
             "nodes": [
-                {"type": "agent", "id": "ghost"} # missing agent_ref and construct
+                {"type": "agent", "id": "ghost"}  # missing agent_ref and construct
             ],
             "edges": [],
-            "entry_point": "ghost"
-        }
+            "entry_point": "ghost",
+        },
     }
 
     with pytest.raises(ValidationError) as excinfo:
