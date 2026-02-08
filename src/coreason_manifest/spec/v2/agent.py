@@ -14,6 +14,7 @@ from typing import Any
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.v2.knowledge import RetrievalConfig
 
 
 class ComponentPriority(IntEnum):
@@ -49,6 +50,12 @@ class CognitiveProfile(CoReasonBaseModel):
     # 3. Environment (Where)
     knowledge_contexts: list[ContextDependency] = Field(
         default_factory=list, description="Dynamic context modules to inject."
+    )
+
+    # --- New Field for Archive Support ---
+    memory: list[RetrievalConfig] = Field(
+        default_factory=list,
+        description="Configuration for Long-Term Memory (RAG) access.",
     )
 
     # 4. Task (What) - Maps to StructuredPrimitive
