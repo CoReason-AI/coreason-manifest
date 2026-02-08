@@ -53,11 +53,7 @@ def test_complex_case_full_recipe_serialization() -> None:
         metadata=ManifestMetadata(name="Complex QoS Recipe"),
         interface=RecipeInterface(),
         policy=policy,
-        topology=GraphTopology(
-            nodes=[AgentNode(id="worker", agent_ref="worker-v1")],
-            edges=[],
-            entry_point="worker"
-        )
+        topology=GraphTopology(nodes=[AgentNode(id="worker", agent_ref="worker-v1")], edges=[], entry_point="worker"),
     )
 
     dumped = recipe.model_dump()
@@ -78,11 +74,7 @@ def test_complex_case_nested_structure_immutability() -> None:
         metadata=ManifestMetadata(name="Immutable Policy"),
         interface=RecipeInterface(),
         policy=policy,
-        topology=GraphTopology(
-            nodes=[AgentNode(id="a", agent_ref="b")],
-            edges=[],
-            entry_point="a"
-        )
+        topology=GraphTopology(nodes=[AgentNode(id="a", agent_ref="b")], edges=[], entry_point="a"),
     )
 
     # Attempting to modify the frozen model should raise ValidationError
