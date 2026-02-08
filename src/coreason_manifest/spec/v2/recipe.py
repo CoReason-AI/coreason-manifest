@@ -20,6 +20,8 @@ from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
+from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 from coreason_manifest.spec.v2.identity import IdentityRequirement
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
@@ -331,6 +333,12 @@ class RecipeNode(CoReasonBaseModel):
 
     # --- New Field: Flow Governance ---
     recovery: RecoveryConfig | None = Field(None, description="Error handling and resilience settings.")
+
+    # --- New Field for Episteme Support ---
+    reasoning: ReasoningConfig | None = Field(
+        None,
+        description="Meta-cognition settings: Review loops, gap scanning, and validation strategies.",
+    )
 
 
 class AgentNode(RecipeNode):
