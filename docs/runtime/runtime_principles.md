@@ -28,7 +28,7 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
     2.  It must resolve variables from the Blackboard (e.g., `data.row_count`) and apply the defined operator (`eq`, `gt`, `contains`).
     3.  If a `required: True` constraint fails, the runtime must abort execution immediately with the provided `error_message`.
 
-### 3. The "Multiplexed Stream" Mandate (New in v0.21.0)
+### 3. The "Multiplexed Stream" Mandate
 
 **The Rule:** The runtime must treat outputs as **named, concurrent streams**, not a single text pipe.
 
@@ -39,7 +39,7 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
     3.  **Lifecycle Emission:** The runtime must explicitly emit `STREAM_START` events (with `content_type`) before sending data chunks, and `STREAM_END` events when a stream closes.
     4.  **Backward Compatibility:** If no stream is specified by the agent, the runtime must default to `stream_id="default"` and `content_type="text/plain"`.
 
-### 4. The Interception Layer (Middleware) (New in v0.21.0)
+### 4. The Interception Layer (Middleware)
 
 **The Rule:** The runtime must support standardized injection points for cross-cutting logic (PII, Toxicity, Audit).
 
@@ -49,7 +49,7 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
     2.  **Request Pipeline:** Before the agent sees the input, pass the `AgentRequest` through all registered `IRequestInterceptor` implementations.
     3.  **Response Pipeline:** As the agent streams output, pass every `StreamPacket` through registered `IResponseInterceptor` implementations (e.g., to block toxic tokens in real-time).
 
-### 5. Generative Provenance & Awareness (New in v0.21.0)
+### 5. Generative Provenance & Awareness
 
 **The Rule:** The runtime must preserve and expose the metadata indicating *why* a workflow exists, especially if AI-generated.
 
@@ -108,9 +108,9 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 
 | Feature | Manifest Source | Runtime Action |
 | :--- | :--- | :--- |
-| **Multiplexed Streams** | `stream_lifecycle.md` | **NEW:** Emit `STREAM_START/END` events; support `stream_id` in chunks. |
-| **Middleware** | `middleware_extension_interfaces.md` | **NEW:** Apply `IRequestInterceptor` and `IResponseInterceptor` chains. |
-| **Generative Provenance** | `definitions.py` | **NEW:** Log `generation_rationale` and `confidence_score` from metadata. |
+| **Multiplexed Streams** | `stream_lifecycle.md` | Emit `STREAM_START/END` events; support `stream_id` in chunks. |
+| **Middleware** | `middleware_extension_interfaces.md` | Apply `IRequestInterceptor` and `IResponseInterceptor` chains. |
+| **Generative Provenance** | `definitions.py` | Log `generation_rationale` and `confidence_score` from metadata. |
 | **Pre-Flight Checks** | `recipe.py` -> `Constraint` | Evaluate `requirements` against context before execution using `check_feasibility`. |
 | **Operational Policy** | `recipe.py` -> `PolicyConfig` | Enforce `timeout_seconds` and `max_retries`. |
 | **Dynamic Routing** | `recipe.py` -> `RouterNode` | Switch execution path based on Blackboard variable values. |
