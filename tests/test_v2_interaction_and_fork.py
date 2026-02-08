@@ -3,6 +3,7 @@
 from datetime import UTC
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.provenance import ProvenanceData
@@ -94,7 +95,7 @@ def test_empty_interaction_config() -> None:
 
 def test_interaction_config_invalid_field() -> None:
     """Verify that extra fields are forbidden in InteractionConfig."""
-    with pytest.raises(Exception):  # Pydantic validation error
+    with pytest.raises(ValidationError):  # Pydantic validation error
         InteractionConfig(extra_field="invalid")  # type: ignore[call-arg]
 
 
@@ -118,7 +119,9 @@ def test_mixed_transparency_topology() -> None:
         nodes=[node1, node2], edges=[{"source": "step-1", "target": "step-2"}], entry_point="step-1"
     )
 
+    assert topology.nodes[0].interaction is not None
     assert topology.nodes[0].interaction.transparency == TransparencyLevel.OPAQUE
+    assert topology.nodes[1].interaction is not None
     assert topology.nodes[1].interaction.transparency == TransparencyLevel.INTERACTIVE
 
 

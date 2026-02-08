@@ -65,7 +65,7 @@ def test_solver_config_validation_edge_cases() -> None:
 def test_solver_config_invalid_strategy() -> None:
     """Test invalid strategy enum value (Pydantic validation)."""
     with pytest.raises(ValidationError) as exc:
-        SolverConfig(strategy="invalid_strategy")  # type: ignore[arg-type]
+        SolverConfig(strategy="invalid_strategy")
     assert "Input should be 'standard', 'tree_search' or 'ensemble'" in str(exc.value)
 
 
