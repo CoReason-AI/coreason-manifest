@@ -99,3 +99,45 @@ def test_self_reference_fallback() -> None:
 
     assert recipe.topology.nodes[0].recovery is not None
     assert recipe.topology.nodes[0].recovery.fallback_node_id == "Agent_A"
+
+
+def test_empty_topology() -> None:
+    """Test an empty topology to ensure validator handles it gracefully."""
+    # GraphTopology requires non-empty nodes list by default due to entry_point validation
+    # unless status is draft and we construct it carefully or mock it.
+    # However, GraphTopology definition:
+    # nodes: list[...] = Field(..., description="List of nodes in the graph.")
+    # It doesn't enforce min_length at Pydantic level, but check validation logic.
+
+    # GraphTopology validation:
+    # @model_validator(mode="after")
+    # def validate_integrity(self) -> "GraphTopology":
+    # ...
+    # if self.status == "draft": return self
+
+    # So for draft status, we can have empty nodes if we bypass other constraints.
+    # But wait, entry_point is required field.
+
+    # Let's try to construct a minimal valid empty topology if possible,
+    # or just one that passes Pydantic validation enough to reach our validator.
+
+    # If nodes is empty, entry_point validation will fail in GraphTopology.validate_integrity
+    # unless status is draft.
+
+    # But wait, `validate_topology_integrity` in `RecipeDefinition` runs regardless of status.
+
+    topology = GraphTopology(
+        nodes=[],
+        edges=[],
+        entry_point="None",  # Required field
+        status="draft",
+    )
+
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="Empty Topology"),
+        interface=RecipeInterface(),
+        topology=topology,
+        status=RecipeStatus.DRAFT,
+    )
+
+    assert len(recipe.topology.nodes) == 0
