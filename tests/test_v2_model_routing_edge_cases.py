@@ -3,9 +3,9 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.v2.recipe import AgentNode, RecipeDefinition, RecipeInterface, GraphTopology
-from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RoutingStrategy, ComplianceTier
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.recipe import AgentNode, GraphTopology, RecipeDefinition, RecipeInterface
+from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RoutingStrategy
 
 
 def test_model_selection_policy_empty_constraints() -> None:
@@ -31,7 +31,7 @@ def test_recipe_definition_invalid_default_policy() -> None:
             metadata=ManifestMetadata(name="Invalid Recipe"),
             interface=RecipeInterface(),
             topology=GraphTopology(nodes=[AgentNode(id="start", agent_ref="agent-1")], edges=[], entry_point="start"),
-            default_model_policy="not-a-policy-object",  # type: ignore[arg-type]
+            default_model_policy="not-a-policy-object",
         )
 
 
@@ -40,16 +40,14 @@ def test_compliance_tier_validation() -> None:
     with pytest.raises(ValidationError):
         ModelSelectionPolicy(
             strategy=RoutingStrategy.PRIORITY,
-            compliance=["invalid_compliance"],  # type: ignore[list-item]
+            compliance=["invalid_compliance"],
         )
 
 
 def test_routing_strategy_validation() -> None:
     """Test that invalid routing strategies are rejected."""
     with pytest.raises(ValidationError):
-        ModelSelectionPolicy(
-            strategy="random_strategy"  # type: ignore[arg-type]
-        )
+        ModelSelectionPolicy(strategy="random_strategy")
 
 
 def test_agent_node_invalid_model_policy_type() -> None:
@@ -58,5 +56,5 @@ def test_agent_node_invalid_model_policy_type() -> None:
         AgentNode(
             id="agent-1",
             agent_ref="agent-a",
-            model_policy=123,  # type: ignore[arg-type]
+            model_policy=123,
         )

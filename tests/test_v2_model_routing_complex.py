@@ -1,9 +1,8 @@
 # Copyright (c) 2025 CoReason, Inc.
 
-import pytest
-from coreason_manifest.spec.v2.recipe import AgentNode, RecipeDefinition, RecipeInterface, GraphTopology, GraphEdge
-from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RoutingStrategy, ComplianceTier
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.recipe import AgentNode, GraphEdge, GraphTopology, RecipeDefinition, RecipeInterface
+from coreason_manifest.spec.v2.resources import ComplianceTier, ModelSelectionPolicy, RoutingStrategy
 
 
 def test_complex_recipe_mixed_policies() -> None:
