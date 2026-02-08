@@ -76,10 +76,11 @@ def test_strategy_string_coercion() -> None:
 def test_extra_fields_forbidden() -> None:
     """Verify that extra fields raise ValidationError."""
     with pytest.raises(ValidationError):
-        ReasoningConfig(**{"extra_field": "invalid"})  # type: ignore[arg-type]
+        # Use model_validate to simulate runtime payload validation
+        ReasoningConfig.model_validate({"extra_field": "invalid"})
 
     with pytest.raises(ValidationError):
-        AdversarialConfig(**{"extra_field": "invalid"})  # type: ignore[arg-type]
+        AdversarialConfig.model_validate({"persona": "skeptic", "extra_field": "invalid"})
 
     with pytest.raises(ValidationError):
-        GapScanConfig(**{"extra_field": "invalid"})  # type: ignore[arg-type]
+        GapScanConfig.model_validate({"extra_field": "invalid"})
