@@ -9,10 +9,10 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from coreason_manifest.spec.v2.recipe import (
-    FailureBehavior,
-    RecoveryConfig,
     AgentNode,
+    FailureBehavior,
     RecipeNode,
+    RecoveryConfig,
 )
 
 
