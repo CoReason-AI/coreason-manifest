@@ -68,6 +68,32 @@ def test_constraint_type_safety() -> None:
     assert Constraint(variable="val", operator="contains", value=10).evaluate(context) is False
 
 
+def test_constraint_edge_cases() -> None:
+    """Test various edge cases for Constraint evaluation."""
+    # 1. Empty context
+    assert Constraint(variable="any.key", operator="eq", value=1).evaluate({}) is False
+
+    # 2. Value is None
+    context = {"key": None}
+    assert Constraint(variable="key", operator="eq", value=None).evaluate(context) is True
+    assert Constraint(variable="key", operator="neq", value=1).evaluate(context) is True
+
+    # 3. Complex types in value (list of dicts)
+    context_complex = {"items": [{"id": 1}, {"id": 2}]}
+    target = [{"id": 1}, {"id": 2}]
+    assert Constraint(variable="items", operator="eq", value=target).evaluate(context_complex) is True
+
+    # 4. 'contains' with disparate types
+    context_mixed = {"tags": ["a", 1, True]}
+    assert Constraint(variable="tags", operator="contains", value="a").evaluate(context_mixed) is True
+    assert Constraint(variable="tags", operator="contains", value=1).evaluate(context_mixed) is True
+    assert Constraint(variable="tags", operator="contains", value=True).evaluate(context_mixed) is True
+
+    # 5. Deeply nested missing key
+    context_deep = {"a": {"b": {"c": 1}}}
+    assert Constraint(variable="a.b.c.d.e", operator="eq", value=1).evaluate(context_deep) is False
+
+
 def test_recipe_check_feasibility() -> None:
     """Test check_feasibility method on RecipeDefinition."""
 

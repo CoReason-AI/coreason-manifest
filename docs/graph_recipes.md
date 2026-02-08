@@ -63,7 +63,37 @@ interface=RecipeInterface(
 )
 ```
 
-### 2. The State Layer (`StateDefinition`)
+### 2. Feasibility Constraints (`Constraint`)
+
+The `RecipeDefinition` can enforce feasibility checks (logic gates) against the execution context before running. These are defined in the `requirements` list.
+
+```python
+from coreason_manifest.spec.v2.recipe import Constraint
+
+requirements=[
+    Constraint(variable="user.role", operator="eq", value="admin"),
+    Constraint(variable="data.row_count", operator="gt", value=500),
+    Constraint(
+        variable="system.mode",
+        operator="eq",
+        value="maintenance",
+        required=False, # If this fails, it logs a warning but proceeds
+        error_message="System is in maintenance mode; performance may be degraded."
+    )
+]
+```
+
+**Supported Operators:** `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `in`, `contains`.
+
+You can validate these constraints against a context dictionary using the `check_feasibility` method:
+
+```python
+is_feasible, errors = recipe.check_feasibility(context={"user": {"role": "guest"}})
+if not is_feasible:
+    print(f"Recipe cannot run: {errors}")
+```
+
+### 3. The State Layer (`StateDefinition`)
 Defines the shared memory structure (Blackboard) and persistence strategy.
 
 ```python
@@ -73,7 +103,7 @@ state=StateDefinition(
 )
 ```
 
-### 3. The Policy Layer (`PolicyConfig`)
+### 4. The Policy Layer (`PolicyConfig`)
 Sets execution limits and error handling strategies.
 
 ```python
