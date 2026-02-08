@@ -1,5 +1,6 @@
-import pytest
 from datetime import datetime
+
+import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
@@ -58,7 +59,7 @@ def test_provenance_type_validation() -> None:
 
     # Invalid type
     with pytest.raises(ValidationError) as excinfo:
-        ProvenanceData(type="alien")  # type: ignore
+        ProvenanceData(type="alien")
     assert "Input should be 'ai', 'human' or 'hybrid'" in str(excinfo.value)
 
 
@@ -75,7 +76,7 @@ def test_manifest_metadata_extra_fields() -> None:
 def test_provenance_extra_forbid() -> None:
     """Test that ProvenanceData forbids extra fields."""
     with pytest.raises(ValidationError) as excinfo:
-        ProvenanceData(type="ai", extra_field="forbidden")
+        ProvenanceData(type="ai", extra_field="forbidden")  # type: ignore[call-arg]
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
 
