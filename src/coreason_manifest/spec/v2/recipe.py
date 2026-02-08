@@ -131,6 +131,41 @@ class PolicyConfig(CoReasonBaseModel):
     )
 
 
+class AuditLevel(StrEnum):
+    """The depth of the audit trail required."""
+
+    NONE = "none"  # No persistent logging
+    BASIC = "basic"  # Inputs/Outputs only
+    FULL = "full"  # Full reasoning trace + tool inputs/outputs
+    GXP_COMPLIANT = "gxp"  # Full trace + signatures + immutable archiving
+
+
+class RetentionPolicy(StrEnum):
+    """How long the audit artifacts must be retained."""
+
+    EPHEMERAL = "ephemeral"  # Delete after session
+    THIRTY_DAYS = "30_days"
+    ONE_YEAR = "1_year"
+    SEVEN_YEARS = "7_years"  # Standard for financial/legal
+
+
+class ComplianceConfig(CoReasonBaseModel):
+    """Configuration for the Coreason Auditor."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    audit_level: AuditLevel = Field(AuditLevel.BASIC, description="Depth of logging.")
+    retention: RetentionPolicy = Field(RetentionPolicy.THIRTY_DAYS, description="Data retention requirement.")
+
+    # Artifact Generation Flags
+    generate_aibom: bool = Field(False, description="Generate an AI Bill of Materials (software supply chain).")
+    generate_pdf_report: bool = Field(False, description="Generate a human-readable PDF report of the session.")
+    require_signature: bool = Field(False, description="Cryptographically sign the final output.")
+
+    # PII/Sensitivity
+    mask_pii: bool = Field(True, description="Attempt to scrub PII from logs before archiving.")
+
+
 # ==========================================
 # 2. Node Definitions
 # ==========================================
@@ -524,6 +559,11 @@ class RecipeDefinition(CoReasonBaseModel):
     state: StateDefinition | None = Field(None, description="Internal state schema.")
     policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")
     # ----------------------
+
+    # --- New Field for Auditor Support ---
+    compliance: ComplianceConfig | None = Field(
+        None, description="Directives for the Auditor worker (logging, retention, signing)."
+    )
 
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
         ..., description="The execution graph topology."
