@@ -60,6 +60,4 @@ class Constitution(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     laws: list[Law] = Field(default_factory=list, description="Semantic laws for the LLM Judge.")
-    sentinel_rules: list[SentinelRule] = Field(
-        default_factory=list, description="Hard regex rules for the Sentinel."
-    )
+    sentinel_rules: list[SentinelRule] = Field(default_factory=list, description="Hard regex rules for the Sentinel.")
