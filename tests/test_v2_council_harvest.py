@@ -117,10 +117,10 @@ def test_solver_config_complex_cases() -> None:
     # This is valid because SolverConfig is a single model covering all strategies
     hybrid_config = SolverConfig(
         strategy=SolverStrategy.TREE_SEARCH,  # Strategy says Tree
-        beam_width=5,                         # LATS param
-        max_iterations=20,                    # LATS param
-        diversity_threshold=0.8,              # Council param (should be ignored by logic but valid in schema)
-        enable_dissenter=True,                # Council param
+        beam_width=5,  # LATS param
+        max_iterations=20,  # LATS param
+        diversity_threshold=0.8,  # Council param (should be ignored by logic but valid in schema)
+        enable_dissenter=True,  # Council param
     )
 
     assert hybrid_config.strategy == SolverStrategy.TREE_SEARCH
