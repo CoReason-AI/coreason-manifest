@@ -108,3 +108,41 @@ class RuntimeEnvironment(CoReasonBaseModel):
 
     mcp_servers: list[McpServerRequirement] = Field(default_factory=list, description="Required MCP servers.")
     python_version: str | None = Field("3.12", description="Required Python version.")
+
+
+class RoutingStrategy(StrEnum):
+    """How the Arbitrage Engine selects a model."""
+
+    PRIORITY = "priority"  # Use the first available model in the list
+    LOWEST_COST = "lowest_cost"  # Cheapest model meeting constraints
+    LOWEST_LATENCY = "lowest_latency"  # Fastest model (based on historical stats)
+    PERFORMANCE = "performance"  # Strongest model (based on benchmarks)
+    ROUND_ROBIN = "round_robin"  # Distribute load evenly
+
+
+class ComplianceTier(StrEnum):
+    """Data residency and compliance requirements."""
+
+    STANDARD = "standard"  # No specific requirements
+    EU_RESIDENCY = "eu_residency"
+    HIPAA = "hipaa"
+    FEDRAMP = "fedramp"
+
+
+class ModelSelectionPolicy(CoReasonBaseModel):
+    """Configuration for dynamic model routing (Arbitrage)."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    strategy: RoutingStrategy = Field(RoutingStrategy.PRIORITY, description="Selection algorithm.")
+
+    # Constraints
+    min_context_window: int | None = Field(None, description="Minimum required context size.")
+    max_input_cost_per_m: float | None = Field(None, description="Max allowed input cost ($/1M tokens).")
+    compliance: list[ComplianceTier] = Field(default_factory=list, description="Required compliance certifications.")
+    provider_whitelist: list[str] = Field(
+        default_factory=list, description="Allowed providers (e.g. ['azure', 'anthropic'])."
+    )
+
+    # Fallback
+    allow_fallback: bool = Field(True, description="If primary selection fails, try others?")

@@ -20,7 +20,7 @@ from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
-from coreason_manifest.spec.v2.resources import RuntimeEnvironment
+from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -281,6 +281,13 @@ class AgentNode(RecipeNode):
     agent_ref: str | SemanticRef | None = Field(
         None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
     )
+
+    # --- New Field for Arbitrage Support ---
+    model_policy: ModelSelectionPolicy | str | None = Field(
+        None,
+        description="The routing policy for the LLM. Can be an inline policy or a reference to a Model ID.",
+    )
+
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
 
@@ -548,6 +555,11 @@ class RecipeDefinition(CoReasonBaseModel):
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
     environment: RuntimeEnvironment | None = Field(None, description="The infrastructure requirements for the recipe.")
+
+    # --- New Field for Global Default ---
+    default_model_policy: ModelSelectionPolicy | None = Field(
+        None, description="Default model selection rules for all agents in this recipe."
+    )
 
     # --- New Harvesting Field ---
     tests: list[SimulationScenario] = Field(
