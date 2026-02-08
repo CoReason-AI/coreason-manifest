@@ -667,7 +667,8 @@ class RecipeDefinition(CoReasonBaseModel):
                 target_id = node.recovery.fallback_node_id
                 if target_id not in valid_node_ids:
                     errors.append(
-                        f"Node '{node.id}' defines fallback_node_id='{target_id}', but '{target_id}' does not exist in the recipe."
+                        f"Node '{node.id}' defines fallback_node_id='{target_id}', "
+                        f"but '{target_id}' does not exist in the recipe."
                     )
 
             # Future proofing: If you add explicit 'next_step' fields later, add checks here.
