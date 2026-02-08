@@ -50,8 +50,10 @@ pip install coreason-manifest
 Recipes are now graphs, allowing for complex orchestration logic.
 
 ```python
-from coreason_manifest.spec.v2.recipe import RecipeDefinition, GraphTopology, AgentNode, HumanNode, GraphEdge
-from coreason_manifest.spec.v2.definitions import ManifestMetadata, InterfaceDefinition
+from coreason_manifest import (
+    RecipeDefinition, GraphTopology, AgentNode, HumanNode, GraphEdge,
+    ManifestMetadata, RecipeInterface
+)
 
 # Define the nodes
 research_node = AgentNode(
@@ -78,7 +80,7 @@ topology = GraphTopology(
 # Create the Recipe
 recipe = RecipeDefinition(
     metadata=ManifestMetadata(name="Research & Approve Workflow"),
-    interface=InterfaceDefinition(
+    interface=RecipeInterface(
         inputs={"user_input": {"type": "string"}},
         outputs={"approval_status": {"type": "string"}}
     ),
@@ -93,7 +95,7 @@ print(f"Recipe '{recipe.metadata.name}' is valid!")
 The `AgentRequest` envelope ensures that every action is traceable back to its origin.
 
 ```python
-from coreason_manifest.spec.common.request import AgentRequest
+from coreason_manifest import AgentRequest
 from uuid import uuid4
 
 # 1. Incoming Request (Root)
@@ -118,7 +120,7 @@ print(f"Child Root ID:   {child_request.root_request_id}   (Should match Root Re
 For a fluent, Pythonic API to construct manifests (especially useful for tooling), use the `ManifestBuilder`.
 
 ```python
-from coreason_manifest.builder import AgentBuilder
+from coreason_manifest import AgentBuilder
 
 agent = AgentBuilder("ResearchAgent") \
     .with_model("gpt-4-turbo") \
