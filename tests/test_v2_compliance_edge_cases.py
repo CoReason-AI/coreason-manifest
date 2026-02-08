@@ -43,7 +43,7 @@ def test_invalid_hash_algorithm() -> None:
 
     # Testing type mismatch
     with pytest.raises(ValidationError):
-        IntegrityConfig(hash_algorithm=123)  # type: ignore[arg-type]
+        IntegrityConfig(hash_algorithm=123)
 
 
 def test_empty_compliance_config_partial_integrity() -> None:
@@ -69,4 +69,4 @@ def test_frozen_integrity_config() -> None:
     """Edge Case: IntegrityConfig is frozen."""
     config = IntegrityConfig()
     with pytest.raises(ValidationError):
-        config.input_mode = AuditContentMode.OFF  # type: ignore[attr-defined]
+        config.input_mode = AuditContentMode.OFF  # type: ignore[misc]

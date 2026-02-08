@@ -47,6 +47,7 @@ def test_complex_gxp_configuration() -> None:
         ),
     )
 
+    assert recipe.compliance is not None
     assert recipe.compliance.integrity.integrity_level == IntegrityLevel.BLOCKCHAIN_ANCHOR
     assert recipe.compliance.integrity.hash_algorithm == "sha512"
     assert recipe.compliance.audit_level == AuditLevel.GXP_COMPLIANT
@@ -72,6 +73,8 @@ def test_integrity_with_policy_limits() -> None:
         ),
     )
 
+    assert recipe.policy is not None
+    assert recipe.compliance is not None
     assert recipe.policy.budget_cap_usd == 50.0
     assert recipe.compliance.integrity.integrity_level == IntegrityLevel.DIGITAL_SIGNATURE
 
@@ -94,6 +97,7 @@ def test_nested_serialization_deserialization() -> None:
     json_str = original_recipe.model_dump_json()
     loaded_recipe = RecipeDefinition.model_validate_json(json_str)
 
+    assert loaded_recipe.compliance is not None
     assert loaded_recipe.compliance.integrity.input_mode == AuditContentMode.REDACTED
     assert loaded_recipe.compliance.integrity.integrity_level == IntegrityLevel.CHECKSUM
     # Default
