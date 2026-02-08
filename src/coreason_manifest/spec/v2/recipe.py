@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -23,6 +24,22 @@ logger = logging.getLogger(__name__)
 # ==========================================
 # 1. Configuration Schemas (New)
 # ==========================================
+
+
+class RecipeStatus(StrEnum):
+    """Lifecycle status of a Recipe."""
+
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    ARCHIVED = "archived"
+
+
+class SemanticRef(CoReasonBaseModel):
+    """A semantic reference (placeholder) for an agent or tool."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    intent: str = Field(..., description="The intent description for this placeholder.")
 
 
 class RecipeInterface(CoReasonBaseModel):
@@ -80,7 +97,9 @@ class AgentNode(RecipeNode):
     """A node that executes an AI Agent."""
 
     type: Literal["agent"] = "agent"
-    agent_ref: str = Field(..., description="The ID or URI of the Agent Definition to execute.")
+    agent_ref: str | SemanticRef = Field(
+        ..., description="The ID or URI of the Agent Definition, or a Semantic Reference."
+    )
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
 
@@ -285,6 +304,10 @@ class RecipeDefinition(CoReasonBaseModel):
 
     metadata: ManifestMetadata = Field(..., description="Metadata including name and design info.")
 
+    status: RecipeStatus = Field(
+        default=RecipeStatus.DRAFT, description="Lifecycle state. 'published' enforces strict validation."
+    )
+
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
     requirements: list[Constraint] = Field(default_factory=list, description="List of feasibility constraints.")
@@ -295,6 +318,31 @@ class RecipeDefinition(CoReasonBaseModel):
     topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
         ..., description="The execution graph topology."
     )
+
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "RecipeDefinition":
+        """
+        Lifecycle Guardrail:
+        - DRAFT: Allows SemanticRefs and partial graphs.
+        - PUBLISHED: Requires concrete IDs and valid graph.
+        """
+        if self.status == RecipeStatus.PUBLISHED:
+            # 1. Enforce Concrete Resolution
+            for node in self.topology.nodes:
+                if isinstance(node, AgentNode) and isinstance(node.agent_ref, SemanticRef):
+                    raise ValueError(
+                        f"Lifecycle Error: Node '{node.id}' is still abstract. "
+                        "Resolve all SemanticRefs to concrete IDs before publishing."
+                    )
+
+            # 2. Enforce Graph Integrity
+            if not self.topology.verify_completeness():
+                raise ValueError(
+                    "Lifecycle Error: Topology is structurally invalid (dangling edges or missing entry). "
+                    "Fix graph integrity before publishing."
+                )
+
+        return self
 
     def check_feasibility(self, context: dict[str, Any]) -> tuple[bool, list[str]]:
         """Check if all required constraints are satisfied."""
