@@ -150,7 +150,7 @@ def test_complex_compliance_scenario() -> None:
         generate_aibom=True,
         generate_pdf_report=True,
         require_signature=True,
-        mask_pii=False # Explicitly keeping PII for clinical records
+        mask_pii=False,  # Explicitly keeping PII for clinical records
     )
 
     # 2. Define recipe with this compliance
@@ -158,11 +158,10 @@ def test_complex_compliance_scenario() -> None:
         metadata=ManifestMetadata(
             name="Clinical Trial Analysis",
             description="Analyzes patient data for adverse events.",
-            version="1.0.0"
+            version="1.0.0",
         ),
         interface=RecipeInterface(
-            inputs={"patient_id": {"type": "string"}},
-            outputs={"risk_score": {"type": "number"}}
+            inputs={"patient_id": {"type": "string"}}, outputs={"risk_score": {"type": "number"}}
         ),
         compliance=clinical_compliance,
         topology=GraphTopology(
@@ -170,11 +169,9 @@ def test_complex_compliance_scenario() -> None:
                 AgentNode(id="ingest", agent_ref="ingestion-bot"),
                 AgentNode(id="analyze", agent_ref="clinical-reasoner"),
             ],
-            edges=[
-                {"source": "ingest", "target": "analyze"}
-            ],
-            entry_point="ingest"
-        )
+            edges=[{"source": "ingest", "target": "analyze"}],
+            entry_point="ingest",
+        ),
     )
 
     # 3. Serialize
@@ -207,6 +204,6 @@ def test_compliance_extra_forbid() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ComplianceConfig(
             audit_level=AuditLevel.BASIC,
-            extra_field="should_fail"
+            extra_field="should_fail",  # type: ignore[call-arg]
         )
     assert "Extra inputs are not permitted" in str(excinfo.value)
