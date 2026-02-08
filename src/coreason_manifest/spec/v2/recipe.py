@@ -136,6 +136,47 @@ class InteractionConfig(CoReasonBaseModel):
     guidance_hint: str | None = Field(None, description="Hint for the human operator.")
 
 
+class VisualizationStyle(StrEnum):
+    """How the UI should render the node's running state."""
+
+    CHAT = "chat"
+    TREE = "tree"
+    KANBAN = "kanban"
+    DOCUMENT = "document"
+
+
+class PresentationHints(CoReasonBaseModel):
+    """Directives for the frontend on how to render the internal reasoning."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    style: VisualizationStyle = Field(VisualizationStyle.CHAT, description="Visualization style.")
+    display_title: str | None = Field(None, description="Human-friendly label override.")
+    icon: str | None = Field(None, description="Icon name/emoji, e.g., 'lucide:brain'.")
+    hidden_fields: list[str] = Field(
+        default_factory=list, description="Whitelist of internal variables to hide from the non-debug UI."
+    )
+    progress_indicator: str | None = Field(None, description="Name of the context variable to watch for % completion.")
+
+
+class CollaborationMode(StrEnum):
+    """The protocol for human engagement."""
+
+    COMPLETION = "completion"
+    INTERACTIVE = "interactive"
+    CO_EDIT = "co_edit"
+
+
+class CollaborationConfig(CoReasonBaseModel):
+    """Rules for human-agent engagement."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
+    feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
+    supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
+
+
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -143,8 +184,10 @@ class RecipeNode(CoReasonBaseModel):
 
     id: str = Field(..., description="Unique identifier within the graph.")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Custom metadata (not for UI layout).")
-    presentation: NodePresentation | None = Field(None, description="Visual layout and styling metadata.")
+    presentation: NodePresentation | None = Field(None, description="Static visual layout (x, y, color).")
     interaction: InteractionConfig | None = Field(None, description="Interactive control plane configuration.")
+    visualization: PresentationHints | None = Field(None, description="Dynamic rendering hints (Glass Box).")
+    collaboration: CollaborationConfig | None = Field(None, description="Human engagement rules (Co-Pilot).")
 
 
 class AgentNode(RecipeNode):
