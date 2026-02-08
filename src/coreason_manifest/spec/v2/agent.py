@@ -49,14 +49,8 @@ class CognitiveProfile(CoReasonBaseModel):
     reasoning_mode: str | None = Field("standard", description="The thinking style (e.g., 'six_hats', 'socratic').")
 
     # --- Reasoning Capabilities ---
-    reasoning: ReasoningConfig | None = Field(
-        None,
-        description="System 2: Deep reasoning configuration (Episteme)."
-    )
-    reflex: ReflexConfig | None = Field(
-        None,
-        description="System 1: Fast response configuration (Cortex)."
-    )
+    reasoning: ReasoningConfig | None = Field(None, description="System 2: Deep reasoning configuration (Episteme).")
+    reflex: ReflexConfig | None = Field(None, description="System 1: Fast response configuration (Cortex).")
 
     # 3. Environment (Where)
     knowledge_contexts: list[ContextDependency] = Field(
@@ -65,14 +59,9 @@ class CognitiveProfile(CoReasonBaseModel):
 
     # --- Memory Capabilities ---
     memory_read: list[RetrievalConfig] = Field(
-        default_factory=list,
-        alias="memory",
-        description="Sources to read from (RAG)."
+        default_factory=list, alias="memory", description="Sources to read from (RAG)."
     )
-    memory_write: MemoryWriteConfig | None = Field(
-        None,
-        description="Rules for saving new memories (Crystallization)."
-    )
+    memory_write: MemoryWriteConfig | None = Field(None, description="Rules for saving new memories (Crystallization).")
 
     # 4. Task (What) - Maps to StructuredPrimitive
     task_primitive: str | None = Field(

@@ -10,28 +10,25 @@
 
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.knowledge import ConsolidationStrategy, MemoryWriteConfig, RetrievalConfig
-from coreason_manifest.spec.v2.reasoning import ReflexConfig, ReasoningConfig
+from coreason_manifest.spec.v2.reasoning import ReasoningConfig, ReflexConfig
+
 
 def test_memory_consolidation() -> None:
     """Test 1: Memory Consolidation configuration."""
-    config = MemoryWriteConfig(
-        strategy=ConsolidationStrategy.SUMMARY_WINDOW,
-        frequency_turns=5
-    )
+    config = MemoryWriteConfig(strategy=ConsolidationStrategy.SUMMARY_WINDOW, frequency_turns=5)
     assert config.strategy == ConsolidationStrategy.SUMMARY_WINDOW
     assert config.frequency_turns == 5
     assert config.destination_collection is None
 
+
 def test_reflex_configuration() -> None:
     """Test 2: Reflex Configuration."""
-    config = ReflexConfig(
-        enabled=True,
-        allowed_tools=["weather_api"]
-    )
+    config = ReflexConfig(enabled=True, allowed_tools=["weather_api"])
     assert config.enabled is True
     assert config.allowed_tools == ["weather_api"]
     # Verify default confidence threshold
     assert config.confidence_threshold == 0.9
+
 
 def test_cognitive_profile_integration() -> None:
     """Test 3: Full Cognitive Profile Integration."""
@@ -50,7 +47,7 @@ def test_cognitive_profile_integration() -> None:
         reflex=reflex_config,
         reasoning=reasoning_config,
         memory_write=write_config,
-        memory_read=[read_config]
+        memory_read=[read_config],
     )
 
     # Verify fields
@@ -71,6 +68,6 @@ def test_cognitive_profile_integration() -> None:
     # Verify alias works in input
     profile_from_alias = CognitiveProfile(
         role="tester",
-        memory=[read_config] # using the alias 'memory'
+        memory=[read_config],  # type: ignore[call-arg]
     )
     assert profile_from_alias.memory_read == [read_config]

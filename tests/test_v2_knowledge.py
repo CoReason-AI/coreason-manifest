@@ -103,7 +103,7 @@ def test_cognitive_profile_with_memory() -> None:
     memory_config = RetrievalConfig(strategy=RetrievalStrategy.DENSE, collection_name="history")
     profile = CognitiveProfile(
         role="archivist",
-        memory=[memory_config],
+        memory_read=[memory_config],
     )
     assert len(profile.memory) == 1
     assert profile.memory[0].collection_name == "history"
@@ -135,7 +135,7 @@ def test_cognitive_profile_complex_memory() -> None:
 
     profile = CognitiveProfile(
         role="researcher",
-        memory=memory_configs,
+        memory_read=memory_configs,
     )
 
     assert len(profile.memory) == 3
@@ -151,7 +151,7 @@ def test_cognitive_profile_redundant_memory() -> None:
     config = RetrievalConfig(collection_name="test")
     profile = CognitiveProfile(
         role="tester",
-        memory=[config, config],
+        memory=[config, config],  # type: ignore[call-arg]
     )
     assert len(profile.memory) == 2
     assert profile.memory[0] == profile.memory[1]

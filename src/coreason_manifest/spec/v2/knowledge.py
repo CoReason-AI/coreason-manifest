@@ -62,9 +62,7 @@ class MemoryWriteConfig(CoReasonBaseModel):
     strategy: ConsolidationStrategy = Field(
         ConsolidationStrategy.SESSION_CLOSE, description="When to persist memories."
     )
-    frequency_turns: int = Field(
-        10, description="If strategy is SUMMARY_WINDOW, how many turns trigger a write."
-    )
+    frequency_turns: int = Field(10, description="If strategy is SUMMARY_WINDOW, how many turns trigger a write.")
     destination_collection: str | None = Field(
         None,
         description="Target vector store collection. If None, uses the primary retrieval collection.",
