@@ -42,6 +42,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
 
+*   **[Active Defense & Guardrails](active_defense.md)**
+    *   Documentation for `GuardrailsConfig`, covering Circuit Breakers, Drift Detection, and runtime active defense strategies.
+
 *   **[Agent Skills System](skills.md)**
     *   Documentation for defining and using procedural knowledge ("Skills") with `SkillDefinition` and `LoadStrategy`.
 

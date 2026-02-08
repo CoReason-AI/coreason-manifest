@@ -20,11 +20,9 @@ from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
-from coreason_manifest.spec.v2.identity import IdentityRequirement
-from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
-from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 from coreason_manifest.spec.v2.identity import IdentityRequirement
+from coreason_manifest.spec.v2.reasoning import ReasoningConfig
 from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -335,12 +333,6 @@ class RecipeNode(CoReasonBaseModel):
 
     # --- New Field: Flow Governance ---
     recovery: RecoveryConfig | None = Field(None, description="Resilience settings.")
-
-    # --- New Field for Episteme Support ---
-    reasoning: ReasoningConfig | None = Field(
-        None,
-        description="Meta-cognition settings: Review loops, gap scanning, and validation strategies.",
-    )
 
     # --- New Field for Episteme Support ---
     reasoning: ReasoningConfig | None = Field(
@@ -680,7 +672,7 @@ class RecipeDefinition(CoReasonBaseModel):
     )
 
     # --- New Field for Sentinel ---
-    guardrails: Any | None = Field(
+    guardrails: GuardrailsConfig | None = Field(
         None,
         description="Active defense rules (Circuit Breakers, Drift, Spot Checks).",
     )
