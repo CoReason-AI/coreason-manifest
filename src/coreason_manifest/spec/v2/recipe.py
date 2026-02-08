@@ -1,12 +1,4 @@
-# Copyright (c) 2025 CoReason, Inc.
-#
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
-#
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
+# src/coreason_manifest/spec/v2/recipe.py
 
 import logging
 from enum import StrEnum
@@ -17,9 +9,9 @@ from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
+from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
-from coreason_manifest.spec.v2.knowledge import RetrievalConfig
 from coreason_manifest.spec.v2.resources import RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -125,23 +117,6 @@ class PolicyConfig(CoReasonBaseModel):
         default_factory=list,
         description="Whitelist of MCP server names this recipe is allowed to access.",
     )
-
-
-class CognitiveProfile(CoReasonBaseModel):
-    """Configuration for the internal reasoning architecture of an agent."""
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
-
-    role: str = Field(..., description="The role or persona of the agent.")
-    reasoning_mode: str = Field(..., description="The reasoning mode (e.g., 'react', 'cot').")
-
-    # --- New Field for Archive Support ---
-    memory: list[RetrievalConfig] = Field(
-        default_factory=list, description="Configuration for Long-Term Memory (RAG) access."
-    )
-
-    knowledge_contexts: list[str] = Field(default_factory=list, description="List of knowledge context IDs.")
-    task_primitive: str | None = Field(None, description="The task primitive to execute.")
 
 
 # ==========================================
