@@ -233,15 +233,41 @@ A recipe in `DRAFT` mode is permissive. It allows:
 *   **Partial Configuration**: Useful for AI-generated plans or initial human sketches.
 
 #### Intent-Based Planning (`SemanticRef`)
-In Draft mode, you can use `SemanticRef` to describe *what* an agent should do without selecting a specific tool or model yet.
+In Draft mode, you can use `SemanticRef` to describe *what* an agent should do without selecting a specific tool or model yet. The `SemanticRef` structure supports rich metadata for AI Architects, including constraints, candidate recommendations, and optimization directives.
 
 ```python
-from coreason_manifest.spec.v2.recipe import AgentNode, SemanticRef, RecipeStatus
+from coreason_manifest.spec.v2.recipe import (
+    AgentNode,
+    SemanticRef,
+    RecipeRecommendation,
+    OptimizationIntent,
+    RecipeStatus
+)
 
-# An abstract step: "Find flight prices"
+# 1. Recommendations from the Catalog
+rec = RecipeRecommendation(
+    ref="travel-agent-v1",
+    score=0.95,
+    rationale="High success rate for flight bookings.",
+    warnings=["Requires API key"]
+)
+
+# 2. Directives for Improvement
+opt = OptimizationIntent(
+    base_ref="generic-agent",
+    improvement_goal="Minimize latency",
+    strategy="parallel"
+)
+
+# 3. An Abstract Step with Metadata
 node = AgentNode(
     id="step-1",
-    agent_ref=SemanticRef(intent="Find cheapest flights to Tokyo")
+    agent_ref=SemanticRef(
+        intent="Find cheapest flights to Tokyo",
+        constraints=["max_price < 1000", "airline in [ANA, JAL]"],
+        candidates=[rec],
+        optimization=opt
+    )
 )
 
 # Valid in DRAFT mode
