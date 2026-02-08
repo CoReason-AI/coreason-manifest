@@ -18,6 +18,7 @@ from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
+from coreason_manifest.spec.v2.compliance import AuditLevel, ComplianceConfig, RetentionPolicy
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.identity import IdentityRequirement
@@ -166,39 +167,6 @@ class PolicyConfig(CoReasonBaseModel):
     legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
 
 
-class AuditLevel(StrEnum):
-    """The depth of the audit trail required."""
-
-    NONE = "none"  # No persistent logging
-    BASIC = "basic"  # Inputs/Outputs only
-    FULL = "full"  # Full reasoning trace + tool inputs/outputs
-    GXP_COMPLIANT = "gxp"  # Full trace + signatures + immutable archiving
-
-
-class RetentionPolicy(StrEnum):
-    """How long the audit artifacts must be retained."""
-
-    EPHEMERAL = "ephemeral"  # Delete after session
-    THIRTY_DAYS = "30_days"
-    ONE_YEAR = "1_year"
-    SEVEN_YEARS = "7_years"  # Standard for financial/legal
-
-
-class ComplianceConfig(CoReasonBaseModel):
-    """Configuration for the Coreason Auditor."""
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
-
-    audit_level: AuditLevel = Field(AuditLevel.BASIC, description="Depth of logging.")
-    retention: RetentionPolicy = Field(RetentionPolicy.THIRTY_DAYS, description="Data retention requirement.")
-
-    # Artifact Generation Flags
-    generate_aibom: bool = Field(False, description="Generate an AI Bill of Materials (software supply chain).")
-    generate_pdf_report: bool = Field(False, description="Generate a human-readable PDF report of the session.")
-    require_signature: bool = Field(False, description="Cryptographically sign the final output.")
-
-    # PII/Sensitivity
-    mask_pii: bool = Field(True, description="Attempt to scrub PII from logs before archiving.")
 
 
 # ==========================================
