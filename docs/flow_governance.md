@@ -95,8 +95,8 @@ robust_node = AgentNode(
 
 ## Validation
 
-The `RecipeDefinition` strictly validates Flow Governance configurations:
-*   `max_retries` must be non-negative.
-*   `retry_delay_seconds` must be non-negative.
+The `RecipeDefinition` validates Flow Governance configurations:
+*   `max_retries` should typically be non-negative (logic depends on runtime implementation).
+*   `retry_delay_seconds` should typically be non-negative.
 *   If `behavior` is `route_to_fallback`, `fallback_node_id` MUST be provided and MUST exist in the graph.
 *   If `behavior` is `continue_with_default`, `default_output` generally should be provided (though `None` is valid).
