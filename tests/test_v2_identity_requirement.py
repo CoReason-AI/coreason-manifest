@@ -145,7 +145,7 @@ def test_identity_edge_cases_boolean_flags() -> None:
 def test_identity_edge_cases_invalid_enum() -> None:
     """Test validation error for invalid enum value (Edge Case 3)."""
     with pytest.raises(ValidationError):
-        IdentityRequirement(min_scope="invalid_scope")  # type: ignore[arg-type]
+        IdentityRequirement(min_scope="invalid_scope")
 
 
 # --- Complex Case Tests ---
