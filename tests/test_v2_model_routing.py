@@ -1,8 +1,8 @@
 # Copyright (c) 2025 CoReason, Inc.
 
-from coreason_manifest.spec.v2.recipe import AgentNode, RecipeDefinition, RecipeInterface, GraphTopology
-from coreason_manifest.spec.v2.resources import ModelSelectionPolicy, RoutingStrategy, ComplianceTier
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.recipe import AgentNode, GraphTopology, RecipeDefinition, RecipeInterface
+from coreason_manifest.spec.v2.resources import ComplianceTier, ModelSelectionPolicy, RoutingStrategy
 
 
 def test_model_selection_policy() -> None:
