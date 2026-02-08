@@ -27,12 +27,12 @@ from coreason_manifest.spec.v2.recipe import (
 def test_agent_node_no_ref_no_construct() -> None:
     """
     Test AgentNode with neither agent_ref nor construct.
-    Expects strict validation failure.
+    Technically valid by schema (both Optional), but Runtime should handle it.
     """
-    with pytest.raises(ValidationError) as excinfo:
-        AgentNode(id="ghost-agent")
-
-    assert "AgentNode must provide either 'agent_ref' (catalog) or 'construct' (inline)." in str(excinfo.value)
+    node = AgentNode(id="ghost-agent")
+    assert node.agent_ref is None
+    assert node.construct is None
+    # This node is essentially empty, waiting for runtime logic or injection.
 
 
 def test_cognitive_profile_minimal() -> None:
@@ -167,7 +167,7 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
 
 
 def test_lifecycle_validation_incomplete_node() -> None:
-    """Test that validation rejects nodes without agent_ref or construct (even before lifecycle)."""
+    """Test that PUBLISHED status rejects nodes without agent_ref or construct."""
     data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
@@ -186,5 +186,4 @@ def test_lifecycle_validation_incomplete_node() -> None:
     with pytest.raises(ValidationError) as excinfo:
         RecipeDefinition.model_validate(data)
 
-    # The AgentNode validator runs first
-    assert "AgentNode must provide either 'agent_ref' (catalog) or 'construct' (inline)." in str(excinfo.value)
+    assert "Nodes ['ghost'] are incomplete" in str(excinfo.value)

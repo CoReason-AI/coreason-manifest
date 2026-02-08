@@ -122,6 +122,8 @@ policy=PolicyConfig(
 
 New in 0.22.0, the `environment` field allows recipes to declare their **MCP Infrastructure Requirements**.
 
+The `RecipeDefinition` also supports a `default_model_policy` field to set global model selection rules for all agents in the recipe. See [Model Routing](model_routing.md).
+
 ```python
 from coreason_manifest.spec.v2.resources import RuntimeEnvironment, McpServerRequirement
 
@@ -213,6 +215,7 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
 1.  **`AgentNode`** (`type: agent`): Executes an AI Agent.
     - `agent_ref`: The ID or URI of the Agent Definition to execute.
     - `construct`: (Optional) Inline definition of the agent's cognitive architecture (Assembler Pattern). See [The Assembler Pattern](assembler_pattern.md).
+    - `model_policy`: (Optional) Semantic Model Selection policy (inline or string ID). See [Model Routing](model_routing.md).
     - `system_prompt_override`: Context-specific instructions (optional).
     - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
 
