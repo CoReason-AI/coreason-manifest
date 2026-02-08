@@ -69,7 +69,7 @@ def test_complex_nesting_serialization() -> None:
 
 def test_strategy_string_coercion() -> None:
     """Verify string input for strategy enum."""
-    config = ReasoningConfig(strategy="adversarial")  # type: ignore[arg-type]
+    config = ReasoningConfig(strategy="adversarial")
     assert config.strategy == ReviewStrategy.ADVERSARIAL
 
 
