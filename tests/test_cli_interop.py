@@ -19,10 +19,7 @@ from _pytest.capture import CaptureFixture
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.cli import main
 from coreason_manifest.spec.v2.definitions import (
-    AgentStep,
-    ManifestMetadata,
     ManifestV2,
-    Workflow,
 )
 from coreason_manifest.utils.loader import load_agent_from_ref
 
