@@ -130,6 +130,15 @@ class PolicyConfig(CoReasonBaseModel):
         description="Whitelist of MCP server names this recipe is allowed to access.",
     )
 
+    # --- New Harvesting Fields from Coreason-Protocol ---
+    safety_preamble: str | None = Field(
+        None, description="Mandatory safety instruction injected into the system prompt."
+    )
+
+    legal_disclaimer: str | None = Field(
+        None, description="Text that must be appended to the final output."
+    )
+
 
 class AuditLevel(StrEnum):
     """The depth of the audit trail required."""
