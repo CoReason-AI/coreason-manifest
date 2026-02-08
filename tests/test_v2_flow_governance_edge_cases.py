@@ -45,10 +45,7 @@ def test_edge_case_negative_delay() -> None:
 
 def test_edge_case_default_output_none() -> None:
     """Edge Case: continue_with_default with None default_output."""
-    config = RecoveryConfig(
-        behavior=FailureBehavior.CONTINUE_WITH_DEFAULT,
-        default_output=None
-    )
+    config = RecoveryConfig(behavior=FailureBehavior.CONTINUE_WITH_DEFAULT, default_output=None)
     assert config.behavior == FailureBehavior.CONTINUE_WITH_DEFAULT
     assert config.default_output is None
 
@@ -58,12 +55,12 @@ def test_complex_cyclic_fallback() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B")
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="B"),
     )
     node_b = AgentNode(
         id="B",
         agent_ref="agent-b",
-        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="A")
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="A"),
     )
 
     # Structurally valid, though runtime might loop infinitely
@@ -76,7 +73,7 @@ def test_complex_self_fallback() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="A")
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="A"),
     )
 
     topo = GraphTopology(nodes=[node_a], edges=[], entry_point="A")
@@ -89,20 +86,17 @@ def test_complex_fallback_chain() -> None:
     # Create A, B, C pointing to next
     chars = ["A", "B", "C", "D"]
     for i in range(3):
-        nodes.append(AgentNode(
-            id=chars[i],
-            agent_ref=f"agent-{chars[i]}",
-            recovery=RecoveryConfig(
-                behavior=FailureBehavior.ROUTE_TO_FALLBACK,
-                fallback_node_id=chars[i+1]
+        nodes.append(
+            AgentNode(
+                id=chars[i],
+                agent_ref=f"agent-{chars[i]}",
+                recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id=chars[i + 1]),
             )
-        ))
+        )
     # D fails workflow
-    nodes.append(AgentNode(
-        id="D",
-        agent_ref="agent-d",
-        recovery=RecoveryConfig(behavior=FailureBehavior.FAIL_WORKFLOW)
-    ))
+    nodes.append(
+        AgentNode(id="D", agent_ref="agent-d", recovery=RecoveryConfig(behavior=FailureBehavior.FAIL_WORKFLOW))
+    )
 
     topo = GraphTopology(nodes=nodes, edges=[], entry_point="A")
     assert topo.status == "valid"
@@ -113,10 +107,7 @@ def test_validation_fallback_missing_node() -> None:
     node_a = AgentNode(
         id="A",
         agent_ref="agent-a",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK,
-            fallback_node_id="MISSING_NODE"
-        )
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="MISSING_NODE"),
     )
 
     with pytest.raises(ValidationError, match="Invalid fallback_node_id 'MISSING_NODE'"):
