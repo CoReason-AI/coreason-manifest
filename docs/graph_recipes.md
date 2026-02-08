@@ -337,3 +337,58 @@ To prevent infinite loops in malformed graphs, the executor enforces a `max_step
 ### Trace Generation
 
 The executor generates a `SimulationTrace` containing a list of `SimulationStep` objects, providing a full audit trail of the execution path, including inputs, outputs, and routing decisions.
+
+## Interactive Control Plane (New in 0.22.0)
+
+Coreason V2 introduces an **Interactive Control Plane**, allowing any node (`AgentNode`, `GenerativeNode`, etc.) to declare *when* it should pause for human intervention and *what* parts of its state are mutable during execution.
+
+This is configured via the `interaction` field on any `RecipeNode`.
+
+### Configuration (`InteractionConfig`)
+
+```python
+from coreason_manifest.spec.v2.recipe import (
+    InteractionConfig,
+    TransparencyLevel,
+    InterventionTrigger
+)
+
+# Define interaction settings
+interaction = InteractionConfig(
+    transparency=TransparencyLevel.INTERACTIVE, # "Step-Through" mode
+    triggers=[
+        InterventionTrigger.ON_PLAN_GENERATION, # Pause after planning
+        InterventionTrigger.ON_FAILURE          # Pause on error
+    ],
+    editable_fields=["inputs", "system_prompt_override"], # Whitelist mutable fields
+    enforce_contract=True, # Validate steered output against schema
+    guidance_hint="Please review the plan carefully."
+)
+
+# Attach to a node
+node = AgentNode(
+    id="planner",
+    agent_ref="planner-v1",
+    interaction=interaction
+)
+```
+
+### Primitives
+
+1.  **`TransparencyLevel`**:
+    *   `OPAQUE`: (Default) Black box. Only inputs/outputs are visible.
+    *   `OBSERVABLE`: "Glass Box." Emits internal thought traces/events.
+    *   `INTERACTIVE`: "Step-Through." Implies `OBSERVABLE` + signals runtime to expect pauses.
+
+2.  **`InterventionTrigger`**:
+    *   `ON_START`: Pause before node execution (e.g., to tweak inputs).
+    *   `ON_PLAN_GENERATION`: Pause after a `GenerativeNode` creates a plan (Review & Refine).
+    *   `ON_FAILURE`: Pause on error (Manual Recovery).
+    *   `ON_COMPLETION`: Pause before output release (Quality Check).
+
+3.  **`InteractionConfig` Fields**:
+    *   `transparency`: `TransparencyLevel` (Default: `OPAQUE`).
+    *   `triggers`: `list[InterventionTrigger]` (Default: `[]`).
+    *   `editable_fields`: `list[str]` (Default: `[]`). Whitelist of fields the user can modify during a pause.
+    *   `enforce_contract`: `bool` (Default: `True`). If True, the runtime MUST validate the steered output against the original output_schema.
+    *   `guidance_hint`: `str | None`. Optional instruction for the operator.
