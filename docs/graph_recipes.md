@@ -181,6 +181,13 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `fail_route`: Node ID to go to if score < threshold.
     - `feedback_variable`: The key in the state where the critique/reasoning will be written.
 
+5.  **`GenerativeNode`** (`type: generative`): Acts as an interface definition for dynamic solvers (like ROMA) to solve a high-level goal recursively.
+    - `goal`: The high-level objective to be solved (e.g., "Research competitor pricing").
+    - `max_depth`: Recursion limit for sub-tasks (default: 3).
+    - `strategy`: Traversal strategy hint (`bfs`, `dfs`, `hybrid`).
+    - `allowed_tools`: Whitelist of Tool IDs the solver is permitted to use.
+    - `output_schema`: JSON Schema defining the expected structure of the final answer.
+
 ## Evaluator-Optimizer Workflow
 
 Coreason V2 natively supports the **Evaluator-Optimizer** pattern (popularized by Anthropic's Claude Cookbook). This pattern uses a dedicated `EvaluatorNode` to critique the output of a Generator agent and loop back for refinements until a quality threshold is met.
