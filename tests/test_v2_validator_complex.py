@@ -1,11 +1,11 @@
 import pytest
+
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile, SuccessCriterion
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
     EvaluatorNode,
     FailureBehavior,
-    GraphEdge,
     GraphTopology,
     HumanNode,
     RecipeDefinition,
@@ -106,8 +106,8 @@ def test_complex_broken_topology() -> None:
         default_route="Manager",
         recovery=RecoveryConfig(
             behavior=FailureBehavior.ROUTE_TO_FALLBACK,
-            fallback_node_id="Missing_Node"  # This is the error
-        )
+            fallback_node_id="Missing_Node",  # This is the error
+        ),
     )
 
     topology = GraphTopology(
@@ -135,10 +135,7 @@ def test_mixed_node_types() -> None:
         input_key="x",
         routes={},
         default_route="Human_Help",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK,
-            fallback_node_id="Human_Help"
-        )
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="Human_Help"),
     )
 
     node_evaluator = EvaluatorNode(
@@ -146,23 +143,14 @@ def test_mixed_node_types() -> None:
         target_variable="output",
         evaluator_agent_ref="gpt-4",
         evaluation_profile=EvaluationProfile(
-            grading_rubric=[
-                SuccessCriterion(
-                    name="accuracy",
-                    description="Must be accurate",
-                    threshold=0.9
-                )
-            ]
+            grading_rubric=[SuccessCriterion(name="accuracy", description="Must be accurate", threshold=0.9)]
         ),
         pass_threshold=0.9,
         max_refinements=1,
         pass_route="Human_Help",
         fail_route="Human_Help",
         feedback_variable="feedback",
-        recovery=RecoveryConfig(
-            behavior=FailureBehavior.ROUTE_TO_FALLBACK,
-            fallback_node_id="Human_Help"
-        )
+        recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id="Human_Help"),
     )
 
     topology = GraphTopology(
