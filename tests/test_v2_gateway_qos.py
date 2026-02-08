@@ -92,11 +92,13 @@ def test_recipe_definition_with_qos_policy() -> None:
 
 # --- User Requested Tests ---
 
+
 def test_qos_priority_enum_user_requested() -> None:
     """Verify traffic priority levels."""
-    assert ExecutionPriority.CRITICAL == 10
-    assert ExecutionPriority.NORMAL == 5
-    assert ExecutionPriority.BATCH == 1
+    assert ExecutionPriority.CRITICAL.value == 10
+    assert ExecutionPriority.NORMAL.value == 5
+    assert ExecutionPriority.BATCH.value == 1
+
 
 def test_policy_qos_fields_user_requested() -> None:
     """Ensure PolicyConfig accepts rate limits and priority."""
@@ -105,12 +107,13 @@ def test_policy_qos_fields_user_requested() -> None:
         priority=ExecutionPriority.HIGH,
         rate_limit_rpm=120,
         rate_limit_tpm=50000,
-        caching_enabled=False
+        caching_enabled=False,
     )
 
     assert policy.priority == ExecutionPriority.HIGH
     assert policy.rate_limit_rpm == 120
     assert policy.caching_enabled is False
+
 
 def test_qos_defaults_user_requested() -> None:
     """Verify default QoS settings."""
@@ -119,11 +122,9 @@ def test_qos_defaults_user_requested() -> None:
     assert policy.caching_enabled is True
     assert policy.rate_limit_rpm is None
 
+
 def test_serialization_user_requested() -> None:
     """Verify JSON persistence of QoS fields."""
-    policy = PolicyConfig(
-        budget_cap_usd=1.0,
-        priority=ExecutionPriority.BATCH
-    )
-    data = policy.model_dump(mode='json')
-    assert data['priority'] == 1  # IntEnum serializes to value
+    policy = PolicyConfig(budget_cap_usd=1.0, priority=ExecutionPriority.BATCH)
+    data = policy.model_dump(mode="json")
+    assert data["priority"] == 1  # IntEnum serializes to value
