@@ -42,7 +42,7 @@ class MockGenerator:
 
     def _random_string(self, min_len: int = 5, max_len: int = 20) -> str:
         length = self.rng.randint(min_len, max_len)
-        return "".join(self.rng.choices(string.ascii_letters + string.digits + " ", k=length)).strip()
+        return "".join(self.rng.choices(string.ascii_letters + string.digits, k=length))
 
     def _random_int(self, min_val: int = 0, max_val: int = 100) -> int:
         return self.rng.randint(min_val, max_val)

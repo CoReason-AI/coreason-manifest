@@ -264,6 +264,35 @@ class CollaborationConfig(CoReasonBaseModel):
     )
 
 
+class FailureBehavior(StrEnum):
+    """Action to take when a node fails after retries are exhausted."""
+
+    FAIL_WORKFLOW = "fail_workflow"  # Default: Stop everything
+    CONTINUE_WITH_DEFAULT = "continue_with_default"  # Use 'default_output'
+    ROUTE_TO_FALLBACK = "route_to_fallback"  # Jump to specific node
+    IGNORE = "ignore"  # Return None and proceed
+
+
+class RecoveryConfig(CoReasonBaseModel):
+    """Configuration for node-level resilience (harvested from Maco)."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    max_retries: int | None = Field(None, ge=0, description="Override global retry limit.")
+    retry_delay_seconds: float = Field(1.0, ge=0.0, description="Backoff start.")
+
+    behavior: FailureBehavior = Field(FailureBehavior.FAIL_WORKFLOW, description="Strategy on final failure.")
+
+    fallback_node_id: str | None = Field(
+        None,
+        description="The ID of the node to transition to if behavior is ROUTE_TO_FALLBACK.",
+    )
+    default_output: dict[str, Any] | None = Field(
+        None,
+        description="Static payload to return if behavior is CONTINUE_WITH_DEFAULT.",
+    )
+
+
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -275,6 +304,9 @@ class RecipeNode(CoReasonBaseModel):
     interaction: InteractionConfig | None = Field(None, description="Interactive control plane configuration.")
     visualization: PresentationHints | None = Field(None, description="Dynamic rendering hints (Glass Box).")
     collaboration: CollaborationConfig | None = Field(None, description="Human engagement rules (Co-Pilot).")
+
+    # --- New Field: Flow Governance ---
+    recovery: RecoveryConfig | None = Field(None, description="Error handling and resilience settings.")
 
 
 class AgentNode(RecipeNode):
@@ -461,6 +493,19 @@ class GraphTopology(CoReasonBaseModel):
                 raise ValueError(f"Dangling edge source: {edge.source} -> {edge.target}")
             if edge.target not in valid_ids:
                 raise ValueError(f"Dangling edge target: {edge.source} -> {edge.target}")
+
+        # 4. Check fallback nodes (Flow Governance)
+        for node in self.nodes:
+            if (
+                node.recovery
+                and node.recovery.behavior == FailureBehavior.ROUTE_TO_FALLBACK
+                and node.recovery.fallback_node_id
+            ):
+                fallback_id = node.recovery.fallback_node_id
+                if fallback_id not in valid_ids:
+                    raise ValueError(
+                        f"Invalid fallback_node_id '{fallback_id}' in node '{node.id}': Node not found in graph."
+                    )
 
 
 class TaskSequence(CoReasonBaseModel):
