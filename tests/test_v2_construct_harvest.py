@@ -1,11 +1,13 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.v2.recipe import (
-    AgentNode,
+from coreason_manifest.spec.v2.agent import (
     CognitiveProfile,
     ComponentPriority,
     ContextDependency,
+)
+from coreason_manifest.spec.v2.recipe import (
+    AgentNode,
     PolicyConfig,
 )
 

@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
-from enum import IntEnum, StrEnum
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -218,49 +218,6 @@ class CollaborationConfig(CoReasonBaseModel):
     )
 
 
-class ComponentPriority(IntEnum):
-    """Priority levels for token optimization (harvested from Weaver)."""
-
-    LOW = 1
-    MEDIUM = 5
-    HIGH = 8
-    CRITICAL = 10
-
-
-class ContextDependency(CoReasonBaseModel):
-    """A reference to a knowledge context module (e.g., 'hipaa_context')."""
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
-
-    name: str = Field(..., description="The registry name of the context component.")
-    priority: ComponentPriority = Field(ComponentPriority.MEDIUM, description="Token optimization priority.")
-    parameters: dict[str, Any] = Field(default_factory=dict, description="Variables to inject into the context.")
-
-
-class CognitiveProfile(CoReasonBaseModel):
-    """The configuration for the Weaver to assemble a Prompt."""
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
-
-    # 1. Identity (Who)
-    role: str = Field(..., description="The specific Role/Persona (e.g., 'safety_scientist').")
-
-    # 2. Mode (How)
-    reasoning_mode: str | None = Field("standard", description="The thinking style (e.g., 'six_hats', 'socratic').")
-
-    # 3. Environment (Where)
-    knowledge_contexts: list[ContextDependency] = Field(
-        default_factory=list,
-        description="Dynamic context modules to inject (e.g., 'meddra_dictionary').",
-    )
-
-    # 4. Task (What)
-    task_primitive: str | None = Field(
-        None,
-        description="The logic primitive to apply (e.g., 'extract', 'classify', 'cohort').",
-    )
-
-
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -290,12 +247,6 @@ class AgentNode(RecipeNode):
         None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
     )
 
-    # --- New Field: Harvested from Construct ---
-    construct: CognitiveProfile | None = Field(
-        None,
-        description="Inline definition of the agent's cognitive architecture (for the Weaver).",
-    )  # type: ignore[assignment]
-
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
 
@@ -322,29 +273,11 @@ class SolverConfig(CoReasonBaseModel):
 
     strategy: SolverStrategy = Field(SolverStrategy.STANDARD, description="The planning strategy to use.")
     depth_limit: int = Field(3, ge=1, description="Hard limit on recursion depth.")
-    # --- Ensemble / Council Configuration (Harvested) ---
-    n_samples: int = Field(1, ge=1, description="Council size: How many plans to generate.")
-
-    diversity_threshold: float | None = Field(
-        0.3,
-        ge=0.0,
-        le=1.0,
-        description="For Ensemble: Minimum Jaccard distance required between generated plans.",
-    )
-
-    enable_dissenter: bool = Field(
-        False, description="If True, an adversarial agent will critique plans before voting."
-    )
-
-    consensus_threshold: float | None = Field(
-        0.6, ge=0.0, le=1.0, description="Percentage of votes required to ratify a plan."
-    )
-
-    # --- Tree Search Configuration ---
+    n_samples: int = Field(1, ge=1, description="For SPIO: How many distinct plans to generate in parallel.")
     beam_width: int = Field(1, ge=1, description="For LATS: How many children to expand per node.")
     max_iterations: int = Field(10, ge=1, description="For LATS: The 'Search Budget' (total simulations).")
     aggregation_method: Literal["best_of_n", "majority_vote", "weighted_merge"] | None = Field(
-        None, description="How to combine results if n_samples > 1."
+        None, description="How to combine results if n_samples > 1 (SPIO-E logic)."
     )
 
 
@@ -594,26 +527,16 @@ class RecipeDefinition(CoReasonBaseModel):
         - PUBLISHED: Requires concrete IDs and valid graph.
         """
         if self.status == RecipeStatus.PUBLISHED:
-            # 1. Enforce Concrete Resolution and Complete Definition
+            # 1. Enforce Concrete Resolution
             abstract_nodes = []
-            incomplete_nodes = []
             for node in self.topology.nodes:
-                if isinstance(node, AgentNode):
-                    if isinstance(node.agent_ref, SemanticRef):
-                        abstract_nodes.append(node.id)
-                    elif not node.agent_ref and not node.construct:
-                        incomplete_nodes.append(node.id)
+                if isinstance(node, AgentNode) and isinstance(node.agent_ref, SemanticRef):
+                    abstract_nodes.append(node.id)
 
             if abstract_nodes:
                 raise ValueError(
                     f"Lifecycle Error: Nodes {abstract_nodes} are still abstract. "
                     "Resolve all SemanticRefs to concrete IDs before publishing."
-                )
-
-            if incomplete_nodes:
-                raise ValueError(
-                    f"Lifecycle Error: Nodes {incomplete_nodes} are incomplete. "
-                    "Must provide either 'agent_ref' or 'construct' before publishing."
                 )
 
             # 2. Enforce Graph Integrity
