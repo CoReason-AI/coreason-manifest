@@ -270,8 +270,8 @@ class RecoveryConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    max_retries: int | None = Field(None, ge=0, description="Override global retry limit.")
-    retry_delay_seconds: float = Field(1.0, ge=0.0, description="Backoff start.")
+    max_retries: int | None = Field(None, description="Override global retry limit.")
+    retry_delay_seconds: float = Field(1.0, description="Backoff start.")
 
     behavior: FailureBehavior = Field(FailureBehavior.FAIL_WORKFLOW, description="Strategy on final failure.")
 
