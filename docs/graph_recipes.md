@@ -183,10 +183,17 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
 
 5.  **`GenerativeNode`** (`type: generative`): Acts as an interface definition for dynamic solvers (like ROMA) to solve a high-level goal recursively.
     - `goal`: The high-level objective to be solved (e.g., "Research competitor pricing").
-    - `max_depth`: Recursion limit for sub-tasks (default: 3).
-    - `strategy`: Traversal strategy hint (`bfs`, `dfs`, `hybrid`).
-    - `allowed_tools`: Whitelist of Tool IDs the solver is permitted to use.
     - `output_schema`: JSON Schema defining the expected structure of the final answer.
+    - `solver`: Configuration for the autonomous planning capabilities (`SolverConfig`).
+        - `strategy`: The planning strategy (`standard`, `tree_search`, `ensemble`).
+        - `depth_limit`: Hard limit on recursion depth (default: 3).
+        - `n_samples`: For SPIO (Ensemble): How many distinct plans to generate in parallel (default: 1).
+        - `beam_width`: For LATS (Tree Search): How many children to expand per node (default: 1).
+        - `max_iterations`: For LATS: The "Search Budget" (total simulations) (default: 10).
+        - `aggregation_method`: For SPIO-E: How to combine results (`best_of_n`, `majority_vote`, `weighted_merge`).
+    - `allowed_tools`: Whitelist of Tool IDs the solver is permitted to use.
+
+See [Generative Solvers & Strategies](generative_solvers.md) for more details.
 
 ## Evaluator-Optimizer Workflow
 
