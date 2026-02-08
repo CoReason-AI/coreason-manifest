@@ -14,20 +14,17 @@ from pydantic import ValidationError
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     GenerativeNode,
+    GraphTopology,
     RecipeDefinition,
     RecipeInterface,
-    GraphTopology,
     SolverConfig,
     SolverStrategy,
 )
 
+
 def test_solver_config_serialization() -> None:
     """Test serialization of SolverConfig."""
-    config = SolverConfig(
-        strategy=SolverStrategy.ENSEMBLE,
-        n_samples=5,
-        aggregation_method="best_of_n"
-    )
+    config = SolverConfig(strategy=SolverStrategy.ENSEMBLE, n_samples=5, aggregation_method="best_of_n")
     data = config.model_dump()
     assert data["strategy"] == "ensemble"
     assert data["n_samples"] == 5
@@ -39,6 +36,7 @@ def test_solver_config_serialization() -> None:
     assert data_default["strategy"] == "standard"
     assert data_default["depth_limit"] == 3
     assert data_default["n_samples"] == 1
+
 
 def test_solver_config_validation_edge_cases() -> None:
     """Test numeric boundaries for SolverConfig fields."""
@@ -63,25 +61,18 @@ def test_solver_config_validation_edge_cases() -> None:
         SolverConfig(depth_limit=0)
     assert "Input should be greater than or equal to 1" in str(exc.value)
 
+
 def test_solver_config_invalid_strategy() -> None:
     """Test invalid strategy enum value (Pydantic validation)."""
     with pytest.raises(ValidationError) as exc:
-        SolverConfig(strategy="invalid_strategy") # type: ignore[arg-type]
+        SolverConfig(strategy="invalid_strategy")
     assert "Input should be 'standard', 'tree_search' or 'ensemble'" in str(exc.value)
+
 
 def test_generative_node_with_custom_solver() -> None:
     """Test GenerativeNode correctly embeds a custom SolverConfig."""
-    solver = SolverConfig(
-        strategy=SolverStrategy.TREE_SEARCH,
-        max_iterations=100,
-        beam_width=5
-    )
-    node = GenerativeNode(
-        id="gen-node",
-        goal="Solve complex logic",
-        output_schema={},
-        solver=solver
-    )
+    solver = SolverConfig(strategy=SolverStrategy.TREE_SEARCH, max_iterations=100, beam_width=5)
+    node = GenerativeNode(id="gen-node", goal="Solve complex logic", output_schema={}, solver=solver)
 
     assert node.solver.strategy == SolverStrategy.TREE_SEARCH
     assert node.solver.max_iterations == 100
@@ -91,6 +82,7 @@ def test_generative_node_with_custom_solver() -> None:
     dump = node.model_dump()
     assert dump["solver"]["max_iterations"] == 100
 
+
 def test_full_recipe_serialization_with_complex_solver() -> None:
     """Test full round-trip serialization of a Recipe containing advanced GenerativeNodes."""
 
@@ -98,32 +90,22 @@ def test_full_recipe_serialization_with_complex_solver() -> None:
         id="step-1",
         goal="Generate ideas",
         output_schema={"type": "array"},
-        solver=SolverConfig(
-            strategy=SolverStrategy.ENSEMBLE,
-            n_samples=10,
-            aggregation_method="weighted_merge"
-        )
+        solver=SolverConfig(strategy=SolverStrategy.ENSEMBLE, n_samples=10, aggregation_method="weighted_merge"),
     )
 
     node_refine = GenerativeNode(
         id="step-2",
         goal="Refine best idea",
         output_schema={"type": "string"},
-        solver=SolverConfig(
-            strategy=SolverStrategy.TREE_SEARCH,
-            depth_limit=10,
-            beam_width=2
-        )
+        solver=SolverConfig(strategy=SolverStrategy.TREE_SEARCH, depth_limit=10, beam_width=2),
     )
 
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="Complex Solver Recipe"),
         interface=RecipeInterface(),
         topology=GraphTopology(
-            nodes=[node_ensemble, node_refine],
-            edges=[{"source": "step-1", "target": "step-2"}],
-            entry_point="step-1"
-        )
+            nodes=[node_ensemble, node_refine], edges=[{"source": "step-1", "target": "step-2"}], entry_point="step-1"
+        ),
     )
 
     # Serialize
@@ -145,6 +127,7 @@ def test_full_recipe_serialization_with_complex_solver() -> None:
     assert nodes["step-2"].solver.strategy == SolverStrategy.TREE_SEARCH
     assert nodes["step-2"].solver.depth_limit == 10
 
+
 def test_complex_overlapping_solver_config() -> None:
     """
     Test a configuration that sets parameters relevant to multiple strategies.
@@ -153,19 +136,14 @@ def test_complex_overlapping_solver_config() -> None:
     """
     # Setting both n_samples (SPIO) and beam_width (LATS)
     solver = SolverConfig(
-        strategy=SolverStrategy.STANDARD, # Strategy is standard
-        n_samples=5,                      # But we set SPIO param
-        beam_width=3,                     # And LATS param
-        max_iterations=50
+        strategy=SolverStrategy.STANDARD,  # Strategy is standard
+        n_samples=5,  # But we set SPIO param
+        beam_width=3,  # And LATS param
+        max_iterations=50,
     )
 
     # Should validate fine as a data structure
-    node = GenerativeNode(
-        id="mixed-config",
-        goal="Ambiguous task",
-        output_schema={},
-        solver=solver
-    )
+    node = GenerativeNode(id="mixed-config", goal="Ambiguous task", output_schema={}, solver=solver)
 
     assert node.solver.n_samples == 5
     assert node.solver.beam_width == 3
