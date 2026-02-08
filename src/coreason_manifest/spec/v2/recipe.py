@@ -253,23 +253,23 @@ class Constraint(CoReasonBaseModel):
         # 2. Compare
         try:
             if self.operator == "eq":
-                return resolved_value == self.value
-            elif self.operator == "neq":
-                return resolved_value != self.value
-            elif self.operator == "gt":
-                return resolved_value > self.value
-            elif self.operator == "gte":
-                return resolved_value >= self.value
-            elif self.operator == "lt":
-                return resolved_value < self.value
-            elif self.operator == "lte":
-                return resolved_value <= self.value
-            elif self.operator == "in":
-                return resolved_value in self.value
-            elif self.operator == "contains":
-                return self.value in resolved_value
-            else:
-                return False
+                return bool(resolved_value == self.value)
+            if self.operator == "neq":
+                return bool(resolved_value != self.value)
+            if self.operator == "gt":
+                return bool(resolved_value > self.value)
+            if self.operator == "gte":
+                return bool(resolved_value >= self.value)
+            if self.operator == "lt":
+                return bool(resolved_value < self.value)
+            if self.operator == "lte":
+                return bool(resolved_value <= self.value)
+            if self.operator == "in":
+                return bool(resolved_value in self.value)
+            if self.operator == "contains":
+                return bool(self.value in resolved_value)
+
+            return False
         except TypeError:
             # Type mismatch (e.g., comparing str > int)
             return False
@@ -287,9 +287,7 @@ class RecipeDefinition(CoReasonBaseModel):
 
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
-    requirements: list[Constraint] = Field(
-        default_factory=list, description="List of feasibility constraints."
-    )
+    requirements: list[Constraint] = Field(default_factory=list, description="List of feasibility constraints.")
     state: StateDefinition | None = Field(None, description="Internal state schema.")
     policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")
     # ----------------------
@@ -304,15 +302,14 @@ class RecipeDefinition(CoReasonBaseModel):
         is_feasible = True
 
         for constraint in self.requirements:
-            if not constraint.evaluate(context):
-                if constraint.required:
-                    is_feasible = False
-                    msg = (
-                        constraint.error_message
-                        or f"Constraint failed: {constraint.variable} {constraint.operator} {constraint.value}"
-                    )
-                    errors.append(msg)
-                # If not required, we just log/ignore for now as per spec "If False, it's a warning."
-                # The method returns feasibility based on required constraints.
+            if not constraint.evaluate(context) and constraint.required:
+                is_feasible = False
+                msg = (
+                    constraint.error_message
+                    or f"Constraint failed: {constraint.variable} {constraint.operator} {constraint.value}"
+                )
+                errors.append(msg)
+            # If not required, we just log/ignore for now as per spec "If False, it's a warning."
+            # The method returns feasibility based on required constraints.
 
         return is_feasible, errors

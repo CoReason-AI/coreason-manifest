@@ -1,8 +1,8 @@
-import pytest
-from coreason_manifest.spec.v2.recipe import Constraint, RecipeDefinition, AgentNode, GraphTopology, GraphEdge, RecipeInterface
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.recipe import AgentNode, Constraint, GraphTopology, RecipeDefinition, RecipeInterface
 
-def test_constraint_evaluate_operators():
+
+def test_constraint_evaluate_operators() -> None:
     """Test various operators for constraint evaluation."""
     context = {"val": 10, "list": [1, 2, 3], "str": "hello world"}
 
@@ -40,7 +40,8 @@ def test_constraint_evaluate_operators():
     assert Constraint(variable="str", operator="contains", value="world").evaluate(context) is True
     assert Constraint(variable="str", operator="contains", value="python").evaluate(context) is False
 
-def test_constraint_nested_path():
+
+def test_constraint_nested_path() -> None:
     """Test path resolution for nested dictionaries."""
     context = {"data": {"nested": {"value": 42}}}
 
@@ -54,7 +55,8 @@ def test_constraint_nested_path():
     # Path traversing non-dict
     assert Constraint(variable="data.nested.value.sub", operator="eq", value=42).evaluate(context) is False
 
-def test_constraint_type_safety():
+
+def test_constraint_type_safety() -> None:
     """Test that type mismatches do not crash."""
     context = {"val": "string"}
 
@@ -66,7 +68,7 @@ def test_constraint_type_safety():
     assert Constraint(variable="val", operator="contains", value=10).evaluate(context) is False
 
 
-def test_recipe_check_feasibility():
+def test_recipe_check_feasibility() -> None:
     """Test check_feasibility method on RecipeDefinition."""
 
     # Setup minimal valid recipe
@@ -82,8 +84,8 @@ def test_recipe_check_feasibility():
         topology=topology,
         requirements=[
             Constraint(variable="user.role", operator="eq", value="admin"),
-            Constraint(variable="system.ready", operator="eq", value=True)
-        ]
+            Constraint(variable="system.ready", operator="eq", value=True),
+        ],
     )
 
     context = {"user": {"role": "admin"}, "system": {"ready": True}}
@@ -103,9 +105,7 @@ def test_recipe_check_feasibility():
         metadata=metadata,
         interface=interface,
         topology=topology,
-        requirements=[
-            Constraint(variable="user.role", operator="eq", value="admin", required=False)
-        ]
+        requirements=[Constraint(variable="user.role", operator="eq", value="admin", required=False)],
     )
 
     feasible, errors = recipe_optional.check_feasibility(context_fail)
@@ -118,13 +118,8 @@ def test_recipe_check_feasibility():
         interface=interface,
         topology=topology,
         requirements=[
-            Constraint(
-                variable="user.role",
-                operator="eq",
-                value="admin",
-                error_message="User must be admin"
-            )
-        ]
+            Constraint(variable="user.role", operator="eq", value="admin", error_message="User must be admin")
+        ],
     )
 
     feasible, errors = recipe_custom_msg.check_feasibility(context_fail)
