@@ -548,8 +548,6 @@ def test_recipe_visualization_topology() -> None:
 
 
 def test_mermaid_with_layout_color() -> None:
-    from coreason_manifest.spec.v2.recipe import NodePresentation
-
     data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
