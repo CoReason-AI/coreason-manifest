@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -116,6 +116,10 @@ class PolicyConfig(CoReasonBaseModel):
     budget_cap_usd: float | None = Field(
         None, description="Hard limit for estimated token + tool costs. Execution halts if exceeded."
     )
+    token_budget: int | None = Field(
+        None,
+        description="Max tokens for the assembled prompt. Low-priority contexts will be pruned if exceeded.",
+    )
     sensitive_tools: list[str] = Field(
         default_factory=list,
         description="List of tool names that ALWAYS require human confirmation (InteractionConfig override).",
@@ -213,6 +217,55 @@ class CollaborationConfig(CoReasonBaseModel):
     )
 
 
+class ComponentPriority(IntEnum):
+    """Priority levels for token optimization (harvested from Weaver)."""
+
+    LOW = 1
+    MEDIUM = 5
+    HIGH = 8
+    CRITICAL = 10
+
+
+class ContextDependency(CoReasonBaseModel):
+    """A reference to a knowledge context module (e.g., 'hipaa_context')."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    name: str = Field(..., description="The registry name of the context component.")
+    priority: ComponentPriority = Field(
+        ComponentPriority.MEDIUM, description="Token optimization priority."
+    )
+    parameters: dict[str, Any] = Field(
+        default_factory=dict, description="Variables to inject into the context."
+    )
+
+
+class CognitiveProfile(CoReasonBaseModel):
+    """The configuration for the Weaver to assemble a Prompt."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    # 1. Identity (Who)
+    role: str = Field(..., description="The specific Role/Persona (e.g., 'safety_scientist').")
+
+    # 2. Mode (How)
+    reasoning_mode: str | None = Field(
+        "standard", description="The thinking style (e.g., 'six_hats', 'socratic')."
+    )
+
+    # 3. Environment (Where)
+    knowledge_contexts: list[ContextDependency] = Field(
+        default_factory=list,
+        description="Dynamic context modules to inject (e.g., 'meddra_dictionary').",
+    )
+
+    # 4. Task (What)
+    task_primitive: str | None = Field(
+        None,
+        description="The logic primitive to apply (e.g., 'extract', 'classify', 'cohort').",
+    )
+
+
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -230,11 +283,30 @@ class AgentNode(RecipeNode):
     """A node that executes an AI Agent."""
 
     type: Literal["agent"] = "agent"
-    agent_ref: str | SemanticRef = Field(
-        ..., description="The ID or URI of the Agent Definition, or a Semantic Reference."
+
+    # --- Modified Field: Made Optional ---
+    agent_ref: str | SemanticRef | None = Field(
+        None,
+        description="Reference to a catalog definition. Required if 'construct' is missing.",
     )
+
+    # --- New Field: Harvested from Construct ---
+    construct: CognitiveProfile | None = Field(
+        None,
+        description="Inline definition of the agent's cognitive architecture (for the Weaver).",
+    )  # type: ignore[assignment]
+
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
+
+    @model_validator(mode="after")
+    def validate_agent_definition(self) -> "AgentNode":
+        """Ensure the node has a definition source."""
+        if not self.agent_ref and not self.construct:
+            raise ValueError(
+                "AgentNode must provide either 'agent_ref' (catalog) or 'construct' (inline)."
+            )
+        return self
 
 
 class SolverStrategy(StrEnum):
