@@ -60,6 +60,4 @@ class Constitution(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     laws: list[Law] = Field(default_factory=list, description="Principles for semantic critique.")
-    sentinel_rules: list[SentinelRule] = Field(
-        default_factory=list, description="Patterns for hard filtering."
-    )
+    sentinel_rules: list[SentinelRule] = Field(default_factory=list, description="Patterns for hard filtering.")
