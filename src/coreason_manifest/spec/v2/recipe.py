@@ -155,25 +155,15 @@ class ComplianceConfig(CoReasonBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     audit_level: AuditLevel = Field(AuditLevel.BASIC, description="Depth of logging.")
-    retention: RetentionPolicy = Field(
-        RetentionPolicy.THIRTY_DAYS, description="Data retention requirement."
-    )
+    retention: RetentionPolicy = Field(RetentionPolicy.THIRTY_DAYS, description="Data retention requirement.")
 
     # Artifact Generation Flags
-    generate_aibom: bool = Field(
-        False, description="Generate an AI Bill of Materials (software supply chain)."
-    )
-    generate_pdf_report: bool = Field(
-        False, description="Generate a human-readable PDF report of the session."
-    )
-    require_signature: bool = Field(
-        False, description="Cryptographically sign the final output."
-    )
+    generate_aibom: bool = Field(False, description="Generate an AI Bill of Materials (software supply chain).")
+    generate_pdf_report: bool = Field(False, description="Generate a human-readable PDF report of the session.")
+    require_signature: bool = Field(False, description="Cryptographically sign the final output.")
 
     # PII/Sensitivity
-    mask_pii: bool = Field(
-        True, description="Attempt to scrub PII from logs before archiving."
-    )
+    mask_pii: bool = Field(True, description="Attempt to scrub PII from logs before archiving.")
 
 
 # ==========================================

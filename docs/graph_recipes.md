@@ -151,6 +151,23 @@ tests=[
 ]
 ```
 
+### 7. The Compliance Layer (`ComplianceConfig`)
+
+The `compliance` field dictates the rigor of the audit trail, instructing the `coreason-auditor` worker on what artifacts to generate (GxP, SOC2, etc.).
+
+```python
+from coreason_manifest.spec.v2.recipe import ComplianceConfig, AuditLevel, RetentionPolicy
+
+compliance=ComplianceConfig(
+    audit_level=AuditLevel.GXP_COMPLIANT, # "full" trace + signatures
+    retention=RetentionPolicy.SEVEN_YEARS, # Legal hold
+    generate_aibom=True,    # Create software supply chain manifest
+    generate_pdf_report=True,
+    require_signature=True, # Cryptographically sign output
+    mask_pii=False          # Do not scrub PII (e.g., if needed for clinical records)
+)
+```
+
 ## The Graph Topology Schema (`GraphTopology`)
 
 The `GraphTopology` enforces structural integrity. It requires a list of `nodes`, a list of `edges`, and a valid `entry_point`.
