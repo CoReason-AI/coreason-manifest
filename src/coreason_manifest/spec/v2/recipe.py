@@ -107,6 +107,22 @@ class CollaborationConfig(CoReasonBaseModel):
     )
 
 
+class InteractionConfig(CoReasonBaseModel):
+    """Interactive control settings."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+
+class NodePresentation(CoReasonBaseModel):
+    """Static visual layout (x, y, color)."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    x: float = Field(..., description="X coordinate.")
+    y: float = Field(..., description="Y coordinate.")
+    color: str | None = Field(None, description="Color code.")
+
+
 class RecipeNode(CoReasonBaseModel):
     """Base class for all nodes in a Recipe graph."""
 
@@ -114,7 +130,9 @@ class RecipeNode(CoReasonBaseModel):
 
     id: str = Field(..., description="Unique identifier within the graph.")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Custom metadata (not for UI layout).")
-    presentation: PresentationHints | None = Field(None, description="Visual layout and styling metadata.")
+    presentation: NodePresentation | None = Field(None, description="Static visual layout (x, y, color).")
+    interaction: InteractionConfig | None = Field(None, description="Interactive control settings.")
+    visualization: PresentationHints | None = Field(None, description="Dynamic rendering hints (Glass Box).")
     collaboration: CollaborationConfig | None = Field(None, description="Rules for human-agent engagement.")
 
 

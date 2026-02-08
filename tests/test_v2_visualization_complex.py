@@ -28,7 +28,7 @@ def test_full_spectrum_node() -> None:
     node = AgentNode(
         id="full-node",
         agent_ref="super-agent",
-        presentation=PresentationHints(
+        visualization=PresentationHints(
             style=VisualizationStyle.TREE,
             display_title="Complex Reasoner",
             icon="lucide:brain-circuit",
@@ -44,12 +44,12 @@ def test_full_spectrum_node() -> None:
 
     dumped = node.model_dump(mode="json")
 
-    # Verify Presentation
-    assert dumped["presentation"]["style"] == "TREE"
-    assert dumped["presentation"]["display_title"] == "Complex Reasoner"
-    assert dumped["presentation"]["icon"] == "lucide:brain-circuit"
-    assert dumped["presentation"]["hidden_fields"] == ["context.history", "debug_log"]
-    assert dumped["presentation"]["progress_indicator"] == "progress.percent"
+    # Verify Visualization
+    assert dumped["visualization"]["style"] == "TREE"
+    assert dumped["visualization"]["display_title"] == "Complex Reasoner"
+    assert dumped["visualization"]["icon"] == "lucide:brain-circuit"
+    assert dumped["visualization"]["hidden_fields"] == ["context.history", "debug_log"]
+    assert dumped["visualization"]["progress_indicator"] == "progress.percent"
 
     # Verify Collaboration
     assert dumped["collaboration"]["mode"] == "INTERACTIVE"
@@ -61,16 +61,18 @@ def test_hybrid_workflow_visualization() -> None:
     """Test a recipe mixing nodes with different visualization styles."""
 
     # 1. Chat Node (Default)
-    start_node = AgentNode(id="start", agent_ref="ref-1", presentation=PresentationHints(style=VisualizationStyle.CHAT))
+    start_node = AgentNode(
+        id="start", agent_ref="ref-1", visualization=PresentationHints(style=VisualizationStyle.CHAT)
+    )
 
     # 2. Tree Search Node
     search_node = AgentNode(
-        id="deep-search", agent_ref="ref-2", presentation=PresentationHints(style=VisualizationStyle.TREE)
+        id="deep-search", agent_ref="ref-2", visualization=PresentationHints(style=VisualizationStyle.TREE)
     )
 
     # 3. Kanban Node
     task_node = AgentNode(
-        id="tasks", agent_ref="ref-3", presentation=PresentationHints(style=VisualizationStyle.KANBAN)
+        id="tasks", agent_ref="ref-3", visualization=PresentationHints(style=VisualizationStyle.KANBAN)
     )
 
     recipe = RecipeDefinition(
@@ -84,7 +86,7 @@ def test_hybrid_workflow_visualization() -> None:
     )
 
     assert len(recipe.topology.nodes) == 3
-    styles = [node.presentation.style for node in recipe.topology.nodes if node.presentation]
+    styles = [node.visualization.style for node in recipe.topology.nodes if node.visualization]
     assert VisualizationStyle.CHAT in styles
     assert VisualizationStyle.TREE in styles
     assert VisualizationStyle.KANBAN in styles

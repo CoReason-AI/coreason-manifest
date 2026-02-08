@@ -87,9 +87,9 @@ def test_collaboration_config_empty_commands() -> None:
 def test_node_integration_missing_optional_fields() -> None:
     """Test AgentNode with minimal PresentationHints and CollaborationConfig."""
     node = AgentNode(
-        id="test-node", agent_ref="ref", presentation=PresentationHints(), collaboration=CollaborationConfig()
+        id="test-node", agent_ref="ref", visualization=PresentationHints(), collaboration=CollaborationConfig()
     )
-    assert node.presentation is not None
-    assert node.presentation.style == VisualizationStyle.CHAT
+    assert node.visualization is not None
+    assert node.visualization.style == VisualizationStyle.CHAT
     assert node.collaboration is not None
     assert node.collaboration.mode == CollaborationMode.COMPLETION

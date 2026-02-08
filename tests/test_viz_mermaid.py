@@ -469,7 +469,7 @@ def test_recipe_visualization_topology() -> None:
             input_key="intent",
             routes={"finance": "finance_agent", "support": "support_agent"},
             default_route="support_agent",
-            presentation=PresentationHints(display_title="Check Intent"),
+            visualization=PresentationHints(display_title="Check Intent"),
         ),
         AgentNode(
             id="finance_agent",
@@ -482,7 +482,7 @@ def test_recipe_visualization_topology() -> None:
         HumanNode(
             id="approval",
             prompt="Approve?",
-            presentation=PresentationHints(display_title="Manager Approval"),
+            visualization=PresentationHints(display_title="Manager Approval"),
         ),
         EvaluatorNode(
             id="quality_check",
@@ -494,7 +494,7 @@ def test_recipe_visualization_topology() -> None:
             pass_route="approval",
             fail_route="support_agent",
             feedback_variable="feedback",
-            presentation=PresentationHints(display_title="Quality Check"),
+            visualization=PresentationHints(display_title="Quality Check"),
         ),
     ]
     edges = [
@@ -545,3 +545,30 @@ def test_recipe_visualization_topology() -> None:
     # Implicit Evaluator Edges
     assert "quality_check -->|pass| approval" in mermaid
     assert "quality_check -->|fail| support_agent" in mermaid
+
+
+def test_mermaid_with_layout_color() -> None:
+    from coreason_manifest.spec.v2.recipe import NodePresentation
+
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Colored Node"},
+        "interface": {},
+        "topology": {
+            "entry_point": "start",
+            "nodes": [
+                {
+                    "type": "agent",
+                    "id": "start",
+                    "agent_ref": "ref",
+                    "presentation": {"x": 0, "y": 0, "color": "#ff0000"},
+                }
+            ],
+            "edges": [],
+        },
+    }
+    manifest = RecipeDefinition.model_validate(data)
+    chart = generate_recipe_mermaid(manifest)
+
+    assert "style start fill:#ff0000" in chart

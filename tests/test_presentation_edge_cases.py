@@ -104,7 +104,7 @@ def test_recipe_node_integration_full() -> None:
         id="complex-node",
         agent_ref="agent-v1",
         metadata={"custom_key": "custom_value", "version": 1},
-        presentation=PresentationHints(
+        visualization=PresentationHints(
             style=VisualizationStyle.TREE,
             display_title="My Node",
             icon="lucide:cpu",
@@ -114,9 +114,9 @@ def test_recipe_node_integration_full() -> None:
     dumped = node.model_dump(mode="json")
 
     # Check Presentation
-    assert dumped["presentation"]["style"] == "TREE"
-    assert dumped["presentation"]["display_title"] == "My Node"
-    assert dumped["presentation"]["icon"] == "lucide:cpu"
+    assert dumped["visualization"]["style"] == "TREE"
+    assert dumped["visualization"]["display_title"] == "My Node"
+    assert dumped["visualization"]["icon"] == "lucide:cpu"
 
     # Check Metadata
     assert dumped["metadata"]["custom_key"] == "custom_value"

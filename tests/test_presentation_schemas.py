@@ -200,12 +200,12 @@ def test_node_presentation_integration() -> None:
     node = AgentNode(
         id="node-1",
         agent_ref="agent-v1",
-        presentation=PresentationHints(style=VisualizationStyle.TREE, display_title="My Node"),
+        visualization=PresentationHints(style=VisualizationStyle.TREE, display_title="My Node"),
     )
 
     dumped = node.model_dump(mode="json")
-    assert dumped["presentation"]["style"] == "TREE"
-    assert dumped["presentation"]["display_title"] == "My Node"
+    assert dumped["visualization"]["style"] == "TREE"
+    assert dumped["visualization"]["display_title"] == "My Node"
 
     # Create a node without presentation
     node_no_pres = AgentNode(id="node-2", agent_ref="agent-v1")

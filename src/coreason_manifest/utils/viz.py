@@ -124,8 +124,8 @@ def generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
 
         # Determine Label
         label = node.id
-        if node.presentation and node.presentation.display_title:
-            label = node.presentation.display_title
+        if node.visualization and node.visualization.display_title:
+            label = node.visualization.display_title
 
         # Escape quotes in label
         label = label.replace('"', "'")
@@ -182,11 +182,10 @@ def generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
             lines.append(f"{src} -->|fail| {fail_tgt}")
 
     # 5. Apply Styles
-    # PresentationHints does not support color yet, relying on defaults
-    # for node in recipe.topology.nodes:
-    #     if node.presentation and node.presentation.color:
-    #         node_id = _sanitize_id(node.id)
-    #         color = node.presentation.color
-    #         lines.append(f"style {node_id} fill:{color},stroke:#333,stroke-width:2px")
+    for node in recipe.topology.nodes:
+        if node.presentation and node.presentation.color:
+            node_id = _sanitize_id(node.id)
+            color = node.presentation.color
+            lines.append(f"style {node_id} fill:{color},stroke:#333,stroke-width:2px")
 
     return "\n".join(lines)
