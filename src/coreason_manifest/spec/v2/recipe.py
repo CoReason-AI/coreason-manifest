@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, ConfigDict, Field, model_validator
@@ -106,6 +106,16 @@ class StateDefinition(CoReasonBaseModel):
     )
 
 
+class ExecutionPriority(IntEnum):
+    """Traffic priority for the AI Gateway (Load Shedding)."""
+
+    CRITICAL = 10  # Real-time user interaction (CEO bot)
+    HIGH = 8  # Standard synchronous flows
+    NORMAL = 5  # Default
+    LOW = 2  # Background tasks / Bulk processing
+    BATCH = 1  # Overnight jobs
+
+
 class PolicyConfig(CoReasonBaseModel):
     """Governance rules for execution limits (harvested from Connect)."""
 
@@ -114,6 +124,23 @@ class PolicyConfig(CoReasonBaseModel):
     max_retries: int = Field(0, description="Global retry limit for failed steps.")
     timeout_seconds: int | None = Field(None, description="Global execution timeout.")
     execution_mode: Literal["sequential", "parallel"] = Field("sequential", description="Default execution strategy.")
+
+    # --- New QoS Fields for AI Gateway ---
+    priority: ExecutionPriority = Field(
+        ExecutionPriority.NORMAL,
+        description="Traffic priority. Low priority requests may be queued or dropped during high load.",
+    )
+
+    rate_limit_rpm: int | None = Field(
+        None, ge=0, description="Max requests per minute allowed for this recipe execution."
+    )
+
+    rate_limit_tpm: int | None = Field(None, ge=0, description="Max tokens per minute allowed (input + output).")
+
+    caching_enabled: bool = Field(
+        True,
+        description="Allow the Gateway to serve cached responses for identical inputs (Semantic Caching).",
+    )
 
     # --- New Harvesting Fields ---
     budget_cap_usd: float | None = Field(

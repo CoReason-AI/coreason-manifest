@@ -104,14 +104,24 @@ state=StateDefinition(
 ```
 
 ### 4. The Policy Layer (`PolicyConfig`)
-Sets execution limits and error handling strategies, including **MCP Governance**.
+Sets execution limits and error handling strategies, including **MCP Governance** and **Traffic Prioritization**.
 
 ```python
+from coreason_manifest.spec.v2.recipe import PolicyConfig, ExecutionPriority
+
 policy=PolicyConfig(
+    # --- Traffic Governance (QoS) ---
+    priority=ExecutionPriority.CRITICAL, # 10 (High), 5 (Normal), 2 (Low), 1 (Batch)
+    rate_limit_rpm=60,      # Max 60 requests per minute
+    rate_limit_tpm=10000,   # Max 10k tokens per minute
+    caching_enabled=True,   # Semantic Caching allowed
+
+    # --- Execution Limits ---
     max_retries=3,
     timeout_seconds=3600,
     execution_mode="sequential", # or "parallel"
-    # New Harvesting Fields
+
+    # --- Financial & Safety ---
     budget_cap_usd=50.0,
     sensitive_tools=["buy_stock", "delete_db"],
     allowed_mcp_servers=["github", "brave-search"],
