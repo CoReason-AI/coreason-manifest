@@ -404,6 +404,17 @@ To prevent infinite loops in malformed graphs, the executor enforces a `max_step
 
 The executor generates a `SimulationTrace` containing a list of `SimulationStep` objects, providing a full audit trail of the execution path, including inputs, outputs, and routing decisions.
 
+## Flow Governance & Resilience (New in 0.23.0)
+
+Coreason V2 introduces **Flow Governance**, transforming the Recipe from a static DAG into a resilient State Machine.
+
+Nodes can now define `RecoveryConfig` to handle failures via **Retries** and **Fallbacks**. This is configured via the `recovery` field on any `RecipeNode`.
+
+*   **Retries**: Automatically retry failed nodes with backoff (`max_retries`).
+*   **Fallbacks**: Route execution to a backup node (`fallback_node_id`) or return a default value (`default_output`) if the node fails.
+
+See [Flow Governance & Resilience](flow_governance.md) for detailed configuration patterns.
+
 ## Interactive Control Plane (New in 0.22.0)
 
 Coreason V2 introduces an **Interactive Control Plane**, allowing any node (`AgentNode`, `GenerativeNode`, etc.) to declare *when* it should pause for human intervention and *what* parts of its state are mutable during execution.

@@ -284,8 +284,8 @@ class RecoveryConfig(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    max_retries: int | None = Field(None, description="Override global retry limit.")
-    retry_delay_seconds: float = Field(1.0, description="Backoff start.")
+    max_retries: int | None = Field(None, ge=0, description="Override global retry limit.")
+    retry_delay_seconds: float = Field(1.0, ge=0.0, description="Backoff start.")
 
     behavior: FailureBehavior = Field(FailureBehavior.FAIL_WORKFLOW, description="Strategy on final failure.")
 
@@ -499,6 +499,19 @@ class GraphTopology(CoReasonBaseModel):
                 raise ValueError(f"Dangling edge source: {edge.source} -> {edge.target}")
             if edge.target not in valid_ids:
                 raise ValueError(f"Dangling edge target: {edge.source} -> {edge.target}")
+
+        # 4. Check fallback nodes (Flow Governance)
+        for node in self.nodes:
+            if (
+                node.recovery
+                and node.recovery.behavior == FailureBehavior.ROUTE_TO_FALLBACK
+                and node.recovery.fallback_node_id
+            ):
+                fallback_id = node.recovery.fallback_node_id
+                if fallback_id not in valid_ids:
+                    raise ValueError(
+                        f"Invalid fallback_node_id '{fallback_id}' in node '{node.id}': Node not found in graph."
+                    )
 
 
 class TaskSequence(CoReasonBaseModel):
