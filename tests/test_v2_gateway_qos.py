@@ -7,16 +7,14 @@ from coreason_manifest.spec.v2.recipe import ExecutionPriority, PolicyConfig, Re
 def test_policy_config_instantiation() -> None:
     """Test instantiating PolicyConfig with new QoS fields."""
     policy = PolicyConfig(
-        priority=ExecutionPriority.BATCH,
-        rate_limit_rpm=60,
-        rate_limit_tpm=1000,
-        caching_enabled=False
+        priority=ExecutionPriority.BATCH, rate_limit_rpm=60, rate_limit_tpm=1000, caching_enabled=False
     )
 
     assert policy.priority == ExecutionPriority.BATCH
     assert policy.rate_limit_rpm == 60
     assert policy.rate_limit_tpm == 1000
     assert policy.caching_enabled is False
+
 
 def test_policy_config_defaults() -> None:
     """Test default values for PolicyConfig."""
@@ -26,6 +24,7 @@ def test_policy_config_defaults() -> None:
     assert policy.rate_limit_rpm is None
     assert policy.rate_limit_tpm is None
     assert policy.caching_enabled is True
+
 
 def test_rate_limit_validation() -> None:
     """Test validation for rate limits (must be non-negative)."""
@@ -48,29 +47,20 @@ def test_rate_limit_validation() -> None:
 
     assert "Input should be greater than or equal to 0" in str(excinfo.value)
 
+
 def test_integration_recipe_definition() -> None:
     """Test integrating PolicyConfig with RecipeDefinition."""
     from coreason_manifest.spec.v2.definitions import ManifestMetadata
-    from coreason_manifest.spec.v2.recipe import RecipeInterface, GraphTopology, AgentNode
+    from coreason_manifest.spec.v2.recipe import AgentNode, GraphTopology, RecipeInterface
 
-    policy = PolicyConfig(
-        priority=ExecutionPriority.CRITICAL,
-        rate_limit_rpm=100
-    )
+    policy = PolicyConfig(priority=ExecutionPriority.CRITICAL, rate_limit_rpm=100)
 
     # Minimal valid recipe setup
     agent = AgentNode(id="agent1", agent_ref="my-agent")
-    topology = GraphTopology(
-        nodes=[agent],
-        edges=[],
-        entry_point="agent1"
-    )
+    topology = GraphTopology(nodes=[agent], edges=[], entry_point="agent1")
 
     recipe = RecipeDefinition(
-        metadata=ManifestMetadata(name="test-recipe"),
-        interface=RecipeInterface(),
-        topology=topology,
-        policy=policy
+        metadata=ManifestMetadata(name="test-recipe"), interface=RecipeInterface(), topology=topology, policy=policy
     )
 
     assert recipe.policy is not None
