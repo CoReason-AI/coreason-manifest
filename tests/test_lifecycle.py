@@ -13,7 +13,7 @@ from coreason_manifest.spec.v2.recipe import (
 )
 
 
-def test_draft_recipe_with_semantic_ref():
+def test_draft_recipe_with_semantic_ref() -> None:
     """Test that a DRAFT recipe allows SemanticRef."""
     semantic_node = AgentNode(
         id="planner",
@@ -23,13 +23,8 @@ def test_draft_recipe_with_semantic_ref():
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="Draft Recipe"),
         interface=RecipeInterface(),
-        topology=GraphTopology(
-            nodes=[semantic_node],
-            edges=[],
-            entry_point="planner",
-            status="draft"
-        ),
-        status=RecipeStatus.DRAFT
+        topology=GraphTopology(nodes=[semantic_node], edges=[], entry_point="planner", status="draft"),
+        status=RecipeStatus.DRAFT,
     )
 
     assert recipe.status == RecipeStatus.DRAFT
@@ -37,7 +32,7 @@ def test_draft_recipe_with_semantic_ref():
     assert isinstance(recipe.topology.nodes[0].agent_ref, SemanticRef)
 
 
-def test_published_recipe_with_semantic_ref_fails():
+def test_published_recipe_with_semantic_ref_fails() -> None:
     """Test that a PUBLISHED recipe raises ValidationError if SemanticRef is present."""
     semantic_node = AgentNode(
         id="planner",
@@ -48,19 +43,14 @@ def test_published_recipe_with_semantic_ref_fails():
         RecipeDefinition(
             metadata=ManifestMetadata(name="Published Recipe"),
             interface=RecipeInterface(),
-            topology=GraphTopology(
-                nodes=[semantic_node],
-                edges=[],
-                entry_point="planner",
-                status="valid"
-            ),
-            status=RecipeStatus.PUBLISHED
+            topology=GraphTopology(nodes=[semantic_node], edges=[], entry_point="planner", status="valid"),
+            status=RecipeStatus.PUBLISHED,
         )
 
     assert "Resolve all SemanticRefs to concrete IDs" in str(exc.value)
 
 
-def test_published_recipe_with_broken_topology_fails():
+def test_published_recipe_with_broken_topology_fails() -> None:
     """Test that a PUBLISHED recipe raises ValidationError if topology is incomplete."""
     # Dangling edge scenario
     node1 = AgentNode(id="start", agent_ref="agent-1")
@@ -73,18 +63,15 @@ def test_published_recipe_with_broken_topology_fails():
             metadata=ManifestMetadata(name="Broken Recipe"),
             interface=RecipeInterface(),
             topology=GraphTopology(
-                nodes=[node1],
-                edges=[GraphEdge(source="start", target="missing")],
-                entry_point="start",
-                status="draft"
+                nodes=[node1], edges=[GraphEdge(source="start", target="missing")], entry_point="start", status="draft"
             ),
-            status=RecipeStatus.PUBLISHED
+            status=RecipeStatus.PUBLISHED,
         )
 
     assert "Topology is structurally invalid" in str(exc.value)
 
 
-def test_published_recipe_valid():
+def test_published_recipe_valid() -> None:
     """Test that a valid PUBLISHED recipe passes validation."""
     node1 = AgentNode(id="start", agent_ref="agent-1")
     node2 = AgentNode(id="end", agent_ref="agent-2")
@@ -93,18 +80,15 @@ def test_published_recipe_valid():
         metadata=ManifestMetadata(name="Valid Recipe"),
         interface=RecipeInterface(),
         topology=GraphTopology(
-            nodes=[node1, node2],
-            edges=[GraphEdge(source="start", target="end")],
-            entry_point="start",
-            status="valid"
+            nodes=[node1, node2], edges=[GraphEdge(source="start", target="end")], entry_point="start", status="valid"
         ),
-        status=RecipeStatus.PUBLISHED
+        status=RecipeStatus.PUBLISHED,
     )
 
     assert recipe.status == RecipeStatus.PUBLISHED
 
 
-def test_draft_recipe_with_broken_topology_passes():
+def test_draft_recipe_with_broken_topology_passes() -> None:
     """Test that a DRAFT recipe allows broken topology."""
     node1 = AgentNode(id="start", agent_ref="agent-1")
 
@@ -112,12 +96,9 @@ def test_draft_recipe_with_broken_topology_passes():
         metadata=ManifestMetadata(name="Broken Draft"),
         interface=RecipeInterface(),
         topology=GraphTopology(
-            nodes=[node1],
-            edges=[GraphEdge(source="start", target="missing")],
-            entry_point="start",
-            status="draft"
+            nodes=[node1], edges=[GraphEdge(source="start", target="missing")], entry_point="start", status="draft"
         ),
-        status=RecipeStatus.DRAFT
+        status=RecipeStatus.DRAFT,
     )
 
     assert recipe.status == RecipeStatus.DRAFT
