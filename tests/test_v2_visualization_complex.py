@@ -33,16 +33,13 @@ def test_full_spectrum_node() -> None:
             display_title="Complex Reasoner",
             icon="lucide:brain-circuit",
             hidden_fields=["context.history", "debug_log"],
-            progress_indicator="progress.percent"
+            progress_indicator="progress.percent",
         ),
         collaboration=CollaborationConfig(
             mode=CollaborationMode.INTERACTIVE,
-            feedback_schema={
-                "type": "object",
-                "properties": {"score": {"type": "integer"}}
-            },
-            supported_commands=["/stop", "/restart", "/explain"]
-        )
+            feedback_schema={"type": "object", "properties": {"score": {"type": "integer"}}},
+            supported_commands=["/stop", "/restart", "/explain"],
+        ),
     )
 
     dumped = node.model_dump(mode="json")
@@ -64,24 +61,16 @@ def test_hybrid_workflow_visualization() -> None:
     """Test a recipe mixing nodes with different visualization styles."""
 
     # 1. Chat Node (Default)
-    start_node = AgentNode(
-        id="start",
-        agent_ref="ref-1",
-        presentation=PresentationHints(style=VisualizationStyle.CHAT)
-    )
+    start_node = AgentNode(id="start", agent_ref="ref-1", presentation=PresentationHints(style=VisualizationStyle.CHAT))
 
     # 2. Tree Search Node
     search_node = AgentNode(
-        id="deep-search",
-        agent_ref="ref-2",
-        presentation=PresentationHints(style=VisualizationStyle.TREE)
+        id="deep-search", agent_ref="ref-2", presentation=PresentationHints(style=VisualizationStyle.TREE)
     )
 
     # 3. Kanban Node
     task_node = AgentNode(
-        id="tasks",
-        agent_ref="ref-3",
-        presentation=PresentationHints(style=VisualizationStyle.KANBAN)
+        id="tasks", agent_ref="ref-3", presentation=PresentationHints(style=VisualizationStyle.KANBAN)
     )
 
     recipe = RecipeDefinition(
@@ -89,12 +78,9 @@ def test_hybrid_workflow_visualization() -> None:
         interface=RecipeInterface(),
         topology=GraphTopology(
             nodes=[start_node, search_node, task_node],
-            edges=[
-                GraphEdge(source="start", target="deep-search"),
-                GraphEdge(source="deep-search", target="tasks")
-            ],
-            entry_point="start"
-        )
+            edges=[GraphEdge(source="start", target="deep-search"), GraphEdge(source="deep-search", target="tasks")],
+            entry_point="start",
+        ),
     )
 
     assert len(recipe.topology.nodes) == 3
@@ -112,21 +98,17 @@ def test_orchestrator_pattern_collaboration() -> None:
         id="orchestrator",
         input_key="intent",
         routes={"help": "human-help", "info": "bot-info"},
-        default_route="bot-info"
+        default_route="bot-info",
     )
 
     # Interactive Node (Human-on-the-Loop)
     human_node = AgentNode(
-        id="human-help",
-        agent_ref="human-agent",
-        collaboration=CollaborationConfig(mode=CollaborationMode.INTERACTIVE)
+        id="human-help", agent_ref="human-agent", collaboration=CollaborationConfig(mode=CollaborationMode.INTERACTIVE)
     )
 
     # Completion Node (Standard)
     bot_node = AgentNode(
-        id="bot-info",
-        agent_ref="bot-agent",
-        collaboration=CollaborationConfig(mode=CollaborationMode.COMPLETION)
+        id="bot-info", agent_ref="bot-agent", collaboration=CollaborationConfig(mode=CollaborationMode.COMPLETION)
     )
 
     recipe = RecipeDefinition(
@@ -136,14 +118,16 @@ def test_orchestrator_pattern_collaboration() -> None:
             nodes=[router, human_node, bot_node],
             edges=[
                 GraphEdge(source="orchestrator", target="human-help"),
-                GraphEdge(source="orchestrator", target="bot-info")
+                GraphEdge(source="orchestrator", target="bot-info"),
             ],
-            entry_point="orchestrator"
-        )
+            entry_point="orchestrator",
+        ),
     )
 
     # Verify configurations persist in topology
     nodes_map = {node.id: node for node in recipe.topology.nodes}
 
+    assert nodes_map["human-help"].collaboration is not None
     assert nodes_map["human-help"].collaboration.mode == CollaborationMode.INTERACTIVE
+    assert nodes_map["bot-info"].collaboration is not None
     assert nodes_map["bot-info"].collaboration.mode == CollaborationMode.COMPLETION

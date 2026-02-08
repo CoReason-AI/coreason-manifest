@@ -33,7 +33,7 @@ def test_presentation_hints_defaults() -> None:
 def test_presentation_hints_invalid_style() -> None:
     """Test invalid style enum value."""
     with pytest.raises(ValidationError) as excinfo:
-        PresentationHints(style="INVALID_STYLE")  # type: ignore[arg-type]
+        PresentationHints(style="INVALID_STYLE")
     assert "Input should be 'CHAT', 'TREE', 'KANBAN' or 'DOCUMENT'" in str(excinfo.value)
 
 
@@ -61,7 +61,7 @@ def test_collaboration_config_defaults() -> None:
 def test_collaboration_config_invalid_mode() -> None:
     """Test invalid mode enum value."""
     with pytest.raises(ValidationError) as excinfo:
-        CollaborationConfig(mode="INVALID_MODE")  # type: ignore[arg-type]
+        CollaborationConfig(mode="INVALID_MODE")
     assert "Input should be 'COMPLETION', 'INTERACTIVE' or 'CO_EDIT'" in str(excinfo.value)
 
 
@@ -71,11 +71,8 @@ def test_collaboration_config_complex_feedback_schema() -> None:
         "type": "object",
         "properties": {
             "rating": {"type": "integer", "minimum": 1, "maximum": 5},
-            "comments": {
-                "type": "array",
-                "items": {"type": "string"}
-            }
-        }
+            "comments": {"type": "array", "items": {"type": "string"}},
+        },
     }
     config = CollaborationConfig(feedback_schema=schema)
     assert config.feedback_schema == schema
@@ -90,10 +87,7 @@ def test_collaboration_config_empty_commands() -> None:
 def test_node_integration_missing_optional_fields() -> None:
     """Test AgentNode with minimal PresentationHints and CollaborationConfig."""
     node = AgentNode(
-        id="test-node",
-        agent_ref="ref",
-        presentation=PresentationHints(),
-        collaboration=CollaborationConfig()
+        id="test-node", agent_ref="ref", presentation=PresentationHints(), collaboration=CollaborationConfig()
     )
     assert node.presentation is not None
     assert node.presentation.style == VisualizationStyle.CHAT
