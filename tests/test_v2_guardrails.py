@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.guardrails import (
     BreakerScope,
     CircuitBreakerConfig,
@@ -15,57 +16,54 @@ from coreason_manifest.spec.v2.guardrails import (
     GuardrailsConfig,
 )
 from coreason_manifest.spec.v2.recipe import (
+    AgentNode,
+    GraphTopology,
     RecipeDefinition,
     RecipeInterface,
     RecipeStatus,
-    GraphTopology,
-    AgentNode,
-    GraphEdge,
 )
-from coreason_manifest.spec.v2.definitions import ManifestMetadata
 
-def test_circuit_breaker_config():
+
+def test_circuit_breaker_config() -> None:
     """Test CircuitBreakerConfig instantiation and validation."""
     config = CircuitBreakerConfig(
         failure_rate_threshold=0.2,
         window_seconds=120,
         recovery_timeout_seconds=600,
-        scope=BreakerScope.RECIPE
+        scope=BreakerScope.RECIPE,
     )
     assert config.failure_rate_threshold == 0.2
     assert config.window_seconds == 120
     assert config.recovery_timeout_seconds == 600
     assert config.scope == BreakerScope.RECIPE
 
-def test_drift_config():
+
+def test_drift_config() -> None:
     """Test DriftConfig instantiation."""
     config = DriftConfig(
         input_drift_threshold=0.15,
         output_drift_threshold=0.25,
-        baseline_dataset_id="dataset-xyz"
+        baseline_dataset_id="dataset-xyz",
     )
     assert config.input_drift_threshold == 0.15
     assert config.output_drift_threshold == 0.25
     assert config.baseline_dataset_id == "dataset-xyz"
 
-def test_guardrails_config_defaults():
+
+def test_guardrails_config_defaults() -> None:
     """Test GuardrailsConfig default values."""
     config = GuardrailsConfig()
     assert config.circuit_breaker is None
     assert config.drift_check is None
     assert config.spot_check_rate == 0.0
 
-def test_recipe_definition_integration():
+
+def test_recipe_definition_integration() -> None:
     """Test integrating GuardrailsConfig into RecipeDefinition."""
     guardrails = GuardrailsConfig(
-        circuit_breaker=CircuitBreakerConfig(
-            failure_rate_threshold=0.5,
-            scope=BreakerScope.AGENT
-        ),
-        drift_check=DriftConfig(
-            input_drift_threshold=0.1
-        ),
-        spot_check_rate=0.05
+        circuit_breaker=CircuitBreakerConfig(failure_rate_threshold=0.5, scope=BreakerScope.AGENT),
+        drift_check=DriftConfig(input_drift_threshold=0.1),
+        spot_check_rate=0.05,
     )
 
     recipe = RecipeDefinition(
@@ -76,13 +74,17 @@ def test_recipe_definition_integration():
         topology=GraphTopology(
             nodes=[AgentNode(id="agent-1", agent_ref="agent-lib/v1/test-agent")],
             edges=[],
-            entry_point="agent-1"
-        )
+            entry_point="agent-1",
+        ),
     )
 
     assert recipe.guardrails is not None
     assert recipe.guardrails.spot_check_rate == 0.05
+
+    assert recipe.guardrails.circuit_breaker is not None
     assert recipe.guardrails.circuit_breaker.failure_rate_threshold == 0.5
+
+    assert recipe.guardrails.drift_check is not None
     assert recipe.guardrails.drift_check.input_drift_threshold == 0.1
 
     # Verify serialization
