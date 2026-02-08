@@ -19,6 +19,7 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.knowledge import RetrievalConfig
 from coreason_manifest.spec.v2.resources import RuntimeEnvironment
 
 logger = logging.getLogger(__name__)
@@ -124,6 +125,23 @@ class PolicyConfig(CoReasonBaseModel):
         default_factory=list,
         description="Whitelist of MCP server names this recipe is allowed to access.",
     )
+
+
+class CognitiveProfile(CoReasonBaseModel):
+    """Configuration for the internal reasoning architecture of an agent."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    role: str = Field(..., description="The role or persona of the agent.")
+    reasoning_mode: str = Field(..., description="The reasoning mode (e.g., 'react', 'cot').")
+
+    # --- New Field for Archive Support ---
+    memory: list[RetrievalConfig] = Field(
+        default_factory=list, description="Configuration for Long-Term Memory (RAG) access."
+    )
+
+    knowledge_contexts: list[str] = Field(default_factory=list, description="List of knowledge context IDs.")
+    task_primitive: str | None = Field(None, description="The task primitive to execute.")
 
 
 # ==========================================
@@ -232,6 +250,9 @@ class AgentNode(RecipeNode):
     type: Literal["agent"] = "agent"
     agent_ref: str | SemanticRef = Field(
         ..., description="The ID or URI of the Agent Definition, or a Semantic Reference."
+    )
+    construct: CognitiveProfile | None = Field(  # type: ignore[assignment]
+        None, description="Inline cognitive architecture definition."
     )
     system_prompt_override: str | None = Field(None, description="Context-specific instructions.")
     inputs_map: dict[str, str] = Field(default_factory=dict, description="Mapping parent outputs to agent inputs.")
