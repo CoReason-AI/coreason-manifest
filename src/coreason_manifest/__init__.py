@@ -10,7 +10,6 @@
 
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
-from .interop.mcp import CoreasonMCPServer, create_mcp_tool_definition
 from .shortcuts import simple_agent
 from .spec.cap import (
     ErrorSeverity,
@@ -112,6 +111,7 @@ from .spec.v2.resources import (
 from .utils.audit import compute_audit_hash, verify_chain
 from .utils.diff import ChangeCategory, DiffReport, compare_agents
 from .utils.docs import render_agent_card
+from .utils.mcp_adapter import CoreasonMCPServer, create_mcp_tool_definition
 from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
@@ -120,7 +120,7 @@ from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
-__version__ = "0.20.0"
+__version__ = "0.21.0"
 
 Manifest = ManifestV2
 Recipe = RecipeDefinition

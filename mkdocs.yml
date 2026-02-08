@@ -5,8 +5,10 @@ nav:
   - Home: index.md
   - Usage: usage.md
   - Specifications:
-      - "Orchestration (Recipes)": graph_recipes.md
-      - "Agent Definitions (V2)": cap/specification.md
+      - "Graph Recipes (Orchestration)": graph_recipes.md
+      - "Agent Manifest (CAM) & Linear Workflows": cap/specification.md
+      - "Agent Skills System": skills.md
+      - "Tool Packs (Plugins)": tool_packs.md
       - "Inline Tools": inline_tools.md
       - "Transport & Tracing": transport_layer.md
       - "Simulation & Eval": simulation.md

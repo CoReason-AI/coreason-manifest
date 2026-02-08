@@ -91,3 +91,21 @@ The `strict_url_validation` setting controls how Tool URIs are normalized **befo
     *   Hostnames are lower-cased (standard `urlparse` behavior).
     *   Trailing dots are **preserved**.
     *   Comparison is exact against the `allowed_domains` list. If your allowed list contains `example.com` but the tool uses `example.com.`, validation will fail in Loose mode but pass in Strict mode.
+
+## Operational Feasibility vs. Policy Governance
+
+It is important to distinguish between **Policy Governance** (this module) and **Operational Feasibility** (defined in `RecipeDefinition.requirements`).
+
+*   **Policy Governance (`GovernanceConfig`)**:
+    *   **Scope**: Static analysis of the Manifest structure.
+    *   **Concern**: Security, Compliance, Organizational Standards.
+    *   **Example**: "No tools from untrusted-domain.com", "Critical tools require auth".
+    *   **Enforcement**: Manifest Validation time (Build/Deploy).
+
+*   **Operational Feasibility (`RecipeDefinition.requirements`)**:
+    *   **Scope**: Dynamic check against a runtime Context.
+    *   **Concern**: Logic gating, User permissions, Data readiness.
+    *   **Example**: "User must be admin", "Dataset must have > 500 rows".
+    *   **Enforcement**: Runtime (Just before execution).
+
+See [Graph Recipes](graph_recipes.md#2-feasibility-constraints-constraint) for details on Feasibility Constraints.

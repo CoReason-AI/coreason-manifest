@@ -8,13 +8,17 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import logging
 from typing import Annotated, Any, Literal
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import BeforeValidator, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # 1. Configuration Schemas (New)
@@ -99,6 +103,30 @@ class RouterNode(RecipeNode):
     default_route: str = Field(..., description="Fallback target_node_id.")
 
 
+class EvaluatorNode(RecipeNode):
+    """A node that evaluates a target variable using an LLM judge."""
+
+    type: Literal["evaluator"] = "evaluator"
+    target_variable: str = Field(
+        ..., description="The key in the shared state/blackboard containing the content to evaluate."
+    )
+    evaluator_agent_ref: str = Field(
+        ..., description="Reference to the Agent Definition ID that will act as the judge."
+    )
+    evaluation_profile: EvaluationProfile | str = Field(
+        ..., description="Inline criteria definition or a reference to a preset profile."
+    )
+    pass_threshold: float = Field(..., description="The score, 0.0-1.0, required to proceed.")
+    max_refinements: int = Field(
+        ..., description="Maximum number of loops allowed before forcing a generic fail/fallback."
+    )
+    pass_route: str = Field(..., description="Node ID to go to if score >= threshold.")
+    fail_route: str = Field(..., description="Node ID to go to if score < threshold.")
+    feedback_variable: str = Field(
+        ..., description="The key in the state where the critique/reasoning will be written."
+    )
+
+
 class GraphEdge(CoReasonBaseModel):
     """A directed edge between two nodes."""
 
@@ -114,11 +142,12 @@ class GraphTopology(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    nodes: list[Annotated[AgentNode | HumanNode | RouterNode, Field(discriminator="type")]] = Field(
+    nodes: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]] = Field(
         ..., description="List of nodes in the graph."
     )
     edges: list[GraphEdge] = Field(..., description="List of directed edges.")
     entry_point: str = Field(..., description="ID of the start node.")
+    status: Literal["draft", "valid"] = Field("valid", description="Validation status of the topology.")
 
     @model_validator(mode="after")
     def validate_integrity(self) -> "GraphTopology":
@@ -129,20 +158,121 @@ class GraphTopology(CoReasonBaseModel):
             duplicates = {id_ for id_ in ids if ids.count(id_) > 1}
             raise ValueError(f"Duplicate node IDs found: {duplicates}")
 
-        valid_ids = set(ids)
+        # If status is draft, skip semantic checks
+        if self.status == "draft":
+            return self
+
+        self._validate_completeness()
+        return self
+
+    def verify_completeness(self) -> bool:
+        """Check if the graph is semantically complete (valid entry point and edges)."""
+        try:
+            self._validate_completeness()
+            return True
+        except ValueError:
+            return False
+
+    def _validate_completeness(self) -> None:
+        """Internal validation logic for entry point and edges."""
+        valid_ids = {node.id for node in self.nodes}
 
         # 2. Check entry point
         if self.entry_point not in valid_ids:
             raise ValueError(f"Entry point '{self.entry_point}' not found in nodes: {valid_ids}")
 
-        # 2. Check edges
+        # 3. Check edges
         for edge in self.edges:
             if edge.source not in valid_ids:
                 raise ValueError(f"Dangling edge source: {edge.source} -> {edge.target}")
             if edge.target not in valid_ids:
                 raise ValueError(f"Dangling edge target: {edge.source} -> {edge.target}")
 
-        return self
+
+class TaskSequence(CoReasonBaseModel):
+    """A linear sequence of tasks that simplifies graph creation."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    steps: list[Annotated[AgentNode | HumanNode | RouterNode | EvaluatorNode, Field(discriminator="type")]] = Field(
+        ..., min_length=1, description="Ordered list of steps to execute."
+    )
+
+    def to_graph(self) -> GraphTopology:
+        """Compiles the sequence into a GraphTopology."""
+        nodes = self.steps
+        edges = []
+
+        for i in range(len(nodes) - 1):
+            edges.append(GraphEdge(source=nodes[i].id, target=nodes[i + 1].id))
+
+        return GraphTopology(nodes=nodes, edges=edges, entry_point=nodes[0].id)
+
+
+def coerce_topology(v: Any) -> Any:
+    """Coerce linear lists or TaskSequence dicts into GraphTopology."""
+    # 1. If topology is a list (simplification), treat as steps
+    if isinstance(v, list):
+        return TaskSequence(steps=v).to_graph()
+
+    # 2. If topology is a dict
+    if isinstance(v, dict) and "steps" in v and "nodes" not in v:
+        # If it has "steps", treat as TaskSequence
+        return TaskSequence.model_validate(v).to_graph()
+    # Otherwise assume it's GraphTopology structure, let Pydantic handle it
+
+    return v
+
+
+class Constraint(CoReasonBaseModel):
+    """Represents a feasibility constraint for a Recipe."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    variable: str = Field(..., description="The context variable path to check (e.g., 'data.row_count').")
+    operator: Literal["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains"] = Field(
+        ..., description="Comparison operator."
+    )
+    value: Any = Field(..., description="The threshold or reference value.")
+    required: bool = Field(True, description="If True, failure halts execution. If False, it's a warning.")
+    error_message: str | None = Field(None, description="Custom error message to display on failure.")
+
+    def evaluate(self, context: dict[str, Any]) -> bool:
+        """Evaluate the constraint against the given context."""
+        # 1. Resolve Path
+        current = context
+        for part in self.variable.split("."):
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                # Path not found
+                return False
+
+        resolved_value = current
+
+        # 2. Compare
+        try:
+            if self.operator == "eq":
+                return bool(resolved_value == self.value)
+            if self.operator == "neq":
+                return bool(resolved_value != self.value)
+            if self.operator == "gt":
+                return bool(resolved_value > self.value)
+            if self.operator == "gte":
+                return bool(resolved_value >= self.value)
+            if self.operator == "lt":
+                return bool(resolved_value < self.value)
+            if self.operator == "lte":
+                return bool(resolved_value <= self.value)
+            if self.operator == "in":
+                return bool(resolved_value in self.value)
+            if self.operator == "contains":
+                return bool(self.value in resolved_value)
+
+            return False  # pragma: no cover
+        except TypeError:
+            # Type mismatch (e.g., comparing str > int)
+            return False
 
 
 class RecipeDefinition(CoReasonBaseModel):
@@ -157,8 +287,30 @@ class RecipeDefinition(CoReasonBaseModel):
 
     # --- New Components ---
     interface: RecipeInterface = Field(..., description="Input/Output contract.")
+    requirements: list[Constraint] = Field(default_factory=list, description="List of feasibility constraints.")
     state: StateDefinition | None = Field(None, description="Internal state schema.")
     policy: PolicyConfig | None = Field(None, description="Execution limits and error handling.")
     # ----------------------
 
-    topology: GraphTopology = Field(..., description="The execution graph topology.")
+    topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
+        ..., description="The execution graph topology."
+    )
+
+    def check_feasibility(self, context: dict[str, Any]) -> tuple[bool, list[str]]:
+        """Check if all required constraints are satisfied."""
+        errors = []
+        is_feasible = True
+
+        for constraint in self.requirements:
+            if not constraint.evaluate(context):
+                msg = (
+                    constraint.error_message
+                    or f"Constraint failed: {constraint.variable} {constraint.operator} {constraint.value}"
+                )
+                if constraint.required:
+                    is_feasible = False
+                    errors.append(msg)
+                else:
+                    logger.warning(f"Optional constraint warning: {msg}")
+
+        return is_feasible, errors
