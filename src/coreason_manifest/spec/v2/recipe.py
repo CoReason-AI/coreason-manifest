@@ -135,9 +135,7 @@ class PolicyConfig(CoReasonBaseModel):
         None, description="Mandatory safety instruction injected into the system prompt."
     )
 
-    legal_disclaimer: str | None = Field(
-        None, description="Text that must be appended to the final output."
-    )
+    legal_disclaimer: str | None = Field(None, description="Text that must be appended to the final output.")
 
 
 class AuditLevel(StrEnum):
