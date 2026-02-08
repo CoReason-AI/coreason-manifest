@@ -12,24 +12,14 @@ def test_recipe_complex_mixed_constraints() -> None:
     requirements = [
         Constraint(variable="env", operator="eq", value="prod", required=True),
         Constraint(variable="user.tier", operator="in", value=["gold", "platinum"], required=True),
-        Constraint(variable="feature.beta", operator="eq", value=True, required=False), # Optional, fails
+        Constraint(variable="feature.beta", operator="eq", value=True, required=False),  # Optional, fails
         Constraint(variable="quota.remaining", operator="gte", value=100, required=True),
     ]
 
-    recipe = RecipeDefinition(
-        metadata=metadata,
-        interface=interface,
-        topology=topology,
-        requirements=requirements
-    )
+    recipe = RecipeDefinition(metadata=metadata, interface=interface, topology=topology, requirements=requirements)
 
     # Scenario 1: All required pass, optional fails
-    context_pass = {
-        "env": "prod",
-        "user": {"tier": "gold"},
-        "feature": {"beta": False},
-        "quota": {"remaining": 500}
-    }
+    context_pass = {"env": "prod", "user": {"tier": "gold"}, "feature": {"beta": False}, "quota": {"remaining": 500}}
     feasible, errors = recipe.check_feasibility(context_pass)
     assert feasible is True
     assert len(errors) == 0
@@ -37,20 +27,24 @@ def test_recipe_complex_mixed_constraints() -> None:
     # Scenario 2: One required fails, optional fails
     context_fail = {
         "env": "prod",
-        "user": {"tier": "silver"}, # Fail
+        "user": {"tier": "silver"},  # Fail
         "feature": {"beta": False},
-        "quota": {"remaining": 500}
+        "quota": {"remaining": 500},
     }
     feasible, errors = recipe.check_feasibility(context_fail)
     assert feasible is False
     assert len(errors) == 1
-    assert "Constraint failed" in errors[0] and "user.tier" in errors[0]
+    assert "Constraint failed" in errors[0]
+    assert "user.tier" in errors[0]
+
 
 def test_constraint_mutable_context() -> None:
     """Test evaluating constraints against mutable context objects."""
+
     class MutableObj:
         def __init__(self, val: int):
             self.val = val
+
         def __eq__(self, other: object) -> bool:
             if isinstance(other, int):
                 return self.val == other
@@ -66,6 +60,7 @@ def test_constraint_mutable_context() -> None:
 
     context["obj"].val = 5
     assert Constraint(variable="obj", operator="eq", value=10).evaluate(context) is False
+
 
 def test_constraint_large_scale() -> None:
     """Test a large number of constraints."""
@@ -87,7 +82,7 @@ def test_constraint_large_scale() -> None:
         metadata=ManifestMetadata(name="Large Recipe"),
         interface=RecipeInterface(),
         topology=topology,
-        requirements=requirements
+        requirements=requirements,
     )
 
     feasible, errors = recipe.check_feasibility(context)
