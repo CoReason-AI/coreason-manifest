@@ -513,16 +513,26 @@ class RecipeDefinition(CoReasonBaseModel):
         - PUBLISHED: Requires concrete IDs and valid graph.
         """
         if self.status == RecipeStatus.PUBLISHED:
-            # 1. Enforce Concrete Resolution
+            # 1. Enforce Concrete Resolution and Complete Definition
             abstract_nodes = []
+            incomplete_nodes = []
             for node in self.topology.nodes:
-                if isinstance(node, AgentNode) and isinstance(node.agent_ref, SemanticRef):
-                    abstract_nodes.append(node.id)
+                if isinstance(node, AgentNode):
+                    if isinstance(node.agent_ref, SemanticRef):
+                        abstract_nodes.append(node.id)
+                    elif not node.agent_ref and not node.construct:
+                        incomplete_nodes.append(node.id)
 
             if abstract_nodes:
                 raise ValueError(
                     f"Lifecycle Error: Nodes {abstract_nodes} are still abstract. "
                     "Resolve all SemanticRefs to concrete IDs before publishing."
+                )
+
+            if incomplete_nodes:
+                raise ValueError(
+                    f"Lifecycle Error: Nodes {incomplete_nodes} are incomplete. "
+                    "Must provide either 'agent_ref' or 'construct' before publishing."
                 )
 
             # 2. Enforce Graph Integrity
