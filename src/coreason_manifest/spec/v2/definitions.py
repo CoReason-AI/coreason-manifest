@@ -17,7 +17,10 @@ from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
 from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
+from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
+from coreason_manifest.spec.v2.provenance import ProvenanceData
 from coreason_manifest.spec.v2.resources import ModelProfile
+from coreason_manifest.spec.v2.skills import SkillDefinition
 
 __all__ = [
     "AgentDefinition",
@@ -31,6 +34,8 @@ __all__ = [
     "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
+    "ProvenanceData",
+    "SkillDefinition",
     "Step",
     "SwitchStep",
     "ToolDefinition",
@@ -111,6 +116,10 @@ class AgentDefinition(CoReasonBaseModel):
         default_factory=list, description="List of Tool Requirements or Inline Definitions."
     )
     knowledge: list[str] = Field(default_factory=list, description="List of file paths or knowledge base IDs.")
+    skills: list[str] = Field(default_factory=list, description="List of Skill IDs to equip this agent with.")
+    context_strategy: Literal["full", "compressed", "hybrid"] = Field(
+        "hybrid", description="Context optimization strategy for skills."
+    )
 
     @field_validator("tools", mode="before")
     @classmethod
@@ -171,6 +180,9 @@ class AgentStep(BaseStep):
     agent: str = Field(..., description="Reference to an Agent definition (by ID or name).")
     next: str | None = Field(None, description="ID of the next step to execute.")
     system_prompt: str | None = Field(None, description="Optional override for system prompt.")
+    temporary_skills: list[str] = Field(
+        default_factory=list, description="Skills injected into the agent ONLY for this specific step."
+    )
 
 
 class LogicStep(BaseStep):
@@ -220,7 +232,20 @@ class ManifestMetadata(CoReasonBaseModel):
     model_config = ConfigDict(extra="allow", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
+    version: str = Field("0.1.0", description="Semantic version of the manifest.")
+    provenance: ProvenanceData | None = Field(None, description="Lineage and authorship information.")
     design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
+    tested_models: list[str] = Field(
+        default_factory=list, description="List of LLM identifiers this manifest has been tested on."
+    )
+
+
+# Import ToolPackDefinition after definitions are declared to avoid circular import
+
+# Update forward references for ToolPackDefinition using the local namespace
+ToolPackDefinition.model_rebuild(
+    _types_namespace={"AgentDefinition": AgentDefinition, "ToolDefinition": ToolDefinition}
+)
 
 
 class ManifestV2(CoReasonBaseModel):
@@ -236,6 +261,10 @@ class ManifestV2(CoReasonBaseModel):
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
     definitions: dict[
         str,
-        Annotated[ToolDefinition | AgentDefinition, Field(discriminator="type")] | GenericDefinition,
+        Annotated[
+            ToolDefinition | AgentDefinition | SkillDefinition | MCPResourceDefinition | ToolPackDefinition,
+            Field(discriminator="type"),
+        ]
+        | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")

@@ -24,9 +24,11 @@ from coreason_manifest.spec.v2.definitions import (
     ManifestV2,
     SwitchStep,
 )
+from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.mock import generate_mock_output
-from coreason_manifest.utils.viz import generate_mermaid_graph
+from coreason_manifest.utils.simulation_executor import GraphExecutor
+from coreason_manifest.utils.viz import generate_mermaid_graph, generate_recipe_mermaid
 
 
 def handle_init(args: argparse.Namespace) -> None:
@@ -303,7 +305,11 @@ def main() -> None:
         print(agent.model_dump_json(indent=2, by_alias=True, exclude_none=True))
 
     elif args.command == "viz":
-        mermaid = generate_mermaid_graph(agent)
+        if isinstance(agent, RecipeDefinition):
+            mermaid = generate_recipe_mermaid(agent)
+        else:
+            mermaid = generate_mermaid_graph(agent)
+
         if args.json:
             print(json.dumps({"mermaid": mermaid}))
         else:
@@ -311,12 +317,38 @@ def main() -> None:
 
     elif args.command == "run":
         try:
-            json.loads(args.inputs)
+            inputs = json.loads(args.inputs)
         except json.JSONDecodeError as e:
             sys.stderr.write(f"Error parsing inputs: {e}\n")
             sys.exit(1)
 
-        _run_simulation(agent, args.mock)
+        if isinstance(agent, RecipeDefinition):
+            import asyncio
+
+            # Instantiate executor
+            executor = GraphExecutor(agent, inputs)
+
+            # Run simulation
+            try:
+                trace = asyncio.run(executor.run())
+
+                # Print result
+                print(
+                    json.dumps(
+                        {
+                            "trace_id": str(trace.trace_id),
+                            "final_state": executor.context,
+                            "steps_count": len(trace.steps),
+                        },
+                        indent=2,
+                        default=str,
+                    )
+                )
+            except Exception as e:
+                sys.stderr.write(f"Error running graph executor: {e}\n")
+                sys.exit(1)
+        else:
+            _run_simulation(agent, args.mock)
 
 
 def _run_simulation(agent: ManifestV2, mock: bool) -> None:

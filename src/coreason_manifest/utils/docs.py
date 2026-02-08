@@ -48,10 +48,8 @@ def render_agent_card(agent: ManifestV2) -> str:
                 break
 
     # 2. Header Section
-    # Check for version in extra fields of metadata
+    # Check for version in metadata
     version = getattr(metadata, "version", "0.0.0")
-    if not isinstance(version, str):
-        version = str(version)
 
     output = [f"# {metadata.name} (v{version})"]
 

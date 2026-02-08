@@ -56,7 +56,10 @@ from coreason_manifest import (
 
 # 1. Define Metadata
 metadata = ManifestMetadata(
-    name="Research Recipe"
+    name="Research Recipe",
+    # Optional provenance fields
+    confidence_score=0.95,
+    generated_by="coreason-strategist-v1"
 )
 
 # 2. Define Topology

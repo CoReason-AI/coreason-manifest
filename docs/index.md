@@ -33,14 +33,26 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 ## Specifications & Protocols
 
-*   **[Coreason Agent Manifest (CAM) Specification](cap/specification.md)**
-    *   The authoritative "Human-Centric" YAML format specification for defining Agents, Recipes, Workflows, and their components.
+*   **[Coreason Agent Manifest (CAM) & Linear Workflows](cap/specification.md)**
+    *   The authoritative "Human-Centric" YAML format specification for defining Agents and simple, linear workflows (`ManifestV2`).
+
+*   **[Graph Recipes (Orchestration)](graph_recipes.md)**
+    *   Describes the system for complex, non-linear, cyclic graph execution using `RecipeDefinition` and `GraphTopology`.
+
+*   **[Evaluator-Optimizer Pattern](evaluator_optimizer.md)**
+    *   Documentation for the iterative "Generator-Judge-Refiner" loop pattern for high-quality content generation.
 
 *   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
     *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
 
-*   **[Graph Recipes (Work Package JJ)](graph_recipes.md)**
-    *   Describes the system for non-linear, cyclic graph execution using `RecipeDefinition` and `GraphTopology`.
+*   **[Agent Skills System](skills.md)**
+    *   Documentation for defining and using procedural knowledge ("Skills") with `SkillDefinition` and `LoadStrategy`.
+
+*   **[Tool Packs (Plugins)](tool_packs.md)**
+    *   Documentation for the Tool Pack architecture, enabling reusable bundles of Agents, Skills, and Tools.
+
+*   **[MCP Adapter](interop/mcp_adapter.md)**
+    *   Guide for integrating Model Context Protocol (MCP) servers as Coreason Tools.
 
 *   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
     *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
@@ -56,6 +68,9 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Evaluation Metadata](evaluation_metadata.md)**
     *   Specifications for embedding testing requirements (`EvaluationProfile`) and quality criteria (`SuccessCriterion`) directly into Agent Definitions.
+
+*   **[Provenance Metadata](provenance_metadata.md)**
+    *   Specifications for tracking AI generation lineage (`ManifestMetadata`) including confidence scores and original intent.
 
 *   **[Active Memory Interface](active_memory_interface.md)**
     *   Protocol (`SessionHandle`) for active agent interactions with storage (history, recall, persistent variables).

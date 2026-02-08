@@ -14,22 +14,23 @@ from pathlib import Path
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.spec.v2.definitions import ManifestV2
+from coreason_manifest.spec.v2.recipe import RecipeDefinition
 
 
-def load_agent_from_ref(reference: str) -> ManifestV2:
+def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
     """
-    Dynamically loads an Agent Definition (ManifestV2) from a python file reference.
+    Dynamically loads an Agent Definition (ManifestV2) or RecipeDefinition from a python file reference.
 
     Args:
         reference: A string in the format "path/to/file.py:variable_name".
                    If ":variable_name" is omitted, defaults to "agent".
 
     Returns:
-        ManifestV2: The loaded agent manifest.
+        ManifestV2 | RecipeDefinition: The loaded agent manifest or recipe.
 
     Raises:
         ValueError: If the file does not exist, the variable is missing,
-                    or the object is not a valid AgentBuilder or ManifestV2.
+                    or the object is not a valid AgentBuilder, ManifestV2, or RecipeDefinition.
     """
     # Default assumptions
     file_path_str = reference
@@ -66,6 +67,11 @@ def load_agent_from_ref(reference: str) -> ManifestV2:
 
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
+
+        # SECURITY WARNING: This executes arbitrary code from the file.
+        sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
+        sys.stderr.flush()
+
         spec.loader.exec_module(module)
     except Exception as e:
         raise ValueError(f"Error loading module {file_path}: {e}") from e
@@ -84,7 +90,10 @@ def load_agent_from_ref(reference: str) -> ManifestV2:
             raise ValueError(f"Error building agent from builder: {e}") from e
 
     # Validate type
-    if not isinstance(agent_obj, ManifestV2):
-        raise ValueError(f"Object '{var_name}' is not a ManifestV2 or AgentBuilder. Got: {type(agent_obj).__name__}")
+    if not isinstance(agent_obj, (ManifestV2, RecipeDefinition)):
+        raise ValueError(
+            f"Object '{var_name}' is not a ManifestV2, RecipeDefinition, or AgentBuilder. "
+            f"Got: {type(agent_obj).__name__}"
+        )
 
     return agent_obj
