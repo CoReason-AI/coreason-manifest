@@ -16,12 +16,12 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
 class AccessScope(StrEnum):
-    """Broad permission scopes."""
+    """Broad permission scopes (Harvested from Coreason-Identity)."""
 
-    PUBLIC = "public"
-    AUTHENTICATED = "authenticated"
-    INTERNAL = "internal"
-    ADMIN = "admin"
+    PUBLIC = "public"  # No auth required
+    AUTHENTICATED = "authenticated"  # Any logged-in user
+    INTERNAL = "internal"  # Employee/Staff only
+    ADMIN = "admin"  # Tenant Administrators
 
 
 class ContextField(StrEnum):
@@ -38,25 +38,27 @@ class ContextField(StrEnum):
 
 
 class IdentityRequirement(CoReasonBaseModel):
-    """RBAC and Context Injection rules."""
+    """RBAC and Context Injection rules for a Recipe."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     # 1. Access Control (Who can run this?)
-    min_scope: AccessScope = Field(AccessScope.AUTHENTICATED, description="Minimum auth level required.")
-    required_roles: list[str] = Field(default_factory=list, description="List of mandatory roles (OR logic).")
+    min_scope: AccessScope = Field(
+        AccessScope.AUTHENTICATED, description="Minimum authentication level required to execute this recipe."
+    )
+    required_roles: list[str] = Field(
+        default_factory=list, description="List of mandatory roles (OR logic). User must have at least one."
+    )
     required_permissions: list[str] = Field(
-        default_factory=list,
-        description="List of specific permission strings (AND logic).",
+        default_factory=list, description="List of specific permission strings (AND logic). User must have all."
     )
 
     # 2. Context Injection (What does the agent see?)
-    # If True, the runtime injects these values into the System Prompt preamble.
-    inject_user_profile: bool = Field(False, description="Inject name, email, and ID.")
-    inject_locale_info: bool = Field(True, description="Inject timezone and locale/language.")
+    inject_user_profile: bool = Field(False, description="If True, injects name, email, and ID into the context.")
+    inject_locale_info: bool = Field(True, description="If True, injects timezone and locale/language preference.")
 
     # 3. Privacy
     anonymize_pii: bool = Field(
         True,
-        description="If True, replaces real names/emails with hashes/aliases in the prompt.",
+        description="If True, the runtime replaces real names/emails with hashes or aliases before sending to LLM.",
     )

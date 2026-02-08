@@ -148,6 +148,30 @@ def test_identity_edge_cases_invalid_enum() -> None:
         IdentityRequirement(min_scope="invalid_scope")
 
 
+def test_identity_edge_cases_duplicate_roles() -> None:
+    """Test that duplicate roles are preserved (list semantic) but valid (Edge Case 4)."""
+    req = IdentityRequirement(
+        required_roles=["admin", "admin"],
+        required_permissions=["read", "read"],
+    )
+    # Pydantic doesn't deduplicate lists by default
+    assert req.required_roles == ["admin", "admin"]
+    assert req.required_permissions == ["read", "read"]
+
+
+def test_identity_edge_cases_invalid_list_type() -> None:
+    """Test validation error when passing a string instead of a list (Edge Case 5)."""
+    with pytest.raises(ValidationError):
+        # Mypy would catch this, but we test runtime validation
+        IdentityRequirement(required_roles="admin")
+
+
+def test_identity_edge_cases_extra_fields() -> None:
+    """Test that extra fields are forbidden (Edge Case 6)."""
+    with pytest.raises(ValidationError):
+        IdentityRequirement(extra_field="should_fail")  # type: ignore[call-arg]
+
+
 # --- Complex Case Tests ---
 
 
@@ -215,3 +239,23 @@ def test_complex_recipe_integration() -> None:
     assert recipe.identity.required_permissions == ["deploy:prod"]
     # Verify defaults didn't change unexpectedly
     assert recipe.identity.anonymize_pii is True
+
+
+def test_complex_max_constraints_scenario() -> None:
+    """Test a scenario where ALL fields are set to strict/non-default values (Complex Case 4)."""
+    identity = IdentityRequirement(
+        min_scope=AccessScope.ADMIN,
+        required_roles=["superadmin", "owner", "root"],
+        required_permissions=["system:reset", "system:wipe", "audit:delete"],
+        inject_user_profile=True,
+        inject_locale_info=False,
+        anonymize_pii=False,
+    )
+
+    dumped = identity.dump()
+    assert dumped["min_scope"] == "admin"
+    assert len(dumped["required_roles"]) == 3
+    assert len(dumped["required_permissions"]) == 3
+    assert dumped["inject_user_profile"] is True
+    assert dumped["inject_locale_info"] is False
+    assert dumped["anonymize_pii"] is False
