@@ -119,8 +119,7 @@ def render_agent_card(agent: ManifestV2) -> str:
         policies = getattr(governance, "policies", [])
         if policies:
             output.append("- **Active Policies:**")
-            for policy in policies:
-                output.append(f"  - {policy}")
+            output.extend(f"  - {policy}" for policy in policies)
 
     # 5. Interface Contract
     output.append("\n## 🔌 API Interface")
@@ -142,9 +141,10 @@ def render_agent_card(agent: ManifestV2) -> str:
 
         if eval_profile.grading_rubric:
             output.append("- **Grading Rubric:**")
-            for criterion in eval_profile.grading_rubric:
-                # Criterion is SuccessCriterion object
-                output.append(f"  - **{criterion.name}:** {criterion.description} (Threshold: {criterion.threshold})")
+            output.extend(
+                f"  - **{criterion.name}:** {criterion.description} (Threshold: {criterion.threshold})"
+                for criterion in eval_profile.grading_rubric
+            )
 
         if eval_profile.expected_latency_ms:
             output.append(f"- **SLA:** {eval_profile.expected_latency_ms}ms latency")

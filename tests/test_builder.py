@@ -92,7 +92,7 @@ def test_capability_configuration() -> None:
         description="Stream",
         input_model=SearchInput,
         output_model=SearchOutput,
-        type=CapabilityType.ATOMIC,
+        capability_type=CapabilityType.ATOMIC,
         delivery_mode=DeliveryMode.SERVER_SENT_EVENTS,
     )
 
@@ -224,7 +224,7 @@ def test_kitchen_sink_full_composition() -> None:
         input_model=AliasModel,
         output_model=EmptyModel,
         delivery_mode=DeliveryMode.SERVER_SENT_EVENTS,
-        type=CapabilityType.ATOMIC,
+        capability_type=CapabilityType.ATOMIC,
     )
 
     agent = (
