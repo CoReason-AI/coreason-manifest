@@ -20,11 +20,18 @@ def convert_to_openai_assistant(agent: AgentDefinition) -> dict[str, Any]:
     This function maps the agent's identity, instructions, and tools to the format
     expected by the OpenAI Assistants API.
 
+    WARNING: This conversion involves lossy transformations:
+    1. Instructions: Concatenates `role`, `goal`, and `backstory` into a single text block.
+    2. Tool Dropping: SILENTLY DROPS any `ToolRequirement` (remote tools) because their
+       schema is not available locally for registration with OpenAI.
+    3. Model Default: Invents "gpt-4-turbo-preview" as the default model if `agent.model`
+       is not specified.
+
     Args:
-        agent: The agent definition to convert.
+        agent (AgentDefinition): The agent definition to convert.
 
     Returns:
-        A dictionary representing the OpenAI Assistant configuration.
+        dict[str, Any]: A dictionary representing the OpenAI Assistant configuration.
     """
     instructions_parts = [
         f"Role: {agent.role}",

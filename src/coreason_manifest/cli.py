@@ -18,16 +18,10 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
-    AgentStep,
-    CouncilStep,
-    LogicStep,
     ManifestV2,
-    SwitchStep,
 )
 from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.loader import load_agent_from_ref
-from coreason_manifest.utils.mock import generate_mock_output
-from coreason_manifest.utils.simulation_executor import GraphExecutor
 from coreason_manifest.utils.viz import generate_mermaid_graph
 
 
@@ -64,7 +58,7 @@ def handle_init(args: argparse.Namespace) -> None:
             description="Greets the user with a friendly message.",
             input_model=GreetInput,
             output_model=GreetOutput,
-            type=CapabilityType.ATOMIC
+            capability_type=CapabilityType.ATOMIC
         )
 
         # 3. Build Agent
@@ -109,14 +103,6 @@ def handle_init(args: argparse.Namespace) -> None:
         1. Open this folder in VS Code.
         2. Open `agent.py`.
 
-        ## Running
-
-        - Press F5 to run the agent in mock mode.
-        - Or use the CLI:
-          ```bash
-          coreason run agent.py:agent --mock --inputs '{{"name": "World"}}'
-          ```
-
         ## Visualization
 
         - Use the "Viz" launch configuration in VS Code.
@@ -137,19 +123,6 @@ def handle_init(args: argparse.Namespace) -> None:
         {
             "version": "0.2.0",
             "configurations": [
-                {
-                    "name": "CoReason: Run Agent (Mock)",
-                    "type": "python",
-                    "request": "launch",
-                    "module": "coreason_manifest.cli",
-                    "args": [
-                        "run",
-                        "${file}:agent",
-                        "--mock",
-                        "--inputs", "{\\"name\\": \\"World\\"}"
-                    ],
-                    "console": "integratedTerminal"
-                },
                 {
                     "name": "CoReason: Visualize Graph",
                     "type": "python",
@@ -173,11 +146,11 @@ def handle_init(args: argparse.Namespace) -> None:
 
     # 4. Success Message
     print(f"✅ Created new agent project in './{args.name}'")
-    print("")
+    print()
     print("👉 Next steps:")
     print(f"   1. cd {args.name}")
     print("   2. code .  (Open in VS Code)")
-    print("   3. Open 'agent.py' and press F5 to run!")
+    print("   3. Open 'agent.py' to explore.")
 
 
 def handle_validate(args: argparse.Namespace) -> None:
@@ -264,16 +237,6 @@ def main() -> None:
     viz_parser.add_argument("ref", help="Reference to the agent")
     viz_parser.add_argument("--json", action="store_true", help="Output JSON wrapper around mermaid")
 
-    # Run
-    run_parser = subparsers.add_parser("run", help="Simulate an agent execution")
-    run_parser.add_argument("ref", help="Reference to the agent")
-    run_parser.add_argument("--inputs", default="{}", help="JSON string inputs")
-    run_parser.add_argument("--mock", action="store_true", help="Use mock outputs")
-
-    # The prompt says "All commands must support a --json flag".
-    # For 'run', it's redundant as we output NDJSON events, but we support it for compliance.
-    run_parser.add_argument("--json", action="store_true", help="Output JSON events")
-
     # Init
     init_parser = subparsers.add_parser("init", help="Initialize a new CoReason agent project")
     init_parser.add_argument("name", help="Name of the agent/directory (e.g., my_first_agent)")
@@ -315,80 +278,6 @@ def main() -> None:
             print(json.dumps({"mermaid": mermaid}))
         else:
             print(mermaid)
-
-    elif args.command == "run":
-        try:
-            inputs = json.loads(args.inputs)
-        except json.JSONDecodeError as e:
-            sys.stderr.write(f"Error parsing inputs: {e}\n")
-            sys.exit(1)
-
-        if isinstance(agent, RecipeDefinition):
-            import asyncio
-
-            # Instantiate executor
-            executor = GraphExecutor(agent, inputs)
-
-            # Run simulation
-            try:
-                trace = asyncio.run(executor.run())
-
-                # Print result
-                print(
-                    json.dumps(
-                        {
-                            "trace_id": str(trace.trace_id),
-                            "final_state": executor.context,
-                            "steps_count": len(trace.steps),
-                        },
-                        indent=2,
-                        default=str,
-                    )
-                )
-            except Exception as e:
-                sys.stderr.write(f"Error running graph executor: {e}\n")
-                sys.exit(1)
-        else:
-            _run_simulation(agent, args.mock)
-
-
-def _run_simulation(agent: ManifestV2, mock: bool) -> None:
-    """
-    Runs a simulation of the agent workflow.
-    Iterates through all steps defined in the workflow (not graph traversal)
-    as per instructions to ensure full coverage during inspection.
-    """
-    for step_id, step in agent.workflow.steps.items():
-        capability = "Unknown"
-
-        if isinstance(step, AgentStep):
-            capability = step.agent
-        elif isinstance(step, LogicStep):
-            capability = "Logic"
-        elif isinstance(step, CouncilStep):
-            capability = "Council"
-        elif isinstance(step, SwitchStep):
-            capability = "Switch"
-
-        # Emit step_start
-        print(json.dumps({"type": "step_start", "step_id": step_id, "capability": capability}))
-        sys.stdout.flush()
-
-        result = None
-        if mock and isinstance(step, AgentStep):
-            # Resolve definition
-            defn = agent.definitions.get(step.agent)
-            if isinstance(defn, AgentDefinition):
-                try:
-                    result = generate_mock_output(defn)
-                except Exception as e:
-                    sys.stderr.write(f"Error generating mock for {step.agent}: {e}\n")
-            else:
-                sys.stderr.write(f"Definition for {step.agent} not found or not an Agent.\n")
-
-        # Emit step_output
-        print(json.dumps({"type": "step_output", "step_id": step_id, "output": result}))
-        sys.stdout.flush()
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -72,7 +72,7 @@ def build_financial_analyst() -> ManifestV2:
             description="Fetches raw financial data for a company.",
             input_model=FinancialDataInput,
             output_model=FinancialData,
-            type=CapabilityType.ATOMIC,
+            capability_type=CapabilityType.ATOMIC,
         )
     )
     # Extract the definition
@@ -91,7 +91,7 @@ def build_financial_analyst() -> ManifestV2:
             description="Analyzes financial trends and risk.",
             input_model=FinancialData,
             output_model=TrendAnalysis,
-            type=CapabilityType.GRAPH,
+            capability_type=CapabilityType.GRAPH,
         )
     )
     # Extract definition
@@ -118,7 +118,7 @@ def build_financial_analyst() -> ManifestV2:
             description="Generates a final report.",
             input_model=TrendAnalysis,
             output_model=InvestmentSummary,
-            type=CapabilityType.ATOMIC,
+            capability_type=CapabilityType.ATOMIC,
         )
     )
     writer_def = writer_builder.build().definitions["WriterAgent"]

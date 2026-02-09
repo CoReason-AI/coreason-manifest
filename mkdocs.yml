@@ -6,6 +6,7 @@ nav:
   - Usage: usage.md
   - Specifications:
       - "Graph Recipes (Orchestration)": graph_recipes.md
+      - "The Assembler Pattern (Inline Agents)": assembler_pattern.md
       - "Agent Manifest (CAM) & Linear Workflows": cap/specification.md
       - "Agent Skills System": skills.md
       - "Tool Packs (Plugins)": tool_packs.md

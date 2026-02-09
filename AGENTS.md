@@ -30,7 +30,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ### **Law 3: Decoupled Contracts (The "Middleware" Rule)**
 * **Constraint:** The Manifest defines the *shape* of data, not the *method* of execution.
 * **Forbidden:** Dependencies on execution-layer libraries (e.g., `fastapi`, `starlette`, auth middleware, database drivers like `psycopg2`).
-* **Allowed:** Pure data dependencies (`pydantic`, `pyyaml`, `jsonschema`).
+* **Allowed:** Pure data dependencies (`pydantic`, `pyyaml`).
 
 ---
 
@@ -48,7 +48,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 ## **3. Technical Standards**
 
 ### **Environment & Package Management**
-* **Manager:** Poetry.
+* **Manager:** `uv`.
 * **Language:** Python 3.12+.
 * **License:** Prosperity Public License 3.0. Every file must include the license header.
 

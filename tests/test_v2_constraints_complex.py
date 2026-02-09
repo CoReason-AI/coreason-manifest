@@ -1,3 +1,13 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import AgentNode, Constraint, GraphTopology, RecipeDefinition, RecipeInterface
 
@@ -64,9 +74,7 @@ def test_constraint_mutable_context() -> None:
 
 def test_constraint_large_scale() -> None:
     """Test a large number of constraints."""
-    requirements = []
-    for i in range(100):
-        requirements.append(Constraint(variable=f"var_{i}", operator="eq", value=i))
+    requirements = [Constraint(variable=f"var_{i}", operator="eq", value=i) for i in range(100)]
 
     context = {f"var_{i}": i for i in range(100)}
 

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import ConfigDict, Field, model_validator
@@ -16,7 +16,7 @@ from pydantic import ConfigDict, Field, model_validator
 from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
-class LoadStrategy(str, Enum):
+class LoadStrategy(StrEnum):
     """Strategy for loading the skill."""
 
     EAGER = "eager"
@@ -25,7 +25,14 @@ class LoadStrategy(str, Enum):
 
 
 class SkillDependency(CoReasonBaseModel):
-    """Dependency required by a skill."""
+    """
+    Dependency required by a skill.
+
+    Attributes:
+        ecosystem (Literal["python", "node", "system", "mcp"]): The ecosystem of the dependency.
+        package (str): The package name or command.
+        version_constraint (str | None): Optional version constraint.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -35,7 +42,28 @@ class SkillDependency(CoReasonBaseModel):
 
 
 class SkillDefinition(CoReasonBaseModel):
-    """Definition of an Agent Skill (Procedural Knowledge)."""
+    """
+    Definition of an Agent Skill (Procedural Knowledge).
+
+    Attributes:
+        type (Literal["skill"]): Discriminator. (Default: "skill").
+        id (str): Unique ID for the skill.
+        name (str): Human-readable name of the skill.
+        version (str): Semantic version of the skill. (Default: "1.0.0").
+        description (str): Human-readable summary.
+        trigger_intent (str | None): Dense, semantic description used for vector routing. Critical for lazy loading.
+        instructions (str | None): Inline system prompt/instructions.
+        instructions_uri (str | None): Path to external SKILL.md file.
+        scripts (dict[str, str]): Map of script names to file paths.
+        dependencies (list[SkillDependency]): List of dependencies required by the skill.
+        load_strategy (LoadStrategy): Strategy for loading the skill instructions. (Default: LAZY).
+
+    Validators:
+        validate_consistency (@model_validator):
+            Ensures consistency between load strategy and trigger intent.
+            - LAZY loading requires a `trigger_intent`.
+            - Enforces XOR between `instructions` and `instructions_uri` (must have exactly one).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 

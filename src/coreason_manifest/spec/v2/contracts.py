@@ -16,7 +16,13 @@ from coreason_manifest.spec.common_base import CoReasonBaseModel
 
 
 class InterfaceDefinition(CoReasonBaseModel):
-    """Defines the input/output contract."""
+    """
+    Defines the input/output contract.
+
+    Attributes:
+        inputs (dict[str, Any]): JSON Schema definitions for arguments.
+        outputs (dict[str, Any]): JSON Schema definitions for return values.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -25,7 +31,13 @@ class InterfaceDefinition(CoReasonBaseModel):
 
 
 class StateDefinition(CoReasonBaseModel):
-    """Defines the conversation memory/context structure."""
+    """
+    Defines the conversation memory/context structure.
+
+    Attributes:
+        schema_ (dict[str, Any]): The structure of the conversation memory/context. (Alias: 'schema').
+        backend (str | None): Backend storage type (e.g., 'redis', 'memory').
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -36,7 +48,15 @@ class StateDefinition(CoReasonBaseModel):
 
 
 class PolicyDefinition(CoReasonBaseModel):
-    """Defines execution policy and governance rules."""
+    """
+    Defines execution policy and governance rules.
+
+    Attributes:
+        max_steps (int | None): Execution limit on number of steps.
+        max_retries (int): Maximum number of retries. (Default: 3).
+        timeout (int | None): Timeout in seconds.
+        human_in_the_loop (bool): Whether to require human approval. (Default: False).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
