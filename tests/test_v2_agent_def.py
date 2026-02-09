@@ -11,6 +11,20 @@
 import yaml
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition, GenericDefinition, ManifestV2, ToolDefinition
+from tests.factories import create_agent_definition
+
+
+def test_factory_usage() -> None:
+    """Demonstrate using the factory to create an agent."""
+    agent = create_agent_definition(
+        id="factory-agent",
+        name="Factory Agent",
+        # defaults handle type, role, goal
+    )
+    assert agent.id == "factory-agent"
+    assert agent.name == "Factory Agent"
+    assert agent.role == "Tester"
+    assert agent.type == "agent"
 
 
 def test_polymorphic_parsing() -> None:

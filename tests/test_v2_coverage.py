@@ -12,6 +12,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.spec.common_base import ToolRiskLevel
 from coreason_manifest.spec.governance import GovernanceConfig
@@ -26,7 +27,7 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 from coreason_manifest.utils.v2.governance import _risk_score, check_compliance_v2
-from coreason_manifest.utils.v2.validator import validate_integrity, validate_loose
+from coreason_manifest.utils.v2.validator import validate_loose
 
 # --- Governance Tests ---
 
@@ -215,40 +216,46 @@ def test_validator_strict_missing_start() -> None:
     """Test strict validation missing start step."""
     agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
 
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
-        definitions={"a": agent_def},
-    )
+    # Construct as draft first to bypass initial validation
+    # Now manually call validate_integrity or rely on Pydantic to catch it if instantiated with status=published
+    # But wait, if I instantiate with status="published", it should raise ValidationError immediately!
+    # The previous test used validate_integrity explicitly.
+    # Now it's a model validator.
+    # So constructing it should fail.
 
-    with pytest.raises(ValueError, match="Start step 'missing_start' not found"):
-        validate_integrity(manifest)
+    with pytest.raises(ValidationError, match="Start step 'missing_start' not found"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Test"),
+            status="published",
+            workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
+            definitions={"a": agent_def},
+        )
 
 
 def test_validator_strict_switch_broken_targets() -> None:
     """Test strict validation broken switch targets."""
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(
-            start="s1",
-            steps={"s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")},
-        ),
-    )
-
-    with pytest.raises(ValueError, match="references missing step"):
-        validate_integrity(manifest)
+    with pytest.raises(ValidationError, match="references missing step"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Test"),
+            status="published",
+            workflow=Workflow(
+                start="s1",
+                steps={
+                    "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
+                },
+            ),
+        )
 
 
 def test_validator_strict_missing_agent_definition() -> None:
     """Test strict validation missing agent definition."""
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
-        definitions={},
-    )
-
-    with pytest.raises(ValueError, match="references missing agent"):
-        validate_integrity(manifest)
+    with pytest.raises(ValidationError, match="references missing agent"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Test"),
+            status="published",
+            workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
+            definitions={},
+        )
