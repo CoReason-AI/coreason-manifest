@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.spec.common_base import ToolRiskLevel
 from coreason_manifest.spec.governance import GovernanceConfig
@@ -21,7 +22,6 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 from coreason_manifest.utils.v2.governance import check_compliance_v2
-from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture
@@ -43,13 +43,13 @@ def basic_manifest() -> ManifestV2:
 
 def test_validation_loose_vs_strict() -> None:
     """Test that loose validation ignores dangling pointers while strict catches them."""
-    # Now that ManifestV2 enforces strict validation via explicit call, construction should succeed.
-
     agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
 
-    manifest = ManifestV2(
+    # Loose mode (draft) should pass
+    ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Broken Agent"),
+        status="draft",
         workflow=Workflow(
             start="step1",
             steps={
@@ -59,8 +59,20 @@ def test_validation_loose_vs_strict() -> None:
         definitions={"my-agent": agent_def},
     )
 
-    with pytest.raises(ValueError, match="missing next step 'step2'"):
-        validate_integrity(manifest)
+    # Strict mode (published) should fail
+    with pytest.raises(ValidationError, match="missing next step 'step2'"):
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Broken Agent"),
+            status="published",
+            workflow=Workflow(
+                start="step1",
+                steps={
+                    "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
+                },
+            ),
+            definitions={"my-agent": agent_def},
+        )
 
 
 def test_governance_tool_risk() -> None:

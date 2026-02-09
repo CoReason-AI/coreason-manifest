@@ -10,7 +10,8 @@
 
 from typing import Any
 
-from coreason_manifest.spec.v2.definitions import AgentDefinition, InlineToolDefinition, ToolRequirement
+from coreason_manifest.spec.v2.definitions import AgentDefinition
+from coreason_manifest.utils.base_adapter import BaseManifestAdapter
 
 
 def convert_to_openai_assistant(agent: AgentDefinition) -> dict[str, Any]:
@@ -33,31 +34,19 @@ def convert_to_openai_assistant(agent: AgentDefinition) -> dict[str, Any]:
     Returns:
         dict[str, Any]: A dictionary representing the OpenAI Assistant configuration.
     """
-    instructions_parts = [
-        f"Role: {agent.role}",
-        f"Goal: {agent.goal}",
+    instructions = BaseManifestAdapter._build_system_prompt(agent, include_header=False)
+
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.parameters,
+            },
+        }
+        for tool in BaseManifestAdapter._iter_inline_tools(agent)
     ]
-    if agent.backstory:
-        instructions_parts.append(f"Backstory: {agent.backstory}")
-
-    instructions = "\n\n".join(instructions_parts)
-
-    tools = []
-    for tool in agent.tools:
-        if isinstance(tool, InlineToolDefinition):
-            tools.append(
-                {
-                    "type": "function",
-                    "function": {
-                        "name": tool.name,
-                        "description": tool.description,
-                        "parameters": tool.parameters,
-                    },
-                }
-            )
-        elif isinstance(tool, ToolRequirement):
-            # Remote tools (ToolRequirement) are skipped as their schema is not available locally.
-            continue
 
     return {
         "name": agent.name,
