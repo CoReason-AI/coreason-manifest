@@ -168,8 +168,6 @@ def test_cli_viz_json(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> No
     assert "graph TD" in output["mermaid"]
 
 
-
-
 def test_cli_load_error(capsys: CaptureFixture[str]) -> None:
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", side_effect=ValueError("Load failed")),
@@ -180,5 +178,3 @@ def test_cli_load_error(capsys: CaptureFixture[str]) -> None:
 
     captured = capsys.readouterr()
     assert "Error loading agent: Load failed" in captured.err
-
-

@@ -17,7 +17,6 @@ from unittest.mock import patch
 import pytest
 from _pytest.capture import CaptureFixture
 
-from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.cli import main
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
@@ -73,8 +72,6 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
 
     with pytest.raises(ValueError, match="Error loading module"):
         load_agent_from_ref(str(p))
-
-
 
 
 def test_loader_windows_path_heuristics() -> None:
@@ -217,8 +214,6 @@ def complex_workflow_agent() -> ManifestV2:
         workflow=workflow,
         definitions={"AgentA": agent_a_def, "AgentB": agent_b_def},
     )
-
-
 
 
 def test_loader_cyclic_import_simulation(edge_case_dir: Path) -> None:

@@ -1,6 +1,5 @@
-import json
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -39,5 +38,3 @@ def test_viz_recipe_not_implemented(capsys: pytest.CaptureFixture[str]) -> None:
 
     captured = capsys.readouterr()
     assert "Visualization not yet implemented for RecipeDefinition" in captured.err
-
-
