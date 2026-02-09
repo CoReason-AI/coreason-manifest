@@ -115,7 +115,7 @@ def test_manifest_builder_interface_metadata_error() -> None:
     builder.set_interface(interface)
 
     # Test set_metadata
-    builder.set_metadata("extra_field", "extra_value")
+    # builder.set_metadata("extra_field", "extra_value")  # Removed: extra fields are now forbidden
 
     # Test ValueError for missing start step
     builder.add_step(LogicStep(id="s1", code="pass"))
@@ -130,7 +130,7 @@ def test_manifest_builder_interface_metadata_error() -> None:
 
     assert manifest.interface.inputs["type"] == "object"
     # Pydantic V2 allows accessing extra fields as attributes if not colliding
-    assert getattr(manifest.metadata, "extra_field", None) == "extra_value"
+    # assert getattr(manifest.metadata, "extra_field", None) == "extra_value"
 
 
 def test_manifest_builder_switch_and_council_steps() -> None:

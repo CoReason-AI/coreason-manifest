@@ -53,20 +53,10 @@ def test_manifest_metadata_confidence_score_validation() -> None:
 
 
 def test_manifest_metadata_extra_fields() -> None:
-    """Test that extra fields are still allowed."""
-    # Pydantic V2 with extra='allow' stores in model_extra
-    # Access via attribute depends on __getattr__ implementation in base class
-    # but we can definitely check via dictionary access or model_dump
-    metadata = ManifestMetadata(name="Test Extra", unknown_field="some value")
-    assert metadata.name == "Test Extra"
-
-    # Check via model_dump
-    dump = metadata.model_dump()
-    assert dump["unknown_field"] == "some value"
-
-    # Check via direct attribute access (if supported by Pydantic V2 ConfigDict)
-    # Based on local test, it seems supported
-    assert getattr(metadata, "unknown_field", None) == "some value"
+    """Test that extra fields are forbidden."""
+    with pytest.raises(ValidationError) as excinfo:
+        ManifestMetadata(name="Test Extra", unknown_field="some value")
+    assert "Extra inputs are not permitted" in str(excinfo.value)
 
 
 def test_manifest_metadata_edge_cases() -> None:
@@ -104,7 +94,6 @@ def test_manifest_metadata_complex_roundtrip() -> None:
         "generation_rationale": "Complex rationale with \n newlines and symbols !@#$",
         "original_user_intent": "Make it so.",
         "generated_by": "the-architect",
-        "extra_data": 123,
     }
 
     # Create from dict
@@ -124,8 +113,6 @@ def test_manifest_metadata_complex_roundtrip() -> None:
     assert m2.name == m.name
     assert m2.confidence_score == m.confidence_score
     assert m2.generated_by == m.generated_by
-    # Extra fields should be preserved in roundtrip
-    assert getattr(m2, "extra_data", None) == 123
 
 
 def test_manifest_metadata_type_coercion_failure() -> None:
