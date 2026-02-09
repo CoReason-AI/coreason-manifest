@@ -176,7 +176,7 @@ def test_manifest_serialization(base_manifest_kwargs: dict[str, Any]) -> None:
 
     # Assert risk_level is serialized to string
     # We must access it via the definitions dict
-    # Note: ManifestV2 definitions values are Union[Union[ToolDefinition, AgentDefinition], GenericDefinition]
+    # Note: ManifestV2 definitions values are a union of strict types.
     # But when dumped, it is a dict of dicts.
     assert dumped["definitions"]["tool1"]["risk_level"] == "safe"
     assert isinstance(dumped["definitions"]["tool1"]["risk_level"], str)

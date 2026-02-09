@@ -8,18 +8,19 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import pytest
 import yaml
+from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
-    GenericDefinition,
     ManifestV2,
     ToolDefinition,
 )
 
 
 def test_mixed_definitions_typo_tolerance() -> None:
-    """Test mixing valid types and 'typo' types falling back to Generic."""
+    """Test mixing valid types and 'typo' types should raise ValidationError."""
     yaml_content = """
 apiVersion: coreason.ai/v2
 kind: Agent
@@ -44,18 +45,9 @@ definitions:
     goal: G1
 
   typo_thing:
-    type: unknown_type # This should become GenericDefinition
+    type: unknown_type
     id: u1
     name: Unknown
 """
-    manifest = ManifestV2(**yaml.safe_load(yaml_content))
-
-    assert isinstance(manifest.definitions["valid_tool"], ToolDefinition)
-    assert isinstance(manifest.definitions["valid_agent"], AgentDefinition)
-    assert isinstance(manifest.definitions["typo_thing"], GenericDefinition)
-
-    # Check access on generic
-    generic = manifest.definitions["typo_thing"]
-    # GenericDefinition stores extra fields in __pydantic_extra__ or via model_dump
-    data = generic.model_dump()
-    assert data["type"] == "unknown_type"
+    with pytest.raises(ValidationError):
+        ManifestV2(**yaml.safe_load(yaml_content))

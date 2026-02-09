@@ -23,7 +23,6 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
 
     Args:
         reference: A string in the format "path/to/file.py:variable_name".
-                   If ":variable_name" is omitted, defaults to "agent".
 
     Returns:
         ManifestV2 | RecipeDefinition: The loaded agent manifest or recipe.
@@ -32,21 +31,18 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
         ValueError: If the file does not exist, the variable is missing,
                     or the object is not a valid AgentBuilder, ManifestV2, or RecipeDefinition.
     """
-    # Default assumptions
-    file_path_str = reference
-    var_name = "agent"
+    if ":" not in reference:
+        raise ValueError(
+            f"Invalid reference format: '{reference}'. "
+            "Expected format 'path/to/file.py:variable_name'"
+        )
 
-    if ":" in reference:
-        # Potential split: separate path from variable name
-        possible_path, possible_var = reference.rsplit(":", 1)
+    # Split on the *last* colon to support drive letters if absolutely necessary,
+    # but simplest is strict split.
+    file_path_str, var_name = reference.rsplit(":", 1)
 
-        # Heuristic for Windows paths:
-        # If the part after the last colon contains path separators ('/' or '\'),
-        # it is likely part of the file path (e.g., 'C:\path\to\file.py') rather than a variable name.
-        # This prevents splitting 'C:\file.py' into 'C' and '\file.py'.
-        if not any(sep in possible_var for sep in ["/", "\\"]):
-            file_path_str = possible_path
-            var_name = possible_var
+    if not file_path_str or not var_name:
+        raise ValueError("Reference must contain both file path and variable name.")
 
     # Resolve file path
     file_path = Path(file_path_str).resolve()

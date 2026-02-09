@@ -8,9 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import pytest
 import yaml
+from pydantic import ValidationError
 
-from coreason_manifest.spec.v2.definitions import AgentDefinition, GenericDefinition, ManifestV2, ToolDefinition
+from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2, ToolDefinition
 from tests.factories import create_agent_definition
 
 
@@ -71,7 +73,7 @@ definitions:
 
 
 def test_validation_failure() -> None:
-    # Missing 'role' for agent. Should fall back to GenericDefinition.
+    # Missing 'role' for agent. Should raise ValidationError now.
     yaml_content = """
 apiVersion: coreason.ai/v2
 kind: Agent
@@ -93,10 +95,5 @@ definitions:
     goal: Find data
 """
     manifest_data = yaml.safe_load(yaml_content)
-    manifest = ManifestV2(**manifest_data)
-
-    assert "bad_agent" in manifest.definitions
-    # Should fallback to GenericDefinition because validation failed for AgentDefinition
-    assert isinstance(manifest.definitions["bad_agent"], GenericDefinition)
-    # Ensure it is NOT AgentDefinition
-    assert not isinstance(manifest.definitions["bad_agent"], AgentDefinition)
+    with pytest.raises(ValidationError):
+        ManifestV2(**manifest_data)

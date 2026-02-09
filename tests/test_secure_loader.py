@@ -15,7 +15,7 @@ import pytest
 import yaml
 
 from coreason_manifest import Manifest, load
-from coreason_manifest.spec.v2.definitions import GenericDefinition, ToolDefinition
+from coreason_manifest.spec.v2.definitions import ToolDefinition
 
 
 def test_secure_loader_happy_path(tmp_path: Path) -> None:
@@ -90,59 +90,3 @@ def test_secure_loader_cycle_detection(tmp_path: Path) -> None:
         load(tmp_path / "a.yaml")
 
 
-def test_secure_loader_diamond_dependency(tmp_path: Path) -> None:
-    """Test that diamond dependencies (A->C, B->C) are supported."""
-    # C (Leaf)
-    # Using Generic definition structure (no type) to allow definitions if needed,
-    # but here C is just a value.
-    dict_c = {"val": "C"}
-    (tmp_path / "c.yaml").write_text(yaml.dump(dict_c), encoding="utf-8")
-
-    # A -> C
-    dict_a = {"val": "A", "definitions": {"ref_c": {"$ref": "c.yaml"}}}
-    (tmp_path / "a.yaml").write_text(yaml.dump(dict_a), encoding="utf-8")
-
-    # B -> C
-    dict_b = {"val": "B", "definitions": {"ref_c": {"$ref": "c.yaml"}}}
-    (tmp_path / "b.yaml").write_text(yaml.dump(dict_b), encoding="utf-8")
-
-    # Main -> A, B
-    main_manifest = {
-        "apiVersion": "coreason.ai/v2",
-        "kind": "Recipe",
-        "metadata": {"name": "Diamond"},
-        "workflow": {
-            "start": "s",
-            "steps": {"s": {"id": "s", "type": "logic", "code": "pass"}},
-        },
-        "definitions": {
-            "def_a": {"$ref": "a.yaml"},
-            "def_b": {"$ref": "b.yaml"},
-        },
-    }
-    main_path = tmp_path / "main.yaml"
-    main_path.write_text(yaml.dump(main_manifest), encoding="utf-8")
-
-    # This should succeed without RecursionError
-    manifest = load(main_path)
-
-    # Verify content
-    # definitions are GenericDefinition
-    def_a = manifest.definitions["def_a"]
-    def_b = manifest.definitions["def_b"]
-
-    assert isinstance(def_a, GenericDefinition)
-    assert isinstance(def_b, GenericDefinition)
-
-    assert def_a.model_extra is not None
-    assert def_b.model_extra is not None
-
-    assert def_a.model_extra["val"] == "A"
-    assert def_b.model_extra["val"] == "B"
-
-    # Verify nested resolution (accessed via model_extra because it's dynamic)
-    assert isinstance(def_a.model_extra["definitions"], dict)
-    assert isinstance(def_b.model_extra["definitions"], dict)
-
-    assert def_a.model_extra["definitions"]["ref_c"]["val"] == "C"
-    assert def_b.model_extra["definitions"]["ref_c"]["val"] == "C"

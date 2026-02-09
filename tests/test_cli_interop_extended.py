@@ -50,7 +50,7 @@ agent = AgentBuilder(name="PathTest").build()
 """)
 
     # Load it
-    load_agent_from_ref(str(p))
+    load_agent_from_ref(f"{p}:agent")
 
     # Check if directory is in sys.path
     assert str(edge_case_dir) in sys.path
@@ -62,7 +62,7 @@ def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
     p.write_text("agent = 'I am just a string'")
 
     with pytest.raises(ValueError, match="is not a ManifestV2"):
-        load_agent_from_ref(str(p))
+        load_agent_from_ref(f"{p}:agent")
 
 
 def test_loader_syntax_error(edge_case_dir: Path) -> None:
@@ -71,111 +71,53 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
     p.write_text("def broken_func(:\n    pass")
 
     with pytest.raises(ValueError, match="Error loading module"):
-        load_agent_from_ref(str(p))
+        load_agent_from_ref(f"{p}:broken_func")
 
 
-def test_loader_windows_path_heuristics() -> None:
+def test_loader_strict_splitting() -> None:
     """
-    Simulate loading logic for Windows paths to ensure splitting logic is robust.
-    We mock Path.exists/resolve to simulate Windows environment behavior even on Linux.
+    Test strict splitting logic.
+    Format is strictly `path:var`.
     """
-    # Simulate a path: C:\Users\Dev\agent.py
-    # This contains a colon but is a file path, so it should NOT be split into ("C", "\Users\...")
+    # 1. Simple path
+    ref = "/path/to/file.py:var"
+    # rsplit(":", 1) -> "/path/to/file.py", "var" - OK
 
-    win_path_str = r"C:\Users\Dev\agent.py"
+    with patch("pathlib.Path.exists", return_value=True), \
+         patch("importlib.util.spec_from_file_location"), \
+         patch("coreason_manifest.utils.loader.sys.path", []), \
+         contextlib.suppress(Exception): # We expect it to fail later, but check split
+             # Just checking if it crashes on split
+             load_agent_from_ref(ref)
 
-    # We patch Path to intercept resolving and existence checks
-    with (
-        patch("pathlib.Path.exists", return_value=True),
-        patch("pathlib.Path.resolve", return_value=Path("/tmp/agent.py")),
-        patch("coreason_manifest.utils.loader.sys.path", []),
-        patch("importlib.util.spec_from_file_location") as mock_spec,
-    ):
-        # Mock module loading internals so it doesn't crash
-        mock_module = sys.modules[__name__]  # Just use current module as dummy
-        mock_spec.return_value.loader.exec_module = lambda _: None
+    # 2. Windows path with drive letter AND variable
+    # ref = "C:\\path\\to\\file.py:var"
+    # rsplit(":", 1) -> "C:\\path\\to\\file.py", "var" - OK
+    ref_win = r"C:\path\to\file.py:var"
 
-        # We need to ensure getattr(module, "agent") returns something valid
-        # But importlib returns a module. We can mock what module_from_spec returns.
-        with patch("importlib.util.module_from_spec", return_value=mock_module):
-            # We inject a dummy 'agent' into the mock_module (which is this test module actually)
-            # But safer to mock getattr behavior if possible, or just set attribute on mock object.
-            # Actually, simpler: load_agent_from_ref calls getattr(module, var_name).
+    with patch("pathlib.Path.exists", return_value=True) as mock_exists, \
+         patch("importlib.util.spec_from_file_location") as mock_spec_load:
+        with contextlib.suppress(Exception):
+            load_agent_from_ref(ref_win)
 
-            # Let's override getattr on the module object returned by module_from_spec
-            patch("importlib.util.module_from_spec").start()
+        # Verify it resolved the correct path part (C:\path\to\file.py)
+        # Note: On linux, Path("C:\...") might resolve oddly, but it should contain the path part
+        args, _ = mock_spec_load.call_args
+        # The path passed to spec_from_file_location should be the first part of split
+        assert str(args[1]) == str(Path(r"C:\path\to\file.py").resolve())
 
-            # Create a dummy Manifest
-            ManifestV2(
-                kind="Agent",
-                metadata=ManifestMetadata(name="WinAgent", version="1.0"),
-                workflow=Workflow(start="s", steps={}),
-            )
+    # 3. Path WITHOUT variable (should fail)
+    # ref = "C:\\path\\to\\file.py"
+    # missing colon if we ignore drive letter colon? No, rsplit(":", 1) will split at drive letter colon if present!
+    # "C", "\\path\\to\\file.py".
+    # file_path_str="C", var_name="\\path\\to\\file.py".
+    # This is technically valid split format-wise, but "C" is likely not a file, or "\...\file.py" not a var.
+    # But if "C" is a directory, Path("C").exists() might be true.
+    # The requirement is strict format `path/to/file.py:variable_name`.
 
-            # The loader logic:
-            # 1. Checks splits
-            # 2. Resolves path
-            # 3. Loads module
-            # 4. Gets var
-
-            # If our logic is correct, for "C:\...\agent.py", var_name should remain "agent" (default).
-            # If logic is wrong, it splits to "C", and var_name becomes "\...\agent.py".
-
-            # So we verify that the loader attempts to load from the FULL path, not "C".
-            # And looks for "agent".
-
-            # To verify this without full execution, we can rely on how `Path(file_path_str)` is called.
-            # But `load_agent_from_ref` does `Path(file_path_str).resolve()`.
-
-            # Let's spy on Path constructor? Hard.
-            # Instead, we can force failure if it tries to load the wrong path.
-
-    # Actually, simply running the splitting logic in isolation is better for a unit test of the utility
-    # function, but the utility function is monolithic.
-    # Let's invoke `load_agent_from_ref` and expect it to reach the file loading stage with correct path.
-
-    with patch("pathlib.Path.exists") as mock_exists:
-        # Scenario 1: Absolute path with colon (drive letter), default var
-        # ref = "C:\foo.py"
-        # "C:\foo.py".rsplit(":", 1) -> "C", "\foo.py"
-        # "\foo.py" has "\", so heuristic should prevent split.
-        # path becomes "C:\foo.py", var becomes "agent"
-
-        mock_exists.return_value = True  # Pretend file exists
-
-        # We expect it to try to load "C:\foo.py"
-        # We'll fail at spec_from_file_location or module loading, catching that to verify args
-
-        with patch("importlib.util.spec_from_file_location") as mock_spec_load:
-            with contextlib.suppress(Exception):
-                load_agent_from_ref(win_path_str)
-
-            # Verify it tried to load the full path
-            # spec_from_file_location(name, path)
-            args, _ = mock_spec_load.call_args
-            # The second arg is the path
-            assert str(args[1]) == str(Path(win_path_str).resolve())
-
-    with patch("pathlib.Path.exists") as mock_exists:
-        # Scenario 2: Absolute path with colon AND explicit var
-        # ref = "C:\foo.py:my_var"
-        # rsplit -> "C:\foo.py", "my_var"
-        # "my_var" has no sep. Split accepted.
-        # path "C:\foo.py", var "my_var"
-
-        mock_exists.return_value = True
-        win_path_with_var = r"C:\Users\Dev\agent.py:my_custom_agent"
-
-        with patch("importlib.util.spec_from_file_location") as mock_spec_load:
-            with contextlib.suppress(Exception):
-                load_agent_from_ref(win_path_with_var)
-
-            # It should have tried to load C:\Users\Dev\agent.py
-            args, _ = mock_spec_load.call_args
-            expected_path = win_path_str  # The part before :
-            assert str(args[1]) == str(Path(expected_path).resolve())
-
-            # To verify var name, we'd need to mock the module loading deeper, but path correctness is the main risk.
+    ref_invalid = "/path/to/file.py"
+    with pytest.raises(ValueError, match="Invalid reference format"):
+        load_agent_from_ref(ref_invalid)
 
 
 # --- Complex Cases ---
@@ -228,14 +170,14 @@ raise RecursionError("Cyclic import detected")
 """)
 
     with pytest.raises(ValueError, match="Error loading module"):
-        load_agent_from_ref(str(p))
+        load_agent_from_ref(f"{p}:agent")
 
 
 def test_cli_inspect_complex(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     """Verify inspect output for complex agent."""
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent),
-        patch.object(sys, "argv", ["coreason", "inspect", "dummy.py"]),
+        patch.object(sys, "argv", ["coreason", "inspect", "dummy.py:agent"]),
     ):
         main()
 

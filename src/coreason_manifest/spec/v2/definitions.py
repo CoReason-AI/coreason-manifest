@@ -28,7 +28,6 @@ __all__ = [
     "BaseStep",
     "CouncilStep",
     "DesignMetadata",
-    "GenericDefinition",
     "InlineToolDefinition",
     "InterfaceDefinition",
     "LogicStep",
@@ -210,16 +209,6 @@ class AgentDefinition(ManifestBaseModel):
     resources: ModelProfile | None = Field(
         None, description="Hardware, pricing, and operational constraints for this agent."
     )
-
-
-class GenericDefinition(ManifestBaseModel):
-    """
-    Fallback for unknown definitions.
-
-    Allows any extra fields.
-    """
-
-    model_config = ConfigDict(extra="allow", frozen=True)
 
 
 class BaseStep(ManifestBaseModel):
@@ -426,8 +415,7 @@ class ManifestV2(ManifestBaseModel):
             | ToolPackDefinition
             | PlaceholderDefinition,
             Field(discriminator="type"),
-        ]
-        | GenericDefinition,
+        ],
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
 
