@@ -160,7 +160,7 @@ def test_cognitive_profile_redundant_memory() -> None:
 def test_serialization() -> None:
     """Test serialization of RetrievalConfig."""
     config = RetrievalConfig(collection_name="test", top_k=3)
-    dumped = config.dump()
+    dumped = config.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["collection_name"] == "test"
     assert dumped["top_k"] == 3
     assert dumped["strategy"] == "hybrid"  # Default

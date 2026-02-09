@@ -104,7 +104,7 @@ def test_full_recipe_with_extensions() -> None:
     assert recipe.policy.max_retries == 3
 
     # Test serialization
-    dumped = recipe.dump()
+    dumped = recipe.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["interface"]["inputs"]["query"]["type"] == "string"
     assert dumped["state"]["persistence"] == "postgres"
     assert dumped["policy"]["max_retries"] == 3

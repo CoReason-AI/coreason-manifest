@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class AuditLevel(StrEnum):
@@ -57,7 +57,7 @@ class IntegrityLevel(StrEnum):
     BLOCKCHAIN_ANCHOR = "anchor"  # Immutable public/private ledger anchoring
 
 
-class IntegrityConfig(CoReasonBaseModel):
+class IntegrityConfig(ManifestBaseModel):
     """
     Configuration for Zero-Copy auditing and Verification logic.
 
@@ -90,7 +90,7 @@ class IntegrityConfig(CoReasonBaseModel):
     )
 
 
-class ComplianceConfig(CoReasonBaseModel):
+class ComplianceConfig(ManifestBaseModel):
     """
     Configuration for the Coreason Auditor.
 

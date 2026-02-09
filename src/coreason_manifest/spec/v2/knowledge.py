@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class RetrievalStrategy(StrEnum):
@@ -33,7 +33,7 @@ class KnowledgeScope(StrEnum):
     SESSION = "session"  # Ephemeral conversation context
 
 
-class RetrievalConfig(CoReasonBaseModel):
+class RetrievalConfig(ManifestBaseModel):
     """
     Configuration for the RAG engine.
 
@@ -63,7 +63,7 @@ class ConsolidationStrategy(StrEnum):
     SESSION_CLOSE = "session_close"  # Crystallize only when session ends
 
 
-class MemoryWriteConfig(CoReasonBaseModel):
+class MemoryWriteConfig(ManifestBaseModel):
     """
     Configuration for the Cortex Crystallizer (Memory Writer).
 

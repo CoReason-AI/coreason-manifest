@@ -149,7 +149,7 @@ def test_full_manifest_roundtrip() -> None:
         ),
     )
 
-    json_str = recipe.to_json()
+    json_str = recipe.model_dump_json(by_alias=True, exclude_none=True)
     loaded = RecipeDefinition.model_validate_json(json_str)
 
     assert loaded.metadata.name == "Test Recipe"
@@ -159,7 +159,7 @@ def test_full_manifest_roundtrip() -> None:
     assert loaded.topology.edges[0].target == "approval"
 
     # Check dumping
-    dumped = loaded.dump()
+    dumped = loaded.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["kind"] == "Recipe"
     assert dumped["apiVersion"] == "coreason.ai/v2"
 

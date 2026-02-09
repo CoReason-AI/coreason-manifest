@@ -13,7 +13,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
 class Role(StrEnum):
@@ -25,7 +25,7 @@ class Role(StrEnum):
     TOOL = "tool"
 
 
-class ChatMessage(CoReasonBaseModel):
+class ChatMessage(ManifestBaseModel):
     """A single message in a conversation."""
 
     model_config = ConfigDict(frozen=True)

@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class ReviewStrategy(StrEnum):
@@ -25,7 +25,7 @@ class ReviewStrategy(StrEnum):
     CONSENSUS = "consensus"  # Multi-model agreement
 
 
-class AdversarialConfig(CoReasonBaseModel):
+class AdversarialConfig(ManifestBaseModel):
     """
     Configuration for the 'Devil's Advocate' reviewer.
 
@@ -48,7 +48,7 @@ class AdversarialConfig(CoReasonBaseModel):
     temperature: float = Field(0.7, description="Creativity level of the critique.")
 
 
-class GapScanConfig(CoReasonBaseModel):
+class GapScanConfig(ManifestBaseModel):
     """
     Configuration for Knowledge Gap detection (Episteme).
 
@@ -66,7 +66,7 @@ class GapScanConfig(CoReasonBaseModel):
     )
 
 
-class ReasoningConfig(CoReasonBaseModel):
+class ReasoningConfig(ManifestBaseModel):
     """
     Container for meta-cognitive behaviors attached to a Node.
 
@@ -91,7 +91,7 @@ class ReasoningConfig(CoReasonBaseModel):
     max_revisions: int = Field(1, description="Maximum self-correction loops allowed if critique fails.")
 
 
-class ReflexConfig(CoReasonBaseModel):
+class ReflexConfig(ManifestBaseModel):
     """
     Configuration for 'System 1' fast thinking (Cortex Reflex).
 

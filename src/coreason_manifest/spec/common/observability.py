@@ -15,7 +15,7 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field, model_validator
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
 class EventContentType(StrEnum):
@@ -25,7 +25,7 @@ class EventContentType(StrEnum):
     ARTIFACT = "application/vnd.coreason.artifact+json"
 
 
-class CloudEvent(CoReasonBaseModel):
+class CloudEvent(ManifestBaseModel):
     """
     A strictly typed Pydantic model compliant with the CloudEvents 1.0 JSON Format.
     https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/formats/json-format.md
@@ -48,7 +48,7 @@ class CloudEvent(CoReasonBaseModel):
     tracestate: str | None = None
 
 
-class ReasoningTrace(CoReasonBaseModel):
+class ReasoningTrace(ManifestBaseModel):
     """
     A structured log entry for audit trails.
 
@@ -83,7 +83,7 @@ class ReasoningTrace(CoReasonBaseModel):
         return data
 
 
-class AuditLog(CoReasonBaseModel):
+class AuditLog(ManifestBaseModel):
     """Immutable audit record for compliance and security monitoring."""
 
     model_config = ConfigDict(frozen=True)

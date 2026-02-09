@@ -11,10 +11,10 @@
 
 from pydantic import ConfigDict, Field
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
-class Identity(CoReasonBaseModel):
+class Identity(ManifestBaseModel):
     """A pure, frozen data structure representing an actor (user, agent, system)."""
 
     model_config = ConfigDict(frozen=True)

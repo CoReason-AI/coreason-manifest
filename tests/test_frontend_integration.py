@@ -61,6 +61,6 @@ def test_graph_event_polymorphism() -> None:
 
 def test_graph_event_serialization() -> None:
     event = GraphEventNodeStream(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, chunk="hi")
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["event_type"] == "NODE_STREAM"
     assert dumped["chunk"] == "hi"

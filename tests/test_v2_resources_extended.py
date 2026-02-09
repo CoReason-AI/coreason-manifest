@@ -57,7 +57,7 @@ def test_tool_definition_complex_nested_params() -> None:
     assert tool.parameters["properties"]["config"]["properties"]["nested"]["type"] == "array"
 
     # Verify serialization
-    dumped = tool.dump()
+    dumped = tool.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["parameters"]["type"] == "object"
 
 
@@ -159,7 +159,7 @@ def test_full_recipe_integration() -> None:
     assert recipe.policy.max_retries == 5
 
     # Test Serialization
-    dumped = recipe.dump()
+    dumped = recipe.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["environment"]["mcp_servers"][0]["name"] == "github"
     assert dumped["policy"]["allowed_mcp_servers"] == ["github"]
 

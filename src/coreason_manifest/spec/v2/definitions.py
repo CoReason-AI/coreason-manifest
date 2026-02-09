@@ -8,13 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Annotated, Any, Literal, Self
+from typing import Annotated, Any, Literal
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 
 from coreason_manifest.spec.common.capabilities import AgentCapabilities
 from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
-from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
+from coreason_manifest.spec.common_base import ManifestBaseModel, StrictUri, ToolRiskLevel
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefinition, StateDefinition
 from coreason_manifest.spec.v2.evaluation import EvaluationProfile
 from coreason_manifest.spec.v2.packs import MCPResourceDefinition, ToolPackDefinition
@@ -34,6 +34,8 @@ __all__ = [
     "LogicStep",
     "ManifestMetadata",
     "ManifestV2",
+    "PlaceholderDefinition",
+    "PlaceholderStep",
     "SkillDefinition",
     "Step",
     "SwitchStep",
@@ -43,7 +45,7 @@ __all__ = [
 ]
 
 
-class DesignMetadata(CoReasonBaseModel):
+class DesignMetadata(ManifestBaseModel):
     """
     UI-specific metadata for the visual builder.
 
@@ -68,7 +70,7 @@ class DesignMetadata(CoReasonBaseModel):
     collapsed: bool = Field(False, description="Whether the node is collapsed in UI.")
 
 
-class ToolDefinition(CoReasonBaseModel):
+class ToolDefinition(ManifestBaseModel):
     """
     Definition of an external tool.
 
@@ -91,7 +93,7 @@ class ToolDefinition(CoReasonBaseModel):
     description: str | None = Field(None, description="Description of the tool.")
 
 
-class ToolRequirement(CoReasonBaseModel):
+class ToolRequirement(ManifestBaseModel):
     """
     A requirement for a remote tool.
 
@@ -108,7 +110,24 @@ class ToolRequirement(CoReasonBaseModel):
     hash: str | None = Field(None, description="Optional integrity hash.")
 
 
-class InlineToolDefinition(CoReasonBaseModel):
+class PlaceholderDefinition(ManifestBaseModel):
+    """
+    A placeholder for a definition that is yet to be determined.
+
+    Attributes:
+        type (Literal["placeholder"]): Discriminator. (Default: "placeholder").
+        id (str): The reserved ID.
+        notes (str | None): For developer comments.
+    """
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    type: Literal["placeholder"] = "placeholder"
+    id: str = Field(..., description="The reserved ID.")
+    notes: str | None = Field(None, description="For developer comments.")
+
+
+class InlineToolDefinition(ManifestBaseModel):
     """
     A tool defined directly within the manifest (Serverless/Local).
 
@@ -136,7 +155,7 @@ class InlineToolDefinition(CoReasonBaseModel):
         return v
 
 
-class AgentDefinition(CoReasonBaseModel):
+class AgentDefinition(ManifestBaseModel):
     """
     Definition of an Agent.
 
@@ -193,7 +212,7 @@ class AgentDefinition(CoReasonBaseModel):
     )
 
 
-class GenericDefinition(CoReasonBaseModel):
+class GenericDefinition(ManifestBaseModel):
     """
     Fallback for unknown definitions.
 
@@ -203,7 +222,7 @@ class GenericDefinition(CoReasonBaseModel):
     model_config = ConfigDict(extra="allow", frozen=True)
 
 
-class BaseStep(CoReasonBaseModel):
+class BaseStep(ManifestBaseModel):
     """
     Base attributes for all steps.
 
@@ -289,13 +308,31 @@ class SwitchStep(BaseStep):
     # Note: 'next' is deliberately excluded for SwitchStep in favor of cases/default.
 
 
+class PlaceholderStep(BaseStep):
+    """
+    A placeholder for a step that is yet to be determined.
+
+    Attributes:
+        type (Literal["placeholder"]): Discriminator. (Default: "placeholder").
+        id (str): Unique identifier for the step.
+        inputs (dict[str, Any]): To preserve any partial configuration.
+        design_metadata (DesignMetadata | None): UI metadata.
+        notes (str | None): For developer comments.
+    """
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
+
+    type: Literal["placeholder"] = "placeholder"
+    notes: str | None = Field(None, description="For developer comments.")
+
+
 Step = Annotated[
-    AgentStep | LogicStep | CouncilStep | SwitchStep,
+    AgentStep | LogicStep | CouncilStep | SwitchStep | PlaceholderStep,
     Field(discriminator="type", description="Polymorphic step definition."),
 ]
 
 
-class Workflow(CoReasonBaseModel):
+class Workflow(ManifestBaseModel):
     """
     Defines the execution topology.
 
@@ -310,7 +347,7 @@ class Workflow(CoReasonBaseModel):
     steps: dict[str, Step] = Field(..., description="Dictionary of all steps indexed by ID.")
 
 
-class ManifestMetadata(CoReasonBaseModel):
+class ManifestMetadata(ManifestBaseModel):
     """
     Metadata for the manifest.
 
@@ -355,7 +392,7 @@ ToolPackDefinition.model_rebuild(
 )
 
 
-class ManifestV2(CoReasonBaseModel):
+class ManifestV2(ManifestBaseModel):
     """
     Root object for Coreason Manifest V2.
 
@@ -379,69 +416,85 @@ class ManifestV2(CoReasonBaseModel):
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition)
     state: StateDefinition = Field(default_factory=StateDefinition)
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
-    status: Literal["draft", "published"] = Field("draft", description="Lifecycle status.")
     definitions: dict[
         str,
         Annotated[
-            ToolDefinition | AgentDefinition | SkillDefinition | MCPResourceDefinition | ToolPackDefinition,
+            ToolDefinition
+            | AgentDefinition
+            | SkillDefinition
+            | MCPResourceDefinition
+            | ToolPackDefinition
+            | PlaceholderDefinition,
             Field(discriminator="type"),
         ]
         | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
 
-    @model_validator(mode="after")
-    def validate_integrity(self) -> Self:
-        """Validate referential integrity of the manifest."""
-        if self.status != "published":
-            return self
+    @property
+    def is_executable(self) -> bool:
+        """Check if the manifest is complete and executable."""
+        return len(self.verify()) == 0
 
+    def verify(self) -> list[str]:
+        """
+        Verify semantic integrity of the manifest.
+
+        Returns:
+            A list of human-readable error strings. If empty, the manifest is executable.
+        """
+        errors = []
         steps = self.workflow.steps
 
-        # 1. Validate Start Step
         if self.workflow.start not in steps:
-            raise ValueError(f"Start step '{self.workflow.start}' not found in steps.")
+            errors.append(f"Start step '{self.workflow.start}' missing from workflow.")
 
-        for step in steps.values():
-            # 2. Validate 'next' pointers (AgentStep, LogicStep, CouncilStep)
+        for step_id, step in steps.items():
+            if isinstance(step, PlaceholderStep):
+                errors.append(f"Step '{step_id}' is a placeholder.")
+                continue
+
+            # Check 'next' links
             if hasattr(step, "next") and step.next and step.next not in steps:
-                raise ValueError(f"Step '{step.id}' references missing next step '{step.next}'.")
+                errors.append(f"Step '{step_id}' references missing next step '{step.next}'.")
 
-            # 3. Validate SwitchStep targets
+            # Check Switch cases
             if isinstance(step, SwitchStep):
-                for target in step.cases.values():
+                for cond, target in step.cases.items():
                     if target not in steps:
-                        raise ValueError(f"SwitchStep '{step.id}' references missing step '{target}' in cases.")
+                        errors.append(f"SwitchStep '{step_id}' case '{cond}' references missing step '{target}'.")
                 if step.default and step.default not in steps:
-                    raise ValueError(f"SwitchStep '{step.id}' references missing step '{step.default}' in default.")
+                    errors.append(f"SwitchStep '{step_id}' references missing step '{step.default}' in default.")
 
-            # 4. Validate Definition References
+            # Check Agent validity
             if isinstance(step, AgentStep):
                 if step.agent not in self.definitions:
-                    raise ValueError(f"AgentStep '{step.id}' references missing agent '{step.agent}'.")
-
-                # Check type
-                agent_def = self.definitions[step.agent]
-                if not isinstance(agent_def, AgentDefinition):
-                    raise ValueError(
-                        f"AgentStep '{step.id}' references '{step.agent}' which is not an AgentDefinition "
-                        f"(got {type(agent_def).__name__})."
-                    )
+                    errors.append(f"AgentStep '{step_id}' references missing agent '{step.agent}'.")
+                else:
+                    agent_def = self.definitions[step.agent]
+                    if isinstance(agent_def, PlaceholderDefinition):
+                        errors.append(f"AgentStep '{step_id}' references placeholder agent '{step.agent}'.")
+                    elif not isinstance(agent_def, AgentDefinition):
+                        errors.append(
+                            f"AgentStep '{step_id}' references '{step.agent}' which is not an AgentDefinition "
+                            f"(got {type(agent_def).__name__})."
+                        )
 
             if isinstance(step, CouncilStep):
                 for voter in step.voters:
                     if voter not in self.definitions:
-                        raise ValueError(f"CouncilStep '{step.id}' references missing voter '{voter}'.")
+                        errors.append(f"CouncilStep '{step_id}' references missing voter '{voter}'.")
+                    else:
+                        agent_def = self.definitions[voter]
+                        if isinstance(agent_def, PlaceholderDefinition):
+                            errors.append(f"CouncilStep '{step_id}' references placeholder voter '{voter}'.")
+                        elif not isinstance(agent_def, AgentDefinition):
+                            errors.append(
+                                f"CouncilStep '{step_id}' references voter '{voter}' which is not an AgentDefinition "
+                                f"(got {type(agent_def).__name__})."
+                            )
 
-                    # Check type
-                    agent_def = self.definitions[voter]
-                    if not isinstance(agent_def, AgentDefinition):
-                        raise ValueError(
-                            f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition "
-                            f"(got {type(agent_def).__name__})."
-                        )
-
-        # 5. Validate Agent Tools
+        # Check Agent Tools
         for definition in self.definitions.values():
             if isinstance(definition, AgentDefinition):
                 for tool_ref in definition.tools:
@@ -450,12 +503,12 @@ class ManifestV2(CoReasonBaseModel):
                         if tool_ref.uri in self.definitions:
                             tool_def = self.definitions[tool_ref.uri]
                             if not isinstance(tool_def, ToolDefinition):
-                                raise ValueError(
+                                errors.append(
                                     f"Agent '{definition.id}' references '{tool_ref.uri}' "
                                     f"which is not a ToolDefinition (got {type(tool_def).__name__})."
                                 )
                         elif "://" not in tool_ref.uri:
                             # If it's not a valid URI (no scheme) and not in definitions, assume broken ID reference
-                            raise ValueError(f"Agent '{definition.id}' references missing tool '{tool_ref.uri}'.")
+                            errors.append(f"Agent '{definition.id}' references missing tool '{tool_ref.uri}'.")
 
-        return self
+        return errors

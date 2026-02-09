@@ -40,7 +40,7 @@ def test_sota_tree_search_configuration() -> None:
         ),
     )
 
-    data = node.dump()
+    data = node.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert data["visualization"]["style"] == "tree"
     assert data["visualization"]["display_title"] == "Reasoning Tree"
     assert data["collaboration"]["mode"] == "interactive"
@@ -69,7 +69,7 @@ def test_conflict_avoidance() -> None:
         visualization=PresentationHints(style=VisualizationStyle.CHAT),
     )
 
-    data = node.dump()
+    data = node.model_dump(mode="json", by_alias=True, exclude_none=True)
 
     # Check that both fields exist and are correct
     assert data["presentation"]["x"] == 100
@@ -143,7 +143,7 @@ def test_complex_configuration() -> None:
         ),
     )
 
-    data = node.dump()
+    data = node.model_dump(mode="json", by_alias=True, exclude_none=True)
 
     # Assertions for complex structure
     assert data["presentation"]["color"] == "#FF0000"
@@ -164,7 +164,7 @@ def test_serialization_roundtrip() -> None:
     )
 
     # Dump to dict
-    serialized = original.dump()
+    serialized = original.model_dump(mode="json", by_alias=True, exclude_none=True)
 
     # Load back
     reloaded = AgentNode.model_validate(serialized)
