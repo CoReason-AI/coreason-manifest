@@ -109,7 +109,7 @@ def test_agent_step_referencing_tool() -> None:
         "kind": "Recipe",
         "metadata": {"name": "Test"},
         "definitions": {
-                "my-tool": {"type": "tool", "id": "my-tool", "name": "Tool", "uri": "mcp://tool", "risk_level": "safe"}
+            "my-tool": {"type": "tool", "id": "my-tool", "name": "Tool", "uri": "mcp://tool", "risk_level": "safe"}
         },
         "workflow": {
             "start": "step-1",
@@ -128,7 +128,7 @@ def test_council_step_referencing_tool() -> None:
         "kind": "Recipe",
         "metadata": {"name": "Test"},
         "definitions": {
-                "my-tool": {"type": "tool", "id": "my-tool", "name": "Tool", "uri": "mcp://tool", "risk_level": "safe"}
+            "my-tool": {"type": "tool", "id": "my-tool", "name": "Tool", "uri": "mcp://tool", "risk_level": "safe"}
         },
         "workflow": {
             "start": "step-1",

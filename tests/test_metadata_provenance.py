@@ -55,7 +55,7 @@ def test_manifest_metadata_confidence_score_validation() -> None:
 def test_manifest_metadata_extra_fields() -> None:
     """Test that extra fields are forbidden."""
     with pytest.raises(ValidationError) as excinfo:
-        ManifestMetadata(name="Test Extra", unknown_field="some value")
+        ManifestMetadata.model_validate({"name": "Test Extra", "unknown_field": "some value"})
     assert "Extra inputs are not permitted" in str(excinfo.value)
 
 

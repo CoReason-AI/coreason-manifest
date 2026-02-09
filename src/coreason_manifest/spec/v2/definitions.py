@@ -443,7 +443,7 @@ class ManifestV2(ManifestBaseModel):
             errors.append(f"Start step '{self.workflow.start}' missing from workflow.")
 
         for def_id, definition in self.definitions.items():
-            if definition.id != def_id:
+            if hasattr(definition, "id") and definition.id != def_id:
                 errors.append(f"Definition Key Mismatch: Key '{def_id}' does not match object ID '{definition.id}'.")
 
         for step_id, step in steps.items():
