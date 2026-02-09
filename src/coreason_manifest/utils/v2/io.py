@@ -111,7 +111,7 @@ def dump_to_yaml(manifest: ManifestV2) -> str:
     Returns:
         The YAML string representation.
     """
-    # Serialize to dict, using aliases (e.g., x-design) and excluding None
+    # Serialize to dict, using aliases and excluding None
     data = manifest.model_dump(by_alias=True, exclude_none=True)
 
     # Reorder keys to ensure human readability

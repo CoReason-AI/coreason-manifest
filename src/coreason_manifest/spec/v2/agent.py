@@ -78,7 +78,7 @@ class CognitiveProfile(CoReasonBaseModel):
 
     # --- Memory Capabilities ---
     memory_read: list[RetrievalConfig] = Field(
-        default_factory=list, alias="memory", description="Sources to read from (RAG)."
+        default_factory=list, description="Sources to read from (RAG)."
     )
     memory_write: MemoryWriteConfig | None = Field(None, description="Rules for saving new memories (Crystallization).")
 
@@ -86,8 +86,3 @@ class CognitiveProfile(CoReasonBaseModel):
     task_primitive: str | None = Field(
         None, description="The logic primitive to apply (e.g., 'extract', 'classify', 'cohort')."
     )
-
-    @property
-    def memory(self) -> list[RetrievalConfig]:
-        """Alias for memory_read to maintain backward compatibility."""
-        return self.memory_read

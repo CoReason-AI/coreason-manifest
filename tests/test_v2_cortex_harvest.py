@@ -61,13 +61,8 @@ def test_cognitive_profile_integration() -> None:
     assert dumped["reflex"]["enabled"] is True
     assert dumped["reasoning"]["max_revisions"] == 2
     assert dumped["memory_write"]["strategy"] == "session_close"
-    # Verify alias works in serialization (field 'memory_read' should be 'memory')
-    assert "memory" in dumped
-    assert dumped["memory"][0]["collection_name"] == "test_collection"
+    # Verify no alias (field 'memory_read' should be 'memory_read')
+    assert "memory_read" in dumped
+    assert dumped["memory_read"][0]["collection_name"] == "test_collection"
 
-    # Verify alias works in input
-    profile_from_alias = CognitiveProfile(
-        role="tester",
-        memory=[read_config],  # type: ignore[call-arg]
-    )
-    assert profile_from_alias.memory_read == [read_config]
+    # Verify alias input removed (would fail)

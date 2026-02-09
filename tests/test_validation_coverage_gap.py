@@ -17,6 +17,7 @@ from coreason_manifest import (
     ManifestMetadata,
     SwitchStep,
     ToolDefinition,
+    ToolRequirement,
     ToolRiskLevel,
     Workflow,
     validate_loose,
@@ -28,7 +29,13 @@ def test_validate_loose_full_coverage() -> None:
 
     # Create definitions including wrong types for cross-referencing
     tool_def = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
-    agent_def = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["missing-tool", "agent2"])
+    agent_def = AgentDefinition(
+        id="agent1",
+        name="Agent",
+        role="Role",
+        goal="Goal",
+        tools=[ToolRequirement(uri="missing-tool"), ToolRequirement(uri="agent2")],
+    )
     # agent2 is defined as an Agent, but if we use it as a tool in agent1, that triggers warning.
     # However, to test "Agent referencing non-Tool", we need agent1 to reference something that exists but isn't a tool.
     # Let's use 'agent2' which is an Agent.

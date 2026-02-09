@@ -11,14 +11,12 @@
 from typing import Any
 
 from coreason_manifest import (
-    EventContentType,
     GraphEvent,
     GraphEventArtifactGenerated,
     GraphEventCouncilVote,
     GraphEventNodeDone,
     GraphEventNodeStart,
     GraphEventNodeStream,
-    migrate_graph_event_to_cloud_event,
 )
 
 
@@ -33,13 +31,10 @@ def test_payload_recursion() -> None:
 
     event = GraphEventNodeStart(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, payload=recursive_data)
 
-    # Should serialize fine (Python default depth is usually 1000, but Pydantic is stricter)
-    # CloudEvent dump checks JSON serialization
-    ce = migrate_graph_event_to_cloud_event(event)
-    dumped = ce.dump()
-    assert dumped["data"]["level"] == 0
+    dumped = event.dump()
+    assert dumped["payload"]["level"] == 0
     # verify deep access
-    assert dumped["data"]["next"]["next"]["level"] == 2
+    assert dumped["payload"]["next"]["next"]["level"] == 2
 
 
 def test_special_characters() -> None:
@@ -47,12 +42,8 @@ def test_special_characters() -> None:
     special_str = "Hello \u0000 World 🌍 🚀 \n \t"
     event = GraphEventNodeStream(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, chunk=special_str)
 
-    ce = migrate_graph_event_to_cloud_event(event)
-    assert ce.data is not None
-    assert ce.data["chunk"] == special_str
-
-    dumped = ce.dump()
-    assert dumped["data"]["chunk"] == special_str
+    dumped = event.dump()
+    assert dumped["chunk"] == special_str
 
 
 def test_empty_fields() -> None:
@@ -67,12 +58,11 @@ def test_empty_fields() -> None:
         visual_cue=None,
     )
 
-    ce = migrate_graph_event_to_cloud_event(event)
-    dumped = ce.dump()
+    dumped = event.dump()
 
-    assert ce.data == {}
-    assert "com_coreason_ui_cue" not in dumped  # Should be excluded if None
-    assert ce.type == "ai.coreason.node.done"
+    assert dumped["output"] == {}
+    assert "visual_cue" not in dumped  # Should be excluded if None
+    assert dumped["event_type"] == "NODE_DONE"
 
 
 def test_large_payload() -> None:
@@ -80,9 +70,8 @@ def test_large_payload() -> None:
     large_str = "a" * 100_000  # 100KB
     event = GraphEventNodeStream(run_id="r1", trace_id="t1", node_id="n1", timestamp=100.0, chunk=large_str)
 
-    ce = migrate_graph_event_to_cloud_event(event)
-    assert ce.data is not None
-    assert len(ce.data["chunk"]) == 100_000
+    dumped = event.dump()
+    assert len(dumped["chunk"]) == 100_000
 
 
 def test_full_node_lifecycle() -> None:
@@ -142,29 +131,28 @@ def test_full_node_lifecycle() -> None:
         )
     )
 
-    # Migration Check
-    cloud_events = [migrate_graph_event_to_cloud_event(e) for e in events]
+    # Dump Check
+    dumped_events = [e.dump() for e in events]
 
-    assert len(cloud_events) == 6
-    assert cloud_events[0].type == "ai.coreason.node.start"
-    assert cloud_events[0].data == {"query": "Why?"}
+    assert len(dumped_events) == 6
+    assert dumped_events[0]["event_type"] == "NODE_START"
+    assert dumped_events[0]["payload"] == {"query": "Why?"}
 
     # Check streaming sequence
-    assert cloud_events[1].data == {"chunk": "Because"}
-    assert cloud_events[2].data == {"chunk": " "}
-    assert cloud_events[3].data == {"chunk": "Science"}
-    assert cloud_events[3].datacontenttype == EventContentType.STREAM
+    assert dumped_events[1]["chunk"] == "Because"
+    assert dumped_events[2]["chunk"] == " "
+    assert dumped_events[3]["chunk"] == "Science"
 
     # Check artifact
-    assert cloud_events[4].type == "ai.coreason.artifact.generated"
-    assert cloud_events[4].datacontenttype == EventContentType.ARTIFACT
+    assert dumped_events[4]["event_type"] == "ARTIFACT_GENERATED"
+    assert dumped_events[4]["artifact_type"] == "text/plain"
 
     # Check done
-    assert cloud_events[5].type == "ai.coreason.node.done"
-    assert cloud_events[5].data == {"answer": "Because Science"}
+    assert dumped_events[5]["event_type"] == "NODE_DONE"
+    assert dumped_events[5]["output"] == {"answer": "Because Science"}
 
     # Verify Extension consistency
-    assert cloud_events[1].dump()["com_coreason_ui_cue"] == "typing"
+    assert dumped_events[1]["visual_cue"] == "typing"
 
 
 def test_complex_council_vote() -> None:
@@ -182,9 +170,8 @@ def test_complex_council_vote() -> None:
 
     event = GraphEventCouncilVote(run_id="r1", trace_id="t1", node_id="council-1", timestamp=100.0, votes=votes_data)
 
-    ce = migrate_graph_event_to_cloud_event(event)
+    dumped = event.dump()
 
-    assert ce.type == "ai.coreason.council.vote"
-    assert ce.data is not None
-    assert ce.data["votes"] == votes_data
-    assert ce.data["votes"]["results"]["legal_bot"]["vote"] == "REJECT"
+    assert dumped["event_type"] == "COUNCIL_VOTE"
+    assert dumped["votes"] == votes_data
+    assert dumped["votes"]["results"]["legal_bot"]["vote"] == "REJECT"
