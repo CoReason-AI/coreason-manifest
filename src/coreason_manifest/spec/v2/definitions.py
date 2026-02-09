@@ -152,10 +152,12 @@ class AgentDefinition(CoReasonBaseModel):
             (Validation: Normalizes string URIs or partial dicts to ToolRequirement).
         knowledge (list[str]): List of file paths or knowledge base IDs.
         skills (list[str]): List of Skill IDs to equip this agent with.
-        context_strategy (Literal["full", "compressed", "hybrid"]): Context optimization strategy for skills. (Default: "hybrid").
+        context_strategy (Literal["full", "compressed", "hybrid"]): Context optimization strategy for skills.
+            (Default: "hybrid").
         interface (InterfaceDefinition): Input/Output contract.
         capabilities (AgentCapabilities): Feature flags and capabilities for the agent.
-        runtime (AgentRuntimeConfig | None): Configuration for the agent runtime environment (e.g. environment variables).
+        runtime (AgentRuntimeConfig | None): Configuration for the agent runtime environment
+            (e.g. environment variables).
         evaluation (EvaluationProfile | None): Quality assurance and testing metadata.
         resources (ModelProfile | None): Hardware, pricing, and operational constraints for this agent.
     """
@@ -387,7 +389,8 @@ class ManifestV2(CoReasonBaseModel):
         interface (InterfaceDefinition): Input/Output contract.
         state (StateDefinition): Internal state schema.
         policy (PolicyDefinition): Policy and governance.
-        definitions (dict[str, ToolDefinition | AgentDefinition | ...]): Reusable definitions. (Polymorphic: Discriminator 'type').
+        definitions (dict[str, ToolDefinition | AgentDefinition | ...]): Reusable definitions.
+            (Polymorphic: Discriminator 'type').
         workflow (Workflow): The main workflow topology.
     """
 

@@ -47,7 +47,8 @@ class IdentityRequirement(CoReasonBaseModel):
         required_permissions (list[str]): List of specific permission strings (AND logic). User must have all.
         inject_user_profile (bool): If True, injects name, email, and ID into the context. (Default: False).
         inject_locale_info (bool): If True, injects timezone and locale/language preference. (Default: True).
-        anonymize_pii (bool): If True, the runtime replaces real names/emails with hashes or aliases before sending to LLM. (Default: True).
+        anonymize_pii (bool): If True, the runtime replaces real names/emails with hashes or aliases before sending
+            to LLM. (Default: True).
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)

@@ -98,7 +98,8 @@ class ReflexConfig(CoReasonBaseModel):
     Attributes:
         enabled (bool): Allow fast-path responses without deep reasoning chains. (Default: True).
         confidence_threshold (float): Minimum confidence required to bypass the solver loop. (Default: 0.9).
-        allowed_tools (list[str]): List of read-only tools that can be called in Reflex mode (e.g., 'search', 'get_time').
+        allowed_tools (list[str]): List of read-only tools that can be called in Reflex mode (e.g., 'search',
+            'get_time').
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)

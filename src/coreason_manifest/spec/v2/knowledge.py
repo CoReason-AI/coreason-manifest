@@ -70,7 +70,8 @@ class MemoryWriteConfig(CoReasonBaseModel):
     Attributes:
         strategy (ConsolidationStrategy): When to persist memories. (Default: SESSION_CLOSE).
         frequency_turns (int): If strategy is SUMMARY_WINDOW, how many turns trigger a write. (Default: 10).
-        destination_collection (str | None): Target vector store collection. If None, uses the primary retrieval collection.
+        destination_collection (str | None): Target vector store collection. If None, uses the primary
+            retrieval collection.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)

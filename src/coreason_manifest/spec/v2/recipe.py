@@ -68,9 +68,11 @@ class OptimizationIntent(CoReasonBaseModel):
         base_ref (str): Parent ID to fork.
         improvement_goal (str): Prompt for the optimizer (e.g., 'Reduce hallucinations').
         strategy (Literal["atomic", "parallel"]): Optimization strategy. (Default: "parallel").
-        metric_name (str): The grading function to optimize against (e.g., 'faithfulness', 'json_validity'). (Default: "exact_match").
+        metric_name (str): The grading function to optimize against (e.g., 'faithfulness', 'json_validity').
+            (Default: "exact_match").
         teacher_model (str | None): ID of a stronger model to use for bootstrapping synthetic training data.
-        max_demonstrations (int): Maximum number of few-shot examples to learn and inject. (Default: 5, Constraint: >= 0).
+        max_demonstrations (int): Maximum number of few-shot examples to learn and inject.
+            (Default: 5, Constraint: >= 0).
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -135,7 +137,8 @@ class StateDefinition(CoReasonBaseModel):
 
     Attributes:
         properties (dict[str, Any]): JSON Schema properties for the shared state variables.
-        persistence (Literal["ephemeral", "redis", "postgres"]): How the state should be stored across steps. (Default: "ephemeral").
+        persistence (Literal["ephemeral", "redis", "postgres"]): How the state should be stored across steps.
+            (Default: "ephemeral").
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -164,13 +167,17 @@ class PolicyConfig(CoReasonBaseModel):
         max_retries (int): Global retry limit for failed steps. (Default: 0).
         timeout_seconds (int | None): Global execution timeout.
         execution_mode (Literal["sequential", "parallel"]): Default execution strategy. (Default: "sequential").
-        priority (ExecutionPriority): Traffic priority. Low priority requests may be queued or dropped during high load. (Default: NORMAL).
+        priority (ExecutionPriority): Traffic priority. Low priority requests may be queued or dropped during high load.
+            (Default: NORMAL).
         rate_limit_rpm (int | None): Max requests per minute allowed for this recipe execution. (Constraint: >= 0).
         rate_limit_tpm (int | None): Max tokens per minute allowed (input + output). (Constraint: >= 0).
-        caching_enabled (bool): Allow the Gateway to serve cached responses for identical inputs (Semantic Caching). (Default: True).
+        caching_enabled (bool): Allow the Gateway to serve cached responses for identical inputs (Semantic Caching).
+            (Default: True).
         budget_cap_usd (float | None): Hard limit for estimated token + tool costs. Execution halts if exceeded.
-        token_budget (int | None): Max tokens for the assembled prompt. Low-priority contexts will be pruned if exceeded.
-        sensitive_tools (list[str]): List of tool names that ALWAYS require human confirmation (InteractionConfig override).
+        token_budget (int | None): Max tokens for the assembled prompt. Low-priority contexts will be pruned if
+            exceeded.
+        sensitive_tools (list[str]): List of tool names that ALWAYS require human confirmation (InteractionConfig
+            override).
         allowed_mcp_servers (list[str]): Whitelist of MCP server names this recipe is allowed to access.
         safety_preamble (str | None): Mandatory safety instruction injected into the system prompt.
         legal_disclaimer (str | None): Text that must be appended to the final output.
@@ -317,7 +324,8 @@ class CollaborationConfig(CoReasonBaseModel):
         supported_commands (list[str]): Slash commands the agent understands.
         channels (list[str]): Communication channels to notify (e.g., ['slack', 'email', 'mobile_push']).
         timeout_seconds (int | None): How long to wait for human input before triggering fallback.
-        fallback_behavior (Literal["fail", "proceed_with_default", "escalate"]): Action to take if the timeout is exceeded. (Default: "fail").
+        fallback_behavior (Literal["fail", "proceed_with_default", "escalate"]): Action to take if the timeout
+            is exceeded. (Default: "fail").
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -389,7 +397,8 @@ class RecipeNode(CoReasonBaseModel):
         visualization (PresentationHints | None): Dynamic rendering hints (Glass Box).
         collaboration (CollaborationConfig | None): Human engagement rules (Co-Pilot).
         recovery (RecoveryConfig | None): Error handling and resilience settings.
-        reasoning (ReasoningConfig | None): Meta-cognition settings: Review loops, gap scanning, and validation strategies.
+        reasoning (ReasoningConfig | None): Meta-cognition settings: Review loops, gap scanning, and validation
+            strategies.
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -417,9 +426,11 @@ class AgentNode(RecipeNode):
 
     Attributes:
         type (Literal["agent"]): Discriminator. (Default: "agent").
-        cognitive_profile (CognitiveProfile | None): Inline definition of the agent's cognitive architecture (for the Weaver).
+        cognitive_profile (CognitiveProfile | None): Inline definition of the agent's cognitive architecture
+            (for the Weaver).
         agent_ref (str | SemanticRef | None): The ID or URI of the Agent Definition, or a Semantic Reference.
-        model_policy (ModelSelectionPolicy | str | None): The routing policy for the LLM. Can be an inline policy or a reference to a Model ID.
+        model_policy (ModelSelectionPolicy | str | None): The routing policy for the LLM. Can be an inline policy
+            or a reference to a Model ID.
         system_prompt_override (str | None): Context-specific instructions.
         inputs_map (dict[str, str]): Mapping parent outputs to agent inputs.
     """
@@ -463,12 +474,15 @@ class SolverConfig(CoReasonBaseModel):
         strategy (SolverStrategy): The planning strategy to use. (Default: STANDARD).
         depth_limit (int): Hard limit on recursion depth. (Default: 3, Constraint: >= 1).
         n_samples (int): Council size: How many plans to generate. (Default: 1, Constraint: >= 1).
-        diversity_threshold (float | None): For Ensemble: Minimum Jaccard distance required between generated plans. (Default: 0.3, Constraint: 0.0-1.0).
+        diversity_threshold (float | None): For Ensemble: Minimum Jaccard distance required between generated plans.
+            (Default: 0.3, Constraint: 0.0-1.0).
         enable_dissenter (bool): If True, an adversarial agent will critique plans before voting. (Default: False).
-        consensus_threshold (float | None): Percentage of votes required to ratify a plan. (Default: 0.6, Constraint: 0.0-1.0).
+        consensus_threshold (float | None): Percentage of votes required to ratify a plan.
+            (Default: 0.6, Constraint: 0.0-1.0).
         beam_width (int): For LATS: How many children to expand per node. (Default: 1, Constraint: >= 1).
         max_iterations (int): For LATS: The 'Search Budget' (total simulations). (Default: 10, Constraint: >= 1).
-        aggregation_method (Literal["best_of_n", "majority_vote", "weighted_merge"] | None): How to combine results if n_samples > 1.
+        aggregation_method (Literal["best_of_n", "majority_vote", "weighted_merge"] | None): How to combine results
+            if n_samples > 1.
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -809,7 +823,8 @@ class RecipeDefinition(CoReasonBaseModel):
         interface (RecipeInterface): Input/Output contract.
         environment (RuntimeEnvironment | None): The infrastructure requirements for the recipe.
         default_model_policy (ModelSelectionPolicy | None): Default model selection rules for all agents in this recipe.
-        tests (list[SimulationScenario]): Self-contained test scenarios (harvested from Simulacrum) to validate this recipe.
+        tests (list[SimulationScenario]): Self-contained test scenarios (harvested from Simulacrum) to validate
+            this recipe.
         requirements (list[Constraint]): List of feasibility constraints.
         state (StateDefinition | None): Internal state schema.
         policy (PolicyConfig | None): Execution limits and error handling.

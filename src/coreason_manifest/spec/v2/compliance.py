@@ -65,7 +65,8 @@ class IntegrityConfig(CoReasonBaseModel):
         input_mode (AuditContentMode): How to handle user/system inputs in the audit log. (Default: FULL_PAYLOAD).
         output_mode (AuditContentMode): How to handle agent outputs in the audit log. (Default: FULL_PAYLOAD).
         integrity_level (IntegrityLevel): Cryptographic proof requirement for the execution trace. (Default: NONE).
-        hash_algorithm (str): Algorithm used for generating payload references (if mode is reference_only). (Default: "sha256").
+        hash_algorithm (str): Algorithm used for generating payload references (if mode is reference_only).
+            (Default: "sha256").
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
