@@ -13,7 +13,7 @@ from typing import Any
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 from coreason_manifest.spec.v2.knowledge import MemoryWriteConfig, RetrievalConfig
 from coreason_manifest.spec.v2.reasoning import ReasoningConfig, ReflexConfig
 
@@ -27,7 +27,7 @@ class ComponentPriority(IntEnum):
     CRITICAL = 10
 
 
-class ContextDependency(CoReasonBaseModel):
+class ContextDependency(ManifestBaseModel):
     """
     A reference to a context module (e.g. 'hipaa_context').
 
@@ -44,7 +44,7 @@ class ContextDependency(CoReasonBaseModel):
     parameters: dict[str, Any] = Field(default_factory=dict, description="Variables to inject into the context.")
 
 
-class CognitiveProfile(CoReasonBaseModel):
+class CognitiveProfile(ManifestBaseModel):
     """
     The configuration for the Weaver to assemble a Prompt.
 

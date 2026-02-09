@@ -25,9 +25,9 @@ def test_close_op_payload() -> None:
     assert packet.p is None
 
     # Verify it dumps correctly
-    dumped = packet.dump()
+    dumped = packet.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["op"] == "close"
-    # CoReasonBaseModel.dump() excludes None fields by default
+    # ManifestBaseModel.model_dump(mode='json', by_alias=True, exclude_none=True) excludes None fields by default
     assert "p" not in dumped
 
 

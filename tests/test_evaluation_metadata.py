@@ -30,7 +30,7 @@ def test_serialization() -> None:
         id="test-agent", name="Test Agent", role="Tester", goal="Test things", evaluation=profile
     )
 
-    dumped = agent_def.dump()
+    dumped = agent_def.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["evaluation"]["expected_latency_ms"] == 200
     assert dumped["evaluation"]["grading_rubric"][0]["name"] == "accuracy"
     assert dumped["evaluation"]["grading_rubric"][0]["threshold"] == 0.95
@@ -170,7 +170,7 @@ def test_complex_serialization_cycle() -> None:
     manifest = ManifestV2.model_validate(original_data)
 
     # Dump
-    dumped = manifest.dump()
+    dumped = manifest.model_dump(mode="json", by_alias=True, exclude_none=True)
 
     # Load again
     manifest_reloaded = ManifestV2.model_validate(dumped)

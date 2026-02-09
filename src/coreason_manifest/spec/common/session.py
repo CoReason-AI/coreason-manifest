@@ -15,7 +15,7 @@ from uuid import uuid4
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class MemoryStrategy(StrEnum):
@@ -29,7 +29,7 @@ class MemoryStrategy(StrEnum):
     VECTOR_STORE = "vector_store"
 
 
-class LineageMetadata(CoReasonBaseModel):
+class LineageMetadata(ManifestBaseModel):
     """Metadata for tracking request lineage across boundaries."""
 
     model_config = ConfigDict(frozen=True)
@@ -38,7 +38,7 @@ class LineageMetadata(CoReasonBaseModel):
     parent_interaction_id: str | None = None
 
 
-class Interaction(CoReasonBaseModel):
+class Interaction(ManifestBaseModel):
     """External boundary interaction model."""
 
     model_config = ConfigDict(frozen=True)
@@ -48,7 +48,7 @@ class Interaction(CoReasonBaseModel):
     lineage: LineageMetadata | None = None
 
 
-class SessionState(CoReasonBaseModel):
+class SessionState(ManifestBaseModel):
     """Immutable container for conversational memory state."""
 
     model_config = ConfigDict(frozen=True)

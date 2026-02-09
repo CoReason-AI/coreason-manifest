@@ -22,10 +22,10 @@ from uuid import UUID
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.spec.cap import AgentRequest, StreamPacket
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
-class InterceptorContext(CoReasonBaseModel):
+class InterceptorContext(ManifestBaseModel):
     """Context for middleware interception."""
 
     model_config = ConfigDict(frozen=True)

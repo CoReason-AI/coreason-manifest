@@ -14,10 +14,10 @@ from uuid import UUID, uuid4
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
-class AgentRequest(CoReasonBaseModel):
+class AgentRequest(ManifestBaseModel):
     """Transport Envelope for all communication within the CoReason ecosystem.
 
     Ensures strict validation of trace lineage and context propagation.

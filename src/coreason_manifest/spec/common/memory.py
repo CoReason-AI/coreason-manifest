@@ -12,13 +12,13 @@ from typing import Self
 
 from pydantic import ConfigDict, Field, model_validator
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 from .session import MemoryStrategy
 
 __all__ = ["MemoryConfig", "MemoryStrategy"]
 
 
-class MemoryConfig(CoReasonBaseModel):
+class MemoryConfig(ManifestBaseModel):
     """Configuration for agent memory and eviction policies."""
 
     model_config = ConfigDict(frozen=True)

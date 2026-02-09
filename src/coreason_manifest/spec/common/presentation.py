@@ -16,10 +16,10 @@ from uuid import UUID, uuid4
 
 from pydantic import AnyUrl, ConfigDict, Field, field_validator, model_validator
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
-class NodePresentation(CoReasonBaseModel):
+class NodePresentation(ManifestBaseModel):
     """Visual presentation metadata for a graph node."""
 
     model_config = ConfigDict(frozen=True)
@@ -50,7 +50,7 @@ class PresentationEventType(StrEnum):
     USER_ERROR = "user_error"
 
 
-class CitationItem(CoReasonBaseModel):
+class CitationItem(ManifestBaseModel):
     """An individual citation item."""
 
     model_config = ConfigDict(frozen=True)
@@ -61,7 +61,7 @@ class CitationItem(CoReasonBaseModel):
     snippet: str | None = None
 
 
-class CitationBlock(CoReasonBaseModel):
+class CitationBlock(ManifestBaseModel):
     """A block of citations."""
 
     model_config = ConfigDict(frozen=True)
@@ -69,7 +69,7 @@ class CitationBlock(CoReasonBaseModel):
     items: list[CitationItem]
 
 
-class ProgressUpdate(CoReasonBaseModel):
+class ProgressUpdate(ManifestBaseModel):
     """A progress update event."""
 
     model_config = ConfigDict(frozen=True)
@@ -79,7 +79,7 @@ class ProgressUpdate(CoReasonBaseModel):
     progress_percent: float | None = Field(None, ge=0.0, le=1.0)
 
 
-class MediaItem(CoReasonBaseModel):
+class MediaItem(ManifestBaseModel):
     """An individual media item."""
 
     model_config = ConfigDict(frozen=True)
@@ -89,7 +89,7 @@ class MediaItem(CoReasonBaseModel):
     alt_text: str | None = None
 
 
-class MediaCarousel(CoReasonBaseModel):
+class MediaCarousel(ManifestBaseModel):
     """A carousel of media items."""
 
     model_config = ConfigDict(frozen=True)
@@ -97,7 +97,7 @@ class MediaCarousel(CoReasonBaseModel):
     items: list[MediaItem]
 
 
-class MarkdownBlock(CoReasonBaseModel):
+class MarkdownBlock(ManifestBaseModel):
     """A block of markdown content."""
 
     model_config = ConfigDict(frozen=True)
@@ -105,7 +105,7 @@ class MarkdownBlock(CoReasonBaseModel):
     content: str
 
 
-class PresentationEvent(CoReasonBaseModel):
+class PresentationEvent(ManifestBaseModel):
     """A container for presentation events."""
 
     model_config = ConfigDict(frozen=True)

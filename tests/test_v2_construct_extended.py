@@ -162,7 +162,7 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
     )
 
     # Dump
-    json_str = recipe.to_json()
+    json_str = recipe.model_dump_json(by_alias=True, exclude_none=True)
 
     # Load
     loaded = RecipeDefinition.model_validate_json(json_str)

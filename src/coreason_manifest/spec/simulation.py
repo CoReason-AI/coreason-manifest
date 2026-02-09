@@ -15,7 +15,7 @@ from uuid import UUID, uuid4
 
 from pydantic import Field
 
-from .common_base import CoReasonBaseModel
+from .common_base import ManifestBaseModel
 
 
 class StepType(StrEnum):
@@ -37,7 +37,7 @@ class ValidationLogic(StrEnum):
     LLM_JUDGE = "llm_judge"
 
 
-class SimulationStep(CoReasonBaseModel):
+class SimulationStep(ManifestBaseModel):
     """The atomic unit of execution history."""
 
     step_id: UUID = Field(default_factory=uuid4)
@@ -51,7 +51,7 @@ class SimulationStep(CoReasonBaseModel):
     snapshot: dict[str, Any] = Field(default_factory=dict)
 
 
-class SimulationTrace(CoReasonBaseModel):
+class SimulationTrace(ManifestBaseModel):
     """The full recording of a session."""
 
     trace_id: UUID = Field(default_factory=uuid4)
@@ -63,7 +63,7 @@ class SimulationTrace(CoReasonBaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
-class AdversaryProfile(CoReasonBaseModel):
+class AdversaryProfile(ManifestBaseModel):
     """Configuration for the Red Team agent."""
 
     name: str
@@ -73,7 +73,7 @@ class AdversaryProfile(CoReasonBaseModel):
     persona: dict[str, Any] | None = None
 
 
-class ChaosConfig(CoReasonBaseModel):
+class ChaosConfig(ManifestBaseModel):
     """Configuration for infrastructure faults."""
 
     latency_ms: int = 0
@@ -81,7 +81,7 @@ class ChaosConfig(CoReasonBaseModel):
     token_throttle: bool = False
 
 
-class SimulationScenario(CoReasonBaseModel):
+class SimulationScenario(ManifestBaseModel):
     """The test case definition."""
 
     id: str
@@ -91,7 +91,7 @@ class SimulationScenario(CoReasonBaseModel):
     validation_logic: ValidationLogic
 
 
-class SimulationRequest(CoReasonBaseModel):
+class SimulationRequest(ManifestBaseModel):
     """The trigger payload sent to the runner."""
 
     scenario: SimulationScenario
