@@ -27,7 +27,7 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 from coreason_manifest.utils.v2.governance import _risk_score, check_compliance_v2
-from coreason_manifest.utils.v2.validator import validate_integrity, validate_loose
+from coreason_manifest.utils.v2.validator import validate_loose
 
 # --- Governance Tests ---
 
@@ -217,14 +217,6 @@ def test_validator_strict_missing_start() -> None:
     agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
 
     # Construct as draft first to bypass initial validation
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        status="published",
-        workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
-        definitions={"a": agent_def},
-    )
-
     # Now manually call validate_integrity or rely on Pydantic to catch it if instantiated with status=published
     # But wait, if I instantiate with status="published", it should raise ValidationError immediately!
     # The previous test used validate_integrity explicitly.

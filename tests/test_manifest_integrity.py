@@ -124,3 +124,19 @@ def test_integrity_agent_tool_reference_missing() -> None:
     with pytest.raises(ValidationError) as excinfo:
         ManifestV2.model_validate(data)
     assert "references missing tool 'missing-tool-id'" in str(excinfo.value)
+
+
+def test_integrity_success_published() -> None:
+    """Ensure validation passes for a correct published manifest."""
+    data = {
+        "apiVersion": "coreason.ai/v2",
+        "kind": "Recipe",
+        "metadata": {"name": "Valid Published"},
+        "status": "published",
+        "workflow": {
+            "start": "step-1",
+            "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
+        },
+    }
+    manifest = ManifestV2.model_validate(data)
+    assert manifest.status == "published"

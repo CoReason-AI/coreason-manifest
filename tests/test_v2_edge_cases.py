@@ -115,7 +115,9 @@ def test_agent_step_referencing_tool() -> None:
             "steps": {"step-1": {"type": "agent", "id": "step-1", "agent": "my-tool"}},
         },
     }
-    with pytest.raises(ValidationError, match="AgentStep 'step-1' references 'my-tool' which is not an AgentDefinition"):
+    with pytest.raises(
+        ValidationError, match="AgentStep 'step-1' references 'my-tool' which is not an AgentDefinition"
+    ):
         ManifestV2.model_validate(data)
 
 
