@@ -35,7 +35,10 @@ def test_duplicate_tools() -> None:
         "name": "Duplicate Tools",
         "role": "Worker",
         "goal": "Work",
-        "tools": ["tool-1", "tool-1"],
+        "tools": [
+            {"type": "remote", "uri": "tool-1"},
+            {"type": "remote", "uri": "tool-1"},
+        ],
     }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 2
@@ -44,14 +47,14 @@ def test_duplicate_tools() -> None:
 
 
 def test_complex_mixed_usage() -> None:
-    """Complex Case: Mix of ID reference, Remote Requirement, and Inline Definition."""
+    """Complex Case: Mix of ID reference (strict), Remote Requirement, and Inline Definition."""
     data = {
         "id": "agent-complex",
         "name": "Complex Agent",
         "role": "Worker",
         "goal": "Work",
         "tools": [
-            "search-tool-id",
+            {"type": "remote", "uri": "search-tool-id"},
             {"type": "remote", "uri": "mcp://weather"},
             {
                 "type": "inline",
@@ -64,7 +67,7 @@ def test_complex_mixed_usage() -> None:
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 3
 
-    # 1. ID Reference (converted to Remote)
+    # 1. ID Reference
     assert isinstance(agent.tools[0], ToolRequirement)
     assert agent.tools[0].uri == "search-tool-id"
     assert agent.tools[0].type == "remote"

@@ -134,7 +134,9 @@ definitions:
     name: Manager
     role: Boss
     goal: Manage
-    tools: ["worker_tool"] # Uses worker as tool via wrapper
+    tools:
+      - type: remote
+        uri: worker_tool
 
   worker_tool:
     type: tool
@@ -149,7 +151,9 @@ definitions:
     name: Director
     role: Exec
     goal: Direct
-    tools: ["manager_tool"] # Uses manager as tool via wrapper
+    tools:
+      - type: remote
+        uri: manager_tool
 
   manager_tool:
     type: tool
