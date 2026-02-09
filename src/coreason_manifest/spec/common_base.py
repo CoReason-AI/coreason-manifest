@@ -21,8 +21,6 @@ class ManifestBaseModel(BaseModel):
 
     This base class addresses JSON serialization challenges in Pydantic v2 (e.g., UUID, datetime)
     by providing standardized methods (`dump`, `to_json`) with optimal configuration.
-
-    For a detailed rationale, see `docs/coreason_base_model_rationale.md`.
     """
 
     model_config = ConfigDict(

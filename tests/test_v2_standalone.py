@@ -15,7 +15,6 @@ import yaml
 
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
-    GenericDefinition,
     ManifestV2,
 )
 
@@ -82,28 +81,9 @@ definitions:
     # Let's assert based on current knowledge (ManifestBaseModel usually strict).
 
     # Actually, let's verify if AgentDefinition allows extra.
-    # If it fails, good. If it passes, check if field exists.
+    # It should fail because AgentDefinition has extra="forbid" and GenericDefinition is removed.
 
-    if is_strict:
-        assert True  # Strict is good for cleanup
-    else:
-        # If it passed, ensure the field is NOT in the model fields (it was ignored or extra)
-        m = ManifestV2(**data)
-        # It shouldn't be accessible as a first-class field
-        agent = m.definitions["my_agent"]
-
-        # KEY BEHAVIOR:
-        # Because AgentDefinition is strict (extra='forbid'), the extra field causes validation to fail.
-        # The discriminated union then falls back to GenericDefinition (which is permissive).
-        # This confirms that "bridge trash" effectively INVALIDATES the AgentDefinition,
-        # preventing it from being used as a valid agent in the runtime.
-
-        assert not isinstance(agent, AgentDefinition)
-        assert isinstance(agent, GenericDefinition)
-
-        # The junk field is preserved in the generic container, but the type is lost.
-        # This is the desired "rejection" behavior.
-        assert agent.bridge_conversion_hint == "ignore_me"  # type: ignore[attr-defined]
+    assert is_strict, "Validation should fail for extra fields in V2 definitions."
 
 
 def test_complex_recursive_composition_native() -> None:

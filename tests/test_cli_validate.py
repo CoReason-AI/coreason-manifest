@@ -281,7 +281,7 @@ def test_validate_complex_manifest(tmp_path: Path, capsys: pytest.CaptureFixture
                 "name": "Researcher",
                 "role": "Researcher",
                 "goal": "Find info",
-                "tools": ["web_search"],
+                "tools": [{"type": "remote", "uri": "web_search"}],
             },
         },
         "workflow": {

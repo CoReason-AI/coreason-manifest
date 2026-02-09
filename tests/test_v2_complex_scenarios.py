@@ -16,7 +16,6 @@ from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     CouncilStep,
-    GenericDefinition,
     LogicStep,
     ManifestV2,
     SwitchStep,
@@ -269,8 +268,8 @@ def test_tool_definition_full_spec() -> None:
     assert tool.risk_level == ToolRiskLevel.STANDARD
 
 
-# Test 7: Generic Definition Fallback
-def test_generic_definition_fallback() -> None:
+# Test 7: Invalid Definition Type
+def test_invalid_definition_type() -> None:
     data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
@@ -284,14 +283,8 @@ def test_generic_definition_fallback() -> None:
         },
         "workflow": {"start": "s1", "steps": {"s1": {"type": "logic", "id": "s1", "code": "pass"}}},
     }
-    manifest = ManifestV2.model_validate(data)
-    definition = manifest.definitions["unknown-thing"]
-    assert isinstance(definition, GenericDefinition)
-    # GenericDefinition allows extra fields
-    # In Pydantic V2 with extra='allow', fields are in model_extra
-    assert definition.model_extra is not None
-    assert definition.model_extra["type"] == "alien-tech"
-    assert definition.model_extra["id"] == "unknown-1"
+    with pytest.raises(ValidationError):
+        ManifestV2.model_validate(data)
 
 
 # Test 8: Invalid References

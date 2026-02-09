@@ -16,7 +16,6 @@ from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefin
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
     CouncilStep,
-    GenericDefinition,
     LogicStep,
     SwitchStep,
     ToolDefinition,
@@ -100,25 +99,6 @@ def test_manifest_builder_tools() -> None:
     tool_def = manifest.definitions["tool1"]
     assert isinstance(tool_def, ToolDefinition)
     assert tool_def.uri == StrictUri("https://example.com/mcp")
-
-
-def test_manifest_builder_generic_def() -> None:
-    generic = GenericDefinition(some_field="value")
-
-    manifest = (
-        ManifestBuilder("GenericManifest")
-        .add_generic_definition("my_generic", generic)
-        .add_step(LogicStep(id="main", code="pass"))
-        .build()
-    )
-
-    assert "my_generic" in manifest.definitions
-    # Accessing dynamic fields on Pydantic models usually works if configured properly,
-    # but GenericDefinition has model_config(extra="allow").
-    # Pydantic v2 access for extra fields:
-    generic_def = manifest.definitions["my_generic"]
-    assert isinstance(generic_def, GenericDefinition)
-    assert generic_def.some_field == "value"  # type: ignore
 
 
 def test_manifest_builder_implicit_start_step() -> None:
