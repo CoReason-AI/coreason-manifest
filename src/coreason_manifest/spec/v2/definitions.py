@@ -8,9 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common.capabilities import AgentCapabilities
 from coreason_manifest.spec.common.interoperability import AgentRuntimeConfig
@@ -411,3 +411,70 @@ class ManifestV2(CoReasonBaseModel):
         | GenericDefinition,
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
+
+    @model_validator(mode="after")
+    def validate_integrity(self) -> Self:
+        """Validate referential integrity of the manifest."""
+        steps = self.workflow.steps
+
+        # 1. Validate Start Step
+        if self.workflow.start not in steps:
+            raise ValueError(f"Start step '{self.workflow.start}' not found in steps.")
+
+        for step in steps.values():
+            # 2. Validate 'next' pointers (AgentStep, LogicStep, CouncilStep)
+            if hasattr(step, "next") and step.next and step.next not in steps:
+                raise ValueError(f"Step '{step.id}' references missing next step '{step.next}'.")
+
+            # 3. Validate SwitchStep targets
+            if isinstance(step, SwitchStep):
+                for target in step.cases.values():
+                    if target not in steps:
+                        raise ValueError(f"SwitchStep '{step.id}' references missing step '{target}' in cases.")
+                if step.default and step.default not in steps:
+                    raise ValueError(f"SwitchStep '{step.id}' references missing step '{step.default}' in default.")
+
+            # 4. Validate Definition References
+            if isinstance(step, AgentStep):
+                if step.agent not in self.definitions:
+                    raise ValueError(f"AgentStep '{step.id}' references missing agent '{step.agent}'.")
+
+                # Check type
+                agent_def = self.definitions[step.agent]
+                if not isinstance(agent_def, AgentDefinition):
+                    raise ValueError(
+                        f"AgentStep '{step.id}' references '{step.agent}' which is not an AgentDefinition "
+                        f"(got {type(agent_def).__name__})."
+                    )
+
+            if isinstance(step, CouncilStep):
+                for voter in step.voters:
+                    if voter not in self.definitions:
+                        raise ValueError(f"CouncilStep '{step.id}' references missing voter '{voter}'.")
+
+                    # Check type
+                    agent_def = self.definitions[voter]
+                    if not isinstance(agent_def, AgentDefinition):
+                        raise ValueError(
+                            f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition "
+                            f"(got {type(agent_def).__name__})."
+                        )
+
+        # 5. Validate Agent Tools
+        for definition in self.definitions.values():
+            if isinstance(definition, AgentDefinition):
+                for tool_ref in definition.tools:
+                    # Handle ToolRequirement (remote tools)
+                    if isinstance(tool_ref, ToolRequirement):
+                        if tool_ref.uri in self.definitions:
+                            tool_def = self.definitions[tool_ref.uri]
+                            if not isinstance(tool_def, ToolDefinition):
+                                raise ValueError(
+                                    f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
+                                    f"(got {type(tool_def).__name__})."
+                                )
+                        elif "://" not in tool_ref.uri:
+                            # If it's not a valid URI (no scheme) and not in definitions, assume broken ID reference
+                            raise ValueError(f"Agent '{definition.id}' references missing tool '{tool_ref.uri}'.")
+
+        return self

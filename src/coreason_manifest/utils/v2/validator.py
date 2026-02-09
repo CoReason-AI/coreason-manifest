@@ -24,87 +24,15 @@ from coreason_manifest.spec.v2.definitions import (
 def validate_integrity(manifest: ManifestV2) -> ManifestV2:
     """Validate referential integrity of the manifest.
 
-    Checks:
-    1. workflow.start exists in steps.
-    2. step.next pointers exist in steps.
-    3. SwitchStep.cases targets exist.
-    4. agent references in AgentStep exist in definitions.
-    5. CouncilStep voters exist in definitions.
-    6. AgentDefinition tools exist in definitions.
+    DEPRECATED: ManifestV2 now self-validates on instantiation.
+    Any ManifestV2 object passed here is already guaranteed to be valid.
 
     Args:
         manifest: The V2 manifest to validate.
 
     Returns:
         The valid manifest (for chaining).
-
-    Raises:
-        ValueError: If referential integrity is violated.
     """
-    steps = manifest.workflow.steps
-
-    # 1. Validate Start Step
-    if manifest.workflow.start not in steps:
-        raise ValueError(f"Start step '{manifest.workflow.start}' not found in steps.")
-
-    for step in steps.values():
-        # 2. Validate 'next' pointers (AgentStep, LogicStep, CouncilStep)
-        if hasattr(step, "next") and step.next and step.next not in steps:
-            raise ValueError(f"Step '{step.id}' references missing next step '{step.next}'.")
-
-        # 3. Validate SwitchStep targets
-        if isinstance(step, SwitchStep):
-            for target in step.cases.values():
-                if target not in steps:
-                    raise ValueError(f"SwitchStep '{step.id}' references missing step '{target}' in cases.")
-            if step.default and step.default not in steps:
-                raise ValueError(f"SwitchStep '{step.id}' references missing step '{step.default}' in default.")
-
-        # 4. Validate Definition References
-        if isinstance(step, AgentStep):
-            if step.agent not in manifest.definitions:
-                raise ValueError(f"AgentStep '{step.id}' references missing agent '{step.agent}'.")
-
-            # Check type
-            agent_def = manifest.definitions[step.agent]
-            if not isinstance(agent_def, AgentDefinition):
-                raise ValueError(
-                    f"AgentStep '{step.id}' references '{step.agent}' which is not an AgentDefinition "
-                    f"(got {type(agent_def).__name__})."
-                )
-
-        if isinstance(step, CouncilStep):
-            for voter in step.voters:
-                if voter not in manifest.definitions:
-                    raise ValueError(f"CouncilStep '{step.id}' references missing voter '{voter}'.")
-
-                # Check type
-                agent_def = manifest.definitions[voter]
-                if not isinstance(agent_def, AgentDefinition):
-                    raise ValueError(
-                        f"CouncilStep '{step.id}' references voter '{voter}' which is not an AgentDefinition "
-                        f"(got {type(agent_def).__name__})."
-                    )
-
-    # 5. Validate Agent Tools
-    for definition in manifest.definitions.values():
-        if isinstance(definition, AgentDefinition):
-            for tool_ref in definition.tools:
-                # Handle ToolRequirement (remote tools)
-                if isinstance(tool_ref, ToolRequirement):
-                    if tool_ref.uri in manifest.definitions:
-                        tool_def = manifest.definitions[tool_ref.uri]
-                        if not isinstance(tool_def, ToolDefinition):
-                            raise ValueError(
-                                f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
-                                f"(got {type(tool_def).__name__})."
-                            )
-                    elif "://" not in tool_ref.uri:
-                        # If it's not a valid URI (no scheme) and not in definitions, assume broken ID reference
-                        raise ValueError(f"Agent '{definition.id}' references missing tool '{tool_ref.uri}'.")
-
-                # InlineToolDefinition needs no referential validation as it is self-contained.
-
     return manifest
 
 

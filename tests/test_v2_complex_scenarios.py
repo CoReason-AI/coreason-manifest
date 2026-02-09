@@ -22,17 +22,16 @@ from coreason_manifest.spec.v2.definitions import (
     SwitchStep,
     ToolDefinition,
 )
+from tests.factories import create_agent_definition, create_manifest_v2, create_workflow
 
 
 # Test 1: Complex Workflow with Cycles
 def test_complex_workflow_with_cycles() -> None:
-    data = {
-        "apiVersion": "coreason.ai/v2",
-        "kind": "Recipe",
-        "metadata": {"name": "Cyclic Workflow"},
-        "workflow": {
-            "start": "start-switch",
-            "steps": {
+    manifest = create_manifest_v2(
+        name="Cyclic Workflow",
+        workflow=create_workflow(
+            start="start-switch",
+            steps={
                 "start-switch": {
                     "type": "switch",
                     "id": "start-switch",
@@ -57,18 +56,17 @@ def test_complex_workflow_with_cycles() -> None:
                     "code": "print('Done')",
                 },
             },
+        ),
+        definitions={
+            "worker-1": create_agent_definition(
+                id="worker-1",
+                name="Worker",
+                role="worker",
+                goal="work",
+            )
         },
-        "definitions": {
-            "worker-1": {
-                "type": "agent",
-                "id": "worker-1",
-                "name": "Worker",
-                "role": "worker",
-                "goal": "work",
-            }
-        },
-    }
-    manifest = ManifestV2.model_validate(data)
+    )
+
     assert manifest.workflow.start == "start-switch"
     steps = manifest.workflow.steps
     assert isinstance(steps["start-switch"], SwitchStep)

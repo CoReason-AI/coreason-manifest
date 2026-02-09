@@ -10,7 +10,8 @@
 
 from typing import Any
 
-from coreason_manifest.spec.v2.definitions import AgentDefinition, InlineToolDefinition, ToolRequirement
+from coreason_manifest.spec.v2.definitions import AgentDefinition
+from coreason_manifest.utils.base_adapter import BaseManifestAdapter
 
 
 def convert_to_langchain_kwargs(agent: AgentDefinition) -> dict[str, Any]:
@@ -31,33 +32,21 @@ def convert_to_langchain_kwargs(agent: AgentDefinition) -> dict[str, Any]:
         - `model_name`: The name of the LLM model to use.
     """
     # Construct the system message
-    instructions_parts = [
-        f"You are {agent.name}.",
-        f"Role: {agent.role}",
-        f"Goal: {agent.goal}",
-    ]
-    if agent.backstory:
-        instructions_parts.append(f"Backstory: {agent.backstory}")
-
-    system_message = "\n\n".join(instructions_parts)
+    system_message = BaseManifestAdapter._build_system_prompt(agent, include_header=True)
 
     # Convert tools to schemas compatible with LangChain's bind_tools (which accepts OpenAI format)
     tool_schemas = []
-    for tool in agent.tools:
-        if isinstance(tool, InlineToolDefinition):
-            tool_schemas.append(
-                {
-                    "type": "function",
-                    "function": {
-                        "name": tool.name,
-                        "description": tool.description,
-                        "parameters": tool.parameters,
-                    },
-                }
-            )
-        elif isinstance(tool, ToolRequirement):
-            # Remote tools are skipped as their schema is not available locally.
-            continue
+    for tool in BaseManifestAdapter._iter_inline_tools(agent):
+        tool_schemas.append(
+            {
+                "type": "function",
+                "function": {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.parameters,
+                },
+            }
+        )
 
     return {
         "system_message": system_message,
