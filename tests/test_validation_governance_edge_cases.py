@@ -32,7 +32,7 @@ def test_auth_mandate_explicit_false(base_workflow: Workflow) -> None:
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
     config = GovernanceConfig(require_auth_for_critical_tools=True)
 
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Explicit Insecure", requires_auth=False),
         definitions={"nuke": tool},
@@ -50,7 +50,7 @@ def test_auth_mandate_none_default(base_workflow: Workflow) -> None:
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
     config = GovernanceConfig(require_auth_for_critical_tools=True)
 
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Default Insecure"),
         definitions={"nuke": tool},
@@ -74,7 +74,7 @@ def test_auth_mandate_mixed_tools(base_workflow: Workflow) -> None:
     }
     config = GovernanceConfig(require_auth_for_critical_tools=True)
 
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Mixed Risk Agent"),
         definitions=tools,
@@ -94,7 +94,7 @@ def test_auth_mandate_config_disabled(base_workflow: Workflow) -> None:
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
     config = GovernanceConfig(require_auth_for_critical_tools=False)
 
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Config Disabled Agent"),
         definitions={"nuke": tool},
@@ -121,7 +121,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     # This might be a gotcha, but strictly speaking, the user claimed auth is "false" (string).
     # If the system interprets truthiness, it passes.
     # This test documents CURRENT behavior: truthy values pass.
-    manifest_str_false = Manifest(
+    manifest_str_false = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="String False", requires_auth="false"),
         definitions={"nuke": tool},
@@ -131,7 +131,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     assert report.passed is True  # "false" is truthy
 
     # "true" string -> Truthy -> Pass
-    manifest_str_true = Manifest(
+    manifest_str_true = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="String True", requires_auth="true"),
         definitions={"nuke": tool},
@@ -141,7 +141,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     assert report_true.passed is True
 
     # 0 integer -> Falsy -> Fail
-    manifest_int_0 = Manifest(
+    manifest_int_0 = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Int Zero", requires_auth=0),
         definitions={"nuke": tool},
@@ -164,7 +164,7 @@ def test_auth_mandate_dynamic_extra_field(base_workflow: Workflow) -> None:
     # ManifestMetadata has extra='allow'.
     metadata = ManifestMetadata(name="Dynamic Secure", requires_auth=True)
 
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=metadata,
         definitions={"nuke": tool},

@@ -106,7 +106,7 @@ def test_loader_windows_path_heuristics() -> None:
             patch("importlib.util.module_from_spec").start()
 
             # Create a dummy Manifest
-            ManifestV2(
+            ManifestV2.model_construct(
                 kind="Agent",
                 metadata=ManifestMetadata(name="WinAgent", version="1.0"),
                 workflow=Workflow(start="s", steps={}),

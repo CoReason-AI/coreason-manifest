@@ -116,7 +116,6 @@ from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
-from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
 __version__ = "0.22.0"
@@ -234,7 +233,5 @@ __all__ = [
     "load",
     "render_agent_card",
     "simple_agent",
-    "validate_integrity",
-    "validate_loose",
     "verify_chain",
 ]

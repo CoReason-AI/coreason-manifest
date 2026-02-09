@@ -65,7 +65,6 @@ def handle_init(args: argparse.Namespace) -> None:
         builder = AgentBuilder(name="GreeterAgent")
         builder.with_system_prompt("You are a helpful assistant.")
         builder.with_model("gpt-4o")
-        builder.with_tool("hello_world_tool")
         builder.with_capability(greet_cap)
 
         # 4. Generate Manifest

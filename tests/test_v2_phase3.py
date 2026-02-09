@@ -21,7 +21,6 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 from coreason_manifest.utils.v2.governance import check_compliance_v2
-from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture
@@ -47,20 +46,18 @@ def test_validation_loose_vs_strict() -> None:
 
     agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
 
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Broken Agent"),
-        workflow=Workflow(
-            start="step1",
-            steps={
-                "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
-            },
-        ),
-        definitions={"my-agent": agent_def},
-    )
-
     with pytest.raises(ValueError, match="missing next step 'step2'"):
-        validate_integrity(manifest)
+        ManifestV2(
+            kind="Agent",
+            metadata=ManifestMetadata(name="Broken Agent"),
+            workflow=Workflow(
+                start="step1",
+                steps={
+                    "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
+                },
+            ),
+            definitions={"my-agent": agent_def},
+        )
 
 
 def test_governance_tool_risk() -> None:

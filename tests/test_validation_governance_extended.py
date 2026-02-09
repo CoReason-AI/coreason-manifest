@@ -28,7 +28,7 @@ def test_governance_auth_edge_cases() -> None:
     config = GovernanceConfig(require_auth_for_critical_tools=True)
 
     # 1. requires_auth explicitly False
-    manifest_false = Manifest(
+    manifest_false = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="FalseAuth", requires_auth=False),
         definitions={"crit": tool},
@@ -51,7 +51,7 @@ def test_governance_auth_edge_cases() -> None:
     # Wait, if `requires_auth` is NOT in the schema (it wasn't in the definitions file I read earlier,
     # only `name` and `design_metadata`), then passing it to constructor puts it in extra.
 
-    manifest_extra = Manifest(
+    manifest_extra = Manifest.model_construct(
         kind="Agent",
         metadata=meta_extra,
         definitions={"crit": tool},
@@ -69,7 +69,7 @@ def test_governance_domain_normalization_edge_cases() -> None:
 
     # 1. Strict Validation: Should normalize 'example.com.' -> 'example.com' and match
     config_strict = GovernanceConfig(allowed_domains=["example.com"], strict_url_validation=True)
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Test"),
         definitions={"t1": tool},
@@ -91,7 +91,7 @@ def test_governance_domain_normalization_edge_cases() -> None:
     tool_upper = ToolDefinition(id="t2", name="T2", uri="https://EXAMPLE.COM/api", risk_level=ToolRiskLevel.SAFE)
     config_loose_case = GovernanceConfig(allowed_domains=["Example.com"], strict_url_validation=False)
 
-    manifest_upper = Manifest(
+    manifest_upper = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="TestUpper"),
         definitions={"t2": tool_upper},
@@ -112,8 +112,9 @@ def test_governance_custom_logic_complex() -> None:
     config = GovernanceConfig(allow_custom_logic=False)
 
     # Case 1: Import in switch case
+    # This requires default="step3" but step3 doesn't exist, so integrity check fails unless bypassed.
     step_import = SwitchStep(id="s1", cases={"import os; os.system('ls')": "step2"}, default="step3")
-    manifest_import = Manifest(
+    manifest_import = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="BadSwitch"),
         workflow=Workflow(start="s1", steps={"s1": step_import}),
@@ -124,7 +125,7 @@ def test_governance_custom_logic_complex() -> None:
 
     # Case 2: Dunder in switch case
     step_dunder = SwitchStep(id="s2", cases={"val.__class__": "step2"}, default="step3")
-    manifest_dunder = Manifest(
+    manifest_dunder = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="BadSwitch2"),
         workflow=Workflow(start="s2", steps={"s2": step_dunder}),
@@ -147,7 +148,7 @@ def test_governance_mixed_complex_scenario() -> None:
     logic_step = LogicStep(id="logic", code="x = 1")
     agent_step = AgentStep(id="agent", agent="bond")
 
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Mixed", requires_auth=True),
         definitions={"crit": crit_tool, "safe": safe_tool},

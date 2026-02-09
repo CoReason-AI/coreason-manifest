@@ -127,10 +127,8 @@ def test_init_complex_verification(tmp_path: Path) -> None:
     defn = agent.definitions["GreeterAgent"]
     assert isinstance(defn, AgentDefinition)
 
-    # 2. Verify Tools
-    # tools is now list[ToolRequirement | InlineToolDefinition]
-    tools = [t.uri for t in defn.tools if hasattr(t, "uri")]
-    assert "hello_world_tool" in tools
+    # 2. Verify Tools (No tools in default template anymore)
+    assert len(defn.tools) == 0
 
     # 3. Verify Capabilities
     # The builder merges capabilities into the interface.

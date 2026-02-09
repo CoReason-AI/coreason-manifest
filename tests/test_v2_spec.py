@@ -23,7 +23,6 @@ from coreason_manifest.spec.v2.definitions import (
     ToolRequirement,
     Workflow,
 )
-from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture
@@ -47,8 +46,8 @@ def test_integrity_valid(base_manifest_kwargs: dict[str, Any]) -> None:
         },
     )
 
-    manifest = ManifestV2(workflow=workflow, definitions={"tool1": tool, "agent1": agent}, **base_manifest_kwargs)
-    validate_integrity(manifest)
+    # Validation happens on initialization
+    ManifestV2(workflow=workflow, definitions={"tool1": tool, "agent1": agent}, **base_manifest_kwargs)
 
 
 def test_integrity_failure_missing_tool(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -58,10 +57,8 @@ def test_integrity_failure_missing_tool(base_manifest_kwargs: dict[str, Any]) ->
     )
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
 
-    manifest = ManifestV2(workflow=workflow, definitions={"agent1": agent}, **base_manifest_kwargs)
-
     with pytest.raises(ValueError, match="Agent 'agent1' references missing tool 'missing-tool'"):
-        validate_integrity(manifest)
+        ManifestV2(workflow=workflow, definitions={"agent1": agent}, **base_manifest_kwargs)
 
 
 def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -76,10 +73,8 @@ def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: dict[str, Any])
     agent2 = AgentDefinition(id="agent2", name="Agent 2", role="Role", goal="Goal")
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
 
-    manifest = ManifestV2(workflow=workflow, definitions={"agent1": agent1, "agent2": agent2}, **base_manifest_kwargs)
-
     with pytest.raises(ValueError, match="Agent 'agent1' references 'agent2' which is not a ToolDefinition"):
-        validate_integrity(manifest)
+        ManifestV2(workflow=workflow, definitions={"agent1": agent1, "agent2": agent2}, **base_manifest_kwargs)
 
 
 def test_integrity_failure_missing_next_step(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -87,10 +82,8 @@ def test_integrity_failure_missing_next_step(base_manifest_kwargs: dict[str, Any
     agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal")
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1", next="missing-step")})
 
-    manifest = ManifestV2(workflow=workflow, definitions={"agent1": agent}, **base_manifest_kwargs)
-
     with pytest.raises(ValueError, match="Step 'step1' references missing next step 'missing-step'"):
-        validate_integrity(manifest)
+        ManifestV2(workflow=workflow, definitions={"agent1": agent}, **base_manifest_kwargs)
 
 
 def test_integrity_failure_missing_switch_target(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -100,11 +93,8 @@ def test_integrity_failure_missing_switch_target(base_manifest_kwargs: dict[str,
         steps={"switch1": SwitchStep(id="switch1", cases={"cond": "missing-case"}, default="missing-default")},
     )
 
-    manifest = ManifestV2(workflow=workflow, definitions={}, **base_manifest_kwargs)
-
-    # It might fail on the first missing one it finds
     with pytest.raises(ValueError, match="SwitchStep 'switch1' references missing step"):
-        validate_integrity(manifest)
+        ManifestV2(workflow=workflow, definitions={}, **base_manifest_kwargs)
 
 
 def test_strictness_unknown_field_step() -> None:

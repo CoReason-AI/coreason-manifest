@@ -18,6 +18,15 @@ def test_mermaid_basic_structure() -> None:
         "kind": "Agent",
         "metadata": {"name": "Basic Agent"},
         "interface": {"inputs": {"query": {"type": "string"}}},
+        "definitions": {
+            "helper-agent": {
+                "type": "agent",
+                "id": "helper-agent",
+                "name": "Helper",
+                "role": "Help",
+                "goal": "Help",
+            }
+        },
         "workflow": {
             "start": "step_1",
             "steps": {
@@ -62,6 +71,15 @@ def test_mermaid_sanitization() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Sanitization Test"},
+        "definitions": {
+            "search_tool": {
+                "type": "agent",
+                "id": "search_tool",
+                "name": "Search",
+                "role": "Search",
+                "goal": "Search",
+            }
+        },
         "workflow": {
             "start": "Step One",
             "steps": {
@@ -130,6 +148,10 @@ def test_mermaid_council_step() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Council Test"},
+        "definitions": {
+            "agent1": {"type": "agent", "id": "agent1", "name": "A1", "role": "R", "goal": "G"},
+            "agent2": {"type": "agent", "id": "agent2", "name": "A2", "role": "R", "goal": "G"},
+        },
         "workflow": {
             "start": "vote",
             "steps": {
@@ -151,6 +173,8 @@ def test_mermaid_council_step() -> None:
 
 
 def test_mermaid_invalid_start_step() -> None:
+    # Creating a manifest with invalid start step via model_construct to bypass validation
+    # This allows testing the visualization fallback for broken manifests
     data = {
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
@@ -162,7 +186,23 @@ def test_mermaid_invalid_start_step() -> None:
             },
         },
     }
-    manifest = ManifestV2.model_validate(data)
+    # Use model_validate with context or just construct manually if strict
+    # But since we want to test visualization of BROKEN manifests, we must bypass validation.
+    # ManifestV2 validation is now strict.
+    # We can try model_construct, but nested models might still validate if initialized.
+    # Let's try construct.
+    from coreason_manifest.spec.v2.definitions import ManifestMetadata, Workflow, LogicStep
+
+    manifest = ManifestV2.model_construct(
+        apiVersion="coreason.ai/v2",
+        kind="Recipe",
+        metadata=ManifestMetadata(name="Invalid Start Test"),
+        workflow=Workflow.model_construct(
+            start="non_existent_step",
+            steps={"step1": LogicStep(id="step1", code="pass")}
+        )
+    )
+
     chart = generate_mermaid_graph(manifest)
 
     # Should fallback to linking Inputs to End
@@ -174,6 +214,9 @@ def test_mermaid_cyclic_workflow() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Cyclic"},
+        "definitions": {
+            "worker": {"type": "agent", "id": "worker", "name": "W", "role": "W", "goal": "W"}
+        },
         "workflow": {
             "start": "A",
             "steps": {
@@ -245,6 +288,9 @@ def test_mermaid_special_characters_heavy() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Special Chars"},
+        "definitions": {
+            "tool/v1": {"type": "agent", "id": "tool/v1", "name": "T", "role": "T", "goal": "T"}
+        },
         "workflow": {
             "start": "start@node",
             "steps": {
@@ -322,6 +368,9 @@ def test_mermaid_council_with_next() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Council Next"},
+        "definitions": {
+            "a1": {"type": "agent", "id": "a1", "name": "A1", "role": "R", "goal": "G"}
+        },
         "workflow": {
             "start": "vote",
             "steps": {
@@ -408,6 +457,10 @@ def test_mermaid_kitchen_sink() -> None:
         "kind": "Recipe",
         "metadata": {"name": "Kitchen Sink"},
         "interface": {"inputs": {"query": {"type": "string"}}},
+        "definitions": {
+            "searcher": {"type": "agent", "id": "searcher", "name": "S", "role": "S", "goal": "S"},
+            "admin": {"type": "agent", "id": "admin", "name": "A", "role": "A", "goal": "A"},
+        },
         "workflow": {
             "start": "research",
             "steps": {

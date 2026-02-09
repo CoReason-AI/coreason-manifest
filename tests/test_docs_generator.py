@@ -159,6 +159,7 @@ def test_schema_parsing() -> None:
         metadata=ManifestMetadata(name="SchemaTest"),
         workflow=Workflow(start="main", steps={"main": AgentStep(id="main", agent="SchemaTest")}),
         interface=interface,
+        definitions={"SchemaTest": AgentDefinition(id="SchemaTest", name="SchemaTest", role="Tester", goal="Test")},
     )
 
     card = render_agent_card(manifest)

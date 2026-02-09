@@ -155,11 +155,33 @@ def test_manifest_builder_interface_metadata_error() -> None:
 
 def test_manifest_builder_switch_and_council_steps() -> None:
     """Test building complex steps like Switch and Council."""
+    # Ensure integrity by adding referenced steps and agents
     switch = SwitchStep(id="router", cases={"condition1": "step_a", "condition2": "step_b"}, default="step_default")
-
     council = CouncilStep(id="council1", voters=["agent1", "agent2"], strategy="consensus", next="next_step")
 
-    manifest = ManifestBuilder("ComplexSteps").add_step(switch).add_step(council).set_start_step("router").build()
+    # Mock definitions
+    agent1 = AgentBuilder("agent1").build_definition()
+    agent2 = AgentBuilder("agent2").build_definition()
+
+    # Mock steps
+    step_a = LogicStep(id="step_a", code="pass")
+    step_b = LogicStep(id="step_b", code="pass")
+    step_default = LogicStep(id="step_default", code="pass")
+    next_step = LogicStep(id="next_step", code="pass")
+
+    manifest = (
+        ManifestBuilder("ComplexSteps")
+        .add_agent(agent1)
+        .add_agent(agent2)
+        .add_step(switch)
+        .add_step(council)
+        .add_step(step_a)
+        .add_step(step_b)
+        .add_step(step_default)
+        .add_step(next_step)
+        .set_start_step("router")
+        .build()
+    )
 
     s_step = manifest.workflow.steps["router"]
     assert isinstance(s_step, SwitchStep)

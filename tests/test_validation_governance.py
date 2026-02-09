@@ -20,48 +20,25 @@ from coreason_manifest import (
     ToolRiskLevel,
     Workflow,
     check_compliance_v2,
-    validate_integrity,
-    validate_loose,
 )
-
-
-def test_draft_mode_loose() -> None:
-    """Test that we can create a broken manifest and get warnings."""
-    # Create manifest with broken references (missing start step)
-    manifest = Manifest(
-        kind="Agent",
-        metadata={"name": "Broken Agent"},
-        workflow=Workflow(
-            start="step1",
-            steps={},  # Missing step1
-        ),
-    )
-
-    # Assert instantiation succeeded (no crash)
-    assert manifest.metadata.name == "Broken Agent"
-
-    # Assert validate_loose returns warnings
-    warnings = validate_loose(manifest)
-    assert len(warnings) > 0
-    assert any("Start step 'step1' not found" in w for w in warnings)
 
 
 def test_compiler_mode_strict() -> None:
     """Test that strict validation raises ValueError."""
-    manifest = Manifest(kind="Agent", metadata={"name": "Broken Agent"}, workflow=Workflow(start="step1", steps={}))
-
     with pytest.raises(ValueError, match="Start step 'step1' not found"):
-        validate_integrity(manifest)
+        Manifest(kind="Agent", metadata={"name": "Broken Agent"}, workflow=Workflow(start="step1", steps={}))
 
 
 def test_governance_risk() -> None:
     """Test governance policy enforcement on tool risk levels."""
     tool = ToolDefinition(id="nuke", name="Nuke", uri="https://nuke.com", risk_level=ToolRiskLevel.CRITICAL)
-    # We create a manifest. It can be referentially broken (no agent def),
-    # governance check should still work on tools present.
-    manifest = Manifest(
+    # We create a manifest. Using model_construct to bypass referential integrity checks
+    # since we want to test governance logic on the tools, not the graph validity.
+    from coreason_manifest.spec.v2.definitions import ManifestMetadata
+
+    manifest = Manifest.model_construct(
         kind="Agent",
-        metadata={"name": "Risky Agent"},
+        metadata=ManifestMetadata(name="Risky Agent"),
         definitions={"nuke": tool},
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
@@ -95,7 +72,7 @@ def test_governance_auth_mandate() -> None:
     config = GovernanceConfig(require_auth_for_critical_tools=True)
 
     # Case 1: Violation
-    manifest_insecure = Manifest(
+    manifest_insecure = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Insecure"),
         definitions={"nuke": tool},
@@ -109,7 +86,7 @@ def test_governance_auth_mandate() -> None:
     assert "uses CRITICAL tools but does not enforce authentication" in report.violations[0].message
 
     # Case 2: Compliant
-    manifest_secure = Manifest(
+    manifest_secure = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Secure", requires_auth=True),
         definitions={"nuke": tool},
@@ -128,7 +105,7 @@ def test_governance_domain_restriction() -> None:
 
     # Case 1: Allowed (normalized match)
     tool_ok = ToolDefinition(id="t1", name="T1", uri="https://Example.COM/foo", risk_level=ToolRiskLevel.SAFE)
-    manifest_ok = Manifest(
+    manifest_ok = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="OK"),
         definitions={"t1": tool_ok},
@@ -139,7 +116,7 @@ def test_governance_domain_restriction() -> None:
 
     # Case 2: Blocked
     tool_bad = ToolDefinition(id="t2", name="T2", uri="https://evil.com/foo", risk_level=ToolRiskLevel.SAFE)
-    manifest_bad = Manifest(
+    manifest_bad = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Bad"),
         definitions={"t2": tool_bad},

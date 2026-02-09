@@ -41,7 +41,7 @@ def test_complex_large_manifest_many_tools() -> None:
         )
 
     config = GovernanceConfig(require_auth_for_critical_tools=True)
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Manifest"),
         definitions=tools,
@@ -62,7 +62,7 @@ def test_complex_compliant_large_manifest() -> None:
     )
 
     config = GovernanceConfig(require_auth_for_critical_tools=True)
-    manifest = Manifest(
+    manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Compliant", requires_auth=True),
         definitions=tools,
