@@ -162,6 +162,7 @@ class AgentDefinition(ManifestBaseModel):
         type (Literal["agent"]): Discriminator. (Default: "agent").
         id (str): Unique ID for the agent.
         name (str): Name of the agent.
+        description (str | None): Description of the agent.
         role (str): The persona/job title.
         goal (str): Primary objective.
         backstory (str | None): Backstory or directives.
@@ -443,8 +444,11 @@ class ManifestV2(ManifestBaseModel):
             errors.append(f"Start step '{self.workflow.start}' missing from workflow.")
 
         for def_id, definition in self.definitions.items():
-            if hasattr(definition, "id") and definition.id != def_id:
-                errors.append(f"Definition Key Mismatch: Key '{def_id}' does not match object ID '{definition.id}'.")
+            # Check for 'id' attribute to handle types like MCPResourceDefinition or future types
+            if hasattr(definition, "id"):
+                def_id_val = getattr(definition, "id")
+                if def_id_val != def_id:
+                    errors.append(f"Definition Key Mismatch: Key '{def_id}' does not match object ID '{def_id_val}'.")
 
         for step_id, step in steps.items():
             if isinstance(step, PlaceholderStep):

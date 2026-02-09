@@ -54,6 +54,7 @@ def test_manifest_metadata_confidence_score_validation() -> None:
 
 def test_manifest_metadata_extra_fields() -> None:
     """Test that extra fields are forbidden."""
+    # We use model_validate to bypass static type checkers complaining about unknown args
     with pytest.raises(ValidationError) as excinfo:
         ManifestMetadata.model_validate({"name": "Test Extra", "unknown_field": "some value"})
     assert "Extra inputs are not permitted" in str(excinfo.value)

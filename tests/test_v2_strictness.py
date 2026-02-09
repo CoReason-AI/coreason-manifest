@@ -47,10 +47,10 @@ def test_generic_definition_gone() -> None:
     Ensure GenericDefinition is completely removed.
     """
     with pytest.raises(ImportError):
-        from coreason_manifest.spec.v2.definitions import GenericDefinition  # type: ignore
+        from coreason_manifest.spec.v2.definitions import GenericDefinition
 
     with pytest.raises(ImportError):
-        from coreason_manifest.spec.v2 import GenericDefinition  # type: ignore
+        from coreason_manifest.spec.v2 import GenericDefinition
 
 
 def test_all_exports_clean() -> None:
