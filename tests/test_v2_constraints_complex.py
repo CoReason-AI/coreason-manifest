@@ -74,10 +74,7 @@ def test_constraint_mutable_context() -> None:
 
 def test_constraint_large_scale() -> None:
     """Test a large number of constraints."""
-    requirements = [
-        Constraint(variable=f"var_{i}", operator="eq", value=i)
-        for i in range(100)
-    ]
+    requirements = [Constraint(variable=f"var_{i}", operator="eq", value=i) for i in range(100)]
 
     context = {f"var_{i}": i for i in range(100)}
 

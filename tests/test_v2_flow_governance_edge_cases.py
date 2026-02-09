@@ -88,9 +88,7 @@ def test_complex_fallback_chain() -> None:
         AgentNode(
             id=chars[i],
             agent_ref=f"agent-{chars[i]}",
-            recovery=RecoveryConfig(
-                behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id=chars[i + 1]
-            ),
+            recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id=chars[i + 1]),
         )
         for i in range(3)
     ]

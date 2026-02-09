@@ -518,10 +518,7 @@ class TaskSequence(CoReasonBaseModel):
     def to_graph(self) -> GraphTopology:
         """Compiles the sequence into a GraphTopology."""
         nodes = self.steps
-        edges = [
-            GraphEdge(source=nodes[i].id, target=nodes[i + 1].id)
-            for i in range(len(nodes) - 1)
-        ]
+        edges = [GraphEdge(source=nodes[i].id, target=nodes[i + 1].id) for i in range(len(nodes) - 1)]
 
         return GraphTopology(nodes=nodes, edges=edges, entry_point=nodes[0].id)
 
