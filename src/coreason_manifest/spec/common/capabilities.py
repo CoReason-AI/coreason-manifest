@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
 class CapabilityType(StrEnum):
@@ -29,7 +29,7 @@ class DeliveryMode(StrEnum):
     SERVER_SENT_EVENTS = "server_sent_events"
 
 
-class AgentCapabilities(CoReasonBaseModel):
+class AgentCapabilities(ManifestBaseModel):
     """Feature flags and capabilities for the agent."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")

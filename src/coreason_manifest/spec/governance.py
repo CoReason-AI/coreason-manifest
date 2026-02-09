@@ -19,10 +19,10 @@ NOTE: This module contains PURE DATA only. The actual enforcement logic is locat
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel, ToolRiskLevel
+from coreason_manifest.spec.common_base import ManifestBaseModel, ToolRiskLevel
 
 
-class GovernanceConfig(CoReasonBaseModel):
+class GovernanceConfig(ManifestBaseModel):
     """Configuration for governance rules.
 
     NOTE: This configuration defines policies for STATIC validation of the Manifest.
@@ -61,7 +61,7 @@ class GovernanceConfig(CoReasonBaseModel):
     )
 
 
-class ComplianceViolation(CoReasonBaseModel):
+class ComplianceViolation(ManifestBaseModel):
     """Details of a compliance violation.
 
     Attributes:
@@ -79,7 +79,7 @@ class ComplianceViolation(CoReasonBaseModel):
     severity: str | None = Field(None, description="Severity level (e.g., 'error', 'warning').")
 
 
-class ComplianceReport(CoReasonBaseModel):
+class ComplianceReport(ManifestBaseModel):
     """Report of compliance checks.
 
     Attributes:

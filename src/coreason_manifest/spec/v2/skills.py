@@ -13,7 +13,7 @@ from typing import Literal
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class LoadStrategy(StrEnum):
@@ -24,7 +24,7 @@ class LoadStrategy(StrEnum):
     USER = "user"
 
 
-class SkillDependency(CoReasonBaseModel):
+class SkillDependency(ManifestBaseModel):
     """
     Dependency required by a skill.
 
@@ -41,7 +41,7 @@ class SkillDependency(CoReasonBaseModel):
     version_constraint: str | None = Field(None, description="Optional version constraint.")
 
 
-class SkillDefinition(CoReasonBaseModel):
+class SkillDefinition(ManifestBaseModel):
     """
     Definition of an Agent Skill (Procedural Knowledge).
 

@@ -129,7 +129,7 @@ def test_full_provenance_structure() -> None:
         modifications=["Removed retry loop", "Added caching"],
     )
 
-    dump = provenance.dump()
+    dump = provenance.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dump["type"] == "hybrid"
     assert dump["generated_by"] == "coreason-strategist-v2"
     assert dump["confidence_score"] == 0.88

@@ -252,7 +252,7 @@ def test_complex_max_constraints_scenario() -> None:
         anonymize_pii=False,
     )
 
-    dumped = identity.dump()
+    dumped = identity.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["min_scope"] == "admin"
     assert len(dumped["required_roles"]) == 3
     assert len(dumped["required_permissions"]) == 3

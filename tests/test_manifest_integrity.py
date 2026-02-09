@@ -8,8 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import pytest
-from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import ManifestV2
 
@@ -19,15 +17,15 @@ def test_integrity_start_step_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Start"},
-        "status": "published",
         "workflow": {
             "start": "missing-step",
             "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
         },
     }
-    with pytest.raises(ValidationError) as excinfo:
-        ManifestV2.model_validate(data)
-    assert "Start step 'missing-step' not found" in str(excinfo.value)
+    manifest = ManifestV2.model_validate(data)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "Start step 'missing-step' missing from workflow" in errors[0]
 
 
 def test_integrity_next_step_missing() -> None:
@@ -35,7 +33,6 @@ def test_integrity_next_step_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Next"},
-        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {
@@ -48,9 +45,10 @@ def test_integrity_next_step_missing() -> None:
             },
         },
     }
-    with pytest.raises(ValidationError) as excinfo:
-        ManifestV2.model_validate(data)
-    assert "references missing next step 'missing-next'" in str(excinfo.value)
+    manifest = ManifestV2.model_validate(data)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "references missing next step 'missing-next'" in errors[0]
 
 
 def test_integrity_switch_case_missing() -> None:
@@ -58,7 +56,6 @@ def test_integrity_switch_case_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Switch"},
-        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {
@@ -71,10 +68,11 @@ def test_integrity_switch_case_missing() -> None:
             },
         },
     }
-    with pytest.raises(ValidationError) as excinfo:
-        ManifestV2.model_validate(data)
+    manifest = ManifestV2.model_validate(data)
+    errors = manifest.verify()
+    assert len(errors) > 0
     # The error could be about case or default, depends on order.
-    assert "references missing step" in str(excinfo.value)
+    assert any("references missing step" in e for e in errors)
 
 
 def test_integrity_agent_definition_missing() -> None:
@@ -82,7 +80,6 @@ def test_integrity_agent_definition_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Agent Ref"},
-        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {
@@ -95,9 +92,10 @@ def test_integrity_agent_definition_missing() -> None:
         },
         "definitions": {},
     }
-    with pytest.raises(ValidationError) as excinfo:
-        ManifestV2.model_validate(data)
-    assert "references missing agent 'missing-agent'" in str(excinfo.value)
+    manifest = ManifestV2.model_validate(data)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "references missing agent 'missing-agent'" in errors[0]
 
 
 def test_integrity_agent_tool_reference_missing() -> None:
@@ -105,7 +103,6 @@ def test_integrity_agent_tool_reference_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Tool Ref"},
-        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
@@ -121,9 +118,10 @@ def test_integrity_agent_tool_reference_missing() -> None:
             }
         },
     }
-    with pytest.raises(ValidationError) as excinfo:
-        ManifestV2.model_validate(data)
-    assert "references missing tool 'missing-tool-id'" in str(excinfo.value)
+    manifest = ManifestV2.model_validate(data)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "references missing tool 'missing-tool-id'" in errors[0]
 
 
 def test_integrity_success_published() -> None:
@@ -132,11 +130,10 @@ def test_integrity_success_published() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Valid Published"},
-        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
         },
     }
     manifest = ManifestV2.model_validate(data)
-    assert manifest.status == "published"
+    assert manifest.is_executable

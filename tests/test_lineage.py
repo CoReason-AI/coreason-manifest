@@ -176,7 +176,7 @@ def test_audit_log_structure() -> None:
     assert log.integrity_hash == "sha256:abc..."
 
     # Verify serialization
-    dump = log.dump()
+    dump = log.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dump["id"] == str(log_id)
     assert dump["integrity_hash"] == "sha256:abc..."
 
