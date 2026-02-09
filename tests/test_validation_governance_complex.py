@@ -46,7 +46,7 @@ def test_complex_large_manifest_many_tools() -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Manifest"),
-        definitions=cast(dict[str, Any], tools),
+        definitions=cast("dict[str, Any]", tools),
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 
@@ -67,7 +67,7 @@ def test_complex_compliant_large_manifest() -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Compliant", requires_auth=True),
-        definitions=cast(dict[str, Any], tools),
+        definitions=cast("dict[str, Any]", tools),
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 

@@ -175,23 +175,13 @@ def test_mermaid_council_step() -> None:
 def test_mermaid_invalid_start_step() -> None:
     # Creating a manifest with invalid start step via model_construct to bypass validation
     # This allows testing the visualization fallback for broken manifests
-    data = {
-        "apiVersion": "coreason.ai/v2",
-        "kind": "Recipe",
-        "metadata": {"name": "Invalid Start Test"},
-        "workflow": {
-            "start": "non_existent_step",
-            "steps": {
-                "step1": {"type": "logic", "id": "step1", "code": "pass"},
-            },
-        },
-    }
+
     # Use model_validate with context or just construct manually if strict
     # But since we want to test visualization of BROKEN manifests, we must bypass validation.
     # ManifestV2 validation is now strict.
     # We can try model_construct, but nested models might still validate if initialized.
     # Let's try construct.
-    from coreason_manifest.spec.v2.definitions import ManifestMetadata, Workflow, LogicStep
+    from coreason_manifest.spec.v2.definitions import LogicStep, ManifestMetadata, Workflow
 
     manifest = ManifestV2.model_construct(
         apiVersion="coreason.ai/v2",

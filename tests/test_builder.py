@@ -76,11 +76,11 @@ def test_fluent_chaining_fixed() -> None:
     assert tool.uri == "tool-1"
 
     # Check AgentDefinition (from step 1)
-    agent_def = agent.definitions["TestAgent"]
-    assert isinstance(agent_def, AgentDefinition)
-    assert agent_def.model == "gpt-4"
-    assert agent_def.backstory == "Be helpful"
-    assert "s3://bucket/doc.pdf" in agent_def.knowledge
+    manifest_agent_def = agent.definitions["TestAgent"]
+    assert isinstance(manifest_agent_def, AgentDefinition)
+    assert manifest_agent_def.model == "gpt-4"
+    assert manifest_agent_def.backstory == "Be helpful"
+    assert "s3://bucket/doc.pdf" in manifest_agent_def.knowledge
 
 
 def test_capability_configuration() -> None:
@@ -254,6 +254,7 @@ def test_kitchen_sink_full_composition() -> None:
     assert agent_def.backstory == "System Prompt"
     # tools is now list[ToolRequirement | InlineToolDefinition]
     from coreason_manifest.spec.v2.definitions import ToolRequirement
+
     tools = [t.uri for t in agent_def.tools if isinstance(t, ToolRequirement)]
     assert tools == ["tool-search", "tool-calculator"]
     assert agent_def.knowledge == ["s3://data/kb.pdf"]
