@@ -314,10 +314,16 @@ class AgentNode(RecipeNode):
 
     # New Field: Inline Definition
     # If provided, this overrides 'agent_ref' lookup.
-    construct: CognitiveProfile | None = Field(  # type: ignore[assignment]
+    cognitive_profile: CognitiveProfile | None = Field(
         None,
+        alias="construct",
         description="Inline definition of the agent's cognitive architecture (for the Weaver).",
     )
+
+    @property
+    def construct(self) -> CognitiveProfile | None:  # type: ignore[override]
+        """Alias for cognitive_profile to maintain backward compatibility."""
+        return self.cognitive_profile
 
     agent_ref: str | SemanticRef | None = Field(
         None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
