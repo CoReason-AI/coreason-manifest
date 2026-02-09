@@ -409,7 +409,7 @@ Behaves similarly to `DRAFT` but indicates the recipe is deprecated or read-only
 
 ## Runtime Execution
 
-The `GraphExecutor` is responsible for traversing the `RecipeDefinition` and executing nodes.
+A compliant Runtime Engine (e.g., **CoReason Simulacrum**) is responsible for traversing the `RecipeDefinition` and executing nodes.
 
 ### The Blackboard Architecture
 
