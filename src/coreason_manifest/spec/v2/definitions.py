@@ -402,6 +402,7 @@ class ManifestV2(CoReasonBaseModel):
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition)
     state: StateDefinition = Field(default_factory=StateDefinition)
     policy: PolicyDefinition = Field(default_factory=PolicyDefinition)
+    status: Literal["draft", "published"] = Field("draft", description="Lifecycle status.")
     definitions: dict[
         str,
         Annotated[
@@ -415,6 +416,9 @@ class ManifestV2(CoReasonBaseModel):
     @model_validator(mode="after")
     def validate_integrity(self) -> Self:
         """Validate referential integrity of the manifest."""
+        if self.status != "published":
+            return self
+
         steps = self.workflow.steps
 
         # 1. Validate Start Step

@@ -19,6 +19,7 @@ def test_integrity_start_step_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Start"},
+        "status": "published",
         "workflow": {
             "start": "missing-step",
             "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
@@ -34,6 +35,7 @@ def test_integrity_next_step_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Next"},
+        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {
@@ -56,6 +58,7 @@ def test_integrity_switch_case_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Switch"},
+        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {
@@ -79,6 +82,7 @@ def test_integrity_agent_definition_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Agent Ref"},
+        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {
@@ -101,6 +105,7 @@ def test_integrity_agent_tool_reference_missing() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Invalid Tool Ref"},
+        "status": "published",
         "workflow": {
             "start": "step-1",
             "steps": {"step-1": {"type": "logic", "id": "step-1", "code": "pass"}},
