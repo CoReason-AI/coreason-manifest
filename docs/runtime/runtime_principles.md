@@ -83,7 +83,7 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 
 **The Rule:** The runtime must produce a standardized trace object, not just raw logs.
 
-*   **The Component:** `SimulationTrace` and `SimulationStep` in `simulation_executor.py`.
+*   **The Component:** `SimulationTrace` and `SimulationStep` in `spec/simulation.py`.
 *   **Runtime Requirement:**
     *   Every state transition must be recorded as a `SimulationStep`.
     *   The step must explicitly capture `thought` (reasoning), `action` (tool/router decision), `observation` (result), and a `snapshot` of the Blackboard context at that moment.
@@ -115,5 +115,5 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 | **Operational Policy** | `recipe.py` -> `PolicyConfig` | Enforce `timeout_seconds` and `max_retries`. |
 | **Dynamic Routing** | `recipe.py` -> `RouterNode` | Switch execution path based on Blackboard variable values. |
 | **Lazy Loading** | `skills.py` -> `SkillDefinition` | Index `trigger_intent` for vector search; load only when needed. |
-| **Observability** | `simulation_executor.py` | Generate structured `SimulationStep` objects with state snapshots. |
+| **Observability** | `spec/simulation.py` | Generate structured `SimulationStep` objects with state snapshots. |
 | **Self-Correction** | `recipe.py` -> `EvaluatorNode` | Implement logic to parse "Score" and route based on threshold. |

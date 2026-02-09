@@ -75,36 +75,6 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
         load_agent_from_ref(str(p))
 
 
-def test_cli_run_empty_inputs(capsys: CaptureFixture[str]) -> None:
-    """Test running with empty JSON object inputs."""
-    builder = AgentBuilder(name="EmptyInputAgent")
-    agent = builder.build()
-
-    with (
-        patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent),
-        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", "{}"]),
-    ):
-        main()
-
-    captured = capsys.readouterr()
-    assert "step_start" in captured.out
-
-
-def test_cli_run_nested_json_inputs(capsys: CaptureFixture[str]) -> None:
-    """Test running with deeply nested JSON inputs."""
-    builder = AgentBuilder(name="NestedInputAgent")
-    agent = builder.build()
-
-    inputs = json.dumps({"a": {"b": {"c": [1, 2, 3]}}})
-
-    with (
-        patch("coreason_manifest.cli.load_agent_from_ref", return_value=agent),
-        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--inputs", inputs]),
-    ):
-        main()
-
-    captured = capsys.readouterr()
-    assert "step_start" in captured.out
 
 
 def test_loader_windows_path_heuristics() -> None:
@@ -249,68 +219,6 @@ def complex_workflow_agent() -> ManifestV2:
     )
 
 
-def test_cli_run_complex_workflow(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
-    """
-    Verify that 'run' iterates all steps in a complex workflow and emits correct events.
-    Note: The CLI iteration logic simply iterates keys in definitions, not graph traversal.
-    """
-
-    with (
-        patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent),
-        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]),
-    ):
-        main()
-
-    captured = capsys.readouterr()
-    lines = captured.out.strip().split("\n")
-    events = [json.loads(line) for line in lines if line.strip()]
-
-    # Collect all step_ids visited
-    visited_steps = [e["step_id"] for e in events if e["type"] == "step_start"]
-
-    # Ensure all defined steps are visited (since CLI iterates dictionary)
-    expected_steps = ["step_logic", "step_switch", "step_agent_a", "step_agent_b", "step_council"]
-    for step in expected_steps:
-        assert step in visited_steps
-
-    # Verify Capabilities
-    capabilities = {e["step_id"]: e["capability"] for e in events if e["type"] == "step_start"}
-    assert capabilities["step_logic"] == "Logic"
-    assert capabilities["step_switch"] == "Switch"
-    assert capabilities["step_council"] == "Council"
-    assert capabilities["step_agent_a"] == "AgentA"
-    assert capabilities["step_agent_b"] == "AgentB"
-
-
-def test_cli_run_mock_complex(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
-    """
-    Verify --mock behavior for complex workflow.
-    Only AgentSteps should generate mock output.
-    """
-    mock_output = {"mocked_data": "test"}
-
-    with (
-        patch("coreason_manifest.cli.load_agent_from_ref", return_value=complex_workflow_agent),
-        patch("coreason_manifest.cli.generate_mock_output", return_value=mock_output),
-        patch.object(sys, "argv", ["coreason", "run", "dummy.py", "--mock"]),
-    ):
-        main()
-
-    captured = capsys.readouterr()
-    lines = captured.out.strip().split("\n")
-    events = [json.loads(line) for line in lines if line.strip()]
-
-    # Check outputs
-    outputs = {e["step_id"]: e["output"] for e in events if e["type"] == "step_output"}
-
-    # Agent steps should have mock output
-    assert outputs["step_agent_a"] == mock_output
-    assert outputs["step_agent_b"] == mock_output
-
-    # Other steps should be None (mock generation logic skips them)
-    assert outputs["step_logic"] is None
-    assert outputs["step_switch"] is None
-    assert outputs["step_council"] is None
 
 
 def test_loader_cyclic_import_simulation(edge_case_dir: Path) -> None:
