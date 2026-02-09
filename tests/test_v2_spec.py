@@ -38,9 +38,7 @@ def base_manifest_kwargs() -> dict[str, Any]:
 def test_integrity_valid(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test a perfectly valid manifest."""
     tool = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
-    agent = AgentDefinition(
-        id="agent1", name="Agent", role="Role", goal="Goal", tools=[ToolRequirement(uri="tool1")]
-    )
+    agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=[ToolRequirement(uri="tool1")])
     workflow = Workflow(
         start="step1",
         steps={
