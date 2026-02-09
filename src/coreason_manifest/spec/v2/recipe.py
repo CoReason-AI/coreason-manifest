@@ -314,7 +314,7 @@ class AgentNode(RecipeNode):
 
     # New Field: Inline Definition
     # If provided, this overrides 'agent_ref' lookup.
-    construct: CognitiveProfile | None = Field(  # type: ignore[assignment]
+    cognitive_profile: CognitiveProfile | None = Field(
         None,
         description="Inline definition of the agent's cognitive architecture (for the Weaver).",
     )
@@ -693,7 +693,7 @@ class RecipeDefinition(CoReasonBaseModel):
                 if isinstance(node, AgentNode):
                     if isinstance(node.agent_ref, SemanticRef):
                         abstract_nodes.append(node.id)
-                    elif not node.agent_ref and not node.construct:
+                    elif not node.agent_ref and not node.cognitive_profile:
                         incomplete_nodes.append(node.id)
 
             if abstract_nodes:
@@ -705,7 +705,7 @@ class RecipeDefinition(CoReasonBaseModel):
             if incomplete_nodes:
                 raise ValueError(
                     f"Lifecycle Error: Nodes {incomplete_nodes} are incomplete. "
-                    "Must provide either 'agent_ref' or 'construct' before publishing."
+                    "Must provide either 'agent_ref' or 'cognitive_profile' before publishing."
                 )
 
             # 2. Enforce Graph Integrity

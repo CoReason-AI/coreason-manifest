@@ -40,7 +40,7 @@ def test_agent_node_no_ref_no_construct() -> None:
     """
     node = AgentNode(id="ghost-agent")
     assert node.agent_ref is None
-    assert node.construct is None
+    assert node.cognitive_profile is None
     # This node is essentially empty, waiting for runtime logic or injection.
 
 
@@ -87,14 +87,16 @@ def test_hybrid_recipe_topology() -> None:
     3. Agent with concrete reference.
     """
     # 1. Inline Agent
-    node_inline = AgentNode(id="step-1-inline", construct=CognitiveProfile(role="analyst", task_primitive="analyze"))
+    node_inline = AgentNode(
+        id="step-1-inline", cognitive_profile=CognitiveProfile(role="analyst", task_primitive="analyze")
+    )
 
     # 2. Concrete Agent
     node_concrete = AgentNode(id="step-2-concrete", agent_ref="summarizer-v1")
 
     # 3. Hybrid (Both - construct takes precedence logic wise, but both exist in model)
     node_hybrid = AgentNode(
-        id="step-3-hybrid", construct=CognitiveProfile(role="reviewer"), agent_ref="reviewer-base-v1"
+        id="step-3-hybrid", cognitive_profile=CognitiveProfile(role="reviewer"), agent_ref="reviewer-base-v1"
     )
 
     topology = GraphTopology(
@@ -146,7 +148,7 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
             nodes=[
                 AgentNode(
                     id="start",
-                    construct=CognitiveProfile(
+                    cognitive_profile=CognitiveProfile(
                         role="orchestrator",
                         reasoning_mode="six_hats",
                         knowledge_contexts=[ContextDependency(name="project_specs", priority=ComponentPriority.HIGH)],
@@ -171,8 +173,8 @@ def test_full_recipe_serialization_roundtrip_complex() -> None:
 
     start_node = next(n for n in loaded.topology.nodes if n.id == "start")
     assert isinstance(start_node, AgentNode)
-    assert start_node.construct is not None
-    assert start_node.construct.reasoning_mode == "six_hats"
+    assert start_node.cognitive_profile is not None
+    assert start_node.cognitive_profile.reasoning_mode == "six_hats"
 
 
 def test_lifecycle_validation_incomplete_node() -> None:
