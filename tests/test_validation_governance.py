@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest import (
     AgentStep,
@@ -20,7 +21,6 @@ from coreason_manifest import (
     ToolRiskLevel,
     Workflow,
     check_compliance_v2,
-    validate_integrity,
     validate_loose,
 )
 
@@ -31,6 +31,7 @@ def test_draft_mode_loose() -> None:
     manifest = Manifest(
         kind="Agent",
         metadata={"name": "Broken Agent"},
+        status="draft",
         workflow=Workflow(
             start="step1",
             steps={},  # Missing step1
@@ -48,10 +49,13 @@ def test_draft_mode_loose() -> None:
 
 def test_compiler_mode_strict() -> None:
     """Test that strict validation raises ValueError."""
-    manifest = Manifest(kind="Agent", metadata={"name": "Broken Agent"}, workflow=Workflow(start="step1", steps={}))
-
-    with pytest.raises(ValueError, match="Start step 'step1' not found"):
-        validate_integrity(manifest)
+    with pytest.raises(ValidationError, match="Start step 'step1' not found"):
+        Manifest(
+            kind="Agent",
+            metadata={"name": "Broken Agent"},
+            status="published",
+            workflow=Workflow(start="step1", steps={}),
+        )
 
 
 def test_governance_risk() -> None:
