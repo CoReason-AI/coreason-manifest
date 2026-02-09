@@ -58,7 +58,7 @@ def handle_init(args: argparse.Namespace) -> None:
             description="Greets the user with a friendly message.",
             input_model=GreetInput,
             output_model=GreetOutput,
-            type=CapabilityType.ATOMIC
+            capability_type=CapabilityType.ATOMIC
         )
 
         # 3. Build Agent
@@ -146,7 +146,7 @@ def handle_init(args: argparse.Namespace) -> None:
 
     # 4. Success Message
     print(f"✅ Created new agent project in './{args.name}'")
-    print("")
+    print()
     print("👉 Next steps:")
     print(f"   1. cd {args.name}")
     print("   2. code .  (Open in VS Code)")

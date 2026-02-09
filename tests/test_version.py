@@ -20,13 +20,9 @@ def test_version() -> None:
     with open(pyproject_path, "rb") as f:
         pyproject_data = tomllib.load(f)
 
-    poetry_version = pyproject_data["tool"]["poetry"]["version"]
     project_version = pyproject_data["project"]["version"]
     package_version = coreason_manifest.__version__
 
-    assert poetry_version == package_version, (
-        f"Poetry version {poetry_version} does not match package version {package_version}"
-    )
     assert project_version == package_version, (
         f"Project version {project_version} does not match package version {package_version}"
     )

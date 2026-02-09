@@ -518,10 +518,7 @@ class TaskSequence(CoReasonBaseModel):
     def to_graph(self) -> GraphTopology:
         """Compiles the sequence into a GraphTopology."""
         nodes = self.steps
-        edges = []
-
-        for i in range(len(nodes) - 1):
-            edges.append(GraphEdge(source=nodes[i].id, target=nodes[i + 1].id))
+        edges = [GraphEdge(source=nodes[i].id, target=nodes[i + 1].id) for i in range(len(nodes) - 1)]
 
         return GraphTopology(nodes=nodes, edges=edges, entry_point=nodes[0].id)
 
@@ -597,7 +594,7 @@ class RecipeDefinition(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")
+    apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")  # noqa: N815
     kind: Literal["Recipe"] = Field("Recipe", description="Kind of the object.")
 
     metadata: ManifestMetadata = Field(..., description="Metadata including name and design info.")

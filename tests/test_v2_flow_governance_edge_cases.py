@@ -82,17 +82,16 @@ def test_complex_self_fallback() -> None:
 
 def test_complex_fallback_chain() -> None:
     """Complex Case: Long fallback chain (A -> B -> C -> D)."""
-    nodes = []
-    # Create A, B, C pointing to next
     chars = ["A", "B", "C", "D"]
-    for i in range(3):
-        nodes.append(
-            AgentNode(
-                id=chars[i],
-                agent_ref=f"agent-{chars[i]}",
-                recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id=chars[i + 1]),
-            )
+    # Create A, B, C pointing to next
+    nodes = [
+        AgentNode(
+            id=chars[i],
+            agent_ref=f"agent-{chars[i]}",
+            recovery=RecoveryConfig(behavior=FailureBehavior.ROUTE_TO_FALLBACK, fallback_node_id=chars[i + 1]),
         )
+        for i in range(3)
+    ]
     # D fails workflow
     nodes.append(
         AgentNode(id="D", agent_ref="agent-d", recovery=RecoveryConfig(behavior=FailureBehavior.FAIL_WORKFLOW))
