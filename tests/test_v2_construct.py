@@ -100,7 +100,7 @@ def test_full_recipe_with_construct() -> None:
     )
 
     # Roundtrip
-    json_str = recipe.to_json()
+    json_str = recipe.model_dump_json(by_alias=True, exclude_none=True)
     loaded = RecipeDefinition.model_validate_json(json_str)
 
     node = loaded.topology.nodes[0]

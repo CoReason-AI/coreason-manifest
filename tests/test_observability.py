@@ -29,12 +29,12 @@ def test_cloud_event_serialization() -> None:
         data={"message": "hello"},
     )
 
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["specversion"] == "1.0"
     assert dumped["id"] == "evt-1"
     assert dumped["source"] == "urn:node:step-1"
     assert dumped["type"] == "ai.coreason.node.started"
-    # CoReasonBaseModel serializes datetime with Z suffix
+    # ManifestBaseModel serializes datetime with Z suffix
     assert dumped["time"] == now.isoformat().replace("+00:00", "Z")
     assert dumped["datacontenttype"] == "application/json"
     assert dumped["data"] == {"message": "hello"}
@@ -50,7 +50,7 @@ def test_cloud_event_tracing_extensions() -> None:
         traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
         tracestate="rojo=00f067aa0ba902b7-01",
     )
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["traceparent"] == "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
     assert dumped["tracestate"] == "rojo=00f067aa0ba902b7-01"
 
@@ -71,7 +71,7 @@ def test_reasoning_trace_serialization() -> None:
         timestamp=now,
     )
 
-    dumped = trace.dump()
+    dumped = trace.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["request_id"] == str(req_id)
     assert dumped["root_request_id"] == str(root_id)
     assert dumped["node_id"] == "step-analysis"
@@ -119,12 +119,12 @@ def test_event_content_type_enum() -> None:
     )
 
     # 2. Serialization Check
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["datacontenttype"] == "application/vnd.coreason.error+json"
 
     # 3. String Compatibility
     event_str = CloudEvent(id="evt-str", source="urn:str", type="test.str", time=now, datacontenttype="text/plain")
-    dumped_str = event_str.dump()
+    dumped_str = event_str.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped_str["datacontenttype"] == "text/plain"
 
 
@@ -135,7 +135,7 @@ def test_cloud_event_minimal() -> None:
     """Test CloudEvent with only required fields."""
     now = datetime.now(UTC)
     event = CloudEvent(id="evt-min", source="urn:min", type="test.min", time=now)
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["id"] == "evt-min"
     # data is optional and None by default, so exclude_none=True removes it
     assert "data" not in dumped
@@ -173,7 +173,7 @@ def test_reasoning_trace_missing_optional() -> None:
         timestamp=now,
     )
 
-    dumped = trace.dump()
+    dumped = trace.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["request_id"] == str(req_id)
     assert "parent_request_id" not in dumped  # exclude_none=True
     assert "inputs" not in dumped
@@ -218,7 +218,7 @@ def test_complex_nested_payloads() -> None:
         id="evt-complex", source="urn:complex", type="test.complex", time=datetime.now(UTC), data=complex_data
     )
 
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["data"]["user"]["profile"]["roles"][1] == "editor"
     assert dumped["data"]["user"]["history"][1]["coords"]["y"] == 20
 
@@ -287,7 +287,7 @@ def test_trace_chain_simulation() -> None:
     assert trace_subtask.parent_request_id == trace_child_a.request_id
 
     # Check Dump Consistency
-    dump_sub = trace_subtask.dump()
+    dump_sub = trace_subtask.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dump_sub["root_request_id"] == str(root_id)
     assert dump_sub["parent_request_id"] == str(child_a_id)
 
@@ -309,7 +309,7 @@ def test_enum_as_string_input() -> None:
         time=now,
         datacontenttype="application/vnd.coreason.error+json",
     )
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["datacontenttype"] == "application/vnd.coreason.error+json"
 
     # Since we are using Union[EventContentType, str], the value might be stored as string or coerced.
@@ -323,7 +323,7 @@ def test_empty_string_content_type() -> None:
     """Test empty string as content type."""
     now = datetime.now(UTC)
     event = CloudEvent(id="evt-empty", source="urn:test", type="test.empty", time=now, datacontenttype="")
-    dumped = event.dump()
+    dumped = event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["datacontenttype"] == ""
 
 
@@ -336,7 +336,7 @@ def test_mixed_list_of_events() -> None:
         CloudEvent(id="3", source="u", type="t", time=now, datacontenttype=EventContentType.STREAM),
     ]
 
-    dumped = [e.dump() for e in events]
+    dumped = [e.model_dump(mode="json", by_alias=True, exclude_none=True) for e in events]
     assert dumped[0]["datacontenttype"] == "application/json"
     assert dumped[1]["datacontenttype"] == "text/plain"
     assert dumped[2]["datacontenttype"] == "application/vnd.coreason.stream+json"
@@ -363,9 +363,9 @@ def test_nested_cloud_event_in_data() -> None:
         type="outer.wrapper",
         time=now,
         datacontenttype=EventContentType.JSON,
-        data={"wrapped_event": inner_event.dump()},
+        data={"wrapped_event": inner_event.model_dump(mode="json", by_alias=True, exclude_none=True)},
     )
 
-    dumped = outer_event.dump()
+    dumped = outer_event.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dumped["datacontenttype"] == "application/json"
     assert dumped["data"]["wrapped_event"]["datacontenttype"] == "application/vnd.coreason.artifact+json"

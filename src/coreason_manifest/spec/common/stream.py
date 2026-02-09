@@ -10,7 +10,7 @@
 
 from enum import StrEnum
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
 class StreamState(StrEnum):
@@ -19,7 +19,7 @@ class StreamState(StrEnum):
     FAILED = "failed"
 
 
-class StreamReference(CoReasonBaseModel):
+class StreamReference(ManifestBaseModel):
     stream_id: str
     name: str | None = None
     content_type: str = "text/plain"

@@ -18,7 +18,7 @@ from coreason_manifest import AgentRequest, ServiceContract
 
 def test_agent_request_serialization() -> None:
     req = AgentRequest(session_id=uuid4(), payload={"query": "Hello", "conversation_id": "123"})
-    dump = req.dump()
+    dump = req.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dump["payload"]["query"] == "Hello"
     assert dump["payload"]["conversation_id"] == "123"
     assert dump["metadata"] == {}
@@ -52,7 +52,7 @@ def test_agent_request_defaults() -> None:
     req = AgentRequest(session_id=uuid4(), payload={"query": "Just checking"})
     assert req.metadata == {}
 
-    dump = req.dump()
+    dump = req.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dump["metadata"] == {}
 
 
@@ -75,7 +75,7 @@ def test_agent_request_complex_meta() -> None:
         "flags": {"experimental": True},
     }
     req = AgentRequest(session_id=uuid4(), payload={"query": "Complex"}, metadata=meta)
-    dump = req.dump()
+    dump = req.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert dump["metadata"]["user_info"]["timezone"] == "UTC"
     assert dump["metadata"]["history"] == [1, 2, 3]
 
@@ -84,7 +84,7 @@ def test_agent_request_with_files() -> None:
     """Test AgentRequest with files list."""
     files = ["s3://bucket/file1.txt", "http://example.com/image.png"]
     req = AgentRequest(session_id=uuid4(), payload={"query": "Analyze this", "files": files})
-    dump = req.dump()
+    dump = req.model_dump(mode="json", by_alias=True, exclude_none=True)
     assert len(dump["payload"]["files"]) == 2
     assert dump["payload"]["files"][0] == "s3://bucket/file1.txt"
 

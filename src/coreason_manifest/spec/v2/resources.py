@@ -13,7 +13,7 @@ from typing import Any
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class PricingUnit(StrEnum):
@@ -32,7 +32,7 @@ class Currency(StrEnum):
     EUR = "EUR"
 
 
-class RateCard(CoReasonBaseModel):
+class RateCard(ManifestBaseModel):
     """
     Pricing details for a resource.
 
@@ -53,7 +53,7 @@ class RateCard(CoReasonBaseModel):
     fixed_cost_per_request: float = Field(0.0, description="Optional base fee.")
 
 
-class ResourceConstraints(CoReasonBaseModel):
+class ResourceConstraints(ManifestBaseModel):
     """
     Technical limitations and constraints.
 
@@ -72,7 +72,7 @@ class ResourceConstraints(CoReasonBaseModel):
     rate_limit_tpm: int | None = Field(None, ge=0, description="Tokens per minute.")
 
 
-class ModelProfile(CoReasonBaseModel):
+class ModelProfile(ManifestBaseModel):
     """
     Resource profile describing hardware, pricing, and operational constraints.
 
@@ -91,7 +91,7 @@ class ModelProfile(CoReasonBaseModel):
     constraints: ResourceConstraints | None = Field(None, description="Technical limits.")
 
 
-class ToolParameter(CoReasonBaseModel):
+class ToolParameter(ManifestBaseModel):
     """
     Parameter definition for a tool.
 
@@ -110,7 +110,7 @@ class ToolParameter(CoReasonBaseModel):
     required: bool = Field(True, description="Whether the parameter is required.")
 
 
-class ToolDefinition(CoReasonBaseModel):
+class ToolDefinition(ManifestBaseModel):
     """
     Static definition of an MCP tool capability.
 
@@ -133,7 +133,7 @@ class ToolDefinition(CoReasonBaseModel):
     namespace: str | None = Field(None, description="Expected MCP server namespace (e.g., 'github').")
 
 
-class McpServerRequirement(CoReasonBaseModel):
+class McpServerRequirement(ManifestBaseModel):
     """
     Declares that this recipe needs a specific MCP server available.
 
@@ -150,7 +150,7 @@ class McpServerRequirement(CoReasonBaseModel):
     version_constraint: str | None = Field(None, description="Version constraint.")
 
 
-class RuntimeEnvironment(CoReasonBaseModel):
+class RuntimeEnvironment(ManifestBaseModel):
     """
     The infrastructure requirements for the recipe.
 
@@ -184,7 +184,7 @@ class ComplianceTier(StrEnum):
     FEDRAMP = "fedramp"
 
 
-class ModelSelectionPolicy(CoReasonBaseModel):
+class ModelSelectionPolicy(ManifestBaseModel):
     """
     Configuration for dynamic model routing (Arbitrage).
 

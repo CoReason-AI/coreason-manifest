@@ -13,7 +13,7 @@ from typing import Any
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 from coreason_manifest.spec.v2.definitions import AgentDefinition, ManifestV2
 
 
@@ -27,7 +27,7 @@ class ChangeCategory(StrEnum):
     PATCH = "PATCH"  # Description, metadata, version bump
 
 
-class DiffChange(CoReasonBaseModel):
+class DiffChange(ManifestBaseModel):
     """A specific change detected in the agent definition."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -38,7 +38,7 @@ class DiffChange(CoReasonBaseModel):
     category: ChangeCategory = Field(..., description="The semantic category of the change.")
 
 
-class DiffReport(CoReasonBaseModel):
+class DiffReport(ManifestBaseModel):
     """Report of all semantic changes between two agent definitions."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)

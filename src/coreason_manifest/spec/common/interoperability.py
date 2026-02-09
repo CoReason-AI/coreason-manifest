@@ -10,11 +10,11 @@
 
 from pydantic import ConfigDict, Field
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 from .memory import MemoryConfig
 
 
-class AdapterHints(CoReasonBaseModel):
+class AdapterHints(ManifestBaseModel):
     """Metadata for external transpilers/adapters."""
 
     model_config = ConfigDict(frozen=True)
@@ -24,7 +24,7 @@ class AdapterHints(CoReasonBaseModel):
     config: dict[str, str] = Field(default_factory=dict, description="Adapter-specific configuration.")
 
 
-class AgentRuntimeConfig(CoReasonBaseModel):
+class AgentRuntimeConfig(ManifestBaseModel):
     """Configuration for the agent runtime environment."""
 
     model_config = ConfigDict(frozen=True)

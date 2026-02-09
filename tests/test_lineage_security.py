@@ -49,7 +49,7 @@ def test_interaction_id_security() -> None:
 def test_lineage_metadata_type_coercion_attack() -> None:
     """Verify that LineageMetadata strictly enforces string types for IDs (no unexpected casting)."""
     # Passing an integer should fail because Pydantic V2 is strict on types by default in some configs,
-    # or CoReasonBaseModel settings might enforce it.
+    # or ManifestBaseModel settings might enforce it.
 
     with pytest.raises(ValidationError):
         LineageMetadata(root_request_id=12345)

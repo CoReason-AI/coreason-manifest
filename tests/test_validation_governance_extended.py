@@ -42,7 +42,7 @@ def test_governance_auth_edge_cases() -> None:
     # We construct metadata manually to inject extra fields if needed,
     # but ManifestMetadata has extra="allow", so we can pass it in constructor if defined that way.
     # However, ManifestMetadata definition in provided context showed:
-    # class ManifestMetadata(CoReasonBaseModel):
+    # class ManifestMetadata(ManifestBaseModel):
     #     model_config = ConfigDict(extra="allow", ...)
     #     name: str
 

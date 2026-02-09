@@ -17,7 +17,7 @@ from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.identity import Identity
 from coreason_manifest.spec.common.request import AgentRequest as AgentRequest
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class HealthCheckStatus(StrEnum):
@@ -28,7 +28,7 @@ class HealthCheckStatus(StrEnum):
     MAINTENANCE = "maintenance"
 
 
-class HealthCheckResponse(CoReasonBaseModel):
+class HealthCheckResponse(ManifestBaseModel):
     """Response for a health check request."""
 
     model_config = ConfigDict(frozen=True)
@@ -55,7 +55,7 @@ class StreamOpCode(StrEnum):
     CLOSE = "close"
 
 
-class StreamError(CoReasonBaseModel):
+class StreamError(ManifestBaseModel):
     """Strict error model for stream exceptions."""
 
     model_config = ConfigDict(frozen=True)
@@ -66,7 +66,7 @@ class StreamError(CoReasonBaseModel):
     details: dict[str, Any] | None = None
 
 
-class StreamPacket(CoReasonBaseModel):
+class StreamPacket(ManifestBaseModel):
     """A packet of data streaming from an agent."""
 
     model_config = ConfigDict(frozen=True)
@@ -85,7 +85,7 @@ class StreamPacket(CoReasonBaseModel):
         return self
 
 
-class ServiceResponse(CoReasonBaseModel):
+class ServiceResponse(ManifestBaseModel):
     """Synchronous response from an agent service."""
 
     model_config = ConfigDict(frozen=True)
@@ -96,7 +96,7 @@ class ServiceResponse(CoReasonBaseModel):
     metrics: dict[str, Any] | None = None
 
 
-class SessionContext(CoReasonBaseModel):
+class SessionContext(ManifestBaseModel):
     """Strict context containing authentication and session details."""
 
     model_config = ConfigDict(frozen=True)
@@ -106,7 +106,7 @@ class SessionContext(CoReasonBaseModel):
     agent: Identity | None = None
 
 
-class ServiceRequest(CoReasonBaseModel):
+class ServiceRequest(ManifestBaseModel):
     """Request to an agent service.
 
     Attributes:

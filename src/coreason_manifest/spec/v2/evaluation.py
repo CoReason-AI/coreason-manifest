@@ -10,10 +10,10 @@
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
-class SuccessCriterion(CoReasonBaseModel):
+class SuccessCriterion(ManifestBaseModel):
     """A specific criterion for evaluating agent success."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -24,7 +24,7 @@ class SuccessCriterion(CoReasonBaseModel):
     strict: bool = Field(True, description="Whether failure blocks deployment.")
 
 
-class EvaluationProfile(CoReasonBaseModel):
+class EvaluationProfile(ManifestBaseModel):
     """Metadata describing how an agent should be evaluated."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)

@@ -87,7 +87,7 @@ def test_immutability_and_serialization() -> None:
         req.payload = {"query": "hacked"}  # type: ignore
 
     # Serialization
-    json_str = req.to_json()
+    json_str = req.model_dump_json(by_alias=True, exclude_none=True)
     data = json.loads(json_str)
 
     assert data["request_id"] == str(req.request_id)
