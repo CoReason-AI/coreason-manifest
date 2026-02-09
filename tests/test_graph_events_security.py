@@ -8,8 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any
-
 import pytest
 from pydantic import ValidationError
 
@@ -28,5 +26,3 @@ def test_red_team_type_confusion() -> None:
             timestamp=100.0,
             payload=["not", "a", "dict"],
         )
-
-

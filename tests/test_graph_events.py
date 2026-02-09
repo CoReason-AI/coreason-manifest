@@ -19,7 +19,6 @@ from coreason_manifest.spec.common.graph_events import (
     GraphEventNodeStart,
     GraphEventNodeStream,
 )
-from coreason_manifest.spec.common.observability import EventContentType
 
 
 def test_polymorphic_serialization() -> None:
