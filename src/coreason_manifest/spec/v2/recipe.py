@@ -42,7 +42,15 @@ class RecipeStatus(StrEnum):
 
 
 class RecipeRecommendation(CoReasonBaseModel):
-    """Stores search results from the catalog."""
+    """
+    Stores search results from the catalog.
+
+    Attributes:
+        ref (str): ID of the candidate.
+        score (float): 0.0 - 1.0 score.
+        rationale (str): Rationale for the recommendation.
+        warnings (list[str]): Warnings if any.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -53,7 +61,19 @@ class RecipeRecommendation(CoReasonBaseModel):
 
 
 class OptimizationIntent(CoReasonBaseModel):
-    """Directives for 'Fork & Improve' workflows (harvested from Foundry)."""
+    """
+    Directives for 'Fork & Improve' workflows (harvested from Foundry).
+
+    Attributes:
+        base_ref (str): Parent ID to fork.
+        improvement_goal (str): Prompt for the optimizer (e.g., 'Reduce hallucinations').
+        strategy (Literal["atomic", "parallel"]): Optimization strategy. (Default: "parallel").
+        metric_name (str): The grading function to optimize against (e.g., 'faithfulness', 'json_validity').
+            (Default: "exact_match").
+        teacher_model (str | None): ID of a stronger model to use for bootstrapping synthetic training data.
+        max_demonstrations (int): Maximum number of few-shot examples to learn and inject.
+            (Default: 5, Constraint: >= 0).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -74,7 +94,15 @@ class OptimizationIntent(CoReasonBaseModel):
 
 
 class SemanticRef(CoReasonBaseModel):
-    """A semantic reference (placeholder) for an agent or tool."""
+    """
+    A semantic reference (placeholder) for an agent or tool.
+
+    Attributes:
+        intent (str): The intent description for this placeholder.
+        constraints (list[str]): Hard requirements.
+        candidates (list[RecipeRecommendation]): AI suggestions.
+        optimization (OptimizationIntent | None): Optional directive.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -85,7 +113,13 @@ class SemanticRef(CoReasonBaseModel):
 
 
 class RecipeInterface(CoReasonBaseModel):
-    """Defines the Input/Output contract for the Recipe using JSON Schema."""
+    """
+    Defines the Input/Output contract for the Recipe using JSON Schema.
+
+    Attributes:
+        inputs (dict[str, Any]): JSON Schema defining the expected input arguments.
+        outputs (dict[str, Any]): JSON Schema defining the structure of the final result.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -98,7 +132,14 @@ class RecipeInterface(CoReasonBaseModel):
 
 
 class StateDefinition(CoReasonBaseModel):
-    """Defines the shared memory (Blackboard) structure and persistence."""
+    """
+    Defines the shared memory (Blackboard) structure and persistence.
+
+    Attributes:
+        properties (dict[str, Any]): JSON Schema properties for the shared state variables.
+        persistence (Literal["ephemeral", "redis", "postgres"]): How the state should be stored across steps.
+            (Default: "ephemeral").
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -119,7 +160,28 @@ class ExecutionPriority(IntEnum):
 
 
 class PolicyConfig(CoReasonBaseModel):
-    """Governance rules for execution limits (harvested from Connect)."""
+    """
+    Governance rules for execution limits (harvested from Connect).
+
+    Attributes:
+        max_retries (int): Global retry limit for failed steps. (Default: 0).
+        timeout_seconds (int | None): Global execution timeout.
+        execution_mode (Literal["sequential", "parallel"]): Default execution strategy. (Default: "sequential").
+        priority (ExecutionPriority): Traffic priority. Low priority requests may be queued or dropped during high load.
+            (Default: NORMAL).
+        rate_limit_rpm (int | None): Max requests per minute allowed for this recipe execution. (Constraint: >= 0).
+        rate_limit_tpm (int | None): Max tokens per minute allowed (input + output). (Constraint: >= 0).
+        caching_enabled (bool): Allow the Gateway to serve cached responses for identical inputs (Semantic Caching).
+            (Default: True).
+        budget_cap_usd (float | None): Hard limit for estimated token + tool costs. Execution halts if exceeded.
+        token_budget (int | None): Max tokens for the assembled prompt. Low-priority contexts will be pruned if
+            exceeded.
+        sensitive_tools (list[str]): List of tool names that ALWAYS require human confirmation (InteractionConfig
+            override).
+        allowed_mcp_servers (list[str]): Whitelist of MCP server names this recipe is allowed to access.
+        safety_preamble (str | None): Mandatory safety instruction injected into the system prompt.
+        legal_disclaimer (str | None): Text that must be appended to the final output.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -192,7 +254,16 @@ class InterventionTrigger(StrEnum):
 
 
 class InteractionConfig(CoReasonBaseModel):
-    """Configuration for the Interactive Control Plane."""
+    """
+    Configuration for the Interactive Control Plane.
+
+    Attributes:
+        transparency (TransparencyLevel): Visibility level. (Default: OPAQUE).
+        triggers (list[InterventionTrigger]): When to pause.
+        editable_fields (list[str]): Whitelist of fields modifiable during pause.
+        enforce_contract (bool): Validate steered output against original schema. (Default: True).
+        guidance_hint (str | None): Hint for the human operator.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -213,7 +284,16 @@ class VisualizationStyle(StrEnum):
 
 
 class PresentationHints(CoReasonBaseModel):
-    """Directives for the frontend on how to render the internal reasoning."""
+    """
+    Directives for the frontend on how to render the internal reasoning.
+
+    Attributes:
+        style (VisualizationStyle): Visualization style. (Default: CHAT).
+        display_title (str | None): Human-friendly label override.
+        icon (str | None): Icon name/emoji, e.g., 'lucide:brain'.
+        hidden_fields (list[str]): Whitelist of internal variables to hide from the non-debug UI.
+        progress_indicator (str | None): Name of the context variable to watch for % completion.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -235,7 +315,18 @@ class CollaborationMode(StrEnum):
 
 
 class CollaborationConfig(CoReasonBaseModel):
-    """Rules for human-agent engagement (harvested from Human-Layer)."""
+    """
+    Rules for human-agent engagement (harvested from Human-Layer).
+
+    Attributes:
+        mode (CollaborationMode): Engagement mode. (Default: COMPLETION).
+        feedback_schema (dict[str, Any] | None): JSON Schema for structured feedback.
+        supported_commands (list[str]): Slash commands the agent understands.
+        channels (list[str]): Communication channels to notify (e.g., ['slack', 'email', 'mobile_push']).
+        timeout_seconds (int | None): How long to wait for human input before triggering fallback.
+        fallback_behavior (Literal["fail", "proceed_with_default", "escalate"]): Action to take if the timeout
+            is exceeded. (Default: "fail").
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -266,7 +357,16 @@ class FailureBehavior(StrEnum):
 
 
 class RecoveryConfig(CoReasonBaseModel):
-    """Configuration for node-level resilience (harvested from Maco)."""
+    """
+    Configuration for node-level resilience (harvested from Maco).
+
+    Attributes:
+        max_retries (int | None): Override global retry limit.
+        retry_delay_seconds (float): Backoff start. (Default: 1.0).
+        behavior (FailureBehavior): Strategy on final failure. (Default: FAIL_WORKFLOW).
+        fallback_node_id (str | None): The ID of the node to transition to if behavior is ROUTE_TO_FALLBACK.
+        default_output (dict[str, Any] | None): Static payload to return if behavior is CONTINUE_WITH_DEFAULT.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -286,7 +386,20 @@ class RecoveryConfig(CoReasonBaseModel):
 
 
 class RecipeNode(CoReasonBaseModel):
-    """Base class for all nodes in a Recipe graph."""
+    """
+    Base class for all nodes in a Recipe graph.
+
+    Attributes:
+        id (str): Unique identifier within the graph.
+        metadata (dict[str, Any]): Custom metadata (not for UI layout).
+        presentation (NodePresentation | None): Static visual layout (x, y, color).
+        interaction (InteractionConfig | None): Interactive control plane configuration.
+        visualization (PresentationHints | None): Dynamic rendering hints (Glass Box).
+        collaboration (CollaborationConfig | None): Human engagement rules (Co-Pilot).
+        recovery (RecoveryConfig | None): Error handling and resilience settings.
+        reasoning (ReasoningConfig | None): Meta-cognition settings: Review loops, gap scanning, and validation
+            strategies.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -308,7 +421,19 @@ class RecipeNode(CoReasonBaseModel):
 
 
 class AgentNode(RecipeNode):
-    """A node that executes an AI Agent."""
+    """
+    A node that executes an AI Agent.
+
+    Attributes:
+        type (Literal["agent"]): Discriminator. (Default: "agent").
+        cognitive_profile (CognitiveProfile | None): Inline definition of the agent's cognitive architecture
+            (for the Weaver).
+        agent_ref (str | SemanticRef | None): The ID or URI of the Agent Definition, or a Semantic Reference.
+        model_policy (ModelSelectionPolicy | str | None): The routing policy for the LLM. Can be an inline policy
+            or a reference to a Model ID.
+        system_prompt_override (str | None): Context-specific instructions.
+        inputs_map (dict[str, str]): Mapping parent outputs to agent inputs.
+    """
 
     type: Literal["agent"] = "agent"
 
@@ -342,7 +467,23 @@ class SolverStrategy(StrEnum):
 
 
 class SolverConfig(CoReasonBaseModel):
-    """Configuration for the autonomous planning capabilities."""
+    """
+    Configuration for the autonomous planning capabilities.
+
+    Attributes:
+        strategy (SolverStrategy): The planning strategy to use. (Default: STANDARD).
+        depth_limit (int): Hard limit on recursion depth. (Default: 3, Constraint: >= 1).
+        n_samples (int): Council size: How many plans to generate. (Default: 1, Constraint: >= 1).
+        diversity_threshold (float | None): For Ensemble: Minimum Jaccard distance required between generated plans.
+            (Default: 0.3, Constraint: 0.0-1.0).
+        enable_dissenter (bool): If True, an adversarial agent will critique plans before voting. (Default: False).
+        consensus_threshold (float | None): Percentage of votes required to ratify a plan.
+            (Default: 0.6, Constraint: 0.0-1.0).
+        beam_width (int): For LATS: How many children to expand per node. (Default: 1, Constraint: >= 1).
+        max_iterations (int): For LATS: The 'Search Budget' (total simulations). (Default: 10, Constraint: >= 1).
+        aggregation_method (Literal["best_of_n", "majority_vote", "weighted_merge"] | None): How to combine results
+            if n_samples > 1.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -375,7 +516,16 @@ class SolverConfig(CoReasonBaseModel):
 
 
 class GenerativeNode(RecipeNode):
-    """A node that acts as an interface definition for dynamic solvers."""
+    """
+    A node that acts as an interface definition for dynamic solvers.
+
+    Attributes:
+        type (Literal["generative"]): Discriminator. (Default: "generative").
+        goal (str): The high-level objective.
+        solver (SolverConfig): Configuration for the autonomous planning capabilities.
+        allowed_tools (list[str]): Whitelist of Tool IDs the solver is permitted to use.
+        output_schema (dict[str, Any]): The contract for the result.
+    """
 
     type: Literal["generative"] = "generative"
     goal: str = Field(..., description="The high-level objective.")
@@ -390,7 +540,15 @@ class GenerativeNode(RecipeNode):
 
 
 class HumanNode(RecipeNode):
-    """A node that pauses execution for human input/approval."""
+    """
+    A node that pauses execution for human input/approval.
+
+    Attributes:
+        type (Literal["human"]): Discriminator. (Default: "human").
+        prompt (str): Instruction for the human user.
+        timeout_seconds (int | None): SLA for approval.
+        required_role (str | None): Role required to approve (e.g., manager).
+    """
 
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Instruction for the human user.")
@@ -399,7 +557,15 @@ class HumanNode(RecipeNode):
 
 
 class RouterNode(RecipeNode):
-    """A node that routes execution based on a variable."""
+    """
+    A node that routes execution based on a variable.
+
+    Attributes:
+        type (Literal["router"]): Discriminator. (Default: "router").
+        input_key (str): The variable to evaluate (e.g., 'classification').
+        routes (dict[str, str]): Map of value -> target_node_id.
+        default_route (str): Fallback target_node_id.
+    """
 
     type: Literal["router"] = "router"
     input_key: str = Field(..., description="The variable to evaluate (e.g., 'classification').")
@@ -408,7 +574,20 @@ class RouterNode(RecipeNode):
 
 
 class EvaluatorNode(RecipeNode):
-    """A node that evaluates a target variable using an LLM judge."""
+    """
+    A node that evaluates a target variable using an LLM judge.
+
+    Attributes:
+        type (Literal["evaluator"]): Discriminator. (Default: "evaluator").
+        target_variable (str): The key in the shared state/blackboard containing the content to evaluate.
+        evaluator_agent_ref (str): Reference to the Agent Definition ID that will act as the judge.
+        evaluation_profile (EvaluationProfile | str): Inline criteria definition or a reference to a preset profile.
+        pass_threshold (float): The score, 0.0-1.0, required to proceed.
+        max_refinements (int): Maximum number of loops allowed before forcing a generic fail/fallback.
+        pass_route (str): Node ID to go to if score >= threshold.
+        fail_route (str): Node ID to go to if score < threshold.
+        feedback_variable (str): The key in the state where the critique/reasoning will be written.
+    """
 
     type: Literal["evaluator"] = "evaluator"
     target_variable: str = Field(
@@ -432,7 +611,14 @@ class EvaluatorNode(RecipeNode):
 
 
 class GraphEdge(CoReasonBaseModel):
-    """A directed edge between two nodes."""
+    """
+    A directed edge between two nodes.
+
+    Attributes:
+        source (str): Source Node ID.
+        target (str): Target Node ID.
+        condition (str | None): Label for visualization (e.g., 'approved').
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -442,7 +628,24 @@ class GraphEdge(CoReasonBaseModel):
 
 
 class GraphTopology(CoReasonBaseModel):
-    """The directed cyclic graph structure defining the control flow."""
+    """
+    The directed cyclic graph structure defining the control flow.
+
+    Attributes:
+        nodes (list[AgentNode | HumanNode | RouterNode | EvaluatorNode | GenerativeNode]): List of nodes in the graph.
+        edges (list[GraphEdge]): List of directed edges.
+        entry_point (str): ID of the start node.
+        status (Literal["draft", "valid"]): Validation status of the topology. (Default: "valid").
+
+    Validators:
+        validate_integrity (@model_validator):
+            Verifies graph integrity:
+            1. Checks for duplicate node IDs.
+            2. If status is 'valid', calls _validate_completeness() to ensure:
+                - Entry point exists in nodes.
+                - All edges connect existing nodes (no dangling edges).
+                - All fallback nodes (from RecoveryConfig) exist.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -507,7 +710,12 @@ class GraphTopology(CoReasonBaseModel):
 
 
 class TaskSequence(CoReasonBaseModel):
-    """A linear sequence of tasks that simplifies graph creation."""
+    """
+    A linear sequence of tasks that simplifies graph creation.
+
+    Attributes:
+        steps (list[AgentNode | ...]): Ordered list of steps to execute. (Constraint: Min length 1).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -524,7 +732,12 @@ class TaskSequence(CoReasonBaseModel):
 
 
 def coerce_topology(v: Any) -> Any:
-    """Coerce linear lists or TaskSequence dicts into GraphTopology."""
+    """
+    Coerce linear lists or TaskSequence dicts into GraphTopology.
+
+    This validator allows users to provide a simple list of steps, which will be
+    converted into a full graph topology automatically.
+    """
     # 1. If topology is a list (simplification), treat as steps
     if isinstance(v, list):
         return TaskSequence(steps=v).to_graph()
@@ -539,7 +752,16 @@ def coerce_topology(v: Any) -> Any:
 
 
 class Constraint(CoReasonBaseModel):
-    """Represents a feasibility constraint for a Recipe."""
+    """
+    Represents a feasibility constraint for a Recipe.
+
+    Attributes:
+        variable (str): The context variable path to check (e.g., 'data.row_count').
+        operator (Literal["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains"]): Comparison operator.
+        value (Any): The threshold or reference value.
+        required (bool): If True, failure halts execution. If False, it's a warning. (Default: True).
+        error_message (str | None): Custom error message to display on failure.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -590,7 +812,37 @@ class Constraint(CoReasonBaseModel):
 
 
 class RecipeDefinition(CoReasonBaseModel):
-    """Definition of a Recipe (Graph-based Workflow)."""
+    """
+    Definition of a Recipe (Graph-based Workflow).
+
+    Attributes:
+        apiVersion (Literal["coreason.ai/v2"]): API Version. (Default: "coreason.ai/v2").
+        kind (Literal["Recipe"]): Kind of the object. (Default: "Recipe").
+        metadata (ManifestMetadata): Metadata including name and design info.
+        status (RecipeStatus): Lifecycle state. 'published' enforces strict validation. (Default: DRAFT).
+        interface (RecipeInterface): Input/Output contract.
+        environment (RuntimeEnvironment | None): The infrastructure requirements for the recipe.
+        default_model_policy (ModelSelectionPolicy | None): Default model selection rules for all agents in this recipe.
+        tests (list[SimulationScenario]): Self-contained test scenarios (harvested from Simulacrum) to validate
+            this recipe.
+        requirements (list[Constraint]): List of feasibility constraints.
+        state (StateDefinition | None): Internal state schema.
+        policy (PolicyConfig | None): Execution limits and error handling.
+        compliance (ComplianceConfig | None): Directives for the Auditor worker (logging, retention, signing).
+        identity (IdentityRequirement | None): Access control and user context injection rules.
+        guardrails (GuardrailsConfig | None): Active defense rules (Circuit Breakers, Drift, Spot Checks).
+        topology (Annotated[GraphTopology, BeforeValidator(coerce_topology)]): The execution graph topology.
+            (Validation: Applies `coerce_topology` before parsing).
+
+    Validators:
+        validate_topology_integrity (@model_validator):
+            Ensures all `recovery.fallback_node_id` references point to existing Node IDs.
+        enforce_lifecycle_constraints (@model_validator):
+            If status is PUBLISHED:
+            - Rejects abstract nodes (SemanticRef).
+            - Rejects incomplete nodes (missing cognitive_profile or agent_ref).
+            - Enforces strict graph integrity (no dangling edges).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 

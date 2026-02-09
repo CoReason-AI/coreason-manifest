@@ -26,7 +26,14 @@ class ReviewStrategy(StrEnum):
 
 
 class AdversarialConfig(CoReasonBaseModel):
-    """Configuration for the 'Devil's Advocate' reviewer."""
+    """
+    Configuration for the 'Devil's Advocate' reviewer.
+
+    Attributes:
+        persona (str): The persona adopted by the reviewer (e.g., 'security_auditor', 'skeptic'). (Default: "skeptic").
+        attack_vectors (list[str]): Specific angles of critique (e.g., 'pii_leakage', 'hallucination').
+        temperature (float): Creativity level of the critique. (Default: 0.7).
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -42,7 +49,13 @@ class AdversarialConfig(CoReasonBaseModel):
 
 
 class GapScanConfig(CoReasonBaseModel):
-    """Configuration for Knowledge Gap detection (Episteme)."""
+    """
+    Configuration for Knowledge Gap detection (Episteme).
+
+    Attributes:
+        enabled (bool): If True, scans context for missing prerequisites before execution. (Default: False).
+        confidence_threshold (float): Minimum confidence to proceed without asking clarifying questions. (Default: 0.8).
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -54,7 +67,15 @@ class GapScanConfig(CoReasonBaseModel):
 
 
 class ReasoningConfig(CoReasonBaseModel):
-    """Container for meta-cognitive behaviors attached to a Node."""
+    """
+    Container for meta-cognitive behaviors attached to a Node.
+
+    Attributes:
+        strategy (ReviewStrategy): The active critique method applied to this node's output. (Default: NONE).
+        adversarial (AdversarialConfig | None): Config if strategy is ADVERSARIAL.
+        gap_scan (GapScanConfig | None): Config for pre-execution knowledge scanning.
+        max_revisions (int): Maximum self-correction loops allowed if critique fails. (Default: 1).
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -71,7 +92,15 @@ class ReasoningConfig(CoReasonBaseModel):
 
 
 class ReflexConfig(CoReasonBaseModel):
-    """Configuration for 'System 1' fast thinking (Cortex Reflex)."""
+    """
+    Configuration for 'System 1' fast thinking (Cortex Reflex).
+
+    Attributes:
+        enabled (bool): Allow fast-path responses without deep reasoning chains. (Default: True).
+        confidence_threshold (float): Minimum confidence required to bypass the solver loop. (Default: 0.9).
+        allowed_tools (list[str]): List of read-only tools that can be called in Reflex mode (e.g., 'search',
+            'get_time').
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

@@ -28,7 +28,14 @@ class ComponentPriority(IntEnum):
 
 
 class ContextDependency(CoReasonBaseModel):
-    """A reference to a context module (e.g. 'hipaa_context')."""
+    """
+    A reference to a context module (e.g. 'hipaa_context').
+
+    Attributes:
+        name (str): The registry name of the context component.
+        priority (ComponentPriority): Token optimization priority. (Default: MEDIUM).
+        parameters (dict[str, Any]): Variables to inject into the context.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -38,7 +45,19 @@ class ContextDependency(CoReasonBaseModel):
 
 
 class CognitiveProfile(CoReasonBaseModel):
-    """The configuration for the Weaver to assemble a Prompt."""
+    """
+    The configuration for the Weaver to assemble a Prompt.
+
+    Attributes:
+        role (str): The specific Role/Persona (e.g., 'safety_scientist').
+        reasoning_mode (str | None): The thinking style (e.g., 'six_hats', 'socratic'). (Default: "standard").
+        reasoning (ReasoningConfig | None): System 2: Deep reasoning configuration (Episteme).
+        reflex (ReflexConfig | None): System 1: Fast response configuration (Cortex).
+        knowledge_contexts (list[ContextDependency]): Dynamic context modules to inject.
+        memory_read (list[RetrievalConfig]): Sources to read from (RAG). (Alias: 'memory').
+        memory_write (MemoryWriteConfig | None): Rules for saving new memories (Crystallization).
+        task_primitive (str | None): The logic primitive to apply (e.g., 'extract', 'classify', 'cohort').
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
