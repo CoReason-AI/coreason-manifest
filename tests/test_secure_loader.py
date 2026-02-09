@@ -88,5 +88,3 @@ def test_secure_loader_cycle_detection(tmp_path: Path) -> None:
 
     with pytest.raises(RecursionError, match="Circular dependency detected"):
         load(tmp_path / "a.yaml")
-
-

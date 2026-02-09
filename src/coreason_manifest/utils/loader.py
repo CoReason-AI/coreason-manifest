@@ -32,10 +32,7 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
                     or the object is not a valid AgentBuilder, ManifestV2, or RecipeDefinition.
     """
     if ":" not in reference:
-        raise ValueError(
-            f"Invalid reference format: '{reference}'. "
-            "Expected format 'path/to/file.py:variable_name'"
-        )
+        raise ValueError(f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'")
 
     # Split on the *last* colon to support drive letters if absolutely necessary,
     # but simplest is strict split.

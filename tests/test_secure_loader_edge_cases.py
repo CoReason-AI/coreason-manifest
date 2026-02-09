@@ -63,5 +63,3 @@ def test_ref_self_loop(tmp_path: Path) -> None:
 
     with pytest.raises(RecursionError, match="Circular dependency detected"):
         load(path)
-
-

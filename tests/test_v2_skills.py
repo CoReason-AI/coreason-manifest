@@ -211,7 +211,7 @@ def test_complex_manifest_scenario() -> None:
                 "role": "X",
                 "goal": "X",
                 "skills": ["skill-A"],
-                    "tools": [{"type": "remote", "uri": "tool-1"}],
+                "tools": [{"type": "remote", "uri": "tool-1"}],
             },
             "agent-Y": {
                 "type": "agent",

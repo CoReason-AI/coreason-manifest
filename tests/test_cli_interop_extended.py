@@ -83,20 +83,24 @@ def test_loader_strict_splitting() -> None:
     ref = "/path/to/file.py:var"
     # rsplit(":", 1) -> "/path/to/file.py", "var" - OK
 
-    with patch("pathlib.Path.exists", return_value=True), \
-         patch("importlib.util.spec_from_file_location"), \
-         patch("coreason_manifest.utils.loader.sys.path", []), \
-         contextlib.suppress(Exception): # We expect it to fail later, but check split
-             # Just checking if it crashes on split
-             load_agent_from_ref(ref)
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("importlib.util.spec_from_file_location"),
+        patch("coreason_manifest.utils.loader.sys.path", []),
+        contextlib.suppress(Exception),
+    ):  # We expect it to fail later, but check split
+        # Just checking if it crashes on split
+        load_agent_from_ref(ref)
 
     # 2. Windows path with drive letter AND variable
     # ref = "C:\\path\\to\\file.py:var"
     # rsplit(":", 1) -> "C:\\path\\to\\file.py", "var" - OK
     ref_win = r"C:\path\to\file.py:var"
 
-    with patch("pathlib.Path.exists", return_value=True) as mock_exists, \
-         patch("importlib.util.spec_from_file_location") as mock_spec_load:
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("importlib.util.spec_from_file_location") as mock_spec_load,
+    ):
         with contextlib.suppress(Exception):
             load_agent_from_ref(ref_win)
 

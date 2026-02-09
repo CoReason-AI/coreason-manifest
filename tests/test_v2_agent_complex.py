@@ -13,9 +13,7 @@ import yaml
 from pydantic import ValidationError
 
 from coreason_manifest.spec.v2.definitions import (
-    AgentDefinition,
     ManifestV2,
-    ToolDefinition,
 )
 
 
