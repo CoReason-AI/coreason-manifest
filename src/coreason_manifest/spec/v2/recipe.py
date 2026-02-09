@@ -12,7 +12,7 @@ import logging
 from enum import IntEnum, StrEnum
 from typing import Annotated, Any, Literal, Self
 
-from pydantic import BeforeValidator, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import NodePresentation
 from coreason_manifest.spec.common_base import CoReasonBaseModel

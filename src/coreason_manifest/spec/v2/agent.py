@@ -77,9 +77,7 @@ class CognitiveProfile(CoReasonBaseModel):
     )
 
     # --- Memory Capabilities ---
-    memory_read: list[RetrievalConfig] = Field(
-        default_factory=list, description="Sources to read from (RAG)."
-    )
+    memory_read: list[RetrievalConfig] = Field(default_factory=list, description="Sources to read from (RAG).")
     memory_write: MemoryWriteConfig | None = Field(None, description="Rules for saving new memories (Crystallization).")
 
     # 4. Task (What) - Maps to StructuredPrimitive

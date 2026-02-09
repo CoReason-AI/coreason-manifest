@@ -12,7 +12,6 @@
 from pydantic import TypeAdapter
 
 from coreason_manifest import (
-    EventContentType,
     GraphEvent,
     GraphEventError,
     GraphEventNodeStart,
