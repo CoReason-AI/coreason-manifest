@@ -58,7 +58,15 @@ class IntegrityLevel(StrEnum):
 
 
 class IntegrityConfig(CoReasonBaseModel):
-    """Configuration for Zero-Copy auditing and Verification logic."""
+    """
+    Configuration for Zero-Copy auditing and Verification logic.
+
+    Attributes:
+        input_mode (AuditContentMode): How to handle user/system inputs in the audit log. (Default: FULL_PAYLOAD).
+        output_mode (AuditContentMode): How to handle agent outputs in the audit log. (Default: FULL_PAYLOAD).
+        integrity_level (IntegrityLevel): Cryptographic proof requirement for the execution trace. (Default: NONE).
+        hash_algorithm (str): Algorithm used for generating payload references (if mode is reference_only). (Default: "sha256").
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -82,7 +90,18 @@ class IntegrityConfig(CoReasonBaseModel):
 
 
 class ComplianceConfig(CoReasonBaseModel):
-    """Configuration for the Coreason Auditor."""
+    """
+    Configuration for the Coreason Auditor.
+
+    Attributes:
+        audit_level (AuditLevel): Depth of logging. (Default: BASIC).
+        retention (RetentionPolicy): Data retention requirement. (Default: THIRTY_DAYS).
+        generate_aibom (bool): Generate an AI Bill of Materials (software supply chain). (Default: False).
+        generate_pdf_report (bool): Generate a human-readable PDF report of the session. (Default: False).
+        require_signature (bool): Cryptographically sign the final output. (Default: False).
+        mask_pii (bool): Attempt to scrub PII from logs before archiving. (Default: True).
+        integrity (IntegrityConfig): Configuration for Zero-Copy auditing and data integrity verification.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 

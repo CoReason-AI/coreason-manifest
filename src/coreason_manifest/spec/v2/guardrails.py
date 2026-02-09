@@ -24,7 +24,15 @@ class BreakerScope(StrEnum):
 
 
 class CircuitBreakerConfig(CoReasonBaseModel):
-    """Configuration for automated stoppage rules."""
+    """
+    Configuration for automated stoppage rules.
+
+    Attributes:
+        failure_rate_threshold (float): Error rate to trigger break. (Constraint: 0.0-1.0).
+        window_seconds (int): Time window for error calculation. (Constraint: >= 1).
+        recovery_timeout_seconds (int): Time to wait before retry. (Constraint: >= 1).
+        scope (BreakerScope): Scope of the breaker. (Default: AGENT).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -35,7 +43,14 @@ class CircuitBreakerConfig(CoReasonBaseModel):
 
 
 class DriftConfig(CoReasonBaseModel):
-    """Configuration for semantic drift detection."""
+    """
+    Configuration for semantic drift detection.
+
+    Attributes:
+        input_drift_threshold (float | None): Max allowed input semantic drift. (Constraint: 0.0-1.0).
+        output_drift_threshold (float | None): Max allowed output semantic drift. (Constraint: 0.0-1.0).
+        baseline_dataset_id (str | None): Dataset ID for baseline comparison.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -45,7 +60,14 @@ class DriftConfig(CoReasonBaseModel):
 
 
 class GuardrailsConfig(CoReasonBaseModel):
-    """Active Defense configuration."""
+    """
+    Active Defense configuration.
+
+    Attributes:
+        circuit_breaker (CircuitBreakerConfig | None): Circuit breaker settings.
+        drift_check (DriftConfig | None): Drift detection settings.
+        spot_check_rate (float | None): Probability of human spot check. (Constraint: 0.0-1.0).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 

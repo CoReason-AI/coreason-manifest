@@ -17,7 +17,21 @@ from coreason_manifest.spec.v2.definitions import AgentDefinition
 def create_mcp_tool_definition(agent: AgentDefinition) -> dict[str, Any]:
     """
     Converts a Coreason Agent Definition into an MCP Tool structure.
-    Returns a dictionary compatible with MCP's 'Tool' type.
+
+    This function adapts the agent's identity and interface to match the Model Context Protocol (MCP)
+    'Tool' specification.
+
+    WARNING: This conversion is lossy and opinionated:
+    1. Name Sanitization: The agent name is lowercased and non-alphanumeric characters are replaced
+       with underscores to meet MCP strict naming conventions.
+    2. Description Fallback: Uses `backstory` if available, otherwise `goal`, otherwise a generic string.
+    3. Schema: Directly uses `agent.interface.inputs` as `inputSchema`. Ensure this is a valid JSON Schema.
+
+    Args:
+        agent (AgentDefinition): The source agent definition.
+
+    Returns:
+        dict[str, Any]: A dictionary compatible with MCP's 'Tool' type.
     """
     # Sanitize name: lowercase, replace non-alphanumeric with _, collapse _, strip _
     name = re.sub(r"[^a-zA-Z0-9_-]", "_", agent.name).lower()

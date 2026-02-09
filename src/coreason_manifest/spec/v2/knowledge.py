@@ -34,7 +34,16 @@ class KnowledgeScope(StrEnum):
 
 
 class RetrievalConfig(CoReasonBaseModel):
-    """Configuration for the RAG engine."""
+    """
+    Configuration for the RAG engine.
+
+    Attributes:
+        strategy (RetrievalStrategy): Search algorithm. (Default: HYBRID).
+        collection_name (str): The ID of the vector/graph collection to query.
+        top_k (int): Number of chunks to retrieve. (Default: 5, Constraint: >= 1).
+        score_threshold (float | None): Minimum similarity score. (Default: 0.7, Constraint: 0.0-1.0).
+        scope (KnowledgeScope): Access control scope. (Default: SHARED).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -55,7 +64,14 @@ class ConsolidationStrategy(StrEnum):
 
 
 class MemoryWriteConfig(CoReasonBaseModel):
-    """Configuration for the Cortex Crystallizer (Memory Writer)."""
+    """
+    Configuration for the Cortex Crystallizer (Memory Writer).
+
+    Attributes:
+        strategy (ConsolidationStrategy): When to persist memories. (Default: SESSION_CLOSE).
+        frequency_turns (int): If strategy is SUMMARY_WINDOW, how many turns trigger a write. (Default: 10).
+        destination_collection (str | None): Target vector store collection. If None, uses the primary retrieval collection.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 

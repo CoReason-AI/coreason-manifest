@@ -33,7 +33,16 @@ class Currency(StrEnum):
 
 
 class RateCard(CoReasonBaseModel):
-    """Pricing details for a resource."""
+    """
+    Pricing details for a resource.
+
+    Attributes:
+        unit (PricingUnit): Unit of pricing. (Default: TOKEN_1M).
+        currency (Currency): Currency. (Default: USD).
+        input_cost (float): Cost per unit for input/prompt.
+        output_cost (float): Cost per unit for output/completion.
+        fixed_cost_per_request (float): Optional base fee. (Default: 0.0).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -45,7 +54,15 @@ class RateCard(CoReasonBaseModel):
 
 
 class ResourceConstraints(CoReasonBaseModel):
-    """Technical limitations and constraints."""
+    """
+    Technical limitations and constraints.
+
+    Attributes:
+        context_window_size (int): Total tokens supported. (Constraint: >= 0).
+        max_output_tokens (int | None): Limit on generation. (Constraint: >= 0).
+        rate_limit_rpm (int | None): Requests per minute. (Constraint: >= 0).
+        rate_limit_tpm (int | None): Tokens per minute. (Constraint: >= 0).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -56,7 +73,15 @@ class ResourceConstraints(CoReasonBaseModel):
 
 
 class ModelProfile(CoReasonBaseModel):
-    """Resource profile describing hardware, pricing, and operational constraints."""
+    """
+    Resource profile describing hardware, pricing, and operational constraints.
+
+    Attributes:
+        provider (str): Provider name (e.g. openai).
+        model_id (str): The technical ID (e.g. gpt-4).
+        pricing (RateCard | None): Financials.
+        constraints (ResourceConstraints | None): Technical limits.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -67,7 +92,15 @@ class ModelProfile(CoReasonBaseModel):
 
 
 class ToolParameter(CoReasonBaseModel):
-    """Parameter definition for a tool."""
+    """
+    Parameter definition for a tool.
+
+    Attributes:
+        name (str): Parameter name.
+        type (str): Data type of the parameter.
+        description (str): Parameter description.
+        required (bool): Whether the parameter is required. (Default: True).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -78,7 +111,16 @@ class ToolParameter(CoReasonBaseModel):
 
 
 class ToolDefinition(CoReasonBaseModel):
-    """Static definition of an MCP tool capability."""
+    """
+    Static definition of an MCP tool capability.
+
+    Attributes:
+        name (str): The tool name (e.g., 'brave_search').
+        description (str): What the tool does.
+        parameters (dict[str, Any]): JSON Schema of inputs.
+        is_consequential (bool): If True, coreason-mcp MUST require human approval before execution. (Default: False).
+        namespace (str | None): Expected MCP server namespace (e.g., 'github').
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -92,7 +134,14 @@ class ToolDefinition(CoReasonBaseModel):
 
 
 class McpServerRequirement(CoReasonBaseModel):
-    """Declares that this recipe needs a specific MCP server available."""
+    """
+    Declares that this recipe needs a specific MCP server available.
+
+    Attributes:
+        name (str): Server name.
+        required_tools (list[str]): List of required tools.
+        version_constraint (str | None): Version constraint.
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -102,7 +151,13 @@ class McpServerRequirement(CoReasonBaseModel):
 
 
 class RuntimeEnvironment(CoReasonBaseModel):
-    """The infrastructure requirements for the recipe."""
+    """
+    The infrastructure requirements for the recipe.
+
+    Attributes:
+        mcp_servers (list[McpServerRequirement]): Required MCP servers.
+        python_version (str | None): Required Python version. (Default: "3.12").
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
@@ -130,7 +185,17 @@ class ComplianceTier(StrEnum):
 
 
 class ModelSelectionPolicy(CoReasonBaseModel):
-    """Configuration for dynamic model routing (Arbitrage)."""
+    """
+    Configuration for dynamic model routing (Arbitrage).
+
+    Attributes:
+        strategy (RoutingStrategy): Selection algorithm. (Default: PRIORITY).
+        min_context_window (int | None): Minimum required context size.
+        max_input_cost_per_m (float | None): Max allowed input cost ($/1M tokens).
+        compliance (list[ComplianceTier]): Required compliance certifications.
+        provider_whitelist (list[str]): Allowed providers (e.g. ['azure', 'anthropic']).
+        allow_fallback (bool): If primary selection fails, try others? (Default: True).
+    """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
