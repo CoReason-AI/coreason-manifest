@@ -382,7 +382,7 @@ def test_mermaid_node_with_design_metadata() -> None:
                     "type": "logic",
                     "id": "s1",
                     "code": "pass",
-                    "x-design": {"x": 100, "y": 200, "label": "Visual Label"},
+                    "design_metadata": {"x": 100, "y": 200, "label": "Visual Label"},
                 }
             },
         },

@@ -14,10 +14,12 @@ from pydantic import ValidationError
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
+    FailureBehavior,
     GraphTopology,
     HumanNode,
     RecipeDefinition,
     RecipeInterface,
+    RecoveryConfig,
     RouterNode,
 )
 
@@ -132,7 +134,7 @@ def test_full_manifest_roundtrip() -> None:
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(
             name="Test Recipe",
-            x_design=None,
+            design_metadata=None,
         ),
         interface=RecipeInterface(),
         topology=GraphTopology(
@@ -254,3 +256,49 @@ def test_duplicate_node_ids() -> None:
         GraphTopology.model_validate(data)
 
     assert "Duplicate node IDs found" in str(excinfo.value)
+
+
+def test_recipe_empty_topology() -> None:
+    """Test coverage for empty topology."""
+    # Use draft status to bypass GraphTopology validation
+    topology = GraphTopology(nodes=[], edges=[], entry_point="missing", status="draft")
+
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="Empty"),
+        interface=RecipeInterface(),
+        topology=topology,
+    )
+    # This should hit "if not self.topology.nodes: return self" in RecipeDefinition.validate_topology_integrity
+    assert len(recipe.topology.nodes) == 0
+
+
+def test_recipe_fallback_node_missing() -> None:
+    """Test coverage for missing fallback node."""
+    recovery = RecoveryConfig(
+        behavior=FailureBehavior.ROUTE_TO_FALLBACK,
+        fallback_node_id="missing-fallback",
+    )
+
+    node = AgentNode(
+        id="main",
+        agent_ref="agent1",
+        recovery=recovery,
+    )
+
+    # Use draft status to bypass GraphTopology validation, so RecipeDefinition validator can catch it
+    topology = GraphTopology(
+        nodes=[node],
+        edges=[],
+        entry_point="main",
+        status="draft",
+    )
+
+    with pytest.raises(ValidationError) as exc:
+        RecipeDefinition(
+            metadata=ManifestMetadata(name="Fallback Error"),
+            interface=RecipeInterface(),
+            topology=topology,
+        )
+
+    assert "Topology Integrity Error" in str(exc.value)
+    assert "missing-fallback" in str(exc.value)

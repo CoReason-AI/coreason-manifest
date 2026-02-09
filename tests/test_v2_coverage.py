@@ -27,7 +27,6 @@ from coreason_manifest.spec.v2.definitions import (
     Workflow,
 )
 from coreason_manifest.utils.v2.governance import _risk_score, check_compliance_v2
-from coreason_manifest.utils.v2.validator import validate_loose
 
 # --- Governance Tests ---
 
@@ -169,47 +168,6 @@ def test_governance_custom_logic_violations() -> None:
 
 
 # --- Validator Tests ---
-
-
-def test_validator_loose_id_mismatch() -> None:
-    """Test loose validation catches ID mismatch."""
-    # Since ManifestV2 enforces strict integrity (agent ref), we need to bypass it or provide valid ref.
-    # But validate_integrity does NOT check key/id mismatch.
-    # However, validate_integrity checks if agent 'a' exists.
-
-    agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
-
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(
-            start="key1",  # Point to the key
-            steps={
-                "key1": AgentStep(id="id1", agent="a")  # Mismatch
-            },
-        ),
-        definitions={"a": agent_def},
-    )
-    warnings = validate_loose(manifest)
-    assert any("does not match" in w for w in warnings)
-
-
-def test_validator_loose_invalid_switch_condition() -> None:
-    """Test loose validation catches empty switch condition."""
-    # Need target 's2' to exist for strict validation
-    manifest = ManifestV2(
-        kind="Agent",
-        metadata=ManifestMetadata(name="Test"),
-        workflow=Workflow(
-            start="s1",
-            steps={
-                "s1": SwitchStep(id="s1", cases={"": "s2"}),  # Empty condition
-                "s2": LogicStep(id="s2", code="pass"),
-            },
-        ),
-    )
-    warnings = validate_loose(manifest)
-    assert any("invalid condition" in w for w in warnings)
 
 
 def test_validator_strict_missing_start() -> None:

@@ -19,8 +19,14 @@ from coreason_manifest.spec.v2.definitions import (
 
 
 def test_remote_tool_compatibility() -> None:
-    """Validate remote tool compatibility (type defaults to 'remote')."""
-    data = {"id": "agent-1", "name": "My Agent", "role": "Worker", "goal": "Work", "tools": [{"uri": "mcp://foo"}]}
+    """Validate remote tool compatibility."""
+    data = {
+        "id": "agent-1",
+        "name": "My Agent",
+        "role": "Worker",
+        "goal": "Work",
+        "tools": [{"type": "remote", "uri": "mcp://foo"}],
+    }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 1
     tool = agent.tools[0]
@@ -85,7 +91,7 @@ def test_mixed_list() -> None:
         "role": "Worker",
         "goal": "Work",
         "tools": [
-            {"uri": "mcp://remote"},
+            {"type": "remote", "uri": "mcp://remote"},
             {"type": "inline", "name": "local_tool", "description": "Local", "parameters": {"type": "object"}},
         ],
     }
@@ -98,41 +104,17 @@ def test_mixed_list() -> None:
     assert agent.tools[1].name == "local_tool"
 
 
-def test_legacy_string_list_compatibility() -> None:
-    """Validate backward compatibility for list of strings."""
-    data = {
-        "id": "agent-5",
-        "name": "Legacy Agent",
-        "role": "Worker",
-        "goal": "Work",
-        "tools": ["tool-1", "mcp://legacy"],
-    }
-    agent = AgentDefinition.model_validate(data)
-    assert len(agent.tools) == 2
-
-    t1 = agent.tools[0]
-    assert isinstance(t1, ToolRequirement)
-    assert t1.type == "remote"
-    assert t1.uri == "tool-1"
-
-    t2 = agent.tools[1]
-    assert isinstance(t2, ToolRequirement)
-    assert t2.type == "remote"
-    assert t2.uri == "mcp://legacy"
-
-
 def test_tools_validation_non_list() -> None:
-    """Verify validation when tools is not a list (covers 'normalize_tools' branch)."""
+    """Verify validation when tools is not a list."""
     data = {
         "id": "agent-6",
         "name": "Invalid Tools Agent",
         "role": "Worker",
         "goal": "Work",
-        "tools": "not-a-list",  # This should trigger the early return in normalize_tools
+        "tools": "not-a-list",
     }
     with pytest.raises(ValidationError) as exc:
         AgentDefinition.model_validate(data)
-    # The validator returns the string, then Pydantic checks if it's a list and raises error
     assert "Input should be a valid list" in str(exc.value)
 
 

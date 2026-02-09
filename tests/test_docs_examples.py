@@ -99,7 +99,10 @@ def test_vignette_example() -> None:
         "goal": "Conduct deep internet research on specified topics.",
         "backstory": "You are a meticulous researcher who verifies all sources.",
         "model": "gpt-4-turbo",
-        "tools": ["google-search", "web-scraper"],
+        "tools": [
+            {"type": "remote", "uri": "google-search"},
+            {"type": "remote", "uri": "web-scraper"},
+        ],
         "knowledge": [],
     }
 

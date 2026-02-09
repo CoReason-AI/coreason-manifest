@@ -117,7 +117,7 @@ def test_integrity_agent_tool_reference_missing() -> None:
                 "name": "Agent",
                 "role": "Worker",
                 "goal": "Work",
-                "tools": ["missing-tool-id"],
+                "tools": [{"type": "remote", "uri": "missing-tool-id"}],
             }
         },
     }

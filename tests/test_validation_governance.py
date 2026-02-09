@@ -21,30 +21,7 @@ from coreason_manifest import (
     ToolRiskLevel,
     Workflow,
     check_compliance_v2,
-    validate_loose,
 )
-
-
-def test_draft_mode_loose() -> None:
-    """Test that we can create a broken manifest and get warnings."""
-    # Create manifest with broken references (missing start step)
-    manifest = Manifest(
-        kind="Agent",
-        metadata={"name": "Broken Agent"},
-        status="draft",
-        workflow=Workflow(
-            start="step1",
-            steps={},  # Missing step1
-        ),
-    )
-
-    # Assert instantiation succeeded (no crash)
-    assert manifest.metadata.name == "Broken Agent"
-
-    # Assert validate_loose returns warnings
-    warnings = validate_loose(manifest)
-    assert len(warnings) > 0
-    assert any("Start step 'step1' not found" in w for w in warnings)
 
 
 def test_compiler_mode_strict() -> None:
