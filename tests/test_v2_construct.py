@@ -45,10 +45,10 @@ def test_agent_node_with_construct() -> None:
     profile = CognitiveProfile(role="assistant")
     node = AgentNode(
         id="agent-1",
-        construct=profile,
+        cognitive_profile=profile,
         agent_ref=None,  # Explicitly None
     )
-    assert node.construct == profile
+    assert node.cognitive_profile == profile
     assert node.agent_ref is None
 
 
@@ -61,10 +61,10 @@ def test_agent_node_construct_overrides_agent_ref_in_logic() -> None:
     profile = CognitiveProfile(role="assistant")
     node = AgentNode(
         id="agent-1",
-        construct=profile,
+        cognitive_profile=profile,
         agent_ref="some-catalog-id",
     )
-    assert node.construct == profile
+    assert node.cognitive_profile == profile
     assert node.agent_ref == "some-catalog-id"
 
 
@@ -92,7 +92,7 @@ def test_full_recipe_with_construct() -> None:
         policy=PolicyConfig(token_budget=5000),
         topology=GraphTopology(
             nodes=[
-                AgentNode(id="writer", construct=profile),
+                AgentNode(id="writer", cognitive_profile=profile),
             ],
             edges=[],
             entry_point="writer",
@@ -105,9 +105,9 @@ def test_full_recipe_with_construct() -> None:
 
     node = loaded.topology.nodes[0]
     assert isinstance(node, AgentNode)
-    assert node.construct is not None
-    assert node.construct.role == "writer"
-    assert node.construct.knowledge_contexts[0].priority == ComponentPriority.CRITICAL
+    assert node.cognitive_profile is not None
+    assert node.cognitive_profile.role == "writer"
+    assert node.cognitive_profile.knowledge_contexts[0].priority == ComponentPriority.CRITICAL
 
     assert loaded.policy is not None
     assert loaded.policy.token_budget == 5000

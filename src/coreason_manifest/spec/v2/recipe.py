@@ -316,14 +316,8 @@ class AgentNode(RecipeNode):
     # If provided, this overrides 'agent_ref' lookup.
     cognitive_profile: CognitiveProfile | None = Field(
         None,
-        alias="construct",
         description="Inline definition of the agent's cognitive architecture (for the Weaver).",
     )
-
-    @property
-    def construct(self) -> CognitiveProfile | None:  # type: ignore[override]
-        """Alias for cognitive_profile to maintain backward compatibility."""
-        return self.cognitive_profile
 
     agent_ref: str | SemanticRef | None = Field(
         None, description="The ID or URI of the Agent Definition, or a Semantic Reference."
@@ -699,7 +693,7 @@ class RecipeDefinition(CoReasonBaseModel):
                 if isinstance(node, AgentNode):
                     if isinstance(node.agent_ref, SemanticRef):
                         abstract_nodes.append(node.id)
-                    elif not node.agent_ref and not node.construct:
+                    elif not node.agent_ref and not node.cognitive_profile:
                         incomplete_nodes.append(node.id)
 
             if abstract_nodes:
@@ -711,7 +705,7 @@ class RecipeDefinition(CoReasonBaseModel):
             if incomplete_nodes:
                 raise ValueError(
                     f"Lifecycle Error: Nodes {incomplete_nodes} are incomplete. "
-                    "Must provide either 'agent_ref' or 'construct' before publishing."
+                    "Must provide either 'agent_ref' or 'cognitive_profile' before publishing."
                 )
 
             # 2. Enforce Graph Integrity
