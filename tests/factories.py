@@ -10,6 +10,7 @@
 
 from typing import Any
 
+from coreason_manifest.spec.common_base import ToolRiskLevel
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     InlineToolDefinition,
@@ -17,11 +18,10 @@ from coreason_manifest.spec.v2.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.spec.common_base import ToolRiskLevel
 
 
 def create_agent_definition(
-    id: str = "agent-1",
+    agent_id: str = "agent-1",
     name: str = "Test Agent",
     role: str = "Tester",
     goal: str = "Test things",
@@ -30,7 +30,7 @@ def create_agent_definition(
     """Factory for AgentDefinition."""
     defaults = {
         "type": "agent",
-        "id": id,
+        "id": agent_id,
         "name": name,
         "role": role,
         "goal": goal,
@@ -40,7 +40,7 @@ def create_agent_definition(
 
 
 def create_tool_definition(
-    id: str = "tool-1",
+    tool_id: str = "tool-1",
     name: str = "Test Tool",
     uri: str = "https://example.com/tool",
     risk_level: ToolRiskLevel = ToolRiskLevel.SAFE,
@@ -49,7 +49,7 @@ def create_tool_definition(
     """Factory for ToolDefinition."""
     defaults = {
         "type": "tool",
-        "id": id,
+        "id": tool_id,
         "name": name,
         "uri": uri,
         "risk_level": risk_level,

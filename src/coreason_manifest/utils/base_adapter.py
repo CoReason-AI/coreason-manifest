@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Generator
+from collections.abc import Generator
 
 from coreason_manifest.spec.v2.definitions import AgentDefinition, InlineToolDefinition
 
@@ -29,10 +29,12 @@ class BaseManifestAdapter:
         if include_header:
             parts.append(f"You are {agent.name}.")
 
-        parts.extend([
-            f"Role: {agent.role}",
-            f"Goal: {agent.goal}",
-        ])
+        parts.extend(
+            [
+                f"Role: {agent.role}",
+                f"Goal: {agent.goal}",
+            ]
+        )
 
         if agent.backstory:
             parts.append(f"Backstory: {agent.backstory}")

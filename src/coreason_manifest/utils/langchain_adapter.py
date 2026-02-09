@@ -35,18 +35,17 @@ def convert_to_langchain_kwargs(agent: AgentDefinition) -> dict[str, Any]:
     system_message = BaseManifestAdapter._build_system_prompt(agent, include_header=True)
 
     # Convert tools to schemas compatible with LangChain's bind_tools (which accepts OpenAI format)
-    tool_schemas = []
-    for tool in BaseManifestAdapter._iter_inline_tools(agent):
-        tool_schemas.append(
-            {
-                "type": "function",
-                "function": {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "parameters": tool.parameters,
-                },
-            }
-        )
+    tool_schemas = [
+        {
+            "type": "function",
+            "function": {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.parameters,
+            },
+        }
+        for tool in BaseManifestAdapter._iter_inline_tools(agent)
+    ]
 
     return {
         "system_message": system_message,

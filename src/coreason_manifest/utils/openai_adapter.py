@@ -36,18 +36,17 @@ def convert_to_openai_assistant(agent: AgentDefinition) -> dict[str, Any]:
     """
     instructions = BaseManifestAdapter._build_system_prompt(agent, include_header=False)
 
-    tools = []
-    for tool in BaseManifestAdapter._iter_inline_tools(agent):
-        tools.append(
-            {
-                "type": "function",
-                "function": {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "parameters": tool.parameters,
-                },
-            }
-        )
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.parameters,
+            },
+        }
+        for tool in BaseManifestAdapter._iter_inline_tools(agent)
+    ]
 
     return {
         "name": agent.name,

@@ -470,8 +470,8 @@ class ManifestV2(CoReasonBaseModel):
                             tool_def = self.definitions[tool_ref.uri]
                             if not isinstance(tool_def, ToolDefinition):
                                 raise ValueError(
-                                    f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
-                                    f"(got {type(tool_def).__name__})."
+                                    f"Agent '{definition.id}' references '{tool_ref.uri}' "
+                                    f"which is not a ToolDefinition (got {type(tool_def).__name__})."
                                 )
                         elif "://" not in tool_ref.uri:
                             # If it's not a valid URI (no scheme) and not in definitions, assume broken ID reference
