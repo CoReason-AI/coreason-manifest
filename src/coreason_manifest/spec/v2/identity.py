@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class AccessScope(StrEnum):
@@ -37,7 +37,7 @@ class ContextField(StrEnum):
     PERMISSIONS = "permissions"
 
 
-class IdentityRequirement(CoReasonBaseModel):
+class IdentityRequirement(ManifestBaseModel):
     """
     RBAC and Context Injection rules for a Recipe.
 

@@ -60,7 +60,7 @@ definitions:
     bridge_conversion_hint: "ignore_me"
 """
     # By default, Pydantic V2 BaseModels might be 'ignore' or 'forbid' depending on config.
-    # CoReasonBaseModel typically sets strict config.
+    # ManifestBaseModel typically sets strict config.
     # We expect this to fail if strict, or succeed if loose.
     # The requirement is that we KNOW what happens.
     # Assuming V2 is strict:
@@ -79,7 +79,7 @@ definitions:
     # We assert that whatever the behavior, it is CONSISTENT.
     # Ideally, for "Burn the Ships", we want strict validation so users don't leave bridge trash.
     # But if the current V2 spec allows extra, we just document that it passes.
-    # Let's assert based on current knowledge (CoReasonBaseModel usually strict).
+    # Let's assert based on current knowledge (ManifestBaseModel usually strict).
 
     # Actually, let's verify if AgentDefinition allows extra.
     # If it fails, good. If it passes, check if field exists.

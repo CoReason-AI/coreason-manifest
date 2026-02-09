@@ -26,13 +26,13 @@ from coreason_manifest import (
 def test_chat_message_serialization() -> None:
     """Test ChatMessage serialization with standard ISO timestamp."""
     msg = ChatMessage(role=Role.USER, content="Hello")
-    dumped = msg.dump()
+    dumped = msg.model_dump(mode='json', by_alias=True, exclude_none=True)
 
     assert dumped["role"] == "user"
     assert dumped["content"] == "Hello"
     assert "name" not in dumped
     assert "timestamp" in dumped
-    # CoReasonBaseModel serializes datetime with Z suffix
+    # ManifestBaseModel serializes datetime with Z suffix
     assert dumped["timestamp"].endswith("Z")
 
 
@@ -66,8 +66,8 @@ def test_presentation_polymorphism() -> None:
     assert events[0].type == PresentationEventType.CITATION_BLOCK
     assert events[1].type == PresentationEventType.MEDIA_CAROUSEL
 
-    dumped_citation = events[0].dump()
-    dumped_artifact = events[1].dump()
+    dumped_citation = events[0].model_dump(mode='json', by_alias=True, exclude_none=True)
+    dumped_artifact = events[1].model_dump(mode='json', by_alias=True, exclude_none=True)
 
     assert dumped_citation["type"] == "citation_block"
     assert dumped_artifact["type"] == "media_carousel"

@@ -12,10 +12,10 @@ from typing import Any, Literal
 
 from pydantic import ConfigDict, Field
 
-from ..common_base import CoReasonBaseModel
+from ..common_base import ManifestBaseModel
 
 
-class GraphEventBase(CoReasonBaseModel):
+class GraphEventBase(ManifestBaseModel):
     model_config = ConfigDict(frozen=True)
 
     run_id: str

@@ -12,10 +12,10 @@ from typing import Any
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
-class InterfaceDefinition(CoReasonBaseModel):
+class InterfaceDefinition(ManifestBaseModel):
     """
     Defines the input/output contract.
 
@@ -30,7 +30,7 @@ class InterfaceDefinition(CoReasonBaseModel):
     outputs: dict[str, Any] = Field(default_factory=dict, description="JSON Schema definitions for return values.")
 
 
-class StateDefinition(CoReasonBaseModel):
+class StateDefinition(ManifestBaseModel):
     """
     Defines the conversation memory/context structure.
 
@@ -47,7 +47,7 @@ class StateDefinition(CoReasonBaseModel):
     backend: str | None = Field(None, description="Backend storage type (e.g., 'redis', 'memory').")
 
 
-class PolicyDefinition(CoReasonBaseModel):
+class PolicyDefinition(ManifestBaseModel):
     """
     Defines execution policy and governance rules.
 

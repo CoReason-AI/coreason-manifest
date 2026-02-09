@@ -87,7 +87,7 @@ class TestCanonicalHashing:
 
         hash1 = tool.compute_hash()
 
-        data = tool.dump()
+        data = tool.model_dump(mode='json', by_alias=True, exclude_none=True)
         # Create a new dict with reversed keys
         reversed_data = {k: data[k] for k in reversed(list(data.keys()))}
 

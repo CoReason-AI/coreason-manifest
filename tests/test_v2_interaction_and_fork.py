@@ -81,7 +81,7 @@ def test_provenance_fork_lineage() -> None:
 def test_provenance_serialization() -> None:
     """Verify ProvenanceData dumps correctly."""
     provenance = ProvenanceData(type=ProvenanceType.AI, generated_by="coreason-strategist-v1", confidence_score=0.95)
-    data = provenance.dump()
+    data = provenance.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert data["type"] == "ai"
     assert data["generated_by"] == "coreason-strategist-v1"
     assert data["confidence_score"] == 0.95

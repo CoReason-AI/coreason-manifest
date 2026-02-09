@@ -32,6 +32,6 @@ def test_agent_definition_integration() -> None:
 
 def test_serialization() -> None:
     caps = AgentCapabilities()
-    dumped = caps.dump()
+    dumped = caps.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["delivery_mode"] == "request_response"
     assert dumped["history_support"] is True

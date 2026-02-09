@@ -28,7 +28,7 @@ def test_governance_config_serialization() -> None:
         allow_inline_tools=False,
     )
 
-    data = config.dump()
+    data = config.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert data["allowed_domains"] == ["example.com"]
     assert data["max_risk_level"] == "standard"
     assert data["require_auth_for_critical_tools"] is True
@@ -36,7 +36,7 @@ def test_governance_config_serialization() -> None:
     assert data["allow_custom_logic"] is False  # Default
 
     # Check JSON string serialization
-    json_str = config.to_json()
+    json_str = config.model_dump_json(by_alias=True, exclude_none=True)
     assert '"max_risk_level":"standard"' in json_str
 
 
@@ -48,7 +48,7 @@ def test_compliance_report_serialization() -> None:
 
     report = ComplianceReport(passed=False, violations=[violation])
 
-    data = report.dump()
+    data = report.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert data["passed"] is False
     assert len(data["violations"]) == 1
     v_data = data["violations"][0]

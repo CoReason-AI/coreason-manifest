@@ -26,13 +26,14 @@ from coreason_manifest import (
 
 def test_compiler_mode_strict() -> None:
     """Test that strict validation raises ValueError."""
-    with pytest.raises(ValidationError, match="Start step 'step1' not found"):
-        Manifest(
-            kind="Agent",
-            metadata={"name": "Broken Agent"},
-            status="published",
-            workflow=Workflow(start="step1", steps={}),
-        )
+    manifest = Manifest(
+        kind="Agent",
+        metadata={"name": "Broken Agent"},
+        workflow=Workflow(start="step1", steps={}),
+    )
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "Start step 'step1' missing from workflow" in errors[0]
 
 
 def test_governance_risk() -> None:

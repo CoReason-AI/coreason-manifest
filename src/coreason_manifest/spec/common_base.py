@@ -16,7 +16,7 @@ from typing import Annotated, Any
 from pydantic import AnyUrl, BaseModel, ConfigDict, PlainSerializer
 
 
-class CoReasonBaseModel(BaseModel):
+class ManifestBaseModel(BaseModel):
     """Base model for all CoReason Pydantic models with enhanced serialization.
 
     This base class addresses JSON serialization challenges in Pydantic v2 (e.g., UUID, datetime)
@@ -25,29 +25,12 @@ class CoReasonBaseModel(BaseModel):
     For a detailed rationale, see `docs/coreason_base_model_rationale.md`.
     """
 
-    model_config = ConfigDict(populate_by_name=True, frozen=True)
-
-    def dump(self, **kwargs: Any) -> dict[str, Any]:
-        """Serialize the model to a JSON-compatible dictionary.
-
-        Uses mode='json' to ensure types like UUID and datetime are serialized to strings.
-        Defaults to by_alias=True and exclude_none=True.
-        """
-        # Strict enforcement of json mode for zero-friction serialization
-        kwargs["mode"] = "json"
-        kwargs.setdefault("by_alias", True)
-        kwargs.setdefault("exclude_none", True)
-        return self.model_dump(**kwargs)
-
-    def to_json(self, **kwargs: Any) -> str:
-        """Serialize the model to a JSON string.
-
-        Defaults to by_alias=True and exclude_none=True.
-        """
-        # Set defaults but allow overrides
-        kwargs.setdefault("by_alias", True)
-        kwargs.setdefault("exclude_none", True)
-        return self.model_dump_json(**kwargs)
+    model_config = ConfigDict(
+        populate_by_name=True,
+        frozen=True,
+        ser_json_timedelta="float",
+        ser_json_bytes="utf8",
+    )
 
     def compute_hash(self, exclude: set[str] | None = None) -> str:
         """
@@ -60,8 +43,10 @@ class CoReasonBaseModel(BaseModel):
         Returns:
             The SHA-256 hex digest of the canonical JSON representation.
         """
-        # 1. Get dictionary via self.dump()
-        data = self.dump()
+        # 1. Get dictionary via self.model_dump()
+        # Use mode='json' to ensure types like UUID and datetime are serialized to strings.
+        # Defaults to by_alias=True and exclude_none=True.
+        data = self.model_dump(mode="json", by_alias=True, exclude_none=True)
 
         # 2. If exclude provided, remove keys from dict
         if exclude:

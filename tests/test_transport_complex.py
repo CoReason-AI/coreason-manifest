@@ -75,7 +75,7 @@ def test_nested_envelope_interop() -> None:
     svc_req = ServiceRequest(request_id=uuid4(), context=ctx, payload=outer_req)
 
     # Verify nesting structure
-    dump = svc_req.dump()
+    dump = svc_req.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dump["payload"]["payload"]["wrapped_request"]["payload"]["msg"] == "inner"
 
     # The inner request is just data at this point, but its lineage is preserved

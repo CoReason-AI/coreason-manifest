@@ -12,14 +12,14 @@ from typing import TYPE_CHECKING, Literal, Union
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri
+from coreason_manifest.spec.common_base import ManifestBaseModel, StrictUri
 from coreason_manifest.spec.v2.skills import SkillDefinition
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.v2.definitions import AgentDefinition, ToolDefinition
 
 
-class PackAuthor(CoReasonBaseModel):
+class PackAuthor(ManifestBaseModel):
     """Author information for a pack."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -29,7 +29,7 @@ class PackAuthor(CoReasonBaseModel):
     url: StrictUri | None = Field(None, description="Author website.")
 
 
-class PackMetadata(CoReasonBaseModel):
+class PackMetadata(ManifestBaseModel):
     """Metadata for a Tool Pack."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -41,7 +41,7 @@ class PackMetadata(CoReasonBaseModel):
     homepage: StrictUri | None = Field(None, description="Homepage URL.")
 
 
-class MCPServerDefinition(CoReasonBaseModel):
+class MCPServerDefinition(ManifestBaseModel):
     """Definition of an MCP Server process."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -53,7 +53,7 @@ class MCPServerDefinition(CoReasonBaseModel):
     env: dict[str, str] = Field(default_factory=dict, description="Environment variables.")
 
 
-class MCPResourceDefinition(CoReasonBaseModel):
+class MCPResourceDefinition(ManifestBaseModel):
     """Definition of an MCP Resource (passive data stream)."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
@@ -65,7 +65,7 @@ class MCPResourceDefinition(CoReasonBaseModel):
     description: str | None = Field(None, description="Description.")
 
 
-class ToolPackDefinition(CoReasonBaseModel):
+class ToolPackDefinition(ManifestBaseModel):
     """A distributable bundle of capabilities (Tools, Skills, Agents)."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)

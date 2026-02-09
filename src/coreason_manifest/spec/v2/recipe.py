@@ -15,7 +15,7 @@ from typing import Annotated, Any, Literal, Self
 from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import NodePresentation
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
 from coreason_manifest.spec.v2.compliance import ComplianceConfig
@@ -41,7 +41,7 @@ class RecipeStatus(StrEnum):
     ARCHIVED = "archived"
 
 
-class RecipeRecommendation(CoReasonBaseModel):
+class RecipeRecommendation(ManifestBaseModel):
     """
     Stores search results from the catalog.
 
@@ -60,7 +60,7 @@ class RecipeRecommendation(CoReasonBaseModel):
     warnings: list[str] = Field(default_factory=list, description="Warnings if any.")
 
 
-class OptimizationIntent(CoReasonBaseModel):
+class OptimizationIntent(ManifestBaseModel):
     """
     Directives for 'Fork & Improve' workflows (harvested from Foundry).
 
@@ -93,7 +93,7 @@ class OptimizationIntent(CoReasonBaseModel):
     max_demonstrations: int = Field(5, ge=0, description="Maximum number of few-shot examples to learn and inject.")
 
 
-class SemanticRef(CoReasonBaseModel):
+class SemanticRef(ManifestBaseModel):
     """
     A semantic reference (placeholder) for an agent or tool.
 
@@ -112,7 +112,7 @@ class SemanticRef(CoReasonBaseModel):
     optimization: OptimizationIntent | None = Field(None, description="Optional directive.")
 
 
-class RecipeInterface(CoReasonBaseModel):
+class RecipeInterface(ManifestBaseModel):
     """
     Defines the Input/Output contract for the Recipe using JSON Schema.
 
@@ -131,7 +131,7 @@ class RecipeInterface(CoReasonBaseModel):
     )
 
 
-class StateDefinition(CoReasonBaseModel):
+class StateDefinition(ManifestBaseModel):
     """
     Defines the shared memory (Blackboard) structure and persistence.
 
@@ -159,7 +159,7 @@ class ExecutionPriority(IntEnum):
     BATCH = 1  # Overnight jobs
 
 
-class PolicyConfig(CoReasonBaseModel):
+class PolicyConfig(ManifestBaseModel):
     """
     Governance rules for execution limits (harvested from Connect).
 
@@ -253,7 +253,7 @@ class InterventionTrigger(StrEnum):
     ON_COMPLETION = "on_completion"
 
 
-class InteractionConfig(CoReasonBaseModel):
+class InteractionConfig(ManifestBaseModel):
     """
     Configuration for the Interactive Control Plane.
 
@@ -283,7 +283,7 @@ class VisualizationStyle(StrEnum):
     DOCUMENT = "document"
 
 
-class PresentationHints(CoReasonBaseModel):
+class PresentationHints(ManifestBaseModel):
     """
     Directives for the frontend on how to render the internal reasoning.
 
@@ -314,7 +314,7 @@ class CollaborationMode(StrEnum):
     CO_EDIT = "co_edit"
 
 
-class CollaborationConfig(CoReasonBaseModel):
+class CollaborationConfig(ManifestBaseModel):
     """
     Rules for human-agent engagement (harvested from Human-Layer).
 
@@ -356,7 +356,7 @@ class FailureBehavior(StrEnum):
     IGNORE = "ignore"  # Return None and proceed
 
 
-class RecoveryConfig(CoReasonBaseModel):
+class RecoveryConfig(ManifestBaseModel):
     """
     Configuration for node-level resilience (harvested from Maco).
 
@@ -385,7 +385,7 @@ class RecoveryConfig(CoReasonBaseModel):
     )
 
 
-class RecipeNode(CoReasonBaseModel):
+class RecipeNode(ManifestBaseModel):
     """
     Base class for all nodes in a Recipe graph.
 
@@ -466,7 +466,7 @@ class SolverStrategy(StrEnum):
     ENSEMBLE = "ensemble"  # SPIO (Parallel generation + Voting)
 
 
-class SolverConfig(CoReasonBaseModel):
+class SolverConfig(ManifestBaseModel):
     """
     Configuration for the autonomous planning capabilities.
 
@@ -610,7 +610,7 @@ class EvaluatorNode(RecipeNode):
     )
 
 
-class GraphEdge(CoReasonBaseModel):
+class GraphEdge(ManifestBaseModel):
     """
     A directed edge between two nodes.
 
@@ -627,7 +627,7 @@ class GraphEdge(CoReasonBaseModel):
     condition: str | None = Field(None, description="Label for visualization (e.g., 'approved').")
 
 
-class GraphTopology(CoReasonBaseModel):
+class GraphTopology(ManifestBaseModel):
     """
     The directed cyclic graph structure defining the control flow.
 
@@ -709,7 +709,7 @@ class GraphTopology(CoReasonBaseModel):
                     )
 
 
-class TaskSequence(CoReasonBaseModel):
+class TaskSequence(ManifestBaseModel):
     """
     A linear sequence of tasks that simplifies graph creation.
 
@@ -731,7 +731,7 @@ class TaskSequence(CoReasonBaseModel):
         return GraphTopology(nodes=nodes, edges=edges, entry_point=nodes[0].id)
 
 
-class Constraint(CoReasonBaseModel):
+class Constraint(ManifestBaseModel):
     """
     Represents a feasibility constraint for a Recipe.
 
@@ -791,7 +791,7 @@ class Constraint(CoReasonBaseModel):
             return False
 
 
-class RecipeDefinition(CoReasonBaseModel):
+class RecipeDefinition(ManifestBaseModel):
     """
     Definition of a Recipe (Graph-based Workflow).
 

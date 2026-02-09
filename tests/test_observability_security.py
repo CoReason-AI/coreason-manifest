@@ -30,7 +30,7 @@ def test_security_massive_payload_dos() -> None:
     event = CloudEvent(
         id="dos-test", source="urn:redteam", type="attack.dos", time=datetime.now(UTC), data=massive_dict
     )
-    dumped = event.dump()
+    dumped = event.model_dump(mode='json', by_alias=True, exclude_none=True)
     duration = (datetime.now() - start).total_seconds()
 
     assert dumped["data"]["key_0"] == massive_string
@@ -62,7 +62,7 @@ def test_security_deep_nesting_recursion() -> None:
     # Pydantic serializer raises ValueError: Circular reference detected (depth exceeded)
     # Python raises RecursionError if stack limit hit.
     with pytest.raises((ValueError, RecursionError)):
-        event.dump()
+        event.model_dump(mode='json', by_alias=True, exclude_none=True)
 
 
 def test_security_injection_strings() -> None:
@@ -84,7 +84,7 @@ def test_security_injection_strings() -> None:
         data=malicious_payload,
     )
 
-    dumped = event.dump()
+    dumped = event.model_dump(mode='json', by_alias=True, exclude_none=True)
     # Pydantic/JSON serialization must escape these, preventing execution if blindly rendered.
     # We verify the content remains preserved as data.
     assert dumped["data"]["sqli"] == "'; DROP TABLE users; --"
@@ -109,7 +109,7 @@ def test_security_pii_leakage_warning() -> None:
         timestamp=datetime.now(UTC),
     )
 
-    dumped = trace.dump()
+    dumped = trace.model_dump(mode='json', by_alias=True, exclude_none=True)
     # Confirm secrets are present (i.e., NOT redacted).
     # This confirms the risk: The consumer is responsible for scrubbing.
     assert dumped["inputs"]["api_key"] == "sk-1234567890"
@@ -148,7 +148,7 @@ def test_security_datacontenttype_manipulation() -> None:
         time=now,
         datacontenttype="application/json\0",
     )
-    dumped = event_null.dump()
+    dumped = event_null.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["datacontenttype"] == "application/json\0"
 
     # 2. XSS Payload in Content Type
@@ -161,7 +161,7 @@ def test_security_datacontenttype_manipulation() -> None:
         time=now,
         datacontenttype=xss_type,
     )
-    dumped_xss = event_xss.dump()
+    dumped_xss = event_xss.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped_xss["datacontenttype"] == xss_type
 
     # 3. Massive Content Type String (DoS)
@@ -175,7 +175,7 @@ def test_security_datacontenttype_manipulation() -> None:
         time=now,
         datacontenttype=massive_type,
     )
-    dumped_massive = event_massive.dump()
+    dumped_massive = event_massive.model_dump(mode='json', by_alias=True, exclude_none=True)
     duration = (datetime.now() - start).total_seconds()
 
     assert len(dumped_massive["datacontenttype"]) > 1_000_000

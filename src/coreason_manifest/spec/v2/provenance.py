@@ -13,7 +13,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class ProvenanceType(StrEnum):
@@ -24,7 +24,7 @@ class ProvenanceType(StrEnum):
     HYBRID = "hybrid"
 
 
-class ProvenanceData(CoReasonBaseModel):
+class ProvenanceData(ManifestBaseModel):
     """Captures workflow origin and modifications."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)

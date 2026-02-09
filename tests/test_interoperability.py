@@ -22,7 +22,7 @@ def test_adapter_hints_serialization() -> None:
         version="0.1.0",
         config={"experimental": "true"},
     )
-    payload = hints.dump()
+    payload = hints.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert payload["target"] == "langchain"
     assert payload["version"] == "0.1.0"
     assert payload["config"] == {"experimental": "true"}
@@ -34,7 +34,7 @@ def test_agent_runtime_config_serialization() -> None:
         env_vars={"API_KEY": "secret"},
         adapter_hints=AdapterHints(target="autogen"),
     )
-    payload = config.dump()
+    payload = config.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert payload["env_vars"] == {"API_KEY": "secret"}
     assert payload["adapter_hints"]["target"] == "autogen"
 
@@ -61,7 +61,7 @@ def test_integration_with_agent_definition() -> None:
             env_vars={"DEBUG": "1"},
         ),
     )
-    payload = agent.dump()
+    payload = agent.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert "runtime" in payload
     assert payload["runtime"]["env_vars"] == {"DEBUG": "1"}
 
@@ -72,4 +72,4 @@ def test_integration_with_agent_definition() -> None:
         role="Tester",
         goal="Test things",
     )
-    assert "runtime" not in agent_minimal.dump()
+    assert "runtime" not in agent_minimal.model_dump(mode='json', by_alias=True, exclude_none=True)

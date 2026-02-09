@@ -29,7 +29,7 @@ def test_happy_path_error() -> None:
     )
     packet = StreamPacket(op=StreamOpCode.ERROR, p=error)
 
-    dumped = packet.dump()
+    dumped = packet.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["op"] == "error"
     assert dumped["p"]["code"] == "rate_limit_exceeded"
     assert dumped["p"]["severity"] == "transient"

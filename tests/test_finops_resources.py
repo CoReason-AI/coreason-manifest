@@ -58,7 +58,7 @@ def test_serialization() -> None:
 
     agent = AgentDefinition(id="agent-1", name="FinOps Agent", role="Accountant", goal="Save money", resources=profile)
 
-    data = agent.dump()
+    data = agent.model_dump(mode='json', by_alias=True, exclude_none=True)
 
     assert data["resources"]["provider"] == "openai"
     assert data["resources"]["pricing"]["input_cost"] == 10.0

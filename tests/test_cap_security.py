@@ -58,13 +58,13 @@ def test_payload_injection_deeply_nested_meta() -> None:
     # Verify we can dump it without recursion error or that it fails safely
     # Pydantic v2 has recursion protection which raises ValueError: Circular reference detected (depth exceeded)
     with contextlib.suppress(RecursionError, ValueError):
-        payload.dump()
+        payload.model_dump(mode='json', by_alias=True, exclude_none=True)
 
 
 def test_extra_fields_smuggling() -> None:
     """Verify that extra fields are either ignored or forbidden based on config."""
     # ServiceRequest is frozen, so extra fields in init should fail if config is strict,
-    # or be ignored/allowed. CoReasonBaseModel doesn't explicitly forbid extra by default,
+    # or be ignored/allowed. ManifestBaseModel doesn't explicitly forbid extra by default,
     # but frozen models in Pydantic V2 often behave strictly.
 
     # Attempt to inject a 'superuser' flag
@@ -90,7 +90,7 @@ def test_extra_fields_smuggling() -> None:
     assert not hasattr(req.payload, "exec_code")
 
     # Check if they are in the dump (if extra='ignore', they shouldn't be)
-    dumped = req.dump()
+    dumped = req.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert "is_admin" not in dumped["context"]
     assert "exec_code" not in dumped["payload"]
 
@@ -123,7 +123,7 @@ def test_null_byte_injection() -> None:
     user = Identity(id=malicious_id, name="User")
     assert user.id == "user\0admin"
 
-    dumped = user.dump()
+    dumped = user.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["id"] == "user\0admin"
 
 

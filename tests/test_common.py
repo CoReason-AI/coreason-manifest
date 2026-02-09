@@ -10,10 +10,10 @@
 
 from pydantic import AnyUrl
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
+from coreason_manifest.spec.common_base import ManifestBaseModel, StrictUri, ToolRiskLevel
 
 
-class CommonTestModel(CoReasonBaseModel):
+class CommonTestModel(ManifestBaseModel):
     """Test model for verifying common.py primitives in isolation."""
 
     uri: StrictUri
@@ -32,12 +32,12 @@ def test_common_primitives_isolation() -> None:
     assert model.risk.value == "safe"
     assert model.risk == ToolRiskLevel.SAFE
 
-    # Verify serialization via CoReasonBaseModel.dump()
-    dumped = model.dump()
+    # Verify serialization via ManifestBaseModel.model_dump(mode='json', by_alias=True, exclude_none=True)
+    dumped = model.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["uri"] == "https://example.com/api/v1"
     assert dumped["risk"] == "safe"
 
-    # Verify serialization via CoReasonBaseModel.to_json()
-    json_output = model.to_json()
+    # Verify serialization via ManifestBaseModel.model_dump_json(by_alias=True, exclude_none=True)
+    json_output = model.model_dump_json(by_alias=True, exclude_none=True)
     assert '"risk":"safe"' in json_output.replace(" ", "")
     assert '"uri":"https://example.com/api/v1"' in json_output.replace(" ", "")

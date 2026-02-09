@@ -12,7 +12,7 @@ from enum import StrEnum
 
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel
+from coreason_manifest.spec.common_base import ManifestBaseModel
 
 
 class BreakerScope(StrEnum):
@@ -23,7 +23,7 @@ class BreakerScope(StrEnum):
     GLOBAL = "global"
 
 
-class CircuitBreakerConfig(CoReasonBaseModel):
+class CircuitBreakerConfig(ManifestBaseModel):
     """
     Configuration for automated stoppage rules.
 
@@ -42,7 +42,7 @@ class CircuitBreakerConfig(CoReasonBaseModel):
     scope: BreakerScope = Field(BreakerScope.AGENT, description="Scope of the breaker.")
 
 
-class DriftConfig(CoReasonBaseModel):
+class DriftConfig(ManifestBaseModel):
     """
     Configuration for semantic drift detection.
 
@@ -59,7 +59,7 @@ class DriftConfig(CoReasonBaseModel):
     baseline_dataset_id: str | None = Field(None, description="Dataset ID for baseline comparison.")
 
 
-class GuardrailsConfig(CoReasonBaseModel):
+class GuardrailsConfig(ManifestBaseModel):
     """
     Active Defense configuration.
 

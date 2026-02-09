@@ -174,46 +174,42 @@ def test_validator_strict_missing_start() -> None:
     """Test strict validation missing start step."""
     agent_def = AgentDefinition(id="a", name="A", type="agent", role="R", goal="G")
 
-    # Construct as draft first to bypass initial validation
-    # Now manually call validate_integrity or rely on Pydantic to catch it if instantiated with status=published
-    # But wait, if I instantiate with status="published", it should raise ValidationError immediately!
-    # The previous test used validate_integrity explicitly.
-    # Now it's a model validator.
-    # So constructing it should fail.
-
-    with pytest.raises(ValidationError, match="Start step 'missing_start' not found"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Test"),
-            status="published",
-            workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
-            definitions={"a": agent_def},
-        )
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(start="missing_start", steps={"s1": AgentStep(id="s1", agent="a")}),
+        definitions={"a": agent_def},
+    )
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "Start step 'missing_start' missing from workflow" in errors[0]
 
 
 def test_validator_strict_switch_broken_targets() -> None:
     """Test strict validation broken switch targets."""
-    with pytest.raises(ValidationError, match="references missing step"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Test"),
-            status="published",
-            workflow=Workflow(
-                start="s1",
-                steps={
-                    "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
-                },
-            ),
-        )
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(
+            start="s1",
+            steps={
+                "s1": SwitchStep(id="s1", cases={"cond": "missing_case_target"}, default="missing_default_target")
+            },
+        ),
+    )
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert any("references missing step" in e for e in errors)
 
 
 def test_validator_strict_missing_agent_definition() -> None:
     """Test strict validation missing agent definition."""
-    with pytest.raises(ValidationError, match="references missing agent"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Test"),
-            status="published",
-            workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
-            definitions={},
-        )
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="Test"),
+        workflow=Workflow(start="s1", steps={"s1": AgentStep(id="s1", agent="missing_agent")}),
+        definitions={},
+    )
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "references missing agent" in errors[0]

@@ -41,15 +41,14 @@ def basic_manifest() -> ManifestV2:
     )
 
 
-def test_validation_loose_vs_strict() -> None:
-    """Test that loose validation ignores dangling pointers while strict catches them."""
+def test_validation_verify_completeness() -> None:
+    """Test that manifest loads (draft mode) but verify() catches errors."""
     agent_def = AgentDefinition(id="my-agent", name="My Agent", role="Worker", goal="Work", type="agent")
 
-    # Loose mode (draft) should pass
-    ManifestV2(
+    # Loading should pass (structurally valid)
+    manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="Broken Agent"),
-        status="draft",
         workflow=Workflow(
             start="step1",
             steps={
@@ -59,20 +58,11 @@ def test_validation_loose_vs_strict() -> None:
         definitions={"my-agent": agent_def},
     )
 
-    # Strict mode (published) should fail
-    with pytest.raises(ValidationError, match="missing next step 'step2'"):
-        ManifestV2(
-            kind="Agent",
-            metadata=ManifestMetadata(name="Broken Agent"),
-            status="published",
-            workflow=Workflow(
-                start="step1",
-                steps={
-                    "step1": AgentStep(id="step1", agent="my-agent", next="step2"),
-                },
-            ),
-            definitions={"my-agent": agent_def},
-        )
+    # But verify() should report errors
+    assert not manifest.is_executable
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "references missing next step 'step2'" in errors[0]
 
 
 def test_governance_tool_risk() -> None:

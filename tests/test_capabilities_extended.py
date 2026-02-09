@@ -70,7 +70,7 @@ def test_manifest_roundtrip_with_capabilities() -> None:
     assert agent_def.capabilities.history_support is False
 
     # Dump
-    dumped = manifest.dump()
+    dumped = manifest.model_dump(mode='json', by_alias=True, exclude_none=True)
 
     # Verify Dump
     agent_dump = dumped["definitions"]["my_agent"]

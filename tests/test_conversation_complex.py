@@ -34,7 +34,7 @@ def test_chat_message_edge_cases() -> None:
     # Unicode/Emoji
     msg_emoji = ChatMessage(role=Role.ASSISTANT, content="Hello 🌍! 👍")
     assert msg_emoji.content == "Hello 🌍! 👍"
-    dumped = msg_emoji.dump()
+    dumped = msg_emoji.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["content"] == "Hello 🌍! 👍"
 
     # Very long content
@@ -95,7 +95,7 @@ def test_stream_packet_with_presentation_event() -> None:
     )
 
     # Dump event to dict to fit StreamPacket payload schema
-    packet = StreamPacket(op=StreamOpCode.EVENT, p=citation_event.dump())
+    packet = StreamPacket(op=StreamOpCode.EVENT, p=citation_event.model_dump(mode='json', by_alias=True, exclude_none=True))
 
     assert packet.op == StreamOpCode.EVENT
     assert isinstance(packet.p, dict)
@@ -128,7 +128,7 @@ def test_json_roundtrip() -> None:
         name="calculator",
     )
 
-    json_str = original.to_json()
+    json_str = original.model_dump_json(by_alias=True, exclude_none=True)
     restored = ChatMessage.model_validate_json(json_str)
 
     assert original == restored

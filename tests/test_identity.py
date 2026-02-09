@@ -54,12 +54,12 @@ def test_identity_anonymous_factory() -> None:
 def test_identity_serialization() -> None:
     """Test serialization via dump()."""
     ident = Identity(id="agent-007", name="Bond", role="agent")
-    data = ident.dump()
+    data = ident.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert data == {"id": "agent-007", "name": "Bond", "role": "agent"}
 
     # Test without optional field
     ident2 = Identity(id="u1", name="U1")
-    data2 = ident2.dump()
+    data2 = ident2.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert data2 == {"id": "u1", "name": "U1"}
 
 
@@ -86,7 +86,7 @@ def test_identity_explicit_none() -> None:
     """Test explicitly passing None for optional role."""
     ident = Identity(id="x", name="X", role=None)
     assert ident.role is None
-    data = ident.dump()
+    data = ident.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert "role" not in data  # dump defaults to exclude_none=True
 
 

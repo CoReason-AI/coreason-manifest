@@ -11,10 +11,10 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from coreason_manifest.spec.common_base import CoReasonBaseModel, StrictUri, ToolRiskLevel
+from coreason_manifest.spec.common_base import ManifestBaseModel, StrictUri, ToolRiskLevel
 
 
-class FoundationTestModel(CoReasonBaseModel):
+class FoundationTestModel(ManifestBaseModel):
     id: UUID
     timestamp: datetime
     uri: StrictUri
@@ -22,7 +22,7 @@ class FoundationTestModel(CoReasonBaseModel):
 
 
 def test_foundation_serialization() -> None:
-    """Test that CoReasonBaseModel.dump() serializes complex types to strings."""
+    """Test that ManifestBaseModel.model_dump(mode='json', by_alias=True, exclude_none=True) serializes complex types to strings."""
     model = FoundationTestModel(
         id=uuid4(),
         timestamp=datetime.now(UTC),
@@ -30,7 +30,7 @@ def test_foundation_serialization() -> None:
         risk=ToolRiskLevel.SAFE,
     )
 
-    data = model.dump()
+    data = model.model_dump(mode='json', by_alias=True, exclude_none=True)
 
     # Verify UUID is serialized to str
     assert isinstance(data["id"], str)
@@ -48,7 +48,7 @@ def test_foundation_serialization() -> None:
 
 
 def test_foundation_json() -> None:
-    """Test that CoReasonBaseModel.to_json() produces valid JSON string."""
+    """Test that ManifestBaseModel.model_dump_json(by_alias=True, exclude_none=True) produces valid JSON string."""
     model = FoundationTestModel(
         id=uuid4(),
         timestamp=datetime.now(UTC),
@@ -56,7 +56,7 @@ def test_foundation_json() -> None:
         risk=ToolRiskLevel.SAFE,
     )
 
-    json_str = model.to_json()
+    json_str = model.model_dump_json(by_alias=True, exclude_none=True)
 
     assert isinstance(json_str, str)
     assert str(model.id) in json_str

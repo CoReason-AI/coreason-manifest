@@ -47,11 +47,12 @@ def test_integrity_valid(base_manifest_kwargs: dict[str, Any]) -> None:
         },
     )
 
-    kwargs = base_manifest_kwargs.copy()
-    kwargs["status"] = "published"
-
-    # Should raise no error
-    ManifestV2(workflow=workflow, definitions={"tool1": tool, "agent1": agent}, **kwargs)
+    # Should raise no error and be executable
+    manifest = ManifestV2(
+        workflow=workflow, definitions={"tool1": tool, "agent1": agent}, **base_manifest_kwargs
+    )
+    assert manifest.is_executable
+    assert len(manifest.verify()) == 0
 
 
 def test_integrity_failure_missing_tool(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -61,12 +62,10 @@ def test_integrity_failure_missing_tool(base_manifest_kwargs: dict[str, Any]) ->
     )
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
 
-    # Add status='published' to kwargs
-    kwargs = base_manifest_kwargs.copy()
-    kwargs["status"] = "published"
-
-    with pytest.raises(ValidationError, match="Agent 'agent1' references missing tool 'missing-tool'"):
-        ManifestV2(workflow=workflow, definitions={"agent1": agent}, **kwargs)
+    manifest = ManifestV2(workflow=workflow, definitions={"agent1": agent}, **base_manifest_kwargs)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "Agent 'agent1' references missing tool 'missing-tool'" in errors[0]
 
 
 def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -81,12 +80,12 @@ def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: dict[str, Any])
     agent2 = AgentDefinition(id="agent2", name="Agent 2", role="Role", goal="Goal")
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
 
-    # Add status='published' to kwargs
-    kwargs = base_manifest_kwargs.copy()
-    kwargs["status"] = "published"
-
-    with pytest.raises(ValidationError, match="Agent 'agent1' references 'agent2' which is not a ToolDefinition"):
-        ManifestV2(workflow=workflow, definitions={"agent1": agent1, "agent2": agent2}, **kwargs)
+    manifest = ManifestV2(
+        workflow=workflow, definitions={"agent1": agent1, "agent2": agent2}, **base_manifest_kwargs
+    )
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "Agent 'agent1' references 'agent2' which is not a ToolDefinition" in errors[0]
 
 
 def test_integrity_failure_missing_next_step(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -94,12 +93,10 @@ def test_integrity_failure_missing_next_step(base_manifest_kwargs: dict[str, Any
     agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal")
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1", next="missing-step")})
 
-    # Add status='published' to kwargs
-    kwargs = base_manifest_kwargs.copy()
-    kwargs["status"] = "published"
-
-    with pytest.raises(ValidationError, match="Step 'step1' references missing next step 'missing-step'"):
-        ManifestV2(workflow=workflow, definitions={"agent1": agent}, **kwargs)
+    manifest = ManifestV2(workflow=workflow, definitions={"agent1": agent}, **base_manifest_kwargs)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert "Step 'step1' references missing next step 'missing-step'" in errors[0]
 
 
 def test_integrity_failure_missing_switch_target(base_manifest_kwargs: dict[str, Any]) -> None:
@@ -109,13 +106,10 @@ def test_integrity_failure_missing_switch_target(base_manifest_kwargs: dict[str,
         steps={"switch1": SwitchStep(id="switch1", cases={"cond": "missing-case"}, default="missing-default")},
     )
 
-    # Add status='published' to kwargs
-    kwargs = base_manifest_kwargs.copy()
-    kwargs["status"] = "published"
-
-    # It might fail on the first missing one it finds
-    with pytest.raises(ValidationError, match="SwitchStep 'switch1' references missing step"):
-        ManifestV2(workflow=workflow, definitions={}, **kwargs)
+    manifest = ManifestV2(workflow=workflow, definitions={}, **base_manifest_kwargs)
+    errors = manifest.verify()
+    assert len(errors) > 0
+    assert any("SwitchStep 'switch1' references missing step" in e for e in errors)
 
 
 def test_strictness_unknown_field_step() -> None:
@@ -182,7 +176,7 @@ def test_manifest_serialization(base_manifest_kwargs: dict[str, Any]) -> None:
         **base_manifest_kwargs,
     )
 
-    dumped = manifest.dump()
+    dumped = manifest.model_dump(mode='json', by_alias=True, exclude_none=True)
 
     # Assert risk_level is serialized to string
     # We must access it via the definitions dict

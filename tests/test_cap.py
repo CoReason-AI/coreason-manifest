@@ -33,7 +33,7 @@ def test_health_check_response_serialization() -> None:
     response = HealthCheckResponse(
         status=HealthCheckStatus.OK, agent_id=agent_id, version="1.0.0", uptime_seconds=123.45
     )
-    dumped = response.dump()
+    dumped = response.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["status"] == "ok"
     assert dumped["agent_id"] == str(agent_id)
     assert dumped["version"] == "1.0.0"
@@ -58,7 +58,7 @@ def test_service_response_serialization() -> None:
     response = ServiceResponse(
         request_id=req_id, created_at=now, output={"result": "success"}, metrics={"latency": 100}
     )
-    dumped = response.dump()
+    dumped = response.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["request_id"] == str(req_id)
     # Pydantic v2 JSON serialization uses 'Z' for UTC, while python uses +00:00
     assert dumped["created_at"] == now.isoformat().replace("+00:00", "Z")
@@ -136,7 +136,7 @@ def test_service_request_deep_nesting() -> None:
     context = SessionContext(session_id="s1", user=Identity.anonymous())
     req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
-    dumped = req.dump()
+    dumped = req.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert dumped["payload"]["metadata"]["level1"]["level2"]["level3"]["data"] == "deep"
     assert dumped["payload"]["metadata"]["level1"]["level2"]["level3"]["list"][2]["nested"] == "item"
 
@@ -147,7 +147,7 @@ def test_round_trip_json_serialization() -> None:
     original_req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
     # Dump to JSON string
-    json_str = original_req.to_json()
+    json_str = original_req.model_dump_json(by_alias=True, exclude_none=True)
 
     # Load back from JSON string
     loaded_req = ServiceRequest.model_validate_json(json_str)
@@ -180,8 +180,8 @@ def test_type_preservation_in_dict() -> None:
     payload = AgentRequest(session_id=uuid4(), payload={"query": "test"}, metadata=meta)
     req = ServiceRequest(request_id=uuid4(), context=context, payload=payload)
 
-    # Dump using the CoReasonBaseModel.dump() which sets mode='json'
-    dumped = req.dump()
+    # Dump using the ManifestBaseModel.model_dump(mode='json', by_alias=True, exclude_none=True) which sets mode='json'
+    dumped = req.model_dump(mode='json', by_alias=True, exclude_none=True)
 
     # In mode='json', Pydantic might serialize types to their JSON equivalents.
     # int -> int, float -> float, bool -> bool, None -> null

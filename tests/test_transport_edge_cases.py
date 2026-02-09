@@ -45,7 +45,7 @@ def test_uuid_collision_simulation() -> None:
     req2 = AgentRequest(request_id=uid, session_id=uuid4(), payload={"q": 2})
 
     # They have same ID but different content.
-    # Equality depends on CoReasonBaseModel/Pydantic implementation.
+    # Equality depends on ManifestBaseModel/Pydantic implementation.
     # Usually pydantic models are equal if all fields are equal.
     assert req1 != req2
     assert req1.request_id == req2.request_id
@@ -62,7 +62,7 @@ def test_payload_complex_types() -> None:
     req = AgentRequest(session_id=uuid4(), payload=payload)
 
     # Dump should handle sets/tuples (convert to list)
-    dump = req.dump()
+    dump = req.model_dump(mode='json', by_alias=True, exclude_none=True)
     assert set(dump["payload"]["tags"]) == {"a", "b", "c"}  # serialized as list
     assert dump["payload"]["tuple"] == [1, 2]  # serialized as list
 
@@ -82,7 +82,7 @@ def test_deep_recursion_payload() -> None:
 
     # Serialization might fail
     with contextlib.suppress(RecursionError, ValueError):
-        req.dump()
+        req.model_dump(mode='json', by_alias=True, exclude_none=True)
 
 
 def test_concurrent_modification_attempt() -> None:
@@ -98,7 +98,7 @@ def test_concurrent_modification_attempt() -> None:
     # This is an important behavior to document/test: The envelope is frozen, but the payload content
     # (if strictly a reference) is mutable via the original reference.
     # Ideally, we'd want deep copy, but performance usually dictates reference.
-    # UPDATE: Pydantic V2/CoReasonBaseModel seemingly makes a copy during validation, isolating the model.
+    # UPDATE: Pydantic V2/ManifestBaseModel seemingly makes a copy during validation, isolating the model.
     # This is safer behavior.
     assert req.payload["count"] == 0
 
@@ -110,7 +110,7 @@ def test_invalid_payload_keys() -> None:
 
     payload = {123: "value"}
 
-    # CoReasonBaseModel / Pydantic V2 often coerces keys to strings for Dict[str, Any]
+    # ManifestBaseModel / Pydantic V2 often coerces keys to strings for Dict[str, Any]
     # But it seems strict validation rejects int keys here.
     with pytest.raises(ValidationError):
         AgentRequest(session_id=uuid4(), payload=payload)
