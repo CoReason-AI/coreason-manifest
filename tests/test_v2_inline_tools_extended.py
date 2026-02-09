@@ -35,7 +35,7 @@ def test_duplicate_tools() -> None:
         "name": "Duplicate Tools",
         "role": "Worker",
         "goal": "Work",
-        "tools": ["tool-1", "tool-1"],
+        "tools": [{"type": "remote", "uri": "tool-1"}, {"type": "remote", "uri": "tool-1"}],
     }
     agent = AgentDefinition.model_validate(data)
     assert len(agent.tools) == 2
@@ -51,7 +51,7 @@ def test_complex_mixed_usage() -> None:
         "role": "Worker",
         "goal": "Work",
         "tools": [
-            "search-tool-id",
+            {"type": "remote", "uri": "search-tool-id"},
             {"type": "remote", "uri": "mcp://weather"},
             {
                 "type": "inline",

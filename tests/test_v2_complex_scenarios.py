@@ -149,7 +149,7 @@ def test_full_policy_and_state() -> None:
             "human_in_the_loop": True,
         },
         "state": {
-            "schema": {
+            "data_schema": {
                 "type": "object",
                 "properties": {"counter": {"type": "integer"}},
             },
@@ -161,7 +161,7 @@ def test_full_policy_and_state() -> None:
     assert manifest.policy.max_steps == 100
     assert manifest.policy.human_in_the_loop is True
     assert manifest.state.backend == "redis"
-    assert manifest.state.schema_["properties"]["counter"]["type"] == "integer"
+    assert manifest.state.data_schema["properties"]["counter"]["type"] == "integer"
 
 
 # Test 4: Design Metadata
@@ -171,7 +171,7 @@ def test_metadata_and_design_completeness() -> None:
         "kind": "Recipe",
         "metadata": {
             "name": "Design Demo",
-            "x-design": {
+            "design_metadata": {
                 "x": 100.5,
                 "y": 200.0,
                 "icon": "flow-chart",
@@ -188,7 +188,7 @@ def test_metadata_and_design_completeness() -> None:
                     "type": "logic",
                     "id": "s1",
                     "code": "pass",
-                    "x-design": {"x": 10, "y": 20, "collapsed": True},
+                    "design_metadata": {"x": 10, "y": 20, "collapsed": True},
                 }
             },
         },
@@ -220,7 +220,7 @@ def test_agent_definition_full_spec() -> None:
                 "goal": "Save the world",
                 "backstory": "Classified",
                 "model": "gpt-4-turbo",
-                "tools": ["tool-1"],
+                "tools": [{"type": "remote", "uri": "tool-1"}],
                 "knowledge": ["docs/top_secret.pdf"],
             },
             "tool-1": {

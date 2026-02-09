@@ -22,7 +22,6 @@ from coreason_manifest.spec.v2.definitions import (
     ToolDefinition,
     Workflow,
 )
-from coreason_manifest.utils.v2.validator import validate_integrity
 
 
 @pytest.fixture
@@ -37,7 +36,9 @@ def base_manifest_kwargs() -> dict[str, Any]:
 def test_integrity_valid(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test a perfectly valid manifest."""
     tool = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
-    agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["tool1"])
+    agent = AgentDefinition(
+        id="agent1", name="Agent", role="Role", goal="Goal", tools=[{"type": "remote", "uri": "tool1"}]
+    )
     workflow = Workflow(
         start="step1",
         steps={
@@ -46,13 +47,18 @@ def test_integrity_valid(base_manifest_kwargs: dict[str, Any]) -> None:
         },
     )
 
-    manifest = ManifestV2(workflow=workflow, definitions={"tool1": tool, "agent1": agent}, **base_manifest_kwargs)
-    validate_integrity(manifest)
+    kwargs = base_manifest_kwargs.copy()
+    kwargs["status"] = "published"
+
+    # Should raise no error
+    ManifestV2(workflow=workflow, definitions={"tool1": tool, "agent1": agent}, **kwargs)
 
 
 def test_integrity_failure_missing_tool(base_manifest_kwargs: dict[str, Any]) -> None:
     """Test integrity failure when an Agent references a non-existent Tool ID."""
-    agent = AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["missing-tool"])
+    agent = AgentDefinition(
+        id="agent1", name="Agent", role="Role", goal="Goal", tools=[{"type": "remote", "uri": "missing-tool"}]
+    )
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
 
     # Add status='published' to kwargs
@@ -70,7 +76,7 @@ def test_integrity_failure_wrong_tool_type(base_manifest_kwargs: dict[str, Any])
         name="Agent 1",
         role="Role",
         goal="Goal",
-        tools=["agent2"],  # referencing another agent as a tool
+        tools=[{"type": "remote", "uri": "agent2"}],  # referencing another agent as a tool
     )
     agent2 = AgentDefinition(id="agent2", name="Agent 2", role="Role", goal="Goal")
     workflow = Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1")})
@@ -169,7 +175,9 @@ def test_manifest_serialization(base_manifest_kwargs: dict[str, Any]) -> None:
         ),
         definitions={
             "tool1": tool,
-            "agent1": AgentDefinition(id="agent1", name="Agent", role="Role", goal="Goal", tools=["tool1"]),
+            "agent1": AgentDefinition(
+                id="agent1", name="Agent", role="Role", goal="Goal", tools=[{"type": "remote", "uri": "tool1"}]
+            ),
         },
         **base_manifest_kwargs,
     )

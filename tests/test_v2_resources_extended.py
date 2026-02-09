@@ -17,6 +17,7 @@ from coreason_manifest.spec.v2.recipe import (
     PolicyConfig,
     RecipeDefinition,
     RecipeInterface,
+    TaskSequence,
 )
 from coreason_manifest.spec.v2.resources import (
     McpServerRequirement,
@@ -146,7 +147,7 @@ def test_full_recipe_integration() -> None:
         interface=RecipeInterface(inputs={"q": {"type": "string"}}),
         environment=env,
         policy=policy,
-        topology=[node],  # TaskSequence coercion
+        topology=TaskSequence(steps=[node]).to_graph(),
     )
 
     # Assertions
@@ -169,7 +170,7 @@ def test_recipe_hashing() -> None:
     recipe1 = RecipeDefinition(
         metadata=ManifestMetadata(name="Recipe"),
         interface=RecipeInterface(),
-        topology=[AgentNode(id="a", agent_ref="b")],
+        topology=TaskSequence(steps=[AgentNode(id="a", agent_ref="b")]).to_graph(),
         environment=env,
     )
 
@@ -177,7 +178,7 @@ def test_recipe_hashing() -> None:
     recipe2 = RecipeDefinition(
         metadata=ManifestMetadata(name="Recipe"),
         interface=RecipeInterface(),
-        topology=[AgentNode(id="a", agent_ref="b")],
+        topology=TaskSequence(steps=[AgentNode(id="a", agent_ref="b")]).to_graph(),
         environment=env.model_copy(),
     )
 
@@ -188,7 +189,7 @@ def test_recipe_hashing() -> None:
     recipe3 = RecipeDefinition(
         metadata=ManifestMetadata(name="Recipe"),
         interface=RecipeInterface(),
-        topology=[AgentNode(id="a", agent_ref="b")],
+        topology=TaskSequence(steps=[AgentNode(id="a", agent_ref="b")]).to_graph(),
         environment=env_diff,
     )
 
