@@ -401,6 +401,18 @@ class ManifestV2(CoReasonBaseModel):
     def check_integrity(self) -> Self:
         steps = self.workflow.steps
 
+        # 0. Check for GenericDefinition usage (Warning)
+        for def_id, definition in self.definitions.items():
+            if isinstance(definition, GenericDefinition):
+                import warnings
+
+                warnings.warn(
+                    f"Definition '{def_id}' falls back to GenericDefinition. "
+                    f"Check if 'type' is correct (known types: agent, tool, skill, resource, pack).",
+                    UserWarning,
+                    stacklevel=2,
+                )
+
         # 1. Validate Start Step
         if self.workflow.start not in steps:
             raise ValueError(f"Start step '{self.workflow.start}' not found in steps.")
