@@ -416,9 +416,7 @@ class ManifestV2(CoReasonBaseModel):
                     if target not in steps:
                         raise ValueError(f"SwitchStep '{step.id}' references missing step '{target}' in cases.")
                 if step.default and step.default not in steps:
-                    raise ValueError(
-                        f"SwitchStep '{step.id}' references missing step '{step.default}' in default."
-                    )
+                    raise ValueError(f"SwitchStep '{step.id}' references missing step '{step.default}' in default.")
 
             # 4. Validate Definition References
             if isinstance(step, AgentStep):

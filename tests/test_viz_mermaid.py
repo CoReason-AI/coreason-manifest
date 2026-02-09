@@ -198,9 +198,8 @@ def test_mermaid_invalid_start_step() -> None:
         kind="Recipe",
         metadata=ManifestMetadata(name="Invalid Start Test"),
         workflow=Workflow.model_construct(
-            start="non_existent_step",
-            steps={"step1": LogicStep(id="step1", code="pass")}
-        )
+            start="non_existent_step", steps={"step1": LogicStep(id="step1", code="pass")}
+        ),
     )
 
     chart = generate_mermaid_graph(manifest)
@@ -214,9 +213,7 @@ def test_mermaid_cyclic_workflow() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Cyclic"},
-        "definitions": {
-            "worker": {"type": "agent", "id": "worker", "name": "W", "role": "W", "goal": "W"}
-        },
+        "definitions": {"worker": {"type": "agent", "id": "worker", "name": "W", "role": "W", "goal": "W"}},
         "workflow": {
             "start": "A",
             "steps": {
@@ -288,9 +285,7 @@ def test_mermaid_special_characters_heavy() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Special Chars"},
-        "definitions": {
-            "tool/v1": {"type": "agent", "id": "tool/v1", "name": "T", "role": "T", "goal": "T"}
-        },
+        "definitions": {"tool/v1": {"type": "agent", "id": "tool/v1", "name": "T", "role": "T", "goal": "T"}},
         "workflow": {
             "start": "start@node",
             "steps": {
@@ -368,9 +363,7 @@ def test_mermaid_council_with_next() -> None:
         "apiVersion": "coreason.ai/v2",
         "kind": "Recipe",
         "metadata": {"name": "Council Next"},
-        "definitions": {
-            "a1": {"type": "agent", "id": "a1", "name": "A1", "role": "R", "goal": "G"}
-        },
+        "definitions": {"a1": {"type": "agent", "id": "a1", "name": "A1", "role": "R", "goal": "G"}},
         "workflow": {
             "start": "vote",
             "steps": {
