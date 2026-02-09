@@ -105,9 +105,9 @@ def test_cognitive_profile_with_memory() -> None:
         role="archivist",
         memory_read=[memory_config],
     )
-    assert len(profile.memory) == 1
-    assert profile.memory[0].collection_name == "history"
-    assert profile.memory[0].strategy == RetrievalStrategy.DENSE
+    assert len(profile.memory_read) == 1
+    assert profile.memory_read[0].collection_name == "history"
+    assert profile.memory_read[0].strategy == RetrievalStrategy.DENSE
 
 
 def test_cognitive_profile_complex_memory() -> None:
@@ -138,11 +138,11 @@ def test_cognitive_profile_complex_memory() -> None:
         memory_read=memory_configs,
     )
 
-    assert len(profile.memory) == 3
-    assert profile.memory[0].strategy == RetrievalStrategy.DENSE
-    assert profile.memory[1].scope == KnowledgeScope.USER
-    assert profile.memory[2].strategy == RetrievalStrategy.GRAPH
-    assert profile.memory[1].score_threshold == 0.5
+    assert len(profile.memory_read) == 3
+    assert profile.memory_read[0].strategy == RetrievalStrategy.DENSE
+    assert profile.memory_read[1].scope == KnowledgeScope.USER
+    assert profile.memory_read[2].strategy == RetrievalStrategy.GRAPH
+    assert profile.memory_read[1].score_threshold == 0.5
 
 
 def test_cognitive_profile_redundant_memory() -> None:
@@ -151,10 +151,10 @@ def test_cognitive_profile_redundant_memory() -> None:
     config = RetrievalConfig(collection_name="test")
     profile = CognitiveProfile(
         role="tester",
-        memory=[config, config],  # type: ignore[call-arg]
+        memory_read=[config, config],
     )
-    assert len(profile.memory) == 2
-    assert profile.memory[0] == profile.memory[1]
+    assert len(profile.memory_read) == 2
+    assert profile.memory_read[0] == profile.memory_read[1]
 
 
 def test_serialization() -> None:

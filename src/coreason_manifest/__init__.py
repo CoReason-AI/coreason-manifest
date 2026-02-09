@@ -10,7 +10,6 @@
 
 # Builder SDK exports
 from .builder import AgentBuilder, TypedCapability
-from .shortcuts import simple_agent
 from .spec.cap import (
     ErrorSeverity,
     HealthCheckResponse,
@@ -112,12 +111,10 @@ from .utils.audit import compute_audit_hash, verify_chain
 from .utils.diff import ChangeCategory, DiffReport, compare_agents
 from .utils.docs import render_agent_card
 from .utils.mcp_adapter import create_mcp_tool_definition
-from .utils.migration import migrate_graph_event_to_cloud_event
 from .utils.mock import generate_mock_output
 from .utils.service import ServiceContract
 from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
-from .utils.v2.validator import validate_integrity, validate_loose
 from .utils.viz import generate_mermaid_graph
 
 __version__ = "0.22.0"
@@ -233,10 +230,6 @@ __all__ = [
     "generate_mermaid_graph",
     "generate_mock_output",
     "load",
-    "migrate_graph_event_to_cloud_event",
     "render_agent_card",
-    "simple_agent",
-    "validate_integrity",
-    "validate_loose",
     "verify_chain",
 ]

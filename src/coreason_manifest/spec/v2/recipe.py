@@ -731,26 +731,6 @@ class TaskSequence(CoReasonBaseModel):
         return GraphTopology(nodes=nodes, edges=edges, entry_point=nodes[0].id)
 
 
-def coerce_topology(v: Any) -> Any:
-    """
-    Coerce linear lists or TaskSequence dicts into GraphTopology.
-
-    This validator allows users to provide a simple list of steps, which will be
-    converted into a full graph topology automatically.
-    """
-    # 1. If topology is a list (simplification), treat as steps
-    if isinstance(v, list):
-        return TaskSequence(steps=v).to_graph()
-
-    # 2. If topology is a dict
-    if isinstance(v, dict) and "steps" in v and "nodes" not in v:
-        # If it has "steps", treat as TaskSequence
-        return TaskSequence.model_validate(v).to_graph()
-    # Otherwise assume it's GraphTopology structure, let Pydantic handle it
-
-    return v
-
-
 class Constraint(CoReasonBaseModel):
     """
     Represents a feasibility constraint for a Recipe.
@@ -892,9 +872,7 @@ class RecipeDefinition(CoReasonBaseModel):
         description="Active defense rules (Circuit Breakers, Drift, Spot Checks).",
     )
 
-    topology: Annotated[GraphTopology, BeforeValidator(coerce_topology)] = Field(
-        ..., description="The execution graph topology."
-    )
+    topology: GraphTopology = Field(..., description="The execution graph topology.")
 
     @model_validator(mode="after")
     def validate_topology_integrity(self) -> Self:

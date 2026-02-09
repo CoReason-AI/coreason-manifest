@@ -180,29 +180,6 @@ class AgentDefinition(CoReasonBaseModel):
         "hybrid", description="Context optimization strategy for skills."
     )
 
-    @field_validator("tools", mode="before")
-    @classmethod
-    def normalize_tools(cls, v: Any) -> Any:
-        if not isinstance(v, list):
-            return v
-
-        normalized = []
-        for item in v:
-            if isinstance(item, str):
-                normalized.append({"type": "remote", "uri": item})
-            elif isinstance(item, dict):
-                # If type is missing, assume remote if uri is present, or error out later
-                if "type" not in item and "uri" in item:
-                    # Default to remote for backward compatibility if it looks like one
-                    # But InlineToolDefinition has mandatory fields that remote doesn't.
-                    # Remote has mandatory 'uri'.
-                    item = item.copy()
-                    item["type"] = "remote"
-                normalized.append(item)
-            else:
-                normalized.append(item)
-        return normalized
-
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition, description="Input/Output contract.")
     capabilities: AgentCapabilities = Field(
         default_factory=AgentCapabilities, description="Feature flags and capabilities for the agent."
@@ -240,7 +217,7 @@ class BaseStep(CoReasonBaseModel):
 
     id: str = Field(..., description="Unique identifier for the step.")
     inputs: dict[str, Any] = Field(default_factory=dict, description="Input arguments for the step.")
-    design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
+    design_metadata: DesignMetadata | None = Field(None, description="UI metadata.")
 
 
 class AgentStep(BaseStep):
@@ -363,7 +340,7 @@ class ManifestMetadata(CoReasonBaseModel):
     generated_by: str | None = Field(
         None, description="The model or system ID that generated this manifest (e.g., 'coreason-strategist-v1')."
     )
-    design_metadata: DesignMetadata | None = Field(None, alias="x-design", description="UI metadata.")
+    design_metadata: DesignMetadata | None = Field(None, description="UI metadata.")
     provenance: ProvenanceData | None = Field(None, description="Provenance metadata.")
     tested_models: list[str] = Field(
         default_factory=list, description="List of LLM identifiers this manifest has been tested on."

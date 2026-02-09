@@ -26,10 +26,12 @@ from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
     GenericDefinition,
+    InlineToolDefinition,
     ManifestMetadata,
     ManifestV2,
     Step,
     ToolDefinition,
+    ToolRequirement,
     Workflow,
 )
 
@@ -80,7 +82,7 @@ class AgentBuilder:
     def __init__(self, name: str, version: str = "0.1.0"):
         self.name = name
         self.version = version
-        self.tools: list[str] = []
+        self.tools: list[ToolRequirement | InlineToolDefinition] = []
         self.knowledge: list[str] = []
         self.system_prompt: str | None = None
         self.model: str | None = None
@@ -129,7 +131,7 @@ class AgentBuilder:
         Returns:
             Self: The builder instance for chaining.
         """
-        self.tools.append(tool_id)
+        self.tools.append(ToolRequirement(uri=tool_id))
         return self
 
     def with_knowledge(self, uri: str) -> Self:
