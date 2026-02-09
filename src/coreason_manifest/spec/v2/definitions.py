@@ -308,7 +308,7 @@ class SwitchStep(BaseStep):
     # Note: 'next' is deliberately excluded for SwitchStep in favor of cases/default.
 
 
-class PlaceholderStep(ManifestBaseModel):
+class PlaceholderStep(BaseStep):
     """
     A placeholder for a step that is yet to be determined.
 
@@ -316,14 +316,13 @@ class PlaceholderStep(ManifestBaseModel):
         type (Literal["placeholder"]): Discriminator. (Default: "placeholder").
         id (str): Unique identifier for the step.
         inputs (dict[str, Any]): To preserve any partial configuration.
+        design_metadata (DesignMetadata | None): UI metadata.
         notes (str | None): For developer comments.
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     type: Literal["placeholder"] = "placeholder"
-    id: str = Field(..., description="Unique identifier for the step.")
-    inputs: dict[str, Any] = Field(default_factory=dict, description="To preserve any partial configuration.")
     notes: str | None = Field(None, description="For developer comments.")
 
 
