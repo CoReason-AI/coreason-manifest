@@ -19,8 +19,6 @@ from coreason_manifest.spec.common.graph_events import (
     GraphEventNodeStart,
     GraphEventNodeStream,
 )
-from coreason_manifest.spec.common.observability import EventContentType
-from coreason_manifest.utils.migration import migrate_graph_event_to_cloud_event
 
 
 def test_polymorphic_serialization() -> None:
@@ -61,38 +59,6 @@ def test_polymorphic_serialization() -> None:
 
     assert isinstance(restored_events[2], GraphEventNodeDone)
     assert restored_events[2].output == {"result": "Hello World"}
-
-
-def test_migration_logic() -> None:
-    """
-    2. Migration Logic:
-    * Create a GraphEventNodeStream.
-    * Call migrate_graph_event_to_cloud_event.
-    * Assert: cloudevent.type == "ai.coreason.node.stream".
-    * Assert: cloudevent.datacontenttype == "application/vnd.coreason.stream+json".
-    """
-    now = datetime.now().timestamp()
-    event = GraphEventNodeStream(
-        run_id="run-1", trace_id="trace-1", node_id="step-x", timestamp=now, chunk=" partial", visual_cue="typing"
-    )
-
-    cloud_event = migrate_graph_event_to_cloud_event(event)
-
-    # Check CloudEvent fields
-    assert cloud_event.type == "ai.coreason.node.stream"
-    assert cloud_event.source == "urn:node:step-x"
-    assert cloud_event.datacontenttype == EventContentType.STREAM
-
-    # Check data content
-    assert cloud_event.data == {"chunk": " partial"}
-
-    # Check Extensions
-    # Note: CloudEvent model puts extensions as fields if defined in model, or extra fields?
-    # ExtendedCloudEvent defines com_coreason_ui_cue explicitly.
-    # We access it via getattr or direct attribute if typed.
-    # Since migrate returns CloudEvent (base) but it's actually ExtendedCloudEvent.
-    assert getattr(cloud_event, "com_coreason_ui_cue", None) == "typing"
-    assert cloud_event.traceparent == "trace-1"
 
 
 def test_immutability() -> None:

@@ -20,6 +20,7 @@ from coreason_manifest.spec.v2.recipe import (
     RecipeDefinition,
     RecipeRecommendation,
     SemanticRef,
+    TaskSequence,
 )
 
 
@@ -95,7 +96,7 @@ def test_simulation_harvesting() -> None:
         metadata=ManifestMetadata(name="Test Recipe", provenance=ProvenanceData(type=ProvenanceType.HUMAN)),
         interface={},
         tests=[scenario],
-        topology=[AgentNode(id="step-1", agent_ref="agent-1")],
+        topology=TaskSequence(steps=[AgentNode(id="step-1", agent_ref="agent-1")]).to_graph(),
     )
 
     assert len(recipe.tests) == 1
@@ -115,7 +116,7 @@ def test_simulation_harvesting_multiple_scenarios() -> None:
         metadata=ManifestMetadata(name="Test Recipe", provenance=ProvenanceData(type=ProvenanceType.HUMAN)),
         interface={},
         tests=[scenario1, scenario2],
-        topology=[AgentNode(id="step-1", agent_ref="agent-1")],
+        topology=TaskSequence(steps=[AgentNode(id="step-1", agent_ref="agent-1")]).to_graph(),
     )
 
     assert len(recipe.tests) == 2
@@ -162,7 +163,7 @@ def test_complex_harvesting_scenario() -> None:
         metadata=ManifestMetadata(name="Complex Recipe", provenance=ProvenanceData(type=ProvenanceType.AI)),
         interface={},
         policy=policy,
-        topology=[node],
+        topology=TaskSequence(steps=[node]).to_graph(),
         # Note: status defaults to DRAFT, which allows SemanticRef
     )
 

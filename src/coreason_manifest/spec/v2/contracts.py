@@ -35,14 +35,14 @@ class StateDefinition(CoReasonBaseModel):
     Defines the conversation memory/context structure.
 
     Attributes:
-        schema_ (dict[str, Any]): The structure of the conversation memory/context. (Alias: 'schema').
+        data_schema (dict[str, Any]): The structure of the conversation memory/context.
         backend (str | None): Backend storage type (e.g., 'redis', 'memory').
     """
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    schema_: dict[str, Any] = Field(
-        default_factory=dict, alias="schema", description="The structure of the conversation memory/context."
+    data_schema: dict[str, Any] = Field(
+        default_factory=dict, description="The structure of the conversation memory/context."
     )
     backend: str | None = Field(None, description="Backend storage type (e.g., 'redis', 'memory').")
 

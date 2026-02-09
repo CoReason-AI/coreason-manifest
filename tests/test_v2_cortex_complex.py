@@ -91,15 +91,13 @@ def test_full_cognitive_profile_integration() -> None:
     assert profile.reflex == reflex
     assert profile.reasoning == episteme
     assert profile.memory_read == read_configs
-    # Check alias access
-    assert profile.memory == read_configs
     assert profile.memory_write == write_config
 
     # Verify serialization
     dumped = profile.model_dump(by_alias=True)
     assert dumped["reflex"]["confidence_threshold"] == 0.95
     assert dumped["reasoning"]["strategy"] == "adversarial"
-    assert dumped["memory"][0]["collection_name"] == "global_knowledge"
+    assert dumped["memory_read"][0]["collection_name"] == "global_knowledge"
     assert dumped["memory_write"]["strategy"] == "semantic_cluster"
 
 

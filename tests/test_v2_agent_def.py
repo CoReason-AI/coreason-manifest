@@ -53,7 +53,9 @@ definitions:
     name: Researcher
     role: Research Specialist
     goal: Find data
-    tools: [my_tool]
+    tools:
+      - type: remote
+        uri: my_tool
 """
     manifest_data = yaml.safe_load(yaml_content)
     manifest = ManifestV2(**manifest_data)
