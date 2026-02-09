@@ -25,7 +25,8 @@ def test_simple_agent_minimal() -> None:
 
 def test_simple_agent_full_options() -> None:
     # simple_agent uses AgentBuilder.build() which triggers integrity checks.
-    # Since we can't easily inject ToolDefinitions into simple_agent, this call fails if tools are referenced but undefined.
+    # Since we can't easily inject ToolDefinitions into simple_agent, this call fails
+    # if tools are referenced but undefined.
     # HOWEVER, simple_agent is a high-level shortcut. If it fails on tools, it's brittle.
     # BUT, strict is strict.
     #
@@ -34,12 +35,13 @@ def test_simple_agent_full_options() -> None:
     # Fix: Don't test tools here with simple_agent if we can't make it valid, OR rely on the fact that
     # simple_agent is just a wrapper around AgentBuilder, and we've already tested Builder issues.
     #
-    # OR, we catch the ValidationError and assert it failed because of missing tool, confirming it TRIED to add the tool.
+    # OR, we catch the ValidationError and assert it failed because of missing tool, confirming
+    # it TRIED to add the tool.
     # This proves simple_agent passed the tool to the builder.
 
     # Option 2: Catch error.
-    from pydantic import ValidationError
     import pytest
+    from pydantic import ValidationError
 
     with pytest.raises(ValidationError) as exc:
         simple_agent(

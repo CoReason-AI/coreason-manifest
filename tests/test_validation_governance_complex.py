@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any, cast
+
 from coreason_manifest import (
     AgentStep,
     GovernanceConfig,
@@ -44,7 +46,7 @@ def test_complex_large_manifest_many_tools() -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Manifest"),
-        definitions=tools,
+        definitions=cast(dict[str, Any], tools),
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 
@@ -65,7 +67,7 @@ def test_complex_compliant_large_manifest() -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Large Compliant", requires_auth=True),
-        definitions=tools,
+        definitions=cast(dict[str, Any], tools),
         workflow=Workflow(start="A", steps={"A": AgentStep(id="A", agent="bond")}),
     )
 

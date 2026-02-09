@@ -10,19 +10,18 @@
 
 
 import pytest
+from pydantic import ValidationError
+
 from coreason_manifest import (
     AgentDefinition,
     AgentStep,
-    CouncilStep,
     Manifest,
     ManifestMetadata,
-    SwitchStep,
     ToolDefinition,
     ToolRequirement,
     ToolRiskLevel,
     Workflow,
 )
-from pydantic import ValidationError
 
 
 def test_validate_integrity_full_coverage() -> None:
@@ -31,8 +30,8 @@ def test_validate_integrity_full_coverage() -> None:
     # Create definitions including wrong types for cross-referencing
     tool_def = ToolDefinition(id="tool1", name="Tool", uri="https://example.com", risk_level=ToolRiskLevel.SAFE)
     # Note: AgentDefinition now requires Tools to be ToolRequirement or InlineToolDefinition.
-    # We can't easily make it reference "agent2" in a way that passes Pydantic type validation but fails referential integrity
-    # unless we use ToolRequirement with a URI that matches an agent ID.
+    # We can't easily make it reference "agent2" in a way that passes Pydantic type validation
+    # but fails referential integrity unless we use ToolRequirement with a URI that matches an agent ID.
     # "missing-tool" will be a URI. "agent2" will be a URI.
 
     agent_def = AgentDefinition(

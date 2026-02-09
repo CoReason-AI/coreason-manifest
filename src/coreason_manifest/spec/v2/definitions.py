@@ -291,7 +291,7 @@ class SwitchStep(BaseStep):
     @field_validator("cases")
     @classmethod
     def validate_cases(cls, v: dict[str, str]) -> dict[str, str]:
-        for condition in v.keys():
+        for condition in v:
             if not condition.strip():
                 raise ValueError("Switch condition cannot be empty.")
         return v
@@ -454,8 +454,8 @@ class ManifestV2(CoReasonBaseModel):
                             tool_def = self.definitions[tool_ref.uri]
                             if not isinstance(tool_def, ToolDefinition):
                                 raise ValueError(
-                                    f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition "
-                                    f"(got {type(tool_def).__name__})."
+                                    f"Agent '{definition.id}' references '{tool_ref.uri}' which is not a ToolDefinition"
+                                    f" (got {type(tool_def).__name__})."
                                 )
                         elif "://" not in tool_ref.uri:
                             # If it's not a valid URI (no scheme) and not in definitions, assume broken ID reference

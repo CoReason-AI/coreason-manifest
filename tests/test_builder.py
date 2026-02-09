@@ -66,10 +66,14 @@ def test_fluent_chaining_fixed() -> None:
     assert agent.metadata.name == "TestAgent"
 
     # 2. Test tool addition on definition
+    from coreason_manifest.spec.v2.definitions import ToolRequirement
+
     builder = AgentBuilder("ToolAgent").with_tool("tool-1")
     agent_def = builder.build_definition()
 
-    assert agent_def.tools[0].uri == "tool-1"
+    tool = agent_def.tools[0]
+    assert isinstance(tool, ToolRequirement)
+    assert tool.uri == "tool-1"
 
     # Check AgentDefinition (from step 1)
     agent_def = agent.definitions["TestAgent"]
@@ -249,7 +253,8 @@ def test_kitchen_sink_full_composition() -> None:
     assert agent_def.model == "claude-3-opus"
     assert agent_def.backstory == "System Prompt"
     # tools is now list[ToolRequirement | InlineToolDefinition]
-    tools = [t.uri for t in agent_def.tools if hasattr(t, "uri")]
+    from coreason_manifest.spec.v2.definitions import ToolRequirement
+    tools = [t.uri for t in agent_def.tools if isinstance(t, ToolRequirement)]
     assert tools == ["tool-search", "tool-calculator"]
     assert agent_def.knowledge == ["s3://data/kb.pdf"]
 

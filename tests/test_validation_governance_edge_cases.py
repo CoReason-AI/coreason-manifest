@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import pytest
+from typing import Any, cast
 
 from coreason_manifest import (
     AgentStep,
@@ -35,7 +36,7 @@ def test_auth_mandate_explicit_false(base_workflow: Workflow) -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Explicit Insecure", requires_auth=False),
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
 
@@ -53,7 +54,7 @@ def test_auth_mandate_none_default(base_workflow: Workflow) -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Default Insecure"),
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
 
@@ -77,7 +78,7 @@ def test_auth_mandate_mixed_tools(base_workflow: Workflow) -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Mixed Risk Agent"),
-        definitions=tools,
+        definitions=cast(dict[str, Any], tools),
         workflow=base_workflow,
     )
 
@@ -97,7 +98,7 @@ def test_auth_mandate_config_disabled(base_workflow: Workflow) -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Config Disabled Agent"),
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
 
@@ -124,7 +125,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     manifest_str_false = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="String False", requires_auth="false"),
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
     report = check_compliance_v2(manifest_str_false, config)
@@ -134,7 +135,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     manifest_str_true = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="String True", requires_auth="true"),
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
     report_true = check_compliance_v2(manifest_str_true, config)
@@ -144,7 +145,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     manifest_int_0 = Manifest.model_construct(
         kind="Agent",
         metadata=ManifestMetadata(name="Int Zero", requires_auth=0),
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
     report_int = check_compliance_v2(manifest_int_0, config)
@@ -167,7 +168,7 @@ def test_auth_mandate_dynamic_extra_field(base_workflow: Workflow) -> None:
     manifest = Manifest.model_construct(
         kind="Agent",
         metadata=metadata,
-        definitions={"nuke": tool},
+        definitions=cast(dict[str, Any], {"nuke": tool}),
         workflow=base_workflow,
     )
 
