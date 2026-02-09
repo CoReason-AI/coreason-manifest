@@ -263,7 +263,7 @@ class ManifestV2(CoReasonBaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
-    apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")
+    apiVersion: Literal["coreason.ai/v2"] = Field("coreason.ai/v2", description="API Version.")  # noqa: N815
     kind: Literal["Recipe", "Agent"] = Field(..., description="Kind of the object.")
     metadata: ManifestMetadata = Field(..., description="Metadata including name and design info.")
     interface: InterfaceDefinition = Field(default_factory=InterfaceDefinition)

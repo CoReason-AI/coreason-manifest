@@ -87,7 +87,7 @@ def validate_integrity(manifest: ManifestV2) -> ManifestV2:
                     )
 
     # 5. Validate Agent Tools
-    for _, definition in manifest.definitions.items():
+    for definition in manifest.definitions.values():
         if isinstance(definition, AgentDefinition):
             for tool_ref in definition.tools:
                 # Handle ToolRequirement (remote tools)
@@ -132,9 +132,11 @@ def validate_loose(manifest: ManifestV2) -> list[str]:
     # 2. Check SwitchStep cases syntax
     for step_id, step in manifest.workflow.steps.items():
         if isinstance(step, SwitchStep):
-            for condition in step.cases:
-                if not isinstance(condition, str) or not condition.strip():
-                    warnings.append(f"SwitchStep '{step_id}' has invalid condition: {condition}")
+            warnings.extend(
+                f"SwitchStep '{step_id}' has invalid condition: {condition}"
+                for condition in step.cases
+                if not isinstance(condition, str) or not condition.strip()
+            )
 
     # 3. Check Referential Integrity (Warnings)
     steps = manifest.workflow.steps
@@ -150,9 +152,11 @@ def validate_loose(manifest: ManifestV2) -> list[str]:
 
         # SwitchStep targets
         if isinstance(step, SwitchStep):
-            for target in step.cases.values():
-                if target not in steps:
-                    warnings.append(f"SwitchStep '{step.id}' references missing step '{target}' in cases.")
+            warnings.extend(
+                f"SwitchStep '{step.id}' references missing step '{target}' in cases."
+                for target in step.cases.values()
+                if target not in steps
+            )
             if step.default and step.default not in steps:
                 warnings.append(f"SwitchStep '{step.id}' references missing step '{step.default}' in default.")
 
@@ -181,7 +185,7 @@ def validate_loose(manifest: ManifestV2) -> list[str]:
                         )
 
     # Agent Tools
-    for _, definition in manifest.definitions.items():
+    for definition in manifest.definitions.values():
         if isinstance(definition, AgentDefinition):
             for tool_ref in definition.tools:
                 if isinstance(tool_ref, ToolRequirement):

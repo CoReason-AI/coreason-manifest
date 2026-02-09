@@ -61,7 +61,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
     # 1. Check Tools in Definitions
     has_critical_tools = False
 
-    for _, definition in manifest.definitions.items():
+    for definition in manifest.definitions.values():
         if isinstance(definition, ToolDefinition):
             if definition.risk_level == ToolRiskLevel.CRITICAL:
                 has_critical_tools = True
@@ -101,8 +101,7 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                         if config.strict_url_validation:
                             # Normalize hostname
                             hostname = hostname.lower()
-                            if hostname.endswith("."):
-                                hostname = hostname[:-1]
+                            hostname = hostname.removesuffix(".")
                             allowed_set = {d.lower() for d in config.allowed_domains if d}
                         else:
                             allowed_set = set(config.allowed_domains)
@@ -159,17 +158,17 @@ def check_compliance_v2(manifest: ManifestV2, config: GovernanceConfig) -> Compl
                 )
             elif isinstance(step, SwitchStep):
                 # Flag complex conditions (function calls, imports, internals) as custom logic.
-                for condition in step.cases:
-                    if "(" in condition or "import " in condition or "__" in condition:
-                        violations.append(
-                            ComplianceViolation(
-                                rule="custom_logic_restriction",
-                                message=(
-                                    f"SwitchStep '{step_id}' contains complex condition '{condition}' "
-                                    "which is flagged as custom logic."
-                                ),
-                                component_id=step_id,
-                            )
-                        )
+                violations.extend(
+                    ComplianceViolation(
+                        rule="custom_logic_restriction",
+                        message=(
+                            f"SwitchStep '{step_id}' contains complex condition '{condition}' "
+                            "which is flagged as custom logic."
+                        ),
+                        component_id=step_id,
+                    )
+                    for condition in step.cases
+                    if "(" in condition or "import " in condition or "__" in condition
+                )
 
     return ComplianceReport(passed=len(violations) == 0, violations=violations)

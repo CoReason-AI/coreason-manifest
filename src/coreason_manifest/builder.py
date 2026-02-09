@@ -50,14 +50,14 @@ class TypedCapability[InputT: BaseModel, OutputT: BaseModel]:
         description: str,
         input_model: type[InputT],
         output_model: type[OutputT],
-        type: CapabilityType = CapabilityType.GRAPH,
+        capability_type: CapabilityType = CapabilityType.GRAPH,
         delivery_mode: DeliveryMode = DeliveryMode.REQUEST_RESPONSE,
     ):
         self.name = name
         self.description = description
         self.input_model = input_model
         self.output_model = output_model
-        self.type = type
+        self.type = capability_type
         self.delivery_mode = delivery_mode
 
     def get_input_schema(self) -> dict[str, Any]:
