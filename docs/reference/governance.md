@@ -1,10 +1,10 @@
 # Governance
 
 ## Overview
-This module defines the policies for static validation and runtime auditing, ensuring that agents and tools comply with security and safety standards.
+This module defines the policies for static validation and runtime auditing, ensuring that [agents](../reference/agents.md) and tools comply with security and safety standards.
 
 ## Application Pattern
-This example shows how to configure a `GovernanceConfig` that enforces strict risk levels and blocks the use of "Critical" tools without authentication.
+This example shows how to configure a [GovernanceConfig][coreason_manifest.spec.governance.GovernanceConfig] that enforces strict risk levels and blocks the use of "Critical" tools without authentication.
 
 ```python
 # Example: Creating a Governance Configuration

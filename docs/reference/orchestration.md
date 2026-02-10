@@ -1,10 +1,10 @@
 # Orchestration
 
 ## Overview
-This module controls the flow of execution within an agentic workflow, defining how nodes (agents, routers, humans) are connected and how data flows between them.
+This module controls the flow of execution within an agentic workflow, defining how nodes ([agents](../reference/agents.md), routers, humans) are connected and how data flows between them.
 
 ## Application Pattern
-This example demonstrates how to wire a `GraphTopology` with a simple feedback loop, where an agent's output is evaluated and potentially routed back for refinement.
+This example demonstrates how to wire a [GraphTopology][coreason_manifest.spec.v2.recipe.GraphTopology] with a simple feedback loop, where an [AgentNode][coreason_manifest.spec.v2.recipe.AgentNode]'s output is evaluated and potentially routed back for refinement.
 
 ```python
 # Example: Instantiating a GraphTopology with a Loop
@@ -16,6 +16,7 @@ from coreason_manifest.spec.v2.recipe import (
 )
 
 # Define the Agent Node (The Doer)
+# Refers to an AgentDefinition in 'agents.md'
 agent_node = AgentNode(
     id="step_1_generate",
     agent_ref="agent-writer-v1"
