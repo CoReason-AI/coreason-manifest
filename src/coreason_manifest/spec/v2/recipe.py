@@ -34,6 +34,26 @@ logger = logging.getLogger(__name__)
 # ==========================================
 
 
+class SteeringCommand(StrEnum):
+    """Standardized primitives for human intervention."""
+
+    APPROVE = "approve"
+    REJECT = "reject"
+    MODIFY = "modify"
+    ESCALATE = "escalate"
+    REWIND = "rewind"
+    REPLY = "reply"
+
+
+class RenderStrategy(StrEnum):
+    """Protocol for rendering the feedback interface."""
+
+    PLAIN_TEXT = "plain_text"
+    JSON_FORMS = "json_forms"  # Native forms via JSON Schema
+    ADAPTIVE_CARD = "adaptive_card"  # Microsoft Adaptive Cards
+    CUSTOM_IFRAME = "custom_iframe"  # Embedded Web View
+
+
 class RecipeStatus(StrEnum):
     """Lifecycle status of a Recipe."""
 
@@ -290,7 +310,9 @@ class CollaborationConfig(ManifestBaseModel):
     Attributes:
         mode (CollaborationMode): Engagement mode. (Default: COMPLETION).
         feedback_schema (dict[str, Any] | None): JSON Schema for structured feedback.
-        supported_commands (list[str]): Slash commands the agent understands.
+        supported_commands (list[SteeringCommand]): Slash commands the agent understands.
+        render_strategy (RenderStrategy): Protocol for rendering the feedback interface. (Default: PLAIN_TEXT).
+        trace_intervention (bool): Whether to log detailed intervention traces. (Default: False).
         channels (list[str]): Communication channels to notify (e.g., ['slack', 'email', 'mobile_push']).
         timeout_seconds (int | None): How long to wait for human input before triggering fallback.
         fallback_behavior (Literal["fail", "proceed_with_default", "escalate"]): Action to take if the timeout
@@ -301,7 +323,13 @@ class CollaborationConfig(ManifestBaseModel):
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
     feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
-    supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
+    supported_commands: list[SteeringCommand] = Field(
+        default_factory=list, description="Slash commands the agent understands."
+    )
+    render_strategy: RenderStrategy = Field(
+        RenderStrategy.PLAIN_TEXT, description="Protocol for rendering the feedback interface."
+    )
+    trace_intervention: bool = Field(False, description="Whether to log detailed intervention traces.")
 
     # --- New Harvesting Fields ---
     channels: list[str] = Field(
@@ -517,12 +545,16 @@ class HumanNode(RecipeNode):
         prompt (str): Instruction for the human user.
         timeout_seconds (int | None): SLA for approval.
         required_role (str | None): Role required to approve (e.g., manager).
+        routes (dict[SteeringCommand, str] | None): Map of SteeringCommands to Target Node IDs. If None, flow is linear.
     """
 
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Instruction for the human user.")
     timeout_seconds: int | None = Field(None, description="SLA for approval.")
     required_role: str | None = Field(None, description="Role required to approve (e.g., manager).")
+    routes: dict[SteeringCommand, str] | None = Field(
+        None, description="Map of SteeringCommands to Target Node IDs. If None, flow is linear."
+    )
 
 
 class RouterNode(RecipeNode):
@@ -867,6 +899,15 @@ class RecipeDefinition(ManifestBaseModel):
                         f"Node '{node.id}' defines fallback_node_id='{target_id}', "
                         f"but '{target_id}' does not exist in the recipe."
                     )
+
+            # Check HumanNode routes
+            if isinstance(node, HumanNode) and node.routes:
+                for command, target_id in node.routes.items():
+                    if target_id not in valid_node_ids:
+                        errors.append(
+                            f"Node '{node.id}' defines route '{command}' -> '{target_id}', "
+                            f"but '{target_id}' does not exist in the recipe."
+                        )
 
             # Future proofing: If you add explicit 'next_step' fields later, add checks here.
 

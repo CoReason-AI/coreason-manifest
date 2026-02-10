@@ -25,6 +25,7 @@ from coreason_manifest.spec.v2.definitions import (
 )
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
+    CollaborationMode,
     EvaluatorNode,
     GenerativeNode,
     HumanNode,
@@ -209,7 +210,22 @@ def _generate_recipe_mermaid(
                 label = f"{display_name}<br/>(Agent: {ref_str})"
 
         elif isinstance(node, HumanNode):
-            label = f"{display_name}<br/>(Human Input)"
+            # Icon Logic
+            icon = "👤"
+            if node.collaboration and node.collaboration.mode == CollaborationMode.CO_EDIT:
+                icon = "✍️"
+
+            # Render Strategy
+            strategy = ""
+            if node.collaboration:
+                strategy = f" [{node.collaboration.render_strategy}]"
+
+            label = f"{display_name}<br/>{icon} (Human Input){strategy}"
+
+            # Routing Edges
+            if node.routes:
+                for command, target in node.routes.items():
+                    lines.append(f'{sanitized_id} -- "{command}" --> {_sanitize_id(target)}')
 
         elif isinstance(node, RouterNode):
             label = f"{display_name}<br/>(Router: {node.input_key})"

@@ -76,7 +76,7 @@ def test_recipe_mermaid_human_node() -> None:
     chart = generate_mermaid_graph(recipe)
 
     assert "classDef human" in chart
-    assert 'human1{{"human1<br/>(Human Input)"}}:::human' in chart
+    assert 'human1{{"human1<br/>👤 (Human Input)"}}:::human' in chart
 
 
 def test_recipe_mermaid_router_node() -> None:
