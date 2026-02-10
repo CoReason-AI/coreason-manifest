@@ -12,6 +12,7 @@ import importlib.util
 import os
 import stat
 import sys
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -21,7 +22,7 @@ from coreason_manifest.spec.v2.recipe import RecipeDefinition
 
 
 @contextmanager
-def _temporary_sys_path(path: str):
+def _temporary_sys_path(path: str) -> Generator[None, None, None]:
     """Context manager to temporarily add a path to sys.path."""
     sys.path.insert(0, path)
     try:
