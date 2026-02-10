@@ -78,6 +78,9 @@ Governance Policies (`GovernanceConfig`) are data, but applying them (`check_com
 
 ```mermaid
 graph TD
+    %% SOTA Styling Init
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffecb3', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#e1f5fe'}}}%%
+
     External_App[External App]
     spec[spec]
     utils[utils]
@@ -88,6 +91,16 @@ graph TD
 
     %% Forbidden dependency
     spec --x|Forbidden| utils
+
+    %% Styling Classes
+    classDef app fill:#e1f5fe,stroke:#4fc3f7,stroke-width:2px;
+    classDef kernel fill:#ffecb3,stroke:#ffb74d,stroke-width:2px;
+    classDef logic fill:#e0f2f1,stroke:#4db6ac,stroke-width:2px;
+
+    %% Apply Styles
+    class External_App app;
+    class spec kernel;
+    class utils logic;
 
     linkStyle 3 stroke:red,stroke-width:2px,color:red;
 ```

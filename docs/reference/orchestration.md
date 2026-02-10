@@ -6,6 +6,9 @@ This diagram illustrates the structure of a `RecipeDefinition` and the inheritan
 
 ```mermaid
 classDiagram
+    %% SOTA Styling Init
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffecb3', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#e1f5fe'}}}%%
+
     class RecipeDefinition {
         +ManifestMetadata metadata
         +RecipeInterface interface
@@ -92,7 +95,17 @@ classDiagram
         <<External>>
     }
 
-    %% Styling
-    classDef abstract fill:#f9f9f9,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5;
+    %% Styling Classes
+    classDef root fill:#ffecb3,stroke:#ffb74d,stroke-width:2px;
+    classDef config fill:#e1f5fe,stroke:#4fc3f7,stroke-width:1px;
+    classDef node fill:#e0f2f1,stroke:#4db6ac,stroke-width:1px;
+    classDef abstract fill:#f5f5f5,stroke:#9e9e9e,stroke-width:1px,stroke-dasharray: 5 5;
+    classDef external fill:#fff3e0,stroke:#ffcc80,stroke-width:1px,stroke-dasharray: 2 2;
+
+    %% Apply Styles
+    class RecipeDefinition root;
+    class GraphTopology,RecipeInterface,PolicyConfig config;
+    class AgentNode,RouterNode,HumanNode,EvaluatorNode,GenerativeNode node;
     class RecipeNode abstract;
+    class AgentDefinition external;
 ```
