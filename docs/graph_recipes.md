@@ -1,5 +1,7 @@
 # Orchestration: Graph Recipes
 
+**Note:** This document defines the *schema* and *contract* for orchestration. As part of the Shared Kernel, it provides the blueprints (`RecipeDefinition`) that the Runtime Engine executes. It does not contain the execution logic itself.
+
 Coreason V2 introduces **Graph Recipes**, replacing linear workflows with a robust **Directed Cyclic Graph (DCG)** architecture. This allows for complex orchestration patterns including loops, conditional branching, and human-in-the-loop interactions.
 
 ## Concept: Graphs, Not Lists

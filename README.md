@@ -18,6 +18,10 @@ The definitive source of truth for CoReason-AI Asset definitions. "The Contract.
 
 It provides the **"Blueprint"** that all other services rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
 
+### Where to Start
+
+New to Coreason? Start with the [Study Guide](docs/STUDY_GUIDE.md).
+
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
 
