@@ -80,7 +80,12 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
             style_class = "human"
             shape_open = "{{"
             shape_close = "}}"
-            label = f"{node.id}<br/>(Human Input)"
+
+            # Dynamic Labeling
+            collab = node.collaboration
+            mode_icon = "✍️" if collab and collab.mode == "co_edit" else "👤"
+            strategy = collab.render_strategy if collab else "default"
+            label = f"{mode_icon} {node.id}<br/>(Protocol: {strategy})"
 
         elif isinstance(node, RouterNode):
             # Router Node: Rhombus { }
@@ -129,6 +134,16 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
         else:
             # Unlabeled edge
             lines.append(f"{src} --> {tgt}")
+
+    # Explicit Routing Edges (Human Steering)
+    for node in recipe.topology.nodes:
+        if isinstance(node, HumanNode) and node.routes:
+            src = _sanitize_id(node.id)
+            for command, target_id in node.routes.items():
+                tgt = _sanitize_id(target_id)
+                # Render the steering command as the edge label
+                safe_command = command.replace('"', "'")
+                lines.append(f'{src} -- "{safe_command}" --> {tgt}')
 
     # Implicit edges (e.g. from leaf nodes to END)
     # Finding leaf nodes is a bit complex in graph, so we skip for now unless requested.

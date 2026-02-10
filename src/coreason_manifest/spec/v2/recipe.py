@@ -321,6 +321,7 @@ class CollaborationConfig(ManifestBaseModel):
 
     Attributes:
         mode (CollaborationMode): Engagement mode. (Default: COMPLETION).
+        render_strategy (Literal["json_forms", "adaptive_card"] | str): UI rendering strategy. (Default: "json_forms").
         feedback_schema (dict[str, Any] | None): JSON Schema for structured feedback.
         supported_commands (list[str]): Slash commands the agent understands.
         channels (list[str]): Communication channels to notify (e.g., ['slack', 'email', 'mobile_push']).
@@ -332,6 +333,9 @@ class CollaborationConfig(ManifestBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
+    render_strategy: Literal["json_forms", "adaptive_card"] | str = Field(
+        "json_forms", description="UI rendering strategy."
+    )
     feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
     supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
 
@@ -540,6 +544,9 @@ class GenerativeNode(RecipeNode):
     output_schema: dict[str, Any] = Field(..., description="The contract for the result.")
 
 
+SteeringCommand = str
+
+
 class HumanNode(RecipeNode):
     """
     A node that pauses execution for human input/approval.
@@ -547,12 +554,16 @@ class HumanNode(RecipeNode):
     Attributes:
         type (Literal["human"]): Discriminator. (Default: "human").
         prompt (str): Instruction for the human user.
+        routes (dict[SteeringCommand, str]): Map of SteeringCommand -> target_node_id.
         timeout_seconds (int | None): SLA for approval.
         required_role (str | None): Role required to approve (e.g., manager).
     """
 
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Instruction for the human user.")
+    routes: dict[SteeringCommand, str] = Field(
+        default_factory=dict, description="Map of SteeringCommand -> target_node_id."
+    )
     timeout_seconds: int | None = Field(None, description="SLA for approval.")
     required_role: str | None = Field(None, description="Role required to approve (e.g., manager).")
 
