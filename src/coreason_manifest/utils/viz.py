@@ -323,7 +323,6 @@ def to_graph_json(
     Exports the recipe topology as a structured JSON dict for frontend rendering.
     """
     nodes = []
-    edges = []
 
     # Map nodes
     for node in recipe.topology.nodes:
@@ -365,14 +364,14 @@ def to_graph_json(
         )
 
     # Map edges
-    for edge in recipe.topology.edges:
-        edges.append(
-            {
-                "source": _sanitize_id(edge.source),
-                "target": _sanitize_id(edge.target),
-                "label": edge.condition,
-            }
-        )
+    edges = [
+        {
+            "source": _sanitize_id(edge.source),
+            "target": _sanitize_id(edge.target),
+            "label": edge.condition,
+        }
+        for edge in recipe.topology.edges
+    ]
 
     # Implicit edges (Inputs -> Entry)
     if recipe.topology.entry_point:
