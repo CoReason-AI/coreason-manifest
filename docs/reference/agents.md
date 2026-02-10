@@ -1,66 +1,34 @@
-# Agent Definition
+# Agent Definitions
 
-## Architecture
+## Overview
+This module defines the core structure of an AI Agent, including its persona, goals, tools, and knowledge sources.
 
-This diagram illustrates the composition of an `AgentDefinition`, highlighting its relationships with resources (Model), tools, and knowledge.
+## Application Pattern
+This example demonstrates the minimal configuration required to define a compliant agent with a specific tool requirement.
 
-```mermaid
-classDiagram
-    %% SOTA Styling Init
-    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffecb3', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#e1f5fe'}}}%%
+```python
+# Example: Defining a Support Agent
+from coreason_manifest.spec.v2.definitions import AgentDefinition, ToolRequirement
 
-    class AgentDefinition {
-        +str id
-        +str name
-        +str role
-        +str goal
-        +str backstory
-        +list~str~ knowledge
-        +list~str~ skills
-        +InterfaceDefinition interface
-        +AgentCapabilities capabilities
-        +AgentRuntimeConfig runtime
-        +EvaluationProfile evaluation
-        +ModelProfile resources
-    }
-    class ModelProfile {
-        +str provider
-        +str model_id
-        +RateCard pricing
-        +ResourceConstraints constraints
-    }
-    class ToolRequirement {
-        +str uri
-        +str hash
-    }
-    class InlineToolDefinition {
-        +str name
-        +str description
-        +dict parameters
-        +str code_hash
-    }
-    class InterfaceDefinition {
-        +dict inputs
-        +dict outputs
-    }
-
-    %% Composition
-    AgentDefinition *-- ModelProfile : resources
-    AgentDefinition *-- InterfaceDefinition : interface
-
-    %% Aggregation/Composition for tools (Polymorphic list)
-    AgentDefinition o-- ToolRequirement : tools (reference)
-    AgentDefinition *-- InlineToolDefinition : tools (embedded)
-
-    %% Note: Knowledge is represented as a list of strings (IDs/Paths) within AgentDefinition
-
-    %% Styling Classes
-    classDef root fill:#ffecb3,stroke:#ffb74d,stroke-width:2px;
-    classDef config fill:#e1f5fe,stroke:#4fc3f7,stroke-width:1px;
-    classDef tool fill:#e0f2f1,stroke:#4db6ac,stroke-width:1px;
-
-    %% Apply Styles
-    class AgentDefinition root;
-    class ModelProfile,InterfaceDefinition config;
-    class ToolRequirement,InlineToolDefinition tool;
+support_agent = AgentDefinition(
+    id="customer-support-v1",
+    name="Support Bot",
+    role="Customer Service Representative",
+    goal="Resolve user inquiries efficiently and politely.",
+    backstory="You are a helpful assistant with 10 years of experience.",
+    model="gpt-4-turbo",
+    tools=[
+        ToolRequirement(
+            uri="mcp://zendesk/ticket-search",
+            hash="sha256:..."
+        )
+    ],
+    knowledge=["s3://company-docs/faq.pdf"]
+)
 ```
+
+## API Reference
+
+::: coreason_manifest.spec.v2.definitions.AgentDefinition
+
+::: coreason_manifest.spec.v2.definitions.ToolRequirement
