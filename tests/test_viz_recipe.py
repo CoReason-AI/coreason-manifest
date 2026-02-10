@@ -246,4 +246,4 @@ def test_recipe_mermaid_label_sanitization() -> None:
     chart = generate_mermaid_graph(recipe)
 
     # Quotes in label should be replaced by single quotes
-    assert 'step1["step1<br/>(Agent: Draft: Say \'Hello\')"]:::agent' in chart
+    assert "step1[\"step1<br/>(Agent: Draft: Say 'Hello')\"]:::agent" in chart
