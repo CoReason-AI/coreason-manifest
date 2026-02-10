@@ -320,9 +320,7 @@ class CollaborationConfig(ManifestBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
-    feedback_schema: dict[str, Any] | None = Field(
-        None, description="JSON Schema for structured feedback."
-    )
+    feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
     supported_commands: list[SteeringCommand] = Field(
         default_factory=list, description="Slash commands the agent understands."
     )
@@ -556,9 +554,7 @@ class HumanNode(RecipeNode):
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Instruction for the human user.")
     timeout_seconds: int | None = Field(None, description="SLA for approval.")
-    required_role: str | None = Field(
-        None, description="Role required to approve (e.g., manager)."
-    )
+    required_role: str | None = Field(None, description="Role required to approve (e.g., manager).")
     routes: dict[SteeringCommand, str] | None = Field(
         None, description="Map of SteeringCommands to Target Node IDs. If None, flow is linear."
     )

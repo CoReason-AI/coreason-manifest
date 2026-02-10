@@ -26,7 +26,10 @@ def test_collaboration_config_deserialization() -> None:
     }
     config = CollaborationConfig.model_validate(data)
 
-    assert config.supported_commands == [SteeringCommand.APPROVE, SteeringCommand.REJECT]
+    assert config.supported_commands == [
+        SteeringCommand.APPROVE,
+        SteeringCommand.REJECT,
+    ]
     assert config.render_strategy == RenderStrategy.ADAPTIVE_CARD
     assert config.trace_intervention is True
 
@@ -75,17 +78,18 @@ def test_topology_validation_human_routes_success() -> None:
         AgentNode(id="step-2", agent_ref="agent-a"),
         AgentNode(id="step-3", agent_ref="agent-b"),
     ]
-    edges = []  # Implicit edges via routes don't need explicit graph edges for this test?
-                # Wait, usually edges are explicit. But here flow is directed by routes.
-                # However, GraphTopology requires valid edges if they exist.
-                # If routes are used, edges might not be needed in the `edges` list strictly for connectivity if the runner handles it,
-                # but topology validation checks for dangling edges in `edges` list.
-                # Here we are testing `validate_topology_integrity` which checks references.
+    # Implicit edges via routes don't need explicit graph edges for this test?
+    # Wait, usually edges are explicit. But here flow is directed by routes.
+    # However, GraphTopology requires valid edges if they exist.
+    # If routes are used, edges might not be needed in the `edges` list strictly
+    # for connectivity if the runner handles it, but topology validation checks
+    # for dangling edges in `edges` list. Here we are testing
+    # `validate_topology_integrity` which checks references.
 
     # We need to wrap it in RecipeDefinition to trigger the validator
     topology = GraphTopology(
         nodes=nodes,
-        edges=[], # No explicit edges needed for this specific validator check
+        edges=[],  # No explicit edges needed for this specific validator check
         entry_point="human-1",
     )
 
@@ -95,7 +99,10 @@ def test_topology_validation_human_routes_success() -> None:
         topology=topology,
     )
 
-    assert recipe.topology.nodes[0].routes[SteeringCommand.APPROVE] == "step-2"
+    node = recipe.topology.nodes[0]
+    assert isinstance(node, HumanNode)
+    assert node.routes
+    assert node.routes[SteeringCommand.APPROVE] == "step-2"
 
 
 def test_topology_validation_human_routes_failure() -> None:
@@ -105,8 +112,8 @@ def test_topology_validation_human_routes_failure() -> None:
             id="human-1",
             prompt="Review",
             routes={
-                SteeringCommand.APPROVE: "step-2", # Exists
-                SteeringCommand.REJECT: "missing-step", # Missing
+                SteeringCommand.APPROVE: "step-2",  # Exists
+                SteeringCommand.REJECT: "missing-step",  # Missing
             },
         ),
         AgentNode(id="step-2", agent_ref="agent-a"),
