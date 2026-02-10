@@ -23,5 +23,6 @@ nav:
       - "Runtime Principles": runtime/runtime_principles.md
       - "Flow Governance": flow_governance.md
   - Reference:
+      - "Glossary": GLOSSARY.md
       - "Package Structure": package_structure.md
       - "Full Index": index.md
