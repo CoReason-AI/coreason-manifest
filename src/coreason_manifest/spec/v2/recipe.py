@@ -15,7 +15,7 @@ from typing import Annotated, Any, Literal, Self
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.common.presentation import NodePresentation
+from coreason_manifest.spec.common.presentation import NodePresentation, PresentationHints
 from coreason_manifest.spec.common_base import ManifestBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
@@ -275,36 +275,6 @@ class InteractionConfig(ManifestBaseModel):
     guidance_hint: str | None = Field(None, description="Hint for the human operator.")
 
 
-class VisualizationStyle(StrEnum):
-    """How the UI should render the node's running state."""
-
-    CHAT = "chat"
-    TREE = "tree"
-    KANBAN = "kanban"
-    DOCUMENT = "document"
-
-
-class PresentationHints(ManifestBaseModel):
-    """
-    Directives for the frontend on how to render the internal reasoning.
-
-    Attributes:
-        style (VisualizationStyle): Visualization style. (Default: CHAT).
-        display_title (str | None): Human-friendly label override.
-        icon (str | None): Icon name/emoji, e.g., 'lucide:brain'.
-        hidden_fields (list[str]): Whitelist of internal variables to hide from the non-debug UI.
-        progress_indicator (str | None): Name of the context variable to watch for % completion.
-    """
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
-
-    style: VisualizationStyle = Field(VisualizationStyle.CHAT, description="Visualization style.")
-    display_title: str | None = Field(None, description="Human-friendly label override.")
-    icon: str | None = Field(None, description="Icon name/emoji, e.g., 'lucide:brain'.")
-    hidden_fields: list[str] = Field(
-        default_factory=list, description="Whitelist of internal variables to hide from the non-debug UI."
-    )
-    progress_indicator: str | None = Field(None, description="Name of the context variable to watch for % completion.")
 
 
 class CollaborationMode(StrEnum):
