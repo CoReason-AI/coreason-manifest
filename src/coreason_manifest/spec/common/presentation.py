@@ -146,9 +146,13 @@ class GraphTheme(ManifestBaseModel):
             "human": "fill:#fff3e0,stroke:#e65100",
         }
     )
+    node_shapes: dict[str, str] = Field(
+        default_factory=dict, description="Map of node type to shape (rect, diamond, hexagon, etc.)"
+    )
     primary_color: str | None = None
     secondary_color: str | None = None
     font_family: str | None = None
+    interaction_callback: str = "call_interaction_handler"
 
 
 class NodeStatus(StrEnum):

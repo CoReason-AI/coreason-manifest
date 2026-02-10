@@ -32,11 +32,51 @@ from coreason_manifest.spec.v2.recipe import (
     TransparencyLevel,
 )
 
+# Default Shape Lookup Table
+DEFAULT_SHAPE_MAP = {
+    "agent": "rect",
+    "human": "hexagon",
+    "router": "diamond",
+    "evaluator": "stadium",
+    "generative": "subprocess",
+    "switch": "diamond",
+    "council": "subprocess",
+    "step": "rect",
+}
+
+# Mermaid Syntax Map
+MERMAID_SHAPES = {
+    "rect": ("[", "]"),
+    "diamond": ("{", "}"),
+    "hexagon": ("{{", "}}"),
+    "stadium": ("([", "])"),
+    "subprocess": ("[[", "]]"),
+    "circle": ("((", "))"),
+}
+
 
 def _sanitize_id(text: str) -> str:
     """Sanitizes a string for use as a Mermaid node ID."""
     # Replace anything not alphanumeric or underscore with underscore
     return re.sub(r"[^a-zA-Z0-9_]", "_", text)
+
+
+def _get_shape(node_type: str, theme: GraphTheme | None) -> tuple[str, str, str]:
+    """
+    Resolve shape for a node type based on theme or defaults.
+    Returns: (shape_name, open_char, close_char)
+    """
+    shape_name = "rect"
+    # 1. Theme Override
+    if theme and node_type in theme.node_shapes:
+        shape_name = theme.node_shapes[node_type]
+    # 2. Default Map
+    elif node_type in DEFAULT_SHAPE_MAP:
+        shape_name = DEFAULT_SHAPE_MAP[node_type]
+
+    # 3. Resolve Chars
+    open_char, close_char = MERMAID_SHAPES.get(shape_name, ("[", "]"))
+    return shape_name, open_char, close_char
 
 
 def _generate_recipe_mermaid(
@@ -88,17 +128,37 @@ def _generate_recipe_mermaid(
     lines.append(f'INPUTS["{input_label}"]:::input')
 
     # Nodes
+    callback_name = theme.interaction_callback if theme else "call_interaction_handler"
+
     for node in recipe.topology.nodes:
         sanitized_id = _sanitize_id(node.id)
         label = node.id
         style_class = "default"
-        shape_open = "["
-        shape_close = "]"
         is_subgraph = False
 
+        # Determine Type for Lookup
         if isinstance(node, AgentNode):
-            # Agent Node: Box
+            node_type = "agent"
             style_class = "agent"
+        elif isinstance(node, HumanNode):
+            node_type = "human"
+            style_class = "human"
+        elif isinstance(node, RouterNode):
+            node_type = "router"
+            style_class = "router"
+        elif isinstance(node, EvaluatorNode):
+            node_type = "evaluator"
+            style_class = "evaluator"
+        elif isinstance(node, GenerativeNode):
+            node_type = "generative"
+            style_class = "generative"
+        else:
+            node_type = "step"
+
+        # Resolve Shape
+        _, shape_open, shape_close = _get_shape(node_type, theme)
+
+        if isinstance(node, AgentNode):
             # Check for inline cognitive profile (Nested Graph)
             if node.cognitive_profile:
                 is_subgraph = True
@@ -120,31 +180,15 @@ def _generate_recipe_mermaid(
                 label = f"{node.id}<br/>(Agent: {ref_str})"
 
         elif isinstance(node, HumanNode):
-            # Human Node: Hexagon {{ }}
-            style_class = "human"
-            shape_open = "{{"
-            shape_close = "}}"
             label = f"{node.id}<br/>(Human Input)"
 
         elif isinstance(node, RouterNode):
-            # Router Node: Rhombus { }
-            style_class = "router"
-            shape_open = "{"
-            shape_close = "}"
             label = f"{node.id}<br/>(Router: {node.input_key})"
 
         elif isinstance(node, EvaluatorNode):
-            # Evaluator Node: Circle/Stadium ([ ])
-            style_class = "evaluator"
-            shape_open = "(["
-            shape_close = "])"
             label = f"{node.id}<br/>(Evaluator)"
 
         elif isinstance(node, GenerativeNode):
-            # Generative Node: Subroutine [[ ]]
-            style_class = "generative"
-            shape_open = "[["
-            shape_close = "]]"
             label = f"{node.id}<br/>(Generative)"
 
         if not is_subgraph:
@@ -155,7 +199,7 @@ def _generate_recipe_mermaid(
         # Interaction Binding
         if node.interaction and node.interaction.transparency == TransparencyLevel.INTERACTIVE:
             tooltip = f"Interact with {node.id}"
-            lines.append(f'click {sanitized_id} call_interaction_handler "{tooltip}"')
+            lines.append(f'click {sanitized_id} {callback_name} "{tooltip}"')
 
     # End Node
     lines.append("END((End)):::term")
@@ -249,20 +293,24 @@ def generate_mermaid_graph(
         sanitized_id = _sanitize_id(step_id)
         capability = "Unknown"
         style_class = "step"
-        shape_open = "["
-        shape_close = "]"
 
+        node_type = "step"
         if isinstance(step, AgentStep):
+            node_type = "agent"
             capability = step.agent
         elif isinstance(step, LogicStep):
+            node_type = "step"  # Logic steps are generic steps
             capability = "Logic"
         elif isinstance(step, CouncilStep):
+            node_type = "council"
             capability = "Council"
             style_class = "council"
-            shape_open = "[["
-            shape_close = "]]"
         elif isinstance(step, SwitchStep):
+            node_type = "switch"
             capability = "Switch"
+
+        # Resolve Shape
+        _, shape_open, shape_close = _get_shape(node_type, theme)
 
         lines.append(
             f'STEP_{sanitized_id}{shape_open}"{step_id}<br/>(Call: {capability})"{shape_close}:::{style_class}'
@@ -331,6 +379,9 @@ def to_graph_json(
         node_type = node.type
         sanitized_id = _sanitize_id(node.id)
 
+        # Determine Visual Hint (Shape)
+        shape_name, _, _ = _get_shape(node_type, theme)
+
         # Determine Label
         if isinstance(node, AgentNode):
             ref = getattr(node, "agent_ref", "Inline")
@@ -340,6 +391,12 @@ def to_graph_json(
             label = f"{node.id} ({ref_str})"
         elif isinstance(node, RouterNode):
             label = f"{node.id} (Router: {node.input_key})"
+        elif isinstance(node, HumanNode):
+            label = f"{node.id}<br/>(Human Input)"
+        elif isinstance(node, EvaluatorNode):
+            label = f"{node.id}<br/>(Evaluator)"
+        elif isinstance(node, GenerativeNode):
+            label = f"{node.id}<br/>(Generative)"
         else:
             label = f"{node.id} ({node_type})"
 
@@ -359,6 +416,7 @@ def to_graph_json(
                 "original_id": node.id,
                 "type": node_type,
                 "label": label,
+                "shape": shape_name,
                 "x": x,
                 "y": y,
                 "config": config,
@@ -394,6 +452,7 @@ def to_graph_json(
             "id": "INPUTS",
             "type": "input",
             "label": "Inputs",
+            "shape": "rect",
             "x": 0,
             "y": 0,
             "config": {"inputs": input_keys},

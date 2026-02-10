@@ -147,6 +147,7 @@ def test_viz_json_export() -> None:
     step1 = next(n for n in data["nodes"] if n["id"] == "step1")
     assert step1["type"] == "agent"
     assert step1["original_id"] == "step1"
+    assert step1["shape"] == "rect"
 
     # Check Edges
     edge = next(e for e in data["edges"] if e["source"] == "step1" and e["target"] == "step2")
@@ -249,12 +250,15 @@ def test_to_graph_json_coverage() -> None:
 
     agent_node = next(n for n in data["nodes"] if n["id"] == "agent1")
     assert "Profile: Researcher" in agent_node["label"]
+    assert agent_node["shape"] == "rect"
 
     router_node = next(n for n in data["nodes"] if n["id"] == "router1")
     assert "(Router: classification)" in router_node["label"]
+    assert router_node["shape"] == "diamond"
 
     human_node = next(n for n in data["nodes"] if n["id"] == "human1")
-    assert "(human)" in human_node["label"]
+    assert "(Human Input)" in human_node["label"]
+    assert human_node["shape"] == "hexagon"
 
 
 def test_manifest_v2_with_theme() -> None:
@@ -452,3 +456,50 @@ def test_viz_complex_interactive_debugger() -> None:
     human_node = next(n for n in data["nodes"] if n["id"] == "manual_override")
     assert human_node["config"]["interaction"]["transparency"] == "interactive"
     assert human_node["type"] == "human"
+
+
+def test_custom_interaction_callback() -> None:
+    nodes = [
+        AgentNode(
+            id="step1",
+            agent_ref="agent1",
+            interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE),
+        )
+    ]
+    edges: list[GraphEdge] = []
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="CallbackTest"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="step1"),
+    )
+
+    theme = GraphTheme(interaction_callback="myCustomCallback")
+    chart = generate_mermaid_graph(recipe, theme=theme)
+
+    assert 'click step1 myCustomCallback "Interact with step1"' in chart
+
+
+def test_viz_custom_shape_override() -> None:
+    """Test custom shape overriding via GraphTheme."""
+    nodes = [HumanNode(id="human1", prompt="?")]
+    edges: list[GraphEdge] = []
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="ShapeOverride"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="human1"),
+    )
+
+    # Override HumanNode to be a rectangle instead of hexagon
+    theme = GraphTheme(node_shapes={"human": "rect"})
+
+    # 1. Check Mermaid
+    chart = generate_mermaid_graph(recipe, theme=theme)
+    # Default is {{ }} (hexagon), rect is [ ]
+    assert 'human1["human1<br/>(Human Input)"]' in chart
+    assert "{{" not in chart
+
+    # 2. Check JSON
+    data = to_graph_json(recipe, theme=theme)
+    node = data["nodes"][1]
+    assert node["id"] == "human1"
+    assert node["shape"] == "rect"

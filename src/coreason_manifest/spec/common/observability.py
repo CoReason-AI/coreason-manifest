@@ -68,6 +68,7 @@ class ReasoningTrace(ManifestBaseModel):
     outputs: dict[str, Any] | None = None
     latency_ms: float
     timestamp: datetime
+    token_usage: dict[str, int] | None = Field(default=None, description="Token usage stats: input, output, total.")
 
     @model_validator(mode="before")
     @classmethod
