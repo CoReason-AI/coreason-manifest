@@ -3,6 +3,8 @@
 ## Overview
 The Governance module defines policies and compliance structures for the agent ecosystem. `GovernanceConfig` sets the rules for static analysis, while `ComplianceReport` captures the results of validation.
 
+This module enforces policies on [Agents](agents.md) and their tool usage, ensuring adherence to security and compliance standards.
+
 ## Application Pattern
 This example demonstrates how to configure governance rules to restrict tool usage and enforce strict compliance.
 

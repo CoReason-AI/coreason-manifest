@@ -3,6 +3,8 @@
 ## Overview
 The Capabilities module manages feature flags and architectural properties of an agent. `AgentCapabilities` defines what an agent *can* do, rather than *how* it does it.
 
+These capabilities are configured within the [Agent Definition](agents.md) to enable advanced runtime behaviors like graph reasoning and server-sent events.
+
 ## Application Pattern
 This pattern illustrates how to enable complex graph processing and server-sent events for real-time applications.
 

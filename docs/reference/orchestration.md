@@ -3,6 +3,9 @@
 ## Overview
 The Orchestration module controls the lifecycle and execution graph of an AI agent workflow (Recipe). It defines the `RecipeDefinition` as the root manifest and `GraphTopology` for the control flow.
 
+For details on defining the agents within this graph, see [Agent Definitions](agents.md).
+Governance policies that apply to these recipes are detailed in [Governance & Compliance](governance.md).
+
 ## Application Pattern
 Here is an example of how to define a simple linear recipe using `RecipeDefinition` and `GraphTopology`.
 

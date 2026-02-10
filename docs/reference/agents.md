@@ -3,6 +3,8 @@
 ## Overview
 The Agent module defines the blueprint for an autonomous AI agent. `AgentDefinition` encapsulates identity, tools, and cognitive architecture. `ToolRequirement` handles external dependencies.
 
+This definition works in conjunction with [Agent Capabilities](capabilities.md) to define runtime behavior, and adheres to [Governance Policies](governance.md) for tool safety.
+
 ## Application Pattern
 This pattern shows how to define a minimal agent with a remote tool dependency.
 
