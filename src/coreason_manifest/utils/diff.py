@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import difflib
 from enum import StrEnum
 from typing import Any
 
@@ -76,6 +77,15 @@ def compare_agents(old: ManifestV2 | AgentDefinition, new: ManifestV2 | AgentDef
     return DiffReport(changes=changes)
 
 
+def _make_hashable(value: Any) -> Any:
+    """Convert a value to a hashable representation for diffing."""
+    if isinstance(value, dict):
+        return tuple(sorted((k, _make_hashable(v)) for k, v in value.items()))
+    if isinstance(value, list):
+        return tuple(_make_hashable(v) for v in value)
+    return value
+
+
 def _walk_diff(path: str, old: Any, new: Any, changes: list[DiffChange]) -> None:
     """Recursively walk and compare two objects."""
     if old == new:
@@ -107,22 +117,67 @@ def _walk_diff(path: str, old: Any, new: Any, changes: list[DiffChange]) -> None
             _walk_diff(key_path, old[key], new[key], changes)
 
     elif isinstance(old, list):
-        # Heuristic: List comparison is tricky.
-        # We try to match by index for simplicity unless it looks like a list of IDs.
-        # But for 'tools' (list of strings), removing an item is important.
+        # Use difflib to find optimal matching of items (LCS)
+        # This handles insertions/deletions much better than index-based comparison
+        # and avoids expensive recursive comparisons for shifted items.
 
-        # If lengths differ, we iterate up to max length
-        max_len = max(len(old), len(new))
-        for i in range(max_len):
-            idx_path = f"{path}.{i}"
-            if i < len(old) and i < len(new):
-                _walk_diff(idx_path, old[i], new[i], changes)
-            elif i < len(old):
-                # Removed item
-                _add_change(idx_path, old[i], None, changes)
-            else:
-                # Added item
-                _add_change(idx_path, None, new[i], changes)
+        try:
+            old_h = [_make_hashable(x) for x in old]
+            new_h = [_make_hashable(x) for x in new]
+            matcher = difflib.SequenceMatcher(None, old_h, new_h, autojunk=False)
+
+            for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+                if tag == "equal":
+                    continue
+
+                if tag == "replace":
+                    # Items changed in place. We iterate over both ranges.
+                    # Since lengths might differ, we map up to the shorter length,
+                    # and treat the rest as insert/delete.
+                    len_old_chunk = i2 - i1
+                    len_new_chunk = j2 - j1
+                    common_len = min(len_old_chunk, len_new_chunk)
+
+                    for k in range(common_len):
+                        # Use new index for path to be consistent with 'where is it now'
+                        idx_new = j1 + k
+                        _walk_diff(f"{path}.{idx_new}", old[i1 + k], new[j1 + k], changes)
+
+                    # Handle remaining items
+                    if len_old_chunk > len_new_chunk:
+                        # Deletions (excess old items)
+                        for k in range(common_len, len_old_chunk):
+                            idx_old = i1 + k
+                            _add_change(f"{path}.{idx_old}", old[idx_old], None, changes)
+                    elif len_new_chunk > len_old_chunk:
+                        # Insertions (excess new items)
+                        for k in range(common_len, len_new_chunk):
+                            idx_new = j1 + k
+                            _add_change(f"{path}.{idx_new}", None, new[idx_new], changes)
+
+                elif tag == "delete":
+                    for i in range(i1, i2):
+                        # Use old index for deletion path
+                        _add_change(f"{path}.{i}", old[i], None, changes)
+
+                elif tag == "insert":
+                    for j in range(j1, j2):
+                        # Use new index for insertion path
+                        _add_change(f"{path}.{j}", None, new[j], changes)
+
+        except Exception:
+            # Fallback to simple index-based comparison if difflib fails
+            # This ensures robustness against unforeseen issues with _make_hashable
+            max_len = max(len(old), len(new))
+            for i in range(max_len):
+                idx_path = f"{path}.{i}"
+                if i < len(old) and i < len(new):
+                    _walk_diff(idx_path, old[i], new[i], changes)
+                elif i < len(old):
+                    _add_change(idx_path, old[i], None, changes)
+                else:
+                    _add_change(idx_path, None, new[i], changes)
+
     else:
         # Scalar change
         _add_change(path, old, new, changes)
