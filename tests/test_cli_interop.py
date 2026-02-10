@@ -79,8 +79,9 @@ def test_loader_builder(temp_agent_file: Path) -> None:
 
 def test_loader_missing_colon_error(temp_agent_file: Path) -> None:
     """Test that missing colon raises ValueError."""
+    # Use a string that definitely has no colon to test the format check across all platforms
     with pytest.raises(ValueError, match="Invalid reference format"):
-        load_agent_from_ref(str(temp_agent_file))
+        load_agent_from_ref("path/to/file.py")
 
     # Test empty path or variable
     with pytest.raises(ValueError, match="Reference must contain both"):
