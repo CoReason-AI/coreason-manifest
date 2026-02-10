@@ -65,11 +65,8 @@ def load_agent_from_ref(reference: str, allowed_root_dir: str | Path | None = No
     # Security Check: Path Allowlisting
     allowed_root_dir = Path.cwd() if allowed_root_dir is None else Path(allowed_root_dir).resolve()
 
-    try:
-        # relative_to raises ValueError if file_path is not relative to allowed_root_dir
-        file_path.relative_to(allowed_root_dir)
-    except ValueError:
-        raise ValueError(f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}") from None
+    if not file_path.is_relative_to(allowed_root_dir):
+        raise ValueError(f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}")
 
     if not file_path.exists():
         raise ValueError(f"File not found: {file_path}")
