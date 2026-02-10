@@ -275,7 +275,7 @@ def test_viz_recipe_full_coverage() -> None:
     # Check Labels
     assert 'agent1["Role: Researcher<br/>Mode: standard"]' in chart
     assert 'router1{"router1<br/>(Router: classification)"}' in chart
-    assert 'human1{{"human1<br/>(Human Input)"}}' in chart
+    assert 'human1{{"human1<br/>👤 (Human Input)"}}' in chart
     assert 'eval1(["eval1<br/>(Evaluator)"])' in chart
     assert 'gen1[["gen1<br/>(Generative)"]]' in chart
 
@@ -466,7 +466,7 @@ def test_viz_complex_dashboard_scenario() -> None:
 
     # Verify Nodes & Shapes
     assert 'router{"router<br/>(Router: type)"}:::router' in chart
-    assert 'approval{{"approval<br/>(Human Input)"}}:::human' in chart
+    assert 'approval{{"approval<br/>👤 (Human Input)"}}:::human' in chart
 
     # Verify State Overlays
     assert "class router completed;" in chart
@@ -556,7 +556,7 @@ def test_viz_custom_shape_override() -> None:
     # 1. Check Mermaid
     chart = generate_mermaid_graph(recipe, theme=theme)
     # Default is {{ }} (hexagon), rect is [ ]
-    assert 'human1["human1<br/>(Human Input)"]' in chart
+    assert 'human1["human1<br/>👤 (Human Input)"]' in chart
     assert "{{" not in chart
 
     # 2. Check JSON

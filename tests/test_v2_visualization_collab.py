@@ -20,6 +20,7 @@ from coreason_manifest.spec.v2.recipe import (
     InteractionConfig,
     InterventionTrigger,
     TransparencyLevel,
+    SteeringCommand,
 )
 
 
@@ -34,7 +35,7 @@ def test_sota_tree_search_configuration() -> None:
         ),
         collaboration=CollaborationConfig(
             mode=CollaborationMode.INTERACTIVE,
-            supported_commands=["/prune"],
+            supported_commands=[SteeringCommand.MODIFY],
         ),
     )
 
@@ -42,7 +43,7 @@ def test_sota_tree_search_configuration() -> None:
     assert data["visualization"]["initial_viewport"] == "planner_console"
     assert data["visualization"]["display_title"] == "Reasoning Tree"
     assert data["collaboration"]["mode"] == "interactive"
-    assert data["collaboration"]["supported_commands"] == ["/prune"]
+    assert data["collaboration"]["supported_commands"] == ["modify"]
 
 
 def test_co_edit_agent() -> None:
@@ -132,7 +133,7 @@ def test_complex_configuration() -> None:
         collaboration=CollaborationConfig(
             mode=CollaborationMode.INTERACTIVE,
             feedback_schema={"type": "object", "properties": {"rating": {"type": "integer"}}},
-            supported_commands=["/retry", "/explain"],
+            supported_commands=[SteeringCommand.REWIND, SteeringCommand.REPLY],
         ),
         # 4. Interaction (Control)
         interaction=InteractionConfig(
@@ -150,7 +151,7 @@ def test_complex_configuration() -> None:
     assert data["visualization"]["icon"] == "lucide:brain-circuit"
     assert "internal_scratchpad" in data["visualization"]["hidden_fields"]
     assert data["collaboration"]["feedback_schema"]["properties"]["rating"]["type"] == "integer"
-    assert "/retry" in data["collaboration"]["supported_commands"]
+    assert "rewind" in data["collaboration"]["supported_commands"]
     assert data["interaction"]["transparency"] == "observable"
 
 
