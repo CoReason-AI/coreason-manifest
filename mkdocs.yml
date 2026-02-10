@@ -1,6 +1,12 @@
 site_name: coreason_manifest
 theme:
   name: material
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Welcome:
       - "Study Guide": STUDY_GUIDE.md
