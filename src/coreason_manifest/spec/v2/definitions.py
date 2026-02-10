@@ -28,7 +28,6 @@ __all__ = [
     "BaseStep",
     "CouncilStep",
     "DesignMetadata",
-    "GenericDefinition",
     "InlineToolDefinition",
     "InterfaceDefinition",
     "LogicStep",
@@ -163,6 +162,7 @@ class AgentDefinition(ManifestBaseModel):
         type (Literal["agent"]): Discriminator. (Default: "agent").
         id (str): Unique ID for the agent.
         name (str): Name of the agent.
+        description (str | None): Description of the agent.
         role (str): The persona/job title.
         goal (str): Primary objective.
         backstory (str | None): Backstory or directives.
@@ -186,6 +186,7 @@ class AgentDefinition(ManifestBaseModel):
     type: Literal["agent"] = "agent"
     id: str = Field(..., description="Unique ID for the agent.")
     name: str = Field(..., description="Name of the agent.")
+    description: str | None = Field(None, description="Description of the agent.")
     role: str = Field(..., description="The persona/job title.")
     goal: str = Field(..., description="Primary objective.")
     backstory: str | None = Field(None, description="Backstory or directives.")
@@ -210,16 +211,6 @@ class AgentDefinition(ManifestBaseModel):
     resources: ModelProfile | None = Field(
         None, description="Hardware, pricing, and operational constraints for this agent."
     )
-
-
-class GenericDefinition(ManifestBaseModel):
-    """
-    Fallback for unknown definitions.
-
-    Allows any extra fields.
-    """
-
-    model_config = ConfigDict(extra="allow", frozen=True)
 
 
 class BaseStep(ManifestBaseModel):
@@ -362,9 +353,13 @@ class ManifestMetadata(ManifestBaseModel):
         tested_models (list[str]): List of LLM identifiers this manifest has been tested on.
     """
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True, frozen=True)
+    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     name: str = Field(..., description="Human-readable name of the workflow/agent.")
+    version: str = Field("0.1.0", description="Semantic version of the manifest.")
+    description: str | None = Field(None, description="Description of the agent/recipe.")
+    created: str | None = Field(None, description="Creation date.")
+    requires_auth: bool = Field(False, description="Whether authentication is required to use this agent.")
     generation_rationale: str | None = Field(
         None, description="Reasoning behind the creation or selection of this workflow."
     )
@@ -426,8 +421,7 @@ class ManifestV2(ManifestBaseModel):
             | ToolPackDefinition
             | PlaceholderDefinition,
             Field(discriminator="type"),
-        ]
-        | GenericDefinition,
+        ],
     ] = Field(default_factory=dict, description="Reusable definitions.")
     workflow: Workflow = Field(..., description="The main workflow topology.")
 
@@ -448,6 +442,13 @@ class ManifestV2(ManifestBaseModel):
 
         if self.workflow.start not in steps:
             errors.append(f"Start step '{self.workflow.start}' missing from workflow.")
+
+        for def_id, definition in self.definitions.items():
+            # Check for 'id' attribute to handle types like MCPResourceDefinition or future types
+            if hasattr(definition, "id"):
+                def_id_val = getattr(definition, "id")  # noqa: B009
+                if def_id_val != def_id:
+                    errors.append(f"Definition Key Mismatch: Key '{def_id}' does not match object ID '{def_id_val}'.")
 
         for step_id, step in steps.items():
             if isinstance(step, PlaceholderStep):
