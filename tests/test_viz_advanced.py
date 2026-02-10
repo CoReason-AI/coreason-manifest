@@ -280,3 +280,169 @@ def test_to_graph_json_with_theme() -> None:
     theme = GraphTheme(primary_color="#FF0000")
     data = to_graph_json(recipe, theme=theme)
     assert data["theme"]["primary_color"] == "#FF0000"
+
+
+# --- New Tests for Edge Cases & Complex Scenarios ---
+
+
+def test_viz_edge_case_runtime_state_unknown_nodes() -> None:
+    """Edge Case: RuntimeState contains IDs not in the graph."""
+    nodes = [AgentNode(id="step1", agent_ref="agent1")]
+    edges: list[GraphEdge] = []
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="UnknownNodeState"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="step1"),
+    )
+
+    # 'step99' does not exist in the recipe
+    state = RuntimeStateSnapshot(node_states={"step1": NodeStatus.RUNNING, "step99": NodeStatus.FAILED})
+
+    chart = generate_mermaid_graph(recipe, state=state)
+
+    assert "class step1 running;" in chart
+    # Should handle step99 gracefully (sanitize and add class, even if node isn't defined in graph lines)
+    # Mermaid will just apply class to a node if it appears, or ignore if not.
+    # Our logic appends `class sanitized value;`.
+    # It won't crash the generator.
+    assert "class step99 failed;" in chart
+
+
+def test_viz_edge_case_theme_partial_override() -> None:
+    """Edge Case: Theme provides only partial style overrides."""
+    nodes = [AgentNode(id="step1", agent_ref="agent1")]
+    edges: list[GraphEdge] = []
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="PartialTheme"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="step1"),
+    )
+
+    # Only overriding 'agent', expecting 'input', 'term' etc to remain default
+    theme = GraphTheme(node_styles={"agent": "fill:purple"})
+    chart = generate_mermaid_graph(recipe, theme=theme)
+
+    assert "classDef agent fill:purple;" in chart
+    # Default input style should still be present
+    assert "classDef input fill:#e1f5fe" in chart
+
+
+def test_viz_edge_case_json_missing_optional_presentation() -> None:
+    """Edge Case: Nodes without presentation data in to_graph_json."""
+    nodes = [AgentNode(id="step1", agent_ref="agent1", presentation=None)]
+    edges: list[GraphEdge] = []
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="NoPres"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="step1"),
+    )
+
+    data = to_graph_json(recipe)
+    node = data["nodes"][1]  # Index 0 is INPUTS
+    assert node["id"] == "step1"
+    # Should default to 0.0
+    assert node["x"] == 0.0
+    assert node["y"] == 0.0
+
+
+def test_viz_complex_dashboard_scenario() -> None:
+    """
+    Complex Case: 'The Dashboard View'
+    - Parallel branches
+    - Mixed states (Running, Failed, Completed)
+    - Custom Dark Theme
+    """
+    nodes = [
+        RouterNode(id="router", input_key="type", routes={"A": "task_a", "B": "task_b"}, default_route="task_a"),
+        AgentNode(id="task_a", agent_ref="agent_a"),
+        AgentNode(id="task_b", agent_ref="agent_b"),
+        HumanNode(id="approval", prompt="Verify"),
+    ]
+    edges: list[GraphEdge] = [
+        GraphEdge(source="router", target="task_a", condition="A"),
+        GraphEdge(source="router", target="task_b", condition="B"),
+        GraphEdge(source="task_a", target="approval"),
+        GraphEdge(source="task_b", target="approval"),
+    ]
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="Dashboard"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="router"),
+    )
+
+    # Custom Theme
+    theme = GraphTheme(
+        orientation="LR",
+        node_styles={
+            "agent": "fill:#333,stroke:#fff",
+            "human": "fill:#444,stroke:#fa0",
+            "running": "stroke:#0f0,stroke-width:4px",
+        },
+    )
+
+    # Complex State
+    state = RuntimeStateSnapshot(
+        node_states={
+            "router": NodeStatus.COMPLETED,
+            "task_a": NodeStatus.FAILED,
+            "task_b": NodeStatus.RUNNING,
+            "approval": NodeStatus.PENDING,
+        }
+    )
+
+    chart = generate_mermaid_graph(recipe, theme=theme, state=state)
+
+    # Verify Orientation
+    assert "graph LR" in chart
+
+    # Verify Theme Application
+    assert "classDef agent fill:#333,stroke:#fff;" in chart
+    assert "classDef running stroke:#0f0,stroke-width:4px;" in chart
+
+    # Verify Nodes & Shapes
+    assert 'router{"router<br/>(Router: type)"}:::router' in chart
+    assert 'approval{{"approval<br/>(Human Input)"}}:::human' in chart
+
+    # Verify State Overlays
+    assert "class router completed;" in chart
+    assert "class task_a failed;" in chart
+    assert "class task_b running;" in chart
+    assert "class approval pending;" in chart  # Note: pending might not have a style def by default but class is emitted
+
+
+def test_viz_complex_interactive_debugger() -> None:
+    """
+    Complex Case: 'The Interactive Debugger'
+    - Interactive nodes
+    - JSON export for UI
+    """
+    nodes = [
+        AgentNode(
+            id="debugger_step",
+            agent_ref="debug_agent",
+            interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE),
+        ),
+        HumanNode(id="manual_override", prompt="Override?", interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE)),
+    ]
+    edges: list[GraphEdge] = [GraphEdge(source="debugger_step", target="manual_override")]
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="Debugger"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="debugger_step"),
+    )
+
+    # 1. Verify Mermaid Bindings
+    chart = generate_mermaid_graph(recipe)
+    assert 'click debugger_step call_interaction_handler "Interact with debugger_step"' in chart
+    assert 'click manual_override call_interaction_handler "Interact with manual_override"' in chart
+
+    # 2. Verify JSON Metadata for UI
+    data = to_graph_json(recipe)
+
+    debug_node = next(n for n in data["nodes"] if n["id"] == "debugger_step")
+    interaction_config = debug_node["config"]["interaction"]
+    assert interaction_config["transparency"] == "interactive"
+
+    human_node = next(n for n in data["nodes"] if n["id"] == "manual_override")
+    assert human_node["config"]["interaction"]["transparency"] == "interactive"
+    assert human_node["type"] == "human"

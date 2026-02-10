@@ -67,6 +67,7 @@ def _generate_recipe_mermaid(
         "completed": "stroke:#4caf50,stroke-width:3px",
         "failed": "stroke:#f44336,stroke-width:3px",
         "skipped": "stroke:#9e9e9e,stroke-dasharray: 5 5",
+        "pending": "stroke:#bdbdbd,stroke-width:2px,stroke-dasharray: 2 2",
     }
 
     # Override with theme
@@ -221,6 +222,7 @@ def generate_mermaid_graph(
         "completed": "stroke:#4caf50,stroke-width:3px",
         "failed": "stroke:#f44336,stroke-width:3px",
         "skipped": "stroke:#9e9e9e,stroke-dasharray: 5 5",
+        "pending": "stroke:#bdbdbd,stroke-width:2px,stroke-dasharray: 2 2",
     }
 
     # Override with theme

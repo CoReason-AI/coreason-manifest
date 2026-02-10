@@ -96,7 +96,23 @@ recipe = RecipeDefinition(
 print(f"Recipe '{recipe.metadata.name}' is valid!")
 ```
 
-### 2. Distributed Tracing (Transport)
+### 2. Visualization (Glass Box)
+
+Visualize your recipe with runtime state overlays and custom themes.
+
+```python
+from coreason_manifest.utils.viz import generate_mermaid_graph
+from coreason_manifest.spec.common.presentation import GraphTheme, RuntimeStateSnapshot, NodeStatus
+
+# 1. Static Visualization
+print(generate_mermaid_graph(recipe))
+
+# 2. Runtime Overlay (Glass Box)
+state = RuntimeStateSnapshot(node_states={"research-agent": NodeStatus.RUNNING})
+print(generate_mermaid_graph(recipe, state=state))
+```
+
+### 3. Distributed Tracing (Transport)
 
 The `AgentRequest` envelope ensures that every action is traceable back to its origin.
 
@@ -121,7 +137,7 @@ print(f"Child Parent ID: {child_request.parent_request_id} (Should match Root Re
 print(f"Child Root ID:   {child_request.root_request_id}   (Should match Root Request ID)")
 ```
 
-### 3. Builder SDK (Optional)
+### 4. Builder SDK (Optional)
 
 For a fluent, Pythonic API to construct manifests (especially useful for tooling), use the `ManifestBuilder`.
 
@@ -155,5 +171,5 @@ See [CLI Documentation](docs/cli.md) for full details.
 *   [**Orchestration**](docs/graph_recipes.md): Building Graph Recipes.
 *   [**Transport**](docs/transport_layer.md): Distributed Tracing & Lineage.
 *   [**Inline Tools**](docs/inline_tools.md): Serverless/Local Tool Definitions.
-*   [**Visualization**](docs/presentation_schemas.md): Controlling the UI Layout.
+*   [**Visualization**](docs/visualization.md): Glass Box Visualization Engine.
 *   [**Simulation**](docs/simulation.md): ATIF and Evaluation.
