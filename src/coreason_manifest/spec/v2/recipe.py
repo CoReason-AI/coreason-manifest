@@ -34,6 +34,26 @@ logger = logging.getLogger(__name__)
 # ==========================================
 
 
+class SteeringCommand(StrEnum):
+    """Standardized primitives for human intervention."""
+
+    APPROVE = "approve"
+    REJECT = "reject"
+    MODIFY = "modify"
+    ESCALATE = "escalate"
+    REWIND = "rewind"
+    REPLY = "reply"
+
+
+class RenderStrategy(StrEnum):
+    """Protocol for rendering the feedback interface."""
+
+    PLAIN_TEXT = "plain_text"
+    JSON_FORMS = "json_forms"  # Native forms via JSON Schema
+    ADAPTIVE_CARD = "adaptive_card"  # Microsoft Adaptive Cards
+    CUSTOM_IFRAME = "custom_iframe"  # Embedded Web View
+
+
 class RecipeStatus(StrEnum):
     """Lifecycle status of a Recipe."""
 
@@ -300,8 +320,22 @@ class CollaborationConfig(ManifestBaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
-    feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
-    supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
+    feedback_schema: dict[str, Any] | None = Field(
+        None, description="JSON Schema for structured feedback."
+    )
+    supported_commands: list[SteeringCommand] = Field(
+        default_factory=list, description="Slash commands the agent understands."
+    )
+
+    # --- New Fields for Shared Agency ---
+    render_strategy: RenderStrategy = Field(
+        RenderStrategy.PLAIN_TEXT,
+        description="Protocol for rendering the feedback interface.",
+    )
+    trace_intervention: bool = Field(
+        False,
+        description="If True, the intervention data is crystallized into the agent's Episodic Memory.",
+    )
 
     # --- New Harvesting Fields ---
     channels: list[str] = Field(
@@ -522,7 +556,12 @@ class HumanNode(RecipeNode):
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Instruction for the human user.")
     timeout_seconds: int | None = Field(None, description="SLA for approval.")
-    required_role: str | None = Field(None, description="Role required to approve (e.g., manager).")
+    required_role: str | None = Field(
+        None, description="Role required to approve (e.g., manager)."
+    )
+    routes: dict[SteeringCommand, str] | None = Field(
+        None, description="Map of SteeringCommands to Target Node IDs. If None, flow is linear."
+    )
 
 
 class RouterNode(RecipeNode):
@@ -867,6 +906,15 @@ class RecipeDefinition(ManifestBaseModel):
                         f"Node '{node.id}' defines fallback_node_id='{target_id}', "
                         f"but '{target_id}' does not exist in the recipe."
                     )
+
+            # Check HumanNode routes
+            if isinstance(node, HumanNode) and node.routes:
+                for command, target_id in node.routes.items():
+                    if target_id not in valid_node_ids:
+                        errors.append(
+                            f"Node '{node.id}' defines route '{command}' -> '{target_id}', "
+                            f"but '{target_id}' does not exist in the recipe."
+                        )
 
             # Future proofing: If you add explicit 'next_step' fields later, add checks here.
 
