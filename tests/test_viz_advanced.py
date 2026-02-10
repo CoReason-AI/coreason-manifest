@@ -407,7 +407,9 @@ def test_viz_complex_dashboard_scenario() -> None:
     assert "class router completed;" in chart
     assert "class task_a failed;" in chart
     assert "class task_b running;" in chart
-    assert "class approval pending;" in chart  # Note: pending might not have a style def by default but class is emitted
+    assert (
+        "class approval pending;" in chart
+    )  # Note: pending might not have a style def by default but class is emitted
 
 
 def test_viz_complex_interactive_debugger() -> None:
@@ -422,7 +424,11 @@ def test_viz_complex_interactive_debugger() -> None:
             agent_ref="debug_agent",
             interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE),
         ),
-        HumanNode(id="manual_override", prompt="Override?", interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE)),
+        HumanNode(
+            id="manual_override",
+            prompt="Override?",
+            interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE),
+        ),
     ]
     edges: list[GraphEdge] = [GraphEdge(source="debugger_step", target="manual_override")]
     recipe = RecipeDefinition(
