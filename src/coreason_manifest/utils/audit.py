@@ -61,11 +61,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     None values are excluded from the payload.
     """
     # Fields to extract: Use introspection to get all fields
-    fields = (
-        list(type(entry).model_fields.keys())
-        if isinstance(entry, BaseModel)
-        else list(entry.keys())
-    )
+    fields = list(type(entry).model_fields.keys()) if isinstance(entry, BaseModel) else list(entry.keys())
 
     # Explicitly exclude integrity_hash
     if "integrity_hash" in fields:
@@ -74,9 +70,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     payload: dict[str, Any] = {}
 
     for field in fields:
-        val: Any = (
-            entry.get(field) if isinstance(entry, dict) else getattr(entry, field, None)
-        )
+        val: Any = entry.get(field) if isinstance(entry, dict) else getattr(entry, field, None)
 
         if val is None:
             continue
@@ -89,9 +83,7 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     # Serialize to JSON bytes
     # ensure_ascii=False to support Unicode characters in names/actions
     # sort_keys=True for determinism
-    json_bytes = json.dumps(safe_payload, sort_keys=True, ensure_ascii=False).encode(
-        "utf-8"
-    )
+    json_bytes = json.dumps(safe_payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
 
     return hashlib.sha256(json_bytes).hexdigest()
 

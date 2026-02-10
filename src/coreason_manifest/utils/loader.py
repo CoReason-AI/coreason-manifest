@@ -14,7 +14,6 @@ import stat
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional, Union
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.spec.v2.definitions import ManifestV2
@@ -32,9 +31,7 @@ def _temporary_sys_path(path: str):
             sys.path.pop(0)
 
 
-def load_agent_from_ref(
-    reference: str, allowed_root_dir: Optional[Union[str, Path]] = None
-) -> ManifestV2 | RecipeDefinition:
+def load_agent_from_ref(reference: str, allowed_root_dir: str | Path | None = None) -> ManifestV2 | RecipeDefinition:
     """
     Dynamically loads an Agent Definition (ManifestV2) or RecipeDefinition from a python file reference.
 
@@ -52,9 +49,7 @@ def load_agent_from_ref(
                     Also raises ValueError for security violations (path traversal, world-writable files).
     """
     if ":" not in reference:
-        raise ValueError(
-            f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'"
-        )
+        raise ValueError(f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'")
 
     # Split on the *last* colon to support drive letters if absolutely necessary,
     # but simplest is strict split.
@@ -67,18 +62,13 @@ def load_agent_from_ref(
     file_path = Path(file_path_str).resolve()
 
     # Security Check: Path Allowlisting
-    if allowed_root_dir is None:
-        allowed_root_dir = Path.cwd()
-    else:
-        allowed_root_dir = Path(allowed_root_dir).resolve()
+    allowed_root_dir = Path.cwd() if allowed_root_dir is None else Path(allowed_root_dir).resolve()
 
     try:
         # relative_to raises ValueError if file_path is not relative to allowed_root_dir
         file_path.relative_to(allowed_root_dir)
     except ValueError:
-        raise ValueError(
-            f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}"
-        )
+        raise ValueError(f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}") from None
 
     if not file_path.exists():
         raise ValueError(f"File not found: {file_path}")

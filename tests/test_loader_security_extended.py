@@ -35,16 +35,20 @@ def test_loader_path_traversal_rejection(tmp_path: Path) -> None:
     inside_file.write_text(
         """
 from coreason_manifest.spec.v2.definitions import ManifestV2
-agent = ManifestV2(apiVersion="coreason.ai/v2", kind="Agent", metadata={"name": "SafeAgent"}, definitions={}, workflow={"start": "a", "steps":{}})
+agent = ManifestV2(
+    apiVersion="coreason.ai/v2",
+    kind="Agent",
+    metadata={"name": "SafeAgent"},
+    definitions={},
+    workflow={"start": "a", "steps":{}}
+)
 """,
         encoding="utf-8",
     )
 
     # 1. Attempt to load outside file with safe_root as allowed_root_dir
     ref = f"{outside_file}:agent"
-    with pytest.raises(
-        ValueError, match="Security Violation: File .* is outside allowed root"
-    ):
+    with pytest.raises(ValueError, match=r"Security Violation: File .* is outside allowed root"):
         load_agent_from_ref(ref, allowed_root_dir=safe_root)
 
     # 2. Attempt to load inside file should succeed
@@ -65,7 +69,13 @@ def test_loader_world_writable_rejection(tmp_path: Path) -> None:
     unsafe_file.write_text(
         """
 from coreason_manifest.spec.v2.definitions import ManifestV2
-agent = ManifestV2(apiVersion="coreason.ai/v2", kind="Agent", metadata={"name": "UnsafeAgent"}, definitions={}, workflow={"start": "a", "steps":{}})
+agent = ManifestV2(
+    apiVersion="coreason.ai/v2",
+    kind="Agent",
+    metadata={"name": "UnsafeAgent"},
+    definitions={},
+    workflow={"start": "a", "steps":{}}
+)
 """,
         encoding="utf-8",
     )
@@ -76,7 +86,7 @@ agent = ManifestV2(apiVersion="coreason.ai/v2", kind="Agent", metadata={"name": 
 
     ref = f"{unsafe_file}:agent"
 
-    with pytest.raises(ValueError, match="Security Violation: File .* is world-writable"):
+    with pytest.raises(ValueError, match=r"Security Violation: File .* is world-writable"):
         load_agent_from_ref(ref, allowed_root_dir=safe_root)
 
 
@@ -89,7 +99,13 @@ def test_loader_sys_path_cleanup(tmp_path: Path) -> None:
     module_file.write_text(
         """
 from coreason_manifest.spec.v2.definitions import ManifestV2
-agent = ManifestV2(apiVersion="coreason.ai/v2", kind="Agent", metadata={"name": "Agent"}, definitions={}, workflow={"start": "a", "steps":{}})
+agent = ManifestV2(
+    apiVersion="coreason.ai/v2",
+    kind="Agent",
+    metadata={"name": "Agent"},
+    definitions={},
+    workflow={"start": "a", "steps":{}}
+)
 """,
         encoding="utf-8",
     )
