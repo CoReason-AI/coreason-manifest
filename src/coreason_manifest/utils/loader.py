@@ -65,10 +65,11 @@ def load_agent_from_ref(reference: str, allowed_root_dir: str | Path | None = No
     # Security Check: Path Allowlisting
     allowed_root_dir = Path.cwd() if allowed_root_dir is None else Path(allowed_root_dir).resolve()
 
-    if not file_path.is_relative_to(allowed_root_dir):  # pragma: no cover
+    if not file_path.is_relative_to(allowed_root_dir):
         # Coverage note: This raise is hit by tests/test_loader_security_extended.py
         # but coverage sometimes misses the raise line itself on Windows.
-        raise ValueError(f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}")
+        msg = f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}"
+        raise ValueError(msg)  # pragma: no cover
 
     if not file_path.exists():
         raise ValueError(f"File not found: {file_path}")
