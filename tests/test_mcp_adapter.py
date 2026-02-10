@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import warnings
+
 import pytest
 
 from coreason_manifest.spec.common.error import NamingConventionWarning

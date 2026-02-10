@@ -42,7 +42,8 @@ def create_mcp_tool_definition(agent: AgentDefinition) -> dict[str, Any]:
 
     if name != original_name.lower():
         warnings.warn(
-            f"Agent name '{original_name}' was sanitized to '{name}' for MCP compatibility. This may affect tool calls.",
+            f"Agent name '{original_name}' was sanitized to '{name}' for MCP compatibility. "
+            "This may affect tool calls.",
             NamingConventionWarning,
             stacklevel=2,
         )

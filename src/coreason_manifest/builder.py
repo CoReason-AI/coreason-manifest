@@ -189,8 +189,7 @@ class AgentBuilder:
                         s_type = source_def.get("type")
                         if t_type != s_type:
                             raise SchemaConflictError(
-                                f"Schema conflict for property '{key}': "
-                                f"Existing type '{t_type}' vs New type '{s_type}'"
+                                f"Schema conflict for property '{key}': Existing type '{t_type}' vs New type '{s_type}'"
                             )
 
                         # Check items for arrays

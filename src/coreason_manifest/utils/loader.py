@@ -38,7 +38,9 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
         AgentDefinitionError: If the object cannot be loaded or is not of the expected type.
     """
     if ":" not in reference:
-        raise InvalidReferenceError(f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'")
+        raise InvalidReferenceError(
+            f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'"
+        )
 
     # Split on the *last* colon to support drive letters if absolutely necessary,
     # but simplest is strict split.
