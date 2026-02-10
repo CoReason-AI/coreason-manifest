@@ -19,8 +19,8 @@ from coreason_manifest.spec.v2.recipe import (
     GenerativeNode,
     InteractionConfig,
     InterventionTrigger,
-    TransparencyLevel,
     SteeringCommand,
+    TransparencyLevel,
 )
 
 
