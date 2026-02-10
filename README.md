@@ -3,10 +3,14 @@
 The definitive source of truth for CoReason-AI Asset definitions. "The Contract."
 
 [![License: Prosperity 3.0](https://img.shields.io/badge/license-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason-manifest)
-[![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
+[![PyPI](https://img.shields.io/pypi/v/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
+[![codecov](https://codecov.io/gh/CoReason-AI/coreason-manifest/graph/badge.svg)](https://codecov.io/gh/CoReason-AI/coreason-manifest)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Documentation](https://img.shields.io/badge/docs-home-informational)](docs/index.md)
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/coreason-manifest/)
 
 ## Overview
 

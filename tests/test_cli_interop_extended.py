@@ -18,6 +18,7 @@ import pytest
 from _pytest.capture import CaptureFixture
 
 from coreason_manifest.cli import main
+from coreason_manifest.spec.common.error import AgentDefinitionError, InvalidReferenceError
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -125,7 +126,7 @@ def test_loader_strict_splitting() -> None:
     # The requirement is strict format `path/to/file.py:variable_name`.
 
     ref_invalid = "/path/to/file.py"
-    with pytest.raises(ValueError, match="Invalid reference format"):
+    with pytest.raises(InvalidReferenceError, match="Invalid reference format"):
         load_agent_from_ref(ref_invalid)
 
 
