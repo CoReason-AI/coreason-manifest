@@ -126,3 +126,44 @@ from coreason_manifest import AuditLog
 | `integrity_hash` | `str` | SHA-256 hash of critical fields. | Yes |
 
 For details on how hashes are computed and verified, see [Audit Hashing & Integrity](audit_hashing.md).
+
+---
+
+## Runtime State Snapshotting
+
+To support "Glass Box" visualization, the engine must be able to capture its internal execution state at any point in time.
+
+**Concept:** "Snapshotting" is the process of serializing the current status of all nodes in a recipe into a passive data structure (`RuntimeStateSnapshot`). This snapshot is then passed to the manifest package purely for rendering purposes (no side effects).
+
+### Model: `RuntimeStateSnapshot`
+
+**Import:**
+```python
+from coreason_manifest.spec.common.presentation import RuntimeStateSnapshot
+```
+
+**Fields:**
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `node_states` | `Dict[str, NodeStatus]` | A map of Node IDs to their current status. |
+| `active_path` | `List[str]` | A list of Node IDs representing the current execution path (highlighted edges). |
+
+### Enum: `NodeStatus`
+
+Represents the lifecycle state of a single node.
+
+**Import:**
+```python
+from coreason_manifest.spec.common.presentation import NodeStatus
+```
+
+**Values:**
+
+| Value | Description | Visual Effect (Default Theme) |
+| :--- | :--- | :--- |
+| `PENDING` | Node is waiting to be executed. | Grey dashed border. |
+| `RUNNING` | Node is currently executing. | Yellow border with pulse animation. |
+| `COMPLETED` | Node finished successfully. | Green border. |
+| `FAILED` | Node encountered an error. | Red border. |
+| `SKIPPED` | Node was bypassed (e.g., logic branch). | Grey dotted line. |

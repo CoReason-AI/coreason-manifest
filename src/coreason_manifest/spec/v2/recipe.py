@@ -15,7 +15,7 @@ from typing import Annotated, Any, Literal, Self
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.common.presentation import NodePresentation
+from coreason_manifest.spec.common.presentation import NodePresentation, PresentationHints
 from coreason_manifest.spec.common_base import ManifestBaseModel
 from coreason_manifest.spec.simulation import SimulationScenario
 from coreason_manifest.spec.v2.agent import CognitiveProfile
@@ -32,6 +32,26 @@ logger = logging.getLogger(__name__)
 # ==========================================
 # 1. Configuration Schemas (New)
 # ==========================================
+
+
+class SteeringCommand(StrEnum):
+    """Standardized primitives for human intervention."""
+
+    APPROVE = "approve"
+    REJECT = "reject"
+    MODIFY = "modify"
+    ESCALATE = "escalate"
+    REWIND = "rewind"
+    REPLY = "reply"
+
+
+class RenderStrategy(StrEnum):
+    """Protocol for rendering the feedback interface."""
+
+    PLAIN_TEXT = "plain_text"
+    JSON_FORMS = "json_forms"  # Native forms via JSON Schema
+    ADAPTIVE_CARD = "adaptive_card"  # Microsoft Adaptive Cards
+    CUSTOM_IFRAME = "custom_iframe"  # Embedded Web View
 
 
 class RecipeStatus(StrEnum):
@@ -275,38 +295,6 @@ class InteractionConfig(ManifestBaseModel):
     guidance_hint: str | None = Field(None, description="Hint for the human operator.")
 
 
-class VisualizationStyle(StrEnum):
-    """How the UI should render the node's running state."""
-
-    CHAT = "chat"
-    TREE = "tree"
-    KANBAN = "kanban"
-    DOCUMENT = "document"
-
-
-class PresentationHints(ManifestBaseModel):
-    """
-    Directives for the frontend on how to render the internal reasoning.
-
-    Attributes:
-        style (VisualizationStyle): Visualization style. (Default: CHAT).
-        display_title (str | None): Human-friendly label override.
-        icon (str | None): Icon name/emoji, e.g., 'lucide:brain'.
-        hidden_fields (list[str]): Whitelist of internal variables to hide from the non-debug UI.
-        progress_indicator (str | None): Name of the context variable to watch for % completion.
-    """
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True, frozen=True)
-
-    style: VisualizationStyle = Field(VisualizationStyle.CHAT, description="Visualization style.")
-    display_title: str | None = Field(None, description="Human-friendly label override.")
-    icon: str | None = Field(None, description="Icon name/emoji, e.g., 'lucide:brain'.")
-    hidden_fields: list[str] = Field(
-        default_factory=list, description="Whitelist of internal variables to hide from the non-debug UI."
-    )
-    progress_indicator: str | None = Field(None, description="Name of the context variable to watch for % completion.")
-
-
 class CollaborationMode(StrEnum):
     """The protocol for human engagement."""
 
@@ -333,7 +321,19 @@ class CollaborationConfig(ManifestBaseModel):
 
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, description="Engagement mode.")
     feedback_schema: dict[str, Any] | None = Field(None, description="JSON Schema for structured feedback.")
-    supported_commands: list[str] = Field(default_factory=list, description="Slash commands the agent understands.")
+    supported_commands: list[SteeringCommand] = Field(
+        default_factory=list, description="Slash commands the agent understands."
+    )
+
+    # --- New Fields for Shared Agency ---
+    render_strategy: RenderStrategy = Field(
+        RenderStrategy.PLAIN_TEXT,
+        description="Protocol for rendering the feedback interface.",
+    )
+    trace_intervention: bool = Field(
+        False,
+        description="If True, the intervention data is crystallized into the agent's Episodic Memory.",
+    )
 
     # --- New Harvesting Fields ---
     channels: list[str] = Field(
@@ -555,6 +555,9 @@ class HumanNode(RecipeNode):
     prompt: str = Field(..., description="Instruction for the human user.")
     timeout_seconds: int | None = Field(None, description="SLA for approval.")
     required_role: str | None = Field(None, description="Role required to approve (e.g., manager).")
+    routes: dict[SteeringCommand, str] | None = Field(
+        None, description="Map of SteeringCommands to Target Node IDs. If None, flow is linear."
+    )
 
 
 class RouterNode(RecipeNode):
@@ -899,6 +902,15 @@ class RecipeDefinition(ManifestBaseModel):
                         f"Node '{node.id}' defines fallback_node_id='{target_id}', "
                         f"but '{target_id}' does not exist in the recipe."
                     )
+
+            # Check HumanNode routes
+            if isinstance(node, HumanNode) and node.routes:
+                for command, target_id in node.routes.items():
+                    if target_id not in valid_node_ids:
+                        errors.append(
+                            f"Node '{node.id}' defines route '{command}' -> '{target_id}', "
+                            f"but '{target_id}' does not exist in the recipe."
+                        )
 
             # Future proofing: If you add explicit 'next_step' fields later, add checks here.
 

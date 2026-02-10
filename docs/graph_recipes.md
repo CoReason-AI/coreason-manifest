@@ -1,5 +1,7 @@
 # Orchestration: Graph Recipes
 
+**Note:** This document defines the *schema* and *contract* for orchestration. As part of the Shared Kernel, it provides the blueprints (`RecipeDefinition`) that the Runtime Engine executes. It does not contain the execution logic itself.
+
 Coreason V2 introduces **Graph Recipes**, replacing linear workflows with a robust **Directed Cyclic Graph (DCG)** architecture. This allows for complex orchestration patterns including loops, conditional branching, and human-in-the-loop interactions.
 
 ## Concept: Graphs, Not Lists
@@ -223,6 +225,27 @@ The `GraphTopology` enforces structural integrity. It requires a list of `nodes`
 
 Here is a raw JSON example of a topology where an AI Agent performs a task, and then a Human Manager must approve it.
 
+### Visualization
+
+```mermaid
+graph TD
+    start((Entry)) --> A[research-task]
+    A -->|on_success| B{{manager-approval}}
+    B -->|approve| C[publish-result]
+    B -->|reject| A
+    C --> stop((End))
+
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#fff9c4,stroke:#e65100,stroke-width:2px
+    style C fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+**How to Interpret this Diagram:**
+*   **Rectangles (`[Node]`)**: Represent **Agent Tasks** (e.g., `research-task`, `publish-result`).
+*   **Hexagons (`{{Node}}`)**: Represent **Human Decision Gateways** (e.g., `manager-approval`).
+*   **Arrows (`-->`)**: Represent the **Control Flow** (Edges). The label on the arrow (e.g., `on_success`, `reject`) is the condition required to traverse that edge.
+*   **Cycles**: Notice the arrow going from `manager-approval` back to `research-task` if rejected. This illustrates the **Cyclic** nature of the graph.
+
 ```json
 {
   "entry_point": "research-task",
@@ -239,6 +262,10 @@ Here is a raw JSON example of a topology where an AI Agent performs a task, and 
       "type": "human",
       "id": "manager-approval",
       "prompt": "Review the research report. Approve to proceed?",
+      "routes": {
+        "approve": "publish-result",
+        "reject": "research-task"
+      },
       "timeout_seconds": 86400,
       "required_role": "manager"
     }
@@ -264,10 +291,12 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `system_prompt_override`: Context-specific instructions (optional).
     - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
 
-2.  **`HumanNode`** (`type: human`): Suspends execution until a human provides input or approval.
+2.  **`HumanNode`** (`type: human`): **A conditional router for human decision-making.** It presents a choice to the user and routes execution based on the selected `SteeringCommand`.
     - `prompt`: Instruction for the human user.
+    - `routes`: A dictionary mapping `SteeringCommand` keys to Target Node IDs (type: `dict[SteeringCommand, str]`).
     - `timeout_seconds`: SLA for approval (optional).
     - `required_role`: Role required to approve (e.g., manager) (optional).
+    - **Note:** `HumanNode` inherits `collaboration` from `RecipeNode`. It does *not* use a separate `config` field.
 
 3.  **`RouterNode`** (`type: router`): Evaluates a variable and branches execution to different target nodes.
     - `input_key`: The variable to evaluate (e.g., 'classification').
@@ -556,6 +585,7 @@ The `collaboration` field defines the protocol for human engagement (e.g., Co-Ed
 
 *   `mode`: `CollaborationMode` (`COMPLETION`, `INTERACTIVE`, `CO_EDIT`).
 *   `feedback_schema`: JSON Schema for structured feedback.
-*   `supported_commands`: Slash commands the agent understands (e.g., `/refine`).
+*   `supported_commands`: Typed list of `SteeringCommand` (e.g., `[SteeringCommand.MODIFY]`).
+*   `render_strategy`: UI protocol (`JSON_FORMS`, `ADAPTIVE_CARD`).
 
 See [UX & Collaboration: Human-on-the-Loop](ux_collaboration.md) for detailed configuration examples.

@@ -65,13 +65,37 @@ The `collaboration` field defines the rules of engagement for "Human-on-the-Loop
 class CollaborationConfig(CoReasonBaseModel):
     mode: CollaborationMode = Field(CollaborationMode.COMPLETION, ...)
     feedback_schema: dict[str, Any] | None = Field(None, ...)
-    supported_commands: list[str] = Field(default=[], ...)
+    supported_commands: list[SteeringCommand] = Field(default=[], ...)
+
+    # Shared Agency Fields
+    render_strategy: RenderStrategy = Field(RenderStrategy.PLAIN_TEXT, ...)
+    trace_intervention: bool = Field(False, ...) # Concept: "Learning from Feedback"
 
     # Harvesting Fields (Human-Layer)
     channels: list[str] = Field(default=[], ...)
     timeout_seconds: int | None = Field(None, ...)
     fallback_behavior: Literal["fail", "proceed_with_default", "escalate"] = Field("fail", ...)
 ```
+
+### Steering Primitives (`SteeringCommand`)
+
+Replaces "magic strings" with standardized primitives for human intervention. These commands are keys in the `HumanNode.routes` map.
+
+1.  **`APPROVE`**: Accept the current state/plan.
+2.  **`REJECT`**: Deny the current state/plan.
+3.  **`MODIFY`**: Edit the content or parameters directly.
+4.  **`ESCALATE`**: Route to a higher authority or specialized human pool.
+5.  **`REWIND`**: Go back to a previous state (Time Travel).
+6.  **`REPLY`**: Provide textual feedback or answer a question.
+
+### UI Rendering Protocols (`RenderStrategy`)
+
+Protocol for rendering the feedback interface.
+
+1.  **`PLAIN_TEXT`**: Simple text input.
+2.  **`JSON_FORMS`**: Native forms generated via JSON Schema.
+3.  **`ADAPTIVE_CARD`**: Microsoft Adaptive Cards format.
+4.  **`CUSTOM_IFRAME`**: Embedded Web View.
 
 ### Collaboration Modes (`CollaborationMode`)
 
@@ -92,11 +116,15 @@ class CollaborationConfig(CoReasonBaseModel):
 ### Example: Interactive Feedback
 
 ```python
+from coreason_manifest.spec.v2.recipe import SteeringCommand, RenderStrategy
+
 node = AgentNode(
     id="writer",
     agent_ref="copywriter",
     collaboration=CollaborationConfig(
         mode=CollaborationMode.INTERACTIVE,
+        render_strategy=RenderStrategy.JSON_FORMS,
+        trace_intervention=True, # Learn from corrections
         # Structured Feedback Form
         feedback_schema={
             "type": "object",
@@ -105,8 +133,8 @@ node = AgentNode(
                 "critique": {"type": "string"}
             }
         },
-        # Slash Commands
-        supported_commands=["/rewrite", "/expand", "/shorten"]
+        # Strictly Typed Commands
+        supported_commands=[SteeringCommand.MODIFY, SteeringCommand.REPLY]
     )
 )
 ```

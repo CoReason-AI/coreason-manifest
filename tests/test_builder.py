@@ -12,10 +12,12 @@
 Test suite for the Builder SDK (AgentBuilder and TypedCapability).
 """
 
+import pytest
 from pydantic import BaseModel, Field
 
 from coreason_manifest.builder import AgentBuilder, TypedCapability
 from coreason_manifest.spec.common.capabilities import CapabilityType, DeliveryMode
+from coreason_manifest.spec.common.error import SchemaConflictError
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
@@ -33,6 +35,22 @@ class EmptyModel(BaseModel):
 
 class ConflictInput(BaseModel):
     query: int  # Different type from SearchInput (integer vs string)
+
+
+class ArrayStrInput(BaseModel):
+    tags: list[str]
+
+
+class ArrayIntInput(BaseModel):
+    tags: list[int]
+
+
+class DescriptionAInput(BaseModel):
+    query: str = Field(..., description="Query A")
+
+
+class DescriptionBInput(BaseModel):
+    query: str = Field(..., description="Query B")
 
 
 def test_schema_auto_generation() -> None:
@@ -121,7 +139,7 @@ def test_edge_empty_model() -> None:
 
 
 def test_edge_overlapping_properties() -> None:
-    # Last writer wins
+    # Conflicting properties should raise SchemaConflictError
     cap1 = TypedCapability(
         name="Cap1",
         description="Cap1",
@@ -135,11 +153,52 @@ def test_edge_overlapping_properties() -> None:
         output_model=SearchOutput,
     )
 
-    agent = AgentBuilder("ConflictAgent").with_capability(cap1).with_capability(cap2).build()
+    builder = AgentBuilder("ConflictAgent").with_capability(cap1)
 
-    # cap2 should win
-    query_prop = agent.interface.inputs["properties"]["query"]
-    assert query_prop["type"] == "integer"
+    with pytest.raises(SchemaConflictError, match="Schema conflict for property 'query'"):
+        builder.with_capability(cap2)
+
+
+def test_edge_array_mismatch() -> None:
+    # Conflicting array items should raise SchemaConflictError
+    cap1 = TypedCapability(
+        name="Cap1",
+        description="Cap1",
+        input_model=ArrayStrInput,
+        output_model=EmptyModel,
+    )
+    cap2 = TypedCapability(
+        name="Cap2",
+        description="Cap2",
+        input_model=ArrayIntInput,
+        output_model=EmptyModel,
+    )
+
+    builder = AgentBuilder("ArrayConflict").with_capability(cap1)
+
+    with pytest.raises(SchemaConflictError, match="Array items mismatch"):
+        builder.with_capability(cap2)
+
+
+def test_edge_description_mismatch() -> None:
+    # Conflicting descriptions should raise SchemaConflictError
+    cap1 = TypedCapability(
+        name="Cap1",
+        description="Cap1",
+        input_model=DescriptionAInput,
+        output_model=EmptyModel,
+    )
+    cap2 = TypedCapability(
+        name="Cap2",
+        description="Cap2",
+        input_model=DescriptionBInput,
+        output_model=EmptyModel,
+    )
+
+    builder = AgentBuilder("DescConflict").with_capability(cap1)
+
+    with pytest.raises(SchemaConflictError, match="Definitions do not match"):
+        builder.with_capability(cap2)
 
 
 def test_complex_capability_delivery_mode_precedence() -> None:

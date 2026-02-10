@@ -117,7 +117,7 @@ from .utils.v2.governance import check_compliance_v2
 from .utils.v2.io import dump_to_yaml, load_from_yaml
 from .utils.viz import generate_mermaid_graph
 
-__version__ = "0.23.0"
+__version__ = "0.24.0"
 
 Manifest = ManifestV2
 Recipe = RecipeDefinition
