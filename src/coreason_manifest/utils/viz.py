@@ -299,7 +299,7 @@ def generate_mermaid_graph(
             node_type = "agent"
             capability = step.agent
         elif isinstance(step, LogicStep):
-            node_type = "step" # Logic steps are generic steps
+            node_type = "step"  # Logic steps are generic steps
             capability = "Logic"
         elif isinstance(step, CouncilStep):
             node_type = "council"

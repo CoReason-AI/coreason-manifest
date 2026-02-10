@@ -504,28 +504,24 @@ def test_viz_custom_shape_override() -> None:
     assert node["id"] == "human1"
     assert node["shape"] == "rect"
 
+
 def test_viz_unknown_node_type_json_export() -> None:
     """
     Test forcing an unknown node type into to_graph_json via model_construct.
     This hits the defensive 'else' block for 100% coverage.
     """
+
     # Create a fake node that mimics RecipeNode but has a weird type
     class FakeNode(AgentNode):
-        type: str = "mystery_node" # type: ignore
+        type: str = "mystery_node"  # type: ignore
 
     fake_node = FakeNode.model_construct(id="mystery1", type="mystery_node")
 
     # Bypass validation by constructing topology manually
-    topology = GraphTopology.model_construct(
-        nodes=[fake_node],
-        edges=[],
-        entry_point="mystery1"
-    )
+    topology = GraphTopology.model_construct(nodes=[fake_node], edges=[], entry_point="mystery1")
 
     recipe = RecipeDefinition.model_construct(
-        metadata=ManifestMetadata(name="MysteryTest"),
-        interface=RecipeInterface(),
-        topology=topology
+        metadata=ManifestMetadata(name="MysteryTest"), interface=RecipeInterface(), topology=topology
     )
 
     data = to_graph_json(recipe)
