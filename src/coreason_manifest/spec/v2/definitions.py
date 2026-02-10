@@ -446,7 +446,7 @@ class ManifestV2(ManifestBaseModel):
         for def_id, definition in self.definitions.items():
             # Check for 'id' attribute to handle types like MCPResourceDefinition or future types
             if hasattr(definition, "id"):
-                def_id_val = getattr(definition, "id")
+                def_id_val = getattr(definition, "id")  # noqa: B009
                 if def_id_val != def_id:
                     errors.append(f"Definition Key Mismatch: Key '{def_id}' does not match object ID '{def_id_val}'.")
 
