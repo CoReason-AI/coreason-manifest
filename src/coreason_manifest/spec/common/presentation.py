@@ -134,3 +134,33 @@ class PresentationEvent(ManifestBaseModel):
                 elif t == PresentationEventType.MARKDOWN_BLOCK:
                     values["data"] = MarkdownBlock.model_validate(d)
         return values
+
+
+class GraphTheme(ManifestBaseModel):
+    """Configuration for graph visualization styling."""
+
+    orientation: Literal["TD", "LR"] = "TD"
+    node_styles: dict[str, str] = Field(
+        default_factory=lambda: {
+            "agent": "fill:#e3f2fd,stroke:#1565c0",
+            "human": "fill:#fff3e0,stroke:#e65100",
+        }
+    )
+    primary_color: str | None = None
+    secondary_color: str | None = None
+    font_family: str | None = None
+
+
+class NodeStatus(StrEnum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+
+
+class RuntimeStateSnapshot(ManifestBaseModel):
+    """A frozen snapshot of execution state for visualization."""
+
+    node_states: dict[str, NodeStatus]
+    active_path: list[str] = []

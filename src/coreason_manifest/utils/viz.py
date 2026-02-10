@@ -9,7 +9,13 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import re
+from typing import Any
 
+from coreason_manifest.spec.common.presentation import (
+    GraphTheme,
+    NodeStatus,
+    RuntimeStateSnapshot,
+)
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
     CouncilStep,
@@ -24,6 +30,7 @@ from coreason_manifest.spec.v2.recipe import (
     HumanNode,
     RecipeDefinition,
     RouterNode,
+    TransparencyLevel,
 )
 
 
@@ -33,22 +40,45 @@ def _sanitize_id(text: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_]", "_", text)
 
 
-def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
+def _generate_recipe_mermaid(
+    recipe: RecipeDefinition,
+    theme: GraphTheme | None = None,
+    state: RuntimeStateSnapshot | None = None,
+) -> str:
     """
     Generates a Mermaid.js flowchart string from a RecipeDefinition.
     """
-    lines = ["graph TD"]
+    # 1. Orientation
+    orientation = theme.orientation if theme else "TD"
+    lines = [f"graph {orientation}"]
 
-    # Styling Definitions
-    # Consistent color palette but adapted for Recipe nodes
-    lines.append("classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;")
-    lines.append("classDef input fill:#e1f5fe,stroke:#01579b,stroke-width:2px;")  # Light Blue
-    lines.append("classDef agent fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;")  # Blue
-    lines.append("classDef human fill:#fff3e0,stroke:#e65100,stroke-width:2px;")  # Orange
-    lines.append("classDef router fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;")  # Purple
-    lines.append("classDef evaluator fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;")  # Green
-    lines.append("classDef generative fill:#fce4ec,stroke:#880e4f,stroke-width:2px;")  # Pink
-    lines.append("classDef term fill:#eceff1,stroke:#37474f,stroke-width:2px,rx:10,ry:10;")  # Grey
+    # 2. Styling Definitions
+    # Defaults
+    styles = {
+        "default": "fill:#f9f9f9,stroke:#333,stroke-width:1px",
+        "input": "fill:#e1f5fe,stroke:#01579b,stroke-width:2px",
+        "agent": "fill:#e3f2fd,stroke:#1565c0,stroke-width:2px",
+        "human": "fill:#fff3e0,stroke:#e65100,stroke-width:2px",
+        "router": "fill:#f3e5f5,stroke:#4a148c,stroke-width:2px",
+        "evaluator": "fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px",
+        "generative": "fill:#fce4ec,stroke:#880e4f,stroke-width:2px",
+        "term": "fill:#eceff1,stroke:#37474f,stroke-width:2px,rx:10,ry:10",
+        # State styles
+        "running": "stroke:#ffeb3b,stroke-width:4px,animation:pulse 2s infinite",
+        "completed": "stroke:#4caf50,stroke-width:3px",
+        "failed": "stroke:#f44336,stroke-width:3px",
+        "skipped": "stroke:#9e9e9e,stroke-dasharray: 5 5",
+    }
+
+    # Override with theme
+    if theme:
+        # If primary/secondary colors are provided, we might want to adapt defaults?
+        # For now, we respect specific overrides in node_styles
+        for k, v in theme.node_styles.items():
+            styles[k] = v
+
+    for name, style in styles.items():
+        lines.append(f"classDef {name} {style};")
 
     # Start Node
     lines.append("START((Start)):::term")
@@ -67,13 +97,30 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
         style_class = "default"
         shape_open = "["
         shape_close = "]"
+        is_subgraph = False
 
         if isinstance(node, AgentNode):
             # Agent Node: Box
             style_class = "agent"
-            ref = getattr(node, "agent_ref", "Inline")
-            ref_str = f"Draft: {ref.intent}" if hasattr(ref, "intent") else str(ref)
-            label = f"{node.id}<br/>(Agent: {ref_str})"
+            # Check for inline cognitive profile (Nested Graph)
+            if node.cognitive_profile:
+                is_subgraph = True
+                role = node.cognitive_profile.role
+
+                lines.append(f"subgraph cluster_{sanitized_id} [\"{node.id} (Cognitive Profile)\"]")
+                lines.append(f"  direction {orientation}")
+
+                profile_label = f"Role: {role}"
+                if node.cognitive_profile.reasoning_mode:
+                    profile_label += f"<br/>Mode: {node.cognitive_profile.reasoning_mode}"
+
+                lines.append(f'  {sanitized_id}["{profile_label}"]:::{style_class}')
+                lines.append("end")
+
+            else:
+                ref = getattr(node, "agent_ref", "Inline")
+                ref_str = f"Draft: {ref.intent}" if hasattr(ref, "intent") else str(ref)
+                label = f"{node.id}<br/>(Agent: {ref_str})"
 
         elif isinstance(node, HumanNode):
             # Human Node: Hexagon {{ }}
@@ -103,9 +150,15 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
             shape_close = "]]"
             label = f"{node.id}<br/>(Generative)"
 
-        # Escape quotes in label
-        safe_label = label.replace('"', "'")
-        lines.append(f'{sanitized_id}{shape_open}"{safe_label}"{shape_close}:::{style_class}')
+        if not is_subgraph:
+            # Escape quotes in label
+            safe_label = label.replace('"', "'")
+            lines.append(f'{sanitized_id}{shape_open}"{safe_label}"{shape_close}:::{style_class}')
+
+        # Interaction Binding
+        if node.interaction and node.interaction.transparency == TransparencyLevel.INTERACTIVE:
+            tooltip = f"Interact with {node.id}"
+            lines.append(f'click {sanitized_id} call_interaction_handler "{tooltip}"')
 
     # End Node
     lines.append("END((End)):::term")
@@ -130,29 +183,57 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
             # Unlabeled edge
             lines.append(f"{src} --> {tgt}")
 
-    # Implicit edges (e.g. from leaf nodes to END)
-    # Finding leaf nodes is a bit complex in graph, so we skip for now unless requested.
-    # Users can manually add edges to END if needed, or rely on visual inspection.
-    # However, for clarity, we might want to verify if any node has no outgoing edges.
-    # But graph topology doesn't strictly enforce a sink node structure except via edges.
+    # Runtime State Overlay
+    if state:
+        for node_id, status in state.node_states.items():
+            sanitized = _sanitize_id(node_id)
+            # Map status enum to classDef name
+            # e.g. NodeStatus.RUNNING -> "running"
+            if status.value in styles:
+                lines.append(f"class {sanitized} {status.value};")
+
+            # TODO: Handle active_path highlighting if needed (e.g. bold edges)
 
     return "\n".join(lines)
 
 
-def generate_mermaid_graph(agent: ManifestV2 | RecipeDefinition) -> str:
+def generate_mermaid_graph(
+    agent: ManifestV2 | RecipeDefinition,
+    theme: GraphTheme | None = None,
+    state: RuntimeStateSnapshot | None = None,
+) -> str:
     """
     Generates a Mermaid.js flowchart string from a ManifestV2 (Agent Definition) or RecipeDefinition.
     """
     if isinstance(agent, RecipeDefinition):
-        return _generate_recipe_mermaid(agent)
+        return _generate_recipe_mermaid(agent, theme, state)
 
-    lines = ["graph TD"]
+    # ManifestV2 Handling
+    orientation = theme.orientation if theme else "TD"
+    lines = [f"graph {orientation}"]
 
     # Styling Definitions
-    lines.append("classDef input fill:#e1f5fe,stroke:#01579b,stroke-width:2px;")
-    lines.append("classDef tool fill:#fff3e0,stroke:#e65100,stroke-width:2px;")
-    lines.append("classDef step fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;")
-    lines.append("classDef term fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,rx:10,ry:10;")
+    # Defaults
+    styles = {
+        "input": "fill:#e1f5fe,stroke:#01579b,stroke-width:2px",
+        "tool": "fill:#fff3e0,stroke:#e65100,stroke-width:2px",
+        "step": "fill:#f3e5f5,stroke:#4a148c,stroke-width:2px",
+        "council": "fill:#fce4ec,stroke:#880e4f,stroke-width:2px",
+        "term": "fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,rx:10,ry:10",
+        # State styles
+        "running": "stroke:#ffeb3b,stroke-width:4px,animation:pulse 2s infinite",
+        "completed": "stroke:#4caf50,stroke-width:3px",
+        "failed": "stroke:#f44336,stroke-width:3px",
+        "skipped": "stroke:#9e9e9e,stroke-dasharray: 5 5",
+    }
+
+    # Override with theme
+    if theme:
+        for k, v in theme.node_styles.items():
+            styles[k] = v
+
+    for name, style in styles.items():
+        lines.append(f"classDef {name} {style};")
 
     # Start Node
     lines.append("START((Start)):::term")
@@ -170,16 +251,23 @@ def generate_mermaid_graph(agent: ManifestV2 | RecipeDefinition) -> str:
     for step_id, step in steps.items():
         sanitized_id = _sanitize_id(step_id)
         capability = "Unknown"
+        style_class = "step"
+        shape_open = "["
+        shape_close = "]"
+
         if isinstance(step, AgentStep):
             capability = step.agent
         elif isinstance(step, LogicStep):
             capability = "Logic"
         elif isinstance(step, CouncilStep):
             capability = "Council"
+            style_class = "council"
+            shape_open = "[["
+            shape_close = "]]"
         elif isinstance(step, SwitchStep):
             capability = "Switch"
 
-        lines.append(f'STEP_{sanitized_id}["{step_id}<br/>(Call: {capability})"]:::step')
+        lines.append(f'STEP_{sanitized_id}{shape_open}"{step_id}<br/>(Call: {capability})"{shape_close}:::{style_class}')
 
     # End Node
     lines.append("END((End)):::term")
@@ -219,4 +307,99 @@ def generate_mermaid_graph(agent: ManifestV2 | RecipeDefinition) -> str:
             # If no default and no case matches, flow implicitly stops or errors.
             # Visualizing implicit end for switch is complex, we leave it as open unless mapped.
 
+    # State overlay for ManifestV2
+    if state:
+        for node_id, status in state.node_states.items():
+            sanitized = f"STEP_{_sanitize_id(node_id)}"
+            # Map status enum to classDef name
+            if status.value in styles:
+                 lines.append(f"class {sanitized} {status.value};")
+
     return "\n".join(lines)
+
+
+def to_graph_json(
+    recipe: RecipeDefinition,
+    theme: GraphTheme | None = None,
+) -> dict[str, Any]:
+    """
+    Exports the recipe topology as a structured JSON dict for frontend rendering.
+    """
+    nodes = []
+    edges = []
+
+    # Map nodes
+    for node in recipe.topology.nodes:
+        node_type = node.type
+        sanitized_id = _sanitize_id(node.id)
+
+        # Determine Label
+        if isinstance(node, AgentNode):
+            ref = getattr(node, "agent_ref", "Inline")
+            ref_str = f"Draft: {ref.intent}" if hasattr(ref, "intent") else str(ref)
+            if node.cognitive_profile:
+                 ref_str = f"Profile: {node.cognitive_profile.role}"
+            label = f"{node.id} ({ref_str})"
+        elif isinstance(node, RouterNode):
+            label = f"{node.id} (Router: {node.input_key})"
+        else:
+            label = f"{node.id} ({node_type})"
+
+        # Config / Metadata
+        config = node.model_dump(exclude={"id", "type"}, mode="json")
+
+        # Presentation
+        x = 0
+        y = 0
+        if node.presentation:
+            x = node.presentation.x
+            y = node.presentation.y
+
+        nodes.append({
+            "id": sanitized_id,
+            "original_id": node.id,
+            "type": node_type,
+            "label": label,
+            "x": x,
+            "y": y,
+            "config": config,
+        })
+
+    # Map edges
+    for edge in recipe.topology.edges:
+        edges.append({
+            "source": _sanitize_id(edge.source),
+            "target": _sanitize_id(edge.target),
+            "label": edge.condition
+        })
+
+    # Implicit edges (Inputs -> Entry)
+    if recipe.topology.entry_point:
+        edges.append({
+            "source": "INPUTS",
+            "target": _sanitize_id(recipe.topology.entry_point),
+            "label": None,
+            "type": "implicit"
+        })
+
+    # Add special INPUTS node
+    input_keys = list(recipe.interface.inputs.keys())
+    nodes.insert(0, {
+        "id": "INPUTS",
+        "type": "input",
+        "label": "Inputs",
+        "x": 0,
+        "y": 0,
+        "config": {"inputs": input_keys}
+    })
+
+    # Default Theme
+    default_theme = GraphTheme().model_dump()
+    if theme:
+        default_theme.update(theme.model_dump(exclude_unset=True))
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "theme": default_theme
+    }
