@@ -10,6 +10,12 @@
 
 from typing import Any, cast
 
+from coreason_manifest.spec.common.presentation import (
+    ComponentSpec,
+    ComponentType,
+    PresentationHints,
+    ViewportMode,
+)
 from coreason_manifest.spec.v2.definitions import ManifestMetadata
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
@@ -247,3 +253,42 @@ def test_recipe_mermaid_label_sanitization() -> None:
 
     # Quotes in label should be replaced by single quotes
     assert "step1[\"step1<br/>(Agent: Draft: Say 'Hello')\"]:::agent" in chart
+
+
+def test_recipe_mermaid_magentic_visualization() -> None:
+    nodes = [
+        AgentNode(
+            id="planner_node",
+            agent_ref="planner",
+            visualization=PresentationHints(
+                display_title="Super Planner",
+                icon="🧠",
+                initial_viewport=ViewportMode.PLANNER_CONSOLE,
+                components=[
+                    ComponentSpec(
+                        id="plan_editor",
+                        type=ComponentType.CODE_EDITOR,
+                        data_source="plan",
+                        is_mutable=True,
+                    )
+                ],
+            ),
+        )
+    ]
+    edges: list[GraphEdge] = []
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="TestRecipe"),
+        interface=RecipeInterface(),
+        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="planner_node"),
+    )
+
+    chart = generate_mermaid_graph(recipe)
+
+    # Check classDef
+    assert "classDef magentic" in chart
+    # Check label override and icon
+    assert "🧠 Super Planner" in chart
+    # Check viewport annotation
+    assert "(View: planner_console)" in chart
+    # Check style override
+    assert 'planner_node["🧠 Super Planner<br/>(Agent: planner)<br/>(View: planner_console)"]:::magentic' in chart
