@@ -1,0 +1,55 @@
+
+--- Simulation Scenario: Dominant Competitor (Zocor) ---
+✅ Manifest 'LipitorLaunchProtocol' Verified.
+👉 Step: step_analyze (agent)
+   🤖 Agent: MarketAnalyst is working...
+   📄 Output: {
+  "opportunity_score": 85.0,
+  "prescriber_sentiment": "Skeptical",
+  "knowledge_gap": true
+}
+👉 Step: step_decide (agent)
+   🤖 Agent: StrategyDirector is working...
+   📄 Output: {
+  "action": "DEPLOY_MSL",
+  "rationale": "High knowledge gap detected. Science-first approach required.",
+  "key_message": "Atorvastatin offers superior LDL reduction efficacy."
+}
+👉 Step: step_route (switch)
+   🔀 Evaluating Route...
+      Matched: DEPLOY_MSL -> step_msl
+👉 Step: step_msl (agent)
+   🤖 Agent: MedicalScienceLiaison is working...
+   📄 Output: {
+  "prescriptions_lift": 12.5,
+  "feedback": "Physician appreciated the mechanism of action data."
+}
+🏁 Workflow Complete.
+
+
+--- Simulation Scenario: Friendly Territory ---
+✅ Manifest 'LipitorLaunchProtocol' Verified.
+👉 Step: step_analyze (agent)
+   🤖 Agent: MarketAnalyst is working...
+   📄 Output: {
+  "opportunity_score": 85.0,
+  "prescriber_sentiment": "Neutral",
+  "knowledge_gap": false
+}
+👉 Step: step_decide (agent)
+   🤖 Agent: StrategyDirector is working...
+   📄 Output: {
+  "action": "DEPLOY_REP",
+  "rationale": "Standard market conditions. Relationship maintenance sufficient.",
+  "key_message": "Remember to prescribe Lipitor."
+}
+👉 Step: step_route (switch)
+   🔀 Evaluating Route...
+      Matched: DEPLOY_REP -> step_rep
+👉 Step: step_rep (agent)
+   🤖 Agent: SalesRepresentative is working...
+   📄 Output: {
+  "prescriptions_lift": 3.2,
+  "feedback": "Physician accepted samples."
+}
+🏁 Workflow Complete.

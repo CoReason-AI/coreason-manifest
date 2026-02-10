@@ -13,6 +13,7 @@ from coreason_manifest.builder import AgentBuilder, CapabilityType, ManifestBuil
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
+    ManifestV2,
     SwitchStep,
 )
 
@@ -21,6 +22,7 @@ from coreason_manifest.spec.v2.definitions import (
 
 class MarketData(BaseModel):
     """Raw market intelligence data."""
+
     region_code: str = Field(..., description="Geographic region code (e.g., 'US-EAST').")
     competitor_share: float = Field(..., description="Market share of Zocor/Pravachol (0.0-1.0).")
     cardiologist_density: int = Field(..., description="Number of cardiologists in the region.")
@@ -28,6 +30,7 @@ class MarketData(BaseModel):
 
 class StrategicAnalysis(BaseModel):
     """Analysis of the market situation."""
+
     opportunity_score: float = Field(..., description="0-100 score of potential revenue.")
     prescriber_sentiment: str = Field(..., description="Current sentiment (Skeptical/Open/Loyal).")
     knowledge_gap: bool = Field(..., description="True if physicians lack understanding of LDL potency.")
@@ -35,15 +38,15 @@ class StrategicAnalysis(BaseModel):
 
 class EngagementStrategy(BaseModel):
     """The strategic decision for engagement."""
-    action: Literal["DEPLOY_MSL", "DEPLOY_REP"] = Field(
-        ..., description="The chosen engagement channel."
-    )
+
+    action: Literal["DEPLOY_MSL", "DEPLOY_REP"] = Field(..., description="The chosen engagement channel.")
     rationale: str = Field(..., description="Reasoning for the decision.")
     key_message: str = Field(..., description="The primary scientific or promotional message.")
 
 
 class EngagementOutcome(BaseModel):
     """Result of the engagement."""
+
     prescriptions_lift: float = Field(..., description="Percentage increase in prescriptions.")
     feedback: str = Field(..., description="Qualitative feedback from the physician.")
 
@@ -51,7 +54,7 @@ class EngagementOutcome(BaseModel):
 # --- 2. Build the Agent System (The Manifest) ---
 
 
-def build_launch_strategy_manifest():
+def build_launch_strategy_manifest() -> ManifestV2:
     """
     Constructs the 'Lipitor Launch' Agent System.
     This encodes the strategic decision to use MSLs for high-knowledge-gap areas.
@@ -139,14 +142,10 @@ def build_launch_strategy_manifest():
 
     # Add Steps
     # Step 1: Analyst
-    manifest_builder.add_step(
-        AgentStep(id="step_analyze", agent="MarketAnalyst", next="step_decide")
-    )
+    manifest_builder.add_step(AgentStep(id="step_analyze", agent="MarketAnalyst", next="step_decide"))
 
     # Step 2: Director decides
-    manifest_builder.add_step(
-        AgentStep(id="step_decide", agent="StrategyDirector", next="step_route")
-    )
+    manifest_builder.add_step(AgentStep(id="step_decide", agent="StrategyDirector", next="step_route"))
 
     # Step 3: Router (SwitchStep)
     # This encodes the conditional logic into the graph structure.
@@ -154,23 +153,16 @@ def build_launch_strategy_manifest():
     manifest_builder.add_step(
         SwitchStep(
             id="step_route",
-            cases={
-                "action == 'DEPLOY_MSL'": "step_msl",
-                "action == 'DEPLOY_REP'": "step_rep"
-            },
-            default="step_rep" # Fallback
+            cases={"action == 'DEPLOY_MSL'": "step_msl", "action == 'DEPLOY_REP'": "step_rep"},
+            default="step_rep",  # Fallback
         )
     )
 
     # Step 4a: MSL Engagement
-    manifest_builder.add_step(
-        AgentStep(id="step_msl", agent="MedicalScienceLiaison", next=None)
-    )
+    manifest_builder.add_step(AgentStep(id="step_msl", agent="MedicalScienceLiaison", next=None))
 
     # Step 4b: Rep Engagement
-    manifest_builder.add_step(
-        AgentStep(id="step_rep", agent="SalesRepresentative", next=None)
-    )
+    manifest_builder.add_step(AgentStep(id="step_rep", agent="SalesRepresentative", next=None))
 
     # Set Entry Point
     manifest_builder.set_start_step("step_analyze")
@@ -181,7 +173,7 @@ def build_launch_strategy_manifest():
 # --- 3. Simulation Logic ---
 
 
-def simulate_launch(scenario_name: str, input_data: dict[str, Any]):
+def simulate_launch(scenario_name: str, input_data: dict[str, Any]) -> None:
     print(f"\n--- Simulation Scenario: {scenario_name} ---")
     manifest = build_launch_strategy_manifest()
 
@@ -197,10 +189,10 @@ def simulate_launch(scenario_name: str, input_data: dict[str, Any]):
 
     # Execution Loop
     current_step_id = manifest.workflow.start
-    context = {"inputs": input_data} # Shared context for simulation
+    context = {"inputs": input_data}  # Shared context for simulation
 
     # To track the "action" for the router
-    last_output = {}
+    last_output: dict[str, Any] = {}
 
     while current_step_id:
         step = manifest.workflow.steps.get(current_step_id)
@@ -220,16 +212,16 @@ def simulate_launch(scenario_name: str, input_data: dict[str, Any]):
                 # For this mock, we force the StrategyDirector to follow the prompt policy
                 # based on the input data context.
 
-                mock_output = {}
+                mock_output: dict[str, Any] = {}
 
                 if agent.name == "MarketAnalyst":
                     # Simulate finding a knowledge gap if share is low
                     share = input_data.get("competitor_share", 0.5)
-                    gap = share > 0.6 # If competitor is dominant, assume knowledge gap
+                    gap = share > 0.6  # If competitor is dominant, assume knowledge gap
                     mock_output = {
                         "opportunity_score": 85.0,
                         "prescriber_sentiment": "Skeptical" if gap else "Neutral",
-                        "knowledge_gap": gap
+                        "knowledge_gap": gap,
                     }
                     context["analysis"] = mock_output
 
@@ -239,33 +231,30 @@ def simulate_launch(scenario_name: str, input_data: dict[str, Any]):
                         mock_output = {
                             "action": "DEPLOY_MSL",
                             "rationale": "High knowledge gap detected. Science-first approach required.",
-                            "key_message": "Atorvastatin offers superior LDL reduction efficacy."
+                            "key_message": "Atorvastatin offers superior LDL reduction efficacy.",
                         }
                     else:
                         mock_output = {
                             "action": "DEPLOY_REP",
                             "rationale": "Standard market conditions. Relationship maintenance sufficient.",
-                            "key_message": "Remember to prescribe Lipitor."
+                            "key_message": "Remember to prescribe Lipitor.",
                         }
                     context["strategy"] = mock_output
-                    last_output = mock_output # Store for router
+                    last_output = mock_output  # Store for router
 
                 elif agent.name == "MedicalScienceLiaison":
                     mock_output = {
                         "prescriptions_lift": 12.5,
-                        "feedback": "Physician appreciated the mechanism of action data."
+                        "feedback": "Physician appreciated the mechanism of action data.",
                     }
 
                 elif agent.name == "SalesRepresentative":
-                    mock_output = {
-                        "prescriptions_lift": 3.2,
-                        "feedback": "Physician accepted samples."
-                    }
+                    mock_output = {"prescriptions_lift": 3.2, "feedback": "Physician accepted samples."}
 
                 print(f"   📄 Output: {json.dumps(mock_output, indent=2)}")
 
                 # Move next
-                current_step_id = step.next
+                current_step_id = step.next if step.next is not None else ""
 
         elif isinstance(step, SwitchStep):
             # Evaluate Conditions
@@ -284,7 +273,7 @@ def simulate_launch(scenario_name: str, input_data: dict[str, Any]):
             else:
                 print(f"      No match, using default -> {next_step}")
 
-            current_step_id = next_step
+            current_step_id = next_step if next_step is not None else ""
 
         else:
             print(f"   Unknown step type: {step.type}")
@@ -293,18 +282,19 @@ def simulate_launch(scenario_name: str, input_data: dict[str, Any]):
     print("🏁 Workflow Complete.\n")
 
 
-def main():
+def main() -> None:
     # Scenario 1: High Competitor Share (Requires MSL)
     simulate_launch(
         scenario_name="Dominant Competitor (Zocor)",
-        input_data={"region_code": "NY-01", "competitor_share": 0.75, "cardiologist_density": 120}
+        input_data={"region_code": "NY-01", "competitor_share": 0.75, "cardiologist_density": 120},
     )
 
     # Scenario 2: Low Competitor Share (Standard Rep)
     simulate_launch(
         scenario_name="Friendly Territory",
-        input_data={"region_code": "TX-05", "competitor_share": 0.30, "cardiologist_density": 45}
+        input_data={"region_code": "TX-05", "competitor_share": 0.30, "cardiologist_density": 45},
     )
+
 
 if __name__ == "__main__":
     main()
