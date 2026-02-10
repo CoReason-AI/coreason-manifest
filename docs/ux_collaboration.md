@@ -69,7 +69,7 @@ class CollaborationConfig(CoReasonBaseModel):
 
     # Shared Agency Fields
     render_strategy: RenderStrategy = Field(RenderStrategy.PLAIN_TEXT, ...)
-    trace_intervention: bool = Field(False, ...) # If True, intervention is crystallized into memory
+    trace_intervention: bool = Field(False, ...) # Concept: "Learning from Feedback"
 
     # Harvesting Fields (Human-Layer)
     channels: list[str] = Field(default=[], ...)
@@ -77,9 +77,9 @@ class CollaborationConfig(CoReasonBaseModel):
     fallback_behavior: Literal["fail", "proceed_with_default", "escalate"] = Field("fail", ...)
 ```
 
-### Steering Commands (`SteeringCommand`)
+### Steering Primitives (`SteeringCommand`)
 
-Replaces "magic strings" with standardized primitives for human intervention.
+Replaces "magic strings" with standardized primitives for human intervention. These commands are keys in the `HumanNode.routes` map.
 
 1.  **`APPROVE`**: Accept the current state/plan.
 2.  **`REJECT`**: Deny the current state/plan.
@@ -88,7 +88,7 @@ Replaces "magic strings" with standardized primitives for human intervention.
 5.  **`REWIND`**: Go back to a previous state (Time Travel).
 6.  **`REPLY`**: Provide textual feedback or answer a question.
 
-### Render Strategies (`RenderStrategy`)
+### UI Rendering Protocols (`RenderStrategy`)
 
 Protocol for rendering the feedback interface.
 
@@ -124,7 +124,7 @@ node = AgentNode(
     collaboration=CollaborationConfig(
         mode=CollaborationMode.INTERACTIVE,
         render_strategy=RenderStrategy.JSON_FORMS,
-        trace_intervention=True,
+        trace_intervention=True, # Learn from corrections
         # Structured Feedback Form
         feedback_schema={
             "type": "object",

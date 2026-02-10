@@ -209,7 +209,13 @@ def _generate_recipe_mermaid(
                 label = f"{display_name}<br/>(Agent: {ref_str})"
 
         elif isinstance(node, HumanNode):
-            label = f"{display_name}<br/>(Human Input)"
+            collab = node.collaboration
+            if collab:
+                mode_icon = "✍️" if collab.mode == "co_edit" else "👤"
+                protocol = collab.render_strategy
+                label = f"{mode_icon} {display_name}<br/>(Protocol: {protocol})"
+            else:
+                label = f"{display_name}<br/>(Human Input)"
 
         elif isinstance(node, RouterNode):
             label = f"{display_name}<br/>(Router: {node.input_key})"
@@ -254,6 +260,14 @@ def _generate_recipe_mermaid(
         else:
             # Unlabeled edge
             lines.append(f"{src} --> {tgt}")
+
+    # Human Routing Edges
+    for node in recipe.topology.nodes:
+        if isinstance(node, HumanNode) and node.routes:
+            src = _sanitize_id(node.id)
+            for command, target_id in node.routes.items():
+                tgt = _sanitize_id(target_id)
+                lines.append(f'{src} -- "{command}" --> {tgt}')
 
     # Runtime State Overlay
     if state:
