@@ -124,10 +124,10 @@ def test_complex_manifest_integrity() -> None:
         metadata=ManifestMetadata(name="Complex Test", version="2.0.0"),
         workflow=Workflow(start="s", steps={"s": {"type": "placeholder", "id": "s"}}),
         definitions={
-            "agent1": valid_agent,      # Valid
-            "wrong_key_agent": invalid_agent, # Invalid: key != id
-            "my_resource": resource     # Valid: no ID check
-        }
+            "agent1": valid_agent,  # Valid
+            "wrong_key_agent": invalid_agent,  # Invalid: key != id
+            "my_resource": resource,  # Valid: no ID check
+        },
     )
 
     errors = manifest.verify()
