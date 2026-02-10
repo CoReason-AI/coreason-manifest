@@ -89,6 +89,12 @@ def test_loader_missing_colon_error(temp_agent_file: Path) -> None:
     with pytest.raises(ValueError, match="Reference must contain both"):
         load_agent_from_ref(f"{temp_agent_file}:")
 
+    # Test invalid identifier to ensure coverage on Linux (where path has no colon)
+    # On Windows, the temp_agent_file path has a colon, so it might hit this check earlier if not handled right,
+    # but specifically providing a valid-looking path structure with invalid var ensures specific branch coverage.
+    with pytest.raises(ValueError, match="Invalid reference format"):
+        load_agent_from_ref("some/path/file.py:invalid-variable-name")
+
 
 def test_loader_errors(temp_agent_file: Path) -> None:
     # File not found
