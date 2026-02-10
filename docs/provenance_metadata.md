@@ -33,7 +33,7 @@ metadata = ManifestMetadata(
 ## Validation
 
 *   **Confidence Score**: Must be between `0.0` and `1.0` inclusive.
-*   **Extra Fields**: The schema permits extra fields (`extra="allow"`) to support forward compatibility and custom metadata, but the fields above are strictly typed.
+*   **Extra Fields**: The schema strictly forbids extra fields (`extra="forbid"`) to prevent metadata drift. Standard fields like `version`, `description`, `created`, and `requires_auth` are explicitly defined.
 
 ## Provenance Data (New in 0.22.0)
 
