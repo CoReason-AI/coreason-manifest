@@ -39,5 +39,6 @@ nav:
       - "Governance API": reference/governance.md
       - "Agent API": reference/agents.md
       - "Capabilities API": reference/capabilities.md
+      - "Glossary": GLOSSARY.md
       - "Package Structure": package_structure.md
       - "Full Index": index.md
