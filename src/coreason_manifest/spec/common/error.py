@@ -25,25 +25,20 @@ class CoreasonError(Exception):
     """Base class for all Coreason Manifest errors."""
 
 
-
 class AgentNotFoundError(CoreasonError, ValueError):
     """Raised when an agent file or path does not exist."""
-
 
 
 class InvalidReferenceError(CoreasonError, ValueError):
     """Raised when an agent reference string (e.g., 'file:var') is malformed."""
 
 
-
 class AgentDefinitionError(CoreasonError, ValueError):
     """Raised when the loaded object is not of the expected type or cannot be defined."""
 
 
-
 class SchemaConflictError(CoreasonError, ValueError):
     """Raised when merging capabilities results in incompatible JSON schemas."""
-
 
 
 class NamingConventionWarning(UserWarning):
