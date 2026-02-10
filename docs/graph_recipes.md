@@ -1,5 +1,7 @@
 # Orchestration: Graph Recipes
 
+**Note:** This document defines the *schema* and *contract* for orchestration. As part of the Shared Kernel, it provides the blueprints (`RecipeDefinition`) that the Runtime Engine executes. It does not contain the execution logic itself.
+
 Coreason V2 introduces **Graph Recipes**, replacing linear workflows with a robust **Directed Cyclic Graph (DCG)** architecture. This allows for complex orchestration patterns including loops, conditional branching, and human-in-the-loop interactions.
 
 ## Concept: Graphs, Not Lists
@@ -222,6 +224,27 @@ The `GraphTopology` enforces structural integrity. It requires a list of `nodes`
 ### JSON Example: Agent -> Human Handover
 
 Here is a raw JSON example of a topology where an AI Agent performs a task, and then a Human Manager must approve it.
+
+### Visualization
+
+```mermaid
+graph TD
+    start((Entry)) --> A[research-task]
+    A -->|on_success| B{manager-approval}
+    B -->|approved| C[publish-result]
+    B -->|rejected| A
+    C --> stop((End))
+
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,stroke-dasharray: 5 5
+    style C fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+**How to Interpret this Diagram:**
+*   **Rectangles (`[Node]`)**: Represent **Agent Tasks** (e.g., `research-task`, `publish-result`).
+*   **Diamonds (`{Node}`)**: Represent **Decision Points** or **Human Interventions** (e.g., `manager-approval`).
+*   **Arrows (`-->`)**: Represent the **Control Flow** (Edges). The label on the arrow (e.g., `on_success`, `rejected`) is the condition required to traverse that edge.
+*   **Cycles**: Notice the arrow going from `manager-approval` back to `research-task` if rejected. This illustrates the **Cyclic** nature of the graph.
 
 ```json
 {
