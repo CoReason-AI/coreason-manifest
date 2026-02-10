@@ -275,8 +275,6 @@ class InteractionConfig(ManifestBaseModel):
     guidance_hint: str | None = Field(None, description="Hint for the human operator.")
 
 
-
-
 class CollaborationMode(StrEnum):
     """The protocol for human engagement."""
 

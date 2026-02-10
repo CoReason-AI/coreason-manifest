@@ -93,7 +93,7 @@ def test_edge_cases() -> None:
 
     # 2. Test invalid Viewport Mode
     with pytest.raises(ValidationError) as exc:
-        PresentationHints(initial_viewport="INVALID_STYLE")  # type: ignore
+        PresentationHints(initial_viewport="INVALID_STYLE")
     assert "Input should be 'stream', 'artifact_split', 'planner_console' or 'canvas'" in str(exc.value)
 
     # 3. Test invalid Collaboration Mode

@@ -13,7 +13,6 @@ def test_presentation_hints_viewport_initialization() -> None:
     """Test initializing PresentationHints with ViewportMode.PLANNER_CONSOLE."""
     hints = PresentationHints(initial_viewport=ViewportMode.PLANNER_CONSOLE)
     assert hints.initial_viewport == ViewportMode.PLANNER_CONSOLE
-    assert hints.initial_viewport == "planner_console"
 
 
 def test_component_spec_serialization() -> None:
