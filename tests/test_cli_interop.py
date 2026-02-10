@@ -77,22 +77,23 @@ def test_loader_builder(temp_agent_file: Path) -> None:
     assert agent.metadata.name == "BuilderAgent"
 
 
-def test_loader_default_var(temp_agent_file: Path) -> None:
-    # Create file with 'agent' variable
-    p = temp_agent_file.parent / "default_agent.py"
-    p.write_text("""
-from coreason_manifest.builder import AgentBuilder
-agent = AgentBuilder(name="DefaultAgent").build()
-""")
-    ref = str(p)
-    loaded = load_agent_from_ref(ref)
-    assert loaded.metadata.name == "DefaultAgent"
+def test_loader_missing_colon_error(temp_agent_file: Path) -> None:
+    """Test that missing colon raises ValueError."""
+    with pytest.raises(ValueError, match="Invalid reference format"):
+        load_agent_from_ref(str(temp_agent_file))
+
+    # Test empty path or variable
+    with pytest.raises(ValueError, match="Reference must contain both"):
+        load_agent_from_ref(":agent")
+
+    with pytest.raises(ValueError, match="Reference must contain both"):
+        load_agent_from_ref(f"{temp_agent_file}:")
 
 
 def test_loader_errors(temp_agent_file: Path) -> None:
     # File not found
     with pytest.raises(ValueError, match="File not found"):
-        load_agent_from_ref("non_existent.py")
+        load_agent_from_ref("non_existent.py:agent")
 
     # Var not found
     with pytest.raises(ValueError, match="Variable 'missing' not found"):
@@ -106,7 +107,7 @@ def test_loader_errors(temp_agent_file: Path) -> None:
     bad_file = temp_agent_file.parent / "bad.py"
     bad_file.write_text("this is not python")
     with pytest.raises(ValueError, match="Error loading module"):
-        load_agent_from_ref(str(bad_file))
+        load_agent_from_ref(f"{bad_file}:agent")
 
     # Broken builder
     with pytest.raises(ValueError, match="Error building agent"):
@@ -118,7 +119,7 @@ def test_loader_spec_error(temp_agent_file: Path) -> None:
         patch("importlib.util.spec_from_file_location", return_value=None),
         pytest.raises(ValueError, match="Could not load spec"),
     ):
-        load_agent_from_ref(str(temp_agent_file))
+        load_agent_from_ref(f"{temp_agent_file}:agent")
 
 
 # CLI Tests
@@ -133,7 +134,7 @@ def mock_agent() -> ManifestV2:
 def test_cli_inspect(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent),
-        patch.object(sys, "argv", ["coreason", "inspect", "dummy.py"]),
+        patch.object(sys, "argv", ["coreason", "inspect", "dummy.py:agent"]),
     ):
         main()
 
@@ -148,7 +149,7 @@ def test_cli_inspect(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> Non
 def test_cli_viz(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent),
-        patch.object(sys, "argv", ["coreason", "viz", "dummy.py"]),
+        patch.object(sys, "argv", ["coreason", "viz", "dummy.py:agent"]),
     ):
         main()
 
@@ -159,7 +160,7 @@ def test_cli_viz(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
 def test_cli_viz_json(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", return_value=mock_agent),
-        patch.object(sys, "argv", ["coreason", "viz", "dummy.py", "--json"]),
+        patch.object(sys, "argv", ["coreason", "viz", "dummy.py:agent", "--json"]),
     ):
         main()
 
@@ -171,7 +172,7 @@ def test_cli_viz_json(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> No
 def test_cli_load_error(capsys: CaptureFixture[str]) -> None:
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", side_effect=ValueError("Load failed")),
-        patch.object(sys, "argv", ["coreason", "inspect", "bad.py"]),
+        patch.object(sys, "argv", ["coreason", "inspect", "bad.py:agent"]),
         pytest.raises(SystemExit),
     ):
         main()

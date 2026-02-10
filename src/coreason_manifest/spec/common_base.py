@@ -17,12 +17,9 @@ from pydantic import AnyUrl, BaseModel, ConfigDict, PlainSerializer
 
 
 class ManifestBaseModel(BaseModel):
-    """Base model for all CoReason Pydantic models with enhanced serialization.
+    """Base model for all CoReason Pydantic models.
 
-    This base class addresses JSON serialization challenges in Pydantic v2 (e.g., UUID, datetime)
-    by providing standardized methods (`dump`, `to_json`) with optimal configuration.
-
-    For a detailed rationale, see `docs/coreason_base_model_rationale.md`.
+    Configured for strict serialization of types like UUID and datetime using standard Pydantic mechanisms.
     """
 
     model_config = ConfigDict(

@@ -8,7 +8,7 @@ It is designed to be a pure data library, meaning it contains **no execution log
 
 ### 1. Agent & Recipe Definition
 The `Manifest` is the source of truth for an AI Agent or Recipe. It includes:
-- **Metadata**: Identity, versioning (Strict SemVer), and authorship.
+- **Metadata**: Identity, versioning (Strict SemVer), and authorship. Extra fields are strictly forbidden to prevent drift.
 - **Interface**: Strictly typed modes of interaction (`inputs`, `outputs` as JSON Schema).
 - **Topology**: A graph-based execution flow (`Workflow`) supporting cyclic loops (e.g., for reflection).
 - **Definitions**: Reusable components like Tools (`ToolDefinition`) and sub-agents.

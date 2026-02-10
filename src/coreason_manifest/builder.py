@@ -25,7 +25,6 @@ from coreason_manifest.spec.v2.contracts import (
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
-    GenericDefinition,
     InlineToolDefinition,
     ManifestMetadata,
     ManifestV2,
@@ -259,7 +258,7 @@ class ManifestBuilder:
         self.name = name
         self.version = version
         self.kind = kind
-        self.definitions: dict[str, ToolDefinition | AgentDefinition | GenericDefinition] = {}
+        self.definitions: dict[str, ToolDefinition | AgentDefinition] = {}
         self.steps: dict[str, Step] = {}
         self.start_step_id: str | None = None
         self.interface = InterfaceDefinition()
@@ -291,20 +290,6 @@ class ManifestBuilder:
             Self: The builder instance for chaining.
         """
         self.definitions[tool.id] = tool
-        return self
-
-    def add_generic_definition(self, key: str, definition: GenericDefinition) -> Self:
-        """
-        Add a generic definition to the manifest.
-
-        Args:
-            key (str): The key/id for the definition.
-            definition (GenericDefinition): The definition object.
-
-        Returns:
-            Self: The builder instance for chaining.
-        """
-        self.definitions[key] = definition
         return self
 
     def add_step(self, step: Step) -> Self:

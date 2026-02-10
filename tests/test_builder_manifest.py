@@ -16,7 +16,6 @@ from coreason_manifest.spec.v2.contracts import InterfaceDefinition, PolicyDefin
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
     CouncilStep,
-    GenericDefinition,
     LogicStep,
     SwitchStep,
     ToolDefinition,
@@ -102,25 +101,6 @@ def test_manifest_builder_tools() -> None:
     assert tool_def.uri == StrictUri("https://example.com/mcp")
 
 
-def test_manifest_builder_generic_def() -> None:
-    generic = GenericDefinition(some_field="value")
-
-    manifest = (
-        ManifestBuilder("GenericManifest")
-        .add_generic_definition("my_generic", generic)
-        .add_step(LogicStep(id="main", code="pass"))
-        .build()
-    )
-
-    assert "my_generic" in manifest.definitions
-    # Accessing dynamic fields on Pydantic models usually works if configured properly,
-    # but GenericDefinition has model_config(extra="allow").
-    # Pydantic v2 access for extra fields:
-    generic_def = manifest.definitions["my_generic"]
-    assert isinstance(generic_def, GenericDefinition)
-    assert generic_def.some_field == "value"  # type: ignore
-
-
 def test_manifest_builder_implicit_start_step() -> None:
     # If only one step, it should be auto-selected as start
     manifest = ManifestBuilder("ImplicitStart").add_step(LogicStep(id="only_step", code="pass")).build()
@@ -135,7 +115,7 @@ def test_manifest_builder_interface_metadata_error() -> None:
     builder.set_interface(interface)
 
     # Test set_metadata
-    builder.set_metadata("extra_field", "extra_value")
+    # builder.set_metadata("extra_field", "extra_value")  # Removed: extra fields are now forbidden
 
     # Test ValueError for missing start step
     builder.add_step(LogicStep(id="s1", code="pass"))
@@ -150,7 +130,7 @@ def test_manifest_builder_interface_metadata_error() -> None:
 
     assert manifest.interface.inputs["type"] == "object"
     # Pydantic V2 allows accessing extra fields as attributes if not colliding
-    assert getattr(manifest.metadata, "extra_field", None) == "extra_value"
+    # assert getattr(manifest.metadata, "extra_field", None) == "extra_value"
 
 
 def test_manifest_builder_switch_and_council_steps() -> None:

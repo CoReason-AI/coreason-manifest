@@ -128,7 +128,8 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
         workflow=base_workflow,
     )
     report = check_compliance_v2(manifest_str_false, config)
-    assert report.passed is True  # "false" is truthy
+    # "false" string -> False boolean (strict typing parses it correctly now)
+    assert report.passed is False
 
     # "true" string -> Truthy -> Pass
     manifest_str_true = Manifest(
@@ -149,7 +150,7 @@ def test_auth_mandate_coercion(base_workflow: Workflow) -> None:
     )
     report_int = check_compliance_v2(manifest_int_0, config)
     assert report_int.passed is False
-    assert len(report.violations) == 0
+    assert len(report_int.violations) == 1
 
 
 def test_auth_mandate_dynamic_extra_field(base_workflow: Workflow) -> None:
