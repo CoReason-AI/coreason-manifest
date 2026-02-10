@@ -104,8 +104,10 @@ def test_loader_strict_splitting() -> None:
         patch("importlib.util.spec_from_file_location") as mock_spec_load,
     ):
         mock_stat.return_value.st_mode = 0o644
+        # Calculate allowed root dynamically to handle cross-platform behavior of C:\ paths
+        mock_root = Path(r"C:\path\to\file.py").resolve().parent
         with contextlib.suppress(Exception):
-            load_agent_from_ref(ref_win)
+            load_agent_from_ref(ref_win, allowed_root_dir=mock_root)
 
         # Verify it resolved the correct path part (C:\path\to\file.py)
         # Note: On linux, Path("C:\...") might resolve oddly, but it should contain the path part
