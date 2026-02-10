@@ -41,6 +41,9 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
     if not file_path_str or not var_name:
         raise ValueError("Reference must contain both file path and variable name.")
 
+    if not var_name.isidentifier():
+        raise ValueError(f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'")
+
     # Resolve file path
     file_path = Path(file_path_str).resolve()
     if not file_path.exists():
