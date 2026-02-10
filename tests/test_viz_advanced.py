@@ -248,11 +248,21 @@ def test_viz_recipe_full_coverage() -> None:
             default_route="agent1",
         ),
         HumanNode(id="human1", prompt="Approve?"),
-        EvaluatorNode.model_construct(id="eval1", criteria="quality"),
-        GenerativeNode.model_construct(id="gen1", prompt="Generate"),
+        EvaluatorNode.model_construct(
+            id="eval1",
+            evaluation_profile="quality",
+            target_variable="data",
+            evaluator_agent_ref="judge",
+            pass_threshold=0.8,
+            max_refinements=3,
+            pass_route="next",
+            fail_route="fail",
+            feedback_variable="feedback",
+        ),
+        GenerativeNode.model_construct(id="gen1", goal="Generate", output_schema={}),
     ]
     edges: list[GraphEdge] = [GraphEdge(source="router1", target="agent1", condition="A")]
-    topology = GraphTopology.model_construct(nodes=nodes, edges=edges, entry_point="router1")
+    topology = GraphTopology.model_construct(nodes=nodes, edges=edges, entry_point="router1")  # type: ignore[arg-type]
     recipe = RecipeDefinition.model_construct(
         metadata=ManifestMetadata(name="CoverageTest"),
         interface=RecipeInterface(),
@@ -571,7 +581,7 @@ def test_viz_unknown_node_type_json_export() -> None:
     fake_node = FakeNode(id="mystery1", type="mystery_node")
 
     # Bypass validation by constructing topology manually
-    topology = GraphTopology.model_construct(nodes=[fake_node], edges=[], entry_point="mystery1")
+    topology = GraphTopology.model_construct(nodes=[fake_node], edges=[], entry_point="mystery1")  # type: ignore[list-item]
 
     recipe = RecipeDefinition.model_construct(
         metadata=ManifestMetadata(name="MysteryTest"), interface=RecipeInterface(), topology=topology
