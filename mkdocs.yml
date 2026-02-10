@@ -3,46 +3,63 @@ theme:
   name: material
 nav:
   - Home: index.md
-  - Usage: usage.md
-  - Specifications:
+  - Usage Guide: usage.md
+  - Core Specifications (V2):
       - "Graph Recipes (Orchestration)": graph_recipes.md
       - "The Assembler Pattern (Inline Agents)": assembler_pattern.md
+      - "Episteme (Meta-Cognition & Reasoning)": episteme_reasoning.md
+      - "Flow Governance (Resilience)": flow_governance.md
+      - "Identity & Access Management": identity_access_management.md
+      - "Generative Solvers & Strategies": generative_solvers.md
+      - "Evaluator-Optimizer Pattern": evaluator_optimizer.md
+      - "UX & Collaboration": ux_collaboration.md
+      - "Model Routing": model_routing.md
+      - "MCP Runtime & Governance": mcp_runtime.md
+      - "Gateway QoS & Traffic Control": gateway_qos.md
+      - "Knowledge Retrieval (RAG)": knowledge_retrieval.md
+      - "Compliance & Audit (Veritas)": veritas_integrity.md
+      - "Compliance Schema": compliance_schema.md
+  - Legacy / V1 Specs:
       - "Agent Manifest (CAM) & Linear Workflows": cap/specification.md
       - "Agent Skills System": skills.md
       - "Tool Packs (Plugins)": tool_packs.md
       - "Inline Tools": inline_tools.md
-      - "Transport & Tracing": transport_layer.md
+  - Runtime Interfaces:
+      - "Runtime Principles": runtime/runtime_principles.md
+      - "Runtime Protocol (Behavior)": behavior.md
+      - "Transport Layer (Tracing)": transport_layer.md
+      - "Streaming Contracts": cap/streaming_contracts.md
+      - "Stream Lifecycle": cap/stream_lifecycle.md
+      - "CAP Wire Protocol": cap/wire_protocol.md
+      - "Middleware Extensions": middleware_extension_interfaces.md
+      - "Active Memory Interface": active_memory_interface.md
       - "Simulation & Eval": simulation.md
       - "Visualization (UI)": presentation_schemas.md
-  - Interfaces:
-      - "Runtime Protocol": behavior.md
-      - "Middleware": middleware_extension_interfaces.md
-  - Architecture:
-      - "Shared Kernel": architecture/ADR-001-shared-kernel-boundaries.md
-      - "Package Structure": package_structure.md
-      - "Base Model Rationale": coreason_base_model_rationale.md
-      - "Product Requirements": product_requirements.md
-  - Advanced / Reference:
+  - Developer Tools:
       - "Builder SDK": builder_sdk.md
       - "CLI Reference": cli.md
-      - "Governance & Policy": governance_policy_enforcement.md
-      - "Active Memory Interface": active_memory_interface.md
+      - "CLI Interop": cli_interop.md
+      - "Agent Card Generator": agent_card_generator.md
+      - "Mock Factory": mock_factory.md
+  - Architecture & Reference:
+      - "Shared Kernel Strategy": architecture/ADR-001-shared-kernel-boundaries.md
+      - "Package Structure": package_structure.md
+      - "Product Requirements": product_requirements.md
+      - "Governance Policy": governance_policy_enforcement.md
       - "Audit Hashing": audit_hashing.md
       - "Semantic Diffing": semantic_diffing.md
       - "Memory Governance": memory_governance.md
       - "Session Management": session_management.md
       - "Observability": observability.md
-      - "Mock Factory": mock_factory.md
       - "Error Handling": error_handling_standards.md
       - "Evaluation Metadata": evaluation_metadata.md
       - "Event Content Types": event_content_types.md
       - "Frontend Integration": frontend_integration.md
-      - "Request Lineage (Impl)": request_lineage_implementation.md
-      - "Agent Card Generator": agent_card_generator.md
+      - "Request Lineage": request_lineage_implementation.md
       - "Composition": composition.md
-      - "CLI Interop": cli_interop.md
       - "Visualization (Reference)": visualization.md
-      - "CAP Wire Protocol": cap/wire_protocol.md
-      - "Stream Lifecycle": cap/stream_lifecycle.md
-      - "Streaming Contracts": cap/streaming_contracts.md
+      - "Provenance Metadata": provenance_metadata.md
+      - "Council Features": council_features.md
+      - "V2 Harvesting Features": v2_harvesting_features.md
       - "MCP Adapter": interop/mcp_adapter.md
+      - "Audit Report": audit_report.md

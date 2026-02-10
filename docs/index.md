@@ -2,101 +2,38 @@
 
 This is the central documentation index for the `coreason-manifest` project, which defines the standard schemas, protocols, and governance models for the Coreason AI ecosystem.
 
-## Core Documentation
+## Core Doctrine: Code is Source of Truth
 
-*   **[Usage Guide](usage.md)**
-    *   A comprehensive guide on how to use `coreason-manifest` to define agents, recipes, and work with the library's core concepts programmatically.
+This project follows the **"Code is Source of Truth"** doctrine. The Pydantic models in `src/coreason_manifest/spec` are the definitive contract. This documentation strives to reflect that reality accurately. If a discrepancy exists, the code takes precedence.
 
-*   **[Builder SDK](builder_sdk.md)**
-    *   Documentation for the fluent Builder API (`AgentBuilder`, `TypedCapability`) to simplify Agent creation.
+## Core Specifications (V2)
 
-*   **[Visualization Tools](visualization.md)**
-    *   Guide for generating Mermaid.js flowcharts to visualize complex Agent workflows and routing logic.
+The V2 specification introduces a graph-based architecture for complex agent orchestration.
 
-*   **[Secure Composition](composition.md)**
-    *   Explains the Secure Recursive Loader, the `$ref` syntax for modular composition, the "Jail" security model, and cycle detection mechanisms.
+*   **[Graph Recipes (Orchestration)](graph_recipes.md)**: The definitive guide to `RecipeDefinition` and `GraphTopology`, enabling cycles, conditionals, and advanced flows.
+*   **[The Assembler Pattern](assembler_pattern.md)**: Inline agent definitions and cognitive architecture composition.
+*   **[Episteme (Meta-Cognition)](episteme_reasoning.md)**: Configuration for System 2 reasoning, review loops, and gap scanning.
+*   **[Flow Governance](flow_governance.md)**: Resilience mechanisms including retries, fallbacks, and circuit breakers.
+*   **[Identity & Access Management](identity_access_management.md)**: RBAC, user context injection, and security scopes.
+*   **[Generative Solvers](generative_solvers.md)**: Configuration for autonomous planning strategies (Tree Search, Ensemble).
+*   **[Evaluator-Optimizer](evaluator_optimizer.md)**: Patterns for self-correcting agent loops.
 
-*   **[Governance & Policy Enforcement](governance_policy_enforcement.md)**
-    *   Details the Governance module for defining and enforcing organizational rules, risk levels, and compliance policies on agents and tools.
+## Runtime Protocols
 
-*   **[Agent Card Generator](agent_card_generator.md)**
-    *   Guide for using the automated documentation utility to generate standardized "Agent Cards" from Manifest definitions.
+*   **[Runtime Behavior](behavior.md)**: The expected behavior of the execution engine.
+*   **[Transport Layer](transport_layer.md)**: Distributed tracing, request lineage, and the `AgentRequest` envelope.
+*   **[Streaming Contracts](cap/streaming_contracts.md)**: Protocols for real-time token streaming and event delivery.
+*   **[MCP Runtime](mcp_runtime.md)**: Integration with the Model Context Protocol for tool access.
 
-*   **[Mock Data Factory](mock_factory.md)**
-    *   Utility for generating deterministic, schema-compliant synthetic data for Agent outputs and testing.
+## Developer Tools
 
-*   **[CLI Reference](cli.md)**
-    *   Complete documentation for the `coreason` CLI, including the `init` command for project scaffolding.
+*   **[Builder SDK](builder_sdk.md)**: Fluent API for constructing Agents programmatically.
+*   **[CLI Reference](cli.md)**: Guide to the `coreason` command-line interface.
+*   **[Agent Card Generator](agent_card_generator.md)**: Automating documentation from manifests.
 
-*   **[Interop Layer](cli_interop.md)**
-    *   Documentation for the dynamic loader utility and interoperability features.
+## Architecture & Governance
 
-## Specifications & Protocols
-
-*   **[Coreason Agent Manifest (CAM) & Linear Workflows](cap/specification.md)**
-    *   The authoritative "Human-Centric" YAML format specification for defining Agents and simple, linear workflows (`ManifestV2`).
-
-*   **[Graph Recipes (Orchestration)](graph_recipes.md)**
-    *   Describes the system for complex, non-linear, cyclic graph execution using `RecipeDefinition` and `GraphTopology`.
-
-*   **[Coreason Agent Protocol (CAP) Wire Format](cap/wire_protocol.md)**
-    *   Defines the runtime wire protocol, including standard request/response envelopes (`ServiceRequest`, `ServiceResponse`) and streaming contracts (`StreamPacket`).
-
-*   **[Agent Skills System](skills.md)**
-    *   Documentation for defining and using procedural knowledge ("Skills") with `SkillDefinition` and `LoadStrategy`.
-
-*   **[Tool Packs (Plugins)](tool_packs.md)**
-    *   Documentation for the Tool Pack architecture, enabling reusable bundles of Agents, Skills, and Tools.
-
-*   **[Explicit Streaming Contracts](cap/streaming_contracts.md)**
-    *   Defines the contracts for Agent execution (`atomic`, `graph`) and delivery modes (`request_response`, `server_sent_events`).
-
-*   **[Stream Identity & Lifecycle](cap/stream_lifecycle.md)**
-    *   Protocols and data structures for explicit, multiplexed output streams (`STREAM_START`, `STREAM_END`).
-
-*   **[Memory Governance](memory_governance.md)**
-    *   Declarative configuration for agent memory eviction policies (Sliding Window, Summary, etc.) and `MemoryConfig` models.
-
-*   **[Session Management](session_management.md)**
-    *   Architecture for strict, immutable, and stateless management of conversational memory (`SessionState`, `MemoryStrategy`).
-
-*   **[Evaluation Metadata](evaluation_metadata.md)**
-    *   Specifications for embedding testing requirements (`EvaluationProfile`) and quality criteria (`SuccessCriterion`) directly into Agent Definitions.
-
-*   **[Active Memory Interface](active_memory_interface.md)**
-    *   Protocol (`SessionHandle`) for active agent interactions with storage (history, recall, persistent variables).
-
-*   **[Request Lineage Implementation](request_lineage_implementation.md)**
-    *   Details the tracking of cryptographic causality, distributed tracing IDs (`request_id`, `root_request_id`), and auto-rooting logic.
-
-*   **[Observability & Tracing](observability.md)**
-    *   Standard telemetry envelopes (`CloudEvent`, `ReasoningTrace`) for system notifications, audit logs, and distributed tracing.
-
-*   **[Audit Hashing & Integrity](audit_hashing.md)**
-    *   Specifications for the "Tamper-Evident" audit logging system, including the `AuditLog` model and SHA-256 chain verification algorithms.
-
-*   **[Standardized Presentation Schemas](presentation_schemas.md)**
-    *   Enforces strictly typed Pydantic models for UI events (`PresentationEvent`) like citations, progress indicators, and media carousels.
-
-*   **[Frontend Integration & Graph Events](frontend_integration.md)**
-    *   Defines the strict `GraphEvent` hierarchy for internal engine state and the migration strategy to standard `CloudEvent` formats.
-
-*   **[Event Content Types](event_content_types.md)**
-    *   Specification of standard MIME types (`EventContentType`) used in CloudEvents for protocol compliance.
-
-*   **[Semantic Error Handling](error_handling_standards.md)**
-    *   Defines standard Error Domains and the `UserErrorEvent` for structured, user-friendly error reporting.
-
-*   **[Middleware Extension Interfaces](middleware_extension_interfaces.md)**
-    *   Defines the protocols (`IRequestInterceptor`, `IResponseInterceptor`) and context models for injecting cross-cutting logic like PII redaction and rate limiting.
-
-## Architecture & Rationale
-
-*   **[Product Requirements & Philosophy](product_requirements.md)**
-    *   Outlines the "Shared Kernel" philosophy, architectural standards, and the role of `coreason-manifest` as the definitive source of truth ("The Blueprint").
-
-*   **[Package Structure & Architecture](package_structure.md)**
-    *   Explains the physical structure of the package (`spec/` vs `utils/`) and the strict separation of Pure Data Specifications from Utility Logic.
-
-*   **[CoReasonBaseModel Rationale](coreason_base_model_rationale.md)**
-    *   Explains the architectural decision to use `CoReasonBaseModel` for solving JSON serialization challenges with UUIDs and Datetimes.
+*   **[Shared Kernel Strategy](architecture/ADR-001-shared-kernel-boundaries.md)**: The architectural philosophy behind this library.
+*   **[Compliance & Audit](veritas_integrity.md)**: The Veritas framework for tamper-evident logging and regulatory compliance.
+*   **[Governance Policy](governance_policy_enforcement.md)**: Defining organizational rules and risk limits.
+*   **[Observability](observability.md)**: Telemetry standards and `CloudEvent` specifications.
