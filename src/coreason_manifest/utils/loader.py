@@ -8,13 +8,18 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import asyncio
 import importlib.util
 import sys
+import threading
 from pathlib import Path
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.spec.v2.definitions import ManifestV2
 from coreason_manifest.spec.v2.recipe import RecipeDefinition
+
+# Module-level lock to ensure thread safety during sys.path modification and import
+_loader_lock = threading.Lock()
 
 
 def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
@@ -46,34 +51,36 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
     if not file_path.exists():
         raise ValueError(f"File not found: {file_path}")
 
-    # Add directory to sys.path to allow relative imports within the module
-    module_dir = str(file_path.parent)
-    if module_dir not in sys.path:
-        sys.path.insert(0, module_dir)
+    # Use a lock to prevent race conditions when modifying sys.path and importing modules
+    with _loader_lock:
+        # Add directory to sys.path to allow relative imports within the module
+        module_dir = str(file_path.parent)
+        if module_dir not in sys.path:
+            sys.path.insert(0, module_dir)
 
-    module_name = file_path.stem
+        module_name = file_path.stem
 
-    try:
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        if spec is None or spec.loader is None:
-            raise ValueError(f"Could not load spec for module: {file_path}")
+        try:
+            spec = importlib.util.spec_from_file_location(module_name, file_path)
+            if spec is None or spec.loader is None:
+                raise ValueError(f"Could not load spec for module: {file_path}")
 
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
 
-        # SECURITY WARNING: This executes arbitrary code from the file.
-        sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
-        sys.stderr.flush()
+            # SECURITY WARNING: This executes arbitrary code from the file.
+            sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
+            sys.stderr.flush()
 
-        spec.loader.exec_module(module)
-    except Exception as e:
-        raise ValueError(f"Error loading module {file_path}: {e}") from e
+            spec.loader.exec_module(module)
+        except Exception as e:
+            raise ValueError(f"Error loading module {file_path}: {e}") from e
 
-    # Extract variable
-    try:
-        agent_obj = getattr(module, var_name)
-    except AttributeError as e:
-        raise ValueError(f"Variable '{var_name}' not found in {file_path}") from e
+        # Extract variable
+        try:
+            agent_obj = getattr(module, var_name)
+        except AttributeError as e:
+            raise ValueError(f"Variable '{var_name}' not found in {file_path}") from e
 
     # Handle Builder
     if isinstance(agent_obj, AgentBuilder):
@@ -90,3 +97,18 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
         )
 
     return agent_obj
+
+
+async def load_agent_from_ref_async(reference: str) -> ManifestV2 | RecipeDefinition:
+    """
+    Asynchronously loads an Agent Definition (ManifestV2) or RecipeDefinition from a python file reference.
+    Offloads the blocking file I/O and import operations to a thread pool.
+
+    Args:
+        reference: A string in the format "path/to/file.py:variable_name".
+
+    Returns:
+        ManifestV2 | RecipeDefinition: The loaded agent manifest or recipe.
+    """
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, load_agent_from_ref, reference)

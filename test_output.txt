@@ -1,0 +1,75 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+configfile: pyproject.toml
+plugins: cov-7.0.0, asyncio-1.3.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 9 items
+
+tests/test_cli_interop.py .........
+ERROR: Coverage failure: total of 61 is less than fail-under=100
+                                                                         [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.12-final-0 _______________
+
+Name                                                    Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------------------
+src/coreason_manifest/__init__.py                          40      0   100%
+src/coreason_manifest/builder.py                          113     65    42%   57-62, 66, 70, 107-108, 120-121, 133-134, 146-147, 163-176, 180-189, 258-267, 279-280, 292-293, 305-306, 318-319, 331-332, 344-345, 357-358, 371-372, 384-394
+src/coreason_manifest/cli.py                              115     75    35%   28-152, 156-222, 251-252, 255-256
+src/coreason_manifest/spec/cap.py                          59      5    92%   79-85
+src/coreason_manifest/spec/common/capabilities.py          14      0   100%
+src/coreason_manifest/spec/common/error.py                  7      0   100%
+src/coreason_manifest/spec/common/graph_events.py          44      0   100%
+src/coreason_manifest/spec/common/identity.py              12      2    83%   27, 32
+src/coreason_manifest/spec/common/interoperability.py      13      0   100%
+src/coreason_manifest/spec/common/memory.py                15      3    80%   33-35
+src/coreason_manifest/spec/common/message.py               16      0   100%
+src/coreason_manifest/spec/common/observability.py         54      6    89%   75-83
+src/coreason_manifest/spec/common/presentation.py          75     16    79%   37-39, 122-136
+src/coreason_manifest/spec/common/request.py               31     13    58%   39-56, 61-63
+src/coreason_manifest/spec/common/session.py               37      6    84%   66-74
+src/coreason_manifest/spec/common/stream.py                10      0   100%
+src/coreason_manifest/spec/common_base.py                  20      7    65%   46-60
+src/coreason_manifest/spec/governance.py                   20      0   100%
+src/coreason_manifest/spec/interfaces/__init__.py           0      0   100%
+src/coreason_manifest/spec/interfaces/middleware.py        17      0   100%
+src/coreason_manifest/spec/interfaces/session.py           13      0   100%
+src/coreason_manifest/spec/interfaces/stream.py             3      0   100%
+src/coreason_manifest/spec/simulation.py                   55      0   100%
+src/coreason_manifest/spec/v2/__init__.py                   2      0   100%
+src/coreason_manifest/spec/v2/agent.py                     26      0   100%
+src/coreason_manifest/spec/v2/compliance.py                38      0   100%
+src/coreason_manifest/spec/v2/contracts.py                 17      0   100%
+src/coreason_manifest/spec/v2/definitions.py              182     53    71%   152-154, 431, 440-515
+src/coreason_manifest/spec/v2/evaluation.py                14      0   100%
+src/coreason_manifest/spec/v2/guardrails.py                23      0   100%
+src/coreason_manifest/spec/v2/identity.py                  25      0   100%
+src/coreason_manifest/spec/v2/knowledge.py                 30      0   100%
+src/coreason_manifest/spec/v2/packs.py                     40      0   100%
+src/coreason_manifest/spec/v2/provenance.py                19      0   100%
+src/coreason_manifest/spec/v2/reasoning.py                 29      0   100%
+src/coreason_manifest/spec/v2/recipe.py                   322     93    71%   664-675, 679-683, 687-709, 730-733, 761-793, 886-908, 917-947, 951-966
+src/coreason_manifest/spec/v2/resources.py                 72      0   100%
+src/coreason_manifest/spec/v2/skills.py                    37      9    76%   97-109
+src/coreason_manifest/utils/__init__.py                     0      0   100%
+src/coreason_manifest/utils/audit.py                       44     32    27%   36-66, 74-75, 86-101, 109-110
+src/coreason_manifest/utils/base_adapter.py                17     17     0%   11-49
+src/coreason_manifest/utils/diff.py                       130    100    23%   52, 57, 71-77, 82-86, 91-183, 188-189, 201-254
+src/coreason_manifest/utils/docs.py                        89     85     4%   30-150, 155-180
+src/coreason_manifest/utils/langchain_adapter.py            7      7     0%   11-50
+src/coreason_manifest/utils/loader.py                      49      2    96%   113-114
+src/coreason_manifest/utils/logger.py                       5      5     0%   11-18
+src/coreason_manifest/utils/mcp_adapter.py                  9      5    44%   37-47
+src/coreason_manifest/utils/mock.py                       172    147    15%   33-41, 44-45, 48, 51, 55-80, 84-104, 107-112, 115-201, 204-218, 221-227, 230-236, 239, 242-246, 249-256, 263-267
+src/coreason_manifest/utils/openai_adapter.py               7      7     0%   11-51
+src/coreason_manifest/utils/service.py                      6      1    83%   22
+src/coreason_manifest/utils/v2/governance.py               50     44    12%   31-37, 59-170
+src/coreason_manifest/utils/v2/io.py                       48     40    17%   29-60, 85-100, 115-132
+src/coreason_manifest/utils/v2/resolver.py                 14     10    29%   31, 49-64
+src/coreason_manifest/utils/viz.py                        117     80    32%   40-139, 147, 175-180, 196, 204-205, 209-218
+-------------------------------------------------------------------------------------
+TOTAL                                                    2423    935    61%
+FAIL Required test coverage of 100% not reached. Total coverage: 61.41%
+============================== 9 passed in 1.37s ===============================
