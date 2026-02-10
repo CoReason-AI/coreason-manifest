@@ -69,6 +69,7 @@ def test_recipe_mermaid_human_routing() -> None:
     # human_decision -- "revise" --> human_decision
     assert 'human_decision -- "revise" --> human_decision' in chart
 
+
 def test_recipe_mermaid_human_default() -> None:
     # Test default icon and protocol
     human_node = HumanNode(
