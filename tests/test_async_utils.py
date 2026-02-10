@@ -1,18 +1,16 @@
-import asyncio
-import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from coreason_manifest.builder import AgentBuilder
+
 from coreason_manifest.spec.common.observability import AuditLog
 from coreason_manifest.spec.v2.definitions import ManifestV2
 from coreason_manifest.utils.audit import compute_audit_hash, compute_audit_hash_async, verify_chain_async
 from coreason_manifest.utils.loader import load_agent_from_ref_async
 
-
 # --- Loader Tests ---
+
 
 @pytest.fixture
 def temp_agent_file(tmp_path: Path) -> Path:
@@ -27,12 +25,14 @@ agent = builder.build()
 """)
     return p
 
+
 @pytest.mark.asyncio
 async def test_load_agent_from_ref_async(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:agent"
     agent = await load_agent_from_ref_async(ref)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "AsyncAgent"
+
 
 @pytest.mark.asyncio
 async def test_load_agent_from_ref_async_error() -> None:
@@ -42,22 +42,24 @@ async def test_load_agent_from_ref_async_error() -> None:
 
 # --- Audit Tests ---
 
-def create_audit_log(prev_hash=None):
+
+def create_audit_log(prev_hash: str | None = None) -> AuditLog:
     req_id = uuid.uuid4()
     entry = {
         "id": uuid.uuid4(),
         "request_id": req_id,
         "root_request_id": req_id,
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(UTC),
         "actor": "system",
         "action": "test_action",
         "outcome": "success",
-        "previous_hash": prev_hash
+        "previous_hash": prev_hash,
     }
     # Compute hash synchronously to set it
     integrity_hash = compute_audit_hash(entry)
     entry["integrity_hash"] = integrity_hash
     return AuditLog(**entry)
+
 
 @pytest.mark.asyncio
 async def test_compute_audit_hash_async() -> None:
@@ -66,7 +68,7 @@ async def test_compute_audit_hash_async() -> None:
         "id": uuid.uuid4(),
         "request_id": req_id,
         "root_request_id": req_id,
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(UTC),
         "actor": "system",
         "action": "test_action",
         "outcome": "success",
@@ -82,10 +84,11 @@ async def test_compute_audit_hash_async() -> None:
     assert isinstance(async_hash, str)
     assert len(async_hash) == 64  # SHA-256 hex digest length
 
+
 @pytest.mark.asyncio
 async def test_verify_chain_async() -> None:
     chain = []
-    prev_hash = None
+    prev_hash: str | None = None
     for _ in range(10):
         log = create_audit_log(prev_hash)
         chain.append(log)
@@ -94,10 +97,11 @@ async def test_verify_chain_async() -> None:
     result = await verify_chain_async(chain)
     assert result is True
 
+
 @pytest.mark.asyncio
 async def test_verify_chain_async_tampered() -> None:
     chain = []
-    prev_hash = None
+    prev_hash: str | None = None
     for _ in range(10):
         log = create_audit_log(prev_hash)
         chain.append(log)
@@ -118,7 +122,7 @@ async def test_verify_chain_async_tampered() -> None:
     # we can create one with wrong hash.
 
     tampered_log_dict = chain[5].model_dump()
-    tampered_log_dict["integrity_hash"] = "0" * 64 # Wrong hash
+    tampered_log_dict["integrity_hash"] = "0" * 64  # Wrong hash
 
     tampered_log = AuditLog(**tampered_log_dict)
     chain[5] = tampered_log
@@ -126,10 +130,11 @@ async def test_verify_chain_async_tampered() -> None:
     result = await verify_chain_async(chain)
     assert result is False
 
+
 @pytest.mark.asyncio
 async def test_verify_chain_async_broken_link() -> None:
     chain = []
-    prev_hash = None
+    prev_hash: str | None = None
     for _ in range(10):
         log = create_audit_log(prev_hash)
         chain.append(log)
@@ -145,7 +150,7 @@ async def test_verify_chain_async_broken_link() -> None:
     # Otherwise it fails self-integrity check first.
     # To test chain link failure specifically, we need valid self-integrity but invalid link.
 
-    new_integrity_hash = compute_audit_hash(bad_link_log_dict) # Compute hash with the BAD previous_hash
+    new_integrity_hash = compute_audit_hash(bad_link_log_dict)  # Compute hash with the BAD previous_hash
     bad_link_log_dict["integrity_hash"] = new_integrity_hash
 
     bad_link_log = AuditLog(**bad_link_log_dict)
