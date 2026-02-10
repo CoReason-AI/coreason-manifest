@@ -48,14 +48,15 @@ def test_list_swap_tools() -> None:
 
     report = compare_agents(agent1, agent2)
     # logic sees:
-    # 0: tool_a -> tool_b
-    # 1: tool_b -> tool_a
+    # With difflib, 'tool_a' is matched (equal), so:
+    # 1. 'tool_b' is inserted at 0 (FEATURE)
+    # 2. 'tool_b' is deleted from 1 (BREAKING)
     assert len(report.changes) >= 2
-    # These are value changes in 'tools', usually FEATURE or PATCH if not adding/removing.
-    # _categorize_change for 'tools':
-    # if new is None -> BREAKING. if old is None -> FEATURE.
-    # Here both are strings. So it falls to PATCH (default).
-    assert all(c.category == ChangeCategory.PATCH for c in report.changes)
+
+    categories = {c.category for c in report.changes}
+    # Swapping results in Delete+Insert for the moved item(s) that didn't align
+    assert ChangeCategory.BREAKING in categories
+    assert ChangeCategory.FEATURE in categories
 
 
 def test_type_change_scalar() -> None:
