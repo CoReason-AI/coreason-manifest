@@ -78,17 +78,34 @@ When generating static documentation using `generate_mermaid_graph`, the engine 
 
 | Feature | Visual Representation | Meaning |
 | :--- | :--- | :--- |
-| **Standard Node** | Solid Border | A deterministic, non-interactive step. |
+| **Standard Node** | Solid Border `[]` | A deterministic, non-interactive step. |
+| **Human Node** | Hexagon `{{ }}` | A conditional router awaiting human decision. |
 | **Magentic Node** | **Dashed Purple Border** | The node contains mutable components (Drafting/Editing state). |
 | **Viewport Label** | `(View: PLANNER)` text | The step triggers a major UI layout shift. |
 | **Custom Icon** | Icon prepended to title | Visual aid defined in manifest (e.g., 🧠, 🗺️). |
+
+### Human Node Visualization
+
+The engine dynamically renders `HumanNode` icons based on the `CollaborationMode`:
+
+*   **👤 (Standard)**: Standard gate (`mode="completion"` or `mode="interactive"`).
+*   **✍️ (Co-Edit)**: Shared state mutation (`mode="co_edit"`).
+
+Routing paths defined in `HumanNode.routes` are visualized as labeled edges (e.g., `-- reject -->`).
 
 ### Example Output
 
 ```mermaid
 graph TD
 classDef magentic fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
+classDef human fill:#fff3e0,stroke:#e65100,stroke-width:2px;
+
 planner_node["🧠 Strategic Planner<br/>(View: planner_console)"]:::magentic
+human_check{{"✍️ Manager Review<br/>(Protocol: adaptive_card)"}}:::human
+
+planner_node --> human_check
+human_check -- "approve" --> deploy
+human_check -- "reject" --> planner_node
 ```
 
 ## Glass Box Observability
