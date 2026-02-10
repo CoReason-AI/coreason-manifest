@@ -287,10 +287,12 @@ All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `prese
     - `system_prompt_override`: Context-specific instructions (optional).
     - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
 
-2.  **`HumanNode`** (`type: human`): Suspends execution until a human provides input or approval.
+2.  **`HumanNode`** (`type: human`): Suspends execution until a human provides input or approval. Acts as a **Router** based on the user's decision.
     - `prompt`: Instruction for the human user.
     - `timeout_seconds`: SLA for approval (optional).
     - `required_role`: Role required to approve (e.g., manager) (optional).
+    - `routes`: A dictionary mapping `SteeringCommand` keys to Target Node IDs (e.g., `{ "approve": "next_step", "reject": "previous_step" }`).
+    - **Note:** `HumanNode` inherits `collaboration` from `RecipeNode`. It does *not* use a separate `config` field.
 
 3.  **`RouterNode`** (`type: router`): Evaluates a variable and branches execution to different target nodes.
     - `input_key`: The variable to evaluate (e.g., 'classification').
@@ -579,6 +581,7 @@ The `collaboration` field defines the protocol for human engagement (e.g., Co-Ed
 
 *   `mode`: `CollaborationMode` (`COMPLETION`, `INTERACTIVE`, `CO_EDIT`).
 *   `feedback_schema`: JSON Schema for structured feedback.
-*   `supported_commands`: Slash commands the agent understands (e.g., `/refine`).
+*   `supported_commands`: Typed list of `SteeringCommand` (e.g., `[SteeringCommand.MODIFY]`).
+*   `render_strategy`: UI protocol (`JSON_FORMS`, `ADAPTIVE_CARD`).
 
 See [UX & Collaboration: Human-on-the-Loop](ux_collaboration.md) for detailed configuration examples.
