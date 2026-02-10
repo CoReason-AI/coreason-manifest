@@ -96,7 +96,9 @@ def test_loader_strict_splitting() -> None:
     # 2. Windows path with drive letter AND variable
     # ref = "C:\\path\\to\\file.py:var"
     # rsplit(":", 1) -> "C:\\path\\to\\file.py", "var" - OK
-    ref_win = r"C:\path\to\file.py:var"
+    # Use current drive letter if on Windows to ensure path resolution works across drives if needed
+    drive = Path.cwd().drive or "C:"
+    ref_win = f"{drive}\\path\\to\\file.py:var"
 
     with (
         patch("pathlib.Path.exists", return_value=True),
@@ -104,16 +106,16 @@ def test_loader_strict_splitting() -> None:
         patch("importlib.util.spec_from_file_location") as mock_spec_load,
     ):
         mock_stat.return_value.st_mode = 0o644
-        # Calculate allowed root dynamically to handle cross-platform behavior of C:\ paths
-        mock_root = Path(r"C:\path\to\file.py").resolve().parent
+        # Calculate allowed root dynamically to handle cross-platform behavior
+        mock_root = Path(f"{drive}\\path\\to\\file.py").resolve().parent
         with contextlib.suppress(Exception):
             load_agent_from_ref(ref_win, allowed_root_dir=mock_root)
 
-        # Verify it resolved the correct path part (C:\path\to\file.py)
-        # Note: On linux, Path("C:\...") might resolve oddly, but it should contain the path part
+        # Verify it resolved the correct path part
+        assert mock_spec_load.called, "importlib.util.spec_from_file_location was not called"
         args, _ = mock_spec_load.call_args
         # The path passed to spec_from_file_location should be the first part of split
-        assert str(args[1]) == str(Path(r"C:\path\to\file.py").resolve())
+        assert str(args[1]) == str(Path(f"{drive}\\path\\to\\file.py").resolve())
 
     # 3. Path WITHOUT variable (should fail)
     # ref = "C:\\path\\to\\file.py"
