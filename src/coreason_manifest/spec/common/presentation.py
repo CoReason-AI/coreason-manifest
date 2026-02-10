@@ -168,3 +168,87 @@ class RuntimeStateSnapshot(ManifestBaseModel):
 
     node_states: dict[str, NodeStatus]
     active_path: list[str] = Field(default_factory=list)
+
+
+class ViewportMode(StrEnum):
+    """Layout mode for the presentation."""
+
+    STREAM = "stream"
+    ARTIFACT_SPLIT = "artifact_split"
+    PLANNER_CONSOLE = "planner_console"
+    CANVAS = "canvas"
+
+
+class ComponentType(StrEnum):
+    """Type of generative UI component."""
+
+    MARKDOWN = "markdown"
+    CODE_EDITOR = "code_editor"
+    DATA_GRID = "data_grid"
+    KANBAN_BOARD = "kanban_board"
+    FORM = "form"
+
+
+class DesignIntent(StrEnum):
+    """Visual design intent."""
+
+    PRIMARY = "primary"
+    SECONDARY = "secondary"
+    DANGER = "danger"
+    SUCCESS = "success"
+    NEUTRAL = "neutral"
+
+
+class ComponentSpec(ManifestBaseModel):
+    """Defines a generative UI element."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    type: ComponentType
+    title: str | None = None
+    data_source: str
+    is_mutable: bool = False
+    mutation_handler_ref: str | None = None
+
+
+class ArtifactDefinition(ManifestBaseModel):
+    """Defines a side-panel artifact."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    label: str
+    content_type: str
+    auto_open: bool = False
+
+
+class Perspective(ManifestBaseModel):
+    """Defines role-based filtering."""
+
+    model_config = ConfigDict(frozen=True)
+
+    role_id: str
+    visible_components: list[str]
+    allow_mutation: bool = False
+
+
+class PresentationHints(ManifestBaseModel):
+    """
+    Directives for the frontend on how to render the internal reasoning.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    initial_viewport: ViewportMode = Field(ViewportMode.STREAM, description="Layout mode")
+    components: list[ComponentSpec] = Field(default_factory=list)
+    supported_artifacts: list[ArtifactDefinition] = Field(default_factory=list)
+    perspectives: list[Perspective] = Field(default_factory=list)
+
+    display_title: str | None = Field(None, description="Human-friendly label override.")
+    icon: str | None = Field(None, description="Icon name/emoji, e.g., 'lucide:brain'.")
+    hidden_fields: list[str] = Field(
+        default_factory=list, description="Whitelist of internal variables to hide from the non-debug UI."
+    )
+    accent_intent: DesignIntent = DesignIntent.PRIMARY
+    progress_indicator: str | None = Field(None, description="Name of the context variable to watch for % completion.")
