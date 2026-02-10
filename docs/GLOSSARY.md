@@ -82,4 +82,4 @@ The structural layout of a Graph Recipe, defined as a Directed Cyclic Graph (DCG
 ## W
 
 ### Workflow (Simulation)
-The *runtime instance* (Object) of a Recipe. It represents the actual execution of the graph, preserving state transitions, data flow, and audit trails (`SimulationTrace`).
+The *runtime instance* (Object) of a Recipe. It represents the actual execution of the graph, preserving state transitions, data flow, and audit trails (schema: `SimulationTrace`).
