@@ -73,3 +73,34 @@ The Manifest allows local file references (`$ref`). Security logic to ensure the
 
 ### 3. Governance Portability
 Governance Policies (`GovernanceConfig`) are data, but applying them (`check_compliance`) is logic. By keeping the enforcer in the kernel, we allow "Policy" to be portable. A policy defined in the Web UI can be enforced identically in the CLI because they share the exact same enforcement code.
+
+## Package Map
+
+```mermaid
+graph TD
+    %% SOTA Styling Init
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffecb3', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#e1f5fe'}}}%%
+
+    External_App[External App]
+    spec[spec]
+    utils[utils]
+
+    External_App --> spec
+    External_App --> utils
+    utils --> spec
+
+    %% Forbidden dependency
+    spec --x|Forbidden| utils
+
+    %% Styling Classes
+    classDef app fill:#e1f5fe,stroke:#4fc3f7,stroke-width:2px;
+    classDef kernel fill:#ffecb3,stroke:#ffb74d,stroke-width:2px;
+    classDef logic fill:#e0f2f1,stroke:#4db6ac,stroke-width:2px;
+
+    %% Apply Styles
+    class External_App app;
+    class spec kernel;
+    class utils logic;
+
+    linkStyle 3 stroke:red,stroke-width:2px,color:red;
+```

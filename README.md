@@ -3,16 +3,24 @@
 The definitive source of truth for CoReason-AI Asset definitions. "The Contract."
 
 [![License: Prosperity 3.0](https://img.shields.io/badge/license-Prosperity%203.0-blue)](https://github.com/CoReason-AI/coreason-manifest)
-[![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
+[![PyPI](https://img.shields.io/pypi/v/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/coreason-manifest)](https://pypi.org/project/coreason-manifest/)
+[![Build Status](https://github.com/CoReason-AI/coreason-manifest/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/CoReason-AI/coreason-manifest/actions)
+[![codecov](https://codecov.io/gh/CoReason-AI/coreason-manifest/graph/badge.svg)](https://codecov.io/gh/CoReason-AI/coreason-manifest)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Documentation](https://img.shields.io/badge/docs-home-informational)](docs/index.md)
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/coreason-manifest/)
 
 ## Overview
 
 `coreason-manifest` serves as the **Shared Kernel** for the Coreason ecosystem. It is not just a schema library; it is the **Contract** between the Builder (UI), the Engine (Runtime), and the Analyst (Eval).
 
 It provides the **"Blueprint"** that all other services rely on. It focuses on strict typing, schema validation, and serialization, ensuring that if it isn't in the manifest, it doesn't exist.
+
+### Where to Start
+
+New to Coreason? Start with the [Study Guide](docs/STUDY_GUIDE.md).
 
 ### Standards Clarification
 *Note: The "Coreason Agent Manifest" (CAM) is a proprietary, strict governance schema designed for the CoReason Platform. It is distinct from the Oracle/Linux Foundation "Open Agent Specification," though we aim for future interoperability via adapters.*
@@ -88,7 +96,23 @@ recipe = RecipeDefinition(
 print(f"Recipe '{recipe.metadata.name}' is valid!")
 ```
 
-### 2. Distributed Tracing (Transport)
+### 2. Visualization (Glass Box)
+
+Visualize your recipe with runtime state overlays and custom themes.
+
+```python
+from coreason_manifest.utils.viz import generate_mermaid_graph
+from coreason_manifest.spec.common.presentation import GraphTheme, RuntimeStateSnapshot, NodeStatus
+
+# 1. Static Visualization
+print(generate_mermaid_graph(recipe))
+
+# 2. Runtime Overlay (Glass Box)
+state = RuntimeStateSnapshot(node_states={"research-agent": NodeStatus.RUNNING})
+print(generate_mermaid_graph(recipe, state=state))
+```
+
+### 3. Distributed Tracing (Transport)
 
 The `AgentRequest` envelope ensures that every action is traceable back to its origin.
 
@@ -113,7 +137,7 @@ print(f"Child Parent ID: {child_request.parent_request_id} (Should match Root Re
 print(f"Child Root ID:   {child_request.root_request_id}   (Should match Root Request ID)")
 ```
 
-### 3. Builder SDK (Optional)
+### 4. Builder SDK (Optional)
 
 For a fluent, Pythonic API to construct manifests (especially useful for tooling), use the `ManifestBuilder`.
 
@@ -147,5 +171,5 @@ See [CLI Documentation](docs/cli.md) for full details.
 *   [**Orchestration**](docs/graph_recipes.md): Building Graph Recipes.
 *   [**Transport**](docs/transport_layer.md): Distributed Tracing & Lineage.
 *   [**Inline Tools**](docs/inline_tools.md): Serverless/Local Tool Definitions.
-*   [**Visualization**](docs/presentation_schemas.md): Controlling the UI Layout.
+*   [**Visualization**](docs/visualization.md): Glass Box Visualization Engine.
 *   [**Simulation**](docs/simulation.md): ATIF and Evaluation.

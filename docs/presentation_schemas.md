@@ -81,3 +81,14 @@ class PresentationEvent(CoReasonBaseModel):
   }
 }
 ```
+
+## 3. User Experience (`PresentationHints`)
+
+While `NodePresentation` controls the *static layout* of the graph, `PresentationHints` controls the *dynamic user experience* when the agent is active. This field lives in `node.visualization` and is defined in `coreason_manifest.spec.common.presentation`.
+
+It dictates:
+*   **ViewportMode:** Whether to show a Chat, Split View, or Planner Console.
+*   **Components:** Which Generative UI widgets (Data Grid, Kanban) to render.
+*   **Mutability:** Whether the user can edit the agent's workspace.
+
+See [Magentic UI & Visualization Protocol](visualization.md) for details.
