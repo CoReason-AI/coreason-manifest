@@ -8,20 +8,22 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any
+
 from coreason_manifest import (
     AgentBuilder,
     ManifestV2,
     compare_agents,
 )
 from coreason_manifest.spec.v2.definitions import AgentDefinition
-from coreason_manifest.utils.diff import _walk_diff, DiffChange
+from coreason_manifest.utils.diff import DiffChange, _walk_diff
 
 
 def create_base_manifest() -> ManifestV2:
     return AgentBuilder("test-agent").build()
 
 
-def update_agent_tools(manifest: ManifestV2, tools: list) -> ManifestV2:
+def update_agent_tools(manifest: ManifestV2, tools: list[Any]) -> ManifestV2:
     defs = manifest.definitions.copy()
     agent_def = defs["test-agent"]
     assert isinstance(agent_def, AgentDefinition)
