@@ -8,7 +8,7 @@ This pattern shows how to define a minimal agent with a remote tool dependency.
 
 ```python
 # Example: Creating an Agent Definition
-from coreason_manifest.spec.v2.definitions import (
+from coreason_manifest import (
     AgentDefinition,
     ToolRequirement,
     InterfaceDefinition

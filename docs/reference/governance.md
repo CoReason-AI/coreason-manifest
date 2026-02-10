@@ -8,7 +8,7 @@ This example demonstrates how to configure governance rules to restrict tool usa
 
 ```python
 # Example: Configuring Governance Rules
-from coreason_manifest.spec.governance import GovernanceConfig, ToolRiskLevel
+from coreason_manifest import GovernanceConfig, ToolRiskLevel
 
 # Define a strict governance policy
 policy = GovernanceConfig(

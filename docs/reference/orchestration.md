@@ -8,14 +8,13 @@ Here is an example of how to define a simple linear recipe using `RecipeDefiniti
 
 ```python
 # Example: Defining a Recipe with a simple Agent loop
-from coreason_manifest.spec.v2.recipe import (
+from coreason_manifest import (
     RecipeDefinition,
     GraphTopology,
     AgentNode,
-    GraphEdge,
-    RecipeStatus
+    ManifestMetadata
 )
-from coreason_manifest.spec.v2.definitions import ManifestMetadata
+from coreason_manifest.spec.v2.recipe import GraphEdge, RecipeStatus
 
 # Define the Nodes
 agent_node = AgentNode(

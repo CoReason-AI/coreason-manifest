@@ -8,7 +8,7 @@ This pattern illustrates how to enable complex graph processing and server-sent 
 
 ```python
 # Example: Configuring Agent Capabilities
-from coreason_manifest.spec.common.capabilities import (
+from coreason_manifest import (
     AgentCapabilities,
     CapabilityType,
     DeliveryMode
