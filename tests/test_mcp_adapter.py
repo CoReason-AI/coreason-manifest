@@ -8,6 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import warnings
+import pytest
+
+from coreason_manifest.spec.common.error import NamingConventionWarning
 from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 from coreason_manifest.utils.mcp_adapter import create_mcp_tool_definition
@@ -25,7 +29,8 @@ def test_schema_projection() -> None:
         ),
     )
 
-    tool_def = create_mcp_tool_definition(agent)
+    with pytest.warns(NamingConventionWarning, match="was sanitized to"):
+        tool_def = create_mcp_tool_definition(agent)
 
     assert tool_def["name"] == "test_agent"
     assert tool_def["inputSchema"]["type"] == "object"
@@ -42,7 +47,8 @@ def test_sanitization() -> None:
         backstory="A detailed backstory.",
     )
 
-    tool_def = create_mcp_tool_definition(agent)
+    with pytest.warns(NamingConventionWarning, match="was sanitized to"):
+        tool_def = create_mcp_tool_definition(agent)
 
     assert tool_def["name"] == "research_assistant_v2"
     assert tool_def["description"] == "A detailed backstory."
@@ -51,21 +57,28 @@ def test_sanitization() -> None:
 def test_sanitization_edge_cases() -> None:
     """Test more aggressive name sanitization edge cases."""
     cases = [
-        ("My... Agent!!!", "my_agent"),
-        ("  Spaces  Here  ", "spaces_here"),
-        ("___Underscores___", "underscores"),
-        ("123 Start Number", "123_start_number"),
-        ("Mixed-Case_And.Dots", "mixed-case_and_dots"),
-        ("!@#$%^&*()", ""),  # Should result in empty string, handled by fallback?
-        # If empty, MCP might reject, but our logic just strips.
-        # Let's check regex behavior: sub non-alnum -> _, collapse _, strip _.
-        # if all non-alnum, it becomes empty string.
-        # The MCP SDK might fail, but for now we test our logic.
+        ("My... Agent!!!", "my_agent", True),
+        ("  Spaces  Here  ", "spaces_here", True),
+        ("___Underscores___", "underscores", True),
+        ("123 Start Number", "123_start_number", True),
+        ("Mixed-Case_And.Dots", "mixed-case_and_dots", True),
+        ("!@#$%^&*()", "", True),
+        ("MyAgent", "myagent", False),  # Case change only -> No warning
     ]
 
-    for name, expected in cases:
+    for name, expected, should_warn in cases:
         agent = AgentDefinition(id="x", name=name, role="R", goal="G")
-        tool_def = create_mcp_tool_definition(agent)
+
+        if should_warn:
+            with pytest.warns(NamingConventionWarning, match="was sanitized to"):
+                tool_def = create_mcp_tool_definition(agent)
+        else:
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                tool_def = create_mcp_tool_definition(agent)
+                relevant_warnings = [x for x in w if issubclass(x.category, NamingConventionWarning)]
+                assert len(relevant_warnings) == 0, f"Unexpected warning for {name}"
+
         assert tool_def["name"] == expected, f"Failed for {name}"
 
 
@@ -73,7 +86,12 @@ def test_minimal_agent() -> None:
     """Test projection of a minimal agent without optional fields."""
     agent = AgentDefinition(id="min", name="MinAgent", role="Min", goal="Minimize")
 
-    tool_def = create_mcp_tool_definition(agent)
+    # MinAgent -> minagent (only case change, no warning)
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        tool_def = create_mcp_tool_definition(agent)
+        relevant_warnings = [x for x in w if issubclass(x.category, NamingConventionWarning)]
+        assert len(relevant_warnings) == 0
 
     assert tool_def["name"] == "minagent"
     assert tool_def["description"] == "Minimize"  # Fallback to goal
@@ -99,6 +117,8 @@ def test_complex_input_schema() -> None:
         id="complex", name="Complex Agent", role="Dev", goal="Code", interface=InterfaceDefinition(inputs=schema)
     )
 
-    tool_def = create_mcp_tool_definition(agent)
+    with pytest.warns(NamingConventionWarning, match="was sanitized to"):
+        tool_def = create_mcp_tool_definition(agent)
+
     assert tool_def["inputSchema"] == schema
     assert tool_def["inputSchema"]["properties"]["user"]["required"] == ["name"]

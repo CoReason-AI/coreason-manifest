@@ -9,8 +9,10 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import re
+import warnings
 from typing import Any
 
+from coreason_manifest.spec.common.error import NamingConventionWarning
 from coreason_manifest.spec.v2.definitions import AgentDefinition
 
 
@@ -34,8 +36,16 @@ def create_mcp_tool_definition(agent: AgentDefinition) -> dict[str, Any]:
         dict[str, Any]: A dictionary compatible with MCP's 'Tool' type.
     """
     # Sanitize name: lowercase, replace non-alphanumeric with _, collapse _, strip _
-    name = re.sub(r"[^a-zA-Z0-9_-]", "_", agent.name).lower()
+    original_name = agent.name
+    name = re.sub(r"[^a-zA-Z0-9_-]", "_", original_name).lower()
     name = re.sub(r"_+", "_", name).strip("_")
+
+    if name != original_name.lower():
+        warnings.warn(
+            f"Agent name '{original_name}' was sanitized to '{name}' for MCP compatibility. This may affect tool calls.",
+            NamingConventionWarning,
+            stacklevel=2,
+        )
 
     # Description: use backstory or goal or generic fallback
     description = agent.backstory or agent.goal or f"Agent {agent.name}"

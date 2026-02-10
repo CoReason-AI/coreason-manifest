@@ -19,3 +19,33 @@ class ErrorDomain(StrEnum):
     LLM = "llm"
     TOOL = "tool"
     SECURITY = "security"
+
+
+class CoreasonError(Exception):
+    """Base class for all Coreason Manifest errors."""
+    pass
+
+
+class AgentNotFoundError(CoreasonError, ValueError):
+    """Raised when an agent file or path does not exist."""
+    pass
+
+
+class InvalidReferenceError(CoreasonError, ValueError):
+    """Raised when an agent reference string (e.g., 'file:var') is malformed."""
+    pass
+
+
+class AgentDefinitionError(CoreasonError, ValueError):
+    """Raised when the loaded object is not of the expected type or cannot be defined."""
+    pass
+
+
+class SchemaConflictError(CoreasonError, ValueError):
+    """Raised when merging capabilities results in incompatible JSON schemas."""
+    pass
+
+
+class NamingConventionWarning(UserWarning):
+    """Warning for aggressive name sanitization."""
+    pass
