@@ -1,6 +1,18 @@
 site_name: coreason_manifest
 theme:
   name: material
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            heading_level: 2
+            show_category_heading: true
+            docstring_style: google
+            separate_signature: true
 markdown_extensions:
   - pymdownx.superfences:
       custom_fences:
@@ -23,5 +35,9 @@ nav:
       - "Runtime Principles": runtime/runtime_principles.md
       - "Flow Governance": flow_governance.md
   - Reference:
+      - "Orchestration API": reference/orchestration.md
+      - "Governance API": reference/governance.md
+      - "Agent API": reference/agents.md
+      - "Capabilities API": reference/capabilities.md
       - "Package Structure": package_structure.md
       - "Full Index": index.md
