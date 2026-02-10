@@ -50,10 +50,10 @@ agent = AgentBuilder(name="PathTest").build()
 """)
 
     # Load it
-    load_agent_from_ref(f"{p}:agent")
+    load_agent_from_ref(f"{p}:agent", allowed_root_dir=edge_case_dir)
 
-    # Check if directory is in sys.path
-    assert str(edge_case_dir) in sys.path
+    # Check if directory is NOT in sys.path (cleaned up)
+    assert str(edge_case_dir) not in sys.path
 
 
 def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
@@ -62,7 +62,7 @@ def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
     p.write_text("agent = 'I am just a string'")
 
     with pytest.raises(ValueError, match="is not a ManifestV2"):
-        load_agent_from_ref(f"{p}:agent")
+        load_agent_from_ref(f"{p}:agent", allowed_root_dir=edge_case_dir)
 
 
 def test_loader_syntax_error(edge_case_dir: Path) -> None:
@@ -71,7 +71,7 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
     p.write_text("def broken_func(:\n    pass")
 
     with pytest.raises(ValueError, match="Error loading module"):
-        load_agent_from_ref(f"{p}:broken_func")
+        load_agent_from_ref(f"{p}:broken_func", allowed_root_dir=edge_case_dir)
 
 
 def test_loader_strict_splitting() -> None:
@@ -90,7 +90,8 @@ def test_loader_strict_splitting() -> None:
         contextlib.suppress(Exception),
     ):  # We expect it to fail later, but check split
         # Just checking if it crashes on split
-        load_agent_from_ref(ref)
+        # Use allowed_root_dir="/" to permit absolute path check during split test
+        load_agent_from_ref(ref, allowed_root_dir="/")
 
     # 2. Windows path with drive letter AND variable
     # ref = "C:\\path\\to\\file.py:var"
@@ -99,8 +100,10 @@ def test_loader_strict_splitting() -> None:
 
     with (
         patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.stat") as mock_stat,
         patch("importlib.util.spec_from_file_location") as mock_spec_load,
     ):
+        mock_stat.return_value.st_mode = 0o644
         with contextlib.suppress(Exception):
             load_agent_from_ref(ref_win)
 
@@ -174,7 +177,7 @@ raise RecursionError("Cyclic import detected")
 """)
 
     with pytest.raises(ValueError, match="Error loading module"):
-        load_agent_from_ref(f"{p}:agent")
+        load_agent_from_ref(f"{p}:agent", allowed_root_dir=edge_case_dir)
 
 
 def test_cli_inspect_complex(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:

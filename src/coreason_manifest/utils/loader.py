@@ -9,20 +9,39 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import importlib.util
+import os
+import stat
 import sys
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Optional, Union
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.spec.v2.definitions import ManifestV2
 from coreason_manifest.spec.v2.recipe import RecipeDefinition
 
 
-def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
+@contextmanager
+def _temporary_sys_path(path: str):
+    """Context manager to temporarily add a path to sys.path."""
+    sys.path.insert(0, path)
+    try:
+        yield
+    finally:
+        if sys.path and sys.path[0] == path:
+            sys.path.pop(0)
+
+
+def load_agent_from_ref(
+    reference: str, allowed_root_dir: Optional[Union[str, Path]] = None
+) -> ManifestV2 | RecipeDefinition:
     """
     Dynamically loads an Agent Definition (ManifestV2) or RecipeDefinition from a python file reference.
 
     Args:
         reference: A string in the format "path/to/file.py:variable_name".
+        allowed_root_dir: The root directory that the file must reside within.
+                          Defaults to current working directory if None.
 
     Returns:
         ManifestV2 | RecipeDefinition: The loaded agent manifest or recipe.
@@ -30,9 +49,12 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
     Raises:
         ValueError: If the file does not exist, the variable is missing,
                     or the object is not a valid AgentBuilder, ManifestV2, or RecipeDefinition.
+                    Also raises ValueError for security violations (path traversal, world-writable files).
     """
     if ":" not in reference:
-        raise ValueError(f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'")
+        raise ValueError(
+            f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'"
+        )
 
     # Split on the *last* colon to support drive letters if absolutely necessary,
     # but simplest is strict split.
@@ -43,13 +65,32 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
 
     # Resolve file path
     file_path = Path(file_path_str).resolve()
+
+    # Security Check: Path Allowlisting
+    if allowed_root_dir is None:
+        allowed_root_dir = Path.cwd()
+    else:
+        allowed_root_dir = Path(allowed_root_dir).resolve()
+
+    try:
+        # relative_to raises ValueError if file_path is not relative to allowed_root_dir
+        file_path.relative_to(allowed_root_dir)
+    except ValueError:
+        raise ValueError(
+            f"Security Violation: File {file_path} is outside allowed root {allowed_root_dir}"
+        )
+
     if not file_path.exists():
         raise ValueError(f"File not found: {file_path}")
 
+    # Security Check: File Permissions (POSIX)
+    if os.name == "posix":
+        mode = file_path.stat().st_mode
+        if mode & stat.S_IWOTH:
+            raise ValueError(f"Security Violation: File {file_path} is world-writable.")
+
     # Add directory to sys.path to allow relative imports within the module
     module_dir = str(file_path.parent)
-    if module_dir not in sys.path:
-        sys.path.insert(0, module_dir)
 
     module_name = file_path.stem
 
@@ -65,7 +106,8 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
         sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
         sys.stderr.flush()
 
-        spec.loader.exec_module(module)
+        with _temporary_sys_path(module_dir):
+            spec.loader.exec_module(module)
     except Exception as e:
         raise ValueError(f"Error loading module {file_path}: {e}") from e
 

@@ -65,14 +65,14 @@ broken_builder = BrokenBuilder(name="Broken")
 
 def test_loader_manifest(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:manifest"
-    agent = load_agent_from_ref(ref)
+    agent = load_agent_from_ref(ref, allowed_root_dir=temp_agent_file.parent)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "ManifestAgent"
 
 
 def test_loader_builder(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:builder_agent"
-    agent = load_agent_from_ref(ref)
+    agent = load_agent_from_ref(ref, allowed_root_dir=temp_agent_file.parent)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "BuilderAgent"
 
@@ -98,21 +98,21 @@ def test_loader_errors(temp_agent_file: Path) -> None:
 
     # Var not found
     with pytest.raises(ValueError, match="Variable 'missing' not found"):
-        load_agent_from_ref(f"{temp_agent_file}:missing")
+        load_agent_from_ref(f"{temp_agent_file}:missing", allowed_root_dir=temp_agent_file.parent)
 
     # Not an agent
     with pytest.raises(ValueError, match="is not a ManifestV2"):
-        load_agent_from_ref(f"{temp_agent_file}:not_agent")
+        load_agent_from_ref(f"{temp_agent_file}:not_agent", allowed_root_dir=temp_agent_file.parent)
 
     # Import error (bad syntax)
     bad_file = temp_agent_file.parent / "bad.py"
     bad_file.write_text("this is not python")
     with pytest.raises(ValueError, match="Error loading module"):
-        load_agent_from_ref(f"{bad_file}:agent")
+        load_agent_from_ref(f"{bad_file}:agent", allowed_root_dir=temp_agent_file.parent)
 
     # Broken builder
     with pytest.raises(ValueError, match="Error building agent"):
-        load_agent_from_ref(f"{temp_agent_file}:broken_builder")
+        load_agent_from_ref(f"{temp_agent_file}:broken_builder", allowed_root_dir=temp_agent_file.parent)
 
 
 def test_loader_spec_error(temp_agent_file: Path) -> None:
@@ -120,7 +120,7 @@ def test_loader_spec_error(temp_agent_file: Path) -> None:
         patch("importlib.util.spec_from_file_location", return_value=None),
         pytest.raises(ValueError, match="Could not load spec"),
     ):
-        load_agent_from_ref(f"{temp_agent_file}:agent")
+        load_agent_from_ref(f"{temp_agent_file}:agent", allowed_root_dir=temp_agent_file.parent)
 
 
 # CLI Tests
