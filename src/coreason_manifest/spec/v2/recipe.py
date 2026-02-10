@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import logging
+from collections import Counter
 from enum import IntEnum, StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -662,7 +663,8 @@ class GraphTopology(ManifestBaseModel):
         # 1. Check for duplicate IDs
         ids = [node.id for node in self.nodes]
         if len(ids) != len(set(ids)):
-            duplicates = {id_ for id_ in ids if ids.count(id_) > 1}
+            counts = Counter(ids)
+            duplicates = {id_ for id_, count in counts.items() if count > 1}
             raise ValueError(f"Duplicate node IDs found: {duplicates}")
 
         # If status is draft, skip semantic checks
