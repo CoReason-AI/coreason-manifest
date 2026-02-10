@@ -16,51 +16,65 @@ The architecture leverages a "best-in-class" stack where each component does exa
 *   **Shared Kernel**: This library is a **passive** Shared Kernel. It contains no active execution logic, server capabilities, or policy engines. It strictly provides the data structures that downstream services (Builder, Engine, Simulator) rely on.
 *   **Serialization**: Core definitions (like `AgentDefinition`) use standard Pydantic models for maximum compatibility, while shared configuration models (like `GovernanceConfig`) use `CoReasonBaseModel` for enhanced JSON serialization.
 
-### 3. In Practice (The How)
+### 3. In Practice: The Lipitor Launch Protocol
 
-The usage of `coreason-manifest` is designed to be declarative and synchronous. It serves as the foundation for validating agent definitions programmatically.
+To understand the power of a declarative manifest, let's consider a historical example of strategic decision-making: **The Launch of Lipitor**.
 
-Here is how the system validates compliance in a clean, Pythonic way:
+**The Strategic Context:**
+In the late 1990s, the statin market was dominated by Zocor and Pravachol. Pfizer and Warner-Lambert had a more potent drug (Atorvastatin) but were late to market. They made a critical strategic decision: instead of relying solely on traditional sales representatives to push samples, they would deploy **Medical Science Liaisons (MSLs)**—PhD-level scientists—to engage in deep, peer-to-peer scientific dialogue with cardiologists.
+
+This was not just a "tactic"; it was a fundamental shift in the *protocol* of engagement.
+
+**Encoding Strategy into the Manifest:**
+With `coreason-manifest`, this strategic logic is not buried in `if/else` statements deep in application code. It is elevated to the **Manifest Level**.
+
+The workflow explicitly defines:
+1.  **Analysis**: Identify the "Knowledge Gap" in a region.
+2.  **Decision**: If a gap exists, the protocol *mandates* a science-first approach.
+3.  **Routing**: The system dynamically routes execution to an expensive but high-impact `MedicalScienceLiaison` agent instead of a standard `SalesRepresentative`.
+
+#### The Code (Strategic Intent as Schema)
+
+Using the `ManifestBuilder`, we construct this protocol programmatically. Notice how the **Policy** (High Knowledge Gap -> Deploy MSL) becomes part of the graph topology via the `SwitchStep`.
 
 ```python
-from coreason_manifest import AgentDefinition
+# from examples/02_pharma_launch/lipitor_strategy.py
 
-# 1. Load Raw Data
-# In a real scenario, this would come from an agent.yaml file or API payload
-raw_data = {
-    "type": "agent",
-    "id": "research-agent-001",
-    "name": "Deep Researcher",
-    "role": "Senior Researcher",
-    "goal": "Conduct deep internet research on specified topics.",
-    "backstory": "You are a meticulous researcher who verifies all sources.",
-    "model": "gpt-4-turbo",
-    "tools": ["google-search", "web-scraper"],
-    "knowledge": []
-}
+# ... (Agent Definitions for Analyst, Director, MSL, Rep) ...
 
-try:
-    # 2. Validate Structure
-    # This single call performs strict Schema Validation and Type Checking
-    agent = AgentDefinition(**raw_data)
-
-    # 3. Happy Path: The agent is structurally valid and ready for use
-    print(f"Agent '{agent.name}' verified.")
-    print(f"Authorized Tools: {len(agent.tools)}")
-
-    # Note: Further policy checks (OPA) and integrity verification are performed
-    # by the consuming services (Builder, Engine) using this validated object.
-
-except Exception as e:
-    # The agent was invalid
-    print(f"Validation Failure: {e}")
+# Step 3: Router (SwitchStep)
+# This encodes the conditional logic into the graph structure.
+manifest_builder.add_step(
+    SwitchStep(
+        id="step_route",
+        cases={
+            "action == 'DEPLOY_MSL'": "step_msl", # The Strategic Path
+            "action == 'DEPLOY_REP'": "step_rep"  # The Standard Path
+        },
+        default="step_rep"
+    )
+)
 ```
 
-In this snippet, the library ensures that the data structure is sound and strictly typed. If a field is missing or an ID is invalid, it fails fast before the data enters the system.
+#### Simulation: Validating the Strategy
+
+By running this manifest through the simulator, we can verify that the strategy holds under different market conditions.
+
+*Scenario A: High Skepticism (New York)*
+> **Analyst:** "Knowledge Gap Detected."
+> **Director:** "Deploy MSL. Science-first approach required."
+> **Outcome:** Prescription Lift +12.5% (Driven by Education)
+
+*Scenario B: Friendly Territory (Texas)*
+> **Analyst:** "No Gap."
+> **Director:** "Deploy Rep. Maintain relationship."
+> **Outcome:** Prescription Lift +3.2% (Driven by Presence)
+
+This vignette demonstrates that `coreason-manifest` is not just about validating JSON schemas; it is about **validating strategic intent**. By defining the "Rules of Engagement" in the manifest, we ensure that every autonomous agent acts as a compliant extension of the organization's strategy.
 
 ### 4. Builder Pattern for Complex Manifests (New in v0.17)
 
-As agent systems grow into complex "God Objects" (ManifestV2) involving Workflows, Policy, and State, hand-writing YAML becomes error-prone and tedious.
+As shown above, as agent systems grow into complex "God Objects" (ManifestV2) involving Workflows, Policy, and State, hand-writing YAML becomes error-prone and tedious.
 
 The `ManifestBuilder` solves this developer experience friction:
 
