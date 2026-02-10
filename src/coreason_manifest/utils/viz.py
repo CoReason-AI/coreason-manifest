@@ -72,10 +72,7 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
             # Agent Node: Box
             style_class = "agent"
             ref = getattr(node, "agent_ref", "Inline")
-            if hasattr(ref, "intent"):  # SemanticRef
-                ref_str = f"Draft: {ref.intent}"
-            else:
-                ref_str = str(ref)
+            ref_str = f"Draft: {ref.intent}" if hasattr(ref, "intent") else str(ref)
             label = f"{node.id}<br/>(Agent: {ref_str})"
 
         elif isinstance(node, HumanNode):
@@ -106,7 +103,9 @@ def _generate_recipe_mermaid(recipe: RecipeDefinition) -> str:
             shape_close = "]]"
             label = f"{node.id}<br/>(Generative)"
 
-        lines.append(f'{sanitized_id}{shape_open}"{label}"{shape_close}:::{style_class}')
+        # Escape quotes in label
+        safe_label = label.replace('"', "'")
+        lines.append(f'{sanitized_id}{shape_open}"{safe_label}"{shape_close}:::{style_class}')
 
     # End Node
     lines.append("END((End)):::term")

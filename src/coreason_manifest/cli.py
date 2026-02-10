@@ -20,7 +20,6 @@ from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     ManifestV2,
 )
-from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.viz import generate_mermaid_graph
 
