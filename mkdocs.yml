@@ -21,24 +21,21 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
-  - Welcome:
-      - "Study Guide": STUDY_GUIDE.md
-      - "The Vignette": VIGNETTE.md
-      - "Agents Directive": AGENTS.md
-  - "Guide: Building Agents":
-      - "Graph Recipes": graph_recipes.md
-      - "Episteme Reasoning": episteme_reasoning.md
-      - "Builder SDK": builder_sdk.md
-  - "Guide: Governance & Security":
-      - "Governance Policy": governance_policy_enforcement.md
-      - "Identity & Access Management": identity_access_management.md
-  - "Guide: Runtime Engineering":
-      - "Runtime Principles": runtime/runtime_principles.md
-      - "Flow Governance": flow_governance.md
-  - Reference:
-      - "Orchestration API": reference/orchestration.md
-      - "Governance API": reference/governance.md
-      - "Agent API": reference/agents.md
-      - "Capabilities API": reference/capabilities.md
-      - "Package Structure": package_structure.md
-      - "Full Index": index.md
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: usage.md
+      - CLI Reference: cli.md
+      - Tutorial: VIGNETTE.md
+  - Core Concepts:
+      - Graph Orchestration: graph_recipes.md
+      - Reasoning Patterns: episteme_reasoning.md
+  - Developer Guides:
+      - Building Agents: builder_sdk.md
+      - Flow Governance: flow_governance.md
+  - API Reference:
+      - Agents & Tools: reference/agents.md
+      - Orchestration: reference/orchestration.md
+  - Internal Architecture:
+      - Contributor Protocols: architecture/contributor_protocols.md
+      - Shared Kernel Strategy: architecture/ADR-001-shared-kernel-boundaries.md
+      - Compliance & Integrity: veritas_integrity.md
