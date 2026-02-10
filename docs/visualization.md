@@ -2,106 +2,89 @@
 
 The `coreason-manifest` library includes a "Glass Box" visualization engine designed to render not just the static topology of an agent system, but its **runtime state** and **interactive capabilities**.
 
-This engine follows the "Passive Shared Kernel" philosophy: it generates standard strings (Mermaid.js) and data structures (JSON) that can be rendered by any frontend (Streamlit, Flutter, React Flow) without importing heavy graphical dependencies.
+## The Passive Visualization Engine
 
-## Key Features
+Adhering to the "Shared Kernel" philosophy, the visualization engine in `coreason_manifest.utils.viz` is strictly **passive**. It does not run a server, open sockets, or require heavy dependencies like `matplotlib` or `graphviz`.
 
-1.  **Themable Mermaid.js:** Decouple logic from aesthetics using `GraphTheme`.
-2.  **Runtime State Overlay:** Inject execution status (Running, Failed, Completed) into the graph.
-3.  **JSON Interchange:** Export a structured JSON format for "Magentic" UIs (e.g., React Flow, Flutter).
-4.  **BPMN 2.0 Compliance:** Standard shapes for Agents (Task), Routers (Gateway), and Humans (User Task).
+Instead, it converts a `RecipeDefinition` (or `ManifestV2`) into:
+1.  **Mermaid.js Strings:** For rapid documentation, prototyping, and markdown rendering.
+2.  **Structured JSON:** For consumption by production UIs (React Flow, Flutter, Streamlit).
 
-## Usage
+This ensures that the manifest package remains a lightweight data library while enabling rich observability.
 
-### 1. Generating a Static Flowchart (Mermaid)
+## Glass Box Observability
 
-The simplest usage generates a Mermaid string for documentation.
+The engine supports "Time Travel" debug views by accepting a `RuntimeStateSnapshot`. This allows you to overlay execution status (e.g., "Running", "Failed") onto the static graph structure.
+
+### `generate_mermaid_graph`
+
+```python
+def generate_mermaid_graph(
+    agent: ManifestV2 | RecipeDefinition,
+    theme: GraphTheme | None = None,
+    state: RuntimeStateSnapshot | None = None,
+) -> str:
+    ...
+```
+
+### Example: Rendering a Failed State
+
+By passing a `RuntimeStateSnapshot` with node statuses, you can generate a graph that highlights exactly where a process failed.
 
 ```python
 from coreason_manifest.utils.viz import generate_mermaid_graph
-from coreason_manifest.spec.common.presentation import GraphTheme
-
-# Define your recipe (see Orchestration docs)
-# recipe = ...
-
-# Generate graph with a custom theme
-theme = GraphTheme(
-    orientation="LR",
-    primary_color="#1565c0"
+from coreason_manifest.spec.common.presentation import (
+    RuntimeStateSnapshot,
+    NodeStatus,
+    GraphTheme
 )
 
-mermaid_code = generate_mermaid_graph(recipe, theme=theme)
-print(mermaid_code)
-```
-
-### 2. Runtime State Overlay (Glass Box)
-
-To visualize a "live" execution, pass a `RuntimeStateSnapshot`.
-
-```python
-from coreason_manifest.spec.common.presentation import RuntimeStateSnapshot, NodeStatus
-
-# Snapshot of the engine's state
-state = RuntimeStateSnapshot(
+# 1. Create a Snapshot of the execution state
+# (In a real app, this would come from the engine's event log)
+snapshot = RuntimeStateSnapshot(
     node_states={
         "research_step": NodeStatus.COMPLETED,
-        "approval_step": NodeStatus.RUNNING
-    }
+        "critique_step": NodeStatus.FAILED,  # This will be red
+        "rewrite_step": NodeStatus.SKIPPED   # This will be dashed
+    },
+    active_path=["research_step", "critique_step"]
 )
 
-# The generated Mermaid code will now include CSS classes
-# (e.g., class approval_step running;)
-mermaid_code = generate_mermaid_graph(recipe, state=state)
+# 2. Generate the Mermaid graph with the snapshot
+mermaid_code = generate_mermaid_graph(my_recipe, state=snapshot)
+
+# 3. Render in Markdown (e.g., inside a Jupyter Notebook or Streamlit)
+# st.markdown(f"```mermaid\n{mermaid_code}\n```")
 ```
 
-**Supported States:**
-*   `PENDING` (Default)
-*   `RUNNING` (Pulsing animation)
-*   `COMPLETED` (Green border)
-*   `FAILED` (Red border)
-*   `SKIPPED` (Dashed line)
+## Theming
 
-### 3. JSON Export for Frontends
-
-For rich UIs like Flutter or React Flow, use the JSON export utility. This provides raw node/edge data with sanitization and metadata.
+The visual appearance of the graph is fully customizable via the `GraphTheme` schema. This allows consuming applications to inject brand colors and style overrides without modifying the core library.
 
 ```python
-from coreason_manifest.utils.viz import to_graph_json
-
-graph_data = to_graph_json(recipe)
-
-# Structure:
-# {
-#   "nodes": [
-#     { "id": "step1", "type": "agent", "label": "Research", "x": 0, "y": 0, "config": {...} }
-#   ],
-#   "edges": [
-#     { "source": "step1", "target": "step2", "label": "success" }
-#   ],
-#   "theme": { ... }
-# }
+theme = GraphTheme(
+    primary_color="#6200ea",  # Brand Primary
+    orientation="LR",         # Left-to-Right layout
+    node_styles={
+        "agent": "fill:#ede7f6,stroke:#6200ea,stroke-width:2px",
+        "failed": "fill:#ffebee,stroke:#c62828,stroke-width:3px"
+    }
+)
 ```
 
-## Node Types & Visual Semantics
+## BPMN 2.0 Semantics
 
-The engine maps Coreason Node types to BPMN 2.0 shapes:
+The engine maps Coreason concepts to standard BPMN 2.0 shapes to ensure familiarity for business users and system architects.
 
-| Node Type | Mermaid Shape | Meaning |
-| :--- | :--- | :--- |
-| `AgentNode` | `[Rect]` | Standard Task / Unit of Work |
-| `RouterNode` | `{Rhombus}` | Exclusive Gateway (Decision) |
-| `HumanNode` | `{{Hexagon}}` | User Task (Human Input) |
-| `EvaluatorNode` | `([Stadium])` | Event-Based Gateway (Quality Gate) |
-| `GenerativeNode` | `[[Subroutine]]` | Sub-Process (Complex Solver) |
-| `SwitchStep` | `{Rhombus}` | Exclusive Gateway (ManifestV2) |
-| `CouncilStep` | `[[Subroutine]]` | Parallel Gateway (ManifestV2) |
+| Node Type | Shape | Visual Representation | Meaning |
+| :--- | :--- | :--- | :--- |
+| **`AgentNode`** | Rectangle | `[ Task ]` | A unit of work performed by an Agent. |
+| **`RouterNode`** | Rhombus | `{ Decision }` | A gateway that routes flow based on logic. |
+| **`HumanNode`** | Hexagon | `{{ Interaction }}` | A step requiring human input or approval. |
+| **`CouncilStep`** | Double-lined Rect | `[[ Sub-process ]]` | A complex governance or voting process. |
 
-## Interactive Graphs
-
-If a node has an `InteractionConfig` with `transparency="interactive"`, the engine generates a clickable binding:
-
-```mermaid
-click step_id call_interaction_handler "Tooltip"
-```
-
-This allows the hosting application to define a JavaScript callback (`call_interaction_handler`) to open a configuration modal or debug view when the node is clicked.
+### Legend
+*   **Rectangle (`[ ]`)**: Standard Task.
+*   **Rhombus (`{ }`)**: Exclusive Gateway (Decision).
+*   **Hexagon (`{{ }}`)**: User Task (Interaction).
+*   **Double-lined Rect (`[[ ]]`)**: Sub-process or Collapsed Activity.
