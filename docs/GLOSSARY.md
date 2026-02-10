@@ -41,8 +41,16 @@ A pattern where a dedicated `EvaluatorNode` critiques the output of a Generator 
 
 ## G
 
+### Generative Component
+A specific UI widget (e.g., Data Grid, Kanban Board, Code Editor) instantiated dynamically by the agent's manifest (`ComponentSpec`) rather than being hardcoded in the frontend application.
+
 ### Governance Policy
 Static analysis rules (allowlists, risk levels) enforced at build time to ensure organizational standards and security compliance (e.g., "No tools from untrusted domains"). Distinct from runtime feasibility checks. See [Governance Policy Enforcement](governance_policy_enforcement.md).
+
+## M
+
+### Magentic UI
+An interface paradigm where the user and agent collaborate on shared, mutable state objects (co-planning). In a Magentic UI, the agent can "draft" a plan or document, which the user can then "edit" directly before execution resumes.
 
 ## P
 
@@ -78,6 +86,11 @@ Syntactic sugar in `RecipeDefinition` that allows defining a simple list of node
 
 ### Topology
 The structural layout of a Graph Recipe, defined as a Directed Cyclic Graph (DCG) of Nodes and Edges. It is distinct from the *execution* of the graph.
+
+## V
+
+### Viewport
+The high-level layout container (e.g., Chat, Split View, Planner Console, Canvas) requested by an agent via `ViewportMode`. It dictates the overall structure of the Magentic UI for a specific step.
 
 ## W
 
