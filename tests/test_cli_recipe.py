@@ -34,17 +34,18 @@ def create_dummy_recipe() -> RecipeDefinition:
     )
 
 
-def test_viz_recipe_not_implemented(capsys: pytest.CaptureFixture[str]) -> None:
-    """Test that 'viz' command fails for RecipeDefinition."""
+def test_viz_recipe_success(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test that 'viz' command succeeds for RecipeDefinition."""
     recipe = create_dummy_recipe()
 
     with (
         patch("coreason_manifest.cli.load_agent_from_ref", return_value=recipe),
         patch.object(sys, "argv", ["coreason", "viz", "dummy:recipe"]),
     ):
-        with pytest.raises(SystemExit) as exc:
-            main()
-        assert exc.value.code == 1
+        main()
 
     captured = capsys.readouterr()
-    assert "Visualization not yet implemented for RecipeDefinition" in captured.err
+    # Check for Mermaid graph start
+    assert "graph TD" in captured.out
+    # Check for the node
+    assert "start" in captured.out

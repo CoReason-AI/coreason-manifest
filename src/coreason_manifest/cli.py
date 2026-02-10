@@ -20,7 +20,6 @@ from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     ManifestV2,
 )
-from coreason_manifest.spec.v2.recipe import RecipeDefinition
 from coreason_manifest.utils.loader import load_agent_from_ref
 from coreason_manifest.utils.viz import generate_mermaid_graph
 
@@ -268,11 +267,6 @@ def main() -> None:
         print(agent.model_dump_json(indent=2, by_alias=True, exclude_none=True))
 
     elif args.command == "viz":
-        if isinstance(agent, RecipeDefinition):
-            # TODO: Implement visualization for RecipeDefinition
-            sys.stderr.write("Visualization not yet implemented for RecipeDefinition.\n")
-            sys.exit(1)
-
         mermaid = generate_mermaid_graph(agent)
         if args.json:
             print(json.dumps({"mermaid": mermaid}))
