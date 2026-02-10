@@ -163,4 +163,4 @@ class RuntimeStateSnapshot(ManifestBaseModel):
     """A frozen snapshot of execution state for visualization."""
 
     node_states: dict[str, NodeStatus]
-    active_path: list[str] = []
+    active_path: list[str] = Field(default_factory=list)

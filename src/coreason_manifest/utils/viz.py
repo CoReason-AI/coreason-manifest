@@ -13,7 +13,6 @@ from typing import Any
 
 from coreason_manifest.spec.common.presentation import (
     GraphTheme,
-    NodeStatus,
     RuntimeStateSnapshot,
 )
 from coreason_manifest.spec.v2.definitions import (
@@ -72,10 +71,7 @@ def _generate_recipe_mermaid(
 
     # Override with theme
     if theme:
-        # If primary/secondary colors are provided, we might want to adapt defaults?
-        # For now, we respect specific overrides in node_styles
-        for k, v in theme.node_styles.items():
-            styles[k] = v
+        styles.update(theme.node_styles)
 
     for name, style in styles.items():
         lines.append(f"classDef {name} {style};")
@@ -107,7 +103,7 @@ def _generate_recipe_mermaid(
                 is_subgraph = True
                 role = node.cognitive_profile.role
 
-                lines.append(f"subgraph cluster_{sanitized_id} [\"{node.id} (Cognitive Profile)\"]")
+                lines.append(f'subgraph cluster_{sanitized_id} ["{node.id} (Cognitive Profile)"]')
                 lines.append(f"  direction {orientation}")
 
                 profile_label = f"Role: {role}"
@@ -229,8 +225,7 @@ def generate_mermaid_graph(
 
     # Override with theme
     if theme:
-        for k, v in theme.node_styles.items():
-            styles[k] = v
+        styles.update(theme.node_styles)
 
     for name, style in styles.items():
         lines.append(f"classDef {name} {style};")
@@ -267,7 +262,9 @@ def generate_mermaid_graph(
         elif isinstance(step, SwitchStep):
             capability = "Switch"
 
-        lines.append(f'STEP_{sanitized_id}{shape_open}"{step_id}<br/>(Call: {capability})"{shape_close}:::{style_class}')
+        lines.append(
+            f'STEP_{sanitized_id}{shape_open}"{step_id}<br/>(Call: {capability})"{shape_close}:::{style_class}'
+        )
 
     # End Node
     lines.append("END((End)):::term")
@@ -313,7 +310,7 @@ def generate_mermaid_graph(
             sanitized = f"STEP_{_sanitize_id(node_id)}"
             # Map status enum to classDef name
             if status.value in styles:
-                 lines.append(f"class {sanitized} {status.value};")
+                lines.append(f"class {sanitized} {status.value};")
 
     return "\n".join(lines)
 
@@ -338,7 +335,7 @@ def to_graph_json(
             ref = getattr(node, "agent_ref", "Inline")
             ref_str = f"Draft: {ref.intent}" if hasattr(ref, "intent") else str(ref)
             if node.cognitive_profile:
-                 ref_str = f"Profile: {node.cognitive_profile.role}"
+                ref_str = f"Profile: {node.cognitive_profile.role}"
             label = f"{node.id} ({ref_str})"
         elif isinstance(node, RouterNode):
             label = f"{node.id} (Router: {node.input_key})"
@@ -349,57 +346,62 @@ def to_graph_json(
         config = node.model_dump(exclude={"id", "type"}, mode="json")
 
         # Presentation
-        x = 0
-        y = 0
+        x: float = 0.0
+        y: float = 0.0
         if node.presentation:
             x = node.presentation.x
             y = node.presentation.y
 
-        nodes.append({
-            "id": sanitized_id,
-            "original_id": node.id,
-            "type": node_type,
-            "label": label,
-            "x": x,
-            "y": y,
-            "config": config,
-        })
+        nodes.append(
+            {
+                "id": sanitized_id,
+                "original_id": node.id,
+                "type": node_type,
+                "label": label,
+                "x": x,
+                "y": y,
+                "config": config,
+            }
+        )
 
     # Map edges
     for edge in recipe.topology.edges:
-        edges.append({
-            "source": _sanitize_id(edge.source),
-            "target": _sanitize_id(edge.target),
-            "label": edge.condition
-        })
+        edges.append(
+            {
+                "source": _sanitize_id(edge.source),
+                "target": _sanitize_id(edge.target),
+                "label": edge.condition,
+            }
+        )
 
     # Implicit edges (Inputs -> Entry)
     if recipe.topology.entry_point:
-        edges.append({
-            "source": "INPUTS",
-            "target": _sanitize_id(recipe.topology.entry_point),
-            "label": None,
-            "type": "implicit"
-        })
+        edges.append(
+            {
+                "source": "INPUTS",
+                "target": _sanitize_id(recipe.topology.entry_point),
+                "label": None,
+                "type": "implicit",
+            }
+        )
 
     # Add special INPUTS node
     input_keys = list(recipe.interface.inputs.keys())
-    nodes.insert(0, {
-        "id": "INPUTS",
-        "type": "input",
-        "label": "Inputs",
-        "x": 0,
-        "y": 0,
-        "config": {"inputs": input_keys}
-    })
+    nodes.insert(
+        0,
+        {
+            "id": "INPUTS",
+            "type": "input",
+            "label": "Inputs",
+            "x": 0,
+            "y": 0,
+            "config": {"inputs": input_keys},
+        },
+    )
 
     # Default Theme
     default_theme = GraphTheme().model_dump()
     if theme:
         default_theme.update(theme.model_dump(exclude_unset=True))
 
-    return {
-        "nodes": nodes,
-        "edges": edges,
-        "theme": default_theme
-    }
+    return {"nodes": nodes, "edges": edges, "theme": default_theme}

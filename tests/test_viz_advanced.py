@@ -39,7 +39,7 @@ from coreason_manifest.utils.viz import generate_mermaid_graph, to_graph_json
 
 def test_viz_theme_application() -> None:
     nodes = [AgentNode(id="step1", agent_ref="agent1")]
-    edges = []
+    edges: list[GraphEdge] = []
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="ThemeTest"),
         interface=RecipeInterface(),
@@ -62,7 +62,7 @@ def test_viz_runtime_state_overlay() -> None:
         AgentNode(id="step1", agent_ref="agent1"),
         AgentNode(id="step2", agent_ref="agent2"),
     ]
-    edges = [GraphEdge(source="step1", target="step2")]
+    edges: list[GraphEdge] = [GraphEdge(source="step1", target="step2")]
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="StateTest"),
         interface=RecipeInterface(),
@@ -87,7 +87,7 @@ def test_viz_interaction_binding() -> None:
             interaction=InteractionConfig(transparency=TransparencyLevel.INTERACTIVE),
         )
     ]
-    edges = []
+    edges: list[GraphEdge] = []
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="InteractionTest"),
         interface=RecipeInterface(),
@@ -107,7 +107,7 @@ def test_viz_nested_graph() -> None:
             cognitive_profile=profile,
         )
     ]
-    edges = []
+    edges: list[GraphEdge] = []
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="NestedTest"),
         interface=RecipeInterface(),
@@ -126,7 +126,7 @@ def test_viz_json_export() -> None:
         AgentNode(id="step1", agent_ref="agent1"),
         AgentNode(id="step2", agent_ref="agent2"),
     ]
-    edges = [GraphEdge(source="step1", target="step2", condition="success")]
+    edges: list[GraphEdge] = [GraphEdge(source="step1", target="step2", condition="success")]
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="JsonTest"),
         interface=RecipeInterface(inputs={"q": {"type": "string"}}),
@@ -165,10 +165,8 @@ def test_viz_council_step_shape() -> None:
         metadata=ManifestMetadata(name="CouncilTest"),
         workflow=Workflow(
             start="vote",
-            steps={
-                "vote": CouncilStep(id="vote", voters=["a", "b"], next=None)
-            }
-        )
+            steps={"vote": CouncilStep(id="vote", voters=["a", "b"], next=None)},
+        ),
     )
 
     chart = generate_mermaid_graph(manifest)
@@ -186,7 +184,7 @@ def test_to_graph_json_with_presentation() -> None:
             presentation=NodePresentation(x=100, y=200),
         )
     ]
-    edges = []
+    edges: list[GraphEdge] = []
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="JsonPresTest"),
         interface=RecipeInterface(),
@@ -208,20 +206,14 @@ def test_manifest_v2_advanced_viz() -> None:
             start="start_step",
             steps={
                 "start_step": AgentStep(id="start_step", agent="agent1", next="decision"),
-                "decision": SwitchStep(
-                    id="decision",
-                    cases={"x>1": "end_ok", "x<0": "end_fail"},
-                    default="end_ok"
-                ),
+                "decision": SwitchStep(id="decision", cases={"x>1": "end_ok", "x<0": "end_fail"}, default="end_ok"),
                 "end_ok": AgentStep(id="end_ok", agent="agent1", next=None),
                 "end_fail": AgentStep(id="end_fail", agent="agent1", next=None),
-            }
-        )
+            },
+        ),
     )
 
-    state = RuntimeStateSnapshot(
-        node_states={"start_step": NodeStatus.COMPLETED, "decision": NodeStatus.RUNNING}
-    )
+    state = RuntimeStateSnapshot(node_states={"start_step": NodeStatus.COMPLETED, "decision": NodeStatus.RUNNING})
 
     chart = generate_mermaid_graph(manifest, state=state)
 
@@ -248,7 +240,7 @@ def test_to_graph_json_coverage() -> None:
         ),
         HumanNode(id="human1", prompt="Approve?"),
     ]
-    edges = [GraphEdge(source="router1", target="agent1", condition="A")]
+    edges: list[GraphEdge] = [GraphEdge(source="router1", target="agent1", condition="A")]
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="CoverageTest"),
         interface=RecipeInterface(),
@@ -266,23 +258,22 @@ def test_to_graph_json_coverage() -> None:
     human_node = next(n for n in data["nodes"] if n["id"] == "human1")
     assert "(human)" in human_node["label"]
 
+
 def test_manifest_v2_with_theme() -> None:
     manifest = ManifestV2(
         kind="Agent",
         metadata=ManifestMetadata(name="ThemeV2Test"),
-        workflow=Workflow(
-            start="step1",
-            steps={"step1": AgentStep(id="step1", agent="agent1", next=None)}
-        )
+        workflow=Workflow(start="step1", steps={"step1": AgentStep(id="step1", agent="agent1", next=None)}),
     )
     theme = GraphTheme(orientation="LR", node_styles={"step": "fill:red"})
     chart = generate_mermaid_graph(manifest, theme=theme)
     assert "graph LR" in chart
     assert "classDef step fill:red;" in chart
 
+
 def test_to_graph_json_with_theme() -> None:
     nodes = [AgentNode(id="step1", agent_ref="agent1")]
-    edges = []
+    edges: list[GraphEdge] = []
     recipe = RecipeDefinition(
         metadata=ManifestMetadata(name="JsonThemeTest"),
         interface=RecipeInterface(),
