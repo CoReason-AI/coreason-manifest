@@ -73,12 +73,12 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
         if spec is None or spec.loader is None:
             raise AgentDefinitionError(f"Could not load spec for module: {file_path}")
 
-            module = importlib.util.module_from_spec(spec)
-            sys.modules[module_name] = module
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
 
-            # SECURITY WARNING: This executes arbitrary code from the file.
-            sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
-            sys.stderr.flush()
+        # SECURITY WARNING: This executes arbitrary code from the file.
+        sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
+        sys.stderr.flush()
 
         spec.loader.exec_module(module)
     except (ImportError, SyntaxError) as e:
