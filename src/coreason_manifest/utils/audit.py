@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import asyncio
 import hashlib
 import json
 from datetime import UTC, datetime
@@ -89,15 +88,6 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
     return hashlib.sha256(json_bytes).hexdigest()
 
 
-async def compute_audit_hash_async(entry: AuditLog | dict[str, Any]) -> str:
-    """
-    Asynchronously computes a deterministic SHA-256 hash of the audit entry.
-    Offloads the CPU-bound hashing to a thread pool.
-    """
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, compute_audit_hash, entry)
-
-
 def verify_chain(chain: list[AuditLog]) -> bool:
     """
     Verifies the cryptographic integrity of a chain of audit logs.
@@ -122,12 +112,3 @@ def verify_chain(chain: list[AuditLog]) -> bool:
                 return False
 
     return True
-
-
-async def verify_chain_async(chain: list[AuditLog]) -> bool:
-    """
-    Asynchronously verifies the cryptographic integrity of a chain of audit logs.
-    Offloads the CPU-bound verification loop to a thread pool.
-    """
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, verify_chain, chain)
