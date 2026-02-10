@@ -97,6 +97,3 @@ This is the central documentation index for the `coreason-manifest` project, whi
 
 *   **[Package Structure & Architecture](package_structure.md)**
     *   Explains the physical structure of the package (`spec/` vs `utils/`) and the strict separation of Pure Data Specifications from Utility Logic.
-
-*   **[CoReasonBaseModel Rationale](coreason_base_model_rationale.md)**
-    *   Explains the architectural decision to use `CoReasonBaseModel` for solving JSON serialization challenges with UUIDs and Datetimes.

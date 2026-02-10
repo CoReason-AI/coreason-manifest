@@ -20,7 +20,6 @@ nav:
   - Architecture:
       - "Shared Kernel": architecture/ADR-001-shared-kernel-boundaries.md
       - "Package Structure": package_structure.md
-      - "Base Model Rationale": coreason_base_model_rationale.md
       - "Product Requirements": product_requirements.md
   - Advanced / Reference:
       - "Builder SDK": builder_sdk.md
