@@ -152,7 +152,7 @@ def _generate_recipe_mermaid(
         elif isinstance(node, GenerativeNode):
             node_type = "generative"
             style_class = "generative"
-        else: # pragma: no cover
+        else:  # pragma: no cover
             node_type = "step"
 
         # Resolve Shape
@@ -299,7 +299,7 @@ def generate_mermaid_graph(
             node_type = "agent"
             capability = step.agent
         elif isinstance(step, LogicStep):
-            node_type = "step" # Logic steps are generic steps
+            node_type = "step"  # Logic steps are generic steps
             capability = "Logic"
         elif isinstance(step, CouncilStep):
             node_type = "council"
@@ -397,7 +397,7 @@ def to_graph_json(
             label = f"{node.id}<br/>(Evaluator)"
         elif isinstance(node, GenerativeNode):
             label = f"{node.id}<br/>(Generative)"
-        else: # pragma: no cover
+        else:  # pragma: no cover
             label = f"{node.id} ({node_type})"
 
         # Config / Metadata
