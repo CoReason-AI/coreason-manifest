@@ -18,6 +18,7 @@ import pytest
 from _pytest.capture import CaptureFixture
 
 from coreason_manifest.cli import main
+from coreason_manifest.spec.common.error import AgentDefinitionError, InvalidReferenceError
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -61,7 +62,7 @@ def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
     p = edge_case_dir / "string_var.py"
     p.write_text("agent = 'I am just a string'")
 
-    with pytest.raises(ValueError, match="is not a ManifestV2"):
+    with pytest.raises(AgentDefinitionError, match="is not a ManifestV2"):
         load_agent_from_ref(f"{p}:agent")
 
 
@@ -70,7 +71,7 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
     p = edge_case_dir / "syntax_error.py"
     p.write_text("def broken_func(:\n    pass")
 
-    with pytest.raises(ValueError, match="Error loading module"):
+    with pytest.raises(AgentDefinitionError, match="Failed to import module"):
         load_agent_from_ref(f"{p}:broken_func")
 
 
@@ -120,7 +121,7 @@ def test_loader_strict_splitting() -> None:
     # The requirement is strict format `path/to/file.py:variable_name`.
 
     ref_invalid = "/path/to/file.py"
-    with pytest.raises(ValueError, match="Invalid reference format"):
+    with pytest.raises(InvalidReferenceError, match="Invalid reference format"):
         load_agent_from_ref(ref_invalid)
 
 
@@ -173,7 +174,7 @@ def test_loader_cyclic_import_simulation(edge_case_dir: Path) -> None:
 raise RecursionError("Cyclic import detected")
 """)
 
-    with pytest.raises(ValueError, match="Error loading module"):
+    with pytest.raises(AgentDefinitionError, match="Error loading module"):
         load_agent_from_ref(f"{p}:agent")
 
 

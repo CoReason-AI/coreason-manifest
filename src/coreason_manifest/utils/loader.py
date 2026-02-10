@@ -15,6 +15,11 @@ import threading
 from pathlib import Path
 
 from coreason_manifest.builder import AgentBuilder
+from coreason_manifest.spec.common.error import (
+    AgentDefinitionError,
+    AgentNotFoundError,
+    InvalidReferenceError,
+)
 from coreason_manifest.spec.v2.definitions import ManifestV2
 from coreason_manifest.spec.v2.recipe import RecipeDefinition
 
@@ -33,23 +38,26 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
         ManifestV2 | RecipeDefinition: The loaded agent manifest or recipe.
 
     Raises:
-        ValueError: If the file does not exist, the variable is missing,
-                    or the object is not a valid AgentBuilder, ManifestV2, or RecipeDefinition.
+        InvalidReferenceError: If the reference format is incorrect.
+        AgentNotFoundError: If the file does not exist.
+        AgentDefinitionError: If the object cannot be loaded or is not of the expected type.
     """
     if ":" not in reference:
-        raise ValueError(f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'")
+        raise InvalidReferenceError(
+            f"Invalid reference format: '{reference}'. Expected format 'path/to/file.py:variable_name'"
+        )
 
     # Split on the *last* colon to support drive letters if absolutely necessary,
     # but simplest is strict split.
     file_path_str, var_name = reference.rsplit(":", 1)
 
     if not file_path_str or not var_name:
-        raise ValueError("Reference must contain both file path and variable name.")
+        raise InvalidReferenceError("Reference must contain both file path and variable name.")
 
     # Resolve file path
     file_path = Path(file_path_str).resolve()
     if not file_path.exists():
-        raise ValueError(f"File not found: {file_path}")
+        raise AgentNotFoundError(f"File not found: {file_path}")
 
     # Use a lock to prevent race conditions when modifying sys.path and importing modules
     with _loader_lock:
@@ -60,10 +68,10 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
 
         module_name = file_path.stem
 
-        try:
-            spec = importlib.util.spec_from_file_location(module_name, file_path)
-            if spec is None or spec.loader is None:
-                raise ValueError(f"Could not load spec for module: {file_path}")
+    try:
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec is None or spec.loader is None:
+            raise AgentDefinitionError(f"Could not load spec for module: {file_path}")
 
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module
@@ -72,26 +80,28 @@ def load_agent_from_ref(reference: str) -> ManifestV2 | RecipeDefinition:
             sys.stderr.write(f"⚠️  SECURITY WARNING: Executing code from {file_path}\n")
             sys.stderr.flush()
 
-            spec.loader.exec_module(module)
-        except Exception as e:
-            raise ValueError(f"Error loading module {file_path}: {e}") from e
+        spec.loader.exec_module(module)
+    except (ImportError, SyntaxError) as e:
+        raise AgentDefinitionError(f"Failed to import module '{file_path}': {e}") from e
+    except Exception as e:
+        raise AgentDefinitionError(f"Error loading module {file_path}: {e}") from e
 
-        # Extract variable
-        try:
-            agent_obj = getattr(module, var_name)
-        except AttributeError as e:
-            raise ValueError(f"Variable '{var_name}' not found in {file_path}") from e
+    # Extract variable
+    try:
+        agent_obj = getattr(module, var_name)
+    except AttributeError as e:
+        raise AgentDefinitionError(f"Variable '{var_name}' not found in {file_path}") from e
 
     # Handle Builder
     if isinstance(agent_obj, AgentBuilder):
         try:
             agent_obj = agent_obj.build()
         except Exception as e:
-            raise ValueError(f"Error building agent from builder: {e}") from e
+            raise AgentDefinitionError(f"Error building agent from builder: {e}") from e
 
     # Validate type
     if not isinstance(agent_obj, (ManifestV2, RecipeDefinition)):
-        raise ValueError(
+        raise AgentDefinitionError(
             f"Object '{var_name}' is not a ManifestV2, RecipeDefinition, or AgentBuilder. "
             f"Got: {type(agent_obj).__name__}"
         )
