@@ -14,6 +14,7 @@ from typing import Any
 from coreason_manifest.spec.common.presentation import (
     GraphTheme,
     RuntimeStateSnapshot,
+    ViewportMode,
 )
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
@@ -108,6 +109,7 @@ def _generate_recipe_mermaid(
         "failed": "stroke:#f44336,stroke-width:3px",
         "skipped": "stroke:#9e9e9e,stroke-dasharray: 5 5",
         "pending": "stroke:#bdbdbd,stroke-width:2px,stroke-dasharray: 2 2",
+        "magentic": "fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5",
     }
 
     # Override with theme
@@ -132,7 +134,30 @@ def _generate_recipe_mermaid(
 
     for node in recipe.topology.nodes:
         sanitized_id = _sanitize_id(node.id)
-        label = node.id
+
+        # Resolve Visualization Hints
+        display_name = node.id
+        viz = node.visualization
+        is_magentic = False
+        viewport_label = ""
+
+        if viz:
+            if viz.display_title:
+                display_name = viz.display_title
+
+            if viz.icon:
+                display_name = f"{viz.icon} {display_name}"
+
+            if viz.initial_viewport and viz.initial_viewport != ViewportMode.STREAM:
+                viewport_label = f"<br/>(View: {viz.initial_viewport})"
+
+            if viz.components:
+                for comp in viz.components:
+                    if comp.is_mutable:
+                        is_magentic = True
+                        break
+
+        label = display_name
         style_class = "default"
         is_subgraph = False
 
@@ -155,6 +180,10 @@ def _generate_recipe_mermaid(
         else:
             node_type = "step"
 
+        # Override style if magentic
+        if is_magentic:
+            style_class = "magentic"
+
         # Resolve Shape
         _, shape_open, shape_close = _get_shape(node_type, theme)
 
@@ -164,7 +193,7 @@ def _generate_recipe_mermaid(
                 is_subgraph = True
                 role = node.cognitive_profile.role
 
-                lines.append(f'subgraph cluster_{sanitized_id} ["{node.id} (Cognitive Profile)"]')
+                lines.append(f'subgraph cluster_{sanitized_id} ["{display_name} (Cognitive Profile)"]')
                 lines.append(f"  direction {orientation}")
 
                 profile_label = f"Role: {role}"
@@ -177,21 +206,23 @@ def _generate_recipe_mermaid(
             else:
                 ref = getattr(node, "agent_ref", "Inline")
                 ref_str = f"Draft: {ref.intent}" if hasattr(ref, "intent") else str(ref)
-                label = f"{node.id}<br/>(Agent: {ref_str})"
+                label = f"{display_name}<br/>(Agent: {ref_str})"
 
         elif isinstance(node, HumanNode):
-            label = f"{node.id}<br/>(Human Input)"
+            label = f"{display_name}<br/>(Human Input)"
 
         elif isinstance(node, RouterNode):
-            label = f"{node.id}<br/>(Router: {node.input_key})"
+            label = f"{display_name}<br/>(Router: {node.input_key})"
 
         elif isinstance(node, EvaluatorNode):
-            label = f"{node.id}<br/>(Evaluator)"
+            label = f"{display_name}<br/>(Evaluator)"
 
         elif isinstance(node, GenerativeNode):
-            label = f"{node.id}<br/>(Generative)"
+            label = f"{display_name}<br/>(Generative)"
 
         if not is_subgraph:
+            # Append viewport label if present
+            label += viewport_label
             # Escape quotes in label
             safe_label = label.replace('"', "'")
             lines.append(f'{sanitized_id}{shape_open}"{safe_label}"{shape_close}:::{style_class}')
