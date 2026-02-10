@@ -69,9 +69,7 @@ def test_viz_runtime_state_overlay() -> None:
         topology=GraphTopology(nodes=nodes, edges=edges, entry_point="step1"),
     )
 
-    state = RuntimeStateSnapshot(
-        node_states={"step1": NodeStatus.COMPLETED, "step2": NodeStatus.RUNNING}
-    )
+    state = RuntimeStateSnapshot(node_states={"step1": NodeStatus.COMPLETED, "step2": NodeStatus.RUNNING})
 
     chart = generate_mermaid_graph(recipe, state=state)
 
