@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from pydantic import Field
+
 from coreason_manifest.spec.common.presentation import (
     GraphTheme,
     NodePresentation,
@@ -15,9 +17,11 @@ from coreason_manifest.spec.common.presentation import (
     RuntimeStateSnapshot,
 )
 from coreason_manifest.spec.v2.agent import CognitiveProfile
+from coreason_manifest.spec.v2.contracts import InterfaceDefinition
 from coreason_manifest.spec.v2.definitions import (
     AgentStep,
     CouncilStep,
+    LogicStep,
     ManifestMetadata,
     ManifestV2,
     SwitchStep,
@@ -25,12 +29,15 @@ from coreason_manifest.spec.v2.definitions import (
 )
 from coreason_manifest.spec.v2.recipe import (
     AgentNode,
+    EvaluatorNode,
+    GenerativeNode,
     GraphEdge,
     GraphTopology,
     HumanNode,
     InteractionConfig,
     RecipeDefinition,
     RecipeInterface,
+    RecipeNode,
     RouterNode,
     TransparencyLevel,
 )
@@ -226,8 +233,11 @@ def test_manifest_v2_advanced_viz() -> None:
     assert "class STEP_decision running;" in chart
 
 
-def test_to_graph_json_coverage() -> None:
-    # Test RouterNode and HumanNode to cover logic branches in to_graph_json
+def test_viz_recipe_full_coverage() -> None:
+    """
+    Test all node types in RecipeDefinition for both Mermaid and JSON generation.
+    Covers EvaluatorNode, GenerativeNode, and others in _generate_recipe_mermaid and to_graph_json.
+    """
     profile = CognitiveProfile(role="Researcher", reasoning_mode="standard")
     nodes = [
         AgentNode(id="agent1", cognitive_profile=profile),
@@ -238,14 +248,28 @@ def test_to_graph_json_coverage() -> None:
             default_route="agent1",
         ),
         HumanNode(id="human1", prompt="Approve?"),
+        EvaluatorNode.model_construct(id="eval1", criteria="quality"),
+        GenerativeNode.model_construct(id="gen1", prompt="Generate"),
     ]
     edges: list[GraphEdge] = [GraphEdge(source="router1", target="agent1", condition="A")]
-    recipe = RecipeDefinition(
+    topology = GraphTopology.model_construct(nodes=nodes, edges=edges, entry_point="router1")
+    recipe = RecipeDefinition.model_construct(
         metadata=ManifestMetadata(name="CoverageTest"),
         interface=RecipeInterface(),
-        topology=GraphTopology(nodes=nodes, edges=edges, entry_point="router1"),
+        topology=topology,
     )
 
+    # 1. Mermaid Generation
+    chart = generate_mermaid_graph(recipe)
+
+    # Check Labels
+    assert 'agent1["Role: Researcher<br/>Mode: standard"]' in chart
+    assert 'router1{"router1<br/>(Router: classification)"}' in chart
+    assert 'human1{{"human1<br/>(Human Input)"}}' in chart
+    assert 'eval1(["eval1<br/>(Evaluator)"])' in chart
+    assert 'gen1[["gen1<br/>(Generative)"]]' in chart
+
+    # 2. JSON Export
     data = to_graph_json(recipe)
 
     agent_node = next(n for n in data["nodes"] if n["id"] == "agent1")
@@ -259,6 +283,33 @@ def test_to_graph_json_coverage() -> None:
     human_node = next(n for n in data["nodes"] if n["id"] == "human1")
     assert "(Human Input)" in human_node["label"]
     assert human_node["shape"] == "hexagon"
+
+    eval_node = next(n for n in data["nodes"] if n["id"] == "eval1")
+    assert "(Evaluator)" in eval_node["label"]
+    assert eval_node["shape"] == "stadium"
+
+    gen_node = next(n for n in data["nodes"] if n["id"] == "gen1")
+    assert "(Generative)" in gen_node["label"]
+    assert gen_node["shape"] == "subprocess"
+
+
+def test_manifest_v2_logic_step_coverage() -> None:
+    """Test LogicStep in ManifestV2 for coverage."""
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="LogicTest"),
+        workflow=Workflow(
+            start="logic1",
+            steps={
+                "logic1": LogicStep(id="logic1", code="pass", next=None),
+            },
+        ),
+    )
+
+    chart = generate_mermaid_graph(manifest)
+    # LogicStep maps to "step" -> rect ([])
+    # Label should contain (Call: Logic)
+    assert 'STEP_logic1["logic1<br/>(Call: Logic)"]' in chart
 
 
 def test_manifest_v2_with_theme() -> None:
@@ -511,11 +562,13 @@ def test_viz_unknown_node_type_json_export() -> None:
     This hits the defensive 'else' block for 100% coverage.
     """
 
-    # Create a fake node that mimics RecipeNode but has a weird type
-    class FakeNode(AgentNode):
-        type: str = "mystery_node"  # type: ignore
+    # Create a fake node that mimics RecipeNode (which doesn't have a default type)
+    # but adds a custom type field.
+    class FakeNode(RecipeNode):
+        type: str = Field(default="mystery_node")
 
-    fake_node = FakeNode.model_construct(id="mystery1", type="mystery_node")
+    # Instantiate directly instead of using model_construct to ensure 'type' is set properly
+    fake_node = FakeNode(id="mystery1", type="mystery_node")
 
     # Bypass validation by constructing topology manually
     topology = GraphTopology.model_construct(nodes=[fake_node], edges=[], entry_point="mystery1")
@@ -524,6 +577,7 @@ def test_viz_unknown_node_type_json_export() -> None:
         metadata=ManifestMetadata(name="MysteryTest"), interface=RecipeInterface(), topology=topology
     )
 
+    # 1. Test JSON Export (hits the else block in label generation)
     data = to_graph_json(recipe)
     node = data["nodes"][1]
 
@@ -531,3 +585,39 @@ def test_viz_unknown_node_type_json_export() -> None:
     assert node["type"] == "mystery_node"
     # Verify the label fallback logic: f"{node.id} ({node_type})"
     assert node["label"] == "mystery1 (mystery_node)"
+
+    # 2. Test Mermaid Generation (hits the else block in node_type determination)
+    chart = generate_mermaid_graph(recipe)
+    # Fallback node type is 'step', which maps to 'rect' ([]) by default
+    assert 'mystery1["mystery1"]:::default' in chart
+
+
+def test_viz_recipe_missing_entry_point_and_inputs() -> None:
+    """Test generating Mermaid for a recipe without entry point and with inputs."""
+    nodes = [AgentNode(id="step1", agent_ref="agent1")]
+    recipe = RecipeDefinition(
+        metadata=ManifestMetadata(name="NoEntry"),
+        interface=RecipeInterface(inputs={"q": {"type": "string"}}),
+        topology=GraphTopology(nodes=nodes, edges=[], entry_point="", status="draft"),
+    )
+
+    chart = generate_mermaid_graph(recipe)
+    assert "INPUTS --> END" in chart
+    assert "q" in chart  # Verify inputs are rendered
+
+
+def test_manifest_v2_missing_start_step_and_inputs() -> None:
+    """Test generating Mermaid for a ManifestV2 with invalid start step and inputs."""
+    manifest = ManifestV2(
+        kind="Agent",
+        metadata=ManifestMetadata(name="NoStart"),
+        interface=InterfaceDefinition(inputs={"q": {"type": "string"}}),
+        workflow=Workflow(
+            start="non_existent",
+            steps={"step1": AgentStep(id="step1", agent="agent1", next=None)},
+        ),
+    )
+
+    chart = generate_mermaid_graph(manifest)
+    assert "INPUTS --> END" in chart
+    assert "q" in chart  # Verify inputs are rendered
