@@ -42,11 +42,11 @@ class NewLinearFlow:
         return self
 
     def add_inspector(
-        self, id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
+        self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
     ) -> "NewLinearFlow":
         """Adds an inspector node to the sequence."""
         node = InspectorNode(
-            id=id,
+            id=node_id,
             metadata={},
             supervision=None,
             target_variable=target,
@@ -106,11 +106,11 @@ class NewGraphFlow:
         return self
 
     def add_inspector(
-        self, id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
+        self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
     ) -> "NewGraphFlow":
         """Adds an inspector node to the graph."""
         node = InspectorNode(
-            id=id,
+            id=node_id,
             metadata={},
             supervision=None,
             target_variable=target,

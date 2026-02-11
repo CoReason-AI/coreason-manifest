@@ -2,17 +2,18 @@ from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.nodes import InspectorNode
 from coreason_manifest.utils.visualizer import to_mermaid
 
-def test_inspector_lifecycle_graph():
+
+def test_inspector_lifecycle_graph() -> None:
     # 1. Use NewGraphFlow builder to construct a flow
     flow_builder = NewGraphFlow(name="inspector-test-graph", version="0.25")
 
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
-        id="inspector-1",
+        node_id="inspector-1",
         target="result.score",
         criteria="Score must be > 0.8",
         output="verification_result",
-        pass_threshold=0.8
+        pass_threshold=0.8,
     )
 
     # 3. Build the flow
@@ -48,17 +49,17 @@ def test_inspector_lifecycle_graph():
     assert "class inspector_1 inspector;" in mermaid_code
 
 
-def test_inspector_lifecycle_linear():
+def test_inspector_lifecycle_linear() -> None:
     # 1. Use NewLinearFlow builder to construct a flow
     flow_builder = NewLinearFlow(name="inspector-test-linear", version="0.25")
 
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
-        id="inspector-2",
+        node_id="inspector-2",
         target="result.quality",
         criteria="Quality must be high",
         output="quality_check",
-        pass_threshold=0.9
+        pass_threshold=0.9,
     )
 
     # 3. Build the flow
