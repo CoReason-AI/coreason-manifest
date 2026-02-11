@@ -78,3 +78,9 @@ filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
 
 [tool.coverage.run]
 omit = ["tests/*", "/tmp/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if os.name == \"posix\":",
+]
