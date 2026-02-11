@@ -41,7 +41,7 @@ def test_load_agent_security_warning(mock_agent_file: Path, capsys: pytest.Captu
     if module_name in sys.modules:
         del sys.modules[module_name]
 
-    load_agent_from_ref(f"{mock_agent_file}:agent")
+    load_agent_from_ref(f"{mock_agent_file}:agent", allowed_root_dir=mock_agent_file.parent)
 
     captured = capsys.readouterr()
     assert "⚠️  SECURITY WARNING: Executing code from" in captured.err
