@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -28,9 +28,12 @@ class Supervision(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    strategy: Literal["resume", "restart", "escalate"]
+    strategy: Literal["resume", "restart", "escalate", "degrade"]
     max_retries: int
     fallback: str | None
+    retry_delay_seconds: float = 1.0
+    backoff_factor: float = 2.0
+    default_payload: dict[str, Any] | None = None
 
 
 class Optimizer(BaseModel):

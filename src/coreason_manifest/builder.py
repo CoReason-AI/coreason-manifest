@@ -10,6 +10,7 @@
 
 from typing import Any
 
+from coreason_manifest.spec.core.engines import Supervision
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -21,10 +22,29 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import InspectorNode
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
+
+
+def create_supervision(
+    retries: int,
+    strategy: str = "escalate",
+    backoff: float = 2.0,
+    delay: float = 1.0,
+    default: dict[str, Any] | None = None,
+) -> Supervision:
+    """Helper to create a Supervision config."""
+    # cast strategy to Literal if needed, or rely on pydantic validation
+    return Supervision(
+        max_retries=retries,
+        strategy=strategy,  # type: ignore
+        backoff_factor=backoff,
+        retry_delay_seconds=delay,
+        default_payload=default,
+        fallback=None,
+    )
 
 
 class NewLinearFlow:
@@ -67,6 +87,21 @@ class NewLinearFlow:
     def set_governance(self, gov: Governance) -> "NewLinearFlow":
         """Sets the governance policy."""
         self.governance = gov
+        return self
+
+    def set_circuit_breaker(
+        self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None
+    ) -> "NewLinearFlow":
+        """Sets the circuit breaker policy."""
+        cb = CircuitBreaker(
+            error_threshold_count=error_threshold,
+            reset_timeout_seconds=reset_timeout,
+            fallback_node_id=fallback_node,
+        )
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"circuit_breaker": cb})
+        else:
+            self.governance = Governance(circuit_breaker=cb)
         return self
 
     def build(self) -> LinearFlow:
@@ -136,6 +171,21 @@ class NewGraphFlow:
     def set_governance(self, gov: Governance) -> "NewGraphFlow":
         """Sets the governance policy."""
         self.governance = gov
+        return self
+
+    def set_circuit_breaker(
+        self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None
+    ) -> "NewGraphFlow":
+        """Sets the circuit breaker policy."""
+        cb = CircuitBreaker(
+            error_threshold_count=error_threshold,
+            reset_timeout_seconds=reset_timeout,
+            fallback_node_id=fallback_node,
+        )
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"circuit_breaker": cb})
+        else:
+            self.governance = Governance(circuit_breaker=cb)
         return self
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
