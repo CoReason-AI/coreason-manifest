@@ -30,7 +30,7 @@ def test_builder_integration_circuit_breaker() -> None:
 
     # Graph Flow
     gf = NewGraphFlow(name="Test Graph")
-    gf.set_circuit_breaker(error_threshold=10, reset_timeout=60, fallback_node="fallback")
+    gf.set_circuit_breaker(error_threshold=10, reset_timeout=60, fallback_node="dummy")
     # Add a dummy node so build() passes validation "Graph must contain at least one node"
     node_g = AgentNode(
         id="dummy",
@@ -46,7 +46,7 @@ def test_builder_integration_circuit_breaker() -> None:
     assert flow_g.governance.circuit_breaker is not None
     assert flow_g.governance.circuit_breaker.error_threshold_count == 10
     assert flow_g.governance.circuit_breaker.reset_timeout_seconds == 60
-    assert flow_g.governance.circuit_breaker.fallback_node_id == "fallback"
+    assert flow_g.governance.circuit_breaker.fallback_node_id == "dummy"
 
 
 def test_supervision_logic() -> None:
@@ -159,3 +159,47 @@ def test_builder_integration_governance_update() -> None:
     assert flow_g.governance.timeout_seconds == 60
     assert flow_g.governance.circuit_breaker is not None
     assert flow_g.governance.circuit_breaker.error_threshold_count == 2
+
+
+def test_validator_catch_invalid_fallback_ids() -> None:
+    # 1. Invalid Circuit Breaker Fallback
+    lf = NewLinearFlow(name="Invalid CB Fallback")
+    lf.set_circuit_breaker(error_threshold=5, reset_timeout=30, fallback_node="missing_node")
+
+    node = AgentNode(
+        id="node1",
+        metadata={},
+        supervision=None,
+        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        tools=[],
+    )
+    lf.add_step(node)
+
+    with pytest.raises(
+        ValueError, match="Circuit Breaker Error: 'fallback_node_id' points to missing ID 'missing_node'"
+    ):
+        lf.build()
+
+    # 2. Invalid Supervision Fallback
+    sup = Supervision(
+        strategy="escalate",
+        max_retries=3,
+        fallback="missing_sup_node",
+        retry_delay_seconds=1.0,
+        backoff_factor=2.0,
+    )
+
+    lf2 = NewLinearFlow(name="Invalid Sup Fallback")
+    node2 = AgentNode(
+        id="node2",
+        metadata={},
+        supervision=sup,
+        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        tools=[],
+    )
+    lf2.add_step(node2)
+
+    with pytest.raises(
+        ValueError, match="Supervision Error: Node 'node2' fallback points to missing ID 'missing_sup_node'"
+    ):
+        lf2.build()

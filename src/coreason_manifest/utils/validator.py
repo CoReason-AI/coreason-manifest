@@ -13,10 +13,6 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     """
     errors: list[str] = []
 
-    # 1. Common Checks
-    if flow.governance:
-        errors.extend(_validate_governance(flow.governance))
-
     # Flatten nodes based on flow type
     nodes: list[AnyNode] = []
     if isinstance(flow, GraphFlow):
@@ -24,11 +20,17 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     elif isinstance(flow, LinearFlow):
         nodes = flow.sequence
 
+    valid_ids = {n.id for n in nodes}
+
+    # 1. Common Checks
+    if flow.governance:
+        errors.extend(_validate_governance(flow.governance, valid_ids))
+
     if flow.tool_packs:
         errors.extend(_validate_tools(nodes, flow.tool_packs))
 
     for node in nodes:
-        errors.extend(_validate_supervision(node))
+        errors.extend(_validate_supervision(node, valid_ids))
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
@@ -55,12 +57,20 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     return errors
 
 
-def _validate_governance(gov: Governance) -> list[str]:
+def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[str]:
     errors: list[str] = []
     if gov.rate_limit_rpm is not None and gov.rate_limit_rpm < 0:
         errors.append("Governance Error: rate_limit_rpm cannot be negative.")
     if gov.cost_limit_usd is not None and gov.cost_limit_usd < 0:
         errors.append("Governance Error: cost_limit_usd cannot be negative.")
+    if (
+        gov.circuit_breaker
+        and gov.circuit_breaker.fallback_node_id
+        and gov.circuit_breaker.fallback_node_id not in valid_ids
+    ):
+        errors.append(
+            f"Circuit Breaker Error: 'fallback_node_id' points to missing ID '{gov.circuit_breaker.fallback_node_id}'."
+        )
     return errors
 
 
@@ -153,7 +163,7 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
     return [f"Orphan Node Warning: Node '{oid}' has no incoming edges." for oid in orphans]
 
 
-def _validate_supervision(node: AnyNode) -> list[str]:
+def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     errors: list[str] = []
     if node.supervision:
         if node.supervision.strategy == "degrade" and node.supervision.default_payload is None:
@@ -161,5 +171,10 @@ def _validate_supervision(node: AnyNode) -> list[str]:
 
         if node.supervision.backoff_factor < 1.0:
             errors.append(f"Supervision Error: Node '{node.id}' backoff_factor must be >= 1.0.")
+
+        if node.supervision.fallback and node.supervision.fallback not in valid_ids:
+            errors.append(
+                f"Supervision Error: Node '{node.id}' fallback points to missing ID '{node.supervision.fallback}'."
+            )
 
     return errors
