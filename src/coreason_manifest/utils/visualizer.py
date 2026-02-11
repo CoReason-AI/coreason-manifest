@@ -1,17 +1,12 @@
 import html
-from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import (
-    Node,
-    SwitchNode,
-)
+from coreason_manifest.spec.core.nodes import Node, SwitchNode
+from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 
 
 def _safe_id(node_id: str) -> str:
     """Sanitizes strings to be valid Mermaid IDs (alphanumeric only)."""
-    # Replace spaces and hyphens with underscores to avoid Mermaid syntax errors.
-    # Also handle other potential problematic chars if needed, but per instructions:
     return node_id.replace("-", "_").replace(" ", "_")
 
 
@@ -20,46 +15,82 @@ def _escape_label(text: str) -> str:
     return html.escape(text).replace('"', "&quot;")
 
 
-def _render_node_def(node: Node) -> str:
-    """Renders the node definition line for Mermaid."""
+def _get_state_class(state: NodeState) -> str | None:
+    match state:
+        case NodeState.RUNNING:
+            return "running"
+        case NodeState.FAILED | NodeState.CANCELLED:
+            return "failed"
+        case NodeState.COMPLETED:
+            return "completed"
+        case NodeState.SKIPPED:
+            return "skipped"
+        case _:
+            return None
+
+
+def _render_node_def(node: Node, snapshot: ExecutionSnapshot | None) -> str:
+    """Renders the node definition line for Mermaid with optional state styling."""
     safe_id = _safe_id(node.id)
     label_id = _escape_label(node.id)
 
+    # Determine shape based on type
     if node.type == "agent":
-        return f'{safe_id}["{label_id}<br/>(Agent)"]'
-    if node.type == "switch":
-        return f'{safe_id}{{"{label_id}<br/>(Switch)"}}'
-    if node.type == "planner":
-        return f'{safe_id}{{{{"{label_id}<br/>(Planner)"}}}}'
-    if node.type == "human":
-        return f'{safe_id}[/"{label_id}<br/>(Human)"/]'
-    if node.type == "placeholder":
-        return f'{safe_id}("{label_id}<br/>(Placeholder)")'
-    # Fallback for unknown types
-    return f'{safe_id}["{label_id}<br/>({node.type})"]'
+        shape_start, shape_end = '[', ']'
+        label_suffix = "<br/>(Agent)"
+    elif node.type == "switch":
+        shape_start, shape_end = '{', '}'
+        label_suffix = "<br/>(Switch)"
+    elif node.type == "planner":
+        shape_start, shape_end = '{{', '}}'
+        label_suffix = "<br/>(Planner)"
+    elif node.type == "human":
+        shape_start, shape_end = '[/', '/]'
+        label_suffix = "<br/>(Human)"
+    elif node.type == "placeholder":
+        shape_start, shape_end = '(', ')'
+        label_suffix = "<br/>(Placeholder)"
+    else:
+        shape_start, shape_end = '[', ']'
+        label_suffix = f"<br/>({node.type})"
+
+    definition = f'{safe_id}{shape_start}"{label_id}{label_suffix}"{shape_end}'
+
+    # Apply state styling if snapshot is provided
+    if snapshot and node.id in snapshot.node_states:
+        state = snapshot.node_states[node.id]
+        class_name = _get_state_class(state)
+        if class_name:
+            definition += f":::{class_name}"
+
+    return definition
 
 
-def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
+def to_mermaid(flow: LinearFlow | GraphFlow, snapshot: ExecutionSnapshot | None = None) -> str:
     """Generates valid Mermaid.js diagram code."""
     lines: list[str] = []
 
     if isinstance(flow, LinearFlow):
         lines.append("graph TD")
+        nodes = flow.sequence
 
         # Render nodes
-        lines.extend(f"    {_render_node_def(node)}" for node in flow.sequence)
+        for node in nodes:
+            lines.append(f"    {_render_node_def(node, snapshot)}")
 
         # Render implicit edges
-        for i in range(len(flow.sequence) - 1):
-            source = flow.sequence[i]
-            target = flow.sequence[i + 1]
+        for i in range(len(nodes) - 1):
+            source = nodes[i]
+            target = nodes[i + 1]
             lines.append(f"    {_safe_id(source.id)} --> {_safe_id(target.id)}")
 
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
+        nodes_dict = flow.graph.nodes
 
-        # Render nodes from flow.graph.nodes
-        lines.extend(f"    {_render_node_def(node)}" for node in flow.graph.nodes.values())
+        # Render nodes
+        for node in nodes_dict.values():
+            lines.append(f"    {_render_node_def(node, snapshot)}")
 
         # Render edges
         for edge in flow.graph.edges:
@@ -69,7 +100,7 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
 
             if not label_text:
                 # Try to infer label from SwitchNode logic
-                source_node = flow.graph.nodes.get(edge.source)
+                source_node = nodes_dict.get(edge.source)
                 if isinstance(source_node, SwitchNode):
                     # Check cases
                     for case_condition, case_target in source_node.cases.items():
@@ -85,30 +116,10 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
 
     # Add styling classes
     lines.append("")
-    lines.append("    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;")
-    lines.append("    classDef switch fill:#ffcc00,stroke:#333,stroke-width:2px;")
-    lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
-
-    # Apply classes
-    # We need to collect IDs for styling
-    switch_ids = []
-    human_ids = []
-
-    nodes_iter: list[Any] = []
-    if isinstance(flow, LinearFlow):
-        nodes_iter = flow.sequence
-    elif isinstance(flow, GraphFlow):
-        nodes_iter = list(flow.graph.nodes.values())
-
-    for node in nodes_iter:
-        if node.type == "switch":
-            switch_ids.append(_safe_id(node.id))
-        elif node.type == "human":
-            human_ids.append(_safe_id(node.id))
-
-    if switch_ids:
-        lines.append(f"    class {','.join(switch_ids)} switch;")
-    if human_ids:
-        lines.append(f"    class {','.join(human_ids)} human;")
+    lines.append("    %% Styling Classes")
+    lines.append("    classDef running fill:#fcf3cf,stroke:#f1c40f,stroke-width:3px;")  # Yellow/Pulse-ish
+    lines.append("    classDef failed fill:#f2d7d5,stroke:#c0392b,stroke-width:2px;")   # Red/Alert
+    lines.append("    classDef completed fill:#d5f5e3,stroke:#2ecc71,stroke-width:2px;") # Green/Success
+    lines.append("    classDef skipped fill:#e5e7e9,stroke:#bdc3c7,stroke-dasharray: 5 5;") # Grey/Dashed
 
     return "\n".join(lines)
