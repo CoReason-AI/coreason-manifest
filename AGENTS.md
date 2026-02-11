@@ -2,6 +2,34 @@
 
 **Note to Agent:** This file contains the **Supreme Law** for this repository. It defines the architectural constraints of a "Shared Kernel." Read this before planning or executing *any* task.
 
+# **Core Guidelines: Coreason Architectural Standard**
+
+**Status:** Immutable Constitution
+**Scope:** All Naming, Design, and Structural Decisions.
+
+## **1. Principle of "Topological Determinism"**
+
+* **The Philosophy:** We do not use generic names like "Manifest" or "Recipe" because they obscure the *shape* of the execution.
+* **The Rule:** Names must describe the topology of the control flow.
+    * If a structure is a deterministic, sequential list, the name must imply **Linearity** and **Order** (e.g., "Sequence", "Flow", "Line").
+    * If a structure supports cycles, loops, or non-deterministic jumps, the name must imply **Graph Theory** and **Network Structure** (e.g., "Graph", "Circuit", "Net").
+* **The Test:** Can I draw the shape of the architecture just by reading the class name?
+
+## **2. Principle of "SOTA Engineering Standards"**
+
+* **The Philosophy:** We reject "Internal Lore" (e.g., Project Code Names) and "Academic Abstractions" in favor of industry-standard engineering terminology.
+* **The Rule:** Use terms found in State-of-the-Art (SOTA) systems engineering.
+    * *Avoid:* "Weaver", "Maco", "Episteme" (Requires a dictionary).
+    * *Prefer:* "Assembler", "Supervisor", "Reasoning" (Self-explanatory).
+* **Guideline:** If the term exists in Kubernetes, Erlang/Elixir, or DSPy to describe the same behavior, use that term.
+
+## **3. Principle of "WYSIWYG Components"**
+
+* **The Philosophy:** A component's name must reveal its active behavior, not its passive configuration.
+* **The Rule:** Rename components based on what they *do* to the data.
+    * *Example:* If a node routes traffic based on a variable, name it after the physical mechanism that does that (e.g., a "Switch"), not the network abstract (a "Router").
+    * *Example:* If a component stores shared state, name it after the architectural pattern (e.g., "Blackboard"), not the data type ("StateDef").
+
 # **PRIMARY DIRECTIVE: THE SHARED KERNEL PROTOCOL**
 
 **Current Status:** Pure Data Library
