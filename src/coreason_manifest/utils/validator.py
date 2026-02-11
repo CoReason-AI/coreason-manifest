@@ -42,9 +42,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
                 errors.append(f"Edge target '{edge.target}' not found in graph nodes.")
 
     # 4. Linear Integrity (LinearFlow only)
-    if isinstance(flow, LinearFlow):
-        if not flow.sequence:
-            errors.append("LinearFlow sequence must not be empty.")
+    if isinstance(flow, LinearFlow) and not flow.sequence:
+        errors.append("LinearFlow sequence must not be empty.")
 
     # 5. Node Logic Checks
     for node in nodes:
@@ -58,11 +57,11 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
         # Missing Tool Check
         if isinstance(node, AgentNode):
-            for tool in node.tools:
-                if tool not in available_tools:
-                    errors.append(
-                        f"Agent '{node.id}' requires tool '{tool}' but it is not provided by any ToolPack."
-                    )
+            errors.extend(
+                f"Agent '{node.id}' requires tool '{tool}' but it is not provided by any ToolPack."
+                for tool in node.tools
+                if tool not in available_tools
+            )
 
     # 6. Governance Sanity Check
     if flow.governance:
