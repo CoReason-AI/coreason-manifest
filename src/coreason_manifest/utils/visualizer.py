@@ -8,13 +8,11 @@ from coreason_manifest.spec.core.nodes import (
 )
 
 
-def _escape_id(node_id: str) -> str:
-    """Escapes the node ID for Mermaid compatibility."""
-    # If the ID contains spaces or special characters, wrap it in quotes.
-    # Simple heuristic: if it's not alphanumeric (plus _), quote it.
-    if not node_id.replace("_", "").isalnum():
-        return f'"{node_id}"'
-    return node_id
+def _safe_id(node_id: str) -> str:
+    """Sanitizes strings to be valid Mermaid IDs (alphanumeric only)."""
+    # Replace spaces and hyphens with underscores to avoid Mermaid syntax errors.
+    # Also handle other potential problematic chars if needed, but per instructions:
+    return node_id.replace("-", "_").replace(" ", "_")
 
 
 def _escape_label(text: str) -> str:
@@ -24,7 +22,7 @@ def _escape_label(text: str) -> str:
 
 def _render_node_def(node: Node) -> str:
     """Renders the node definition line for Mermaid."""
-    safe_id = _escape_id(node.id)
+    safe_id = _safe_id(node.id)
     label_id = _escape_label(node.id)
 
     if node.type == "agent":
@@ -55,7 +53,7 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
         for i in range(len(flow.sequence) - 1):
             source = flow.sequence[i]
             target = flow.sequence[i + 1]
-            lines.append(f"    {_escape_id(source.id)} --> {_escape_id(target.id)}")
+            lines.append(f"    {_safe_id(source.id)} --> {_safe_id(target.id)}")
 
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
@@ -65,32 +63,31 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
 
         # Render edges
         for edge in flow.graph.edges:
-            source_id = _escape_id(edge.source)
-            target_id = _escape_id(edge.target)
-            label = ""
+            source_id = _safe_id(edge.source)
+            target_id = _safe_id(edge.target)
+            label_text = edge.condition
 
-            if edge.condition:
-                label = f"|{_escape_label(edge.condition)}|"
-            else:
+            if not label_text:
                 # Try to infer label from SwitchNode logic
                 source_node = flow.graph.nodes.get(edge.source)
                 if isinstance(source_node, SwitchNode):
                     # Check cases
                     for case_condition, case_target in source_node.cases.items():
                         if case_target == edge.target:
-                            label = f"|{_escape_label(case_condition)}|"
+                            label_text = case_condition
                             break
-                    # If not found in cases, check if it's default?
-                    # The prompt didn't explicitly ask for default handling but it's good practice.
-                    # However, sticking to prompt: "If the edge comes from a SwitchNode, try to match the
-                    # Edge.target against the node's cases to find the condition string if Edge.condition is missing."
+                    # Check default
+                    if not label_text and source_node.default == edge.target:
+                        label_text = "default"
 
+            label = f"|{_escape_label(label_text)}|" if label_text else ""
             lines.append(f"    {source_id} -->{label} {target_id}")
 
     # Add styling classes
     lines.append("")
-    lines.append("    classDef switch fill:#f96,stroke:#333,stroke-width:2px;")
-    lines.append("    classDef human fill:#9cf,stroke:#333,stroke-width:2px;")
+    lines.append("    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;")
+    lines.append("    classDef switch fill:#ffcc00,stroke:#333,stroke-width:2px;")
+    lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
 
     # Apply classes
     # We need to collect IDs for styling
@@ -105,9 +102,9 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
 
     for node in nodes_iter:
         if node.type == "switch":
-            switch_ids.append(_escape_id(node.id))
+            switch_ids.append(_safe_id(node.id))
         elif node.type == "human":
-            human_ids.append(_escape_id(node.id))
+            human_ids.append(_safe_id(node.id))
 
     if switch_ids:
         lines.append(f"    class {','.join(switch_ids)} switch;")

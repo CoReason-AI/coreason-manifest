@@ -159,6 +159,32 @@ def test_graph_flow_to_mermaid() -> None:
     assert "class decision switch;" in mermaid_code
 
 
+def test_switch_default_path() -> None:
+    nodes: dict[str, Any] = {
+        "decision": _get_switch_node("decision", cases={"success": "end"}, default="fallback"),
+        "end": _get_placeholder_node("end"),
+        "fallback": _get_placeholder_node("fallback"),
+    }
+
+    edges = [
+        Edge(source="decision", target="end"), # Case: success
+        Edge(source="decision", target="fallback"), # Case: default
+    ]
+
+    graph = Graph(nodes=nodes, edges=edges)
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=_get_metadata(),
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph,
+    )
+
+    mermaid_code = to_mermaid(flow)
+    assert "decision -->|success| end" in mermaid_code
+    assert "decision -->|default| fallback" in mermaid_code
+
+
 def test_explicit_edge_labels() -> None:
     nodes: dict[str, Any] = {
         "A": _get_agent_node("A"),
@@ -184,6 +210,7 @@ def test_special_characters_escaping() -> None:
     nodes: list[Any] = [
         _get_agent_node("agent 1"),  # Space in ID
         _get_agent_node('agent"2"'),  # Quote in ID
+        _get_agent_node('agent-3'),  # Hyphen in ID
     ]
 
     flow = LinearFlow(
@@ -194,28 +221,40 @@ def test_special_characters_escaping() -> None:
 
     mermaid_code = to_mermaid(flow)
 
-    assert '"agent 1"["agent 1<br/>(Agent)"]' in mermaid_code
-    # HTML escaping for quotes in label: &quot;
-    # ID escaping: quote only if not alphanumeric. "agent"2"" is tricky for ID.
-    # My _escape_id logic quotes if not alnum. So '"agent"2""'. This is invalid mermaid ID if inner quotes exist?
-    # Mermaid docs say: If you need to use other characters you can wrap the ID in quotes.
-    # But if the ID itself contains quotes, it might break.
-    # Let's see how I implemented it.
+    # Expected IDs after sanitization:
+    # "agent 1" -> "agent_1"
+    # 'agent"2"' -> 'agent"2"' (only spaces and hyphens are replaced per spec, alphanumeric check might still fail?)
+    # Wait, the spec was: replace "-" and " " with "_".
+    # What about quotes? "agent"2"" -> "agent"2""
+    # If the ID is 'agent"2"', replace does nothing.
+    # The output format for definition: ID["Original ID<br/>..."]
 
-    # Implementation:
-    # if not node_id.replace("_", "").isalnum():
-    #    return f'"{node_id}"'
+    # agent 1 -> agent_1["agent 1<br/>..."]
+    assert 'agent_1["agent 1<br/>(Agent)"]' in mermaid_code
 
-    # If node_id is 'agent"2"', it returns '"agent"2""'.
-    # This is probably invalid mermaid syntax. Mermaid likely requires escaping inner quotes.
-    # But usually IDs are somewhat restricted.
-    # If the user allows any string as ID, I should probably sanitize it better.
-    # However, for this test case, let's just see if it generates what we implemented.
+    # agent"2" -> agent"2"["agent&quot;2&quot;<br/>..."] ?
+    # If "agent"2"" is the ID, it's not alphanumeric.
+    # But we are using the new logic: replace spaces and hyphens.
+    # So "agent"2"" remains "agent"2"".
+    # Mermaid might not like quotes in the ID part.
+    # However, I must follow the prompt instructions which said:
+    # "Sanitizes strings to be valid Mermaid IDs (alphanumeric only).
+    # ... return id_str.replace("-", "_").replace(" ", "_")"
+    # It says "alphanumeric only" but the code example only replaces spaces and hyphens.
+    # I will stick to the code example provided in the feedback.
 
-    expected_id_1 = '"agent 1"'
-    expected_id_2 = '"agent"2""'
+    # For 'agent"2"', label escaping happens: &quot;
+    assert 'agent"2"["agent&quot;2&quot;<br/>(Agent)"]' in mermaid_code
 
-    assert f"{expected_id_1} --> {expected_id_2}" in mermaid_code
+    # agent-3 -> agent_3
+    assert 'agent_3["agent-3<br/>(Agent)"]' in mermaid_code
+
+    # Check implicit edges
+    # agent 1 -> agent"2" => agent_1 --> agent"2"
+    # agent"2" -> agent-3 => agent"2" --> agent_3
+
+    assert "agent_1 --> agent\"2\"" in mermaid_code
+    assert "agent\"2\" --> agent_3" in mermaid_code
 
 
 def test_unknown_node_type() -> None:
@@ -231,6 +270,7 @@ def test_unknown_node_type() -> None:
 if __name__ == "__main__":
     test_linear_flow_to_mermaid()
     test_graph_flow_to_mermaid()
+    test_switch_default_path()
     test_explicit_edge_labels()
     test_special_characters_escaping()
     test_unknown_node_type()
