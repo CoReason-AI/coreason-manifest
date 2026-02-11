@@ -167,8 +167,8 @@ def test_switch_default_path() -> None:
     }
 
     edges = [
-        Edge(source="decision", target="end"), # Case: success
-        Edge(source="decision", target="fallback"), # Case: default
+        Edge(source="decision", target="end"),  # Case: success
+        Edge(source="decision", target="fallback"),  # Case: default
     ]
 
     graph = Graph(nodes=nodes, edges=edges)
@@ -210,7 +210,7 @@ def test_special_characters_escaping() -> None:
     nodes: list[Any] = [
         _get_agent_node("agent 1"),  # Space in ID
         _get_agent_node('agent"2"'),  # Quote in ID
-        _get_agent_node('agent-3'),  # Hyphen in ID
+        _get_agent_node("agent-3"),  # Hyphen in ID
     ]
 
     flow = LinearFlow(
@@ -253,8 +253,8 @@ def test_special_characters_escaping() -> None:
     # agent 1 -> agent"2" => agent_1 --> agent"2"
     # agent"2" -> agent-3 => agent"2" --> agent_3
 
-    assert "agent_1 --> agent\"2\"" in mermaid_code
-    assert "agent\"2\" --> agent_3" in mermaid_code
+    assert 'agent_1 --> agent"2"' in mermaid_code
+    assert 'agent"2" --> agent_3' in mermaid_code
 
 
 def test_unknown_node_type() -> None:
