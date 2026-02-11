@@ -19,7 +19,7 @@ from coreason_manifest.utils.visualizer import to_mermaid
 def main() -> int:
     """Entry point for the coreason CLI."""
     parser = argparse.ArgumentParser(prog="coreason", description="CoReason Manifest CLI")
-    parser.add_argument("--version", action="version", version="%(prog)s 0.23.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 0.25.0")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
