@@ -1,3 +1,5 @@
+from typing import cast
+
 from coreason_manifest.spec.core.flow import (
     Edge,
     FlowInterface,
@@ -180,3 +182,10 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
     assert len(errors) == 2
     assert "SwitchNode 'switch1' case 'case1' target 'missing1' not found." in errors
     assert "SwitchNode 'switch1' default target 'missing2' not found." in errors
+
+
+def test_validate_flow_invalid_type() -> None:
+    """Test that validate_flow returns error for unknown type."""
+    # Cast to LinearFlow to satisfy type checker but pass None
+    errors = validate_flow(cast(LinearFlow, None))
+    assert errors == ["Unknown flow type"]
