@@ -1,8 +1,10 @@
 import sys
+from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
+import pytest
 import yaml
 from _pytest.capture import CaptureFixture
 
@@ -163,3 +165,28 @@ def test_visualize_unexpected_error(capsys: CaptureFixture[str]) -> None:
         assert ret == 1
         captured = capsys.readouterr()
         assert "Unexpected Error: Boom" in captured.err
+
+
+def test_version(capsys: CaptureFixture[str]) -> None:
+    """Test that the version command works."""
+    test_args = ["coreason", "--version"]
+    with patch.object(sys, "argv", test_args):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
+        captured = capsys.readouterr()
+        assert "0.25.0" in captured.out
+
+
+def test_version_not_found(capsys: CaptureFixture[str]) -> None:
+    """Test that the version command handles PackageNotFoundError."""
+    test_args = ["coreason", "--version"]
+    with (
+        patch.object(sys, "argv", test_args),
+        patch("coreason_manifest.cli.version", side_effect=PackageNotFoundError),
+    ):
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
+        captured = capsys.readouterr()
+        assert "unknown" in captured.out
