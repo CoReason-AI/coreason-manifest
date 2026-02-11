@@ -9,10 +9,12 @@
 
 ## **1. Principle of "Topological Determinism"**
 
-* **The Philosophy:** We do not use generic names like "Manifest" or "Recipe" because they obscure the *shape* of the execution.
-* **The Rule:** Names must describe the topology of the control flow.
-    * If a structure is a deterministic, sequential list, the name must imply **Linearity** and **Order** (e.g., "Sequence", "Flow", "Line").
-    * If a structure supports cycles, loops, or non-deterministic jumps, the name must imply **Graph Theory** and **Network Structure** (e.g., "Graph", "Circuit", "Net").
+* **The Philosophy:** We reject generic abstractions. Names must reveal the *structural shape* of the control flow or the *active mechanical function* of the component.
+* **The Forbidden List:** Strictly NO generic names like "Manager", "Handler", "Controller", "Service", "Manifest", or "Recipe". These obscure the architectural reality.
+* **The Topology Rule:**
+    * **Linear Structures:** Must imply deterministic order (e.g., `LinearFlow`, `Sequence`, `Pipeline`).
+    * **Graph Structures:** Must imply cyclic/network capabilities (e.g., `GraphFlow`, `Circuit`, `Network`).
+* **The Component Rule:** Names must describe the active mechanism (e.g., `Switch` for branching, `Assembler` for construction, `Supervisor` for lifecycle).
 * **The Test:** Can I draw the shape of the architecture just by reading the class name?
 
 ## **2. Principle of "SOTA Engineering Standards"**
