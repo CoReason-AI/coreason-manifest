@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.spec.core.engines import (
     Optimizer,
@@ -16,6 +18,7 @@ class Node(BaseModel):
     id: str
     metadata: dict[str, str]
     supervision: Supervision | None
+    type: str  # Base type field
 
 
 class Brain(BaseModel):
@@ -34,6 +37,7 @@ class AgentNode(Node):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["agent"] = "agent"
     brain: Brain
     tools: list[str]
 
@@ -43,6 +47,8 @@ class SwitchNode(Node):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["switch"] = "switch"
+    variable: str = Field(..., description="The blackboard variable to evaluate.")
     cases: dict[str, str]
     default: str
 
@@ -52,6 +58,7 @@ class PlannerNode(Node):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["planner"] = "planner"
     goal: str
     optimizer: Optimizer | None
 
@@ -61,6 +68,7 @@ class HumanNode(Node):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["human"] = "human"
     prompt: str
     timeout_seconds: int
 
@@ -70,4 +78,5 @@ class Placeholder(Node):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["placeholder"] = "placeholder"
     required_capabilities: list[str]

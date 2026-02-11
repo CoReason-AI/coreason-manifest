@@ -1,8 +1,20 @@
-from typing import Literal
+from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
-from coreason_manifest.spec.core.nodes import Node
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    HumanNode,
+    Placeholder,
+    PlannerNode,
+    SwitchNode,
+)
+
+# Polymorphic Node Type
+AnyNode = Annotated[
+    Union[AgentNode, SwitchNode, PlannerNode, HumanNode, Placeholder],
+    Field(discriminator="type"),
+]
 
 
 class FlowMetadata(BaseModel):
@@ -25,21 +37,32 @@ class FlowInterface(BaseModel):
     outputs: dict[str, str]
 
 
+class VariableDef(BaseModel):
+    """Definition of a blackboard variable."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    type: str
+    description: str | None = None
+
+
 class Blackboard(BaseModel):
     """Shared, observable memory space."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    variables: dict[str, str]
+    variables: dict[str, VariableDef]
     persistence: bool
 
 
-class Step(BaseModel):
-    """Wrapper for a linear step."""
+class Edge(BaseModel):
+    """Directed connection between nodes."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    node: Node
+    source: str
+    target: str
+    condition: str | None = None
 
 
 class Graph(BaseModel):
@@ -47,8 +70,8 @@ class Graph(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    nodes: dict[str, Node]
-    edges: list[dict[str, str]]
+    nodes: dict[str, AnyNode]
+    edges: list[Edge]
 
 
 class LinearFlow(BaseModel):
@@ -58,7 +81,7 @@ class LinearFlow(BaseModel):
 
     kind: Literal["LinearFlow"]
     metadata: FlowMetadata
-    sequence: list[Step]
+    sequence: list[AnyNode]
 
 
 class GraphFlow(BaseModel):
