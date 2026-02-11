@@ -1,46 +1,39 @@
 import sys
-from unittest.mock import patch
-from tempfile import NamedTemporaryFile
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from unittest.mock import patch
+
 import yaml
-import pytest
 from _pytest.capture import CaptureFixture
 
 from coreason_manifest.cli import main
 
-def create_valid_flow(path: str):
+
+def create_valid_flow(path: str) -> None:
     data = {
         "kind": "LinearFlow",
-        "metadata": {
-            "name": "ValidFlow",
-            "version": "1.0",
-            "description": "Test",
-            "tags": []
-        },
+        "metadata": {"name": "ValidFlow", "version": "1.0", "description": "Test", "tags": []},
         "sequence": [
             {"id": "step1", "type": "placeholder", "metadata": {}, "supervision": None, "required_capabilities": []}
         ],
-        "tool_packs": []
+        "tool_packs": [],
     }
     with open(path, "w") as f:
         yaml.dump(data, f)
 
-def create_invalid_flow(path: str):
+
+def create_invalid_flow(path: str) -> None:
     data = {
         "kind": "LinearFlow",
-        "metadata": {
-            "name": "InvalidFlow",
-            "version": "1.0",
-            "description": "Test",
-            "tags": []
-        },
-        "sequence": [], # Empty sequence is invalid
-        "tool_packs": []
+        "metadata": {"name": "InvalidFlow", "version": "1.0", "description": "Test", "tags": []},
+        "sequence": [],  # Empty sequence is invalid
+        "tool_packs": [],
     }
     with open(path, "w") as f:
         yaml.dump(data, f)
 
-def test_validate_success(capsys: CaptureFixture[str]):
+
+def test_validate_success(capsys: CaptureFixture[str]) -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
@@ -56,7 +49,8 @@ def test_validate_success(capsys: CaptureFixture[str]):
     finally:
         Path(tmp_path).unlink()
 
-def test_validate_failure(capsys: CaptureFixture[str]):
+
+def test_validate_failure(capsys: CaptureFixture[str]) -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
@@ -72,7 +66,8 @@ def test_validate_failure(capsys: CaptureFixture[str]):
     finally:
         Path(tmp_path).unlink()
 
-def test_visualize_success(capsys: CaptureFixture[str]):
+
+def test_visualize_success(capsys: CaptureFixture[str]) -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
@@ -88,7 +83,8 @@ def test_visualize_success(capsys: CaptureFixture[str]):
     finally:
         Path(tmp_path).unlink()
 
-def test_visualize_with_errors(capsys: CaptureFixture[str]):
+
+def test_visualize_with_errors(capsys: CaptureFixture[str]) -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
@@ -98,12 +94,13 @@ def test_visualize_with_errors(capsys: CaptureFixture[str]):
         test_args = ["coreason", "visualize", tmp_path]
         with patch.object(sys, "argv", test_args):
             ret = main()
-            assert ret == 0 # Visualize proceeds even with errors
+            assert ret == 0  # Visualize proceeds even with errors
             captured = capsys.readouterr()
             assert "Flow has validation errors" in captured.err
             assert "graph TD" in captured.out
     finally:
         Path(tmp_path).unlink()
+
 
 def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
     """Test that the validate command handles missing files."""
@@ -114,6 +111,7 @@ def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
         captured = capsys.readouterr()
         assert "Manifest file not found" in captured.err
 
+
 def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
     """Test that the visualize command handles missing files."""
     test_args = ["coreason", "visualize", "non_existent.yaml"]
@@ -122,6 +120,7 @@ def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
         assert ret == 1
         captured = capsys.readouterr()
         assert "Manifest file not found" in captured.err
+
 
 def test_cli_help(capsys: CaptureFixture[str]) -> None:
     """Test that help is printed when no command is given."""

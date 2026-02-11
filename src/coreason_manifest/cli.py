@@ -10,7 +10,6 @@
 
 import argparse
 import sys
-from typing import NoReturn
 
 from coreason_manifest.utils.loader import load_flow_from_file
 from coreason_manifest.utils.validator import validate_flow
@@ -37,7 +36,7 @@ def main() -> int:
     if args.command == "validate":
         return _handle_validate(args.file)
 
-    elif args.command == "visualize":
+    if args.command == "visualize":
         return _handle_visualize(args.file)
 
     parser.print_help()
@@ -52,11 +51,10 @@ def _handle_validate(file_path: str) -> int:
         if not errors:
             print("✅ Flow is valid.")
             return 0
-        else:
-            print("❌ Validation failed:", file=sys.stderr)
-            for error in errors:
-                print(f"- {error}", file=sys.stderr)
-            return 1
+        print("❌ Validation failed:", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
 
     except Exception as e:
         print(f"❌ Error: {e}", file=sys.stderr)

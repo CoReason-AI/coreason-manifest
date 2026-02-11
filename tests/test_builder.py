@@ -1,13 +1,19 @@
 import pytest
-from coreason_manifest.builder import NewLinearFlow, NewGraphFlow
+
+from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
+from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import Placeholder
 from coreason_manifest.spec.core.tools import ToolPack
-from coreason_manifest.spec.core.governance import Governance
 
-def test_linear_builder():
+
+def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0", description="Desc")
-    builder.add_step(Placeholder(id="step1", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
-    builder.add_step(Placeholder(id="step2", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+    builder.add_step(
+        Placeholder(id="step1", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+    )
+    builder.add_step(
+        Placeholder(id="step2", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+    )
 
     tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
     builder.add_tool_pack(tp)
@@ -21,9 +27,11 @@ def test_linear_builder():
     assert flow.metadata.name == "MyLinear"
     assert len(flow.sequence) == 2
     assert len(flow.tool_packs) == 1
+    assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
 
-def test_graph_builder():
+
+def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0", description="Desc")
     builder.add_node(Placeholder(id="n1", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
     builder.add_node(Placeholder(id="n2", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
@@ -45,15 +53,18 @@ def test_graph_builder():
     assert flow.graph.edges[0].target == "n2"
     assert flow.graph.edges[0].condition == "ok"
     assert len(flow.tool_packs) == 1
+    assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
 
-def test_linear_builder_invalid():
+
+def test_linear_builder_invalid() -> None:
     # Empty sequence is invalid
     builder = NewLinearFlow("Invalid")
     with pytest.raises(ValueError, match="Validation failed"):
         builder.build()
 
-def test_graph_builder_invalid():
+
+def test_graph_builder_invalid() -> None:
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
     with pytest.raises(ValueError, match="Validation failed"):

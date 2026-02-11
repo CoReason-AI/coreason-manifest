@@ -27,9 +27,7 @@ class NewLinearFlow:
     """Fluent API to construct LinearFlows programmatically."""
 
     def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
-        self.metadata = FlowMetadata(
-            name=name, version=version, description=description, tags=[]
-        )
+        self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self.sequence: list[AnyNode] = []
         self.tool_packs: list[ToolPack] = []
         self.governance: Governance | None = None
@@ -70,9 +68,7 @@ class NewGraphFlow:
     """Fluent API to construct GraphFlows programmatically."""
 
     def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
-        self.metadata = FlowMetadata(
-            name=name, version=version, description=description, tags=[]
-        )
+        self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []
 
@@ -87,9 +83,7 @@ class NewGraphFlow:
         self._nodes[node.id] = node
         return self
 
-    def connect(
-        self, source: str, target: str, condition: str | None = None
-    ) -> "NewGraphFlow":
+    def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
         """Adds an edge to the graph."""
         self._edges.append(Edge(source=source, target=target, condition=condition))
         return self

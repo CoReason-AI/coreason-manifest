@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +49,6 @@ def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
     kind = data.get("kind")
     if kind == "LinearFlow":
         return LinearFlow.model_validate(data)
-    elif kind == "GraphFlow":
+    if kind == "GraphFlow":
         return GraphFlow.model_validate(data)
-    else:
-        raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
+    raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
