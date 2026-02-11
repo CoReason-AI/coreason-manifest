@@ -121,9 +121,7 @@ def test_linear_flow_to_mermaid() -> None:
 def test_graph_flow_to_mermaid() -> None:
     nodes: dict[str, Any] = {
         "start": _get_agent_node("start"),
-        "decision": _get_switch_node(
-            "decision", cases={"success": "end", "retry": "start"}, default="end"
-        ),
+        "decision": _get_switch_node("decision", cases={"success": "end", "retry": "start"}, default="end"),
         "end": _get_placeholder_node("end"),
     }
 
