@@ -61,6 +61,7 @@ class PlannerNode(Node):
     type: Literal["planner"] = "planner"
     goal: str
     optimizer: Optimizer | None
+    output_schema: dict[str, Any] = Field(..., description="JSON Schema defining the structure of the generated plan/result.")
 
 
 class HumanNode(Node):
