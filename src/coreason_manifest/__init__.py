@@ -8,6 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from coreason_manifest.builder import (
+    NewGraphFlow,
+    NewLinearFlow,
+)
 from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningEngine,
@@ -59,6 +63,8 @@ __all__ = [
     "GraphFlow",
     "HumanNode",
     "LinearFlow",
+    "NewGraphFlow",
+    "NewLinearFlow",
     "Node",
     "Optimizer",
     "Placeholder",

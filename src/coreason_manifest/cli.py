@@ -46,39 +46,45 @@ def main() -> int:
 def _handle_validate(file_path: str) -> int:
     try:
         flow = load_flow_from_file(file_path)
-        errors = validate_flow(flow)
-
-        if not errors:
-            print("✅ Flow is valid.")
-            return 0
-        print("❌ Validation failed:", file=sys.stderr)
-        for error in errors:
-            print(f"- {error}", file=sys.stderr)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"❌ Error loading file: {e}", file=sys.stderr)
         return 1
-
     except Exception as e:
-        print(f"❌ Error: {e}", file=sys.stderr)
+        print(f"❌ Unexpected Error: {e}", file=sys.stderr)
         return 1
+
+    errors = validate_flow(flow)
+
+    if not errors:
+        print("✅ Flow is valid.")
+        return 0
+
+    print("❌ Validation failed:", file=sys.stderr)
+    for error in errors:
+        print(f"- {error}", file=sys.stderr)
+    return 1
 
 
 def _handle_visualize(file_path: str) -> int:
     try:
         flow = load_flow_from_file(file_path)
-
-        # Optional: Warn if invalid, but proceed
-        errors = validate_flow(flow)
-        if errors:
-            print("⚠️ Warning: Flow has validation errors:", file=sys.stderr)
-            for error in errors:
-                print(f"- {error}", file=sys.stderr)
-
-        diagram = to_mermaid(flow)
-        print(diagram)
-        return 0
-
-    except Exception as e:
-        print(f"❌ Error: {e}", file=sys.stderr)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"❌ Error loading file: {e}", file=sys.stderr)
         return 1
+    except Exception as e:
+        print(f"❌ Unexpected Error: {e}", file=sys.stderr)
+        return 1
+
+    # Optional: Warn if invalid, but proceed
+    errors = validate_flow(flow)
+    if errors:
+        print("⚠️ Warning: Flow has validation errors:", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+
+    diagram = to_mermaid(flow)
+    print(diagram)
+    return 0
 
 
 if __name__ == "__main__":

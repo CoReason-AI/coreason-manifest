@@ -109,6 +109,8 @@ def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
         ret = main()
         assert ret == 1
         captured = capsys.readouterr()
+        # Updated assertion to match new error message
+        assert "Error loading file" in captured.err
         assert "Manifest file not found" in captured.err
 
 
@@ -119,6 +121,8 @@ def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
         ret = main()
         assert ret == 1
         captured = capsys.readouterr()
+        # Updated assertion to match new error message
+        assert "Error loading file" in captured.err
         assert "Manifest file not found" in captured.err
 
 
@@ -133,3 +137,27 @@ def test_cli_help(capsys: CaptureFixture[str]) -> None:
             assert "usage: coreason" in captured.out
         except SystemExit:
             pass
+
+
+def test_validate_unexpected_error(capsys: CaptureFixture[str]) -> None:
+    """Test that validate handles unexpected errors."""
+    test_args = ["coreason", "validate", "test.yaml"]
+    with patch.object(sys, "argv", test_args), patch(
+        "coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")
+    ):
+        ret = main()
+        assert ret == 1
+        captured = capsys.readouterr()
+        assert "Unexpected Error: Boom" in captured.err
+
+
+def test_visualize_unexpected_error(capsys: CaptureFixture[str]) -> None:
+    """Test that visualize handles unexpected errors."""
+    test_args = ["coreason", "visualize", "test.yaml"]
+    with patch.object(sys, "argv", test_args), patch(
+        "coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")
+    ):
+        ret = main()
+        assert ret == 1
+        captured = capsys.readouterr()
+        assert "Unexpected Error: Boom" in captured.err
