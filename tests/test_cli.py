@@ -142,8 +142,9 @@ def test_cli_help(capsys: CaptureFixture[str]) -> None:
 def test_validate_unexpected_error(capsys: CaptureFixture[str]) -> None:
     """Test that validate handles unexpected errors."""
     test_args = ["coreason", "validate", "test.yaml"]
-    with patch.object(sys, "argv", test_args), patch(
-        "coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")
+    with (
+        patch.object(sys, "argv", test_args),
+        patch("coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")),
     ):
         ret = main()
         assert ret == 1
@@ -154,8 +155,9 @@ def test_validate_unexpected_error(capsys: CaptureFixture[str]) -> None:
 def test_visualize_unexpected_error(capsys: CaptureFixture[str]) -> None:
     """Test that visualize handles unexpected errors."""
     test_args = ["coreason", "visualize", "test.yaml"]
-    with patch.object(sys, "argv", test_args), patch(
-        "coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")
+    with (
+        patch.object(sys, "argv", test_args),
+        patch("coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")),
     ):
         ret = main()
         assert ret == 1
