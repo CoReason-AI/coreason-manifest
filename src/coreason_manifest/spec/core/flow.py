@@ -6,6 +6,7 @@ from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     HumanNode,
+    InspectorNode,
     Placeholder,
     PlannerNode,
     SwitchNode,
@@ -14,7 +15,7 @@ from coreason_manifest.spec.core.tools import ToolPack
 
 # Polymorphic Node Type
 AnyNode = Annotated[
-    AgentNode | SwitchNode | PlannerNode | HumanNode | Placeholder,
+    AgentNode | SwitchNode | PlannerNode | HumanNode | Placeholder | InspectorNode,
     Field(discriminator="type"),
 ]
 
