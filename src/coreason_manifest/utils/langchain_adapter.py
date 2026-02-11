@@ -1,6 +1,7 @@
 from typing import Any
 
-from coreason_manifest.spec.core.flow import LinearFlow, GraphFlow
+from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+
 
 def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
     """
@@ -13,16 +14,12 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
         A dictionary representing the LangChain configuration.
     """
     if isinstance(flow, LinearFlow):
-        return {
-            "type": "chain",
-            "steps": [node.id for node in flow.sequence]
-        }
-    elif isinstance(flow, GraphFlow):
+        return {"type": "chain", "steps": [node.id for node in flow.sequence]}
+    if isinstance(flow, GraphFlow):
         return {
             "type": "graph",
             "nodes": list(flow.graph.nodes.keys()),
-            "edges": [(edge.source, edge.target, edge.condition) for edge in flow.graph.edges]
+            "edges": [(edge.source, edge.target, edge.condition) for edge in flow.graph.edges],
         }
-    else:
-        # This case should ideally not be reachable if type hints are respected
-        raise ValueError(f"Unknown flow type: {type(flow)}")
+    # This case should ideally not be reachable if type hints are respected
+    raise ValueError(f"Unknown flow type: {type(flow)}")

@@ -3,7 +3,8 @@ from typing import Any
 from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.tools import ToolPack
 
-def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] = []) -> dict[str, Any]:
+
+def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
     """
     Convert an AgentNode into an OpenAI Assistant definition.
 
@@ -14,6 +15,9 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] = []) -
     Returns:
         A dictionary representing the OpenAI Assistant configuration.
     """
+    if tool_packs is None:
+        tool_packs = []
+
     # Model: use node.brain.reasoning.model or default
     model = "gpt-4-turbo"
     if node.brain.reasoning:
@@ -27,18 +31,10 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] = []) -
     for pack in tool_packs:
         available_tools.update(pack.tools)
 
-    tools_definitions = []
-    for tool_name in node.tools:
-        if tool_name in available_tools:
-            # Stub the function schema
-            tools_definitions.append({
-                "type": "function",
-                "function": {"name": tool_name}
-            })
+    tools_definitions = [
+        {"type": "function", "function": {"name": tool_name}}
+        for tool_name in node.tools
+        if tool_name in available_tools
+    ]
 
-    return {
-        "name": node.id,
-        "instructions": instructions,
-        "model": model,
-        "tools": tools_definitions
-    }
+    return {"name": node.id, "instructions": instructions, "model": model, "tools": tools_definitions}
