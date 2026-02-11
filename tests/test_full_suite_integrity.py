@@ -1,8 +1,9 @@
-from coreason_manifest.builder import NewLinearFlow, NewGraphFlow
+from coreason_manifest.builder import NewLinearFlow
 from coreason_manifest.spec.core.nodes import Placeholder
+from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.validator import validate_flow
 from coreason_manifest.utils.visualizer import to_mermaid
-from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
+
 
 def test_full_suite_integrity() -> None:
     """
@@ -12,18 +13,10 @@ def test_full_suite_integrity() -> None:
     builder = NewLinearFlow("IntegrityCheck", version="1.0", description="Verifying Core Integrity")
 
     node1 = Placeholder(
-        id="step-1",
-        metadata={},
-        supervision=None,
-        required_capabilities=["logging"],
-        type="placeholder"
+        id="step-1", metadata={}, supervision=None, required_capabilities=["logging"], type="placeholder"
     )
     node2 = Placeholder(
-        id="step-2",
-        metadata={},
-        supervision=None,
-        required_capabilities=["alerting"],
-        type="placeholder"
+        id="step-2", metadata={}, supervision=None, required_capabilities=["alerting"], type="placeholder"
     )
 
     builder.add_step(node1)
