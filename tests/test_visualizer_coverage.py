@@ -1,11 +1,20 @@
 
-from datetime import datetime
-from coreason_manifest.spec.core.nodes import AgentNode, Brain, SwitchNode, HumanNode, PlannerNode, InspectorNode, Placeholder, Node
+from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    Brain,
+    HumanNode,
+    InspectorNode,
+    Node,
+    Placeholder,
+    PlannerNode,
+    SwitchNode,
+)
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 from coreason_manifest.utils.visualizer import _get_state_class, _render_node_def, to_mermaid
-from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
 
-def test_get_state_class_coverage():
+
+def test_get_state_class_coverage() -> None:
     assert _get_state_class(NodeState.RUNNING) == "running"
     assert _get_state_class(NodeState.RETRYING) == "retrying"
     assert _get_state_class(NodeState.FAILED) == "failed"
@@ -14,7 +23,8 @@ def test_get_state_class_coverage():
     assert _get_state_class(NodeState.SKIPPED) == "skipped"
     assert _get_state_class(NodeState.PENDING) is None
 
-def test_switch_edge_inference():
+
+def test_switch_edge_inference() -> None:
     # Setup graph with switch
     flow_builder = NewGraphFlow(name="switch-test", version="1.0")
 
@@ -25,7 +35,7 @@ def test_switch_edge_inference():
         variable="var",
         cases={"case1": "target-1"},
         default="target-2",
-        type="switch"
+        type="switch",
     )
 
     target_node_1 = AgentNode(
@@ -34,7 +44,7 @@ def test_switch_edge_inference():
         supervision=None,
         brain=Brain(role="r", persona="p", reasoning=None, reflex=None),
         tools=[],
-        type="agent"
+        type="agent",
     )
 
     target_node_2 = AgentNode(
@@ -43,7 +53,7 @@ def test_switch_edge_inference():
         supervision=None,
         brain=Brain(role="r", persona="p", reasoning=None, reflex=None),
         tools=[],
-        type="agent"
+        type="agent",
     )
 
     flow_builder.add_node(switch_node)
@@ -61,21 +71,19 @@ def test_switch_edge_inference():
     assert "switch_1 -->|case1| target_1" in mermaid
     assert "switch_1 -->|default| target_2" in mermaid
 
-def test_visualizer_snapshot_state_application():
+
+def test_visualizer_snapshot_state_application() -> None:
     node = AgentNode(
         id="agent-1",
         metadata={},
         supervision=None,
         brain=Brain(role="r", persona="p", reasoning=None, reflex=None),
         tools=[],
-        type="agent"
+        type="agent",
     )
 
     # Snapshot with state
-    snapshot = ExecutionSnapshot(
-        node_states={"agent-1": NodeState.FAILED},
-        active_path=["agent-1"]
-    )
+    snapshot = ExecutionSnapshot(node_states={"agent-1": NodeState.FAILED}, active_path=["agent-1"])
 
     render = _render_node_def(node, snapshot)
     assert ":::failed" in render
@@ -85,27 +93,15 @@ def test_visualizer_snapshot_state_application():
     render_empty = _render_node_def(node, snapshot_empty)
     assert ":::failed" not in render_empty
 
-def test_visualizer_linear_flow_styling_ids():
+
+def test_visualizer_linear_flow_styling_ids() -> None:
     # This targets the loop at the end of to_mermaid for linear flows
     flow_builder = NewLinearFlow(name="linear-test")
 
-    human_node = HumanNode(
-        id="human-lin",
-        metadata={},
-        supervision=None,
-        prompt="p",
-        timeout_seconds=1,
-        type="human"
-    )
+    human_node = HumanNode(id="human-lin", metadata={}, supervision=None, prompt="p", timeout_seconds=1, type="human")
 
     switch_node = SwitchNode(
-        id="switch-lin",
-        metadata={},
-        supervision=None,
-        variable="var",
-        cases={},
-        default="human-lin",
-        type="switch"
+        id="switch-lin", metadata={}, supervision=None, variable="var", cases={}, default="human-lin", type="switch"
     )
 
     flow_builder.add_step(switch_node)
@@ -117,16 +113,11 @@ def test_visualizer_linear_flow_styling_ids():
     assert "class switch_lin switch;" in mermaid
     assert "class human_lin human;" in mermaid
 
-def test_visualizer_node_types_coverage():
+
+def test_visualizer_node_types_coverage() -> None:
     # Planner
     planner = PlannerNode(
-        id="plan",
-        metadata={},
-        supervision=None,
-        goal="g",
-        optimizer=None,
-        output_schema={},
-        type="planner"
+        id="plan", metadata={}, supervision=None, goal="g", optimizer=None, output_schema={}, type="planner"
     )
     render_planner = _render_node_def(planner)
     assert "(Planner)" in render_planner
@@ -142,20 +133,14 @@ def test_visualizer_node_types_coverage():
         pass_threshold=0.5,
         output_variable="o",
         optimizer=None,
-        type="inspector"
+        type="inspector",
     )
     render_inspector = _render_node_def(inspector)
     assert "(Inspector)" in render_inspector
     assert ":::inspector" in render_inspector
 
     # Placeholder
-    placeholder = Placeholder(
-        id="place",
-        metadata={},
-        supervision=None,
-        required_capabilities=[],
-        type="placeholder"
-    )
+    placeholder = Placeholder(id="place", metadata={}, supervision=None, required_capabilities=[], type="placeholder")
     render_place = _render_node_def(placeholder)
     assert "(Placeholder)" in render_place
     assert "(" in render_place
@@ -164,12 +149,7 @@ def test_visualizer_node_types_coverage():
     class CustomNode(Node):
         type: str = "custom"
 
-    custom = CustomNode(
-        id="cust",
-        metadata={},
-        supervision=None,
-        type="custom"
-    )
+    custom = CustomNode(id="cust", metadata={}, supervision=None, type="custom")
     render_custom = _render_node_def(custom)
     assert "(custom)" in render_custom
     assert "[" in render_custom
