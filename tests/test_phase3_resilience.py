@@ -1,0 +1,189 @@
+import pytest
+from coreason_manifest.builder import NewLinearFlow, NewGraphFlow, create_supervision
+from coreason_manifest.spec.core.engines import Supervision, ReasoningEngine, Reflex
+from coreason_manifest.spec.core.nodes import AgentNode, Brain
+from coreason_manifest.utils.validator import validate_flow
+
+def test_builder_integration_circuit_breaker():
+    # Linear Flow
+    lf = NewLinearFlow(name="Test Linear")
+    lf.set_circuit_breaker(error_threshold=5, reset_timeout=30)
+
+    # Add a dummy node to pass sequence cannot be empty check
+    node = AgentNode(
+        id="dummy_linear",
+        metadata={},
+        supervision=None,
+        brain=Brain(
+            role="dummy",
+            persona="dummy",
+            reasoning=None,
+            reflex=None
+        ),
+        tools=[]
+    )
+    lf.add_step(node)
+
+    flow = lf.build()
+
+    assert flow.governance is not None
+    assert flow.governance.circuit_breaker is not None
+    assert flow.governance.circuit_breaker.error_threshold_count == 5
+    assert flow.governance.circuit_breaker.reset_timeout_seconds == 30
+    assert flow.governance.circuit_breaker.fallback_node_id is None
+
+    # Graph Flow
+    gf = NewGraphFlow(name="Test Graph")
+    gf.set_circuit_breaker(error_threshold=10, reset_timeout=60, fallback_node="fallback")
+    # Add a dummy node so build() passes validation "Graph must contain at least one node"
+    node_g = AgentNode(
+        id="dummy",
+        metadata={},
+        supervision=None,
+        brain=Brain(
+            role="dummy",
+            persona="dummy",
+            reasoning=None,
+            reflex=None
+        ),
+        tools=[]
+    )
+    gf.add_node(node_g)
+
+    flow_g = gf.build()
+    assert flow_g.governance is not None
+    assert flow_g.governance.circuit_breaker is not None
+    assert flow_g.governance.circuit_breaker.error_threshold_count == 10
+    assert flow_g.governance.circuit_breaker.reset_timeout_seconds == 60
+    assert flow_g.governance.circuit_breaker.fallback_node_id == "fallback"
+
+
+def test_supervision_logic():
+    # Manual creation
+    sup = Supervision(
+        strategy="degrade",
+        max_retries=3,
+        fallback=None,
+        retry_delay_seconds=1.5,
+        backoff_factor=2.5,
+        default_payload={"status": "mock"}
+    )
+
+    assert sup.strategy == "degrade"
+    assert sup.max_retries == 3
+    assert sup.retry_delay_seconds == 1.5
+    assert sup.backoff_factor == 2.5
+    assert sup.default_payload == {"status": "mock"}
+
+    # Helper creation
+    sup2 = create_supervision(
+        retries=2,
+        strategy="escalate",
+        backoff=3.0,
+        delay=0.5,
+        default=None
+    )
+    assert sup2.strategy == "escalate"
+    assert sup2.max_retries == 2
+    assert sup2.backoff_factor == 3.0
+    assert sup2.retry_delay_seconds == 0.5
+    assert sup2.default_payload is None
+
+
+def test_validator_catch_degrade_missing_payload():
+    sup = Supervision(
+        strategy="degrade",
+        max_retries=3,
+        fallback=None,
+        default_payload=None # Invalid for degrade
+    )
+
+    node = AgentNode(
+        id="node1",
+        metadata={},
+        supervision=sup,
+        brain=Brain(
+            role="tester",
+            persona="tester",
+            reasoning=None,
+            reflex=None
+        ),
+        tools=[]
+    )
+
+    lf = NewLinearFlow(name="Invalid Flow")
+    lf.add_step(node)
+
+    # Validation is called in build()
+    with pytest.raises(ValueError) as excinfo:
+        lf.build()
+
+    assert "Node 'node1' is set to 'degrade' but missing 'default_payload'." in str(excinfo.value)
+
+
+def test_validator_catch_invalid_backoff():
+    sup = Supervision(
+        strategy="restart",
+        max_retries=3,
+        fallback=None,
+        backoff_factor=0.5 # Invalid < 1.0
+    )
+
+    node = AgentNode(
+        id="node2",
+        metadata={},
+        supervision=sup,
+        brain=Brain(
+            role="tester",
+            persona="tester",
+            reasoning=None,
+            reflex=None
+        ),
+        tools=[]
+    )
+
+    lf = NewLinearFlow(name="Invalid Flow Backoff")
+    lf.add_step(node)
+
+    with pytest.raises(ValueError) as excinfo:
+        lf.build()
+
+    assert "backoff_factor must be >= 1.0" in str(excinfo.value)
+
+def test_builder_integration_governance_update():
+    # Test setting circuit breaker when governance already exists
+    from coreason_manifest.spec.core.governance import Governance
+
+    lf = NewLinearFlow(name="Test Update")
+    lf.set_governance(Governance(rate_limit_rpm=100))
+    lf.set_circuit_breaker(error_threshold=5, reset_timeout=30)
+
+    # Add dummy node
+    node = AgentNode(
+        id="dummy_update",
+        metadata={},
+        supervision=None,
+        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        tools=[]
+    )
+    lf.add_step(node)
+
+    flow = lf.build()
+
+    assert flow.governance is not None
+    assert flow.governance.rate_limit_rpm == 100
+    assert flow.governance.circuit_breaker is not None
+    assert flow.governance.circuit_breaker.error_threshold_count == 5
+
+    # Same for GraphFlow
+    gf = NewGraphFlow(name="Test Graph Update")
+    gf.set_governance(Governance(timeout_seconds=60))
+    gf.set_circuit_breaker(error_threshold=2, reset_timeout=10)
+
+    gf.add_node(node) # Use same dummy node
+
+    flow_g = gf.build()
+    assert flow_g.governance is not None
+    assert flow_g.governance.timeout_seconds == 60
+    assert flow_g.governance.circuit_breaker is not None
+    assert flow_g.governance.circuit_breaker.error_threshold_count == 2

@@ -17,15 +17,18 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     if flow.governance:
         errors.extend(_validate_governance(flow.governance))
 
-    if flow.tool_packs:
-        # Flatten nodes based on flow type
-        nodes: list[AnyNode] = []
-        if isinstance(flow, GraphFlow):
-            nodes = list(flow.graph.nodes.values())
-        elif isinstance(flow, LinearFlow):
-            nodes = flow.sequence
+    # Flatten nodes based on flow type
+    nodes: list[AnyNode] = []
+    if isinstance(flow, GraphFlow):
+        nodes = list(flow.graph.nodes.values())
+    elif isinstance(flow, LinearFlow):
+        nodes = flow.sequence
 
+    if flow.tool_packs:
         errors.extend(_validate_tools(nodes, flow.tool_packs))
+
+    for node in nodes:
+        errors.extend(_validate_supervision(node))
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
@@ -148,3 +151,15 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
         orphans.remove(entry_point)
 
     return [f"Orphan Node Warning: Node '{oid}' has no incoming edges." for oid in orphans]
+
+
+def _validate_supervision(node: AnyNode) -> list[str]:
+    errors: list[str] = []
+    if node.supervision:
+        if node.supervision.strategy == "degrade" and node.supervision.default_payload is None:
+            errors.append(f"Node '{node.id}' is set to 'degrade' but missing 'default_payload'.")
+
+        if node.supervision.backoff_factor < 1.0:
+            errors.append(f"Supervision Error: Node '{node.id}' backoff_factor must be >= 1.0.")
+
+    return errors

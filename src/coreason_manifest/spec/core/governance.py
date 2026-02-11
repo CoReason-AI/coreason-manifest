@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Safety(BaseModel):
@@ -22,6 +22,14 @@ class Audit(BaseModel):
     log_payloads: bool
 
 
+class CircuitBreaker(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    error_threshold_count: int = Field(..., description="Number of errors before opening the circuit.")
+    reset_timeout_seconds: int = Field(..., description="Seconds to wait before attempting half-open state.")
+    fallback_node_id: str | None = Field(None, description="Optional node to jump to when circuit opens.")
+
+
 class Governance(BaseModel):
     """Governance constraints and policies."""
 
@@ -32,3 +40,4 @@ class Governance(BaseModel):
     cost_limit_usd: float | None = None
     safety: Safety | None = None
     audit: Audit | None = None
+    circuit_breaker: CircuitBreaker | None = None
