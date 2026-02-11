@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from typing import Any
+
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -17,6 +19,7 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+    VariableDef,
 )
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.tools import ToolPack
@@ -96,6 +99,16 @@ class NewGraphFlow:
     def set_governance(self, gov: Governance) -> "NewGraphFlow":
         """Sets the governance policy."""
         self.governance = gov
+        return self
+
+    def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
+        """Defines the Input/Output contract for the Flow."""
+        self.interface = FlowInterface(inputs=inputs, outputs=outputs)
+        return self
+
+    def set_blackboard(self, variables: dict[str, VariableDef], persistence: bool = False) -> "NewGraphFlow":
+        """Configures the shared memory blackboard."""
+        self.blackboard = Blackboard(variables=variables, persistence=persistence)
         return self
 
     def build(self) -> GraphFlow:

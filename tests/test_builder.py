@@ -1,6 +1,7 @@
 import pytest
 
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
+from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import Placeholder
 from coreason_manifest.spec.core.tools import ToolPack
@@ -43,6 +44,12 @@ def test_graph_builder() -> None:
     gov = Governance(rate_limit_rpm=10)
     builder.set_governance(gov)
 
+    # Test set_interface and set_blackboard
+    builder.set_interface(inputs={"in": "str"}, outputs={"out": "int"})
+    builder.set_blackboard(
+        variables={"var1": VariableDef(type="string", description="test var")}, persistence=True
+    )
+
     flow = builder.build()
 
     assert flow.kind == "GraphFlow"
@@ -55,6 +62,14 @@ def test_graph_builder() -> None:
     assert len(flow.tool_packs) == 1
     assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
+
+    # Assert new features
+    assert flow.interface.inputs == {"in": "str"}
+    assert flow.interface.outputs == {"out": "int"}
+    assert flow.blackboard is not None
+    assert flow.blackboard.persistence is True
+    assert "var1" in flow.blackboard.variables
+    assert flow.blackboard.variables["var1"].type == "string"
 
 
 def test_linear_builder_invalid() -> None:
