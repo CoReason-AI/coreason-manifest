@@ -1,42 +1,35 @@
+import sys
+from unittest.mock import patch
+
 import pytest
-from coreason_manifest.cli import main
+from _pytest.capture import CaptureFixture
+
 from coreason_manifest.builder import AgentBuilder
+from coreason_manifest.cli import main
 
-def test_cli_validate_not_implemented(capsys):
+
+def test_cli_validate_not_implemented(capsys: CaptureFixture[str]) -> None:
     """Test that the validate command prints a not implemented message."""
-    # Simulate arguments
-    import sys
-    from unittest.mock import patch
-
     test_args = ["coreason", "validate", "test.yaml"]
-    with patch.object(sys, 'argv', test_args):
+    with patch.object(sys, "argv", test_args):
         ret = main()
         assert ret == 1
         captured = capsys.readouterr()
         assert "Validation of test.yaml is not yet implemented" in captured.out
 
-def test_cli_help(capsys):
+
+def test_cli_help(capsys: CaptureFixture[str]) -> None:
     """Test that help is printed when no command is given."""
-    import sys
-    from unittest.mock import patch
-
     test_args = ["coreason"]
-    with patch.object(sys, 'argv', test_args):
-        # argparse prints help and exits with 0 when no args if configured,
-        # but here we handled it manually or via argparse behavior.
-        # Wait, my cli.py implementation:
-        # parser.parse_args() will return empty namespace if no args? No, subparsers usually required=False by default in recent py?
-        # Let's check cli.py logic.
-        # if args.command == "validate": ...
-        # parser.print_help()
-        # return 0
-
+    with patch.object(sys, "argv", test_args):
+        # argparse prints help and exits with 0 when no args if configured
         ret = main()
         assert ret == 0
         captured = capsys.readouterr()
         assert "usage: coreason" in captured.out
 
-def test_builder_not_implemented():
+
+def test_builder_not_implemented() -> None:
     """Test that the AgentBuilder raises NotImplementedError."""
     with pytest.raises(NotImplementedError):
         AgentBuilder()
