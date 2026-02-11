@@ -19,6 +19,8 @@ def _get_state_class(state: NodeState) -> str | None:
     match state:
         case NodeState.RUNNING:
             return "running"
+        case NodeState.RETRYING:
+            return "retrying"
         case NodeState.FAILED | NodeState.CANCELLED:
             return "failed"
         case NodeState.COMPLETED:
@@ -36,22 +38,22 @@ def _render_node_def(node: Node, snapshot: ExecutionSnapshot | None) -> str:
 
     # Determine shape based on type
     if node.type == "agent":
-        shape_start, shape_end = '[', ']'
+        shape_start, shape_end = "[", "]"
         label_suffix = "<br/>(Agent)"
     elif node.type == "switch":
-        shape_start, shape_end = '{', '}'
+        shape_start, shape_end = "{", "}"
         label_suffix = "<br/>(Switch)"
     elif node.type == "planner":
-        shape_start, shape_end = '{{', '}}'
+        shape_start, shape_end = "{{", "}}"
         label_suffix = "<br/>(Planner)"
     elif node.type == "human":
-        shape_start, shape_end = '[/', '/]'
+        shape_start, shape_end = "[/", "/]"
         label_suffix = "<br/>(Human)"
     elif node.type == "placeholder":
-        shape_start, shape_end = '(', ')'
+        shape_start, shape_end = "(", ")"
         label_suffix = "<br/>(Placeholder)"
     else:
-        shape_start, shape_end = '[', ']'
+        shape_start, shape_end = "[", "]"
         label_suffix = f"<br/>({node.type})"
 
     definition = f'{safe_id}{shape_start}"{label_id}{label_suffix}"{shape_end}'
@@ -75,8 +77,7 @@ def to_mermaid(flow: LinearFlow | GraphFlow, snapshot: ExecutionSnapshot | None 
         nodes = flow.sequence
 
         # Render nodes
-        for node in nodes:
-            lines.append(f"    {_render_node_def(node, snapshot)}")
+        lines.extend(f"    {_render_node_def(node, snapshot)}" for node in nodes)
 
         # Render implicit edges
         for i in range(len(nodes) - 1):
@@ -89,8 +90,9 @@ def to_mermaid(flow: LinearFlow | GraphFlow, snapshot: ExecutionSnapshot | None 
         nodes_dict = flow.graph.nodes
 
         # Render nodes
-        for node in nodes_dict.values():
-            lines.append(f"    {_render_node_def(node, snapshot)}")
+        lines.extend(
+            f"    {_render_node_def(node, snapshot)}" for node in nodes_dict.values()
+        )
 
         # Render edges
         for edge in flow.graph.edges:
@@ -117,9 +119,12 @@ def to_mermaid(flow: LinearFlow | GraphFlow, snapshot: ExecutionSnapshot | None 
     # Add styling classes
     lines.append("")
     lines.append("    %% Styling Classes")
-    lines.append("    classDef running fill:#fcf3cf,stroke:#f1c40f,stroke-width:3px;")  # Yellow/Pulse-ish
+    # Active (Pulse effect simulated with dashed border for compatibility)
+    lines.append("    classDef running fill:#fcf3cf,stroke:#f1c40f,stroke-width:3px,stroke-dasharray: 5 5;")
+    # Retrying (Orange/Warning)
+    lines.append("    classDef retrying fill:#ffe0b2,stroke:#fb8c00,stroke-width:3px,stroke-dasharray: 5 5;")
     lines.append("    classDef failed fill:#f2d7d5,stroke:#c0392b,stroke-width:2px;")   # Red/Alert
     lines.append("    classDef completed fill:#d5f5e3,stroke:#2ecc71,stroke-width:2px;") # Green/Success
-    lines.append("    classDef skipped fill:#e5e7e9,stroke:#bdc3c7,stroke-dasharray: 5 5;") # Grey/Dashed
+    lines.append("    classDef skipped fill:#e5e7e9,stroke:#bdc3c7,stroke-dasharray: 2 2;") # Grey/Dashed
 
     return "\n".join(lines)

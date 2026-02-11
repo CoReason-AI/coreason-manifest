@@ -1,19 +1,27 @@
 import sys
-from typing import Literal
 
 from coreason_manifest.spec.core.flow import (
-    FlowMetadata,
-    LinearFlow,
-    GraphFlow,
-    FlowInterface,
-    Graph,
     Edge,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
 )
-from coreason_manifest.spec.core.nodes import Node, AgentNode, SwitchNode, Brain, PlannerNode, HumanNode, Placeholder
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    Brain,
+    HumanNode,
+    Node,
+    Placeholder,
+    PlannerNode,
+    SwitchNode,
+)
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
-from coreason_manifest.utils.visualizer import to_mermaid, _render_node_def, _get_state_class
+from coreason_manifest.utils.visualizer import _get_state_class, _render_node_def, to_mermaid
 
-def test_visualizer():
+
+def test_visualizer() -> None:
     # Common Metadata
     metadata = FlowMetadata(
         name="Test Flow",
@@ -49,7 +57,7 @@ def test_visualizer():
         type="planner",
         goal="Plan stuff",
         optimizer=None,
-        output_schema={}
+        output_schema={},
     )
 
     human_node = HumanNode(
@@ -58,7 +66,7 @@ def test_visualizer():
         supervision=None,
         type="human",
         prompt="Approve?",
-        timeout_seconds=60
+        timeout_seconds=60,
     )
 
     placeholder_node = Placeholder(
@@ -66,7 +74,7 @@ def test_visualizer():
         metadata={},
         supervision=None,
         type="placeholder",
-        required_capabilities=[]
+        required_capabilities=[],
     )
 
     # 1. Test LinearFlow with None snapshot and multiple node types
@@ -84,9 +92,9 @@ def test_visualizer():
     assert "human_1" in mermaid_linear
     assert "placeholder_1" in mermaid_linear
     # Check shapes
-    assert "{{" in mermaid_linear # Planner
-    assert "[/" in mermaid_linear # Human
-    assert "(" in mermaid_linear # Placeholder
+    assert "{{" in mermaid_linear  # Planner
+    assert "[/" in mermaid_linear  # Human
+    assert "(" in mermaid_linear  # Placeholder
     print("LinearFlow OK.")
 
     # 2. Test GraphFlow with Snapshot and Switch logic inference
@@ -105,7 +113,7 @@ def test_visualizer():
                 "agent-1": agent_node,
                 "switch-1": switch_node,
                 "agent-2": agent_2,
-                "planner-1": planner_node, # skipped
+                "planner-1": planner_node,  # skipped
             },
             edges=[
                 Edge(source="agent-1", target="switch-1"),
@@ -124,7 +132,7 @@ def test_visualizer():
             "agent-1": NodeState.COMPLETED,
             "switch-1": NodeState.RUNNING,
             "agent-2": NodeState.FAILED,
-            "planner-1": NodeState.SKIPPED,
+            "planner-1": NodeState.RETRYING,
         },
         active_path=["agent-1", "switch-1"],
     )
@@ -142,12 +150,14 @@ def test_visualizer():
     assert ":::completed" in mermaid_graph
     assert ":::running" in mermaid_graph
     assert ":::failed" in mermaid_graph
-    assert ":::skipped" in mermaid_graph
+    assert ":::retrying" in mermaid_graph
+    assert "classDef retrying" in mermaid_graph
+    assert "stroke-dasharray: 5 5" in mermaid_graph # Check pulse effect
 
     print("GraphFlow OK.")
 
     # 3. Check for legacy references
-    with open("src/coreason_manifest/utils/visualizer.py", "r") as f:
+    with open("src/coreason_manifest/utils/visualizer.py") as f:
         content = f.read()
         assert "ManifestV2" not in content
         assert "RuntimeStateSnapshot" not in content
@@ -156,6 +166,8 @@ def test_visualizer():
     # 4. Test coverage for fallback cases
     # Test unknown state (PENDING -> None)
     assert _get_state_class(NodeState.PENDING) is None
+    # Test RETRYING state
+    assert _get_state_class(NodeState.RETRYING) == "retrying"
 
     # Test unknown node type
     class CustomNode(Node):
@@ -166,6 +178,7 @@ def test_visualizer():
     assert "(custom)" in rendered
     print("Coverage check OK.")
 
+
 if __name__ == "__main__":
     try:
         test_visualizer()
@@ -174,5 +187,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
