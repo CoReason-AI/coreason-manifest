@@ -187,5 +187,5 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
 def test_validate_flow_invalid_type() -> None:
     """Test that validate_flow returns error for unknown type."""
     # Cast to LinearFlow to satisfy type checker but pass None
-    errors = validate_flow(cast(LinearFlow, None))
+    errors = validate_flow(cast("LinearFlow", None))
     assert errors == ["Unknown flow type"]
