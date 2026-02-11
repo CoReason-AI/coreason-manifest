@@ -18,11 +18,6 @@ from _pytest.capture import CaptureFixture
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.cli import main
-from coreason_manifest.spec.common.error import (
-    AgentDefinitionError,
-    AgentNotFoundError,
-    InvalidReferenceError,
-)
 from coreason_manifest.spec.v2.definitions import (
     ManifestV2,
 )
@@ -70,62 +65,62 @@ broken_builder = BrokenBuilder(name="Broken")
 
 def test_loader_manifest(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:manifest"
-    agent = load_agent_from_ref(ref)
+    agent = load_agent_from_ref(ref, allowed_root_dir=temp_agent_file.parent)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "ManifestAgent"
 
 
 def test_loader_builder(temp_agent_file: Path) -> None:
     ref = f"{temp_agent_file}:builder_agent"
-    agent = load_agent_from_ref(ref)
+    agent = load_agent_from_ref(ref, allowed_root_dir=temp_agent_file.parent)
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "BuilderAgent"
 
 
 def test_loader_missing_colon_error(temp_agent_file: Path) -> None:
-    """Test that missing colon raises InvalidReferenceError."""
+    """Test that missing colon raises ValueError."""
     # Use a string that definitely has no colon to test the format check across all platforms
-    with pytest.raises(InvalidReferenceError, match="Invalid reference format"):
+    with pytest.raises(ValueError, match="Invalid reference format"):
         load_agent_from_ref("path/to/file.py")
 
     # Test empty path or variable
-    with pytest.raises(InvalidReferenceError, match="Reference must contain both"):
+    with pytest.raises(ValueError, match="Reference must contain both"):
         load_agent_from_ref(":agent")
 
-    with pytest.raises(InvalidReferenceError, match="Reference must contain both"):
+    with pytest.raises(ValueError, match="Reference must contain both"):
         load_agent_from_ref(f"{temp_agent_file}:")
 
 
 def test_loader_errors(temp_agent_file: Path) -> None:
     # File not found
-    with pytest.raises(AgentNotFoundError, match="File not found"):
+    with pytest.raises(ValueError, match="File not found"):
         load_agent_from_ref("non_existent.py:agent")
 
     # Var not found
-    with pytest.raises(AgentDefinitionError, match="Variable 'missing' not found"):
-        load_agent_from_ref(f"{temp_agent_file}:missing")
+    with pytest.raises(ValueError, match="Variable 'missing' not found"):
+        load_agent_from_ref(f"{temp_agent_file}:missing", allowed_root_dir=temp_agent_file.parent)
 
     # Not an agent
-    with pytest.raises(AgentDefinitionError, match="is not a ManifestV2"):
-        load_agent_from_ref(f"{temp_agent_file}:not_agent")
+    with pytest.raises(ValueError, match="is not a ManifestV2"):
+        load_agent_from_ref(f"{temp_agent_file}:not_agent", allowed_root_dir=temp_agent_file.parent)
 
     # Import error (bad syntax)
     bad_file = temp_agent_file.parent / "bad.py"
-    bad_file.write_text("class 123:")
-    with pytest.raises(AgentDefinitionError, match="Failed to import module"):
-        load_agent_from_ref(f"{bad_file}:agent")
+    bad_file.write_text("this is not python")
+    with pytest.raises(ValueError, match="Error loading module"):
+        load_agent_from_ref(f"{bad_file}:agent", allowed_root_dir=temp_agent_file.parent)
 
     # Broken builder
-    with pytest.raises(AgentDefinitionError, match="Error building agent"):
-        load_agent_from_ref(f"{temp_agent_file}:broken_builder")
+    with pytest.raises(ValueError, match="Error building agent"):
+        load_agent_from_ref(f"{temp_agent_file}:broken_builder", allowed_root_dir=temp_agent_file.parent)
 
 
 def test_loader_spec_error(temp_agent_file: Path) -> None:
     with (
         patch("importlib.util.spec_from_file_location", return_value=None),
-        pytest.raises(AgentDefinitionError, match="Could not load spec"),
+        pytest.raises(ValueError, match="Could not load spec"),
     ):
-        load_agent_from_ref(f"{temp_agent_file}:agent")
+        load_agent_from_ref(f"{temp_agent_file}:agent", allowed_root_dir=temp_agent_file.parent)
 
 
 # CLI Tests
@@ -177,7 +172,7 @@ def test_cli_viz_json(mock_agent: ManifestV2, capsys: CaptureFixture[str]) -> No
 
 def test_cli_load_error(capsys: CaptureFixture[str]) -> None:
     with (
-        patch("coreason_manifest.cli.load_agent_from_ref", side_effect=AgentDefinitionError("Load failed")),
+        patch("coreason_manifest.cli.load_agent_from_ref", side_effect=ValueError("Load failed")),
         patch.object(sys, "argv", ["coreason", "inspect", "bad.py:agent"]),
         pytest.raises(SystemExit),
     ):

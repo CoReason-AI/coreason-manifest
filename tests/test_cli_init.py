@@ -48,7 +48,7 @@ def test_init_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> Non
 
     # We need to make sure the load_agent_from_ref can import the module.
     # It dynamically imports, so it should work if the file exists.
-    agent = load_agent_from_ref(ref)
+    agent = load_agent_from_ref(ref, allowed_root_dir=project_dir.parent)
 
     assert isinstance(agent, ManifestV2)
     assert agent.metadata.name == "GreeterAgent"
@@ -119,7 +119,7 @@ def test_init_complex_verification(tmp_path: Path) -> None:
         main()
 
     ref = f"{project_dir}/agent.py:agent"
-    agent = load_agent_from_ref(ref)
+    agent = load_agent_from_ref(ref, allowed_root_dir=project_dir.parent)
 
     assert isinstance(agent, ManifestV2)
     # 1. Verify Definitions

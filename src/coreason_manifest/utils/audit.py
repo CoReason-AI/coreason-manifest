@@ -8,7 +8,6 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import asyncio
 import hashlib
 import json
 from datetime import UTC, datetime
@@ -18,6 +17,35 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from ..spec.common.observability import AuditLog
+
+
+def _safe_serialize(obj: Any) -> Any:
+    """
+    Recursively serializes an object into a JSON-safe structure with strict type allowing.
+
+    Allowed types: dict, list, tuple, str, int, float, bool, None.
+    Converted types: UUID -> str, datetime -> ISO 8601 str.
+    All other types are redacted.
+    """
+    if obj is None:
+        return None
+    if isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, (list, tuple)):
+        return [_safe_serialize(item) for item in obj]
+    if isinstance(obj, dict):
+        # Sort keys for determinism
+        return {k: _safe_serialize(v) for k, v in sorted(obj.items())}
+    if isinstance(obj, UUID):
+        return str(obj)
+    if isinstance(obj, datetime):
+        # Ensure UTC and ISO format
+        dt = obj
+        dt = dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt.astimezone(UTC)
+        return dt.isoformat()
+
+    # Fail-Safe Redaction
+    return f"<REDACTED_TYPE: {type(obj).__name__}>"
 
 
 def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
@@ -47,32 +75,17 @@ def compute_audit_hash(entry: AuditLog | dict[str, Any]) -> str:
         if val is None:
             continue
 
-        if isinstance(val, UUID):
-            payload[field] = str(val)
-        elif isinstance(val, datetime):
-            # Ensure UTC and ISO format
-            dt = val
-            dt = dt.replace(tzinfo=UTC) if dt.tzinfo is None else dt.astimezone(UTC)
-            payload[field] = dt.isoformat()
-        else:
-            payload[field] = val
+        payload[field] = val
+
+    # Serialize using safe serializer
+    safe_payload = _safe_serialize(payload)
 
     # Serialize to JSON bytes
     # ensure_ascii=False to support Unicode characters in names/actions
     # sort_keys=True for determinism
-    # default=str to handle non-serializable objects (like sets or custom classes) safely
-    json_bytes = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
+    json_bytes = json.dumps(safe_payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
 
     return hashlib.sha256(json_bytes).hexdigest()
-
-
-async def compute_audit_hash_async(entry: AuditLog | dict[str, Any]) -> str:
-    """
-    Asynchronously computes a deterministic SHA-256 hash of the audit entry.
-    Offloads the CPU-bound hashing to a thread pool.
-    """
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, compute_audit_hash, entry)
 
 
 def verify_chain(chain: list[AuditLog]) -> bool:
@@ -99,12 +112,3 @@ def verify_chain(chain: list[AuditLog]) -> bool:
                 return False
 
     return True
-
-
-async def verify_chain_async(chain: list[AuditLog]) -> bool:
-    """
-    Asynchronously verifies the cryptographic integrity of a chain of audit logs.
-    Offloads the CPU-bound verification loop to a thread pool.
-    """
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, verify_chain, chain)

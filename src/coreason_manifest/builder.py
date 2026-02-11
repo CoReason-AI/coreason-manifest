@@ -17,7 +17,6 @@ from coreason_manifest.spec.common.capabilities import (
     CapabilityType,
     DeliveryMode,
 )
-from coreason_manifest.spec.common.error import SchemaConflictError
 from coreason_manifest.spec.v2.contracts import (
     InterfaceDefinition,
     PolicyDefinition,
@@ -179,36 +178,7 @@ class AgentBuilder:
     def _merge_schema(self, target: dict[str, Any], source: dict[str, Any]) -> None:
         """Helper to merge JSON Schemas (properties, required, $defs)."""
         if "properties" in source:
-            target_props = target.setdefault("properties", {})
-            source_props = source["properties"]
-            for key, source_def in source_props.items():
-                if key in target_props:
-                    target_def = target_props[key]
-                    if target_def != source_def:
-                        t_type = target_def.get("type")
-                        s_type = source_def.get("type")
-                        if t_type != s_type:
-                            raise SchemaConflictError(
-                                f"Schema conflict for property '{key}': Existing type '{t_type}' vs New type '{s_type}'"
-                            )
-
-                        # Check items for arrays
-                        if t_type == "array":
-                            t_items = target_def.get("items", {})
-                            s_items = source_def.get("items", {})
-                            if t_items != s_items:
-                                raise SchemaConflictError(
-                                    f"Schema conflict for property '{key}': Array items mismatch."
-                                )
-
-                        # Fallback for other mismatches (e.g. description)
-                        raise SchemaConflictError(
-                            f"Schema conflict for property '{key}': Definitions do not match.\n"
-                            f"Existing: {target_def}\n"
-                            f"New: {source_def}"
-                        )
-
-                target_props[key] = source_def
+            target.setdefault("properties", {}).update(source["properties"])
 
         if "required" in source:
             current_req = set(target.get("required", []))
