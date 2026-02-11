@@ -10,6 +10,11 @@
 
 import argparse
 import sys
+from typing import NoReturn
+
+from coreason_manifest.utils.loader import load_flow_from_file
+from coreason_manifest.utils.validator import validate_flow
+from coreason_manifest.utils.visualizer import to_mermaid
 
 
 def main() -> int:
@@ -23,14 +28,59 @@ def main() -> int:
     validate_parser = subparsers.add_parser("validate", help="Validate a manifest file")
     validate_parser.add_argument("file", help="Path to the manifest file")
 
+    # Visualize command
+    visualize_parser = subparsers.add_parser("visualize", help="Generate Mermaid diagram from manifest")
+    visualize_parser.add_argument("file", help="Path to the manifest file")
+
     args = parser.parse_args()
 
     if args.command == "validate":
-        print(f"Validation of {args.file} is not yet implemented in the new Core Kernel.")
-        return 1
+        return _handle_validate(args.file)
+
+    elif args.command == "visualize":
+        return _handle_visualize(args.file)
 
     parser.print_help()
     return 0
+
+
+def _handle_validate(file_path: str) -> int:
+    try:
+        flow = load_flow_from_file(file_path)
+        errors = validate_flow(flow)
+
+        if not errors:
+            print("✅ Flow is valid.")
+            return 0
+        else:
+            print("❌ Validation failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+    except Exception as e:
+        print(f"❌ Error: {e}", file=sys.stderr)
+        return 1
+
+
+def _handle_visualize(file_path: str) -> int:
+    try:
+        flow = load_flow_from_file(file_path)
+
+        # Optional: Warn if invalid, but proceed
+        errors = validate_flow(flow)
+        if errors:
+            print("⚠️ Warning: Flow has validation errors:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+
+        diagram = to_mermaid(flow)
+        print(diagram)
+        return 0
+
+    except Exception as e:
+        print(f"❌ Error: {e}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

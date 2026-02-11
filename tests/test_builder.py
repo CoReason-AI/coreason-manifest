@@ -1,0 +1,60 @@
+import pytest
+from coreason_manifest.builder import NewLinearFlow, NewGraphFlow
+from coreason_manifest.spec.core.nodes import Placeholder
+from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.governance import Governance
+
+def test_linear_builder():
+    builder = NewLinearFlow("MyLinear", version="1.0", description="Desc")
+    builder.add_step(Placeholder(id="step1", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+    builder.add_step(Placeholder(id="step2", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+
+    tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
+    builder.add_tool_pack(tp)
+
+    gov = Governance(rate_limit_rpm=10)
+    builder.set_governance(gov)
+
+    flow = builder.build()
+
+    assert flow.kind == "LinearFlow"
+    assert flow.metadata.name == "MyLinear"
+    assert len(flow.sequence) == 2
+    assert len(flow.tool_packs) == 1
+    assert flow.governance.rate_limit_rpm == 10
+
+def test_graph_builder():
+    builder = NewGraphFlow("MyGraph", version="1.0", description="Desc")
+    builder.add_node(Placeholder(id="n1", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+    builder.add_node(Placeholder(id="n2", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+    builder.connect("n1", "n2", condition="ok")
+
+    tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
+    builder.add_tool_pack(tp)
+
+    gov = Governance(rate_limit_rpm=10)
+    builder.set_governance(gov)
+
+    flow = builder.build()
+
+    assert flow.kind == "GraphFlow"
+    assert flow.metadata.name == "MyGraph"
+    assert len(flow.graph.nodes) == 2
+    assert len(flow.graph.edges) == 1
+    assert flow.graph.edges[0].source == "n1"
+    assert flow.graph.edges[0].target == "n2"
+    assert flow.graph.edges[0].condition == "ok"
+    assert len(flow.tool_packs) == 1
+    assert flow.governance.rate_limit_rpm == 10
+
+def test_linear_builder_invalid():
+    # Empty sequence is invalid
+    builder = NewLinearFlow("Invalid")
+    with pytest.raises(ValueError, match="Validation failed"):
+        builder.build()
+
+def test_graph_builder_invalid():
+    # Empty graph is invalid
+    builder = NewGraphFlow("Invalid")
+    with pytest.raises(ValueError, match="Validation failed"):
+        builder.build()

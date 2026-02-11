@@ -8,18 +8,118 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import (
+    AnyNode,
+    Blackboard,
+    Edge,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
+from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.utils.validator import validate_flow
 
 
-class AgentBuilder:
-    """Builder for creating Agent manifests programmatically.
+class NewLinearFlow:
+    """Fluent API to construct LinearFlows programmatically."""
 
-    WARNING: This builder is currently a placeholder for the new Core Kernel refactor.
-    """
+    def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
+        self.metadata = FlowMetadata(
+            name=name, version=version, description=description, tags=[]
+        )
+        self.sequence: list[AnyNode] = []
+        self.tool_packs: list[ToolPack] = []
+        self.governance: Governance | None = None
 
-    def __init__(self) -> None:
-        raise NotImplementedError("Builder is being refactored for the new Core Kernel.")
+    def add_step(self, node: AnyNode) -> "NewLinearFlow":
+        """Appends a node to the sequence."""
+        self.sequence.append(node)
+        return self
 
-    def build(self) -> LinearFlow | GraphFlow:
-        """Build and validate the manifest."""
-        raise NotImplementedError()
+    def add_tool_pack(self, pack: ToolPack) -> "NewLinearFlow":
+        """Adds a tool pack to the flow."""
+        self.tool_packs.append(pack)
+        return self
+
+    def set_governance(self, gov: Governance) -> "NewLinearFlow":
+        """Sets the governance policy."""
+        self.governance = gov
+        return self
+
+    def build(self) -> LinearFlow:
+        """Constructs and validates the LinearFlow object."""
+        flow = LinearFlow(
+            kind="LinearFlow",
+            metadata=self.metadata,
+            sequence=self.sequence,
+            tool_packs=self.tool_packs,
+            governance=self.governance,
+        )
+
+        errors = validate_flow(flow)
+        if errors:
+            raise ValueError("Validation failed:\n- " + "\n- ".join(errors))
+
+        return flow
+
+
+class NewGraphFlow:
+    """Fluent API to construct GraphFlows programmatically."""
+
+    def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
+        self.metadata = FlowMetadata(
+            name=name, version=version, description=description, tags=[]
+        )
+        self._nodes: dict[str, AnyNode] = {}
+        self._edges: list[Edge] = []
+
+        # Defaults
+        self.interface = FlowInterface(inputs={}, outputs={})
+        self.blackboard: Blackboard | None = None
+        self.tool_packs: list[ToolPack] = []
+        self.governance: Governance | None = None
+
+    def add_node(self, node: AnyNode) -> "NewGraphFlow":
+        """Adds a node to the graph."""
+        self._nodes[node.id] = node
+        return self
+
+    def connect(
+        self, source: str, target: str, condition: str | None = None
+    ) -> "NewGraphFlow":
+        """Adds an edge to the graph."""
+        self._edges.append(Edge(source=source, target=target, condition=condition))
+        return self
+
+    def add_tool_pack(self, pack: ToolPack) -> "NewGraphFlow":
+        """Adds a tool pack to the flow."""
+        self.tool_packs.append(pack)
+        return self
+
+    def set_governance(self, gov: Governance) -> "NewGraphFlow":
+        """Sets the governance policy."""
+        self.governance = gov
+        return self
+
+    def build(self) -> GraphFlow:
+        """Constructs and validates the GraphFlow object."""
+        graph = Graph(nodes=self._nodes, edges=self._edges)
+
+        flow = GraphFlow(
+            kind="GraphFlow",
+            metadata=self.metadata,
+            interface=self.interface,
+            blackboard=self.blackboard,
+            graph=graph,
+            tool_packs=self.tool_packs,
+            governance=self.governance,
+        )
+
+        errors = validate_flow(flow)
+        if errors:
+            raise ValueError("Validation failed:\n- " + "\n- ".join(errors))
+
+        return flow
