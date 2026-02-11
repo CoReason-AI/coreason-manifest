@@ -1,15 +1,12 @@
 import html
 from typing import Any
 
-from coreason_manifest.spec.core.flow import LinearFlow, GraphFlow, Graph
+from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import (
-    AgentNode,
-    SwitchNode,
-    PlannerNode,
-    HumanNode,
-    Placeholder,
     Node,
+    SwitchNode,
 )
+
 
 def _escape_id(node_id: str) -> str:
     """Escapes the node ID for Mermaid compatibility."""
@@ -19,9 +16,11 @@ def _escape_id(node_id: str) -> str:
         return f'"{node_id}"'
     return node_id
 
+
 def _escape_label(text: str) -> str:
     """Escapes text for use in Mermaid labels."""
-    return html.escape(text).replace('"', '&quot;')
+    return html.escape(text).replace('"', "&quot;")
+
 
 def _render_node_def(node: Node) -> str:
     """Renders the node definition line for Mermaid."""
@@ -30,41 +29,39 @@ def _render_node_def(node: Node) -> str:
 
     if node.type == "agent":
         return f'{safe_id}["{label_id}<br/>(Agent)"]'
-    elif node.type == "switch":
+    if node.type == "switch":
         return f'{safe_id}{{"{label_id}<br/>(Switch)"}}'
-    elif node.type == "planner":
+    if node.type == "planner":
         return f'{safe_id}{{{{"{label_id}<br/>(Planner)"}}}}'
-    elif node.type == "human":
+    if node.type == "human":
         return f'{safe_id}[/"{label_id}<br/>(Human)"/]'
-    elif node.type == "placeholder":
+    if node.type == "placeholder":
         return f'{safe_id}("{label_id}<br/>(Placeholder)")'
-    else:
-        # Fallback for unknown types
-        return f'{safe_id}["{label_id}<br/>({node.type})"]'
+    # Fallback for unknown types
+    return f'{safe_id}["{label_id}<br/>({node.type})"]'
+
 
 def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
     """Generates valid Mermaid.js diagram code."""
-    lines = []
+    lines: list[str] = []
 
     if isinstance(flow, LinearFlow):
         lines.append("graph TD")
 
         # Render nodes
-        for node in flow.sequence:
-            lines.append(f"    {_render_node_def(node)}")
+        lines.extend(f"    {_render_node_def(node)}" for node in flow.sequence)
 
         # Render implicit edges
         for i in range(len(flow.sequence) - 1):
             source = flow.sequence[i]
-            target = flow.sequence[i+1]
+            target = flow.sequence[i + 1]
             lines.append(f"    {_escape_id(source.id)} --> {_escape_id(target.id)}")
 
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
 
         # Render nodes from flow.graph.nodes
-        for node in flow.graph.nodes.values():
-            lines.append(f"    {_render_node_def(node)}")
+        lines.extend(f"    {_render_node_def(node)}" for node in flow.graph.nodes.values())
 
         # Render edges
         for edge in flow.graph.edges:
@@ -85,8 +82,8 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
                             break
                     # If not found in cases, check if it's default?
                     # The prompt didn't explicitly ask for default handling but it's good practice.
-                    # However, sticking to prompt: "If the edge comes from a SwitchNode, try to match the Edge.target against the node's cases to find the condition string if Edge.condition is missing."
-                    pass
+                    # However, sticking to prompt: "If the edge comes from a SwitchNode, try to match the
+                    # Edge.target against the node's cases to find the condition string if Edge.condition is missing."
 
             lines.append(f"    {source_id} -->{label} {target_id}")
 
@@ -100,7 +97,7 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
     switch_ids = []
     human_ids = []
 
-    nodes_iter = []
+    nodes_iter: list[Any] = []
     if isinstance(flow, LinearFlow):
         nodes_iter = flow.sequence
     elif isinstance(flow, GraphFlow):

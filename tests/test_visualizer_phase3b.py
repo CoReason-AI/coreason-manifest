@@ -1,26 +1,26 @@
-import pytest
+from typing import Any
+
 from coreason_manifest.spec.core.flow import (
-    LinearFlow,
-    GraphFlow,
-    FlowMetadata,
-    Graph,
     Edge,
     FlowInterface,
-    Blackboard,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    SwitchNode,
-    PlannerNode,
-    HumanNode,
-    Placeholder,
     Brain,
+    HumanNode,
+    Node,
+    Placeholder,
+    PlannerNode,
+    SwitchNode,
 )
-from coreason_manifest.spec.core.engines import ReasoningEngine, Reflex, Optimizer
-from coreason_manifest.utils.visualizer import to_mermaid, _render_node_def
-from coreason_manifest.spec.core.nodes import Node
+from coreason_manifest.utils.visualizer import _render_node_def, to_mermaid
 
-def _get_metadata():
+
+def _get_metadata() -> FlowMetadata:
     return FlowMetadata(
         name="Test Flow",
         version="1.0.0",
@@ -28,7 +28,8 @@ def _get_metadata():
         tags=["test"],
     )
 
-def _get_agent_node(node_id: str):
+
+def _get_agent_node(node_id: str) -> AgentNode:
     return AgentNode(
         id=node_id,
         metadata={},
@@ -42,7 +43,8 @@ def _get_agent_node(node_id: str):
         tools=[],
     )
 
-def _get_switch_node(node_id: str, cases: dict[str, str], default: str):
+
+def _get_switch_node(node_id: str, cases: dict[str, str], default: str) -> SwitchNode:
     return SwitchNode(
         id=node_id,
         metadata={},
@@ -52,7 +54,8 @@ def _get_switch_node(node_id: str, cases: dict[str, str], default: str):
         default=default,
     )
 
-def _get_human_node(node_id: str):
+
+def _get_human_node(node_id: str) -> HumanNode:
     return HumanNode(
         id=node_id,
         metadata={},
@@ -61,7 +64,8 @@ def _get_human_node(node_id: str):
         timeout_seconds=3600,
     )
 
-def _get_planner_node(node_id: str):
+
+def _get_planner_node(node_id: str) -> PlannerNode:
     return PlannerNode(
         id=node_id,
         metadata={},
@@ -71,7 +75,8 @@ def _get_planner_node(node_id: str):
         output_schema={"type": "object"},
     )
 
-def _get_placeholder_node(node_id: str):
+
+def _get_placeholder_node(node_id: str) -> Placeholder:
     return Placeholder(
         id=node_id,
         metadata={},
@@ -79,8 +84,9 @@ def _get_placeholder_node(node_id: str):
         required_capabilities=["coding"],
     )
 
-def test_linear_flow_to_mermaid():
-    nodes = [
+
+def test_linear_flow_to_mermaid() -> None:
+    nodes: list[Any] = [
         _get_agent_node("start"),
         _get_human_node("review"),
         _get_planner_node("plan"),
@@ -111,13 +117,12 @@ def test_linear_flow_to_mermaid():
     assert "classDef human" in mermaid_code
     assert "class review human;" in mermaid_code
 
-def test_graph_flow_to_mermaid():
-    nodes = {
+
+def test_graph_flow_to_mermaid() -> None:
+    nodes: dict[str, Any] = {
         "start": _get_agent_node("start"),
         "decision": _get_switch_node(
-            "decision",
-            cases={"success": "end", "retry": "start"},
-            default="end"
+            "decision", cases={"success": "end", "retry": "start"}, default="end"
         ),
         "end": _get_placeholder_node("end"),
     }
@@ -125,7 +130,7 @@ def test_graph_flow_to_mermaid():
     edges = [
         Edge(source="start", target="decision"),
         Edge(source="decision", target="end"),  # Case: success (implicit via switch logic)
-        Edge(source="decision", target="start"), # Case: retry (implicit via switch logic)
+        Edge(source="decision", target="start"),  # Case: retry (implicit via switch logic)
     ]
 
     graph = Graph(nodes=nodes, edges=edges)
@@ -148,15 +153,16 @@ def test_graph_flow_to_mermaid():
     # Check edges
     assert "start --> decision" in mermaid_code
     # Check switch logic labels
-    assert 'decision -->|success| end' in mermaid_code
-    assert 'decision -->|retry| start' in mermaid_code
+    assert "decision -->|success| end" in mermaid_code
+    assert "decision -->|retry| start" in mermaid_code
 
     # Check styling
     assert "classDef switch" in mermaid_code
     assert "class decision switch;" in mermaid_code
 
-def test_explicit_edge_labels():
-    nodes = {
+
+def test_explicit_edge_labels() -> None:
+    nodes: dict[str, Any] = {
         "A": _get_agent_node("A"),
         "B": _get_agent_node("B"),
     }
@@ -175,10 +181,11 @@ def test_explicit_edge_labels():
     mermaid_code = to_mermaid(flow)
     assert "A -->|explicit_cond| B" in mermaid_code
 
-def test_special_characters_escaping():
-    nodes = [
-        _get_agent_node("agent 1"), # Space in ID
-        _get_agent_node('agent"2"'), # Quote in ID
+
+def test_special_characters_escaping() -> None:
+    nodes: list[Any] = [
+        _get_agent_node("agent 1"),  # Space in ID
+        _get_agent_node('agent"2"'),  # Quote in ID
     ]
 
     flow = LinearFlow(
@@ -210,21 +217,18 @@ def test_special_characters_escaping():
     expected_id_1 = '"agent 1"'
     expected_id_2 = '"agent"2""'
 
-    assert f'{expected_id_1} --> {expected_id_2}' in mermaid_code
+    assert f"{expected_id_1} --> {expected_id_2}" in mermaid_code
 
-def test_unknown_node_type():
+
+def test_unknown_node_type() -> None:
     class CustomNode(Node):
         type: str = "custom"
 
-    node = CustomNode(
-        id="custom1",
-        metadata={},
-        supervision=None,
-        type="custom"
-    )
+    node = CustomNode(id="custom1", metadata={}, supervision=None, type="custom")
 
     result = _render_node_def(node)
     assert 'custom1["custom1<br/>(custom)"]' in result
+
 
 if __name__ == "__main__":
     test_linear_flow_to_mermaid()
