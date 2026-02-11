@@ -1,6 +1,14 @@
 from coreason_manifest.spec.core.engines import Optimizer, ReasoningEngine, Supervision
 from coreason_manifest.spec.core.flow import FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow, Step
-from coreason_manifest.spec.core.nodes import AgentBrain, AgentNode, HumanNode, Node, Placeholder, PlannerNode, SwitchNode
+from coreason_manifest.spec.core.nodes import (
+    AgentBrain,
+    AgentNode,
+    HumanNode,
+    Node,
+    Placeholder,
+    PlannerNode,
+    SwitchNode,
+)
 
 
 def test_engines_instantiation() -> None:
