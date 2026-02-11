@@ -31,9 +31,7 @@ def create_agent_node(node_id: str, tools: list[str]) -> AgentNode:
     )
 
 
-def create_switch_node(
-    node_id: str, variable: str, cases: dict[str, str], default: str
-) -> SwitchNode:
+def create_switch_node(node_id: str, variable: str, cases: dict[str, str], default: str) -> SwitchNode:
     return SwitchNode(
         id=node_id,
         metadata={},
@@ -124,10 +122,7 @@ def test_validate_missing_tool() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
-    assert (
-        "Agent 'agent1' requires tool 'tool1' but it is not provided by any ToolPack."
-        in errors
-    )
+    assert "Agent 'agent1' requires tool 'tool1' but it is not provided by any ToolPack." in errors
 
 
 def test_validate_governance_sanity() -> None:

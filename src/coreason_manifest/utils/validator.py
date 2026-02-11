@@ -66,16 +66,10 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     # 6. Governance Sanity Check
     if flow.governance:
         # rate_limit_rpm: int | None
-        if (
-            flow.governance.rate_limit_rpm is not None
-            and flow.governance.rate_limit_rpm < 0
-        ):
+        if flow.governance.rate_limit_rpm is not None and flow.governance.rate_limit_rpm < 0:
             errors.append("Governance rate_limit_rpm must be non-negative.")
         # cost_limit_usd: float | None
-        if (
-            flow.governance.cost_limit_usd is not None
-            and flow.governance.cost_limit_usd < 0
-        ):
+        if flow.governance.cost_limit_usd is not None and flow.governance.cost_limit_usd < 0:
             errors.append("Governance cost_limit_usd must be non-negative.")
 
     return errors
