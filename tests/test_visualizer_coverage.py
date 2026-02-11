@@ -1,4 +1,3 @@
-
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
