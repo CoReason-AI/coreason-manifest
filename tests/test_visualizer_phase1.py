@@ -168,6 +168,8 @@ def test_visualizer() -> None:
     assert _get_state_class(NodeState.PENDING) is None
     # Test RETRYING state
     assert _get_state_class(NodeState.RETRYING) == "retrying"
+    # Test SKIPPED state (Fix for coverage gap)
+    assert _get_state_class(NodeState.SKIPPED) == "skipped"
 
     # Test unknown node type
     class CustomNode(Node):
