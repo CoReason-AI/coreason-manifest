@@ -46,12 +46,12 @@ jobs:
           restore-keys: |
             v1-${{ runner.os }}-python-${{ matrix.python-version }}-
 
-      - name: Install Poetry
-        run: pipx install poetry
+      - name: Install uv
+        run: pip install uv
         shell: bash
 
       - name: Install dependencies
-        run: poetry install --with dev
+        run: uv sync --frozen
         shell: bash
 
       - name: Run tests
@@ -61,7 +61,7 @@ jobs:
           PGUSER: ${{ secrets.DB_POSTGRES_TEST_USERNAME}}
           PGPASSWORD: ${{ secrets.DB_POSTGRES_TEST_PASSWORD}}
           PGDATABASE: ${{ secrets.DB_POSTGRES_TEST_PATIENT_SYNTHETIC_DATA}}
-        run: poetry run pytest --cov=src --cov-report=xml
+        run: uv run pytest --cov=src --cov-report=xml
         shell: bash
 
       - name: Upload coverage to Codecov
@@ -90,16 +90,16 @@ jobs:
           restore-keys: |
             v1-${{ runner.os }}-python-3.12-
 
-      - name: Install Poetry
-        run: pipx install poetry
+      - name: Install uv
+        run: pip install uv
         shell: bash
 
       - name: Install dependencies
-        run: poetry install --with dev
+        run: uv sync --frozen
         shell: bash
 
       - name: Build documentation
-        run: poetry run mkdocs build --strict
+        run: uv run mkdocs build --strict
         shell: bash
 
   build-package:
