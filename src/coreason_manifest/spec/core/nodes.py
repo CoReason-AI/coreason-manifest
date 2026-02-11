@@ -88,6 +88,8 @@ class HumanNode(Node):
     type: Literal["human"] = "human"
     prompt: str
     timeout_seconds: int
+    input_schema: dict[str, Any] | None = Field(None, description="JSON Schema for data entry.")
+    options: list[str] | None = Field(None, description="List of decision buttons (e.g. ['Approve', 'Reject']).")
 
 
 class Placeholder(Node):

@@ -203,3 +203,38 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         ValueError, match="Supervision Error: Node 'node2' fallback points to missing ID 'missing_sup_node'"
     ):
         lf2.build()
+
+def test_human_node_options_and_visualizer() -> None:
+    from coreason_manifest.spec.core.nodes import HumanNode
+    from coreason_manifest.utils.visualizer import to_mermaid
+
+    # Test HumanNode instantiation with options
+    human = HumanNode(
+        id="human_decision",
+        metadata={},
+        supervision=None,
+        prompt="Approve or Reject?",
+        timeout_seconds=600,
+        options=["Approve", "Reject"],
+        input_schema={"type": "object", "properties": {"reason": {"type": "string"}}}
+    )
+
+    assert human.options == ["Approve", "Reject"]
+    assert human.input_schema is not None
+
+    # Test Visualizer rendering
+    lf = NewLinearFlow(name="Human Flow")
+    lf.add_step(human)
+    flow = lf.build()
+
+    mermaid_code = to_mermaid(flow)
+
+    # Check if options are present in the mermaid code
+    assert "[Approve, Reject]" in mermaid_code
+    assert "(Human)" in mermaid_code
+    assert "human_decision" in mermaid_code
+
+def test_circuit_breaker_export() -> None:
+    # Test that CircuitBreaker is exported from spec.core
+    from coreason_manifest.spec.core import CircuitBreaker
+    assert CircuitBreaker is not None
