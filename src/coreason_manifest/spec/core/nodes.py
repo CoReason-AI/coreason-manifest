@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -16,7 +16,7 @@ class Node(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     id: str
-    metadata: dict[str, str]
+    metadata: dict[str, Any]
     supervision: Supervision | None
     type: str  # Base type field
 

@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,8 +33,8 @@ class FlowInterface(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    inputs: dict[str, str]
-    outputs: dict[str, str]
+    inputs: dict[str, Any]
+    outputs: dict[str, Any]
 
 
 class VariableDef(BaseModel):
