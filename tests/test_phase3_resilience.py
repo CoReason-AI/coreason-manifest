@@ -204,6 +204,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     ):
         lf2.build()
 
+
 def test_human_node_options_and_visualizer() -> None:
     from coreason_manifest.spec.core.nodes import HumanNode
     from coreason_manifest.utils.visualizer import to_mermaid
@@ -216,7 +217,7 @@ def test_human_node_options_and_visualizer() -> None:
         prompt="Approve or Reject?",
         timeout_seconds=600,
         options=["Approve", "Reject"],
-        input_schema={"type": "object", "properties": {"reason": {"type": "string"}}}
+        input_schema={"type": "object", "properties": {"reason": {"type": "string"}}},
     )
 
     assert human.options == ["Approve", "Reject"]
@@ -234,7 +235,9 @@ def test_human_node_options_and_visualizer() -> None:
     assert "(Human)" in mermaid_code
     assert "human_decision" in mermaid_code
 
+
 def test_circuit_breaker_export() -> None:
     # Test that CircuitBreaker is exported from spec.core
     from coreason_manifest.spec.core import CircuitBreaker
+
     assert CircuitBreaker is not None
