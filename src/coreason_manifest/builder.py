@@ -10,6 +10,7 @@
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 
+
 class AgentBuilder:
     """Builder for creating Agent manifests programmatically.
 

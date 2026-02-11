@@ -29,14 +29,10 @@ def test_core_kernel_instantiation() -> None:
     reasoning = ReasoningEngine(model="gpt-4", thoughts_max=5, min_confidence=0.9)
     reflex = Reflex(model="gpt-3.5", timeout_ms=1000, caching=True)
     supervision = Supervision(strategy="restart", max_retries=3, fallback=None)
-    optimizer = Optimizer(
-        teacher_model="gpt-4", metric="accuracy", max_demonstrations=3
-    )
+    optimizer = Optimizer(teacher_model="gpt-4", metric="accuracy", max_demonstrations=3)
 
     # Test Nodes
-    brain = Brain(
-        role="assistant", persona="helpful", reasoning=reasoning, reflex=reflex
-    )
+    brain = Brain(role="assistant", persona="helpful", reasoning=reasoning, reflex=reflex)
     agent_node = AgentNode(
         id="agent-1",
         metadata={"foo": "bar", "priority": 1},
@@ -80,12 +76,8 @@ def test_core_kernel_instantiation() -> None:
     )
 
     # Test Flow
-    metadata = FlowMetadata(
-        name="test-flow", version="1.0", description="test", tags=["test"]
-    )
-    interface = FlowInterface(
-        inputs={"q": {"type": "string"}}, outputs={"a": {"type": "string"}}
-    )
+    metadata = FlowMetadata(name="test-flow", version="1.0", description="test", tags=["test"])
+    interface = FlowInterface(inputs={"q": {"type": "string"}}, outputs={"a": {"type": "string"}})
     variable_def = VariableDef(type="string", description="User context")
     blackboard = Blackboard(variables={"context": variable_def}, persistence=False)
     edge = Edge(source="agent-1", target="switch-1")
