@@ -7,28 +7,27 @@
 **Status:** Immutable Constitution
 **Scope:** All Naming, Design, and Structural Decisions.
 
-## **1. Principle of "Topological Determinism"**
+## **1. Philosophy of Topological Determinism**
 
-* **The Philosophy:** We do not use generic names like "Manifest" or "Recipe" because they obscure the *shape* of the execution.
-* **The Rule:** Names must describe the topology of the control flow.
-    * If a structure is a deterministic, sequential list, the name must imply **Linearity** and **Order** (e.g., "Sequence", "Flow", "Line").
-    * If a structure supports cycles, loops, or non-deterministic jumps, the name must imply **Graph Theory** and **Network Structure** (e.g., "Graph", "Circuit", "Net").
-* **The Test:** Can I draw the shape of the architecture just by reading the class name?
+* **The Philosophy:** We abandon generic names like "Manifest" or "Recipe" because they obscure the runtime behavior. We adopt names that describe the control flow topology.
+* **The Rule:** "If it is a list, name it a Sequence/Flow. If it loops, name it a Graph."
+    * A deterministic script must be a `Sequence` or `LinearFlow`.
+    * A cyclic, non-deterministic structure must be a `Graph` or `GraphFlow`.
 
-## **2. Principle of "SOTA Engineering Standards"**
+## **2. Functional Over Abstract Naming**
 
-* **The Philosophy:** We reject "Internal Lore" (e.g., Project Code Names) and "Academic Abstractions" in favor of industry-standard engineering terminology.
-* **The Rule:** Use terms found in State-of-the-Art (SOTA) systems engineering.
-    * *Avoid:* "Weaver", "Maco", "Episteme" (Requires a dictionary).
-    * *Prefer:* "Assembler", "Supervisor", "Reasoning" (Self-explanatory).
-* **Guideline:** If the term exists in Kubernetes, Erlang/Elixir, or DSPy to describe the same behavior, use that term.
+* **The Philosophy:** Components must be named after their mechanical function, not an abstract concept.
+* **The Rule:** "Use functional component names (`Switch`, `Reflex`) over abstract names (`Router`, `Cortex`)."
+    * *Switch:* Routes traffic based on conditions (visual metaphor).
+    * *Reflex:* Fast, automatic response (biological metaphor).
 
-## **3. Principle of "WYSIWYG Components"**
+## **3. SOTA Engineering Standards**
 
-* **The Philosophy:** A component's name must reveal its active behavior, not its passive configuration.
-* **The Rule:** Rename components based on what they *do* to the data.
-    * *Example:* If a node routes traffic based on a variable, name it after the physical mechanism that does that (e.g., a "Switch"), not the network abstract (a "Router").
-    * *Example:* If a component stores shared state, name it after the architectural pattern (e.g., "Blackboard"), not the data type ("StateDef").
+* **The Philosophy:** We reject internal project code names in favor of industry-standard terms from Erlang, DSPy, and Multi-Agent Systems.
+* **The Rule:** "Use SOTA engineering terms (`Supervision`, `Blackboard`) over internal project names (`Maco`, `State`)."
+    * *Supervision:* Active lifecycle management (Actor Model).
+    * *Blackboard:* Shared, observable memory (Multi-Agent Systems).
+    * *Optimizer:* Self-improvement/compilation (DSPy).
 
 # **PRIMARY DIRECTIVE: THE SHARED KERNEL PROTOCOL**
 
