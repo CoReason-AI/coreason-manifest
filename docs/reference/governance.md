@@ -1,30 +1,37 @@
 # Governance
 
 ## Overview
-This module defines the policies for static validation and runtime auditing, ensuring that [agents](../reference/agents.md) and tools comply with security and safety standards.
+This module defines the policies and constraints for agents, flows, and tools.
 
-## Application Pattern
-This example shows how to configure a [GovernanceConfig][coreason_manifest.spec.governance.GovernanceConfig] that enforces strict risk levels and blocks the use of "Critical" tools without authentication.
+## Example
 
 ```python
-# Example: Creating a Governance Configuration
-from coreason_manifest.spec.governance import GovernanceConfig, ToolRiskLevel
+from coreason_manifest.spec.core.governance import Governance, Safety, Audit
 
-# Define a policy that blocks critical tools and restricts domains
-policy = GovernanceConfig(
-    allowed_domains=["api.github.com", "slack.com"],
-    max_risk_level=ToolRiskLevel.STANDARD,
-    require_auth_for_critical_tools=True,
-    allow_inline_tools=False,
-    strict_url_validation=True
+safety_policy = Safety(
+    input_filtering=True,
+    pii_redaction=True,
+    content_safety="high"
 )
 
-# If an agent attempts to use a tool with Risk Level 'CRITICAL',
-# this policy will cause a validation error during the manifest check.
+audit_policy = Audit(
+    trace_retention_days=90,
+    log_payloads=False
+)
+
+gov = Governance(
+    rate_limit_rpm=60,
+    timeout_seconds=300,
+    cost_limit_usd=1.0,
+    safety=safety_policy,
+    audit=audit_policy
+)
 ```
 
 ## API Reference
 
-::: coreason_manifest.spec.governance.GovernanceConfig
+::: coreason_manifest.spec.core.governance.Governance
 
-::: coreason_manifest.spec.governance.ComplianceReport
+::: coreason_manifest.spec.core.governance.Safety
+
+::: coreason_manifest.spec.core.governance.Audit

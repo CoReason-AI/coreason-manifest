@@ -1,62 +1,57 @@
 # Agent Definitions
 
 ## Overview
-This module defines the core structure of an AI Agent, including its persona, goals, [tools][coreason_manifest.spec.v2.definitions.ToolRequirement], and knowledge sources. Agents can also be configured with specific [capabilities](../reference/capabilities.md).
+This module defines the core structure of an AI Agent, including its persona, goals, tools, and knowledge sources. Agents can also be configured with specific capabilities.
 
 ## Application Pattern
-This example demonstrates the configuration of an [AgentDefinition][coreason_manifest.spec.v2.definitions.AgentDefinition] with specific [ModelProfile][coreason_manifest.spec.v2.resources.ModelProfile] constraints, ensuring the semantic requirements (e.g., context window size) are explicitly defined.
+This example demonstrates the configuration of an `AgentNode` with specific capabilities and constraints.
 
 ```python
 # Example: Defining a Support Agent with Semantic Model Constraints
-from coreason_manifest.spec.v2.definitions import AgentDefinition, ToolRequirement
-from coreason_manifest.spec.v2.resources import ModelProfile, ResourceConstraints, RateCard, PricingUnit
+from coreason_manifest.spec.core.nodes import AgentNode, Brain
+from coreason_manifest.spec.core.engines import ReasoningEngine, Reflex, Supervision
 
-support_agent = AgentDefinition(
-    id="customer-support-v1",
-    name="Support Bot",
+# Define the Cognitive Engine
+brain = Brain(
     role="Customer Service Representative",
-    goal="Resolve user inquiries efficiently and politely.",
-    backstory="You are a helpful assistant with 10 years of experience.",
-
-    # Semantic Model Definition
-    # Instead of just a string ID, we define the required capabilities
-    model="gpt-4-turbo",
-    resources=ModelProfile(
-        provider="openai",
-        model_id="gpt-4-turbo",
-        constraints=ResourceConstraints(
-            context_window_size=128000,
-            max_output_tokens=4096
-        ),
-        pricing=RateCard(
-            unit=PricingUnit.TOKEN_1M,
-            input_cost=10.00,
-            output_cost=30.00
-        )
+    persona="You are a helpful assistant with 10 years of experience.",
+    reasoning=ReasoningEngine(
+        model="gpt-4-turbo",
+        thoughts_max=3,
+        min_confidence=0.8
     ),
+    reflex=Reflex(
+        model="gpt-3.5-turbo",
+        timeout_ms=500,
+        caching=True
+    )
+)
 
-    tools=[
-        ToolRequirement(
-            uri="mcp://zendesk/ticket-search",
-            hash="sha256:..."
-        )
-    ],
-    knowledge=["s3://company-docs/faq.pdf"]
+# Define the Agent Node
+support_agent = AgentNode(
+    type="agent",
+    id="customer-support-v1",
+    metadata={"version": "1.0"},
+    brain=brain,
+    tools=["zendesk-search"],
+    supervision=Supervision(
+        strategy="restart",
+        max_retries=3,
+        fallback="escalate-to-human"
+    )
 )
 ```
 
 ## API Reference
 
-::: coreason_manifest.spec.v2.definitions.AgentDefinition
+::: coreason_manifest.spec.core.nodes.AgentNode
 
-::: coreason_manifest.spec.v2.definitions.ToolRequirement
+::: coreason_manifest.spec.core.nodes.Brain
 
-### Resources
+### Engines
 
-::: coreason_manifest.spec.v2.resources.ModelProfile
+::: coreason_manifest.spec.core.engines.ReasoningEngine
 
-::: coreason_manifest.spec.v2.resources.ResourceConstraints
+::: coreason_manifest.spec.core.engines.Reflex
 
-::: coreason_manifest.spec.v2.resources.RateCard
-
-::: coreason_manifest.spec.v2.resources.PricingUnit
+::: coreason_manifest.spec.core.engines.Supervision

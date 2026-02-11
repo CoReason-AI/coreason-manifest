@@ -1,22 +1,30 @@
-# Agent Capabilities
+# Tool Packs
 
 ## Overview
-This module defines the feature flags and architectural capabilities of an agent, such as history support and delivery mode.
+This module defines `ToolPack` bundles for organizing and distributing tools.
 
-## Application Pattern
-This example shows how to configure an agent's capabilities to support server-sent events (streaming) and disable history for a stateless micro-agent.
+## Example
 
 ```python
-# Example: Configuring Agent Capabilities
-from coreason_manifest.spec.common.capabilities import AgentCapabilities, DeliveryMode, CapabilityType
+from coreason_manifest.spec.core.tools import ToolPack, Dependency
 
-capabilities = AgentCapabilities(
-    type=CapabilityType.ATOMIC,
-    delivery_mode=DeliveryMode.SERVER_SENT_EVENTS,
-    history_support=False
+pandas_dep = Dependency(
+    name="pandas",
+    version="2.0.0",
+    manager="pip"
+)
+
+finance_pack = ToolPack(
+    kind="ToolPack",
+    namespace="coreason.tools.finance",
+    tools=["calculate_roi", "fetch_ticker"],
+    dependencies=[pandas_dep],
+    env_vars=["ALPHA_VANTAGE_KEY"]
 )
 ```
 
 ## API Reference
 
-::: coreason_manifest.spec.common.capabilities.AgentCapabilities
+::: coreason_manifest.spec.core.tools.ToolPack
+
+::: coreason_manifest.spec.core.tools.Dependency
