@@ -18,7 +18,6 @@ import pytest
 from _pytest.capture import CaptureFixture
 
 from coreason_manifest.cli import main
-from coreason_manifest.spec.common.error import AgentDefinitionError, InvalidReferenceError
 from coreason_manifest.spec.v2.definitions import (
     AgentDefinition,
     AgentStep,
@@ -51,10 +50,10 @@ agent = AgentBuilder(name="PathTest").build()
 """)
 
     # Load it
-    load_agent_from_ref(f"{p}:agent")
+    load_agent_from_ref(f"{p}:agent", allowed_root_dir=edge_case_dir)
 
-    # Check if directory is in sys.path
-    assert str(edge_case_dir) in sys.path
+    # Check if directory is NOT in sys.path (cleaned up)
+    assert str(edge_case_dir) not in sys.path
 
 
 def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
@@ -62,8 +61,8 @@ def test_loader_non_agent_variable(edge_case_dir: Path) -> None:
     p = edge_case_dir / "string_var.py"
     p.write_text("agent = 'I am just a string'")
 
-    with pytest.raises(AgentDefinitionError, match="is not a ManifestV2"):
-        load_agent_from_ref(f"{p}:agent")
+    with pytest.raises(ValueError, match="is not a ManifestV2"):
+        load_agent_from_ref(f"{p}:agent", allowed_root_dir=edge_case_dir)
 
 
 def test_loader_syntax_error(edge_case_dir: Path) -> None:
@@ -71,8 +70,8 @@ def test_loader_syntax_error(edge_case_dir: Path) -> None:
     p = edge_case_dir / "syntax_error.py"
     p.write_text("def broken_func(:\n    pass")
 
-    with pytest.raises(AgentDefinitionError, match="Failed to import module"):
-        load_agent_from_ref(f"{p}:broken_func")
+    with pytest.raises(ValueError, match="Error loading module"):
+        load_agent_from_ref(f"{p}:broken_func", allowed_root_dir=edge_case_dir)
 
 
 def test_loader_strict_splitting() -> None:
@@ -91,25 +90,32 @@ def test_loader_strict_splitting() -> None:
         contextlib.suppress(Exception),
     ):  # We expect it to fail later, but check split
         # Just checking if it crashes on split
-        load_agent_from_ref(ref)
+        # Use allowed_root_dir="/" to permit absolute path check during split test
+        load_agent_from_ref(ref, allowed_root_dir="/")
 
     # 2. Windows path with drive letter AND variable
     # ref = "C:\\path\\to\\file.py:var"
     # rsplit(":", 1) -> "C:\\path\\to\\file.py", "var" - OK
-    ref_win = r"C:\path\to\file.py:var"
+    # Use current drive letter if on Windows to ensure path resolution works across drives if needed
+    drive = Path.cwd().drive or "C:"
+    ref_win = f"{drive}\\path\\to\\file.py:var"
 
     with (
         patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.stat") as mock_stat,
         patch("importlib.util.spec_from_file_location") as mock_spec_load,
     ):
+        mock_stat.return_value.st_mode = 0o644
+        # Calculate allowed root dynamically to handle cross-platform behavior
+        mock_root = Path(f"{drive}\\path\\to\\file.py").resolve().parent
         with contextlib.suppress(Exception):
-            load_agent_from_ref(ref_win)
+            load_agent_from_ref(ref_win, allowed_root_dir=mock_root)
 
-        # Verify it resolved the correct path part (C:\path\to\file.py)
-        # Note: On linux, Path("C:\...") might resolve oddly, but it should contain the path part
+        # Verify it resolved the correct path part
+        assert mock_spec_load.called, "importlib.util.spec_from_file_location was not called"
         args, _ = mock_spec_load.call_args
         # The path passed to spec_from_file_location should be the first part of split
-        assert str(args[1]) == str(Path(r"C:\path\to\file.py").resolve())
+        assert str(args[1]) == str(Path(f"{drive}\\path\\to\\file.py").resolve())
 
     # 3. Path WITHOUT variable (should fail)
     # ref = "C:\\path\\to\\file.py"
@@ -121,7 +127,7 @@ def test_loader_strict_splitting() -> None:
     # The requirement is strict format `path/to/file.py:variable_name`.
 
     ref_invalid = "/path/to/file.py"
-    with pytest.raises(InvalidReferenceError, match="Invalid reference format"):
+    with pytest.raises(ValueError, match="Invalid reference format"):
         load_agent_from_ref(ref_invalid)
 
 
@@ -174,8 +180,8 @@ def test_loader_cyclic_import_simulation(edge_case_dir: Path) -> None:
 raise RecursionError("Cyclic import detected")
 """)
 
-    with pytest.raises(AgentDefinitionError, match="Error loading module"):
-        load_agent_from_ref(f"{p}:agent")
+    with pytest.raises(ValueError, match="Error loading module"):
+        load_agent_from_ref(f"{p}:agent", allowed_root_dir=edge_case_dir)
 
 
 def test_cli_inspect_complex(complex_workflow_agent: ManifestV2, capsys: CaptureFixture[str]) -> None:
