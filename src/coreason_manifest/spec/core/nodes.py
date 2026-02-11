@@ -8,9 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Dict, Optional
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field
 
 from coreason_manifest.spec.common_base import ManifestBaseModel
 from coreason_manifest.spec.core.engines import Optimizer, ReasoningEngine, Reflex, Supervision
@@ -22,8 +21,8 @@ class Node(ManifestBaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     id: str
-    metadata: Dict[str, str] = {}
-    supervision: Optional[Supervision] = None
+    metadata: dict[str, str] = Field(default_factory=dict)
+    supervision: Supervision | None = None
 
 
 class AgentBrain(ManifestBaseModel):
@@ -32,8 +31,8 @@ class AgentBrain(ManifestBaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     role: str
-    reasoning: Optional[ReasoningEngine] = None
-    reflex: Optional[Reflex] = None
+    reasoning: ReasoningEngine | None = None
+    reflex: Reflex | None = None
 
 
 class AgentNode(Node):
@@ -50,8 +49,8 @@ class SwitchNode(Node):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     variable: str
-    cases: Dict[str, str]
-    default: Optional[str] = None
+    cases: dict[str, str]
+    default: str | None = None
 
 
 class PlannerNode(Node):

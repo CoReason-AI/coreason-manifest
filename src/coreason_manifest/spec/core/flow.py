@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
 from pydantic import ConfigDict
 
@@ -23,7 +23,7 @@ class FlowMetadata(ManifestBaseModel):
 
     name: str
     version: str
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class FlowInterface(ManifestBaseModel):
@@ -31,8 +31,8 @@ class FlowInterface(ManifestBaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    inputs: Dict[str, str]
-    outputs: Dict[str, str]
+    inputs: dict[str, str]
+    outputs: dict[str, str]
 
 
 class Blackboard(ManifestBaseModel):
@@ -40,7 +40,7 @@ class Blackboard(ManifestBaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    schema_definition: Dict[str, str]
+    schema_definition: dict[str, str]
 
 
 class Step(ManifestBaseModel):
@@ -59,7 +59,7 @@ class LinearFlow(ManifestBaseModel):
     kind: Literal["LinearFlow"]
     metadata: FlowMetadata
     interface: FlowInterface
-    sequence: List[Step]
+    sequence: list[Step]
 
 
 class Graph(ManifestBaseModel):
@@ -67,8 +67,8 @@ class Graph(ManifestBaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    nodes: List[Node]
-    edges: List[Dict[str, str]]
+    nodes: list[Node]
+    edges: list[dict[str, str]]
 
 
 class GraphFlow(ManifestBaseModel):
@@ -80,4 +80,4 @@ class GraphFlow(ManifestBaseModel):
     metadata: FlowMetadata
     interface: FlowInterface
     graph: Graph
-    blackboard: Optional[Blackboard] = None
+    blackboard: Blackboard | None = None
