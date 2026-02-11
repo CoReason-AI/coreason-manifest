@@ -128,7 +128,7 @@ def to_mermaid(flow: LinearFlow | GraphFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;")
     lines.append("    classDef switch fill:#ffcc00,stroke:#333,stroke-width:2px;")
     lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
-    lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;") # Phase 2
+    lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")  # Phase 2
 
     # Runtime States (Phase 1)
     lines.append("    classDef running fill:#fcf3cf,stroke:#f1c40f,stroke-width:3px,stroke-dasharray: 5 5;")
