@@ -10,6 +10,7 @@
 
 import argparse
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
 from coreason_manifest.utils.loader import load_flow_from_file
 from coreason_manifest.utils.validator import validate_flow
@@ -18,8 +19,13 @@ from coreason_manifest.utils.visualizer import to_mermaid
 
 def main() -> int:
     """Entry point for the coreason CLI."""
+    try:
+        pkg_version = version("coreason_manifest")
+    except PackageNotFoundError:
+        pkg_version = "unknown"
+
     parser = argparse.ArgumentParser(prog="coreason", description="CoReason Manifest CLI")
-    parser.add_argument("--version", action="version", version="%(prog)s 0.25.0")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {pkg_version}")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
