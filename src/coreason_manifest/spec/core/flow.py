@@ -1,4 +1,4 @@
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,7 +12,7 @@ from coreason_manifest.spec.core.nodes import (
 
 # Polymorphic Node Type
 AnyNode = Annotated[
-    Union[AgentNode, SwitchNode, PlannerNode, HumanNode, Placeholder],
+    AgentNode | SwitchNode | PlannerNode | HumanNode | Placeholder,
     Field(discriminator="type"),
 ]
 
