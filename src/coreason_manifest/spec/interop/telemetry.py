@@ -45,6 +45,4 @@ class ExecutionSnapshot(BaseModel):
     node_states: dict[str, NodeState] = Field(
         default_factory=dict, description="Map of node IDs to their current state."
     )
-    active_path: list[str] = Field(
-        default_factory=list, description="Ordered list of visited node IDs."
-    )
+    active_path: list[str] = Field(default_factory=list, description="Ordered list of visited node IDs.")

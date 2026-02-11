@@ -152,7 +152,7 @@ def test_visualizer() -> None:
     assert ":::failed" in mermaid_graph
     assert ":::retrying" in mermaid_graph
     assert "classDef retrying" in mermaid_graph
-    assert "stroke-dasharray: 5 5" in mermaid_graph # Check pulse effect
+    assert "stroke-dasharray: 5 5" in mermaid_graph  # Check pulse effect
 
     print("GraphFlow OK.")
 
