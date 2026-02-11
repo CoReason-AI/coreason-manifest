@@ -11,7 +11,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     Semantically validate a Flow (Linear or Graph).
     Returns a list of error strings. Empty list implies validity.
     """
-    errors = []
+    errors: list[str] = []
 
     # 1. Common Checks
     if flow.governance:
@@ -53,7 +53,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
 
 def _validate_governance(gov: Governance) -> list[str]:
-    errors = []
+    errors: list[str] = []
     if gov.rate_limit_rpm is not None and gov.rate_limit_rpm < 0:
         errors.append("Governance Error: rate_limit_rpm cannot be negative.")
     if gov.cost_limit_usd is not None and gov.cost_limit_usd < 0:
@@ -62,7 +62,7 @@ def _validate_governance(gov: Governance) -> list[str]:
 
 
 def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[str]:
-    errors = []
+    errors: list[str] = []
     available_tools = {t for pack in packs for t in pack.tools}
 
     for node in nodes:
@@ -84,7 +84,7 @@ def _validate_linear_integrity(flow: LinearFlow) -> list[str]:
 
 def _validate_unique_ids(nodes: list[AnyNode]) -> list[str]:
     seen = set()
-    errors = []
+    errors: list[str] = []
     for node in nodes:
         if node.id in seen:
             errors.append(f"ID Collision Error: Duplicate Node ID '{node.id}' found.")
@@ -93,7 +93,7 @@ def _validate_unique_ids(nodes: list[AnyNode]) -> list[str]:
 
 
 def _validate_graph_integrity(graph: Graph) -> list[str]:
-    errors = []
+    errors: list[str] = []
     valid_ids = set(graph.nodes.keys())
 
     # Check 1: Key/ID Integrity
@@ -112,21 +112,19 @@ def _validate_graph_integrity(graph: Graph) -> list[str]:
 
 
 def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[str]:
-    errors = []
+    errors: list[str] = []
     for node in nodes:
         if isinstance(node, SwitchNode):
             # Check Cases
             for condition, target_id in node.cases.items():
                 if target_id not in valid_ids:
                     errors.append(
-                        f"Broken Switch Error: Node '{node.id}' case '{condition}' "
-                        f"points to missing ID '{target_id}'."
+                        f"Broken Switch Error: Node '{node.id}' case '{condition}' points to missing ID '{target_id}'."
                     )
             # Check Default
             if node.default not in valid_ids:
                 errors.append(
-                    f"Broken Switch Error: Node '{node.id}' default route "
-                    f"points to missing ID '{node.default}'."
+                    f"Broken Switch Error: Node '{node.id}' default route points to missing ID '{node.default}'."
                 )
     return errors
 

@@ -189,6 +189,7 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
 
 def test_validate_flow_invalid_type() -> None:
     """Test that validate_flow handles unknown flow types gracefully."""
+
     class DummyFlow:
         governance = None
         tool_packs: ClassVar[list[Any]] = []
@@ -201,7 +202,7 @@ def test_validate_flow_invalid_type() -> None:
 def test_validate_duplicate_node_ids() -> None:
     """Test validation for duplicate node IDs."""
     agent1 = create_agent_node("agent1", [])
-    agent2 = create_agent_node("agent1", []) # Duplicate ID
+    agent2 = create_agent_node("agent1", [])  # Duplicate ID
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=create_metadata(),
@@ -250,10 +251,7 @@ def test_validate_orphan_nodes() -> None:
     node2 = create_agent_node("node2", [])
     node3 = create_agent_node("node3", [])
 
-    graph = Graph(
-        nodes={"node1": node1, "node2": node2, "node3": node3},
-        edges=[Edge(source="node1", target="node2")]
-    )
+    graph = Graph(nodes={"node1": node1, "node2": node2, "node3": node3}, edges=[Edge(source="node1", target="node2")])
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
