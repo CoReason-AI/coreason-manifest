@@ -25,6 +25,11 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
+from coreason_manifest.spec.core.governance import (
+    Audit,
+    Governance,
+    Safety,
+)
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     Brain,
@@ -34,15 +39,22 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.tools import (
+    Dependency,
+    ToolPack,
+)
 
 __all__ = [
     "AgentNode",
     "AnyNode",
+    "Audit",
     "Blackboard",
     "Brain",
+    "Dependency",
     "Edge",
     "FlowInterface",
     "FlowMetadata",
+    "Governance",
     "Graph",
     "GraphFlow",
     "HumanNode",
@@ -53,7 +65,9 @@ __all__ = [
     "PlannerNode",
     "ReasoningEngine",
     "Reflex",
+    "Safety",
     "Supervision",
     "SwitchNode",
+    "ToolPack",
     "VariableDef",
 ]

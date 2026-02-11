@@ -2,6 +2,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     HumanNode,
@@ -9,6 +10,7 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.tools import ToolPack
 
 # Polymorphic Node Type
 AnyNode = Annotated[
@@ -82,6 +84,8 @@ class LinearFlow(BaseModel):
     kind: Literal["LinearFlow"]
     metadata: FlowMetadata
     sequence: list[AnyNode]
+    governance: Governance | None = None
+    tool_packs: list[ToolPack] = Field(default_factory=list)
 
 
 class GraphFlow(BaseModel):
@@ -94,3 +98,5 @@ class GraphFlow(BaseModel):
     interface: FlowInterface
     blackboard: Blackboard | None
     graph: Graph
+    governance: Governance | None = None
+    tool_packs: list[ToolPack] = Field(default_factory=list)
