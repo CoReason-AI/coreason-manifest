@@ -45,8 +45,8 @@ def test_inspector_lifecycle_graph() -> None:
     expected_node_str = 'inspector_1{{"inspector-1<br/>(Inspector)"}}'
     assert expected_node_str in mermaid_code
 
-    # Check for class application
-    assert "class inspector_1 inspector;" in mermaid_code
+    # Check for class application - Updated for inline styling in Phase 1+2 merger
+    assert ":::inspector" in mermaid_code
 
 
 def test_inspector_lifecycle_linear() -> None:
