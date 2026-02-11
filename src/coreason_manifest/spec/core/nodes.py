@@ -53,6 +53,19 @@ class SwitchNode(Node):
     default: str
 
 
+class InspectorNode(Node):
+    """A node that evaluates a variable against criteria."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    type: Literal["inspector"] = "inspector"
+    target_variable: str
+    criteria: str
+    pass_threshold: float | None = None
+    output_variable: str
+    optimizer: Optimizer | None = None
+
+
 class PlannerNode(Node):
     """A node that dynamically plans/solves."""
 

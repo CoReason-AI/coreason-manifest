@@ -31,6 +31,8 @@ def _render_node_def(node: Node) -> str:
         return f'{safe_id}{{"{label_id}<br/>(Switch)"}}'
     if node.type == "planner":
         return f'{safe_id}{{{{"{label_id}<br/>(Planner)"}}}}'
+    if node.type == "inspector":
+        return f'{safe_id}{{{{"{label_id}<br/>(Inspector)"}}}}'
     if node.type == "human":
         return f'{safe_id}[/"{label_id}<br/>(Human)"/]'
     if node.type == "placeholder":
@@ -88,11 +90,13 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
     lines.append("    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;")
     lines.append("    classDef switch fill:#ffcc00,stroke:#333,stroke-width:2px;")
     lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
+    lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
 
     # Apply classes
     # We need to collect IDs for styling
     switch_ids = []
     human_ids = []
+    inspector_ids = []
 
     nodes_iter: list[Any] = []
     if isinstance(flow, LinearFlow):
@@ -105,10 +109,14 @@ def to_mermaid(flow: LinearFlow | GraphFlow) -> str:
             switch_ids.append(_safe_id(node.id))
         elif node.type == "human":
             human_ids.append(_safe_id(node.id))
+        elif node.type == "inspector":
+            inspector_ids.append(_safe_id(node.id))
 
     if switch_ids:
         lines.append(f"    class {','.join(switch_ids)} switch;")
     if human_ids:
         lines.append(f"    class {','.join(human_ids)} human;")
+    if inspector_ids:
+        lines.append(f"    class {','.join(inspector_ids)} inspector;")
 
     return "\n".join(lines)

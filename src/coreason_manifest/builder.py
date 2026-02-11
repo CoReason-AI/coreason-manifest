@@ -22,6 +22,7 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.nodes import InspectorNode
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
@@ -37,6 +38,24 @@ class NewLinearFlow:
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence."""
+        self.sequence.append(node)
+        return self
+
+    def add_inspector(
+        self, id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
+    ) -> "NewLinearFlow":
+        """Adds an inspector node to the sequence."""
+        node = InspectorNode(
+            id=id,
+            metadata={},
+            supervision=None,
+            target_variable=target,
+            criteria=criteria,
+            pass_threshold=pass_threshold,
+            output_variable=output,
+            optimizer=None,
+            type="inspector",
+        )
         self.sequence.append(node)
         return self
 
@@ -83,6 +102,24 @@ class NewGraphFlow:
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
         """Adds a node to the graph."""
+        self._nodes[node.id] = node
+        return self
+
+    def add_inspector(
+        self, id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
+    ) -> "NewGraphFlow":
+        """Adds an inspector node to the graph."""
+        node = InspectorNode(
+            id=id,
+            metadata={},
+            supervision=None,
+            target_variable=target,
+            criteria=criteria,
+            pass_threshold=pass_threshold,
+            output_variable=output,
+            optimizer=None,
+            type="inspector",
+        )
         self._nodes[node.id] = node
         return self
 
