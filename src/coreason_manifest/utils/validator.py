@@ -1,75 +1,152 @@
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+# src/coreason_manifest/utils/validator.py
+
+from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
+from coreason_manifest.spec.core.tools import ToolPack
 
 
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     """
-    Validates the semantic correctness of a flow.
-
-    Args:
-        flow: The LinearFlow or GraphFlow to validate.
-
-    Returns:
-        A list of human-readable error strings. If empty, the flow is valid.
+    Semantically validate a Flow (Linear or Graph).
+    Returns a list of error strings. Empty list implies validity.
     """
     errors = []
 
-    # 1. Gather all node IDs and nodes
-    nodes = []
-    node_ids = set()
+    # 1. Common Checks
+    if flow.governance:
+        errors.extend(_validate_governance(flow.governance))
 
+    if flow.tool_packs:
+        # Flatten nodes based on flow type
+        nodes: list[AnyNode] = []
+        if isinstance(flow, GraphFlow):
+            nodes = list(flow.graph.nodes.values())
+        elif isinstance(flow, LinearFlow):
+            nodes = flow.sequence
+
+        errors.extend(_validate_tools(nodes, flow.tool_packs))
+
+    # 2. LinearFlow Specific Checks
+    if isinstance(flow, LinearFlow):
+        errors.extend(_validate_linear_integrity(flow))
+        node_ids = {n.id for n in flow.sequence}
+        errors.extend(_validate_unique_ids(flow.sequence))
+        errors.extend(_validate_switch_logic(flow.sequence, node_ids))
+
+    # 3. GraphFlow Specific Checks
     if isinstance(flow, GraphFlow):
-        nodes = list(flow.graph.nodes.values())
+        if not flow.graph.nodes:
+            errors.append("GraphFlow Error: Graph must contain at least one node.")
+
+        errors.extend(_validate_graph_integrity(flow.graph))
+
+        # Helper for extracting nodes for generic logic checks
+        nodes_list = list(flow.graph.nodes.values())
         node_ids = set(flow.graph.nodes.keys())
-    elif isinstance(flow, LinearFlow):
-        nodes = flow.sequence
-        node_ids = {node.id for node in nodes}
-    else:
-        # Should not happen given type hint, but safe to handle?
-        return ["Unknown flow type"]
 
-    # 2. Gather all available tools
-    available_tools = set()
-    for tool_pack in flow.tool_packs:
-        available_tools.update(tool_pack.tools)
+        errors.extend(_validate_unique_ids(nodes_list))
+        errors.extend(_validate_switch_logic(nodes_list, node_ids))
+        errors.extend(_validate_orphan_nodes(flow.graph))
 
-    # 3. Graph Integrity (GraphFlow only)
-    if isinstance(flow, GraphFlow):
-        for edge in flow.graph.edges:
-            if edge.source not in node_ids:
-                errors.append(f"Edge source '{edge.source}' not found in graph nodes.")
-            if edge.target not in node_ids:
-                errors.append(f"Edge target '{edge.target}' not found in graph nodes.")
+    return errors
 
-    # 4. Linear Integrity (LinearFlow only)
-    if isinstance(flow, LinearFlow) and not flow.sequence:
-        errors.append("LinearFlow sequence must not be empty.")
 
-    # 5. Node Logic Checks
+def _validate_governance(gov: Governance) -> list[str]:
+    errors = []
+    if gov.rate_limit_rpm is not None and gov.rate_limit_rpm < 0:
+        errors.append("Governance Error: rate_limit_rpm cannot be negative.")
+    if gov.cost_limit_usd is not None and gov.cost_limit_usd < 0:
+        errors.append("Governance Error: cost_limit_usd cannot be negative.")
+    return errors
+
+
+def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[str]:
+    errors = []
+    available_tools = {t for pack in packs for t in pack.tools}
+
     for node in nodes:
-        # Switch Logic
-        if isinstance(node, SwitchNode):
-            for case_key, target_id in node.cases.items():
-                if target_id not in node_ids:
-                    errors.append(f"SwitchNode '{node.id}' case '{case_key}' target '{target_id}' not found.")
-            if node.default not in node_ids:
-                errors.append(f"SwitchNode '{node.id}' default target '{node.default}' not found.")
-
-        # Missing Tool Check
         if isinstance(node, AgentNode):
             errors.extend(
-                f"Agent '{node.id}' requires tool '{tool}' but it is not provided by any ToolPack."
+                f"Missing Tool Warning: Agent '{node.id}' requires tool '{tool}' "
+                "but it is not provided by any attached ToolPack."
                 for tool in node.tools
                 if tool not in available_tools
             )
+    return errors
 
-    # 6. Governance Sanity Check
-    if flow.governance:
-        # rate_limit_rpm: int | None
-        if flow.governance.rate_limit_rpm is not None and flow.governance.rate_limit_rpm < 0:
-            errors.append("Governance rate_limit_rpm must be non-negative.")
-        # cost_limit_usd: float | None
-        if flow.governance.cost_limit_usd is not None and flow.governance.cost_limit_usd < 0:
-            errors.append("Governance cost_limit_usd must be non-negative.")
+
+def _validate_linear_integrity(flow: LinearFlow) -> list[str]:
+    if not flow.sequence:
+        return ["LinearFlow Error: Sequence cannot be empty."]
+    return []
+
+
+def _validate_unique_ids(nodes: list[AnyNode]) -> list[str]:
+    seen = set()
+    errors = []
+    for node in nodes:
+        if node.id in seen:
+            errors.append(f"ID Collision Error: Duplicate Node ID '{node.id}' found.")
+        seen.add(node.id)
+    return errors
+
+
+def _validate_graph_integrity(graph: Graph) -> list[str]:
+    errors = []
+    valid_ids = set(graph.nodes.keys())
+
+    # Check 1: Key/ID Integrity
+    for key, node in graph.nodes.items():
+        if key != node.id:
+            errors.append(f"Graph Integrity Error: Node key '{key}' does not match Node ID '{node.id}'.")
+
+    # Check 2: Edge Validity
+    for edge in graph.edges:
+        if edge.source not in valid_ids:
+            errors.append(f"Dangling Edge Error: Source '{edge.source}' not found in graph nodes.")
+        if edge.target not in valid_ids:
+            errors.append(f"Dangling Edge Error: Target '{edge.target}' not found in graph nodes.")
 
     return errors
+
+
+def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[str]:
+    errors = []
+    for node in nodes:
+        if isinstance(node, SwitchNode):
+            # Check Cases
+            for condition, target_id in node.cases.items():
+                if target_id not in valid_ids:
+                    errors.append(
+                        f"Broken Switch Error: Node '{node.id}' case '{condition}' "
+                        f"points to missing ID '{target_id}'."
+                    )
+            # Check Default
+            if node.default not in valid_ids:
+                errors.append(
+                    f"Broken Switch Error: Node '{node.id}' default route "
+                    f"points to missing ID '{node.default}'."
+                )
+    return errors
+
+
+def _validate_orphan_nodes(graph: Graph) -> list[str]:
+    if not graph.nodes:
+        return []
+
+    # All nodes physically present in the dict
+    all_ids = set(graph.nodes.keys())
+
+    # Assume first node is entry point and exempt it
+    entry_point = next(iter(graph.nodes.keys()))
+
+    targeted_ids = {edge.target for edge in graph.edges}
+
+    orphans = all_ids - targeted_ids
+
+    # Remove entry point from orphans if present (it's expected to have no incoming edges)
+    if entry_point in orphans:
+        orphans.remove(entry_point)
+
+    return [f"Orphan Node Warning: Node '{oid}' has no incoming edges." for oid in orphans]

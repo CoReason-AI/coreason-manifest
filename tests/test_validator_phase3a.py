@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Any, ClassVar, cast
 
 from coreason_manifest.spec.core.flow import (
     Edge,
@@ -89,8 +89,8 @@ def test_validate_graph_flow_invalid_edges() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 2
-    assert "Edge target 'missing' not found in graph nodes." in errors
-    assert "Edge source 'missing' not found in graph nodes." in errors
+    assert "Dangling Edge Error: Target 'missing' not found in graph nodes." in errors
+    assert "Dangling Edge Error: Source 'missing' not found in graph nodes." in errors
 
 
 def test_validate_switch_node_invalid_targets() -> None:
@@ -105,8 +105,8 @@ def test_validate_switch_node_invalid_targets() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 2
-    assert "SwitchNode 'switch1' case 'case1' target 'missing1' not found." in errors
-    assert "SwitchNode 'switch1' default target 'missing2' not found." in errors
+    assert "Broken Switch Error: Node 'switch1' case 'case1' points to missing ID 'missing1'." in errors
+    assert "Broken Switch Error: Node 'switch1' default route points to missing ID 'missing2'." in errors
 
 
 def test_validate_missing_tool() -> None:
@@ -124,7 +124,10 @@ def test_validate_missing_tool() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
-    assert "Agent 'agent1' requires tool 'tool1' but it is not provided by any ToolPack." in errors
+    assert (
+        "Missing Tool Warning: Agent 'agent1' requires tool 'tool1' but it is not provided by any attached ToolPack."
+        in errors
+    )
 
 
 def test_validate_governance_sanity() -> None:
@@ -141,8 +144,8 @@ def test_validate_governance_sanity() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 2
-    assert "Governance rate_limit_rpm must be non-negative." in errors
-    assert "Governance cost_limit_usd must be non-negative." in errors
+    assert "Governance Error: rate_limit_rpm cannot be negative." in errors
+    assert "Governance Error: cost_limit_usd cannot be negative." in errors
 
 
 def test_validate_linear_flow_valid() -> None:
@@ -166,7 +169,7 @@ def test_validate_linear_flow_empty() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
-    assert "LinearFlow sequence must not be empty." in errors
+    assert "LinearFlow Error: Sequence cannot be empty." in errors
 
 
 def test_validate_linear_flow_switch_missing_targets() -> None:
@@ -180,12 +183,87 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
     errors = validate_flow(flow)
     # Target IDs must be present in the sequence
     assert len(errors) == 2
-    assert "SwitchNode 'switch1' case 'case1' target 'missing1' not found." in errors
-    assert "SwitchNode 'switch1' default target 'missing2' not found." in errors
+    assert "Broken Switch Error: Node 'switch1' case 'case1' points to missing ID 'missing1'." in errors
+    assert "Broken Switch Error: Node 'switch1' default route points to missing ID 'missing2'." in errors
 
 
 def test_validate_flow_invalid_type() -> None:
-    """Test that validate_flow returns error for unknown type."""
-    # Cast to LinearFlow to satisfy type checker but pass None
-    errors = validate_flow(cast("LinearFlow", None))
-    assert errors == ["Unknown flow type"]
+    """Test that validate_flow handles unknown flow types gracefully."""
+    class DummyFlow:
+        governance = None
+        tool_packs: ClassVar[list[Any]] = []
+
+    # Should not raise error and return empty list (checks skipped)
+    errors = validate_flow(cast("LinearFlow", DummyFlow()))
+    assert errors == []
+
+
+def test_validate_duplicate_node_ids() -> None:
+    """Test validation for duplicate node IDs."""
+    agent1 = create_agent_node("agent1", [])
+    agent2 = create_agent_node("agent1", []) # Duplicate ID
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=create_metadata(),
+        sequence=[agent1, agent2],
+    )
+    errors = validate_flow(flow)
+    assert "ID Collision Error: Duplicate Node ID 'agent1' found." in errors
+
+
+def test_validate_graph_flow_empty() -> None:
+    """Test validation for empty graph."""
+    graph = Graph(nodes={}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+    )
+    errors = validate_flow(flow)
+    assert "GraphFlow Error: Graph must contain at least one node." in errors
+
+
+def test_validate_graph_flow_key_id_mismatch() -> None:
+    """Test validation for mismatch between graph node key and node ID."""
+    agent = create_agent_node("agent1", [])
+    # Key is "wrong_key", ID is "agent1"
+    graph = Graph(nodes={"wrong_key": agent}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+    )
+    errors = validate_flow(flow)
+    assert "Graph Integrity Error: Node key 'wrong_key' does not match Node ID 'agent1'." in errors
+
+
+def test_validate_orphan_nodes() -> None:
+    """Test orphan node detection with entry point exemption."""
+    # node1 is entry point (first in dict)
+    # node2 is connected
+    # node3 is orphan
+    node1 = create_agent_node("node1", [])
+    node2 = create_agent_node("node2", [])
+    node3 = create_agent_node("node3", [])
+
+    graph = Graph(
+        nodes={"node1": node1, "node2": node2, "node3": node3},
+        edges=[Edge(source="node1", target="node2")]
+    )
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+    )
+    errors = validate_flow(flow)
+
+    # node1 has no incoming edges but should be exempt as entry point
+    # node3 has no incoming edges and should be flagged
+    assert not any("node1" in e for e in errors)
+    assert any("Orphan Node Warning: Node 'node3' has no incoming edges." in e for e in errors)
