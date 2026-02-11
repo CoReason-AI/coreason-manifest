@@ -14,7 +14,9 @@ import sys
 
 def main() -> int:
     """Entry point for the coreason CLI."""
-    parser = argparse.ArgumentParser(description="CoReason Manifest CLI")
+    parser = argparse.ArgumentParser(
+        prog="coreason", description="CoReason Manifest CLI"
+    )
     parser.add_argument("--version", action="version", version="%(prog)s 0.23.0")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -26,7 +28,9 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.command == "validate":
-        print(f"Validation of {args.file} is not yet implemented in the new Core Kernel.")
+        print(
+            f"Validation of {args.file} is not yet implemented in the new Core Kernel."
+        )
         return 1
 
     parser.print_help()
