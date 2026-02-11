@@ -51,10 +51,10 @@ def _render_node_def(node: Node, snapshot: ExecutionSnapshot | None = None) -> s
         label_suffix = "<br/>(Inspector)"
     elif node.type == "human":
         shape_start, shape_end = "[/", "/]"
-        # Show options if present
+        # --- UPDATE: Render Options ---
         if hasattr(node, "options") and node.options:
-            opts_str = ", ".join(node.options)
-            label_suffix = f"<br/>(Human)<br/>[{opts_str}]"
+            opts = ", ".join(node.options)
+            label_suffix = f"<br/>(Human)<br/>[{opts}]"
         else:
             label_suffix = "<br/>(Human)"
     elif node.type == "placeholder":
