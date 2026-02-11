@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.common.observability import AuditLog
-from coreason_manifest.utils.audit import compute_audit_hash, verify_chain
+from coreason_manifest.utils.audit import _safe_serialize, compute_audit_hash, verify_chain
 
 
 def test_audit_log_safety_metadata_roundtrip() -> None:
@@ -90,3 +90,39 @@ def test_audit_log_safety_metadata_tamper() -> None:
 
     # Verify chain should fail
     assert verify_chain([tampered_log]) is False
+
+
+def test_audit_sensitive_data_redaction() -> None:
+    """Test that sensitive objects are redacted in audit logs."""
+
+    class SecretKey:
+        def __repr__(self) -> str:
+            return "SECRET_API_KEY_12345"
+
+        def __str__(self) -> str:
+            return "SECRET_API_KEY_12345"
+
+    entry = {
+        "id": uuid.uuid4(),
+        "action": "login",
+        "timestamp": datetime.now(UTC),
+        "details": {
+            "username": "admin",
+            "key": SecretKey(),  # This should be redacted
+            "safe_val": 123,
+        },
+    }
+
+    # Compute hash
+    hash_val = compute_audit_hash(entry)
+
+    # Verify via _safe_serialize
+    serialized = _safe_serialize(entry)
+
+    assert serialized["details"]["key"] == "<REDACTED_TYPE: SecretKey>"
+    assert serialized["details"]["username"] == "admin"
+    assert serialized["details"]["safe_val"] == 123
+
+    # Ensure it doesn't crash
+    assert isinstance(hash_val, str)
+    assert len(hash_val) == 64

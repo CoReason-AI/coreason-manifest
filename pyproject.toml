@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coreason_manifest"
-version = "0.24.0"
+version = "0.23.0"
 description = "This package is the definitive source of truth. If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -78,3 +78,20 @@ filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
 
 [tool.coverage.run]
 omit = ["tests/*", "/tmp/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "if os.name == \"posix\":",
+    "\\.\\.\\.",
+]
