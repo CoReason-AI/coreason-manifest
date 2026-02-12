@@ -1,10 +1,8 @@
 # src/coreason_manifest/utils/gatekeeper.py
 
-from typing import Any
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow, AnyNode
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode, SwitchNode
-from coreason_manifest.spec.core.engines import BaseReasoning
+from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
@@ -36,11 +34,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
             else:
                 reasoning = node.profile.reasoning
 
-        elif isinstance(node, SwarmNode):
+        elif isinstance(node, SwarmNode) and flow.definitions and node.worker_profile in flow.definitions.profiles:
             # Resolve worker profile
-            if flow.definitions and node.worker_profile in flow.definitions.profiles:
-                profile = flow.definitions.profiles[node.worker_profile]
-                reasoning = profile.reasoning
+            profile = flow.definitions.profiles[node.worker_profile]
+            reasoning = profile.reasoning
 
         # Use contract, not hasattr
         # ReasoningConfig is a Union, but all members inherit from BaseReasoning (except if new ones added incorrectly)
@@ -87,7 +84,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
                 return True
         return False
 
-    elif isinstance(flow, GraphFlow):
+    if isinstance(flow, GraphFlow):
         # Reachability Analysis
 
         all_ids = set(flow.graph.nodes.keys())
