@@ -143,14 +143,14 @@ class NewLinearFlow:
 
     def define_brain(
         self,
-        id: str,
+        brain_id: str,
         role: str,
         persona: str,
         reasoning: ReasoningConfig | None = None,
         reflex: Reflex | None = None,
     ) -> "NewLinearFlow":
         """Registers a reusable brain definition."""
-        self._brains[id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
+        self._brains[brain_id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
@@ -158,8 +158,10 @@ class NewLinearFlow:
         self.sequence.append(agent)
         return self
 
-    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] = []) -> "NewLinearFlow":
+    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] | None = None) -> "NewLinearFlow":
         """Adds a node that points to a registered brain."""
+        if tools is None:
+            tools = []
         node = AgentNode(
             id=node_id,
             metadata={},
@@ -258,14 +260,14 @@ class NewGraphFlow:
 
     def define_brain(
         self,
-        id: str,
+        brain_id: str,
         role: str,
         persona: str,
         reasoning: ReasoningConfig | None = None,
         reflex: Reflex | None = None,
     ) -> "NewGraphFlow":
         """Registers a reusable brain definition."""
-        self._brains[id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
+        self._brains[brain_id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
@@ -273,8 +275,10 @@ class NewGraphFlow:
         self._nodes[agent.id] = agent
         return self
 
-    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] = []) -> "NewGraphFlow":
+    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] | None = None) -> "NewGraphFlow":
         """Adds a node that points to a registered brain."""
+        if tools is None:
+            tools = []
         node = AgentNode(
             id=node_id,
             metadata={},

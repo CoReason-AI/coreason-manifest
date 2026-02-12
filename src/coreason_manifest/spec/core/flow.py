@@ -110,9 +110,8 @@ class LinearFlow(BaseModel):
         valid_brains = self.definitions.brains.keys() if self.definitions else set()
 
         for node in self.sequence:
-            if isinstance(node, AgentNode) and isinstance(node.brain, str):
-                if node.brain not in valid_brains:
-                    raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
+            if isinstance(node, AgentNode) and isinstance(node.brain, str) and node.brain not in valid_brains:
+                raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
         return self
 
 
@@ -135,7 +134,6 @@ class GraphFlow(BaseModel):
         valid_brains = self.definitions.brains.keys() if self.definitions else set()
 
         for node in self.graph.nodes.values():
-            if isinstance(node, AgentNode) and isinstance(node.brain, str):
-                if node.brain not in valid_brains:
-                    raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
+            if isinstance(node, AgentNode) and isinstance(node.brain, str) and node.brain not in valid_brains:
+                raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
         return self
