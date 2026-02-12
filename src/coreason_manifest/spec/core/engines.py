@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -70,7 +70,7 @@ class CouncilReasoning(BaseReasoning):
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
 ReasoningConfig = Annotated[
-    Union[StandardReasoning, TreeSearchReasoning, AtomReasoning, CouncilReasoning],
+    StandardReasoning | TreeSearchReasoning | AtomReasoning | CouncilReasoning,
     Field(discriminator="type"),
 ]
 

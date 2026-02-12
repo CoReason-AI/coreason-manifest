@@ -123,21 +123,10 @@ def test_core_kernel_instantiation() -> None:
 def test_polymorphic_reasoning() -> None:
     # Test TreeSearchReasoning
     lats_reasoning = TreeSearchReasoning(
-        model="gpt-4",
-        depth=5,
-        branching_factor=4,
-        simulations=10,
-        exploration_weight=1.5
+        model="gpt-4", depth=5, branching_factor=4, simulations=10, exploration_weight=1.5
     )
     brain = Brain(role="solver", persona="math", reasoning=lats_reasoning, reflex=None)
-    agent = AgentNode(
-        id="agent-lats",
-        metadata={},
-        supervision=None,
-        type="agent",
-        brain=brain,
-        tools=[]
-    )
+    agent = AgentNode(id="agent-lats", metadata={}, supervision=None, type="agent", brain=brain, tools=[])
 
     # Validate JSON serialization/deserialization for LATS
     agent_json = agent.model_dump_json()
