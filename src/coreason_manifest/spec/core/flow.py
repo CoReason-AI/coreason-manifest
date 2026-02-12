@@ -127,6 +127,12 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
                         f"AgentNode '{node.id}' requires missing tool '{tool}'. Available: {list(valid_tools)}"
                     )
 
+        elif isinstance(node, SwarmNode):
+            if node.worker_profile not in valid_profiles:
+                raise ValueError(
+                    f"SwarmNode '{node.id}' references undefined worker profile ID '{node.worker_profile}'"
+                )
+
 
 class LinearFlow(BaseModel):
     """A deterministic script."""
