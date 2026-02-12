@@ -151,7 +151,7 @@ class EnsembleReasoning(BaseReasoning):
     # 'lexical': Jaccard/Token overlap (Zero cost, good for strict code/math).
     # 'hybrid': Average of both.
     fast_comparison_mode: Literal["embedding", "lexical", "hybrid"] = Field(
-        "embedding", description="Metric for fast check."
+        "embedding", description="Method for initial cheap agreement check."
     )
 
     # Thresholds for the Fast Path
@@ -246,6 +246,40 @@ class ComputerUseReasoning(BaseReasoning):
     screenshot_frequency_ms: int = Field(1000, description="Delay between visual observation frames (in milliseconds).")
 
 
+class GraphReasoning(BaseReasoning):
+    """
+    GraphRAG (Graph-based Retrieval Augmented Generation).
+    Performs retrieval over a Knowledge Graph to capture structural relationships
+    and multi-hop reasoning paths that Vector RAG misses.
+    """
+
+    type: Literal["graph"] = "graph"
+
+    # 1. The Database Connection
+    graph_store: str = Field(..., description="Identifier for the Knowledge Graph (e.g. 'neo4j-prod').")
+
+    # 2. The Model acting as the 'Graph Navigator'
+    # Used to generate Cypher/Gremlin queries or extract entity keywords from the prompt.
+    extraction_model: ModelRef | None = Field(
+        None, description="Model used to translate user prompt into graph queries."
+    )
+
+    # 3. SOTA Retrieval Strategies
+    # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
+    # global: "Corpus-Centric". Good for "What are the themes?" (uses pre-computed community summaries).
+    # hybrid: The best of both worlds.
+    retrieval_mode: Literal["local", "global", "hybrid"] = Field(
+        "local", description="Strategy for traversing the graph."
+    )
+
+    # Local Mode Constraints
+    max_hops: int = Field(2, description="Traversal depth for local neighbor search.")
+
+    # Global Mode Constraints
+    # GraphRAG builds hierarchical communities (Level 0 = Root, Level 1 = Broad Clusters, Level 2 = Specifics).
+    community_level: int = Field(1, description="For global search: which level of community summaries to query.")
+
+
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
@@ -258,7 +292,8 @@ ReasoningConfig = Annotated[
     | CouncilReasoning
     | EnsembleReasoning
     | RedTeamingReasoning
-    | ComputerUseReasoning,
+    | ComputerUseReasoning
+    | GraphReasoning,
     Field(discriminator="type"),
 ]
 
