@@ -133,7 +133,7 @@ class EnsembleReasoning(BaseReasoning):
     """
     Multi-Model Consensus with Cascading Verification.
     Executes parallel queries and uses a hybrid fast/slow path to verify agreement.
-    NOTE: The 'model' field should use routing_mode='broadcast'.
+    NOTE: disagreement_threshold < 0.6 is a strong signal of emergent instability.
     """
 
     type: Literal["ensemble"] = "ensemble"
@@ -195,8 +195,9 @@ class RedTeamingReasoning(BaseReasoning):
     # refusal_suppression: Rhetorical constraints to prevent standard refusals.
     # payload_splitting: Breaking malicious payloads across tokens.
     # goat: Generative Offensive Agent Tester (Tree-based planning).
-    attack_strategy: Literal["crescendo", "refusal_suppression", "payload_splitting", "goat"] = Field(
-        "crescendo", description="The algorithmic protocol for generating attacks."
+    # emergence_boosting: Pressure testing to elicit latent behaviors.
+    attack_strategy: Literal["crescendo", "refusal_suppression", "payload_splitting", "goat", "emergence_boosting"] = (
+        Field("crescendo", description="The algorithmic protocol for generating attacks.")
     )
 
     max_turns: int = Field(5, description="Maximum conversation depth/trajectory.")
