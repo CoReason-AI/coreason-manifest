@@ -41,7 +41,7 @@ def test_secure_loader(jail_dir: Path) -> None:
         loader.load(jail_dir / "bad_ref.yaml")
 
     # Test Absolute Path Bypass Attempt (New)
-    abs_outside = str(outside.resolve())
+    abs_outside = outside.resolve().as_posix()
     with open(jail_dir / "bypass.yaml", "w") as f:
         f.write(f'ref: {{"$ref": "{abs_outside}"}}')
 
