@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
@@ -104,6 +104,17 @@ class LinearFlow(BaseModel):
     sequence: list[AnyNode]
     governance: Governance | None = None
 
+    @model_validator(mode="after")
+    def validate_referential_integrity(self) -> "LinearFlow":
+        """Ensures all string-based brain references point to a valid definition."""
+        valid_brains = self.definitions.brains.keys() if self.definitions else set()
+
+        for node in self.sequence:
+            if isinstance(node, AgentNode) and isinstance(node.brain, str):
+                if node.brain not in valid_brains:
+                    raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
+        return self
+
 
 class GraphFlow(BaseModel):
     """Cyclic Graph structure."""
@@ -117,3 +128,14 @@ class GraphFlow(BaseModel):
     blackboard: Blackboard | None
     graph: Graph
     governance: Governance | None = None
+
+    @model_validator(mode="after")
+    def validate_referential_integrity(self) -> "GraphFlow":
+        """Ensures all string-based brain references point to a valid definition."""
+        valid_brains = self.definitions.brains.keys() if self.definitions else set()
+
+        for node in self.graph.nodes.values():
+            if isinstance(node, AgentNode) and isinstance(node.brain, str):
+                if node.brain not in valid_brains:
+                    raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
+        return self

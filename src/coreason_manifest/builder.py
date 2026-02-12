@@ -132,7 +132,8 @@ class NewLinearFlow:
     def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self.sequence: list[AnyNode] = []
-        self.tool_packs: list[ToolPack] = []
+        self._brains: dict[str, Brain] = {}
+        self._tool_packs: dict[str, ToolPack] = {}
         self.governance: Governance | None = None
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
@@ -140,9 +141,34 @@ class NewLinearFlow:
         self.sequence.append(node)
         return self
 
+    def define_brain(
+        self,
+        id: str,
+        role: str,
+        persona: str,
+        reasoning: ReasoningConfig | None = None,
+        reflex: Reflex | None = None,
+    ) -> "NewLinearFlow":
+        """Registers a reusable brain definition."""
+        self._brains[id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
+        return self
+
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
         """Appends an agent node to the sequence."""
         self.sequence.append(agent)
+        return self
+
+    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] = []) -> "NewLinearFlow":
+        """Adds a node that points to a registered brain."""
+        node = AgentNode(
+            id=node_id,
+            metadata={},
+            supervision=None,
+            type="agent",
+            brain=brain_id,
+            tools=tools,
+        )
+        self.sequence.append(node)
         return self
 
     def add_inspector(
@@ -165,7 +191,7 @@ class NewLinearFlow:
 
     def add_tool_pack(self, pack: ToolPack) -> "NewLinearFlow":
         """Adds a tool pack to the flow."""
-        self.tool_packs.append(pack)
+        self._tool_packs[pack.namespace] = pack
         return self
 
     def set_governance(self, gov: Governance) -> "NewLinearFlow":
@@ -190,11 +216,10 @@ class NewLinearFlow:
 
     def build(self) -> LinearFlow:
         """Constructs and validates the LinearFlow object."""
-        definitions = None
-        if self.tool_packs:
-            definitions = FlowDefinitions(
-                tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self.tool_packs}
-            )
+        definitions = FlowDefinitions(
+            brains=self._brains,
+            tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self._tool_packs.values()},
+        )
 
         flow = LinearFlow(
             kind="LinearFlow",
@@ -222,7 +247,8 @@ class NewGraphFlow:
         # Defaults
         self.interface = FlowInterface(inputs={}, outputs={})
         self.blackboard: Blackboard | None = None
-        self.tool_packs: list[ToolPack] = []
+        self._brains: dict[str, Brain] = {}
+        self._tool_packs: dict[str, ToolPack] = {}
         self.governance: Governance | None = None
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
@@ -230,9 +256,34 @@ class NewGraphFlow:
         self._nodes[node.id] = node
         return self
 
+    def define_brain(
+        self,
+        id: str,
+        role: str,
+        persona: str,
+        reasoning: ReasoningConfig | None = None,
+        reflex: Reflex | None = None,
+    ) -> "NewGraphFlow":
+        """Registers a reusable brain definition."""
+        self._brains[id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
+        return self
+
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
         """Adds an agent node to the graph."""
         self._nodes[agent.id] = agent
+        return self
+
+    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] = []) -> "NewGraphFlow":
+        """Adds a node that points to a registered brain."""
+        node = AgentNode(
+            id=node_id,
+            metadata={},
+            supervision=None,
+            type="agent",
+            brain=brain_id,
+            tools=tools,
+        )
+        self._nodes[node.id] = node
         return self
 
     def add_inspector(
@@ -260,7 +311,7 @@ class NewGraphFlow:
 
     def add_tool_pack(self, pack: ToolPack) -> "NewGraphFlow":
         """Adds a tool pack to the flow."""
-        self.tool_packs.append(pack)
+        self._tool_packs[pack.namespace] = pack
         return self
 
     def set_governance(self, gov: Governance) -> "NewGraphFlow":
@@ -297,11 +348,10 @@ class NewGraphFlow:
         """Constructs and validates the GraphFlow object."""
         graph = Graph(nodes=self._nodes, edges=self._edges)
 
-        definitions = None
-        if self.tool_packs:
-            definitions = FlowDefinitions(
-                tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self.tool_packs}
-            )
+        definitions = FlowDefinitions(
+            brains=self._brains,
+            tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self._tool_packs.values()},
+        )
 
         flow = GraphFlow(
             kind="GraphFlow",
