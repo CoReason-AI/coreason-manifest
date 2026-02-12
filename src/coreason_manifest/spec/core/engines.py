@@ -107,11 +107,11 @@ class AdaptiveReasoning(BaseReasoning):
 
     type: Literal["adaptive"] = "adaptive"
 
-    max_compute_tokens: int = Field(..., description="Maximum tokens allocated for internal reasoning.")
-    max_duration_seconds: float = Field(..., description="Time budget for reasoning.")
+    max_compute_tokens: int = Field(..., gt=0, description="Maximum tokens allocated for internal reasoning.")
+    max_duration_seconds: float = Field(..., gt=0.0, description="Time budget for reasoning.")
     scaling_mode: Literal["depth_first", "breadth_first", "hybrid"] = Field(..., description="Scaling strategy.")
 
-    min_confidence_score: float = Field(..., description="Threshold to halt reasoning (0.0 - 1.0).")
+    min_confidence_score: float = Field(..., ge=0.0, le=1.0, description="Threshold to halt reasoning (0.0 - 1.0).")
     verifier_model: ModelRef = Field(..., description="External judge model to score thoughts.")
 
     # Fallback
