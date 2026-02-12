@@ -1,8 +1,9 @@
+from coreason_manifest.spec.core.engines import ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.governance import Governance, PolicyConfig
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwitchNode
-from coreason_manifest.spec.core.engines import ComputerUseReasoning, StandardReasoning
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
 from coreason_manifest.utils.gatekeeper import validate_policy
+
 
 def test_gatekeeper_capability_check() -> None:
     # Setup
@@ -34,6 +35,7 @@ def test_gatekeeper_capability_check() -> None:
     assert len(violations) == 1
     assert violations[0].rule == "Capability Check"
 
+
 def test_gatekeeper_topology_check_unguarded_path() -> None:
     # Setup: Policy requires critical nodes to be guarded
     policy = PolicyConfig(allowed_capabilities=["computer_use"], require_human_in_loop_for=[], max_risk_score=0.5)
@@ -60,9 +62,12 @@ def test_gatekeeper_topology_check_unguarded_path() -> None:
     )
 
     start = AgentNode(
-        id="start", type="agent", metadata={}, supervision=None,
+        id="start",
+        type="agent",
+        metadata={},
+        supervision=None,
         profile=CognitiveProfile(role="start", persona="s", reasoning=StandardReasoning(model="gpt-4"), fast_path=None),
-        tools=[]
+        tools=[],
     )
 
     # Graph with TWO paths:
@@ -74,8 +79,8 @@ def test_gatekeeper_topology_check_unguarded_path() -> None:
         edges=[
             Edge(source="start", target="human"),
             Edge(source="human", target="critical"),
-            Edge(source="start", target="critical") # Bypass!
-        ]
+            Edge(source="start", target="critical"),  # Bypass!
+        ],
     )
 
     flow_exploit = GraphFlow(
@@ -91,6 +96,7 @@ def test_gatekeeper_topology_check_unguarded_path() -> None:
     assert len(violations) == 1
     assert violations[0].rule == "Topology Check"
     assert "accessible via unguarded path" in violations[0].message
+
 
 def test_gatekeeper_topology_check_fully_guarded() -> None:
     # Setup
@@ -117,9 +123,12 @@ def test_gatekeeper_topology_check_fully_guarded() -> None:
     )
 
     start = AgentNode(
-        id="start", type="agent", metadata={}, supervision=None,
+        id="start",
+        type="agent",
+        metadata={},
+        supervision=None,
         profile=CognitiveProfile(role="start", persona="s", reasoning=StandardReasoning(model="gpt-4"), fast_path=None),
-        tools=[]
+        tools=[],
     )
 
     # Graph with ONE path, fully guarded
@@ -130,7 +139,7 @@ def test_gatekeeper_topology_check_fully_guarded() -> None:
         edges=[
             Edge(source="start", target="human"),
             Edge(source="human", target="critical"),
-        ]
+        ],
     )
 
     flow_safe = GraphFlow(

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from coreason_manifest.spec.core.flow import GraphFlow, AnyNode
+from coreason_manifest.spec.core.flow import GraphFlow
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwitchNode
 
 
@@ -51,22 +51,19 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
                 # Use extensible capability check
                 if hasattr(reasoning, "required_capabilities"):
                     req_caps = reasoning.required_capabilities()
-                    for cap in req_caps:
-                        if cap not in allowed_caps:
-                            violations.append(
-                                PolicyViolation(
-                                    node_id=node_id,
-                                    rule="Capability Check",
-                                    message=f"Node '{node_id}' uses '{cap}' but it is not in allowed_capabilities.",
-                                )
-                            )
+                    violations.extend(
+                        PolicyViolation(
+                            node_id=node_id,
+                            rule="Capability Check",
+                            message=f"Node '{node_id}' uses '{cap}' but it is not in allowed_capabilities.",
+                        )
+                        for cap in req_caps
+                        if cap not in allowed_caps
+                    )
 
     # Rule 2: Topology Check (The SOTA Red Button)
     # Identify Critical Nodes
-    critical_nodes = [
-        nid for nid, n in nodes.items()
-        if n.metadata.get("risk_level") == "critical"
-    ]
+    critical_nodes = [nid for nid, n in nodes.items() if n.metadata.get("risk_level") == "critical"]
 
     for target_id in critical_nodes:
         # DFS to find ANY path to a root that does NOT pass through a guard
@@ -81,7 +78,8 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
             curr_id, path = stack.pop()
 
             # 1. Stop if we hit a Guard (This path is safe)
-            # IMPORTANT: The target node itself cannot be its own upstream guard unless it's a SwitchNode acting as a gate?
+            # IMPORTANT: The target node itself cannot be its own upstream guard
+            # unless it's a SwitchNode acting as a gate?
             # Usually the guard is *before* the critical action.
             # If the critical node is ITSELF a HumanNode, is it guarded? Yes.
             curr_node = nodes[curr_id]
@@ -96,17 +94,17 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
             # 3. If no parents, we reached a ROOT without hitting a guard -> VIOLATION
             if not parents:
                 # We found an exposed root!
-                violations.append(PolicyViolation(
-                    node_id=target_id,
-                    rule="Topology Check",
-                    message=f"Critical node '{target_id}' is accessible via unguarded path: {' <- '.join(path)}"
-                ))
+                violations.append(
+                    PolicyViolation(
+                        node_id=target_id,
+                        rule="Topology Check",
+                        message=f"Critical node '{target_id}' is accessible via unguarded path: {' <- '.join(path)}",
+                    )
+                )
                 # Break to avoid duplicate violations for the same node
                 break
 
             # 4. Continue searching upstream
-            for pid in parents:
-                if pid not in path: # simple cycle avoidance
-                    stack.append((pid, path + [pid]))
+            stack.extend((pid, [*path, pid]) for pid in parents if pid not in path)
 
     return violations

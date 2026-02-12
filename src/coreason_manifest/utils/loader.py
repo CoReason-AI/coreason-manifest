@@ -45,7 +45,8 @@ def safety_check(data: Any) -> None:
                 warnings.warn(
                     f"Potential Security Issue: Pattern '{pattern.pattern}' found in manifest content. "
                     "Ensure this input is trusted.",
-                    UserWarning
+                    UserWarning,
+                    stacklevel=2,
                 )
 
 
