@@ -1,15 +1,100 @@
 # Core specification package
 
+from coreason_manifest.spec.core.engines import (
+    AtomReasoning,
+    AttentionReasoning,
+    BaseReasoning,
+    BufferReasoning,
+    ComputerUseReasoning,
+    CouncilReasoning,
+    EnsembleReasoning,
+    GraphReasoning,
+    ModelCriteria,
+    ModelRef,
+    Optimizer,
+    ReasoningConfig,
+    RedTeamingReasoning,
+    Reflex,
+    StandardReasoning,
+    Supervision,
+    TreeSearchReasoning,
+)
+from coreason_manifest.spec.core.flow import (
+    AnyNode,
+    Blackboard,
+    Edge,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+    VariableDef,
+)
 from coreason_manifest.spec.core.governance import (
     Audit,
     CircuitBreaker,
     Governance,
     Safety,
 )
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    BaseInspector,
+    Brain,
+    EmergenceInspector,
+    HumanNode,
+    InspectorNode,
+    Node,
+    Placeholder,
+    PlannerNode,
+    SwitchNode,
+)
+from coreason_manifest.spec.core.tools import ToolPack
 
 __all__ = [
+    # Nodes
+    "AgentNode",
+    # Flow
+    "AnyNode",
+    # Engines
+    "AtomReasoning",
+    "AttentionReasoning",
+    # Governance
     "Audit",
+    "BaseInspector",
+    "BaseReasoning",
+    "Blackboard",
+    "Brain",
+    "BufferReasoning",
     "CircuitBreaker",
+    "ComputerUseReasoning",
+    "CouncilReasoning",
+    "Edge",
+    "EmergenceInspector",
+    "EnsembleReasoning",
+    "FlowInterface",
+    "FlowMetadata",
     "Governance",
+    "Graph",
+    "GraphFlow",
+    "GraphReasoning",
+    "HumanNode",
+    "InspectorNode",
+    "LinearFlow",
+    "ModelCriteria",
+    "ModelRef",
+    "Node",
+    "Optimizer",
+    "Placeholder",
+    "PlannerNode",
+    "ReasoningConfig",
+    "RedTeamingReasoning",
+    "Reflex",
     "Safety",
+    "StandardReasoning",
+    "Supervision",
+    "SwitchNode",
+    # Tools
+    "ToolPack",
+    "TreeSearchReasoning",
+    "VariableDef",
 ]

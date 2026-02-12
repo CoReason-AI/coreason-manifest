@@ -51,7 +51,19 @@ class SwitchNode(Node):
     default: str
 
 
-class InspectorNode(Node):
+class BaseInspector(Node):
+    """Shared logic for all inspection/judgement nodes."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    target_variable: str
+    criteria: str
+    output_variable: str
+    judge_model: ModelRef | None = Field(None, description="Model/Policy to use for semantic evaluation.")
+    optimizer: Optimizer | None = None
+
+
+class InspectorNode(BaseInspector):
     """
     A node that evaluates a variable against criteria.
     Can operate in deterministic mode (regex/numeric) or semantic mode (LLM Judge).
@@ -60,19 +72,29 @@ class InspectorNode(Node):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["inspector"] = "inspector"
-    target_variable: str
-
-    # Dual-mode criteria: regex/python expression OR natural language rubric
-    criteria: str
 
     mode: Literal["programmatic", "semantic"] = "programmatic"
 
-    # SOTA UPGRADE: Use the new ModelRef for the judge
-    judge_model: ModelRef | None = Field(None, description="Model/Policy to use for semantic evaluation.")
-
     pass_threshold: float | None = None
-    output_variable: str
-    optimizer: Optimizer | None = None
+
+
+class EmergenceInspector(BaseInspector):
+    """
+    Specialized inspector for detecting novel/emergent behaviors.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    type: Literal["emergence_inspector"] = "emergence_inspector"
+
+    # Pre-defined behavioral markers to scan for
+    detect_sycophancy: bool = True
+    detect_power_seeking: bool = True
+    detect_deception: bool = True
+
+    # Override defaults - Forced semantic mode
+    mode: Literal["semantic"] = "semantic"
+    judge_model: ModelRef = Field(..., description="Model required for emergence detection")
 
 
 class PlannerNode(Node):
@@ -99,3 +121,17 @@ class Placeholder(Node):
 
     type: Literal["placeholder"] = "placeholder"
     required_capabilities: list[str]
+
+
+__all__ = [
+    "AgentNode",
+    "BaseInspector",
+    "Brain",
+    "EmergenceInspector",
+    "HumanNode",
+    "InspectorNode",
+    "Node",
+    "Placeholder",
+    "PlannerNode",
+    "SwitchNode",
+]
