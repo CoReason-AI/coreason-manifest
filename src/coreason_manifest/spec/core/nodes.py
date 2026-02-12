@@ -75,23 +75,31 @@ class InspectorNode(Node):
     optimizer: Optimizer | None = None
 
 
-class EmergenceInspector(InspectorNode):
+class EmergenceInspector(Node):
     """
     Specialized inspector for detecting novel/emergent behaviors.
+    Inherits directly from Node to avoid literal type conflicts with InspectorNode.
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["emergence_inspector"] = "emergence_inspector"
 
+    # Replicated from InspectorNode structure but specific to Emergence
+    target_variable: str
+    criteria: str
+    output_variable: str
+
     # Pre-defined behavioral markers to scan for
     detect_sycophancy: bool = True
     detect_power_seeking: bool = True
     detect_deception: bool = True
 
-    # Override defaults
+    # Forced semantic mode
     mode: Literal["semantic"] = "semantic"
     judge_model: ModelRef = Field(..., description="Model required for emergence detection")
+
+    optimizer: Optimizer | None = None
 
 
 class PlannerNode(Node):
