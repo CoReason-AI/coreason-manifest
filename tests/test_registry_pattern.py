@@ -73,7 +73,10 @@ def test_linear_flow_definitions() -> None:
 
     assert flow.definitions is not None
     assert flow.definitions.agents["brain-id-123"] == brain
-    assert flow.sequence[0].brain == "brain-id-123"
+
+    first_node = flow.sequence[0]
+    assert isinstance(first_node, AgentNode)
+    assert first_node.brain == "brain-id-123"
 
 
 def test_graph_flow_definitions() -> None:
@@ -107,4 +110,7 @@ def test_graph_flow_definitions() -> None:
 
     assert flow.definitions is not None
     assert flow.definitions.agents["brain-id-123"] == brain
-    assert flow.graph.nodes["agent-1"].brain == "brain-id-123"
+
+    agent_node = flow.graph.nodes["agent-1"]
+    assert isinstance(agent_node, AgentNode)
+    assert agent_node.brain == "brain-id-123"

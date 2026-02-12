@@ -132,6 +132,7 @@ def test_polymorphic_reasoning() -> None:
     agent_json = agent.model_dump_json()
     agent_loaded = AgentNode.model_validate_json(agent_json)
 
+    assert isinstance(agent_loaded.brain, Brain)
     assert isinstance(agent_loaded.brain.reasoning, TreeSearchReasoning)
     assert agent_loaded.brain.reasoning.type == "tree_search"
     assert agent_loaded.brain.reasoning.depth == 5
