@@ -1,15 +1,16 @@
-import pytest
+from datetime import datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import yaml
-import json
-from datetime import datetime
 
-from coreason_manifest.utils.loader import CitadelLoader, SecurityError, load_flow_from_file
-from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
+import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
+from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
+from coreason_manifest.utils.loader import CitadelLoader, SecurityError
 
-def test_citadel_loader_basic():
+
+def test_citadel_loader_basic() -> None:
     with TemporaryDirectory() as tmpdir:
         root = Path(tmpdir)
         (root / "main.yaml").write_text("kind: LinearFlow\nsequence: []")
@@ -18,7 +19,8 @@ def test_citadel_loader_basic():
         data = loader.load_file(root / "main.yaml")
         assert data["kind"] == "LinearFlow"
 
-def test_citadel_loader_jailbreak():
+
+def test_citadel_loader_jailbreak() -> None:
     with TemporaryDirectory() as tmpdir:
         root = Path(tmpdir)
         jail = root / "jail"
@@ -26,7 +28,7 @@ def test_citadel_loader_jailbreak():
         outside = root / "outside.yaml"
         outside.write_text("secret: true")
 
-        (jail / "exploit.yaml").write_text(f'$ref: "../outside.yaml"')
+        (jail / "exploit.yaml").write_text('$ref: "../outside.yaml"')
 
         loader = CitadelLoader(jail)
 
@@ -38,7 +40,8 @@ def test_citadel_loader_jailbreak():
         with pytest.raises(SecurityError):
             loader.load_file(jail / "exploit.yaml")
 
-def test_citadel_loader_recursion():
+
+def test_citadel_loader_recursion() -> None:
     with TemporaryDirectory() as tmpdir:
         root = Path(tmpdir)
         (root / "part.yaml").write_text("value: 42")
@@ -48,7 +51,8 @@ def test_citadel_loader_recursion():
         data = loader.load_file(root / "main.yaml")
         assert data["data"]["value"] == 42
 
-def test_node_execution_schema():
+
+def test_node_execution_schema() -> None:
     # Valid new schema
     node = NodeExecution(
         node_id="n1",
@@ -73,7 +77,7 @@ def test_node_execution_schema():
     assert node2.previous_hashes == []
 
     # Check forbidden previous_hash
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         NodeExecution(
             node_id="n3",
             state=NodeState.COMPLETED,
@@ -81,10 +85,11 @@ def test_node_execution_schema():
             outputs={},
             timestamp=datetime.now(),
             duration_ms=100.0,
-            previous_hash="abc" # Should fail extra="forbid"
+            previous_hash="abc",  # type: ignore # Should fail extra="forbid"
         )
 
-def test_verify_merkle_dag():
+
+def test_verify_merkle_dag() -> None:
     # Construct a valid DAG chain
     # Node 1 (Genesis)
     n1 = {"id": "1", "previous_hashes": []}
@@ -116,7 +121,8 @@ def test_verify_merkle_dag():
     n_disconnected = {"id": "disc", "previous_hashes": []}
     assert not verify_merkle_proof([n1, n_disconnected])
 
-def test_citadel_loader_missing_ref():
+
+def test_citadel_loader_missing_ref() -> None:
     with TemporaryDirectory() as tmpdir:
         root = Path(tmpdir)
         (root / "main.yaml").write_text("data: { $ref: 'missing.yaml' }")
@@ -125,7 +131,8 @@ def test_citadel_loader_missing_ref():
         with pytest.raises(FileNotFoundError, match="Referenced file not found"):
             loader.load_file(root / "main.yaml")
 
-def test_citadel_loader_invalid_ref_type():
+
+def test_citadel_loader_invalid_ref_type() -> None:
     with TemporaryDirectory() as tmpdir:
         root = Path(tmpdir)
         (root / "main.yaml").write_text("data: { $ref: 123 }")

@@ -18,7 +18,6 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 
 class SecurityError(Exception):
     """Raised when a security boundary is violated."""
-    pass
 
 
 class CitadelLoader:
@@ -44,8 +43,8 @@ class CitadelLoader:
         # Security Check: Ensure target is within root_path
         try:
             target.relative_to(self.root_path)
-        except ValueError:
-            raise SecurityError(f"Path traversal detected: '{ref_path}' escapes jail '{self.root_path}'")
+        except ValueError as e:
+            raise SecurityError(f"Path traversal detected: '{ref_path}' escapes jail '{self.root_path}'") from e
 
         if not target.exists():
             raise FileNotFoundError(f"Referenced file not found: {target}")
@@ -63,7 +62,7 @@ class CitadelLoader:
                 # Usually {"$ref": "..."} replaces the node entirely.
                 ref_path = data["$ref"]
                 if not isinstance(ref_path, str):
-                     raise ValueError(f"Invalid $ref value: {ref_path}")
+                    raise ValueError(f"Invalid $ref value: {ref_path}")
 
                 target_path = self._resolve_path(current_file.parent, ref_path)
                 return self.load_file(target_path)
@@ -71,12 +70,11 @@ class CitadelLoader:
             # Recursive traversal for dict
             return {k: self._process_refs(v, current_file) for k, v in data.items()}
 
-        elif isinstance(data, list):
+        if isinstance(data, list):
             # Recursive traversal for list
             return [self._process_refs(item, current_file) for item in data]
 
-        else:
-            return data
+        return data
 
     def load_file(self, path: Path | str) -> Any:
         """
@@ -87,8 +85,8 @@ class CitadelLoader:
         # Verify the file itself is within the jail
         try:
             path.relative_to(self.root_path)
-        except ValueError:
-             raise SecurityError(f"File outside jail: {path}")
+        except ValueError as e:
+            raise SecurityError(f"File outside jail: {path}") from e
 
         if not path.exists():
             raise FileNotFoundError(f"Manifest file not found: {path}")

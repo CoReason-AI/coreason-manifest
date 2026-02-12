@@ -41,9 +41,8 @@ def verify_merkle_proof(chain: list[Any], trusted_root_hash: str | None = None) 
 
     # 1. Headless Chain Check
     genesis_hash = compute_hash(chain[0])
-    if trusted_root_hash:
-        if genesis_hash != trusted_root_hash:
-            return False
+    if trusted_root_hash and genesis_hash != trusted_root_hash:
+        return False
 
     # Initialize verified hashes with genesis
     verified_hashes = {genesis_hash}
