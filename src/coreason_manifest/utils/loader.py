@@ -95,7 +95,8 @@ class CitadelLoader:
         # Jail check
         if not target_path.is_relative_to(self.root):
             raise ValueError(
-                f"Security Violation: Path traversal attempt denied. '{ref}' resolves to '{target_path}' which is outside root '{self.root}'."
+                f"Security Violation: Path traversal attempt denied. "
+                f"'{ref}' resolves to '{target_path}' which is outside root '{self.root}'."
             )
 
         return target_path
