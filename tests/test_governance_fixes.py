@@ -1,0 +1,345 @@
+# tests/test_governance_fixes.py
+
+import pytest
+import json
+from typing import Any
+from pydantic import BaseModel
+
+from coreason_manifest.spec.core.flow import LinearFlow, GraphFlow, FlowDefinitions, FlowMetadata, Graph, Edge, FlowInterface
+from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwitchNode, SwarmNode, CognitiveProfile
+from coreason_manifest.spec.core.engines import ComputerUseReasoning, StandardReasoning, CodeExecutionReasoning
+from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
+
+# Helper to create common metadata
+def get_meta():
+    return FlowMetadata(name="test", version="1.0", description="test", tags=[])
+
+def get_defs():
+    # Profile with Computer Use
+    p_comp = CognitiveProfile(
+        role="worker",
+        persona="worker",
+        reasoning=ComputerUseReasoning(
+            model="gpt-4",
+            interaction_mode="native_os",
+            coordinate_system="normalized_0_1"
+        ),
+        fast_path=None
+    )
+    # Safe Profile
+    p_safe = CognitiveProfile(
+        role="safe",
+        persona="safe",
+        reasoning=StandardReasoning(model="gpt-3.5"),
+        fast_path=None
+    )
+    # Profile with Code Execution
+    p_code = CognitiveProfile(
+        role="coder",
+        persona="coder",
+        reasoning=CodeExecutionReasoning(
+            model="gpt-4",
+            allow_network=False,
+            timeout_seconds=30.0
+        ),
+        fast_path=None
+    )
+    return FlowDefinitions(profiles={"comp": p_comp, "safe": p_safe, "code": p_code})
+
+def test_code_execution_unguarded():
+    defs = get_defs()
+    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="code", tools=[])
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[node]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 1
+    assert "code_execution" in errors[0]
+
+def test_base_reasoning_capabilities():
+    # Case: StandardReasoning (inherits BaseReasoning)
+    defs = get_defs()
+    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="safe", tools=[])
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[node]
+    )
+
+    # Should call StandardReasoning.required_capabilities() -> []
+    errors = validate_policy(flow)
+    assert len(errors) == 0
+
+def test_linear_unguarded_computer_use():
+    defs = get_defs()
+    # Unguarded AgentNode using "comp" profile
+    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[node]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 1
+    assert "requires high-risk capabilities ['computer_use']" in errors[0]
+    assert "not guarded by a HumanNode" in errors[0]
+
+def test_linear_guarded_computer_use():
+    defs = get_defs()
+    human = HumanNode(id="h1", metadata={}, supervision=None, type="human", prompt="ok?", timeout_seconds=10)
+    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[human, node]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 0
+
+def test_linear_switch_bypass_fails():
+    # SwitchNode should NOT count as guard
+    defs = get_defs()
+    switch = SwitchNode(id="s1", metadata={}, supervision=None, type="switch", variable="x", cases={}, default="a1")
+    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[switch, node]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 1 # Still fails because Switch is not Human
+
+def test_linear_missing_node_exception():
+    # Force ValueError in _is_guarded by checking a node not in sequence
+    # (Though logic usually iterates nodes in sequence, so index() always succeeds)
+    # We can manually call _is_guarded to cover the exception block?
+    # Or create a malformed flow where we check a node that isn't in sequence?
+    pass
+
+def test_swarm_unguarded():
+    defs = get_defs()
+    # SwarmNode using "comp" worker profile
+    swarm = SwarmNode(
+        id="swarm1",
+        metadata={},
+        supervision=None,
+        type="swarm",
+        worker_profile="comp", # Dangerous profile
+        workload_variable="v",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="vote",
+        output_variable="out"
+    )
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[swarm]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 1
+    assert "requires high-risk capabilities" in errors[0]
+
+def test_swarm_missing_profile_validation():
+    # SwarmNode pointing to missing profile should raise ValidationError from LinearFlow
+    defs = get_defs()
+    swarm = SwarmNode(
+        id="swarm1",
+        metadata={},
+        supervision=None,
+        type="swarm",
+        worker_profile="missing",
+        workload_variable="v",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="vote",
+        output_variable="out"
+    )
+    with pytest.raises(Exception): # ValidationError
+        LinearFlow(
+            kind="LinearFlow",
+            metadata=get_meta(),
+            definitions=defs,
+            sequence=[swarm]
+        )
+
+def test_gatekeeper_robustness_missing_profile():
+    # Use model_construct to bypass validation and test gatekeeper logic
+    defs = get_defs()
+    swarm = SwarmNode(
+        id="swarm1",
+        metadata={},
+        supervision=None,
+        type="swarm",
+        worker_profile="missing",
+        workload_variable="v",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="vote",
+        output_variable="out"
+    )
+    flow = LinearFlow.model_construct(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        sequence=[swarm]
+    )
+    # Gatekeeper handles missing profile gracefully (no capabilities found)
+    errors = validate_policy(flow)
+    assert len(errors) == 0
+
+def test_graph_unguarded_path():
+    defs = get_defs()
+    # Entry -> Agent(comp) -> End
+    # No human
+    agent = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    graph = Graph(
+        nodes={"a1": agent},
+        edges=[]
+    )
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 1 # a1 is entry and unguarded
+
+def test_graph_guarded_path():
+    defs = get_defs()
+    # Entry(Human) -> Agent(comp)
+    human = HumanNode(id="h1", metadata={}, supervision=None, type="human", prompt="ok?", timeout_seconds=10)
+    agent = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    graph = Graph(
+        nodes={"h1": human, "a1": agent},
+        edges=[Edge(source="h1", target="a1")]
+    )
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 0
+
+def test_graph_cycle_no_entry():
+    # Cyclic graph with no entry points
+    # a1(comp) -> a1
+    defs = get_defs()
+    agent = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    graph = Graph(
+        nodes={"a1": agent},
+        edges=[Edge(source="a1", target="a1")]
+    )
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph
+    )
+
+    # Should fail closed (return False in _is_guarded because no entry_ids but nodes exist)
+    errors = validate_policy(flow)
+    assert len(errors) == 1
+
+def test_integrity_trusted_root():
+    chain_single = [{"data": "genesis"}]
+    root_hash_single = compute_hash(chain_single[0])
+
+    # Valid
+    assert verify_merkle_proof(chain_single, trusted_root_hash=root_hash_single) == True
+
+    # Invalid Root
+    assert verify_merkle_proof(chain_single, trusted_root_hash="badhash") == False
+
+def test_integrity_chain_links():
+    genesis = {"data": "genesis"}
+    h0 = compute_hash(genesis)
+
+    block1 = {"data": "block1", "prev_hash": h0}
+
+    chain = [genesis, block1]
+
+    # Valid
+    assert verify_merkle_proof(chain) == True
+
+    # Invalid Link
+    block1_bad = {"data": "block1", "prev_hash": "wrong"}
+    chain_bad = [genesis, block1_bad]
+
+    assert verify_merkle_proof(chain_bad) == False
+
+def test_integrity_compute_hash_variants():
+    # Test object with compute_hash method
+    class HasMethod:
+        def compute_hash(self):
+            return "hash_method"
+
+    assert compute_hash(HasMethod()) == "hash_method"
+
+    # Test Pydantic model
+    class MyModel(BaseModel):
+        val: int
+
+    m = MyModel(val=1)
+    # Pydantic v2 has model_dump_json
+    h = compute_hash(m)
+    assert len(h) == 64
+
+    # Test object with json method (mock)
+    class HasJson:
+        def json(self):
+            return '{"a": 1}'
+
+    assert compute_hash(HasJson()) == compute_hash({"a": 1})
+
+    # Test fallback
+    class PlainObj:
+        def __str__(self):
+            return "plain"
+
+    assert compute_hash(PlainObj()) == compute_hash("plain")
+
+def test_integrity_missing_prev_hash():
+    # Element without prev_hash in middle of chain
+    chain = [{"a": 1}, {"b": 2}] # No prev_hash key
+    assert verify_merkle_proof(chain) == False
+
+if __name__ == "__main__":
+    pytest.main([__file__])

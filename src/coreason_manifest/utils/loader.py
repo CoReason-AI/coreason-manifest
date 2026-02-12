@@ -39,6 +39,7 @@ def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
 
     try:
         # yaml.safe_load parses both YAML and JSON
+        # Validated: No regex checks or FORBIDDEN_PATTERNS (Security Theater removed)
         data: dict[str, Any] = yaml.safe_load(content)
     except yaml.YAMLError as e:
         raise ValueError(f"Failed to parse manifest file: {e}") from e
