@@ -199,7 +199,7 @@ def test_dag_integrity() -> None:
     assert verify_merkle_proof(trace_incomplete) is False
 
     # Verify Genesis Trusted Root
-    assert verify_merkle_proof([n1], trusted_root_hash=cast(str, n1.execution_hash)) is True
+    assert verify_merkle_proof([n1], trusted_root_hash=cast("str", n1.execution_hash)) is True
     assert verify_merkle_proof([n1], trusted_root_hash="bad_root") is False
 
 
