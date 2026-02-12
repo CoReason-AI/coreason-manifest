@@ -35,8 +35,12 @@ def test_linear_builder() -> None:
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0", description="Desc")
-    builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
-    builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+    builder.add_node(
+        PlaceholderNode(id="n1", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+    )
+    builder.add_node(
+        PlaceholderNode(id="n2", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+    )
     builder.connect("n1", "n2", condition="ok")
 
     tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])

@@ -3,8 +3,8 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.engines import (
     CouncilReasoning,
-    ModelCriteria,
     FastPath,
+    ModelCriteria,
     StandardReasoning,
     Supervision,
     TreeSearchReasoning,

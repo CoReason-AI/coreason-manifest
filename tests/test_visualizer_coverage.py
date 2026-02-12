@@ -139,7 +139,9 @@ def test_visualizer_node_types_coverage() -> None:
     assert ":::inspector" in render_inspector
 
     # PlaceholderNode
-    placeholder = PlaceholderNode(id="place", metadata={}, supervision=None, required_capabilities=[], type="placeholder")
+    placeholder = PlaceholderNode(
+        id="place", metadata={}, supervision=None, required_capabilities=[], type="placeholder"
+    )
     render_place = _render_node_def(placeholder)
     assert "(PlaceholderNode)" in render_place
     assert "(" in render_place
