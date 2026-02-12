@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from coreason_manifest.spec.interop.otel import to_otel_attributes
 from coreason_manifest.spec.interop.telemetry import NodeState
@@ -156,3 +157,35 @@ def test_otel_bridge() -> None:
     # Check input/output serialization
     inputs_json = json.loads(otel_attrs["gen_ai.request.content"])
     assert inputs_json["prompt"] == "hello"
+
+
+def test_privacy_sentinel_no_pii_redaction() -> None:
+    """
+    Verify that if redact_pii is False, PII strings are returned as-is.
+    """
+    sentinel = PrivacySentinel(redact_pii=False)
+    email = "test@example.com"
+    sanitized = sentinel.sanitize(email)
+    assert sanitized == email
+
+
+def test_recorder_handles_non_dict_sanitized_data() -> None:
+    """
+    Verify that BlackBoxRecorder handles cases where PrivacySentinel returns
+    non-dict data for inputs/outputs (e.g. if a custom sanitizer is used).
+    """
+
+    class MockSentinel(PrivacySentinel):
+        def sanitize(self, data: Any) -> Any:
+            # Force return a string even if input is dict
+            return "sanitized_string"
+
+    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel())
+
+    rec = recorder.record(
+        node_id="test_node", state=NodeState.COMPLETED, inputs={"a": 1}, outputs={"b": 2}, duration_ms=10.0
+    )
+
+    # The recorder should have wrapped the string result in a dict
+    assert rec.inputs == {"_sanitized_value": "sanitized_string"}
+    assert rec.outputs == {"_sanitized_value": "sanitized_string"}
