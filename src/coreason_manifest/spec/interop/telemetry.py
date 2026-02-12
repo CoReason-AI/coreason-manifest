@@ -6,10 +6,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class NodeState(StrEnum):
-    """
-    Standard lifecycle states for a node execution.
-    """
-
     PENDING = "PENDING"
     RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"
@@ -22,6 +18,7 @@ class NodeState(StrEnum):
 class NodeExecution(BaseModel):
     """
     Telemetry record for a single node execution attempt.
+    Includes Veritas integrity fields for cryptographic chaining.
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -34,15 +31,14 @@ class NodeExecution(BaseModel):
     timestamp: datetime
     duration_ms: float
 
+    # --- VERITAS INTEGRITY RESTORATION ---
+    execution_hash: str | None = Field(None, description="SHA-256 hash of inputs+outputs+config.")
+    previous_hash: str | None = Field(None, description="Hash of the preceding execution in the trace.")
+    signature: str | None = Field(None, description="Optional cryptographic signature of the event.")
+
 
 class ExecutionSnapshot(BaseModel):
-    """
-    Current runtime state of a flow execution for visualization.
-    """
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    node_states: dict[str, NodeState] = Field(
-        default_factory=dict, description="Map of node IDs to their current state."
-    )
-    active_path: list[str] = Field(default_factory=list, description="Ordered list of visited node IDs.")
+    node_states: dict[str, NodeState]
+    active_path: list[str]

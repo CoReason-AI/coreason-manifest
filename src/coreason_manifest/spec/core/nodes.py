@@ -2,7 +2,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# IMPORT ModelRef to link the new routing capability
 from coreason_manifest.spec.core.engines import (
+    ModelRef,
     Optimizer,
     ReasoningConfig,
     Reflex,
@@ -18,7 +20,7 @@ class Node(BaseModel):
     id: str
     metadata: dict[str, Any]
     supervision: Supervision | None
-    type: str  # Base type field
+    type: str
 
 
 class Brain(BaseModel):
@@ -33,8 +35,6 @@ class Brain(BaseModel):
 
 
 class AgentNode(Node):
-    """A node representing an agent."""
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["agent"] = "agent"
@@ -43,8 +43,6 @@ class AgentNode(Node):
 
 
 class SwitchNode(Node):
-    """A node for branching logic tracks."""
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["switch"] = "switch"
@@ -54,49 +52,49 @@ class SwitchNode(Node):
 
 
 class InspectorNode(Node):
-    """A node that evaluates a variable against criteria."""
+    """
+    A node that evaluates a variable against criteria.
+    Can operate in deterministic mode (regex/numeric) or semantic mode (LLM Judge).
+    """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["inspector"] = "inspector"
     target_variable: str
+
+    # Dual-mode criteria: regex/python expression OR natural language rubric
     criteria: str
+
+    mode: Literal["programmatic", "semantic"] = "programmatic"
+
+    # SOTA UPGRADE: Use the new ModelRef for the judge
+    judge_model: ModelRef | None = Field(None, description="Model/Policy to use for semantic evaluation.")
+
     pass_threshold: float | None = None
     output_variable: str
     optimizer: Optimizer | None = None
 
 
 class PlannerNode(Node):
-    """A node that dynamically plans/solves."""
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["planner"] = "planner"
     goal: str
     optimizer: Optimizer | None
-    output_schema: dict[str, Any] = Field(
-        ...,
-        description="JSON Schema defining the structure of the generated plan/result.",
-    )
+    output_schema: dict[str, Any]
 
 
 class HumanNode(Node):
-    """A node representing human interaction."""
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["human"] = "human"
     prompt: str
     timeout_seconds: int
-    input_schema: dict[str, Any] | None = Field(None, description="JSON Schema for data entry (forms).")
-    options: list[str] | None = Field(
-        None, description="List of explicit decision buttons (e.g. ['Approve', 'Reject'])."
-    )
+    input_schema: dict[str, Any] | None = None
+    options: list[str] | None = None
 
 
 class Placeholder(Node):
-    """An empty slot to be filled later."""
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["placeholder"] = "placeholder"
