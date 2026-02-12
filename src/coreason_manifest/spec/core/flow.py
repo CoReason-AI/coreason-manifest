@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
+    EmergenceInspector,
     HumanNode,
     InspectorNode,
     Placeholder,
@@ -15,7 +16,7 @@ from coreason_manifest.spec.core.tools import ToolPack
 
 # Polymorphic Node Type
 AnyNode = Annotated[
-    AgentNode | SwitchNode | PlannerNode | HumanNode | Placeholder | InspectorNode,
+    AgentNode | SwitchNode | PlannerNode | HumanNode | Placeholder | InspectorNode | EmergenceInspector,
     Field(discriminator="type"),
 ]
 
