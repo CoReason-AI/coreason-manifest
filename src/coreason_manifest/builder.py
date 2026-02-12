@@ -11,7 +11,9 @@
 from typing import Any, Self
 
 from coreason_manifest.spec.core.engines import (
+    ComputerUseReasoning,
     FastPath,
+    ModelRef,
     ReasoningConfig,
     StandardReasoning,
     Supervision,
@@ -29,7 +31,13 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    EmergenceInspectorNode,
+    InspectorNode,
+    SwitchNode,
+)
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
@@ -301,6 +309,67 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes[node.id] = node
         return self
 
+    def add_emergence_inspector(
+        self, node_id: str, target: str, criteria: str, output: str, judge_model: ModelRef
+    ) -> "NewGraphFlow":
+        """Adds an emergence inspector node to the graph."""
+        node = EmergenceInspectorNode(
+            id=node_id,
+            metadata={},
+            supervision=None,
+            target_variable=target,
+            criteria=criteria,
+            output_variable=output,
+            optimizer=None,
+            type="emergence_inspector",
+            judge_model=judge_model,
+        )
+        self._nodes[node.id] = node
+        return self
+
+    def add_switch(
+        self, node_id: str, variable: str, cases: dict[str, str], default: str
+    ) -> "NewGraphFlow":
+        """Adds a switch node to the graph."""
+        node = SwitchNode(
+            id=node_id,
+            metadata={},
+            supervision=None,
+            type="switch",
+            variable=variable,
+            cases=cases,
+            default=default,
+        )
+        self._nodes[node.id] = node
+        return self
+
+    def add_computer_use(
+        self,
+        profile_id: str,
+        role: str,
+        persona: str,
+        model: str,
+        actions: list[str] | None = None,
+    ) -> "NewGraphFlow":
+        """Helper to register a Computer Use profile."""
+        if actions is None:
+            actions = ["click", "type", "scroll", "screenshot"]
+
+        reasoning = ComputerUseReasoning(
+            model=model,
+            allowed_actions=actions,  # type: ignore
+            coordinate_system="normalized_0_1",
+            interaction_mode="native_os",
+        )
+
+        self.define_profile(
+            profile_id=profile_id,
+            role=role,
+            persona=persona,
+            reasoning=reasoning,
+        )
+        return self
+
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
         """Adds an edge to the graph."""
         self._edges.append(Edge(source=source, target=target, condition=condition))
@@ -318,6 +387,13 @@ class NewGraphFlow(BaseFlowBuilder):
 
     def build(self) -> GraphFlow:
         """Constructs and validates the GraphFlow object."""
+        # Pre-validation: Ensure all edges connect to existing nodes
+        for edge in self._edges:
+            if edge.source not in self._nodes:
+                raise ValueError(f"Edge source '{edge.source}' not found in nodes.")
+            if edge.target not in self._nodes:
+                raise ValueError(f"Edge target '{edge.target}' not found in nodes.")
+
         graph = Graph(nodes=self._nodes, edges=self._edges)
 
         flow = GraphFlow(
