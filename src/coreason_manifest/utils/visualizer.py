@@ -49,6 +49,9 @@ def _render_node_def(node: Node, snapshot: ExecutionSnapshot | None = None) -> s
     elif node.type == "inspector":  # <--- PHASE 2 CHANGE
         shape_start, shape_end = "{{", "}}"
         label_suffix = "<br/>(Inspector)"
+    elif node.type == "emergence_inspector":
+        shape_start, shape_end = "{{", "}}"
+        label_suffix = "<br/>(EmergenceInspectorNode)"
     elif node.type == "human":
         shape_start, shape_end = "[/", "/]"
         # --- UPDATE: Render Options ---
@@ -67,7 +70,7 @@ def _render_node_def(node: Node, snapshot: ExecutionSnapshot | None = None) -> s
     definition = f'{safe_id}{shape_start}"{label_id}{label_suffix}"{shape_end}'
 
     # Apply Inspector styling (Phase 2)
-    if node.type == "inspector":
+    if node.type == "inspector" or node.type == "emergence_inspector":
         definition += ":::inspector"
 
     # Apply state styling override if snapshot is provided (Phase 1)

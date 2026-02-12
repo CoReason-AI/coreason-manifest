@@ -2,6 +2,7 @@ from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
+    EmergenceInspectorNode,
     HumanNode,
     InspectorNode,
     Node,
@@ -137,6 +138,22 @@ def test_visualizer_node_types_coverage() -> None:
     render_inspector = _render_node_def(inspector)
     assert "(Inspector)" in render_inspector
     assert ":::inspector" in render_inspector
+
+    # EmergenceInspectorNode
+    emergence = EmergenceInspectorNode(
+        id="emerge",
+        metadata={},
+        supervision=None,
+        target_variable="t",
+        criteria="c",
+        output_variable="o",
+        judge_model="gpt-4",
+        optimizer=None,
+        type="emergence_inspector",
+    )
+    render_emergence = _render_node_def(emergence)
+    assert "(EmergenceInspectorNode)" in render_emergence
+    assert ":::inspector" in render_emergence
 
     # PlaceholderNode
     placeholder = PlaceholderNode(
