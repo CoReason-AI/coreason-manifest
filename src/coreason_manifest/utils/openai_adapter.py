@@ -20,6 +20,11 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
 
     # Model: use node.brain.reasoning.model or default
     model: Any = "gpt-4-turbo"
+    if isinstance(node.brain, str):
+        # TODO: Lookup Brain from registry in Phase 2
+        # For now, we raise an error as we can't resolve the string ID without the registry context
+        raise NotImplementedError("Brain resolution from string ID not yet implemented in adapter.")
+
     if node.brain.reasoning:
         model = node.brain.reasoning.model
 

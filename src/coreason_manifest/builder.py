@@ -20,6 +20,7 @@ from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
     Edge,
+    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
@@ -189,11 +190,17 @@ class NewLinearFlow:
 
     def build(self) -> LinearFlow:
         """Constructs and validates the LinearFlow object."""
+        definitions = None
+        if self.tool_packs:
+            definitions = FlowDefinitions(
+                tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self.tool_packs}
+            )
+
         flow = LinearFlow(
             kind="LinearFlow",
             metadata=self.metadata,
             sequence=self.sequence,
-            tool_packs=self.tool_packs,
+            definitions=definitions,
             governance=self.governance,
         )
 
@@ -290,13 +297,19 @@ class NewGraphFlow:
         """Constructs and validates the GraphFlow object."""
         graph = Graph(nodes=self._nodes, edges=self._edges)
 
+        definitions = None
+        if self.tool_packs:
+            definitions = FlowDefinitions(
+                tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self.tool_packs}
+            )
+
         flow = GraphFlow(
             kind="GraphFlow",
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,
             graph=graph,
-            tool_packs=self.tool_packs,
+            definitions=definitions,
             governance=self.governance,
         )
 

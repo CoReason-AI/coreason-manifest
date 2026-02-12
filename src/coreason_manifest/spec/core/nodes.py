@@ -35,10 +35,18 @@ class Brain(BaseModel):
 
 
 class AgentNode(Node):
+    """
+    Executes a cognitive task using a Brain configuration.
+
+    The 'brain' field is polymorphic:
+    - Pass a Brain object for inline definition (Scripting mode).
+    - Pass a string ID to reference 'definitions.brains' (Production mode).
+    """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["agent"] = "agent"
-    brain: Brain
+    brain: Brain | str
     tools: list[str]
 
 

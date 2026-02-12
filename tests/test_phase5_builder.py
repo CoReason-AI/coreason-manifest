@@ -2,6 +2,7 @@ import pytest
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
 from coreason_manifest.spec.core.engines import StandardReasoning
+from coreason_manifest.spec.core.nodes import Brain
 
 
 def test_fluent_agent_construction() -> None:
@@ -21,6 +22,7 @@ def test_fluent_agent_construction() -> None:
     assert agent.id == "research-bot"
 
     # Verify Identity
+    assert isinstance(agent.brain, Brain)
     assert agent.brain.role == "Researcher"
     assert agent.brain.persona == "You are strictly factual."
 

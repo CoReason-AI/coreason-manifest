@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
+    Brain,
     EmergenceInspector,
     HumanNode,
     InspectorNode,
@@ -78,6 +79,20 @@ class Graph(BaseModel):
     edges: list[Edge]
 
 
+class FlowDefinitions(BaseModel):
+    """
+    Registry for reusable components (The Blueprint).
+    Separates 'definition' from 'usage' to reduce payload size.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    # Maps ID -> Configuration
+    brains: dict[str, Brain] = Field(default_factory=dict, description="Reusable cognitive configurations.")
+    tool_packs: dict[str, ToolPack] = Field(default_factory=dict, description="Reusable tool dependencies.")
+    skills: dict[str, Any] = Field(default_factory=dict, description="Reusable executable skills (Future use).")
+
+
 class LinearFlow(BaseModel):
     """A deterministic script."""
 
@@ -85,9 +100,9 @@ class LinearFlow(BaseModel):
 
     kind: Literal["LinearFlow"]
     metadata: FlowMetadata
+    definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     sequence: list[AnyNode]
     governance: Governance | None = None
-    tool_packs: list[ToolPack] = Field(default_factory=list)
 
 
 class GraphFlow(BaseModel):
@@ -97,8 +112,8 @@ class GraphFlow(BaseModel):
 
     kind: Literal["GraphFlow"]
     metadata: FlowMetadata
+    definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     interface: FlowInterface
     blackboard: Blackboard | None
     graph: Graph
     governance: Governance | None = None
-    tool_packs: list[ToolPack] = Field(default_factory=list)

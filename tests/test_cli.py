@@ -18,7 +18,6 @@ def create_valid_flow(path: str) -> None:
         "sequence": [
             {"id": "step1", "type": "placeholder", "metadata": {}, "supervision": None, "required_capabilities": []}
         ],
-        "tool_packs": [],
     }
     with open(path, "w") as f:
         yaml.dump(data, f)
@@ -29,7 +28,6 @@ def create_invalid_flow(path: str) -> None:
         "kind": "LinearFlow",
         "metadata": {"name": "InvalidFlow", "version": "1.0", "description": "Test", "tags": []},
         "sequence": [],  # Empty sequence is invalid
-        "tool_packs": [],
     }
     with open(path, "w") as f:
         yaml.dump(data, f)

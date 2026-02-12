@@ -26,8 +26,10 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     if flow.governance:
         errors.extend(_validate_governance(flow.governance, valid_ids))
 
-    if flow.tool_packs:
-        errors.extend(_validate_tools(nodes, flow.tool_packs))
+    if flow.definitions and flow.definitions.tool_packs:
+        # Convert dict to list for backward compatibility with _validate_tools
+        tool_packs = list(flow.definitions.tool_packs.values())
+        errors.extend(_validate_tools(nodes, tool_packs))
 
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids))

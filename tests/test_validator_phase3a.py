@@ -1,7 +1,8 @@
-from typing import Any, ClassVar, cast
+from typing import cast
 
 from coreason_manifest.spec.core.flow import (
     Edge,
+    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
@@ -64,7 +65,7 @@ def test_validate_graph_flow_valid() -> None:
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        tool_packs=[tp],
+        definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
     errors = validate_flow(flow)
     assert errors == []
@@ -120,7 +121,7 @@ def test_validate_missing_tool() -> None:
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        tool_packs=[tp],
+        definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
@@ -155,7 +156,7 @@ def test_validate_linear_flow_valid() -> None:
         kind="LinearFlow",
         metadata=create_metadata(),
         sequence=[agent],
-        tool_packs=[tp],
+        definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
     errors = validate_flow(flow)
     assert errors == []
@@ -192,7 +193,7 @@ def test_validate_flow_invalid_type() -> None:
 
     class DummyFlow:
         governance = None
-        tool_packs: ClassVar[list[Any]] = []
+        definitions = None
 
     # Should not raise error and return empty list (checks skipped)
     errors = validate_flow(cast("LinearFlow", DummyFlow()))

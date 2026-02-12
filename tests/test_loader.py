@@ -14,7 +14,6 @@ def test_load_linear_flow() -> None:
         "kind": "LinearFlow",
         "metadata": {"name": "TestLinear", "version": "1.0", "description": "Test", "tags": []},
         "sequence": [],
-        "tool_packs": [],
     }
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         yaml.dump(data, tmp)
@@ -35,7 +34,6 @@ def test_load_graph_flow() -> None:
         "interface": {"inputs": {}, "outputs": {}},
         "blackboard": None,
         "graph": {"nodes": {}, "edges": []},
-        "tool_packs": [],
     }
     with NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
         # JSON is also valid YAML
