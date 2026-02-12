@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any
+from typing import Any, Self
 
 from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
@@ -126,20 +126,14 @@ class AgentBuilder:
         )
 
 
-class NewLinearFlow:
-    """Fluent API to construct LinearFlows programmatically."""
+class BaseFlowBuilder:
+    """Shared logic for all flow builders to enforce DRY principles."""
 
-    def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
+    def __init__(self, name: str, version: str, description: str) -> None:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
-        self.sequence: list[AnyNode] = []
         self._brains: dict[str, Brain] = {}
         self._tool_packs: dict[str, ToolPack] = {}
         self.governance: Governance | None = None
-
-    def add_step(self, node: AnyNode) -> "NewLinearFlow":
-        """Appends a node to the sequence."""
-        self.sequence.append(node)
-        return self
 
     def define_brain(
         self,
@@ -148,9 +142,52 @@ class NewLinearFlow:
         persona: str,
         reasoning: ReasoningConfig | None = None,
         reflex: Reflex | None = None,
-    ) -> "NewLinearFlow":
+    ) -> Self:
         """Registers a reusable brain definition."""
         self._brains[brain_id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
+        return self
+
+    def add_tool_pack(self, pack: ToolPack) -> Self:
+        """Adds a tool pack to the flow."""
+        self._tool_packs[pack.namespace] = pack
+        return self
+
+    def set_governance(self, gov: Governance) -> Self:
+        """Sets the governance policy."""
+        self.governance = gov
+        return self
+
+    def set_circuit_breaker(self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None) -> Self:
+        """Sets the circuit breaker policy."""
+        cb = CircuitBreaker(
+            error_threshold_count=error_threshold,
+            reset_timeout_seconds=reset_timeout,
+            fallback_node_id=fallback_node,
+        )
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"circuit_breaker": cb})
+        else:
+            self.governance = Governance(circuit_breaker=cb)
+        return self
+
+    def _build_definitions(self) -> FlowDefinitions:
+        """Helper to build FlowDefinitions from registered components."""
+        return FlowDefinitions(
+            brains=self._brains,
+            tool_packs=self._tool_packs,
+        )
+
+
+class NewLinearFlow(BaseFlowBuilder):
+    """Fluent API to construct LinearFlows programmatically."""
+
+    def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
+        super().__init__(name, version, description)
+        self.sequence: list[AnyNode] = []
+
+    def add_step(self, node: AnyNode) -> "NewLinearFlow":
+        """Appends a node to the sequence."""
+        self.sequence.append(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
@@ -191,43 +228,13 @@ class NewLinearFlow:
         self.sequence.append(node)
         return self
 
-    def add_tool_pack(self, pack: ToolPack) -> "NewLinearFlow":
-        """Adds a tool pack to the flow."""
-        self._tool_packs[pack.namespace] = pack
-        return self
-
-    def set_governance(self, gov: Governance) -> "NewLinearFlow":
-        """Sets the governance policy."""
-        self.governance = gov
-        return self
-
-    def set_circuit_breaker(
-        self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None
-    ) -> "NewLinearFlow":
-        """Sets the circuit breaker policy."""
-        cb = CircuitBreaker(
-            error_threshold_count=error_threshold,
-            reset_timeout_seconds=reset_timeout,
-            fallback_node_id=fallback_node,
-        )
-        if self.governance:
-            self.governance = self.governance.model_copy(update={"circuit_breaker": cb})
-        else:
-            self.governance = Governance(circuit_breaker=cb)
-        return self
-
     def build(self) -> LinearFlow:
         """Constructs and validates the LinearFlow object."""
-        definitions = FlowDefinitions(
-            brains=self._brains,
-            tool_packs=self._tool_packs,
-        )
-
         flow = LinearFlow(
             kind="LinearFlow",
             metadata=self.metadata,
             sequence=self.sequence,
-            definitions=definitions,
+            definitions=self._build_definitions(),
             governance=self.governance,
         )
 
@@ -238,36 +245,20 @@ class NewLinearFlow:
         return flow
 
 
-class NewGraphFlow:
+class NewGraphFlow(BaseFlowBuilder):
     """Fluent API to construct GraphFlows programmatically."""
 
     def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
-        self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
+        super().__init__(name, version, description)
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []
-
         # Defaults
         self.interface = FlowInterface(inputs={}, outputs={})
         self.blackboard: Blackboard | None = None
-        self._brains: dict[str, Brain] = {}
-        self._tool_packs: dict[str, ToolPack] = {}
-        self.governance: Governance | None = None
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
         """Adds a node to the graph."""
         self._nodes[node.id] = node
-        return self
-
-    def define_brain(
-        self,
-        brain_id: str,
-        role: str,
-        persona: str,
-        reasoning: ReasoningConfig | None = None,
-        reflex: Reflex | None = None,
-    ) -> "NewGraphFlow":
-        """Registers a reusable brain definition."""
-        self._brains[brain_id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
@@ -313,31 +304,6 @@ class NewGraphFlow:
         self._edges.append(Edge(source=source, target=target, condition=condition))
         return self
 
-    def add_tool_pack(self, pack: ToolPack) -> "NewGraphFlow":
-        """Adds a tool pack to the flow."""
-        self._tool_packs[pack.namespace] = pack
-        return self
-
-    def set_governance(self, gov: Governance) -> "NewGraphFlow":
-        """Sets the governance policy."""
-        self.governance = gov
-        return self
-
-    def set_circuit_breaker(
-        self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None
-    ) -> "NewGraphFlow":
-        """Sets the circuit breaker policy."""
-        cb = CircuitBreaker(
-            error_threshold_count=error_threshold,
-            reset_timeout_seconds=reset_timeout,
-            fallback_node_id=fallback_node,
-        )
-        if self.governance:
-            self.governance = self.governance.model_copy(update={"circuit_breaker": cb})
-        else:
-            self.governance = Governance(circuit_breaker=cb)
-        return self
-
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
         """Defines the Input/Output contract for the Flow."""
         self.interface = FlowInterface(inputs=inputs, outputs=outputs)
@@ -352,18 +318,13 @@ class NewGraphFlow:
         """Constructs and validates the GraphFlow object."""
         graph = Graph(nodes=self._nodes, edges=self._edges)
 
-        definitions = FlowDefinitions(
-            brains=self._brains,
-            tool_packs=self._tool_packs,
-        )
-
         flow = GraphFlow(
             kind="GraphFlow",
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,
             graph=graph,
-            definitions=definitions,
+            definitions=self._build_definitions(),
             governance=self.governance,
         )
 
