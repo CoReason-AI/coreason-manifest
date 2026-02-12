@@ -10,7 +10,7 @@
 
 from typing import Any
 
-from coreason_manifest.spec.core.engines import Supervision
+from coreason_manifest.spec.core.engines import ReasoningEngine, Reflex, Supervision
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -23,7 +23,7 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
-from coreason_manifest.spec.core.nodes import InspectorNode
+from coreason_manifest.spec.core.nodes import AgentNode, Brain, InspectorNode
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
@@ -47,6 +47,85 @@ def create_supervision(
     )
 
 
+class AgentBuilder:
+    """Fluent API to construct AgentNodes."""
+
+    def __init__(self, agent_id: str) -> None:
+        self.agent_id = agent_id
+        self.role: str | None = None
+        self.persona: str | None = None
+        self.reasoning: ReasoningEngine | None = None
+        self.reflex: Reflex | None = None
+        self.tools: list[str] = []
+        self.supervision: Supervision | None = None
+
+    def with_identity(self, role: str, persona: str) -> "AgentBuilder":
+        """Configures Brain.role and Brain.persona."""
+        self.role = role
+        self.persona = persona
+        return self
+
+    def with_reasoning(
+        self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7
+    ) -> "AgentBuilder":
+        """Configures Brain.reasoning."""
+        self.reasoning = ReasoningEngine(
+            model=model, thoughts_max=thoughts_max, min_confidence=min_confidence
+        )
+        return self
+
+    def with_reflex(
+        self, model: str, timeout_ms: int = 1000, caching: bool = True
+    ) -> "AgentBuilder":
+        """Configures Brain.reflex."""
+        self.reflex = Reflex(model=model, timeout_ms=timeout_ms, caching=caching)
+        return self
+
+    def with_tools(self, tools: list[str]) -> "AgentBuilder":
+        """Appends to AgentNode.tools."""
+        self.tools.extend(tools)
+        return self
+
+    def with_supervision(
+        self,
+        retries: int,
+        strategy: str = "escalate",
+        backoff: float = 2.0,
+        delay: float = 1.0,
+        default: dict[str, Any] | None = None,
+    ) -> "AgentBuilder":
+        """Helper to configure AgentNode.supervision."""
+        self.supervision = create_supervision(
+            retries=retries,
+            strategy=strategy,
+            backoff=backoff,
+            delay=delay,
+            default=default,
+        )
+        return self
+
+    def build(self) -> AgentNode:
+        """Validates and returns the node."""
+        if not self.role or not self.persona:
+            raise ValueError("Agent identity (role, persona) must be set.")
+
+        brain = Brain(
+            role=self.role,
+            persona=self.persona,
+            reasoning=self.reasoning,
+            reflex=self.reflex,
+        )
+
+        return AgentNode(
+            id=self.agent_id,
+            metadata={},
+            supervision=self.supervision,
+            type="agent",
+            brain=brain,
+            tools=self.tools,
+        )
+
+
 class NewLinearFlow:
     """Fluent API to construct LinearFlows programmatically."""
 
@@ -59,6 +138,11 @@ class NewLinearFlow:
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence."""
         self.sequence.append(node)
+        return self
+
+    def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
+        """Appends an agent node to the sequence."""
+        self.sequence.append(agent)
         return self
 
     def add_inspector(
@@ -138,6 +222,11 @@ class NewGraphFlow:
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
         """Adds a node to the graph."""
         self._nodes[node.id] = node
+        return self
+
+    def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
+        """Adds an agent node to the graph."""
+        self._nodes[agent.id] = agent
         return self
 
     def add_inspector(
