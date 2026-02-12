@@ -1,5 +1,5 @@
 from coreason_manifest.builder import NewLinearFlow
-from coreason_manifest.spec.core.nodes import Placeholder
+from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.validator import validate_flow
 from coreason_manifest.utils.visualizer import to_mermaid
@@ -12,10 +12,10 @@ def test_full_suite_integrity() -> None:
     # 1. Build a simple LinearFlow using the Builder
     builder = NewLinearFlow("IntegrityCheck", version="1.0", description="Verifying Core Integrity")
 
-    node1 = Placeholder(
+    node1 = PlaceholderNode(
         id="step-1", metadata={}, supervision=None, required_capabilities=["logging"], type="placeholder"
     )
-    node2 = Placeholder(
+    node2 = PlaceholderNode(
         id="step-2", metadata={}, supervision=None, required_capabilities=["alerting"], type="placeholder"
     )
 

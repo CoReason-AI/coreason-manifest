@@ -1,6 +1,6 @@
 from coreason_manifest.spec.core.engines import (
     Optimizer,
-    Reflex,
+    FastPath,
     StandardReasoning,
     Supervision,
     TreeSearchReasoning,
@@ -18,9 +18,9 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    Brain,
+    CognitiveProfile,
     HumanNode,
-    Placeholder,
+    PlaceholderNode,
     PlannerNode,
     SwitchNode,
 )
@@ -30,17 +30,17 @@ from coreason_manifest.spec.core.tools import ToolPack
 def test_core_kernel_instantiation() -> None:
     # Test Engines
     reasoning = StandardReasoning(model="gpt-4", thoughts_max=5, min_confidence=0.8)
-    reflex = Reflex(model="gpt-3.5", timeout_ms=1000, caching=True)
+    reflex = FastPath(model="gpt-3.5", timeout_ms=1000, caching=True)
     supervision = Supervision(strategy="restart", max_retries=3, fallback=None)
     optimizer = Optimizer(teacher_model="gpt-4", metric="accuracy", max_demonstrations=3)
 
     # Test Nodes
-    brain = Brain(role="assistant", persona="helpful", reasoning=reasoning, reflex=reflex)
+    brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=reasoning, fast_path=reflex)
     agent_node = AgentNode(
         id="agent-1",
         metadata={"foo": "bar", "priority": 1},
         supervision=supervision,
-        brain=brain,
+        profile=brain,
         tools=["search"],
         type="agent",
     )
@@ -70,7 +70,7 @@ def test_core_kernel_instantiation() -> None:
         timeout_seconds=60,
         type="human",
     )
-    placeholder = Placeholder(
+    placeholder = PlaceholderNode(
         id="place-1",
         metadata={},
         supervision=None,
@@ -134,14 +134,14 @@ def test_polymorphic_reasoning() -> None:
     lats_reasoning = TreeSearchReasoning(
         model="gpt-4", depth=5, branching_factor=4, simulations=10, exploration_weight=1.5
     )
-    brain = Brain(role="solver", persona="math", reasoning=lats_reasoning, reflex=None)
-    agent = AgentNode(id="agent-lats", metadata={}, supervision=None, type="agent", brain=brain, tools=[])
+    brain = CognitiveProfile(role="solver", persona="math", reasoning=lats_reasoning, fast_path=None)
+    agent = AgentNode(id="agent-lats", metadata={}, supervision=None, type="agent", profile=brain, tools=[])
 
     # Validate JSON serialization/deserialization for LATS
     agent_json = agent.model_dump_json()
     agent_loaded = AgentNode.model_validate_json(agent_json)
 
-    assert isinstance(agent_loaded.brain, Brain)
-    assert isinstance(agent_loaded.brain.reasoning, TreeSearchReasoning)
-    assert agent_loaded.brain.reasoning.type == "tree_search"
-    assert agent_loaded.brain.reasoning.depth == 5
+    assert isinstance(agent_loaded.profile, CognitiveProfile)
+    assert isinstance(agent_loaded.profile.reasoning, TreeSearchReasoning)
+    assert agent_loaded.profile.reasoning.type == "tree_search"
+    assert agent_loaded.profile.reasoning.depth == 5

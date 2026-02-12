@@ -10,7 +10,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, Brain
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.mcp_adapter import pack_to_mcp_resources
@@ -29,13 +29,13 @@ def test_mcp_adapter() -> None:
 
 def test_openai_adapter() -> None:
     pack = ToolPack(kind="ToolPack", namespace="utils", tools=["calculator", "weather"], dependencies=[], env_vars=[])
-    brain = Brain(
+    brain = CognitiveProfile(
         role="assistant",
         persona="helpful",
         reasoning=StandardReasoning(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
-        reflex=None,
+        fast_path=None,
     )
-    node = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", brain=brain, tools=["calculator"])
+    node = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", profile=brain, tools=["calculator"])
     openai_res = node_to_openai_assistant(node, [pack])
     expected_openai = {
         "name": "agent1",
@@ -59,14 +59,14 @@ def test_openai_adapter() -> None:
 def test_langchain_adapter() -> None:
     meta = FlowMetadata(name="test", version="1.0", description="desc", tags=[])
     pack = ToolPack(kind="ToolPack", namespace="utils", tools=["calculator", "weather"], dependencies=[], env_vars=[])
-    brain = Brain(
+    brain = CognitiveProfile(
         role="assistant",
         persona="helpful",
         reasoning=StandardReasoning(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
-        reflex=None,
+        fast_path=None,
     )
-    node1 = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", brain=brain, tools=["calculator"])
-    node2 = AgentNode(id="agent2", metadata={}, supervision=None, type="agent", brain=brain, tools=["weather"])
+    node1 = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", profile=brain, tools=["calculator"])
+    node2 = AgentNode(id="agent2", metadata={}, supervision=None, type="agent", profile=brain, tools=["weather"])
 
     # LinearFlow
     linear_flow = LinearFlow(

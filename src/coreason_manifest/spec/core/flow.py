@@ -6,11 +6,11 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    Brain,
-    EmergenceInspector,
+    CognitiveProfile,
+    EmergenceInspectorNode,
     HumanNode,
     InspectorNode,
-    Placeholder,
+    PlaceholderNode,
     PlannerNode,
     SwitchNode,
 )
@@ -18,7 +18,7 @@ from coreason_manifest.spec.core.tools import ToolPack
 
 # Polymorphic Node Type
 AnyNode = Annotated[
-    AgentNode | SwitchNode | PlannerNode | HumanNode | Placeholder | InspectorNode | EmergenceInspector,
+    AgentNode | SwitchNode | PlannerNode | HumanNode | PlaceholderNode | InspectorNode | EmergenceInspectorNode,
     Field(discriminator="type"),
 ]
 
@@ -89,14 +89,16 @@ class FlowDefinitions(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     # Maps ID -> Configuration
-    brains: dict[str, Brain] = Field(default_factory=dict, description="Reusable cognitive configurations.")
+    profiles: dict[str, CognitiveProfile] = Field(
+        default_factory=dict, description="Reusable cognitive configurations."
+    )
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict, description="Reusable tool dependencies.")
     skills: dict[str, Any] = Field(default_factory=dict, description="Reusable executable skills (Future use).")
 
 
 def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyNode]) -> None:
     """Shared referential integrity validation logic."""
-    valid_brains = definitions.brains.keys() if definitions else set()
+    valid_profiles = definitions.profiles.keys() if definitions else set()
 
     # SOTA: Create a set of all available tools from registered packs
     valid_tools = set()
@@ -106,9 +108,9 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
 
     for node in nodes:
         if isinstance(node, AgentNode):
-            # 1. Brain Check
-            if isinstance(node.brain, str) and node.brain not in valid_brains:
-                raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
+            # 1. Profile Check
+            if isinstance(node.profile, str) and node.profile not in valid_profiles:
+                raise ValueError(f"AgentNode '{node.id}' references undefined profile ID '{node.profile}'")
 
             # 2. Tool Check
             for tool in node.tools:
@@ -131,7 +133,7 @@ class LinearFlow(BaseModel):
 
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "LinearFlow":
-        """Ensures all string-based brain references point to a valid definition."""
+        """Ensures all string-based profile references point to a valid definition."""
         validate_integrity(self.definitions, self.sequence)
         return self
 
@@ -151,6 +153,6 @@ class GraphFlow(BaseModel):
 
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "GraphFlow":
-        """Ensures all string-based brain references point to a valid definition."""
+        """Ensures all string-based profile references point to a valid definition."""
         validate_integrity(self.definitions, self.graph.nodes.values())
         return self

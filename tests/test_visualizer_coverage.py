@@ -1,11 +1,11 @@
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    Brain,
+    CognitiveProfile,
     HumanNode,
     InspectorNode,
     Node,
-    Placeholder,
+    PlaceholderNode,
     PlannerNode,
     SwitchNode,
 )
@@ -41,7 +41,7 @@ def test_switch_edge_inference() -> None:
         id="target-1",
         metadata={},
         supervision=None,
-        brain=Brain(role="r", persona="p", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         type="agent",
     )
@@ -50,7 +50,7 @@ def test_switch_edge_inference() -> None:
         id="target-2",
         metadata={},
         supervision=None,
-        brain=Brain(role="r", persona="p", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         type="agent",
     )
@@ -76,7 +76,7 @@ def test_visualizer_snapshot_state_application() -> None:
         id="agent-1",
         metadata={},
         supervision=None,
-        brain=Brain(role="r", persona="p", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         type="agent",
     )
@@ -138,10 +138,10 @@ def test_visualizer_node_types_coverage() -> None:
     assert "(Inspector)" in render_inspector
     assert ":::inspector" in render_inspector
 
-    # Placeholder
-    placeholder = Placeholder(id="place", metadata={}, supervision=None, required_capabilities=[], type="placeholder")
+    # PlaceholderNode
+    placeholder = PlaceholderNode(id="place", metadata={}, supervision=None, required_capabilities=[], type="placeholder")
     render_place = _render_node_def(placeholder)
-    assert "(Placeholder)" in render_place
+    assert "(PlaceholderNode)" in render_place
     assert "(" in render_place
 
     # Unknown/Fallback

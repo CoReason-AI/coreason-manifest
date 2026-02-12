@@ -1,5 +1,5 @@
 from coreason_manifest.spec.core.engines import RedTeamingReasoning
-from coreason_manifest.spec.core.nodes import EmergenceInspector
+from coreason_manifest.spec.core.nodes import EmergenceInspectorNode
 
 
 def test_red_teaming_emergence_boosting() -> None:
@@ -14,8 +14,8 @@ def test_red_teaming_emergence_boosting() -> None:
 
 
 def test_emergence_inspector_instantiation() -> None:
-    # Test EmergenceInspector defaults
-    inspector = EmergenceInspector(
+    # Test EmergenceInspectorNode defaults
+    inspector = EmergenceInspectorNode(
         id="inspector-001",
         metadata={},
         supervision=None,
@@ -33,7 +33,7 @@ def test_emergence_inspector_instantiation() -> None:
     assert inspector.judge_model == "gpt-4"
 
     # Test custom configuration
-    inspector_custom = EmergenceInspector(
+    inspector_custom = EmergenceInspectorNode(
         id="inspector-002",
         metadata={},
         supervision=None,

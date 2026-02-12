@@ -11,8 +11,8 @@
 from typing import Any, Self
 
 from coreason_manifest.spec.core.engines import (
+    FastPath,
     ReasoningConfig,
-    Reflex,
     StandardReasoning,
     Supervision,
 )
@@ -29,7 +29,7 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
-from coreason_manifest.spec.core.nodes import AgentNode, Brain, InspectorNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
@@ -61,24 +61,24 @@ class AgentBuilder:
         self.role: str | None = None
         self.persona: str | None = None
         self.reasoning: ReasoningConfig | None = None
-        self.reflex: Reflex | None = None
+        self.fast_path: FastPath | None = None
         self.tools: list[str] = []
         self.supervision: Supervision | None = None
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
-        """Configures Brain.role and Brain.persona."""
+        """Configures CognitiveProfile.role and CognitiveProfile.persona."""
         self.role = role
         self.persona = persona
         return self
 
     def with_reasoning(self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7) -> "AgentBuilder":
-        """Configures Brain.reasoning (Standard CoT)."""
+        """Configures CognitiveProfile.reasoning (Standard CoT)."""
         self.reasoning = StandardReasoning(model=model, thoughts_max=thoughts_max, min_confidence=min_confidence)
         return self
 
-    def with_reflex(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> "AgentBuilder":
-        """Configures Brain.reflex."""
-        self.reflex = Reflex(model=model, timeout_ms=timeout_ms, caching=caching)
+    def with_fast_path(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> "AgentBuilder":
+        """Configures CognitiveProfile.fast_path."""
+        self.fast_path = FastPath(model=model, timeout_ms=timeout_ms, caching=caching)
         return self
 
     def with_tools(self, tools: list[str]) -> "AgentBuilder":
@@ -109,11 +109,11 @@ class AgentBuilder:
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
-        brain = Brain(
+        profile = CognitiveProfile(
             role=self.role,
             persona=self.persona,
             reasoning=self.reasoning,
-            reflex=self.reflex,
+            fast_path=self.fast_path,
         )
 
         return AgentNode(
@@ -121,7 +121,7 @@ class AgentBuilder:
             metadata={},
             supervision=self.supervision,
             type="agent",
-            brain=brain,
+            profile=profile,
             tools=self.tools,
         )
 
@@ -131,20 +131,22 @@ class BaseFlowBuilder:
 
     def __init__(self, name: str, version: str, description: str) -> None:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
-        self._brains: dict[str, Brain] = {}
+        self._profiles: dict[str, CognitiveProfile] = {}
         self._tool_packs: dict[str, ToolPack] = {}
         self.governance: Governance | None = None
 
-    def define_brain(
+    def define_profile(
         self,
-        brain_id: str,
+        profile_id: str,
         role: str,
         persona: str,
         reasoning: ReasoningConfig | None = None,
-        reflex: Reflex | None = None,
+        fast_path: FastPath | None = None,
     ) -> Self:
-        """Registers a reusable brain definition."""
-        self._brains[brain_id] = Brain(role=role, persona=persona, reasoning=reasoning, reflex=reflex)
+        """Registers a reusable profile definition."""
+        self._profiles[profile_id] = CognitiveProfile(
+            role=role, persona=persona, reasoning=reasoning, fast_path=fast_path
+        )
         return self
 
     def add_tool_pack(self, pack: ToolPack) -> Self:
@@ -173,7 +175,7 @@ class BaseFlowBuilder:
     def _build_definitions(self) -> FlowDefinitions:
         """Helper to build FlowDefinitions from registered components."""
         return FlowDefinitions(
-            brains=self._brains,
+            profiles=self._profiles,
             tool_packs=self._tool_packs,
         )
 
@@ -195,8 +197,8 @@ class NewLinearFlow(BaseFlowBuilder):
         self.sequence.append(agent)
         return self
 
-    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] | None = None) -> "NewLinearFlow":
-        """Adds a node that points to a registered brain."""
+    def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> "NewLinearFlow":
+        """Adds a node that points to a registered profile."""
         if tools is None:
             tools = []
         node = AgentNode(
@@ -204,7 +206,7 @@ class NewLinearFlow(BaseFlowBuilder):
             metadata={},
             supervision=None,
             type="agent",
-            brain=brain_id,
+            profile=profile_id,
             tools=tools,
         )
         self.sequence.append(node)
@@ -266,8 +268,8 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes[agent.id] = agent
         return self
 
-    def add_agent_ref(self, node_id: str, brain_id: str, tools: list[str] | None = None) -> "NewGraphFlow":
-        """Adds a node that points to a registered brain."""
+    def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> "NewGraphFlow":
+        """Adds a node that points to a registered profile."""
         if tools is None:
             tools = []
         node = AgentNode(
@@ -275,7 +277,7 @@ class NewGraphFlow(BaseFlowBuilder):
             metadata={},
             supervision=None,
             type="agent",
-            brain=brain_id,
+            profile=profile_id,
             tools=tools,
         )
         self._nodes[node.id] = node

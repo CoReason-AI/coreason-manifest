@@ -13,7 +13,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, Brain, SwitchNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
@@ -32,7 +32,7 @@ def create_agent_node(node_id: str, tools: list[str]) -> AgentNode:
         id=node_id,
         metadata={},
         supervision=None,
-        brain=Brain(role="assistant", persona="helpful", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None),
         tools=tools,
     )
 

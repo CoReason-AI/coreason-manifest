@@ -59,7 +59,7 @@ def _render_node_def(node: Node, snapshot: ExecutionSnapshot | None = None) -> s
             label_suffix = "<br/>(Human)"
     elif node.type == "placeholder":
         shape_start, shape_end = "(", ")"
-        label_suffix = "<br/>(Placeholder)"
+        label_suffix = "<br/>(PlaceholderNode)"
     else:
         shape_start, shape_end = "[", "]"
         label_suffix = f"<br/>({node.type})"
