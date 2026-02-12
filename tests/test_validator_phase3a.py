@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, cast
+from typing import cast
 
 from coreason_manifest.spec.core.flow import (
     Edge,
