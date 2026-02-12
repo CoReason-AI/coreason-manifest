@@ -10,12 +10,11 @@ from pydantic import BaseModel, ConfigDict, Field
 class ModelCriteria(BaseModel):
     """
     Defines 'What kind of model' is needed.
-    Now supports Multi-Model Routing for reliability (Fallback) or scale (Round Robin).
+    Supports Multi-Model Routing for reliability (Fallback) or scale (Round Robin).
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    # --- Selection Constraints ---
     strategy: Literal["lowest_cost", "lowest_latency", "performance", "balanced"] = Field(
         "balanced", description="Optimization target for model selection."
     )
@@ -28,23 +27,17 @@ class ModelCriteria(BaseModel):
     )
     max_cost_per_m_tokens: float | None = Field(None, description="FinOps circuit breaker.")
 
-    # --- Multi-Model Routing ---
-    # single: Use one model (default).
-    # fallback: Try list in order until one works.
-    # round_robin: Rotate between matching models.
-    # broadcast: Send to ALL matching models (used by EnsembleReasoning).
+    # Multi-Model Routing
     routing_mode: Literal["single", "fallback", "round_robin", "broadcast"] = Field(
         "single", description="How to handle multiple matching models."
     )
 
-    # Explicit Definition (Optional)
     provider_whitelist: list[str] | None = None
     specific_models: list[str] | None = Field(
         None, description="Explicit list of model IDs to route between (e.g. ['gpt-4', 'claude-3'])."
     )
 
 
-# Type alias: A model can be a hardcoded ID ("gpt-4") OR a semantic policy
 ModelRef = str | ModelCriteria
 
 
@@ -73,7 +66,7 @@ class StandardReasoning(BaseReasoning):
 
 class AttentionReasoning(BaseReasoning):
     """
-    *** NEW SOTA CAPABILITY: System 2 Attention (S2A) ***
+    System 2 Attention (S2A).
     Filters and rewrites the input context to remove irrelevant information
     (noise/bias) BEFORE reasoning begins.
     """
@@ -89,7 +82,7 @@ class AttentionReasoning(BaseReasoning):
 
 class BufferReasoning(BaseReasoning):
     """
-    *** NEW SOTA CAPABILITY: Buffer of Thoughts (BoT) ***
+    Buffer of Thoughts (BoT).
     Retrieves a high-level 'Thought Template' from a meta-buffer (vector store)
     to guide the reasoning process, rather than generating from scratch.
     """
@@ -138,28 +131,43 @@ class CouncilReasoning(BaseReasoning):
 
 class EnsembleReasoning(BaseReasoning):
     """
-    *** NEW SOTA CAPABILITY ***
-    Multi-Model Consensus (Same Persona, Different Models).
-    Executes the query in parallel across multiple models and unifies the result.
+    Multi-Model Consensus with Cascading Verification.
+    Executes parallel queries and uses a hybrid fast/slow path to verify agreement.
     NOTE: The 'model' field should use routing_mode='broadcast'.
     """
 
     type: Literal["ensemble"] = "ensemble"
 
-    # Semantic Analysis: Uses a model to determine if answers are functionally equivalent
-    # This replaces simple cosine similarity with deeper semantic understanding
+    # --- 1. Cascading Verification Strategy ---
 
-    # 1. Fast Path (Embeddings)
-    semantic_similarity_threshold: float | None = Field(
-        0.85, description="If set, uses fast vector embeddings to check agreement."
+    # Fast Path: How to calculate the initial cheap score.
+    # 'embedding': Vector cosine similarity (Default).
+    # 'lexical': Jaccard/Token overlap (Zero cost, good for strict code/math).
+    # 'hybrid': Average of both.
+    fast_comparison_mode: Literal["embedding", "lexical", "hybrid"] = Field(
+        "embedding", description="Method for initial cheap agreement check."
     )
 
-    # 2. Slow Path (LLM Judge) - Keep this as an optional override
+    # Thresholds for the Fast Path
+    # Score > agreement_threshold -> Auto-Accept as Same.
+    # Score < disagreement_threshold -> Auto-Reject as Different.
+    # Between -> Ambiguous (Trigger Slow Path).
+    agreement_threshold: float = Field(0.85, description="High confidence match threshold.")
+    disagreement_threshold: float = Field(0.60, description="Low confidence mismatch threshold.")
+
+    # Slow Path Trigger
+    # 'ambiguous_only': Trigger LLM check only if score is in the grey zone (0.60-0.85).
+    # 'always': Always double-check with LLM (Paranoid mode).
+    # 'never': Trust the fast path implicitly (Fastest).
+    verification_mode: Literal["ambiguous_only", "always", "never"] = Field(
+        "ambiguous_only", description="When to trigger the deep similarity_model check."
+    )
+
     similarity_model: ModelRef | None = Field(
-        None, description="Optional. If set, uses this LLM for high-fidelity agreement checking."
+        None, description="The LLM used for deep semantic verification if triggered."
     )
 
-    # Consensus Strategy
+    # --- 2. Consensus & Tie-Breaking ---
     aggregation: Literal["majority_vote", "strongest_judge", "union"] = "majority_vote"
 
     # Tie-Breaker: If models disagree, this judge decides.

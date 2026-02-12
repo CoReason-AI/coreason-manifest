@@ -13,7 +13,7 @@ def test_attention_reasoning_instantiation() -> None:
     # Test defaults
     attn = AttentionReasoning(model="gpt-4")
     assert attn.type == "attention"
-    # UPDATED: Default is now "rephrase" for safety
+    # Default is now "rephrase" for safety
     assert attn.attention_mode == "rephrase"
     assert attn.focus_model is None
 
@@ -79,9 +79,11 @@ def test_ensemble_reasoning_instantiation_in_union() -> None:
     ens = EnsembleReasoning(model="gpt-4", aggregation="strongest_judge")
     assert ens.type == "ensemble"
     assert ens.aggregation == "strongest_judge"
-    # Defaults check
-    assert ens.semantic_similarity_threshold == 0.85
-    assert ens.similarity_model is None
+    # Cascading Defaults check
+    assert ens.agreement_threshold == 0.85
+    assert ens.disagreement_threshold == 0.60
+    assert ens.verification_mode == "ambiguous_only"
+    assert ens.fast_comparison_mode == "embedding"
 
     # Ensure our Union parses it correctly
     adapter: TypeAdapter[ReasoningConfig] = TypeAdapter(ReasoningConfig)
