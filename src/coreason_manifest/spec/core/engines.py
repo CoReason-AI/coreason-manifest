@@ -174,6 +174,37 @@ class EnsembleReasoning(BaseReasoning):
     judge_model: ModelRef | None = Field(None, description="The 'Supreme Court' model that resolves conflicts.")
 
 
+class RedTeamingReasoning(BaseReasoning):
+    """
+    Agentic Red Teaming (ART).
+    Proactive adversarial simulation engine.
+    Uses an 'Attacker' model to run multi-turn attacks against a 'Target' model
+    to discover vulnerabilities, hallucinations, or policy failures.
+    """
+
+    type: Literal["red_teaming"] = "red_teaming"
+
+    # The adversarial agent (Red Team)
+    attacker_model: ModelRef = Field(..., description="The model configured to generate attack vectors.")
+
+    # The victim agent (Blue Team). If None, the agent attacks itself (Self-Correction).
+    target_model: ModelRef | None = Field(None, description="The target model under evaluation.")
+
+    # SOTA Attack Vectors (2025/2026)
+    # crescendo: Multi-turn context escalation.
+    # refusal_suppression: Rhetorical constraints to prevent standard refusals.
+    # payload_splitting: Breaking malicious payloads across tokens.
+    # goat: Generative Offensive Agent Tester (Tree-based planning).
+    attack_strategy: Literal["crescendo", "refusal_suppression", "payload_splitting", "goat"] = Field(
+        "crescendo", description="The algorithmic protocol for generating attacks."
+    )
+
+    max_turns: int = Field(5, description="Maximum conversation depth/trajectory.")
+    success_criteria: str = Field(
+        ..., description="Natural language definition of a successful break (e.g. 'PII Leakage')."
+    )
+
+
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
@@ -184,7 +215,8 @@ ReasoningConfig = Annotated[
     | TreeSearchReasoning
     | AtomReasoning
     | CouncilReasoning
-    | EnsembleReasoning,
+    | EnsembleReasoning
+    | RedTeamingReasoning,
     Field(discriminator="type"),
 ]
 
