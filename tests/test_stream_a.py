@@ -7,6 +7,7 @@ from coreason_manifest.utils.diff import ChangeCategory, compare_manifests
 from coreason_manifest.utils.hashing import canonicalize, compute_integrity_hash, verify_chain
 from coreason_manifest.utils.secure_io import SecureLoader, SecurityError
 from coreason_manifest.spec.core.tools import ToolPack
+from typing import Any
 
 @pytest.fixture
 def jail_dir(tmp_path: Path) -> Path:
@@ -85,8 +86,9 @@ def test_hashing() -> None:
 
     # 2. Integrity Hash (Aliases)
     class MockModel:
-        # ARG002 Fix: Rename unused 'mode' to '_mode'
-        def model_dump(self, mode, by_alias=False):
+        # Update signature to match usage: model_dump(mode=..., by_alias=...)
+        # Rename unused 'mode' to '_mode' to fix ARG002
+        def model_dump(self, mode: str | None = None, by_alias: bool = False) -> dict[str, Any]:
             if by_alias:
                 return {"previousHash": "abc"}
             return {"previous_hash": "abc"}
@@ -164,6 +166,8 @@ def test_builder_and_diff() -> None:
          builder4.add_node(node)
     builder4._edges = flow3.graph.edges
     # Copy definitions
+    # mypy fix: assert definitions is not None
+    assert flow3.definitions is not None
     builder4._profiles = flow3.definitions.profiles
 
     flow4 = builder4.build()
@@ -176,6 +180,8 @@ def test_builder_and_diff() -> None:
     # Same graph as flow3 - B007 Fix, PERF102 Fix
     for node in flow3.graph.nodes.values(): builder5.add_node(node)
     builder5._edges = flow3.graph.edges
+    # mypy fix: assert definitions is not None
+    assert flow3.definitions is not None
     builder5._profiles = flow3.definitions.profiles
 
     # Valid ToolPack

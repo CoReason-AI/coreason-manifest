@@ -135,7 +135,7 @@ def compare_manifests(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
     return changes
 
 
-def _diff_dicts(old: dict, new: dict, path_prefix: str, changes: list, item_category: ChangeCategory):
+def _diff_dicts(old: dict[str, Any], new: dict[str, Any], path_prefix: str, changes: list[DiffChange], item_category: ChangeCategory) -> None:
     """Generic dict diff helper."""
     changes.extend(
         [
@@ -159,7 +159,7 @@ def _diff_dicts(old: dict, new: dict, path_prefix: str, changes: list, item_cate
     )
 
 
-def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list):
+def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[DiffChange]) -> None:
     """Detailed node comparison."""
     if old_node.type != new_node.type:
         changes.append(
