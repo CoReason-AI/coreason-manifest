@@ -71,6 +71,36 @@ class StandardReasoning(BaseReasoning):
     min_confidence: float = Field(0.7, description="Minimum confidence score to proceed.")
 
 
+class AttentionReasoning(BaseReasoning):
+    """
+    *** NEW SOTA CAPABILITY: System 2 Attention (S2A) ***
+    Filters and rewrites the input context to remove irrelevant information
+    (noise/bias) BEFORE reasoning begins.
+    """
+
+    type: Literal["attention"] = "attention"
+
+    attention_mode: Literal["rephrase", "extract"] = Field(
+        "extract", description="Method for sanitizing input context."
+    )
+    # The model used to filter the noise (can be smaller/faster than the main reasoning model)
+    focus_model: ModelRef | None = Field(None, description="Model used for the S2A filtering step.")
+
+
+class BufferReasoning(BaseReasoning):
+    """
+    *** NEW SOTA CAPABILITY: Buffer of Thoughts (BoT) ***
+    Retrieves a high-level 'Thought Template' from a meta-buffer (vector store)
+    to guide the reasoning process, rather than generating from scratch.
+    """
+
+    type: Literal["buffer"] = "buffer"
+
+    max_templates: int = Field(3, description="Max number of templates to retrieve.")
+    similarity_threshold: float = Field(0.75, description="Min cosine similarity for a template match.")
+    template_collection: str = Field(..., description="Name of the vector collection containing thought templates.")
+
+
 class TreeSearchReasoning(BaseReasoning):
     """Language Agent Tree Search (LATS) with MCTS."""
 
@@ -133,7 +163,13 @@ class EnsembleReasoning(BaseReasoning):
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
 ReasoningConfig = Annotated[
-    StandardReasoning | TreeSearchReasoning | AtomReasoning | CouncilReasoning | EnsembleReasoning,
+    StandardReasoning
+    | AttentionReasoning
+    | BufferReasoning
+    | TreeSearchReasoning
+    | AtomReasoning
+    | CouncilReasoning
+    | EnsembleReasoning,
     Field(discriminator="type"),
 ]
 
