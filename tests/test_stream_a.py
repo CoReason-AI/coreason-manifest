@@ -171,15 +171,11 @@ def test_builder_and_diff() -> None:
     changes = compare_manifests(flow, flow2)
 
     # Check tool changes
-    breaking = [
-        c for c in changes if c.category == ChangeCategory.BREAKING and c.path == "graph.nodes.agent1.tools"
-    ]
+    breaking = [c for c in changes if c.category == ChangeCategory.BREAKING and c.path == "graph.nodes.agent1.tools"]
     assert len(breaking) == 1
     assert breaking[0].old == ["search"]
 
-    features = [
-        c for c in changes if c.category == ChangeCategory.FEATURE and c.path == "graph.nodes.agent1.tools"
-    ]
+    features = [c for c in changes if c.category == ChangeCategory.FEATURE and c.path == "graph.nodes.agent1.tools"]
     assert len(features) == 1
     assert features[0].new == ["calculator"]
 
@@ -247,11 +243,7 @@ def test_builder_and_diff() -> None:
     builder_tp._tool_packs = flow.definitions.tool_packs.copy()
 
     # Valid ToolPack
-    builder_tp.add_tool_pack(
-        ToolPack(
-            kind="ToolPack", namespace="newpack", tools=["t1"], dependencies=[], env_vars=[]
-        )
-    )
+    builder_tp.add_tool_pack(ToolPack(kind="ToolPack", namespace="newpack", tools=["t1"], dependencies=[], env_vars=[]))
     flow_tp = builder_tp.build()
     changes_tp = compare_manifests(flow, flow_tp)
     features = [c for c in changes_tp if c.category == ChangeCategory.FEATURE]
@@ -285,9 +277,7 @@ def test_diff_logic() -> None:
     builder = NewGraphFlow("test", "1.0", "Test")
     builder.define_profile("p1", "role", "persona")
     # Need to register tools
-    builder.add_tool_pack(
-        ToolPack(kind="ToolPack", namespace="base", tools=["t1", "t2"], dependencies=[], env_vars=[])
-    )
+    builder.add_tool_pack(ToolPack(kind="ToolPack", namespace="base", tools=["t1", "t2"], dependencies=[], env_vars=[]))
 
     builder.add_agent_ref("a1", "p1", tools=["t1", "t2"])
     flow1 = builder.build()
