@@ -156,8 +156,14 @@ class SwarmNode(Node):
     )
     max_concurrency: int = Field(..., description="Limit parallel workers.")
 
+    # SOTA: Reliability (Partial Failure)
+    failure_tolerance_percent: float = Field(0.0, description="0.0 = All must succeed. 0.2 = Allow 20% failure.")
+
     # Aggregation
     reducer_function: Literal["concat", "vote", "summarize"] = Field(..., description="How to combine results.")
+    aggregator_model: ModelRef | None = Field(
+        None, description="If set, uses this model to summarize the worker outputs into a single string."
+    )
     output_variable: str = Field(..., description="Variable to store the aggregated result.")
 
 

@@ -114,6 +114,11 @@ class AdaptiveReasoning(BaseReasoning):
     min_confidence_score: float = Field(..., description="Threshold to halt reasoning (0.0 - 1.0).")
     verifier_model: ModelRef = Field(..., description="External judge model to score thoughts.")
 
+    # Fallback
+    halt_on_budget_exhaustion: bool = Field(
+        True, description="If True, return best guess when budget fails. If False, error."
+    )
+
 
 class AttentionReasoning(BaseReasoning):
     """
