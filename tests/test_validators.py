@@ -3,7 +3,7 @@ import pytest
 from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
 from coreason_manifest.spec.core.engines import AdaptiveReasoning
 
-def test_human_node_validators_coverage():
+def test_human_node_validators_coverage() -> None:
     """Test validation logic in HumanNode to ensure 100% coverage."""
 
     # Test 1: Shadow mode without shadow_timeout_seconds (Should raise ValueError)
@@ -22,7 +22,7 @@ def test_human_node_validators_coverage():
         )
     assert "HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'" in str(exc.value)
 
-def test_swarm_node_validators_coverage():
+def test_swarm_node_validators_coverage() -> None:
     """Test validation logic in SwarmNode to ensure 100% coverage."""
 
     # Test 1: Summarize reducer without aggregator_model (Should raise ValueError)
@@ -44,7 +44,7 @@ def test_swarm_node_validators_coverage():
     )
     assert valid_swarm.reducer_function == "vote"
 
-def test_adaptive_reasoning_validators_coverage():
+def test_adaptive_reasoning_validators_coverage() -> None:
     """Test validation logic in AdaptiveReasoning."""
 
     # Test 1: Invalid max_compute_tokens <= 0
