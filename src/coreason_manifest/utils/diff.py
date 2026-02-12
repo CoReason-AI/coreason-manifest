@@ -47,22 +47,26 @@ def compare_manifests(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
     new_nodes = new.graph.nodes
 
     # Added Nodes (FEATURE)
-    for node_id in set(new_nodes) - set(old_nodes):
-        changes.append(DiffChange(
+    changes.extend([
+        DiffChange(
             path=f"graph.nodes.{node_id}",
             old=None,
             new=new_nodes[node_id],
             category=ChangeCategory.FEATURE
-        ))
+        )
+        for node_id in set(new_nodes) - set(old_nodes)
+    ])
 
     # Removed Nodes (BREAKING)
-    for node_id in set(old_nodes) - set(new_nodes):
-        changes.append(DiffChange(
+    changes.extend([
+        DiffChange(
             path=f"graph.nodes.{node_id}",
             old=old_nodes[node_id],
             new=None,
             category=ChangeCategory.BREAKING
-        ))
+        )
+        for node_id in set(old_nodes) - set(new_nodes)
+    ])
 
     # Changed Nodes
     for node_id in set(old_nodes) & set(new_nodes):
@@ -119,19 +123,24 @@ def compare_manifests(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
                 ))
 
     # Added/Removed profiles
-    for profile_id in set(new_profiles) - set(old_profiles):
-        changes.append(DiffChange(
+    changes.extend([
+        DiffChange(
             path=f"definitions.profiles.{profile_id}",
             old=None,
             new=new_profiles[profile_id],
             category=ChangeCategory.FEATURE
-        ))
-    for profile_id in set(old_profiles) - set(new_profiles):
-        changes.append(DiffChange(
+        )
+        for profile_id in set(new_profiles) - set(old_profiles)
+    ])
+
+    changes.extend([
+        DiffChange(
             path=f"definitions.profiles.{profile_id}",
             old=old_profiles[profile_id],
             new=None,
             category=ChangeCategory.BREAKING
-        ))
+        )
+        for profile_id in set(old_profiles) - set(new_profiles)
+    ])
 
     return changes

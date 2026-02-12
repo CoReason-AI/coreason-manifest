@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
 class SecurityError(Exception):
     """Raised when a file access violates security policies."""
@@ -58,7 +59,16 @@ class SecureLoader:
         except ValueError as e:
             raise SecurityError(f"Initial file '{path}' is outside the jail '{self.root_dir}'") from e
 
-        return self._load_recursive(path, set())
+        # Cast the result to ensure type safety (or check it)
+        result = self._load_recursive(path, set())
+        if not isinstance(result, dict):
+             # Depending on requirement, we might allow list, but type hint says dict[str, Any]
+             # If root is list, this is a type violation for the caller.
+             # The spec says "Method load(path: Path) -> dict".
+             if isinstance(result, list):
+                 raise TypeError(f"Expected dict at root, got list in '{path}'")
+             return result # type: ignore
+        return result
 
     def _load_recursive(self, path: Path, visited: set[Path]) -> Any:
         if path in visited:

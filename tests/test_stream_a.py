@@ -2,18 +2,18 @@ import pytest
 from pathlib import Path
 import json
 import yaml
-from coreason_manifest.utils.secure_io import SecureLoader, SecurityError
-from coreason_manifest.utils.hashing import compute_integrity_hash, verify_chain, canonicalize
-from coreason_manifest.utils.diff import compare_manifests, ChangeCategory
 from coreason_manifest.builder import NewGraphFlow
+from coreason_manifest.utils.diff import ChangeCategory, compare_manifests
+from coreason_manifest.utils.hashing import canonicalize, compute_integrity_hash, verify_chain
+from coreason_manifest.utils.secure_io import SecureLoader, SecurityError
 
 @pytest.fixture
-def jail_dir(tmp_path):
+def jail_dir(tmp_path: Path) -> Path:
     jail = tmp_path / "jail"
     jail.mkdir()
     return jail
 
-def test_secure_loader(jail_dir):
+def test_secure_loader(jail_dir: Path) -> None:
     loader = SecureLoader(jail_dir)
 
     # 1. Test Jail Enforcement
@@ -40,7 +40,7 @@ def test_secure_loader(jail_dir):
     with open(jail_dir / "main.yaml", "w") as f:
         f.write('sub: {"$ref": "sub.yaml"}')
     with open(jail_dir / "sub.yaml", "w") as f:
-        f.write('value: 123')
+        f.write("value: 123")
 
     data = loader.load(jail_dir / "main.yaml")
     assert data["sub"]["value"] == 123
@@ -69,7 +69,7 @@ def test_secure_loader(jail_dir):
     assert data["b"]["d"]["val"] == "d"
     assert data["c"]["d"]["val"] == "d"
 
-def test_hashing():
+def test_hashing() -> None:
     # 1. Canonicalization
     data1 = {"b": 2, "a": 1}
     data2 = {"a": 1, "b": 2}
@@ -100,7 +100,7 @@ def test_hashing():
     entry1["data"] = "hacked"
     assert not verify_chain(chain)
 
-def test_builder_and_diff():
+def test_builder_and_diff() -> None:
     # 1. Build Graph
     builder = NewGraphFlow("test_flow", "1.0", "Test")
 
@@ -126,7 +126,7 @@ def test_builder_and_diff():
 
     # 2. Diff
     builder2 = NewGraphFlow("test_flow", "1.1", "Test")
-    builder2.define_profile("profile1", "assistant", "helpful") # Same profile
+    builder2.define_profile("profile1", "assistant", "helpful")  # Same profile
     builder2.add_switch("switch1", "var1", {"case1": "agent1"}, "agent1")
     builder2.add_agent_ref("agent1", "profile1")
     builder2.connect("switch1", "agent1")
