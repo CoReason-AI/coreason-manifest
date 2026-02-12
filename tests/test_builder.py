@@ -140,14 +140,18 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
     builder_l.define_brain("brain1", "role", "persona")
     builder_l.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
     assert len(builder_l.sequence) == 1
-    assert builder_l.sequence[0].tools == []
+    node_l = builder_l.sequence[0]
+    assert isinstance(node_l, AgentNode)
+    assert node_l.tools == []
 
     # Graph
     builder_g = NewGraphFlow("Test", "1.0", "Desc")
     builder_g.define_brain("brain1", "role", "persona")
     builder_g.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
     assert "agent1" in builder_g._nodes
-    assert builder_g._nodes["agent1"].tools == []
+    node_g = builder_g._nodes["agent1"]
+    assert isinstance(node_g, AgentNode)
+    assert node_g.tools == []
 
 
 def test_builder_coverage_explicit_add_agent() -> None:
@@ -173,6 +177,7 @@ def test_agent_builder() -> None:
     builder.with_identity("role1", "persona1")
     agent = builder.build()
     assert agent.id == "agent1"
+    assert isinstance(agent.brain, Brain)
     assert agent.brain.role == "role1"
     assert agent.brain.persona == "persona1"
 
@@ -185,6 +190,7 @@ def test_agent_builder() -> None:
     builder.with_supervision(retries=3)
 
     agent = builder.build()
+    assert isinstance(agent.brain, Brain)
     assert agent.brain.reasoning is not None
     assert agent.brain.reflex is not None
     assert agent.tools == ["tool1"]

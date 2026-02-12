@@ -1,4 +1,5 @@
-from typing import Annotated, Any, Iterable, Literal
+from collections.abc import Iterable
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 

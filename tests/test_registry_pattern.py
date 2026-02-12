@@ -176,6 +176,7 @@ def test_tool_integrity_failure() -> None:
             sequence=[agent],
         )
 
+
 def test_tool_integrity_failure_graph() -> None:
     """Ensures that referencing a missing tool raises a validation error in GraphFlow."""
     brain = Brain(role="assistant", persona="helper", reasoning=None, reflex=None)

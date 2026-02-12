@@ -85,13 +85,7 @@ def test_core_kernel_instantiation() -> None:
     blackboard = Blackboard(variables={"context": variable_def}, persistence=False)
 
     # Define ToolPack for integrity
-    tool_pack = ToolPack(
-        kind="ToolPack",
-        namespace="core",
-        tools=["search"],
-        dependencies=[],
-        env_vars=[]
-    )
+    tool_pack = ToolPack(kind="ToolPack", namespace="core", tools=["search"], dependencies=[], env_vars=[])
     definitions = FlowDefinitions(tool_packs={"core": tool_pack})
 
     edge = Edge(source="agent-1", target="switch-1")
