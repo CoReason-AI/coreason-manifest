@@ -148,6 +148,7 @@ class SwarmNode(Node):
     distribution_strategy: Literal["sharded", "round_robin"] = "sharded"
     max_concurrency: int = 5
     reducer_function: str = "concat"
+    aggregator_model: ModelRef | None = None # NEW
     output_variable: str
 
 

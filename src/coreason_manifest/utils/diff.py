@@ -192,6 +192,9 @@ def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[Di
     # 3. Type-Specific Logic (The SOTA Upgrade)
     if old_node.type == "agent":
         _diff_agent_node(path, old_node, new_node, changes)
+    elif old_node.type == "switch":
+        # NEW: Handle Logic Drift in routing
+        _diff_switch_node(path, old_node, new_node, changes)
     elif old_node.type == "inspector" and old_node.criteria != new_node.criteria:
         # Changing criteria is strict governance - Fixed SIM102 (combined if)
         changes.append(
@@ -204,7 +207,6 @@ def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[Di
         )
 
     # 4. Fallback for unhandled fields
-    # Fixed SIM102 (combined if)
     if old_node != new_node and not any(c.path.startswith(path) for c in changes):
         changes.append(DiffChange(path=path, old=old_node, new=new_node, category=ChangeCategory.PATCH))
 
@@ -212,19 +214,35 @@ def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[Di
 def _diff_agent_node(path: str, old: Any, new: Any, changes: list[DiffChange]) -> None:
     """Specialized logic for Agent Nodes."""
     # Tools: Removal = BREAKING, Addition = FEATURE
-    old_tools = set(old.tools)
-    new_tools = set(new.tools)
+    old_tools = old.tools
+    new_tools = new.tools
 
-    removed = old_tools - new_tools
-    added = new_tools - old_tools
+    old_tools_set = set(old_tools)
+    new_tools_set = set(new_tools)
+
+    removed = old_tools_set - new_tools_set
+    added = new_tools_set - old_tools_set
 
     if removed:
         changes.append(
-            DiffChange(path=f"{path}.tools", old=list(removed), new=None, category=ChangeCategory.BREAKING)
+            DiffChange(
+                path=f"{path}.tools", old=list(removed), new=None, category=ChangeCategory.BREAKING
+            )
         )
     if added:
         changes.append(
             DiffChange(path=f"{path}.tools", old=None, new=list(added), category=ChangeCategory.FEATURE)
+        )
+
+    # NEW: Order Sensitivity Check (Optimization Patch)
+    if not removed and not added and old_tools != new_tools:
+        changes.append(
+            DiffChange(
+                path=f"{path}.tools",
+                old=old_tools,
+                new=new_tools,
+                category=ChangeCategory.PATCH,  # Not breaking, but semantic
+            )
         )
 
     # Profile: Inline definition change could be RESOURCE (model) or GOVERNANCE (prompt)
@@ -232,5 +250,50 @@ def _diff_agent_node(path: str, old: Any, new: Any, changes: list[DiffChange]) -
         # If it's a string ref change, it's a PATCH (pointers changed)
         # For safety, changing the profile reference is often significant.
         changes.append(
-            DiffChange(path=f"{path}.profile", old=old.profile, new=new.profile, category=ChangeCategory.PATCH)
+            DiffChange(
+                path=f"{path}.profile", old=old.profile, new=new.profile, category=ChangeCategory.PATCH
+            )
         )
+
+
+def _diff_switch_node(path: str, old: Any, new: Any, changes: list[DiffChange]) -> None:
+    """Detect logic drift in routing tables."""
+    old_cases = set(old.cases.keys())
+    new_cases = set(new.cases.keys())
+
+    # Removing a route is BREAKING logic (users might hit default unexpectedly)
+    if old_cases - new_cases:
+        changes.append(
+            DiffChange(
+                path=f"{path}.cases",
+                old=list(old_cases - new_cases),
+                new=None,
+                category=ChangeCategory.BREAKING,
+            )
+        )
+
+    # Adding a route is a FEATURE
+    if new_cases - old_cases:
+        changes.append(
+            DiffChange(
+                path=f"{path}.cases",
+                old=None,
+                new=list(new_cases - old_cases),
+                category=ChangeCategory.FEATURE,
+            )
+        )
+
+    # Changing the target of an existing route is a PATCH (Logic Change)
+    # Fix PERF401
+    changes.extend(
+        [
+            DiffChange(
+                path=f"{path}.cases.{key}",
+                old=old.cases[key],
+                new=new.cases[key],
+                category=ChangeCategory.PATCH,
+            )
+            for key in old_cases & new_cases
+            if old.cases[key] != new.cases[key]
+        ]
+    )

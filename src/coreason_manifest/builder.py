@@ -377,12 +377,19 @@ class NewGraphFlow(BaseFlowBuilder):
         worker_profile: str,
         workload_variable: str,
         reducer: str = "concat",
+        aggregator_model: str | None = None,  # NEW
         concurrency: int = 5,
         output_variable: str = "",
     ) -> "NewGraphFlow":
         """Adds a SwarmNode for parallel execution."""
         if not output_variable:
             output_variable = f"{node_id}_output"
+
+        # Resolve string model name to ModelRef if provided
+        # ModelRef is str | ModelCriteria, so passing string directly is valid.
+        # But if we want to be strict or if SwarmNode expects ModelRef, we might need check.
+        # Assuming string is fine.
+        agg_model_ref = aggregator_model
 
         node = SwarmNode(
             id=node_id,
@@ -394,6 +401,7 @@ class NewGraphFlow(BaseFlowBuilder):
             distribution_strategy="sharded",
             max_concurrency=concurrency,
             reducer_function=reducer,
+            aggregator_model=agg_model_ref, # NEW
             output_variable=output_variable,
         )
         self._nodes[node.id] = node
