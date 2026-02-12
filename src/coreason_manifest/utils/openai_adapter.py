@@ -19,7 +19,7 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
         tool_packs = []
 
     # Model: use node.brain.reasoning.model or default
-    model = "gpt-4-turbo"
+    model: Any = "gpt-4-turbo"
     if node.brain.reasoning:
         model = node.brain.reasoning.model
 

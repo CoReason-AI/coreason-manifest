@@ -1,17 +1,18 @@
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
-
 
 # =========================================================================
 #  1. SEMANTIC MODEL ROUTING ("The Hardware")
 # =========================================================================
+
 
 class ModelCriteria(BaseModel):
     """
     Defines 'What kind of model' is needed, rather than 'Which specific model'.
     Allows the runtime to route dynamically based on health, cost, or policy.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     strategy: Literal["lowest_cost", "lowest_latency", "performance", "balanced"] = Field(
@@ -24,24 +25,24 @@ class ModelCriteria(BaseModel):
     compliance: list[Literal["hipaa", "gdpr", "eu_residency", "fedramp"]] | None = Field(
         None, description="Regulatory and data residency constraints."
     )
-    max_cost_per_m_tokens: float | None = Field(
-        None, description="FinOps circuit breaker for input/output cost."
-    )
+    max_cost_per_m_tokens: float | None = Field(None, description="FinOps circuit breaker for input/output cost.")
     provider_whitelist: list[str] | None = Field(
         None, description="Restrict selection to specific providers (e.g. ['azure', 'bedrock'])."
     )
 
 
 # Type alias: A model can be a hardcoded ID ("gpt-4") OR a semantic policy
-ModelRef = Union[str, ModelCriteria]
+ModelRef = str | ModelCriteria
 
 
 # =========================================================================
 #  2. COGNITIVE ARCHITECTURES ("The Software")
 # =========================================================================
 
+
 class BaseReasoning(BaseModel):
     """Base configuration for System 2 cognitive processes."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     # UPDATED: Accepts ModelRef (str | Criteria)
@@ -53,6 +54,7 @@ class BaseReasoning(BaseModel):
 
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
+
     type: Literal["standard"] = "standard"
     thoughts_max: int = Field(..., description="Max sequential reasoning steps.")
     min_confidence: float = Field(0.7, description="Minimum confidence score to proceed.")
@@ -63,6 +65,7 @@ class TreeSearchReasoning(BaseReasoning):
     Language Agent Tree Search (LATS).
     Uses Monte Carlo Tree Search (MCTS) to simulate and score paths.
     """
+
     type: Literal["tree_search"] = "tree_search"
 
     depth: int = Field(3, description="Max tree depth.")
@@ -79,6 +82,7 @@ class AtomReasoning(BaseReasoning):
     Atom of Thoughts (AoT).
     Efficient DAG-based reasoning with context contraction.
     """
+
     type: Literal["atom"] = "atom"
 
     decomposition_breadth: int = Field(..., description="Max parallel atoms.")
@@ -91,6 +95,7 @@ class CouncilReasoning(BaseReasoning):
     Multi-Persona Consensus (SPIO).
     Orchestrates a voting protocol among diverse personas.
     """
+
     type: Literal["council"] = "council"
 
     personas: list[str] = Field(..., description="List of system prompts.")
@@ -106,7 +111,7 @@ class CouncilReasoning(BaseReasoning):
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
 ReasoningConfig = Annotated[
-    Union[StandardReasoning, TreeSearchReasoning, AtomReasoning, CouncilReasoning],
+    StandardReasoning | TreeSearchReasoning | AtomReasoning | CouncilReasoning,
     Field(discriminator="type"),
 ]
 
@@ -115,8 +120,10 @@ ReasoningConfig = Annotated[
 #  3. SYSTEM 1 & OVERSIGHT
 # =========================================================================
 
+
 class Reflex(BaseModel):
     """Configuration for System 1 (Fast) reactions."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     model: ModelRef  # <--- Updated to allow routing
@@ -126,6 +133,7 @@ class Reflex(BaseModel):
 
 class Supervision(BaseModel):
     """Fault tolerance and adversarial oversight."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     strategy: Literal["resume", "restart", "escalate", "degrade", "adversarial"]
@@ -143,6 +151,7 @@ class Supervision(BaseModel):
 
 class Optimizer(BaseModel):
     """Self-Improvement / DSPy-style optimization."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     teacher_model: str
