@@ -30,6 +30,7 @@ class NodeExecution(BaseModel):
     error: str | None = None
     timestamp: datetime
     duration_ms: float
+    attributes: dict[str, str | int | float | bool] = Field(default_factory=dict)
 
     # --- VERITAS INTEGRITY RESTORATION ---
     execution_hash: str | None = Field(None, description="SHA-256 hash of inputs+outputs+config.")
