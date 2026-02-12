@@ -133,9 +133,7 @@ class HumanNode(Node):
     interaction_mode: Literal["blocking", "shadow", "steering"] = Field(
         "blocking", description="Wait for input vs shadow execution."
     )
-    shadow_timeout_seconds: int | None = Field(
-        None, description="Time window for intervention in shadow mode."
-    )
+    shadow_timeout_seconds: int | None = Field(None, description="Time window for intervention in shadow mode.")
 
 
 class SwarmNode(Node):
