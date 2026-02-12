@@ -89,6 +89,10 @@ class BaseReasoning(BaseModel):
     # *** UPGRADE: CONSTITUTIONAL AI ***
     constitution: ConstitutionalScope | None = Field(None, description="Intrinsic safety constraints.")
 
+    def required_capabilities(self) -> list[str]:
+        """Returns a list of high-risk capabilities required by this engine."""
+        return []
+
 
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
@@ -293,6 +297,24 @@ class ComputerUseReasoning(BaseReasoning):
 
     screenshot_frequency_ms: int = Field(1000, description="Delay between visual observation frames (in milliseconds).")
 
+    def required_capabilities(self) -> list[str]:
+        return ["computer_use"]
+
+
+class CodeExecutionReasoning(BaseReasoning):
+    """
+    Executes Python code in a sandboxed environment.
+    """
+
+    type: Literal["code_execution"] = "code_execution"
+
+    # Environment
+    allow_network: bool = Field(False, description="Allow external network access.")
+    timeout_seconds: float = Field(30.0, description="Max execution time.")
+
+    def required_capabilities(self) -> list[str]:
+        return ["code_execution"]
+
 
 class GraphReasoning(BaseReasoning):
     """
@@ -340,6 +362,7 @@ ReasoningConfig = Annotated[
     | EnsembleReasoning
     | RedTeamingReasoning
     | ComputerUseReasoning
+    | CodeExecutionReasoning
     | GraphReasoning,
     Field(discriminator="type"),
 ]
@@ -392,6 +415,7 @@ __all__ = [
     "AttentionReasoning",
     "BaseReasoning",
     "BufferReasoning",
+    "CodeExecutionReasoning",
     "ComputerUseReasoning",
     "ConstitutionalScope",
     "CouncilReasoning",
