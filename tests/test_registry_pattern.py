@@ -41,17 +41,19 @@ def test_flow_definitions() -> None:
     """Test FlowDefinitions instantiation."""
     brain = Brain(role="assistant", persona="helpful", reasoning=None, reflex=None)
     definitions = FlowDefinitions(
-        agents={"brain-id-123": brain},
+        brains={"brain-id-123": brain},
         tool_packs={},
+        skills={"skill-1": {"type": "python", "code": "print('hello')"}},
     )
-    assert definitions.agents["brain-id-123"] == brain
+    assert definitions.brains["brain-id-123"] == brain
+    assert definitions.skills["skill-1"]["type"] == "python"
 
 
 def test_linear_flow_definitions() -> None:
     """Test LinearFlow with definitions."""
     brain = Brain(role="assistant", persona="helpful", reasoning=None, reflex=None)
     definitions = FlowDefinitions(
-        agents={"brain-id-123": brain},
+        brains={"brain-id-123": brain},
         tool_packs={},
     )
     agent = AgentNode(
@@ -72,7 +74,7 @@ def test_linear_flow_definitions() -> None:
     )
 
     assert flow.definitions is not None
-    assert flow.definitions.agents["brain-id-123"] == brain
+    assert flow.definitions.brains["brain-id-123"] == brain
 
     first_node = flow.sequence[0]
     assert isinstance(first_node, AgentNode)
@@ -83,7 +85,7 @@ def test_graph_flow_definitions() -> None:
     """Test GraphFlow with definitions."""
     brain = Brain(role="assistant", persona="helpful", reasoning=None, reflex=None)
     definitions = FlowDefinitions(
-        agents={"brain-id-123": brain},
+        brains={"brain-id-123": brain},
         tool_packs={},
     )
     agent = AgentNode(
@@ -109,7 +111,7 @@ def test_graph_flow_definitions() -> None:
     )
 
     assert flow.definitions is not None
-    assert flow.definitions.agents["brain-id-123"] == brain
+    assert flow.definitions.brains["brain-id-123"] == brain
 
     agent_node = flow.graph.nodes["agent-1"]
     assert isinstance(agent_node, AgentNode)
