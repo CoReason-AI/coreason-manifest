@@ -16,6 +16,8 @@ def test_attention_reasoning_instantiation() -> None:
     # Default is now "rephrase" for safety
     assert attn.attention_mode == "rephrase"
     assert attn.focus_model is None
+    # BaseReasoning default
+    assert attn.guided_decoding == "none"
 
     # Test with custom fields
     criteria = ModelCriteria(strategy="lowest_latency")
@@ -23,10 +25,12 @@ def test_attention_reasoning_instantiation() -> None:
         model="gpt-4",
         attention_mode="extract",
         focus_model=criteria,
+        guided_decoding="regex",
     )
     assert attn.attention_mode == "extract"
     assert isinstance(attn.focus_model, ModelCriteria)
     assert attn.focus_model.strategy == "lowest_latency"
+    assert attn.guided_decoding == "regex"
 
 
 def test_buffer_reasoning_instantiation() -> None:
@@ -36,6 +40,7 @@ def test_buffer_reasoning_instantiation() -> None:
     assert buf.max_templates == 3
     assert buf.similarity_threshold == 0.75
     assert buf.template_collection == "my_templates"
+    assert buf.learning_strategy == "read_only"
 
     # Test with custom fields
     buf = BufferReasoning(
@@ -43,10 +48,12 @@ def test_buffer_reasoning_instantiation() -> None:
         max_templates=10,
         similarity_threshold=0.9,
         template_collection="advanced_templates",
+        learning_strategy="append_new",
     )
     assert buf.max_templates == 10
     assert buf.similarity_threshold == 0.9
     assert buf.template_collection == "advanced_templates"
+    assert buf.learning_strategy == "append_new"
 
 
 def test_reasoning_config_union_s2a_bot() -> None:

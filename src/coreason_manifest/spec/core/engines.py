@@ -29,15 +29,14 @@ class ModelCriteria(BaseModel):
 
     # Multi-Model Routing
     routing_mode: Literal["single", "fallback", "round_robin", "broadcast"] = Field(
-        "single", description="How to handle multiple matching models."
+        "single", description="Broadcast mode is required for EnsembleReasoning."
     )
 
     provider_whitelist: list[str] | None = None
-    specific_models: list[str] | None = Field(
-        None, description="Explicit list of model IDs to route between (e.g. ['gpt-4', 'claude-3'])."
-    )
+    specific_models: list[str] | None = Field(None, description="Explicit list of model IDs to route between.")
 
 
+# Type alias: A model can be a hardcoded ID ("gpt-4") OR a semantic policy
 ModelRef = str | ModelCriteria
 
 
@@ -51,31 +50,34 @@ class BaseReasoning(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    model: ModelRef = Field(..., description="The model (or policy) responsible for this reasoning loop.")
+    model: ModelRef = Field(..., description="The primary model responsible for execution.")
     temperature: float = Field(0.0, description="Sampling temperature.")
     max_tokens: int | None = Field(None, description="Hard limit on output tokens.")
+
+    # *** FIX 3: GUIDED DECODING ***
+    # Enforces syntax constraints at the token level (SOTA reliability)
+    guided_decoding: Literal["json_schema", "regex", "grammar", "none"] = Field(
+        "none", description="If set, restricts the model to output valid syntax only."
+    )
 
 
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
 
     type: Literal["standard"] = "standard"
-    thoughts_max: int = Field(..., description="Max sequential reasoning steps.")
+    thoughts_max: int = Field(5, description="Max sequential reasoning steps.")
     min_confidence: float = Field(0.7, description="Minimum confidence score to proceed.")
 
 
 class AttentionReasoning(BaseReasoning):
     """
     System 2 Attention (S2A).
-    Filters and rewrites the input context to remove irrelevant information
-    (noise/bias) BEFORE reasoning begins.
+    Filters and rewrites input context to maximize signal-to-noise ratio.
     """
 
     type: Literal["attention"] = "attention"
 
-    attention_mode: Literal["rephrase", "extract"] = Field(
-        "rephrase", description="Method for sanitizing input context."
-    )
+    attention_mode: Literal["rephrase", "extract"] = Field("rephrase", description="Method for sanitizing input.")
     # The model used to filter the noise (can be smaller/faster than the main reasoning model)
     focus_model: ModelRef | None = Field(None, description="Model used for the S2A filtering step.")
 
@@ -83,15 +85,20 @@ class AttentionReasoning(BaseReasoning):
 class BufferReasoning(BaseReasoning):
     """
     Buffer of Thoughts (BoT).
-    Retrieves a high-level 'Thought Template' from a meta-buffer (vector store)
-    to guide the reasoning process, rather than generating from scratch.
+    Retrieves and STORES thought templates to solve routine problems.
     """
 
     type: Literal["buffer"] = "buffer"
 
-    max_templates: int = Field(3, description="Max number of templates to retrieve.")
-    similarity_threshold: float = Field(0.75, description="Min cosine similarity for a template match.")
-    template_collection: str = Field(..., description="Name of the vector collection containing thought templates.")
+    max_templates: int = Field(3, description="Max templates to retrieve.")
+    similarity_threshold: float = Field(0.75, description="Min cosine similarity.")
+    template_collection: str = Field(..., description="Vector collection name.")
+
+    # *** FIX 1: LEARNING STRATEGY ***
+    # Allows the agent to contribute new knowledge back to the buffer
+    learning_strategy: Literal["read_only", "append_new", "refine_existing"] = Field(
+        "read_only", description="Whether to save successful executions back to the buffer."
+    )
 
 
 class TreeSearchReasoning(BaseReasoning):
@@ -112,28 +119,27 @@ class AtomReasoning(BaseReasoning):
 
     type: Literal["atom"] = "atom"
 
-    decomposition_breadth: int = Field(..., description="Max parallel atoms.")
-    contract_every_steps: int = Field(2, description="Frequency of context condensation.")
-    global_context_window: int = Field(4096, description="Rolling window size.")
+    decomposition_breadth: int = 3
+    contract_every_steps: int = 2
+    global_context_window: int = 4096
 
 
 class CouncilReasoning(BaseReasoning):
-    """Multi-Persona Consensus (Same Model, Different Personas)."""
+    """Multi-Persona Consensus."""
 
     type: Literal["council"] = "council"
 
     personas: list[str] = Field(..., description="List of system prompts.")
-    proposal_count: int = Field(1, description="Proposals per persona.")
+    proposal_count: int = 1
     voting_mode: Literal["unanimous", "majority", "weighted"] = "majority"
-    rounds: int = Field(1, description="Max debate rounds.")
+    rounds: int = 1
     tie_breaker_model: ModelRef | None = None
 
 
 class EnsembleReasoning(BaseReasoning):
     """
     Multi-Model Consensus with Cascading Verification.
-    Executes parallel queries and uses a hybrid fast/slow path to verify agreement.
-    NOTE: disagreement_threshold < 0.6 is a strong signal of emergent instability.
+    Uses 'fast path' metrics (embedding/lexical) before triggering 'slow path' LLMs.
     """
 
     type: Literal["ensemble"] = "ensemble"
@@ -145,7 +151,7 @@ class EnsembleReasoning(BaseReasoning):
     # 'lexical': Jaccard/Token overlap (Zero cost, good for strict code/math).
     # 'hybrid': Average of both.
     fast_comparison_mode: Literal["embedding", "lexical", "hybrid"] = Field(
-        "embedding", description="Method for initial cheap agreement check."
+        "embedding", description="Metric for fast check."
     )
 
     # Thresholds for the Fast Path
@@ -178,8 +184,6 @@ class RedTeamingReasoning(BaseReasoning):
     """
     Agentic Red Teaming (ART).
     Proactive adversarial simulation engine.
-    Uses an 'Attacker' model to run multi-turn attacks against a 'Target' model
-    to discover vulnerabilities, hallucinations, or policy failures.
     """
 
     type: Literal["red_teaming"] = "red_teaming"
@@ -209,8 +213,7 @@ class RedTeamingReasoning(BaseReasoning):
 class ComputerUseReasoning(BaseReasoning):
     """
     Computer Use / GUI Automation.
-    Enables 'Operator Agents' that can view a screen and perform mouse/keyboard actions.
-    Uses Vision-Language-Action (VLA) models to interact with GUIs.
+    Enables 'Operator Agents' to control desktop environments.
     """
 
     type: Literal["computer_use"] = "computer_use"
@@ -218,6 +221,12 @@ class ComputerUseReasoning(BaseReasoning):
     # Environment Configuration
     screen_resolution: tuple[int, int] | None = Field(
         None, description="Target display dimensions (width, height). If None, auto-detected."
+    )
+
+    # *** FIX 2: COORDINATE SYSTEM ***
+    # Critical for model portability across screen sizes
+    coordinate_system: Literal["absolute_px", "normalized_0_1"] = Field(
+        "normalized_0_1", description="Coordinate format (pixels vs relative)."
     )
 
     # Interaction Protocol
