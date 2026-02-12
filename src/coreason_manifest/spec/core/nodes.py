@@ -4,10 +4,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # IMPORT ModelRef to link the new routing capability
 from coreason_manifest.spec.core.engines import (
+    FastPath,
     ModelRef,
     Optimizer,
     ReasoningConfig,
-    Reflex,
     Supervision,
 )
 
@@ -23,7 +23,7 @@ class Node(BaseModel):
     type: str
 
 
-class Brain(BaseModel):
+class CognitiveProfile(BaseModel):
     """The active processing unit of an agent."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -31,22 +31,22 @@ class Brain(BaseModel):
     role: str
     persona: str
     reasoning: ReasoningConfig | None
-    reflex: Reflex | None
+    fast_path: FastPath | None
 
 
 class AgentNode(Node):
     """
-    Executes a cognitive task using a Brain configuration.
+    Executes a cognitive task using a CognitiveProfile configuration.
 
-    The 'brain' field is polymorphic:
-    - Pass a Brain object for inline definition (Scripting mode).
-    - Pass a string ID to reference 'definitions.brains' (Production mode).
+    The 'profile' field is polymorphic:
+    - Pass a CognitiveProfile object for inline definition (Scripting mode).
+    - Pass a string ID to reference 'definitions.profiles' (Production mode).
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["agent"] = "agent"
-    brain: Brain | str
+    profile: CognitiveProfile | str
     tools: list[str]
 
 
@@ -59,7 +59,7 @@ class SwitchNode(Node):
     default: str
 
 
-class BaseInspector(Node):
+class InspectorNodeBase(Node):
     """Shared logic for all inspection/judgement nodes."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -71,7 +71,7 @@ class BaseInspector(Node):
     optimizer: Optimizer | None = None
 
 
-class InspectorNode(BaseInspector):
+class InspectorNode(InspectorNodeBase):
     """
     A node that evaluates a variable against criteria.
     Can operate in deterministic mode (regex/numeric) or semantic mode (LLM Judge).
@@ -86,7 +86,7 @@ class InspectorNode(BaseInspector):
     pass_threshold: float | None = None
 
 
-class EmergenceInspector(BaseInspector):
+class EmergenceInspectorNode(InspectorNodeBase):
     """
     Specialized inspector for detecting novel/emergent behaviors.
     """
@@ -124,7 +124,7 @@ class HumanNode(Node):
     options: list[str] | None = None
 
 
-class Placeholder(Node):
+class PlaceholderNode(Node):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["placeholder"] = "placeholder"
@@ -133,13 +133,13 @@ class Placeholder(Node):
 
 __all__ = [
     "AgentNode",
-    "BaseInspector",
-    "Brain",
-    "EmergenceInspector",
+    "CognitiveProfile",
+    "EmergenceInspectorNode",
     "HumanNode",
     "InspectorNode",
+    "InspectorNodeBase",
     "Node",
-    "Placeholder",
+    "PlaceholderNode",
     "PlannerNode",
     "SwitchNode",
 ]

@@ -3,17 +3,17 @@ import pytest
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, Brain, Placeholder
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.core.tools import ToolPack
 
 
 def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0", description="Desc")
     builder.add_step(
-        Placeholder(id="step1", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+        PlaceholderNode(id="step1", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
     )
     builder.add_step(
-        Placeholder(id="step2", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+        PlaceholderNode(id="step2", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
     )
 
     tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
@@ -35,8 +35,12 @@ def test_linear_builder() -> None:
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0", description="Desc")
-    builder.add_node(Placeholder(id="n1", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
-    builder.add_node(Placeholder(id="n2", type="placeholder", metadata={}, supervision=None, required_capabilities=[]))
+    builder.add_node(
+        PlaceholderNode(id="n1", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+    )
+    builder.add_node(
+        PlaceholderNode(id="n2", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
+    )
     builder.connect("n1", "n2", condition="ok")
 
     tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
@@ -137,7 +141,7 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
     """Test add_agent_ref with default tools=None."""
     # Linear
     builder_l = NewLinearFlow("Test", "1.0", "Desc")
-    builder_l.define_brain("brain1", "role", "persona")
+    builder_l.define_profile("brain1", "role", "persona")
     builder_l.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
     assert len(builder_l.sequence) == 1
     node_l = builder_l.sequence[0]
@@ -146,7 +150,7 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
 
     # Graph
     builder_g = NewGraphFlow("Test", "1.0", "Desc")
-    builder_g.define_brain("brain1", "role", "persona")
+    builder_g.define_profile("brain1", "role", "persona")
     builder_g.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
     assert "agent1" in builder_g._nodes
     node_g = builder_g._nodes["agent1"]
@@ -156,8 +160,8 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
 
 def test_builder_coverage_explicit_add_agent() -> None:
     """Explicitly test add_agent to ensure coverage."""
-    brain = Brain(role="role", persona="persona", reasoning=None, reflex=None)
-    agent = AgentNode(id="agent1", type="agent", brain=brain, tools=[], metadata={}, supervision=None)
+    brain = CognitiveProfile(role="role", persona="persona", reasoning=None, fast_path=None)
+    agent = AgentNode(id="agent1", type="agent", profile=brain, tools=[], metadata={}, supervision=None)
 
     # Linear
     builder_l = NewLinearFlow("Test", "1.0", "Desc")
@@ -177,22 +181,22 @@ def test_agent_builder() -> None:
     builder.with_identity("role1", "persona1")
     agent = builder.build()
     assert agent.id == "agent1"
-    assert isinstance(agent.brain, Brain)
-    assert agent.brain.role == "role1"
-    assert agent.brain.persona == "persona1"
+    assert isinstance(agent.profile, CognitiveProfile)
+    assert agent.profile.role == "role1"
+    assert agent.profile.persona == "persona1"
 
     # Full build
     builder = AgentBuilder("agent2")
     builder.with_identity("role2", "persona2")
     builder.with_reasoning(model="gpt-4")
-    builder.with_reflex(model="gpt-3.5")
+    builder.with_fast_path(model="gpt-3.5")
     builder.with_tools(["tool1"])
     builder.with_supervision(retries=3)
 
     agent = builder.build()
-    assert isinstance(agent.brain, Brain)
-    assert agent.brain.reasoning is not None
-    assert agent.brain.reflex is not None
+    assert isinstance(agent.profile, CognitiveProfile)
+    assert agent.profile.reasoning is not None
+    assert agent.profile.fast_path is not None
     assert agent.tools == ["tool1"]
     assert agent.supervision is not None
     assert agent.supervision.max_retries == 3

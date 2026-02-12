@@ -18,18 +18,18 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     if tool_packs is None:
         tool_packs = []
 
-    # Model: use node.brain.reasoning.model or default
+    # Model: use node.profile.reasoning.model or default
     model: Any = "gpt-4-turbo"
-    if isinstance(node.brain, str):
-        # TODO: Lookup Brain from registry in Phase 2
+    if isinstance(node.profile, str):
+        # TODO: Lookup Profile from registry in Phase 2
         # For now, we raise an error as we can't resolve the string ID without the registry context
-        raise NotImplementedError("Brain resolution from string ID not yet implemented in adapter.")
+        raise NotImplementedError("Profile resolution from string ID not yet implemented in adapter.")
 
-    if node.brain.reasoning:
-        model = node.brain.reasoning.model
+    if node.profile.reasoning:
+        model = node.profile.reasoning.model
 
     # Instructions: Combine role and persona
-    instructions = f"{node.brain.role} {node.brain.persona}"
+    instructions = f"{node.profile.role} {node.profile.persona}"
 
     # Tools: Generate function definitions for every tool listed in node.tools found in tool_packs
     available_tools = set()

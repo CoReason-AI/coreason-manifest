@@ -3,8 +3,8 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.engines import (
     CouncilReasoning,
+    FastPath,
     ModelCriteria,
-    Reflex,
     StandardReasoning,
     Supervision,
     TreeSearchReasoning,
@@ -56,7 +56,7 @@ def test_tree_search_evaluator_routing() -> None:
 
 def test_reflex_routing() -> None:
     criteria = ModelCriteria(strategy="lowest_latency")
-    reflex = Reflex(model=criteria, timeout_ms=500)
+    reflex = FastPath(model=criteria, timeout_ms=500)
     assert isinstance(reflex.model, ModelCriteria)
     assert reflex.model.strategy == "lowest_latency"
 

@@ -2,7 +2,7 @@ import pytest
 
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_supervision
 from coreason_manifest.spec.core.engines import Supervision
-from coreason_manifest.spec.core.nodes import AgentNode, Brain
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 
 
 def test_builder_integration_circuit_breaker() -> None:
@@ -15,7 +15,7 @@ def test_builder_integration_circuit_breaker() -> None:
         id="dummy_linear",
         metadata={},
         supervision=None,
-        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     lf.add_step(node)
@@ -36,7 +36,7 @@ def test_builder_integration_circuit_breaker() -> None:
         id="dummy",
         metadata={},
         supervision=None,
-        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     gf.add_node(node_g)
@@ -87,7 +87,7 @@ def test_validator_catch_degrade_missing_payload() -> None:
         id="node1",
         metadata={},
         supervision=sup,
-        brain=Brain(role="tester", persona="tester", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None),
         tools=[],
     )
 
@@ -111,7 +111,7 @@ def test_validator_catch_invalid_backoff() -> None:
         id="node2",
         metadata={},
         supervision=sup,
-        brain=Brain(role="tester", persona="tester", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None),
         tools=[],
     )
 
@@ -135,7 +135,7 @@ def test_builder_integration_governance_update() -> None:
         id="dummy_update",
         metadata={},
         supervision=None,
-        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     lf.add_step(node)
@@ -170,7 +170,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         id="node1",
         metadata={},
         supervision=None,
-        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     lf.add_step(node)
@@ -194,7 +194,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         id="node2",
         metadata={},
         supervision=sup,
-        brain=Brain(role="dummy", persona="dummy", reasoning=None, reflex=None),
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     lf2.add_step(node2)

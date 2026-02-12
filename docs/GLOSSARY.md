@@ -77,7 +77,7 @@ A passive, pure data library that serves as the definitive source of truth for s
 A mechanism allowing agents to emit multiple named, concurrent streams (e.g., `stream_id="thinking"` vs `stream_id="default"`) during execution.
 
 ### System 2
-Slow, deliberative reasoning loops (Review, Critique) used for deep thinking and self-correction, as opposed to System 1 (Fast generation/Reflex).
+Slow, deliberative reasoning loops (Review, Critique) used for deep thinking and self-correction, as opposed to System 1 (Fast generation/FastPath).
 
 ## T
 

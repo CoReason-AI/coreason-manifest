@@ -21,13 +21,13 @@ We are adopting standard terminology from Multi-Agent Systems, Actor Model, and 
 | `RecipeDefinition` | `GraphFlow` | Explicitly describes the Cyclic Graph structure. |
 | `StateDefinition` | `Blackboard` | "Blackboard Pattern" implies shared multi-agent memory. |
 | `Episteme` | `ReasoningConfig` | System 2 slow-thinking logic. |
-| `Cortex` | `Reflex` | System 1 fast-response logic. |
+| `Cortex` | `FastPath` | System 1 fast-response logic. |
 | `Maco` | `Supervision` | "Supervisor Pattern" (Erlang) > "Error Handling". |
 | `Foundry` | `Optimizer` | DSPy-style self-improvement/compilation. |
-| `CognitiveProfile` | `Brain` | The active processing unit of an agent. |
+| `CognitiveProfile` | `CognitiveProfile` | The active processing unit of an agent. |
 | `RouterNode` | `SwitchNode` | Visual metaphor for branching logic tracks. |
 | `GenerativeNode` | `PlannerNode` | A node that dynamically plans/solves. |
-| `SemanticRef` | `Placeholder` | An empty slot to be filled later. |
+| `SemanticRef` | `PlaceholderNode` | An empty slot to be filled later. |
 
 ## The Architectural Doctrine
 

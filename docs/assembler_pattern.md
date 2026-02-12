@@ -17,7 +17,7 @@ The `CognitiveProfile` consists of key components:
     *   **Memory (Read)**: Sources to fetch context from (`memory_read` / `memory`).
     *   **Memory (Write)**: Rules for saving memories (`memory_write`).
 4.  **Cognition (Think)**:
-    *   **Reflex (System 1)**: Fast-path execution (`reflex`).
+    *   **FastPath (System 1)**: Fast-path execution (`fast_path`).
     *   **Reasoning (System 2)**: Deep thinking and self-correction (`reasoning`).
 5.  **Task (What)**: The logic primitive to apply (`task_primitive`, e.g., `extract`, `classify`).
 
@@ -26,65 +26,46 @@ The `CognitiveProfile` consists of key components:
 The `AgentNode` now supports a `construct` field. If provided, this inline definition takes precedence over `agent_ref`.
 
 ```python
-from coreason_manifest.spec.v2.recipe import AgentNode
-from coreason_manifest.spec.v2.agent import (
-    CognitiveProfile,
-    ContextDependency,
-    ComponentPriority
-)
-from coreason_manifest.spec.v2.knowledge import (
-    RetrievalConfig, RetrievalStrategy,
-    MemoryWriteConfig, ConsolidationStrategy
-)
-from coreason_manifest.spec.v2.reasoning import ReflexConfig, ReasoningConfig
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+# Note: These imports are illustrative; strict paths may vary
+from coreason_manifest.spec.core.engines import FastPath, ReasoningConfig
 
 # Define an inline agent with advanced cognitive capabilities
 profile = CognitiveProfile(
     role="senior_editor",
-    reasoning_mode="critique",
+    # reasoning_mode="critique", # Simplified for example
 
-    # 1. Context Dependencies
-    knowledge_contexts=[
-        ContextDependency(
-            name="brand_guidelines",
-            priority=ComponentPriority.CRITICAL
-        )
-    ],
+    # 1. Context Dependencies (Illustration)
+    # knowledge_contexts=[...],
 
-    # 2. Memory Access (RAG)
-    memory=[
-        RetrievalConfig(
-            strategy=RetrievalStrategy.DENSE,
-            collection_name="past_editorials",
-            top_k=3
-        )
-    ],
+    # 2. Memory Access (Illustration)
+    # memory=[...],
 
-    # 3. Memory Consolidation
-    memory_write=MemoryWriteConfig(
-        strategy=ConsolidationStrategy.SUMMARY_WINDOW,
-        frequency_turns=5
-    ),
+    # 3. Memory Consolidation (Illustration)
+    # memory_write=...,
 
     # 4. Fast Thinking (System 1)
-    reflex=ReflexConfig(
-        enabled=True,
-        confidence_threshold=0.9,
-        allowed_tools=["grammar_check"]
+    fast_path=FastPath(
+        model="gpt-3.5",
+        timeout_ms=1000,
+        caching=True
     ),
 
     # 5. Deep Reasoning (System 2)
     reasoning=ReasoningConfig(
-        max_revisions=2
-    ),
-
-    task_primitive="review_and_edit"
+        model="gpt-4",
+        # max_revisions=2
+    )
 )
 
 # Create the node
 node = AgentNode(
     id="editor_step",
-    construct=profile,
+    type="agent",
+    metadata={},
+    supervision=None,
+    tools=[],
+    profile=profile,
     # agent_ref is optional when construct is used
 )
 ```
@@ -106,10 +87,10 @@ Each `ContextDependency` has a `priority` level:
 The `PolicyConfig` now includes a `token_budget` field. The Weaver uses this budget to decide which context modules to prune.
 
 ```python
-from coreason_manifest.spec.v2.recipe import PolicyConfig
+# from coreason_manifest.spec.core.governance import PolicyConfig
 
-policy = PolicyConfig(
-    token_budget=8000,  # Max tokens for the assembled prompt
-    budget_cap_usd=5.0
-)
+# policy = PolicyConfig(
+#     token_budget=8000,  # Max tokens for the assembled prompt
+#     budget_cap_usd=5.0
+# )
 ```

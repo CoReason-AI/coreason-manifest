@@ -128,10 +128,10 @@ class TreeSearchReasoning(BaseReasoning):
     evaluator_model: ModelRef | None = Field(None, description="Model used to score leaf nodes.")
 
 
-class AtomReasoning(BaseReasoning):
-    """Atom of Thoughts (AoT) DAG decomposition."""
+class DecompositionReasoning(BaseReasoning):
+    """Decomposition (Atom of Thoughts) DAG splitting."""
 
-    type: Literal["atom"] = "atom"
+    type: Literal["decomposition"] = "decomposition"
 
     decomposition_breadth: int = 3
     contract_every_steps: int = 2
@@ -297,7 +297,7 @@ ReasoningConfig = Annotated[
     | AttentionReasoning
     | BufferReasoning
     | TreeSearchReasoning
-    | AtomReasoning
+    | DecompositionReasoning
     | CouncilReasoning
     | EnsembleReasoning
     | RedTeamingReasoning
@@ -312,7 +312,7 @@ ReasoningConfig = Annotated[
 # =========================================================================
 
 
-class Reflex(BaseModel):
+class FastPath(BaseModel):
     """Configuration for System 1 (Fast) reactions."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -350,20 +350,20 @@ class Optimizer(BaseModel):
 
 
 __all__ = [
-    "AtomReasoning",
     "AttentionReasoning",
     "BaseReasoning",
     "BufferReasoning",
     "ComputerUseReasoning",
     "CouncilReasoning",
+    "DecompositionReasoning",
     "EnsembleReasoning",
+    "FastPath",
     "GraphReasoning",
     "ModelCriteria",
     "ModelRef",
     "Optimizer",
     "ReasoningConfig",
     "RedTeamingReasoning",
-    "Reflex",
     "StandardReasoning",
     "Supervision",
     "TreeSearchReasoning",

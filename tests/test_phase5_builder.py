@@ -2,7 +2,7 @@ import pytest
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
 from coreason_manifest.spec.core.engines import StandardReasoning
-from coreason_manifest.spec.core.nodes import Brain
+from coreason_manifest.spec.core.nodes import CognitiveProfile
 
 
 def test_fluent_agent_construction() -> None:
@@ -11,7 +11,7 @@ def test_fluent_agent_construction() -> None:
         AgentBuilder("research-bot")
         .with_identity("Researcher", "You are strictly factual.")
         .with_reasoning(model="gpt-4o")
-        .with_reflex(model="gpt-3.5-turbo", timeout_ms=500)
+        .with_fast_path(model="gpt-3.5-turbo", timeout_ms=500)
         .with_tools(["web_search"])
         .with_supervision(retries=3)
         .build()
@@ -22,21 +22,21 @@ def test_fluent_agent_construction() -> None:
     assert agent.id == "research-bot"
 
     # Verify Identity
-    assert isinstance(agent.brain, Brain)
-    assert agent.brain.role == "Researcher"
-    assert agent.brain.persona == "You are strictly factual."
+    assert isinstance(agent.profile, CognitiveProfile)
+    assert agent.profile.role == "Researcher"
+    assert agent.profile.persona == "You are strictly factual."
 
     # Verify Reasoning
-    assert agent.brain.reasoning is not None
-    assert isinstance(agent.brain.reasoning, StandardReasoning)
-    assert agent.brain.reasoning.model == "gpt-4o"
-    assert agent.brain.reasoning.thoughts_max == 5  # default
+    assert agent.profile.reasoning is not None
+    assert isinstance(agent.profile.reasoning, StandardReasoning)
+    assert agent.profile.reasoning.model == "gpt-4o"
+    assert agent.profile.reasoning.thoughts_max == 5  # default
 
-    # Verify Reflex
-    assert agent.brain.reflex is not None
-    assert agent.brain.reflex.model == "gpt-3.5-turbo"
-    assert agent.brain.reflex.timeout_ms == 500
-    assert agent.brain.reflex.caching is True  # default
+    # Verify FastPath
+    assert agent.profile.fast_path is not None
+    assert agent.profile.fast_path.model == "gpt-3.5-turbo"
+    assert agent.profile.fast_path.timeout_ms == 500
+    assert agent.profile.fast_path.caching is True  # default
 
     # Verify Tools
     assert agent.tools == ["web_search"]

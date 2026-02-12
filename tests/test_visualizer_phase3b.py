@@ -10,10 +10,10 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    Brain,
+    CognitiveProfile,
     HumanNode,
     Node,
-    Placeholder,
+    PlaceholderNode,
     PlannerNode,
     SwitchNode,
 )
@@ -34,11 +34,11 @@ def _get_agent_node(node_id: str) -> AgentNode:
         id=node_id,
         metadata={},
         supervision=None,
-        brain=Brain(
+        profile=CognitiveProfile(
             role="assistant",
             persona="helpful",
             reasoning=None,
-            reflex=None,
+            fast_path=None,
         ),
         tools=[],
     )
@@ -76,8 +76,8 @@ def _get_planner_node(node_id: str) -> PlannerNode:
     )
 
 
-def _get_placeholder_node(node_id: str) -> Placeholder:
-    return Placeholder(
+def _get_placeholder_node(node_id: str) -> PlaceholderNode:
+    return PlaceholderNode(
         id=node_id,
         metadata={},
         supervision=None,
@@ -107,7 +107,7 @@ def test_linear_flow_to_mermaid() -> None:
     assert 'start["start<br/>(Agent)"]' in mermaid_code
     assert 'review[/"review<br/>(Human)"/]' in mermaid_code
     assert 'plan{{"plan<br/>(Planner)"}}' in mermaid_code
-    assert 'end("end<br/>(Placeholder)")' in mermaid_code
+    assert 'end("end<br/>(PlaceholderNode)")' in mermaid_code
 
     assert "start --> review" in mermaid_code
     assert "review --> plan" in mermaid_code
