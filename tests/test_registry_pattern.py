@@ -1,3 +1,5 @@
+import pytest
+
 from coreason_manifest.spec.core.flow import (
     FlowDefinitions,
     FlowInterface,
@@ -116,3 +118,90 @@ def test_graph_flow_definitions() -> None:
     agent_node = flow.graph.nodes["agent-1"]
     assert isinstance(agent_node, AgentNode)
     assert agent_node.brain == "brain-id-123"
+
+
+def test_referential_integrity_failure() -> None:
+    """
+    SOTA SAFETY CHECK:
+    Ensures that referencing a non-existent brain ID raises a validation error.
+    This prevents 'dangling pointer' runtime crashes.
+    """
+    # 1. Define a flow with an AgentNode pointing to "ghost-brain"
+    # 2. But DO NOT define "ghost-brain" in the registry
+
+    agent = AgentNode(
+        id="bad-agent",
+        type="agent",
+        brain="ghost-brain",  # <--- This ID does not exist
+        tools=[],
+        metadata={},
+        supervision=None,
+    )
+
+    metadata = FlowMetadata(name="broken-flow", version="1.0", description="fail", tags=[])
+
+    # 3. Expect a ValueError during initialization
+    with pytest.raises(ValueError, match="references undefined brain ID 'ghost-brain'"):
+        LinearFlow(
+            kind="LinearFlow",
+            metadata=metadata,
+            definitions=FlowDefinitions(),  # Empty registry
+            sequence=[agent],
+        )
+
+
+def test_tool_integrity_failure() -> None:
+    """Ensures that referencing a missing tool raises a validation error."""
+    # Define a brain (so that part passes)
+    brain = Brain(role="assistant", persona="helper", reasoning=None, reflex=None)
+    definitions = FlowDefinitions(
+        brains={"my-brain": brain},
+        tool_packs={},  # No tools registered
+    )
+
+    agent = AgentNode(
+        id="agent-1",
+        type="agent",
+        brain="my-brain",
+        tools=["missing-tool"],  # <--- Violation
+        metadata={},
+        supervision=None,
+    )
+
+    with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
+        LinearFlow(
+            kind="LinearFlow",
+            metadata=FlowMetadata(name="fail", version="1", description="", tags=[]),
+            definitions=definitions,
+            sequence=[agent],
+        )
+
+
+def test_tool_integrity_failure_graph() -> None:
+    """Ensures that referencing a missing tool raises a validation error in GraphFlow."""
+    brain = Brain(role="assistant", persona="helper", reasoning=None, reflex=None)
+    definitions = FlowDefinitions(
+        brains={"my-brain": brain},
+        tool_packs={},  # No tools registered
+    )
+
+    agent = AgentNode(
+        id="agent-1",
+        type="agent",
+        brain="my-brain",
+        tools=["missing-tool"],  # <--- Violation
+        metadata={},
+        supervision=None,
+    )
+
+    graph = Graph(nodes={"agent-1": agent}, edges=[])
+
+    with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
+        GraphFlow(
+            kind="GraphFlow",
+            metadata=FlowMetadata(name="fail", version="1", description="", tags=[]),
+            definitions=definitions,
+            interface=FlowInterface(inputs={}, outputs={}),
+            blackboard=None,
+            graph=graph,
+        )
