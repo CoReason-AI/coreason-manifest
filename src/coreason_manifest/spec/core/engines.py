@@ -59,6 +59,18 @@ ModelRef = str | ModelCriteria
 # =========================================================================
 
 
+class ConstitutionalScope(BaseModel):
+    """
+    Defines the ethical and safety boundaries for the cognitive process.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    principles: list[str] = Field(..., description="List of safety principles.")
+    enforcement: Literal["warning", "block", "correction"] = Field(..., description="Action on violation.")
+    inject_into_system_prompt: bool = Field(True, description="Whether to prepend principles to the prompt.")
+
+
 class BaseReasoning(BaseModel):
     """Base configuration for System 2 cognitive processes."""
 
@@ -74,6 +86,9 @@ class BaseReasoning(BaseModel):
         "none", description="If set, restricts the model to output valid syntax only."
     )
 
+    # *** UPGRADE: CONSTITUTIONAL AI ***
+    constitution: ConstitutionalScope | None = Field(None, description="Intrinsic safety constraints.")
+
 
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
@@ -81,6 +96,23 @@ class StandardReasoning(BaseReasoning):
     type: Literal["standard"] = "standard"
     thoughts_max: int = Field(5, description="Max sequential reasoning steps.")
     min_confidence: float = Field(0.7, description="Minimum confidence score to proceed.")
+    forcing_function: str | None = Field(None, description="Force the start of the assistant's response.")
+
+
+class AdaptiveReasoning(BaseReasoning):
+    """
+    Adaptive Reasoning (Test-Time Scaling).
+    Dynamically expands the reasoning trace until confidence is met or budget is exhausted.
+    """
+
+    type: Literal["adaptive"] = "adaptive"
+
+    max_compute_tokens: int = Field(..., description="Maximum tokens allocated for internal reasoning.")
+    max_duration_seconds: float = Field(..., description="Time budget for reasoning.")
+    scaling_mode: Literal["depth_first", "breadth_first", "hybrid"] = Field(..., description="Scaling strategy.")
+
+    min_confidence_score: float = Field(..., description="Threshold to halt reasoning (0.0 - 1.0).")
+    verifier_model: ModelRef = Field(..., description="External judge model to score thoughts.")
 
 
 class AttentionReasoning(BaseReasoning):
@@ -294,6 +326,7 @@ class GraphReasoning(BaseReasoning):
 # -------------------------------------------------------------------------
 ReasoningConfig = Annotated[
     StandardReasoning
+    | AdaptiveReasoning
     | AttentionReasoning
     | BufferReasoning
     | TreeSearchReasoning
@@ -350,10 +383,12 @@ class Optimizer(BaseModel):
 
 
 __all__ = [
+    "AdaptiveReasoning",
     "AttentionReasoning",
     "BaseReasoning",
     "BufferReasoning",
     "ComputerUseReasoning",
+    "ConstitutionalScope",
     "CouncilReasoning",
     "DecompositionReasoning",
     "EnsembleReasoning",

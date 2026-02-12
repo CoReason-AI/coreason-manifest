@@ -115,6 +115,12 @@ class PlannerNode(Node):
 
 
 class HumanNode(Node):
+    """
+    Human-in-the-Loop interaction node.
+    Supports blocking approval, or 'shadow' mode where the agent streams intent
+    and proceeds if no signal is received, while 'steering' allows mid-flight plan alteration.
+    """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["human"] = "human"
@@ -122,6 +128,39 @@ class HumanNode(Node):
     timeout_seconds: int
     input_schema: dict[str, Any] | None = None
     options: list[str] | None = None
+
+    # *** UPGRADE: SHADOW MODE ***
+    interaction_mode: Literal["blocking", "shadow", "steering"] = Field(
+        "blocking", description="Wait for input vs shadow execution."
+    )
+    shadow_timeout_seconds: int | None = Field(
+        None, description="Time window for intervention in shadow mode."
+    )
+
+
+class SwarmNode(Node):
+    """
+    Dynamic Swarm Spawning (The "Hive").
+    Spins up N ephemeral worker agents to process a dataset/workload in parallel.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    type: Literal["swarm"] = "swarm"
+
+    # Worker Config
+    worker_profile: str = Field(..., description="Reference to a CognitiveProfile ID.")
+    workload_variable: str = Field(..., description="The Blackboard list/dataset to process.")
+
+    # Topology
+    distribution_strategy: Literal["sharded", "replicated"] = Field(
+        ..., description="Sharded=split data; Replicated=same data, many attempts."
+    )
+    max_concurrency: int = Field(..., description="Limit parallel workers.")
+
+    # Aggregation
+    reducer_function: Literal["concat", "vote", "summarize"] = Field(..., description="How to combine results.")
+    output_variable: str = Field(..., description="Variable to store the aggregated result.")
 
 
 class PlaceholderNode(Node):
@@ -141,5 +180,6 @@ __all__ = [
     "Node",
     "PlaceholderNode",
     "PlannerNode",
+    "SwarmNode",
     "SwitchNode",
 ]
