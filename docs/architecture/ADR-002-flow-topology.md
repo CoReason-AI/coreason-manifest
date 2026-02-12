@@ -20,7 +20,7 @@ We are adopting standard terminology from Multi-Agent Systems, Actor Model, and 
 | `ManifestV2` | `LinearFlow` | A deterministic script must be a "Sequence". |
 | `RecipeDefinition` | `GraphFlow` | Explicitly describes the Cyclic Graph structure. |
 | `StateDefinition` | `Blackboard` | "Blackboard Pattern" implies shared multi-agent memory. |
-| `Episteme` | `ReasoningEngine` | System 2 slow-thinking logic. |
+| `Episteme` | `ReasoningConfig` | System 2 slow-thinking logic. |
 | `Cortex` | `Reflex` | System 1 fast-response logic. |
 | `Maco` | `Supervision` | "Supervisor Pattern" (Erlang) > "Error Handling". |
 | `Foundry` | `Optimizer` | DSPy-style self-improvement/compilation. |

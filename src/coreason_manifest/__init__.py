@@ -13,10 +13,15 @@ from coreason_manifest.builder import (
     NewLinearFlow,
 )
 from coreason_manifest.spec.core.engines import (
+    AtomReasoning,
+    BaseReasoning,
+    CouncilReasoning,
     Optimizer,
-    ReasoningEngine,
+    ReasoningConfig,
     Reflex,
+    StandardReasoning,
     Supervision,
+    TreeSearchReasoning,
 )
 from coreason_manifest.spec.core.flow import (
     AnyNode,
@@ -51,9 +56,12 @@ from coreason_manifest.spec.core.tools import (
 __all__ = [
     "AgentNode",
     "AnyNode",
+    "AtomReasoning",
     "Audit",
+    "BaseReasoning",
     "Blackboard",
     "Brain",
+    "CouncilReasoning",
     "Dependency",
     "Edge",
     "FlowInterface",
@@ -69,11 +77,13 @@ __all__ = [
     "Optimizer",
     "Placeholder",
     "PlannerNode",
-    "ReasoningEngine",
+    "ReasoningConfig",
     "Reflex",
     "Safety",
+    "StandardReasoning",
     "Supervision",
     "SwitchNode",
     "ToolPack",
+    "TreeSearchReasoning",
     "VariableDef",
 ]

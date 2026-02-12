@@ -1,6 +1,7 @@
 import pytest
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
+from coreason_manifest.spec.core.engines import StandardReasoning
 
 
 def test_fluent_agent_construction() -> None:
@@ -25,6 +26,7 @@ def test_fluent_agent_construction() -> None:
 
     # Verify Reasoning
     assert agent.brain.reasoning is not None
+    assert isinstance(agent.brain.reasoning, StandardReasoning)
     assert agent.brain.reasoning.model == "gpt-4o"
     assert agent.brain.reasoning.thoughts_max == 5  # default
 

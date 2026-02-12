@@ -9,13 +9,13 @@ This example demonstrates the configuration of an `AgentNode` with specific capa
 ```python
 # Example: Defining a Support Agent with Semantic Model Constraints
 from coreason_manifest.spec.core.nodes import AgentNode, Brain
-from coreason_manifest.spec.core.engines import ReasoningEngine, Reflex, Supervision
+from coreason_manifest.spec.core.engines import StandardReasoning, Reflex, Supervision
 
 # Define the Cognitive Engine
 brain = Brain(
     role="Customer Service Representative",
     persona="You are a helpful assistant with 10 years of experience.",
-    reasoning=ReasoningEngine(
+    reasoning=StandardReasoning(
         model="gpt-4-turbo",
         thoughts_max=3,
         min_confidence=0.8
@@ -50,7 +50,13 @@ support_agent = AgentNode(
 
 ### Engines
 
-::: coreason_manifest.spec.core.engines.ReasoningEngine
+::: coreason_manifest.spec.core.engines.StandardReasoning
+
+::: coreason_manifest.spec.core.engines.TreeSearchReasoning
+
+::: coreason_manifest.spec.core.engines.AtomReasoning
+
+::: coreason_manifest.spec.core.engines.CouncilReasoning
 
 ::: coreason_manifest.spec.core.engines.Reflex
 
