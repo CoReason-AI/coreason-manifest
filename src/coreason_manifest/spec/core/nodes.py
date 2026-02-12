@@ -123,12 +123,32 @@ class HumanNode(Node):
     input_schema: dict[str, Any] | None = None
     options: list[str] | None = None
 
+    # New Stream B feature: Shadow Mode
+    interaction_mode: Literal["blocking", "shadow"] = "blocking"
+    shadow_timeout_seconds: int | None = None
+
 
 class PlaceholderNode(Node):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["placeholder"] = "placeholder"
     required_capabilities: list[str]
+
+
+class SwarmNode(Node):
+    """
+    A node that orchestrates parallel execution of agents (Stream B).
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    type: Literal["swarm"] = "swarm"
+    worker_profile: str
+    workload_variable: str
+    distribution_strategy: Literal["sharded", "round_robin"] = "sharded"
+    max_concurrency: int = 5
+    reducer_function: str = "concat"
+    output_variable: str
 
 
 __all__ = [
@@ -142,4 +162,5 @@ __all__ = [
     "PlaceholderNode",
     "PlannerNode",
     "SwitchNode",
+    "SwarmNode",
 ]

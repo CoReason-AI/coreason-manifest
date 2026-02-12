@@ -8,24 +8,35 @@ import yaml
 if TYPE_CHECKING:
     from pathlib import Path
 
+
 class SecurityError(Exception):
     """Raised when a file access violates security policies."""
 
+
 class SecureLoader:
     """
-    A secure file loader that enforces jail restrictions and resolves references.
+    A secure file loader that enforces jail restrictions, depth limits, and resolves references.
     """
 
-    def __init__(self, root_dir: Path) -> None:
+    def __init__(self, root_dir: Path, max_depth: int = 25) -> None:
         """
-        Initialize the SecureLoader with a trusted root directory (jail).
+        Initialize the SecureLoader.
+
+        Args:
+            root_dir: The jail root.
+            max_depth: Maximum recursion depth for $ref resolution to prevent Stack Overflows.
         """
         self.root_dir = root_dir.resolve()
+        self.max_depth = max_depth
 
     def resolve_ref(self, current_file: Path, ref: str) -> Path:
         """
         Resolve a reference relative to the current file, ensuring it stays within the jail.
         """
+        # Explicitly check for absolute paths to prevent bypass before join
+        if os.path.isabs(ref):
+            raise SecurityError(f"Access denied: Absolute paths are forbidden in $ref: '{ref}'")
+
         # Resolve the path relative to the current file's directory
         resolved_path = (current_file.parent / ref).resolve()
 
@@ -60,43 +71,42 @@ class SecureLoader:
             raise SecurityError(f"Initial file '{path}' is outside the jail '{self.root_dir}'") from e
 
         # Cast the result to ensure type safety (or check it)
-        result = self._load_recursive(path, set())
+        result = self._load_recursive(path, set(), 0)
         if not isinstance(result, dict):
-             # Depending on requirement, we might allow list, but type hint says dict[str, Any]
-             # If root is list, this is a type violation for the caller.
-             # The spec says "Method load(path: Path) -> dict".
-             if isinstance(result, list):
-                 raise TypeError(f"Expected dict at root, got list in '{path}'")
-             return result # type: ignore
+            if isinstance(result, list):
+                raise TypeError(f"Expected dict at root, got list in '{path}'")
+            return result  # type: ignore
         return result
 
-    def _load_recursive(self, path: Path, visited: set[Path]) -> Any:
+    def _load_recursive(self, path: Path, visited: set[Path], depth: int) -> Any:
+        if depth > self.max_depth:
+            raise RecursionError(f"Max recursion depth ({self.max_depth}) exceeded at {path}")
+
         if path in visited:
             raise RecursionError(f"Circular dependency detected: {path}")
 
         # Create a new set for the current path to allow diamond dependencies
-        # (A -> B, A -> C, B -> D, C -> D)
-        # If we modified visited in place, D would be visited via B, then rejected via C.
         new_visited = visited | {path}
 
-        with open(path, encoding='utf-8') as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        return self._scan_and_resolve(data, path, new_visited)
+        return self._scan_and_resolve(data, path, new_visited, depth)
 
-    def _scan_and_resolve(self, data: Any, current_file: Path, visited: set[Path]) -> Any:
+    def _scan_and_resolve(self, data: Any, current_file: Path, visited: set[Path], depth: int) -> Any:
         if isinstance(data, dict):
             if "$ref" in data:
                 ref = data["$ref"]
                 if not isinstance(ref, str):
-                     raise ValueError(f"Invalid $ref value in {current_file}: {ref}")
+                    raise ValueError(f"Invalid $ref value in {current_file}: {ref}")
 
                 resolved_path = self.resolve_ref(current_file, ref)
-                return self._load_recursive(resolved_path, visited)
+                # Increment depth on recursive load
+                return self._load_recursive(resolved_path, visited, depth + 1)
 
-            return {k: self._scan_and_resolve(v, current_file, visited) for k, v in data.items()}
+            return {k: self._scan_and_resolve(v, current_file, visited, depth) for k, v in data.items()}
 
         if isinstance(data, list):
-            return [self._scan_and_resolve(item, current_file, visited) for item in data]
+            return [self._scan_and_resolve(item, current_file, visited, depth) for item in data]
 
         return data

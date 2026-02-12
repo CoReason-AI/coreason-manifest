@@ -35,7 +35,9 @@ from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
+    HumanNode,
     InspectorNode,
+    SwarmNode,
     SwitchNode,
 )
 from coreason_manifest.spec.core.tools import ToolPack
@@ -327,9 +329,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes[node.id] = node
         return self
 
-    def add_switch(
-        self, node_id: str, variable: str, cases: dict[str, str], default: str
-    ) -> "NewGraphFlow":
+    def add_switch(self, node_id: str, variable: str, cases: dict[str, str], default: str) -> "NewGraphFlow":
         """Adds a switch node to the graph."""
         node = SwitchNode(
             id=node_id,
@@ -368,6 +368,49 @@ class NewGraphFlow(BaseFlowBuilder):
             persona=persona,
             reasoning=reasoning,
         )
+        return self
+
+    def add_swarm(
+        self,
+        node_id: str,
+        worker_profile: str,
+        workload_variable: str,
+        reducer: str = "concat",
+        concurrency: int = 5,
+        output_variable: str = "",
+    ) -> "NewGraphFlow":
+        """Adds a SwarmNode for parallel execution."""
+        if not output_variable:
+            output_variable = f"{node_id}_output"
+
+        node = SwarmNode(
+            id=node_id,
+            metadata={},
+            supervision=None,
+            type="swarm",
+            worker_profile=worker_profile,
+            workload_variable=workload_variable,
+            distribution_strategy="sharded",
+            max_concurrency=concurrency,
+            reducer_function=reducer,
+            output_variable=output_variable,
+        )
+        self._nodes[node.id] = node
+        return self
+
+    def add_human_shadow(self, node_id: str, prompt: str, timeout: int = 300) -> "NewGraphFlow":
+        """Adds a HumanNode configured for Shadow Mode (Non-blocking steering)."""
+        node = HumanNode(
+            id=node_id,
+            metadata={},
+            supervision=None,
+            type="human",
+            prompt=prompt,
+            timeout_seconds=timeout,
+            interaction_mode="shadow",  # Stream B feature
+            shadow_timeout_seconds=timeout,
+        )
+        self._nodes[node.id] = node
         return self
 
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":

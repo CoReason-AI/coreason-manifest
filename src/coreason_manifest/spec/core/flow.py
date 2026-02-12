@@ -12,13 +12,21 @@ from coreason_manifest.spec.core.nodes import (
     InspectorNode,
     PlaceholderNode,
     PlannerNode,
+    SwarmNode,
     SwitchNode,
 )
 from coreason_manifest.spec.core.tools import ToolPack
 
 # Polymorphic Node Type
 AnyNode = Annotated[
-    AgentNode | SwitchNode | PlannerNode | HumanNode | PlaceholderNode | InspectorNode | EmergenceInspectorNode,
+    AgentNode
+    | SwitchNode
+    | PlannerNode
+    | HumanNode
+    | PlaceholderNode
+    | InspectorNode
+    | EmergenceInspectorNode
+    | SwarmNode,
     Field(discriminator="type"),
 ]
 
