@@ -13,10 +13,8 @@ class BlackBoxRecorder:
     and structured logging (Telemetry).
     """
 
-    def __init__(self, privacy_sentinel: PrivacySentinel | None = None, initial_hash: str | None = None) -> None:
+    def __init__(self, privacy_sentinel: PrivacySentinel | None = None) -> None:
         self.privacy = privacy_sentinel or PrivacySentinel()
-        # The tail of the Merkle Chain
-        self.previous_hash = initial_hash
 
     def record(
         self,
@@ -25,6 +23,7 @@ class BlackBoxRecorder:
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         duration_ms: float,
+        previous_hashes: list[str],
         timestamp: datetime | None = None,
         error: str | None = None,
         attributes: dict[str, Any] | None = None,
@@ -53,7 +52,7 @@ class BlackBoxRecorder:
 
         # 2. Prepare payload for hashing
         # We construct a partial model or dict to hash.
-        # It MUST include previous_hash to enforce the chain.
+        # It MUST include previous_hashes (sorted for determinism) to enforce the chain.
         # We exclude execution_hash (which we are computing) and signature (optional/external).
         payload = {
             "node_id": node_id,
@@ -64,14 +63,14 @@ class BlackBoxRecorder:
             "timestamp": timestamp.isoformat(),  # Normalize datetime for consistent hashing
             "duration_ms": duration_ms,
             "attributes": attributes,
-            "previous_hash": self.previous_hash,
+            "previous_hashes": sorted(previous_hashes),
         }
 
         # 3. Compute Hash
         execution_hash = compute_hash(payload)
 
         # 4. Construct Immutable Record
-        record = NodeExecution(
+        return NodeExecution(
             node_id=node_id,
             state=state,
             inputs=safe_inputs,
@@ -80,11 +79,6 @@ class BlackBoxRecorder:
             timestamp=timestamp,
             duration_ms=duration_ms,
             attributes=attributes,
-            previous_hash=self.previous_hash,
+            previous_hashes=sorted(previous_hashes),
             execution_hash=execution_hash,
         )
-
-        # 5. Update State
-        self.previous_hash = execution_hash
-
-        return record

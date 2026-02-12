@@ -1,8 +1,9 @@
 import json
-from typing import Any
+from typing import Any, cast
 
 from coreason_manifest.spec.interop.otel import to_otel_attributes
 from coreason_manifest.spec.interop.telemetry import NodeState
+from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.utils.privacy import PrivacySentinel
 from coreason_manifest.utils.recorder import BlackBoxRecorder
 
@@ -22,6 +23,20 @@ def test_privacy_sentinel_secrets() -> None:
     # Verify hashing consistency
     sanitized2 = sentinel.sanitize(data)
     assert sanitized["password"] == sanitized2["password"]
+
+
+def test_privacy_sentinel_custom_keys() -> None:
+    # Test extensibility
+    sentinel = PrivacySentinel(redact_secrets=True, custom_sensitive_keys={"mrn", "dob", "patient_id"})
+
+    data = {"patient_id": "12345", "mrn": "A-999", "dob": "2000-01-01", "other": "safe"}
+    sanitized = sentinel.sanitize(data)
+
+    assert sanitized["patient_id"] != "12345"
+    assert str(sanitized["patient_id"]).startswith("<REDACTED:SECRET:")
+    assert sanitized["mrn"] != "A-999"
+    assert sanitized["dob"] != "2000-01-01"
+    assert sanitized["other"] == "safe"
 
 
 def test_privacy_sentinel_heuristics() -> None:
@@ -96,27 +111,96 @@ def test_privacy_sentinel_recursion() -> None:
     assert sanitized2["config"]["password"].startswith("<REDACTED:SECRET:")
 
 
-def test_recorder_chaining() -> None:
-    recorder = BlackBoxRecorder(initial_hash="GENESIS_HASH")
+def test_recorder_stateless_dag() -> None:
+    # Recorder is now stateless
+    recorder = BlackBoxRecorder()
 
-    # Record 1
+    # Step 1: Genesis Node
     rec1 = recorder.record(
-        node_id="node1", state=NodeState.COMPLETED, inputs={"a": 1}, outputs={"b": 2}, duration_ms=10.0
+        node_id="genesis",
+        state=NodeState.COMPLETED,
+        inputs={"a": 1},
+        outputs={"b": 2},
+        duration_ms=10.0,
+        previous_hashes=[],  # Genesis
     )
-
-    assert rec1.previous_hash == "GENESIS_HASH"
     assert rec1.execution_hash is not None
+    assert rec1.previous_hashes == []
 
-    # Record 2
-    rec2 = recorder.record(
-        node_id="node2", state=NodeState.COMPLETED, inputs={"prev": 2}, outputs={"curr": 3}, duration_ms=15.0
+    # Step 2: Parallel Node A (links to Genesis)
+    rec2a = recorder.record(
+        node_id="worker_a",
+        state=NodeState.COMPLETED,
+        inputs={"in": "a"},
+        outputs={"out": "a"},
+        duration_ms=5.0,
+        previous_hashes=[rec1.execution_hash],  # Link to rec1
+    )
+    assert rec2a.previous_hashes == [rec1.execution_hash]
+
+    # Step 3: Parallel Node B (links to Genesis)
+    rec2b = recorder.record(
+        node_id="worker_b",
+        state=NodeState.COMPLETED,
+        inputs={"in": "b"},
+        outputs={"out": "b"},
+        duration_ms=5.0,
+        previous_hashes=[rec1.execution_hash],  # Link to rec1
+    )
+    assert rec2b.previous_hashes == [rec1.execution_hash]
+
+    # Step 4: Aggregator Node (links to A and B) - The DAG Merge
+    rec3 = recorder.record(
+        node_id="aggregator",
+        state=NodeState.COMPLETED,
+        inputs={"results": ["a", "b"]},
+        outputs={"final": "done"},
+        duration_ms=20.0,
+        previous_hashes=[cast("str", rec2a.execution_hash), cast("str", rec2b.execution_hash)],  # Merge
     )
 
-    assert rec2.previous_hash == rec1.execution_hash
-    assert rec2.execution_hash != rec1.execution_hash
+    assert len(rec3.previous_hashes) == 2
+    assert rec2a.execution_hash in rec3.previous_hashes
+    assert rec2b.execution_hash in rec3.previous_hashes
 
-    # Verify internal state updated
-    assert recorder.previous_hash == rec2.execution_hash
+
+def test_dag_integrity() -> None:
+    # Re-use the DAG construction from above logic (simplified) to test verify_merkle_proof
+    recorder = BlackBoxRecorder()
+
+    # 1. Genesis
+    n1 = recorder.record("n1", NodeState.COMPLETED, {}, {}, 1.0, previous_hashes=[])
+    # 2. Branch A
+    n2a = recorder.record("n2a", NodeState.COMPLETED, {}, {}, 1.0, previous_hashes=[cast("str", n1.execution_hash)])
+    # 3. Branch B
+    n2b = recorder.record("n2b", NodeState.COMPLETED, {}, {}, 1.0, previous_hashes=[cast("str", n1.execution_hash)])
+    # 4. Merge
+    n3 = recorder.record(
+        "n3",
+        NodeState.COMPLETED,
+        {},
+        {},
+        1.0,
+        previous_hashes=[cast("str", n2a.execution_hash), cast("str", n2b.execution_hash)],
+    )
+
+    trace = [n1, n2a, n2b, n3]
+
+    # Verify valid DAG
+    assert verify_merkle_proof(trace) is True
+
+    # Verify Broken Link
+    n3_bad = n3.model_copy(update={"previous_hashes": ["bad_hash", n2b.execution_hash]})
+    trace_bad = [n1, n2a, n2b, n3_bad]
+    assert verify_merkle_proof(trace_bad) is False
+
+    # Verify Missing Parent in History
+    trace_incomplete = [n1, n2a, n3]  # n3 depends on n2b which is missing
+    assert verify_merkle_proof(trace_incomplete) is False
+
+    # Verify Genesis Trusted Root
+    assert verify_merkle_proof([n1], trusted_root_hash=cast(str, n1.execution_hash)) is True
+    assert verify_merkle_proof([n1], trusted_root_hash="bad_root") is False
 
 
 def test_recorder_sanitization_integration() -> None:
@@ -129,6 +213,7 @@ def test_recorder_sanitization_integration() -> None:
         inputs={"password": "secret"},
         outputs={"result": "ok"},
         duration_ms=5.0,
+        previous_hashes=[],
     )
 
     assert rec.inputs["password"] != "secret"
@@ -145,6 +230,7 @@ def test_otel_bridge() -> None:
         duration_ms=100.0,
         error="Something went wrong",
         attributes={"custom.tag": "value"},
+        previous_hashes=[],
     )
 
     otel_attrs = to_otel_attributes(rec)
@@ -183,7 +269,12 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
     recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel())
 
     rec = recorder.record(
-        node_id="test_node", state=NodeState.COMPLETED, inputs={"a": 1}, outputs={"b": 2}, duration_ms=10.0
+        node_id="test_node",
+        state=NodeState.COMPLETED,
+        inputs={"a": 1},
+        outputs={"b": 2},
+        duration_ms=10.0,
+        previous_hashes=[],
     )
 
     # The recorder should have wrapped the string result in a dict

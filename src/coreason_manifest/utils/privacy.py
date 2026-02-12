@@ -30,10 +30,21 @@ class PrivacySentinel:
         "secret_key",
     }
 
-    def __init__(self, redact_pii: bool = True, redact_secrets: bool = True, hashing_salt: str = ""):
+    def __init__(
+        self,
+        redact_pii: bool = True,
+        redact_secrets: bool = True,
+        hashing_salt: str = "",
+        custom_sensitive_keys: set[str] | None = None,
+    ):
         self.redact_pii = redact_pii
         self.redact_secrets = redact_secrets
         self.hashing_salt = hashing_salt
+
+        # Merge default sensitive words with custom ones
+        self.sensitive_words = self.SENSITIVE_WORDS.copy()
+        if custom_sensitive_keys:
+            self.sensitive_words.update(custom_sensitive_keys)
 
     def sanitize(self, data: Any) -> Any:
         """
@@ -57,13 +68,17 @@ class PrivacySentinel:
             lower_key = key.lower()
             normalized_key = lower_key.replace("-", "_")
 
-            # Check for specific substrings
+            # Check for specific substrings (using class default)
             if any(term in normalized_key for term in self.SENSITIVE_SUBSTRINGS):
                 return self._redact(str(value))
 
-            # Check for sensitive words (split by non-alphanumeric)
+            # Check exact match for custom keys
+            if normalized_key in self.sensitive_words:
+                return self._redact(str(value))
+
+            # Check for sensitive words (using instance merged set)
             parts = re.split(r"[^a-z0-9]", lower_key)
-            if any(part in self.SENSITIVE_WORDS for part in parts):
+            if any(part in self.sensitive_words for part in parts):
                 return self._redact(str(value))
 
         # 2. Recurse or check value

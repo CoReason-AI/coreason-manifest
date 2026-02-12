@@ -29,46 +29,81 @@ def compute_hash(obj: Any) -> str:
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
 
-def verify_merkle_proof(chain: list[Any], trusted_root_hash: str | None = None) -> bool:
+def reconstruct_payload(node: Any) -> dict[str, Any]:
     """
-    Verifies the cryptographic integrity of a state chain (Merkle Proof).
+    Reconstructs the payload dictionary used for hashing from a NodeExecution object.
+    """
+    # Extract fields assuming node is NodeExecution or dict
+    d = node if isinstance(node, dict) else node.model_dump()
 
-    1. Headless Chain Check: If trusted_root_hash is provided, validates the genesis block.
-    2. Chain Continuity: Validates that each block's prev_hash matches the hash of the previous block.
+    # Replicate recorder.py payload construction
+    timestamp = d.get("timestamp")
+    if timestamp and hasattr(timestamp, "isoformat"):
+        timestamp = timestamp.isoformat()
+    elif timestamp and not isinstance(timestamp, str):
+        timestamp = str(timestamp)
+
+    return {
+        "node_id": d.get("node_id"),
+        "state": d.get("state"),
+        "inputs": d.get("inputs"),
+        "outputs": d.get("outputs"),
+        "error": d.get("error"),
+        "timestamp": timestamp,
+        "duration_ms": d.get("duration_ms"),
+        "attributes": d.get("attributes", {}),
+        "previous_hashes": sorted(d.get("previous_hashes", [])),
+    }
+
+
+def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
     """
-    if not chain:
+    Verifies the cryptographic integrity of a DAG trace (Merkle DAG).
+
+    1. Content Integrity: Recomputes the hash of each node and compares with its `execution_hash`.
+    2. Link Integrity: Each node's declared `previous_hashes` must exist in the verified history.
+    """
+    if not trace:
         return False
 
-    # 1. Headless Chain Check (The Fix)
-    if trusted_root_hash:
-        # Using the prompt's specific requirement: check chain[0].compute_hash() == trusted_root_hash
-        # We use our helper which delegates to .compute_hash() if present.
-        genesis_hash = compute_hash(chain[0])
-        if genesis_hash != trusted_root_hash:
+    verified_hashes = set()
+
+    for i, node in enumerate(trace):
+        # 1. Verify Content Integrity
+        # We must recompute the hash exactly as the recorder did
+        payload = reconstruct_payload(node)
+        computed_hash = compute_hash(payload)
+
+        stored_hash = None
+        if hasattr(node, "execution_hash"):
+            stored_hash = node.execution_hash
+        elif isinstance(node, dict):
+            stored_hash = node.get("execution_hash")
+
+        if stored_hash != computed_hash:
+            # Hash mismatch implies tampering or corruption
             return False
 
-    # 2. Chain Continuity
-    for i in range(1, len(chain)):
-        curr = chain[i]
-        prev = chain[i - 1]
+        # 2. Extract declared parents
+        previous_hashes = payload["previous_hashes"]
 
-        expected_prev_hash = compute_hash(prev)
-
-        # Access prev_hash from current block
-        actual_prev_hash = None
-        if isinstance(curr, dict):
-            actual_prev_hash = curr.get("prev_hash")
-        elif hasattr(curr, "prev_hash"):
-            actual_prev_hash = curr.prev_hash
+        # 3. Verify Linkage
+        if not previous_hashes:
+            # Genesis Node (No parents in this trace)
+            if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
+                return False
         else:
-            # If structure doesn't support chaining, we can't verify continuity
-            # But the task focuses on "The Headless Chain", so we prioritize the root check.
-            # We fail closed if we can't verify links?
-            # Or maybe just return True if trusted root passed and no links to check?
-            # Assuming standard behavior: fail if prev_hash is missing.
-            return False
+            # Child Node
+            # Ensure ALL hash strings in node.previous_hashes exist in verified_hashes.
+            for prev_hash in previous_hashes:
+                # If trusted_root_hash acts as an external parent
+                if trusted_root_hash and prev_hash == trusted_root_hash:
+                    continue
 
-        if actual_prev_hash != expected_prev_hash:
-            return False
+                if prev_hash not in verified_hashes:
+                    return False
+
+        # 4. Add to verified set
+        verified_hashes.add(stored_hash)
 
     return True
