@@ -1,17 +1,18 @@
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
-
 
 # =========================================================================
 #  1. SEMANTIC MODEL ROUTING ("The Hardware")
 # =========================================================================
+
 
 class ModelCriteria(BaseModel):
     """
     Defines 'What kind of model' is needed.
     Now supports Multi-Model Routing for reliability (Fallback) or scale (Round Robin).
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     # --- Selection Constraints ---
@@ -44,15 +45,17 @@ class ModelCriteria(BaseModel):
 
 
 # Type alias: A model can be a hardcoded ID ("gpt-4") OR a semantic policy
-ModelRef = Union[str, ModelCriteria]
+ModelRef = str | ModelCriteria
 
 
 # =========================================================================
 #  2. COGNITIVE ARCHITECTURES ("The Software")
 # =========================================================================
 
+
 class BaseReasoning(BaseModel):
     """Base configuration for System 2 cognitive processes."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     model: ModelRef = Field(..., description="The model (or policy) responsible for this reasoning loop.")
@@ -62,6 +65,7 @@ class BaseReasoning(BaseModel):
 
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
+
     type: Literal["standard"] = "standard"
     thoughts_max: int = Field(..., description="Max sequential reasoning steps.")
     min_confidence: float = Field(0.7, description="Minimum confidence score to proceed.")
@@ -69,6 +73,7 @@ class StandardReasoning(BaseReasoning):
 
 class TreeSearchReasoning(BaseReasoning):
     """Language Agent Tree Search (LATS) with MCTS."""
+
     type: Literal["tree_search"] = "tree_search"
 
     depth: int = Field(3, description="Max tree depth.")
@@ -81,6 +86,7 @@ class TreeSearchReasoning(BaseReasoning):
 
 class AtomReasoning(BaseReasoning):
     """Atom of Thoughts (AoT) DAG decomposition."""
+
     type: Literal["atom"] = "atom"
 
     decomposition_breadth: int = Field(..., description="Max parallel atoms.")
@@ -90,6 +96,7 @@ class AtomReasoning(BaseReasoning):
 
 class CouncilReasoning(BaseReasoning):
     """Multi-Persona Consensus (Same Model, Different Personas)."""
+
     type: Literal["council"] = "council"
 
     personas: list[str] = Field(..., description="List of system prompts.")
@@ -106,11 +113,13 @@ class EnsembleReasoning(BaseReasoning):
     Executes the query in parallel across multiple models and unifies the result.
     NOTE: The 'model' field should use routing_mode='broadcast'.
     """
+
     type: Literal["ensemble"] = "ensemble"
 
-    # Semantic Analysis: Checks if answers are effectively the same using embeddings
-    semantic_similarity_threshold: float = Field(
-        0.85, description="Cosine similarity threshold to consider two answers 'agreed'."
+    # Semantic Analysis: Uses a model to determine if answers are functionally equivalent
+    # This replaces simple cosine similarity with deeper semantic understanding
+    similarity_model: ModelRef | None = Field(
+        None, description="Model used to judge if two different answers are semantically equivalent."
     )
 
     # Consensus Strategy
@@ -124,7 +133,7 @@ class EnsembleReasoning(BaseReasoning):
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
 ReasoningConfig = Annotated[
-    Union[StandardReasoning, TreeSearchReasoning, AtomReasoning, CouncilReasoning, EnsembleReasoning],
+    StandardReasoning | TreeSearchReasoning | AtomReasoning | CouncilReasoning | EnsembleReasoning,
     Field(discriminator="type"),
 ]
 
@@ -133,8 +142,10 @@ ReasoningConfig = Annotated[
 #  3. SYSTEM 1 & OVERSIGHT
 # =========================================================================
 
+
 class Reflex(BaseModel):
     """Configuration for System 1 (Fast) reactions."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     model: ModelRef
@@ -144,6 +155,7 @@ class Reflex(BaseModel):
 
 class Supervision(BaseModel):
     """Fault tolerance and adversarial oversight."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     strategy: Literal["resume", "restart", "escalate", "degrade", "adversarial"]
@@ -160,6 +172,7 @@ class Supervision(BaseModel):
 
 class Optimizer(BaseModel):
     """Self-Improvement / DSPy-style optimization."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     teacher_model: str
