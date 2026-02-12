@@ -1,8 +1,9 @@
 from coreason_manifest.spec.core.engines import (
     Optimizer,
-    ReasoningEngine,
     Reflex,
+    StandardReasoning,
     Supervision,
+    TreeSearchReasoning,
 )
 from coreason_manifest.spec.core.flow import (
     Blackboard,
@@ -26,7 +27,7 @@ from coreason_manifest.spec.core.nodes import (
 
 def test_core_kernel_instantiation() -> None:
     # Test Engines
-    reasoning = ReasoningEngine(model="gpt-4", thoughts_max=5, min_confidence=0.9)
+    reasoning = StandardReasoning(model="gpt-4", thoughts_max=5, min_confidence=0.8)
     reflex = Reflex(model="gpt-3.5", timeout_ms=1000, caching=True)
     supervision = Supervision(strategy="restart", max_retries=3, fallback=None)
     optimizer = Optimizer(teacher_model="gpt-4", metric="accuracy", max_demonstrations=3)
@@ -117,3 +118,31 @@ def test_core_kernel_instantiation() -> None:
     assert isinstance(linear_loaded.sequence[0], AgentNode)
     assert isinstance(linear_loaded.sequence[1], SwitchNode)
     assert isinstance(linear_loaded.sequence[2], PlannerNode)
+
+
+def test_polymorphic_reasoning() -> None:
+    # Test TreeSearchReasoning
+    lats_reasoning = TreeSearchReasoning(
+        model="gpt-4",
+        depth=5,
+        branching_factor=4,
+        simulations=10,
+        exploration_weight=1.5
+    )
+    brain = Brain(role="solver", persona="math", reasoning=lats_reasoning, reflex=None)
+    agent = AgentNode(
+        id="agent-lats",
+        metadata={},
+        supervision=None,
+        type="agent",
+        brain=brain,
+        tools=[]
+    )
+
+    # Validate JSON serialization/deserialization for LATS
+    agent_json = agent.model_dump_json()
+    agent_loaded = AgentNode.model_validate_json(agent_json)
+
+    assert isinstance(agent_loaded.brain.reasoning, TreeSearchReasoning)
+    assert agent_loaded.brain.reasoning.type == "tree_search"
+    assert agent_loaded.brain.reasoning.depth == 5

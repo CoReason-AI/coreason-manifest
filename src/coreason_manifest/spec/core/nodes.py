@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.spec.core.engines import (
     Optimizer,
-    ReasoningEngine,
+    ReasoningConfig,
     Reflex,
     Supervision,
 )
@@ -28,7 +28,7 @@ class Brain(BaseModel):
 
     role: str
     persona: str
-    reasoning: ReasoningEngine | None
+    reasoning: ReasoningConfig | None
     reflex: Reflex | None
 
 

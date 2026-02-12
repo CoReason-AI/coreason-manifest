@@ -1,6 +1,6 @@
 import pytest
 
-from coreason_manifest.spec.core.engines import ReasoningEngine
+from coreason_manifest.spec.core.engines import StandardReasoning
 from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, Brain
 from coreason_manifest.spec.core.tools import ToolPack
@@ -24,7 +24,7 @@ def test_openai_adapter() -> None:
     brain = Brain(
         role="assistant",
         persona="helpful",
-        reasoning=ReasoningEngine(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
+        reasoning=StandardReasoning(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
         reflex=None,
     )
     node = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", brain=brain, tools=["calculator"])
@@ -54,7 +54,7 @@ def test_langchain_adapter() -> None:
     brain = Brain(
         role="assistant",
         persona="helpful",
-        reasoning=ReasoningEngine(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
+        reasoning=StandardReasoning(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
         reflex=None,
     )
     node1 = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", brain=brain, tools=["calculator"])

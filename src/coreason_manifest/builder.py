@@ -10,7 +10,12 @@
 
 from typing import Any
 
-from coreason_manifest.spec.core.engines import ReasoningEngine, Reflex, Supervision
+from coreason_manifest.spec.core.engines import (
+    ReasoningConfig,
+    Reflex,
+    StandardReasoning,
+    Supervision,
+)
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -54,7 +59,7 @@ class AgentBuilder:
         self.agent_id = agent_id
         self.role: str | None = None
         self.persona: str | None = None
-        self.reasoning: ReasoningEngine | None = None
+        self.reasoning: ReasoningConfig | None = None
         self.reflex: Reflex | None = None
         self.tools: list[str] = []
         self.supervision: Supervision | None = None
@@ -66,8 +71,8 @@ class AgentBuilder:
         return self
 
     def with_reasoning(self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7) -> "AgentBuilder":
-        """Configures Brain.reasoning."""
-        self.reasoning = ReasoningEngine(model=model, thoughts_max=thoughts_max, min_confidence=min_confidence)
+        """Configures Brain.reasoning (Standard CoT)."""
+        self.reasoning = StandardReasoning(model=model, thoughts_max=thoughts_max, min_confidence=min_confidence)
         return self
 
     def with_reflex(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> "AgentBuilder":
