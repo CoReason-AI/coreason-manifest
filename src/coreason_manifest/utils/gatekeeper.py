@@ -15,7 +15,7 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
     """
     Validates a GraphFlow against its Governance policy.
     """
-    violations = []
+    violations: list[PolicyViolation] = []
 
     # Check if governance exists
     if not flow.governance or not flow.governance.policy:

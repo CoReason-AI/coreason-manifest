@@ -109,7 +109,7 @@ class CitadelLoader:
 
         return target_path
 
-    def load_recursive(self, path: Path) -> dict[str, Any]:
+    def load_recursive(self, path: Path) -> Any:
         """
         Loads a YAML file, recursively resolving $ref keys.
         """
@@ -150,7 +150,7 @@ class CitadelLoader:
         # 5. Cache
         self.registry.mark_loaded(path_str, resolved_data)
 
-        return resolved_data  # type: ignore
+        return resolved_data
 
     def _traverse_and_resolve(self, data: Any, current_file_path: Path) -> Any:
         if isinstance(data, dict):
