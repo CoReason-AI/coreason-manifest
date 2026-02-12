@@ -356,7 +356,7 @@ def test_integrity_obj_no_prev_hash() -> None:
 def test_integrity_obj_with_prev_hash() -> None:
     # Integrity L62: elif hasattr ... actual_prev_hash = curr.prev_hash
     class WithPrevHash:
-        def __init__(self, data: str, prev_hash: str | None = None):
+        def __init__(self, data: str, prev_hash: str | None = None) -> None:
             self.data = data
             self.prev_hash = prev_hash
 
@@ -376,7 +376,7 @@ def test_gatekeeper_attribute_error() -> None:
     # Gatekeeper L50-52: except AttributeError: return []
     class BrokenReasoning:
         @property
-        def required_capabilities(self):
+        def required_capabilities(self) -> None:
             raise AttributeError("mock")
 
     class MockProfile:
