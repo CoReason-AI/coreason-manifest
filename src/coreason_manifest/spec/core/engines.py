@@ -79,6 +79,10 @@ class BaseReasoning(BaseModel):
     # *** UPGRADE: CONSTITUTIONAL AI ***
     constitution: ConstitutionalScope | None = Field(None, description="Intrinsic safety constraints.")
 
+    def required_capabilities(self) -> list[str]:
+        """Returns capabilities required by this engine."""
+        return []
+
 
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
@@ -282,6 +286,9 @@ class ComputerUseReasoning(BaseReasoning):
     )
 
     screenshot_frequency_ms: int = Field(1000, description="Delay between visual observation frames (in milliseconds).")
+
+    def required_capabilities(self) -> list[str]:
+        return ["computer_use"]
 
 
 class GraphReasoning(BaseReasoning):

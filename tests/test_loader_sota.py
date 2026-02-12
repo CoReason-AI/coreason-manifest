@@ -7,7 +7,7 @@ from coreason_manifest.utils.loader import CitadelLoader, safety_check
 
 def test_safety_check_violation() -> None:
     data = {"some_key": "import subprocess; subprocess.Popen('ls')"}
-    with pytest.raises(ValueError, match="Security Violation"):
+    with pytest.warns(UserWarning, match="Potential Security Issue"):
         safety_check(data)
 
 

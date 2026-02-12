@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
-from coreason_manifest.spec.core.engines import ComputerUseReasoning
-from coreason_manifest.spec.core.flow import GraphFlow
+from coreason_manifest.spec.core.flow import GraphFlow, AnyNode
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwitchNode
 
 
@@ -49,46 +48,65 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
 
             if isinstance(profile, CognitiveProfile) and profile.reasoning:
                 reasoning = profile.reasoning
-                if isinstance(reasoning, ComputerUseReasoning) and "computer_use" not in allowed_caps:
-                    violations.append(
-                        PolicyViolation(
-                            node_id=node_id,
-                            rule="Capability Check",
-                            message=f"Node '{node_id}' uses 'computer_use' but it is not in allowed_capabilities.",
-                        )
-                    )
+                # Use extensible capability check
+                if hasattr(reasoning, "required_capabilities"):
+                    req_caps = reasoning.required_capabilities()
+                    for cap in req_caps:
+                        if cap not in allowed_caps:
+                            violations.append(
+                                PolicyViolation(
+                                    node_id=node_id,
+                                    rule="Capability Check",
+                                    message=f"Node '{node_id}' uses '{cap}' but it is not in allowed_capabilities.",
+                                )
+                            )
 
-    # Rule 2: Topology Check (Red Button)
-    for node_id, node in nodes.items():
-        risk = node.metadata.get("risk_level")
-        if risk == "critical":
-            # Check ancestry for HumanNode or SwitchNode
-            ancestors = set()
-            queue = [node_id]
-            visited = {node_id}
-            has_guard = False
+    # Rule 2: Topology Check (The SOTA Red Button)
+    # Identify Critical Nodes
+    critical_nodes = [
+        nid for nid, n in nodes.items()
+        if n.metadata.get("risk_level") == "critical"
+    ]
 
-            while queue:
-                curr = queue.pop(0)
-                for parent_id in upstream_adj.get(curr, []):
-                    if parent_id not in visited:
-                        visited.add(parent_id)
-                        ancestors.add(parent_id)
-                        parent_node = nodes[parent_id]
-                        if isinstance(parent_node, (HumanNode, SwitchNode)):
-                            has_guard = True
-                            break
-                        queue.append(parent_id)
-                if has_guard:
-                    break
+    for target_id in critical_nodes:
+        # DFS to find ANY path to a root that does NOT pass through a guard
+        # State: (current_node, path_trace)
+        stack = [(target_id, [target_id])]
 
-            if not has_guard:
-                violations.append(
-                    PolicyViolation(
-                        node_id=node_id,
-                        rule="Topology Check",
-                        message=f"Critical node '{node_id}' lacks a HumanNode or SwitchNode in its ancestry.",
-                    )
-                )
+        # We need to track visited for the current DFS path to avoid cycles,
+        # but also globally if we want to optimize.
+        # For simplicity and correctness with "path trace", we check path membership.
+
+        while stack:
+            curr_id, path = stack.pop()
+
+            # 1. Stop if we hit a Guard (This path is safe)
+            # IMPORTANT: The target node itself cannot be its own upstream guard unless it's a SwitchNode acting as a gate?
+            # Usually the guard is *before* the critical action.
+            # If the critical node is ITSELF a HumanNode, is it guarded? Yes.
+            curr_node = nodes[curr_id]
+            if isinstance(curr_node, (HumanNode, SwitchNode)):
+                # If we hit a guard, this path is secured. We stop traversing this branch.
+                # NOTE: If target_id IS a HumanNode, it is safe.
+                continue
+
+            # 2. Get parents
+            parents = upstream_adj.get(curr_id, [])
+
+            # 3. If no parents, we reached a ROOT without hitting a guard -> VIOLATION
+            if not parents:
+                # We found an exposed root!
+                violations.append(PolicyViolation(
+                    node_id=target_id,
+                    rule="Topology Check",
+                    message=f"Critical node '{target_id}' is accessible via unguarded path: {' <- '.join(path)}"
+                ))
+                # Break to avoid duplicate violations for the same node
+                break
+
+            # 4. Continue searching upstream
+            for pid in parents:
+                if pid not in path: # simple cycle avoidance
+                    stack.append((pid, path + [pid]))
 
     return violations

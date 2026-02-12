@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import re
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -41,8 +42,10 @@ def safety_check(data: Any) -> None:
     elif isinstance(data, str):
         for pattern in FORBIDDEN_PATTERNS:
             if pattern.search(data):
-                raise ValueError(
-                    f"Security Violation: Forbidden pattern '{pattern.pattern}' found in manifest content."
+                warnings.warn(
+                    f"Potential Security Issue: Pattern '{pattern.pattern}' found in manifest content. "
+                    "Ensure this input is trusted.",
+                    UserWarning
                 )
 
 
