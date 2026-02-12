@@ -9,7 +9,7 @@ def test_human_node_validators_coverage() -> None:
     """Test validation logic in HumanNode to ensure 100% coverage."""
 
     # Test 1: Shadow mode without shadow_timeout_seconds (Should raise ValueError)
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError, match="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'"):
         HumanNode(
             id="h1",
             metadata={},
@@ -20,10 +20,9 @@ def test_human_node_validators_coverage() -> None:
             interaction_mode="shadow",
             shadow_timeout_seconds=None,
         )
-    assert "HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'" in str(exc.value)
 
     # Test 2: Blocking mode with shadow_timeout_seconds (Should raise ValueError)
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError, match="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'"):
         HumanNode(
             id="h2",
             metadata={},
@@ -34,14 +33,13 @@ def test_human_node_validators_coverage() -> None:
             interaction_mode="blocking",
             shadow_timeout_seconds=5,
         )
-    assert "HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'" in str(exc.value)
 
 
 def test_swarm_node_validators_coverage() -> None:
     """Test validation logic in SwarmNode to ensure 100% coverage."""
 
     # Test 1: Summarize reducer without aggregator_model (Should raise ValueError)
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError, match="SwarmNode with reducer='summarize' requires an 'aggregator_model'"):
         SwarmNode(
             id="s1",
             metadata={},
@@ -56,7 +54,6 @@ def test_swarm_node_validators_coverage() -> None:
             aggregator_model=None,
             output_variable="out",
         )
-    assert "SwarmNode with reducer='summarize' requires an 'aggregator_model'" in str(exc.value)
 
     # Test 2: Valid SwarmNode to hit the 'return self' statement
     valid_swarm = SwarmNode(
@@ -80,7 +77,7 @@ def test_adaptive_reasoning_validators_coverage() -> None:
     """Test validation logic in AdaptiveReasoning."""
 
     # Test 1: Invalid max_compute_tokens <= 0
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
         AdaptiveReasoning(
             model="o1",
             max_compute_tokens=0,
@@ -89,4 +86,3 @@ def test_adaptive_reasoning_validators_coverage() -> None:
             min_confidence_score=0.5,
             verifier_model="v1",
         )
-    assert "Input should be greater than 0" in str(exc.value)

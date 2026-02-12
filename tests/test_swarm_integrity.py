@@ -1,18 +1,14 @@
 import pytest
-from pydantic import ValidationError
+
 from coreason_manifest.spec.core.flow import FlowDefinitions, validate_integrity
-from coreason_manifest.spec.core.nodes import SwarmNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import CognitiveProfile, SwarmNode
+
 
 def test_swarm_integrity_validation() -> None:
     """Test that SwarmNode integrity checks work correctly."""
 
     # Define a valid profile
-    profile = CognitiveProfile(
-        role="worker",
-        persona="worker persona",
-        reasoning=None,
-        fast_path=None
-    )
+    profile = CognitiveProfile(role="worker", persona="worker persona", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(profiles={"worker-1": profile})
 
     # Case 1: Valid SwarmNode
@@ -28,7 +24,7 @@ def test_swarm_integrity_validation() -> None:
         failure_tolerance_percent=0.1,
         reducer_function="vote",
         aggregator_model=None,
-        output_variable="out"
+        output_variable="out",
     )
 
     # Should not raise
@@ -47,13 +43,12 @@ def test_swarm_integrity_validation() -> None:
         failure_tolerance_percent=0.1,
         reducer_function="vote",
         aggregator_model=None,
-        output_variable="out"
+        output_variable="out",
     )
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError, match="SwarmNode 's2' references undefined worker profile ID 'ghost-worker'"):
         validate_integrity(definitions, [invalid_swarm])
 
-    assert "SwarmNode 's2' references undefined worker profile ID 'ghost-worker'" in str(exc.value)
 
 if __name__ == "__main__":
     test_swarm_integrity_validation()
