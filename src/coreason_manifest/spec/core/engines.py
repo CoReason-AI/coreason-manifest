@@ -2,6 +2,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from coreason_manifest.spec.core.governance import ConstitutionalScope
+
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
 # =========================================================================
@@ -57,18 +59,6 @@ ModelRef = str | ModelCriteria
 # =========================================================================
 #  2. COGNITIVE ARCHITECTURES ("The Software")
 # =========================================================================
-
-
-class ConstitutionalScope(BaseModel):
-    """
-    Defines the ethical and safety boundaries for the cognitive process.
-    """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    principles: list[str] = Field(..., description="List of safety principles.")
-    enforcement: Literal["warning", "block", "correction"] = Field(..., description="Action on violation.")
-    inject_into_system_prompt: bool = Field(True, description="Whether to prepend principles to the prompt.")
 
 
 class BaseReasoning(BaseModel):
