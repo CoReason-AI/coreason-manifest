@@ -38,7 +38,7 @@ class AgentNode(Node):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["agent"] = "agent"
-    brain: Brain
+    brain: Brain | str
     tools: list[str]
 
 
