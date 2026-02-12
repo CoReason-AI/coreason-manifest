@@ -50,9 +50,8 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
 
             if isinstance(profile, CognitiveProfile) and profile.reasoning:
                 reasoning = profile.reasoning
-                if isinstance(reasoning, ComputerUseReasoning):
-                    if "computer_use" not in allowed_caps:
-                        violations.append(PolicyViolation(
+                if isinstance(reasoning, ComputerUseReasoning) and "computer_use" not in allowed_caps:
+                    violations.append(PolicyViolation(
                             node_id=node_id,
                             rule="Capability Check",
                             message=f"Node '{node_id}' uses 'computer_use' but it is not in allowed_capabilities."

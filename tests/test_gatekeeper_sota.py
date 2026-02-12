@@ -4,7 +4,7 @@ from coreason_manifest.spec.core.engines import ComputerUseReasoning, StandardRe
 from coreason_manifest.spec.core.governance import Governance, PolicyConfig
 from coreason_manifest.utils.gatekeeper import validate_policy
 
-def test_gatekeeper_capability_check():
+def test_gatekeeper_capability_check() -> None:
     # Setup
     policy = PolicyConfig(
         allowed_capabilities=[], # No computer_use
@@ -44,7 +44,7 @@ def test_gatekeeper_capability_check():
     assert len(violations) == 1
     assert violations[0].rule == "Capability Check"
 
-def test_gatekeeper_topology_check():
+def test_gatekeeper_topology_check() -> None:
     # Setup
     policy = PolicyConfig(
         allowed_capabilities=["computer_use"],

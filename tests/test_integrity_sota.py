@@ -1,6 +1,6 @@
 from coreason_manifest.utils.integrity import MerkleNode, create_merkle_node, verify_merkle_proof
 
-def test_integrity_chain_valid():
+def test_integrity_chain_valid() -> None:
     # Genesis
     genesis = create_merkle_node(
         previous_hash="0",
@@ -27,7 +27,7 @@ def test_integrity_chain_valid():
 
     assert verify_merkle_proof(chain)
 
-def test_integrity_chain_tampered():
+def test_integrity_chain_tampered() -> None:
     # Genesis
     genesis = create_merkle_node(
         previous_hash="0",

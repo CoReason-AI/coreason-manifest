@@ -40,7 +40,9 @@ def safety_check(data: Any) -> None:
     elif isinstance(data, str):
         for pattern in FORBIDDEN_PATTERNS:
             if pattern.search(data):
-                raise ValueError(f"Security Violation: Forbidden pattern '{pattern.pattern}' found in manifest content.")
+                raise ValueError(
+                    f"Security Violation: Forbidden pattern '{pattern.pattern}' found in manifest content."
+                )
 
 class ManifestRegistry:
     """
@@ -85,18 +87,16 @@ class CitadelLoader:
             # or treat it as a placeholder.
             raise NotImplementedError("HTTPS loading not yet implemented.")
 
-        if ref.startswith("file://"):
-            # Strip file:// prefix
-            path_str = ref[7:]
-        else:
-            path_str = ref
+        path_str = ref[7:] if ref.startswith("file://") else ref
 
         # Resolve path
         target_path = (base_path.parent / path_str).resolve()
 
         # Jail check
         if not target_path.is_relative_to(self.root):
-            raise ValueError(f"Security Violation: Path traversal attempt denied. '{ref}' resolves to '{target_path}' which is outside root '{self.root}'.")
+            raise ValueError(
+                f"Security Violation: Path traversal attempt denied. '{ref}' resolves to '{target_path}' which is outside root '{self.root}'."
+            )
 
         return target_path
 
@@ -150,14 +150,7 @@ class CitadelLoader:
                 ref = data["$ref"]
                 target_path = self._resolve_ref(current_file_path, ref)
                 # Recursively load the referenced file
-                loaded_content = self.load_recursive(target_path)
-
-                # If there are other keys in the dict containing $ref, usually $ref replaces everything.
-                # Standard JSON Reference behavior: keys other than $ref are ignored.
-                # However, v0.24.0 behavior might have been merge?
-                # Prompt says: "Restore Recursion... recursive $ref support".
-                # I will assume replacement.
-                return loaded_content
+                return self.load_recursive(target_path)
 
             # Recurse for other keys
             return {k: self._traverse_and_resolve(v, current_file_path) for k, v in data.items()}

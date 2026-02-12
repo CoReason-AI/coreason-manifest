@@ -2,12 +2,12 @@ import pytest
 from pathlib import Path
 from coreason_manifest.utils.loader import CitadelLoader, safety_check
 
-def test_safety_check_violation():
+def test_safety_check_violation() -> None:
     data = {"some_key": "import subprocess; subprocess.Popen('ls')"}
     with pytest.raises(ValueError, match="Security Violation"):
         safety_check(data)
 
-def test_loader_jail_violation(tmp_path):
+def test_loader_jail_violation(tmp_path: Path) -> None:
     # Setup
     jail = tmp_path / "jail"
     jail.mkdir()
@@ -22,7 +22,7 @@ def test_loader_jail_violation(tmp_path):
     with pytest.raises(ValueError, match="Path traversal attempt denied"):
         loader.load_recursive(inside)
 
-def test_loader_recursive_success(tmp_path):
+def test_loader_recursive_success(tmp_path: Path) -> None:
     root = tmp_path / "app"
     root.mkdir()
 
@@ -37,7 +37,7 @@ def test_loader_recursive_success(tmp_path):
 
     assert result == {"hello": "world"}
 
-def test_circular_dependency(tmp_path):
+def test_circular_dependency(tmp_path: Path) -> None:
     root = tmp_path / "app"
     root.mkdir()
 
