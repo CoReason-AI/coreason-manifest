@@ -59,9 +59,7 @@ class BaseInspector(Node):
     target_variable: str
     criteria: str
     output_variable: str
-    judge_model: ModelRef | None = Field(
-        None, description="Model/Policy to use for semantic evaluation."
-    )
+    judge_model: ModelRef | None = Field(None, description="Model/Policy to use for semantic evaluation.")
     optimizer: Optimizer | None = None
 
 
