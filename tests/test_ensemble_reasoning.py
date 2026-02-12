@@ -30,6 +30,7 @@ def test_ensemble_reasoning_instantiation() -> None:
     ensemble = EnsembleReasoning(model="gpt-4")
     assert ensemble.type == "ensemble"
     assert ensemble.aggregation == "majority_vote"
+    assert ensemble.semantic_similarity_threshold == 0.85
     assert ensemble.similarity_model is None
     assert ensemble.judge_model is None
 
@@ -37,6 +38,7 @@ def test_ensemble_reasoning_instantiation() -> None:
     ensemble = EnsembleReasoning(
         model=ModelCriteria(strategy="balanced", routing_mode="broadcast"),
         aggregation="strongest_judge",
+        semantic_similarity_threshold=None,
         similarity_model="gpt-4",
         judge_model="gpt-4-turbo",
     )
@@ -45,6 +47,7 @@ def test_ensemble_reasoning_instantiation() -> None:
     assert isinstance(ensemble.model, ModelCriteria)
     assert ensemble.model.routing_mode == "broadcast"
     assert ensemble.aggregation == "strongest_judge"
+    assert ensemble.semantic_similarity_threshold is None
     assert ensemble.similarity_model == "gpt-4"
     assert ensemble.judge_model == "gpt-4-turbo"
 

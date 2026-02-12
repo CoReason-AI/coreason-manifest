@@ -81,7 +81,7 @@ class AttentionReasoning(BaseReasoning):
     type: Literal["attention"] = "attention"
 
     attention_mode: Literal["rephrase", "extract"] = Field(
-        "extract", description="Method for sanitizing input context."
+        "rephrase", description="Method for sanitizing input context."
     )
     # The model used to filter the noise (can be smaller/faster than the main reasoning model)
     focus_model: ModelRef | None = Field(None, description="Model used for the S2A filtering step.")
@@ -148,8 +148,15 @@ class EnsembleReasoning(BaseReasoning):
 
     # Semantic Analysis: Uses a model to determine if answers are functionally equivalent
     # This replaces simple cosine similarity with deeper semantic understanding
+
+    # 1. Fast Path (Embeddings)
+    semantic_similarity_threshold: float | None = Field(
+        0.85, description="If set, uses fast vector embeddings to check agreement."
+    )
+
+    # 2. Slow Path (LLM Judge) - Keep this as an optional override
     similarity_model: ModelRef | None = Field(
-        None, description="Model used to judge if two different answers are semantically equivalent."
+        None, description="Optional. If set, uses this LLM for high-fidelity agreement checking."
     )
 
     # Consensus Strategy
