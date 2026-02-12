@@ -3,6 +3,28 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 # =========================================================================
+#  TYPE DEFINITIONS & ALIASES
+# =========================================================================
+
+RoutingStrategy = Literal["lowest_cost", "lowest_latency", "performance", "balanced"]
+RoutingMode = Literal["single", "fallback", "round_robin", "broadcast"]
+ModelCapability = Literal["vision", "coding", "json_mode", "function_calling"]
+ComplianceStandard = Literal["hipaa", "gdpr", "eu_residency", "fedramp"]
+
+AttentionMode = Literal["rephrase", "extract"]
+BoTLearningStrategy = Literal["read_only", "append_new", "refine_existing"]
+FastComparisonMode = Literal["embedding", "lexical", "hybrid"]
+VerificationMode = Literal["ambiguous_only", "always", "never"]
+AggregationStrategy = Literal["majority_vote", "strongest_judge", "union"]
+AttackStrategy = Literal["crescendo", "refusal_suppression", "payload_splitting", "goat", "emergence_boosting"]
+InteractionMode = Literal["native_os", "browser_dom", "hybrid"]
+AllowedAction = Literal["click", "type", "scroll", "screenshot", "drag", "hover", "hotkey"]
+CoordinateSystem = Literal["absolute_px", "normalized_0_1"]
+GraphRetrievalMode = Literal["local", "global", "hybrid"]
+GuidedDecodingMode = Literal["json_schema", "regex", "grammar", "none"]
+
+
+# =========================================================================
 #  1. SEMANTIC MODEL ROUTING ("The Hardware")
 # =========================================================================
 
@@ -15,22 +37,14 @@ class ModelCriteria(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    strategy: Literal["lowest_cost", "lowest_latency", "performance", "balanced"] = Field(
-        "balanced", description="Optimization target for model selection."
-    )
+    strategy: RoutingStrategy = Field("balanced", description="Optimization target for model selection.")
     min_context: int | None = Field(None, description="Minimum required context window (tokens).")
-    capabilities: list[Literal["vision", "coding", "json_mode", "function_calling"]] | None = Field(
-        None, description="Hard technical requirements."
-    )
-    compliance: list[Literal["hipaa", "gdpr", "eu_residency", "fedramp"]] | None = Field(
-        None, description="Regulatory constraints."
-    )
+    capabilities: list[ModelCapability] | None = Field(None, description="Hard technical requirements.")
+    compliance: list[ComplianceStandard] | None = Field(None, description="Regulatory constraints.")
     max_cost_per_m_tokens: float | None = Field(None, description="FinOps circuit breaker.")
 
     # Multi-Model Routing
-    routing_mode: Literal["single", "fallback", "round_robin", "broadcast"] = Field(
-        "single", description="Broadcast mode is required for EnsembleReasoning."
-    )
+    routing_mode: RoutingMode = Field("single", description="How to handle multiple matching models.")
 
     provider_whitelist: list[str] | None = None
     specific_models: list[str] | None = Field(None, description="Explicit list of model IDs to route between.")
@@ -56,7 +70,7 @@ class BaseReasoning(BaseModel):
 
     # *** FIX 3: GUIDED DECODING ***
     # Enforces syntax constraints at the token level (SOTA reliability)
-    guided_decoding: Literal["json_schema", "regex", "grammar", "none"] = Field(
+    guided_decoding: GuidedDecodingMode = Field(
         "none", description="If set, restricts the model to output valid syntax only."
     )
 
@@ -77,7 +91,7 @@ class AttentionReasoning(BaseReasoning):
 
     type: Literal["attention"] = "attention"
 
-    attention_mode: Literal["rephrase", "extract"] = Field("rephrase", description="Method for sanitizing input.")
+    attention_mode: AttentionMode = Field("rephrase", description="Method for sanitizing input.")
     # The model used to filter the noise (can be smaller/faster than the main reasoning model)
     focus_model: ModelRef | None = Field(None, description="Model used for the S2A filtering step.")
 
@@ -96,7 +110,7 @@ class BufferReasoning(BaseReasoning):
 
     # *** FIX 1: LEARNING STRATEGY ***
     # Allows the agent to contribute new knowledge back to the buffer
-    learning_strategy: Literal["read_only", "append_new", "refine_existing"] = Field(
+    learning_strategy: BoTLearningStrategy = Field(
         "read_only", description="Whether to save successful executions back to the buffer."
     )
 
@@ -139,7 +153,8 @@ class CouncilReasoning(BaseReasoning):
 class EnsembleReasoning(BaseReasoning):
     """
     Multi-Model Consensus with Cascading Verification.
-    Uses 'fast path' metrics (embedding/lexical) before triggering 'slow path' LLMs.
+    Executes parallel queries and uses a hybrid fast/slow path to verify agreement.
+    NOTE: disagreement_threshold < 0.6 is a strong signal of emergent instability.
     """
 
     type: Literal["ensemble"] = "ensemble"
@@ -150,7 +165,7 @@ class EnsembleReasoning(BaseReasoning):
     # 'embedding': Vector cosine similarity (Default).
     # 'lexical': Jaccard/Token overlap (Zero cost, good for strict code/math).
     # 'hybrid': Average of both.
-    fast_comparison_mode: Literal["embedding", "lexical", "hybrid"] = Field(
+    fast_comparison_mode: FastComparisonMode = Field(
         "embedding", description="Method for initial cheap agreement check."
     )
 
@@ -165,7 +180,7 @@ class EnsembleReasoning(BaseReasoning):
     # 'ambiguous_only': Trigger LLM check only if score is in the grey zone (0.60-0.85).
     # 'always': Always double-check with LLM (Paranoid mode).
     # 'never': Trust the fast path implicitly (Fastest).
-    verification_mode: Literal["ambiguous_only", "always", "never"] = Field(
+    verification_mode: VerificationMode = Field(
         "ambiguous_only", description="When to trigger the deep similarity_model check."
     )
 
@@ -174,7 +189,7 @@ class EnsembleReasoning(BaseReasoning):
     )
 
     # --- 2. Consensus & Tie-Breaking ---
-    aggregation: Literal["majority_vote", "strongest_judge", "union"] = "majority_vote"
+    aggregation: AggregationStrategy = "majority_vote"
 
     # Tie-Breaker: If models disagree, this judge decides.
     judge_model: ModelRef | None = Field(None, description="The 'Supreme Court' model that resolves conflicts.")
@@ -200,9 +215,7 @@ class RedTeamingReasoning(BaseReasoning):
     # payload_splitting: Breaking malicious payloads across tokens.
     # goat: Generative Offensive Agent Tester (Tree-based planning).
     # emergence_boosting: Pressure testing to elicit latent behaviors.
-    attack_strategy: Literal["crescendo", "refusal_suppression", "payload_splitting", "goat", "emergence_boosting"] = (
-        Field("crescendo", description="The algorithmic protocol for generating attacks.")
-    )
+    attack_strategy: AttackStrategy = Field("crescendo", description="The algorithmic protocol for generating attacks.")
 
     max_turns: int = Field(5, description="Maximum conversation depth/trajectory.")
     success_criteria: str = Field(
@@ -225,20 +238,18 @@ class ComputerUseReasoning(BaseReasoning):
 
     # *** FIX 2: COORDINATE SYSTEM ***
     # Critical for model portability across screen sizes
-    coordinate_system: Literal["absolute_px", "normalized_0_1"] = Field(
-        "normalized_0_1", description="Coordinate format (pixels vs relative)."
-    )
+    coordinate_system: CoordinateSystem = Field("normalized_0_1", description="Coordinate format (pixels vs relative).")
 
     # Interaction Protocol
     # native_os: Uses XY coordinates and OS events (clicks, hotkeys).
     # browser_dom: Uses HTML selectors and JS events (Playwright style).
     # hybrid: Allows switching between OS and DOM interaction.
-    interaction_mode: Literal["native_os", "browser_dom", "hybrid"] = Field(
+    interaction_mode: InteractionMode = Field(
         "native_os", description="The layer at which the agent perceives and acts."
     )
 
     # Safety Governance
-    allowed_actions: list[Literal["click", "type", "scroll", "screenshot", "drag", "hover", "hotkey"]] = Field(
+    allowed_actions: list[AllowedAction] = Field(
         default=["click", "type", "scroll", "screenshot"],
         description="Allow-list of permitted GUI operations.",
     )
@@ -268,9 +279,7 @@ class GraphReasoning(BaseReasoning):
     # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
     # global: "Corpus-Centric". Good for "What are the themes?" (uses pre-computed community summaries).
     # hybrid: The best of both worlds.
-    retrieval_mode: Literal["local", "global", "hybrid"] = Field(
-        "local", description="Strategy for traversing the graph."
-    )
+    retrieval_mode: GraphRetrievalMode = Field("local", description="Strategy for traversing the graph.")
 
     # Local Mode Constraints
     max_hops: int = Field(2, description="Traversal depth for local neighbor search.")
@@ -338,3 +347,24 @@ class Optimizer(BaseModel):
     teacher_model: str
     metric: str
     max_demonstrations: int
+
+
+__all__ = [
+    "AtomReasoning",
+    "AttentionReasoning",
+    "BaseReasoning",
+    "BufferReasoning",
+    "ComputerUseReasoning",
+    "CouncilReasoning",
+    "EnsembleReasoning",
+    "GraphReasoning",
+    "ModelCriteria",
+    "ModelRef",
+    "Optimizer",
+    "ReasoningConfig",
+    "RedTeamingReasoning",
+    "Reflex",
+    "StandardReasoning",
+    "Supervision",
+    "TreeSearchReasoning",
+]
