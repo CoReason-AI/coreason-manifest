@@ -1,6 +1,7 @@
 import hashlib
 import re
-from typing import Any
+from typing import Any, ClassVar
+
 
 class PrivacySentinel:
     """
@@ -16,11 +17,18 @@ class PrivacySentinel:
     SSN_REGEX = r"\b\d{3}-\d{2}-\d{4}\b"
 
     # Terms that must appear as distinct words (separated by _) to trigger redaction
-    SENSITIVE_WORDS = {"password", "token", "auth", "secret", "credential", "passcode"}
+    SENSITIVE_WORDS: ClassVar[set[str]] = {"password", "token", "auth", "secret", "credential", "passcode"}
 
     # Terms that trigger redaction if they appear anywhere in the key
     # We normalize "-" to "_" before checking these.
-    SENSITIVE_SUBSTRINGS = {"api_key", "apikey", "access_token", "refresh_token", "private_key", "secret_key"}
+    SENSITIVE_SUBSTRINGS: ClassVar[set[str]] = {
+        "api_key",
+        "apikey",
+        "access_token",
+        "refresh_token",
+        "private_key",
+        "secret_key",
+    }
 
     def __init__(self, redact_pii: bool = True, redact_secrets: bool = True, hashing_salt: str = ""):
         self.redact_pii = redact_pii
@@ -33,12 +41,11 @@ class PrivacySentinel:
         """
         if isinstance(data, dict):
             return {k: self._sanitize_kv(k, v) for k, v in data.items()}
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return [self.sanitize(item) for item in data]
-        elif isinstance(data, str):
+        if isinstance(data, str):
             return self._sanitize_string(data)
-        else:
-            return data
+        return data
 
     def _sanitize_kv(self, key: str, value: Any) -> Any:
         """
@@ -52,10 +59,10 @@ class PrivacySentinel:
 
             # Check for specific substrings
             if any(term in normalized_key for term in self.SENSITIVE_SUBSTRINGS):
-                 return self._redact(str(value))
+                return self._redact(str(value))
 
             # Check for sensitive words (split by non-alphanumeric)
-            parts = re.split(r'[^a-z0-9]', lower_key)
+            parts = re.split(r"[^a-z0-9]", lower_key)
             if any(part in self.SENSITIVE_WORDS for part in parts):
                 return self._redact(str(value))
 
@@ -69,9 +76,11 @@ class PrivacySentinel:
         if not self.redact_pii:
             return text
 
-        if re.search(self.EMAIL_REGEX, text) or \
-           re.search(self.CREDIT_CARD_REGEX, text) or \
-           re.search(self.SSN_REGEX, text):
+        if (
+            re.search(self.EMAIL_REGEX, text)
+            or re.search(self.CREDIT_CARD_REGEX, text)
+            or re.search(self.SSN_REGEX, text)
+        ):
             return self._redact(text)
 
         return text

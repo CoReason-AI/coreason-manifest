@@ -19,7 +19,7 @@ def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:
 
     if execution.error:
         attributes["error.message"] = execution.error
-        attributes["error.type"] = "NodeExecutionError" # Generic error type
+        attributes["error.type"] = "NodeExecutionError"  # Generic error type
 
     # Merge custom attributes
     # We might need to handle naming collisions, but for now we trust the user/recorder.

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
@@ -13,11 +13,7 @@ class BlackBoxRecorder:
     and structured logging (Telemetry).
     """
 
-    def __init__(
-        self,
-        privacy_sentinel: PrivacySentinel | None = None,
-        initial_hash: str | None = None
-    ) -> None:
+    def __init__(self, privacy_sentinel: PrivacySentinel | None = None, initial_hash: str | None = None) -> None:
         self.privacy = privacy_sentinel or PrivacySentinel()
         # The tail of the Merkle Chain
         self.previous_hash = initial_hash
@@ -40,7 +36,7 @@ class BlackBoxRecorder:
         3. Returns immutable record.
         """
         if timestamp is None:
-            timestamp = datetime.now(timezone.utc)
+            timestamp = datetime.now(UTC)
 
         if attributes is None:
             attributes = {}
@@ -65,7 +61,7 @@ class BlackBoxRecorder:
             "inputs": safe_inputs,
             "outputs": safe_outputs,
             "error": error,
-            "timestamp": timestamp.isoformat(), # Normalize datetime for consistent hashing
+            "timestamp": timestamp.isoformat(),  # Normalize datetime for consistent hashing
             "duration_ms": duration_ms,
             "attributes": attributes,
             "previous_hash": self.previous_hash,

@@ -1,10 +1,9 @@
 import json
-from datetime import datetime, timezone
 
+from coreason_manifest.spec.interop.otel import to_otel_attributes
 from coreason_manifest.spec.interop.telemetry import NodeState
 from coreason_manifest.utils.privacy import PrivacySentinel
 from coreason_manifest.utils.recorder import BlackBoxRecorder
-from coreason_manifest.spec.interop.otel import to_otel_attributes
 
 
 def test_privacy_sentinel_secrets() -> None:
@@ -22,6 +21,7 @@ def test_privacy_sentinel_secrets() -> None:
     # Verify hashing consistency
     sanitized2 = sentinel.sanitize(data)
     assert sanitized["password"] == sanitized2["password"]
+
 
 def test_privacy_sentinel_heuristics() -> None:
     sentinel = PrivacySentinel(redact_secrets=True)
@@ -43,8 +43,8 @@ def test_privacy_sentinel_heuristics() -> None:
         "total_tokens": 150,
         "author": "Gowtham",
         "authenticated": True,  # "authenticated" splits to ["authenticated"] which is not "auth"
-        "key_id": "123",        # "key" is not in SENSITIVE_WORDS anymore (api_key is substring)
-        "public_key_id": "pk_123"
+        "key_id": "123",  # "key" is not in SENSITIVE_WORDS anymore (api_key is substring)
+        "public_key_id": "pk_123",
     }
 
     for key, val in should_redact.items():
@@ -52,9 +52,9 @@ def test_privacy_sentinel_heuristics() -> None:
         assert res[key] != val, f"Expected redaction for {key}"
         assert str(res[key]).startswith("<REDACTED:SECRET:"), f"Expected redaction for {key}"
 
-    for key, val in should_keep.items():
-        res = sentinel.sanitize({key: val})
-        assert res[key] == val, f"Expected NO redaction for {key}"
+    for k_keep, v_keep in should_keep.items():
+        res = sentinel.sanitize({k_keep: v_keep})
+        assert res[k_keep] == v_keep, f"Expected NO redaction for {k_keep}"
 
 
 def test_privacy_sentinel_pii() -> None:
@@ -76,17 +76,7 @@ def test_privacy_sentinel_pii() -> None:
 def test_privacy_sentinel_recursion() -> None:
     sentinel = PrivacySentinel(redact_secrets=True, redact_pii=True)
 
-    data = {
-        "user": {
-            "profile": {
-                "email": "user@example.com",
-                "id": 123
-            },
-            "auth": {
-                "token": "secret_token"
-            }
-        }
-    }
+    data = {"user": {"profile": {"email": "user@example.com", "id": 123}, "auth": {"token": "secret_token"}}}
 
     sanitized = sentinel.sanitize(data)
 
@@ -110,11 +100,7 @@ def test_recorder_chaining() -> None:
 
     # Record 1
     rec1 = recorder.record(
-        node_id="node1",
-        state=NodeState.COMPLETED,
-        inputs={"a": 1},
-        outputs={"b": 2},
-        duration_ms=10.0
+        node_id="node1", state=NodeState.COMPLETED, inputs={"a": 1}, outputs={"b": 2}, duration_ms=10.0
     )
 
     assert rec1.previous_hash == "GENESIS_HASH"
@@ -122,11 +108,7 @@ def test_recorder_chaining() -> None:
 
     # Record 2
     rec2 = recorder.record(
-        node_id="node2",
-        state=NodeState.COMPLETED,
-        inputs={"prev": 2},
-        outputs={"curr": 3},
-        duration_ms=15.0
+        node_id="node2", state=NodeState.COMPLETED, inputs={"prev": 2}, outputs={"curr": 3}, duration_ms=15.0
     )
 
     assert rec2.previous_hash == rec1.execution_hash
@@ -145,11 +127,11 @@ def test_recorder_sanitization_integration() -> None:
         state=NodeState.COMPLETED,
         inputs={"password": "secret"},
         outputs={"result": "ok"},
-        duration_ms=5.0
+        duration_ms=5.0,
     )
 
     assert rec.inputs["password"] != "secret"
-    assert rec.inputs["password"].startswith("<REDACTED:SECRET:")
+    assert str(rec.inputs["password"]).startswith("<REDACTED:SECRET:")
 
 
 def test_otel_bridge() -> None:
@@ -161,7 +143,7 @@ def test_otel_bridge() -> None:
         outputs={"response": "world"},
         duration_ms=100.0,
         error="Something went wrong",
-        attributes={"custom.tag": "value"}
+        attributes={"custom.tag": "value"},
     )
 
     otel_attrs = to_otel_attributes(rec)
