@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Iterable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -93,6 +93,30 @@ class FlowDefinitions(BaseModel):
     skills: dict[str, Any] = Field(default_factory=dict, description="Reusable executable skills (Future use).")
 
 
+def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyNode]) -> None:
+    """Shared referential integrity validation logic."""
+    valid_brains = definitions.brains.keys() if definitions else set()
+
+    # SOTA: Create a set of all available tools from registered packs
+    valid_tools = set()
+    if definitions and definitions.tool_packs:
+        for pack in definitions.tool_packs.values():
+            valid_tools.update(pack.tools)
+
+    for node in nodes:
+        if isinstance(node, AgentNode):
+            # 1. Brain Check
+            if isinstance(node.brain, str) and node.brain not in valid_brains:
+                raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
+
+            # 2. Tool Check
+            for tool in node.tools:
+                if tool not in valid_tools:
+                    raise ValueError(
+                        f"AgentNode '{node.id}' requires missing tool '{tool}'. Available: {list(valid_tools)}"
+                    )
+
+
 class LinearFlow(BaseModel):
     """A deterministic script."""
 
@@ -107,26 +131,7 @@ class LinearFlow(BaseModel):
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "LinearFlow":
         """Ensures all string-based brain references point to a valid definition."""
-        valid_brains = self.definitions.brains.keys() if self.definitions else set()
-
-        # SOTA: Create a set of all available tools from registered packs
-        valid_tools = set()
-        if self.definitions and self.definitions.tool_packs:
-            for pack in self.definitions.tool_packs.values():
-                valid_tools.update(pack.tools)
-
-        for node in self.sequence:
-            if isinstance(node, AgentNode):
-                # 1. Brain Check
-                if isinstance(node.brain, str) and node.brain not in valid_brains:
-                    raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
-
-                # 2. Tool Check
-                for tool in node.tools:
-                    if tool not in valid_tools:
-                        raise ValueError(
-                            f"AgentNode '{node.id}' requires missing tool '{tool}'. Available: {list(valid_tools)}"
-                        )
+        validate_integrity(self.definitions, self.sequence)
         return self
 
 
@@ -146,24 +151,5 @@ class GraphFlow(BaseModel):
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "GraphFlow":
         """Ensures all string-based brain references point to a valid definition."""
-        valid_brains = self.definitions.brains.keys() if self.definitions else set()
-
-        # SOTA: Create a set of all available tools from registered packs
-        valid_tools = set()
-        if self.definitions and self.definitions.tool_packs:
-            for pack in self.definitions.tool_packs.values():
-                valid_tools.update(pack.tools)
-
-        for node in self.graph.nodes.values():
-            if isinstance(node, AgentNode):
-                # 1. Brain Check
-                if isinstance(node.brain, str) and node.brain not in valid_brains:
-                    raise ValueError(f"AgentNode '{node.id}' references undefined brain ID '{node.brain}'")
-
-                # 2. Tool Check
-                for tool in node.tools:
-                    if tool not in valid_tools:
-                        raise ValueError(
-                            f"AgentNode '{node.id}' requires missing tool '{tool}'. Available: {list(valid_tools)}"
-                        )
+        validate_integrity(self.definitions, self.graph.nodes.values())
         return self

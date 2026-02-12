@@ -8,6 +8,7 @@ from coreason_manifest.spec.core.engines import (
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     Edge,
+    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
@@ -23,6 +24,7 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.tools import ToolPack
 
 
 def test_core_kernel_instantiation() -> None:
@@ -81,6 +83,17 @@ def test_core_kernel_instantiation() -> None:
     interface = FlowInterface(inputs={"q": {"type": "string"}}, outputs={"a": {"type": "string"}})
     variable_def = VariableDef(type="string", description="User context")
     blackboard = Blackboard(variables={"context": variable_def}, persistence=False)
+
+    # Define ToolPack for integrity
+    tool_pack = ToolPack(
+        kind="ToolPack",
+        namespace="core",
+        tools=["search"],
+        dependencies=[],
+        env_vars=[]
+    )
+    definitions = FlowDefinitions(tool_packs={"core": tool_pack})
+
     edge = Edge(source="agent-1", target="switch-1")
     graph = Graph(
         nodes={
@@ -97,6 +110,7 @@ def test_core_kernel_instantiation() -> None:
         kind="LinearFlow",
         metadata=metadata,
         sequence=[agent_node, switch_node, planner_node, human_node, placeholder],
+        definitions=definitions,
     )
     graph_flow = GraphFlow(
         kind="GraphFlow",
@@ -104,6 +118,7 @@ def test_core_kernel_instantiation() -> None:
         interface=interface,
         blackboard=blackboard,
         graph=graph,
+        definitions=definitions,
     )
 
     # Test Serialization / Deserialization Polymorphism

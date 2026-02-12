@@ -1,9 +1,9 @@
 import pytest
 
-from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
+from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import Placeholder
+from coreason_manifest.spec.core.nodes import AgentNode, Brain, Placeholder
 from coreason_manifest.spec.core.tools import ToolPack
 
 
@@ -83,4 +83,115 @@ def test_graph_builder_invalid() -> None:
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
     with pytest.raises(ValueError, match="Validation failed"):
+        builder.build()
+
+
+def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
+    """Test setting circuit breaker when governance is already set."""
+    builder = NewLinearFlow("Test", "1.0", "Desc")
+    gov = Governance(rate_limit_rpm=10)
+    builder.set_governance(gov)
+
+    # This should trigger the `if self.governance:` branch in set_circuit_breaker
+    builder.set_circuit_breaker(error_threshold=5, reset_timeout=30)
+
+    assert builder.governance is not None
+    assert builder.governance.rate_limit_rpm == 10
+    assert builder.governance.circuit_breaker is not None
+    assert builder.governance.circuit_breaker.error_threshold_count == 5
+
+
+def test_builder_coverage_set_circuit_breaker_without_governance() -> None:
+    """Test setting circuit breaker when governance is NOT set."""
+    builder = NewLinearFlow("Test", "1.0", "Desc")
+    # No governance set
+
+    # This should trigger the `else:` branch in set_circuit_breaker
+    builder.set_circuit_breaker(error_threshold=5, reset_timeout=30)
+
+    assert builder.governance is not None
+    assert builder.governance.circuit_breaker is not None
+    assert builder.governance.circuit_breaker.error_threshold_count == 5
+
+
+def test_builder_coverage_add_inspector_linear() -> None:
+    """Test add_inspector method in NewLinearFlow."""
+    builder = NewLinearFlow("Test", "1.0", "Desc")
+    builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
+    assert len(builder.sequence) == 1
+    node = builder.sequence[0]
+    assert node.id == "inspector1"
+    assert node.type == "inspector"
+
+
+def test_builder_coverage_add_inspector_graph() -> None:
+    """Test add_inspector method in NewGraphFlow."""
+    builder = NewGraphFlow("Test", "1.0", "Desc")
+    builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
+    assert "inspector1" in builder._nodes
+    node = builder._nodes["inspector1"]
+    assert node.type == "inspector"
+
+
+def test_builder_coverage_add_agent_ref_defaults() -> None:
+    """Test add_agent_ref with default tools=None."""
+    # Linear
+    builder_l = NewLinearFlow("Test", "1.0", "Desc")
+    builder_l.define_brain("brain1", "role", "persona")
+    builder_l.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
+    assert len(builder_l.sequence) == 1
+    assert builder_l.sequence[0].tools == []
+
+    # Graph
+    builder_g = NewGraphFlow("Test", "1.0", "Desc")
+    builder_g.define_brain("brain1", "role", "persona")
+    builder_g.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
+    assert "agent1" in builder_g._nodes
+    assert builder_g._nodes["agent1"].tools == []
+
+
+def test_builder_coverage_explicit_add_agent() -> None:
+    """Explicitly test add_agent to ensure coverage."""
+    brain = Brain(role="role", persona="persona", reasoning=None, reflex=None)
+    agent = AgentNode(id="agent1", type="agent", brain=brain, tools=[], metadata={}, supervision=None)
+
+    # Linear
+    builder_l = NewLinearFlow("Test", "1.0", "Desc")
+    builder_l.add_agent(agent)
+    assert len(builder_l.sequence) == 1
+
+    # Graph
+    builder_g = NewGraphFlow("Test", "1.0", "Desc")
+    builder_g.add_agent(agent)
+    assert "agent1" in builder_g._nodes
+
+
+def test_agent_builder() -> None:
+    """Test the AgentBuilder fluent API."""
+    # Basic build
+    builder = AgentBuilder("agent1")
+    builder.with_identity("role1", "persona1")
+    agent = builder.build()
+    assert agent.id == "agent1"
+    assert agent.brain.role == "role1"
+    assert agent.brain.persona == "persona1"
+
+    # Full build
+    builder = AgentBuilder("agent2")
+    builder.with_identity("role2", "persona2")
+    builder.with_reasoning(model="gpt-4")
+    builder.with_reflex(model="gpt-3.5")
+    builder.with_tools(["tool1"])
+    builder.with_supervision(retries=3)
+
+    agent = builder.build()
+    assert agent.brain.reasoning is not None
+    assert agent.brain.reflex is not None
+    assert agent.tools == ["tool1"]
+    assert agent.supervision is not None
+    assert agent.supervision.max_retries == 3
+
+    # Fail build
+    builder = AgentBuilder("agent3")
+    with pytest.raises(ValueError, match="Agent identity"):
         builder.build()

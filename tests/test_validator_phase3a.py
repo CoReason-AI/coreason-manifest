@@ -1,5 +1,8 @@
 from typing import cast
 
+import pytest
+from pydantic import ValidationError
+
 from coreason_manifest.spec.core.flow import (
     Edge,
     FlowDefinitions,
@@ -115,20 +118,17 @@ def test_validate_missing_tool() -> None:
     # Tool pack has no tools
     tp = create_tool_pack("ns", [])
     graph = Graph(nodes={"agent1": agent}, edges=[])
-    flow = GraphFlow(
-        kind="GraphFlow",
-        metadata=create_metadata(),
-        interface=create_interface(),
-        blackboard=None,
-        graph=graph,
-        definitions=FlowDefinitions(tool_packs={"tp": tp}),
-    )
-    errors = validate_flow(flow)
-    assert len(errors) == 1
-    assert (
-        "Missing Tool Warning: Agent 'agent1' requires tool 'tool1' but it is not provided by any attached ToolPack."
-        in errors
-    )
+
+    # Expect ValidationError during instantiation due to Runtime Integrity
+    with pytest.raises(ValidationError, match="requires missing tool 'tool1'"):
+        GraphFlow(
+            kind="GraphFlow",
+            metadata=create_metadata(),
+            interface=create_interface(),
+            blackboard=None,
+            graph=graph,
+            definitions=FlowDefinitions(tool_packs={"tp": tp}),
+        )
 
 
 def test_validate_governance_sanity() -> None:
