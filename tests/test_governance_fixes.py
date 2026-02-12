@@ -249,10 +249,10 @@ def test_integrity_trusted_root() -> None:
 
 
 def test_integrity_chain_links() -> None:
-    genesis = {"data": "genesis"}
+    genesis = {"data": "genesis", "previous_hashes": []}
     h0 = compute_hash(genesis)
 
-    block1 = {"data": "block1", "prev_hash": h0}
+    block1 = {"data": "block1", "previous_hashes": [h0]}
 
     chain = [genesis, block1]
 
@@ -260,7 +260,7 @@ def test_integrity_chain_links() -> None:
     assert verify_merkle_proof(chain) is True
 
     # Invalid Link
-    block1_bad = {"data": "block1", "prev_hash": "wrong"}
+    block1_bad = {"data": "block1", "previous_hashes": ["wrong"]}
     chain_bad = [genesis, block1_bad]
 
     assert verify_merkle_proof(chain_bad) is False
@@ -356,9 +356,9 @@ def test_integrity_obj_no_prev_hash() -> None:
 def test_integrity_obj_with_prev_hash() -> None:
     # Integrity L62: elif hasattr ... actual_prev_hash = curr.prev_hash
     class WithPrevHash:
-        def __init__(self, data: str, prev_hash: str | None = None) -> None:
+        def __init__(self, data: str, previous_hashes: list[str] | None = None) -> None:
             self.data = data
-            self.prev_hash = prev_hash
+            self.previous_hashes = previous_hashes or []
 
         def compute_hash(self) -> str:
             # Simple mock hash
@@ -366,7 +366,7 @@ def test_integrity_obj_with_prev_hash() -> None:
 
     genesis = WithPrevHash("gen")
     h0 = genesis.compute_hash()
-    block1 = WithPrevHash("b1", h0)
+    block1 = WithPrevHash("b1", [h0])
 
     chain = [genesis, block1]
     assert verify_merkle_proof(chain) is True

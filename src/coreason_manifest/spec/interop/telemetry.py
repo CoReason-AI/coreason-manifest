@@ -33,7 +33,7 @@ class NodeExecution(BaseModel):
 
     # --- VERITAS INTEGRITY RESTORATION ---
     execution_hash: str | None = Field(None, description="SHA-256 hash of inputs+outputs+config.")
-    previous_hash: str | None = Field(None, description="Hash of the preceding execution in the trace.")
+    previous_hashes: list[str] = Field(default_factory=list, description="Hashes of the preceding executions in the trace (DAG).")
     signature: str | None = Field(None, description="Optional cryptographic signature of the event.")
 
 
