@@ -220,7 +220,7 @@ class NewLinearFlow:
         """Constructs and validates the LinearFlow object."""
         definitions = FlowDefinitions(
             brains=self._brains,
-            tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self._tool_packs.values()},
+            tool_packs=self._tool_packs,
         )
 
         flow = LinearFlow(
@@ -354,7 +354,7 @@ class NewGraphFlow:
 
         definitions = FlowDefinitions(
             brains=self._brains,
-            tool_packs={f"{pack.namespace}/{pack.kind}": pack for pack in self._tool_packs.values()},
+            tool_packs=self._tool_packs,
         )
 
         flow = GraphFlow(

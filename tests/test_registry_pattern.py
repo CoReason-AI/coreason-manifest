@@ -7,6 +7,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, Brain
+import pytest
 
 
 def test_agent_node_brain_string() -> None:
@@ -116,3 +117,36 @@ def test_graph_flow_definitions() -> None:
     agent_node = flow.graph.nodes["agent-1"]
     assert isinstance(agent_node, AgentNode)
     assert agent_node.brain == "brain-id-123"
+
+
+def test_referential_integrity_failure() -> None:
+    """
+    SOTA SAFETY CHECK:
+    Ensures that referencing a non-existent brain ID raises a validation error.
+    This prevents 'dangling pointer' runtime crashes.
+    """
+    # 1. Define a flow with an AgentNode pointing to "ghost-brain"
+    # 2. But DO NOT define "ghost-brain" in the registry
+
+    agent = AgentNode(
+        id="bad-agent",
+        type="agent",
+        brain="ghost-brain", # <--- This ID does not exist
+        tools=[],
+        metadata={},
+        supervision=None
+    )
+
+    metadata = FlowMetadata(name="broken-flow", version="1.0", description="fail", tags=[])
+
+    # 3. Expect a ValueError during initialization
+    with pytest.raises(ValueError) as excinfo:
+        LinearFlow(
+            kind="LinearFlow",
+            metadata=metadata,
+            definitions=FlowDefinitions(), # Empty registry
+            sequence=[agent],
+        )
+
+    # 4. Verify the error message is helpful
+    assert "references undefined brain ID 'ghost-brain'" in str(excinfo.value)
