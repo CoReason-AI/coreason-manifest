@@ -11,6 +11,7 @@
 from typing import Any, Self
 
 from coreason_manifest.spec.core.engines import (
+    AllowedAction,
     ComputerUseReasoning,
     FastPath,
     ModelRef,
@@ -349,11 +350,11 @@ class NewGraphFlow(BaseFlowBuilder):
         role: str,
         persona: str,
         model: str,
-        actions: list[str] | None = None,
+        actions: list[AllowedAction | str] | None = None,
     ) -> "NewGraphFlow":
         """Helper to register a Computer Use profile."""
         if actions is None:
-            actions = ["click", "type", "scroll", "screenshot"]
+            actions = ["scroll", "screenshot", "click", "type"]
 
         reasoning = ComputerUseReasoning(
             model=model,

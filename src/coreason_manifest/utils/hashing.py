@@ -29,9 +29,14 @@ def _prepare_for_jcs(data: Any) -> Any:
     if isinstance(data, list):
         return [_prepare_for_jcs(v) for v in data]
     if isinstance(data, float):
-        # RFC 8785: Integers represented as floats must be stripped of .0
+        # RFC 8785 strictness:
+        # 1. 20.0 -> 20 (Integer check)
         if data.is_integer():
             return int(data)
+        # 2. Prevent NaN/Infinity (Security risk in JSON)
+        # Although allow_nan=False in json.dumps catches this, catching it here is explicit.
+        if data != data or data == float("inf") or data == float("-inf"):
+            raise ValueError("NaN/Infinity not allowed in canonical hash")
         return data
     return data
 

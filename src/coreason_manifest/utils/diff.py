@@ -135,7 +135,13 @@ def compare_manifests(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
     return changes
 
 
-def _diff_dicts(old: dict[str, Any], new: dict[str, Any], path_prefix: str, changes: list[DiffChange], item_category: ChangeCategory) -> None:
+def _diff_dicts(
+    old: dict[str, Any],
+    new: dict[str, Any],
+    path_prefix: str,
+    changes: list[DiffChange],
+    item_category: ChangeCategory,
+) -> None:
     """Generic dict diff helper."""
     changes.extend(
         [
@@ -149,7 +155,6 @@ def _diff_dicts(old: dict[str, Any], new: dict[str, Any], path_prefix: str, chan
             for k in set(old) - set(new)
         ]
     )
-    # Fix PERF401: Use list comprehension for extending changes with modifications
     changes.extend(
         [
             DiffChange(path=f"{path_prefix}.{k}", old=old[k], new=new[k], category=item_category)
@@ -161,6 +166,7 @@ def _diff_dicts(old: dict[str, Any], new: dict[str, Any], path_prefix: str, chan
 
 def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[DiffChange]) -> None:
     """Detailed node comparison."""
+    # 1. Polymorphism Check
     if old_node.type != new_node.type:
         changes.append(
             DiffChange(
@@ -172,7 +178,7 @@ def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[Di
         )
         return
 
-    # Check for Supervision changes (Reliability/Resource)
+    # 2. Supervision (Reliability)
     if old_node.supervision != new_node.supervision:
         changes.append(
             DiffChange(
@@ -183,8 +189,48 @@ def _deep_node_compare(path: str, old_node: Any, new_node: Any, changes: list[Di
             )
         )
 
-    # Fallback content check
-    if old_node != new_node and old_node.supervision == new_node.supervision:
+    # 3. Type-Specific Logic (The SOTA Upgrade)
+    if old_node.type == "agent":
+        _diff_agent_node(path, old_node, new_node, changes)
+    elif old_node.type == "inspector" and old_node.criteria != new_node.criteria:
+        # Changing criteria is strict governance - Fixed SIM102 (combined if)
         changes.append(
-            DiffChange(path=path, old=old_node, new=new_node, category=ChangeCategory.PATCH)
+            DiffChange(
+                path=f"{path}.criteria",
+                old=old_node.criteria,
+                new=new_node.criteria,
+                category=ChangeCategory.GOVERNANCE,
+            )
+        )
+
+    # 4. Fallback for unhandled fields
+    # Fixed SIM102 (combined if)
+    if old_node != new_node and not any(c.path.startswith(path) for c in changes):
+        changes.append(DiffChange(path=path, old=old_node, new=new_node, category=ChangeCategory.PATCH))
+
+
+def _diff_agent_node(path: str, old: Any, new: Any, changes: list[DiffChange]) -> None:
+    """Specialized logic for Agent Nodes."""
+    # Tools: Removal = BREAKING, Addition = FEATURE
+    old_tools = set(old.tools)
+    new_tools = set(new.tools)
+
+    removed = old_tools - new_tools
+    added = new_tools - old_tools
+
+    if removed:
+        changes.append(
+            DiffChange(path=f"{path}.tools", old=list(removed), new=None, category=ChangeCategory.BREAKING)
+        )
+    if added:
+        changes.append(
+            DiffChange(path=f"{path}.tools", old=None, new=list(added), category=ChangeCategory.FEATURE)
+        )
+
+    # Profile: Inline definition change could be RESOURCE (model) or GOVERNANCE (prompt)
+    if old.profile != new.profile:
+        # If it's a string ref change, it's a PATCH (pointers changed)
+        # For safety, changing the profile reference is often significant.
+        changes.append(
+            DiffChange(path=f"{path}.profile", old=old.profile, new=new.profile, category=ChangeCategory.PATCH)
         )
