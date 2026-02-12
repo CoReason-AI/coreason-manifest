@@ -10,13 +10,17 @@ def test_builder_add_agent_ref_with_tools() -> None:
     builder_linear = NewLinearFlow(name="test_linear")
     builder_linear.add_agent_ref(node_id="agent1", profile_id="profile1", tools=["tool1"])
     # Verify tools were added
-    assert builder_linear.sequence[0].tools == ["tool1"]
+    node_linear = builder_linear.sequence[0]
+    assert isinstance(node_linear, AgentNode)
+    assert node_linear.tools == ["tool1"]
 
     # Test NewGraphFlow.add_agent_ref with tools (missing branch 273->275)
     builder_graph = NewGraphFlow(name="test_graph")
     builder_graph.add_agent_ref(node_id="agent1", profile_id="profile1", tools=["tool1"])
     # Verify tools were added
-    assert builder_graph._nodes["agent1"].tools == ["tool1"]
+    node_graph = builder_graph._nodes["agent1"]
+    assert isinstance(node_graph, AgentNode)
+    assert node_graph.tools == ["tool1"]
 
 
 def test_openai_adapter_no_reasoning() -> None:
