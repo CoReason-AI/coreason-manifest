@@ -65,18 +65,12 @@ class AgentBuilder:
         self.persona = persona
         return self
 
-    def with_reasoning(
-        self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7
-    ) -> "AgentBuilder":
+    def with_reasoning(self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7) -> "AgentBuilder":
         """Configures Brain.reasoning."""
-        self.reasoning = ReasoningEngine(
-            model=model, thoughts_max=thoughts_max, min_confidence=min_confidence
-        )
+        self.reasoning = ReasoningEngine(model=model, thoughts_max=thoughts_max, min_confidence=min_confidence)
         return self
 
-    def with_reflex(
-        self, model: str, timeout_ms: int = 1000, caching: bool = True
-    ) -> "AgentBuilder":
+    def with_reflex(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> "AgentBuilder":
         """Configures Brain.reflex."""
         self.reflex = Reflex(model=model, timeout_ms=timeout_ms, caching=caching)
         return self
