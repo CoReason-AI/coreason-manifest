@@ -103,11 +103,6 @@ class LinearFlow(BaseModel):
     definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     sequence: list[AnyNode]
     governance: Governance | None = None
-    tool_packs: list[ToolPack] = Field(
-        default_factory=list,
-        json_schema_extra={"deprecated": True},
-        description="DEPRECATED: Use definitions.tool_packs instead.",
-    )
 
 
 class GraphFlow(BaseModel):
@@ -122,8 +117,3 @@ class GraphFlow(BaseModel):
     blackboard: Blackboard | None
     graph: Graph
     governance: Governance | None = None
-    tool_packs: list[ToolPack] = Field(
-        default_factory=list,
-        json_schema_extra={"deprecated": True},
-        description="DEPRECATED: Use definitions.tool_packs instead.",
-    )

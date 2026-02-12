@@ -1,7 +1,15 @@
 import pytest
 
 from coreason_manifest.spec.core.engines import StandardReasoning
-from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import (
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.nodes import AgentNode, Brain
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
@@ -61,7 +69,12 @@ def test_langchain_adapter() -> None:
     node2 = AgentNode(id="agent2", metadata={}, supervision=None, type="agent", brain=brain, tools=["weather"])
 
     # LinearFlow
-    linear_flow = LinearFlow(kind="LinearFlow", metadata=meta, sequence=[node1, node2], tool_packs=[pack])
+    linear_flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=meta,
+        sequence=[node1, node2],
+        definitions=FlowDefinitions(tool_packs={"pack": pack}),
+    )
     lc_linear = flow_to_langchain_config(linear_flow)
     expected_lc_linear = {"type": "chain", "steps": ["agent1", "agent2"]}
     assert lc_linear == expected_lc_linear
@@ -76,7 +89,7 @@ def test_langchain_adapter() -> None:
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
         graph=graph,
-        tool_packs=[pack],
+        definitions=FlowDefinitions(tool_packs={"pack": pack}),
     )
     lc_graph = flow_to_langchain_config(graph_flow)
 

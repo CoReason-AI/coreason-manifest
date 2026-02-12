@@ -27,7 +27,8 @@ def test_linear_builder() -> None:
     assert flow.kind == "LinearFlow"
     assert flow.metadata.name == "MyLinear"
     assert len(flow.sequence) == 2
-    assert len(flow.tool_packs) == 1
+    assert flow.definitions is not None
+    assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
 
@@ -57,7 +58,8 @@ def test_graph_builder() -> None:
     assert flow.graph.edges[0].source == "n1"
     assert flow.graph.edges[0].target == "n2"
     assert flow.graph.edges[0].condition == "ok"
-    assert len(flow.tool_packs) == 1
+    assert flow.definitions is not None
+    assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
 
