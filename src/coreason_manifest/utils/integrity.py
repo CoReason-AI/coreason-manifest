@@ -1,8 +1,10 @@
 import hashlib
 import json
+from datetime import UTC, datetime
 from typing import Any, Literal
-from pydantic import BaseModel, Field, ConfigDict
-from datetime import datetime, timezone
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class MerkleNode(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -20,10 +22,10 @@ class MerkleNode(BaseModel):
         payload = f"{self.timestamp}{self.previous_hash}{self.node_id}{self.state_diff_hash}"
         if algorithm == "sha256":
             return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-        elif algorithm == "sha512":
+        if algorithm == "sha512":
             return hashlib.sha512(payload.encode("utf-8")).hexdigest()
-        else:
-            raise ValueError(f"Unsupported algorithm: {algorithm}")
+        raise ValueError(f"Unsupported algorithm: {algorithm}")
+
 
 def compute_state_hash(blackboard: dict[str, Any], algorithm: Literal["sha256", "sha512"] = "sha256") -> str:
     """
@@ -33,27 +35,25 @@ def compute_state_hash(blackboard: dict[str, Any], algorithm: Literal["sha256", 
     serialized = json.dumps(blackboard, sort_keys=True, default=str)
     if algorithm == "sha256":
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
-    elif algorithm == "sha512":
+    if algorithm == "sha512":
         return hashlib.sha512(serialized.encode("utf-8")).hexdigest()
-    else:
-        raise ValueError(f"Unsupported algorithm: {algorithm}")
+    raise ValueError(f"Unsupported algorithm: {algorithm}")
+
 
 def create_merkle_node(
-    previous_hash: str,
-    node_id: str,
-    blackboard: dict[str, Any],
-    algorithm: Literal["sha256", "sha512"] = "sha256"
+    previous_hash: str, node_id: str, blackboard: dict[str, Any], algorithm: Literal["sha256", "sha512"] = "sha256"
 ) -> MerkleNode:
     """
     Creates a new MerkleNode anchored to the previous hash.
     """
     state_hash = compute_state_hash(blackboard, algorithm)
     return MerkleNode(
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.now(UTC).isoformat(),
         previous_hash=previous_hash,
         node_id=node_id,
-        state_diff_hash=state_hash
+        state_diff_hash=state_hash,
     )
+
 
 def verify_merkle_proof(chain: list[MerkleNode], algorithm: Literal["sha256", "sha512"] = "sha256") -> bool:
     """
@@ -66,7 +66,7 @@ def verify_merkle_proof(chain: list[MerkleNode], algorithm: Literal["sha256", "s
     # Iterate chain starting from second element
     for i in range(1, len(chain)):
         current = chain[i]
-        prev = chain[i-1]
+        prev = chain[i - 1]
 
         # Check if current.previous_hash matches Hash(prev)
         expected_prev_hash = prev.compute_hash(algorithm)

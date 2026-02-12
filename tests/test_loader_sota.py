@@ -1,11 +1,15 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from coreason_manifest.utils.loader import CitadelLoader, safety_check
+
 
 def test_safety_check_violation() -> None:
     data = {"some_key": "import subprocess; subprocess.Popen('ls')"}
     with pytest.raises(ValueError, match="Security Violation"):
         safety_check(data)
+
 
 def test_loader_jail_violation(tmp_path: Path) -> None:
     # Setup
@@ -15,12 +19,13 @@ def test_loader_jail_violation(tmp_path: Path) -> None:
     outside.write_text("foo: bar", encoding="utf-8")
 
     inside = jail / "main.yaml"
-    inside.write_text(f'$ref: "../outside.yaml"', encoding="utf-8")
+    inside.write_text('$ref: "../outside.yaml"', encoding="utf-8")
 
     loader = CitadelLoader(root=jail)
 
     with pytest.raises(ValueError, match="Path traversal attempt denied"):
         loader.load_recursive(inside)
+
 
 def test_loader_recursive_success(tmp_path: Path) -> None:
     root = tmp_path / "app"
@@ -36,6 +41,7 @@ def test_loader_recursive_success(tmp_path: Path) -> None:
     result = loader.load_recursive(main)
 
     assert result == {"hello": "world"}
+
 
 def test_circular_dependency(tmp_path: Path) -> None:
     root = tmp_path / "app"

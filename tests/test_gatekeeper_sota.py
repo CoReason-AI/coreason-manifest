@@ -1,33 +1,24 @@
-from coreason_manifest.spec.core.flow import GraphFlow, FlowMetadata, FlowInterface, Graph, Edge
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, CognitiveProfile
 from coreason_manifest.spec.core.engines import ComputerUseReasoning, StandardReasoning
+from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.governance import Governance, PolicyConfig
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
 from coreason_manifest.utils.gatekeeper import validate_policy
+
 
 def test_gatekeeper_capability_check() -> None:
     # Setup
     policy = PolicyConfig(
-        allowed_capabilities=[], # No computer_use
+        allowed_capabilities=[],  # No computer_use
         require_human_in_loop_for=[],
-        max_risk_score=0.5
+        max_risk_score=0.5,
     )
     gov = Governance(policy=policy)
 
     profile = CognitiveProfile(
-        role="worker",
-        persona="you are a worker",
-        reasoning=ComputerUseReasoning(model="gpt-4"),
-        fast_path=None
+        role="worker", persona="you are a worker", reasoning=ComputerUseReasoning(model="gpt-4"), fast_path=None
     )
 
-    node = AgentNode(
-        id="agent1",
-        type="agent",
-        metadata={},
-        supervision=None,
-        profile=profile,
-        tools=[]
-    )
+    node = AgentNode(id="agent1", type="agent", metadata={}, supervision=None, profile=profile, tools=[])
 
     graph = Graph(nodes={"agent1": node}, edges=[])
 
@@ -37,20 +28,17 @@ def test_gatekeeper_capability_check() -> None:
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
         graph=graph,
-        governance=gov
+        governance=gov,
     )
 
     violations = validate_policy(flow)
     assert len(violations) == 1
     assert violations[0].rule == "Capability Check"
 
+
 def test_gatekeeper_topology_check() -> None:
     # Setup
-    policy = PolicyConfig(
-        allowed_capabilities=["computer_use"],
-        require_human_in_loop_for=[],
-        max_risk_score=0.5
-    )
+    policy = PolicyConfig(allowed_capabilities=["computer_use"], require_human_in_loop_for=[], max_risk_score=0.5)
     gov = Governance(policy=policy)
 
     # Critical Node
@@ -60,7 +48,7 @@ def test_gatekeeper_topology_check() -> None:
         metadata={"risk_level": "critical"},
         supervision=None,
         profile=CognitiveProfile(role="foo", persona="bar", reasoning=StandardReasoning(model="gpt-4"), fast_path=None),
-        tools=[]
+        tools=[],
     )
 
     # Safe Graph: Start -> Human -> Critical
@@ -71,13 +59,10 @@ def test_gatekeeper_topology_check() -> None:
         supervision=None,
         prompt="Confirm?",
         timeout_seconds=60,
-        interaction_mode="blocking"
+        interaction_mode="blocking",
     )
 
-    graph_safe = Graph(
-        nodes={"critical": critical, "human": human},
-        edges=[Edge(source="human", target="critical")]
-    )
+    graph_safe = Graph(nodes={"critical": critical, "human": human}, edges=[Edge(source="human", target="critical")])
 
     flow_safe = GraphFlow(
         kind="GraphFlow",
@@ -85,7 +70,7 @@ def test_gatekeeper_topology_check() -> None:
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
         graph=graph_safe,
-        governance=gov
+        governance=gov,
     )
 
     assert len(validate_policy(flow_safe)) == 0
@@ -93,7 +78,7 @@ def test_gatekeeper_topology_check() -> None:
     # Unsafe Graph: Start -> Critical
     graph_unsafe = Graph(
         nodes={"critical": critical},
-        edges=[] # No upstream guard
+        edges=[],  # No upstream guard
     )
 
     flow_unsafe = GraphFlow(
@@ -102,7 +87,7 @@ def test_gatekeeper_topology_check() -> None:
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
         graph=graph_unsafe,
-        governance=gov
+        governance=gov,
     )
 
     violations = validate_policy(flow_unsafe)

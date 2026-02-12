@@ -1,17 +1,16 @@
-from typing import Any
 from pydantic import BaseModel
-from coreason_manifest.spec.core.flow import GraphFlow
-from coreason_manifest.spec.core.nodes import (
-    AgentNode, HumanNode, SwitchNode, CognitiveProfile
-)
+
 from coreason_manifest.spec.core.engines import ComputerUseReasoning
-from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.flow import GraphFlow
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwitchNode
+
 
 class PolicyViolation(BaseModel):
     node_id: str
     rule: str
     message: str
     severity: str = "error"
+
 
 def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
     """
@@ -51,11 +50,13 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
             if isinstance(profile, CognitiveProfile) and profile.reasoning:
                 reasoning = profile.reasoning
                 if isinstance(reasoning, ComputerUseReasoning) and "computer_use" not in allowed_caps:
-                    violations.append(PolicyViolation(
+                    violations.append(
+                        PolicyViolation(
                             node_id=node_id,
                             rule="Capability Check",
-                            message=f"Node '{node_id}' uses 'computer_use' but it is not in allowed_capabilities."
-                        ))
+                            message=f"Node '{node_id}' uses 'computer_use' but it is not in allowed_capabilities.",
+                        )
+                    )
 
     # Rule 2: Topology Check (Red Button)
     for node_id, node in nodes.items():
@@ -82,10 +83,12 @@ def validate_policy(flow: GraphFlow) -> list[PolicyViolation]:
                     break
 
             if not has_guard:
-                 violations.append(PolicyViolation(
-                    node_id=node_id,
-                    rule="Topology Check",
-                    message=f"Critical node '{node_id}' lacks a HumanNode or SwitchNode in its ancestry."
-                ))
+                violations.append(
+                    PolicyViolation(
+                        node_id=node_id,
+                        rule="Topology Check",
+                        message=f"Critical node '{node_id}' lacks a HumanNode or SwitchNode in its ancestry.",
+                    )
+                )
 
     return violations

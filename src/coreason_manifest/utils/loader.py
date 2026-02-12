@@ -8,10 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import os
+import re
 from pathlib import Path
 from typing import Any
-import re
+
 import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
@@ -24,6 +24,7 @@ FORBIDDEN_PATTERNS = [
     re.compile(r"eval\(", re.IGNORECASE),
     re.compile(r"exec\(", re.IGNORECASE),
 ]
+
 
 def safety_check(data: Any) -> None:
     """
@@ -44,10 +45,12 @@ def safety_check(data: Any) -> None:
                     f"Security Violation: Forbidden pattern '{pattern.pattern}' found in manifest content."
                 )
 
+
 class ManifestRegistry:
     """
     Registry to cache loaded definitions and prevent circular import loops.
     """
+
     def __init__(self) -> None:
         self._cache: dict[str, dict[str, Any]] = {}
         self._loading: set[str] = set()
@@ -64,6 +67,7 @@ class ManifestRegistry:
 
     def get(self, path: str) -> dict[str, Any] | None:
         return self._cache.get(path)
+
 
 class CitadelLoader:
     def __init__(self, root: Path, allow_https: bool = False):
@@ -87,7 +91,7 @@ class CitadelLoader:
             # or treat it as a placeholder.
             raise NotImplementedError("HTTPS loading not yet implemented.")
 
-        path_str = ref[7:] if ref.startswith("file://") else ref
+        path_str = ref.removeprefix("file://")
 
         # Resolve path
         target_path = (base_path.parent / path_str).resolve()
@@ -130,8 +134,8 @@ class CitadelLoader:
             raise ValueError(f"Failed to parse manifest file {abs_path}: {e}") from e
 
         if not isinstance(data, (dict, list)):
-             # Top level could be list? Usually dict for Flow.
-             pass
+            # Top level could be list? Usually dict for Flow.
+            pass
 
         # 3. Safety Check
         safety_check(data)
@@ -142,7 +146,7 @@ class CitadelLoader:
         # 5. Cache
         self.registry.mark_loaded(path_str, resolved_data)
 
-        return resolved_data # type: ignore
+        return resolved_data  # type: ignore
 
     def _traverse_and_resolve(self, data: Any, current_file_path: Path) -> Any:
         if isinstance(data, dict):
@@ -156,7 +160,7 @@ class CitadelLoader:
             # Recurse for other keys
             return {k: self._traverse_and_resolve(v, current_file_path) for k, v in data.items()}
 
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return [self._traverse_and_resolve(item, current_file_path) for item in data]
 
         return data
