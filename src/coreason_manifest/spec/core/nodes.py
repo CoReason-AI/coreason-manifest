@@ -190,6 +190,23 @@ class PlaceholderNode(Node):
     required_capabilities: list[str]
 
 
+class SwarmNode(Node):
+    """
+    A node that orchestrates parallel execution of agents (Stream B).
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    type: Literal["swarm"] = "swarm"
+    worker_profile: str
+    workload_variable: str
+    distribution_strategy: Literal["sharded", "round_robin"] = "sharded"
+    max_concurrency: int = 5
+    reducer_function: str = "concat"
+    aggregator_model: ModelRef | None = None  # NEW
+    output_variable: str
+
+
 __all__ = [
     "AgentNode",
     "CognitiveProfile",
