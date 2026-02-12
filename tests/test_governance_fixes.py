@@ -306,3 +306,170 @@ def test_integrity_missing_prev_hash() -> None:
 
 if __name__ == "__main__":
     pytest.main([__file__])
+# tests/test_coverage_gap_fix.py
+
+import pytest
+from coreason_manifest.spec.core.flow import LinearFlow, GraphFlow, FlowMetadata, FlowDefinitions, AnyNode, Graph, Edge, FlowInterface
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
+from coreason_manifest.spec.core.engines import StandardReasoning, ComputerUseReasoning
+from coreason_manifest.utils.gatekeeper import validate_policy, _is_guarded
+from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
+
+def get_meta() -> FlowMetadata:
+    return FlowMetadata(name="test", version="1.0", description="test", tags=[])
+
+def test_gatekeeper_inline_profile() -> None:
+    # Gatekeeper L35: reasoning = node.profile.reasoning
+    profile = CognitiveProfile(
+        role="worker",
+        persona="worker",
+        reasoning=StandardReasoning(model="gpt-3.5"),
+        fast_path=None
+    )
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        supervision=None,
+        type="agent",
+        profile=profile, # Inline profile
+        tools=[]
+    )
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=None,
+        sequence=[node]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 0
+
+def test_gatekeeper_is_guarded_value_error() -> None:
+    # Gatekeeper L78-79: except ValueError: return False
+    node1 = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="p1", tools=[])
+    node2 = AgentNode(id="a2", metadata={}, supervision=None, type="agent", profile="p1", tools=[])
+
+    # Use model_construct to bypass referential integrity validation (missing profile p1)
+    flow = LinearFlow.model_construct(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=FlowDefinitions(),
+        sequence=[node1]
+    )
+
+    # Check node2 which is NOT in flow.sequence
+    assert _is_guarded(node2, flow) is False
+
+def test_integrity_empty_chain() -> None:
+    # Integrity L40: if not chain: return False
+    assert verify_merkle_proof([]) is False
+
+def test_integrity_obj_no_prev_hash() -> None:
+    # Integrity L61-69: else: return False (L69)
+    class NoPrevHash:
+        def compute_hash(self) -> str:
+            return "hash"
+
+    chain = [NoPrevHash(), NoPrevHash()]
+    assert verify_merkle_proof(chain) is False
+
+def test_integrity_obj_with_prev_hash() -> None:
+    # Integrity L62: elif hasattr ... actual_prev_hash = curr.prev_hash
+    class WithPrevHash:
+        def __init__(self, data: str, prev_hash: str | None = None):
+            self.data = data
+            self.prev_hash = prev_hash
+
+        def compute_hash(self) -> str:
+            # Simple mock hash
+            return f"hash({self.data})"
+
+    genesis = WithPrevHash("gen")
+    h0 = genesis.compute_hash()
+    block1 = WithPrevHash("b1", h0)
+
+    chain = [genesis, block1]
+    assert verify_merkle_proof(chain) is True
+
+def test_gatekeeper_attribute_error() -> None:
+    # Gatekeeper L50-52: except AttributeError: return []
+    class BrokenReasoning:
+        @property
+        def required_capabilities(self):
+            raise AttributeError("mock")
+
+    class MockProfile:
+        role = "r"
+        persona = "p"
+        fast_path = None
+        reasoning = BrokenReasoning()
+
+    node = AgentNode.model_construct(
+        id="a1",
+        metadata={},
+        supervision=None,
+        type="agent",
+        profile=MockProfile(), # type: ignore
+        tools=[]
+    )
+
+    flow = LinearFlow.model_construct(
+        kind="LinearFlow",
+        metadata=get_meta(),
+        definitions=None,
+        sequence=[node]
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 0
+
+def test_graph_traversal_unguarded() -> None:
+    # Hit neighbor expansion in BFS
+    # a1 (entry, safe) -> a2 (target, comp)
+
+    p_comp = CognitiveProfile(
+        role="worker",
+        persona="worker",
+        reasoning=ComputerUseReasoning(model="gpt-4", interaction_mode="native_os", coordinate_system="normalized_0_1"),
+        fast_path=None
+    )
+    p_safe = CognitiveProfile(
+        role="safe",
+        persona="safe",
+        reasoning=StandardReasoning(model="gpt-3.5"),
+        fast_path=None
+    )
+    defs = FlowDefinitions(profiles={"comp": p_comp, "safe": p_safe})
+
+    a1 = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="safe", tools=[])
+    a2 = AgentNode(id="a2", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+
+    graph = Graph(
+        nodes={"a1": a1, "a2": a2},
+        edges=[Edge(source="a1", target="a2")]
+    )
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=get_meta(),
+        definitions=defs,
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph
+    )
+
+    errors = validate_policy(flow)
+    assert len(errors) == 1
+    assert "not guarded" in errors[0]
+
+def test_unknown_flow_type() -> None:
+    # Hit final return False in _is_guarded
+    class UnknownFlow:
+        pass
+
+    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="p", tools=[])
+    assert _is_guarded(node, UnknownFlow()) is False # type: ignore
+
+if __name__ == "__main__":
+    pytest.main([__file__])
