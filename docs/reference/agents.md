@@ -8,11 +8,11 @@ This example demonstrates the configuration of an `AgentNode` with specific capa
 
 ```python
 # Example: Defining a Support Agent with Semantic Model Constraints
-from coreason_manifest.spec.core.nodes import AgentNode, Brain
-from coreason_manifest.spec.core.engines import StandardReasoning, Reflex, Supervision
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.engines import StandardReasoning, FastPath, Supervision
 
 # Define the Cognitive Engine
-brain = Brain(
+profile = CognitiveProfile(
     role="Customer Service Representative",
     persona="You are a helpful assistant with 10 years of experience.",
     reasoning=StandardReasoning(
@@ -20,7 +20,7 @@ brain = Brain(
         thoughts_max=3,
         min_confidence=0.8
     ),
-    reflex=Reflex(
+    fast_path=FastPath(
         model="gpt-3.5-turbo",
         timeout_ms=500,
         caching=True
@@ -32,7 +32,7 @@ support_agent = AgentNode(
     type="agent",
     id="customer-support-v1",
     metadata={"version": "1.0"},
-    brain=brain,
+    profile=profile,
     tools=["zendesk-search"],
     supervision=Supervision(
         strategy="restart",
@@ -46,7 +46,7 @@ support_agent = AgentNode(
 
 ::: coreason_manifest.spec.core.nodes.AgentNode
 
-::: coreason_manifest.spec.core.nodes.Brain
+::: coreason_manifest.spec.core.nodes.CognitiveProfile
 
 ### Engines
 
@@ -54,10 +54,10 @@ support_agent = AgentNode(
 
 ::: coreason_manifest.spec.core.engines.TreeSearchReasoning
 
-::: coreason_manifest.spec.core.engines.AtomReasoning
+::: coreason_manifest.spec.core.engines.DecompositionReasoning
 
 ::: coreason_manifest.spec.core.engines.CouncilReasoning
 
-::: coreason_manifest.spec.core.engines.Reflex
+::: coreason_manifest.spec.core.engines.FastPath
 
 ::: coreason_manifest.spec.core.engines.Supervision

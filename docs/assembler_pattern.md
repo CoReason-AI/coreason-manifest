@@ -17,7 +17,7 @@ The `CognitiveProfile` consists of key components:
     *   **Memory (Read)**: Sources to fetch context from (`memory_read` / `memory`).
     *   **Memory (Write)**: Rules for saving memories (`memory_write`).
 4.  **Cognition (Think)**:
-    *   **Reflex (System 1)**: Fast-path execution (`reflex`).
+    *   **FastPath (System 1)**: Fast-path execution (`reflex`).
     *   **Reasoning (System 2)**: Deep thinking and self-correction (`reasoning`).
 5.  **Task (What)**: The logic primitive to apply (`task_primitive`, e.g., `extract`, `classify`).
 
@@ -36,7 +36,7 @@ from coreason_manifest.spec.v2.knowledge import (
     RetrievalConfig, RetrievalStrategy,
     MemoryWriteConfig, ConsolidationStrategy
 )
-from coreason_manifest.spec.v2.reasoning import ReflexConfig, ReasoningConfig
+from coreason_manifest.spec.v2.reasoning import FastPath, ReasoningConfig
 
 # Define an inline agent with advanced cognitive capabilities
 profile = CognitiveProfile(
@@ -67,7 +67,7 @@ profile = CognitiveProfile(
     ),
 
     # 4. Fast Thinking (System 1)
-    reflex=ReflexConfig(
+    fast_path=FastPath(
         enabled=True,
         confidence_threshold=0.9,
         allowed_tools=["grammar_check"]
