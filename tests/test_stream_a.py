@@ -1,21 +1,19 @@
-from pathlib import Path
-from typing import Any
-
 import pytest
-
+from pathlib import Path
+import json
+import yaml
 from coreason_manifest.builder import NewGraphFlow
-from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.diff import ChangeCategory, compare_manifests
 from coreason_manifest.utils.hashing import canonicalize, compute_integrity_hash, verify_chain
 from coreason_manifest.utils.secure_io import SecureLoader, SecurityError
-
+from coreason_manifest.spec.core.tools import ToolPack
+from typing import Any
 
 @pytest.fixture
 def jail_dir(tmp_path: Path) -> Path:
     jail = tmp_path / "jail"
     jail.mkdir()
     return jail
-
 
 def test_secure_loader(jail_dir: Path) -> None:
     loader = SecureLoader(jail_dir, max_depth=5)
@@ -69,13 +67,12 @@ def test_secure_loader(jail_dir: Path) -> None:
     # 4. Test Max Depth (New)
     for i in range(7):
         with open(jail_dir / f"depth_{i}.yaml", "w") as f:
-            f.write(f'next: {{"$ref": "depth_{i + 1}.yaml"}}')
+             f.write(f'next: {{"$ref": "depth_{i+1}.yaml"}}')
     with open(jail_dir / "depth_7.yaml", "w") as f:
         f.write("val: end")
 
     with pytest.raises(RecursionError, match="Max recursion depth"):
         loader.load(jail_dir / "depth_0.yaml")
-
 
 def test_hashing() -> None:
     # 1. Canonicalization
@@ -89,13 +86,12 @@ def test_hashing() -> None:
 
     # NaN/Inf check
     with pytest.raises(ValueError, match="NaN/Infinity not allowed"):
-        canonicalize({"val": float("inf")})
+        canonicalize({"val": float('inf')})
 
     # 2. Integrity Hash (Aliases)
     class MockModel:
-        # ARG002 Fix: Rename unused 'mode' to '_mode'
-        # mypy fix: add type annotation for return
-        def model_dump(self, _mode: str | None = None, by_alias: bool = False) -> dict[str, Any]:
+        # Revert to 'mode' to support keyword argument calls from hashing.py
+        def model_dump(self, mode: str | None = None, by_alias: bool = False) -> dict[str, Any]: # noqa: ARG002
             if by_alias:
                 return {"previousHash": "abc"}
             return {"previous_hash": "abc"}
@@ -117,7 +113,6 @@ def test_hashing() -> None:
     chain = [entry1, entry2]
     assert verify_chain(chain)
 
-
 def test_builder_and_diff() -> None:
     # 1. Build Graph
     builder = NewGraphFlow("test_flow", "1.0", "Test")
@@ -125,9 +120,12 @@ def test_builder_and_diff() -> None:
     # Add profile for agent
     builder.define_profile("profile1", "assistant", "helpful")
 
+    # Add tool pack so agent tools are valid
+    builder.add_tool_pack(ToolPack(kind="ToolPack", namespace="base", tools=["search", "calculator"], dependencies=[], env_vars=[]))
+
     # Add switch first to be entry point
     builder.add_switch("switch1", "var1", {"case1": "agent1"}, "agent1")
-    builder.add_agent_ref("agent1", "profile1")
+    builder.add_agent_ref("agent1", "profile1", tools=["search"])
 
     # Connect
     builder.connect("switch1", "agent1")
@@ -137,69 +135,103 @@ def test_builder_and_diff() -> None:
     # 2. Diff
     builder2 = NewGraphFlow("test_flow", "1.1", "Test")
     builder2.define_profile("profile1", "assistant", "helpful")  # Same profile
+    builder2.add_tool_pack(ToolPack(kind="ToolPack", namespace="base", tools=["search", "calculator"], dependencies=[], env_vars=[]))
+
     builder2.add_switch("switch1", "var1", {"case1": "agent1"}, "agent1")
-    builder2.add_agent_ref("agent1", "profile1")
+    builder2.add_agent_ref("agent1", "profile1", tools=["calculator"]) # Changed tool
     builder2.connect("switch1", "agent1")
 
-    # Add new node
+    # Add new node and connect it to avoid orphan warning
     builder2.add_inspector("insp1", "target", "crit", "out")
     builder2.connect("agent1", "insp1")
 
     flow2 = builder2.build()
 
     changes = compare_manifests(flow, flow2)
-    assert len(changes) > 0
-    features = [c for c in changes if c.category == ChangeCategory.FEATURE]
+
+    # Check tool changes
+    breaking = [c for c in changes if c.category == ChangeCategory.BREAKING and c.path == "graph.nodes.agent1.tools"]
+    assert len(breaking) == 1
+    assert breaking[0].old == ["search"]
+
+    features = [c for c in changes if c.category == ChangeCategory.FEATURE and c.path == "graph.nodes.agent1.tools"]
     assert len(features) == 1
-    assert features[0].path == "graph.nodes.insp1"
+    assert features[0].new == ["calculator"]
 
-    # Test Resource Change
+    # 3. Diff (Inspector Criteria)
     builder3 = NewGraphFlow("test_flow", "1.2", "Test")
-    builder3.add_computer_use("profile1", "assistant", "helpful", "gpt-4-computer")
-    builder3.add_switch("switch1", "var1", {"case1": "agent1"}, "agent1")
-    builder3.add_agent_ref("agent1", "profile1")
-    builder3.connect("switch1", "agent1")
-    flow3 = builder3.build()
+    # ... setup flow3 with inspector change ...
+    builder_insp = NewGraphFlow("insp_flow", "1.0", "Test")
+    builder_insp.add_inspector("insp1", "target", "loose", "out")
+    flow_insp = builder_insp.build()
 
-    changes3 = compare_manifests(flow, flow3)
-    resources = [c for c in changes3 if c.category == ChangeCategory.RESOURCE]
+    builder_insp2 = NewGraphFlow("insp_flow", "1.1", "Test")
+    builder_insp2.add_inspector("insp1", "target", "strict", "out")
+    flow_insp2 = builder_insp2.build()
+
+    changes_insp = compare_manifests(flow_insp, flow_insp2)
+    governance = [c for c in changes_insp if c.category == ChangeCategory.GOVERNANCE]
+    assert len(governance) == 1
+    assert governance[0].path == "graph.nodes.insp1.criteria"
+
+    # Test Resource Change (Model)
+    # Reusing builders properly
+    builder_res = NewGraphFlow("res_flow", "1.0", "Test")
+    builder_res.define_profile("profile1", "assistant", "helpful")
+    builder_res.add_switch("switch1", "var1", {"case1": "agent1"}, "agent1")
+    builder_res.add_agent_ref("agent1", "profile1")
+    builder_res.connect("switch1", "agent1")
+    flow_res = builder_res.build()
+
+    builder_res2 = NewGraphFlow("res_flow", "1.1", "Test")
+    # Model change via computer use shortcut
+    builder_res2.add_computer_use("profile1", "assistant", "helpful", "gpt-4-computer")
+    builder_res2.add_switch("switch1", "var1", {"case1": "agent1"}, "agent1")
+    builder_res2.add_agent_ref("agent1", "profile1")
+    builder_res2.connect("switch1", "agent1")
+    flow_res2 = builder_res2.build()
+
+    changes_res = compare_manifests(flow_res, flow_res2)
+    resources = [c for c in changes_res if c.category == ChangeCategory.RESOURCE]
     assert len(resources) == 1
     assert resources[0].path == "definitions.profiles.profile1.reasoning.model"
 
     # Test Interface Diff
-    builder4 = NewGraphFlow("test_flow", "1.3", "Test")
-    builder4.set_interface(inputs={"new": "input"}, outputs={})
-    # Copy graph - B007 Fix (Rename unused variable), PERF102 Fix (Use .values())
-    for node in flow3.graph.nodes.values():
-        builder4.add_node(node)
-    builder4._edges = flow3.graph.edges
+    builder_int = NewGraphFlow("test_flow", "1.3", "Test")
+    builder_int.set_interface(inputs={"new": "input"}, outputs={})
+    # Copy graph from valid flow
+    for node in flow.graph.nodes.values():
+         builder_int.add_node(node)
+    builder_int._edges = flow.graph.edges
     # Copy definitions
-    # mypy fix: assert definitions is not None
-    assert flow3.definitions is not None
-    builder4._profiles = flow3.definitions.profiles
+    assert flow.definitions is not None
+    builder_int._profiles = flow.definitions.profiles
+    builder_int._tool_packs = flow.definitions.tool_packs
 
-    flow4 = builder4.build()
-    changes4 = compare_manifests(flow3, flow4)
-    breaking = [c for c in changes4 if c.category == ChangeCategory.BREAKING]
+    flow_int = builder_int.build()
+    changes_int = compare_manifests(flow, flow_int)
+    breaking = [c for c in changes_int if c.category == ChangeCategory.BREAKING]
     assert any(c.path == "interface" for c in breaking)
 
     # Test Tool Pack Diff
-    builder5 = NewGraphFlow("test_flow", "1.4", "Test")
-    # Same graph as flow3 - B007 Fix, PERF102 Fix
-    for node in flow3.graph.nodes.values():
-        builder5.add_node(node)
-    builder5._edges = flow3.graph.edges
-    # mypy fix: assert definitions is not None
-    assert flow3.definitions is not None
-    builder5._profiles = flow3.definitions.profiles
+    builder_tp = NewGraphFlow("test_flow", "1.4", "Test")
+    for node in flow.graph.nodes.values(): builder_tp.add_node(node)
+    builder_tp._edges = flow.graph.edges
+    builder_tp._profiles = flow.definitions.profiles
+    builder_tp._tool_packs = flow.definitions.tool_packs.copy()
 
     # Valid ToolPack
-    builder5.add_tool_pack(ToolPack(kind="ToolPack", namespace="newpack", tools=["t1"], dependencies=[], env_vars=[]))
-    flow5 = builder5.build()
-    changes5 = compare_manifests(flow3, flow5)
-    features = [c for c in changes5 if c.category == ChangeCategory.FEATURE]
+    builder_tp.add_tool_pack(ToolPack(
+        kind="ToolPack",
+        namespace="newpack",
+        tools=["t1"],
+        dependencies=[],
+        env_vars=[]
+    ))
+    flow_tp = builder_tp.build()
+    changes_tp = compare_manifests(flow, flow_tp)
+    features = [c for c in changes_tp if c.category == ChangeCategory.FEATURE]
     assert any(c.path == "definitions.tool_packs.newpack" for c in features)
-
 
 def test_new_builder_methods() -> None:
     builder = NewGraphFlow("stream_b", "0.1", "Test")
@@ -222,17 +254,20 @@ def test_new_builder_methods() -> None:
     assert flow.graph.nodes["human1"].type == "human"
     assert flow.graph.nodes["human1"].interaction_mode == "shadow"
 
-
 def test_diff_logic() -> None:
     # 1. Agent Tool Reordering
     builder = NewGraphFlow("test", "1.0", "Test")
     builder.define_profile("p1", "role", "persona")
+    # Need to register tools
+    builder.add_tool_pack(ToolPack(kind="ToolPack", namespace="base", tools=["t1", "t2"], dependencies=[], env_vars=[]))
+
     builder.add_agent_ref("a1", "p1", tools=["t1", "t2"])
     flow1 = builder.build()
 
     builder2 = NewGraphFlow("test", "1.1", "Test")
     builder2.define_profile("p1", "role", "persona")
-    builder2.add_agent_ref("a1", "p1", tools=["t2", "t1"])  # Reordered
+    builder2.add_tool_pack(ToolPack(kind="ToolPack", namespace="base", tools=["t1", "t2"], dependencies=[], env_vars=[]))
+    builder2.add_agent_ref("a1", "p1", tools=["t2", "t1"]) # Reordered
     flow2 = builder2.build()
 
     changes = compare_manifests(flow1, flow2)
@@ -243,20 +278,27 @@ def test_diff_logic() -> None:
     # 2. Switch Logic
     builder3 = NewGraphFlow("test", "1.0", "Test")
     builder3.define_profile("p1", "role", "persona")
+    # Make 's1' the first node to avoid orphan warning if it's entry
+    builder3.add_switch("s1", "var", {"case1": "c1"}, "default")
     builder3.add_agent_ref("default", "p1")
     builder3.add_agent_ref("c1", "p1")
-    builder3.add_switch("s1", "var", {"case1": "c1"}, "default")
     builder3.connect("s1", "c1")
     builder3.connect("s1", "default")
     flow3 = builder3.build()
 
     builder4 = NewGraphFlow("test", "1.1", "Test")
     builder4.define_profile("p1", "role", "persona")
+    # Make 's1' first
+    builder4.add_switch("s1", "var", {}, "default")
     builder4.add_agent_ref("default", "p1")
     builder4.add_agent_ref("c1", "p1")
     # Remove case1
-    builder4.add_switch("s1", "var", {}, "default")
     builder4.connect("s1", "default")
+    # c1 is orphaned but since s1 is entry, validation might pass warnings?
+    # To be safe, connect default to c1? No, logic change is what we test.
+    # We can connect default -> c1 to ensure connectivity.
+    builder4.connect("default", "c1")
+
     flow4 = builder4.build()
 
     changes2 = compare_manifests(flow3, flow4)

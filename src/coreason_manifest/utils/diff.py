@@ -29,9 +29,7 @@ def compare_manifests(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
     # 1. Interface
     if old.interface != new.interface:
         changes.append(
-            DiffChange(
-                path="interface", old=old.interface, new=new.interface, category=ChangeCategory.BREAKING
-            )
+            DiffChange(path="interface", old=old.interface, new=new.interface, category=ChangeCategory.BREAKING)
         )
 
     # 2. Tool Packs
@@ -57,9 +55,7 @@ def compare_manifests(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
     # Feature/Breaking for add/remove
     changes.extend(
         [
-            DiffChange(
-                path=f"graph.nodes.{nid}", old=None, new=new_nodes[nid], category=ChangeCategory.FEATURE
-            )
+            DiffChange(path=f"graph.nodes.{nid}", old=None, new=new_nodes[nid], category=ChangeCategory.FEATURE)
             for nid in set(new_nodes) - set(old_nodes)
         ]
     )
@@ -224,15 +220,9 @@ def _diff_agent_node(path: str, old: Any, new: Any, changes: list[DiffChange]) -
     added = new_tools_set - old_tools_set
 
     if removed:
-        changes.append(
-            DiffChange(
-                path=f"{path}.tools", old=list(removed), new=None, category=ChangeCategory.BREAKING
-            )
-        )
+        changes.append(DiffChange(path=f"{path}.tools", old=list(removed), new=None, category=ChangeCategory.BREAKING))
     if added:
-        changes.append(
-            DiffChange(path=f"{path}.tools", old=None, new=list(added), category=ChangeCategory.FEATURE)
-        )
+        changes.append(DiffChange(path=f"{path}.tools", old=None, new=list(added), category=ChangeCategory.FEATURE))
 
     # NEW: Order Sensitivity Check (Optimization Patch)
     if not removed and not added and old_tools != new_tools:
@@ -250,9 +240,7 @@ def _diff_agent_node(path: str, old: Any, new: Any, changes: list[DiffChange]) -
         # If it's a string ref change, it's a PATCH (pointers changed)
         # For safety, changing the profile reference is often significant.
         changes.append(
-            DiffChange(
-                path=f"{path}.profile", old=old.profile, new=new.profile, category=ChangeCategory.PATCH
-            )
+            DiffChange(path=f"{path}.profile", old=old.profile, new=new.profile, category=ChangeCategory.PATCH)
         )
 
 

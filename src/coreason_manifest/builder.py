@@ -401,7 +401,7 @@ class NewGraphFlow(BaseFlowBuilder):
             distribution_strategy="sharded",
             max_concurrency=concurrency,
             reducer_function=reducer,
-            aggregator_model=agg_model_ref, # NEW
+            aggregator_model=agg_model_ref,  # NEW
             output_variable=output_variable,
         )
         self._nodes[node.id] = node
