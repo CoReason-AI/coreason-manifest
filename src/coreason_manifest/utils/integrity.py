@@ -4,13 +4,14 @@ import hashlib
 import json
 from typing import Any
 
+
 def compute_hash(obj: Any) -> str:
     """
     Computes a SHA-256 hash of a JSON-serializable object.
     If the object has a .compute_hash() method, it uses that.
     """
     if hasattr(obj, "compute_hash"):
-        return obj.compute_hash()
+        return str(obj.compute_hash())
 
     # Standardize serialization for hashing
     if hasattr(obj, "model_dump_json"):
@@ -49,7 +50,7 @@ def verify_merkle_proof(chain: list[Any], trusted_root_hash: str | None = None) 
     # 2. Chain Continuity
     for i in range(1, len(chain)):
         curr = chain[i]
-        prev = chain[i-1]
+        prev = chain[i - 1]
 
         expected_prev_hash = compute_hash(prev)
 

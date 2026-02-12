@@ -305,6 +305,7 @@ class CodeExecutionReasoning(BaseReasoning):
     """
     Executes Python code in a sandboxed environment.
     """
+
     type: Literal["code_execution"] = "code_execution"
 
     # Environment

@@ -60,12 +60,11 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
         caps = get_capabilities(node)
 
         # Check for high-risk capabilities
-        if "computer_use" in caps or "code_execution" in caps: # extensible list
-             if not _is_guarded(node, flow):
-                 errors.append(
-                     f"Policy Violation: Node '{node.id}' requires high-risk capabilities {caps} "
-                     "but is not guarded by a HumanNode."
-                 )
+        if ("computer_use" in caps or "code_execution" in caps) and not _is_guarded(node, flow):  # extensible list
+            errors.append(
+                f"Policy Violation: Node '{node.id}' requires high-risk capabilities {caps} "
+                "but is not guarded by a HumanNode."
+            )
 
     return errors
 
@@ -126,7 +125,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             curr_id = queue.pop(0)
 
             if curr_id == target_node.id:
-                return False # Reached target without passing a guard
+                return False  # Reached target without passing a guard
 
             # If current node is a guard, we stop traversing this path
             # (because downstream is guarded by this node).
