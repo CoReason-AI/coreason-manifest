@@ -206,6 +206,37 @@ class RedTeamingReasoning(BaseReasoning):
     )
 
 
+class ComputerUseReasoning(BaseReasoning):
+    """
+    Computer Use / GUI Automation.
+    Enables 'Operator Agents' that can view a screen and perform mouse/keyboard actions.
+    Uses Vision-Language-Action (VLA) models to interact with GUIs.
+    """
+
+    type: Literal["computer_use"] = "computer_use"
+
+    # Environment Configuration
+    screen_resolution: tuple[int, int] | None = Field(
+        None, description="Target display dimensions (width, height). If None, auto-detected."
+    )
+
+    # Interaction Protocol
+    # native_os: Uses XY coordinates and OS events (clicks, hotkeys).
+    # browser_dom: Uses HTML selectors and JS events (Playwright style).
+    # hybrid: Allows switching between OS and DOM interaction.
+    interaction_mode: Literal["native_os", "browser_dom", "hybrid"] = Field(
+        "native_os", description="The layer at which the agent perceives and acts."
+    )
+
+    # Safety Governance
+    allowed_actions: list[Literal["click", "type", "scroll", "screenshot", "drag", "hover", "hotkey"]] = Field(
+        default=["click", "type", "scroll", "screenshot"],
+        description="Allow-list of permitted GUI operations.",
+    )
+
+    screenshot_frequency_ms: int = Field(1000, description="Delay between visual observation frames (in milliseconds).")
+
+
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
@@ -217,7 +248,8 @@ ReasoningConfig = Annotated[
     | AtomReasoning
     | CouncilReasoning
     | EnsembleReasoning
-    | RedTeamingReasoning,
+    | RedTeamingReasoning
+    | ComputerUseReasoning,
     Field(discriminator="type"),
 ]
 
