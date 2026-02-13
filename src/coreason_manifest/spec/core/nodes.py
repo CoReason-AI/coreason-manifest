@@ -2,6 +2,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.common.presentation import PresentationHints
+
 # IMPORT ModelRef to link the new routing capability
 from coreason_manifest.spec.core.engines import (
     FastPath,
@@ -10,7 +12,6 @@ from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
     Supervision,
 )
-from coreason_manifest.spec.common.presentation import PresentationHints
 
 
 class Node(BaseModel):

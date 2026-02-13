@@ -1,9 +1,10 @@
 import html
+from collections.abc import Sequence
 from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import Node, SwitchNode
-from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
+from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot
 
 
 def _safe_id(node_id: str) -> str:
@@ -78,14 +79,15 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     """Generates valid Mermaid.js diagram code."""
     lines = []
 
-    nodes: list[Node] = []
+    nodes: Sequence[Node] = []
     edges: list[tuple[str, str, str | None]] = []
 
     if isinstance(flow, LinearFlow):
         lines.append("graph TD")
         nodes = flow.sequence
-        for i in range(len(nodes) - 1):
-            edges.append((nodes[i].id, nodes[i+1].id, None))
+        edges.extend(
+            (nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1)
+        )
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
         nodes = list(flow.graph.nodes.values())
@@ -110,13 +112,16 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     for group_name, group_nodes in grouped_nodes.items():
         safe_group_name = _safe_id(group_name)
         lines.append(f"    subgraph {safe_group_name} [{_escape_label(group_name)}]")
-        for node in group_nodes:
-            lines.append(f"        {_render_mermaid_node(node, snapshot)}")
+        lines.extend(
+            f"        {_render_mermaid_node(node, snapshot)}"
+            for node in group_nodes
+        )
         lines.append("    end")
 
     # Render Ungrouped Nodes
-    for node in ungrouped_nodes:
-        lines.append(f"    {_render_mermaid_node(node, snapshot)}")
+    lines.extend(
+        f"    {_render_mermaid_node(node, snapshot)}" for node in ungrouped_nodes
+    )
 
     # Render Edges
     nodes_dict = {n.id: n for n in nodes}
@@ -167,13 +172,14 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
     rf_nodes: list[dict[str, Any]] = []
     rf_edges: list[dict[str, Any]] = []
 
-    nodes: list[Node] = []
+    nodes: Sequence[Node] = []
     edges: list[tuple[str, str, str | None]] = []
 
     if isinstance(flow, LinearFlow):
         nodes = flow.sequence
-        for i in range(len(nodes) - 1):
-            edges.append((nodes[i].id, nodes[i+1].id, None))
+        edges.extend(
+            (nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1)
+        )
     else:
         nodes = list(flow.graph.nodes.values())
         edges = [(e.source, e.target, e.condition) for e in flow.graph.edges]

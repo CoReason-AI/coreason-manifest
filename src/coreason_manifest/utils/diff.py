@@ -63,28 +63,28 @@ class ManifestDiff:
         removed_nodes = old_nodes - new_nodes
         common_nodes = old_nodes & new_nodes
 
-        for node_id in added_nodes:
-            changes.append(
-                DiffChange(
-                    type=ChangeType.TOPOLOGICAL,
-                    node_id=node_id,
-                    field=None,
-                    old_value=None,
-                    new_value="Present",
-                    description=f"Node '{node_id}' added",
-                )
+        changes.extend(
+            DiffChange(
+                type=ChangeType.TOPOLOGICAL,
+                node_id=node_id,
+                field=None,
+                old_value=None,
+                new_value="Present",
+                description=f"Node '{node_id}' added",
             )
-        for node_id in removed_nodes:
-            changes.append(
-                DiffChange(
-                    type=ChangeType.TOPOLOGICAL,
-                    node_id=node_id,
-                    field=None,
-                    old_value="Present",
-                    new_value=None,
-                    description=f"Node '{node_id}' removed",
-                )
+            for node_id in added_nodes
+        )
+        changes.extend(
+            DiffChange(
+                type=ChangeType.TOPOLOGICAL,
+                node_id=node_id,
+                field=None,
+                old_value="Present",
+                new_value=None,
+                description=f"Node '{node_id}' removed",
             )
+            for node_id in removed_nodes
+        )
 
         # Compare Edges
         old_edges = {(e.source, e.target, e.condition) for e in old.graph.edges}
@@ -93,28 +93,28 @@ class ManifestDiff:
         added_edges = new_edges - old_edges
         removed_edges = old_edges - new_edges
 
-        for src, tgt, cond in added_edges:
-             changes.append(
-                DiffChange(
-                    type=ChangeType.TOPOLOGICAL,
-                    node_id=None,
-                    field="edges",
-                    old_value=None,
-                    new_value=f"{src}->{tgt}",
-                    description=f"Edge added: {src} -> {tgt} ({cond})",
-                )
+        changes.extend(
+            DiffChange(
+                type=ChangeType.TOPOLOGICAL,
+                node_id=None,
+                field="edges",
+                old_value=None,
+                new_value=f"{src}->{tgt}",
+                description=f"Edge added: {src} -> {tgt} ({cond})",
             )
-        for src, tgt, cond in removed_edges:
-             changes.append(
-                DiffChange(
-                    type=ChangeType.TOPOLOGICAL,
-                    node_id=None,
-                    field="edges",
-                    old_value=f"{src}->{tgt}",
-                    new_value=None,
-                    description=f"Edge removed: {src} -> {tgt} ({cond})",
-                )
+            for src, tgt, cond in added_edges
+        )
+        changes.extend(
+            DiffChange(
+                type=ChangeType.TOPOLOGICAL,
+                node_id=None,
+                field="edges",
+                old_value=f"{src}->{tgt}",
+                new_value=None,
+                description=f"Edge removed: {src} -> {tgt} ({cond})",
             )
+            for src, tgt, cond in removed_edges
+        )
 
         # 3. Compare Node Details
         for node_id in common_nodes:
@@ -224,18 +224,21 @@ class ManifestDiff:
                     )
 
             # SwarmNode: Workload (Behavioral?), Worker Profile (Behavioral)
-            if isinstance(old_node, SwarmNode) and isinstance(new_node, SwarmNode):
-                if old_node.worker_profile != new_node.worker_profile:
-                     changes.append(
-                        DiffChange(
-                            type=ChangeType.BEHAVIORAL,
-                            node_id=node_id,
-                            field="worker_profile",
-                            old_value=old_node.worker_profile,
-                            new_value=new_node.worker_profile,
-                            description="Swarm worker profile changed",
-                        )
+            if (
+                isinstance(old_node, SwarmNode)
+                and isinstance(new_node, SwarmNode)
+                and old_node.worker_profile != new_node.worker_profile
+            ):
+                changes.append(
+                    DiffChange(
+                        type=ChangeType.BEHAVIORAL,
+                        node_id=node_id,
+                        field="worker_profile",
+                        old_value=old_node.worker_profile,
+                        new_value=new_node.worker_profile,
+                        description="Swarm worker profile changed",
                     )
+                )
 
         # 4. Compare Governance (Critical)
         if old.governance != new.governance:

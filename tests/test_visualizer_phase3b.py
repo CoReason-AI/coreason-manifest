@@ -1,5 +1,6 @@
 from typing import Any
 
+from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
     Edge,
     FlowInterface,
@@ -17,7 +18,6 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
-from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 from coreason_manifest.utils.visualizer import to_mermaid, to_react_flow
 
@@ -233,14 +233,18 @@ def test_special_characters_escaping() -> None:
 
 
 def test_react_flow_output() -> None:
-    nodes: dict[str, Any] = {
+    # Explicitly type as dict[str, AnyNode] or Node if compatible, but Node is safer for generic visualizer tests
+    nodes: dict[str, Node] = {
         "start": _get_agent_node("start"),
         "end": _get_placeholder_node("end"),
     }
-    edges = [
+    edges: list[Edge] = [
         Edge(source="start", target="end"),
     ]
-    graph = Graph(nodes=nodes, edges=edges)
+    # The Graph model expects AnyNode which is a union of specific node types.
+    # Casting to Any or explicitly using the union might be needed if MyPy complains about covariance.
+    # For now, let's try casting the dict values to Any to bypass strict invariance check on the Union type
+    graph = Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
@@ -264,14 +268,15 @@ def test_react_flow_output() -> None:
 
 
 def test_react_flow_linear() -> None:
-    nodes: list[Any] = [
+    nodes: list[Node] = [
         _get_agent_node("start"),
         _get_placeholder_node("end"),
     ]
+    # LinearFlow sequence expects AnyNode.
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes,
+        sequence=nodes, # type: ignore[arg-type]
     )
 
     rf = to_react_flow(flow)
@@ -292,7 +297,7 @@ def test_visualizer_coverage_extras() -> None:
     nodes = {"agent-cov": agent, "end": _get_placeholder_node("end")}
     edges = [Edge(source="agent-cov", target="end", condition="go")]
 
-    graph = Graph(nodes=nodes, edges=edges)
+    graph = Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
@@ -329,9 +334,9 @@ def test_visualizer_grouping() -> None:
     other = _get_agent_node("other") # No group
 
     nodes = {"agent-group": agent, "other": other}
-    edges = []
+    edges: list[Edge] = []
 
-    graph = Graph(nodes=nodes, edges=edges)
+    graph = Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),

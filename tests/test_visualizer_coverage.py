@@ -1,9 +1,8 @@
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow, FlowMetadata, FlowInterface, Graph, Edge
+from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
-    HumanNode,
     InspectorNode,
     Node,
     PlaceholderNode,
@@ -54,7 +53,7 @@ def test_visualizer_state_application() -> None:
 
 
 def test_visualizer_node_types_coverage() -> None:
-    nodes = []
+    nodes: list[Node] = []
 
     # Planner
     planner = PlannerNode(
@@ -99,7 +98,7 @@ def test_visualizer_node_types_coverage() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes,
+        sequence=nodes,  # type: ignore[arg-type]
     )
 
     mermaid = to_mermaid(flow)
@@ -142,7 +141,7 @@ def test_switch_edge_inference() -> None:
         type="agent",
     )
 
-    nodes = {
+    nodes: dict[str, Node] = {
         "switch-1": switch_node,
         "target-1": target_node_1,
         "target-2": target_node_2,
@@ -158,7 +157,7 @@ def test_switch_edge_inference() -> None:
         metadata=_get_metadata(),
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
-        graph=Graph(nodes=nodes, edges=edges)
+        graph=Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
     )
 
     mermaid = to_mermaid(flow)

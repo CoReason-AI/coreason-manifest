@@ -1,11 +1,11 @@
 import hashlib
 import json
 import random
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import Node, SwitchNode, PlannerNode, HumanNode
+from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
 
@@ -24,33 +24,32 @@ class MockFactory:
         type_ = schema.get("type", "string")
         if type_ == "string":
             return "lorem ipsum"
-        elif type_ == "integer":
+        if type_ == "integer":
             return self.rng.randint(1, 100)
-        elif type_ == "number":
+        if type_ == "number":
             return self.rng.random()
-        elif type_ == "boolean":
+        if type_ == "boolean":
             return self.rng.choice([True, False])
-        elif type_ == "object":
+        if type_ == "object":
             props = schema.get("properties", {})
             return {k: self._generate_schema_data(v) for k, v in props.items()}
-        elif type_ == "array":
+        if type_ == "array":
             return [self._generate_schema_data(schema.get("items"))]
         return "mock_data"
 
     def simulate_trace(self, flow: GraphFlow | LinearFlow, max_steps: int = 20) -> list[NodeExecution]:
         trace: list[NodeExecution] = []
-        execution_map: dict[str, NodeExecution] = {} # node_id -> last execution
+        execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
         if isinstance(flow, LinearFlow):
             nodes = flow.sequence
-            prev_hashes = []
+            prev_hashes: list[str] = []
             for node in nodes:
                 exec_record = self._execute_node(node, execution_map, prev_hashes)
                 trace.append(exec_record)
                 execution_map[node.id] = exec_record
                 # Next node depends on this one
-                if exec_record.execution_hash:
-                    prev_hashes = [exec_record.execution_hash]
+                prev_hashes = [exec_record.execution_hash] if exec_record.execution_hash else []
 
         elif isinstance(flow, GraphFlow):
             # Find start nodes (indegree 0)
@@ -61,12 +60,12 @@ class MockFactory:
             if not start_nodes:
                 # Cycle or no nodes? Pick first
                 if graph.nodes:
-                    start_nodes = [list(graph.nodes.values())[0]]
+                    start_nodes = [next(iter(graph.nodes.values()))]
                 else:
                     return []
 
             # Simple random walk
-            current_node = self.rng.choice(start_nodes)
+            current_node: Node | None = self.rng.choice(start_nodes)
             steps = 0
 
             # For the very first node, no previous hash
@@ -79,10 +78,7 @@ class MockFactory:
                 steps += 1
 
                 # Update prev_hashes for next iteration
-                if exec_record.execution_hash:
-                    prev_hashes = [exec_record.execution_hash]
-                else:
-                    prev_hashes = []
+                prev_hashes = [exec_record.execution_hash] if exec_record.execution_hash else []
 
                 # Find next node
                 outgoing_edges = [e for e in graph.edges if e.source == current_node.id]
@@ -95,23 +91,29 @@ class MockFactory:
 
         return trace
 
-    def _execute_node(self, node: Node, execution_map: dict[str, NodeExecution], prev_hashes: list[str] | None = None) -> NodeExecution:
+    def _execute_node(
+        self,
+        node: Node,
+        _execution_map: dict[str, NodeExecution],
+        prev_hashes: list[str] | None = None,
+    ) -> NodeExecution:
         # Generate inputs/outputs
         inputs = {"mock_input": "data"}
-        outputs = {}
+        outputs: Any = {}
 
         if isinstance(node, PlannerNode):
             outputs = self._generate_schema_data(node.output_schema)
         elif isinstance(node, HumanNode):
-             if node.input_schema:
-                 outputs = self._generate_schema_data(node.input_schema)
-             else:
-                 outputs = {"approved": True}
+            outputs = (
+                self._generate_schema_data(node.input_schema)
+                if node.input_schema
+                else {"approved": True}
+            )
         else:
-             outputs = {"result": "mock_output"}
+            outputs = {"result": "mock_output"}
 
         # Create execution record
-        timestamp = datetime.now(timezone.utc)
+        timestamp = datetime.now(UTC)
         duration = self.rng.uniform(10, 500)
 
         # Calculate hash
