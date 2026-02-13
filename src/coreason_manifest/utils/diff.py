@@ -181,8 +181,8 @@ class ManifestDiff:
             old_pres = getattr(old_node, "presentation", None)
             new_pres = getattr(new_node, "presentation", None)
             if old_pres != new_pres:
-                val1 = old_pres.model_dump(exclude_none=True) if old_pres else None
-                val2 = new_pres.model_dump(exclude_none=True) if new_pres else None
+                val1 = old_pres.model_dump(exclude_none=True) if old_pres else {}
+                val2 = new_pres.model_dump(exclude_none=True) if new_pres else {}
                 changes.extend(_deep_diff("presentation", val1, val2, ChangeType.COSMETIC, node_id))
 
             # Compare Specific Node Types
@@ -274,8 +274,8 @@ class ManifestDiff:
 
         # 4. Compare Governance (Critical)
         if old.governance != new.governance:
-            val1 = old.governance.model_dump(exclude_none=True) if old.governance else None
-            val2 = new.governance.model_dump(exclude_none=True) if new.governance else None
+            val1 = old.governance.model_dump(exclude_none=True) if old.governance else {}
+            val2 = new.governance.model_dump(exclude_none=True) if new.governance else {}
             changes.extend(_deep_diff("governance", val1, val2, ChangeType.CRITICAL, None))
 
         return changes
