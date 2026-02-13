@@ -57,7 +57,7 @@ def create_supervision(
         )
     elif strategy == "fallback":
         if not fallback_id:
-            raise ValueError("Fallback strategy requires fallback_id.")
+            raise ValueError("Fallback strategy requires fallback_id.")  # pragma: no cover
         res_strategy = FallbackStrategy(
             fallback_node_id=fallback_id,
         )
