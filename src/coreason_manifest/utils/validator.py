@@ -40,6 +40,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids))
 
+    errors.extend(_validate_fallback_cycles(nodes))
+
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
         errors.extend(_validate_linear_integrity(flow))
@@ -182,22 +184,83 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     strategies.append(policy.default_strategy)
 
     for strategy in strategies:
-        if isinstance(strategy, ReflexionStrategy):
-            if node.type not in ("agent", "inspector", "emergence_inspector"):
-                errors.append(
-                    f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. Only Agent/Inspector nodes support reflexion."
-                )
+        if isinstance(strategy, ReflexionStrategy) and node.type not in (
+            "agent",
+            "inspector",
+            "emergence_inspector",
+            "swarm",
+        ):
+            errors.append(
+                f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. "
+                "Only Agent/Inspector/Swarm nodes support reflexion."
+            )
 
-        if isinstance(strategy, FallbackStrategy):
-            if strategy.fallback_node_id not in valid_ids:
-                errors.append(
-                    f"Resilience Error: Node '{node.id}' fallback points to missing ID '{strategy.fallback_node_id}'."
-                )
+        if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id not in valid_ids:
+            errors.append(
+                f"Resilience Error: Node '{node.id}' fallback points to missing ID '{strategy.fallback_node_id}'."
+            )
 
-        if isinstance(strategy, EscalationStrategy):
-            if not strategy.queue_name:
-                errors.append(
-                    f"Resilience Error: Node '{node.id}' uses EscalationStrategy with empty queue_name."
-                )
+        if isinstance(strategy, EscalationStrategy) and not strategy.queue_name:
+            errors.append(f"Resilience Error: Node '{node.id}' uses EscalationStrategy with empty queue_name.")
+
+    return errors
+
+
+def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
+    errors: list[str] = []
+    # Build adjacency list for fallback references
+    adj: dict[str, list[str]] = {n.id: [] for n in nodes}
+
+    for node in nodes:
+        if not node.supervision:
+            continue
+
+        policy = node.supervision
+        strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
+        strategies.append(policy.default_strategy)
+
+        for strategy in strategies:
+            if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
+                # Only add edge if target exists (validity checked elsewhere)
+                adj[node.id].append(strategy.fallback_node_id)
+
+    # Detect cycles using DFS
+    visited = set()
+    recursion_stack = set()
+
+    # Track cycle paths for reporting
+    path_stack: list[str] = []
+
+    def dfs(u: str) -> bool:
+        visited.add(u)
+        recursion_stack.add(u)
+        path_stack.append(u)
+
+        for v in adj[u]:
+            if v not in visited:
+                if dfs(v):
+                    return True
+            elif v in recursion_stack:
+                # Cycle detected
+                path_stack.append(v)
+                return True
+
+        path_stack.pop()
+        recursion_stack.remove(u)
+        return False
+
+    for node_id in adj:
+        if node_id not in visited and dfs(node_id):
+            # Extract the cycle portion
+            try:
+                start_index = path_stack.index(path_stack[-1])
+                cycle = path_stack[start_index:]
+                cycle_str = " -> ".join(cycle)
+                errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
+            except ValueError:
+                # Should not happen if logic is correct
+                pass
+            # Clear stacks for next component (optional, but DFS handles components)
+            path_stack.clear()
 
     return errors

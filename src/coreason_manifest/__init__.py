@@ -22,7 +22,6 @@ from coreason_manifest.spec.core.engines import (
     StandardReasoning,
     TreeSearchReasoning,
 )
-from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -48,6 +47,7 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import (
     Dependency,
     ToolPack,

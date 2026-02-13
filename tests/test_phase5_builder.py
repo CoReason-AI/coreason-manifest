@@ -3,6 +3,7 @@ import pytest
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
 from coreason_manifest.spec.core.engines import StandardReasoning
 from coreason_manifest.spec.core.nodes import CognitiveProfile
+from coreason_manifest.spec.core.resilience import EscalationStrategy
 
 
 def test_fluent_agent_construction() -> None:
@@ -43,8 +44,8 @@ def test_fluent_agent_construction() -> None:
 
     # Verify Supervision
     assert agent.supervision is not None
-    assert agent.supervision.max_retries == 3
-    assert agent.supervision.strategy == "escalate"  # default
+    # max_attempts removed from EscalationStrategy
+    assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 
 
 def test_agent_builder_missing_identity() -> None:

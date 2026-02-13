@@ -1,14 +1,17 @@
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_supervision
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode, SwitchNode
 from coreason_manifest.spec.core.resilience import (
+    ErrorDomain,
+    ErrorHandler,
     EscalationStrategy,
     FallbackStrategy,
     ReflexionStrategy,
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
 
 
 def test_builder_integration_circuit_breaker() -> None:
@@ -58,8 +61,7 @@ def test_builder_integration_circuit_breaker() -> None:
 def test_supervision_logic() -> None:
     # Manual creation
     policy = SupervisionPolicy(
-        handlers=[],
-        default_strategy=RetryStrategy(max_attempts=3, backoff_factor=2.5, initial_delay_seconds=1.5)
+        handlers=[], default_strategy=RetryStrategy(max_attempts=3, backoff_factor=2.5, initial_delay_seconds=1.5)
     )
 
     strategy = policy.default_strategy
@@ -77,25 +79,15 @@ def test_supervision_logic() -> None:
 
 
 def test_validator_catch_reflexion_type_mismatch() -> None:
-    # Reflexion is only for Agents/Inspectors. Try putting it on a SwitchNode.
+    # Reflexion is only for Agents/Inspectors/Swarms. Try putting it on a SwitchNode.
     policy = SupervisionPolicy(
         handlers=[],
         default_strategy=ReflexionStrategy(
-            max_attempts=3,
-            critic_model="gpt-4",
-            critic_prompt="Fix it",
-            include_trace=True
-        )
+            max_attempts=3, critic_model="gpt-4", critic_prompt="Fix it", include_trace=True
+        ),
     )
 
-    node = SwitchNode(
-        id="switch1",
-        metadata={},
-        supervision=policy,
-        variable="x",
-        cases={},
-        default="next"
-    )
+    node = SwitchNode(id="switch1", metadata={}, supervision=policy, variable="x", cases={}, default="next")
 
     lf = NewLinearFlow(name="Invalid Flow")
     lf.add_step(node)
@@ -112,11 +104,11 @@ def test_validator_catch_escalation_empty_queue() -> None:
     policy = SupervisionPolicy(
         handlers=[],
         default_strategy=EscalationStrategy(
-            max_attempts=3,
-            queue_name="", # Invalid empty
+            # max_attempts removed
+            queue_name="",  # Invalid empty
             notification_level="warning",
-            timeout_seconds=10
-        )
+            timeout_seconds=10,
+        ),
     )
 
     node = AgentNode(
@@ -194,8 +186,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
 
     # 2. Invalid Supervision Fallback
     policy = SupervisionPolicy(
-        handlers=[],
-        default_strategy=FallbackStrategy(max_attempts=3, fallback_node_id="missing_sup_node")
+        handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node")
     )
 
     lf2 = NewLinearFlow(name="Invalid Sup Fallback")
@@ -250,3 +241,97 @@ def test_circuit_breaker_export() -> None:
     from coreason_manifest.spec.core import CircuitBreaker
 
     assert CircuitBreaker is not None
+
+
+def test_error_handler_regex_validation() -> None:
+    """Test that ErrorHandler validates regex patterns."""
+    # Valid regex
+    ErrorHandler(
+        match_domain=[ErrorDomain.SYSTEM],
+        match_pattern=r"^Error \d+$",
+        strategy=RetryStrategy(max_attempts=3)
+    )
+
+    # Invalid regex
+    with pytest.raises(ValidationError, match="Invalid regex pattern"):
+        ErrorHandler(
+            match_domain=[ErrorDomain.SYSTEM],
+            match_pattern="[unclosed group",
+            strategy=RetryStrategy(max_attempts=3)
+        )
+
+
+def test_swarm_reflexion_support() -> None:
+    """Test that SwarmNode supports ReflexionStrategy."""
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=ReflexionStrategy(
+            max_attempts=3, critic_model="gpt-4", critic_prompt="Fix", include_trace=True
+        ),
+    )
+
+    # Swarm node
+    swarm = SwarmNode(
+        id="swarm1",
+        type="swarm",
+        metadata={},
+        supervision=policy,
+        worker_profile="worker",
+        workload_variable="tasks",
+        distribution_strategy="sharded",
+        max_concurrency=5,
+        failure_tolerance_percent=0.2,
+        reducer_function="concat",
+        output_variable="results",
+        aggregator_model=None
+    )
+
+    gf = NewGraphFlow(name="Swarm Flow")
+    gf.add_node(swarm)
+
+    # Add dummy worker profile to pass integrity check
+    gf.define_profile("worker", "role", "persona")
+
+    # Should not raise validation error
+    flow = gf.build()
+    assert flow.graph.nodes["swarm1"].supervision is not None
+
+
+def test_fallback_cycle_detection() -> None:
+    """Test detection of fallback cycles."""
+    # Node A -> Node B
+    policy_a = SupervisionPolicy(
+        handlers=[],
+        default_strategy=FallbackStrategy(fallback_node_id="node_b")
+    )
+
+    # Node B -> Node A
+    policy_b = SupervisionPolicy(
+        handlers=[],
+        default_strategy=FallbackStrategy(fallback_node_id="node_a")
+    )
+
+    node_a = AgentNode(
+        id="node_a",
+        metadata={},
+        supervision=policy_a,
+        profile="p",
+        tools=[],
+        type="agent"
+    )
+
+    node_b = AgentNode(
+        id="node_b",
+        metadata={},
+        supervision=policy_b,
+        profile="p",
+        tools=[],
+        type="agent"
+    )
+
+    gf = NewGraphFlow(name="Cycle Flow")
+    gf.add_node(node_a).add_node(node_b)
+    gf.define_profile("p", "r", "p")
+
+    with pytest.raises(ValueError, match="Fallback cycle detected"):
+        gf.build()

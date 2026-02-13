@@ -2,7 +2,6 @@ from coreason_manifest.spec.core.engines import (
     FastPath,
     Optimizer,
     StandardReasoning,
-    Supervision,
     TreeSearchReasoning,
 )
 from coreason_manifest.spec.core.flow import (
@@ -24,6 +23,10 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.resilience import (
+    RetryStrategy,
+    SupervisionPolicy,
+)
 from coreason_manifest.spec.core.tools import ToolPack
 
 
@@ -31,7 +34,9 @@ def test_core_kernel_instantiation() -> None:
     # Test Engines
     reasoning = StandardReasoning(model="gpt-4", thoughts_max=5, min_confidence=0.8)
     reflex = FastPath(model="gpt-3.5", timeout_ms=1000, caching=True)
-    supervision = Supervision(strategy="restart", max_retries=3, fallback=None)
+
+    supervision = SupervisionPolicy(handlers=[], default_strategy=RetryStrategy(max_attempts=3))
+
     optimizer = Optimizer(teacher_model="gpt-4", metric="accuracy", max_demonstrations=3)
 
     # Test Nodes

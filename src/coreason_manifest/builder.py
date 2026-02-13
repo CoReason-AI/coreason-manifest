@@ -15,12 +15,6 @@ from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
     StandardReasoning,
 )
-from coreason_manifest.spec.core.resilience import (
-    EscalationStrategy,
-    FallbackStrategy,
-    RetryStrategy,
-    SupervisionPolicy,
-)
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -35,6 +29,12 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode
+from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    FallbackStrategy,
+    RetryStrategy,
+    SupervisionPolicy,
+)
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
@@ -59,13 +59,11 @@ def create_supervision(
         if not fallback_id:
             raise ValueError("Fallback strategy requires fallback_id.")
         res_strategy = FallbackStrategy(
-            max_attempts=retries,
             fallback_node_id=fallback_id,
         )
     else:
         # Default to escalate
         res_strategy = EscalationStrategy(
-            max_attempts=retries,
             queue_name=queue_name or "default_human_queue",
             notification_level="warning",
             timeout_seconds=3600,

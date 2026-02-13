@@ -6,8 +6,11 @@ from coreason_manifest.spec.core.engines import (
     FastPath,
     ModelCriteria,
     StandardReasoning,
-    Supervision,
     TreeSearchReasoning,
+)
+from coreason_manifest.spec.core.resilience import (
+    ReflexionStrategy,
+    SupervisionPolicy,
 )
 
 
@@ -63,14 +66,15 @@ def test_reflex_routing() -> None:
 
 def test_supervision_critic_routing() -> None:
     criteria = ModelCriteria(capabilities=["coding"])
-    sup = Supervision(
-        strategy="adversarial",
-        max_retries=3,
-        fallback=None,
-        critic_model=criteria,
-    )
-    assert isinstance(sup.critic_model, ModelCriteria)
-    assert sup.critic_model.capabilities == ["coding"]
+
+    # SupervisionPolicy doesn't have critic_model directly, it's inside ReflexionStrategy
+    strategy = ReflexionStrategy(max_attempts=3, critic_model=criteria, critic_prompt="Test", include_trace=True)
+
+    sup = SupervisionPolicy(handlers=[], default_strategy=strategy)
+
+    assert isinstance(sup.default_strategy, ReflexionStrategy)
+    assert isinstance(sup.default_strategy.critic_model, ModelCriteria)
+    assert sup.default_strategy.critic_model.capabilities == ["coding"]
 
 
 def test_council_tie_breaker_routing() -> None:
