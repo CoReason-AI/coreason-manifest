@@ -276,7 +276,7 @@ def test_react_flow_linear() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes, # type: ignore[arg-type]
+        sequence=nodes,  # type: ignore[arg-type]
     )
 
     rf = to_react_flow(flow)
@@ -331,7 +331,7 @@ def test_visualizer_grouping() -> None:
     agent = _get_agent_node("agent-group")
     agent = agent.model_copy(update={"presentation": PresentationHints(group="My Group")})
 
-    other = _get_agent_node("other") # No group
+    other = _get_agent_node("other")  # No group
 
     nodes = {"agent-group": agent, "other": other}
     edges: list[Edge] = []

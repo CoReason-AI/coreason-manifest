@@ -21,6 +21,7 @@ def _get_metadata() -> FlowMetadata:
         tags=["test"],
     )
 
+
 def test_visualizer_state_application() -> None:
     node = AgentNode(
         id="agent-1",
@@ -111,6 +112,7 @@ def test_visualizer_node_types_coverage() -> None:
     assert "place" in mermaid
     assert "(" in mermaid
 
+
 def test_switch_edge_inference() -> None:
     # Setup graph with switch
     switch_node = SwitchNode(
@@ -157,7 +159,7 @@ def test_switch_edge_inference() -> None:
         metadata=_get_metadata(),
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
-        graph=Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
+        graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
     )
 
     mermaid = to_mermaid(flow)

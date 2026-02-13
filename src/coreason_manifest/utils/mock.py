@@ -104,11 +104,7 @@ class MockFactory:
         if isinstance(node, PlannerNode):
             outputs = self._generate_schema_data(node.output_schema)
         elif isinstance(node, HumanNode):
-            outputs = (
-                self._generate_schema_data(node.input_schema)
-                if node.input_schema
-                else {"approved": True}
-            )
+            outputs = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
         else:
             outputs = {"result": "mock_output"}
 
@@ -129,5 +125,5 @@ class MockFactory:
             duration_ms=duration,
             execution_hash=exec_hash,
             previous_hashes=prev_hashes or [],
-            attributes={"mock": True}
+            attributes={"mock": True},
         )

@@ -49,15 +49,15 @@ def _render_mermaid_node(node: Node, snapshot: ExecutionSnapshot | None = None) 
 
     # Fallback/Enhancement if no explicit presentation label
     if not (node.presentation and node.presentation.label):
-         # Convert snake_case to Title Case (e.g. emergence_inspector -> Emergence Inspector)
-         type_label = node.type.replace("_", " ").title()
-         # Special case for Emergence Inspector if needed, but generic is fine.
-         # Legacy used "EmergenceInspectorNode", we stick to clean UI "Emergence Inspector"
+        # Convert snake_case to Title Case (e.g. emergence_inspector -> Emergence Inspector)
+        type_label = node.type.replace("_", " ").title()
+        # Special case for Emergence Inspector if needed, but generic is fine.
+        # Legacy used "EmergenceInspectorNode", we stick to clean UI "Emergence Inspector"
 
-         label += f"<br/>({type_label})"
-         if node.type == "human" and hasattr(node, "options") and node.options:
-             opts = ", ".join(node.options)
-             label += f"<br/>[{opts}]"
+        label += f"<br/>({type_label})"
+        if node.type == "human" and hasattr(node, "options") and node.options:
+            opts = ", ".join(node.options)
+            label += f"<br/>[{opts}]"
 
     shape_start, shape_end = _get_node_shape(node)
 
@@ -90,9 +90,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     if isinstance(flow, LinearFlow):
         lines.append("graph TD")
         nodes = flow.sequence
-        edges.extend(
-            (nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1)
-        )
+        edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
         nodes = list(flow.graph.nodes.values())
@@ -117,16 +115,11 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     for group_name, group_nodes in grouped_nodes.items():
         safe_group_name = _safe_id(group_name)
         lines.append(f"    subgraph {safe_group_name} [{_escape_label(group_name)}]")
-        lines.extend(
-            f"        {_render_mermaid_node(node, snapshot)}"
-            for node in group_nodes
-        )
+        lines.extend(f"        {_render_mermaid_node(node, snapshot)}" for node in group_nodes)
         lines.append("    end")
 
     # Render Ungrouped Nodes
-    lines.extend(
-        f"    {_render_mermaid_node(node, snapshot)}" for node in ungrouped_nodes
-    )
+    lines.extend(f"    {_render_mermaid_node(node, snapshot)}" for node in ungrouped_nodes)
 
     # Render Edges
     nodes_dict = {n.id: n for n in nodes}
@@ -136,17 +129,17 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
 
         label = ""
         if condition:
-             label = f"|{_escape_label(condition)}|"
+            label = f"|{_escape_label(condition)}|"
         else:
             # Infer switch label logic
             source_node = nodes_dict.get(source_id)
             if source_node and isinstance(source_node, SwitchNode):
-                 for case_cond, case_target in source_node.cases.items():
-                     if case_target == target_id:
-                         label = f"|{_escape_label(case_cond)}|"
-                         break
-                 if not label and source_node.default == target_id:
-                     label = "|default|"
+                for case_cond, case_target in source_node.cases.items():
+                    if case_target == target_id:
+                        label = f"|{_escape_label(case_cond)}|"
+                        break
+                if not label and source_node.default == target_id:
+                    label = "|default|"
 
         lines.append(f"    {s_safe} -->{label} {t_safe}")
 
@@ -182,9 +175,7 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
 
     if isinstance(flow, LinearFlow):
         nodes = flow.sequence
-        edges.extend(
-            (nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1)
-        )
+        edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
     else:
         nodes = list(flow.graph.nodes.values())
         edges = [(e.source, e.target, e.condition) for e in flow.graph.edges]
@@ -210,12 +201,14 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
         if snapshot and node.id in snapshot.node_states:
             node_data["state"] = snapshot.node_states[node.id]
 
-        rf_nodes.append({
-            "id": node.id,
-            "type": node.type,
-            "position": position,
-            "data": node_data,
-        })
+        rf_nodes.append(
+            {
+                "id": node.id,
+                "type": node.type,
+                "position": position,
+                "data": node_data,
+            }
+        )
 
     for i, (source, target, condition) in enumerate(edges):
         edge_data = {
@@ -228,7 +221,4 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
 
         rf_edges.append(edge_data)
 
-    return {
-        "nodes": rf_nodes,
-        "edges": rf_edges
-    }
+    return {"nodes": rf_nodes, "edges": rf_edges}

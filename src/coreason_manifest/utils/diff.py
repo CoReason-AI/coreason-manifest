@@ -123,7 +123,7 @@ class ManifestDiff:
 
             # Compare Type
             if old_node.type != new_node.type:
-                 changes.append(
+                changes.append(
                     DiffChange(
                         type=ChangeType.TOPOLOGICAL,
                         node_id=node_id,
@@ -133,7 +133,7 @@ class ManifestDiff:
                         description=f"Node type changed from {old_node.type} to {new_node.type}",
                     )
                 )
-                 continue # If type changed, comparison of fields might be invalid/messy
+                continue  # If type changed, comparison of fields might be invalid/messy
 
             # Compare Metadata (Cosmetic)
             if old_node.metadata != new_node.metadata:
@@ -152,7 +152,7 @@ class ManifestDiff:
             old_pres = getattr(old_node, "presentation", None)
             new_pres = getattr(new_node, "presentation", None)
             if old_pres != new_pres:
-                 changes.append(
+                changes.append(
                     DiffChange(
                         type=ChangeType.COSMETIC,
                         node_id=node_id,
@@ -185,7 +185,7 @@ class ManifestDiff:
                 # Profile (Behavioral)
                 # If profile is inline (CognitiveProfile object) or ID (str).
                 if old_node.profile != new_node.profile:
-                     changes.append(
+                    changes.append(
                         DiffChange(
                             type=ChangeType.BEHAVIORAL,
                             node_id=node_id,
@@ -212,7 +212,7 @@ class ManifestDiff:
 
                 # Interaction mode
                 if old_node.interaction_mode != new_node.interaction_mode:
-                     changes.append(
+                    changes.append(
                         DiffChange(
                             type=ChangeType.BEHAVIORAL,
                             node_id=node_id,
@@ -242,7 +242,7 @@ class ManifestDiff:
 
         # 4. Compare Governance (Critical)
         if old.governance != new.governance:
-             changes.append(
+            changes.append(
                 DiffChange(
                     type=ChangeType.CRITICAL,
                     node_id=None,
