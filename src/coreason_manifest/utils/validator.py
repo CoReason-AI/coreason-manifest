@@ -252,14 +252,10 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
     for node_id in adj:
         if node_id not in visited and dfs(node_id):
             # Extract the cycle portion
-            try:
-                start_index = path_stack.index(path_stack[-1])
-                cycle = path_stack[start_index:]
-                cycle_str = " -> ".join(cycle)
-                errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
-            except ValueError:
-                # Should not happen if logic is correct
-                pass
+            start_index = path_stack.index(path_stack[-1])
+            cycle = path_stack[start_index:]
+            cycle_str = " -> ".join(cycle)
+            errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
             # Clear stacks for next component (optional, but DFS handles components)
             path_stack.clear()
 
