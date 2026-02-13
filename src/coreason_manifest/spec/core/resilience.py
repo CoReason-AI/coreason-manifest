@@ -19,6 +19,7 @@ class ErrorDomain(StrEnum):
 
 class ResilienceStrategy(BaseModel):
     """Base configuration for resilience strategies."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     trace_activation: bool = Field(True, description="Emit telemetry event when this strategy triggers.")
@@ -26,6 +27,7 @@ class ResilienceStrategy(BaseModel):
 
 class RetryStrategy(ResilienceStrategy):
     """Network/System focus: Retry with backoff."""
+
     type: Literal["retry"] = "retry"
 
     max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
@@ -36,6 +38,7 @@ class RetryStrategy(ResilienceStrategy):
 
 class FallbackStrategy(ResilienceStrategy):
     """Redundancy focus: Switch to a backup node."""
+
     type: Literal["fallback"] = "fallback"
 
     fallback_node_id: str = Field(..., description="The ID of the backup node/agent.")
@@ -44,6 +47,7 @@ class FallbackStrategy(ResilienceStrategy):
 
 class ReflexionStrategy(ResilienceStrategy):
     """Cognitive Correction focus: Use a critic to analyze and fix."""
+
     type: Literal["reflexion"] = "reflexion"
 
     max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
@@ -54,6 +58,7 @@ class ReflexionStrategy(ResilienceStrategy):
 
 class EscalationStrategy(ResilienceStrategy):
     """Human-in-the-Loop focus: Pause and wait for intervention."""
+
     type: Literal["escalate"] = "escalate"
 
     queue_name: str = Field(..., description="The task queue for suspended sessions.")
@@ -70,6 +75,7 @@ ResilienceConfig = Annotated[
 
 class ErrorHandler(BaseModel):
     """Maps specific failure types to a specific strategy."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     match_domain: list[ErrorDomain] = Field(..., description="List of error domains to handle.")
@@ -95,6 +101,7 @@ class SupervisionPolicy(BaseModel):
     Note: Local supervision executes *before* global governance circuit breakers trip,
     unless the error is a GovernanceViolation.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     handlers: list[ErrorHandler] = Field(..., description="An ordered list of specific rules.")

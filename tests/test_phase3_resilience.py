@@ -185,9 +185,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         lf.build()
 
     # 2. Invalid Supervision Fallback
-    policy = SupervisionPolicy(
-        handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node")
-    )
+    policy = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node"))
 
     lf2 = NewLinearFlow(name="Invalid Sup Fallback")
     node2 = AgentNode(
@@ -247,17 +245,13 @@ def test_error_handler_regex_validation() -> None:
     """Test that ErrorHandler validates regex patterns."""
     # Valid regex
     ErrorHandler(
-        match_domain=[ErrorDomain.SYSTEM],
-        match_pattern=r"^Error \d+$",
-        strategy=RetryStrategy(max_attempts=3)
+        match_domain=[ErrorDomain.SYSTEM], match_pattern=r"^Error \d+$", strategy=RetryStrategy(max_attempts=3)
     )
 
     # Invalid regex
     with pytest.raises(ValidationError, match="Invalid regex pattern"):
         ErrorHandler(
-            match_domain=[ErrorDomain.SYSTEM],
-            match_pattern="[unclosed group",
-            strategy=RetryStrategy(max_attempts=3)
+            match_domain=[ErrorDomain.SYSTEM], match_pattern="[unclosed group", strategy=RetryStrategy(max_attempts=3)
         )
 
 
@@ -283,7 +277,7 @@ def test_swarm_reflexion_support() -> None:
         failure_tolerance_percent=0.2,
         reducer_function="concat",
         output_variable="results",
-        aggregator_model=None
+        aggregator_model=None,
     )
 
     gf = NewGraphFlow(name="Swarm Flow")
@@ -300,34 +294,14 @@ def test_swarm_reflexion_support() -> None:
 def test_fallback_cycle_detection() -> None:
     """Test detection of fallback cycles."""
     # Node A -> Node B
-    policy_a = SupervisionPolicy(
-        handlers=[],
-        default_strategy=FallbackStrategy(fallback_node_id="node_b")
-    )
+    policy_a = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="node_b"))
 
     # Node B -> Node A
-    policy_b = SupervisionPolicy(
-        handlers=[],
-        default_strategy=FallbackStrategy(fallback_node_id="node_a")
-    )
+    policy_b = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="node_a"))
 
-    node_a = AgentNode(
-        id="node_a",
-        metadata={},
-        supervision=policy_a,
-        profile="p",
-        tools=[],
-        type="agent"
-    )
+    node_a = AgentNode(id="node_a", metadata={}, supervision=policy_a, profile="p", tools=[], type="agent")
 
-    node_b = AgentNode(
-        id="node_b",
-        metadata={},
-        supervision=policy_b,
-        profile="p",
-        tools=[],
-        type="agent"
-    )
+    node_b = AgentNode(id="node_b", metadata={}, supervision=policy_b, profile="p", tools=[], type="agent")
 
     gf = NewGraphFlow(name="Cycle Flow")
     gf.add_node(node_a).add_node(node_b)
