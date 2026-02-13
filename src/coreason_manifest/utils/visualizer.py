@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import html
-from collections.abc import Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import Node, SwitchNode
-from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot
 
 
 def _safe_id(node_id: str) -> str:
