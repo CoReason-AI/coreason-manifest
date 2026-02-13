@@ -1,4 +1,3 @@
-
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
     FlowDefinitions,
@@ -19,6 +18,7 @@ from coreason_manifest.spec.core.nodes import (
 from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.diff import ChangeType, ManifestDiff, _deep_diff
 from coreason_manifest.utils.mock import MockFactory
+from coreason_manifest.utils.visualizer import to_react_flow
 
 
 def _get_base_metadata() -> FlowMetadata:
@@ -58,7 +58,7 @@ def test_diff_engine_coverage() -> None:
         metadata=meta,
         interface=FlowInterface(inputs={"a": "int"}, outputs={}),
         blackboard=None,
-        graph=Graph(nodes={}, edges=[]),  # type: ignore[arg-type]
+        graph=Graph(nodes={}, edges=[]),
     )
     flow2 = flow1.model_copy(update={"interface": FlowInterface(inputs={"a": "str"}, outputs={"b": "int"})})
 
@@ -90,8 +90,8 @@ def test_diff_engine_coverage() -> None:
     )
     s2 = s1.model_copy(update={"worker_profile": "wp2"})
 
-    graph1 = Graph(nodes={"a": node1, "h": h1, "s": s1}, edges=[])  # type: ignore[arg-type]
-    graph2 = Graph(nodes={"a": node2, "h": h2, "s": s2}, edges=[])  # type: ignore[arg-type]
+    graph1 = Graph(nodes={"a": node1, "h": h1, "s": s1}, edges=[])
+    graph2 = Graph(nodes={"a": node2, "h": h2, "s": s2}, edges=[])
 
     # We need definitions for SwarmNode validation AND AgentNode tool validation
     defs = FlowDefinitions(
@@ -132,7 +132,7 @@ def test_diff_engine_coverage() -> None:
 
     # Metadata Change
     node1_meta = node1.model_copy(update={"metadata": {"changed": True}})
-    graph_meta = Graph(nodes={"a": node1_meta, "h": h1, "s": s1}, edges=[])  # type: ignore[arg-type]
+    graph_meta = Graph(nodes={"a": node1_meta, "h": h1, "s": s1}, edges=[])
     f_meta = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -146,7 +146,7 @@ def test_diff_engine_coverage() -> None:
 
     # Presentation Change
     node1_pres = node1.model_copy(update={"presentation": PresentationHints(label="new")})
-    graph_pres = Graph(nodes={"a": node1_pres, "h": h1, "s": s1}, edges=[])  # type: ignore[arg-type]
+    graph_pres = Graph(nodes={"a": node1_pres, "h": h1, "s": s1}, edges=[])
     f_pres = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -169,7 +169,7 @@ def test_diff_engine_coverage() -> None:
         blackboard=None,
         definitions=defs,
         graph=Graph(nodes={"a": node1_ref}, edges=[]),
-    )  # type: ignore[arg-type]
+    )
     f_ref2 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -177,7 +177,7 @@ def test_diff_engine_coverage() -> None:
         blackboard=None,
         definitions=defs,
         graph=Graph(nodes={"a": node2_ref}, edges=[]),
-    )  # type: ignore[arg-type]
+    )
 
     changes = ManifestDiff.compare(f_ref1, f_ref2)
     assert any(c.field == "profile" and c.type == ChangeType.BEHAVIORAL for c in changes)
@@ -185,7 +185,7 @@ def test_diff_engine_coverage() -> None:
     # Node Type Change
     # Change 'a' from AgentNode to PlannerNode
     planner = PlannerNode(id="a", metadata={}, supervision=None, goal="g", optimizer=None, output_schema={})
-    graph_type = Graph(nodes={"a": planner, "h": h1, "s": s1}, edges=[])  # type: ignore[arg-type]
+    graph_type = Graph(nodes={"a": planner, "h": h1, "s": s1}, edges=[])
     f_type = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -203,8 +203,8 @@ def test_diff_engine_coverage() -> None:
     node1_p = AgentNode(id="a", metadata={}, supervision=None, profile=p1, tools=[])
     node2_p = AgentNode(id="a", metadata={}, supervision=None, profile=p2, tools=[])
 
-    graph_p1 = Graph(nodes={"a": node1_p}, edges=[])  # type: ignore[arg-type]
-    graph_p2 = Graph(nodes={"a": node2_p}, edges=[])  # type: ignore[arg-type]
+    graph_p1 = Graph(nodes={"a": node1_p}, edges=[])
+    graph_p2 = Graph(nodes={"a": node2_p}, edges=[])
 
     f_p1 = GraphFlow(
         kind="GraphFlow",
@@ -286,7 +286,7 @@ def test_mock_factory_coverage() -> None:
 
     edges = [Edge(source="a", target="b"), Edge(source="b", target="a")]
 
-    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges)  # type: ignore[arg-type]
+    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges)
     flow_g = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
@@ -326,7 +326,7 @@ def test_mock_factory_coverage() -> None:
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
         definitions=defs,
-        graph=Graph(nodes={"s": s}, edges=[]),  # type: ignore[arg-type]
+        graph=Graph(nodes={"s": s}, edges=[]),
     )
     trace_s = factory.simulate_trace(flow_swarm)
     # 2 workers + 1 aggregator
@@ -337,7 +337,7 @@ def test_mock_factory_coverage() -> None:
     assert no_schema_data["mock_key"] == "mock_value"
 
     # Empty Graph (disconnected/no roots)
-    graph_empty = Graph(nodes={}, edges=[])  # type: ignore[arg-type]
+    graph_empty = Graph(nodes={}, edges=[])
     flow_empty = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
@@ -347,3 +347,71 @@ def test_mock_factory_coverage() -> None:
     )
     trace_empty = factory.simulate_trace(flow_empty)
     assert len(trace_empty) == 0
+
+
+def test_visualizer_layout_coverage() -> None:
+    # Test 1: Pure Cycle (No roots) to trigger fallback logic
+    # A -> B -> A
+    n_a = AgentNode(
+        id="a",
+        metadata={},
+        supervision=None,
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
+        tools=[],
+    )
+    n_b = AgentNode(
+        id="b",
+        metadata={},
+        supervision=None,
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
+        tools=[],
+    )
+
+    from coreason_manifest.spec.core.flow import Edge
+
+    edges = [Edge(source="a", target="b"), Edge(source="b", target="a")]
+    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges)
+    flow_cycle = GraphFlow(
+        kind="GraphFlow",
+        metadata=_get_base_metadata(),
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph,
+    )
+
+    # This should trigger "no roots" logic
+    rf_data = to_react_flow(flow_cycle)
+    # Check that positions are assigned (not 0,0 for all)
+    # Actually, the fallback assigns ranks.
+    assert len(rf_data["nodes"]) == 2
+
+    # Test 2: Disconnected Component / Unreachable Cycle to trigger "unvisited" logic
+    # C (root), A -> B -> A (cycle)
+    n_c = AgentNode(
+        id="c",
+        metadata={},
+        supervision=None,
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
+        tools=[],
+    )
+
+    edges_mixed = [Edge(source="a", target="b"), Edge(source="b", target="a")]  # C is isolated
+    graph_mixed = Graph(nodes={"a": n_a, "b": n_b, "c": n_c}, edges=edges_mixed)
+    flow_mixed = GraphFlow(
+        kind="GraphFlow",
+        metadata=_get_base_metadata(),
+        interface=FlowInterface(inputs={}, outputs={}),
+        blackboard=None,
+        graph=graph_mixed,
+    )
+
+    # C is root, so queue initially has [C]. A and B are never reached via BFS from C.
+    # But A and B are part of a cycle, so their in-degree is initially > 0.
+    # So they are unvisited.
+    rf_data_mixed = to_react_flow(flow_mixed)
+    assert len(rf_data_mixed["nodes"]) == 3
+    # Check A and B got a fallback rank > C's rank (0)
+    # Positions are x = rank * 300
+    pos_c = next(n["position"]["x"] for n in rf_data_mixed["nodes"] if n["id"] == "c")
+    pos_a = next(n["position"]["x"] for n in rf_data_mixed["nodes"] if n["id"] == "a")
+    assert pos_a > pos_c
