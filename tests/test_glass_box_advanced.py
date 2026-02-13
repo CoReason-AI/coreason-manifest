@@ -1,4 +1,4 @@
-from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.utils.diff import ChangeType, ManifestDiff
 from coreason_manifest.utils.mock import MockFactory
@@ -22,14 +22,17 @@ def test_swarm_simulation_expansion() -> None:
     nodes = {"swarm-1": swarm}
     edges: list[Edge] = []
 
-    # We need a dummy definitions for profile check if we were using real validator,
-    # but MockFactory doesn't validate references.
+    # We need a dummy definitions for profile check because GraphFlow validation enforces referential integrity.
+    definitions = FlowDefinitions(
+        profiles={"worker-p": CognitiveProfile(role="worker", persona="w", reasoning=None, fast_path=None)}
+    )
 
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="SwarmTest", version="1.0", description="T", tags=[]),
         interface=FlowInterface(inputs={}, outputs={}),
         blackboard=None,
+        definitions=definitions,
         graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
     )
 
