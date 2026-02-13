@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode
+from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
 
@@ -45,11 +45,12 @@ class MockFactory:
             nodes = flow.sequence
             prev_hashes: list[str] = []
             for node in nodes:
-                exec_record = self._execute_node(node, execution_map, prev_hashes)
-                trace.append(exec_record)
-                execution_map[node.id] = exec_record
+                exec_records = self._execute_node(node, execution_map, prev_hashes)
+                trace.extend(exec_records)
+                last_record = exec_records[-1]
+                execution_map[node.id] = last_record
                 # Next node depends on this one
-                prev_hashes = [exec_record.execution_hash] if exec_record.execution_hash else []
+                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
         elif isinstance(flow, GraphFlow):
             # Find start nodes (indegree 0)
@@ -72,13 +73,14 @@ class MockFactory:
             prev_hashes = []
 
             while current_node and steps < max_steps:
-                exec_record = self._execute_node(current_node, execution_map, prev_hashes)
-                trace.append(exec_record)
-                execution_map[current_node.id] = exec_record
+                exec_records = self._execute_node(current_node, execution_map, prev_hashes)
+                trace.extend(exec_records)
+                last_record = exec_records[-1]
+                execution_map[current_node.id] = last_record
                 steps += 1
 
                 # Update prev_hashes for next iteration
-                prev_hashes = [exec_record.execution_hash] if exec_record.execution_hash else []
+                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
                 # Find next node
                 outgoing_edges = [e for e in graph.edges if e.source == current_node.id]
@@ -96,8 +98,63 @@ class MockFactory:
         node: Node,
         _execution_map: dict[str, NodeExecution],
         prev_hashes: list[str] | None = None,
-    ) -> NodeExecution:
-        # Generate inputs/outputs
+    ) -> list[NodeExecution]:
+        timestamp = datetime.now(UTC)
+
+        if isinstance(node, SwarmNode):
+            # Swarm Expansion Logic
+            concurrency = min(node.max_concurrency, 3)  # Use 3 as typical sample
+            workers = []
+            worker_hashes = []
+
+            for i in range(concurrency):
+                w_id = f"{node.id}_worker_{i}"
+                w_inputs = {"worker_id": i, "workload": "mock_item"}
+                w_outputs = {"result": "processed"}
+                w_duration = self.rng.uniform(10, 100)
+
+                w_hash = self._generate_hash(
+                    f"{w_id}{json.dumps(w_inputs, sort_keys=True)}{json.dumps(w_outputs, sort_keys=True)}"
+                )
+
+                workers.append(
+                    NodeExecution(
+                        node_id=w_id,
+                        state=NodeState.COMPLETED,
+                        inputs=w_inputs,
+                        outputs=w_outputs,
+                        timestamp=timestamp,
+                        duration_ms=w_duration,
+                        execution_hash=w_hash,
+                        previous_hashes=prev_hashes or [],
+                        attributes={"mock": True, "worker": True},
+                    )
+                )
+                worker_hashes.append(w_hash)
+
+            # Aggregator
+            agg_inputs = {"results": [w.outputs for w in workers]}
+            agg_outputs = {"final": "aggregated_result"}
+            agg_duration = self.rng.uniform(10, 50)
+            agg_hash = self._generate_hash(
+                f"{node.id}{json.dumps(agg_inputs, sort_keys=True)}{json.dumps(agg_outputs, sort_keys=True)}"
+            )
+
+            aggregator = NodeExecution(
+                node_id=node.id,
+                state=NodeState.COMPLETED,
+                inputs=agg_inputs,
+                outputs=agg_outputs,
+                timestamp=timestamp,
+                duration_ms=agg_duration,
+                execution_hash=agg_hash,
+                previous_hashes=worker_hashes,
+                attributes={"mock": True, "role": "aggregator"},
+            )
+
+            return [*workers, aggregator]
+
+        # Standard Node Logic
         inputs = {"mock_input": "data"}
         outputs: Any = {}
 
@@ -108,22 +165,22 @@ class MockFactory:
         else:
             outputs = {"result": "mock_output"}
 
-        # Create execution record
-        timestamp = datetime.now(UTC)
         duration = self.rng.uniform(10, 500)
 
         # Calculate hash
         data_to_hash = f"{node.id}{json.dumps(inputs, sort_keys=True)}{json.dumps(outputs, sort_keys=True)}"
         exec_hash = self._generate_hash(data_to_hash)
 
-        return NodeExecution(
-            node_id=node.id,
-            state=NodeState.COMPLETED,
-            inputs=inputs,
-            outputs=outputs,
-            timestamp=timestamp,
-            duration_ms=duration,
-            execution_hash=exec_hash,
-            previous_hashes=prev_hashes or [],
-            attributes={"mock": True},
-        )
+        return [
+            NodeExecution(
+                node_id=node.id,
+                state=NodeState.COMPLETED,
+                inputs=inputs,
+                outputs=outputs,
+                timestamp=timestamp,
+                duration_ms=duration,
+                execution_hash=exec_hash,
+                previous_hashes=prev_hashes or [],
+                attributes={"mock": True},
+            )
+        ]

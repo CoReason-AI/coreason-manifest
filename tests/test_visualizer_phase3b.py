@@ -266,6 +266,16 @@ def test_react_flow_output() -> None:
     assert "data" in start_node
     assert start_node["data"]["label"] == "start"
 
+    # Check layout (basic check for DAG layout)
+    end_node = next(n for n in rf["nodes"] if n["id"] == "end")
+    start_pos = start_node["position"]
+    end_pos = end_node["position"]
+
+    # Start should be at rank 0 (x=0), End at rank 1 (x=300)
+    assert start_pos["x"] == 0
+    assert end_pos["x"] > 0
+    assert start_pos["x"] != end_pos["x"]
+
 
 def test_react_flow_linear() -> None:
     nodes: list[Node] = [

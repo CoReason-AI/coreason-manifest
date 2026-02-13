@@ -165,6 +165,72 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     return "\n".join(lines)
 
 
+def _compute_layout(nodes: Sequence[Node], edges: list[tuple[str, str, str | None]]) -> dict[str, dict[str, int]]:
+    """Computes a basic DAG layout using Kahn's algorithm layers."""
+    adj: dict[str, list[str]] = {n.id: [] for n in nodes}
+    in_degree: dict[str, int] = {n.id: 0 for n in nodes}
+
+    for src, tgt, _ in edges:
+        if src in adj:
+            adj[src].append(tgt)
+        if tgt in in_degree:
+            in_degree[tgt] += 1
+
+    # Initialize queue with roots (in-degree 0)
+    queue = [n_id for n_id, d in in_degree.items() if d == 0]
+    ranks: dict[str, int] = {}
+
+    # If no roots (pure cycle), pick first node as root
+    if not queue and nodes:
+        first_node = next(iter(nodes)).id
+        queue.append(first_node)
+        in_degree[first_node] = 0 # Force it
+
+    for n_id in queue:
+        ranks[n_id] = 0
+
+    head = 0
+    while head < len(queue):
+        u = queue[head]
+        head += 1
+        r = ranks[u]
+
+        for v in adj.get(u, []):
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                ranks[v] = r + 1
+                queue.append(v)
+
+    # Handle cycles / disconnected components not reachable from roots
+    # Assign them to a rank beyond the max found so far
+    current_max_rank = max(ranks.values(), default=0)
+    unvisited = [n.id for n in nodes if n.id not in ranks]
+
+    if unvisited:
+        # Simple fallback: dump them all in next rank
+        # Or better: Iterate and if we find a node with remaining in-degree, force it.
+        # But for visualization, just placing them is enough.
+        fallback_rank = current_max_rank + 1
+        for n_id in unvisited:
+            ranks[n_id] = fallback_rank
+
+    # Assign Positions
+    positions = {}
+    rows: dict[int, int] = {}  # rank -> count
+
+    for n in nodes:
+        r = ranks.get(n.id, 0)
+        row_idx = rows.get(r, 0)
+        rows[r] = row_idx + 1
+
+        positions[n.id] = {
+            "x": r * 300,
+            "y": row_idx * 150,
+        }
+
+    return positions
+
+
 def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None = None) -> dict[str, Any]:
     """Generates React Flow compatible JSON."""
     rf_nodes: list[dict[str, Any]] = []
@@ -180,10 +246,11 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
         nodes = list(flow.graph.nodes.values())
         edges = [(e.source, e.target, e.condition) for e in flow.graph.edges]
 
-    for i, node in enumerate(nodes):
-        # Basic layouting placeholder.
-        # In a real scenario, this might need a DAG layout algorithm (e.g. dagre).
-        position = {"x": 0, "y": i * 100}
+    # Compute Layout
+    positions = _compute_layout(nodes, edges)
+
+    for _i, node in enumerate(nodes):
+        position = positions.get(node.id, {"x": 0, "y": 0})
 
         node_data = {
             "label": node.id,

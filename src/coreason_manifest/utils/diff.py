@@ -26,6 +26,58 @@ class DiffChange(BaseModel):
     description: str
 
 
+def _deep_diff(
+    path: str, obj1: Any, obj2: Any, change_type: ChangeType, node_id: str | None
+) -> list[DiffChange]:
+    changes: list[DiffChange] = []
+
+    if obj1 == obj2:
+        return changes
+
+    if isinstance(obj1, dict) and isinstance(obj2, dict):
+        all_keys = set(obj1.keys()) | set(obj2.keys())
+        for key in all_keys:
+            new_path = f"{path}.{key}" if path else key
+            if key not in obj1:
+                changes.append(
+                    DiffChange(
+                        type=change_type,
+                        node_id=node_id,
+                        field=new_path,
+                        old_value=None,
+                        new_value=obj2[key],
+                        description=f"Field '{new_path}' added",
+                    )
+                )
+            elif key not in obj2:
+                changes.append(
+                    DiffChange(
+                        type=change_type,
+                        node_id=node_id,
+                        field=new_path,
+                        old_value=obj1[key],
+                        new_value=None,
+                        description=f"Field '{new_path}' removed",
+                    )
+                )
+            else:
+                changes.extend(_deep_diff(new_path, obj1[key], obj2[key], change_type, node_id))
+    else:
+        # For lists or primitives that differ
+        changes.append(
+            DiffChange(
+                type=change_type,
+                node_id=node_id,
+                field=path,
+                old_value=str(obj1),
+                new_value=str(obj2),
+                description=f"Field '{path}' changed",
+            )
+        )
+
+    return changes
+
+
 class ManifestDiff:
     @staticmethod
     def compare(old: GraphFlow, new: GraphFlow) -> list[DiffChange]:
@@ -33,25 +85,15 @@ class ManifestDiff:
 
         # 1. Compare Interface (Breaking)
         if old.interface.inputs != new.interface.inputs:
-            changes.append(
-                DiffChange(
-                    type=ChangeType.BREAKING,
-                    node_id=None,
-                    field="interface.inputs",
-                    old_value=str(old.interface.inputs),
-                    new_value=str(new.interface.inputs),
-                    description="Input schema changed",
+            changes.extend(
+                _deep_diff(
+                    "interface.inputs", old.interface.inputs, new.interface.inputs, ChangeType.BREAKING, None
                 )
             )
         if old.interface.outputs != new.interface.outputs:
-            changes.append(
-                DiffChange(
-                    type=ChangeType.BREAKING,
-                    node_id=None,
-                    field="interface.outputs",
-                    old_value=str(old.interface.outputs),
-                    new_value=str(new.interface.outputs),
-                    description="Output schema changed",
+            changes.extend(
+                _deep_diff(
+                    "interface.outputs", old.interface.outputs, new.interface.outputs, ChangeType.BREAKING, None
                 )
             )
 
@@ -137,14 +179,9 @@ class ManifestDiff:
 
             # Compare Metadata (Cosmetic)
             if old_node.metadata != new_node.metadata:
-                changes.append(
-                    DiffChange(
-                        type=ChangeType.COSMETIC,
-                        node_id=node_id,
-                        field="metadata",
-                        old_value=str(old_node.metadata),
-                        new_value=str(new_node.metadata),
-                        description="Metadata changed",
+                changes.extend(
+                    _deep_diff(
+                        "metadata", old_node.metadata, new_node.metadata, ChangeType.COSMETIC, node_id
                     )
                 )
 
@@ -152,16 +189,9 @@ class ManifestDiff:
             old_pres = getattr(old_node, "presentation", None)
             new_pres = getattr(new_node, "presentation", None)
             if old_pres != new_pres:
-                changes.append(
-                    DiffChange(
-                        type=ChangeType.COSMETIC,
-                        node_id=node_id,
-                        field="presentation",
-                        old_value=str(old_pres),
-                        new_value=str(new_pres),
-                        description="Presentation hints changed",
-                    )
-                )
+                val1 = old_pres.model_dump(exclude_none=True) if old_pres else None
+                val2 = new_pres.model_dump(exclude_none=True) if new_pres else None
+                changes.extend(_deep_diff("presentation", val1, val2, ChangeType.COSMETIC, node_id))
 
             # Compare Specific Node Types
 
@@ -183,18 +213,28 @@ class ManifestDiff:
                     )
 
                 # Profile (Behavioral)
-                # If profile is inline (CognitiveProfile object) or ID (str).
                 if old_node.profile != new_node.profile:
-                    changes.append(
-                        DiffChange(
-                            type=ChangeType.BEHAVIORAL,
-                            node_id=node_id,
-                            field="profile",
-                            old_value=str(old_node.profile),
-                            new_value=str(new_node.profile),
-                            description="Cognitive Profile changed",
+                    if isinstance(old_node.profile, str) or isinstance(new_node.profile, str):
+                        changes.append(
+                            DiffChange(
+                                type=ChangeType.BEHAVIORAL,
+                                node_id=node_id,
+                                field="profile",
+                                old_value=str(old_node.profile),
+                                new_value=str(new_node.profile),
+                                description="Cognitive Profile changed (ID reference)",
+                            )
                         )
-                    )
+                    else:
+                        changes.extend(
+                            _deep_diff(
+                                "profile",
+                                old_node.profile.model_dump(exclude_none=True),
+                                new_node.profile.model_dump(exclude_none=True),
+                                ChangeType.BEHAVIORAL,
+                                node_id,
+                            )
+                        )
 
             # HumanNode: Prompt (Behavioral), Timeout (Behavioral?)
             if isinstance(old_node, HumanNode) and isinstance(new_node, HumanNode):
@@ -242,15 +282,8 @@ class ManifestDiff:
 
         # 4. Compare Governance (Critical)
         if old.governance != new.governance:
-            changes.append(
-                DiffChange(
-                    type=ChangeType.CRITICAL,
-                    node_id=None,
-                    field="governance",
-                    old_value=str(old.governance),
-                    new_value=str(new.governance),
-                    description="Governance policy changed",
-                )
-            )
+            val1 = old.governance.model_dump(exclude_none=True) if old.governance else None
+            val2 = new.governance.model_dump(exclude_none=True) if new.governance else None
+            changes.extend(_deep_diff("governance", val1, val2, ChangeType.CRITICAL, None))
 
         return changes
