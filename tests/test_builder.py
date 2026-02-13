@@ -207,3 +207,10 @@ def test_agent_builder() -> None:
     builder = AgentBuilder("agent3")
     with pytest.raises(ValueError, match="Agent identity"):
         builder.build()
+
+
+def test_agent_builder_fallback_missing_id() -> None:
+    """Test AgentBuilder raises error when fallback_id is missing for fallback strategy."""
+    builder = AgentBuilder("agent_fallback")
+    with pytest.raises(ValueError, match="Fallback strategy requires fallback_id"):
+        builder.with_supervision(retries=3, strategy="fallback")
