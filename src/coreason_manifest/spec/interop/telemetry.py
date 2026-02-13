@@ -30,10 +30,13 @@ class NodeExecution(BaseModel):
     error: str | None = None
     timestamp: datetime
     duration_ms: float
+    attributes: dict[str, str | int | float | bool] = Field(default_factory=dict)
 
     # --- VERITAS INTEGRITY RESTORATION ---
     execution_hash: str | None = Field(None, description="SHA-256 hash of inputs+outputs+config.")
-    previous_hash: str | None = Field(None, description="Hash of the preceding execution in the trace.")
+    previous_hashes: list[str] = Field(
+        default_factory=list, description="Hashes of preceding executions (DAG parents)."
+    )
     signature: str | None = Field(None, description="Optional cryptographic signature of the event.")
 
 
