@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
@@ -212,5 +213,5 @@ def test_agent_builder() -> None:
 def test_agent_builder_fallback_missing_id() -> None:
     """Test AgentBuilder raises error when fallback_id is missing for fallback strategy."""
     builder = AgentBuilder("agent_fallback")
-    with pytest.raises(ValueError, match="Fallback strategy requires fallback_id"):
+    with pytest.raises(ValidationError):
         builder.with_supervision(retries=3, strategy="fallback")

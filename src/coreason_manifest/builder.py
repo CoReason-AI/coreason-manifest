@@ -56,10 +56,9 @@ def create_supervision(
             initial_delay_seconds=delay,
         )
     elif strategy == "fallback":
-        if not fallback_id:
-            raise ValueError("Fallback strategy requires fallback_id.")  # pragma: no cover
+        # if not fallback_id, Pydantic will raise ValidationError
         res_strategy = FallbackStrategy(
-            fallback_node_id=fallback_id,
+            fallback_node_id=fallback_id,  # type: ignore
         )
     else:
         # Default to escalate

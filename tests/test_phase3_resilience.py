@@ -80,7 +80,7 @@ def test_supervision_logic() -> None:
 
 def test_create_supervision_fallback_missing_id() -> None:
     """Test create_supervision raises error when fallback_id is missing for fallback strategy."""
-    with pytest.raises(ValueError, match="Fallback strategy requires fallback_id"):
+    with pytest.raises(ValidationError):
         create_supervision(retries=3, strategy="fallback", fallback_id=None)
 
 
