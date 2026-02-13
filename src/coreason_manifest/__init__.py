@@ -20,9 +20,9 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
     StandardReasoning,
-    Supervision,
     TreeSearchReasoning,
 )
+from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -81,7 +81,7 @@ __all__ = [
     "ReasoningConfig",
     "Safety",
     "StandardReasoning",
-    "Supervision",
+    "SupervisionPolicy",
     "SwitchNode",
     "ToolPack",
     "TreeSearchReasoning",

@@ -16,8 +16,16 @@ from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
     RedTeamingReasoning,
     StandardReasoning,
-    Supervision,
     TreeSearchReasoning,
+)
+from coreason_manifest.spec.core.resilience import (
+    ErrorHandler,
+    EscalationStrategy,
+    FallbackStrategy,
+    ReflexionStrategy,
+    ResilienceStrategy,
+    RetryStrategy,
+    SupervisionPolicy,
 )
 from coreason_manifest.spec.core.flow import (
     AnyNode,
@@ -71,6 +79,9 @@ __all__ = [
     "Edge",
     "EmergenceInspectorNode",
     "EnsembleReasoning",
+    "ErrorHandler",
+    "EscalationStrategy",
+    "FallbackStrategy",
     "FastPath",
     "FlowDefinitions",
     "FlowInterface",
@@ -91,9 +102,12 @@ __all__ = [
     "PlannerNode",
     "ReasoningConfig",
     "RedTeamingReasoning",
+    "ReflexionStrategy",
+    "ResilienceStrategy",
+    "RetryStrategy",
     "Safety",
     "StandardReasoning",
-    "Supervision",
+    "SupervisionPolicy",
     "SwitchNode",
     # Tools
     "ToolPack",

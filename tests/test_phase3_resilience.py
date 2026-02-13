@@ -1,8 +1,14 @@
 import pytest
 
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_supervision
-from coreason_manifest.spec.core.engines import Supervision
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    FallbackStrategy,
+    ReflexionStrategy,
+    RetryStrategy,
+    SupervisionPolicy,
+)
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
 
 
 def test_builder_integration_circuit_breaker() -> None:
@@ -51,74 +57,80 @@ def test_builder_integration_circuit_breaker() -> None:
 
 def test_supervision_logic() -> None:
     # Manual creation
-    sup = Supervision(
-        strategy="degrade",
-        max_retries=3,
-        fallback=None,
-        retry_delay_seconds=1.5,
-        backoff_factor=2.5,
-        default_payload={"status": "mock"},
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=RetryStrategy(max_attempts=3, backoff_factor=2.5, initial_delay_seconds=1.5)
     )
 
-    assert sup.strategy == "degrade"
-    assert sup.max_retries == 3
-    assert sup.retry_delay_seconds == 1.5
-    assert sup.backoff_factor == 2.5
-    assert sup.default_payload == {"status": "mock"}
+    strategy = policy.default_strategy
+    assert isinstance(strategy, RetryStrategy)
+    assert strategy.max_attempts == 3
+    assert strategy.backoff_factor == 2.5
+    assert strategy.initial_delay_seconds == 1.5
 
     # Helper creation
-    sup2 = create_supervision(retries=2, strategy="escalate", backoff=3.0, delay=0.5, default=None)
-    assert sup2.strategy == "escalate"
-    assert sup2.max_retries == 2
-    assert sup2.backoff_factor == 3.0
-    assert sup2.retry_delay_seconds == 0.5
-    assert sup2.default_payload is None
+    policy2 = create_supervision(retries=2, strategy="retry", backoff=3.0, delay=0.5)
+    assert isinstance(policy2.default_strategy, RetryStrategy)
+    assert policy2.default_strategy.max_attempts == 2
+    assert policy2.default_strategy.backoff_factor == 3.0
+    assert policy2.default_strategy.initial_delay_seconds == 0.5
 
 
-def test_validator_catch_degrade_missing_payload() -> None:
-    sup = Supervision(
-        strategy="degrade",
-        max_retries=3,
-        fallback=None,
-        default_payload=None,  # Invalid for degrade
+def test_validator_catch_reflexion_type_mismatch() -> None:
+    # Reflexion is only for Agents/Inspectors. Try putting it on a SwitchNode.
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=ReflexionStrategy(
+            max_attempts=3,
+            critic_model="gpt-4",
+            critic_prompt="Fix it",
+            include_trace=True
+        )
     )
 
-    node = AgentNode(
-        id="node1",
+    node = SwitchNode(
+        id="switch1",
         metadata={},
-        supervision=sup,
-        profile=CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None),
-        tools=[],
+        supervision=policy,
+        variable="x",
+        cases={},
+        default="next"
     )
 
     lf = NewLinearFlow(name="Invalid Flow")
     lf.add_step(node)
 
-    # Validation is called in build()
-    with pytest.raises(ValueError, match=r"Node 'node1' is set to 'degrade' but missing 'default_payload'\."):
+    # SwitchNode integrity requires target IDs to exist
+    lf.add_agent_ref("next", "profile1")
+    lf.define_profile("profile1", "role", "persona")
+
+    with pytest.raises(ValueError, match=r"uses ReflexionStrategy but is of type 'switch'"):
         lf.build()
 
 
-def test_validator_catch_invalid_backoff() -> None:
-    sup = Supervision(
-        strategy="restart",
-        max_retries=3,
-        fallback=None,
-        backoff_factor=0.5,  # Invalid < 1.0
+def test_validator_catch_escalation_empty_queue() -> None:
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=EscalationStrategy(
+            max_attempts=3,
+            queue_name="", # Invalid empty
+            notification_level="warning",
+            timeout_seconds=10
+        )
     )
 
     node = AgentNode(
-        id="node2",
+        id="node_esc",
         metadata={},
-        supervision=sup,
-        profile=CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None),
+        supervision=policy,
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
 
-    lf = NewLinearFlow(name="Invalid Flow Backoff")
+    lf = NewLinearFlow(name="Invalid Escalation")
     lf.add_step(node)
 
-    with pytest.raises(ValueError, match=r"backoff_factor must be >= 1\.0"):
+    with pytest.raises(ValueError, match="uses EscalationStrategy with empty queue_name"):
         lf.build()
 
 
@@ -181,26 +193,23 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         lf.build()
 
     # 2. Invalid Supervision Fallback
-    sup = Supervision(
-        strategy="escalate",
-        max_retries=3,
-        fallback="missing_sup_node",
-        retry_delay_seconds=1.0,
-        backoff_factor=2.0,
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=FallbackStrategy(max_attempts=3, fallback_node_id="missing_sup_node")
     )
 
     lf2 = NewLinearFlow(name="Invalid Sup Fallback")
     node2 = AgentNode(
         id="node2",
         metadata={},
-        supervision=sup,
+        supervision=policy,
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     lf2.add_step(node2)
 
     with pytest.raises(
-        ValueError, match="Supervision Error: Node 'node2' fallback points to missing ID 'missing_sup_node'"
+        ValueError, match="Resilience Error: Node 'node2' fallback points to missing ID 'missing_sup_node'"
     ):
         lf2.build()
 

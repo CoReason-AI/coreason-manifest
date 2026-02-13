@@ -10,8 +10,8 @@ from coreason_manifest.spec.core.engines import (
     ModelRef,
     Optimizer,
     ReasoningConfig,
-    Supervision,
 )
+from coreason_manifest.spec.core.resilience import SupervisionPolicy
 
 
 class Node(BaseModel):
@@ -21,7 +21,7 @@ class Node(BaseModel):
 
     id: str
     metadata: dict[str, Any]
-    supervision: Supervision | None
+    supervision: SupervisionPolicy | None
     presentation: PresentationHints | None = Field(None, description="UI rendering hints.")
     type: str
 

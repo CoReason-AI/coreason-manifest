@@ -14,7 +14,12 @@ from coreason_manifest.spec.core.engines import (
     FastPath,
     ReasoningConfig,
     StandardReasoning,
-    Supervision,
+)
+from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    FallbackStrategy,
+    RetryStrategy,
+    SupervisionPolicy,
 )
 from coreason_manifest.spec.core.flow import (
     AnyNode,
@@ -39,17 +44,36 @@ def create_supervision(
     strategy: str = "escalate",
     backoff: float = 2.0,
     delay: float = 1.0,
-    default: dict[str, Any] | None = None,
-) -> Supervision:
-    """Helper to create a Supervision config."""
-    # cast strategy to Literal if needed, or rely on pydantic validation
-    return Supervision(
-        max_retries=retries,
-        strategy=strategy,  # type: ignore
-        backoff_factor=backoff,
-        retry_delay_seconds=delay,
-        default_payload=default,
-        fallback=None,
+    fallback_id: str | None = None,
+    queue_name: str | None = None,
+) -> SupervisionPolicy:
+    """Helper to create a SupervisionPolicy."""
+    res_strategy: Any
+    if strategy == "retry":
+        res_strategy = RetryStrategy(
+            max_attempts=retries,
+            backoff_factor=backoff,
+            initial_delay_seconds=delay,
+        )
+    elif strategy == "fallback":
+        if not fallback_id:
+            raise ValueError("Fallback strategy requires fallback_id.")
+        res_strategy = FallbackStrategy(
+            max_attempts=retries,
+            fallback_node_id=fallback_id,
+        )
+    else:
+        # Default to escalate
+        res_strategy = EscalationStrategy(
+            max_attempts=retries,
+            queue_name=queue_name or "default_human_queue",
+            notification_level="warning",
+            timeout_seconds=3600,
+        )
+
+    return SupervisionPolicy(
+        handlers=[],
+        default_strategy=res_strategy,
     )
 
 
@@ -63,7 +87,7 @@ class AgentBuilder:
         self.reasoning: ReasoningConfig | None = None
         self.fast_path: FastPath | None = None
         self.tools: list[str] = []
-        self.supervision: Supervision | None = None
+        self.supervision: SupervisionPolicy | None = None
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures CognitiveProfile.role and CognitiveProfile.persona."""
@@ -92,7 +116,8 @@ class AgentBuilder:
         strategy: str = "escalate",
         backoff: float = 2.0,
         delay: float = 1.0,
-        default: dict[str, Any] | None = None,
+        fallback_id: str | None = None,
+        queue_name: str | None = None,
     ) -> "AgentBuilder":
         """Helper to configure AgentNode.supervision."""
         self.supervision = create_supervision(
@@ -100,7 +125,8 @@ class AgentBuilder:
             strategy=strategy,
             backoff=backoff,
             delay=delay,
-            default=default,
+            fallback_id=fallback_id,
+            queue_name=queue_name,
         )
         return self
 

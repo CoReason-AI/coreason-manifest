@@ -3,6 +3,12 @@
 from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
+from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    FallbackStrategy,
+    ReflexionStrategy,
+    ResilienceStrategy,
+)
 from coreason_manifest.spec.core.tools import ToolPack
 
 
@@ -167,16 +173,31 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
 
 def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     errors: list[str] = []
-    if node.supervision:
-        if node.supervision.strategy == "degrade" and node.supervision.default_payload is None:
-            errors.append(f"Node '{node.id}' is set to 'degrade' but missing 'default_payload'.")
+    policy = node.supervision
+    if not policy:
+        return errors
 
-        if node.supervision.backoff_factor < 1.0:
-            errors.append(f"Supervision Error: Node '{node.id}' backoff_factor must be >= 1.0.")
+    # Collect all strategies from handlers and default
+    strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
+    strategies.append(policy.default_strategy)
 
-        if node.supervision.fallback and node.supervision.fallback not in valid_ids:
-            errors.append(
-                f"Supervision Error: Node '{node.id}' fallback points to missing ID '{node.supervision.fallback}'."
-            )
+    for strategy in strategies:
+        if isinstance(strategy, ReflexionStrategy):
+            if node.type not in ("agent", "inspector", "emergence_inspector"):
+                errors.append(
+                    f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. Only Agent/Inspector nodes support reflexion."
+                )
+
+        if isinstance(strategy, FallbackStrategy):
+            if strategy.fallback_node_id not in valid_ids:
+                errors.append(
+                    f"Resilience Error: Node '{node.id}' fallback points to missing ID '{strategy.fallback_node_id}'."
+                )
+
+        if isinstance(strategy, EscalationStrategy):
+            if not strategy.queue_name:
+                errors.append(
+                    f"Resilience Error: Node '{node.id}' uses EscalationStrategy with empty queue_name."
+                )
 
     return errors
