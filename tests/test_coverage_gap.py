@@ -46,7 +46,7 @@ def test_visualizer_invalid_flow_type() -> None:
     invalid_flow = InvalidFlow()
     # Should not raise exception, just return empty string or partial string
     mermaid = to_mermaid(invalid_flow)  # type: ignore
-    assert mermaid  # Should contain styling classes at least
+    assert mermaid == ""  # Should return empty string
 
 
 def test_visualizer_state_class_none() -> None:

@@ -10,6 +10,7 @@ from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
     Supervision,
 )
+from coreason_manifest.spec.common.presentation import PresentationHints
 
 
 class Node(BaseModel):
@@ -20,6 +21,7 @@ class Node(BaseModel):
     id: str
     metadata: dict[str, Any]
     supervision: Supervision | None
+    presentation: PresentationHints | None = Field(None, description="UI rendering hints.")
     type: str
 
 
