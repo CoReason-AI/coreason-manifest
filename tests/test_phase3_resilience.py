@@ -78,6 +78,12 @@ def test_supervision_logic() -> None:
     assert policy2.default_strategy.initial_delay_seconds == 0.5
 
 
+def test_create_supervision_fallback_missing_id() -> None:
+    """Test create_supervision raises error when fallback_id is missing for fallback strategy."""
+    with pytest.raises(ValueError, match="Fallback strategy requires fallback_id"):
+        create_supervision(retries=3, strategy="fallback", fallback_id=None)
+
+
 def test_validator_catch_reflexion_type_mismatch() -> None:
     # Reflexion is only for Agents/Inspectors/Swarms/Planners. Try putting it on a SwitchNode.
     policy = SupervisionPolicy(
