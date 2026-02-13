@@ -2,7 +2,7 @@ import re
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.core.engines import ModelRef
 
@@ -15,6 +15,7 @@ class ErrorDomain(StrEnum):
     SECURITY = "security"
     CONTEXT = "context"
     DATA = "data"
+    RESOURCE = "resource"
 
 
 class ResilienceStrategy(BaseModel):
@@ -74,14 +75,27 @@ ResilienceConfig = Annotated[
 
 
 class ErrorHandler(BaseModel):
-    """Maps specific failure types to a specific strategy."""
+    """
+    Maps specific failure types to a specific strategy.
+
+    Matching logic is strict intersection (AND). If multiple criteria are provided
+    (e.g., domain AND pattern), the error must match ALL of them to trigger the strategy.
+    """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    match_domain: list[ErrorDomain] = Field(..., description="List of error domains to handle.")
+    match_domain: list[ErrorDomain] | None = Field(None, description="List of error domains to handle.")
     match_pattern: str | None = Field(None, description="Regex for fine-grained error message matching.")
     match_error_code: list[str] | None = Field(None, description="List of specific error codes to match.")
     strategy: ResilienceConfig = Field(..., description="The polymorphic strategy to execute.")
+
+    @model_validator(mode="after")
+    def validate_criteria_existence(self) -> "ErrorHandler":
+        if not any([self.match_domain, self.match_pattern, self.match_error_code]):
+            raise ValueError(
+                "ErrorHandler must specify at least one matching criterion (domain, pattern, or code)."
+            )
+        return self
 
     @field_validator("match_pattern")
     @classmethod

@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_supervision
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode, SwitchNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlannerNode, SwarmNode, SwitchNode
 from coreason_manifest.spec.core.resilience import (
     ErrorDomain,
     ErrorHandler,
@@ -79,7 +79,7 @@ def test_supervision_logic() -> None:
 
 
 def test_validator_catch_reflexion_type_mismatch() -> None:
-    # Reflexion is only for Agents/Inspectors/Swarms. Try putting it on a SwitchNode.
+    # Reflexion is only for Agents/Inspectors/Swarms/Planners. Try putting it on a SwitchNode.
     policy = SupervisionPolicy(
         handlers=[],
         default_strategy=ReflexionStrategy(
@@ -309,3 +309,51 @@ def test_fallback_cycle_detection() -> None:
 
     with pytest.raises(ValueError, match="Fallback cycle detected"):
         gf.build()
+
+
+def test_error_handler_criteria_existence() -> None:
+    """Test that ErrorHandler requires at least one criterion."""
+    with pytest.raises(ValueError, match="ErrorHandler must specify at least one matching criterion"):
+        ErrorHandler(
+            match_domain=None,
+            match_pattern=None,
+            match_error_code=None,
+            strategy=RetryStrategy(max_attempts=3)
+        )
+
+
+def test_planner_reflexion_support() -> None:
+    """Test that PlannerNode supports ReflexionStrategy."""
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=ReflexionStrategy(
+            max_attempts=3, critic_model="gpt-4", critic_prompt="Fix", include_trace=True
+        ),
+    )
+
+    planner = PlannerNode(
+        id="planner1",
+        type="planner",
+        metadata={},
+        supervision=policy,
+        goal="make plan",
+        optimizer=None,
+        output_schema={"type": "object"}
+    )
+
+    gf = NewGraphFlow(name="Planner Flow")
+    gf.add_node(planner)
+
+    # Should not raise validation error
+    flow = gf.build()
+    assert flow.graph.nodes["planner1"].supervision is not None
+
+
+def test_resource_error_domain() -> None:
+    """Test using the RESOURCE error domain."""
+    handler = ErrorHandler(
+        match_domain=[ErrorDomain.RESOURCE],
+        strategy=RetryStrategy(max_attempts=3)
+    )
+    assert handler.match_domain is not None
+    assert ErrorDomain.RESOURCE in handler.match_domain

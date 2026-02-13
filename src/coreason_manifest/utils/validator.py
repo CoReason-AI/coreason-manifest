@@ -189,10 +189,11 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
             "inspector",
             "emergence_inspector",
             "swarm",
+            "planner",
         ):
             errors.append(
                 f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. "
-                "Only Agent/Inspector/Swarm nodes support reflexion."
+                "Only Agent/Inspector/Swarm/Planner nodes support reflexion."
             )
 
         if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id not in valid_ids:
