@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 
 import pytest
-import yaml  # type: ignore
+import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.loader import load_flow_from_file

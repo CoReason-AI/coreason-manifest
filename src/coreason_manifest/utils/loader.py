@@ -11,7 +11,7 @@
 from pathlib import Path
 from typing import Any
 
-import yaml  # type: ignore
+import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 

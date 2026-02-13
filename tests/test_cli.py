@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
 import pytest
-import yaml  # type: ignore
+import yaml
 from _pytest.capture import CaptureFixture
 
 from coreason_manifest.cli import main
