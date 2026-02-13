@@ -184,7 +184,7 @@ def _compute_layout(nodes: Sequence[Node], edges: list[tuple[str, str, str | Non
     if not queue and nodes:
         first_node = next(iter(nodes)).id
         queue.append(first_node)
-        in_degree[first_node] = 0 # Force it
+        in_degree[first_node] = 0  # Force it
 
     for n_id in queue:
         ranks[n_id] = 0

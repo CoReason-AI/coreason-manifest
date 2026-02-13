@@ -26,9 +26,7 @@ class DiffChange(BaseModel):
     description: str
 
 
-def _deep_diff(
-    path: str, obj1: Any, obj2: Any, change_type: ChangeType, node_id: str | None
-) -> list[DiffChange]:
+def _deep_diff(path: str, obj1: Any, obj2: Any, change_type: ChangeType, node_id: str | None) -> list[DiffChange]:
     changes: list[DiffChange] = []
 
     if obj1 == obj2:
@@ -86,15 +84,11 @@ class ManifestDiff:
         # 1. Compare Interface (Breaking)
         if old.interface.inputs != new.interface.inputs:
             changes.extend(
-                _deep_diff(
-                    "interface.inputs", old.interface.inputs, new.interface.inputs, ChangeType.BREAKING, None
-                )
+                _deep_diff("interface.inputs", old.interface.inputs, new.interface.inputs, ChangeType.BREAKING, None)
             )
         if old.interface.outputs != new.interface.outputs:
             changes.extend(
-                _deep_diff(
-                    "interface.outputs", old.interface.outputs, new.interface.outputs, ChangeType.BREAKING, None
-                )
+                _deep_diff("interface.outputs", old.interface.outputs, new.interface.outputs, ChangeType.BREAKING, None)
             )
 
         # 2. Compare Graph Topology (Topological)
@@ -180,9 +174,7 @@ class ManifestDiff:
             # Compare Metadata (Cosmetic)
             if old_node.metadata != new_node.metadata:
                 changes.extend(
-                    _deep_diff(
-                        "metadata", old_node.metadata, new_node.metadata, ChangeType.COSMETIC, node_id
-                    )
+                    _deep_diff("metadata", old_node.metadata, new_node.metadata, ChangeType.COSMETIC, node_id)
                 )
 
             # Presentation (new field)
