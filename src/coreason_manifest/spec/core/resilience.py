@@ -92,9 +92,7 @@ class ErrorHandler(BaseModel):
     @model_validator(mode="after")
     def validate_criteria_existence(self) -> "ErrorHandler":
         if not any([self.match_domain, self.match_pattern, self.match_error_code]):
-            raise ValueError(
-                "ErrorHandler must specify at least one matching criterion (domain, pattern, or code)."
-            )
+            raise ValueError("ErrorHandler must specify at least one matching criterion (domain, pattern, or code).")
         return self
 
     @field_validator("match_pattern")

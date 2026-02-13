@@ -315,10 +315,7 @@ def test_error_handler_criteria_existence() -> None:
     """Test that ErrorHandler requires at least one criterion."""
     with pytest.raises(ValueError, match="ErrorHandler must specify at least one matching criterion"):
         ErrorHandler(
-            match_domain=None,
-            match_pattern=None,
-            match_error_code=None,
-            strategy=RetryStrategy(max_attempts=3)
+            match_domain=None, match_pattern=None, match_error_code=None, strategy=RetryStrategy(max_attempts=3)
         )
 
 
@@ -338,7 +335,7 @@ def test_planner_reflexion_support() -> None:
         supervision=policy,
         goal="make plan",
         optimizer=None,
-        output_schema={"type": "object"}
+        output_schema={"type": "object"},
     )
 
     gf = NewGraphFlow(name="Planner Flow")
@@ -351,9 +348,6 @@ def test_planner_reflexion_support() -> None:
 
 def test_resource_error_domain() -> None:
     """Test using the RESOURCE error domain."""
-    handler = ErrorHandler(
-        match_domain=[ErrorDomain.RESOURCE],
-        strategy=RetryStrategy(max_attempts=3)
-    )
+    handler = ErrorHandler(match_domain=[ErrorDomain.RESOURCE], strategy=RetryStrategy(max_attempts=3))
     assert handler.match_domain is not None
     assert ErrorDomain.RESOURCE in handler.match_domain
