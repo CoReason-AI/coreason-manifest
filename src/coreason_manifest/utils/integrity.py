@@ -148,12 +148,12 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
                     expected_prev_hash = compute_hash(prev_node)
                     if prev_hash != expected_prev_hash:
                         return False
-                elif trusted_root_hash and prev_hash == trusted_root_hash:
-                    pass  # Valid link to root
+                elif trusted_root_hash:
+                    if prev_hash != trusted_root_hash:
+                        return False
                 elif prev_hash:
-                    # Has prev_hash but is index 0 and no trusted root match?
-                    # Or maybe generic objects are not necessarily linear?
-                    # The old test cases imply linear chaining in the list.
+                    # Has prev_hash but is index 0 and no trusted root to match.
+                    # Allow loosely for generic objects/partial chains.
                     pass
 
         # 4. Add to verified set

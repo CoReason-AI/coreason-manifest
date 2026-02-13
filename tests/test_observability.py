@@ -280,3 +280,76 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
     # The recorder should have wrapped the string result in a dict
     assert rec.inputs == {"_sanitized_value": "sanitized_string"}
     assert rec.outputs == {"_sanitized_value": "sanitized_string"}
+
+
+def test_reconstruct_payload_edge_cases() -> None:
+    from coreason_manifest.utils.integrity import reconstruct_payload
+
+    # Test with integer timestamp
+    node_dict = {
+        "node_id": "test",
+        "state": "COMPLETED",
+        "inputs": {},
+        "outputs": {},
+        "duration_ms": 1.0,
+        "timestamp": 1234567890,  # Integer timestamp
+        "previous_hashes": [],
+    }
+    payload = reconstruct_payload(node_dict)
+    assert payload["timestamp"] == "1234567890"
+
+
+def test_dag_integrity_dict_nodes() -> None:
+    # Test verify_merkle_proof with dictionary nodes (mimicking strict NodeExecution structure)
+    from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+
+    # 1. Genesis dict
+    n1_dict = {
+        "node_id": "n1",
+        "state": "COMPLETED",
+        "inputs": {},
+        "outputs": {},
+        "timestamp": "2023-01-01T00:00:00",
+        "duration_ms": 1.0,
+        "previous_hashes": [],
+    }
+    # Compute execution_hash for it
+    payload_n1 = reconstruct_payload(n1_dict)
+    n1_dict["execution_hash"] = compute_hash(payload_n1)
+
+    # 2. Child dict
+    n2_dict = {
+        "node_id": "n2",
+        "state": "COMPLETED",
+        "inputs": {},
+        "outputs": {},
+        "timestamp": "2023-01-01T00:00:01",
+        "duration_ms": 1.0,
+        "previous_hashes": [n1_dict["execution_hash"]],
+    }
+    payload_n2 = reconstruct_payload(n2_dict)
+    n2_dict["execution_hash"] = compute_hash(payload_n2)
+
+    assert verify_merkle_proof([n1_dict, n2_dict]) is True
+
+
+def test_dag_child_links_to_trusted_root() -> None:
+    # Test a strict mode child node linking to trusted root
+    from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+
+    root_hash = "trusted_root_hash_value"
+
+    # Child node linking to root_hash
+    n1_dict = {
+        "node_id": "n1",
+        "state": "COMPLETED",
+        "inputs": {},
+        "outputs": {},
+        "timestamp": "2023-01-01T00:00:00",
+        "duration_ms": 1.0,
+        "previous_hashes": [root_hash],
+    }
+    payload_n1 = reconstruct_payload(n1_dict)
+    n1_dict["execution_hash"] = compute_hash(payload_n1)
+
+    assert verify_merkle_proof([n1_dict], trusted_root_hash=root_hash) is True
