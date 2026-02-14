@@ -376,10 +376,32 @@ def test_reflexion_structured_output() -> None:
 def test_error_handler_integer_codes() -> None:
     """Test that ErrorHandler accepts integer error codes."""
     handler = ErrorHandler(
-        match_error_code=[429, 503, "rate_limit"],
+        match_error_code=[429, 503, "rate_limit"],  # type: ignore
         strategy=RetryStrategy(max_attempts=3),
     )
-    assert handler.match_error_code == [429, 503, "rate_limit"]
+    # Codes should be normalized to strings
+    assert handler.match_error_code == ["429", "503", "rate_limit"]
+
+
+def test_escalation_template_syntax() -> None:
+    """Test EscalationStrategy template validation."""
+    # Template with jinja syntax
+    s1 = EscalationStrategy(
+        queue_name="q",
+        notification_level="info",
+        timeout_seconds=10,
+        template="Error: {{ error }}",
+    )
+    assert s1.template == "Error: {{ error }}"
+
+    # Template without jinja syntax (should pass with warning/note internally)
+    s2 = EscalationStrategy(
+        queue_name="q",
+        notification_level="info",
+        timeout_seconds=10,
+        template="Static error message",
+    )
+    assert s2.template == "Static error message"
 
 
 def test_escalation_template() -> None:

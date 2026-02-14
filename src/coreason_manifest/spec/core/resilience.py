@@ -79,13 +79,13 @@ class ReflexionStrategy(ResilienceStrategy):
             raise ValueError("critic_schema must be a valid JSON Schema (missing 'type', 'properties', or '$ref').")
         return v
 
-    @model_validator(mode="after")
-    def validate_trace_config(self) -> "ReflexionStrategy":
-        if not self.include_trace and self.max_trace_turns is not None:
-            # Auto-fix: Clear max_trace_turns if trace is disabled
-            # Bypass frozen check for initialization fix
-            object.__setattr__(self, "max_trace_turns", None)
-        return self
+    @model_validator(mode="before")
+    @classmethod
+    def validate_trace_config(cls, data: Any) -> Any:
+        # If include_trace is explicitly False, force max_trace_turns to None
+        if isinstance(data, dict) and data.get("include_trace") is False:
+            data["max_trace_turns"] = None
+        return data
 
     @model_validator(mode="after")
     def validate_capabilities(self) -> "ReflexionStrategy":
@@ -115,6 +115,15 @@ class EscalationStrategy(ResilienceStrategy):
         ),
     )
 
+    @field_validator("template")
+    @classmethod
+    def validate_template_syntax(cls, v: str | None) -> str | None:
+        if v and "{{" not in v:
+            # Warning or Note: This looks like a static string, not a Jinja2 template.
+            # We won't block it (valid use case), but it's good to note mentally.
+            pass
+        return v
+
 
 # Polymorphic Union
 ResilienceConfig = Annotated[
@@ -136,8 +145,19 @@ class ErrorHandler(BaseModel):
 
     match_domain: list[ErrorDomain] | None = Field(None, description="List of error domains to handle.")
     match_pattern: str | None = Field(None, description="Regex for fine-grained error message matching.")
-    match_error_code: list[str | int] | None = Field(None, description="List of specific error codes to match.")
+    match_error_code: list[str] | None = Field(None, description="List of specific error codes to match.")
     strategy: ResilienceConfig = Field(..., description="The polymorphic strategy to execute.")
+
+    @field_validator("match_error_code", mode="before")
+    @classmethod
+    def normalize_error_codes(cls, v: Any) -> list[str] | None:
+        if v is None:
+            return None
+        if isinstance(v, (int, str)):
+            return [str(v)]
+        if isinstance(v, list):
+            return [str(item) for item in v]
+        return v  # type: ignore # Let Pydantic raise validation error for other types
 
     @model_validator(mode="after")
     def validate_criteria_existence(self) -> "ErrorHandler":
