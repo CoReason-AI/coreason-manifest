@@ -23,6 +23,7 @@ class ResilienceStrategy(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    name: str | None = Field(None, description="Human-readable ID for this strategy (e.g. 'gpt4-rate-limit-handler').")
     trace_activation: bool = Field(True, description="Emit telemetry event when this strategy triggers.")
 
 
@@ -34,6 +35,9 @@ class RetryStrategy(ResilienceStrategy):
     max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
     backoff_factor: float = Field(2.0, description="Exponential backoff multiplier.")
     initial_delay_seconds: float = Field(1.0, description="Initial wait time.")
+    max_delay_seconds: float = Field(
+        60.0, description="Ceiling for the backoff calculation (e.g., never sleep more than 60s)."
+    )
     jitter: bool = Field(True, description="Add random jitter to delay.")
 
 
@@ -55,6 +59,9 @@ class ReflexionStrategy(ResilienceStrategy):
     critic_model: ModelRef = Field(..., description="The model used to analyze the error.")
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: bool = Field(True, description="Whether to feed the execution trace to the critic.")
+    max_trace_turns: int | None = Field(
+        3, description="Limit the history feed to the Critic to the last N turns. Prevents context overflow."
+    )
     critic_schema: dict[str, Any] | None = Field(
         None,
         description=(
@@ -124,9 +131,18 @@ class SupervisionPolicy(BaseModel):
 
     Note: Local supervision executes *before* global governance circuit breakers trip,
     unless the error is a GovernanceViolation.
+
+    Evaluation Logic:
+    1. Iterate through 'handlers' list in order (Index 0 -> N).
+    2. First handler to match the error triggers its strategy.
+    3. If no handlers match:
+       - If 'default_strategy' is set, execute it.
+       - If 'default_strategy' is None, raise the original exception.
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     handlers: list[ErrorHandler] = Field(..., description="An ordered list of specific rules.")
-    default_strategy: ResilienceConfig = Field(..., description="Catch-all strategy (usually Escalation or Retry).")
+    default_strategy: ResilienceConfig | None = Field(
+        None, description="Catch-all strategy. If None, unhandled errors bubble up."
+    )

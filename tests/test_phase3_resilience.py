@@ -390,3 +390,41 @@ def test_escalation_template() -> None:
         template="Agent failed at step {{step_id}}: {{error}}",
     )
     assert strategy.template == "Agent failed at step {{step_id}}: {{error}}"
+
+
+def test_reflexion_max_trace_turns() -> None:
+    """Test that ReflexionStrategy has max_trace_turns."""
+    strategy = ReflexionStrategy(
+        max_attempts=3,
+        critic_model="gpt-4",
+        critic_prompt="Fix",
+        include_trace=True,
+        max_trace_turns=5,
+    )
+    assert strategy.max_trace_turns == 5
+
+
+def test_retry_max_delay_seconds() -> None:
+    """Test that RetryStrategy has max_delay_seconds."""
+    strategy = RetryStrategy(
+        max_attempts=3,
+        backoff_factor=2.0,
+        initial_delay_seconds=1.0,
+        max_delay_seconds=30.0,
+    )
+    assert strategy.max_delay_seconds == 30.0
+
+
+def test_supervision_optional_default_strategy() -> None:
+    """Test that SupervisionPolicy default_strategy is optional."""
+    policy = SupervisionPolicy(
+        handlers=[ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=RetryStrategy(max_attempts=3))],
+        default_strategy=None,
+    )
+    assert policy.default_strategy is None
+
+
+def test_strategy_name() -> None:
+    """Test that ResilienceStrategy has a name field."""
+    strategy = RetryStrategy(max_attempts=3, name="my-retry-strategy")
+    assert strategy.name == "my-retry-strategy"
