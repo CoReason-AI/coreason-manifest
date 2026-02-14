@@ -156,7 +156,13 @@ class BaseFlowBuilder:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
         self._tool_packs: dict[str, ToolPack] = {}
+        self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
+
+    def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
+        """Registers a reusable supervision policy."""
+        self._supervision_templates[template_id] = policy
+        return self
 
     def define_profile(
         self,
@@ -200,6 +206,7 @@ class BaseFlowBuilder:
         return FlowDefinitions(
             profiles=self._profiles,
             tool_packs=self._tool_packs,
+            supervision_templates=self._supervision_templates,
         )
 
 

@@ -21,7 +21,7 @@ class Node(BaseModel):
 
     id: str
     metadata: dict[str, Any]
-    supervision: SupervisionPolicy | None
+    supervision: SupervisionPolicy | str | None
     presentation: PresentationHints | None = Field(None, description="UI rendering hints.")
     type: str
 

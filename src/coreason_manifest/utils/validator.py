@@ -179,6 +179,11 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     if not policy:
         return errors
 
+    # If policy is a string reference, validation happens in validate_referential_integrity.
+    # We can't validate the content of the referenced policy here without access to FlowDefinitions.
+    if isinstance(policy, str):
+        return errors
+
     # Collect all strategies from handlers and default
     strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
     if policy.default_strategy:
@@ -214,7 +219,8 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
     adj: dict[str, list[str]] = {n.id: [] for n in nodes}
 
     for node in nodes:
-        if not node.supervision:
+        if not node.supervision or isinstance(node.supervision, str):
+            # Skip cycle detection for referenced policies (cannot resolve here)
             continue
 
         policy = node.supervision

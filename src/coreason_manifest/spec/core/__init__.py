@@ -49,6 +49,7 @@ from coreason_manifest.spec.core.nodes import (
     SwitchNode,
 )
 from coreason_manifest.spec.core.resilience import (
+    ErrorDomain,
     ErrorHandler,
     EscalationStrategy,
     FallbackStrategy,
@@ -79,6 +80,7 @@ __all__ = [
     "Edge",
     "EmergenceInspectorNode",
     "EnsembleReasoning",
+    "ErrorDomain",
     "ErrorHandler",
     "EscalationStrategy",
     "FallbackStrategy",
