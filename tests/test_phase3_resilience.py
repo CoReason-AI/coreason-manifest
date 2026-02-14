@@ -428,3 +428,35 @@ def test_strategy_name() -> None:
     """Test that ResilienceStrategy has a name field."""
     strategy = RetryStrategy(max_attempts=3, name="my-retry-strategy")
     assert strategy.name == "my-retry-strategy"
+
+
+def test_supervision_max_cumulative_actions() -> None:
+    """Test that SupervisionPolicy has max_cumulative_actions."""
+    policy = SupervisionPolicy(
+        handlers=[],
+        default_strategy=RetryStrategy(max_attempts=3),
+        max_cumulative_actions=20,
+    )
+    assert policy.max_cumulative_actions == 20
+
+
+def test_timeout_error_domain() -> None:
+    """Test using the TIMEOUT error domain."""
+    handler = ErrorHandler(
+        match_domain=[ErrorDomain.TIMEOUT],
+        strategy=RetryStrategy(max_attempts=3),
+    )
+    assert handler.match_domain is not None
+    assert ErrorDomain.TIMEOUT in handler.match_domain
+
+
+def test_reflexion_invalid_schema() -> None:
+    """Test that ReflexionStrategy validates JSON schema."""
+    with pytest.raises(ValidationError, match="valid JSON Schema"):
+        ReflexionStrategy(
+            max_attempts=3,
+            critic_model="gpt-4",
+            critic_prompt="Fix",
+            include_trace=True,
+            critic_schema={"invalid": "schema"},  # Missing type/properties/$ref
+        )

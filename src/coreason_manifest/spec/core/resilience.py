@@ -16,6 +16,7 @@ class ErrorDomain(StrEnum):
     CONTEXT = "context"
     DATA = "data"
     RESOURCE = "resource"
+    TIMEOUT = "timeout"
 
 
 class ResilienceStrategy(BaseModel):
@@ -70,6 +71,14 @@ class ReflexionStrategy(ResilienceStrategy):
         ),
     )
 
+    @field_validator("critic_schema")
+    @classmethod
+    def validate_json_schema(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        # Minimal check for JSON Schema validity
+        if v is not None and "type" not in v and "properties" not in v and "$ref" not in v:
+            raise ValueError("critic_schema must be a valid JSON Schema (missing 'type', 'properties', or '$ref').")
+        return v
+
 
 class EscalationStrategy(ResilienceStrategy):
     """Human-in-the-Loop focus: Pause and wait for intervention."""
@@ -81,7 +90,10 @@ class EscalationStrategy(ResilienceStrategy):
     timeout_seconds: int = Field(..., description="Max wait for human intervention.")
     template: str | None = Field(
         None,
-        description="Jinja2 template for the human notification (e.g. 'Agent failed at step {{step_id}}: {{error}}').",
+        description=(
+            "Jinja2 template for the human notification. "
+            "Available context: {{ node_id }}, {{ error_type }}, {{ error_message }}, {{ inputs }}, {{ history }}."
+        ),
     )
 
 
@@ -145,4 +157,11 @@ class SupervisionPolicy(BaseModel):
     handlers: list[ErrorHandler] = Field(..., description="An ordered list of specific rules.")
     default_strategy: ResilienceConfig | None = Field(
         None, description="Catch-all strategy. If None, unhandled errors bubble up."
+    )
+    max_cumulative_actions: int = Field(
+        10,
+        description=(
+            "Total number of recovery actions (retries + reflexions + fallbacks) "
+            "allowed for this node before hard failure."
+        ),
     )
