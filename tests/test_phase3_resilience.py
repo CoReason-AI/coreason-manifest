@@ -545,12 +545,12 @@ def test_reflexion_capability_requirement() -> None:
     # Case 1: Missing json_mode
     model_without_json = ModelCriteria(capabilities=["vision"])
     with pytest.raises(ValidationError, match="does not explicitly require 'json_mode'"):
-            ReflexionStrategy(
-                max_attempts=3,
-                critic_model=model_without_json,
-                critic_prompt="Fix",
-                critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
-            )
+        ReflexionStrategy(
+            max_attempts=3,
+            critic_model=model_without_json,
+            critic_prompt="Fix",
+            critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+        )
 
     # Case 2: Has json_mode
     model_with_json = ModelCriteria(capabilities=["json_mode"])

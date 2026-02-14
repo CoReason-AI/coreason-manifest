@@ -30,11 +30,10 @@ class ResilienceStrategy(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name_slug(cls, v: str | None) -> str | None:
-        if v is not None:
-            if not re.match(r"^[a-z0-9_\-]+$", v):
-                raise ValueError(
-                    "Strategy name must be lowercase, alphanumeric, with underscores or dashes only (metric-safe)."
-                )
+        if v is not None and not re.match(r"^[a-z0-9_\-]+$", v):
+            raise ValueError(
+                "Strategy name must be lowercase, alphanumeric, with underscores or dashes only (metric-safe)."
+            )
         return v
 
 
@@ -182,11 +181,7 @@ class ErrorHandler(BaseModel):
     def validate_security_policy(self) -> "ErrorHandler":
         # Security Policy: Never blindly retry security violations.
         # Allow Reflexion (Correction) or Escalate (Human Review), but forbid Retry.
-        if (
-            self.match_domain
-            and ErrorDomain.SECURITY in self.match_domain
-            and self.strategy.type == "retry"
-        ):
+        if self.match_domain and ErrorDomain.SECURITY in self.match_domain and self.strategy.type == "retry":
             raise ValueError(
                 "Security Policy Violation: 'RetryStrategy' cannot be used with 'SECURITY' domain. "
                 "Use 'ReflexionStrategy' (to fix the violation) or 'EscalationStrategy' instead."
