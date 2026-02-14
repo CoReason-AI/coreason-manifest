@@ -27,6 +27,16 @@ class ResilienceStrategy(BaseModel):
     name: str | None = Field(None, description="Human-readable ID for this strategy (e.g. 'gpt4-rate-limit-handler').")
     trace_activation: bool = Field(True, description="Emit telemetry event when this strategy triggers.")
 
+    @field_validator("name")
+    @classmethod
+    def validate_name_slug(cls, v: str | None) -> str | None:
+        if v is not None:
+            if not re.match(r"^[a-z0-9_\-]+$", v):
+                raise ValueError(
+                    "Strategy name must be lowercase, alphanumeric, with underscores or dashes only (metric-safe)."
+                )
+        return v
+
 
 class RetryStrategy(ResilienceStrategy):
     """Network/System focus: Retry with backoff."""
@@ -75,8 +85,11 @@ class ReflexionStrategy(ResilienceStrategy):
     @classmethod
     def validate_json_schema(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
         # Minimal check for JSON Schema validity
-        if v is not None and "type" not in v and "properties" not in v and "$ref" not in v:
-            raise ValueError("critic_schema must be a valid JSON Schema (missing 'type', 'properties', or '$ref').")
+        if v is not None:
+            if "type" not in v and "properties" not in v and "$ref" not in v:
+                raise ValueError("critic_schema must be a valid JSON Schema (missing 'type', 'properties', or '$ref').")
+            if v.get("type") == "object" and "properties" not in v:
+                raise ValueError("Invalid JSON Schema: 'properties' are required when type is 'object'.")
         return v
 
     @model_validator(mode="before")
@@ -163,6 +176,21 @@ class ErrorHandler(BaseModel):
     def validate_criteria_existence(self) -> "ErrorHandler":
         if not any([self.match_domain, self.match_pattern, self.match_error_code]):
             raise ValueError("ErrorHandler must specify at least one matching criterion (domain, pattern, or code).")
+        return self
+
+    @model_validator(mode="after")
+    def validate_security_policy(self) -> "ErrorHandler":
+        # Security Policy: Never blindly retry security violations.
+        # Allow Reflexion (Correction) or Escalate (Human Review), but forbid Retry.
+        if (
+            self.match_domain
+            and ErrorDomain.SECURITY in self.match_domain
+            and self.strategy.type == "retry"
+        ):
+            raise ValueError(
+                "Security Policy Violation: 'RetryStrategy' cannot be used with 'SECURITY' domain. "
+                "Use 'ReflexionStrategy' (to fix the violation) or 'EscalationStrategy' instead."
+            )
         return self
 
     @field_validator("match_pattern")

@@ -545,12 +545,12 @@ def test_reflexion_capability_requirement() -> None:
     # Case 1: Missing json_mode
     model_without_json = ModelCriteria(capabilities=["vision"])
     with pytest.raises(ValidationError, match="does not explicitly require 'json_mode'"):
-        ReflexionStrategy(
-            max_attempts=3,
-            critic_model=model_without_json,
-            critic_prompt="Fix",
-            critic_schema={"type": "object"},
-        )
+            ReflexionStrategy(
+                max_attempts=3,
+                critic_model=model_without_json,
+                critic_prompt="Fix",
+                critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+            )
 
     # Case 2: Has json_mode
     model_with_json = ModelCriteria(capabilities=["json_mode"])
@@ -558,6 +558,50 @@ def test_reflexion_capability_requirement() -> None:
         max_attempts=3,
         critic_model=model_with_json,
         critic_prompt="Fix",
-        critic_schema={"type": "object"},
+        critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
     )
     assert strategy.critic_model == model_with_json
+
+
+def test_security_retry_forbidden() -> None:
+    """Test that SECURITY domain cannot use RetryStrategy."""
+    with pytest.raises(ValidationError, match="Security Policy Violation"):
+        ErrorHandler(
+            match_domain=[ErrorDomain.SECURITY],
+            strategy=RetryStrategy(max_attempts=3),
+        )
+
+
+def test_strategy_name_slug() -> None:
+    """Test that strategy names must be slug-formatted."""
+    # Valid name
+    RetryStrategy(max_attempts=3, name="valid_name")
+    RetryStrategy(max_attempts=3, name="valid-name-123")
+
+    # Invalid names
+    with pytest.raises(ValidationError, match="metric-safe"):
+        RetryStrategy(max_attempts=3, name="Invalid Name")
+    with pytest.raises(ValidationError, match="metric-safe"):
+        RetryStrategy(max_attempts=3, name="invalid/name")
+
+
+def test_reflexion_schema_object_properties() -> None:
+    """Test that object type schemas require properties."""
+    # Valid schema
+    ReflexionStrategy(
+        max_attempts=3,
+        critic_model="gpt-4",
+        critic_prompt="Fix",
+        include_trace=True,
+        critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+    )
+
+    # Invalid schema (missing properties for object)
+    with pytest.raises(ValidationError, match="properties' are required"):
+        ReflexionStrategy(
+            max_attempts=3,
+            critic_model="gpt-4",
+            critic_prompt="Fix",
+            include_trace=True,
+            critic_schema={"type": "object"},
+        )
