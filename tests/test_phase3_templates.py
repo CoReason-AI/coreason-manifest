@@ -51,3 +51,19 @@ def test_missing_supervision_template() -> None:
 
     with pytest.raises(ValueError, match="references undefined supervision template ID 'missing-policy'"):
         lf.build()
+
+
+def test_malformed_supervision_reference() -> None:
+    lf = NewLinearFlow(name="Malformed Ref Flow")
+
+    node = AgentNode(
+        id="node1",
+        metadata={},
+        supervision="invalid-string",
+        profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
+        tools=[],
+    )
+    lf.add_step(node)
+
+    with pytest.raises(ValueError, match="invalid supervision reference"):
+        lf.build()

@@ -127,8 +127,9 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
                 if ref_id not in valid_policies:
                     raise ValueError(f"Node '{node.id}' references undefined supervision template ID '{ref_id}'")
             else:
-                # Should be caught by type checker or node validator, but good to enforce here
-                pass
+                raise ValueError(
+                    f"Node '{node.id}' has invalid supervision reference '{node.supervision}'. Must start with 'ref:'"
+                )
 
         if isinstance(node, AgentNode):
             # 1. Profile Check
