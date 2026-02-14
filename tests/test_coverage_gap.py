@@ -25,7 +25,7 @@ from coreason_manifest.utils.integrity import (
     verify_merkle_proof,
 )
 from coreason_manifest.utils.loader import load_flow_from_file
-from coreason_manifest.utils.v2.io import ManifestIO
+from coreason_manifest.utils.io import ManifestIO
 
 
 # --- Integrity Coverage ---

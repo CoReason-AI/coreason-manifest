@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from coreason_manifest.utils.v2.io import ManifestIO, SecurityViolationError
+from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
 
 @pytest.fixture

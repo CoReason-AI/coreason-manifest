@@ -11,7 +11,7 @@
 from pathlib import Path
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.utils.v2.io import ManifestIO
+from coreason_manifest.utils.io import ManifestIO
 
 
 def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
