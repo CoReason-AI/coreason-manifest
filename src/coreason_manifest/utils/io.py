@@ -1,0 +1,92 @@
+# src/coreason_manifest/utils/io.py
+
+import errno
+import os
+import stat
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+
+class SecurityViolationError(Exception):
+    """Raised when a security constraint is violated during IO operations."""
+
+
+class ManifestIO:
+    """
+    A secure file loader that enforces path confinement and permission checks.
+    Acts as a 'Jail' to prevent Path Traversal attacks.
+    """
+
+    def __init__(self, root_dir: Path, allow_external_refs: bool = False):
+        """
+        Initialize the secure loader.
+
+        Args:
+            root_dir: The root directory to confine file access to.
+            allow_external_refs: Whether to allow loading files outside the root directory.
+        """
+        self.jail = root_dir.resolve()
+        self.allow_external = allow_external_refs
+
+    def load(self, path: str) -> dict[str, Any]:
+        """
+        Load a YAML/JSON file securely.
+
+        Args:
+            path: Relative path to the file within the jail.
+
+        Returns:
+            The parsed dictionary content.
+
+        Raises:
+            SecurityViolationError: If path traversal or unsafe permissions are detected.
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the file content is invalid.
+        """
+        # Resolve path relative to jail
+        file_path = Path(path)
+        target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
+
+        # 1. Path Traversal Check
+        # Ensure the resolved path starts with the jail path
+        if not self.allow_external:
+            try:
+                target_path.relative_to(self.jail)
+            except ValueError as e:
+                raise SecurityViolationError(f"Path Traversal Detected: {path}") from e
+
+        # 2. TOCTOU Mitigation: Open with O_NOFOLLOW and check FD
+        try:
+            # Use O_NOFOLLOW to ensure we don't follow symlinks created after resolve()
+            flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+            fd = os.open(str(target_path), flags)
+        except OSError as e:
+            if e.errno == getattr(errno, "ELOOP", 40):
+                raise SecurityViolationError(f"Symlink loop detected (TOCTOU attack attempt): {path}") from e
+            if e.errno == errno.ENOENT:
+                raise FileNotFoundError(f"Manifest file not found: {path}") from e
+            raise e
+
+        try:
+            # 3. Check Permissions on FD
+            if os.name == "posix":
+                st = os.fstat(fd)
+                if st.st_mode & stat.S_IWOTH:
+                    raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
+
+            # 4. Convert to File Object
+            f = os.fdopen(fd, "r", encoding="utf-8")
+        except Exception:
+            os.close(fd)
+            raise
+
+        try:
+            with f:
+                content = yaml.safe_load(f)
+                if not isinstance(content, dict):
+                    raise ValueError("Manifest content must be a dictionary/object.")
+                return content
+        except yaml.YAMLError as e:
+            raise ValueError(f"Failed to parse manifest file: {e}") from e

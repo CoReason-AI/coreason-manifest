@@ -43,13 +43,28 @@ class FlowMetadata(BaseModel):
     tags: list[str]
 
 
+class DataSchema(BaseModel):
+    """
+    Strict data contract for inputs/outputs.
+    Mandate 5: Contract-First Data I/O.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    schema_ref: str | None = Field(None, description="URI to JSON Schema")
+    json_schema: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Full JSON Schema (Draft 7) definition for validation.",
+    )
+
+
 class FlowInterface(BaseModel):
     """Input/Output JSON schema contracts."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    inputs: dict[str, Any]
-    outputs: dict[str, Any]
+    inputs: DataSchema
+    outputs: DataSchema
 
 
 class VariableDef(BaseModel):
@@ -114,10 +129,10 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
     valid_policies = definitions.supervision_templates.keys() if definitions else set()
 
     # SOTA: Create a set of all available tools from registered packs
-    valid_tools = set()
+    valid_tools: set[str] = set()
     if definitions and definitions.tool_packs:
         for pack in definitions.tool_packs.values():
-            valid_tools.update(pack.tools)
+            valid_tools.update(t.name for t in pack.tools)
 
     for node in nodes:
         # Global Supervision Template Check

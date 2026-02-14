@@ -9,19 +9,18 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from pathlib import Path
-from typing import Any
-
-import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.utils.io import ManifestIO
 
 
-def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
+def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow | GraphFlow:
     """
     Load a flow manifest from a YAML or JSON file.
 
     Args:
         path: Path to the manifest file.
+        root_dir: Optional root directory for path confinement. Defaults to file's parent.
 
     Returns:
         LinearFlow | GraphFlow: The parsed flow object.
@@ -29,20 +28,19 @@ def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
     Raises:
         ValueError: If the file content is invalid or the kind is unknown.
         FileNotFoundError: If the file does not exist.
+        SecurityViolationError: If path traversal or unsafe permissions are detected.
     """
-    file_path = Path(path)
-    if not file_path.exists():
-        raise FileNotFoundError(f"Manifest file not found: {path}")
+    file_path = Path(path).resolve()
+    jail_root = root_dir if root_dir else file_path.parent
 
-    with file_path.open("r", encoding="utf-8") as f:
-        content = f.read()
+    # Initialize secure loader confined to the file's directory
+    loader = ManifestIO(root_dir=jail_root)
 
     try:
-        # yaml.safe_load parses both YAML and JSON
-        # Validated: No regex checks or FORBIDDEN_PATTERNS (Security Theater removed)
-        data: dict[str, Any] = yaml.safe_load(content)
-    except yaml.YAMLError as e:
-        raise ValueError(f"Failed to parse manifest file: {e}") from e
+        data = loader.load(file_path.name)
+    except Exception as e:
+        # Re-raise known exceptions or wrap them
+        raise e
 
     if not isinstance(data, dict):
         raise ValueError("Manifest content must be a dictionary/object.")

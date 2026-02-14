@@ -2,6 +2,7 @@ from typing import Any
 
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     Edge,
     FlowInterface,
     FlowMetadata,
@@ -136,7 +137,10 @@ def test_graph_flow_to_mermaid() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -173,7 +177,10 @@ def test_switch_default_path() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -195,7 +202,10 @@ def test_explicit_edge_labels() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -248,7 +258,10 @@ def test_react_flow_output() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -311,7 +324,10 @@ def test_visualizer_coverage_extras() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -350,7 +366,10 @@ def test_visualizer_grouping() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )

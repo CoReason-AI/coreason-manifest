@@ -14,6 +14,6 @@ def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
         A list of dictionaries representing MCP resources.
     """
     return [
-        {"uri": f"mcp://{pack.namespace}/{tool_name}", "name": tool_name, "mimeType": "application/json"}
-        for tool_name in pack.tools
+        {"uri": f"mcp://{pack.namespace}/{tool.name}", "name": tool.name, "mimeType": "application/json"}
+        for tool in pack.tools
     ]

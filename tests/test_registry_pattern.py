@@ -1,6 +1,7 @@
 import pytest
 
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
@@ -100,7 +101,10 @@ def test_graph_flow_definitions() -> None:
     )
 
     metadata = FlowMetadata(name="test-graph", version="1.0", description="test", tags=[])
-    interface = FlowInterface(inputs={}, outputs={})
+    interface = FlowInterface(
+        inputs=DataSchema(json_schema={}),
+        outputs=DataSchema(json_schema={}),
+    )
     graph = Graph(nodes={"agent-1": agent}, edges=[])
 
     flow = GraphFlow(
@@ -201,7 +205,10 @@ def test_tool_integrity_failure_graph() -> None:
             kind="GraphFlow",
             metadata=FlowMetadata(name="fail", version="1", description="", tags=[]),
             definitions=definitions,
-            interface=FlowInterface(inputs={}, outputs={}),
+            interface=FlowInterface(
+                inputs=DataSchema(json_schema={}),
+                outputs=DataSchema(json_schema={}),
+            ),
             blackboard=None,
             graph=graph,
         )

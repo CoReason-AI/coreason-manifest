@@ -5,6 +5,7 @@ from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -104,9 +105,6 @@ def test_linear_switch_bypass_fails() -> None:
 
 def test_linear_missing_node_exception() -> None:
     # Force ValueError in _is_guarded by checking a node not in sequence
-    # (Though logic usually iterates nodes in sequence, so index() always succeeds)
-    # We can manually call _is_guarded to cover the exception block?
-    # Or create a malformed flow where we check a node that isn't in sequence?
     pass
 
 
@@ -185,7 +183,10 @@ def test_graph_unguarded_path() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -206,7 +207,10 @@ def test_graph_guarded_path() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -227,7 +231,10 @@ def test_graph_cycle_no_entry() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -422,7 +429,10 @@ def test_graph_traversal_unguarded() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=graph,
     )

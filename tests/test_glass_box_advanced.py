@@ -1,4 +1,12 @@
-from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.spec.core.flow import (
+    DataSchema,
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+)
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.utils.diff import ChangeType, ManifestDiff
 from coreason_manifest.utils.mock import MockFactory
@@ -30,7 +38,10 @@ def test_swarm_simulation_expansion() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="SwarmTest", version="1.0", description="T", tags=[]),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         definitions=definitions,
         graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
@@ -63,7 +74,10 @@ def test_deep_diff_granularity() -> None:
     flow_1 = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="DiffTest", version="1.0", description="T", tags=[]),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
         blackboard=None,
         graph=Graph(nodes={"a": node_a}, edges=[]),
     )
