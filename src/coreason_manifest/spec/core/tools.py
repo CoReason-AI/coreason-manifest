@@ -23,7 +23,9 @@ class ToolCapability(BaseModel):
     name: str
     risk_level: Literal["safe", "standard", "critical"] = "standard"
     description: str | None = None
-    requires_approval: bool = False  # From prompt description: "If risk_level == critical, strictly enforce...". Code snippet in prompt showed `requires_approval` too.
+    # From prompt description: "If risk_level == critical, strictly enforce..."
+    # Code snippet in prompt showed `requires_approval` too.
+    requires_approval: bool = False
 
 
 class ToolPack(BaseModel):

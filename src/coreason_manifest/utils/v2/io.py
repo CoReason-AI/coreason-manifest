@@ -8,7 +8,7 @@ from typing import Any
 import yaml
 
 
-class SecurityViolation(Exception):
+class SecurityViolationError(Exception):
     """Raised when a security constraint is violated during IO operations."""
     pass
 
@@ -41,7 +41,7 @@ class ManifestIO:
             The parsed dictionary content.
 
         Raises:
-            SecurityViolation: If path traversal or unsafe permissions are detected.
+            SecurityViolationError: If path traversal or unsafe permissions are detected.
             FileNotFoundError: If the file does not exist.
             ValueError: If the file content is invalid.
         """
@@ -49,18 +49,15 @@ class ManifestIO:
         # Note: If path is absolute, (self.jail / path) will ignore self.jail.
         # We must protect against absolute paths if they are outside jail.
         file_path = Path(path)
-        if file_path.is_absolute():
-            target_path = file_path.resolve()
-        else:
-            target_path = (self.jail / path).resolve()
+        target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
 
         # 1. Path Traversal Check
         # Ensure the resolved path starts with the jail path
         if not self.allow_external:
             try:
                 target_path.relative_to(self.jail)
-            except ValueError:
-                raise SecurityViolation(f"Path Traversal Detected: {path}")
+            except ValueError as e:
+                raise SecurityViolationError(f"Path Traversal Detected: {path}") from e
 
         if not target_path.exists():
             raise FileNotFoundError(f"Manifest file not found: {path}")
@@ -70,7 +67,7 @@ class ManifestIO:
             st = target_path.stat()
             # Check for world-writable (S_IWOTH)
             if st.st_mode & stat.S_IWOTH:
-                raise SecurityViolation(f"Unsafe Permissions: {path} is world-writable.")
+                raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
 
         try:
             with target_path.open("r", encoding="utf-8") as f:

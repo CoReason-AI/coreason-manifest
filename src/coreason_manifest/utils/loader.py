@@ -28,7 +28,7 @@ def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
     Raises:
         ValueError: If the file content is invalid or the kind is unknown.
         FileNotFoundError: If the file does not exist.
-        SecurityViolation: If path traversal or unsafe permissions are detected.
+        SecurityViolationError: If path traversal or unsafe permissions are detected.
     """
     file_path = Path(path).resolve()
     root_dir = file_path.parent

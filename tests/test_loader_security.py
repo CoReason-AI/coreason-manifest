@@ -2,7 +2,7 @@ import os
 import stat
 import pytest
 from pathlib import Path
-from coreason_manifest.utils.v2.io import ManifestIO, SecurityViolation
+from coreason_manifest.utils.v2.io import ManifestIO, SecurityViolationError
 
 @pytest.fixture
 def jail_dir(tmp_path: Path) -> Path:
@@ -24,11 +24,11 @@ def test_path_traversal_detection(jail_dir: Path) -> None:
     loader = ManifestIO(root_dir=jail_dir)
 
     # Try relative path traversal
-    with pytest.raises(SecurityViolation, match="Path Traversal Detected"):
+    with pytest.raises(SecurityViolationError, match="Path Traversal Detected"):
         loader.load("../outside.yaml")
 
     # Try absolute path outside jail
-    with pytest.raises(SecurityViolation, match="Path Traversal Detected"):
+    with pytest.raises(SecurityViolationError, match="Path Traversal Detected"):
         loader.load(str(outside.resolve()))
 
 def test_posix_permissions(jail_dir: Path) -> None:
@@ -43,5 +43,5 @@ def test_posix_permissions(jail_dir: Path) -> None:
     unsafe_file.chmod(mode | stat.S_IWOTH)
 
     loader = ManifestIO(root_dir=jail_dir)
-    with pytest.raises(SecurityViolation, match="Unsafe Permissions"):
+    with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
         loader.load("unsafe.yaml")
