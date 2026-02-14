@@ -18,6 +18,7 @@ from coreason_manifest.spec.core.engines import (
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
+    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -285,7 +286,10 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []
         # Defaults
-        self.interface = FlowInterface(inputs={}, outputs={})
+        self.interface = FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        )
         self.blackboard: Blackboard | None = None
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
@@ -336,9 +340,12 @@ class NewGraphFlow(BaseFlowBuilder):
         self._edges.append(Edge(source=source, target=target, condition=condition))
         return self
 
-    def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
+    def set_interface(self, inputs: dict[str, str], outputs: dict[str, str]) -> "NewGraphFlow":
         """Defines the Input/Output contract for the Flow."""
-        self.interface = FlowInterface(inputs=inputs, outputs=outputs)
+        self.interface = FlowInterface(
+            inputs=DataSchema(fields=inputs, required=list(inputs.keys())),
+            outputs=DataSchema(fields=outputs, required=list(outputs.keys())),
+        )
         return self
 
     def set_blackboard(self, variables: dict[str, VariableDef], persistence: bool = False) -> "NewGraphFlow":

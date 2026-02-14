@@ -34,7 +34,7 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     # Tools: Generate function definitions for every tool listed in node.tools found in tool_packs
     available_tools = set()
     for pack in tool_packs:
-        available_tools.update(pack.tools)
+        available_tools.update(t.name for t in pack.tools)
 
     tools_definitions = [
         {"type": "function", "function": {"name": tool_name}}

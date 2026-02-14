@@ -2,7 +2,59 @@
 
 import hashlib
 import json
-from typing import Any
+from datetime import datetime, timezone
+from typing import Any, TypedDict
+
+
+def to_canonical_timestamp(dt: datetime) -> str:
+    """
+    Converts a datetime to a strict UTC string format: YYYY-MM-DDTHH:MM:SSZ
+    """
+    if dt.tzinfo is None:
+        # Assume UTC if naive
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    # Convert to UTC
+    dt_utc = dt.astimezone(timezone.utc)
+
+    # Format as YYYY-MM-DDTHH:MM:SSZ (no microseconds)
+    return dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class MerkleNode(TypedDict):
+    """
+    Standard structure for verifiable execution blocks.
+    """
+    execution_hash: str
+    previous_hashes: list[str]
+
+
+def _recursive_sort_and_sanitize(obj: Any) -> Any:
+    """
+    Recursively sorts dictionary keys and sanitizes values for consistent hashing.
+    - Dicts: Sorted by key. None values removed.
+    - Lists: Processed recursively.
+    - Datetime: Converted to canonical string.
+    - Models: Converted to dicts.
+    """
+    if isinstance(obj, dict):
+        return {
+            k: _recursive_sort_and_sanitize(v)
+            for k, v in sorted(obj.items())
+            if v is not None
+        }
+    elif isinstance(obj, (list, tuple)):
+        return [_recursive_sort_and_sanitize(x) for x in obj]
+    elif isinstance(obj, datetime):
+        return to_canonical_timestamp(obj)
+    elif hasattr(obj, "model_dump"):
+        # Pydantic v2
+        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True))
+    elif hasattr(obj, "dict"):
+        # Pydantic v1
+        return _recursive_sort_and_sanitize(obj.dict(exclude_none=True))
+    else:
+        return obj
 
 
 def compute_hash(obj: Any) -> str:
@@ -14,17 +66,10 @@ def compute_hash(obj: Any) -> str:
         return str(obj.compute_hash())
 
     # Standardize serialization for hashing
-    if hasattr(obj, "model_dump_json"):
-        # Pydantic v2
-        data = obj.model_dump_json(exclude_none=True)
-    elif hasattr(obj, "json"):
-        # Pydantic v1 or similar
-        data = obj.json()
-    elif isinstance(obj, dict):
-        data = json.dumps(obj, sort_keys=True, default=str)
-    else:
-        # Fallback
-        data = str(obj)
+    sanitized = _recursive_sort_and_sanitize(obj)
+
+    # json.dumps with sort_keys=True ensures consistent ordering (redundant but safe)
+    data = json.dumps(sanitized, sort_keys=True, default=str)
 
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
@@ -38,10 +83,16 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
 
     # Replicate recorder.py payload construction
     timestamp = d.get("timestamp")
-    if timestamp and hasattr(timestamp, "isoformat"):
-        timestamp = timestamp.isoformat()
-    elif timestamp and not isinstance(timestamp, str):
-        timestamp = str(timestamp)
+    if timestamp:
+        if isinstance(timestamp, datetime):
+            timestamp = to_canonical_timestamp(timestamp)
+        elif isinstance(timestamp, str):
+            # Already a string, assume canonical or close enough?
+            # Ideally we parse and re-canonicalize if we want strictness,
+            # but if it's already stored as string in DB, use as is.
+            pass
+        else:
+            timestamp = str(timestamp)
 
     return {
         "node_id": d.get("node_id"),
