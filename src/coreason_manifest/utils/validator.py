@@ -181,7 +181,8 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
 
     # Collect all strategies from handlers and default
     strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
-    strategies.append(policy.default_strategy)
+    if policy.default_strategy:
+        strategies.append(policy.default_strategy)
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -218,7 +219,8 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
 
         policy = node.supervision
         strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
-        strategies.append(policy.default_strategy)
+        if policy.default_strategy:
+            strategies.append(policy.default_strategy)
 
         for strategy in strategies:
             if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
