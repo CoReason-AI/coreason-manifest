@@ -3,6 +3,12 @@
 from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
+from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    FallbackStrategy,
+    ReflexionStrategy,
+    ResilienceStrategy,
+)
 from coreason_manifest.spec.core.tools import ToolPack
 
 
@@ -33,6 +39,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids))
+
+    errors.extend(_validate_fallback_cycles(nodes))
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
@@ -167,16 +175,97 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
 
 def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     errors: list[str] = []
-    if node.supervision:
-        if node.supervision.strategy == "degrade" and node.supervision.default_payload is None:
-            errors.append(f"Node '{node.id}' is set to 'degrade' but missing 'default_payload'.")
+    policy = node.supervision
+    if not policy:
+        return errors
 
-        if node.supervision.backoff_factor < 1.0:
-            errors.append(f"Supervision Error: Node '{node.id}' backoff_factor must be >= 1.0.")
+    # If policy is a string reference, validation happens in validate_referential_integrity.
+    # We can't validate the content of the referenced policy here without access to FlowDefinitions.
+    if isinstance(policy, str):
+        return errors
 
-        if node.supervision.fallback and node.supervision.fallback not in valid_ids:
+    # Collect all strategies from handlers and default
+    strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
+    if policy.default_strategy:
+        strategies.append(policy.default_strategy)
+
+    for strategy in strategies:
+        if isinstance(strategy, ReflexionStrategy) and node.type not in (
+            "agent",
+            "inspector",
+            "emergence_inspector",
+            "swarm",
+            "planner",
+        ):
             errors.append(
-                f"Supervision Error: Node '{node.id}' fallback points to missing ID '{node.supervision.fallback}'."
+                f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. "
+                "Only Agent/Inspector/Swarm/Planner nodes support reflexion."
             )
+
+        if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id not in valid_ids:
+            errors.append(
+                f"Resilience Error: Node '{node.id}' fallback points to missing ID '{strategy.fallback_node_id}'."
+            )
+
+        if isinstance(strategy, EscalationStrategy) and not strategy.queue_name:
+            errors.append(f"Resilience Error: Node '{node.id}' uses EscalationStrategy with empty queue_name.")
+
+    return errors
+
+
+def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
+    errors: list[str] = []
+    # Build adjacency list for fallback references
+    adj: dict[str, list[str]] = {n.id: [] for n in nodes}
+
+    for node in nodes:
+        if not node.supervision or isinstance(node.supervision, str):
+            # Skip cycle detection for referenced policies (cannot resolve here)
+            continue
+
+        policy = node.supervision
+        strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
+        if policy.default_strategy:
+            strategies.append(policy.default_strategy)
+
+        for strategy in strategies:
+            if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
+                # Only add edge if target exists (validity checked elsewhere)
+                adj[node.id].append(strategy.fallback_node_id)
+
+    # Detect cycles using DFS
+    visited = set()
+    recursion_stack = set()
+
+    # Track cycle paths for reporting
+    path_stack: list[str] = []
+
+    def dfs(u: str) -> bool:
+        visited.add(u)
+        recursion_stack.add(u)
+        path_stack.append(u)
+
+        for v in adj[u]:
+            if v not in visited:
+                if dfs(v):
+                    return True
+            elif v in recursion_stack:
+                # Cycle detected
+                path_stack.append(v)
+                return True
+
+        path_stack.pop()
+        recursion_stack.remove(u)
+        return False
+
+    for node_id in adj:
+        if node_id not in visited and dfs(node_id):
+            # Extract the cycle portion
+            start_index = path_stack.index(path_stack[-1])
+            cycle = path_stack[start_index:]
+            cycle_str = " -> ".join(cycle)
+            errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
+            # Clear stacks for next component (optional, but DFS handles components)
+            path_stack.clear()
 
     return errors

@@ -9,7 +9,8 @@ This example demonstrates the configuration of an `AgentNode` with specific capa
 ```python
 # Example: Defining a Support Agent with Semantic Model Constraints
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.engines import StandardReasoning, FastPath, Supervision
+from coreason_manifest.spec.core.engines import StandardReasoning, FastPath
+from coreason_manifest.spec.core.resilience import SupervisionPolicy, RetryStrategy
 
 # Define the Cognitive Engine
 profile = CognitiveProfile(
@@ -34,10 +35,9 @@ support_agent = AgentNode(
     metadata={"version": "1.0"},
     profile=profile,
     tools=["zendesk-search"],
-    supervision=Supervision(
-        strategy="restart",
-        max_retries=3,
-        fallback="escalate-to-human"
+    supervision=SupervisionPolicy(
+        handlers=[],
+        default_strategy=RetryStrategy(max_attempts=3)
     )
 )
 ```
@@ -60,4 +60,18 @@ support_agent = AgentNode(
 
 ::: coreason_manifest.spec.core.engines.FastPath
 
-::: coreason_manifest.spec.core.engines.Supervision
+### Resilience
+
+::: coreason_manifest.spec.core.resilience.SupervisionPolicy
+
+::: coreason_manifest.spec.core.resilience.ErrorHandler
+
+::: coreason_manifest.spec.core.resilience.ResilienceStrategy
+
+::: coreason_manifest.spec.core.resilience.RetryStrategy
+
+::: coreason_manifest.spec.core.resilience.FallbackStrategy
+
+::: coreason_manifest.spec.core.resilience.ReflexionStrategy
+
+::: coreason_manifest.spec.core.resilience.EscalationStrategy

@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -383,23 +383,6 @@ class FastPath(BaseModel):
     caching: bool = True
 
 
-class Supervision(BaseModel):
-    """Fault tolerance and adversarial oversight."""
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    strategy: Literal["resume", "restart", "escalate", "degrade", "adversarial"]
-    max_retries: int
-    fallback: str | None
-
-    critic_model: ModelRef | None = Field(None, description="Model for adversarial review.")
-    critic_prompt: str | None = None
-
-    retry_delay_seconds: float = 1.0
-    backoff_factor: float = 2.0
-    default_payload: dict[str, Any] | None = None
-
-
 class Optimizer(BaseModel):
     """Self-Improvement / DSPy-style optimization."""
 
@@ -429,6 +412,5 @@ __all__ = [
     "ReasoningConfig",
     "RedTeamingReasoning",
     "StandardReasoning",
-    "Supervision",
     "TreeSearchReasoning",
 ]

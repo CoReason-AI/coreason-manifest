@@ -15,6 +15,7 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
 
 # Polymorphic Node Type
@@ -101,12 +102,16 @@ class FlowDefinitions(BaseModel):
         default_factory=dict, description="Reusable cognitive configurations."
     )
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict, description="Reusable tool dependencies.")
+    supervision_templates: dict[str, SupervisionPolicy] = Field(
+        default_factory=dict, description="Reusable resilience policies."
+    )
     skills: dict[str, Any] = Field(default_factory=dict, description="Reusable executable skills (Future use).")
 
 
 def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyNode]) -> None:
     """Shared referential integrity validation logic."""
     valid_profiles = definitions.profiles.keys() if definitions else set()
+    valid_policies = definitions.supervision_templates.keys() if definitions else set()
 
     # SOTA: Create a set of all available tools from registered packs
     valid_tools = set()
@@ -115,6 +120,17 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
             valid_tools.update(pack.tools)
 
     for node in nodes:
+        # Global Supervision Template Check
+        if isinstance(node.supervision, str):
+            if node.supervision.startswith("ref:"):
+                ref_id = node.supervision[4:]  # Strip 'ref:' prefix
+                if ref_id not in valid_policies:
+                    raise ValueError(f"Node '{node.id}' references undefined supervision template ID '{ref_id}'")
+            else:
+                raise ValueError(
+                    f"Node '{node.id}' has invalid supervision reference '{node.supervision}'. Must start with 'ref:'"
+                )
+
         if isinstance(node, AgentNode):
             # 1. Profile Check
             if isinstance(node.profile, str) and node.profile not in valid_profiles:

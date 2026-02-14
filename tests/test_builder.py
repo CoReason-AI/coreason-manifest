@@ -1,9 +1,11 @@
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
+from coreason_manifest.spec.core.resilience import EscalationStrategy, SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
 
 
@@ -198,10 +200,18 @@ def test_agent_builder() -> None:
     assert agent.profile.reasoning is not None
     assert agent.profile.fast_path is not None
     assert agent.tools == ["tool1"]
-    assert agent.supervision is not None
-    assert agent.supervision.max_retries == 3
+    assert isinstance(agent.supervision, SupervisionPolicy)
+    # max_attempts removed from EscalationStrategy
+    assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 
     # Fail build
     builder = AgentBuilder("agent3")
     with pytest.raises(ValueError, match="Agent identity"):
         builder.build()
+
+
+def test_agent_builder_fallback_missing_id() -> None:
+    """Test AgentBuilder raises error when fallback_id is missing for fallback strategy."""
+    builder = AgentBuilder("agent_fallback")
+    with pytest.raises(ValidationError):
+        builder.with_supervision(retries=3, strategy="fallback")
