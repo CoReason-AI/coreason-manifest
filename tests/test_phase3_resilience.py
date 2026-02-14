@@ -383,6 +383,33 @@ def test_error_handler_integer_codes() -> None:
     assert handler.match_error_code == ["429", "503", "rate_limit"]
 
 
+def test_error_handler_single_value_codes() -> None:
+    """Test that ErrorHandler accepts single value error codes."""
+    # Single int
+    handler1 = ErrorHandler(
+        match_error_code=404,  # type: ignore
+        strategy=RetryStrategy(max_attempts=3),
+    )
+    assert handler1.match_error_code == ["404"]
+
+    # Single str
+    handler2 = ErrorHandler(
+        match_error_code="not_found",  # type: ignore
+        strategy=RetryStrategy(max_attempts=3),
+    )
+    assert handler2.match_error_code == ["not_found"]
+
+
+def test_error_handler_invalid_codes() -> None:
+    """Test that ErrorHandler raises validation error for invalid code types."""
+    # Dict is not handled by normalizer, should fall through and fail pydantic validation
+    with pytest.raises(ValidationError):
+        ErrorHandler(
+            match_error_code={"code": 400},  # type: ignore
+            strategy=RetryStrategy(max_attempts=3),
+        )
+
+
 def test_escalation_template_syntax() -> None:
     """Test EscalationStrategy template validation."""
     # Template with jinja syntax
