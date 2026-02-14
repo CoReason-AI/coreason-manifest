@@ -53,6 +53,14 @@ def test_recursive_sanitize_list() -> None:
     assert sanitized == [1, {"a": 2}]
 
 
+def test_recursive_sanitize_set() -> None:
+    # Coverage for set handling (Instruction 3)
+    data = {3, 1, 2}
+    sanitized = _recursive_sort_and_sanitize(data)
+    # Must be sorted list
+    assert sanitized == [1, 2, 3]
+
+
 def test_recursive_sanitize_pydantic() -> None:
     # Coverage for Pydantic v2 (model_dump)
     class MyModel(BaseModel):
@@ -236,6 +244,19 @@ def test_loader_generic_exception(tmp_path: Path) -> None:
             load_flow_from_file(str(f))
 
 
+def test_loader_with_custom_root(tmp_path: Path) -> None:
+    # Test loading with explicit root_dir (Instruction 4)
+    # Create structure: /tmp/jail/manifest.yaml
+    jail = tmp_path / "jail"
+    jail.mkdir()
+    manifest = jail / "manifest.yaml"
+    manifest.write_text("kind: LinearFlow\nmetadata:\n  name: test\n  version: '1'\n  description: d\n  tags: []\nsequence: []")
+
+    # Pass explicit root
+    flow = load_flow_from_file(str(manifest), root_dir=jail)
+    assert flow.kind == "LinearFlow"
+
+
 # --- Diff Coverage ---
 def test_diff_edge_changes() -> None:
     # Cover edge addition and removal
@@ -266,8 +287,8 @@ def test_diff_edge_changes() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[])
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={})
         ),
         blackboard=None,
         graph=graph1
@@ -279,8 +300,8 @@ def test_diff_edge_changes() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[])
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={})
         ),
         blackboard=None,
         graph=graph2

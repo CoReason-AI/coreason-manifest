@@ -14,12 +14,13 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO
 
 
-def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
+def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow | GraphFlow:
     """
     Load a flow manifest from a YAML or JSON file.
 
     Args:
         path: Path to the manifest file.
+        root_dir: Optional root directory for path confinement. Defaults to file's parent.
 
     Returns:
         LinearFlow | GraphFlow: The parsed flow object.
@@ -30,10 +31,10 @@ def load_flow_from_file(path: str) -> LinearFlow | GraphFlow:
         SecurityViolationError: If path traversal or unsafe permissions are detected.
     """
     file_path = Path(path).resolve()
-    root_dir = file_path.parent
+    jail_root = root_dir if root_dir else file_path.parent
 
     # Initialize secure loader confined to the file's directory
-    loader = ManifestIO(root_dir=root_dir)
+    loader = ManifestIO(root_dir=jail_root)
 
     try:
         data = loader.load(file_path.name)

@@ -6,29 +6,27 @@ from coreason_manifest.spec.core.flow import DataSchema, FlowInterface
 
 
 def test_flow_interface_schema() -> None:
-    input_schema = DataSchema(fields={"user_query": "str"}, required=["user_query"])
-    output_schema = DataSchema(fields={"response": "str"}, required=["response"])
+    input_schema = DataSchema(json_schema={"type": "object", "properties": {"user_query": {"type": "string"}}})
+    output_schema = DataSchema(json_schema={"type": "object", "properties": {"response": {"type": "string"}}})
 
     interface = FlowInterface(inputs=input_schema, outputs=output_schema)
-    assert interface.inputs.fields["user_query"] == "str"
-    assert "user_query" in interface.inputs.required
+    assert interface.inputs.json_schema["properties"]["user_query"]["type"] == "string"
 
 
 def test_flow_interface_validation_error() -> None:
     with pytest.raises(ValidationError):
         FlowInterface(
             inputs={"bad": "dict"},  # type: ignore[arg-type]
-            outputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(json_schema={}),
         )
 
 
 def test_builder_interface_construction() -> None:
     builder = NewGraphFlow("test", "1.0", "desc")
-    builder.set_interface(inputs={"query": "str"}, outputs={"answer": "str"})
-    # NewGraphFlow.build() validates the flow.
-    # It requires at least one node if it checks for empty graph?
-    # validator.py: "GraphFlow Error: Graph must contain at least one node."
-    # So we need to add a node.
+    # Builder now accepts raw dicts for schema
+    input_s = {"type": "object", "properties": {"query": {"type": "string"}}}
+    output_s = {"type": "object", "properties": {"answer": {"type": "string"}}}
+    builder.set_interface(inputs=input_s, outputs=output_s)
 
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
@@ -38,6 +36,5 @@ def test_builder_interface_construction() -> None:
     flow = builder.build()
 
     assert isinstance(flow.interface.inputs, DataSchema)
-    assert flow.interface.inputs.fields["query"] == "str"
-    assert "query" in flow.interface.inputs.required
-    assert flow.interface.outputs.fields["answer"] == "str"
+    assert flow.interface.inputs.json_schema["properties"]["query"]["type"] == "string"
+    assert flow.interface.outputs.json_schema["properties"]["answer"]["type"] == "string"

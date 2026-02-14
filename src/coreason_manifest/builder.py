@@ -287,8 +287,8 @@ class NewGraphFlow(BaseFlowBuilder):
         self._edges: list[Edge] = []
         # Defaults
         self.interface = FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         )
         self.blackboard: Blackboard | None = None
 
@@ -340,11 +340,14 @@ class NewGraphFlow(BaseFlowBuilder):
         self._edges.append(Edge(source=source, target=target, condition=condition))
         return self
 
-    def set_interface(self, inputs: dict[str, str], outputs: dict[str, str]) -> "NewGraphFlow":
+    def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
         """Defines the Input/Output contract for the Flow."""
+        # Convert simple dict to JSON schema if needed, or assume raw schema passed?
+        # Mandate says: "Replace the naive dict with a full JSON Schema definition"
+        # The builder might accept the full schema dict.
         self.interface = FlowInterface(
-            inputs=DataSchema(fields=inputs, required=list(inputs.keys())),
-            outputs=DataSchema(fields=outputs, required=list(outputs.keys())),
+            inputs=DataSchema(json_schema=inputs),
+            outputs=DataSchema(json_schema=outputs),
         )
         return self
 

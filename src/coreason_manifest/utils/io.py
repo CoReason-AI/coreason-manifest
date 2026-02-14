@@ -1,5 +1,6 @@
-# src/coreason_manifest/utils/v2/io.py
+# src/coreason_manifest/utils/io.py
 
+import errno
 import os
 import stat
 from pathlib import Path
@@ -45,8 +46,6 @@ class ManifestIO:
             ValueError: If the file content is invalid.
         """
         # Resolve path relative to jail
-        # Note: If path is absolute, (self.jail / path) will ignore self.jail.
-        # We must protect against absolute paths if they are outside jail.
         file_path = Path(path)
         target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
 
@@ -58,18 +57,33 @@ class ManifestIO:
             except ValueError as e:
                 raise SecurityViolationError(f"Path Traversal Detected: {path}") from e
 
-        if not target_path.exists():
-            raise FileNotFoundError(f"Manifest file not found: {path}")
-
-        # 2. POSIX Permission Check
-        if os.name == "posix":
-            st = target_path.stat()
-            # Check for world-writable (S_IWOTH)
-            if st.st_mode & stat.S_IWOTH:
-                raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
+        # 2. TOCTOU Mitigation: Open with O_NOFOLLOW and check FD
+        try:
+            # Use O_NOFOLLOW to ensure we don't follow symlinks created after resolve()
+            flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+            fd = os.open(str(target_path), flags)
+        except OSError as e:
+            if e.errno == getattr(errno, "ELOOP", 40):
+                raise SecurityViolationError(f"Symlink loop detected (TOCTOU attack attempt): {path}") from e
+            if e.errno == errno.ENOENT:
+                raise FileNotFoundError(f"Manifest file not found: {path}") from e
+            raise e
 
         try:
-            with target_path.open("r", encoding="utf-8") as f:
+            # 3. Check Permissions on FD
+            if os.name == "posix":
+                st = os.fstat(fd)
+                if st.st_mode & stat.S_IWOTH:
+                    raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
+
+            # 4. Convert to File Object
+            f = os.fdopen(fd, "r", encoding="utf-8")
+        except Exception:
+            os.close(fd)
+            raise
+
+        try:
+            with f:
                 content = yaml.safe_load(f)
                 if not isinstance(content, dict):
                     raise ValueError("Manifest content must be a dictionary/object.")

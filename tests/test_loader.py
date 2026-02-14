@@ -32,8 +32,8 @@ def test_load_graph_flow() -> None:
         "kind": "GraphFlow",
         "metadata": {"name": "TestGraph", "version": "1.0", "description": "Test", "tags": []},
         "interface": {
-            "inputs": {"fields": {}, "required": []},
-            "outputs": {"fields": {}, "required": []},
+            "inputs": {"json_schema": {}},
+            "outputs": {"json_schema": {}},
         },
         "blackboard": None,
         "graph": {"nodes": {}, "edges": []},

@@ -42,6 +42,8 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
         return {k: _recursive_sort_and_sanitize(v) for k, v in sorted(obj.items()) if v is not None}
     if isinstance(obj, (list, tuple)):
         return [_recursive_sort_and_sanitize(x) for x in obj]
+    if isinstance(obj, set):
+        return sorted([_recursive_sort_and_sanitize(x) for x in obj])
     if isinstance(obj, datetime):
         return to_canonical_timestamp(obj)
     if hasattr(obj, "model_dump"):

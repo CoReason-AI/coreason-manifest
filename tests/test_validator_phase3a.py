@@ -26,8 +26,8 @@ def create_metadata() -> FlowMetadata:
 
 def create_interface() -> FlowInterface:
     return FlowInterface(
-        inputs=DataSchema(fields={}, required=[]),
-        outputs=DataSchema(fields={}, required=[]),
+        inputs=DataSchema(json_schema={}),
+        outputs=DataSchema(json_schema={}),
     )
 
 

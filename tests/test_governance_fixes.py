@@ -105,9 +105,6 @@ def test_linear_switch_bypass_fails() -> None:
 
 def test_linear_missing_node_exception() -> None:
     # Force ValueError in _is_guarded by checking a node not in sequence
-    # (Though logic usually iterates nodes in sequence, so index() always succeeds)
-    # We can manually call _is_guarded to cover the exception block?
-    # Or create a malformed flow where we check a node that isn't in sequence?
     pass
 
 
@@ -187,8 +184,8 @@ def test_graph_unguarded_path() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -211,8 +208,8 @@ def test_graph_guarded_path() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -235,8 +232,8 @@ def test_graph_cycle_no_entry() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -433,8 +430,8 @@ def test_graph_traversal_unguarded() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph,

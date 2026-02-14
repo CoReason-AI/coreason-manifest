@@ -58,8 +58,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={"a": "int"}, required=["a"]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={"properties": {"a": {"type": "int"}}}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=Graph(nodes={}, edges=[]),
@@ -67,15 +67,17 @@ def test_diff_engine_coverage() -> None:
     flow2 = flow1.model_copy(
         update={
             "interface": FlowInterface(
-                inputs=DataSchema(fields={"a": "str"}, required=["a"]),
-                outputs=DataSchema(fields={"b": "int"}, required=["b"]),
+                inputs=DataSchema(json_schema={"properties": {"a": {"type": "str"}}}),
+                outputs=DataSchema(json_schema={"properties": {"b": {"type": "int"}}}),
             )
         }
     )
 
     changes = ManifestDiff.compare(flow1, flow2)
-    assert any(c.field == "interface.inputs.fields.a" for c in changes)
-    assert any(c.field == "interface.outputs.fields.b" for c in changes)
+    # diff of json_schema.properties.a.type
+    assert any(c.field == "interface.inputs.json_schema.properties.a.type" for c in changes)
+    # For outputs, we added 'properties' key to empty dict, so diff is on 'properties'
+    assert any(c.field == "interface.outputs.json_schema.properties" for c in changes)
 
     # Agent Tools
     p = CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)
@@ -122,8 +124,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -133,8 +135,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -160,8 +162,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -177,8 +179,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -195,8 +197,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -206,8 +208,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -225,8 +227,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -248,8 +250,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -259,8 +261,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -335,8 +337,8 @@ def test_mock_factory_coverage() -> None:
         kind="GraphFlow",
         metadata=_get_base_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -371,8 +373,8 @@ def test_mock_factory_coverage() -> None:
         kind="GraphFlow",
         metadata=_get_base_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=defs,
@@ -392,8 +394,8 @@ def test_mock_factory_coverage() -> None:
         kind="GraphFlow",
         metadata=_get_base_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph_empty,
@@ -428,8 +430,8 @@ def test_visualizer_layout_coverage() -> None:
         kind="GraphFlow",
         metadata=_get_base_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -457,8 +459,8 @@ def test_visualizer_layout_coverage() -> None:
         kind="GraphFlow",
         metadata=_get_base_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=graph_mixed,

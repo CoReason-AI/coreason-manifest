@@ -39,8 +39,8 @@ def test_swarm_simulation_expansion() -> None:
         kind="GraphFlow",
         metadata=FlowMetadata(name="SwarmTest", version="1.0", description="T", tags=[]),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         definitions=definitions,
@@ -75,8 +75,8 @@ def test_deep_diff_granularity() -> None:
         kind="GraphFlow",
         metadata=FlowMetadata(name="DiffTest", version="1.0", description="T", tags=[]),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=Graph(nodes={"a": node_a}, edges=[]),

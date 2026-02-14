@@ -52,8 +52,10 @@ class DataSchema(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     schema_ref: str | None = Field(None, description="URI to JSON Schema")
-    fields: dict[str, str] = Field(..., description="Map of field_name -> data_type")
-    required: list[str] = Field(default_factory=list)
+    json_schema: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Full JSON Schema (Draft 7) definition for validation.",
+    )
 
 
 class FlowInterface(BaseModel):

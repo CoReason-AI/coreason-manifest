@@ -166,8 +166,8 @@ def test_switch_edge_inference() -> None:
         kind="GraphFlow",
         metadata=_get_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(fields={}, required=[]),
-            outputs=DataSchema(fields={}, required=[]),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
         graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
