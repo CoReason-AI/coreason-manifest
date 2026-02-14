@@ -5,18 +5,18 @@ from pathlib import Path
 from coreason_manifest.utils.v2.io import ManifestIO, SecurityViolation
 
 @pytest.fixture
-def jail_dir(tmp_path):
+def jail_dir(tmp_path: Path) -> Path:
     jail = tmp_path / "jail"
     jail.mkdir()
     return jail
 
-def test_load_valid_file(jail_dir):
+def test_load_valid_file(jail_dir: Path) -> None:
     (jail_dir / "valid.yaml").write_text("key: value")
     loader = ManifestIO(root_dir=jail_dir)
     data = loader.load("valid.yaml")
     assert data == {"key": "value"}
 
-def test_path_traversal_detection(jail_dir):
+def test_path_traversal_detection(jail_dir: Path) -> None:
     # Create file outside jail
     outside = jail_dir.parent / "outside.yaml"
     outside.write_text("secret: data")
@@ -31,7 +31,7 @@ def test_path_traversal_detection(jail_dir):
     with pytest.raises(SecurityViolation, match="Path Traversal Detected"):
         loader.load(str(outside.resolve()))
 
-def test_posix_permissions(jail_dir):
+def test_posix_permissions(jail_dir: Path) -> None:
     if os.name != "posix":
         pytest.skip("Skipping POSIX permission test on non-POSIX OS")
 

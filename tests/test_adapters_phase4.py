@@ -2,6 +2,7 @@ import pytest
 
 from coreason_manifest.spec.core.engines import StandardReasoning
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -11,14 +12,20 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.mcp_adapter import pack_to_mcp_resources
 from coreason_manifest.utils.openai_adapter import node_to_openai_assistant
 
 
 def test_mcp_adapter() -> None:
-    pack = ToolPack(kind="ToolPack", namespace="utils", tools=["calculator", "weather"], dependencies=[], env_vars=[])
+    pack = ToolPack(
+        kind="ToolPack",
+        namespace="utils",
+        tools=[ToolCapability(name="calculator"), ToolCapability(name="weather")],
+        dependencies=[],
+        env_vars=[],
+    )
     mcp_res = pack_to_mcp_resources(pack)
     expected_mcp = [
         {"uri": "mcp://utils/calculator", "name": "calculator", "mimeType": "application/json"},
@@ -28,7 +35,13 @@ def test_mcp_adapter() -> None:
 
 
 def test_openai_adapter() -> None:
-    pack = ToolPack(kind="ToolPack", namespace="utils", tools=["calculator", "weather"], dependencies=[], env_vars=[])
+    pack = ToolPack(
+        kind="ToolPack",
+        namespace="utils",
+        tools=[ToolCapability(name="calculator"), ToolCapability(name="weather")],
+        dependencies=[],
+        env_vars=[],
+    )
     brain = CognitiveProfile(
         role="assistant",
         persona="helpful",
@@ -58,7 +71,13 @@ def test_openai_adapter() -> None:
 
 def test_langchain_adapter() -> None:
     meta = FlowMetadata(name="test", version="1.0", description="desc", tags=[])
-    pack = ToolPack(kind="ToolPack", namespace="utils", tools=["calculator", "weather"], dependencies=[], env_vars=[])
+    pack = ToolPack(
+        kind="ToolPack",
+        namespace="utils",
+        tools=[ToolCapability(name="calculator"), ToolCapability(name="weather")],
+        dependencies=[],
+        env_vars=[],
+    )
     brain = CognitiveProfile(
         role="assistant",
         persona="helpful",
@@ -86,7 +105,10 @@ def test_langchain_adapter() -> None:
     graph_flow = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
         definitions=FlowDefinitions(tool_packs={"pack": pack}),

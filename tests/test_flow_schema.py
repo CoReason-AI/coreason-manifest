@@ -3,7 +3,7 @@ from pydantic import ValidationError
 from coreason_manifest.spec.core.flow import FlowInterface, DataSchema
 from coreason_manifest.builder import NewGraphFlow
 
-def test_flow_interface_schema():
+def test_flow_interface_schema() -> None:
     input_schema = DataSchema(fields={"user_query": "str"}, required=["user_query"])
     output_schema = DataSchema(fields={"response": "str"}, required=["response"])
 
@@ -11,11 +11,14 @@ def test_flow_interface_schema():
     assert interface.inputs.fields["user_query"] == "str"
     assert "user_query" in interface.inputs.required
 
-def test_flow_interface_validation_error():
+def test_flow_interface_validation_error() -> None:
     with pytest.raises(ValidationError):
-        FlowInterface(inputs={"bad": "dict"}, outputs={})
+        FlowInterface(
+            inputs=DataSchema(fields={"bad": "dict"}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        )
 
-def test_builder_interface_construction():
+def test_builder_interface_construction() -> None:
     builder = NewGraphFlow("test", "1.0", "desc")
     builder.set_interface(
         inputs={"query": "str"},

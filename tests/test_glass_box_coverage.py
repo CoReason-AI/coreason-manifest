@@ -1,5 +1,6 @@
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
@@ -15,7 +16,7 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwarmNode,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.diff import ChangeType, ManifestDiff, _deep_diff
 from coreason_manifest.utils.mock import MockFactory
 from coreason_manifest.utils.visualizer import to_react_flow
@@ -56,11 +57,21 @@ def test_diff_engine_coverage() -> None:
     flow1 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={"a": "int"}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={"a": "int"}, required=["a"]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=Graph(nodes={}, edges=[]),
     )
-    flow2 = flow1.model_copy(update={"interface": FlowInterface(inputs={"a": "str"}, outputs={"b": "int"})})
+    flow2 = flow1.model_copy(
+        update={
+            "interface": FlowInterface(
+                inputs=DataSchema(fields={"a": "str"}, required=["a"]),
+                outputs=DataSchema(fields={"b": "int"}, required=["b"]),
+            )
+        }
+    )
 
     changes = ManifestDiff.compare(flow1, flow2)
     assert any(c.field == "interface.inputs.a" for c in changes)
@@ -97,14 +108,23 @@ def test_diff_engine_coverage() -> None:
     defs = FlowDefinitions(
         profiles={"wp1": p, "wp2": p},
         tool_packs={
-            "default": ToolPack(kind="ToolPack", namespace="d", tools=["t1", "t2"], dependencies=[], env_vars=[])
+            "default": ToolPack(
+                kind="ToolPack",
+                namespace="d",
+                tools=[ToolCapability(name="t1"), ToolCapability(name="t2")],
+                dependencies=[],
+                env_vars=[],
+            )
         },
     )
 
     f1 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph1,
@@ -112,7 +132,10 @@ def test_diff_engine_coverage() -> None:
     f2 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph2,
@@ -136,7 +159,10 @@ def test_diff_engine_coverage() -> None:
     f_meta = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph_meta,
@@ -150,7 +176,10 @@ def test_diff_engine_coverage() -> None:
     f_pres = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph_pres,
@@ -165,7 +194,10 @@ def test_diff_engine_coverage() -> None:
     f_ref1 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=Graph(nodes={"a": node1_ref}, edges=[]),
@@ -173,7 +205,10 @@ def test_diff_engine_coverage() -> None:
     f_ref2 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=Graph(nodes={"a": node2_ref}, edges=[]),
@@ -189,7 +224,10 @@ def test_diff_engine_coverage() -> None:
     f_type = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph_type,
@@ -209,7 +247,10 @@ def test_diff_engine_coverage() -> None:
     f_p1 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph_p1,
@@ -217,7 +258,10 @@ def test_diff_engine_coverage() -> None:
     f_p2 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=graph_p2,
@@ -290,7 +334,10 @@ def test_mock_factory_coverage() -> None:
     flow_g = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -323,7 +370,10 @@ def test_mock_factory_coverage() -> None:
     flow_swarm = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         definitions=defs,
         graph=Graph(nodes={"s": s}, edges=[]),
@@ -341,7 +391,10 @@ def test_mock_factory_coverage() -> None:
     flow_empty = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph_empty,
     )
@@ -374,7 +427,10 @@ def test_visualizer_layout_coverage() -> None:
     flow_cycle = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -400,7 +456,10 @@ def test_visualizer_layout_coverage() -> None:
     flow_mixed = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph_mixed,
     )

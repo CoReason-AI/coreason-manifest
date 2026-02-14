@@ -32,7 +32,7 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     instructions = f"{node.profile.role} {node.profile.persona}"
 
     # Tools: Generate function definitions for every tool listed in node.tools found in tool_packs
-    available_tools = set()
+    available_tools: set[str] = set()
     for pack in tool_packs:
         available_tools.update(t.name for t in pack.tools)
 

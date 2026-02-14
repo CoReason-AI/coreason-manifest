@@ -1,4 +1,12 @@
-from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import (
+    DataSchema,
+    Edge,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
@@ -157,7 +165,10 @@ def test_switch_edge_inference() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
     )

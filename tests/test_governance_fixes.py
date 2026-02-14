@@ -5,6 +5,7 @@ from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -185,7 +186,10 @@ def test_graph_unguarded_path() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -206,7 +210,10 @@ def test_graph_guarded_path() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -227,7 +234,10 @@ def test_graph_cycle_no_entry() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
     )
@@ -422,7 +432,10 @@ def test_graph_traversal_unguarded() -> None:
         kind="GraphFlow",
         metadata=get_meta(),
         definitions=defs,
-        interface=FlowInterface(inputs={}, outputs={}),
+        interface=FlowInterface(
+            inputs=DataSchema(fields={}, required=[]),
+            outputs=DataSchema(fields={}, required=[]),
+        ),
         blackboard=None,
         graph=graph,
     )

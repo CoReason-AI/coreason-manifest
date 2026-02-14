@@ -4,7 +4,7 @@ from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, CognitivePro
 from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, FlowDefinitions
 from coreason_manifest.utils.gatekeeper import validate_policy
 
-def test_critical_tool_requires_guard():
+def test_critical_tool_requires_guard() -> None:
     # Define a critical tool
     critical_tool = ToolCapability(name="delete_db", risk_level="critical")
     safe_tool = ToolCapability(name="read_db", risk_level="safe")
@@ -77,7 +77,7 @@ def test_critical_tool_requires_guard():
     tool_errors = [e for e in errors if "critical tools" in e]
     assert not tool_errors
 
-def test_safe_tool_allowed():
+def test_safe_tool_allowed() -> None:
     # Define tools
     safe_tool = ToolCapability(name="read_db", risk_level="safe")
 

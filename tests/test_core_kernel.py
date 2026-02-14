@@ -6,6 +6,7 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.flow import (
     Blackboard,
+    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -27,7 +28,7 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
 
 def test_core_kernel_instantiation() -> None:
@@ -85,12 +86,21 @@ def test_core_kernel_instantiation() -> None:
 
     # Test Flow
     metadata = FlowMetadata(name="test-flow", version="1.0", description="test", tags=["test"])
-    interface = FlowInterface(inputs={"q": {"type": "string"}}, outputs={"a": {"type": "string"}})
+    interface = FlowInterface(
+        inputs=DataSchema(fields={"q": "string"}, required=["q"]),
+        outputs=DataSchema(fields={"a": "string"}, required=["a"]),
+    )
     variable_def = VariableDef(type="string", description="User context")
     blackboard = Blackboard(variables={"context": variable_def}, persistence=False)
 
     # Define ToolPack for integrity
-    tool_pack = ToolPack(kind="ToolPack", namespace="core", tools=["search"], dependencies=[], env_vars=[])
+    tool_pack = ToolPack(
+        kind="ToolPack",
+        namespace="core",
+        tools=[ToolCapability(name="search", risk_level="standard")],
+        dependencies=[],
+        env_vars=[],
+    )
     definitions = FlowDefinitions(tool_packs={"core": tool_pack})
 
     edge = Edge(source="agent-1", target="switch-1")

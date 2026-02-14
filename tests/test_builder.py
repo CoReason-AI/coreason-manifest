@@ -6,7 +6,7 @@ from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.core.resilience import EscalationStrategy, SupervisionPolicy
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
 
 def test_linear_builder() -> None:
@@ -18,7 +18,20 @@ def test_linear_builder() -> None:
         PlaceholderNode(id="step2", type="placeholder", metadata={}, supervision=None, required_capabilities=[])
     )
 
-    tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
+    tp = ToolPack(
+        kind="ToolPack",
+        namespace="test",
+        tools=[ToolCapability(name="t1")],
+        dependencies=[],
+        env_vars=[],
+    )
+    tp = ToolPack(
+        kind="ToolPack",
+        namespace="test",
+        tools=[ToolCapability(name="t1")],
+        dependencies=[],
+        env_vars=[],
+    )
     builder.add_tool_pack(tp)
 
     gov = Governance(rate_limit_rpm=10)
@@ -45,7 +58,13 @@ def test_graph_builder() -> None:
     )
     builder.connect("n1", "n2", condition="ok")
 
-    tp = ToolPack(kind="ToolPack", namespace="test", tools=["t1"], dependencies=[], env_vars=[])
+    tp = ToolPack(
+        kind="ToolPack",
+        namespace="test",
+        tools=[ToolCapability(name="t1")],
+        dependencies=[],
+        env_vars=[],
+    )
     builder.add_tool_pack(tp)
 
     gov = Governance(rate_limit_rpm=10)
@@ -70,8 +89,8 @@ def test_graph_builder() -> None:
     assert flow.governance.rate_limit_rpm == 10
 
     # Assert new features
-    assert flow.interface.inputs == {"in": "str"}
-    assert flow.interface.outputs == {"out": "int"}
+    assert flow.interface.inputs.fields == {"in": "str"}
+    assert flow.interface.outputs.fields == {"out": "int"}
     assert flow.blackboard is not None
     assert flow.blackboard.persistence is True
     assert "var1" in flow.blackboard.variables

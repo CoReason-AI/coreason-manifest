@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -14,7 +15,7 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -24,7 +25,10 @@ def create_metadata() -> FlowMetadata:
 
 
 def create_interface() -> FlowInterface:
-    return FlowInterface(inputs={}, outputs={})
+    return FlowInterface(
+        inputs=DataSchema(fields={}, required=[]),
+        outputs=DataSchema(fields={}, required=[]),
+    )
 
 
 def create_agent_node(node_id: str, tools: list[str]) -> AgentNode:
@@ -52,7 +56,7 @@ def create_tool_pack(namespace: str, tools: list[str]) -> ToolPack:
     return ToolPack(
         kind="ToolPack",
         namespace=namespace,
-        tools=tools,
+        tools=[ToolCapability(name=t) for t in tools],
         dependencies=[],
         env_vars=[],
     )
