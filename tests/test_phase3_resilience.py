@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_supervision
+from coreason_manifest.spec.core.engines import ModelCriteria
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlannerNode, SwarmNode, SwitchNode
 from coreason_manifest.spec.core.resilience import (
     ErrorDomain,
@@ -460,3 +461,54 @@ def test_reflexion_invalid_schema() -> None:
             include_trace=True,
             critic_schema={"invalid": "schema"},  # Missing type/properties/$ref
         )
+
+
+def test_retry_backoff_ge_1() -> None:
+    """Test that RetryStrategy backoff_factor must be >= 1.0."""
+    with pytest.raises(ValidationError, match="backoff_factor"):
+        RetryStrategy(max_attempts=3, backoff_factor=0.5)
+
+
+def test_reflexion_zombie_config() -> None:
+    """Test that max_trace_turns is cleared if include_trace is False."""
+    strategy = ReflexionStrategy(
+        max_attempts=3,
+        critic_model="gpt-4",
+        critic_prompt="Fix",
+        include_trace=False,
+        max_trace_turns=10,
+    )
+    assert strategy.max_trace_turns is None
+
+
+def test_supervision_limits_conflict() -> None:
+    """Test that SupervisionPolicy raises error if strategy limit > global limit."""
+    with pytest.raises(ValidationError, match="SupervisionPolicy global limit"):
+        SupervisionPolicy(
+            handlers=[],
+            default_strategy=RetryStrategy(max_attempts=20),
+            max_cumulative_actions=10,
+        )
+
+
+def test_reflexion_capability_requirement() -> None:
+    """Test that ReflexionStrategy enforces json_mode capability if critic_schema is present."""
+    # Case 1: Missing json_mode
+    model_without_json = ModelCriteria(capabilities=["vision"])
+    with pytest.raises(ValidationError, match="does not explicitly require 'json_mode'"):
+        ReflexionStrategy(
+            max_attempts=3,
+            critic_model=model_without_json,
+            critic_prompt="Fix",
+            critic_schema={"type": "object"},
+        )
+
+    # Case 2: Has json_mode
+    model_with_json = ModelCriteria(capabilities=["json_mode"])
+    strategy = ReflexionStrategy(
+        max_attempts=3,
+        critic_model=model_with_json,
+        critic_prompt="Fix",
+        critic_schema={"type": "object"},
+    )
+    assert strategy.critic_model == model_with_json

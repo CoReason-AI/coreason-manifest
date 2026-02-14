@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from coreason_manifest.spec.core.engines import ModelRef
+from coreason_manifest.spec.core.engines import ModelCriteria, ModelRef
 
 
 class ErrorDomain(StrEnum):
@@ -34,7 +34,7 @@ class RetryStrategy(ResilienceStrategy):
     type: Literal["retry"] = "retry"
 
     max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
-    backoff_factor: float = Field(2.0, description="Exponential backoff multiplier.")
+    backoff_factor: float = Field(2.0, ge=1.0, description="Exponential backoff multiplier.")
     initial_delay_seconds: float = Field(1.0, description="Initial wait time.")
     max_delay_seconds: float = Field(
         60.0, description="Ceiling for the backoff calculation (e.g., never sleep more than 60s)."
@@ -78,6 +78,25 @@ class ReflexionStrategy(ResilienceStrategy):
         if v is not None and "type" not in v and "properties" not in v and "$ref" not in v:
             raise ValueError("critic_schema must be a valid JSON Schema (missing 'type', 'properties', or '$ref').")
         return v
+
+    @model_validator(mode="after")
+    def validate_trace_config(self) -> "ReflexionStrategy":
+        if not self.include_trace and self.max_trace_turns is not None:
+            # Auto-fix: Clear max_trace_turns if trace is disabled
+            # Bypass frozen check for initialization fix
+            object.__setattr__(self, "max_trace_turns", None)
+        return self
+
+    @model_validator(mode="after")
+    def validate_capabilities(self) -> "ReflexionStrategy":
+        if self.critic_schema is not None and isinstance(self.critic_model, ModelCriteria):
+            caps = self.critic_model.capabilities or []
+            if "json_mode" not in caps:
+                raise ValueError(
+                    "ReflexionStrategy defines a 'critic_schema' but the 'critic_model' criteria "
+                    "does not explicitly require 'json_mode'. Please add 'json_mode' to the model capabilities."
+                )
+        return self
 
 
 class EscalationStrategy(ResilienceStrategy):
@@ -165,3 +184,18 @@ class SupervisionPolicy(BaseModel):
             "allowed for this node before hard failure."
         ),
     )
+
+    @model_validator(mode="after")
+    def validate_limits(self) -> "SupervisionPolicy":
+        strategies = [h.strategy for h in self.handlers]
+        if self.default_strategy:
+            strategies.append(self.default_strategy)
+
+        for strategy in strategies:
+            if hasattr(strategy, "max_attempts") and strategy.max_attempts > self.max_cumulative_actions:
+                raise ValueError(
+                    f"SupervisionPolicy global limit (max_cumulative_actions={self.max_cumulative_actions}) "
+                    f"is lower than a strategy limit (max_attempts={strategy.max_attempts}). "
+                    "The strategy will never complete."
+                )
+        return self
