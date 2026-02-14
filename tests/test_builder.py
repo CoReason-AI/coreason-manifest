@@ -5,7 +5,7 @@ from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
-from coreason_manifest.spec.core.resilience import EscalationStrategy
+from coreason_manifest.spec.core.resilience import EscalationStrategy, SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
 
 
@@ -200,8 +200,7 @@ def test_agent_builder() -> None:
     assert agent.profile.reasoning is not None
     assert agent.profile.fast_path is not None
     assert agent.tools == ["tool1"]
-    assert agent.supervision is not None
-    assert not isinstance(agent.supervision, str)
+    assert isinstance(agent.supervision, SupervisionPolicy)
     # max_attempts removed from EscalationStrategy
     assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 
