@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -6,6 +7,7 @@ import pytest
 from pydantic import BaseModel
 
 from coreason_manifest.spec.core.flow import (
+    AnyNode,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -218,7 +220,7 @@ def test_verify_merkle_legacy_object_attributes() -> None:
 
 
 # --- Loader Coverage ---
-def test_loader_generic_exception(tmp_path) -> None:
+def test_loader_generic_exception(tmp_path: Path) -> None:
     # Line 45: except Exception as e: raise e
     # We mock ManifestIO.load to raise a generic Exception
     # Using tmp_path to avoid mocking Path resolution which was problematic
@@ -256,7 +258,7 @@ def test_diff_edge_changes() -> None:
         tools=[]
     )
 
-    nodes = {"a": node_a, "b": node_b}
+    nodes: dict[str, AnyNode] = {"a": node_a, "b": node_b}
 
     # Graph 1: No edges
     graph1 = Graph(nodes=nodes, edges=[])
