@@ -31,7 +31,10 @@ def test_load_graph_flow() -> None:
     data: dict[str, Any] = {
         "kind": "GraphFlow",
         "metadata": {"name": "TestGraph", "version": "1.0", "description": "Test", "tags": []},
-        "interface": {"inputs": {}, "outputs": {}},
+        "interface": {
+            "inputs": {"fields": {}, "required": []},
+            "outputs": {"fields": {}, "required": []},
+        },
         "blackboard": None,
         "graph": {"nodes": {}, "edges": []},
     }

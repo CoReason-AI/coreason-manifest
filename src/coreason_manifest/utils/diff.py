@@ -84,11 +84,23 @@ class ManifestDiff:
         # 1. Compare Interface (Breaking)
         if old.interface.inputs != new.interface.inputs:
             changes.extend(
-                _deep_diff("interface.inputs", old.interface.inputs, new.interface.inputs, ChangeType.BREAKING, None)
+                _deep_diff(
+                    "interface.inputs",
+                    old.interface.inputs.model_dump(),
+                    new.interface.inputs.model_dump(),
+                    ChangeType.BREAKING,
+                    None,
+                )
             )
         if old.interface.outputs != new.interface.outputs:
             changes.extend(
-                _deep_diff("interface.outputs", old.interface.outputs, new.interface.outputs, ChangeType.BREAKING, None)
+                _deep_diff(
+                    "interface.outputs",
+                    old.interface.outputs.model_dump(),
+                    new.interface.outputs.model_dump(),
+                    ChangeType.BREAKING,
+                    None,
+                )
             )
 
         # 2. Compare Graph Topology (Topological)

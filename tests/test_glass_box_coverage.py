@@ -74,8 +74,8 @@ def test_diff_engine_coverage() -> None:
     )
 
     changes = ManifestDiff.compare(flow1, flow2)
-    assert any(c.field == "interface.inputs.a" for c in changes)
-    assert any(c.field == "interface.outputs.b" for c in changes)
+    assert any(c.field == "interface.inputs.fields.a" for c in changes)
+    assert any(c.field == "interface.outputs.fields.b" for c in changes)
 
     # Agent Tools
     p = CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)
