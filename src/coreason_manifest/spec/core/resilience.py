@@ -55,6 +55,13 @@ class ReflexionStrategy(ResilienceStrategy):
     critic_model: ModelRef = Field(..., description="The model used to analyze the error.")
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: bool = Field(True, description="Whether to feed the execution trace to the critic.")
+    critic_schema: dict[str, Any] | None = Field(
+        None,
+        description=(
+            "JSON Schema to enforce structured output from the critic "
+            "(e.g. {'properties': {'fix': {'type': 'string'}}})."
+        ),
+    )
 
 
 class EscalationStrategy(ResilienceStrategy):
@@ -65,6 +72,10 @@ class EscalationStrategy(ResilienceStrategy):
     queue_name: str = Field(..., description="The task queue for suspended sessions.")
     notification_level: Literal["info", "warning", "critical"] = Field(..., description="Severity level.")
     timeout_seconds: int = Field(..., description="Max wait for human intervention.")
+    template: str | None = Field(
+        None,
+        description="Jinja2 template for the human notification (e.g. 'Agent failed at step {{step_id}}: {{error}}').",
+    )
 
 
 # Polymorphic Union
@@ -78,15 +89,16 @@ class ErrorHandler(BaseModel):
     """
     Maps specific failure types to a specific strategy.
 
-    Matching logic is strict intersection (AND). If multiple criteria are provided
-    (e.g., domain AND pattern), the error must match ALL of them to trigger the strategy.
+    Matching Logic:
+    1. Inter-field: AND. If 'match_domain' AND 'match_error_code' are set, BOTH must match.
+    2. Intra-field: OR. If 'match_domain' is ['LLM', 'SYSTEM'], the error can be EITHER.
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     match_domain: list[ErrorDomain] | None = Field(None, description="List of error domains to handle.")
     match_pattern: str | None = Field(None, description="Regex for fine-grained error message matching.")
-    match_error_code: list[str] | None = Field(None, description="List of specific error codes to match.")
+    match_error_code: list[str | int] | None = Field(None, description="List of specific error codes to match.")
     strategy: ResilienceConfig = Field(..., description="The polymorphic strategy to execute.")
 
     @model_validator(mode="after")

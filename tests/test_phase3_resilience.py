@@ -357,3 +357,36 @@ def test_resource_error_domain() -> None:
     handler = ErrorHandler(match_domain=[ErrorDomain.RESOURCE], strategy=RetryStrategy(max_attempts=3))
     assert handler.match_domain is not None
     assert ErrorDomain.RESOURCE in handler.match_domain
+
+
+def test_reflexion_structured_output() -> None:
+    """Test that ReflexionStrategy accepts a JSON schema."""
+    strategy = ReflexionStrategy(
+        max_attempts=3,
+        critic_model="gpt-4",
+        critic_prompt="Fix",
+        include_trace=True,
+        critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+    )
+    assert strategy.critic_schema is not None
+    assert strategy.critic_schema["properties"]["fix"]["type"] == "string"
+
+
+def test_error_handler_integer_codes() -> None:
+    """Test that ErrorHandler accepts integer error codes."""
+    handler = ErrorHandler(
+        match_error_code=[429, 503, "rate_limit"],
+        strategy=RetryStrategy(max_attempts=3),
+    )
+    assert handler.match_error_code == [429, 503, "rate_limit"]
+
+
+def test_escalation_template() -> None:
+    """Test that EscalationStrategy accepts a template."""
+    strategy = EscalationStrategy(
+        queue_name="human-review",
+        notification_level="warning",
+        timeout_seconds=600,
+        template="Agent failed at step {{step_id}}: {{error}}",
+    )
+    assert strategy.template == "Agent failed at step {{step_id}}: {{error}}"
