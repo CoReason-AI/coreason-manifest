@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, TypedDict
 
 
@@ -12,10 +12,10 @@ def to_canonical_timestamp(dt: datetime) -> str:
     """
     if dt.tzinfo is None:
         # Assume UTC if naive
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
 
     # Convert to UTC
-    dt_utc = dt.astimezone(timezone.utc)
+    dt_utc = dt.astimezone(UTC)
 
     # Format as YYYY-MM-DDTHH:MM:SSZ (no microseconds)
     return dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -25,6 +25,7 @@ class MerkleNode(TypedDict):
     """
     Standard structure for verifiable execution blocks.
     """
+
     execution_hash: str
     previous_hashes: list[str]
 
@@ -38,23 +39,18 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
     - Models: Converted to dicts.
     """
     if isinstance(obj, dict):
-        return {
-            k: _recursive_sort_and_sanitize(v)
-            for k, v in sorted(obj.items())
-            if v is not None
-        }
-    elif isinstance(obj, (list, tuple)):
+        return {k: _recursive_sort_and_sanitize(v) for k, v in sorted(obj.items()) if v is not None}
+    if isinstance(obj, (list, tuple)):
         return [_recursive_sort_and_sanitize(x) for x in obj]
-    elif isinstance(obj, datetime):
+    if isinstance(obj, datetime):
         return to_canonical_timestamp(obj)
-    elif hasattr(obj, "model_dump"):
+    if hasattr(obj, "model_dump"):
         # Pydantic v2
         return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True))
-    elif hasattr(obj, "dict"):
+    if hasattr(obj, "dict"):
         # Pydantic v1
         return _recursive_sort_and_sanitize(obj.dict(exclude_none=True))
-    else:
-        return obj
+    return obj
 
 
 def compute_hash(obj: Any) -> str:

@@ -10,7 +10,6 @@ import yaml
 
 class SecurityViolationError(Exception):
     """Raised when a security constraint is violated during IO operations."""
-    pass
 
 
 class ManifestIO:

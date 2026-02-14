@@ -18,6 +18,7 @@ class ToolCapability(BaseModel):
     Definition of a tool's capabilities and risk profile.
     Mandate 3: Semantic Tool Governance.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     name: str

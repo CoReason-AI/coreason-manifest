@@ -1,8 +1,8 @@
-import pytest
-from coreason_manifest.spec.core.tools import ToolPack, ToolCapability
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, CognitiveProfile
-from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, FlowDefinitions
+from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.gatekeeper import validate_policy
+
 
 def test_critical_tool_requires_guard() -> None:
     # Define a critical tool
@@ -10,35 +10,19 @@ def test_critical_tool_requires_guard() -> None:
     safe_tool = ToolCapability(name="read_db", risk_level="safe")
 
     pack = ToolPack(
-        kind="ToolPack",
-        namespace="db_tools",
-        tools=[critical_tool, safe_tool],
-        dependencies=[],
-        env_vars=[]
+        kind="ToolPack", namespace="db_tools", tools=[critical_tool, safe_tool], dependencies=[], env_vars=[]
     )
 
     # Need a profile for integrity check
-    profile = CognitiveProfile(
-        role="tester",
-        persona="tester",
-        reasoning=None,
-        fast_path=None
-    )
+    profile = CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None)
 
     definitions = FlowDefinitions(
-        profiles={"default_profile": profile},
-        tool_packs={"db_tools": pack},
-        supervision_templates={}
+        profiles={"default_profile": profile}, tool_packs={"db_tools": pack}, supervision_templates={}
     )
 
     # Define Agent using critical tool
     agent = AgentNode(
-        id="agent-1",
-        metadata={},
-        supervision=None,
-        type="agent",
-        profile="default_profile",
-        tools=["delete_db"]
+        id="agent-1", metadata={}, supervision=None, type="agent", profile="default_profile", tools=["delete_db"]
     )
 
     # Unguarded Flow
@@ -46,7 +30,7 @@ def test_critical_tool_requires_guard() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1", description="test", tags=[]),
         definitions=definitions,
-        sequence=[agent]
+        sequence=[agent],
     )
 
     errors = validate_policy(flow_unguarded)
@@ -62,14 +46,14 @@ def test_critical_tool_requires_guard() -> None:
         type="human",
         prompt="Approve?",
         timeout_seconds=60,
-        interaction_mode="blocking"
+        interaction_mode="blocking",
     )
 
     flow_guarded = LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1", description="test", tags=[]),
         definitions=definitions,
-        sequence=[human, agent]
+        sequence=[human, agent],
     )
 
     errors = validate_policy(flow_guarded)
@@ -77,45 +61,28 @@ def test_critical_tool_requires_guard() -> None:
     tool_errors = [e for e in errors if "critical tools" in e]
     assert not tool_errors
 
+
 def test_safe_tool_allowed() -> None:
     # Define tools
     safe_tool = ToolCapability(name="read_db", risk_level="safe")
 
-    pack = ToolPack(
-        kind="ToolPack",
-        namespace="db_tools",
-        tools=[safe_tool],
-        dependencies=[],
-        env_vars=[]
-    )
+    pack = ToolPack(kind="ToolPack", namespace="db_tools", tools=[safe_tool], dependencies=[], env_vars=[])
 
-    profile = CognitiveProfile(
-        role="tester",
-        persona="tester",
-        reasoning=None,
-        fast_path=None
-    )
+    profile = CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None)
 
     definitions = FlowDefinitions(
-        profiles={"default_profile": profile},
-        tool_packs={"db_tools": pack},
-        supervision_templates={}
+        profiles={"default_profile": profile}, tool_packs={"db_tools": pack}, supervision_templates={}
     )
 
     agent = AgentNode(
-        id="agent-1",
-        metadata={},
-        supervision=None,
-        type="agent",
-        profile="default_profile",
-        tools=["read_db"]
+        id="agent-1", metadata={}, supervision=None, type="agent", profile="default_profile", tools=["read_db"]
     )
 
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1", description="test", tags=[]),
         definitions=definitions,
-        sequence=[agent]
+        sequence=[agent],
     )
 
     errors = validate_policy(flow)

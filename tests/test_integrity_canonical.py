@@ -1,9 +1,10 @@
-import json
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta, timezone
+
 from coreason_manifest.utils.integrity import compute_hash, to_canonical_timestamp
 
+
 def test_canonical_timestamp() -> None:
-    dt_utc = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    dt_utc = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
     dt_offset = datetime(2023, 1, 1, 13, 0, 0, tzinfo=timezone(timedelta(hours=1)))
 
     # Verify they represent the same instant
@@ -15,8 +16,9 @@ def test_canonical_timestamp() -> None:
     assert s1 == "2023-01-01T12:00:00Z"
     assert s1 == s2
 
+
 def test_hash_determinism_timezones() -> None:
-    dt_utc = datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    dt_utc = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
     dt_offset = datetime(2023, 1, 1, 13, 0, 0, tzinfo=timezone(timedelta(hours=1)))
 
     obj1 = {"created_at": dt_utc}
@@ -27,6 +29,7 @@ def test_hash_determinism_timezones() -> None:
 
     assert h1 == h2
 
+
 def test_hash_determinism_key_order() -> None:
     obj1 = {"a": 1, "b": {"x": 10, "y": 20}}
     obj2 = {"b": {"y": 20, "x": 10}, "a": 1}
@@ -35,6 +38,7 @@ def test_hash_determinism_key_order() -> None:
     h2 = compute_hash(obj2)
 
     assert h1 == h2
+
 
 def test_hash_exclude_none() -> None:
     obj1 = {"a": 1, "b": None}

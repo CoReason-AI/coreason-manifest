@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from pathlib import Path
-from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.v2.io import ManifestIO

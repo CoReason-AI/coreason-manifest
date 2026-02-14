@@ -1,8 +1,11 @@
 import os
 import stat
-import pytest
 from pathlib import Path
+
+import pytest
+
 from coreason_manifest.utils.v2.io import ManifestIO, SecurityViolationError
+
 
 @pytest.fixture
 def jail_dir(tmp_path: Path) -> Path:
@@ -10,11 +13,13 @@ def jail_dir(tmp_path: Path) -> Path:
     jail.mkdir()
     return jail
 
+
 def test_load_valid_file(jail_dir: Path) -> None:
     (jail_dir / "valid.yaml").write_text("key: value")
     loader = ManifestIO(root_dir=jail_dir)
     data = loader.load("valid.yaml")
     assert data == {"key": "value"}
+
 
 def test_path_traversal_detection(jail_dir: Path) -> None:
     # Create file outside jail
@@ -30,6 +35,7 @@ def test_path_traversal_detection(jail_dir: Path) -> None:
     # Try absolute path outside jail
     with pytest.raises(SecurityViolationError, match="Path Traversal Detected"):
         loader.load(str(outside.resolve()))
+
 
 def test_posix_permissions(jail_dir: Path) -> None:
     if os.name != "posix":

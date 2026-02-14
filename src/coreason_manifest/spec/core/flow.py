@@ -48,6 +48,7 @@ class DataSchema(BaseModel):
     Strict data contract for inputs/outputs.
     Mandate 5: Contract-First Data I/O.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     schema_ref: str | None = Field(None, description="URI to JSON Schema")
