@@ -201,6 +201,7 @@ def test_agent_builder() -> None:
     assert agent.profile.fast_path is not None
     assert agent.tools == ["tool1"]
     assert agent.supervision is not None
+    assert not isinstance(agent.supervision, str)
     # max_attempts removed from EscalationStrategy
     assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 

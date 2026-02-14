@@ -30,6 +30,7 @@ def test_global_supervision_template() -> None:
     # Build should pass validation
     flow = lf.build()
     assert flow.sequence[0].supervision == "ref:standard-retry"
+    assert flow.definitions is not None
     assert flow.definitions.supervision_templates["standard-retry"] == shared_policy
 
 

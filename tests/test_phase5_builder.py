@@ -44,6 +44,7 @@ def test_fluent_agent_construction() -> None:
 
     # Verify Supervision
     assert agent.supervision is not None
+    assert not isinstance(agent.supervision, str)
     # max_attempts removed from EscalationStrategy
     assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 
