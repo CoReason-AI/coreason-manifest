@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from pydantic import BaseModel
@@ -10,15 +10,14 @@ from coreason_manifest.spec.core.flow import (
     AnyNode,
     DataSchema,
     Edge,
-    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
+    LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
-from coreason_manifest.utils.diff import ChangeType, ManifestDiff
+from coreason_manifest.utils.diff import ManifestDiff
 from coreason_manifest.utils.integrity import (
     _recursive_sort_and_sanitize,
     compute_hash,
@@ -27,7 +26,6 @@ from coreason_manifest.utils.integrity import (
     verify_merkle_proof,
 )
 from coreason_manifest.utils.loader import load_flow_from_file
-from coreason_manifest.utils.io import ManifestIO
 
 
 # --- Integrity Coverage ---
@@ -75,6 +73,8 @@ def test_recursive_sanitize_pydantic_v1() -> None:
     # Coverage for Pydantic v1 (dict) - Mocking since we are on v2
     class MockV1:
         def dict(self, exclude_none: bool = False) -> dict[str, Any]:
+            if exclude_none:
+                return {"v1": True}
             return {"v1": True}
 
     sanitized = _recursive_sort_and_sanitize(MockV1())
@@ -85,6 +85,7 @@ def test_compute_hash_method() -> None:
     class HasHash:
         def compute_hash(self) -> str:
             return "custom_hash"
+
     assert compute_hash(HasHash()) == "custom_hash"
 
 
@@ -112,16 +113,6 @@ def test_verify_merkle_empty() -> None:
 
 def test_verify_merkle_strict_object_attributes() -> None:
     # Test with objects having attributes instead of dicts
-    class NodeExec:
-        def __init__(self, h: str, prev: list[str]) -> None:
-            self.execution_hash = h
-            self.previous_hashes = prev
-            self.node_id = "n"
-            self.state = "s"
-            # reconstruct uses .get(), so object usually needs to be dict-like or Model?
-            # integrity.py L78: d = node if isinstance(node, dict) else node.model_dump()
-            # So if it's not dict, it assumes model_dump exists.
-
     # So we must use Pydantic models or mocks with model_dump
     class MockModel:
         def __init__(self, d: dict[str, Any]) -> None:
@@ -153,7 +144,6 @@ def test_verify_merkle_strict_trusted_parent_skip() -> None:
     # Genesis
     p1 = {"node_id": "1", "previous_hashes": [], "attributes": {}}
     h1 = compute_hash(p1)
-    n1 = {"execution_hash": h1, **p1}
 
     # Child
     p2 = {"node_id": "2", "previous_hashes": [h1], "attributes": {}}
@@ -161,14 +151,6 @@ def test_verify_merkle_strict_trusted_parent_skip() -> None:
     n2 = {"execution_hash": h2, **p2}
 
     # Verify child only, with trusted root = h1
-    # Trace starts at child? No, trace is full usually.
-    # But verify_merkle_proof allows verifying a segment if trusted root connects?
-    # If trace=[n2] (i=0).
-    # previous_hashes=[h1].
-    # trusted_root_hash=h1.
-    # loop prev_hash in [h1]:
-    # if prev_hash == trusted_root_hash: continue (Skips check against verified_hashes)
-
     # Note: Genesis logic at i=0 checks `if not previous_hashes`.
     # Here previous_hashes is NOT empty. So it goes to else.
     # So yes, we can verify a child block if we trust its parent.
@@ -195,7 +177,6 @@ def test_verify_merkle_legacy_object_attributes() -> None:
 
     # Child
     n2 = LegacyObj("child", h1)
-    h2 = compute_hash("child")
 
     # verify_merkle_proof for legacy computes hash of node.
     # if node is object, compute_hash uses str(obj).
@@ -213,12 +194,6 @@ def test_verify_merkle_legacy_object_attributes() -> None:
     assert verify_merkle_proof([n1, n2_bad]) is False
 
     # Chain trusted root mismatch (if i > 0, it checks against prev node)
-    # The elif trusted_root_hash branch in legacy is for when i=0 but prev_hash is present?
-    # No, line 198: elif trusted_root_hash: if prev_hash != trusted: return False.
-    # This is reached if i=0 (genesis check failed? no, genesis checks i=0 first).
-    # Wait, line 193: if i > 0.
-    # So line 198 is for i=0.
-
     # Case: Single node with prev_hash matching trusted root
     n_cont = LegacyObj("cont", h1)
     assert verify_merkle_proof([n_cont], trusted_root_hash=h1) is True
@@ -236,8 +211,8 @@ def test_loader_generic_exception(tmp_path: Path) -> None:
     f = tmp_path / "dummy.yaml"
     f.touch()
 
-    with patch("coreason_manifest.utils.loader.ManifestIO") as MockIO:
-        instance = MockIO.return_value
+    with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
+        instance = mock_io.return_value
         instance.load.side_effect = Exception("Generic Error")
 
         with pytest.raises(Exception, match="Generic Error"):
@@ -250,7 +225,15 @@ def test_loader_with_custom_root(tmp_path: Path) -> None:
     jail = tmp_path / "jail"
     jail.mkdir()
     manifest = jail / "manifest.yaml"
-    manifest.write_text("kind: LinearFlow\nmetadata:\n  name: test\n  version: '1'\n  description: d\n  tags: []\nsequence: []")
+    manifest.write_text(
+        "kind: LinearFlow\n"
+        "metadata:\n"
+        "  name: test\n"
+        "  version: '1'\n"
+        "  description: d\n"
+        "  tags: []\n"
+        "sequence: []"
+    )
 
     # Pass explicit root
     flow = load_flow_from_file(str(manifest), root_dir=jail)
@@ -268,7 +251,7 @@ def test_diff_edge_changes() -> None:
         supervision=None,
         type="agent",
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
-        tools=[]
+        tools=[],
     )
     node_b = AgentNode(
         id="b",
@@ -276,7 +259,7 @@ def test_diff_edge_changes() -> None:
         supervision=None,
         type="agent",
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
-        tools=[]
+        tools=[],
     )
 
     nodes: dict[str, AnyNode] = {"a": node_a, "b": node_b}
@@ -288,10 +271,10 @@ def test_diff_edge_changes() -> None:
         metadata=meta,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={})
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
-        graph=graph1
+        graph=graph1,
     )
 
     # Graph 2: Edge a->b
@@ -301,10 +284,10 @@ def test_diff_edge_changes() -> None:
         metadata=meta,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={})
+            outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
-        graph=graph2
+        graph=graph2,
     )
 
     # Compare 1 -> 2 (Edge Added)
@@ -319,7 +302,6 @@ def test_diff_edge_changes() -> None:
 def test_integrity_hash_mismatch_failure() -> None:
     # Strict mode hash mismatch (Line 142)
     p1 = {"node_id": "1", "state": "s", "previous_hashes": [], "attributes": {}}
-    h1 = compute_hash(p1)
     # Tamper with hash
     n1 = {"execution_hash": "bad_hash", **p1}
     assert verify_merkle_proof([n1]) is False
@@ -343,7 +325,6 @@ def test_integrity_legacy_genesis_mismatch() -> None:
     # Legacy genesis mismatch (Line 183)
     # prev_hash is None (genesis), but trusted_root mismatch
     n1 = {"data": "gen"}
-    h1 = compute_hash(n1)
     # Pass wrong root
     assert verify_merkle_proof([n1], trusted_root_hash="wrong") is False
 
@@ -351,7 +332,6 @@ def test_integrity_legacy_genesis_mismatch() -> None:
 def test_integrity_legacy_chain_mismatch() -> None:
     # Legacy chain mismatch (Line 196)
     n1 = {"data": "gen"}
-    h1 = compute_hash(n1)
 
     n2 = {"data": "child", "prev_hash": "wrong"}
 
