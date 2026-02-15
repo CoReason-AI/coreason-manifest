@@ -662,7 +662,7 @@ def test_data_schema_validator() -> None:
 
     # Invalid
     with pytest.raises(ValidationError, match="Invalid JSON Schema"):
-        DataSchema(json_schema={"type": "invalid_type"}) # Invalid type
+        DataSchema(json_schema={"type": "invalid_type"})  # Invalid type
 
 
 def test_tool_capability_validator() -> None:

@@ -1,5 +1,6 @@
 # src/coreason_manifest/utils/io.py
 
+import contextlib
 import errno
 import os
 import stat
@@ -95,8 +96,6 @@ class ManifestIO:
             # Ensure FD is closed if os.fdopen failed or didn't take ownership
             # If os.fdopen succeeded, the 'with' block handles closing.
             # But if os.fdopen raised (e.g. bad mode), we must close fd manually.
-            try:
+            with contextlib.suppress(OSError):
                 os.close(fd)
-            except OSError:
-                pass
             raise
