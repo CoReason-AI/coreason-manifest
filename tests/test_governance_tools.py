@@ -6,7 +6,7 @@ from coreason_manifest.utils.gatekeeper import validate_policy
 
 def test_critical_tool_requires_guard() -> None:
     # Define a critical tool
-    critical_tool = ToolCapability(name="delete_db", risk_level="critical")
+    critical_tool = ToolCapability(name="delete_db", risk_level="critical", description="Deletes the database")
     safe_tool = ToolCapability(name="read_db", risk_level="safe")
 
     pack = ToolPack(

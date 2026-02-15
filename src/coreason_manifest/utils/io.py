@@ -32,7 +32,7 @@ class ManifestIO:
 
     def load(self, path: str) -> dict[str, Any]:
         """
-        Load a YAML/JSON file securely.
+        Load a YAML/JSON file securely using low-level OS calls to prevent TOCTOU.
 
         Args:
             path: Relative path to the file within the jail.
@@ -49,44 +49,54 @@ class ManifestIO:
         file_path = Path(path)
         target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
 
-        # 1. Path Traversal Check
-        # Ensure the resolved path starts with the jail path
+        # 1. Path Traversal Check (High-Level)
         if not self.allow_external:
             try:
                 target_path.relative_to(self.jail)
             except ValueError as e:
                 raise SecurityViolationError(f"Path Traversal Detected: {path}") from e
 
-        # 2. TOCTOU Mitigation: Open with O_NOFOLLOW and check FD
+        # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
         try:
-            # Use O_NOFOLLOW to ensure we don't follow symlinks created after resolve()
+            # O_NOFOLLOW ensures we don't follow symlinks at the end of the path
+            # O_RDONLY ensures read-only access
             flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
             fd = os.open(str(target_path), flags)
         except OSError as e:
-            if e.errno == getattr(errno, "ELOOP", 40):
-                raise SecurityViolationError(f"Symlink loop detected (TOCTOU attack attempt): {path}") from e
+            # Handle specific error codes
+            if e.errno == getattr(errno, "ELOOP", 40):  # ELOOP = Too many symbolic links
+                raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
             if e.errno == errno.ENOENT:
-                raise FileNotFoundError(f"Manifest file not found: {path}") from e
+                raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
             raise e
 
         try:
-            # 3. Check Permissions on FD
-            if os.name == "posix":
-                st = os.fstat(fd)
-                if st.st_mode & stat.S_IWOTH:
-                    raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
+            # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
+            # This guarantees we are checking the actual file we just opened.
+            st = os.fstat(fd)
 
-            # 4. Convert to File Object
-            f = os.fdopen(fd, "r", encoding="utf-8")
-        except Exception:
-            os.close(fd)
-            raise
+            if os.name == "posix" and (st.st_mode & stat.S_IWOTH):
+                raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
 
-        try:
-            with f:
+            # 4. LOAD CONTENT
+            # Wrap the descriptor in a Python file object
+            # Note: os.fdopen takes ownership of the fd, so closing 'f' closes 'fd'
+            with os.fdopen(fd, "r", encoding="utf-8") as f:
                 content = yaml.safe_load(f)
-                if not isinstance(content, dict):
-                    raise ValueError("Manifest content must be a dictionary/object.")
-                return content
+
+            if not isinstance(content, dict):
+                raise ValueError("Manifest content must be a dictionary.")
+
+            return content
+
         except yaml.YAMLError as e:
             raise ValueError(f"Failed to parse manifest file: {e}") from e
+        except Exception:
+            # Ensure FD is closed if os.fdopen failed or didn't take ownership
+            # If os.fdopen succeeded, the 'with' block handles closing.
+            # But if os.fdopen raised (e.g. bad mode), we must close fd manually.
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            raise

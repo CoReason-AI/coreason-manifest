@@ -57,6 +57,13 @@ class DataSchema(BaseModel):
         description="Full JSON Schema (Draft 7) definition for validation.",
     )
 
+    @model_validator(mode="after")
+    def validate_meta_schema(self) -> "DataSchema":
+        if self.json_schema:
+            if "type" not in self.json_schema and "$ref" not in self.json_schema:
+                raise ValueError("Invalid JSON Schema: Must contain 'type' or '$ref'.")
+        return self
+
 
 class FlowInterface(BaseModel):
     """Input/Output JSON schema contracts."""

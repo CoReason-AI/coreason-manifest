@@ -5,7 +5,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
@@ -25,6 +25,7 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.tools import ToolCapability
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 from coreason_manifest.utils.diff import ManifestDiff
 from coreason_manifest.utils.integrity import (
@@ -284,7 +285,7 @@ def test_io_symlink_loop(tmp_path: Path) -> None:
 
         loader = ManifestIO(root_dir=tmp_path)
 
-        with pytest.raises(SecurityViolationError, match="Symlink loop detected"):
+        with pytest.raises(SecurityViolationError, match="Symlink detected"):
             loader.load("dummy.yaml")
 
 
@@ -310,7 +311,7 @@ def test_io_enoent(tmp_path: Path) -> None:
 
         loader = ManifestIO(root_dir=tmp_path)
 
-        with pytest.raises(FileNotFoundError, match="Manifest file not found"):
+        with pytest.raises(FileNotFoundError, match="File not found or inaccessible"):
             loader.load("dummy.yaml")
 
 
@@ -362,6 +363,25 @@ def test_io_path_traversal(tmp_path: Path) -> None:
 
     with pytest.raises(SecurityViolationError, match="Path Traversal Detected"):
         loader.load("../outside.yaml")
+
+
+def test_io_unsafe_permissions(tmp_path: Path) -> None:
+    # Test Unsafe Permissions
+    (tmp_path / "dummy.yaml").touch()
+
+    # Mock os.fstat to return st_mode with S_IWOTH
+    with (
+        patch("os.open", return_value=123),
+        patch("os.close"),
+        patch("os.fstat") as mock_fstat,
+        patch("os.name", "posix"),
+    ):
+        mock_fstat.return_value.st_mode = 0o100000 | 0o002  # S_IFREG | S_IWOTH
+
+        loader = ManifestIO(root_dir=tmp_path)
+
+        with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
+            loader.load("dummy.yaml")
 
 
 # --- Diff Coverage ---
@@ -624,3 +644,27 @@ def test_visualizer_with_snapshot() -> None:
 
     rf = to_react_flow(flow, snapshot)
     assert rf["nodes"][0]["data"]["state"] == NodeState.RUNNING
+
+
+# --- New Validation Tests ---
+
+def test_data_schema_validator() -> None:
+    # Valid
+    DataSchema(json_schema={"type": "object"})
+    DataSchema(json_schema={"$ref": "#/definitions/foo"})
+    DataSchema(json_schema={}) # Wait, default factory is dict, is empty dict valid?
+    # Our validator says: if self.json_schema: check. If empty, it passes.
+
+    # Invalid
+    with pytest.raises(ValidationError, match="Invalid JSON Schema"):
+        DataSchema(json_schema={"foo": "bar"}) # No type or $ref
+
+
+def test_tool_capability_validator() -> None:
+    # Valid
+    ToolCapability(name="t1", risk_level="safe")
+    ToolCapability(name="t2", risk_level="critical", description="Dangerous tool")
+
+    # Invalid
+    with pytest.raises(ValidationError, match="Critical tools must be documented"):
+        ToolCapability(name="t3", risk_level="critical") # Missing description

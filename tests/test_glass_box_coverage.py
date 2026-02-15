@@ -58,8 +58,8 @@ def test_diff_engine_coverage() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(json_schema={"properties": {"a": {"type": "int"}}}),
-            outputs=DataSchema(json_schema={}),
+            inputs=DataSchema(json_schema={"type": "object", "properties": {"a": {"type": "int"}}}),
+            outputs=DataSchema(json_schema={"type": "object"}),
         ),
         blackboard=None,
         graph=Graph(nodes={}, edges=[]),
@@ -67,8 +67,8 @@ def test_diff_engine_coverage() -> None:
     flow2 = flow1.model_copy(
         update={
             "interface": FlowInterface(
-                inputs=DataSchema(json_schema={"properties": {"a": {"type": "str"}}}),
-                outputs=DataSchema(json_schema={"properties": {"b": {"type": "int"}}}),
+                    inputs=DataSchema(json_schema={"type": "object", "properties": {"a": {"type": "str"}}}),
+                    outputs=DataSchema(json_schema={"type": "object", "properties": {"b": {"type": "int"}}}),
             )
         }
     )

@@ -11,7 +11,9 @@
 from pathlib import Path
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.utils.io import ManifestIO
+from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
+
+__all__ = ["load_flow_from_file", "SecurityViolationError"]
 
 
 def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow | GraphFlow:

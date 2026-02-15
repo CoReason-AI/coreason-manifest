@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class Dependency(BaseModel):
@@ -27,6 +27,14 @@ class ToolCapability(BaseModel):
     # From prompt description: "If risk_level == critical, strictly enforce..."
     # Code snippet in prompt showed `requires_approval` too.
     requires_approval: bool = False
+
+    @model_validator(mode="after")
+    def validate_critical_description(self) -> "ToolCapability":
+        if self.risk_level == "critical" and not self.description:
+            raise ValueError(
+                f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
+            )
+        return self
 
 
 class ToolPack(BaseModel):

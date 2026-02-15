@@ -71,7 +71,10 @@ def test_graph_builder() -> None:
     builder.set_governance(gov)
 
     # Test set_interface and set_blackboard
-    builder.set_interface(inputs={"in": "str"}, outputs={"out": "int"})
+    builder.set_interface(
+        inputs={"type": "object", "properties": {"in": {"type": "string"}}},
+        outputs={"type": "object", "properties": {"out": {"type": "integer"}}}
+    )
     builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
 
     flow = builder.build()
@@ -89,8 +92,8 @@ def test_graph_builder() -> None:
     assert flow.governance.rate_limit_rpm == 10
 
     # Assert new features
-    assert flow.interface.inputs.json_schema == {"in": "str"}
-    assert flow.interface.outputs.json_schema == {"out": "int"}
+    assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}
+    assert flow.interface.outputs.json_schema == {"type": "object", "properties": {"out": {"type": "integer"}}}
     assert flow.blackboard is not None
     assert flow.blackboard.persistence is True
     assert "var1" in flow.blackboard.variables
