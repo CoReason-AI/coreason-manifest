@@ -36,14 +36,7 @@ def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow |
     # Initialize secure loader confined to the file's directory
     loader = ManifestIO(root_dir=jail_root)
 
-    try:
-        data = loader.load(file_path.name)
-    except Exception as e:
-        # Re-raise known exceptions or wrap them
-        raise e
-
-    if not isinstance(data, dict):
-        raise ValueError("Manifest content must be a dictionary/object.")
+    data = loader.load(file_path.name)
 
     kind = data.get("kind")
     if kind == "LinearFlow":
