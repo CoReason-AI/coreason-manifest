@@ -652,12 +652,16 @@ def test_data_schema_validator() -> None:
     # Valid
     DataSchema(json_schema={"type": "object"})
     DataSchema(json_schema={"$ref": "#/definitions/foo"})
-    DataSchema(json_schema={}) # Wait, default factory is dict, is empty dict valid?
-    # Our validator says: if self.json_schema: check. If empty, it passes.
+    DataSchema(json_schema={}) # Empty dict passes (no validation if empty)
+
+    # SOTA: Complex Valid Schemas
+    DataSchema(json_schema={"oneOf": [{"type": "string"}, {"type": "integer"}]})
+    DataSchema(json_schema={"enum": ["a", "b"]})
+    DataSchema(json_schema={"properties": {"foo": {"type": "string"}}})
 
     # Invalid
     with pytest.raises(ValidationError, match="Invalid JSON Schema"):
-        DataSchema(json_schema={"foo": "bar"}) # No type or $ref
+        DataSchema(json_schema={"foo": "bar"}) # No structural keywords
 
 
 def test_tool_capability_validator() -> None:

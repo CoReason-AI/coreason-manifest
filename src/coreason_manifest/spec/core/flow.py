@@ -60,8 +60,28 @@ class DataSchema(BaseModel):
     @model_validator(mode="after")
     def validate_meta_schema(self) -> "DataSchema":
         if self.json_schema:
-            if "type" not in self.json_schema and "$ref" not in self.json_schema:
-                raise ValueError("Invalid JSON Schema: Must contain 'type' or '$ref'.")
+            # SOTA: Check for ANY structural keyword, not just type/$ref.
+            # This allows schemas like {"anyOf": ...} or {"properties": ...}
+            structural_keywords = {
+                "type",
+                "$ref",
+                "oneOf",
+                "anyOf",
+                "allOf",
+                "not",
+                "enum",
+                "const",
+                "properties",
+                "items",
+            }
+            keys = set(self.json_schema.keys())
+
+            # If no structural keywords are present, and it's not a $schema declaration, it's likely invalid/empty.
+            if not keys.intersection(structural_keywords) and "$schema" not in self.json_schema:
+                raise ValueError(
+                    f"Invalid JSON Schema: Must contain at least one structural keyword ({', '.join(sorted(structural_keywords))}) "
+                    "or a '$schema' declaration."
+                )
         return self
 
 
