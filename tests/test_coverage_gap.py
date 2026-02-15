@@ -14,7 +14,6 @@ from coreason_manifest.spec.core.flow import (
     FlowMetadata,
     Graph,
     GraphFlow,
-    LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.utils.diff import ManifestDiff
@@ -226,13 +225,7 @@ def test_loader_with_custom_root(tmp_path: Path) -> None:
     jail.mkdir()
     manifest = jail / "manifest.yaml"
     manifest.write_text(
-        "kind: LinearFlow\n"
-        "metadata:\n"
-        "  name: test\n"
-        "  version: '1'\n"
-        "  description: d\n"
-        "  tags: []\n"
-        "sequence: []"
+        "kind: LinearFlow\nmetadata:\n  name: test\n  version: '1'\n  description: d\n  tags: []\nsequence: []"
     )
 
     # Pass explicit root
@@ -269,10 +262,7 @@ def test_diff_edge_changes() -> None:
     flow1 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
-        ),
+        interface=FlowInterface(inputs=DataSchema(json_schema={}), outputs=DataSchema(json_schema={})),
         blackboard=None,
         graph=graph1,
     )
@@ -282,10 +272,7 @@ def test_diff_edge_changes() -> None:
     flow2 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
-        interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
-        ),
+        interface=FlowInterface(inputs=DataSchema(json_schema={}), outputs=DataSchema(json_schema={})),
         blackboard=None,
         graph=graph2,
     )
