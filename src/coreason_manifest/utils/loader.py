@@ -31,12 +31,21 @@ def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow |
         SecurityViolationError: If path traversal or unsafe permissions are detected.
     """
     file_path = Path(path).resolve()
-    jail_root = root_dir if root_dir else file_path.parent
+    jail_root = root_dir or file_path.parent
 
     # Initialize secure loader confined to the file's directory
     loader = ManifestIO(root_dir=jail_root)
 
-    data = loader.load(file_path.name)
+    # Pass relative path from jail root to ensure loader can resolve it correctly
+    try:
+        rel_path = file_path.relative_to(jail_root)
+    except ValueError:
+        # If file is not inside root_dir, let ManifestIO raise the security error
+        # or handle it here. ManifestIO handles absolute paths too if allow_external is False.
+        # But for clarity, we pass the relative path if possible, or just the name if same dir.
+        rel_path = file_path.name
+
+    data = loader.load(str(rel_path))
 
     kind = data.get("kind")
     if kind == "LinearFlow":

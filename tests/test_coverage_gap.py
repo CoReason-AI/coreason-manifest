@@ -1,13 +1,13 @@
 import errno
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 from pydantic import BaseModel
 
+from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     DataSchema,
@@ -18,13 +18,12 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
-    SwitchNode,
-    PlannerNode,
     HumanNode,
+    PlannerNode,
+    SwitchNode,
 )
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 from coreason_manifest.utils.diff import ManifestDiff
@@ -35,8 +34,8 @@ from coreason_manifest.utils.integrity import (
     to_canonical_timestamp,
     verify_merkle_proof,
 )
-from coreason_manifest.utils.loader import load_flow_from_file
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
+from coreason_manifest.utils.loader import load_flow_from_file
 from coreason_manifest.utils.visualizer import to_mermaid, to_react_flow
 
 
@@ -258,6 +257,22 @@ def test_loader_with_custom_root(tmp_path: Path) -> None:
     assert flow.kind == "LinearFlow"
 
 
+def test_loader_outside_root(tmp_path: Path) -> None:
+    # Test loading a file that is outside the provided root_dir
+    # This triggers the ValueError in relative_to and falls back to filename
+    # ManifestIO then tries to load it from root_dir, which fails if not present there
+    jail = tmp_path / "jail"
+    jail.mkdir()
+
+    outside = tmp_path / "outside.yaml"
+    outside.touch()
+
+    # The loader is confined to 'jail', but we ask it to load 'outside.yaml'
+    # It will try to load 'jail/outside.yaml' and fail with FileNotFoundError
+    with pytest.raises(FileNotFoundError):
+        load_flow_from_file(str(outside), root_dir=jail)
+
+
 # --- IO Coverage (Anti-TOCTOU) ---
 def test_io_symlink_loop(tmp_path: Path) -> None:
     # Test ELOOP
@@ -304,11 +319,12 @@ def test_io_exception_after_open(tmp_path: Path) -> None:
     (tmp_path / "dummy.yaml").touch()
 
     # We need to simulate os.open returning a valid fd, then os.fstat raising
-    with patch("os.open", return_value=123), \
-         patch("os.close") as mock_close, \
-         patch("os.fstat", side_effect=RuntimeError("Boom")), \
-         patch("os.name", "posix"):
-
+    with (
+        patch("os.open", return_value=123),
+        patch("os.close") as mock_close,
+        patch("os.fstat", side_effect=RuntimeError("Boom")),
+        patch("os.name", "posix"),
+    ):
         loader = ManifestIO(root_dir=tmp_path)
 
         with pytest.raises(RuntimeError, match="Boom"):
@@ -434,7 +450,7 @@ def test_integrity_legacy_genesis_mismatch() -> None:
 def test_integrity_legacy_chain_mismatch() -> None:
     # Legacy chain mismatch (Line 196)
     n1 = {"data": "gen"}
-    h1 = compute_hash(n1)
+    # Compute hash is implicit in verification
 
     n2 = {"data": "child", "prev_hash": "wrong"}
 
@@ -482,7 +498,7 @@ def test_visualizer_full_coverage() -> None:
         type="agent",
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
-        presentation=PresentationHints(label='Agent "One"', group="Agents")
+        presentation=PresentationHints(label='Agent "One"', group="Agents"),
     )
     node2 = PlannerNode(
         id="planner_1",
@@ -492,7 +508,7 @@ def test_visualizer_full_coverage() -> None:
         goal="g",
         optimizer=None,
         output_schema={},
-        presentation=PresentationHints(group="Planners")
+        presentation=PresentationHints(group="Planners"),
     )
     node3 = SwitchNode(
         id="switch-1",
@@ -510,15 +526,15 @@ def test_visualizer_full_coverage() -> None:
         type="human",
         prompt="Confirm?",
         timeout_seconds=60,
-        options=["yes", "no"]
+        options=["yes", "no"],
     )
 
     # Edges
     edges = [
-        Edge(source="switch-1", target="agent-1"), # Case condition implied
-        Edge(source="switch-1", target="planner_1"), # Default implied
+        Edge(source="switch-1", target="agent-1"),  # Case condition implied
+        Edge(source="switch-1", target="planner_1"),  # Default implied
         Edge(source="agent-1", target="human 1", condition="done"),
-        Edge(source="planner_1", target="switch-1"), # Cycle
+        Edge(source="planner_1", target="switch-1"),  # Cycle
     ]
 
     graph = Graph(nodes={n.id: n for n in [node1, node2, node3, node4]}, edges=edges)
@@ -535,10 +551,10 @@ def test_visualizer_full_coverage() -> None:
     mm = to_mermaid(flow)
     assert "subgraph Agents" in mm
     assert "subgraph Planners" in mm
-    assert 'agent_1["Agent &quot;One&quot;"]' in mm # Check escaping
+    assert 'agent_1["Agent &quot;One&quot;"]' in mm  # Check escaping
     assert "human_1[/" in mm
-    assert "|cond1|" in mm # inferred switch label
-    assert "|default|" in mm # inferred switch default
+    assert "|cond1|" in mm  # inferred switch label
+    assert "|default|" in mm  # inferred switch default
 
     # 2. React Flow Generation
     rf = to_react_flow(flow)
@@ -560,7 +576,7 @@ def test_visualizer_linear_flow() -> None:
         supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
-        metadata={}
+        metadata={},
     )
     node2 = AgentNode(
         id="b",
@@ -568,13 +584,13 @@ def test_visualizer_linear_flow() -> None:
         supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
-        metadata={}
+        metadata={},
     )
 
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name="LinTest", version="1", description="", tags=[]),
-        sequence=[node1, node2]
+        sequence=[node1, node2],
     )
 
     mm = to_mermaid(flow)
@@ -594,19 +610,14 @@ def test_visualizer_with_snapshot() -> None:
         supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
-        metadata={}
+        metadata={},
     )
 
     flow = LinearFlow(
-        kind="LinearFlow",
-        metadata=FlowMetadata(name="LinTest", version="1", description="", tags=[]),
-        sequence=[node1]
+        kind="LinearFlow", metadata=FlowMetadata(name="LinTest", version="1", description="", tags=[]), sequence=[node1]
     )
 
-    snapshot = ExecutionSnapshot(
-        node_states={"a": NodeState.RUNNING},
-        active_path=[]
-    )
+    snapshot = ExecutionSnapshot(node_states={"a": NodeState.RUNNING}, active_path=[])
 
     mm = to_mermaid(flow, snapshot)
     assert ":::running" in mm
