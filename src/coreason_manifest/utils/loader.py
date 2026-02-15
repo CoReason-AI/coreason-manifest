@@ -41,13 +41,14 @@ def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow |
     # Pass relative path from jail root to ensure loader can resolve it correctly
     try:
         rel_path = file_path.relative_to(jail_root)
+        load_path = str(rel_path)
     except ValueError:
         # If file is not inside root_dir, let ManifestIO raise the security error
         # or handle it here. ManifestIO handles absolute paths too if allow_external is False.
         # But for clarity, we pass the relative path if possible, or just the name if same dir.
-        rel_path = file_path.name
+        load_path = file_path.name
 
-    data = loader.load(str(rel_path))
+    data = loader.load(load_path)
 
     kind = data.get("kind")
     if kind == "LinearFlow":

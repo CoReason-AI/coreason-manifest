@@ -557,7 +557,9 @@ def test_visualizer_full_coverage() -> None:
         Edge(source="planner_1", target="switch-1"),  # Cycle
     ]
 
-    graph = Graph(nodes={n.id: n for n in [node1, node2, node3, node4]}, edges=edges)
+    # Explicitly type cast the list to AnyNode to satisfy the Graph definition
+    nodes_list: list[AnyNode] = [node1, node2, node3, node4]
+    graph = Graph(nodes={n.id: n for n in nodes_list}, edges=edges)
 
     flow = GraphFlow(
         kind="GraphFlow",
