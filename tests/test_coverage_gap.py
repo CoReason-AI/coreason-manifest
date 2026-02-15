@@ -80,6 +80,18 @@ def test_recursive_sanitize_pydantic_v1() -> None:
     assert sanitized == {"v1": True}
 
 
+def test_recursive_sanitize_json_exception() -> None:
+    # Coverage for .json() raising exception or returning invalid json
+    class BrokenJson:
+        def json(self) -> str:
+            return "invalid-json{"
+
+    # Should fall through and return the object itself (or str(obj) later)
+    obj = BrokenJson()
+    sanitized = _recursive_sort_and_sanitize(obj)
+    assert sanitized is obj
+
+
 def test_compute_hash_method() -> None:
     class HasHash:
         def compute_hash(self) -> str:

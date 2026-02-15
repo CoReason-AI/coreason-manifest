@@ -52,6 +52,12 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
     if hasattr(obj, "dict"):
         # Pydantic v1
         return _recursive_sort_and_sanitize(obj.dict(exclude_none=True))
+    if hasattr(obj, "json") and callable(obj.json):
+        # Pydantic v1 or compatible (serialized string)
+        try:
+            return _recursive_sort_and_sanitize(json.loads(obj.json()))
+        except (ValueError, TypeError):
+            pass
     return obj
 
 

@@ -76,7 +76,7 @@ def test_linear_unguarded_computer_use() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "requires high-risk capabilities ['computer_use']" in errors[0]
+    assert "requires high-risk features (computer_use capability)" in errors[0]
     assert "not guarded by a HumanNode" in errors[0]
 
 
@@ -128,7 +128,7 @@ def test_swarm_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "requires high-risk capabilities" in errors[0]
+    assert "requires high-risk features" in errors[0]
 
 
 def test_swarm_missing_profile_validation() -> None:

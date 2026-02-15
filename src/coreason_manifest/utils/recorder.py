@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
-from coreason_manifest.utils.integrity import compute_hash
+from coreason_manifest.utils.integrity import compute_hash, to_canonical_timestamp
 from coreason_manifest.utils.privacy import PrivacySentinel
 
 
@@ -60,7 +60,7 @@ class BlackBoxRecorder:
             "inputs": safe_inputs,
             "outputs": safe_outputs,
             "error": error,
-            "timestamp": timestamp.isoformat(),  # Normalize datetime for consistent hashing
+            "timestamp": to_canonical_timestamp(timestamp),
             "duration_ms": duration_ms,
             "attributes": attributes,
             "previous_hashes": sorted(previous_hashes),
