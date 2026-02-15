@@ -73,7 +73,7 @@ def test_graph_builder() -> None:
     # Test set_interface and set_blackboard
     builder.set_interface(
         inputs={"type": "object", "properties": {"in": {"type": "string"}}},
-        outputs={"type": "object", "properties": {"out": {"type": "integer"}}}
+        outputs={"type": "object", "properties": {"out": {"type": "integer"}}},
     )
     builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
 

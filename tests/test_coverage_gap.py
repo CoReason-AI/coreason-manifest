@@ -648,11 +648,12 @@ def test_visualizer_with_snapshot() -> None:
 
 # --- New Validation Tests ---
 
+
 def test_data_schema_validator() -> None:
     # Valid
     DataSchema(json_schema={"type": "object"})
     DataSchema(json_schema={"$ref": "#/definitions/foo"})
-    DataSchema(json_schema={}) # Empty dict passes (no validation if empty)
+    DataSchema(json_schema={})  # Empty dict passes (no validation if empty)
 
     # SOTA: Complex Valid Schemas
     DataSchema(json_schema={"oneOf": [{"type": "string"}, {"type": "integer"}]})
@@ -661,7 +662,7 @@ def test_data_schema_validator() -> None:
 
     # Invalid
     with pytest.raises(ValidationError, match="Invalid JSON Schema"):
-        DataSchema(json_schema={"foo": "bar"}) # No structural keywords
+        DataSchema(json_schema={"type": "invalid_type"}) # Invalid type
 
 
 def test_tool_capability_validator() -> None:
@@ -671,4 +672,4 @@ def test_tool_capability_validator() -> None:
 
     # Invalid
     with pytest.raises(ValidationError, match="Critical tools must be documented"):
-        ToolCapability(name="t3", risk_level="critical") # Missing description
+        ToolCapability(name="t3", risk_level="critical")  # Missing description

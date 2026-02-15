@@ -1,6 +1,8 @@
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
+import jsonschema
+from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.core.governance import Governance
@@ -60,28 +62,12 @@ class DataSchema(BaseModel):
     @model_validator(mode="after")
     def validate_meta_schema(self) -> "DataSchema":
         if self.json_schema:
-            # SOTA: Check for ANY structural keyword, not just type/$ref.
-            # This allows schemas like {"anyOf": ...} or {"properties": ...}
-            structural_keywords = {
-                "type",
-                "$ref",
-                "oneOf",
-                "anyOf",
-                "allOf",
-                "not",
-                "enum",
-                "const",
-                "properties",
-                "items",
-            }
-            keys = set(self.json_schema.keys())
-
-            # If no structural keywords are present, and it's not a $schema declaration, it's likely invalid/empty.
-            if not keys.intersection(structural_keywords) and "$schema" not in self.json_schema:
-                raise ValueError(
-                    f"Invalid JSON Schema: Must contain at least one structural keyword ({', '.join(sorted(structural_keywords))}) "
-                    "or a '$schema' declaration."
-                )
+            try:
+                # SOTA: Validates that the dictionary is ACTUALLY a valid JSON Schema.
+                # Catches {"type": "invalid_type"} which the heuristic missed.
+                jsonschema.Draft7Validator.check_schema(self.json_schema)
+            except SchemaError as e:
+                raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
         return self
 
 
