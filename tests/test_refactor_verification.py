@@ -1,7 +1,9 @@
 import os
 import sys
 import time
+import uuid
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -213,6 +215,12 @@ def test_circuit_breaker_state_updates() -> None:
     with pytest.raises(CircuitOpenError):
         check_circuit(node_id, policy, store)
 
+    # Test early return in record_failure when already open
+    # failure_count should NOT increment
+    count_before = store[node_id].failure_count
+    record_failure(node_id, policy, store)
+    assert store[node_id].failure_count == count_before
+
     # Wait for timeout (simulated by updating time)
     last_failure = store[node_id].last_failure_time
     assert last_failure is not None
@@ -270,6 +278,13 @@ class Ok: pass
 
     with pytest.raises(ValueError, match="Failed to execute"):
         load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
+
+    # 6. Spec Creation Failure
+    # Difficult to trigger via spec_from_file_location with valid path,
+    # but we can mock it to return None
+    with patch("importlib.util.spec_from_file_location", return_value=None):
+        with pytest.raises(ValueError, match="Could not create module spec"):
+            load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
 
 
 # Test 7: Loader Success & Hygiene
