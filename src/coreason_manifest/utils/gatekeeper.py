@@ -93,18 +93,20 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         allowed = True
                         break
 
-                if not allowed:
-                    reports.append(
-                        ComplianceReport(
-                            severity="violation",
-                            message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
-                            remediation=RemediationAction(
-                                type="whitelist_domain",
-                                patch_data={"domain": domain},
-                                description=f"Add '{domain}' to allowed_domains",
-                            ),
-                        )
+                if allowed:
+                    continue
+
+                reports.append(
+                    ComplianceReport(
+                        severity="violation",
+                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
+                        remediation=RemediationAction(
+                            type="whitelist_domain",
+                            patch_data={"domain": domain},
+                            description=f"Add '{domain}' to allowed_domains",
+                        ),
                     )
+                )
 
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:
