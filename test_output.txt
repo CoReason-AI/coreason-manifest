@@ -55,7 +55,7 @@ src/coreason_manifest/spec/common/__init__.py           0      0   100%
 src/coreason_manifest/spec/common/presentation.py      10      0   100%
 src/coreason_manifest/spec/core/__init__.py             7      0   100%
 src/coreason_manifest/spec/core/engines.py            121      0   100%
-src/coreason_manifest/spec/core/flow.py               102      0   100%
+src/coreason_manifest/spec/core/flow.py               101      0   100%
 src/coreason_manifest/spec/core/governance.py          41      0   100%
 src/coreason_manifest/spec/core/nodes.py               83      0   100%
 src/coreason_manifest/spec/core/resilience.py         125      0   100%
@@ -77,6 +77,6 @@ src/coreason_manifest/utils/recorder.py                22      0   100%
 src/coreason_manifest/utils/validator.py              142      0   100%
 src/coreason_manifest/utils/visualizer.py             162      0   100%
 ---------------------------------------------------------------------------------
-TOTAL                                                1612      0   100%
+TOTAL                                                1611      0   100%
 Required test coverage of 100% reached. Total coverage: 100.00%
-============================= 247 passed in 2.97s ==============================
+============================= 247 passed in 3.70s ==============================

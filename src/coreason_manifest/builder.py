@@ -50,7 +50,7 @@ def create_recovery(
     queue_name: str | None = None,
 ) -> RecoveryStrategy:
     """Helper to create a RecoveryStrategy."""
-    res_strategy: Any
+    res_strategy: RecoveryStrategy
     if strategy == "retry":
         res_strategy = RetryStrategy(
             max_attempts=retries,

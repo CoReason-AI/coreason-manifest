@@ -21,9 +21,7 @@ def test_critical_tool_requires_guard() -> None:
     )
 
     # Define Agent using critical tool
-    agent = AgentNode(
-        id="agent-1", metadata={}, type="agent", profile="default_profile", tools=["delete_db"]
-    )
+    agent = AgentNode(id="agent-1", metadata={}, type="agent", profile="default_profile", tools=["delete_db"])
 
     # Unguarded Flow
     flow_unguarded = LinearFlow(
@@ -73,9 +71,7 @@ def test_safe_tool_allowed() -> None:
         profiles={"default_profile": profile}, tool_packs={"db_tools": pack}, supervision_templates={}
     )
 
-    agent = AgentNode(
-        id="agent-1", metadata={}, type="agent", profile="default_profile", tools=["read_db"]
-    )
+    agent = AgentNode(id="agent-1", metadata={}, type="agent", profile="default_profile", tools=["read_db"])
 
     flow = LinearFlow(
         kind="LinearFlow",

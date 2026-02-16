@@ -139,7 +139,6 @@ class FlowDefinitions(BaseModel):
 def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyNode]) -> None:
     """Shared referential integrity validation logic."""
     valid_profiles = definitions.profiles.keys() if definitions else set()
-    valid_policies = definitions.supervision_templates.keys() if definitions else set()
 
     # SOTA: Create a set of all available tools from registered packs
     valid_tools: set[str] = set()

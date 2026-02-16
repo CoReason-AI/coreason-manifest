@@ -1,6 +1,5 @@
-
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from coreason_manifest.builder import AgentBuilder, NewLinearFlow
 from coreason_manifest.spec.core.flow import (
@@ -13,7 +12,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     ReflexionStrategy,
@@ -21,7 +20,6 @@ from coreason_manifest.spec.core.resilience import (
 )
 from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
-from coreason_manifest.utils.validator import validate_flow
 
 
 def test_tool_access_policy_defaults() -> None:
@@ -56,8 +54,11 @@ def test_granular_governance_structure() -> None:
         },
         default_tool_policy=ToolAccessPolicy(risk_level="standard"),
     )
+    assert gov.tool_policy is not None
     assert gov.tool_policy["sql_tool"].require_auth is True
     assert gov.tool_policy["calc_tool"].require_auth is False
+
+    assert gov.default_tool_policy is not None
     assert gov.default_tool_policy.risk_level == "standard"
 
 
@@ -232,9 +233,7 @@ def test_coverage_validator_reflexion_mismatch() -> None:
     class FakeNode:
         id = "fake"
         type = "fake_type"
-        recovery = ReflexionStrategy(
-            max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True
-        )
+        recovery = ReflexionStrategy(max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True)
 
     # Need to invoke _validate_supervision manually?
     # Or force validate_flow with this fake node.
@@ -250,17 +249,16 @@ def test_coverage_validator_reflexion_mismatch() -> None:
 
     node = AgentNode.model_construct(
         id="a1",
-        type="invalid_type", # type: ignore
-        recovery=ReflexionStrategy(
-            max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True
-        ),
+        type="invalid_type",  # type: ignore
+        recovery=ReflexionStrategy(max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True),
         metadata={},
         profile="p",
-        tools=[]
+        tools=[],
     )
 
     # Run validation logic manually
     from coreason_manifest.utils.validator import _validate_supervision
+
     errors = _validate_supervision(node, set())
     assert any("uses ReflexionStrategy but is of type 'invalid_type'" in e for e in errors)
 
@@ -271,21 +269,12 @@ def test_coverage_validator_escalation_empty_queue() -> None:
     # So we use model_construct.
 
     esc = EscalationStrategy.model_construct(
-        type="escalate",
-        queue_name="",
-        notification_level="info",
-        timeout_seconds=10
+        type="escalate", queue_name="", notification_level="info", timeout_seconds=10
     )
 
-    node = AgentNode(
-        id="a1",
-        metadata={},
-        type="agent",
-        profile="p",
-        tools=[],
-        recovery=esc
-    )
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], recovery=esc)
 
     from coreason_manifest.utils.validator import _validate_supervision
+
     errors = _validate_supervision(node, set())
     assert any("empty queue_name" in e for e in errors)

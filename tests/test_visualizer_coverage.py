@@ -64,9 +64,7 @@ def test_visualizer_node_types_coverage() -> None:
     nodes: list[Node] = []
 
     # Planner
-    planner = PlannerNode(
-        id="plan", metadata={}, goal="g", optimizer=None, output_schema={}, type="planner"
-    )
+    planner = PlannerNode(id="plan", metadata={}, goal="g", optimizer=None, output_schema={}, type="planner")
     nodes.append(planner)
 
     # Inspector
@@ -96,9 +94,7 @@ def test_visualizer_node_types_coverage() -> None:
     nodes.append(emergence)
 
     # PlaceholderNode
-    placeholder = PlaceholderNode(
-        id="place", metadata={}, required_capabilities=[], type="placeholder"
-    )
+    placeholder = PlaceholderNode(id="place", metadata={}, required_capabilities=[], type="placeholder")
     nodes.append(placeholder)
 
     flow = LinearFlow(

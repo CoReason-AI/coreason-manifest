@@ -1,22 +1,16 @@
 import pytest
-from pydantic import ValidationError
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
-from coreason_manifest.spec.core.resilience import EscalationStrategy, RecoveryStrategy
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
 
 def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0", description="Desc")
-    builder.add_step(
-        PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[])
-    )
-    builder.add_step(
-        PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[])
-    )
+    builder.add_step(PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.add_step(PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[]))
 
     tp = ToolPack(
         kind="ToolPack",
@@ -50,12 +44,8 @@ def test_linear_builder() -> None:
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0", description="Desc")
-    builder.add_node(
-        PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
-    )
-    builder.add_node(
-        PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
-    )
+    builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[]))
     builder.connect("n1", "n2", condition="ok")
 
     tp = ToolPack(
