@@ -1,14 +1,13 @@
 
 import pytest
-from pydantic import ValidationError
-from datetime import datetime
-
-from coreason_manifest.spec.core.governance import ToolAccessPolicy
-from coreason_manifest.spec.core.flow import GraphFlow, FlowMetadata, FlowDefinitions, FlowInterface, DataSchema, Graph
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.utils.io import SecurityViolationError
-from coreason_manifest.utils.integrity import compute_hash, _recursive_sort_and_sanitize
 from pydantic import BaseModel
+
+from coreason_manifest.spec.core.flow import DataSchema, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.spec.core.governance import ToolAccessPolicy
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
+from coreason_manifest.utils.io import SecurityViolationError
+
 
 def test_tool_access_policy_defaults() -> None:
     # Test critical defaults
@@ -30,6 +29,7 @@ def test_tool_access_policy_defaults() -> None:
     # Test explicit True for standard
     p4 = ToolAccessPolicy(risk_level="standard", require_auth=True)
     assert p4.require_auth is True
+
 
 def test_graph_flow_draft_mode() -> None:
     # Create invalid graph (missing tool)
@@ -77,7 +77,7 @@ def test_graph_flow_draft_mode() -> None:
         id="agent-1",
         type="agent",
         profile="my-brain",
-        tools=[], # Valid
+        tools=[],  # Valid
         metadata={},
         supervision=None,
     )
@@ -94,6 +94,7 @@ def test_graph_flow_draft_mode() -> None:
     )
     assert flow_valid.status == "published"
 
+
 def test_security_violation_error() -> None:
     e = SecurityViolationError("Path bad", code="SEC_001")
     assert str(e) == "Security Error: [SEC_001] Path bad"
@@ -101,10 +102,12 @@ def test_security_violation_error() -> None:
     e2 = SecurityViolationError("Path bad")
     assert str(e2) == "Security Error: Path bad"
 
+
 class MockModel(BaseModel):
     name: str
     integrity_hash: str | None = None
     signature: str | None = None
+
 
 def test_compute_hash_pydantic_exclusion() -> None:
     m = MockModel(name="test", integrity_hash="hash123", signature="sig456")
@@ -124,11 +127,13 @@ def test_compute_hash_pydantic_exclusion() -> None:
     assert "signature" not in sanitized
     assert sanitized["name"] == "test"
 
+
 class MockDumpable:
     def model_dump(self, exclude_none: bool = True) -> dict[str, int]:
         if exclude_none:
             return {"a": 1}
         return {"a": 1}
+
 
 def test_compute_hash_generic_dumpable() -> None:
     # Covers line 58 in integrity.py
