@@ -7,7 +7,6 @@ from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
     ReflexionStrategy,
-    ResilienceStrategy,
 )
 from coreason_manifest.spec.core.tools import ToolPack
 
@@ -174,20 +173,16 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
 
 
 def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
+    # Renamed from "supervision" to generically cover recovery strategies
+    # Logic updated to support RecoveryStrategy on AgentNode
     errors: list[str] = []
-    policy = node.supervision
-    if not policy:
-        return errors
 
-    # If policy is a string reference, validation happens in validate_referential_integrity.
-    # We can't validate the content of the referenced policy here without access to FlowDefinitions.
-    if isinstance(policy, str):
-        return errors
+    strategies = []
+    if isinstance(node, AgentNode) and node.recovery:
+        strategies.append(node.recovery)
 
-    # Collect all strategies from handlers and default
-    strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
-    if policy.default_strategy:
-        strategies.append(policy.default_strategy)
+    # Note: Other nodes lost supervision/recovery fields in this refactor.
+    # If other nodes need validation, add checks here.
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -219,18 +214,9 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
     adj: dict[str, list[str]] = {n.id: [] for n in nodes}
 
     for node in nodes:
-        if not node.supervision or isinstance(node.supervision, str):
-            # Skip cycle detection for referenced policies (cannot resolve here)
-            continue
-
-        policy = node.supervision
-        strategies: list[ResilienceStrategy] = [h.strategy for h in policy.handlers]
-        if policy.default_strategy:
-            strategies.append(policy.default_strategy)
-
-        for strategy in strategies:
+        if isinstance(node, AgentNode) and node.recovery:
+            strategy = node.recovery
             if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
-                # Only add edge if target exists (validity checked elsewhere)
                 adj[node.id].append(strategy.fallback_node_id)
 
     # Detect cycles using DFS

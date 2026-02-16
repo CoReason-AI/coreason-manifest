@@ -16,7 +16,7 @@ def create_valid_flow(path: str) -> None:
         "kind": "LinearFlow",
         "metadata": {"name": "ValidFlow", "version": "1.0", "description": "Test", "tags": []},
         "sequence": [
-            {"id": "step1", "type": "placeholder", "metadata": {}, "supervision": None, "required_capabilities": []}
+            {"id": "step1", "type": "placeholder", "metadata": {}, "required_capabilities": []}
         ],
     }
     with open(path, "w") as f:

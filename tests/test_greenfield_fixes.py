@@ -1,11 +1,27 @@
-import pytest
-from pydantic import BaseModel
 
-from coreason_manifest.spec.core.flow import DataSchema, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
+import pytest
+from pydantic import BaseModel, ValidationError
+
+from coreason_manifest.builder import AgentBuilder, NewLinearFlow
+from coreason_manifest.spec.core.flow import (
+    DataSchema,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
+from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    ReflexionStrategy,
+    SupervisionPolicy,
+)
 from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
+from coreason_manifest.utils.validator import validate_flow
 
 
 def test_tool_access_policy_defaults() -> None:
@@ -30,6 +46,21 @@ def test_tool_access_policy_defaults() -> None:
     assert p4.require_auth is True
 
 
+def test_granular_governance_structure() -> None:
+    from coreason_manifest.spec.core.governance import Governance
+
+    gov = Governance(
+        tool_policy={
+            "sql_tool": ToolAccessPolicy(risk_level="critical"),
+            "calc_tool": ToolAccessPolicy(risk_level="minimal"),
+        },
+        default_tool_policy=ToolAccessPolicy(risk_level="standard"),
+    )
+    assert gov.tool_policy["sql_tool"].require_auth is True
+    assert gov.tool_policy["calc_tool"].require_auth is False
+    assert gov.default_tool_policy.risk_level == "standard"
+
+
 def test_graph_flow_draft_mode() -> None:
     # Create invalid graph (missing tool)
     brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
@@ -40,7 +71,7 @@ def test_graph_flow_draft_mode() -> None:
         profile="my-brain",
         tools=["missing-tool"],
         metadata={},
-        supervision=None,
+        recovery=None,
     )
     graph = Graph(nodes={"agent-1": agent}, edges=[])
 
@@ -78,7 +109,7 @@ def test_graph_flow_draft_mode() -> None:
         profile="my-brain",
         tools=[],  # Valid
         metadata={},
-        supervision=None,
+        recovery=None,
     )
     valid_graph = Graph(nodes={"agent-1": valid_agent}, edges=[])
 
@@ -106,6 +137,8 @@ class MockModel(BaseModel):
     name: str
     integrity_hash: str | None = None
     signature: str | None = None
+
+    _hash_exclude_ = {"integrity_hash", "signature"}
 
 
 def test_compute_hash_pydantic_exclusion() -> None:
@@ -139,3 +172,120 @@ def test_compute_hash_generic_dumpable() -> None:
     obj = MockDumpable()
     h = compute_hash(obj)
     assert h == compute_hash({"a": 1})
+
+
+def test_coverage_agent_builder_recovery() -> None:
+    """Test AgentBuilder.with_recovery and default create_recovery logic."""
+    # Test fallback to escalate (lines 65-70)
+    builder = AgentBuilder("agent-rec")
+    builder.with_identity("r", "p")
+    # Using 'escalate' default implied if not 'retry' or 'fallback'
+    builder.with_recovery(retries=0, strategy="custom_escalate")
+
+    agent = builder.build()
+    assert isinstance(agent.recovery, EscalationStrategy)
+    assert agent.recovery.notification_level == "warning"
+
+
+def test_coverage_flow_builder_template() -> None:
+    """Test define_supervision_template."""
+    # Even if unused by nodes, the method exists
+    lf = NewLinearFlow("Template Test")
+    policy = SupervisionPolicy(handlers=[], default_strategy=None)
+    lf.define_supervision_template("tpl", policy)
+    assert lf._supervision_templates["tpl"] == policy
+
+
+def test_coverage_linear_flow_published() -> None:
+    """Test LinearFlow with status='published' to hit validate_integrity."""
+    brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
+    definitions = FlowDefinitions(profiles={"my-brain": brain})
+    agent = AgentNode(
+        id="agent-1",
+        type="agent",
+        profile="my-brain",
+        tools=[],
+        metadata={},
+        recovery=None,
+    )
+
+    # Should pass validation
+    LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=FlowMetadata(name="test", version="1", description="", tags=[]),
+        definitions=definitions,
+        sequence=[agent],
+    )
+
+
+def test_coverage_validator_reflexion_mismatch() -> None:
+    """Test ReflexionStrategy on non-supported node type (via bypass)."""
+    # SwitchNode doesn't have recovery field, so we can't attach it easily via constructor.
+    # But _validate_supervision checks node.recovery if AgentNode.
+    # It checks type NOT in list.
+    # But only AgentNode has recovery. AgentNode IS in list.
+    # So we can't hit the error unless we manually attach recovery to a SwitchNode?
+    # But SwitchNode structure forbids it.
+    # We can fake a node object.
+
+    class FakeNode:
+        id = "fake"
+        type = "fake_type"
+        recovery = ReflexionStrategy(
+            max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True
+        )
+
+    # Need to invoke _validate_supervision manually?
+    # Or force validate_flow with this fake node.
+    # _validate_supervision logic:
+    # if isinstance(node, AgentNode) and node.recovery:
+    # So it only checks AgentNodes!
+    # And AgentNode type is always "agent".
+    # So "node.type not in (...)" condition where "agent" is in list...
+    # Wait, can AgentNode have type="something_else"?
+    # AgentNode.type is Literal["agent"].
+    # So checking type on AgentNode is redundant if type is fixed.
+    # UNLESS we manually construct AgentNode with invalid type (bypassing validation).
+
+    node = AgentNode.model_construct(
+        id="a1",
+        type="invalid_type", # type: ignore
+        recovery=ReflexionStrategy(
+            max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True
+        ),
+        metadata={},
+        profile="p",
+        tools=[]
+    )
+
+    # Run validation logic manually
+    from coreason_manifest.utils.validator import _validate_supervision
+    errors = _validate_supervision(node, set())
+    assert any("uses ReflexionStrategy but is of type 'invalid_type'" in e for e in errors)
+
+
+def test_coverage_validator_escalation_empty_queue() -> None:
+    """Test EscalationStrategy with empty queue via bypass."""
+    # EscalationStrategy model validation prevents empty string if we used min_length=1.
+    # So we use model_construct.
+
+    esc = EscalationStrategy.model_construct(
+        type="escalate",
+        queue_name="",
+        notification_level="info",
+        timeout_seconds=10
+    )
+
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p",
+        tools=[],
+        recovery=esc
+    )
+
+    from coreason_manifest.utils.validator import _validate_supervision
+    errors = _validate_supervision(node, set())
+    assert any("empty queue_name" in e for e in errors)

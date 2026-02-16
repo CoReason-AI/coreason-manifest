@@ -15,7 +15,6 @@ def test_swarm_integrity_validation() -> None:
     valid_swarm = SwarmNode(
         id="s1",
         metadata={},
-        supervision=None,
         type="swarm",
         worker_profile="worker-1",
         workload_variable="v1",
@@ -34,7 +33,6 @@ def test_swarm_integrity_validation() -> None:
     invalid_swarm = SwarmNode(
         id="s2",
         metadata={},
-        supervision=None,
         type="swarm",
         worker_profile="ghost-worker",
         workload_variable="v1",

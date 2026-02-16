@@ -17,7 +17,6 @@ def test_swarm_simulation_expansion() -> None:
     swarm = SwarmNode(
         id="swarm-1",
         metadata={},
-        supervision=None,
         worker_profile="worker-p",
         workload_variable="items",
         distribution_strategy="sharded",
@@ -69,7 +68,7 @@ def test_swarm_simulation_expansion() -> None:
 def test_deep_diff_granularity() -> None:
     # 1. Base Flow
     profile_a = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
-    node_a = AgentNode(id="a", metadata={}, supervision=None, profile=profile_a, tools=[])
+    node_a = AgentNode(id="a", metadata={}, profile=profile_a, tools=[])
 
     flow_1 = GraphFlow(
         kind="GraphFlow",

@@ -34,7 +34,6 @@ def test_visualizer_state_application() -> None:
     node = AgentNode(
         id="agent-1",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         type="agent",
@@ -66,7 +65,7 @@ def test_visualizer_node_types_coverage() -> None:
 
     # Planner
     planner = PlannerNode(
-        id="plan", metadata={}, supervision=None, goal="g", optimizer=None, output_schema={}, type="planner"
+        id="plan", metadata={}, goal="g", optimizer=None, output_schema={}, type="planner"
     )
     nodes.append(planner)
 
@@ -74,7 +73,6 @@ def test_visualizer_node_types_coverage() -> None:
     inspector = InspectorNode(
         id="inspect",
         metadata={},
-        supervision=None,
         target_variable="t",
         criteria="c",
         pass_threshold=0.5,
@@ -88,7 +86,6 @@ def test_visualizer_node_types_coverage() -> None:
     emergence = EmergenceInspectorNode(
         id="emerge",
         metadata={},
-        supervision=None,
         target_variable="t",
         criteria="c",
         output_variable="o",
@@ -100,7 +97,7 @@ def test_visualizer_node_types_coverage() -> None:
 
     # PlaceholderNode
     placeholder = PlaceholderNode(
-        id="place", metadata={}, supervision=None, required_capabilities=[], type="placeholder"
+        id="place", metadata={}, required_capabilities=[], type="placeholder"
     )
     nodes.append(placeholder)
 
@@ -126,7 +123,6 @@ def test_switch_edge_inference() -> None:
     switch_node = SwitchNode(
         id="switch-1",
         metadata={},
-        supervision=None,
         variable="var",
         cases={"case1": "target-1"},
         default="target-2",
@@ -136,7 +132,6 @@ def test_switch_edge_inference() -> None:
     target_node_1 = AgentNode(
         id="target-1",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         type="agent",
@@ -145,7 +140,6 @@ def test_switch_edge_inference() -> None:
     target_node_2 = AgentNode(
         id="target-2",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         type="agent",

@@ -1,6 +1,6 @@
 from pydantic import TypeAdapter
 
-from coreason_manifest.spec.core.resilience import DiagnosisReasoning, ErrorDomain, ErrorHandler, ResilienceConfig
+from coreason_manifest.spec.core.resilience import DiagnosisReasoning, ErrorDomain, ErrorHandler, RecoveryStrategy
 
 
 def test_diagnosis_reasoning_instantiation() -> None:
@@ -13,7 +13,7 @@ def test_diagnosis_reasoning_instantiation() -> None:
 def test_diagnosis_reasoning_deserialization() -> None:
     data = {"type": "diagnosis", "diagnostic_model": "gpt-3.5", "fix_strategies": ["parameter_tuning"]}
 
-    adapter: TypeAdapter[ResilienceConfig] = TypeAdapter(ResilienceConfig)
+    adapter: TypeAdapter[RecoveryStrategy] = TypeAdapter(RecoveryStrategy)
     strategy = adapter.validate_python(data)
 
     assert isinstance(strategy, DiagnosisReasoning)

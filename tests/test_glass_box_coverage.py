@@ -81,18 +81,17 @@ def test_diff_engine_coverage() -> None:
 
     # Agent Tools
     p = CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)
-    node1 = AgentNode(id="a", metadata={}, supervision=None, profile=p, tools=["t1"])
+    node1 = AgentNode(id="a", metadata={}, profile=p, tools=["t1"])
     node2 = node1.model_copy(update={"tools": ["t1", "t2"]})
 
     # Human interaction
-    h1 = HumanNode(id="h", metadata={}, supervision=None, prompt="p1", timeout_seconds=10)
+    h1 = HumanNode(id="h", metadata={}, prompt="p1", timeout_seconds=10)
     h2 = h1.model_copy(update={"prompt": "p2", "interaction_mode": "steering"})
 
     # Swarm worker
     s1 = SwarmNode(
         id="s",
         metadata={},
-        supervision=None,
         worker_profile="wp1",
         workload_variable="w",
         distribution_strategy="sharded",
@@ -190,8 +189,8 @@ def test_diff_engine_coverage() -> None:
     assert any(c.field == "presentation.label" for c in changes)
 
     # Profile Reference Change (String)
-    node1_ref = AgentNode(id="a", metadata={}, supervision=None, profile="wp1", tools=[])
-    node2_ref = AgentNode(id="a", metadata={}, supervision=None, profile="wp2", tools=[])
+    node1_ref = AgentNode(id="a", metadata={}, profile="wp1", tools=[])
+    node2_ref = AgentNode(id="a", metadata={}, profile="wp2", tools=[])
 
     f_ref1 = GraphFlow(
         kind="GraphFlow",
@@ -221,7 +220,7 @@ def test_diff_engine_coverage() -> None:
 
     # Node Type Change
     # Change 'a' from AgentNode to PlannerNode
-    planner = PlannerNode(id="a", metadata={}, supervision=None, goal="g", optimizer=None, output_schema={})
+    planner = PlannerNode(id="a", metadata={}, goal="g", optimizer=None, output_schema={})
     graph_type = Graph(nodes={"a": planner, "h": h1, "s": s1}, edges=[])
     f_type = GraphFlow(
         kind="GraphFlow",
@@ -240,8 +239,8 @@ def test_diff_engine_coverage() -> None:
     # Profile Object Change
     p1 = CognitiveProfile(role="r1", persona="p", reasoning=None, fast_path=None)
     p2 = CognitiveProfile(role="r2", persona="p", reasoning=None, fast_path=None)
-    node1_p = AgentNode(id="a", metadata={}, supervision=None, profile=p1, tools=[])
-    node2_p = AgentNode(id="a", metadata={}, supervision=None, profile=p2, tools=[])
+    node1_p = AgentNode(id="a", metadata={}, profile=p1, tools=[])
+    node2_p = AgentNode(id="a", metadata={}, profile=p2, tools=[])
 
     graph_p1 = Graph(nodes={"a": node1_p}, edges=[])
     graph_p2 = Graph(nodes={"a": node2_p}, edges=[])
@@ -301,8 +300,8 @@ def test_mock_factory_coverage() -> None:
 
     # Test LinearFlow
     nodes = [
-        PlannerNode(id="p", metadata={}, supervision=None, goal="g", optimizer=None, output_schema=schema),
-        HumanNode(id="h", metadata={}, supervision=None, prompt="p", timeout_seconds=1, input_schema=schema),
+        PlannerNode(id="p", metadata={}, goal="g", optimizer=None, output_schema=schema),
+        HumanNode(id="h", metadata={}, prompt="p", timeout_seconds=1, input_schema=schema),
     ]
     flow = LinearFlow(kind="LinearFlow", metadata=_get_base_metadata(), sequence=nodes)  # type: ignore[arg-type]
 
@@ -316,14 +315,12 @@ def test_mock_factory_coverage() -> None:
     n_a = AgentNode(
         id="a",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
     )
     n_b = AgentNode(
         id="b",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -356,7 +353,6 @@ def test_mock_factory_coverage() -> None:
     s = SwarmNode(
         id="s",
         metadata={},
-        supervision=None,
         worker_profile="wp1",
         workload_variable="w",
         distribution_strategy="sharded",
@@ -410,14 +406,12 @@ def test_visualizer_layout_coverage() -> None:
     n_a = AgentNode(
         id="a",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
     )
     n_b = AgentNode(
         id="b",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -448,7 +442,6 @@ def test_visualizer_layout_coverage() -> None:
     n_c = AgentNode(
         id="c",
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
     )

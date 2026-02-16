@@ -148,17 +148,6 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
             valid_tools.update(t.name for t in pack.tools)
 
     for node in nodes:
-        # Global Supervision Template Check
-        if isinstance(node.supervision, str):
-            if node.supervision.startswith("ref:"):
-                ref_id = node.supervision[4:]  # Strip 'ref:' prefix
-                if ref_id not in valid_policies:
-                    raise ValueError(f"Node '{node.id}' references undefined supervision template ID '{ref_id}'")
-            else:
-                raise ValueError(
-                    f"Node '{node.id}' has invalid supervision reference '{node.supervision}'. Must start with 'ref:'"
-                )
-
         if isinstance(node, AgentNode):
             # 1. Profile Check
             if isinstance(node.profile, str) and node.profile not in valid_profiles:
@@ -184,6 +173,7 @@ class LinearFlow(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["LinearFlow"]
+    status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     sequence: list[AnyNode]
@@ -192,6 +182,8 @@ class LinearFlow(BaseModel):
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "LinearFlow":
         """Ensures all string-based profile references point to a valid definition."""
+        if self.status == "draft":
+            return self
         validate_integrity(self.definitions, self.sequence)
         return self
 

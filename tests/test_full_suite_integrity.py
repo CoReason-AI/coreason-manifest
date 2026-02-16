@@ -13,10 +13,10 @@ def test_full_suite_integrity() -> None:
     builder = NewLinearFlow("IntegrityCheck", version="1.0", description="Verifying Core Integrity")
 
     node1 = PlaceholderNode(
-        id="step-1", metadata={}, supervision=None, required_capabilities=["logging"], type="placeholder"
+        id="step-1", metadata={}, required_capabilities=["logging"], type="placeholder"
     )
     node2 = PlaceholderNode(
-        id="step-2", metadata={}, supervision=None, required_capabilities=["alerting"], type="placeholder"
+        id="step-2", metadata={}, required_capabilities=["alerting"], type="placeholder"
     )
 
     builder.add_step(node1)

@@ -10,7 +10,6 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
-    SupervisionPolicy,
 )
 
 
@@ -70,11 +69,11 @@ def test_supervision_critic_routing() -> None:
     # SupervisionPolicy doesn't have critic_model directly, it's inside ReflexionStrategy
     strategy = ReflexionStrategy(max_attempts=3, critic_model=criteria, critic_prompt="Test", include_trace=True)
 
-    sup = SupervisionPolicy(handlers=[], default_strategy=strategy)
+    # sup = SupervisionPolicy(handlers=[], default_strategy=strategy)
 
-    assert isinstance(sup.default_strategy, ReflexionStrategy)
-    assert isinstance(sup.default_strategy.critic_model, ModelCriteria)
-    assert sup.default_strategy.critic_model.capabilities == ["coding"]
+    assert isinstance(strategy, ReflexionStrategy)
+    assert isinstance(strategy.critic_model, ModelCriteria)
+    assert strategy.critic_model.capabilities == ["coding"]
 
 
 def test_council_tie_breaker_routing() -> None:

@@ -18,7 +18,6 @@ def test_emergence_inspector_instantiation() -> None:
     inspector = EmergenceInspectorNode(
         id="inspector-001",
         metadata={},
-        supervision=None,
         target_variable="agent_response",
         criteria="Check for hidden goals",
         output_variable="is_safe",
@@ -36,7 +35,6 @@ def test_emergence_inspector_instantiation() -> None:
     inspector_custom = EmergenceInspectorNode(
         id="inspector-002",
         metadata={},
-        supervision=None,
         target_variable="response",
         criteria="Check for deception only",
         output_variable="is_deceptive",

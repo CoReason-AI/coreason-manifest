@@ -62,4 +62,5 @@ class Governance(BaseModel):
     safety: Safety | None = None
     audit: Audit | None = None
     circuit_breaker: CircuitBreaker | None = None
-    tool_policy: ToolAccessPolicy | None = None
+    tool_policy: dict[str, ToolAccessPolicy] | None = None
+    default_tool_policy: ToolAccessPolicy | None = None

@@ -11,7 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.resilience import RecoveryStrategy, SupervisionPolicy
+from coreason_manifest.spec.core.resilience import RecoveryStrategy
 
 
 class Node(BaseModel):
@@ -21,7 +21,6 @@ class Node(BaseModel):
 
     id: str
     metadata: dict[str, Any]
-    supervision: SupervisionPolicy | str | None
     presentation: PresentationHints | None = Field(None, description="UI rendering hints.")
     type: str
 

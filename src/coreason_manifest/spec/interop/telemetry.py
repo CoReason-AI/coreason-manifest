@@ -39,6 +39,8 @@ class NodeExecution(BaseModel):
     )
     signature: str | None = Field(None, description="Optional cryptographic signature of the event.")
 
+    _hash_exclude_ = {"execution_hash", "signature"}
+
 
 class ExecutionSnapshot(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)

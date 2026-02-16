@@ -50,7 +50,8 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
         return to_canonical_timestamp(obj)
     if isinstance(obj, BaseModel):
         # Pydantic v2
-        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude={"integrity_hash", "signature"}))
+        excludes = getattr(obj, "_hash_exclude_", None)
+        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes))
     if hasattr(obj, "model_dump"):
         # Pydantic v2 or compatible
         return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True))

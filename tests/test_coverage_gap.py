@@ -392,7 +392,6 @@ def test_diff_edge_changes() -> None:
     node_a = AgentNode(
         id="a",
         metadata={},
-        supervision=None,
         type="agent",
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
@@ -400,7 +399,6 @@ def test_diff_edge_changes() -> None:
     node_b = AgentNode(
         id="b",
         metadata={},
-        supervision=None,
         type="agent",
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
@@ -514,7 +512,6 @@ def test_visualizer_full_coverage() -> None:
     node1 = AgentNode(
         id="agent-1",
         metadata={},
-        supervision=None,
         type="agent",
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
@@ -523,7 +520,6 @@ def test_visualizer_full_coverage() -> None:
     node2 = PlannerNode(
         id="planner_1",
         metadata={},
-        supervision=None,
         type="planner",
         goal="g",
         optimizer=None,
@@ -533,7 +529,6 @@ def test_visualizer_full_coverage() -> None:
     node3 = SwitchNode(
         id="switch-1",
         metadata={},
-        supervision=None,
         type="switch",
         variable="var",
         cases={"cond1": "agent-1"},
@@ -542,7 +537,6 @@ def test_visualizer_full_coverage() -> None:
     node4 = HumanNode(
         id="human 1",
         metadata={},
-        supervision=None,
         type="human",
         prompt="Confirm?",
         timeout_seconds=60,
@@ -595,7 +589,6 @@ def test_visualizer_linear_flow() -> None:
     node1 = AgentNode(
         id="a",
         type="agent",
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         metadata={},
@@ -603,7 +596,6 @@ def test_visualizer_linear_flow() -> None:
     node2 = AgentNode(
         id="b",
         type="agent",
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         metadata={},
@@ -629,7 +621,6 @@ def test_visualizer_with_snapshot() -> None:
     node1 = AgentNode(
         id="a",
         type="agent",
-        supervision=None,
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         metadata={},

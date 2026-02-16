@@ -35,7 +35,7 @@ def create_agent_node(node_id: str, tools: list[str]) -> AgentNode:
     return AgentNode(
         id=node_id,
         metadata={},
-        supervision=None,
+        recovery=None,
         profile=CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None),
         tools=tools,
     )
@@ -45,7 +45,7 @@ def create_switch_node(node_id: str, variable: str, cases: dict[str, str], defau
     return SwitchNode(
         id=node_id,
         metadata={},
-        supervision=None,
+        # # Removed from Node
         variable=variable,
         cases=cases,
         default=default,

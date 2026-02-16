@@ -48,7 +48,7 @@ def test_openai_adapter() -> None:
         reasoning=StandardReasoning(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
         fast_path=None,
     )
-    node = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", profile=brain, tools=["calculator"])
+    node = AgentNode(id="agent1", metadata={}, type="agent", profile=brain, tools=["calculator"])
     openai_res = node_to_openai_assistant(node, [pack])
     expected_openai = {
         "name": "agent1",
@@ -84,8 +84,8 @@ def test_langchain_adapter() -> None:
         reasoning=StandardReasoning(model="gpt-4o", thoughts_max=10, min_confidence=0.5),
         fast_path=None,
     )
-    node1 = AgentNode(id="agent1", metadata={}, supervision=None, type="agent", profile=brain, tools=["calculator"])
-    node2 = AgentNode(id="agent2", metadata={}, supervision=None, type="agent", profile=brain, tools=["weather"])
+    node1 = AgentNode(id="agent1", metadata={}, type="agent", profile=brain, tools=["calculator"])
+    node2 = AgentNode(id="agent2", metadata={}, type="agent", profile=brain, tools=["weather"])
 
     # LinearFlow
     linear_flow = LinearFlow(
