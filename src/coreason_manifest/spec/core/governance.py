@@ -1,6 +1,7 @@
+import time
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class Safety(BaseModel):
@@ -66,3 +67,48 @@ class Governance(BaseModel):
     circuit_breaker: CircuitBreaker | None = None
     tool_policy: dict[str, ToolAccessPolicy] | None = None
     default_tool_policy: ToolAccessPolicy | None = None
+    allowed_domains: list[str] = Field(default_factory=list)
+
+    @field_validator("allowed_domains")
+    @classmethod
+    def validate_allowed_domains(cls, v: list[str]) -> list[str]:
+        return [d.lower().rstrip(".") for d in v]
+
+
+class CircuitState(BaseModel):
+    """Runtime state of a circuit breaker for a specific node."""
+    state: Literal["open", "closed", "half-open"] = "closed"
+    failure_count: int = 0
+    last_failure_time: float | None = None
+
+
+class CircuitOpenError(Exception):
+    """Raised when an operation is attempted on an open circuit."""
+    pass
+
+
+def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:
+    """
+    Middleware hook to enforce circuit breaker policy.
+
+    Args:
+        node_id: The ID of the node being executed.
+        policy: The circuit breaker policy configuration.
+        state_store: A mutable dictionary mapping node IDs to CircuitState objects.
+
+    Raises:
+        CircuitOpenError: If the circuit is open and timeout has not expired.
+    """
+    # Get or create state
+    state = state_store.get(node_id)
+    if not state:
+        state = CircuitState()
+        state_store[node_id] = state
+
+    if state.state == "open":
+        if state.last_failure_time and (time.time() - state.last_failure_time > policy.reset_timeout_seconds):
+            # Timeout expired, try half-open
+            state.state = "half-open"
+            # We don't reset failure_count here; usually we wait for a success to close and reset.
+        else:
+            raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")

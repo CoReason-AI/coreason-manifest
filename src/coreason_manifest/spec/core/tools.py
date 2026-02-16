@@ -27,6 +27,7 @@ class ToolCapability(BaseModel):
     # From prompt description: "If risk_level == critical, strictly enforce..."
     # Code snippet in prompt showed `requires_approval` too.
     requires_approval: bool = False
+    url: str | None = None
 
     @model_validator(mode="after")
     def validate_critical_description(self) -> "ToolCapability":

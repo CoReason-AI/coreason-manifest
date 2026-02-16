@@ -1,19 +1,38 @@
 # src/coreason_manifest/utils/gatekeeper.py
 
+from typing import Any, Literal
+from urllib.parse import urlparse
+
+from pydantic import BaseModel
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 
 
-def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
+class RemediationAction(BaseModel):
+    type: Literal["add_guard_node", "whitelist_domain"]
+    target_node_id: str | None = None
+    patch_data: dict[str, Any]
+    description: str
+
+
+class ComplianceReport(BaseModel):
+    severity: Literal["violation", "warning", "info"]
+    message: str
+    node_id: str | None = None
+    remediation: RemediationAction | None = None
+
+
+def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
 
     1. Capability Analysis: Ensures high-risk capabilities are declared.
     2. Topology Check (Red Button Rule): Critical nodes must be guarded by HumanNode.
     3. Swarm Safety: Recursively checks worker profiles in Swarms.
+    4. Domain Policy: Checks tool URLs against allowed domains.
     """
-    errors: list[str] = []
+    reports: list[ComplianceReport] = []
 
     # Extract all nodes
     nodes: list[AnyNode] = []
@@ -39,25 +58,47 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
             profile = flow.definitions.profiles[node.worker_profile]
             reasoning = profile.reasoning
 
-        # Use contract, not hasattr
-        # ReasoningConfig is a Union, but all members inherit from BaseReasoning (except if new ones added incorrectly)
-        # But we added the method to BaseReasoning.
         if reasoning:
-            # We can rely on duck typing or isinstance check if we import BaseReasoning
-            # Ideally all reasoning objects have this method now.
             try:
                 return reasoning.required_capabilities()
             except AttributeError:
-                # Fail closed if method missing (should not happen with correct inheritance)
                 return []
         return []
 
-    # Build tool map: name -> risk_level
-    tool_risk_map = {}
+    # Build tool map: name -> tool_object
+    tool_map = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:
-                tool_risk_map[tool.name] = tool.risk_level
+                tool_map[tool.name] = tool
+
+    # 0. Domain Policy Check
+    allowed_domains = []
+    if flow.governance and flow.governance.allowed_domains:
+        allowed_domains = flow.governance.allowed_domains
+
+    if allowed_domains:
+        for name, tool in tool_map.items():
+            if tool.url:
+                parsed = urlparse(tool.url)
+                domain = parsed.netloc.lower() or tool.url.lower().rstrip("/")
+
+                allowed = False
+                for allowed_d in allowed_domains:
+                    if domain == allowed_d or domain.endswith("." + allowed_d):
+                        allowed = True
+                        break
+
+                if not allowed:
+                    reports.append(ComplianceReport(
+                        severity="violation",
+                        message=f"Tool '{tool.name}' uses blocked domain: {domain}",
+                        remediation=RemediationAction(
+                            type="whitelist_domain",
+                            patch_data={"domain": domain},
+                            description=f"Add '{domain}' to allowed_domains"
+                        )
+                    ))
 
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:
@@ -67,7 +108,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
         critical_tools = []
         if isinstance(node, AgentNode):
             for tool_name in node.tools:
-                risk = tool_risk_map.get(tool_name, "standard")
+                tool = tool_map.get(tool_name)
+                risk = tool.risk_level if tool else "standard"
                 if risk == "critical":
                     critical_tools.append(tool_name)
 
@@ -86,13 +128,30 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
             needs_guard = True
             violation_reason.append(f"critical tools {critical_tools}")
 
-        if needs_guard and not _is_guarded(node, flow):  # extensible list
-            errors.append(
-                f"Policy Violation: Node '{node.id}' requires high-risk features ({', '.join(violation_reason)}) "
-                "but is not guarded by a HumanNode."
+        if needs_guard and not _is_guarded(node, flow):
+            human_node_id = f"guard_{node.id}"
+            human_node = HumanNode(
+                id=human_node_id,
+                type="human",
+                prompt=f"Approve unsafe action by {node.id}",
+                timeout_seconds=300,
+                interaction_mode="blocking",
+                metadata={}
             )
 
-    return errors
+            reports.append(ComplianceReport(
+                severity="violation",
+                message=f"Policy Violation: Node '{node.id}' requires high-risk features ({', '.join(violation_reason)}) but is not guarded by a HumanNode.",
+                node_id=node.id,
+                remediation=RemediationAction(
+                    type="add_guard_node",
+                    target_node_id=node.id,
+                    patch_data=human_node.model_dump(mode="json"),
+                    description=f"Insert HumanNode '{human_node_id}' before '{node.id}'"
+                )
+            ))
+
+    return reports
 
 
 def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:

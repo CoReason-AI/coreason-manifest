@@ -52,7 +52,7 @@ def test_code_execution_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "code_execution" in errors[0]
+    assert "code_execution" in errors[0].message
 
 
 def test_base_reasoning_capabilities() -> None:
@@ -76,8 +76,8 @@ def test_linear_unguarded_computer_use() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "requires high-risk features (computer_use capability)" in errors[0]
-    assert "not guarded by a HumanNode" in errors[0]
+    assert "requires high-risk features (computer_use capability)" in errors[0].message
+    assert "not guarded by a HumanNode" in errors[0].message
 
 
 def test_linear_guarded_computer_use() -> None:
@@ -127,7 +127,7 @@ def test_swarm_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "requires high-risk features" in errors[0]
+    assert "requires high-risk features" in errors[0].message
 
 
 def test_swarm_missing_profile_validation() -> None:
@@ -440,7 +440,7 @@ def test_graph_traversal_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "not guarded" in errors[0]
+    assert "not guarded" in errors[0].message
 
 
 def test_unknown_flow_type() -> None:
