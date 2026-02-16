@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -39,7 +39,7 @@ class NodeExecution(BaseModel):
     )
     signature: str | None = Field(None, description="Optional cryptographic signature of the event.")
 
-    _hash_exclude_ = {"execution_hash", "signature"}
+    _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
 
 
 class ExecutionSnapshot(BaseModel):
