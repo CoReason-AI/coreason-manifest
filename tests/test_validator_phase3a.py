@@ -127,6 +127,7 @@ def test_validate_missing_tool() -> None:
     with pytest.raises(ValidationError, match="requires missing tool 'tool1'"):
         GraphFlow(
             kind="GraphFlow",
+            status="published",
             metadata=create_metadata(),
             interface=create_interface(),
             blackboard=None,

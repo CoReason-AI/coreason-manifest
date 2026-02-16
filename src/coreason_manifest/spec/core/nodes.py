@@ -11,7 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.resilience import SupervisionPolicy
+from coreason_manifest.spec.core.resilience import RecoveryStrategy, SupervisionPolicy
 
 
 class Node(BaseModel):
@@ -51,6 +51,7 @@ class AgentNode(Node):
     type: Literal["agent"] = "agent"
     profile: CognitiveProfile | str
     tools: list[str]
+    recovery: RecoveryStrategy | None = None
 
 
 class SwitchNode(Node):

@@ -203,6 +203,7 @@ def test_tool_integrity_failure_graph() -> None:
     with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
         GraphFlow(
             kind="GraphFlow",
+            status="published",
             metadata=FlowMetadata(name="fail", version="1", description="", tags=[]),
             definitions=definitions,
             interface=FlowInterface(

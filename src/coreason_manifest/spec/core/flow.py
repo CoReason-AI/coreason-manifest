@@ -202,6 +202,7 @@ class GraphFlow(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["GraphFlow"]
+    status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     interface: FlowInterface
@@ -212,5 +213,7 @@ class GraphFlow(BaseModel):
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "GraphFlow":
         """Ensures all string-based profile references point to a valid definition."""
+        if self.status == "draft":
+            return self
         validate_integrity(self.definitions, self.graph.nodes.values())
         return self

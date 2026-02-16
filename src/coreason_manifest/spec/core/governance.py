@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class Safety(BaseModel):
@@ -30,6 +30,27 @@ class CircuitBreaker(BaseModel):
     fallback_node_id: str | None = Field(None, description="Optional node to jump to when circuit opens.")
 
 
+class ToolAccessPolicy(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    risk_level: Literal["critical", "standard", "minimal"]
+    require_auth: bool | None = None
+    allowed_roles: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def set_defaults(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if data.get("risk_level") == "critical":
+                if data.get("require_auth") is False:
+                    raise ValueError("Critical tools must require authentication.")
+                if data.get("require_auth") is None:
+                    data["require_auth"] = True
+            elif data.get("require_auth") is None:
+                data["require_auth"] = False
+        return data
+
+
 class Governance(BaseModel):
     """Governance constraints and policies."""
 
@@ -41,3 +62,4 @@ class Governance(BaseModel):
     safety: Safety | None = None
     audit: Audit | None = None
     circuit_breaker: CircuitBreaker | None = None
+    tool_policy: ToolAccessPolicy | None = None

@@ -148,9 +148,22 @@ class DiagnosisReasoning(ResilienceStrategy):
     fix_strategies: list[Literal["schema_repair", "parameter_tuning", "context_pruning"]]
 
 
+class HumanHandoffStrategy(ResilienceStrategy):
+    """Human-in-the-Loop focus: Urgent handoff."""
+
+    type: Literal["human_handoff"] = "human_handoff"
+    urgency: Literal["low", "medium", "high", "critical"]
+
+
 # Polymorphic Union
 ResilienceConfig = Annotated[
     RetryStrategy | FallbackStrategy | ReflexionStrategy | EscalationStrategy | DiagnosisReasoning,
+    Field(discriminator="type"),
+]
+
+# Polymorphic Union for Node Recovery
+RecoveryStrategy = Annotated[
+    RetryStrategy | FallbackStrategy | HumanHandoffStrategy,
     Field(discriminator="type"),
 ]
 
