@@ -14,11 +14,12 @@ import sys
 import types
 import uuid
 from pathlib import Path
+from typing import Generator
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
-__all__ = ["SecurityViolationError", "load_flow_from_file", "load_agent_from_ref"]
+__all__ = ["SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
 
 
 def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow | GraphFlow:
@@ -64,7 +65,7 @@ def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow |
 
 
 @contextlib.contextmanager
-def _temp_sys_path(path: Path):
+def _temp_sys_path(path: Path) -> Generator[None, None, None]:
     path_str = str(path)
     sys.path.insert(0, path_str)
     try:
@@ -74,23 +75,22 @@ def _temp_sys_path(path: Path):
             sys.path.remove(path_str)
 
 
-def _validate_ast(source_code: str, filename: str):
+def _validate_ast(source_code: str, filename: str) -> None:
     """
     Scan source code for banned imports using AST.
     """
     try:
         tree = ast.parse(source_code, filename=filename)
     except SyntaxError as e:
-        raise ValueError(f"Syntax error in {filename}: {e}")
+        raise ValueError(f"Syntax error in {filename}: {e}") from e
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 if alias.name in ("os", "subprocess", "sys"):
                     raise SecurityViolationError(f"Banned import '{alias.name}' detected in {filename}")
-        elif isinstance(node, ast.ImportFrom):
-            if node.module in ("os", "subprocess", "sys"):
-                raise SecurityViolationError(f"Banned import '{node.module}' detected in {filename}")
+        elif isinstance(node, ast.ImportFrom) and node.module in ("os", "subprocess", "sys"):
+            raise SecurityViolationError(f"Banned import '{node.module}' detected in {filename}")
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
@@ -131,7 +131,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     try:
         with _temp_sys_path(file_path.parent):
-            code = compile(source_code, str(file_path), 'exec')
+            code = compile(source_code, str(file_path), "exec")
             exec(code, module.__dict__)
     except Exception:
         # Cleanup on failure
@@ -143,5 +143,9 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         # Cleanup on failure
         sys.modules.pop(module_name, None)
         raise ValueError(f"Agent class '{class_name}' not found in {file_ref}")
+
+    if not isinstance(agent_class, type):
+        sys.modules.pop(module_name, None)
+        raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
 
     return agent_class

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.tools import ToolCapability
 
 
 class RemediationAction(BaseModel):
@@ -66,7 +67,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         return []
 
     # Build tool map: name -> tool_object
-    tool_map = {}
+    tool_map: dict[str, ToolCapability] = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:
@@ -78,7 +79,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         allowed_domains = flow.governance.allowed_domains
 
     if allowed_domains:
-        for name, tool in tool_map.items():
+        for tool in tool_map.values():
             if tool.url:
                 parsed = urlparse(tool.url)
                 domain = parsed.netloc.lower() or tool.url.lower().rstrip("/")
@@ -108,8 +109,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         critical_tools = []
         if isinstance(node, AgentNode):
             for tool_name in node.tools:
-                tool = tool_map.get(tool_name)
-                risk = tool.risk_level if tool else "standard"
+                tool_obj = tool_map.get(tool_name)
+                risk = tool_obj.risk_level if tool_obj else "standard"
                 if risk == "critical":
                     critical_tools.append(tool_name)
 
@@ -141,7 +142,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
             reports.append(ComplianceReport(
                 severity="violation",
-                message=f"Policy Violation: Node '{node.id}' requires high-risk features ({', '.join(violation_reason)}) but is not guarded by a HumanNode.",
+                message=(
+                    f"Policy Violation: Node '{node.id}' requires high-risk features "
+                    f"({', '.join(violation_reason)}) but is not guarded by a HumanNode."
+                ),
                 node_id=node.id,
                 remediation=RemediationAction(
                     type="add_guard_node",

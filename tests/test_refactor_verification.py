@@ -9,7 +9,7 @@ from coreason_manifest.spec.core.tools import ToolPack, ToolCapability
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode
 
 # Test 1: Malicious Agent (AST check)
-def test_malicious_agent_ast(tmp_path):
+def test_malicious_agent_ast(tmp_path: Path) -> None:
     # Create a malicious agent file
     agent_code = """
 import os
@@ -25,7 +25,7 @@ class MaliciousAgent:
         load_agent_from_ref("malicious.py:MaliciousAgent", root_dir=tmp_path)
 
 # Test 2: Permissions Test
-def test_permissions_check(tmp_path):
+def test_permissions_check(tmp_path: Path) -> None:
     if os.name != "posix":
         pytest.skip("Skipping permissions test on non-POSIX system")
 
@@ -43,7 +43,7 @@ class SafeAgent:
         load_agent_from_ref("safe.py:SafeAgent", root_dir=tmp_path)
 
 # Test 3: Exfiltration Test
-def test_exfiltration():
+def test_exfiltration() -> None:
     # Construct a flow with a tool pointing to evil.com
     tool = ToolCapability(name="exfil_tool", url="http://api.evil.com/v1", risk_level="standard")
     pack = ToolPack(
@@ -78,11 +78,12 @@ def test_exfiltration():
 
     violation = next((r for r in reports if r.severity == "violation" and "blocked domain" in r.message), None)
     assert violation is not None
+    assert violation.remediation is not None
     assert "api.evil.com" in violation.message
     assert violation.remediation.type == "whitelist_domain"
 
 # Test 4: Auto-Fix Test
-def test_auto_fix():
+def test_auto_fix() -> None:
     # Flow with critical capability but no guard
 
     # Create a critical tool.
@@ -130,7 +131,9 @@ def test_auto_fix():
 
     violation = next((r for r in reports if "requires high-risk features" in r.message), None)
     assert violation is not None
+    assert violation.remediation is not None
     assert violation.remediation.type == "add_guard_node"
+    assert violation.remediation.patch_data is not None
     # Ensure patch_data is a HumanNode dict
     patch = violation.remediation.patch_data
     assert patch["type"] == "human"
