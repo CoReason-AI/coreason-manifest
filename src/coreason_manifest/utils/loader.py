@@ -144,8 +144,8 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         sys.modules.pop(module_name, None)
         raise ValueError(f"Agent class '{class_name}' not found in {file_ref}")
 
-    if not isinstance(agent_class, type):
-        sys.modules.pop(module_name, None)  # pragma: no cover
-        raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+    if isinstance(agent_class, type):
+        return agent_class
 
-    return agent_class
+    sys.modules.pop(module_name, None)
+    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")

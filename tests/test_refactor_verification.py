@@ -215,3 +215,19 @@ class Ok: pass
 
     # ASSERT that the module was cleaned up
     assert expected_module not in sys.modules
+
+
+# Test 7: Loader Success
+def test_loader_success(tmp_path: Path) -> None:
+    code = """
+class MyAgent:
+    def run(self):
+        return "ok"
+"""
+    file = tmp_path / "success.py"
+    file.write_text(code)
+
+    agent_cls = load_agent_from_ref("success.py:MyAgent", root_dir=tmp_path)
+    assert agent_cls.__name__ == "MyAgent"
+    instance = agent_cls()
+    assert instance.run() == "ok"
