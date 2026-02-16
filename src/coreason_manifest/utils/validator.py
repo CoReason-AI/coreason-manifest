@@ -7,6 +7,7 @@ from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
     ReflexionStrategy,
+    ResilienceStrategy,
 )
 from coreason_manifest.spec.core.tools import ToolPack
 
@@ -189,13 +190,13 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
 
     # If it's a SupervisionPolicy (complex)
     if hasattr(policy, "handlers"):
-        strategies.extend([h.strategy for h in policy.handlers])  # type: ignore
-        if hasattr(policy, "default_strategy") and policy.default_strategy:  # type: ignore
-            strategies.append(policy.default_strategy)  # type: ignore
+        strategies.extend([h.strategy for h in policy.handlers])
+        if hasattr(policy, "default_strategy") and policy.default_strategy:
+            strategies.append(policy.default_strategy)
     # If it's a simple RecoveryStrategy (ResilienceConfig which is a Union)
     else:
         # It's a single strategy
-        strategies.append(policy)  # type: ignore
+        strategies.append(policy)
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -235,11 +236,11 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
 
         # Expand policy if complex
         if hasattr(policy, "handlers"):
-            strategies.extend([h.strategy for h in policy.handlers])  # type: ignore
-            if hasattr(policy, "default_strategy") and policy.default_strategy:  # type: ignore
-                strategies.append(policy.default_strategy)  # type: ignore
+            strategies.extend([h.strategy for h in policy.handlers])
+            if hasattr(policy, "default_strategy") and policy.default_strategy:
+                strategies.append(policy.default_strategy)
         else:
-            strategies.append(policy)  # type: ignore
+            strategies.append(policy)
 
         for strategy in strategies:
             if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:

@@ -33,6 +33,7 @@ from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, Inspe
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
+    RecoveryStrategy,
     ResilienceConfig,
     RetryStrategy,
     SupervisionPolicy,

@@ -1,7 +1,5 @@
-
 import pytest
-from typing import Any
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from coreason_manifest.builder import AgentBuilder, NewLinearFlow
 from coreason_manifest.spec.core.flow import (
@@ -14,18 +12,17 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.resilience import (
+    ErrorDomain,
+    ErrorHandler,
     EscalationStrategy,
+    FallbackStrategy,
     ReflexionStrategy,
     SupervisionPolicy,
-    FallbackStrategy,
-    ErrorHandler,
-    ErrorDomain
 )
 from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
-from coreason_manifest.utils.validator import validate_flow
 
 
 def test_tool_access_policy_defaults() -> None:
@@ -231,17 +228,16 @@ def test_coverage_validator_reflexion_mismatch() -> None:
     # Create invalid AgentNode type manually
     node = AgentNode.model_construct(
         id="a1",
-        type="invalid_type", # type: ignore
-        resilience=ReflexionStrategy(
-            max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True
-        ),
+        type="invalid_type",  # type: ignore
+        resilience=ReflexionStrategy(max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True),
         metadata={},
         profile="p",
-        tools=[]
+        tools=[],
     )
 
     # Run validation logic manually
     from coreason_manifest.utils.validator import _validate_supervision
+
     errors = _validate_supervision(node, set())
     # Note: _validate_supervision checks node.resilience, which we set.
     assert any("uses ReflexionStrategy but is of type 'invalid_type'" in e for e in errors)
@@ -253,22 +249,13 @@ def test_coverage_validator_escalation_empty_queue() -> None:
     # So we use model_construct.
 
     esc = EscalationStrategy.model_construct(
-        type="escalate",
-        queue_name="",
-        notification_level="info",
-        timeout_seconds=10
+        type="escalate", queue_name="", notification_level="info", timeout_seconds=10
     )
 
-    node = AgentNode(
-        id="a1",
-        metadata={},
-        type="agent",
-        profile="p",
-        tools=[],
-        resilience=esc
-    )
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], resilience=esc)
 
     from coreason_manifest.utils.validator import _validate_supervision
+
     errors = _validate_supervision(node, set())
     assert any("empty queue_name" in e for e in errors)
 
@@ -279,23 +266,16 @@ def test_supervision_policy_complex_validation() -> None:
     complex_policy = SupervisionPolicy(
         handlers=[
             ErrorHandler(
-                match_domain=[ErrorDomain.SYSTEM],
-                strategy=FallbackStrategy(fallback_node_id="missing_handler")
+                match_domain=[ErrorDomain.SYSTEM], strategy=FallbackStrategy(fallback_node_id="missing_handler")
             )
         ],
-        default_strategy=FallbackStrategy(fallback_node_id="missing_default")
+        default_strategy=FallbackStrategy(fallback_node_id="missing_default"),
     )
 
-    node = AgentNode(
-        id="a1",
-        metadata={},
-        type="agent",
-        profile="p",
-        tools=[],
-        resilience=complex_policy
-    )
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], resilience=complex_policy)
 
     from coreason_manifest.utils.validator import _validate_supervision
+
     errors = _validate_supervision(node, {"a1"})
 
     # Should catch both missing IDs
@@ -305,15 +285,9 @@ def test_supervision_policy_complex_validation() -> None:
 
 def test_validator_string_reference_skip() -> None:
     """Test that string references skip validation in _validate_supervision."""
-    node = AgentNode(
-        id="a1",
-        metadata={},
-        type="agent",
-        profile="p",
-        tools=[],
-        resilience="ref:template"
-    )
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], resilience="ref:template")
     from coreason_manifest.utils.validator import _validate_supervision
+
     errors = _validate_supervision(node, set())
     assert len(errors) == 0
 
@@ -325,19 +299,11 @@ def test_fallback_cycle_complex_policy() -> None:
     # A -> B (via default)
     # B -> A (via handler)
 
-    policy_a = SupervisionPolicy(
-        handlers=[],
-        default_strategy=FallbackStrategy(fallback_node_id="b")
-    )
+    policy_a = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="b"))
 
     policy_b = SupervisionPolicy(
-        handlers=[
-             ErrorHandler(
-                match_domain=[ErrorDomain.SYSTEM],
-                strategy=FallbackStrategy(fallback_node_id="a")
-            )
-        ],
-        default_strategy=None
+        handlers=[ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=FallbackStrategy(fallback_node_id="a"))],
+        default_strategy=None,
     )
 
     node_a = AgentNode(id="a", metadata={}, type="agent", profile="p", tools=[], resilience=policy_a)
