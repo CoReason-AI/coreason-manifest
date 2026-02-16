@@ -111,8 +111,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         critical_tools = []
         if isinstance(node, AgentNode):
             for tool_name in node.tools:
-                tool_obj = tool_map.get(tool_name)
-                risk = tool_obj.risk_level if tool_obj else "standard"
+                resolved_tool = tool_map.get(tool_name)
+                risk = resolved_tool.risk_level if resolved_tool else "standard"
                 if risk == "critical":
                     critical_tools.append(tool_name)
 
