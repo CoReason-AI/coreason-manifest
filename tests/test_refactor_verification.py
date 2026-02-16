@@ -70,20 +70,9 @@ def test_exfiltration() -> None:
     # Governance with allowlist
     governance = Governance(allowed_domains=["api.coreason.com"])
 
-    metadata = FlowMetadata(
-        name="test",
-        version="1.0",
-        description="test",
-        tags=[]
-    )
+    metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
 
-    flow = LinearFlow(
-        kind="LinearFlow",
-        metadata=metadata,
-        sequence=[],
-        definitions=definitions,
-        governance=governance
-    )
+    flow = LinearFlow(kind="LinearFlow", metadata=metadata, sequence=[], definitions=definitions, governance=governance)
 
     reports = validate_policy(flow)
 
@@ -100,44 +89,24 @@ def test_auto_fix() -> None:
 
     # Create a critical tool.
     tool = ToolCapability(
-        name="critical_tool",
-        risk_level="critical",
-        description="Dangerous tool",
-        requires_approval=True
+        name="critical_tool", risk_level="critical", description="Dangerous tool", requires_approval=True
     )
-    pack = ToolPack(
-        kind="ToolPack",
-        namespace="test",
-        tools=[tool],
-        dependencies=[],
-        env_vars=[]
-    )
+    pack = ToolPack(kind="ToolPack", namespace="test", tools=[tool], dependencies=[], env_vars=[])
 
     definitions = FlowDefinitions(tool_packs={"test_pack": pack}, profiles={})
 
     node = AgentNode(
         id="unsafe_node",
         type="agent",
-        profile="dummy_profile", # String reference is enough if not validated against definitions for tool check
+        profile="dummy_profile",  # String reference is enough if not validated against definitions for tool check
         tools=["critical_tool"],
-        metadata={}
+        metadata={},
     )
 
-    metadata = FlowMetadata(
-        name="test",
-        version="1.0",
-        description="test",
-        tags=[]
-    )
+    metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
 
     # We set status="draft" so validate_referential_integrity doesn't complain about missing profile
-    flow = LinearFlow(
-        kind="LinearFlow",
-        status="draft",
-        metadata=metadata,
-        sequence=[node],
-        definitions=definitions
-    )
+    flow = LinearFlow(kind="LinearFlow", status="draft", metadata=metadata, sequence=[node], definitions=definitions)
 
     reports = validate_policy(flow)
 
@@ -209,9 +178,8 @@ def test_loader_errors_and_cleanup(tmp_path: Path) -> None:
     mock_uuid = uuid.UUID("12345678-1234-5678-1234-567812345678")
     expected_module = f"coreason.dynamic.{mock_uuid}"
 
-    with patch("uuid.uuid4", return_value=mock_uuid):
-        with pytest.raises(TypeError, match="is not a class"):
-            load_agent_from_ref("var.py:NotAClass", root_dir=tmp_path)
+    with patch("uuid.uuid4", return_value=mock_uuid), pytest.raises(TypeError, match="is not a class"):
+        load_agent_from_ref("var.py:NotAClass", root_dir=tmp_path)
 
     # ASSERT that the module was cleaned up
     assert expected_module not in sys.modules
@@ -224,9 +192,8 @@ class Ok: pass
     runtime_file = tmp_path / "runtime.py"
     runtime_file.write_text(runtime_code)
 
-    with patch("uuid.uuid4", return_value=mock_uuid):
-        with pytest.raises(ZeroDivisionError):
-            load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
+    with patch("uuid.uuid4", return_value=mock_uuid), pytest.raises(ZeroDivisionError):
+        load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
 
     # ASSERT that the module was cleaned up
     assert expected_module not in sys.modules
