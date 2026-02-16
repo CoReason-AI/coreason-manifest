@@ -1,13 +1,15 @@
 # src/coreason_manifest/utils/gatekeeper.py
 
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
 
 from pydantic import BaseModel
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
-from coreason_manifest.spec.core.tools import ToolCapability
+
+if TYPE_CHECKING:
+    from coreason_manifest.spec.core.tools import ToolCapability
 
 
 class RemediationAction(BaseModel):
@@ -67,7 +69,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         return []
 
     # Build tool map: name -> tool_object
-    tool_map: dict[str, ToolCapability] = {}
+    tool_map: dict[str, "ToolCapability"] = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:
@@ -79,10 +81,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         allowed_domains = flow.governance.allowed_domains
 
     if allowed_domains:
-        for tool in tool_map.values():
-            if tool.url:
-                parsed = urlparse(tool.url)
-                domain = parsed.netloc.lower() or tool.url.lower().rstrip("/")
+        for tool_obj in tool_map.values():
+            if tool_obj.url:
+                parsed = urlparse(tool_obj.url)
+                domain = parsed.netloc.lower() or tool_obj.url.lower().rstrip("/")
 
                 allowed = False
                 for allowed_d in allowed_domains:
@@ -93,7 +95,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 if not allowed:
                     reports.append(ComplianceReport(
                         severity="violation",
-                        message=f"Tool '{tool.name}' uses blocked domain: {domain}",
+                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
                         remediation=RemediationAction(
                             type="whitelist_domain",
                             patch_data={"domain": domain},
