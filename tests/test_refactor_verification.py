@@ -1,6 +1,9 @@
 import os
+import sys
 import time
+import uuid
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -67,9 +70,20 @@ def test_exfiltration() -> None:
     # Governance with allowlist
     governance = Governance(allowed_domains=["api.coreason.com"])
 
-    metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
+    metadata = FlowMetadata(
+        name="test",
+        version="1.0",
+        description="test",
+        tags=[]
+    )
 
-    flow = LinearFlow(kind="LinearFlow", metadata=metadata, sequence=[], definitions=definitions, governance=governance)
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=metadata,
+        sequence=[],
+        definitions=definitions,
+        governance=governance
+    )
 
     reports = validate_policy(flow)
 
@@ -86,24 +100,44 @@ def test_auto_fix() -> None:
 
     # Create a critical tool.
     tool = ToolCapability(
-        name="critical_tool", risk_level="critical", description="Dangerous tool", requires_approval=True
+        name="critical_tool",
+        risk_level="critical",
+        description="Dangerous tool",
+        requires_approval=True
     )
-    pack = ToolPack(kind="ToolPack", namespace="test", tools=[tool], dependencies=[], env_vars=[])
+    pack = ToolPack(
+        kind="ToolPack",
+        namespace="test",
+        tools=[tool],
+        dependencies=[],
+        env_vars=[]
+    )
 
     definitions = FlowDefinitions(tool_packs={"test_pack": pack}, profiles={})
 
     node = AgentNode(
         id="unsafe_node",
         type="agent",
-        profile="dummy_profile",  # String reference is enough if not validated against definitions for tool check
+        profile="dummy_profile", # String reference is enough if not validated against definitions for tool check
         tools=["critical_tool"],
-        metadata={},
+        metadata={}
     )
 
-    metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
+    metadata = FlowMetadata(
+        name="test",
+        version="1.0",
+        description="test",
+        tags=[]
+    )
 
     # We set status="draft" so validate_referential_integrity doesn't complain about missing profile
-    flow = LinearFlow(kind="LinearFlow", status="draft", metadata=metadata, sequence=[node], definitions=definitions)
+    flow = LinearFlow(
+        kind="LinearFlow",
+        status="draft",
+        metadata=metadata,
+        sequence=[node],
+        definitions=definitions
+    )
 
     reports = validate_policy(flow)
 
@@ -144,8 +178,8 @@ def test_circuit_breaker() -> None:
     assert store[node_id].state == "half-open"
 
 
-# Test 6: Loader Error Handling
-def test_loader_errors(tmp_path: Path) -> None:
+# Test 6: Loader Error Handling and Cleanup
+def test_loader_errors_and_cleanup(tmp_path: Path) -> None:
     # 1. Invalid reference format
     with pytest.raises(ValueError, match="Invalid reference format"):
         load_agent_from_ref("invalid_ref", root_dir=tmp_path)
@@ -166,15 +200,23 @@ def test_loader_errors(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="Agent class 'Missing' not found"):
         load_agent_from_ref("empty.py:Missing", root_dir=tmp_path)
 
-    # 4. Not a class
+    # 4. Not a class - Verify Cleanup
     var_code = "NotAClass = 123"
     var_file = tmp_path / "var.py"
     var_file.write_text(var_code)
 
-    with pytest.raises(TypeError, match="is not a class"):
-        load_agent_from_ref("var.py:NotAClass", root_dir=tmp_path)
+    # Mock uuid to get a predictable module name
+    mock_uuid = uuid.UUID("12345678-1234-5678-1234-567812345678")
+    expected_module = f"coreason.dynamic.{mock_uuid}"
 
-    # 5. Runtime Error (to verify cleanup)
+    with patch("uuid.uuid4", return_value=mock_uuid):
+        with pytest.raises(TypeError, match="is not a class"):
+            load_agent_from_ref("var.py:NotAClass", root_dir=tmp_path)
+
+    # ASSERT that the module was cleaned up
+    assert expected_module not in sys.modules
+
+    # 5. Runtime Error - Verify Cleanup
     runtime_code = """
 class Ok: pass
 1 / 0
@@ -182,8 +224,9 @@ class Ok: pass
     runtime_file = tmp_path / "runtime.py"
     runtime_file.write_text(runtime_code)
 
-    with pytest.raises(ZeroDivisionError):
-        load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
+    with patch("uuid.uuid4", return_value=mock_uuid):
+        with pytest.raises(ZeroDivisionError):
+            load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
 
-    # Verify module is cleaned up (though verifying cleanup of uuid module is hard without capturing uuid,
-    # but the coverage line hit is what we want)
+    # ASSERT that the module was cleaned up
+    assert expected_module not in sys.modules

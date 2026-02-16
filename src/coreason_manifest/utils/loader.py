@@ -145,8 +145,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         raise ValueError(f"Agent class '{class_name}' not found in {file_ref}")
 
     if not isinstance(agent_class, type):
-        with contextlib.suppress(KeyError):
-            del sys.modules[module_name]
+        sys.modules.pop(module_name, None)
         raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
 
     return agent_class
