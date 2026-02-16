@@ -112,3 +112,33 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
             # We don't reset failure_count here; usually we wait for a success to close and reset.
         else:
             raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")
+
+
+def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:
+    """
+    Record a failure for the given node and open the circuit if threshold is reached.
+    """
+    state = state_store.get(node_id)
+    if not state:
+        state = CircuitState()
+        state_store[node_id] = state
+
+    if state.state == "open":
+        return
+
+    state.failure_count += 1
+    state.last_failure_time = time.time()
+
+    if state.failure_count >= policy.error_threshold_count:
+        state.state = "open"
+
+
+def record_success(node_id: str, state_store: dict[str, CircuitState]) -> None:
+    """
+    Record a success, resetting the circuit state to closed.
+    """
+    state = state_store.get(node_id)
+    if state:
+        state.state = "closed"
+        state.failure_count = 0
+        state.last_failure_time = None

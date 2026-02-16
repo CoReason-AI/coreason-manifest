@@ -14,6 +14,8 @@ from coreason_manifest.spec.core.governance import (
     CircuitState,
     Governance,
     check_circuit,
+    record_failure,
+    record_success,
 )
 from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
@@ -38,6 +40,21 @@ def test_malicious_agent_ast(tmp_path: Path) -> None:
 
     with pytest.raises(SecurityViolationError, match="Banned import 'subprocess'"):
         load_agent_from_ref("malicious_from.py:MaliciousAgent", root_dir=tmp_path)
+
+    # 3. Submodule Bypass
+    code_sub = "import os.path"
+    file_sub = tmp_path / "bypass.py"
+    file_sub.write_text(code_sub)
+    with pytest.raises(SecurityViolationError, match="Banned import 'os.path'"):
+        load_agent_from_ref("bypass.py:Agent", root_dir=tmp_path)
+
+    # 4. Dangerous Calls
+    for call in ["__import__('os')", "eval('1')", "exec('print(1)')", "compile('1', '', 'exec')"]:
+        code_call = f"x = {call}"
+        file_call = tmp_path / f"call_{call[:4]}.py"
+        file_call.write_text(code_call)
+        with pytest.raises(SecurityViolationError, match="Banned call"):
+            load_agent_from_ref(f"{file_call.name}:Agent", root_dir=tmp_path)
 
 
 # Test 2: Permissions Test
@@ -83,7 +100,7 @@ def test_exfiltration() -> None:
     assert violation.remediation.type == "whitelist_domain"
 
 
-# Test 3b: Allowed URL Test (Coverage)
+# Test 3b: Allowed URL Test (Coverage & Edge Cases)
 def test_allowed_url() -> None:
     # Construct a flow with a tool pointing to allowed domain
     tool = ToolCapability(name="safe_tool", url="http://api.coreason.com/v1", risk_level="standard")
@@ -91,7 +108,7 @@ def test_allowed_url() -> None:
 
     definitions = FlowDefinitions(tool_packs={"test_pack": pack}, profiles={})
 
-    governance = Governance(allowed_domains=["api.coreason.com"])
+    governance = Governance(allowed_domains=["api.coreason.com", "google.com"])
 
     metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
 
@@ -99,6 +116,19 @@ def test_allowed_url() -> None:
 
     reports = validate_policy(flow)
     assert len(reports) == 0
+
+    # Schemeless URL check
+    tool_schemeless = tool.model_copy(update={"url": "google.com/search"})
+    flow.definitions.tool_packs["test_pack"].tools[0] = tool_schemeless
+    reports = validate_policy(flow)
+    assert len(reports) == 0
+
+    # Schemeless Blocked
+    tool_blocked = tool.model_copy(update={"url": "evil.com/foo"})
+    flow.definitions.tool_packs["test_pack"].tools[0] = tool_blocked
+    reports = validate_policy(flow)
+    assert len(reports) == 1
+    assert "evil.com" in reports[0].message
 
 
 # Test 4: Auto-Fix Test
@@ -165,6 +195,37 @@ def test_circuit_breaker() -> None:
     assert store[node_id].state == "half-open"
 
 
+def test_circuit_breaker_state_updates() -> None:
+    policy = CircuitBreaker(error_threshold_count=2, reset_timeout_seconds=1)
+    store: dict[str, CircuitState] = {}
+    node_id = "n1"
+
+    # Fail 1
+    record_failure(node_id, policy, store)
+    assert store[node_id].state == "closed"
+    assert store[node_id].failure_count == 1
+
+    # Fail 2 (Threshold)
+    record_failure(node_id, policy, store)
+    assert store[node_id].state == "open"
+
+    # Check
+    with pytest.raises(CircuitOpenError):
+        check_circuit(node_id, policy, store)
+
+    # Wait for timeout (simulated by updating time)
+    store[node_id].last_failure_time -= 2
+
+    # Check (Half-Open)
+    check_circuit(node_id, policy, store)
+    assert store[node_id].state == "half-open"
+
+    # Success
+    record_success(node_id, store)
+    assert store[node_id].state == "closed"
+    assert store[node_id].failure_count == 0
+
+
 # Test 6: Loader Error Handling and Cleanup
 def test_loader_errors_and_cleanup(tmp_path: Path) -> None:
     # 1. Invalid reference format
@@ -187,22 +248,17 @@ def test_loader_errors_and_cleanup(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="Agent class 'Missing' not found"):
         load_agent_from_ref("empty.py:Missing", root_dir=tmp_path)
 
-    # 4. Not a class - Verify Cleanup
+    # 4. Not a class - Verify Cleanup logic (should not raise KeyError)
     var_code = "NotAClass = 123"
     var_file = tmp_path / "var.py"
     var_file.write_text(var_code)
 
-    # Mock uuid to get a predictable module name
-    mock_uuid = uuid.UUID("12345678-1234-5678-1234-567812345678")
-    expected_module = f"coreason.dynamic.{mock_uuid}"
-
-    with patch("uuid.uuid4", return_value=mock_uuid), pytest.raises(TypeError, match="is not a class"):
+    # In the new implementation, we don't inject into sys.modules, so checking it is not relevant for pollution
+    # But we want to ensure it fails with correct error
+    with pytest.raises(TypeError, match="is not a class"):
         load_agent_from_ref("var.py:NotAClass", root_dir=tmp_path)
 
-    # ASSERT that the module was cleaned up
-    assert expected_module not in sys.modules
-
-    # 5. Runtime Error - Verify Cleanup
+    # 5. Runtime Error - Verify Exception
     runtime_code = """
 class Ok: pass
 1 / 0
@@ -210,15 +266,12 @@ class Ok: pass
     runtime_file = tmp_path / "runtime.py"
     runtime_file.write_text(runtime_code)
 
-    with patch("uuid.uuid4", return_value=mock_uuid), pytest.raises(ZeroDivisionError):
+    with pytest.raises(ValueError, match="Failed to execute"):
         load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
 
-    # ASSERT that the module was cleaned up
-    assert expected_module not in sys.modules
 
-
-# Test 7: Loader Success
-def test_loader_success(tmp_path: Path) -> None:
+# Test 7: Loader Success & Hygiene
+def test_loader_success_hygiene(tmp_path: Path) -> None:
     code = """
 class MyAgent:
     def run(self):
@@ -227,7 +280,21 @@ class MyAgent:
     file = tmp_path / "success.py"
     file.write_text(code)
 
+    # Check sys.path/modules before
+    orig_path = list(sys.path)
+    orig_modules = set(sys.modules.keys())
+
     agent_cls = load_agent_from_ref("success.py:MyAgent", root_dir=tmp_path)
     assert agent_cls.__name__ == "MyAgent"
     instance = agent_cls()
     assert instance.run() == "ok"
+
+    # Verify Hygiene
+    assert sys.path == orig_path
+
+    # Verify module is NOT leaked in sys.modules
+    current_modules = set(sys.modules.keys())
+    diff = current_modules - orig_modules
+    for m in diff:
+        assert "success" not in m
+        assert "coreason.dynamic" not in m

@@ -84,7 +84,12 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     if allowed_domains:
         for tool_obj in tool_map.values():
             if tool_obj.url:
-                parsed = urlparse(tool_obj.url)
+                # SOTA Fix: Handle schemeless URLs to ensure netloc parsing works
+                url_to_parse = tool_obj.url
+                if "://" not in url_to_parse:
+                    url_to_parse = "https://" + url_to_parse
+
+                parsed = urlparse(url_to_parse)
                 domain = parsed.netloc.lower() or tool_obj.url.lower().rstrip("/")
 
                 allowed = False
@@ -174,9 +179,14 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     """
     if isinstance(flow, LinearFlow):
         # Scan sequence backwards from target
-        try:
-            target_idx = flow.sequence.index(target_node)
-        except ValueError:
+        # SOTA Fix: Match by ID to verify identity, not just value equality
+        target_idx = -1
+        for i, node in enumerate(flow.sequence):
+            if node.id == target_node.id:
+                target_idx = i
+                break
+
+        if target_idx == -1:
             return False
 
         for i in range(target_idx - 1, -1, -1):
