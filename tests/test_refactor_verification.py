@@ -214,8 +214,9 @@ def test_circuit_breaker_state_updates() -> None:
         check_circuit(node_id, policy, store)
 
     # Wait for timeout (simulated by updating time)
-    assert store[node_id].last_failure_time is not None
-    store[node_id].last_failure_time -= 2
+    last_failure = store[node_id].last_failure_time
+    assert last_failure is not None
+    store[node_id].last_failure_time = last_failure - 2
 
     # Check (Half-Open)
     check_circuit(node_id, policy, store)
