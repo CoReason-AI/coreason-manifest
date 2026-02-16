@@ -77,6 +77,7 @@ class Governance(BaseModel):
 
 class CircuitState(BaseModel):
     """Runtime state of a circuit breaker for a specific node."""
+
     state: Literal["open", "closed", "half-open"] = "closed"
     failure_count: int = 0
     last_failure_time: float | None = None

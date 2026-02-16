@@ -1,12 +1,15 @@
 import os
-import pytest
 from pathlib import Path
-from coreason_manifest.utils.loader import load_agent_from_ref, SecurityViolationError
-from coreason_manifest.utils.gatekeeper import validate_policy, ComplianceReport, RemediationAction
-from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, FlowDefinitions
+
+import pytest
+
+from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.tools import ToolPack, ToolCapability
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode
+from coreason_manifest.spec.core.nodes import AgentNode
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.utils.loader import SecurityViolationError, load_agent_from_ref
+
 
 # Test 1: Malicious Agent (AST check)
 def test_malicious_agent_ast(tmp_path: Path) -> None:
@@ -23,6 +26,7 @@ class MaliciousAgent:
 
     with pytest.raises(SecurityViolationError, match="Banned import 'os'"):
         load_agent_from_ref("malicious.py:MaliciousAgent", root_dir=tmp_path)
+
 
 # Test 2: Permissions Test
 def test_permissions_check(tmp_path: Path) -> None:
@@ -42,37 +46,21 @@ class SafeAgent:
     with pytest.raises(SecurityViolationError, match="world-writable"):
         load_agent_from_ref("safe.py:SafeAgent", root_dir=tmp_path)
 
+
 # Test 3: Exfiltration Test
 def test_exfiltration() -> None:
     # Construct a flow with a tool pointing to evil.com
     tool = ToolCapability(name="exfil_tool", url="http://api.evil.com/v1", risk_level="standard")
-    pack = ToolPack(
-        kind="ToolPack",
-        namespace="test",
-        tools=[tool],
-        dependencies=[],
-        env_vars=[]
-    )
+    pack = ToolPack(kind="ToolPack", namespace="test", tools=[tool], dependencies=[], env_vars=[])
 
     definitions = FlowDefinitions(tool_packs={"test_pack": pack}, profiles={})
 
     # Governance with allowlist
     governance = Governance(allowed_domains=["api.coreason.com"])
 
-    metadata = FlowMetadata(
-        name="test",
-        version="1.0",
-        description="test",
-        tags=[]
-    )
+    metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
 
-    flow = LinearFlow(
-        kind="LinearFlow",
-        metadata=metadata,
-        sequence=[],
-        definitions=definitions,
-        governance=governance
-    )
+    flow = LinearFlow(kind="LinearFlow", metadata=metadata, sequence=[], definitions=definitions, governance=governance)
 
     reports = validate_policy(flow)
 
@@ -82,50 +70,31 @@ def test_exfiltration() -> None:
     assert "api.evil.com" in violation.message
     assert violation.remediation.type == "whitelist_domain"
 
+
 # Test 4: Auto-Fix Test
 def test_auto_fix() -> None:
     # Flow with critical capability but no guard
 
     # Create a critical tool.
     tool = ToolCapability(
-        name="critical_tool",
-        risk_level="critical",
-        description="Dangerous tool",
-        requires_approval=True
+        name="critical_tool", risk_level="critical", description="Dangerous tool", requires_approval=True
     )
-    pack = ToolPack(
-        kind="ToolPack",
-        namespace="test",
-        tools=[tool],
-        dependencies=[],
-        env_vars=[]
-    )
+    pack = ToolPack(kind="ToolPack", namespace="test", tools=[tool], dependencies=[], env_vars=[])
 
     definitions = FlowDefinitions(tool_packs={"test_pack": pack}, profiles={})
 
     node = AgentNode(
         id="unsafe_node",
         type="agent",
-        profile="dummy_profile", # String reference is enough if not validated against definitions for tool check
+        profile="dummy_profile",  # String reference is enough if not validated against definitions for tool check
         tools=["critical_tool"],
-        metadata={}
+        metadata={},
     )
 
-    metadata = FlowMetadata(
-        name="test",
-        version="1.0",
-        description="test",
-        tags=[]
-    )
+    metadata = FlowMetadata(name="test", version="1.0", description="test", tags=[])
 
     # We set status="draft" so validate_referential_integrity doesn't complain about missing profile
-    flow = LinearFlow(
-        kind="LinearFlow",
-        status="draft",
-        metadata=metadata,
-        sequence=[node],
-        definitions=definitions
-    )
+    flow = LinearFlow(kind="LinearFlow", status="draft", metadata=metadata, sequence=[node], definitions=definitions)
 
     reports = validate_policy(flow)
 

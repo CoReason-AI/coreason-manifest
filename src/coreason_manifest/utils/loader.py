@@ -13,8 +13,8 @@ import contextlib
 import sys
 import types
 import uuid
-from pathlib import Path
 from collections.abc import Generator
+from pathlib import Path
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError

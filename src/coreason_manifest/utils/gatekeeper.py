@@ -94,15 +94,17 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         break
 
                 if not allowed:
-                    reports.append(ComplianceReport(
-                        severity="violation",
-                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
-                        remediation=RemediationAction(
-                            type="whitelist_domain",
-                            patch_data={"domain": domain},
-                            description=f"Add '{domain}' to allowed_domains"
+                    reports.append(
+                        ComplianceReport(
+                            severity="violation",
+                            message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
+                            remediation=RemediationAction(
+                                type="whitelist_domain",
+                                patch_data={"domain": domain},
+                                description=f"Add '{domain}' to allowed_domains",
+                            ),
                         )
-                    ))
+                    )
 
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:
@@ -140,23 +142,25 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 prompt=f"Approve unsafe action by {node.id}",
                 timeout_seconds=300,
                 interaction_mode="blocking",
-                metadata={}
+                metadata={},
             )
 
-            reports.append(ComplianceReport(
-                severity="violation",
-                message=(
-                    f"Policy Violation: Node '{node.id}' requires high-risk features "
-                    f"({', '.join(violation_reason)}) but is not guarded by a HumanNode."
-                ),
-                node_id=node.id,
-                remediation=RemediationAction(
-                    type="add_guard_node",
-                    target_node_id=node.id,
-                    patch_data=human_node.model_dump(mode="json"),
-                    description=f"Insert HumanNode '{human_node_id}' before '{node.id}'"
+            reports.append(
+                ComplianceReport(
+                    severity="violation",
+                    message=(
+                        f"Policy Violation: Node '{node.id}' requires high-risk features "
+                        f"({', '.join(violation_reason)}) but is not guarded by a HumanNode."
+                    ),
+                    node_id=node.id,
+                    remediation=RemediationAction(
+                        type="add_guard_node",
+                        target_node_id=node.id,
+                        patch_data=human_node.model_dump(mode="json"),
+                        description=f"Insert HumanNode '{human_node_id}' before '{node.id}'",
+                    ),
                 )
-            ))
+            )
 
     return reports
 
