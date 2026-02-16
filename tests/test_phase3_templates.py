@@ -1,6 +1,3 @@
-
-
-
 def test_global_supervision_template() -> None:
     pass
     # Define a shared policy
