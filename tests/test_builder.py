@@ -175,7 +175,7 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
 def test_builder_coverage_explicit_add_agent() -> None:
     """Explicitly test add_agent to ensure coverage."""
     brain = CognitiveProfile(role="role", persona="persona", reasoning=None, fast_path=None)
-    agent = AgentNode(id="agent1", type="agent", profile=brain, tools=[], metadata={}, recovery=None)
+    agent = AgentNode(id="agent1", type="agent", profile=brain, tools=[], metadata={}, resilience=None)
 
     # Linear
     builder_l = NewLinearFlow("Test", "1.0", "Desc")

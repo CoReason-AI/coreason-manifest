@@ -17,7 +17,7 @@ def test_agent_node_brain_string() -> None:
     agent = AgentNode(
         id="agent-1",
         metadata={},
-        recovery=None,
+        resilience=None,
         type="agent",
         profile="brain-id-123",
         tools=[],
@@ -31,7 +31,7 @@ def test_agent_node_brain_object() -> None:
     agent = AgentNode(
         id="agent-1",
         metadata={},
-        recovery=None,
+        resilience=None,
         type="agent",
         profile=brain,
         tools=[],
@@ -62,7 +62,7 @@ def test_linear_flow_definitions() -> None:
     agent = AgentNode(
         id="agent-1",
         metadata={},
-        recovery=None,
+        resilience=None,
         type="agent",
         profile="brain-id-123",
         tools=[],
@@ -94,7 +94,7 @@ def test_graph_flow_definitions() -> None:
     agent = AgentNode(
         id="agent-1",
         metadata={},
-        recovery=None,
+        resilience=None,
         type="agent",
         profile="brain-id-123",
         tools=[],
@@ -139,7 +139,7 @@ def test_referential_integrity_failure() -> None:
         profile="ghost-brain",  # <--- This ID does not exist
         tools=[],
         metadata={},
-        recovery=None,
+        resilience=None,
     )
 
     metadata = FlowMetadata(name="broken-flow", version="1.0", description="fail", tags=[])
@@ -170,7 +170,7 @@ def test_tool_integrity_failure() -> None:
         profile="my-brain",
         tools=["missing-tool"],  # <--- Violation
         metadata={},
-        recovery=None,
+        resilience=None,
     )
 
     with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
@@ -197,7 +197,7 @@ def test_tool_integrity_failure_graph() -> None:
         profile="my-brain",
         tools=["missing-tool"],  # <--- Violation
         metadata={},
-        recovery=None,
+        resilience=None,
     )
 
     graph = Graph(nodes={"agent-1": agent}, edges=[])

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_recovery
+from coreason_manifest.builder import NewGraphFlow, NewLinearFlow, create_resilience
 from coreason_manifest.spec.core.engines import ModelCriteria
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.resilience import (
@@ -24,7 +24,7 @@ def test_builder_integration_circuit_breaker() -> None:
     node = AgentNode(
         id="dummy_linear",
         metadata={},
-        recovery=None,
+        resilience=None,
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -45,7 +45,7 @@ def test_builder_integration_circuit_breaker() -> None:
     node_g = AgentNode(
         id="dummy",
         metadata={},
-        recovery=None,
+        resilience=None,
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -72,17 +72,17 @@ def test_supervision_logic() -> None:
     assert strategy.initial_delay_seconds == 1.5
 
     # Helper creation
-    strategy2 = create_recovery(retries=2, strategy="retry", backoff=3.0, delay=0.5)
+    strategy2 = create_resilience(retries=2, strategy="retry", backoff=3.0, delay=0.5)
     assert isinstance(strategy2, RetryStrategy)
     assert strategy2.max_attempts == 2
     assert strategy2.backoff_factor == 3.0
     assert strategy2.initial_delay_seconds == 0.5
 
 
-def test_create_recovery_fallback_missing_id() -> None:
-    """Test create_recovery raises error when fallback_id is missing for fallback strategy."""
+def test_create_resilience_fallback_missing_id() -> None:
+    """Test create_resilience raises error when fallback_id is missing for fallback strategy."""
     with pytest.raises(ValidationError):
-        create_recovery(retries=3, strategy="fallback", fallback_id=None)
+        create_resilience(retries=3, strategy="fallback", fallback_id=None)
 
 
 def test_validator_catch_reflexion_type_mismatch() -> None:
@@ -95,7 +95,7 @@ def test_validator_catch_reflexion_type_mismatch() -> None:
 
 def test_validator_catch_escalation_empty_queue() -> None:
     # This test used SupervisionPolicy on AgentNode.
-    # AgentNode now uses recovery directly (RecoveryStrategy).
+    # AgentNode now uses recovery directly (ResilienceConfig).
     # We can test EscalationStrategy directly or via recovery.
 
     # Direct validation check on strategy
@@ -119,7 +119,7 @@ def test_builder_integration_governance_update() -> None:
     node = AgentNode(
         id="dummy_update",
         metadata={},
-        recovery=None,
+        resilience=None,
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -154,7 +154,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     node = AgentNode(
         id="node1",
         metadata={},
-        recovery=None,
+        resilience=None,
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -174,7 +174,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     node2 = AgentNode(
         id="node2",
         metadata={},
-        recovery=recovery,
+        resilience=recovery,
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -269,9 +269,9 @@ def test_fallback_cycle_detection() -> None:
     # Node B -> Node A
     rec_b = FallbackStrategy(fallback_node_id="node_a")
 
-    node_a = AgentNode(id="node_a", metadata={}, recovery=rec_a, profile="p", tools=[], type="agent")
+    node_a = AgentNode(id="node_a", metadata={}, resilience=rec_a, profile="p", tools=[], type="agent")
 
-    node_b = AgentNode(id="node_b", metadata={}, recovery=rec_b, profile="p", tools=[], type="agent")
+    node_b = AgentNode(id="node_b", metadata={}, resilience=rec_b, profile="p", tools=[], type="agent")
 
     gf = NewGraphFlow(name="Cycle Flow")
     gf.add_node(node_a).add_node(node_b)

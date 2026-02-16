@@ -146,7 +146,20 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
         for pack in definitions.tool_packs.values():
             valid_tools.update(t.name for t in pack.tools)
 
+    valid_policies = definitions.supervision_templates.keys() if definitions else set()
+
     for node in nodes:
+        # Check resilience references
+        if isinstance(node.resilience, str):
+            if node.resilience.startswith("ref:"):
+                ref_id = node.resilience[4:]  # Strip 'ref:' prefix
+                if ref_id not in valid_policies:
+                    raise ValueError(f"Node '{node.id}' references undefined supervision template ID '{ref_id}'")
+            else:
+                raise ValueError(
+                    f"Node '{node.id}' has invalid resilience reference '{node.resilience}'. Must start with 'ref:'"
+                )
+
         if isinstance(node, AgentNode):
             # 1. Profile Check
             if isinstance(node.profile, str) and node.profile not in valid_profiles:

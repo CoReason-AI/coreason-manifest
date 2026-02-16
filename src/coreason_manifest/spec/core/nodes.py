@@ -11,7 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.resilience import RecoveryStrategy
+from coreason_manifest.spec.core.resilience import ResilienceConfig
 
 
 class Node(BaseModel):
@@ -21,6 +21,7 @@ class Node(BaseModel):
 
     id: str
     metadata: dict[str, Any]
+    resilience: ResilienceConfig | str | None = Field(None, description="Error handling policy.")
     presentation: PresentationHints | None = Field(None, description="UI rendering hints.")
     type: str
 
@@ -50,7 +51,6 @@ class AgentNode(Node):
     type: Literal["agent"] = "agent"
     profile: CognitiveProfile | str
     tools: list[str]
-    recovery: RecoveryStrategy | None = None
 
 
 class SwitchNode(Node):

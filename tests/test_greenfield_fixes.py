@@ -1,5 +1,7 @@
+
 import pytest
-from pydantic import BaseModel
+from typing import Any
+from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.builder import AgentBuilder, NewLinearFlow
 from coreason_manifest.spec.core.flow import (
@@ -12,14 +14,18 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     ReflexionStrategy,
     SupervisionPolicy,
+    FallbackStrategy,
+    ErrorHandler,
+    ErrorDomain
 )
 from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
+from coreason_manifest.utils.validator import validate_flow
 
 
 def test_tool_access_policy_defaults() -> None:
@@ -72,7 +78,7 @@ def test_graph_flow_draft_mode() -> None:
         profile="my-brain",
         tools=["missing-tool"],
         metadata={},
-        recovery=None,
+        resilience=None,
     )
     graph = Graph(nodes={"agent-1": agent}, edges=[])
 
@@ -110,7 +116,7 @@ def test_graph_flow_draft_mode() -> None:
         profile="my-brain",
         tools=[],  # Valid
         metadata={},
-        recovery=None,
+        resilience=None,
     )
     valid_graph = Graph(nodes={"agent-1": valid_agent}, edges=[])
 
@@ -176,16 +182,16 @@ def test_compute_hash_generic_dumpable() -> None:
 
 
 def test_coverage_agent_builder_recovery() -> None:
-    """Test AgentBuilder.with_recovery and default create_recovery logic."""
+    """Test AgentBuilder.with_resilience and default create_resilience logic."""
     # Test fallback to escalate (lines 65-70)
     builder = AgentBuilder("agent-rec")
     builder.with_identity("r", "p")
     # Using 'escalate' default implied if not 'retry' or 'fallback'
-    builder.with_recovery(retries=0, strategy="custom_escalate")
+    builder.with_resilience(retries=0, strategy="custom_escalate")
 
     agent = builder.build()
-    assert isinstance(agent.recovery, EscalationStrategy)
-    assert agent.recovery.notification_level == "warning"
+    assert isinstance(agent.resilience, EscalationStrategy)
+    assert agent.resilience.notification_level == "warning"
 
 
 def test_coverage_flow_builder_template() -> None:
@@ -207,7 +213,7 @@ def test_coverage_linear_flow_published() -> None:
         profile="my-brain",
         tools=[],
         metadata={},
-        recovery=None,
+        resilience=None,
     )
 
     # Should pass validation
@@ -222,44 +228,22 @@ def test_coverage_linear_flow_published() -> None:
 
 def test_coverage_validator_reflexion_mismatch() -> None:
     """Test ReflexionStrategy on non-supported node type (via bypass)."""
-    # SwitchNode doesn't have recovery field, so we can't attach it easily via constructor.
-    # But _validate_supervision checks node.recovery if AgentNode.
-    # It checks type NOT in list.
-    # But only AgentNode has recovery. AgentNode IS in list.
-    # So we can't hit the error unless we manually attach recovery to a SwitchNode?
-    # But SwitchNode structure forbids it.
-    # We can fake a node object.
-
-    class FakeNode:
-        id = "fake"
-        type = "fake_type"
-        recovery = ReflexionStrategy(max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True)
-
-    # Need to invoke _validate_supervision manually?
-    # Or force validate_flow with this fake node.
-    # _validate_supervision logic:
-    # if isinstance(node, AgentNode) and node.recovery:
-    # So it only checks AgentNodes!
-    # And AgentNode type is always "agent".
-    # So "node.type not in (...)" condition where "agent" is in list...
-    # Wait, can AgentNode have type="something_else"?
-    # AgentNode.type is Literal["agent"].
-    # So checking type on AgentNode is redundant if type is fixed.
-    # UNLESS we manually construct AgentNode with invalid type (bypassing validation).
-
+    # Create invalid AgentNode type manually
     node = AgentNode.model_construct(
         id="a1",
-        type="invalid_type",  # type: ignore
-        recovery=ReflexionStrategy(max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True),
+        type="invalid_type", # type: ignore
+        resilience=ReflexionStrategy(
+            max_attempts=3, critic_model="gpt-4", critic_prompt="fix", include_trace=True
+        ),
         metadata={},
         profile="p",
-        tools=[],
+        tools=[]
     )
 
     # Run validation logic manually
     from coreason_manifest.utils.validator import _validate_supervision
-
     errors = _validate_supervision(node, set())
+    # Note: _validate_supervision checks node.resilience, which we set.
     assert any("uses ReflexionStrategy but is of type 'invalid_type'" in e for e in errors)
 
 
@@ -269,12 +253,95 @@ def test_coverage_validator_escalation_empty_queue() -> None:
     # So we use model_construct.
 
     esc = EscalationStrategy.model_construct(
-        type="escalate", queue_name="", notification_level="info", timeout_seconds=10
+        type="escalate",
+        queue_name="",
+        notification_level="info",
+        timeout_seconds=10
     )
 
-    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], recovery=esc)
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p",
+        tools=[],
+        resilience=esc
+    )
 
     from coreason_manifest.utils.validator import _validate_supervision
-
     errors = _validate_supervision(node, set())
     assert any("empty queue_name" in e for e in errors)
+
+
+def test_supervision_policy_complex_validation() -> None:
+    """Test validation of SupervisionPolicy (complex) in resilience field."""
+    # Create a complex policy with a fallback strategy that points to a missing node
+    complex_policy = SupervisionPolicy(
+        handlers=[
+            ErrorHandler(
+                match_domain=[ErrorDomain.SYSTEM],
+                strategy=FallbackStrategy(fallback_node_id="missing_handler")
+            )
+        ],
+        default_strategy=FallbackStrategy(fallback_node_id="missing_default")
+    )
+
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p",
+        tools=[],
+        resilience=complex_policy
+    )
+
+    from coreason_manifest.utils.validator import _validate_supervision
+    errors = _validate_supervision(node, {"a1"})
+
+    # Should catch both missing IDs
+    assert any("missing ID 'missing_handler'" in e for e in errors)
+    assert any("missing ID 'missing_default'" in e for e in errors)
+
+
+def test_validator_string_reference_skip() -> None:
+    """Test that string references skip validation in _validate_supervision."""
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p",
+        tools=[],
+        resilience="ref:template"
+    )
+    from coreason_manifest.utils.validator import _validate_supervision
+    errors = _validate_supervision(node, set())
+    assert len(errors) == 0
+
+
+def test_fallback_cycle_complex_policy() -> None:
+    """Test cycle detection with SupervisionPolicy (complex)."""
+    from coreason_manifest.utils.validator import _validate_fallback_cycles
+
+    # A -> B (via default)
+    # B -> A (via handler)
+
+    policy_a = SupervisionPolicy(
+        handlers=[],
+        default_strategy=FallbackStrategy(fallback_node_id="b")
+    )
+
+    policy_b = SupervisionPolicy(
+        handlers=[
+             ErrorHandler(
+                match_domain=[ErrorDomain.SYSTEM],
+                strategy=FallbackStrategy(fallback_node_id="a")
+            )
+        ],
+        default_strategy=None
+    )
+
+    node_a = AgentNode(id="a", metadata={}, type="agent", profile="p", tools=[], resilience=policy_a)
+    node_b = AgentNode(id="b", metadata={}, type="agent", profile="p", tools=[], resilience=policy_b)
+
+    errors = _validate_fallback_cycles([node_a, node_b])
+    assert any("Fallback cycle detected" in e for e in errors)

@@ -239,6 +239,7 @@ class SupervisionPolicy(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["supervision"] = "supervision"
     handlers: list[ErrorHandler] = Field(..., description="An ordered list of specific rules.")
     default_strategy: RecoveryStrategy | None = Field(
         None, description="Catch-all strategy. If None, unhandled errors bubble up."
@@ -265,3 +266,6 @@ class SupervisionPolicy(BaseModel):
                     "The strategy will never complete."
                 )
         return self
+
+
+ResilienceConfig = Annotated[RecoveryStrategy | SupervisionPolicy, Field(discriminator="type")]

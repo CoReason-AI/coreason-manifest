@@ -173,16 +173,29 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
 
 
 def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
-    # Renamed from "supervision" to generically cover recovery strategies
-    # Logic updated to support RecoveryStrategy on AgentNode
     errors: list[str] = []
 
-    strategies = []
-    if isinstance(node, AgentNode) and node.recovery:
-        strategies.append(node.recovery)
+    # Check unified resilience field on any node type
+    policy = node.resilience
+    if not policy:
+        return errors
 
-    # Note: Other nodes lost supervision/recovery fields in this refactor.
-    # If other nodes need validation, add checks here.
+    # If policy is a string reference, validation happens in validate_referential_integrity.
+    if isinstance(policy, str):
+        return errors
+
+    # Collect strategies
+    strategies: list[ResilienceStrategy] = []
+
+    # If it's a SupervisionPolicy (complex)
+    if hasattr(policy, "handlers"):
+        strategies.extend([h.strategy for h in policy.handlers])  # type: ignore
+        if hasattr(policy, "default_strategy") and policy.default_strategy:  # type: ignore
+            strategies.append(policy.default_strategy)  # type: ignore
+    # If it's a simple RecoveryStrategy (ResilienceConfig which is a Union)
+    else:
+        # It's a single strategy
+        strategies.append(policy)  # type: ignore
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -214,8 +227,21 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
     adj: dict[str, list[str]] = {n.id: [] for n in nodes}
 
     for node in nodes:
-        if isinstance(node, AgentNode) and node.recovery:
-            strategy = node.recovery
+        if not node.resilience or isinstance(node.resilience, str):
+            continue
+
+        policy = node.resilience
+        strategies: list[ResilienceStrategy] = []
+
+        # Expand policy if complex
+        if hasattr(policy, "handlers"):
+            strategies.extend([h.strategy for h in policy.handlers])  # type: ignore
+            if hasattr(policy, "default_strategy") and policy.default_strategy:  # type: ignore
+                strategies.append(policy.default_strategy)  # type: ignore
+        else:
+            strategies.append(policy)  # type: ignore
+
+        for strategy in strategies:
             if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
                 adj[node.id].append(strategy.fallback_node_id)
 

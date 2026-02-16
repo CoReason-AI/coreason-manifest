@@ -35,7 +35,9 @@ class ToolAccessPolicy(BaseModel):
 
     risk_level: Literal["critical", "standard", "minimal"]
     require_auth: bool | None = None
-    allowed_roles: list[str] = Field(default_factory=list)
+    allowed_roles: list[str] | None = Field(
+        None, description="If None, allow all. If list, allow only these. Empty list implies deny-all."
+    )
 
     @model_validator(mode="before")
     @classmethod

@@ -44,7 +44,7 @@ def test_core_kernel_instantiation() -> None:
     agent_node = AgentNode(
         id="agent-1",
         metadata={"foo": "bar", "priority": 1},
-        recovery=recovery_strategy,
+        resilience=recovery_strategy,
         profile=brain,
         tools=["search"],
         type="agent",
@@ -145,7 +145,7 @@ def test_polymorphic_reasoning() -> None:
         model="gpt-4", depth=5, branching_factor=4, simulations=10, exploration_weight=1.5
     )
     brain = CognitiveProfile(role="solver", persona="math", reasoning=lats_reasoning, fast_path=None)
-    agent = AgentNode(id="agent-lats", metadata={}, recovery=None, type="agent", profile=brain, tools=[])
+    agent = AgentNode(id="agent-lats", metadata={}, resilience=None, type="agent", profile=brain, tools=[])
 
     # Validate JSON serialization/deserialization for LATS
     agent_json = agent.model_dump_json()
