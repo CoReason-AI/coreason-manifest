@@ -14,7 +14,7 @@ import sys
 import types
 import uuid
 from pathlib import Path
-from typing import Generator
+from collections.abc import Generator
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError

@@ -84,7 +84,6 @@ class CircuitState(BaseModel):
 
 class CircuitOpenError(Exception):
     """Raised when an operation is attempted on an open circuit."""
-    pass
 
 
 def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:

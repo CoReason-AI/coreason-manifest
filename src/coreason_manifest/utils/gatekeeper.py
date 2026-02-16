@@ -1,4 +1,5 @@
 # src/coreason_manifest/utils/gatekeeper.py
+from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
@@ -69,7 +70,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         return []
 
     # Build tool map: name -> tool_object
-    tool_map: dict[str, "ToolCapability"] = {}
+    tool_map: dict[str, ToolCapability] = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:
