@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -282,9 +281,11 @@ class Ok: pass
     # 6. Spec Creation Failure
     # Difficult to trigger via spec_from_file_location with valid path,
     # but we can mock it to return None
-    with patch("importlib.util.spec_from_file_location", return_value=None):
-        with pytest.raises(ValueError, match="Could not create module spec"):
-            load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
+    with (
+        patch("importlib.util.spec_from_file_location", return_value=None),
+        pytest.raises(ValueError, match="Could not create module spec"),
+    ):
+        load_agent_from_ref("runtime.py:Ok", root_dir=tmp_path)
 
 
 # Test 7: Loader Success & Hygiene
