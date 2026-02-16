@@ -52,14 +52,43 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[str]:
                 return []
         return []
 
+    # Build tool map: name -> risk_level
+    tool_risk_map = {}
+    if flow.definitions and flow.definitions.tool_packs:
+        for pack in flow.definitions.tool_packs.values():
+            for tool in pack.tools:
+                tool_risk_map[tool.name] = tool.risk_level
+
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:
         caps = get_capabilities(node)
 
+        # Check tool risks for AgentNode
+        critical_tools = []
+        if isinstance(node, AgentNode):
+            for tool_name in node.tools:
+                risk = tool_risk_map.get(tool_name, "standard")
+                if risk == "critical":
+                    critical_tools.append(tool_name)
+
         # Check for high-risk capabilities
-        if ("computer_use" in caps or "code_execution" in caps) and not _is_guarded(node, flow):  # extensible list
+        needs_guard = False
+        violation_reason = []
+
+        if "computer_use" in caps:
+            needs_guard = True
+            violation_reason.append("computer_use capability")
+        if "code_execution" in caps:
+            needs_guard = True
+            violation_reason.append("code_execution capability")
+
+        if critical_tools:
+            needs_guard = True
+            violation_reason.append(f"critical tools {critical_tools}")
+
+        if needs_guard and not _is_guarded(node, flow):  # extensible list
             errors.append(
-                f"Policy Violation: Node '{node.id}' requires high-risk capabilities {caps} "
+                f"Policy Violation: Node '{node.id}' requires high-risk features ({', '.join(violation_reason)}) "
                 "but is not guarded by a HumanNode."
             )
 

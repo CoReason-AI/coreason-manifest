@@ -86,7 +86,7 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[str]:
 
 def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[str]:
     errors: list[str] = []
-    available_tools = {t for pack in packs for t in pack.tools}
+    available_tools = {t.name for pack in packs for t in pack.tools}
 
     for node in nodes:
         if isinstance(node, AgentNode):

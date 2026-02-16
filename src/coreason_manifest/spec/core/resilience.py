@@ -137,9 +137,20 @@ class EscalationStrategy(ResilienceStrategy):
         return v
 
 
+class DiagnosisReasoning(ResilienceStrategy):
+    """
+    Agentic Error Recovery: Spawns a mini-agent to diagnose and fix inputs.
+    Mandate 4: Agentic Error Recovery.
+    """
+
+    type: Literal["diagnosis"] = "diagnosis"
+    diagnostic_model: ModelRef
+    fix_strategies: list[Literal["schema_repair", "parameter_tuning", "context_pruning"]]
+
+
 # Polymorphic Union
 ResilienceConfig = Annotated[
-    RetryStrategy | FallbackStrategy | ReflexionStrategy | EscalationStrategy,
+    RetryStrategy | FallbackStrategy | ReflexionStrategy | EscalationStrategy | DiagnosisReasoning,
     Field(discriminator="type"),
 ]
 

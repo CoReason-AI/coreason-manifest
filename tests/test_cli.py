@@ -111,7 +111,7 @@ def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
         captured = capsys.readouterr()
         # Updated assertion to match new error message
         assert "Error loading file" in captured.err
-        assert "Manifest file not found" in captured.err
+        assert "File not found or inaccessible" in captured.err
 
 
 def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
@@ -123,7 +123,7 @@ def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
         captured = capsys.readouterr()
         # Updated assertion to match new error message
         assert "Error loading file" in captured.err
-        assert "Manifest file not found" in captured.err
+        assert "File not found or inaccessible" in captured.err
 
 
 def test_cli_help(capsys: CaptureFixture[str]) -> None:
