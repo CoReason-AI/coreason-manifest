@@ -139,7 +139,6 @@ class FlowDefinitions(BaseModel):
 def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyNode]) -> None:
     """Shared referential integrity validation logic."""
     valid_profiles = definitions.profiles.keys() if definitions else set()
-    valid_policies = definitions.supervision_templates.keys() if definitions else set()
 
     # SOTA: Create a set of all available tools from registered packs
     valid_tools: set[str] = set()
@@ -147,16 +146,18 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
         for pack in definitions.tool_packs.values():
             valid_tools.update(t.name for t in pack.tools)
 
+    valid_policies = definitions.supervision_templates.keys() if definitions else set()
+
     for node in nodes:
-        # Global Supervision Template Check
-        if isinstance(node.supervision, str):
-            if node.supervision.startswith("ref:"):
-                ref_id = node.supervision[4:]  # Strip 'ref:' prefix
+        # Check resilience references
+        if isinstance(node.resilience, str):
+            if node.resilience.startswith("ref:"):
+                ref_id = node.resilience[4:]  # Strip 'ref:' prefix
                 if ref_id not in valid_policies:
                     raise ValueError(f"Node '{node.id}' references undefined supervision template ID '{ref_id}'")
             else:
                 raise ValueError(
-                    f"Node '{node.id}' has invalid supervision reference '{node.supervision}'. Must start with 'ref:'"
+                    f"Node '{node.id}' has invalid resilience reference '{node.resilience}'. Must start with 'ref:'"
                 )
 
         if isinstance(node, AgentNode):
@@ -184,6 +185,7 @@ class LinearFlow(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["LinearFlow"]
+    status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     sequence: list[AnyNode]
@@ -192,6 +194,8 @@ class LinearFlow(BaseModel):
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "LinearFlow":
         """Ensures all string-based profile references point to a valid definition."""
+        if self.status == "draft":
+            return self
         validate_integrity(self.definitions, self.sequence)
         return self
 
@@ -202,6 +206,7 @@ class GraphFlow(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["GraphFlow"]
+    status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
     interface: FlowInterface
@@ -212,5 +217,7 @@ class GraphFlow(BaseModel):
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "GraphFlow":
         """Ensures all string-based profile references point to a valid definition."""
+        if self.status == "draft":
+            return self
         validate_integrity(self.definitions, self.graph.nodes.values())
         return self

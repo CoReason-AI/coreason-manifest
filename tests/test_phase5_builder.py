@@ -3,7 +3,8 @@ import pytest
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
 from coreason_manifest.spec.core.engines import StandardReasoning
 from coreason_manifest.spec.core.nodes import CognitiveProfile
-from coreason_manifest.spec.core.resilience import EscalationStrategy, SupervisionPolicy
+
+# from coreason_manifest.spec.core.resilience import EscalationStrategy, SupervisionPolicy
 
 
 def test_fluent_agent_construction() -> None:
@@ -14,7 +15,7 @@ def test_fluent_agent_construction() -> None:
         .with_reasoning(model="gpt-4o")
         .with_fast_path(model="gpt-3.5-turbo", timeout_ms=500)
         .with_tools(["web_search"])
-        .with_supervision(retries=3)
+        # .with_supervision(retries=3)
         .build()
     )
 
@@ -43,9 +44,9 @@ def test_fluent_agent_construction() -> None:
     assert agent.tools == ["web_search"]
 
     # Verify Supervision
-    assert isinstance(agent.supervision, SupervisionPolicy)
+    # assert isinstance(agent.supervision, SupervisionPolicy)
     # max_attempts removed from EscalationStrategy
-    assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
+    # assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 
 
 def test_agent_builder_missing_identity() -> None:

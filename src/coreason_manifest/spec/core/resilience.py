@@ -116,7 +116,7 @@ class EscalationStrategy(ResilienceStrategy):
 
     type: Literal["escalate"] = "escalate"
 
-    queue_name: str = Field(..., description="The task queue for suspended sessions.")
+    queue_name: str = Field(..., min_length=1, description="The task queue for suspended sessions.")
     notification_level: Literal["info", "warning", "critical"] = Field(..., description="Severity level.")
     timeout_seconds: int = Field(..., description="Max wait for human intervention.")
     template: str | None = Field(
@@ -148,9 +148,21 @@ class DiagnosisReasoning(ResilienceStrategy):
     fix_strategies: list[Literal["schema_repair", "parameter_tuning", "context_pruning"]]
 
 
+class HumanHandoffStrategy(ResilienceStrategy):
+    """Human-in-the-Loop focus: Urgent handoff."""
+
+    type: Literal["human_handoff"] = "human_handoff"
+    urgency: Literal["low", "medium", "high", "critical"]
+
+
 # Polymorphic Union
-ResilienceConfig = Annotated[
-    RetryStrategy | FallbackStrategy | ReflexionStrategy | EscalationStrategy | DiagnosisReasoning,
+RecoveryStrategy = Annotated[
+    RetryStrategy
+    | FallbackStrategy
+    | ReflexionStrategy
+    | EscalationStrategy
+    | DiagnosisReasoning
+    | HumanHandoffStrategy,
     Field(discriminator="type"),
 ]
 
@@ -169,7 +181,7 @@ class ErrorHandler(BaseModel):
     match_domain: list[ErrorDomain] | None = Field(None, description="List of error domains to handle.")
     match_pattern: str | None = Field(None, description="Regex for fine-grained error message matching.")
     match_error_code: list[str] | None = Field(None, description="List of specific error codes to match.")
-    strategy: ResilienceConfig = Field(..., description="The polymorphic strategy to execute.")
+    strategy: RecoveryStrategy = Field(..., description="The polymorphic strategy to execute.")
 
     @field_validator("match_error_code", mode="before")
     @classmethod
@@ -227,8 +239,9 @@ class SupervisionPolicy(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    type: Literal["supervision"] = "supervision"
     handlers: list[ErrorHandler] = Field(..., description="An ordered list of specific rules.")
-    default_strategy: ResilienceConfig | None = Field(
+    default_strategy: RecoveryStrategy | None = Field(
         None, description="Catch-all strategy. If None, unhandled errors bubble up."
     )
     max_cumulative_actions: int = Field(
@@ -253,3 +266,6 @@ class SupervisionPolicy(BaseModel):
                     "The strategy will never complete."
                 )
         return self
+
+
+ResilienceConfig = Annotated[RecoveryStrategy | SupervisionPolicy, Field(discriminator="type")]

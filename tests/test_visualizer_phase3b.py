@@ -36,7 +36,6 @@ def _get_agent_node(node_id: str) -> AgentNode:
     return AgentNode(
         id=node_id,
         metadata={},
-        supervision=None,
         profile=CognitiveProfile(
             role="assistant",
             persona="helpful",
@@ -51,7 +50,6 @@ def _get_switch_node(node_id: str, cases: dict[str, str], default: str) -> Switc
     return SwitchNode(
         id=node_id,
         metadata={},
-        supervision=None,
         variable="status",
         cases=cases,
         default=default,
@@ -62,7 +60,6 @@ def _get_human_node(node_id: str) -> HumanNode:
     return HumanNode(
         id=node_id,
         metadata={},
-        supervision=None,
         prompt="Please approve",
         timeout_seconds=3600,
     )
@@ -72,7 +69,6 @@ def _get_planner_node(node_id: str) -> PlannerNode:
     return PlannerNode(
         id=node_id,
         metadata={},
-        supervision=None,
         goal="Solve problems",
         optimizer=None,
         output_schema={"type": "object"},
@@ -83,7 +79,6 @@ def _get_placeholder_node(node_id: str) -> PlaceholderNode:
     return PlaceholderNode(
         id=node_id,
         metadata={},
-        supervision=None,
         required_capabilities=["coding"],
     )
 

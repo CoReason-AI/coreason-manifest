@@ -11,7 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.resilience import SupervisionPolicy
+from coreason_manifest.spec.core.resilience import ResilienceConfig
 
 
 class Node(BaseModel):
@@ -21,7 +21,7 @@ class Node(BaseModel):
 
     id: str
     metadata: dict[str, Any]
-    supervision: SupervisionPolicy | str | None
+    resilience: ResilienceConfig | str | None = Field(None, description="Error handling policy.")
     presentation: PresentationHints | None = Field(None, description="UI rendering hints.")
     type: str
 
@@ -169,7 +169,14 @@ class SwarmNode(Node):
 
     # SOTA: Reliability (Partial Failure)
     failure_tolerance_percent: float = Field(
-        0.0, ge=0.0, le=1.0, description="0.0 = All must succeed. 0.2 = Allow 20% failure."
+        0.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "0.0 = All must succeed. 0.2 = Allow 20% failure. "
+            "Executed AFTER the Node's 'resilience' strategy. "
+            "E.g., if retries exhaust, this tolerance allows the Swarm to still succeed partially."
+        ),
     )
 
     # Aggregation

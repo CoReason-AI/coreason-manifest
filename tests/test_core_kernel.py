@@ -26,7 +26,6 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
-    SupervisionPolicy,
 )
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
@@ -36,7 +35,7 @@ def test_core_kernel_instantiation() -> None:
     reasoning = StandardReasoning(model="gpt-4", thoughts_max=5, min_confidence=0.8)
     reflex = FastPath(model="gpt-3.5", timeout_ms=1000, caching=True)
 
-    supervision = SupervisionPolicy(handlers=[], default_strategy=RetryStrategy(max_attempts=3))
+    recovery_strategy = RetryStrategy(max_attempts=3)
 
     optimizer = Optimizer(teacher_model="gpt-4", metric="accuracy", max_demonstrations=3)
 
@@ -45,7 +44,7 @@ def test_core_kernel_instantiation() -> None:
     agent_node = AgentNode(
         id="agent-1",
         metadata={"foo": "bar", "priority": 1},
-        supervision=supervision,
+        resilience=recovery_strategy,
         profile=brain,
         tools=["search"],
         type="agent",
@@ -53,7 +52,6 @@ def test_core_kernel_instantiation() -> None:
     switch_node = SwitchNode(
         id="switch-1",
         metadata={},
-        supervision=None,
         variable="user_choice",
         cases={"x > 1": "node-2"},
         default="node-3",
@@ -62,7 +60,6 @@ def test_core_kernel_instantiation() -> None:
     planner_node = PlannerNode(
         id="planner-1",
         metadata={},
-        supervision=None,
         goal="solve problem",
         optimizer=optimizer,
         type="planner",
@@ -71,7 +68,6 @@ def test_core_kernel_instantiation() -> None:
     human_node = HumanNode(
         id="human-1",
         metadata={},
-        supervision=None,
         prompt="Please approve",
         timeout_seconds=60,
         type="human",
@@ -79,7 +75,6 @@ def test_core_kernel_instantiation() -> None:
     placeholder = PlaceholderNode(
         id="place-1",
         metadata={},
-        supervision=None,
         required_capabilities=["email"],
         type="placeholder",
     )
@@ -150,7 +145,7 @@ def test_polymorphic_reasoning() -> None:
         model="gpt-4", depth=5, branching_factor=4, simulations=10, exploration_weight=1.5
     )
     brain = CognitiveProfile(role="solver", persona="math", reasoning=lats_reasoning, fast_path=None)
-    agent = AgentNode(id="agent-lats", metadata={}, supervision=None, type="agent", profile=brain, tools=[])
+    agent = AgentNode(id="agent-lats", metadata={}, resilience=None, type="agent", profile=brain, tools=[])
 
     # Validate JSON serialization/deserialization for LATS
     agent_json = agent.model_dump_json()

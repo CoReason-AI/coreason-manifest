@@ -33,6 +33,8 @@ from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, Inspe
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
+    RecoveryStrategy,
+    ResilienceConfig,
     RetryStrategy,
     SupervisionPolicy,
 )
@@ -40,16 +42,16 @@ from coreason_manifest.spec.core.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
 
-def create_supervision(
+def create_resilience(
     retries: int,
     strategy: str = "escalate",
     backoff: float = 2.0,
     delay: float = 1.0,
     fallback_id: str | None = None,
     queue_name: str | None = None,
-) -> SupervisionPolicy:
-    """Helper to create a SupervisionPolicy."""
-    res_strategy: Any
+) -> ResilienceConfig:
+    """Helper to create a ResilienceConfig."""
+    res_strategy: RecoveryStrategy
     if strategy == "retry":
         res_strategy = RetryStrategy(
             max_attempts=retries,
@@ -69,10 +71,7 @@ def create_supervision(
             timeout_seconds=3600,
         )
 
-    return SupervisionPolicy(
-        handlers=[],
-        default_strategy=res_strategy,
-    )
+    return res_strategy
 
 
 class AgentBuilder:
@@ -85,7 +84,7 @@ class AgentBuilder:
         self.reasoning: ReasoningConfig | None = None
         self.fast_path: FastPath | None = None
         self.tools: list[str] = []
-        self.supervision: SupervisionPolicy | None = None
+        self.resilience: ResilienceConfig | None = None
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures CognitiveProfile.role and CognitiveProfile.persona."""
@@ -108,7 +107,7 @@ class AgentBuilder:
         self.tools.extend(tools)
         return self
 
-    def with_supervision(
+    def with_resilience(
         self,
         retries: int,
         strategy: str = "escalate",
@@ -117,8 +116,8 @@ class AgentBuilder:
         fallback_id: str | None = None,
         queue_name: str | None = None,
     ) -> "AgentBuilder":
-        """Helper to configure AgentNode.supervision."""
-        self.supervision = create_supervision(
+        """Helper to configure AgentNode.resilience."""
+        self.resilience = create_resilience(
             retries=retries,
             strategy=strategy,
             backoff=backoff,
@@ -143,7 +142,7 @@ class AgentBuilder:
         return AgentNode(
             id=self.agent_id,
             metadata={},
-            supervision=self.supervision,
+            resilience=self.resilience,
             type="agent",
             profile=profile,
             tools=self.tools,
@@ -235,7 +234,7 @@ class NewLinearFlow(BaseFlowBuilder):
         node = AgentNode(
             id=node_id,
             metadata={},
-            supervision=None,
+            resilience=None,
             type="agent",
             profile=profile_id,
             tools=tools,
@@ -250,7 +249,6 @@ class NewLinearFlow(BaseFlowBuilder):
         node = InspectorNode(
             id=node_id,
             metadata={},
-            supervision=None,
             target_variable=target,
             criteria=criteria,
             pass_threshold=pass_threshold,
@@ -265,6 +263,7 @@ class NewLinearFlow(BaseFlowBuilder):
         """Constructs and validates the LinearFlow object."""
         flow = LinearFlow(
             kind="LinearFlow",
+            status="published",
             metadata=self.metadata,
             sequence=self.sequence,
             definitions=self._build_definitions(),
@@ -309,7 +308,7 @@ class NewGraphFlow(BaseFlowBuilder):
         node = AgentNode(
             id=node_id,
             metadata={},
-            supervision=None,
+            resilience=None,
             type="agent",
             profile=profile_id,
             tools=tools,
@@ -324,7 +323,6 @@ class NewGraphFlow(BaseFlowBuilder):
         node = InspectorNode(
             id=node_id,
             metadata={},
-            supervision=None,
             target_variable=target,
             criteria=criteria,
             pass_threshold=pass_threshold,
@@ -362,6 +360,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         flow = GraphFlow(
             kind="GraphFlow",
+            status="published",
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,

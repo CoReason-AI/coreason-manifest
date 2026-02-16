@@ -13,6 +13,15 @@ import yaml
 class SecurityViolationError(Exception):
     """Raised when a security constraint is violated during IO operations."""
 
+    def __init__(self, message: str, code: str | None = None) -> None:
+        self.code = code
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self) -> str:
+        prefix = f"Security Error: [{self.code}] " if self.code else "Security Error: "
+        return f"{prefix}{self.message}"
+
 
 class ManifestIO:
     """

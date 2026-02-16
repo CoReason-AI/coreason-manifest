@@ -30,7 +30,7 @@ def test_builder_interface_construction() -> None:
 
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
-    node = PlaceholderNode(id="start", metadata={}, supervision=None, type="placeholder", required_capabilities=[])
+    node = PlaceholderNode(id="start", metadata={}, type="placeholder", required_capabilities=[])
     builder.add_node(node)
 
     flow = builder.build()

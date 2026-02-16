@@ -46,7 +46,7 @@ def get_defs() -> FlowDefinitions:
 
 def test_code_execution_unguarded() -> None:
     defs = get_defs()
-    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="code", tools=[])
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="code", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[node])
 
@@ -58,7 +58,7 @@ def test_code_execution_unguarded() -> None:
 def test_base_reasoning_capabilities() -> None:
     # Case: StandardReasoning (inherits BaseReasoning)
     defs = get_defs()
-    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="safe", tools=[])
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="safe", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[node])
 
@@ -70,7 +70,7 @@ def test_base_reasoning_capabilities() -> None:
 def test_linear_unguarded_computer_use() -> None:
     defs = get_defs()
     # Unguarded AgentNode using "comp" profile
-    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[node])
 
@@ -82,8 +82,8 @@ def test_linear_unguarded_computer_use() -> None:
 
 def test_linear_guarded_computer_use() -> None:
     defs = get_defs()
-    human = HumanNode(id="h1", metadata={}, supervision=None, type="human", prompt="ok?", timeout_seconds=10)
-    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[human, node])
 
@@ -94,8 +94,8 @@ def test_linear_guarded_computer_use() -> None:
 def test_linear_switch_bypass_fails() -> None:
     # SwitchNode should NOT count as guard
     defs = get_defs()
-    switch = SwitchNode(id="s1", metadata={}, supervision=None, type="switch", variable="x", cases={}, default="a1")
-    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    switch = SwitchNode(id="s1", metadata={}, type="switch", variable="x", cases={}, default="a1")
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[switch, node])
 
@@ -114,7 +114,6 @@ def test_swarm_unguarded() -> None:
     swarm = SwarmNode(
         id="swarm1",
         metadata={},
-        supervision=None,
         type="swarm",
         worker_profile="comp",  # Dangerous profile
         workload_variable="v",
@@ -137,7 +136,6 @@ def test_swarm_missing_profile_validation() -> None:
     swarm = SwarmNode(
         id="swarm1",
         metadata={},
-        supervision=None,
         type="swarm",
         worker_profile="missing",
         workload_variable="v",
@@ -147,7 +145,13 @@ def test_swarm_missing_profile_validation() -> None:
         output_variable="out",
     )
     with pytest.raises(ValidationError, match="undefined worker profile ID"):
-        LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[swarm])
+        LinearFlow(
+            kind="LinearFlow",
+            status="published",
+            metadata=get_meta(),
+            definitions=defs,
+            sequence=[swarm],
+        )
 
 
 def test_gatekeeper_robustness_missing_profile() -> None:
@@ -156,7 +160,6 @@ def test_gatekeeper_robustness_missing_profile() -> None:
     swarm = SwarmNode(
         id="swarm1",
         metadata={},
-        supervision=None,
         type="swarm",
         worker_profile="missing",
         workload_variable="v",
@@ -175,7 +178,7 @@ def test_graph_unguarded_path() -> None:
     defs = get_defs()
     # Entry -> Agent(comp) -> End
     # No human
-    agent = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"a1": agent}, edges=[])
 
@@ -198,8 +201,8 @@ def test_graph_unguarded_path() -> None:
 def test_graph_guarded_path() -> None:
     defs = get_defs()
     # Entry(Human) -> Agent(comp)
-    human = HumanNode(id="h1", metadata={}, supervision=None, type="human", prompt="ok?", timeout_seconds=10)
-    agent = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
+    agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(source="h1", target="a1")])
 
@@ -223,7 +226,7 @@ def test_graph_cycle_no_entry() -> None:
     # Cyclic graph with no entry points
     # a1(comp) -> a1
     defs = get_defs()
-    agent = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")])
 
@@ -319,7 +322,6 @@ def test_gatekeeper_inline_profile() -> None:
     node = AgentNode(
         id="a1",
         metadata={},
-        supervision=None,
         type="agent",
         profile=profile,  # Inline profile
         tools=[],
@@ -333,8 +335,8 @@ def test_gatekeeper_inline_profile() -> None:
 
 def test_gatekeeper_is_guarded_value_error() -> None:
     # Gatekeeper L78-79: except ValueError: return False
-    node1 = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="p1", tools=[])
-    node2 = AgentNode(id="a2", metadata={}, supervision=None, type="agent", profile="p1", tools=[])
+    node1 = AgentNode(id="a1", metadata={}, type="agent", profile="p1", tools=[])
+    node2 = AgentNode(id="a2", metadata={}, type="agent", profile="p1", tools=[])
 
     # Use model_construct to bypass referential integrity validation (missing profile p1)
     flow = LinearFlow.model_construct(
@@ -395,7 +397,6 @@ def test_gatekeeper_attribute_error() -> None:
     node = AgentNode.model_construct(
         id="a1",
         metadata={},
-        supervision=None,
         type="agent",
         profile=MockProfile(),  # type: ignore
         tools=[],
@@ -420,8 +421,8 @@ def test_graph_traversal_unguarded() -> None:
     p_safe = CognitiveProfile(role="safe", persona="safe", reasoning=StandardReasoning(model="gpt-3.5"), fast_path=None)
     defs = FlowDefinitions(profiles={"comp": p_comp, "safe": p_safe})
 
-    a1 = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="safe", tools=[])
-    a2 = AgentNode(id="a2", metadata={}, supervision=None, type="agent", profile="comp", tools=[])
+    a1 = AgentNode(id="a1", metadata={}, type="agent", profile="safe", tools=[])
+    a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a2")])
 
@@ -447,7 +448,7 @@ def test_unknown_flow_type() -> None:
     class UnknownFlow:
         pass
 
-    node = AgentNode(id="a1", metadata={}, supervision=None, type="agent", profile="p", tools=[])
+    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
     assert _is_guarded(node, UnknownFlow()) is False  # type: ignore
 
 

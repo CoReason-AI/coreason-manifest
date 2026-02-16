@@ -22,7 +22,7 @@ def test_global_supervision_template() -> None:
     node = AgentNode(
         id="node1",
         metadata={},
-        supervision="ref:standard-retry",
+        resilience="ref:standard-retry",
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -30,7 +30,7 @@ def test_global_supervision_template() -> None:
 
     # Build should pass validation
     flow = lf.build()
-    assert flow.sequence[0].supervision == "ref:standard-retry"
+    assert flow.sequence[0].resilience == "ref:standard-retry"
     assert isinstance(flow.definitions, FlowDefinitions)
     assert flow.definitions.supervision_templates["standard-retry"] == shared_policy
 
@@ -43,7 +43,7 @@ def test_missing_supervision_template() -> None:
     node = AgentNode(
         id="node1",
         metadata={},
-        supervision="ref:missing-policy",
+        resilience="ref:missing-policy",
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
@@ -59,11 +59,11 @@ def test_malformed_supervision_reference() -> None:
     node = AgentNode(
         id="node1",
         metadata={},
-        supervision="invalid-string",
+        resilience="invalid-string",
         profile=CognitiveProfile(role="dummy", persona="dummy", reasoning=None, fast_path=None),
         tools=[],
     )
     lf.add_step(node)
 
-    with pytest.raises(ValueError, match="invalid supervision reference"):
+    with pytest.raises(ValueError, match="invalid resilience reference"):
         lf.build()

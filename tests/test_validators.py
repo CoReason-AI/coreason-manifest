@@ -13,7 +13,6 @@ def test_human_node_validators_coverage() -> None:
         HumanNode(
             id="h1",
             metadata={},
-            supervision=None,
             type="human",
             prompt="p",
             timeout_seconds=10,
@@ -26,7 +25,6 @@ def test_human_node_validators_coverage() -> None:
         HumanNode(
             id="h2",
             metadata={},
-            supervision=None,
             type="human",
             prompt="p",
             timeout_seconds=10,
@@ -43,7 +41,6 @@ def test_swarm_node_validators_coverage() -> None:
         SwarmNode(
             id="s1",
             metadata={},
-            supervision=None,
             type="swarm",
             worker_profile="p1",
             workload_variable="v1",
@@ -59,7 +56,6 @@ def test_swarm_node_validators_coverage() -> None:
     valid_swarm = SwarmNode(
         id="s2",
         metadata={},
-        supervision=None,
         type="swarm",
         worker_profile="p1",
         workload_variable="v1",

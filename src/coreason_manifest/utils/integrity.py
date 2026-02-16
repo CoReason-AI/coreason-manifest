@@ -5,6 +5,8 @@ import json
 from datetime import UTC, datetime
 from typing import Any, TypedDict
 
+from pydantic import BaseModel
+
 
 def to_canonical_timestamp(dt: datetime) -> str:
     """
@@ -46,8 +48,12 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
         return sorted([_recursive_sort_and_sanitize(x) for x in obj])
     if isinstance(obj, datetime):
         return to_canonical_timestamp(obj)
-    if hasattr(obj, "model_dump"):
+    if isinstance(obj, BaseModel):
         # Pydantic v2
+        excludes = getattr(obj, "_hash_exclude_", None)
+        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes))
+    if hasattr(obj, "model_dump"):
+        # Pydantic v2 or compatible
         return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True))
     if hasattr(obj, "dict"):
         # Pydantic v1
