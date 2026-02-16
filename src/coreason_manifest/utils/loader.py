@@ -83,10 +83,12 @@ def _validate_ast(source_code: str, filename: str) -> None:
                     raise SecurityViolationError(f"Banned import '{node.module}' detected in {filename}")
 
         # 2. Call Check (Ban __import__, eval, exec, compile)
-        elif isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name):
-                if node.func.id in ("__import__", "eval", "exec", "compile"):
-                    raise SecurityViolationError(f"Banned call '{node.func.id}' detected in {filename}")
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in ("__import__", "eval", "exec", "compile")
+        ):
+            raise SecurityViolationError(f"Banned call '{node.func.id}' detected in {filename}")
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
@@ -126,43 +128,56 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     module = importlib.util.module_from_spec(spec)
 
     # Restrict builtins in the module's dict before execution
-    # This is a basic mitigation. Real sandboxing requires more.
-    # We include 'print', 'range', 'len', etc. but exclude 'open', '__import__' (direct access), etc.
-    # Note: `exec` uses the module's __dict__ as globals.
-    # If we want to support standard imports, we need __import__ available?
-    # Python's `import` statement calls `builtins.__import__`.
-    # If we remove `__import__` from builtins, `import` statement will fail!
-    # So we CANNOT remove `__import__` if we want `from coreason_manifest ...` to work.
-    # However, AST check prevents explicit calls to `__import__`.
-    # So we can provide standard builtins but rely on AST for call prevention.
-    # But the review asked to "construct a restricted __builtins__ dictionary".
-    # I'll define a minimal safe set.
-
     safe_builtins = {
         "__build_class__": __build_class__,
         "__name__": "__main__",
-        "__import__": __import__, # Required for import statements
-        "abs": abs, "all": all, "any": any, "bool": bool, "dict": dict,
-        "divmod": divmod, "enumerate": enumerate, "filter": filter, "float": float,
-        "getattr": getattr, "hasattr": hasattr, "hash": hash, "id": id,
-        "int": int, "isinstance": isinstance, "issubclass": issubclass, "iter": iter,
-        "len": len, "list": list, "map": map, "max": max, "min": min,
-        "next": next, "object": object, "pow": pow, "print": print,
-        "property": property, "range": range, "repr": repr, "reversed": reversed,
-        "round": round, "set": set, "slice": slice, "sorted": sorted,
-        "str": str, "sum": sum, "super": super, "tuple": tuple, "type": type,
+        "__import__": __import__,  # Required for import statements
+        "abs": abs,
+        "all": all,
+        "any": any,
+        "bool": bool,
+        "dict": dict,
+        "divmod": divmod,
+        "enumerate": enumerate,
+        "filter": filter,
+        "float": float,
+        "getattr": getattr,
+        "hasattr": hasattr,
+        "hash": hash,
+        "id": id,
+        "int": int,
+        "isinstance": isinstance,
+        "issubclass": issubclass,
+        "iter": iter,
+        "len": len,
+        "list": list,
+        "map": map,
+        "max": max,
+        "min": min,
+        "next": next,
+        "object": object,
+        "pow": pow,
+        "print": print,
+        "property": property,
+        "range": range,
+        "repr": repr,
+        "reversed": reversed,
+        "round": round,
+        "set": set,
+        "slice": slice,
+        "sorted": sorted,
+        "str": str,
+        "sum": sum,
+        "super": super,
+        "tuple": tuple,
+        "type": type,
         "zip": zip,
     }
 
     module.__dict__["__builtins__"] = safe_builtins
 
     try:
-        # Execute the module.
-        # Since we populated module.__dict__ and module is from spec, we can use exec manually
-        # to ensure we control the globals (module.__dict__).
-        # spec.loader.exec_module(module) might overwrite builtins or use standard ones?
-        # Standard exec_module executes the code.
-        # Let's use manual exec to be sure about the environment.
+        # Execute the module manually with restricted globals
         code = compile(source_code, str(file_path), "exec")
         exec(code, module.__dict__)
     except Exception as e:

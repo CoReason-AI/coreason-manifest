@@ -1,9 +1,7 @@
 import os
 import sys
 import time
-import uuid
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -45,7 +43,7 @@ def test_malicious_agent_ast(tmp_path: Path) -> None:
     code_sub = "import os.path"
     file_sub = tmp_path / "bypass.py"
     file_sub.write_text(code_sub)
-    with pytest.raises(SecurityViolationError, match="Banned import 'os.path'"):
+    with pytest.raises(SecurityViolationError, match=r"Banned import 'os\.path'"):
         load_agent_from_ref("bypass.py:Agent", root_dir=tmp_path)
 
     # 4. Dangerous Calls
@@ -119,12 +117,14 @@ def test_allowed_url() -> None:
 
     # Schemeless URL check
     tool_schemeless = tool.model_copy(update={"url": "google.com/search"})
+    assert flow.definitions is not None
     flow.definitions.tool_packs["test_pack"].tools[0] = tool_schemeless
     reports = validate_policy(flow)
     assert len(reports) == 0
 
     # Schemeless Blocked
     tool_blocked = tool.model_copy(update={"url": "evil.com/foo"})
+    assert flow.definitions is not None
     flow.definitions.tool_packs["test_pack"].tools[0] = tool_blocked
     reports = validate_policy(flow)
     assert len(reports) == 1
@@ -214,6 +214,7 @@ def test_circuit_breaker_state_updates() -> None:
         check_circuit(node_id, policy, store)
 
     # Wait for timeout (simulated by updating time)
+    assert store[node_id].last_failure_time is not None
     store[node_id].last_failure_time -= 2
 
     # Check (Half-Open)
@@ -298,3 +299,11 @@ class MyAgent:
     for m in diff:
         assert "success" not in m
         assert "coreason.dynamic" not in m
+
+
+# Test 8: System Pollution Verification (Ensuring previous tests didn't leak)
+def test_sys_pollution_check() -> None:
+    # This is a meta-check to ensure previous tests cleaned up
+    # Since loader now avoids sys.modules, there should be no coreason.dynamic modules
+    modules = [m for m in sys.modules if "coreason.dynamic" in m]
+    assert len(modules) == 0, f"Leaked modules found: {modules}"
