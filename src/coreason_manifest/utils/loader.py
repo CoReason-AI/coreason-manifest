@@ -99,11 +99,7 @@ def _validate_ast(source_code: str, filename: str) -> None:
                     raise SecurityViolationError(f"Banned import '{node.module}' detected in {filename}")
 
         # 2. Call Check (Ban __import__, eval, exec, compile)
-        elif (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id in BANNED_CALLS
-        ):
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in BANNED_CALLS:
             raise SecurityViolationError(f"Banned call '{node.func.id}' detected in {filename}")
 
         # 3. Attribute Check (Gadget Chain)

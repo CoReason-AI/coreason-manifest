@@ -1,19 +1,18 @@
-
 import pytest
-from pydantic import ValidationError
-from datetime import datetime, timezone
 
-from coreason_manifest.utils.loader import load_agent_from_ref
-from coreason_manifest.utils.gatekeeper import validate_policy, ComplianceReport, RemediationAction
-from coreason_manifest.utils.io import SecurityViolationError
-from coreason_manifest.spec.core.governance import Governance, CircuitBreaker
-from coreason_manifest.spec.core.flow import LinearFlow, AgentNode, GraphFlow, FlowDefinitions as Definitions
+from coreason_manifest.spec.core.flow import AgentNode, LinearFlow
+from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
+from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
-from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof, reconstruct_payload
+from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+from coreason_manifest.utils.io import SecurityViolationError
+from coreason_manifest.utils.loader import load_agent_from_ref
 
 # ------------------------------------------------------------------------
 # 1. Malicious Agent Test (Loader Security)
 # ------------------------------------------------------------------------
+
 
 def test_malicious_agent_ast_check(tmp_path):
     """
@@ -32,6 +31,7 @@ class Agent:
     # We expect a SecurityViolationError from the loader's AST check
     with pytest.raises(SecurityViolationError, match="Security"):
         load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)
+
 
 def test_malicious_gadget_chain(tmp_path):
     """
@@ -54,11 +54,11 @@ class Agent:
 # 2. Permissions Test (ManifestIO)
 # ------------------------------------------------------------------------
 
+
 def test_permissions_world_writable(tmp_path):
     """
     Loading a valid agent from a world-writable file MUST fail on POSIX systems.
     """
-    import os
     import sys
 
     if sys.platform == "win32":
@@ -82,6 +82,7 @@ class Agent:
 # 3. Exfiltration Test (Gatekeeper Domain Policy)
 # ------------------------------------------------------------------------
 
+
 def test_exfiltration_blocked_domain():
     """
     A tool pointing to `api.evil.com` must trigger a validation error
@@ -91,10 +92,7 @@ def test_exfiltration_blocked_domain():
 
     # Tool pointing to evil.com
     tool = ToolCapability(
-        name="EvilTool",
-        risk_level="standard",
-        description="Steals data",
-        url="https://api.evil.com/v1/steal"
+        name="EvilTool", risk_level="standard", description="Steals data", url="https://api.evil.com/v1/steal"
     )
 
     flow = LinearFlow(
@@ -102,11 +100,11 @@ def test_exfiltration_blocked_domain():
         metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
         governance=gov,
         definitions=Definitions(
-            tool_packs={"default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])}
+            tool_packs={
+                "default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])
+            }
         ),
-        sequence=[
-            AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["EvilTool"])
-        ]
+        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["EvilTool"])],
     )
 
     reports = validate_policy(flow)
@@ -116,6 +114,7 @@ def test_exfiltration_blocked_domain():
     assert "api.evil.com" in violation.message
     assert violation.remediation.type == "whitelist_domain"
 
+
 def test_allowed_url():
     """
     A tool pointing to a valid domain should pass.
@@ -123,10 +122,7 @@ def test_allowed_url():
     gov = Governance(allowed_domains=["api.coreason.com"])
 
     tool = ToolCapability(
-        name="GoodTool",
-        risk_level="standard",
-        description="Safe",
-        url="https://api.coreason.com/v1/data"
+        name="GoodTool", risk_level="standard", description="Safe", url="https://api.coreason.com/v1/data"
     )
 
     flow = LinearFlow(
@@ -134,9 +130,11 @@ def test_allowed_url():
         metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
         governance=gov,
         definitions=Definitions(
-             tool_packs={"default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])}
+            tool_packs={
+                "default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])
+            }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])]
+        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])],
     )
 
     reports = validate_policy(flow)
@@ -152,12 +150,17 @@ def test_allowed_url():
         metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
         governance=gov,
         definitions=Definitions(
-             tool_packs={"default": ToolPack(kind="ToolPack", namespace="default", tools=[tool_sub], dependencies=[], env_vars=[])}
+            tool_packs={
+                "default": ToolPack(
+                    kind="ToolPack", namespace="default", tools=[tool_sub], dependencies=[], env_vars=[]
+                )
+            }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])]
+        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])],
     )
     reports = validate_policy(flow_sub)
     assert len([r for r in reports if r.severity == "violation"]) == 0
+
 
 def test_schemeless_url_handling():
     """
@@ -167,21 +170,18 @@ def test_schemeless_url_handling():
 
     # This URL looks like it might be google.com if naive parsing is used,
     # but strictly it is evil.com/google.com
-    tool = ToolCapability(
-        name="TrickyTool",
-        risk_level="standard",
-        description="Tricky",
-        url="evil.com/google.com"
-    )
+    tool = ToolCapability(name="TrickyTool", risk_level="standard", description="Tricky", url="evil.com/google.com")
 
     flow = LinearFlow(
         kind="LinearFlow",
         metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
         governance=gov,
         definitions=Definitions(
-             tool_packs={"default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])}
+            tool_packs={
+                "default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])
+            }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["TrickyTool"])]
+        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["TrickyTool"])],
     )
 
     reports = validate_policy(flow)
@@ -196,14 +196,15 @@ def test_schemeless_url_handling():
 # 4. Auto-Fix Test (Gatekeeper Remediation)
 # ------------------------------------------------------------------------
 
+
 def test_auto_fix_computer_use():
     """
     A graph with an unguarded "Computer Use" node must return a validation report
     containing a JSON patch to insert a HumanNode.
     """
     # Create a profile that requires computer_use
-    from coreason_manifest.spec.core.nodes import CognitiveProfile as Profile
     from coreason_manifest.spec.core.engines import ComputerUseReasoning
+    from coreason_manifest.spec.core.nodes import CognitiveProfile as Profile
 
     # Use actual engine that requires computer_use
     reasoning = ComputerUseReasoning(model="gpt-4")
@@ -214,9 +215,7 @@ def test_auto_fix_computer_use():
         kind="LinearFlow",
         metadata={"name": "unsafe", "version": "1.0", "description": "unsafe", "tags": []},
         definitions=Definitions(profiles={"hacker": profile}),
-        sequence=[
-            AgentNode(id="attacker", metadata={}, type="agent", profile="hacker", tools=[])
-        ]
+        sequence=[AgentNode(id="attacker", metadata={}, type="agent", profile="hacker", tools=[])],
     )
 
     reports = validate_policy(flow)
@@ -231,13 +230,14 @@ def test_auto_fix_computer_use():
     assert patch[0]["op"] == "add"
     assert patch[0]["value"]["type"] == "human"
 
+
 def test_verify_remediation_patch_structure():
     """
     Verify that the remediation patch is a valid JSON Patch structure.
     """
     # ... setup same as above ...
-    from coreason_manifest.spec.core.nodes import CognitiveProfile as Profile
     from coreason_manifest.spec.core.engines import CodeExecutionReasoning
+    from coreason_manifest.spec.core.nodes import CognitiveProfile as Profile
 
     reasoning = CodeExecutionReasoning(model="gpt-4")
 
@@ -247,9 +247,7 @@ def test_verify_remediation_patch_structure():
         kind="LinearFlow",
         metadata={"name": "unsafe", "version": "1.0", "description": "unsafe", "tags": []},
         definitions=Definitions(profiles={"coder": profile}),
-        sequence=[
-            AgentNode(id="coder_agent", metadata={}, type="agent", profile="coder", tools=[])
-        ]
+        sequence=[AgentNode(id="coder_agent", metadata={}, type="agent", profile="coder", tools=[])],
     )
 
     reports = validate_policy(flow)
@@ -259,7 +257,8 @@ def test_verify_remediation_patch_structure():
     patch = violation.remediation.patch_data
     assert len(patch) == 1
     op = patch[0]
-    assert "op" in op and op["op"] == "add"
+    assert "op" in op
+    assert op["op"] == "add"
     assert "path" in op
     assert "value" in op
 
@@ -268,11 +267,17 @@ def test_verify_remediation_patch_structure():
 # 5. Circuit Breaker Test
 # ------------------------------------------------------------------------
 
+
 def test_circuit_breaker_logic():
     """
     Test CircuitState transitions and enforcement.
     """
-    from coreason_manifest.spec.core.governance import CircuitState, check_circuit, CircuitOpenError, record_failure, record_success
+    from coreason_manifest.spec.core.governance import (
+        CircuitOpenError,
+        check_circuit,
+        record_failure,
+        record_success,
+    )
 
     cb = CircuitBreaker(error_threshold_count=2, reset_timeout_seconds=1)
     # We don't manually create state, functions handle it.
@@ -283,10 +288,10 @@ def test_circuit_breaker_logic():
     check_circuit(node_id, cb, store)
 
     # 2. Record Failures
-    record_failure(node_id, cb, store) # count=1
-    check_circuit(node_id, cb, store) # Still closed
+    record_failure(node_id, cb, store)  # count=1
+    check_circuit(node_id, cb, store)  # Still closed
 
-    record_failure(node_id, cb, store) # count=2 -> Open
+    record_failure(node_id, cb, store)  # count=2 -> Open
 
     # 3. Verify Open
     with pytest.raises(CircuitOpenError):
@@ -294,10 +299,11 @@ def test_circuit_breaker_logic():
 
     # 4. Wait for timeout
     import time
+
     time.sleep(1.1)
 
     # 5. Half-Open
-    check_circuit(node_id, cb, store) # Should pass (Half-Open)
+    check_circuit(node_id, cb, store)  # Should pass (Half-Open)
     state = store[node_id]
     assert state.state == "half-open"
 
@@ -311,6 +317,7 @@ def test_circuit_breaker_logic():
 # 6. Strict Integrity Test
 # ------------------------------------------------------------------------
 
+
 def test_strict_integrity():
     """
     Verify strict Merkle proof verification.
@@ -319,11 +326,7 @@ def test_strict_integrity():
     # We must construct payload exactly as reconstruct_payload does to get matching hashes.
     # reconstruct_payload adds 'attributes': {} and sorts 'previous_hashes'
 
-    data1_raw = {
-        "node_id": "n1",
-        "state": "success",
-        "previous_hashes": []
-    }
+    data1_raw = {"node_id": "n1", "state": "success", "previous_hashes": []}
     # Use reconstruct_payload to normalize before hashing, to match verification logic
     payload1 = reconstruct_payload(data1_raw)
     h1 = compute_hash(payload1)
@@ -331,11 +334,7 @@ def test_strict_integrity():
     node1 = data1_raw.copy()
     node1["execution_hash"] = h1
 
-    data2_raw = {
-        "node_id": "n2",
-        "state": "success",
-        "previous_hashes": [h1]
-    }
+    data2_raw = {"node_id": "n2", "state": "success", "previous_hashes": [h1]}
     payload2 = reconstruct_payload(data2_raw)
     h2 = compute_hash(payload2)
 
@@ -347,7 +346,7 @@ def test_strict_integrity():
 
     # 2. Tampered Content
     node1_tampered = node1.copy()
-    node1_tampered["state"] = "failed" # changed content
+    node1_tampered["state"] = "failed"  # changed content
     trace_tampered = [node1_tampered, node2]
     assert verify_merkle_proof(trace_tampered) is False
 

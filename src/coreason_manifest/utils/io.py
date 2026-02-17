@@ -63,9 +63,8 @@ class ManifestIO:
             raise
 
         # 1. Path Traversal Check (High-Level)
-        if not self.allow_external:
-            if not target_path.is_relative_to(self.jail):
-                raise SecurityViolationError(f"Path Traversal Detected: {path}")
+        if not self.allow_external and not target_path.is_relative_to(self.jail):
+            raise SecurityViolationError(f"Path Traversal Detected: {path}")
 
         # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
         try:

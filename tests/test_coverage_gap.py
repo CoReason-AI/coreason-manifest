@@ -1,12 +1,15 @@
 from typing import Any
-import pytest
-from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof, reconstruct_payload
+
 from pydantic import BaseModel
+
+from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+
 
 def test_compute_hash_determinism() -> None:
     data1 = {"b": 2, "a": 1}
     data2 = {"a": 1, "b": 2}
     assert compute_hash(data1) == compute_hash(data2)
+
 
 def test_verify_merkle_proof_valid() -> None:
     # Use reconstruct_payload to ensure hash consistency
@@ -20,6 +23,7 @@ def test_verify_merkle_proof_valid() -> None:
 
     assert verify_merkle_proof([n1, n2]) is True
 
+
 def test_verify_merkle_proof_tampered() -> None:
     n1_raw = {"node_id": "genesis", "state": "ok", "previous_hashes": []}
     h1 = compute_hash(reconstruct_payload(n1_raw))
@@ -30,10 +34,12 @@ def test_verify_merkle_proof_tampered() -> None:
 
     assert verify_merkle_proof([n1_tampered]) is False
 
+
 def test_verify_merkle_legacy_object_attributes() -> None:
     """
     Updated to use Pydantic model for strict verification compatibility.
     """
+
     class NodeModel(BaseModel):
         node_id: str
         state: str
@@ -65,6 +71,7 @@ def test_verify_merkle_legacy_object_attributes() -> None:
 
     assert verify_merkle_proof([n1, n2]) is True
 
+
 def test_integrity_legacy_trusted_root_mismatch_at_genesis_continuation() -> None:
     # Valid continuation
     n1_raw = {"node_id": "cont", "state": "ok", "previous_hashes": ["some_hash"]}
@@ -76,6 +83,7 @@ def test_integrity_legacy_trusted_root_mismatch_at_genesis_continuation() -> Non
 
     # Match (trusted root matches prev_hash)
     assert verify_merkle_proof([n1], trusted_root_hash="some_hash") is True
+
 
 def test_verify_merkle_legacy_genesis_continuation_loose() -> None:
     # Chain start with prev_hash but no trusted root

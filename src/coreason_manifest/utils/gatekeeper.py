@@ -112,13 +112,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             # For simplicity/robustness in this specific case,
                             # we might just describe the operation or assume appending to governance.
                             # Governance allowed_domains is a list.
-                            patch_data=[
-                                {
-                                    "op": "add",
-                                    "path": "/governance/allowed_domains/-",
-                                    "value": domain
-                                }
-                            ],
+                            patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
                             description=f"Add '{domain}' to allowed_domains",
                         ),
                     )
@@ -172,19 +166,13 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                     if n.id == node.id:
                         idx = i
                         break
-                patch_ops.append({
-                    "op": "add",
-                    "path": f"/sequence/{idx}",
-                    "value": human_node.model_dump(mode="json")
-                })
+                patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
             elif isinstance(flow, GraphFlow):
                 # For graph, we just add the node to the nodes map.
                 # Rewiring edges is complex and context-dependent.
-                patch_ops.append({
-                    "op": "add",
-                    "path": f"/graph/nodes/{human_node_id}",
-                    "value": human_node.model_dump(mode="json")
-                })
+                patch_ops.append(
+                    {"op": "add", "path": f"/graph/nodes/{human_node_id}", "value": human_node.model_dump(mode="json")}
+                )
 
             reports.append(
                 ComplianceReport(

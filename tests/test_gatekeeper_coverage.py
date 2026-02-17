@@ -1,8 +1,8 @@
-
-import pytest
-from coreason_manifest.utils.gatekeeper import validate_policy
-from coreason_manifest.spec.core.flow import LinearFlow, AgentNode, FlowDefinitions as Definitions
+from coreason_manifest.spec.core.flow import AgentNode, LinearFlow
+from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
 from coreason_manifest.spec.core.nodes import CognitiveProfile as Profile
+from coreason_manifest.utils.gatekeeper import validate_policy
+
 
 def test_gatekeeper_capability_error_handling():
     """
@@ -12,18 +12,13 @@ def test_gatekeeper_capability_error_handling():
     # Use model_construct to bypass validation.
     # We pass an empty object() as reasoning.
     # Calling object().required_capabilities() will raise AttributeError.
-    profile = Profile.model_construct(
-        role="broken",
-        persona="broken",
-        reasoning=object(),
-        fast_path=None
-    )
+    profile = Profile.model_construct(role="broken", persona="broken", reasoning=object(), fast_path=None)
 
     flow = LinearFlow(
         kind="LinearFlow",
         metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
         definitions=Definitions(profiles={"broken": profile}),
-        sequence=[AgentNode(id="a1", metadata={}, type="agent", profile="broken", tools=[])]
+        sequence=[AgentNode(id="a1", metadata={}, type="agent", profile="broken", tools=[])],
     )
 
     # Should not crash
