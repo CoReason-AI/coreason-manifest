@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from coreason_manifest.builder import AgentBuilder, NewLinearFlow
 from coreason_manifest.spec.core.flow import (
+    Blackboard,
     DataSchema,
     FlowDefinitions,
     FlowInterface,
@@ -11,7 +12,6 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     LinearFlow,
     VariableDef,
-    Blackboard,
 )
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile

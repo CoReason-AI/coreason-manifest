@@ -14,7 +14,7 @@ import importlib.util
 import re
 import warnings
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import yaml
 from yaml.nodes import MappingNode
