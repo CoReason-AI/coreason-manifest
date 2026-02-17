@@ -1,6 +1,5 @@
-import stat
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -14,7 +13,7 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
 )
-from coreason_manifest.spec.core.nodes import InspectorNode, SwarmNode, SwitchNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode, SwitchNode
 from coreason_manifest.utils.io import ManifestIO
 from coreason_manifest.utils.loader import (
     RuntimeSecurityWarning,
@@ -147,13 +146,15 @@ def test_schema_repair_extended() -> None:
         mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_str: dict[str, Any] = {"type": "string", "default": 123}
         ds = DataSchema(json_schema=bad_str)
-        assert "default" not in ds.json_schema
+        # Casting 123 -> "123"
+        assert ds.json_schema["default"] == "123"
 
         # Boolean mismatch
         mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_bool: dict[str, Any] = {"type": "boolean", "default": "true"}  # string "true" is not bool
         ds = DataSchema(json_schema=bad_bool)
-        assert "default" not in ds.json_schema
+        # Casting "true" -> True
+        assert ds.json_schema["default"] is True
 
         # Object mismatch
         mock_check.side_effect = [SchemaError("Simulated"), None]
@@ -217,6 +218,24 @@ def test_validator_coverage() -> None:
     check_node(insp, "InspectorNode 'n1' inspects missing variable 'missing_target'")
     check_node(insp, "InspectorNode 'n1' writes to missing variable 'missing_out'")
 
+    # AgentNode missing vars
+    agent = AgentNode(
+        id="n1",
+        type="agent",
+        metadata={"desc": "Using {{ missing_meta }}"},
+        resilience=None,
+        profile=CognitiveProfile(
+            role="Role with {{ missing_role }}",
+            persona="Persona with {{ missing_persona }}",
+            reasoning=None,
+            fast_path=None,
+        ),
+        tools=[],
+    )
+    check_node(agent, "AgentNode 'n1' references missing variable 'missing_meta'")
+    check_node(agent, "AgentNode 'n1' references missing variable 'missing_role'")
+    check_node(agent, "AgentNode 'n1' references missing variable 'missing_persona'")
+
 
 def test_manifest_io_coverage(tmp_path: Any) -> None:
     loader = ManifestIO(root_dir=tmp_path)
@@ -247,6 +266,9 @@ def test_manifest_io_symlink_loop_coverage(tmp_path: Any) -> None:
 
 
 def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
+    import stat
+    from unittest.mock import MagicMock
+
     loader = ManifestIO(root_dir=tmp_path)
     f = tmp_path / "world_writable.yaml"
     f.write_text("content")

@@ -60,38 +60,38 @@ class DataSchema(BaseModel):
         description="Full JSON Schema (Draft 7) definition for validation.",
     )
 
-    @model_validator(mode="after")
-    def validate_meta_schema(self) -> "DataSchema":
-        if self.json_schema:
-            try:
-                # SOTA: Validates that the dictionary is ACTUALLY a valid JSON Schema.
-                # Catches {"type": "invalid_type"} which the heuristic missed.
-                jsonschema.Draft7Validator.check_schema(self.json_schema)
-            except SchemaError as e:
-                # Domain 3: Adaptive Schema Repair
+    @model_validator(mode="before")
+    @classmethod
+    def validate_meta_schema(cls, data: Any) -> Any:
+        # Check if we have json_schema key in the input dict
+        if isinstance(data, dict) and "json_schema" in data:
+            schema = data["json_schema"]
+            if schema:
                 try:
-                    repaired_schema = self._attempt_repair(self.json_schema)
+                    # SOTA: Validates that the dictionary is ACTUALLY a valid JSON Schema.
+                    jsonschema.Draft7Validator.check_schema(schema)
+                except SchemaError as e:
+                    # Domain 3: Adaptive Schema Repair
+                    try:
+                        repaired_schema = cls._attempt_repair(schema)
 
-                    # Verify repair worked
-                    jsonschema.Draft7Validator.check_schema(repaired_schema)
+                        # Verify repair worked
+                        jsonschema.Draft7Validator.check_schema(repaired_schema)
 
-                    # Log warning
-                    warnings.warn(
-                        f"Schema repaired automatically. Original error: {e.message}",
-                        category=UserWarning,
-                        stacklevel=2,
-                    )
+                        # Log warning
+                        warnings.warn(
+                            f"Schema repaired automatically. Original error: {e.message}",
+                            category=UserWarning,
+                            stacklevel=2,
+                        )
 
-                    # Update schema
-                    # Since frozen=True, we modify the dict in place.
-                    self.json_schema.clear()
-                    self.json_schema.update(repaired_schema)
-                    return self
+                        # Update data dict with repaired schema
+                        data["json_schema"] = repaired_schema
 
-                except Exception:
-                    # Repair failed or verification failed
-                    raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
-        return self
+                    except Exception:
+                        # Repair failed or verification failed
+                        raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
+        return data
 
     @staticmethod
     def _attempt_repair(schema: dict[str, Any]) -> dict[str, Any]:
@@ -111,17 +111,35 @@ class DataSchema(BaseModel):
             d = repaired["default"]
 
             is_conflict = False
-            if (
-                (t == "integer" and not isinstance(d, int))
-                or (t == "string" and not isinstance(d, str))
-                or (t == "boolean" and not isinstance(d, bool))
-                or (t == "object" and not isinstance(d, dict))
-                or (t == "array" and not isinstance(d, list))
-            ):
+            new_default = d
+
+            # Smart Casting
+            if t == "integer" and not isinstance(d, int):
+                try:
+                    new_default = int(d)
+                except (ValueError, TypeError):
+                    is_conflict = True
+            elif t == "string" and not isinstance(d, str):
+                new_default = str(d)
+            elif t == "boolean" and not isinstance(d, bool):
+                if str(d).lower() == "true":
+                    new_default = True
+                elif str(d).lower() == "false":
+                    new_default = False
+                else:
+                    is_conflict = True
+            elif t == "float" and not isinstance(d, float):
+                try:
+                    new_default = float(d)
+                except (ValueError, TypeError):
+                    is_conflict = True
+            elif (t == "object" and not isinstance(d, dict)) or (t == "array" and not isinstance(d, list)):
                 is_conflict = True
 
             if is_conflict:
                 del repaired["default"]
+            elif new_default != d:
+                repaired["default"] = new_default
 
         return repaired
 

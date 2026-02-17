@@ -14,9 +14,10 @@ import importlib.util
 import re
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
+from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
@@ -56,8 +57,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     """
     Construct a mapping while checking for duplicate keys.
     """
-    # Mypy complains about Node vs MappingNode. SafeLoader expects MappingNode for mappings.
-    if not isinstance(node, yaml.MappingNode):
+    if not isinstance(node, MappingNode):
         raise yaml.constructor.ConstructorError(
             None,
             None,
@@ -65,9 +65,10 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
             node.start_mark,
         )
 
-    loader.flatten_mapping(node)
+    mapping_node = cast("MappingNode", node)
+    loader.flatten_mapping(mapping_node)
     mapping = {}
-    for key_node, value_node in node.value:
+    for key_node, value_node in mapping_node.value:
         # construct_object is dynamically added or not typed fully in types-pyyaml
         key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
         if key in mapping:
@@ -98,7 +99,8 @@ def _scan_for_dynamic_references(data: Any) -> bool:
             if _scan_for_dynamic_references(item):
                 return True
     # SIM102: Combined nested if
-    elif isinstance(data, str) and re.match(r".+\.py:[a-zA-Z_]\w+$", data):
+    # SOTA Hardening: Anchored regex to prevent false positives in substrings
+    elif isinstance(data, str) and re.match(r"^.+\.py:[a-zA-Z_]\w+$", data):
         return True
     return False
 

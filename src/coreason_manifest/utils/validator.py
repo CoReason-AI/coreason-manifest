@@ -1,9 +1,12 @@
 # src/coreason_manifest/utils/validator.py
 
+import re
+
 from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
+    CognitiveProfile,
     EmergenceInspectorNode,
     InspectorNode,
     SwarmNode,
@@ -71,49 +74,93 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
         errors.extend(_validate_orphan_nodes(flow.graph))
 
         # 4. Domain 4: Static Data-Flow Analysis
-        # Construct Symbol Table
-        symbol_table: set[str] = set()
+        # Construct Symbol Table: Map variable name -> type (str)
+        symbol_table: dict[str, str] = {}
         if flow.blackboard:
-            symbol_table.update(flow.blackboard.variables.keys())
+            for name, var_def in flow.blackboard.variables.items():
+                symbol_table[name] = var_def.type
         if flow.interface and flow.interface.inputs.json_schema:
             # Extract properties from input schema
+            # Heuristic: extract property type if simple, else "unknown"
             props = flow.interface.inputs.json_schema.get("properties", {})
-            symbol_table.update(props.keys())
+            for name, schema in props.items():
+                symbol_table[name] = schema.get("type", "unknown")
 
         errors.extend(_validate_data_flow(nodes_list, symbol_table))
 
     return errors
 
 
-def _validate_data_flow(nodes: list[AnyNode], symbol_table: set[str]) -> list[str]:
+def _scan_string_for_vars(text: str) -> set[str]:
+    """
+    Scan a string for Jinja2-style variable references: {{ var_name }}
+    """
+    return set(re.findall(r"\{\{([\w\.]+)\}\}", text))
+
+
+def _scan_agent_templates(node: AgentNode) -> set[str]:
+    """
+    Extract variable references from AgentNode fields.
+    Scans:
+    - Inline profile role/persona
+    - Metadata values (if strings)
+    """
+    refs = set()
+
+    # Scan profile if inline
+    if isinstance(node.profile, CognitiveProfile):
+        refs.update(_scan_string_for_vars(node.profile.role))
+        refs.update(_scan_string_for_vars(node.profile.persona))
+
+    # Scan metadata values
+    for val in node.metadata.values():
+        if isinstance(val, str):
+            refs.update(_scan_string_for_vars(val))
+
+    return refs
+
+
+def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> list[str]:
     """
     Check if nodes reference variables that exist in the symbol table.
     """
     errors: list[str] = []
+    # We only care about existence for now, using keys
+    available_vars = set(symbol_table.keys())
+
     for node in nodes:
         if isinstance(node, SwarmNode):
-            if node.workload_variable not in symbol_table:
+            if node.workload_variable not in available_vars:
                 errors.append(
                     f"Data Flow Error: SwarmNode '{node.id}' references missing variable '{node.workload_variable}'."
                 )
-            if node.output_variable not in symbol_table:
+            if node.output_variable not in available_vars:
                 errors.append(
                     f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable '{node.output_variable}'."
                 )
 
         elif isinstance(node, SwitchNode):
-            if node.variable not in symbol_table:
+            if node.variable not in available_vars:
                 errors.append(f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'.")
 
         elif isinstance(node, (InspectorNode, EmergenceInspectorNode)):
-            if node.target_variable not in symbol_table:
+            if node.target_variable not in available_vars:
                 errors.append(
                     f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.target_variable}'."
                 )
-            if node.output_variable not in symbol_table:
+            if node.output_variable not in available_vars:
                 errors.append(
                     f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable '{node.output_variable}'."
                 )
+
+        elif isinstance(node, AgentNode):
+            # Scan for prompt template variables
+            refs = _scan_agent_templates(node)
+            errors.extend(
+                f"Data Flow Error: AgentNode '{node.id}' references missing variable '{var}' in templates."
+                for var in refs
+                if var not in available_vars
+            )
 
     return errors
 
