@@ -1,5 +1,5 @@
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 import yaml
@@ -310,12 +310,13 @@ def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
     mock_stat = MagicMock()
     mock_stat.st_mode = stat.S_IWOTH
 
-    # Mock os.name, os.fstat
+    # Mock _is_posix property and os.fstat
     with (
-        patch("os.name", "posix"),
+        patch("coreason_manifest.utils.io.ManifestIO._is_posix", new_callable=PropertyMock) as mock_posix,
         patch("os.fstat", return_value=mock_stat),
         pytest.raises(SecurityViolationError, match="Unsafe Permissions"),
     ):
+        mock_posix.return_value = True
         loader.read_text("world_writable.yaml")
 
 
@@ -324,11 +325,14 @@ def test_manifest_io_fdopen_error(tmp_path: Any) -> None:
     f = tmp_path / "test.yaml"
     f.write_text("content")
 
-    # Mock os.fdopen to raise an error
+    # Mock _read_from_fd to raise an error
     # We also mock os.close to verify it's called
-    with patch("os.fdopen", side_effect=OSError("fdopen failed")), patch("os.close") as mock_close:
-        with pytest.raises(OSError, match="fdopen failed"):
-            loader.read_text("test.yaml")
+    with (
+        patch.object(ManifestIO, "_read_from_fd", side_effect=OSError("read failed")),
+        patch("os.close") as mock_close,
+        pytest.raises(OSError, match="read failed"),
+    ):
+        loader.read_text("test.yaml")
 
         # Verify os.close was called (cleanup logic)
         mock_close.assert_called()
