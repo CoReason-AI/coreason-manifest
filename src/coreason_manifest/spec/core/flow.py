@@ -53,7 +53,7 @@ class DataSchema(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    schema_ref: str | None = Field(None, description="URI to JSON Schema")
+    schema_ref: Annotated[str | None, Field(description="URI to JSON Schema")] = None
     json_schema: dict[str, Any] = Field(
         default_factory=dict,
         description="Full JSON Schema (Draft 7) definition for validation.",
@@ -185,11 +185,11 @@ class LinearFlow(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["LinearFlow"]
-    status: Literal["draft", "published", "archived"] = "draft"
+    status: Annotated[Literal["draft", "published", "archived"], Field(description="Life-cycle state.")] = "draft"
     metadata: FlowMetadata
-    definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
+    definitions: Annotated[FlowDefinitions | None, Field(description="Shared registry for reusable components.")] = None
     sequence: list[AnyNode]
-    governance: Governance | None = None
+    governance: Annotated[Governance | None, Field(description="Governance policy.")] = None
 
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "LinearFlow":
@@ -206,13 +206,13 @@ class GraphFlow(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["GraphFlow"]
-    status: Literal["draft", "published", "archived"] = "draft"
+    status: Annotated[Literal["draft", "published", "archived"], Field(description="Life-cycle state.")] = "draft"
     metadata: FlowMetadata
-    definitions: FlowDefinitions | None = Field(None, description="Shared registry for reusable components.")
+    definitions: Annotated[FlowDefinitions | None, Field(description="Shared registry for reusable components.")] = None
     interface: FlowInterface
     blackboard: Blackboard | None
     graph: Graph
-    governance: Governance | None = None
+    governance: Annotated[Governance | None, Field(description="Governance policy.")] = None
 
     @model_validator(mode="after")
     def validate_referential_integrity(self) -> "GraphFlow":

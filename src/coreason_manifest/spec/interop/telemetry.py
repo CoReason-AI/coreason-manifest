@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Any, ClassVar
+from typing import Annotated, Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,11 +33,11 @@ class NodeExecution(BaseModel):
     attributes: dict[str, str | int | float | bool] = Field(default_factory=dict)
 
     # --- VERITAS INTEGRITY RESTORATION ---
-    execution_hash: str | None = Field(None, description="SHA-256 hash of inputs+outputs+config.")
+    execution_hash: Annotated[str | None, Field(description="SHA-256 hash of inputs+outputs+config.")] = None
     previous_hashes: list[str] = Field(
         default_factory=list, description="Hashes of preceding executions (DAG parents)."
     )
-    signature: str | None = Field(None, description="Optional cryptographic signature of the event.")
+    signature: Annotated[str | None, Field(description="Optional cryptographic signature of the event.")] = None
 
     _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
 
