@@ -1,7 +1,6 @@
-from typing import Any
-from unittest.mock import patch, MagicMock
-import os
 import stat
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
@@ -260,16 +259,9 @@ def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
     with (
         patch("os.name", "posix"),
         patch("os.fstat", return_value=mock_stat),
-        # We need actual os.open to work so we can stat it, but we mock fstat anyway.
-        # But we need os.open to return a valid fd that we can mock fstat on.
-        # It's easier to let os.open work.
+        pytest.raises(SecurityViolationError, match="Unsafe Permissions"),
     ):
-        # We also need to mock os.close if we don't want real close on real fd?
-        # Actually os.open returns a real FD. os.fstat(fd) is mocked.
-        # os.fdopen consumes the FD.
-
-        with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
-            loader.read_text("world_writable.yaml")
+        loader.read_text("world_writable.yaml")
 
 
 def test_manifest_io_fdopen_error(tmp_path: Any) -> None:
@@ -279,10 +271,7 @@ def test_manifest_io_fdopen_error(tmp_path: Any) -> None:
 
     # Mock os.fdopen to raise an error
     # We also mock os.close to verify it's called
-    with (
-        patch("os.fdopen", side_effect=OSError("fdopen failed")),
-        patch("os.close") as mock_close
-    ):
+    with patch("os.fdopen", side_effect=OSError("fdopen failed")), patch("os.close") as mock_close:
         with pytest.raises(OSError, match="fdopen failed"):
             loader.read_text("test.yaml")
 
