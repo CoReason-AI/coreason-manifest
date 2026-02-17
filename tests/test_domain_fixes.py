@@ -238,6 +238,8 @@ def test_manifest_io_symlink_loop_coverage(tmp_path: Any) -> None:
 
     # Mock pathlib.Path.resolve to raise RuntimeError("Symlink loop")
     # This covers lines 60-62 in io.py
-    with patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop")):
-        with pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"):
-            loader.read_text("some_file")
+    with (
+        patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop")),
+        pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"),
+    ):
+        loader.read_text("some_file")
