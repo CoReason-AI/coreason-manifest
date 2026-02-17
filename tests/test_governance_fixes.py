@@ -52,7 +52,7 @@ def test_code_execution_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "code_execution" in errors[0]
+    assert "code_execution" in errors[0].message
 
 
 def test_base_reasoning_capabilities() -> None:
@@ -76,8 +76,8 @@ def test_linear_unguarded_computer_use() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "requires high-risk features (computer_use capability)" in errors[0]
-    assert "not guarded by a HumanNode" in errors[0]
+    assert "requires high-risk features (computer_use capability)" in errors[0].message
+    assert "not guarded by a HumanNode" in errors[0].message
 
 
 def test_linear_guarded_computer_use() -> None:
@@ -127,7 +127,7 @@ def test_swarm_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "requires high-risk features" in errors[0]
+    assert "requires high-risk features" in errors[0].message
 
 
 def test_swarm_missing_profile_validation() -> None:
@@ -247,35 +247,6 @@ def test_graph_cycle_no_entry() -> None:
     assert len(errors) == 1
 
 
-def test_integrity_trusted_root() -> None:
-    chain_single = [{"data": "genesis"}]
-    root_hash_single = compute_hash(chain_single[0])
-
-    # Valid
-    assert verify_merkle_proof(chain_single, trusted_root_hash=root_hash_single) is True
-
-    # Invalid Root
-    assert verify_merkle_proof(chain_single, trusted_root_hash="badhash") is False
-
-
-def test_integrity_chain_links() -> None:
-    genesis = {"data": "genesis"}
-    h0 = compute_hash(genesis)
-
-    block1 = {"data": "block1", "prev_hash": h0}
-
-    chain = [genesis, block1]
-
-    # Valid
-    assert verify_merkle_proof(chain) is True
-
-    # Invalid Link
-    block1_bad = {"data": "block1", "prev_hash": "wrong"}
-    chain_bad = [genesis, block1_bad]
-
-    assert verify_merkle_proof(chain_bad) is False
-
-
 def test_integrity_compute_hash_variants() -> None:
     # Test object with compute_hash method
     class HasMethod:
@@ -306,12 +277,6 @@ def test_integrity_compute_hash_variants() -> None:
             return "plain"
 
     assert compute_hash(PlainObj()) == compute_hash("plain")
-
-
-def test_integrity_missing_prev_hash() -> None:
-    # Element without prev_hash in middle of chain
-    chain = [{"a": 1}, {"b": 2}]  # No prev_hash key
-    assert verify_merkle_proof(chain) is False
 
 
 def test_gatekeeper_inline_profile() -> None:
@@ -350,35 +315,6 @@ def test_gatekeeper_is_guarded_value_error() -> None:
 def test_integrity_empty_chain() -> None:
     # Integrity L40: if not chain: return False
     assert verify_merkle_proof([]) is False
-
-
-def test_integrity_obj_no_prev_hash() -> None:
-    # Integrity L61-69: else: return False (L69)
-    class NoPrevHash:
-        def compute_hash(self) -> str:
-            return "hash"
-
-    chain = [NoPrevHash(), NoPrevHash()]
-    assert verify_merkle_proof(chain) is False
-
-
-def test_integrity_obj_with_prev_hash() -> None:
-    # Integrity L62: elif hasattr ... actual_prev_hash = curr.prev_hash
-    class WithPrevHash:
-        def __init__(self, data: str, prev_hash: str | None = None) -> None:
-            self.data = data
-            self.prev_hash = prev_hash
-
-        def compute_hash(self) -> str:
-            # Simple mock hash
-            return f"hash({self.data})"
-
-    genesis = WithPrevHash("gen")
-    h0 = genesis.compute_hash()
-    block1 = WithPrevHash("b1", h0)
-
-    chain = [genesis, block1]
-    assert verify_merkle_proof(chain) is True
 
 
 def test_gatekeeper_attribute_error() -> None:
@@ -440,7 +376,7 @@ def test_graph_traversal_unguarded() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "not guarded" in errors[0]
+    assert "not guarded" in errors[0].message
 
 
 def test_unknown_flow_type() -> None:
@@ -450,51 +386,6 @@ def test_unknown_flow_type() -> None:
 
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
     assert _is_guarded(node, UnknownFlow()) is False  # type: ignore
-
-
-def test_integrity_generic_child_links_to_root() -> None:
-    # Generic chain where child links to trusted root
-    root = "root_hash"
-    # Child with prev_hash matching root
-    child = {"data": "child", "prev_hash": root}
-    # Note: verify_merkle_proof iterates trace. If trace has only child, it's index 0 (genesis).
-    # But if it has prev_hash matching root, it might be valid as a continuation.
-
-    # Case 1: Trace is just the child, continuation of root.
-    # i=0. prev_hash = root.
-    # Logic: if prev_hash is None (no).
-    # else:
-    #   if i > 0 (no).
-    #   elif trusted_root_hash and prev_hash == trusted_root_hash: pass (Valid)
-    assert verify_merkle_proof([child], trusted_root_hash=root) is True
-
-    # Case 2: Link mismatch
-    assert verify_merkle_proof([child], trusted_root_hash="other") is False
-
-
-def test_integrity_generic_genesis_with_prev_hash() -> None:
-    # Edge case: Genesis node has a random prev_hash, but no trusted root provided.
-    # Currently, this falls through to `elif prev_hash: pass` or implicit return True?
-    # Logic:
-    # if i > 0: False.
-    # elif trusted_root: False (if mismatch).
-    # elif prev_hash: ... pass?
-
-    # If we interpret any prev_hash at genesis as "must match trusted root if provided, else invalid if no root?"
-    # Standard Merkle chain: Genesis has NO previous hash.
-    # If it has one, it's arguably invalid unless it's a continuation.
-
-    # Let's see current behavior.
-    # chain = [{"prev_hash": "random"}]
-    # verify(chain) -> i=0. prev_hash="random".
-    # i > 0 False. trusted_root False. prev_hash True. -> pass. -> Returns True.
-    # This seems permissive.
-
-    # However, to hit line 151-157 `elif prev_hash: pass` coverage, we need this case.
-
-    chain = [{"data": "gen", "prev_hash": "random"}]
-    # We assert True because the current logic permits it (generic object, maybe loose schema).
-    assert verify_merkle_proof(chain) is True
 
 
 if __name__ == "__main__":

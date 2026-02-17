@@ -33,8 +33,8 @@ def test_critical_tool_requires_guard() -> None:
 
     errors = validate_policy(flow_unguarded)
     # Check for specific error message
-    assert any("critical tools ['delete_db']" in e for e in errors)
-    assert any("not guarded by a HumanNode" in e for e in errors)
+    assert any("critical tools ['delete_db']" in e.message for e in errors)
+    assert any("not guarded by a HumanNode" in e.message for e in errors)
 
     # Guarded Flow
     human = HumanNode(
@@ -55,7 +55,7 @@ def test_critical_tool_requires_guard() -> None:
 
     errors = validate_policy(flow_guarded)
     # Filter for tool policy errors
-    tool_errors = [e for e in errors if "critical tools" in e]
+    tool_errors = [e for e in errors if "critical tools" in e.message]
     assert not tool_errors
 
 

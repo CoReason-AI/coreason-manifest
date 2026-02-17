@@ -1,5 +1,3 @@
-# src/coreason_manifest/utils/io.py
-
 import contextlib
 import errno
 import os
@@ -40,31 +38,33 @@ class ManifestIO:
         self.jail = root_dir.resolve()
         self.allow_external = allow_external_refs
 
-    def load(self, path: str) -> dict[str, Any]:
+    def read_text(self, path: str) -> str:
         """
-        Load a YAML/JSON file securely using low-level OS calls to prevent TOCTOU.
+        Read a file securely using low-level OS calls to prevent TOCTOU.
+        Returns the raw string content.
 
         Args:
             path: Relative path to the file within the jail.
 
         Returns:
-            The parsed dictionary content.
+            The file content as a string.
 
         Raises:
             SecurityViolationError: If path traversal or unsafe permissions are detected.
             FileNotFoundError: If the file does not exist.
-            ValueError: If the file content is invalid.
         """
         # Resolve path relative to jail
         file_path = Path(path)
-        target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
+        try:
+            target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
+        except RuntimeError as e:
+            if "Symlink loop" in str(e):
+                raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
+            raise  # pragma: no cover
 
         # 1. Path Traversal Check (High-Level)
-        if not self.allow_external:
-            try:
-                target_path.relative_to(self.jail)
-            except ValueError as e:
-                raise SecurityViolationError(f"Path Traversal Detected: {path}") from e
+        if not self.allow_external and not target_path.is_relative_to(self.jail):
+            raise SecurityViolationError(f"Path Traversal Detected: {path}")
 
         # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
         try:
@@ -88,11 +88,38 @@ class ManifestIO:
             if os.name == "posix" and (st.st_mode & stat.S_IWOTH):
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
 
-            # 4. LOAD CONTENT
+            # 4. READ CONTENT
             # Wrap the descriptor in a Python file object
             # Note: os.fdopen takes ownership of the fd, so closing 'f' closes 'fd'
             with os.fdopen(fd, "r", encoding="utf-8") as f:
-                content = yaml.safe_load(f)
+                return f.read()
+
+        except Exception:
+            # Ensure FD is closed if os.fdopen failed or didn't take ownership
+            # If os.fdopen succeeded, the 'with' block handles closing.
+            # But if os.fdopen raised (e.g. bad mode), we must close fd manually.
+            with contextlib.suppress(OSError):
+                os.close(fd)
+            raise
+
+    def load(self, path: str) -> dict[str, Any]:
+        """
+        Load a YAML/JSON file securely using low-level OS calls to prevent TOCTOU.
+
+        Args:
+            path: Relative path to the file within the jail.
+
+        Returns:
+            The parsed dictionary content.
+
+        Raises:
+            SecurityViolationError: If path traversal or unsafe permissions are detected.
+            FileNotFoundError: If the file does not exist.
+            ValueError: If the file content is invalid.
+        """
+        try:
+            content_str = self.read_text(path)
+            content = yaml.safe_load(content_str)
 
             if not isinstance(content, dict):
                 raise ValueError("Manifest content must be a dictionary.")
@@ -101,10 +128,3 @@ class ManifestIO:
 
         except yaml.YAMLError as e:
             raise ValueError(f"Failed to parse manifest file: {e}") from e
-        except Exception:
-            # Ensure FD is closed if os.fdopen failed or didn't take ownership
-            # If os.fdopen succeeded, the 'with' block handles closing.
-            # But if os.fdopen raised (e.g. bad mode), we must close fd manually.
-            with contextlib.suppress(OSError):
-                os.close(fd)
-            raise

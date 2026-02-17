@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,11 +11,11 @@ class PresentationHints(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    label: str | None = Field(None, description="Human-readable name for the node.")
-    icon: str | None = Field(None, description="Icon identifier (e.g., 'lucide:shield-check').")
-    style: dict[str, str] | None = Field(None, description="CSS-like properties (color, shape, etc.).")
-    group: str | None = Field(None, description="For visual clustering/subgraphs.")
-    hidden: bool = Field(False, description="Whether the node should be hidden in default views.")
-    metadata_view: Literal["basic", "detailed", "debug"] = Field(
-        "basic", description="Preferred metadata detail level."
-    )
+    label: Annotated[str | None, Field(description="Human-readable name for the node.")] = None
+    icon: Annotated[str | None, Field(description="Icon identifier (e.g., 'lucide:shield-check').")] = None
+    style: Annotated[dict[str, str] | None, Field(description="CSS-like properties (color, shape, etc.).")] = None
+    group: Annotated[str | None, Field(description="For visual clustering/subgraphs.")] = None
+    hidden: Annotated[bool, Field(description="Whether the node should be hidden in default views.")] = False
+    metadata_view: Annotated[
+        Literal["basic", "detailed", "debug"], Field(description="Preferred metadata detail level.")
+    ] = "basic"

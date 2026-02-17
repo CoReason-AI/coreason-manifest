@@ -37,17 +37,19 @@ class ModelCriteria(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    strategy: RoutingStrategy = Field("balanced", description="Optimization target for model selection.")
-    min_context: int | None = Field(None, description="Minimum required context window (tokens).")
-    capabilities: list[ModelCapability] | None = Field(None, description="Hard technical requirements.")
-    compliance: list[ComplianceStandard] | None = Field(None, description="Regulatory constraints.")
-    max_cost_per_m_tokens: float | None = Field(None, description="FinOps circuit breaker.")
+    strategy: Annotated[RoutingStrategy, Field(description="Optimization target for model selection.")] = "balanced"
+    min_context: Annotated[int | None, Field(description="Minimum required context window (tokens).")] = None
+    capabilities: Annotated[list[ModelCapability] | None, Field(description="Hard technical requirements.")] = None
+    compliance: Annotated[list[ComplianceStandard] | None, Field(description="Regulatory constraints.")] = None
+    max_cost_per_m_tokens: Annotated[float | None, Field(description="FinOps circuit breaker.")] = None
 
     # Multi-Model Routing
-    routing_mode: RoutingMode = Field("single", description="How to handle multiple matching models.")
+    routing_mode: Annotated[RoutingMode, Field(description="How to handle multiple matching models.")] = "single"
 
     provider_whitelist: list[str] | None = None
-    specific_models: list[str] | None = Field(None, description="Explicit list of model IDs to route between.")
+    specific_models: Annotated[list[str] | None, Field(description="Explicit list of model IDs to route between.")] = (
+        None
+    )
 
 
 # Type alias: A model can be a hardcoded ID ("gpt-4") OR a semantic policy
@@ -68,7 +70,7 @@ class ConstitutionalScope(BaseModel):
 
     principles: list[str] = Field(..., description="List of safety principles.")
     enforcement: Literal["warning", "block", "correction"] = Field(..., description="Action on violation.")
-    inject_into_system_prompt: bool = Field(True, description="Whether to prepend principles to the prompt.")
+    inject_into_system_prompt: Annotated[bool, Field(description="Whether to prepend principles to the prompt.")] = True
 
 
 class BaseReasoning(BaseModel):
@@ -76,18 +78,18 @@ class BaseReasoning(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    model: ModelRef = Field(..., description="The primary model responsible for execution.")
-    temperature: float = Field(0.0, description="Sampling temperature.")
-    max_tokens: int | None = Field(None, description="Hard limit on output tokens.")
+    model: Annotated[ModelRef, Field(description="The primary model responsible for execution.")]
+    temperature: Annotated[float, Field(description="Sampling temperature.")] = 0.0
+    max_tokens: Annotated[int | None, Field(description="Hard limit on output tokens.")] = None
 
     # *** FIX 3: GUIDED DECODING ***
     # Enforces syntax constraints at the token level (SOTA reliability)
-    guided_decoding: GuidedDecodingMode = Field(
-        "none", description="If set, restricts the model to output valid syntax only."
-    )
+    guided_decoding: Annotated[
+        GuidedDecodingMode, Field(description="If set, restricts the model to output valid syntax only.")
+    ] = "none"
 
     # *** UPGRADE: CONSTITUTIONAL AI ***
-    constitution: ConstitutionalScope | None = Field(None, description="Intrinsic safety constraints.")
+    constitution: Annotated[ConstitutionalScope | None, Field(description="Intrinsic safety constraints.")] = None
 
     def required_capabilities(self) -> list[str]:
         """Returns a list of high-risk capabilities required by this engine."""
@@ -98,9 +100,9 @@ class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
 
     type: Literal["standard"] = "standard"
-    thoughts_max: int = Field(5, description="Max sequential reasoning steps.")
-    min_confidence: float = Field(0.7, description="Minimum confidence score to proceed.")
-    forcing_function: str | None = Field(None, description="Force the start of the assistant's response.")
+    thoughts_max: Annotated[int, Field(description="Max sequential reasoning steps.")] = 5
+    min_confidence: Annotated[float, Field(description="Minimum confidence score to proceed.")] = 0.7
+    forcing_function: Annotated[str | None, Field(description="Force the start of the assistant's response.")] = None
 
 
 class AdaptiveReasoning(BaseReasoning):
@@ -119,9 +121,9 @@ class AdaptiveReasoning(BaseReasoning):
     verifier_model: ModelRef = Field(..., description="External judge model to score thoughts.")
 
     # Fallback
-    halt_on_budget_exhaustion: bool = Field(
-        True, description="If True, return best guess when budget fails. If False, error."
-    )
+    halt_on_budget_exhaustion: Annotated[
+        bool, Field(description="If True, return best guess when budget fails. If False, error.")
+    ] = True
 
 
 class AttentionReasoning(BaseReasoning):
@@ -132,9 +134,9 @@ class AttentionReasoning(BaseReasoning):
 
     type: Literal["attention"] = "attention"
 
-    attention_mode: AttentionMode = Field("rephrase", description="Method for sanitizing input.")
+    attention_mode: Annotated[AttentionMode, Field(description="Method for sanitizing input.")] = "rephrase"
     # The model used to filter the noise (can be smaller/faster than the main reasoning model)
-    focus_model: ModelRef | None = Field(None, description="Model used for the S2A filtering step.")
+    focus_model: Annotated[ModelRef | None, Field(description="Model used for the S2A filtering step.")] = None
 
 
 class BufferReasoning(BaseReasoning):
@@ -145,15 +147,15 @@ class BufferReasoning(BaseReasoning):
 
     type: Literal["buffer"] = "buffer"
 
-    max_templates: int = Field(3, description="Max templates to retrieve.")
-    similarity_threshold: float = Field(0.75, description="Min cosine similarity.")
-    template_collection: str = Field(..., description="Vector collection name.")
+    max_templates: Annotated[int, Field(description="Max templates to retrieve.")] = 3
+    similarity_threshold: Annotated[float, Field(description="Min cosine similarity.")] = 0.75
+    template_collection: Annotated[str, Field(description="Vector collection name.")]
 
     # *** FIX 1: LEARNING STRATEGY ***
     # Allows the agent to contribute new knowledge back to the buffer
-    learning_strategy: BoTLearningStrategy = Field(
-        "read_only", description="Whether to save successful executions back to the buffer."
-    )
+    learning_strategy: Annotated[
+        BoTLearningStrategy, Field(description="Whether to save successful executions back to the buffer.")
+    ] = "read_only"
 
 
 class TreeSearchReasoning(BaseReasoning):
@@ -161,12 +163,12 @@ class TreeSearchReasoning(BaseReasoning):
 
     type: Literal["tree_search"] = "tree_search"
 
-    depth: int = Field(3, description="Max tree depth.")
-    branching_factor: int = Field(3, description="Options per node.")
-    simulations: int = Field(5, description="MCTS simulation budget.")
-    exploration_weight: float = Field(1.41, description="UCT exploration term.")
+    depth: Annotated[int, Field(description="Max tree depth.")] = 3
+    branching_factor: Annotated[int, Field(description="Options per node.")] = 3
+    simulations: Annotated[int, Field(description="MCTS simulation budget.")] = 5
+    exploration_weight: Annotated[float, Field(description="UCT exploration term.")] = 1.41
 
-    evaluator_model: ModelRef | None = Field(None, description="Model used to score leaf nodes.")
+    evaluator_model: Annotated[ModelRef | None, Field(description="Model used to score leaf nodes.")] = None
 
 
 class DecompositionReasoning(BaseReasoning):
@@ -206,34 +208,36 @@ class EnsembleReasoning(BaseReasoning):
     # 'embedding': Vector cosine similarity (Default).
     # 'lexical': Jaccard/Token overlap (Zero cost, good for strict code/math).
     # 'hybrid': Average of both.
-    fast_comparison_mode: FastComparisonMode = Field(
-        "embedding", description="Method for initial cheap agreement check."
-    )
+    fast_comparison_mode: Annotated[
+        FastComparisonMode, Field(description="Method for initial cheap agreement check.")
+    ] = "embedding"
 
     # Thresholds for the Fast Path
     # Score > agreement_threshold -> Auto-Accept as Same.
     # Score < disagreement_threshold -> Auto-Reject as Different.
     # Between -> Ambiguous (Trigger Slow Path).
-    agreement_threshold: float = Field(0.85, description="High confidence match threshold.")
-    disagreement_threshold: float = Field(0.60, description="Low confidence mismatch threshold.")
+    agreement_threshold: Annotated[float, Field(description="High confidence match threshold.")] = 0.85
+    disagreement_threshold: Annotated[float, Field(description="Low confidence mismatch threshold.")] = 0.60
 
     # Slow Path Trigger
     # 'ambiguous_only': Trigger LLM check only if score is in the grey zone (0.60-0.85).
     # 'always': Always double-check with LLM (Paranoid mode).
     # 'never': Trust the fast path implicitly (Fastest).
-    verification_mode: VerificationMode = Field(
-        "ambiguous_only", description="When to trigger the deep similarity_model check."
-    )
+    verification_mode: Annotated[
+        VerificationMode, Field(description="When to trigger the deep similarity_model check.")
+    ] = "ambiguous_only"
 
-    similarity_model: ModelRef | None = Field(
-        None, description="The LLM used for deep semantic verification if triggered."
-    )
+    similarity_model: Annotated[
+        ModelRef | None, Field(description="The LLM used for deep semantic verification if triggered.")
+    ] = None
 
     # --- 2. Consensus & Tie-Breaking ---
     aggregation: AggregationStrategy = "majority_vote"
 
     # Tie-Breaker: If models disagree, this judge decides.
-    judge_model: ModelRef | None = Field(None, description="The 'Supreme Court' model that resolves conflicts.")
+    judge_model: Annotated[ModelRef | None, Field(description="The 'Supreme Court' model that resolves conflicts.")] = (
+        None
+    )
 
 
 class RedTeamingReasoning(BaseReasoning):
@@ -245,10 +249,10 @@ class RedTeamingReasoning(BaseReasoning):
     type: Literal["red_teaming"] = "red_teaming"
 
     # The adversarial agent (Red Team)
-    attacker_model: ModelRef = Field(..., description="The model configured to generate attack vectors.")
+    attacker_model: Annotated[ModelRef, Field(description="The model configured to generate attack vectors.")]
 
     # The victim agent (Blue Team). If None, the agent attacks itself (Self-Correction).
-    target_model: ModelRef | None = Field(None, description="The target model under evaluation.")
+    target_model: Annotated[ModelRef | None, Field(description="The target model under evaluation.")] = None
 
     # SOTA Attack Vectors (2025/2026)
     # crescendo: Multi-turn context escalation.
@@ -256,12 +260,14 @@ class RedTeamingReasoning(BaseReasoning):
     # payload_splitting: Breaking malicious payloads across tokens.
     # goat: Generative Offensive Agent Tester (Tree-based planning).
     # emergence_boosting: Pressure testing to elicit latent behaviors.
-    attack_strategy: AttackStrategy = Field("crescendo", description="The algorithmic protocol for generating attacks.")
+    attack_strategy: Annotated[
+        AttackStrategy, Field(description="The algorithmic protocol for generating attacks.")
+    ] = "crescendo"
 
-    max_turns: int = Field(5, description="Maximum conversation depth/trajectory.")
-    success_criteria: str = Field(
-        ..., description="Natural language definition of a successful break (e.g. 'PII Leakage')."
-    )
+    max_turns: Annotated[int, Field(description="Maximum conversation depth/trajectory.")] = 5
+    success_criteria: Annotated[
+        str, Field(description="Natural language definition of a successful break (e.g. 'PII Leakage').")
+    ]
 
 
 class ComputerUseReasoning(BaseReasoning):
@@ -273,29 +279,35 @@ class ComputerUseReasoning(BaseReasoning):
     type: Literal["computer_use"] = "computer_use"
 
     # Environment Configuration
-    screen_resolution: tuple[int, int] | None = Field(
-        None, description="Target display dimensions (width, height). If None, auto-detected."
-    )
+    screen_resolution: Annotated[
+        tuple[int, int] | None, Field(description="Target display dimensions (width, height). If None, auto-detected.")
+    ] = None
 
     # *** FIX 2: COORDINATE SYSTEM ***
     # Critical for model portability across screen sizes
-    coordinate_system: CoordinateSystem = Field("normalized_0_1", description="Coordinate format (pixels vs relative).")
+    coordinate_system: Annotated[CoordinateSystem, Field(description="Coordinate format (pixels vs relative).")] = (
+        "normalized_0_1"
+    )
 
     # Interaction Protocol
     # native_os: Uses XY coordinates and OS events (clicks, hotkeys).
     # browser_dom: Uses HTML selectors and JS events (Playwright style).
     # hybrid: Allows switching between OS and DOM interaction.
-    interaction_mode: InteractionMode = Field(
-        "native_os", description="The layer at which the agent perceives and acts."
-    )
+    interaction_mode: Annotated[
+        InteractionMode, Field(description="The layer at which the agent perceives and acts.")
+    ] = "native_os"
 
     # Safety Governance
-    allowed_actions: list[AllowedAction] = Field(
-        default=["click", "type", "scroll", "screenshot"],
-        description="Allow-list of permitted GUI operations.",
-    )
+    allowed_actions: Annotated[list[AllowedAction], Field(description="Allow-list of permitted GUI operations.")] = [
+        "click",
+        "type",
+        "scroll",
+        "screenshot",
+    ]
 
-    screenshot_frequency_ms: int = Field(1000, description="Delay between visual observation frames (in milliseconds).")
+    screenshot_frequency_ms: Annotated[
+        int, Field(description="Delay between visual observation frames (in milliseconds).")
+    ] = 1000
 
     def required_capabilities(self) -> list[str]:
         return ["computer_use"]
@@ -309,8 +321,8 @@ class CodeExecutionReasoning(BaseReasoning):
     type: Literal["code_execution"] = "code_execution"
 
     # Environment
-    allow_network: bool = Field(False, description="Allow external network access.")
-    timeout_seconds: float = Field(30.0, description="Max execution time.")
+    allow_network: Annotated[bool, Field(description="Allow external network access.")] = False
+    timeout_seconds: Annotated[float, Field(description="Max execution time.")] = 30.0
 
     def required_capabilities(self) -> list[str]:
         return ["code_execution"]
@@ -326,26 +338,28 @@ class GraphReasoning(BaseReasoning):
     type: Literal["graph"] = "graph"
 
     # 1. The Database Connection
-    graph_store: str = Field(..., description="Identifier for the Knowledge Graph (e.g. 'neo4j-prod').")
+    graph_store: Annotated[str, Field(description="Identifier for the Knowledge Graph (e.g. 'neo4j-prod').")]
 
     # 2. The Model acting as the 'Graph Navigator'
     # Used to generate Cypher/Gremlin queries or extract entity keywords from the prompt.
-    extraction_model: ModelRef | None = Field(
-        None, description="Model used to translate user prompt into graph queries."
-    )
+    extraction_model: Annotated[
+        ModelRef | None, Field(description="Model used to translate user prompt into graph queries.")
+    ] = None
 
     # 3. SOTA Retrieval Strategies
     # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
     # global: "Corpus-Centric". Good for "What are the themes?" (uses pre-computed community summaries).
     # hybrid: The best of both worlds.
-    retrieval_mode: GraphRetrievalMode = Field("local", description="Strategy for traversing the graph.")
+    retrieval_mode: Annotated[GraphRetrievalMode, Field(description="Strategy for traversing the graph.")] = "local"
 
     # Local Mode Constraints
-    max_hops: int = Field(2, description="Traversal depth for local neighbor search.")
+    max_hops: Annotated[int, Field(description="Traversal depth for local neighbor search.")] = 2
 
     # Global Mode Constraints
     # GraphRAG builds hierarchical communities (Level 0 = Root, Level 1 = Broad Clusters, Level 2 = Specifics).
-    community_level: int = Field(1, description="For global search: which level of community summaries to query.")
+    community_level: Annotated[
+        int, Field(description="For global search: which level of community summaries to query.")
+    ] = 1
 
 
 # -------------------------------------------------------------------------
