@@ -124,10 +124,9 @@ def _scan_agent_templates(node: AgentNode) -> set[str]:
 def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> list[str]:
     """
     Check if nodes reference variables that exist in the symbol table.
+    Also validates type compatibility for specific node types.
     """
     errors: list[str] = []
-    # We only care about existence for now, using keys
-    # TODO(v0.26.0): Implement type checking (symbol_table[name] vs node expectations)
     available_vars = set(symbol_table.keys())
 
     for node in nodes:
@@ -136,6 +135,15 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> l
                 errors.append(
                     f"Data Flow Error: SwarmNode '{node.id}' references missing variable '{node.workload_variable}'."
                 )
+            # MVP Type Safety: SwarmNode expects a list/array for workload
+            elif node.workload_variable in symbol_table:
+                var_type = symbol_table[node.workload_variable]
+                if var_type not in ("array", "list", "unknown"):
+                    errors.append(
+                        f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', "
+                        f"but found type '{var_type}'."
+                    )
+
             if node.output_variable not in available_vars:
                 errors.append(
                     f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable '{node.output_variable}'."
@@ -150,6 +158,17 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> l
                 errors.append(
                     f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.target_variable}'."
                 )
+            # MVP Type Safety: Regex matching on complex objects is risky
+            elif node.target_variable in symbol_table:
+                if hasattr(node, "mode") and node.mode == "programmatic":
+                    var_type = symbol_table[node.target_variable]
+                    if var_type in ("object", "array"):
+                        # Just a warning for now
+                        errors.append(
+                            f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
+                            f"variable '{node.target_variable}'. Matching may fail."
+                        )
+
             if node.output_variable not in available_vars:
                 errors.append(
                     f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable '{node.output_variable}'."

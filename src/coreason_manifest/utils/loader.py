@@ -14,7 +14,7 @@ import importlib.util
 import re
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 from yaml.nodes import MappingNode
@@ -58,21 +58,23 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     Construct a mapping while checking for duplicate keys.
     """
     if not isinstance(node, MappingNode):
+        # Cast node to Any to access attributes not in base Node but expected by ConstructorError format
+        node_any = cast(Any, node)
         raise yaml.constructor.ConstructorError(
             None,
             None,
-            f"expected a mapping node, but found {node.id}",  # type: ignore[attr-defined]
+            f"expected a mapping node, but found {node_any.id}",
             node.start_mark,
         )
 
-    # SOTA Hardening: Strict type casting (although type narrowed by isinstance, explicit for safety)
-    # MyPy knows node is MappingNode due to the isinstance check above.
-    mapping_node = node
+    # SOTA Hardening: Strict type casting for robustness
+    mapping_node = cast(MappingNode, node)
     loader.flatten_mapping(mapping_node)
     mapping = {}
     for key_node, value_node in mapping_node.value:
-        # construct_object is dynamically added or not typed fully in types-pyyaml
-        key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
+        # Cast loader to Any or specific Loader type if construct_object is missing from stub
+        loader_obj = cast(Any, loader)
+        key = loader_obj.construct_object(key_node, deep=deep)
         if key in mapping:
             raise yaml.constructor.ConstructorError(
                 "while constructing a mapping",
@@ -80,7 +82,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
                 f"found duplicate key {key!r}",
                 key_node.start_mark,
             )
-        mapping[key] = loader.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
+        mapping[key] = loader_obj.construct_object(value_node, deep=deep)
     return mapping
 
 

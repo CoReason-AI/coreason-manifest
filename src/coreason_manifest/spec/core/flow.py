@@ -113,28 +113,37 @@ class DataSchema(BaseModel):
             is_conflict = False
             new_default = d
 
-            # Smart Casting
-            if t == "integer" and not isinstance(d, int):
-                try:
-                    new_default = int(d)
-                except (ValueError, TypeError):
+            # Handle Null Default Logic (SOTA Hardening)
+            if d is None:
+                # Allow null if explicitly nullable or union type includes "null"
+                nullable = repaired.get("nullable", False)
+                is_union_null = isinstance(t, list) and "null" in t
+                if not (nullable or is_union_null):
+                    # Invalid null default -> remove it
                     is_conflict = True
-            elif t == "string" and not isinstance(d, str):
-                new_default = str(d)
-            elif t == "boolean" and not isinstance(d, bool):
-                if str(d).lower() == "true":
-                    new_default = True
-                elif str(d).lower() == "false":
-                    new_default = False
-                else:
+            else:
+                # Smart Casting for non-null values
+                if t == "integer" and not isinstance(d, int):
+                    try:
+                        new_default = int(d)
+                    except (ValueError, TypeError):
+                        is_conflict = True
+                elif t == "string" and not isinstance(d, str):
+                    new_default = str(d)
+                elif t == "boolean" and not isinstance(d, bool):
+                    if str(d).lower() == "true":
+                        new_default = True
+                    elif str(d).lower() == "false":
+                        new_default = False
+                    else:
+                        is_conflict = True
+                elif t == "float" and not isinstance(d, float):
+                    try:
+                        new_default = float(d)
+                    except (ValueError, TypeError):
+                        is_conflict = True
+                elif (t == "object" and not isinstance(d, dict)) or (t == "array" and not isinstance(d, list)):
                     is_conflict = True
-            elif t == "float" and not isinstance(d, float):
-                try:
-                    new_default = float(d)
-                except (ValueError, TypeError):
-                    is_conflict = True
-            elif (t == "object" and not isinstance(d, dict)) or (t == "array" and not isinstance(d, list)):
-                is_conflict = True
 
             if is_conflict:
                 del repaired["default"]

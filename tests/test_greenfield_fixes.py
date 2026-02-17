@@ -371,3 +371,77 @@ def test_jinja2_filter_validation() -> None:
 
     errors_fail = validate_flow(flow_fail)
     assert any("references missing variable 'missing'" in e for e in errors_fail)
+
+
+def test_swarm_type_safety() -> None:
+    """Test MVP type safety for SwarmNode."""
+    # Define a string variable
+    blackboard = Blackboard(variables={"text_var": VariableDef(type="string")}, persistence=False)
+
+    # SwarmNode expects a list, but points to a string
+    from coreason_manifest.spec.core.nodes import SwarmNode
+
+    swarm = SwarmNode(
+        id="s1",
+        type="swarm",
+        metadata={},
+        resilience=None,
+        worker_profile="p1",
+        workload_variable="text_var",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="concat",
+        output_variable="out",
+    )
+
+    graph = Graph(nodes={"s1": swarm}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    assert any("Type Mismatch" in e and "expects a list" in e for e in errors)
+
+
+def test_schema_repair_null_default() -> None:
+    """Test schema repair for null defaults."""
+    from unittest.mock import MagicMock, patch
+
+    from jsonschema.exceptions import SchemaError
+
+    from coreason_manifest.spec.core.flow import DataSchema
+
+    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        # Case 1: Invalid Null Default (type string, default null, not nullable)
+        # Should remove default
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_null: dict[str, Any] = {"type": "string", "default": None}
+
+        # We need 'Any' imported for type hint above if strict checking is on
+        from typing import Any
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds = DataSchema(json_schema=bad_null)
+        assert "default" not in ds.json_schema
+
+        # Case 2: Valid Null Default (nullable: true)
+        # Should keep default
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        valid_nullable: dict[str, Any] = {"type": "string", "default": None, "nullable": True}
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds2 = DataSchema(json_schema=valid_nullable)
+        assert ds2.json_schema["default"] is None
+
+        # Case 3: Valid Null Default (union type)
+        # Should keep default
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        valid_union: dict[str, Any] = {"type": ["string", "null"], "default": None}
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds3 = DataSchema(json_schema=valid_union)
+        assert ds3.json_schema["default"] is None
