@@ -314,10 +314,10 @@ def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
     with (
         patch("coreason_manifest.utils.io.ManifestIO._is_posix", new_callable=PropertyMock) as mock_posix,
         patch("os.fstat", return_value=mock_stat),
-        pytest.raises(SecurityViolationError, match="Unsafe Permissions"),
     ):
         mock_posix.return_value = True
-        loader.read_text("world_writable.yaml")
+        with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
+            loader.read_text("world_writable.yaml")
 
 
 def test_manifest_io_fdopen_error(tmp_path: Any) -> None:
@@ -330,9 +330,9 @@ def test_manifest_io_fdopen_error(tmp_path: Any) -> None:
     with (
         patch.object(ManifestIO, "_read_from_fd", side_effect=OSError("read failed")),
         patch("os.close") as mock_close,
-        pytest.raises(OSError, match="read failed"),
     ):
-        loader.read_text("test.yaml")
+        with pytest.raises(OSError, match="read failed"):
+            loader.read_text("test.yaml")
 
         # Verify os.close was called (cleanup logic)
         mock_close.assert_called()
