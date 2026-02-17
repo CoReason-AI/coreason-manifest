@@ -1,11 +1,14 @@
 import contextlib
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
-from coreason_manifest.spec.core.flow import GraphFlow
+from coreason_manifest.spec.core.flow import DataSchema, GraphFlow
+from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitOpenError, CircuitState, check_circuit
+from coreason_manifest.spec.core.tools import ToolCapability
 from coreason_manifest.utils.integrity import compute_hash
-from coreason_manifest.utils.io import SecurityViolationError
+from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 from coreason_manifest.utils.loader import load_agent_from_ref, load_flow_from_file
 
 # -------------------------------------------------------------------------
@@ -13,7 +16,7 @@ from coreason_manifest.utils.loader import load_agent_from_ref, load_flow_from_f
 # -------------------------------------------------------------------------
 
 
-def test_loader_root_dir_mismatch(tmp_path):
+def test_loader_root_dir_mismatch(tmp_path: Path) -> None:
     """
     Test loading where file is not inside root_dir.
     Coverage for loader.py lines 63-67.
@@ -38,7 +41,7 @@ sequence: []
         load_flow_from_file(str(flow_file), root_dir=fake_root)
 
 
-def test_loader_graph_flow(tmp_path):
+def test_loader_graph_flow(tmp_path: Path) -> None:
     """
     Test loading a GraphFlow.
     Coverage for loader.py lines 85-86.
@@ -63,7 +66,7 @@ graph:
     assert isinstance(flow, GraphFlow)
 
 
-def test_loader_syntax_error(tmp_path):
+def test_loader_syntax_error(tmp_path: Path) -> None:
     """
     Test loading python file with syntax error.
     Coverage for loader.py lines 96-99.
@@ -75,7 +78,7 @@ def test_loader_syntax_error(tmp_path):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 
-def test_loader_relative_import(tmp_path):
+def test_loader_relative_import(tmp_path: Path) -> None:
     """
     Test AST check for relative import (from . import x).
     Coverage for loader.py line 107 (node.module is None).
@@ -98,7 +101,7 @@ class Agent: pass
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 
-def test_loader_invalid_ref_format(tmp_path):
+def test_loader_invalid_ref_format(tmp_path: Path) -> None:
     """
     Test invalid reference format.
     Coverage for loader.py line 128.
@@ -107,7 +110,7 @@ def test_loader_invalid_ref_format(tmp_path):
         load_agent_from_ref("invalid", root_dir=tmp_path)
 
 
-def test_loader_runtime_error(tmp_path):
+def test_loader_runtime_error(tmp_path: Path) -> None:
     """
     Test runtime error during agent execution.
     Coverage for loader.py exception handler during exec.
@@ -123,7 +126,7 @@ class Agent: pass
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 
-def test_loader_class_not_found(tmp_path):
+def test_loader_class_not_found(tmp_path: Path) -> None:
     """
     Test agent class missing.
     """
@@ -135,7 +138,7 @@ def test_loader_class_not_found(tmp_path):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 
-def test_loader_not_a_class(tmp_path):
+def test_loader_not_a_class(tmp_path: Path) -> None:
     """
     Test reference is not a class.
     """
@@ -147,7 +150,7 @@ def test_loader_not_a_class(tmp_path):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 
-def test_loader_invalid_extension(tmp_path):
+def test_loader_invalid_extension(tmp_path: Path) -> None:
     """
     Test loading file with invalid extension/spec failure.
     Coverage for loader.py line 146.
@@ -157,7 +160,7 @@ def test_loader_invalid_extension(tmp_path):
     py_file.write_text(code)
 
 
-def test_loader_import_from(tmp_path):
+def test_loader_import_from(tmp_path: Path) -> None:
     """
     Test from . import x
     Coverage for loader.py line 107 (if node.module: True branch).
@@ -180,7 +183,7 @@ class Agent: pass
 # -------------------------------------------------------------------------
 
 
-def test_integrity_naive_datetime():
+def test_integrity_naive_datetime() -> None:
     """
     Test hashing naive datetime.
     Coverage for integrity.py line 17.
@@ -189,7 +192,7 @@ def test_integrity_naive_datetime():
     assert compute_hash(dt)
 
 
-def test_integrity_set():
+def test_integrity_set() -> None:
     """
     Test hashing a set.
     Coverage for integrity.py line 48.
@@ -201,20 +204,20 @@ def test_integrity_set():
     assert h1 == h2
 
 
-def test_integrity_pydantic_v1_mock():
+def test_integrity_pydantic_v1_mock() -> None:
     """
     Test hashing Pydantic v1-like objects.
     Coverage for integrity.py lines 60, 65-66.
     """
 
     class V1Mock:
-        def dict(self, exclude_none=True):  # noqa: ARG002
+        def dict(self, exclude_none: bool = True) -> dict[str, int]:  # noqa: ARG002
             return {"a": 1}
 
     assert compute_hash(V1Mock()) == compute_hash({"a": 1})
 
     class V1JsonMock:
-        def json(self):
+        def json(self) -> str:
             return '{"a": 1}'
 
     assert compute_hash(V1JsonMock()) == compute_hash({"a": 1})
@@ -225,13 +228,11 @@ def test_integrity_pydantic_v1_mock():
 # -------------------------------------------------------------------------
 
 
-def test_flow_schema_invalid_json_schema():
+def test_flow_schema_invalid_json_schema() -> None:
     """
     Test DataSchema with invalid JSON Schema.
     Coverage for flow.py lines 69-70.
     """
-    from coreason_manifest.spec.core.flow import DataSchema
-
     with pytest.raises(ValueError, match="Invalid JSON Schema"):
         DataSchema(json_schema={"type": "invalid_type"})
 
@@ -241,13 +242,11 @@ def test_flow_schema_invalid_json_schema():
 # -------------------------------------------------------------------------
 
 
-def test_tool_critical_no_desc():
+def test_tool_critical_no_desc() -> None:
     """
     Test critical tool validation.
     Coverage for tools.py line 35.
     """
-    from coreason_manifest.spec.core.tools import ToolCapability
-
     with pytest.raises(ValueError, match="Critical tools must be documented"):
         ToolCapability(name="crit", risk_level="critical", url="http://x.com")
 
@@ -257,19 +256,17 @@ def test_tool_critical_no_desc():
 # -------------------------------------------------------------------------
 
 
-def test_io_file_not_found(tmp_path):
+def test_io_file_not_found(tmp_path: Path) -> None:
     """
     Test file not found.
     Coverage for io.py ENOENT handling.
     """
-    from coreason_manifest.utils.io import ManifestIO
-
     io = ManifestIO(root_dir=tmp_path)
     with pytest.raises(FileNotFoundError):
         io.read_text("missing.txt")
 
 
-def test_io_symlink_loop(tmp_path):
+def test_io_symlink_loop(tmp_path: Path) -> None:
     """
     Test symlink loop.
     Coverage for io.py ELOOP handling.
@@ -279,8 +276,6 @@ def test_io_symlink_loop(tmp_path):
     if os.name != "posix":
         return
 
-    from coreason_manifest.utils.io import ManifestIO
-
     # Create loop
     (tmp_path / "loop").symlink_to("loop")
 
@@ -289,15 +284,13 @@ def test_io_symlink_loop(tmp_path):
         io.read_text("loop")
 
 
-def test_io_toctou_symlink_race(tmp_path):
+def test_io_toctou_symlink_race(tmp_path: Path) -> None:
     """
     Test ELOOP handling during os.open (TOCTOU race condition).
     Coverage for io.py lines 76-77.
     """
     import errno
     from unittest.mock import patch
-
-    from coreason_manifest.utils.io import ManifestIO
 
     io = ManifestIO(root_dir=tmp_path)
     (tmp_path / "race.txt").write_text("ok")
@@ -310,13 +303,11 @@ def test_io_toctou_symlink_race(tmp_path):
         io.read_text("race.txt")
 
 
-def test_io_traversal(tmp_path):
+def test_io_traversal(tmp_path: Path) -> None:
     """
     Test path traversal.
     Coverage for io.py line 63.
     """
-    from coreason_manifest.utils.io import ManifestIO
-
     io = ManifestIO(root_dir=tmp_path)
 
     # unused 'outside' variable removed
@@ -325,15 +316,13 @@ def test_io_traversal(tmp_path):
         io.read_text("../outside.txt")
 
 
-def test_io_permission_denied(tmp_path):
+def test_io_permission_denied(tmp_path: Path) -> None:
     """
     Test EACCES (Permission Denied).
     Coverage for io.py line 84 (re-raise other OSError).
     """
     import errno
     from unittest.mock import patch
-
-    from coreason_manifest.utils.io import ManifestIO
 
     io = ManifestIO(root_dir=tmp_path)
     (tmp_path / "locked.txt").write_text("secret")
@@ -347,16 +336,14 @@ def test_io_permission_denied(tmp_path):
 # -------------------------------------------------------------------------
 
 
-def test_governance_circuit_breaker_branches():
+def test_governance_circuit_breaker_branches() -> None:
     """
     Ensure we hit all branches of check_circuit.
     """
     import time
 
-    from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitOpenError, CircuitState, check_circuit
-
     cb = CircuitBreaker(error_threshold_count=1, reset_timeout_seconds=100)
-    store = {}
+    store: dict[str, CircuitState] = {}
     node_id = "n1"
 
     # 1. Open State, Not Expired

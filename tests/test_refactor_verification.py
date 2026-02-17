@@ -1,8 +1,9 @@
 import pytest
 
-from coreason_manifest.spec.core.flow import AgentNode, LinearFlow
 from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
-from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
+from coreason_manifest.spec.core.flow import FlowMetadata, LinearFlow
+from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitState, Governance
+from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
@@ -14,7 +15,7 @@ from coreason_manifest.utils.loader import load_agent_from_ref
 # ------------------------------------------------------------------------
 
 
-def test_malicious_agent_ast_check(tmp_path):
+def test_malicious_agent_ast_check(tmp_path) -> None:
     """
     Creating a Python agent with `import subprocess` MUST raise a SecurityViolationError.
     """
@@ -33,7 +34,7 @@ class Agent:
         load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)
 
 
-def test_malicious_gadget_chain(tmp_path):
+def test_malicious_gadget_chain(tmp_path) -> None:
     """
     Test that gadget chains like object.__subclasses__ are blocked.
     """
@@ -55,7 +56,7 @@ class Agent:
 # ------------------------------------------------------------------------
 
 
-def test_permissions_world_writable(tmp_path):
+def test_permissions_world_writable(tmp_path) -> None:
     """
     Loading a valid agent from a world-writable file MUST fail on POSIX systems.
     """
@@ -83,7 +84,7 @@ class Agent:
 # ------------------------------------------------------------------------
 
 
-def test_exfiltration_blocked_domain():
+def test_exfiltration_blocked_domain() -> None:
     """
     A tool pointing to `api.evil.com` must trigger a validation error
     if `allowed_domains=["api.coreason.com"]` is set.
@@ -97,7 +98,7 @@ def test_exfiltration_blocked_domain():
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
+        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -112,10 +113,11 @@ def test_exfiltration_blocked_domain():
     violation = next((r for r in reports if r.severity == "violation" and "blocked domain" in r.message), None)
     assert violation is not None
     assert "api.evil.com" in violation.message
+    assert violation.remediation is not None
     assert violation.remediation.type == "whitelist_domain"
 
 
-def test_allowed_url():
+def test_allowed_url() -> None:
     """
     A tool pointing to a valid domain should pass.
     """
@@ -127,7 +129,7 @@ def test_allowed_url():
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
+        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -147,7 +149,7 @@ def test_allowed_url():
 
     flow_sub = LinearFlow(
         kind="LinearFlow",
-        metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
+        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -162,7 +164,7 @@ def test_allowed_url():
     assert len([r for r in reports if r.severity == "violation"]) == 0
 
 
-def test_schemeless_url_handling():
+def test_schemeless_url_handling() -> None:
     """
     Test that schemeless URLs (evil.com/google.com) are parsed correctly.
     """
@@ -174,7 +176,7 @@ def test_schemeless_url_handling():
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata={"name": "test", "version": "1.0", "description": "test", "tags": []},
+        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -197,7 +199,7 @@ def test_schemeless_url_handling():
 # ------------------------------------------------------------------------
 
 
-def test_auto_fix_computer_use():
+def test_auto_fix_computer_use() -> None:
     """
     A graph with an unguarded "Computer Use" node must return a validation report
     containing a JSON patch to insert a HumanNode.
@@ -213,7 +215,7 @@ def test_auto_fix_computer_use():
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata={"name": "unsafe", "version": "1.0", "description": "unsafe", "tags": []},
+        metadata=FlowMetadata(name="unsafe", version="1.0", description="unsafe", tags=[]),
         definitions=Definitions(profiles={"hacker": profile}),
         sequence=[AgentNode(id="attacker", metadata={}, type="agent", profile="hacker", tools=[])],
     )
@@ -222,6 +224,7 @@ def test_auto_fix_computer_use():
 
     violation = next((r for r in reports if "computer_use capability" in r.message), None)
     assert violation is not None
+    assert violation.remediation is not None
     assert violation.remediation.type == "add_guard_node"
     assert violation.remediation.format == "json_patch"
 
@@ -231,7 +234,7 @@ def test_auto_fix_computer_use():
     assert patch[0]["value"]["type"] == "human"
 
 
-def test_verify_remediation_patch_structure():
+def test_verify_remediation_patch_structure() -> None:
     """
     Verify that the remediation patch is a valid JSON Patch structure.
     """
@@ -245,7 +248,7 @@ def test_verify_remediation_patch_structure():
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata={"name": "unsafe", "version": "1.0", "description": "unsafe", "tags": []},
+        metadata=FlowMetadata(name="unsafe", version="1.0", description="unsafe", tags=[]),
         definitions=Definitions(profiles={"coder": profile}),
         sequence=[AgentNode(id="coder_agent", metadata={}, type="agent", profile="coder", tools=[])],
     )
@@ -254,7 +257,9 @@ def test_verify_remediation_patch_structure():
     violation = next(r for r in reports if "code_execution" in r.message)
 
     # Check structure
+    assert violation.remediation is not None
     patch = violation.remediation.patch_data
+    assert isinstance(patch, list)
     assert len(patch) == 1
     op = patch[0]
     assert "op" in op
@@ -268,7 +273,7 @@ def test_verify_remediation_patch_structure():
 # ------------------------------------------------------------------------
 
 
-def test_circuit_breaker_logic():
+def test_circuit_breaker_logic() -> None:
     """
     Test CircuitState transitions and enforcement.
     """
@@ -281,7 +286,7 @@ def test_circuit_breaker_logic():
 
     cb = CircuitBreaker(error_threshold_count=2, reset_timeout_seconds=1)
     # We don't manually create state, functions handle it.
-    store = {}
+    store: dict[str, CircuitState] = {}
     node_id = "node1"
 
     # 1. Closed State - OK
@@ -309,8 +314,8 @@ def test_circuit_breaker_logic():
 
     # 6. Success -> Closed
     record_success(node_id, store)
-    assert state.state == "closed"
-    assert state.failure_count == 0
+    assert store[node_id].state == "closed"
+    assert store[node_id].failure_count == 0
 
 
 # ------------------------------------------------------------------------
@@ -318,7 +323,7 @@ def test_circuit_breaker_logic():
 # ------------------------------------------------------------------------
 
 
-def test_strict_integrity():
+def test_strict_integrity() -> None:
     """
     Verify strict Merkle proof verification.
     """
