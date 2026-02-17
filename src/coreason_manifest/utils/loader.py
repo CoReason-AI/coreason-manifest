@@ -14,7 +14,7 @@ import importlib.util
 import re
 import warnings
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import yaml
 from yaml.nodes import MappingNode
@@ -65,10 +65,9 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
             node.start_mark,
         )
 
-    mapping_node = cast("MappingNode", node)
-    loader.flatten_mapping(mapping_node)
+    loader.flatten_mapping(node)
     mapping = {}
-    for key_node, value_node in mapping_node.value:
+    for key_node, value_node in node.value:
         # construct_object is dynamically added or not typed fully in types-pyyaml
         key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
         if key in mapping:
