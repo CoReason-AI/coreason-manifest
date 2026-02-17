@@ -61,8 +61,8 @@ def construct_mapping_unique(loader: yaml.Loader, node: yaml.Node, deep: bool = 
         raise yaml.constructor.ConstructorError(
             None,
             None,
-            f"expected a mapping node, but found {node.id}",
-            node.start_mark,  # type: ignore[attr-defined]
+            f"expected a mapping node, but found {node.id}",  # type: ignore[attr-defined]
+            node.start_mark,
         )
 
     loader.flatten_mapping(node)
