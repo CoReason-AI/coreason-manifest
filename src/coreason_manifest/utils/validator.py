@@ -94,8 +94,9 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 def _scan_string_for_vars(text: str) -> set[str]:
     """
     Scan a string for Jinja2-style variable references: {{ var_name }}
+    Handles filters like {{ var | lower }} by stripping them.
     """
-    return set(re.findall(r"\{\{\s*([\w\.]+)\s*\}\}", text))
+    return set(re.findall(r"\{\{\s*([a-zA-Z_][\w\.]*)(?:\s*\|.*?)?\s*\}\}", text))
 
 
 def _scan_agent_templates(node: AgentNode) -> set[str]:
@@ -126,6 +127,7 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> l
     """
     errors: list[str] = []
     # We only care about existence for now, using keys
+    # TODO(v0.26.0): Implement type checking (symbol_table[name] vs node expectations)
     available_vars = set(symbol_table.keys())
 
     for node in nodes:

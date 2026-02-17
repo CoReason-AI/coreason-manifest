@@ -14,7 +14,7 @@ import importlib.util
 import re
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 from yaml.nodes import MappingNode
@@ -65,9 +65,11 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
             node.start_mark,
         )
 
-    loader.flatten_mapping(node)
+    # SOTA Hardening: Strict type casting for robustness
+    mapping_node = cast(MappingNode, node)
+    loader.flatten_mapping(mapping_node)
     mapping = {}
-    for key_node, value_node in node.value:
+    for key_node, value_node in mapping_node.value:
         # construct_object is dynamically added or not typed fully in types-pyyaml
         key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
         if key in mapping:
@@ -88,6 +90,7 @@ def _scan_for_dynamic_references(data: Any) -> bool:
     """
     Recursively scan the data structure for potential dynamic code execution references.
     Looks for strings matching the pattern "file.py:ClassName".
+    Strictly enforces POSIX paths (forward slashes) for cross-platform safety.
     """
     if isinstance(data, dict):
         for value in data.values():
@@ -98,8 +101,8 @@ def _scan_for_dynamic_references(data: Any) -> bool:
             if _scan_for_dynamic_references(item):
                 return True
     # SIM102: Combined nested if
-    # SOTA Hardening: Anchored regex to prevent false positives in substrings
-    elif isinstance(data, str) and re.match(r"^.+\.py:[a-zA-Z_]\w+$", data):
+    # SOTA Hardening: Anchored regex with POSIX path enforcement
+    elif isinstance(data, str) and re.match(r"^[a-zA-Z0-9_\-\./]+\.py:[a-zA-Z_]\w+$", data):
         return True
     return False
 

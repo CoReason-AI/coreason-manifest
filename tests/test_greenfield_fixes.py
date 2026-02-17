@@ -10,6 +10,8 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+    VariableDef,
+    Blackboard,
 )
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
@@ -23,6 +25,7 @@ from coreason_manifest.spec.core.resilience import (
 )
 from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
+from coreason_manifest.utils.validator import validate_flow
 
 
 def test_tool_access_policy_defaults() -> None:
@@ -311,3 +314,63 @@ def test_fallback_cycle_complex_policy() -> None:
 
     errors = _validate_fallback_cycles([node_a, node_b])
     assert any("Fallback cycle detected" in e for e in errors)
+
+
+def test_jinja2_filter_validation() -> None:
+    """
+    Test that Jinja2 filters in templates are correctly handled by the validator.
+    The validator should strip filters and only check the variable name.
+    """
+    agent = AgentNode(
+        id="n1",
+        type="agent",
+        metadata={"desc": "Hello {{ user.name | upper }}"},
+        resilience=None,
+        profile=CognitiveProfile(
+            role="Role",
+            persona="Persona",
+            reasoning=None,
+            fast_path=None,
+        ),
+        tools=[],
+    )
+
+    # Define 'user.name' in blackboard
+    blackboard = Blackboard(
+        variables={"user.name": VariableDef(type="string")},
+        persistence=False
+    )
+
+    graph = Graph(nodes={"n1": agent}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+    )
+
+    # Should pass validation
+    errors = validate_flow(flow)
+    assert not errors, f"Validation failed with errors: {errors}"
+
+    # Now verify failure if variable is missing
+    agent_fail = AgentNode(
+        id="n1",
+        type="agent",
+        metadata={"desc": "Hello {{ missing | upper }}"},
+        resilience=None,
+        profile=CognitiveProfile(role="R", persona="P", reasoning=None, fast_path=None),
+        tools=[],
+    )
+    graph_fail = Graph(nodes={"n1": agent_fail}, edges=[])
+    flow_fail = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph_fail,
+    )
+
+    errors_fail = validate_flow(flow_fail)
+    assert any("references missing variable 'missing'" in e for e in errors_fail)

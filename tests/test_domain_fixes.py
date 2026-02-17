@@ -110,6 +110,49 @@ definitions:
         load_flow_from_file(str(f))
 
 
+def test_dynamic_execution_posix_path_strictness(tmp_path: Any) -> None:
+    """Test that dynamic ref regex enforces POSIX paths (no backslashes)."""
+    # Windows path with backslash should NOT match the strict regex
+    # Therefore, it is NOT flagged as a dynamic reference by the scanner.
+    # This implies the system rejects non-POSIX paths for execution elsewhere.
+    yaml_content = """
+kind: LinearFlow
+metadata:
+  name: "WinPath"
+  version: "1.0"
+  description: "Desc"
+  tags: []
+sequence: []
+definitions:
+  skills:
+    bad_path: "dir\\\\evil.py:Agent"
+"""
+    f = tmp_path / "win.yaml"
+    f.write_text(yaml_content)
+
+    # Should NOT raise SecurityViolationError because regex doesn't match
+    load_flow_from_file(str(f))
+
+    # POSIX path should be detected
+    yaml_content_posix = """
+kind: LinearFlow
+metadata:
+  name: "PosixPath"
+  version: "1.0"
+  description: "Desc"
+  tags: []
+sequence: []
+definitions:
+  skills:
+    good_path: "dir/evil.py:Agent"
+"""
+    f2 = tmp_path / "posix.yaml"
+    f2.write_text(yaml_content_posix)
+
+    with pytest.raises(SecurityViolationError, match="Dynamic code execution references detected"):
+        load_flow_from_file(str(f2))
+
+
 def test_agent_loading_log(tmp_path: Any) -> None:
     py_file = tmp_path / "my_agent.py"
     py_file.write_text("class MyAgent: pass")
