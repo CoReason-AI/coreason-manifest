@@ -133,8 +133,12 @@ class HumanNode(Node):
     options: list[str] | None = None
 
     # *** UPGRADE: SHADOW MODE ***
-    interaction_mode: Annotated[Literal["blocking", "shadow", "steering"], Field(description="Wait for input vs shadow execution.")] = "blocking"
-    shadow_timeout_seconds: Annotated[int | None, Field(gt=0, description="Time window for intervention in shadow mode.")] = None
+    interaction_mode: Annotated[
+        Literal["blocking", "shadow", "steering"], Field(description="Wait for input vs shadow execution.")
+    ] = "blocking"
+    shadow_timeout_seconds: Annotated[
+        int | None, Field(gt=0, description="Time window for intervention in shadow mode.")
+    ] = None
 
     @model_validator(mode="after")
     def validate_interaction_config(self) -> "HumanNode":
@@ -166,19 +170,25 @@ class SwarmNode(Node):
     max_concurrency: int = Field(..., gt=0, description="Limit parallel workers.")
 
     # SOTA: Reliability (Partial Failure)
-    failure_tolerance_percent: Annotated[float, Field(
-        ge=0.0,
-        le=1.0,
-        description=(
-            "0.0 = All must succeed. 0.2 = Allow 20% failure. "
-            "Executed AFTER the Node's 'resilience' strategy. "
-            "E.g., if retries exhaust, this tolerance allows the Swarm to still succeed partially."
+    failure_tolerance_percent: Annotated[
+        float,
+        Field(
+            ge=0.0,
+            le=1.0,
+            description=(
+                "0.0 = All must succeed. 0.2 = Allow 20% failure. "
+                "Executed AFTER the Node's 'resilience' strategy. "
+                "E.g., if retries exhaust, this tolerance allows the Swarm to still succeed partially."
+            ),
         ),
-    )] = 0.0
+    ] = 0.0
 
     # Aggregation
     reducer_function: Literal["concat", "vote", "summarize"] = Field(..., description="How to combine results.")
-    aggregator_model: Annotated[ModelRef | None, Field(description="If set, uses this model to summarize the worker outputs into a single string.")] = None
+    aggregator_model: Annotated[
+        ModelRef | None,
+        Field(description="If set, uses this model to summarize the worker outputs into a single string."),
+    ] = None
     output_variable: str = Field(..., description="Variable to store the aggregated result.")
 
     @model_validator(mode="after")

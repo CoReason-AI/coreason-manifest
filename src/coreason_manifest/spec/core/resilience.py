@@ -24,7 +24,9 @@ class ResilienceStrategy(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    name: Annotated[str | None, Field(description="Human-readable ID for this strategy (e.g. 'gpt4-rate-limit-handler').")] = None
+    name: Annotated[
+        str | None, Field(description="Human-readable ID for this strategy (e.g. 'gpt4-rate-limit-handler').")
+    ] = None
     trace_activation: Annotated[bool, Field(description="Emit telemetry event when this strategy triggers.")] = True
 
     @field_validator("name")
@@ -45,7 +47,9 @@ class RetryStrategy(ResilienceStrategy):
     max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
     backoff_factor: Annotated[float, Field(ge=1.0, description="Exponential backoff multiplier.")] = 2.0
     initial_delay_seconds: Annotated[float, Field(description="Initial wait time.")] = 1.0
-    max_delay_seconds: Annotated[float, Field(description="Ceiling for the backoff calculation (e.g., never sleep more than 60s).")] = 60.0
+    max_delay_seconds: Annotated[
+        float, Field(description="Ceiling for the backoff calculation (e.g., never sleep more than 60s).")
+    ] = 60.0
     jitter: Annotated[bool, Field(description="Add random jitter to delay.")] = True
 
 
@@ -55,7 +59,9 @@ class FallbackStrategy(ResilienceStrategy):
     type: Literal["fallback"] = "fallback"
 
     fallback_node_id: str = Field(..., description="The ID of the backup node/agent.")
-    fallback_payload: Annotated[dict[str, Any] | None, Field(description="Static data to inject if the node is skipped.")] = None
+    fallback_payload: Annotated[
+        dict[str, Any] | None, Field(description="Static data to inject if the node is skipped.")
+    ] = None
 
 
 class ReflexionStrategy(ResilienceStrategy):
@@ -67,8 +73,18 @@ class ReflexionStrategy(ResilienceStrategy):
     critic_model: ModelRef = Field(..., description="The model used to analyze the error.")
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: Annotated[bool, Field(description="Whether to feed the execution trace to the critic.")] = True
-    max_trace_turns: Annotated[int | None, Field(description="Limit the history feed to the Critic to the last N turns. Prevents context overflow.")] = 3
-    critic_schema: Annotated[dict[str, Any] | None, Field(description=("JSON Schema to enforce structured output from the critic (e.g. {'properties': {'fix': {'type': 'string'}}})."))] = None
+    max_trace_turns: Annotated[
+        int | None,
+        Field(description="Limit the history feed to the Critic to the last N turns. Prevents context overflow."),
+    ] = 3
+    critic_schema: Annotated[
+        dict[str, Any] | None,
+        Field(
+            description=(
+                "JSON Schema to enforce structured output from the critic (e.g. {'properties': {'fix': ...}})."
+            )
+        ),
+    ] = None
 
     @field_validator("critic_schema")
     @classmethod
@@ -109,7 +125,12 @@ class EscalationStrategy(ResilienceStrategy):
     queue_name: str = Field(..., min_length=1, description="The task queue for suspended sessions.")
     notification_level: Literal["info", "warning", "critical"] = Field(..., description="Severity level.")
     timeout_seconds: int = Field(..., description="Max wait for human intervention.")
-    template: Annotated[str | None, Field(description=("Jinja2 template for the human notification. Available context: {{ node_id }}, {{ error_type }}, {{ error_message }}, {{ inputs }}, {{ history }}."))] = None
+    template: Annotated[
+        str | None,
+        Field(
+            description=("Jinja2 template for notification. Context: {{ node_id }}, {{ error_type }}, {{ message }}.")
+        ),
+    ] = None
 
     @field_validator("template")
     @classmethod
@@ -225,8 +246,13 @@ class SupervisionPolicy(BaseModel):
 
     type: Literal["supervision"] = "supervision"
     handlers: list[ErrorHandler] = Field(..., description="An ordered list of specific rules.")
-    default_strategy: Annotated[RecoveryStrategy | None, Field(description="Catch-all strategy. If None, unhandled errors bubble up.")] = None
-    max_cumulative_actions: Annotated[int, Field(description=("Total number of recovery actions (retries + reflexions + fallbacks) allowed for this node before hard failure."))] = 10
+    default_strategy: Annotated[
+        RecoveryStrategy | None, Field(description="Catch-all strategy. If None, unhandled errors bubble up.")
+    ] = None
+    max_cumulative_actions: Annotated[
+        int,
+        Field(description=("Total number of recovery actions (retries + reflexions + fallbacks) allowed.")),
+    ] = 10
 
     @model_validator(mode="after")
     def validate_limits(self) -> "SupervisionPolicy":

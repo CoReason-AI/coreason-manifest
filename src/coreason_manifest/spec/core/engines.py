@@ -47,7 +47,9 @@ class ModelCriteria(BaseModel):
     routing_mode: Annotated[RoutingMode, Field(description="How to handle multiple matching models.")] = "single"
 
     provider_whitelist: list[str] | None = None
-    specific_models: Annotated[list[str] | None, Field(description="Explicit list of model IDs to route between.")] = None
+    specific_models: Annotated[list[str] | None, Field(description="Explicit list of model IDs to route between.")] = (
+        None
+    )
 
 
 # Type alias: A model can be a hardcoded ID ("gpt-4") OR a semantic policy
@@ -82,7 +84,9 @@ class BaseReasoning(BaseModel):
 
     # *** FIX 3: GUIDED DECODING ***
     # Enforces syntax constraints at the token level (SOTA reliability)
-    guided_decoding: Annotated[GuidedDecodingMode, Field(description="If set, restricts the model to output valid syntax only.")] = "none"
+    guided_decoding: Annotated[
+        GuidedDecodingMode, Field(description="If set, restricts the model to output valid syntax only.")
+    ] = "none"
 
     # *** UPGRADE: CONSTITUTIONAL AI ***
     constitution: Annotated[ConstitutionalScope | None, Field(description="Intrinsic safety constraints.")] = None
@@ -117,7 +121,9 @@ class AdaptiveReasoning(BaseReasoning):
     verifier_model: ModelRef = Field(..., description="External judge model to score thoughts.")
 
     # Fallback
-    halt_on_budget_exhaustion: Annotated[bool, Field(description="If True, return best guess when budget fails. If False, error.")] = True
+    halt_on_budget_exhaustion: Annotated[
+        bool, Field(description="If True, return best guess when budget fails. If False, error.")
+    ] = True
 
 
 class AttentionReasoning(BaseReasoning):
@@ -147,7 +153,9 @@ class BufferReasoning(BaseReasoning):
 
     # *** FIX 1: LEARNING STRATEGY ***
     # Allows the agent to contribute new knowledge back to the buffer
-    learning_strategy: Annotated[BoTLearningStrategy, Field(description="Whether to save successful executions back to the buffer.")] = "read_only"
+    learning_strategy: Annotated[
+        BoTLearningStrategy, Field(description="Whether to save successful executions back to the buffer.")
+    ] = "read_only"
 
 
 class TreeSearchReasoning(BaseReasoning):
@@ -200,7 +208,9 @@ class EnsembleReasoning(BaseReasoning):
     # 'embedding': Vector cosine similarity (Default).
     # 'lexical': Jaccard/Token overlap (Zero cost, good for strict code/math).
     # 'hybrid': Average of both.
-    fast_comparison_mode: Annotated[FastComparisonMode, Field(description="Method for initial cheap agreement check.")] = "embedding"
+    fast_comparison_mode: Annotated[
+        FastComparisonMode, Field(description="Method for initial cheap agreement check.")
+    ] = "embedding"
 
     # Thresholds for the Fast Path
     # Score > agreement_threshold -> Auto-Accept as Same.
@@ -213,15 +223,21 @@ class EnsembleReasoning(BaseReasoning):
     # 'ambiguous_only': Trigger LLM check only if score is in the grey zone (0.60-0.85).
     # 'always': Always double-check with LLM (Paranoid mode).
     # 'never': Trust the fast path implicitly (Fastest).
-    verification_mode: Annotated[VerificationMode, Field(description="When to trigger the deep similarity_model check.")] = "ambiguous_only"
+    verification_mode: Annotated[
+        VerificationMode, Field(description="When to trigger the deep similarity_model check.")
+    ] = "ambiguous_only"
 
-    similarity_model: Annotated[ModelRef | None, Field(description="The LLM used for deep semantic verification if triggered.")] = None
+    similarity_model: Annotated[
+        ModelRef | None, Field(description="The LLM used for deep semantic verification if triggered.")
+    ] = None
 
     # --- 2. Consensus & Tie-Breaking ---
     aggregation: AggregationStrategy = "majority_vote"
 
     # Tie-Breaker: If models disagree, this judge decides.
-    judge_model: Annotated[ModelRef | None, Field(description="The 'Supreme Court' model that resolves conflicts.")] = None
+    judge_model: Annotated[ModelRef | None, Field(description="The 'Supreme Court' model that resolves conflicts.")] = (
+        None
+    )
 
 
 class RedTeamingReasoning(BaseReasoning):
@@ -244,10 +260,14 @@ class RedTeamingReasoning(BaseReasoning):
     # payload_splitting: Breaking malicious payloads across tokens.
     # goat: Generative Offensive Agent Tester (Tree-based planning).
     # emergence_boosting: Pressure testing to elicit latent behaviors.
-    attack_strategy: Annotated[AttackStrategy, Field(description="The algorithmic protocol for generating attacks.")] = "crescendo"
+    attack_strategy: Annotated[
+        AttackStrategy, Field(description="The algorithmic protocol for generating attacks.")
+    ] = "crescendo"
 
     max_turns: Annotated[int, Field(description="Maximum conversation depth/trajectory.")] = 5
-    success_criteria: Annotated[str, Field(description="Natural language definition of a successful break (e.g. 'PII Leakage').")]
+    success_criteria: Annotated[
+        str, Field(description="Natural language definition of a successful break (e.g. 'PII Leakage').")
+    ]
 
 
 class ComputerUseReasoning(BaseReasoning):
@@ -259,22 +279,35 @@ class ComputerUseReasoning(BaseReasoning):
     type: Literal["computer_use"] = "computer_use"
 
     # Environment Configuration
-    screen_resolution: Annotated[tuple[int, int] | None, Field(description="Target display dimensions (width, height). If None, auto-detected.")] = None
+    screen_resolution: Annotated[
+        tuple[int, int] | None, Field(description="Target display dimensions (width, height). If None, auto-detected.")
+    ] = None
 
     # *** FIX 2: COORDINATE SYSTEM ***
     # Critical for model portability across screen sizes
-    coordinate_system: Annotated[CoordinateSystem, Field(description="Coordinate format (pixels vs relative).")] = "normalized_0_1"
+    coordinate_system: Annotated[CoordinateSystem, Field(description="Coordinate format (pixels vs relative).")] = (
+        "normalized_0_1"
+    )
 
     # Interaction Protocol
     # native_os: Uses XY coordinates and OS events (clicks, hotkeys).
     # browser_dom: Uses HTML selectors and JS events (Playwright style).
     # hybrid: Allows switching between OS and DOM interaction.
-    interaction_mode: Annotated[InteractionMode, Field(description="The layer at which the agent perceives and acts.")] = "native_os"
+    interaction_mode: Annotated[
+        InteractionMode, Field(description="The layer at which the agent perceives and acts.")
+    ] = "native_os"
 
     # Safety Governance
-    allowed_actions: Annotated[list[AllowedAction], Field(description="Allow-list of permitted GUI operations.")] = ["click", "type", "scroll", "screenshot"]
+    allowed_actions: Annotated[list[AllowedAction], Field(description="Allow-list of permitted GUI operations.")] = [
+        "click",
+        "type",
+        "scroll",
+        "screenshot",
+    ]
 
-    screenshot_frequency_ms: Annotated[int, Field(description="Delay between visual observation frames (in milliseconds).")] = 1000
+    screenshot_frequency_ms: Annotated[
+        int, Field(description="Delay between visual observation frames (in milliseconds).")
+    ] = 1000
 
     def required_capabilities(self) -> list[str]:
         return ["computer_use"]
@@ -309,7 +342,9 @@ class GraphReasoning(BaseReasoning):
 
     # 2. The Model acting as the 'Graph Navigator'
     # Used to generate Cypher/Gremlin queries or extract entity keywords from the prompt.
-    extraction_model: Annotated[ModelRef | None, Field(description="Model used to translate user prompt into graph queries.")] = None
+    extraction_model: Annotated[
+        ModelRef | None, Field(description="Model used to translate user prompt into graph queries.")
+    ] = None
 
     # 3. SOTA Retrieval Strategies
     # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
@@ -322,7 +357,9 @@ class GraphReasoning(BaseReasoning):
 
     # Global Mode Constraints
     # GraphRAG builds hierarchical communities (Level 0 = Root, Level 1 = Broad Clusters, Level 2 = Specifics).
-    community_level: Annotated[int, Field(description="For global search: which level of community summaries to query.")] = 1
+    community_level: Annotated[
+        int, Field(description="For global search: which level of community summaries to query.")
+    ] = 1
 
 
 # -------------------------------------------------------------------------

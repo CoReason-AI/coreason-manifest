@@ -16,4 +16,6 @@ class PresentationHints(BaseModel):
     style: Annotated[dict[str, str] | None, Field(description="CSS-like properties (color, shape, etc.).")] = None
     group: Annotated[str | None, Field(description="For visual clustering/subgraphs.")] = None
     hidden: Annotated[bool, Field(description="Whether the node should be hidden in default views.")] = False
-    metadata_view: Annotated[Literal["basic", "detailed", "debug"], Field(description="Preferred metadata detail level.")] = "basic"
+    metadata_view: Annotated[
+        Literal["basic", "detailed", "debug"], Field(description="Preferred metadata detail level.")
+    ] = "basic"
