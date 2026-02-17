@@ -231,3 +231,13 @@ def test_manifest_io_coverage(tmp_path: Any) -> None:
     f2.write_text("key: value: invalid")
     with pytest.raises(ValueError, match="Failed to parse manifest file"):
         loader.load("invalid.yaml")
+
+
+def test_manifest_io_symlink_loop_coverage(tmp_path: Any) -> None:
+    loader = ManifestIO(root_dir=tmp_path)
+
+    # Mock pathlib.Path.resolve to raise RuntimeError("Symlink loop")
+    # This covers lines 60-62 in io.py
+    with patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop")):
+        with pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"):
+            loader.read_text("some_file")
