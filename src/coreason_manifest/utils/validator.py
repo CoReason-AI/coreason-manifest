@@ -159,15 +159,18 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> l
                     f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.target_variable}'."
                 )
             # MVP Type Safety: Regex matching on complex objects is risky
-            elif node.target_variable in symbol_table:
-                if hasattr(node, "mode") and node.mode == "programmatic":
-                    var_type = symbol_table[node.target_variable]
-                    if var_type in ("object", "array"):
-                        # Just a warning for now
-                        errors.append(
-                            f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
-                            f"variable '{node.target_variable}'. Matching may fail."
-                        )
+            elif (
+                node.target_variable in symbol_table
+                and hasattr(node, "mode")
+                and node.mode == "programmatic"
+                and symbol_table[node.target_variable] in ("object", "array")
+            ):
+                var_type = symbol_table[node.target_variable]
+                # Just a warning for now
+                errors.append(
+                    f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
+                    f"variable '{node.target_variable}'. Matching may fail."
+                )
 
             if node.output_variable not in available_vars:
                 errors.append(

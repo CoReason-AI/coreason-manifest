@@ -409,7 +409,8 @@ def test_swarm_type_safety() -> None:
 
 def test_schema_repair_null_default() -> None:
     """Test schema repair for null defaults."""
-    from unittest.mock import MagicMock, patch
+    from typing import Any
+    from unittest.mock import patch
 
     from jsonschema.exceptions import SchemaError
 
@@ -420,9 +421,6 @@ def test_schema_repair_null_default() -> None:
         # Should remove default
         mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_null: dict[str, Any] = {"type": "string", "default": None}
-
-        # We need 'Any' imported for type hint above if strict checking is on
-        from typing import Any
 
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=bad_null)
