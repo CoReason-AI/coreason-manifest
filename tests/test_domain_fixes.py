@@ -1,5 +1,5 @@
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
@@ -142,19 +142,53 @@ def test_schema_repair() -> None:
 
 def test_schema_repair_extended() -> None:
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        # String mismatch
+        # String mismatch: "123" (int) -> "123"
         mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_str: dict[str, Any] = {"type": "string", "default": 123}
         ds = DataSchema(json_schema=bad_str)
-        # Casting 123 -> "123"
         assert ds.json_schema["default"] == "123"
 
-        # Boolean mismatch
+        # Boolean mismatch: "true" -> True
         mock_check.side_effect = [SchemaError("Simulated"), None]
-        bad_bool: dict[str, Any] = {"type": "boolean", "default": "true"}  # string "true" is not bool
+        bad_bool: dict[str, Any] = {"type": "boolean", "default": "true"}
         ds = DataSchema(json_schema=bad_bool)
-        # Casting "true" -> True
         assert ds.json_schema["default"] is True
+
+        # Boolean mismatch: "false" -> False
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_bool_f: dict[str, Any] = {"type": "boolean", "default": "FALSE"}
+        ds = DataSchema(json_schema=bad_bool_f)
+        assert ds.json_schema["default"] is False
+
+        # Boolean fail
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_bool_x: dict[str, Any] = {"type": "boolean", "default": "notbool"}
+        ds = DataSchema(json_schema=bad_bool_x)
+        assert "default" not in ds.json_schema
+
+        # Integer mismatch: "123" -> 123
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_int: dict[str, Any] = {"type": "integer", "default": "123"}
+        ds = DataSchema(json_schema=bad_int)
+        assert ds.json_schema["default"] == 123
+
+        # Integer fail
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_int_x: dict[str, Any] = {"type": "integer", "default": "abc"}
+        ds = DataSchema(json_schema=bad_int_x)
+        assert "default" not in ds.json_schema
+
+        # Float mismatch: "12.5" -> 12.5
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_float: dict[str, Any] = {"type": "float", "default": "12.5"}
+        ds = DataSchema(json_schema=bad_float)
+        assert ds.json_schema["default"] == 12.5
+
+        # Float fail
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_float_x: dict[str, Any] = {"type": "float", "default": "abc"}
+        ds = DataSchema(json_schema=bad_float_x)
+        assert "default" not in ds.json_schema
 
         # Object mismatch
         mock_check.side_effect = [SchemaError("Simulated"), None]

@@ -95,7 +95,7 @@ def _scan_string_for_vars(text: str) -> set[str]:
     """
     Scan a string for Jinja2-style variable references: {{ var_name }}
     """
-    return set(re.findall(r"\{\{([\w\.]+)\}\}", text))
+    return set(re.findall(r"\{\{\s*([\w\.]+)\s*\}\}", text))
 
 
 def _scan_agent_templates(node: AgentNode) -> set[str]:
