@@ -2,6 +2,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+import yaml
 from jsonschema.exceptions import SchemaError
 
 from coreason_manifest.spec.core.flow import (
@@ -17,6 +18,7 @@ from coreason_manifest.utils.io import ManifestIO
 from coreason_manifest.utils.loader import (
     RuntimeSecurityWarning,
     SecurityViolationError,
+    construct_mapping_unique,
     load_agent_from_ref,
     load_flow_from_file,
 )
@@ -42,6 +44,16 @@ metadata:
     # PT011: Added match
     with pytest.raises(ValueError, match="found duplicate key"):
         load_flow_from_file(str(f))
+
+
+def test_construct_mapping_unique_validation() -> None:
+    # Test that construct_mapping_unique raises ConstructorError if node is not a MappingNode
+    # This covers lines 60-65 in loader.py
+    loader = yaml.SafeLoader("")
+    node = yaml.ScalarNode(tag="tag:yaml.org,2002:str", value="test")
+
+    with pytest.raises(yaml.constructor.ConstructorError, match="expected a mapping node"):
+        construct_mapping_unique(loader, node)
 
 
 # Domain 2: Dynamic Execution
