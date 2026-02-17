@@ -336,10 +336,7 @@ def test_jinja2_filter_validation() -> None:
     )
 
     # Define 'user.name' in blackboard
-    blackboard = Blackboard(
-        variables={"user.name": VariableDef(type="string")},
-        persistence=False
-    )
+    blackboard = Blackboard(variables={"user.name": VariableDef(type="string")}, persistence=False)
 
     graph = Graph(nodes={"n1": agent}, edges=[])
     flow = GraphFlow(

@@ -65,8 +65,9 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
             node.start_mark,
         )
 
-    # SOTA Hardening: Strict type casting for robustness
-    mapping_node = cast(MappingNode, node)
+    # SOTA Hardening: Strict type casting (although type narrowed by isinstance, explicit for safety)
+    # MyPy knows node is MappingNode due to the isinstance check above.
+    mapping_node = node
     loader.flatten_mapping(mapping_node)
     mapping = {}
     for key_node, value_node in mapping_node.value:
