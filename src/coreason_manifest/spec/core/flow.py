@@ -1,6 +1,6 @@
+import warnings
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
-import warnings
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
@@ -79,6 +79,7 @@ class DataSchema(BaseModel):
                     warnings.warn(
                         f"Schema repaired automatically. Original error: {e.message}",
                         category=UserWarning,
+                        stacklevel=2,
                     )
 
                     # Update schema
@@ -110,15 +111,13 @@ class DataSchema(BaseModel):
             d = repaired["default"]
 
             is_conflict = False
-            if t == "integer" and not isinstance(d, int):
-                is_conflict = True
-            elif t == "string" and not isinstance(d, str):
-                is_conflict = True
-            elif t == "boolean" and not isinstance(d, bool):
-                is_conflict = True
-            elif t == "object" and not isinstance(d, dict):
-                is_conflict = True
-            elif t == "array" and not isinstance(d, list):
+            if (
+                (t == "integer" and not isinstance(d, int))
+                or (t == "string" and not isinstance(d, str))
+                or (t == "boolean" and not isinstance(d, bool))
+                or (t == "object" and not isinstance(d, dict))
+                or (t == "array" and not isinstance(d, list))
+            ):
                 is_conflict = True
 
             if is_conflict:

@@ -103,9 +103,7 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: set[str]) -> list[st
 
         elif isinstance(node, SwitchNode):
             if node.variable not in symbol_table:
-                errors.append(
-                    f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'."
-                )
+                errors.append(f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'.")
 
         elif isinstance(node, (InspectorNode, EmergenceInspectorNode)):
             if node.target_variable not in symbol_table:

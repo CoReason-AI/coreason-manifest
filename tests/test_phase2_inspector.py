@@ -9,10 +9,12 @@ def test_inspector_lifecycle_graph() -> None:
     flow_builder = NewGraphFlow(name="inspector-test-graph", version="0.25")
 
     # Domain 4: Add Blackboard variables for data flow validation
-    flow_builder.set_blackboard({
-        "result.score": VariableDef(type="float", description="Score"),
-        "verification_result": VariableDef(type="boolean", description="Result"),
-    })
+    flow_builder.set_blackboard(
+        {
+            "result.score": VariableDef(type="float", description="Score"),
+            "verification_result": VariableDef(type="boolean", description="Result"),
+        }
+    )
 
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(

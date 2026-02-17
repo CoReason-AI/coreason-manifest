@@ -11,7 +11,6 @@
 import ast
 import hashlib
 import importlib.util
-import logging
 import re
 import warnings
 from pathlib import Path
@@ -23,7 +22,7 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 from coreason_manifest.utils.logger import logger
 
-__all__ = ["SecurityViolationError", "load_agent_from_ref", "load_flow_from_file", "RuntimeSecurityWarning"]
+__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
 
 
 BANNED_IMPORTS = (
@@ -44,7 +43,6 @@ BANNED_CALLS = ("__import__", "eval", "exec", "compile")
 
 class RuntimeSecurityWarning(RuntimeWarning):
     """Warning for runtime security risks."""
-    pass
 
 
 class UniqueKeyLoader(yaml.SafeLoader):
@@ -58,10 +56,20 @@ def construct_mapping_unique(loader: yaml.Loader, node: yaml.Node, deep: bool = 
     """
     Construct a mapping while checking for duplicate keys.
     """
+    # Mypy complains about Node vs MappingNode. SafeLoader expects MappingNode for mappings.
+    if not isinstance(node, yaml.MappingNode):
+        raise yaml.constructor.ConstructorError(
+            None,
+            None,
+            f"expected a mapping node, but found {node.id}",
+            node.start_mark,  # type: ignore[attr-defined]
+        )
+
     loader.flatten_mapping(node)
     mapping = {}
     for key_node, value_node in node.value:
-        key = loader.construct_object(key_node, deep=deep)
+        # construct_object is dynamically added or not typed fully in types-pyyaml
+        key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
         if key in mapping:
             raise yaml.constructor.ConstructorError(
                 "while constructing a mapping",
@@ -69,7 +77,7 @@ def construct_mapping_unique(loader: yaml.Loader, node: yaml.Node, deep: bool = 
                 f"found duplicate key {key!r}",
                 key_node.start_mark,
             )
-        mapping[key] = loader.construct_object(value_node, deep=deep)
+        mapping[key] = loader.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
     return mapping
 
 
@@ -89,10 +97,9 @@ def _scan_for_dynamic_references(data: Any) -> bool:
         for item in data:
             if _scan_for_dynamic_references(item):
                 return True
-    elif isinstance(data, str):
-        # Pattern: ends with .py, followed by :, followed by ClassName (identifier)
-        if re.match(r".+\.py:[a-zA-Z_]\w+$", data):
-            return True
+    # SIM102: Combined nested if
+    elif isinstance(data, str) and re.match(r".+\.py:[a-zA-Z_]\w+$", data):
+        return True
     return False
 
 
@@ -148,8 +155,7 @@ def load_flow_from_file(
     # Domain 2: Observable Security
     if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
         raise SecurityViolationError(
-            "Dynamic code execution references detected in manifest. "
-            "Set 'allow_dynamic_execution=True' to proceed."
+            "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
         )
 
     kind = data.get("kind")
