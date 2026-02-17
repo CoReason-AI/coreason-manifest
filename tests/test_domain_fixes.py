@@ -301,7 +301,6 @@ def test_manifest_io_symlink_loop_coverage(tmp_path: Any) -> None:
 
 def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
     import stat
-    from unittest.mock import MagicMock
 
     loader = ManifestIO(root_dir=tmp_path)
     f = tmp_path / "world_writable.yaml"
