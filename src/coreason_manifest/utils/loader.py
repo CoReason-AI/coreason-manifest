@@ -52,7 +52,7 @@ class UniqueKeyLoader(yaml.SafeLoader):
     """
 
 
-def construct_mapping_unique(loader: yaml.Loader, node: yaml.Node, deep: bool = False) -> dict[Any, Any]:
+def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: bool = False) -> dict[Any, Any]:
     """
     Construct a mapping while checking for duplicate keys.
     """
