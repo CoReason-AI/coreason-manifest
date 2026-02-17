@@ -443,3 +443,34 @@ def test_schema_repair_null_default() -> None:
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds3 = DataSchema(json_schema=valid_union)
         assert ds3.json_schema["default"] is None
+
+
+def test_inspector_regex_warning() -> None:
+    """Test warning when InspectorNode uses regex mode on complex types."""
+    from coreason_manifest.spec.core.nodes import InspectorNode
+
+    blackboard = Blackboard(variables={"obj_var": VariableDef(type="object")}, persistence=False)
+
+    inspector = InspectorNode(
+        id="i1",
+        type="inspector",
+        metadata={},
+        resilience=None,
+        target_variable="obj_var",
+        criteria="regex:.*",
+        mode="programmatic",  # This triggers the check
+        pass_threshold=0.5,
+        output_variable="out",
+    )
+
+    graph = Graph(nodes={"i1": inspector}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    assert any("Type Warning" in e and "complex type" in e for e in errors)
