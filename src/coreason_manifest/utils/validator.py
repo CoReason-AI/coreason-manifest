@@ -2,7 +2,13 @@
 
 from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    EmergenceInspectorNode,
+    InspectorNode,
+    SwarmNode,
+    SwitchNode,
+)
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
@@ -63,6 +69,53 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
         errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
         errors.extend(_validate_orphan_nodes(flow.graph))
+
+        # 4. Domain 4: Static Data-Flow Analysis
+        # Construct Symbol Table
+        symbol_table: set[str] = set()
+        if flow.blackboard:
+            symbol_table.update(flow.blackboard.variables.keys())
+        if flow.interface and flow.interface.inputs.json_schema:
+            # Extract properties from input schema
+            props = flow.interface.inputs.json_schema.get("properties", {})
+            symbol_table.update(props.keys())
+
+        errors.extend(_validate_data_flow(nodes_list, symbol_table))
+
+    return errors
+
+
+def _validate_data_flow(nodes: list[AnyNode], symbol_table: set[str]) -> list[str]:
+    """
+    Check if nodes reference variables that exist in the symbol table.
+    """
+    errors: list[str] = []
+    for node in nodes:
+        if isinstance(node, SwarmNode):
+            if node.workload_variable not in symbol_table:
+                errors.append(
+                    f"Data Flow Error: SwarmNode '{node.id}' references missing variable '{node.workload_variable}'."
+                )
+            if node.output_variable not in symbol_table:
+                errors.append(
+                    f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable '{node.output_variable}'."
+                )
+
+        elif isinstance(node, SwitchNode):
+            if node.variable not in symbol_table:
+                errors.append(
+                    f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'."
+                )
+
+        elif isinstance(node, (InspectorNode, EmergenceInspectorNode)):
+            if node.target_variable not in symbol_table:
+                errors.append(
+                    f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.target_variable}'."
+                )
+            if node.output_variable not in symbol_table:
+                errors.append(
+                    f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable '{node.output_variable}'."
+                )
 
     return errors
 

@@ -9,13 +9,21 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import ast
+import hashlib
 import importlib.util
+import logging
+import re
+import warnings
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
+from coreason_manifest.utils.logger import logger
 
-__all__ = ["SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
+__all__ = ["SecurityViolationError", "load_agent_from_ref", "load_flow_from_file", "RuntimeSecurityWarning"]
 
 
 BANNED_IMPORTS = (
@@ -34,13 +42,70 @@ BANNED_IMPORTS = (
 BANNED_CALLS = ("__import__", "eval", "exec", "compile")
 
 
-def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow | GraphFlow:
+class RuntimeSecurityWarning(RuntimeWarning):
+    """Warning for runtime security risks."""
+    pass
+
+
+class UniqueKeyLoader(yaml.SafeLoader):
+    """
+    Custom YAML loader that disallows duplicate keys.
+    Prevents "Ghost Logic" where duplicate keys are silently overwritten.
+    """
+
+
+def construct_mapping_unique(loader: yaml.Loader, node: yaml.Node, deep: bool = False) -> dict[Any, Any]:
+    """
+    Construct a mapping while checking for duplicate keys.
+    """
+    loader.flatten_mapping(node)
+    mapping = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping_unique)
+
+
+def _scan_for_dynamic_references(data: Any) -> bool:
+    """
+    Recursively scan the data structure for potential dynamic code execution references.
+    Looks for strings matching the pattern "file.py:ClassName".
+    """
+    if isinstance(data, dict):
+        for value in data.values():
+            if _scan_for_dynamic_references(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if _scan_for_dynamic_references(item):
+                return True
+    elif isinstance(data, str):
+        # Pattern: ends with .py, followed by :, followed by ClassName (identifier)
+        if re.match(r".+\.py:[a-zA-Z_]\w+$", data):
+            return True
+    return False
+
+
+def load_flow_from_file(
+    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False
+) -> LinearFlow | GraphFlow:
     """
     Load a flow manifest from a YAML or JSON file.
 
     Args:
         path: Path to the manifest file.
         root_dir: Optional root directory for path confinement. Defaults to file's parent.
+        allow_dynamic_execution: Whether to allow potential dynamic code execution references.
 
     Returns:
         LinearFlow | GraphFlow: The parsed flow object.
@@ -48,7 +113,9 @@ def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow |
     Raises:
         ValueError: If the file content is invalid or the kind is unknown.
         FileNotFoundError: If the file does not exist.
-        SecurityViolationError: If path traversal or unsafe permissions are detected.
+        SecurityViolationError: If path traversal or unsafe permissions are detected,
+                                or if dynamic execution is attempted without consent.
+        yaml.constructor.ConstructorError: If duplicate keys are found.
     """
     file_path = Path(path).resolve()
     jail_root = root_dir or file_path.parent
@@ -66,7 +133,24 @@ def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow |
         # But for clarity, we pass the relative path if possible, or just the name if same dir.
         load_path = file_path.name
 
-    data = loader.load(load_path)
+    # Domain 1: Lossless Configuration Loading
+    # Read text content securely, then parse with duplicate key detection
+    content_str = loader.read_text(load_path)
+
+    try:
+        data = yaml.load(content_str, Loader=UniqueKeyLoader)
+    except yaml.YAMLError as e:
+        raise ValueError(f"Failed to parse manifest file: {e}") from e
+
+    if not isinstance(data, dict):
+        raise ValueError("Manifest content must be a dictionary.")
+
+    # Domain 2: Observable Security
+    if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
+        raise SecurityViolationError(
+            "Dynamic code execution references detected in manifest. "
+            "Set 'allow_dynamic_execution=True' to proceed."
+        )
 
     kind = data.get("kind")
     if kind == "LinearFlow":
@@ -135,6 +219,24 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # AST Validation
     _validate_ast(source_code, str(file_path))
+
+    # Domain 2: Observable Security - Audit Log and Warning
+    checksum = hashlib.sha256(source_code.encode("utf-8")).hexdigest()
+    logger.warning(
+        "Dynamic Code Execution Detected",
+        extra={
+            "event": "dynamic_exec",
+            "source": str(file_path),
+            "checksum": checksum,
+            "verification": "AST_PASSED",
+        },
+    )
+
+    warnings.warn(
+        f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",
+        category=RuntimeSecurityWarning,
+        stacklevel=2,
+    )
 
     # Dynamic Loading without sys.modules/sys.path side effects
     spec = importlib.util.spec_from_file_location(file_ref, file_path)

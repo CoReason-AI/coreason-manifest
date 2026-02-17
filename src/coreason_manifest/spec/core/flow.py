@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
+import warnings
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
@@ -67,8 +68,63 @@ class DataSchema(BaseModel):
                 # Catches {"type": "invalid_type"} which the heuristic missed.
                 jsonschema.Draft7Validator.check_schema(self.json_schema)
             except SchemaError as e:
-                raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
+                # Domain 3: Adaptive Schema Repair
+                try:
+                    repaired_schema = self._attempt_repair(self.json_schema)
+
+                    # Verify repair worked
+                    jsonschema.Draft7Validator.check_schema(repaired_schema)
+
+                    # Log warning
+                    warnings.warn(
+                        f"Schema repaired automatically. Original error: {e.message}",
+                        category=UserWarning,
+                    )
+
+                    # Update schema
+                    # Since frozen=True, we modify the dict in place.
+                    self.json_schema.clear()
+                    self.json_schema.update(repaired_schema)
+                    return self
+
+                except Exception:
+                    # Repair failed or verification failed
+                    raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
         return self
+
+    @staticmethod
+    def _attempt_repair(schema: dict[str, Any]) -> dict[str, Any]:
+        """
+        Heuristics to repair common schema errors.
+        Returns a NEW dict with repairs applied.
+        """
+        repaired = schema.copy()
+
+        # Fix 1: Missing "type": "object" when "properties" exists
+        if "properties" in repaired and "type" not in repaired:
+            repaired["type"] = "object"
+
+        # Fix 2: Conflict between "default" and "type"
+        if "default" in repaired and "type" in repaired:
+            t = repaired["type"]
+            d = repaired["default"]
+
+            is_conflict = False
+            if t == "integer" and not isinstance(d, int):
+                is_conflict = True
+            elif t == "string" and not isinstance(d, str):
+                is_conflict = True
+            elif t == "boolean" and not isinstance(d, bool):
+                is_conflict = True
+            elif t == "object" and not isinstance(d, dict):
+                is_conflict = True
+            elif t == "array" and not isinstance(d, list):
+                is_conflict = True
+
+            if is_conflict:
+                del repaired["default"]
+
+        return repaired
 
 
 class FlowInterface(BaseModel):
