@@ -106,13 +106,11 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
         state_store[node_id] = state
 
     if state.state == "open":
-        if state.last_failure_time and (
-            time.time() - state.last_failure_time > policy.reset_timeout_seconds
-        ):  # pragma: no cover
+        if state.last_failure_time and (time.time() - state.last_failure_time > policy.reset_timeout_seconds):
             # Timeout expired, try half-open
             state.state = "half-open"
             # We don't reset failure_count here; usually we wait for a success to close and reset.
-        else:  # pragma: no cover
+        else:
             raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")
 
 
