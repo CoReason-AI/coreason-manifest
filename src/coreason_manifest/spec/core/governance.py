@@ -113,7 +113,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
             state.state = "half-open"
             # We don't reset failure_count here; usually we wait for a success to close and reset.
         else:  # pragma: no cover
-            raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")  # pragma: no cover
+            raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")
 
 
 def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:

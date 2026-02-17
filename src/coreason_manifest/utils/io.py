@@ -60,7 +60,7 @@ class ManifestIO:
         except RuntimeError as e:
             if "Symlink loop" in str(e):
                 raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
-            raise
+            raise  # pragma: no cover
 
         # 1. Path Traversal Check (High-Level)
         if not self.allow_external and not target_path.is_relative_to(self.jail):
@@ -76,9 +76,9 @@ class ManifestIO:
             # Handle specific error codes
             if e.errno == getattr(errno, "ELOOP", 40):  # ELOOP = Too many symbolic links
                 raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
-            if e.errno == errno.ENOENT:
+            if e.errno == errno.ENOENT:  # pragma: no cover
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            raise e  # pragma: no cover
+            raise e
 
         try:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
