@@ -1,6 +1,6 @@
+from pathlib import Path
 
 import pytest
-from pathlib import Path
 
 from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
 from coreason_manifest.spec.core.flow import FlowMetadata, LinearFlow
