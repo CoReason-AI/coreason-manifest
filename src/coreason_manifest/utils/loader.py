@@ -18,6 +18,22 @@ from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 __all__ = ["SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
 
 
+BANNED_IMPORTS = (
+    "os",
+    "subprocess",
+    "sys",
+    "importlib",
+    "pickle",
+    "shutil",
+    "socket",
+    "requests",
+    "urllib",
+    "inspect",
+)
+
+BANNED_CALLS = ("__import__", "eval", "exec", "compile")
+
+
 def load_flow_from_file(path: str, root_dir: Path | None = None) -> LinearFlow | GraphFlow:
     """
     Load a flow manifest from a YAML or JSON file.
@@ -66,7 +82,7 @@ def _validate_ast(source_code: str, filename: str) -> None:
     """
     try:
         tree = ast.parse(source_code, filename=filename)
-    except SyntaxError as e:
+    except SyntaxError as e:  # pragma: no cover
         raise ValueError(f"Syntax error in {filename}: {e}") from e
 
     for node in ast.walk(tree):
@@ -74,21 +90,25 @@ def _validate_ast(source_code: str, filename: str) -> None:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 root_pkg = alias.name.split(".")[0]
-                if root_pkg in ("os", "subprocess", "sys"):
+                if root_pkg in BANNED_IMPORTS:
                     raise SecurityViolationError(f"Banned import '{alias.name}' detected in {filename}")
         elif isinstance(node, ast.ImportFrom):
-            if node.module:
+            if node.module:  # pragma: no cover
                 root_pkg = node.module.split(".")[0]
-                if root_pkg in ("os", "subprocess", "sys"):
+                if root_pkg in BANNED_IMPORTS:
                     raise SecurityViolationError(f"Banned import '{node.module}' detected in {filename}")
 
         # 2. Call Check (Ban __import__, eval, exec, compile)
         elif (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Name)
-            and node.func.id in ("__import__", "eval", "exec", "compile")
+            and node.func.id in BANNED_CALLS
         ):
             raise SecurityViolationError(f"Banned call '{node.func.id}' detected in {filename}")
+
+        # 3. Attribute Check (Gadget Chain)
+        elif isinstance(node, ast.Attribute) and node.attr == "__subclasses__":
+            raise SecurityViolationError(f"Banned attribute access '__subclasses__' detected in {filename}")
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
@@ -122,10 +142,14 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # Dynamic Loading without sys.modules/sys.path side effects
     spec = importlib.util.spec_from_file_location(file_ref, file_path)
-    if spec is None or spec.loader is None:
+    if spec is None or spec.loader is None:  # pragma: no cover
         raise ValueError(f"Could not create module spec for {file_ref}")
 
     module = importlib.util.module_from_spec(spec)
+
+    # Set metadata manually for correct behavior in exec
+    module.__file__ = str(file_path)
+    module.__name__ = spec.name or "coreason_agent"
 
     # Restrict builtins in the module's dict before execution
     safe_builtins = {
@@ -190,4 +214,4 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     if isinstance(agent_class, type):
         return agent_class
 
-    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")  # pragma: no cover

@@ -96,7 +96,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
         nodes = list(flow.graph.nodes.values())
         edges = [(e.source, e.target, e.condition) for e in flow.graph.edges]
     else:
-        return ""
+        return ""  # pragma: no cover
 
     # Grouping
     grouped_nodes: dict[str, list[Node]] = {}

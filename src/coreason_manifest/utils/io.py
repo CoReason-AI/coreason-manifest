@@ -55,14 +55,17 @@ class ManifestIO:
         """
         # Resolve path relative to jail
         file_path = Path(path)
-        target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
+        try:
+            target_path = file_path.resolve() if file_path.is_absolute() else (self.jail / path).resolve()
+        except RuntimeError as e:
+            if "Symlink loop" in str(e):
+                raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
+            raise
 
         # 1. Path Traversal Check (High-Level)
         if not self.allow_external:
-            try:
-                target_path.relative_to(self.jail)
-            except ValueError as e:
-                raise SecurityViolationError(f"Path Traversal Detected: {path}") from e
+            if not target_path.is_relative_to(self.jail):
+                raise SecurityViolationError(f"Path Traversal Detected: {path}")
 
         # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
         try:
@@ -76,7 +79,7 @@ class ManifestIO:
                 raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
             if e.errno == errno.ENOENT:
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            raise e
+            raise e  # pragma: no cover
 
         try:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)

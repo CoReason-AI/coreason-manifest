@@ -16,7 +16,8 @@ if TYPE_CHECKING:
 class RemediationAction(BaseModel):
     type: Literal["add_guard_node", "whitelist_domain"]
     target_node_id: str | None = None
-    patch_data: dict[str, Any]
+    format: Literal["json_patch", "merge_patch"] = "json_patch"
+    patch_data: list[dict[str, Any]] | dict[str, Any]
     description: str
 
 
@@ -62,11 +63,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             profile = flow.definitions.profiles[node.worker_profile]
             reasoning = profile.reasoning
 
-        if reasoning:
-            try:
-                return reasoning.required_capabilities()
-            except AttributeError:
-                return []
+        if reasoning and hasattr(reasoning, "required_capabilities"):
+            return reasoning.required_capabilities()
         return []
 
     # Build tool map: name -> tool_object
@@ -84,13 +82,15 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     if allowed_domains:
         for tool_obj in tool_map.values():
             if tool_obj.url:
-                # SOTA Fix: Handle schemeless URLs to ensure netloc parsing works
+                # SOTA Fix: Handle schemeless URLs and strict netloc parsing
                 url_to_parse = tool_obj.url
                 if "://" not in url_to_parse:
                     url_to_parse = "https://" + url_to_parse
 
                 parsed = urlparse(url_to_parse)
-                domain = parsed.netloc.lower() or tool_obj.url.lower().rstrip("/")
+                domain = parsed.netloc.lower()
+                if ":" in domain:
+                    domain = domain.split(":")[0]
 
                 allowed = False
                 for allowed_d in allowed_domains:
@@ -107,7 +107,18 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
                         remediation=RemediationAction(
                             type="whitelist_domain",
-                            patch_data={"domain": domain},
+                            format="json_patch",
+                            # JSON Patch for array update is complex if we don't know the index in tool_packs.
+                            # For simplicity/robustness in this specific case,
+                            # we might just describe the operation or assume appending to governance.
+                            # Governance allowed_domains is a list.
+                            patch_data=[
+                                {
+                                    "op": "add",
+                                    "path": "/governance/allowed_domains/-",
+                                    "value": domain
+                                }
+                            ],
                             description=f"Add '{domain}' to allowed_domains",
                         ),
                     )
@@ -152,6 +163,29 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 metadata={},
             )
 
+            # Construct Patch
+            patch_ops = []
+            if isinstance(flow, LinearFlow):
+                # Find index
+                idx = 0
+                for i, n in enumerate(flow.sequence):
+                    if n.id == node.id:
+                        idx = i
+                        break
+                patch_ops.append({
+                    "op": "add",
+                    "path": f"/sequence/{idx}",
+                    "value": human_node.model_dump(mode="json")
+                })
+            elif isinstance(flow, GraphFlow):
+                # For graph, we just add the node to the nodes map.
+                # Rewiring edges is complex and context-dependent.
+                patch_ops.append({
+                    "op": "add",
+                    "path": f"/graph/nodes/{human_node_id}",
+                    "value": human_node.model_dump(mode="json")
+                })
+
             reports.append(
                 ComplianceReport(
                     severity="violation",
@@ -163,7 +197,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                     remediation=RemediationAction(
                         type="add_guard_node",
                         target_node_id=node.id,
-                        patch_data=human_node.model_dump(mode="json"),
+                        format="json_patch",
+                        patch_data=patch_ops,
                         description=f"Insert HumanNode '{human_node_id}' before '{node.id}'",
                     ),
                 )
