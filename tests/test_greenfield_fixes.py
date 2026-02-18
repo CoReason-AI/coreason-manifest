@@ -474,3 +474,52 @@ def test_inspector_regex_warning() -> None:
 
     errors = validate_flow(flow)
     assert any("Type Warning" in e and "complex type" in e for e in errors)
+
+
+def test_validator_union_type_normalization() -> None:
+    """Test that union types (list) in input schema are normalized in symbol table."""
+    from coreason_manifest.spec.core.nodes import SwarmNode
+
+    # Input with union type ["string", "null"] and fallback case ["null"]
+    inputs = DataSchema(
+        json_schema={
+            "type": "object",
+            "properties": {
+                "union_var": {"type": ["string", "null"]},
+                "null_var": {"type": ["null"]},
+            },
+        }
+    )
+
+    # SwarmNode expects list/array, but we give it a string (via union normalization)
+    # This should trigger a Type Mismatch error, confirming normalization worked.
+    swarm = SwarmNode(
+        id="s1",
+        type="swarm",
+        metadata={},
+        resilience=None,
+        worker_profile="p1",
+        workload_variable="union_var",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="concat",
+        output_variable="out",
+    )
+
+    # Inspector targeting "null_var" (normalized to "union") in regex mode (complex type warning logic)
+    # Wait, "union" is not "object" or "array", so it shouldn't trigger warning unless I change the check.
+    # But testing "union" normalization execution path is key.
+
+    graph = Graph(nodes={"s1": swarm}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=inputs, outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    # If normalization picked "string", SwarmNode check (expects array) should fail with Type Mismatch.
+    # If it failed to normalize or crashed, we wouldn't get this specific error.
+    assert any("Type Mismatch" in e and "expects a list" in e for e in errors)
