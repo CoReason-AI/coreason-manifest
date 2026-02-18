@@ -87,7 +87,9 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
                 raw_type = schema.get("type", "unknown")
                 if isinstance(raw_type, list):
                     # Heuristic: Grab first non-null type or default to 'union'
-                    normalized = next((x for x in raw_type if x != "null"), "union")
+                    # Unrolled generator for coverage tracking
+                    non_nulls = [x for x in raw_type if x != "null"]
+                    normalized = non_nulls[0] if non_nulls else "union"
                     symbol_table[name] = normalized
                 else:
                     symbol_table[name] = str(raw_type)
