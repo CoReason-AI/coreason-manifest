@@ -64,7 +64,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     """
     if not isinstance(node, MappingNode):
         # Cast node to Any to access attributes not in base Node but expected by ConstructorError format
-        node_any = cast(Any, node)
+        node_any = cast("Any", node)
         raise yaml.constructor.ConstructorError(
             None,
             None,
@@ -74,7 +74,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
 
     # SOTA Hardening: Strict type casting for robustness (isinstance narrows it, but explicit for clarity)
     mapping_node = node
-    loader_typed = cast(YamlLoaderProtocol, loader)
+    loader_typed = cast("YamlLoaderProtocol", loader)
     loader_typed.flatten_mapping(mapping_node)
     mapping = {}
     for key_node, value_node in mapping_node.value:
