@@ -186,15 +186,12 @@ class DataSchema(BaseModel):
                         if len(types) == 1:
                             is_conflict = True
 
-                # 5. Object
-                elif "object" in types and not isinstance(d, dict):
-                    if len(types) == 1:
-                        is_conflict = True
-
-                # 6. Array
-                elif "array" in types and not isinstance(d, list):
-                    if len(types) == 1:
-                        is_conflict = True
+                # 5. Object & 6. Array
+                elif (
+                    ("object" in types and not isinstance(d, dict))
+                    or ("array" in types and not isinstance(d, list))
+                ) and len(types) == 1:
+                    is_conflict = True
 
             if is_conflict:
                 del repaired["default"]
