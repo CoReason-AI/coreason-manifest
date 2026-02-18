@@ -86,11 +86,10 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
             for name, schema in props.items():
                 raw_type = schema.get("type", "unknown")
                 if isinstance(raw_type, list):
-                    # Heuristic: Grab first non-null type or default to 'union'
-                    # Unrolled generator for coverage tracking
-                    non_nulls = [x for x in raw_type if x != "null"]
-                    normalized = non_nulls[0] if non_nulls else "union"
-                    symbol_table[name] = normalized
+                    # Sort to ensure deterministic symbol table regardless of input order
+                    # Result: "array|string"
+                    types = sorted(x for x in raw_type if x != "null")
+                    symbol_table[name] = "|".join(types) if types else "union"
                 else:
                     symbol_table[name] = str(raw_type)
 
@@ -146,7 +145,8 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> l
             # MVP Type Safety: SwarmNode expects a list/array for workload
             elif node.workload_variable in symbol_table:
                 var_type = symbol_table[node.workload_variable]
-                if var_type not in ("array", "list", "unknown"):
+                # Check if 'array' is ANY of the permitted types
+                if "array" not in var_type and "list" not in var_type and "unknown" not in var_type:
                     errors.append(
                         f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', "
                         f"but found type '{var_type}'."
