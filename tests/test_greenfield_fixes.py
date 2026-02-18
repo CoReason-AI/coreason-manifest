@@ -312,6 +312,7 @@ def test_fallback_cycle_complex_policy() -> None:
     errors = _validate_fallback_cycles([node_a, node_b])
     assert any("Fallback cycle detected" in e for e in errors)
 
+
 def test_recursive_schema_repair() -> None:
     """Ensure schema repair traverses nested properties."""
     from coreason_manifest.spec.core.flow import DataSchema
@@ -324,12 +325,13 @@ def test_recursive_schema_repair() -> None:
                 "type": "object",
                 "properties": {
                     "name": {"type": "string", "default": None}  # Invalid
-                }
+                },
             }
-        }
+        },
     }
 
     from unittest.mock import patch
+
     from jsonschema.exceptions import SchemaError
 
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
@@ -353,7 +355,6 @@ def test_validator_definitions_profile_scanning() -> None:
         FlowMetadata,
         Graph,
         GraphFlow,
-        VariableDef,
     )
     from coreason_manifest.utils.validator import validate_flow
 
@@ -389,11 +390,12 @@ def test_validator_definitions_profile_scanning() -> None:
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
         graph=graph,
-        definitions=definitions
+        definitions=definitions,
     )
 
     errors = validate_flow(flow)
     assert any("references missing variable 'role_var'" in e for e in errors)
+
 
 # Fixing NameError in previous run
 # Note: Blackboard, VariableDef, etc. need to be imported or available.
