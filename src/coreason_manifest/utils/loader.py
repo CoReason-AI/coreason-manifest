@@ -72,9 +72,9 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     loader.flatten_mapping(mapping_node)
     mapping = {}
     for key_node, value_node in mapping_node.value:
-        # Cast loader to Any or specific Loader type if construct_object is missing from stub
-        loader_obj = cast("yaml.SafeLoader", loader)
-        key = loader_obj.construct_object(key_node, deep=deep)
+        # construct_object is dynamically added or not typed fully in types-pyyaml
+        # We explicitly ignore no-untyped-call because the stubs are incomplete
+        key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
         if key in mapping:
             raise yaml.constructor.ConstructorError(
                 "while constructing a mapping",
@@ -82,7 +82,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
                 f"found duplicate key {key!r}",
                 key_node.start_mark,
             )
-        mapping[key] = loader_obj.construct_object(value_node, deep=deep)
+        mapping[key] = loader.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
     return mapping
 
 
