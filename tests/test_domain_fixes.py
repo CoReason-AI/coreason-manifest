@@ -46,6 +46,15 @@ metadata:
         load_flow_from_file(str(f))
 
 
+def test_duplicate_keys_raises_error(tmp_path: Any) -> None:
+    """Verifies that the UniqueKeyLoader actually prevents duplicate keys."""
+    p = tmp_path / "dup_direct.yaml"
+    # Create a YAML file with duplicate keys
+    p.write_text("step1: {}\nstep1: {}", encoding="utf-8")
+    with pytest.raises(ValueError, match="found duplicate key"):
+        load_flow_from_file(str(p))
+
+
 def test_construct_mapping_unique_validation() -> None:
     # Test that construct_mapping_unique raises ConstructorError if node is not a MappingNode
     # This covers lines 60-65 in loader.py

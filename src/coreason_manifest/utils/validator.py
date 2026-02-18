@@ -84,7 +84,13 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
             # Heuristic: extract property type if simple, else "unknown"
             props = flow.interface.inputs.json_schema.get("properties", {})
             for name, schema in props.items():
-                symbol_table[name] = schema.get("type", "unknown")
+                raw_type = schema.get("type", "unknown")
+                if isinstance(raw_type, list):
+                    # Heuristic: Grab first non-null type or default to 'union'
+                    normalized = next((x for x in raw_type if x != "null"), "union")
+                    symbol_table[name] = normalized
+                else:
+                    symbol_table[name] = str(raw_type)
 
         errors.extend(_validate_data_flow(nodes_list, symbol_table))
 

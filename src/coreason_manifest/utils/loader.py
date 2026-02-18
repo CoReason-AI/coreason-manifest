@@ -59,7 +59,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     """
     if not isinstance(node, MappingNode):
         # Cast node to Any to access attributes not in base Node but expected by ConstructorError format
-        node_any = cast("Any", node)
+        node_any = cast(Any, node)
         raise yaml.constructor.ConstructorError(
             None,
             None,
@@ -67,14 +67,13 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
             node.start_mark,
         )
 
-    # SOTA Hardening: Strict type casting for robustness (Removed redundant cast as per mypy)
-    # MyPy knows node is MappingNode due to the isinstance check above.
-    mapping_node = node
+    # SOTA Hardening: Strict type casting for robustness
+    mapping_node = cast(MappingNode, node)
     loader.flatten_mapping(mapping_node)
     mapping = {}
     for key_node, value_node in mapping_node.value:
         # Cast loader to Any or specific Loader type if construct_object is missing from stub
-        loader_obj = cast("Any", loader)
+        loader_obj = cast(Any, loader)
         key = loader_obj.construct_object(key_node, deep=deep)
         if key in mapping:
             raise yaml.constructor.ConstructorError(
