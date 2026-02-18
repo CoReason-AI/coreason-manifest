@@ -93,14 +93,35 @@ class DataSchema(BaseModel):
                         raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
         return data
 
-    @staticmethod
-    def _attempt_repair(schema: dict[str, Any]) -> dict[str, Any]:
+    @classmethod
+    def _attempt_repair(cls, schema: dict[str, Any]) -> dict[str, Any]:
         """
-        Heuristics to repair common schema errors.
+        Recursively repairs common schema errors.
         Returns a NEW dict with repairs applied.
         """
         repaired = schema.copy()
 
+        # --- Recursion Step ---
+        # 1. Properties (Objects)
+        if "properties" in repaired and isinstance(repaired["properties"], dict):
+            repaired["properties"] = {
+                k: cls._attempt_repair(v) if isinstance(v, dict) else v
+                for k, v in repaired["properties"].items()
+            }
+
+        # 2. Items (Arrays)
+        if "items" in repaired and isinstance(repaired["items"], dict):
+            repaired["items"] = cls._attempt_repair(repaired["items"])
+
+        # 3. Definitions (Reuse)
+        for def_key in ["definitions", "$defs"]:
+            if def_key in repaired and isinstance(repaired[def_key], dict):
+                repaired[def_key] = {
+                    k: cls._attempt_repair(v) if isinstance(v, dict) else v
+                    for k, v in repaired[def_key].items()
+                }
+
+        # --- Heuristic Repairs (Same logic as before, applied to current node) ---
         # Fix 1: Missing "type": "object" when "properties" exists
         if "properties" in repaired and "type" not in repaired:
             repaired["type"] = "object"

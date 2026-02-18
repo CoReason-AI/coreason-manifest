@@ -261,6 +261,46 @@ def test_schema_repair_extended() -> None:
         assert "default" not in ds.json_schema
 
 
+def test_recursive_schema_repair() -> None:
+    """Verify that schema repair traverses nested properties and arrays."""
+    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        # We need check_schema to fail on the nested structure to trigger repair?
+        # Actually _attempt_repair is called ONLY if check_schema fails at root.
+        # But if the error is deep, check_schema will fail.
+        # The mocked validator should simulate a failure initially.
+        mock_check.side_effect = [SchemaError("Deep Error"), None]
+
+        # Nested structure:
+        # properties -> user -> default "bad_int" for integer
+        # items -> default "bad_bool" for boolean
+        nested_schema: dict[str, Any] = {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "integer",
+                    "default": "bad_int",  # Should be removed
+                },
+                "meta": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean",
+                        "default": "not_bool",  # Should be removed
+                    },
+                },
+            },
+        }
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds = DataSchema(json_schema=nested_schema)
+
+        # Assertions
+        user_schema = ds.json_schema["properties"]["user"]
+        assert "default" not in user_schema
+
+        items_schema = ds.json_schema["properties"]["meta"]["items"]
+        assert "default" not in items_schema
+
+
 # Domain 4: Validator Coverage
 def test_validator_coverage() -> None:
     # Helper to validate a node isolated in a graph with empty blackboard
