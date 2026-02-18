@@ -105,8 +105,7 @@ class DataSchema(BaseModel):
         # 1. Properties (Objects)
         if "properties" in repaired and isinstance(repaired["properties"], dict):
             repaired["properties"] = {
-                k: cls._attempt_repair(v) if isinstance(v, dict) else v
-                for k, v in repaired["properties"].items()
+                k: cls._attempt_repair(v) if isinstance(v, dict) else v for k, v in repaired["properties"].items()
             }
 
         # 2. Items (Arrays)
@@ -117,8 +116,7 @@ class DataSchema(BaseModel):
         for def_key in ["definitions", "$defs"]:
             if def_key in repaired and isinstance(repaired[def_key], dict):
                 repaired[def_key] = {
-                    k: cls._attempt_repair(v) if isinstance(v, dict) else v
-                    for k, v in repaired[def_key].items()
+                    k: cls._attempt_repair(v) if isinstance(v, dict) else v for k, v in repaired[def_key].items()
                 }
 
         # --- Heuristic Repairs (Same logic as before, applied to current node) ---
