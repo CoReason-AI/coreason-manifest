@@ -14,7 +14,7 @@ import importlib.util
 import re
 import warnings
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 import yaml
 from yaml.nodes import MappingNode
@@ -46,6 +46,11 @@ class RuntimeSecurityWarning(RuntimeWarning):
     """Warning for runtime security risks."""
 
 
+class YamlLoaderProtocol(Protocol):
+    def construct_object(self, node: yaml.Node, deep: bool = False) -> Any: ...
+    def flatten_mapping(self, node: MappingNode) -> None: ...
+
+
 class UniqueKeyLoader(yaml.SafeLoader):
     """
     Custom YAML loader that disallows duplicate keys.
@@ -59,7 +64,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     """
     if not isinstance(node, MappingNode):
         # Cast node to Any to access attributes not in base Node but expected by ConstructorError format
-        node_any = cast("Any", node)
+        node_any = cast(Any, node)
         raise yaml.constructor.ConstructorError(
             None,
             None,
@@ -69,12 +74,13 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
 
     # SOTA Hardening: Strict type casting for robustness (isinstance narrows it, but explicit for clarity)
     mapping_node = node
-    loader.flatten_mapping(mapping_node)
+    loader_typed = cast(YamlLoaderProtocol, loader)
+    loader_typed.flatten_mapping(mapping_node)
     mapping = {}
     for key_node, value_node in mapping_node.value:
         # construct_object is dynamically added or not typed fully in types-pyyaml
-        # We explicitly ignore no-untyped-call because the stubs are incomplete
-        key = loader.construct_object(key_node, deep=deep)  # type: ignore[no-untyped-call]
+        # We use a Protocol to enforce the contract and avoid silence
+        key = loader_typed.construct_object(key_node, deep=deep)
         if key in mapping:
             raise yaml.constructor.ConstructorError(
                 "while constructing a mapping",
@@ -82,7 +88,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
                 f"found duplicate key {key!r}",
                 key_node.start_mark,
             )
-        mapping[key] = loader.construct_object(value_node, deep=deep)  # type: ignore[no-untyped-call]
+        mapping[key] = loader_typed.construct_object(value_node, deep=deep)
     return mapping
 
 
