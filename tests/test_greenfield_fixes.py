@@ -521,5 +521,49 @@ def test_validator_union_type_normalization() -> None:
 
     errors = validate_flow(flow)
     # If normalization picked "string", SwarmNode check (expects array) should fail with Type Mismatch.
+    # If normalization picked "string", SwarmNode check (expects array) should fail with Type Mismatch.
     # If it failed to normalize or crashed, we wouldn't get this specific error.
     assert any("Type Mismatch" in e and "expects a list" in e for e in errors)
+
+
+def test_loader_duplicate_keys_error(tmp_path: object) -> None:
+    """Ensure the loader rejects YAML with duplicate keys to prevent ghost logic."""
+    from pathlib import Path
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    path = Path(str(tmp_path))
+    # Create a YAML file with duplicate 'step_1' keys in a GraphFlow (where nodes is a dict)
+    dup_yaml = path / "duplicate.yaml"
+    dup_yaml.write_text(
+        """
+        kind: GraphFlow
+        metadata:
+          name: bad-flow
+          version: "1"
+          description: test
+          tags: []
+        interface:
+          inputs:
+            json_schema: {}
+          outputs:
+            json_schema: {}
+        blackboard: null
+        graph:
+          edges: []
+          nodes:
+            step_1:
+              id: step_1
+              type: placeholder
+              metadata: {}
+            step_1:  # Duplicate Key
+              id: step_1
+              type: placeholder
+              metadata: {}
+        """,
+        encoding="utf-8",
+    )
+
+    # Must raise a constructor error (wrapped in ValueError by our loader)
+    with pytest.raises(ValueError, match="found duplicate key"):
+        load_flow_from_file(str(dup_yaml))

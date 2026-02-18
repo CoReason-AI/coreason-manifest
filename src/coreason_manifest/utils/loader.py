@@ -73,7 +73,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
     mapping = {}
     for key_node, value_node in mapping_node.value:
         # Cast loader to Any or specific Loader type if construct_object is missing from stub
-        loader_obj = cast("Any", loader)
+        loader_obj = cast("yaml.SafeLoader", loader)
         key = loader_obj.construct_object(key_node, deep=deep)
         if key in mapping:
             raise yaml.constructor.ConstructorError(

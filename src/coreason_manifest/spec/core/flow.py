@@ -153,13 +153,18 @@ class DataSchema(BaseModel):
                 # Simplified robust repair:
                 # 1. Integer
                 if "integer" in types and not isinstance(d, int):
-                    try:
-                        new_default = int(d)
-                    except (ValueError, TypeError):
-                        # If it's not int, maybe it matches another type in union?
-                        # If simple type 'integer', then it IS a conflict.
+                    # Prevent bool -> int casting (False becomes 0, True becomes 1)
+                    if isinstance(d, bool):
                         if len(types) == 1:
                             is_conflict = True
+                    else:
+                        try:
+                            new_default = int(d)
+                        except (ValueError, TypeError):
+                            # If it's not int, maybe it matches another type in union?
+                            # If simple type 'integer', then it IS a conflict.
+                            if len(types) == 1:
+                                is_conflict = True
 
                 # 2. String
                 elif "string" in types and not isinstance(d, str):
