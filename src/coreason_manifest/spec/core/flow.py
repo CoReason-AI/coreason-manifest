@@ -188,8 +188,7 @@ class DataSchema(BaseModel):
 
                 # 5. Object & 6. Array
                 elif (
-                    ("object" in types and not isinstance(d, dict))
-                    or ("array" in types and not isinstance(d, list))
+                    ("object" in types and not isinstance(d, dict)) or ("array" in types and not isinstance(d, list))
                 ) and len(types) == 1:
                     is_conflict = True
 
