@@ -230,6 +230,12 @@ def test_schema_repair_extended() -> None:
         ds = DataSchema(json_schema=bad_int_x)
         assert "default" not in ds.json_schema
 
+        # Integer bool conflict (bool is int subclass but should not auto-cast)
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_int_bool: dict[str, Any] = {"type": "integer", "default": True}
+        ds = DataSchema(json_schema=bad_int_bool)
+        assert "default" not in ds.json_schema
+
         # Float mismatch: "12.5" -> 12.5
         mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_float: dict[str, Any] = {"type": "float", "default": "12.5"}

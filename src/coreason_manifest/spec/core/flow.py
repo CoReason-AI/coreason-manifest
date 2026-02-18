@@ -152,7 +152,8 @@ class DataSchema(BaseModel):
 
                 # Simplified robust repair:
                 # 1. Integer
-                if "integer" in types and not isinstance(d, int):
+                # Note: isinstance(True, int) is True, so we must explicitly check for bool
+                if "integer" in types and (not isinstance(d, int) or isinstance(d, bool)):
                     # Prevent bool -> int casting (False becomes 0, True becomes 1)
                     if isinstance(d, bool):
                         if len(types) == 1:
