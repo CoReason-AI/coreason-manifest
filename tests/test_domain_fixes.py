@@ -301,6 +301,36 @@ def test_recursive_schema_repair() -> None:
         assert "default" not in items_schema
 
 
+def test_recursive_schema_repair_definitions() -> None:
+    """Verify that schema repair traverses definitions/$defs."""
+    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        mock_check.side_effect = [SchemaError("Def Error"), None]
+
+        defs_schema: dict[str, Any] = {
+            "definitions": {
+                "shared": {
+                    "type": "integer",
+                    "default": "bad_shared",
+                }
+            },
+            "$defs": {
+                "other": {
+                    "type": "boolean",
+                    "default": "bad_bool",
+                }
+            },
+        }
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds = DataSchema(json_schema=defs_schema)
+
+        shared = ds.json_schema["definitions"]["shared"]
+        assert "default" not in shared
+
+        other = ds.json_schema["$defs"]["other"]
+        assert "default" not in other
+
+
 # Domain 4: Validator Coverage
 def test_validator_coverage() -> None:
     # Helper to validate a node isolated in a graph with empty blackboard
