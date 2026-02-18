@@ -2,7 +2,13 @@
 
 import re
 
-from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import (
+    AnyNode,
+    FlowDefinitions,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
@@ -94,7 +100,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
                 else:
                     symbol_table[name] = str(raw_type)
 
-        errors.extend(_validate_data_flow(nodes_list, symbol_table))
+        errors.extend(_validate_data_flow(nodes_list, symbol_table, flow.definitions))
 
     return errors
 
@@ -107,19 +113,27 @@ def _scan_string_for_vars(text: str) -> set[str]:
     return set(re.findall(r"\{\{\s*([a-zA-Z_][\w\.]*)(?:\s*\|.*?)?\s*\}\}", text))
 
 
-def _scan_agent_templates(node: AgentNode) -> set[str]:
+def _scan_agent_templates(node: AgentNode, definitions: FlowDefinitions | None) -> set[str]:
     """
     Extract variable references from AgentNode fields.
     Scans:
     - Inline profile role/persona
+    - Referenced profiles (from definitions)
     - Metadata values (if strings)
     """
     refs = set()
 
-    # Scan profile if inline
+    # Scan profile
     if isinstance(node.profile, CognitiveProfile):
+        # Inline profile
         refs.update(_scan_string_for_vars(node.profile.role))
         refs.update(_scan_string_for_vars(node.profile.persona))
+    elif isinstance(node.profile, str):
+        # Referenced profile
+        if definitions and node.profile in definitions.profiles:
+            profile_def = definitions.profiles[node.profile]
+            refs.update(_scan_string_for_vars(profile_def.role))
+            refs.update(_scan_string_for_vars(profile_def.persona))
 
     # Scan metadata values
     for val in node.metadata.values():
@@ -129,7 +143,11 @@ def _scan_agent_templates(node: AgentNode) -> set[str]:
     return refs
 
 
-def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> list[str]:
+def _validate_data_flow(
+    nodes: list[AnyNode],
+    symbol_table: dict[str, str],
+    definitions: FlowDefinitions | None,
+) -> list[str]:
     """
     Check if nodes reference variables that exist in the symbol table.
     Also validates type compatibility for specific node types.
@@ -188,7 +206,7 @@ def _validate_data_flow(nodes: list[AnyNode], symbol_table: dict[str, str]) -> l
 
         elif isinstance(node, AgentNode):
             # Scan for prompt template variables
-            refs = _scan_agent_templates(node)
+            refs = _scan_agent_templates(node, definitions)
             errors.extend(
                 f"Data Flow Error: AgentNode '{node.id}' references missing variable '{var}' in templates."
                 for var in refs
