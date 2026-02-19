@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict
+from pydantic import BaseModel, BeforeValidator, ConfigDict, ValidationError
 
 
 class StreamError(BaseModel):
@@ -27,7 +27,7 @@ def _duck_type_stream_error(v: Any) -> Any:
                 # Attempt to cast to StreamError.
                 # Use model_validate to allow Pydantic to handle strict validation.
                 return StreamError.model_validate(v)
-            except Exception:
+            except ValidationError:
                 # If validation fails (e.g. types wrong), we return unmodified
                 # and let the Union fallback to dict[str, Any]
                 pass

@@ -216,7 +216,7 @@ class DataSchema(BaseModel):
                 )
 
             # Directive 1: Exhaustive Draft 7 Schema Traversal (Single Schemas)
-            for key in ["if", "then", "else", "not", "contains", "propertyNames"]:
+            for key in ["if", "then", "else", "not", "contains", "propertyNames", "additionalItems"]:
                 if key in repaired and isinstance(repaired[key], dict):
                     repaired[key] = cls._attempt_repair(
                         repaired[key],
