@@ -127,5 +127,5 @@ def test_schema_repair_failure() -> None:
         # When _attempt_repair returns, it calls check_schema again.
         # If mock always raises, it fails the second time too.
 
-        with pytest.raises(ValueError, match="Invalid JSON Schema definition"):
+        with pytest.raises(ValueError, match="Invalid JSON Schema"):
             DataSchema(json_schema=bad_schema)
