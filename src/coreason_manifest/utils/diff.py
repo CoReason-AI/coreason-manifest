@@ -89,7 +89,7 @@ def _create_mutation(
     }[category]
 
     # Cast to ensure return type matches Union
-    return mutation_cls(op=op, path=path, value=value)  # type: ignore[return-value]
+    return mutation_cls(op=op, path=path, value=value)  # type: ignore[no-any-return]
 
 
 def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
