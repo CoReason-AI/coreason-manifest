@@ -38,6 +38,21 @@ class ManifestIO:
         self.jail = root_dir.resolve()
         self.allow_external = allow_external_refs
 
+    @property
+    def _is_posix(self) -> bool:
+        """Check if the operating system is POSIX-compliant."""
+        return os.name == "posix"
+
+    def _read_from_fd(self, fd: int) -> str:
+        """
+        Read content from a file descriptor.
+        This method takes ownership of the file descriptor via os.fdopen.
+        """
+        # Wrap the descriptor in a Python file object
+        # Note: os.fdopen takes ownership of the fd, so closing 'f' closes 'fd'
+        with os.fdopen(fd, "r", encoding="utf-8") as f:
+            return f.read()
+
     def read_text(self, path: str) -> str:
         """
         Read a file securely using low-level OS calls to prevent TOCTOU.
@@ -85,14 +100,11 @@ class ManifestIO:
             # This guarantees we are checking the actual file we just opened.
             st = os.fstat(fd)
 
-            if os.name == "posix" and (st.st_mode & stat.S_IWOTH):
+            if self._is_posix and (st.st_mode & stat.S_IWOTH):
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
 
             # 4. READ CONTENT
-            # Wrap the descriptor in a Python file object
-            # Note: os.fdopen takes ownership of the fd, so closing 'f' closes 'fd'
-            with os.fdopen(fd, "r", encoding="utf-8") as f:
-                return f.read()
+            return self._read_from_fd(fd)
 
         except Exception:
             # Ensure FD is closed if os.fdopen failed or didn't take ownership

@@ -1,3 +1,4 @@
+import warnings
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
@@ -59,16 +60,169 @@ class DataSchema(BaseModel):
         description="Full JSON Schema (Draft 7) definition for validation.",
     )
 
-    @model_validator(mode="after")
-    def validate_meta_schema(self) -> "DataSchema":
-        if self.json_schema:
-            try:
-                # SOTA: Validates that the dictionary is ACTUALLY a valid JSON Schema.
-                # Catches {"type": "invalid_type"} which the heuristic missed.
-                jsonschema.Draft7Validator.check_schema(self.json_schema)
-            except SchemaError as e:
-                raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
-        return self
+    @model_validator(mode="before")
+    @classmethod
+    def validate_meta_schema(cls, data: Any) -> Any:
+        # Check if we have json_schema key in the input dict
+        if isinstance(data, dict) and "json_schema" in data:
+            schema = data["json_schema"]
+            if schema:
+                try:
+                    # SOTA: Validates that the dictionary is ACTUALLY a valid JSON Schema.
+                    jsonschema.Draft7Validator.check_schema(schema)
+                except SchemaError as e:
+                    # Domain 3: Adaptive Schema Repair
+                    try:
+                        repaired_schema = cls._attempt_repair(schema)
+
+                        # Verify repair worked
+                        jsonschema.Draft7Validator.check_schema(repaired_schema)
+
+                        # Log warning
+                        warnings.warn(
+                            f"Schema repaired automatically. Original error: {e.message}",
+                            category=UserWarning,
+                            stacklevel=2,
+                        )
+
+                        # Update data dict with repaired schema
+                        data["json_schema"] = repaired_schema
+
+                    except Exception:
+                        # Repair failed or verification failed
+                        raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
+        return data
+
+    @classmethod
+    def _attempt_repair(cls, schema: dict[str, Any]) -> dict[str, Any]:
+        """
+        Recursively repairs common schema errors.
+        Returns a NEW dict with repairs applied.
+        """
+        repaired = schema.copy()
+
+        # --- Recursion Step ---
+        # 1. Properties (Objects)
+        if "properties" in repaired and isinstance(repaired["properties"], dict):
+            repaired["properties"] = {
+                k: cls._attempt_repair(v) if isinstance(v, dict) else v for k, v in repaired["properties"].items()
+            }
+
+        # 2. Items (Arrays)
+        if "items" in repaired and isinstance(repaired["items"], dict):
+            repaired["items"] = cls._attempt_repair(repaired["items"])
+
+        # 3. Definitions (Reuse)
+        for def_key in ["definitions", "$defs"]:
+            if def_key in repaired and isinstance(repaired[def_key], dict):
+                repaired[def_key] = {
+                    k: cls._attempt_repair(v) if isinstance(v, dict) else v for k, v in repaired[def_key].items()
+                }
+
+        # --- Heuristic Repairs (Same logic as before, applied to current node) ---
+        # Fix 1: Missing "type": "object" when "properties" exists
+        if "properties" in repaired and "type" not in repaired:
+            repaired["type"] = "object"
+
+        # Fix 2: Conflict between "default" and "type"
+        if "default" in repaired and "type" in repaired:
+            t = repaired["type"]
+            d = repaired["default"]
+
+            # Normalize type to set for consistent union handling
+            types = set(t) if isinstance(t, list) else {t}
+
+            is_conflict = False
+            new_default = d
+
+            # Handle Null Default Logic (SOTA Hardening)
+            if d is None:
+                # Allow null if explicitly nullable or union type includes "null"
+                nullable = repaired.get("nullable", False)
+                is_union_null = "null" in types
+                if not (nullable or is_union_null):
+                    # Invalid null default -> remove it
+                    is_conflict = True
+            else:
+                # Smart Casting for non-null values
+                if "integer" in types and not isinstance(d, int):
+                    try:
+                        new_default = int(d)
+                    except (ValueError, TypeError):
+                        # If integer conversion fails, only conflict if no other type matches
+                        # But for simplicity in repair, if we target int and fail, it's likely bad.
+                        # However, with union types (e.g. string|int), 'abc' is valid.
+                        # We only force-repair if the VALUE doesn't match ANY of the types.
+                        # Since we are doing smart casting, we try to cast to the 'primary' type if apparent.
+                        # SOTA: If multiple types, we shouldn't aggressively cast unless unambiguous.
+                        # But the goal here is to fix BROKEN defaults (e.g. "123" for int).
+                        # We proceed with casting if it matches one of the target types.
+                        is_conflict = True
+
+                # Note: The logic below sequentially tries to cast/validate.
+                # If union type ["string", "integer"], and value is "123":
+                # - integer check tries to cast "123" -> 123.
+                # - string check sees "123" is string.
+                # If we convert to 123, is it valid? Yes.
+                # If we leave as "123", is it valid? Yes.
+                # We should prefer the original if valid.
+                # BUT the original code was aggressive.
+                # Let's check validity against ANY type first.
+
+                # Simplified robust repair:
+                # 1. Integer
+                # Note: isinstance(True, int) is True, so we must explicitly check for bool
+                if "integer" in types and (not isinstance(d, int) or isinstance(d, bool)):
+                    # Prevent bool -> int casting (False becomes 0, True becomes 1)
+                    if isinstance(d, bool):
+                        if len(types) == 1:
+                            is_conflict = True
+                    else:
+                        try:
+                            new_default = int(d)
+                        except (ValueError, TypeError):
+                            # If it's not int, maybe it matches another type in union?
+                            # If simple type 'integer', then it IS a conflict.
+                            if len(types) == 1:
+                                is_conflict = True
+
+                # 2. String
+                elif "string" in types and not isinstance(d, str):
+                    # Don't coerce if we just successfully cast to int above?
+                    # Actually logic flow needs care.
+                    # Reverting to linear checks with 'types' set membership for robustness.
+                    new_default = str(d)
+
+                # 3. Boolean
+                elif "boolean" in types and not isinstance(d, bool):
+                    if str(d).lower() == "true":
+                        new_default = True
+                    elif str(d).lower() == "false":
+                        new_default = False
+                    else:
+                        if len(types) == 1:
+                            is_conflict = True
+
+                # 4. Float
+                elif "float" in types and not isinstance(d, float):
+                    try:
+                        new_default = float(d)
+                    except (ValueError, TypeError):
+                        if len(types) == 1:
+                            is_conflict = True
+
+                # 5. Object & 6. Array
+                elif (
+                    ("object" in types and not isinstance(d, dict)) or ("array" in types and not isinstance(d, list))
+                ) and len(types) == 1:
+                    is_conflict = True
+
+            if is_conflict:
+                del repaired["default"]
+            elif new_default != d:
+                repaired["default"] = new_default
+
+        return repaired
 
 
 class FlowInterface(BaseModel):

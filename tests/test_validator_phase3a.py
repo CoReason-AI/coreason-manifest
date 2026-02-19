@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import (
+    Blackboard,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -12,6 +13,7 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+    VariableDef,
 )
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
@@ -104,11 +106,15 @@ def test_validate_graph_flow_invalid_edges() -> None:
 def test_validate_switch_node_invalid_targets() -> None:
     switch = create_switch_node("switch1", "var", {"case1": "missing1"}, "missing2")
     graph = Graph(nodes={"switch1": switch}, edges=[])
+    blackboard = Blackboard(
+        variables={"var": VariableDef(type="string")},
+        persistence=False,
+    )
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        blackboard=blackboard,
         graph=graph,
     )
     errors = validate_flow(flow)

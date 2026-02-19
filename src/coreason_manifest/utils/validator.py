@@ -1,8 +1,23 @@
 # src/coreason_manifest/utils/validator.py
 
-from coreason_manifest.spec.core.flow import AnyNode, Graph, GraphFlow, LinearFlow
+import re
+
+from coreason_manifest.spec.core.flow import (
+    AnyNode,
+    FlowDefinitions,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    EmergenceInspectorNode,
+    InspectorNode,
+    SwarmNode,
+    SwitchNode,
+)
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
@@ -63,6 +78,143 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
         errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
         errors.extend(_validate_orphan_nodes(flow.graph))
+
+        # 4. Domain 4: Static Data-Flow Analysis
+        # Construct Symbol Table: Map variable name -> type (str)
+        symbol_table: dict[str, str] = {}
+        if flow.blackboard:
+            for name, var_def in flow.blackboard.variables.items():
+                # SOTA Fix: Normalize to lowercase to handle "List", "ARRAY", etc.
+                symbol_table[name] = var_def.type.lower()
+        if flow.interface and flow.interface.inputs.json_schema:
+            # Extract properties from input schema
+            # Heuristic: extract property type if simple, else "unknown"
+            props = flow.interface.inputs.json_schema.get("properties", {})
+            for name, schema in props.items():
+                raw_type = schema.get("type", "unknown")
+                if isinstance(raw_type, list):
+                    # Sort to ensure deterministic symbol table regardless of input order
+                    # Result: "array|string"
+                    types = sorted([x for x in raw_type if x != "null"])
+                    if types:
+                        symbol_table[name] = "|".join(types)
+                    else:
+                        symbol_table[name] = "union"
+                else:
+                    symbol_table[name] = str(raw_type)
+
+        errors.extend(_validate_data_flow(nodes_list, symbol_table, flow.definitions))
+
+    return errors
+
+
+def _scan_string_for_vars(text: str) -> set[str]:
+    """
+    Scan a string for Jinja2-style variable references: {{ var_name }}
+    Handles filters like {{ var | lower }} by stripping them.
+    """
+    return set(re.findall(r"\{\{\s*([a-zA-Z_][\w\.]*)(?:\s*\|.*?)?\s*\}\}", text))
+
+
+def _scan_agent_templates(node: AgentNode, definitions: FlowDefinitions | None) -> set[str]:
+    """
+    Extract variable references from AgentNode fields.
+    Scans:
+    - Inline profile role/persona
+    - Referenced profiles (from definitions)
+    - Metadata values (if strings)
+    """
+    refs = set()
+
+    # Scan profile
+    if isinstance(node.profile, CognitiveProfile):
+        # Inline profile
+        refs.update(_scan_string_for_vars(node.profile.role))
+        refs.update(_scan_string_for_vars(node.profile.persona))
+    elif isinstance(node.profile, str):
+        # Referenced profile
+        if definitions and node.profile in definitions.profiles:
+            profile_def = definitions.profiles[node.profile]
+            refs.update(_scan_string_for_vars(profile_def.role))
+            refs.update(_scan_string_for_vars(profile_def.persona))
+
+    # Scan metadata values
+    for val in node.metadata.values():
+        if isinstance(val, str):
+            refs.update(_scan_string_for_vars(val))
+
+    return refs
+
+
+def _validate_data_flow(
+    nodes: list[AnyNode],
+    symbol_table: dict[str, str],
+    definitions: FlowDefinitions | None,
+) -> list[str]:
+    """
+    Check if nodes reference variables that exist in the symbol table.
+    Also validates type compatibility for specific node types.
+    """
+    errors: list[str] = []
+    available_vars = set(symbol_table.keys())
+
+    for node in nodes:
+        if isinstance(node, SwarmNode):
+            if node.workload_variable not in available_vars:
+                errors.append(
+                    f"Data Flow Error: SwarmNode '{node.id}' references missing variable '{node.workload_variable}'."
+                )
+            # MVP Type Safety: SwarmNode expects a list/array for workload
+            elif node.workload_variable in symbol_table:
+                var_type = symbol_table[node.workload_variable]
+                # Check if 'array' is ANY of the permitted types
+                if "array" not in var_type and "list" not in var_type and "unknown" not in var_type:
+                    errors.append(
+                        f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', "
+                        f"but found type '{var_type}'."
+                    )
+
+            if node.output_variable not in available_vars:
+                errors.append(
+                    f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable '{node.output_variable}'."
+                )
+
+        elif isinstance(node, SwitchNode):
+            if node.variable not in available_vars:
+                errors.append(f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'.")
+
+        elif isinstance(node, (InspectorNode, EmergenceInspectorNode)):
+            if node.target_variable not in available_vars:
+                errors.append(
+                    f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.target_variable}'."
+                )
+            # MVP Type Safety: Regex matching on complex objects is risky
+            elif (
+                node.target_variable in symbol_table
+                and hasattr(node, "mode")
+                and node.mode == "programmatic"
+                and symbol_table[node.target_variable] in ("object", "array")
+            ):
+                var_type = symbol_table[node.target_variable]
+                # Just a warning for now
+                errors.append(
+                    f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
+                    f"variable '{node.target_variable}'. Matching may fail."
+                )
+
+            if node.output_variable not in available_vars:
+                errors.append(
+                    f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable '{node.output_variable}'."
+                )
+
+        elif isinstance(node, AgentNode):
+            # Scan for prompt template variables
+            refs = _scan_agent_templates(node, definitions)
+            errors.extend(
+                f"Data Flow Error: AgentNode '{node.id}' references missing variable '{var}' in templates."
+                for var in refs
+                if var not in available_vars
+            )
 
     return errors
 

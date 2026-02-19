@@ -311,3 +311,386 @@ def test_fallback_cycle_complex_policy() -> None:
 
     errors = _validate_fallback_cycles([node_a, node_b])
     assert any("Fallback cycle detected" in e for e in errors)
+
+
+def test_recursive_schema_repair() -> None:
+    """Ensure schema repair traverses nested properties."""
+    from coreason_manifest.spec.core.flow import DataSchema
+
+    # Schema with nested invalid default (type string, default null)
+    nested_schema = {
+        "type": "object",
+        "properties": {
+            "user": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "default": None}  # Invalid
+                },
+            }
+        },
+    }
+
+    from unittest.mock import patch
+
+    from jsonschema.exceptions import SchemaError
+
+    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds = DataSchema(json_schema=nested_schema)
+
+    # Assert repair happened deep in the tree
+    user_props = ds.json_schema["properties"]["user"]["properties"]
+    assert "default" not in user_props["name"]
+
+
+def test_validator_definitions_profile_scanning() -> None:
+    """Verify that the validator scans profiles stored in definitions."""
+    from coreason_manifest.spec.core.flow import (
+        Blackboard,
+        DataSchema,
+        FlowDefinitions,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+    )
+    from coreason_manifest.utils.validator import validate_flow
+
+    # Define a profile with a variable
+    definitions = FlowDefinitions(
+        profiles={
+            "my-profile": CognitiveProfile(
+                role="Role {{ role_var }}",
+                persona="Persona",
+                reasoning=None,
+                fast_path=None,
+            )
+        }
+    )
+
+    # Agent referencing that profile
+    agent = AgentNode(
+        id="a1",
+        type="agent",
+        metadata={},
+        resilience=None,
+        profile="my-profile",
+        tools=[],
+    )
+
+    # Flow with empty blackboard (so role_var is missing)
+    blackboard = Blackboard(variables={}, persistence=False)
+    graph = Graph(nodes={"a1": agent}, edges=[])
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+        definitions=definitions,
+    )
+
+    errors = validate_flow(flow)
+    assert any("references missing variable 'role_var'" in e for e in errors)
+
+
+# Fixing NameError in previous run
+# Note: Blackboard, VariableDef, etc. need to be imported or available.
+# Since I'm appending, I can't easily add imports at the top.
+# But I can add them inside the function.
+
+
+def test_schema_repair_null_default() -> None:
+    """Test schema repair for null defaults."""
+    from typing import Any
+    from unittest.mock import patch
+
+    from jsonschema.exceptions import SchemaError
+
+    from coreason_manifest.spec.core.flow import DataSchema
+
+    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        # Case 1: Invalid Null Default (type string, default null, not nullable)
+        # Should remove default
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        bad_null: dict[str, Any] = {"type": "string", "default": None}
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds = DataSchema(json_schema=bad_null)
+        assert "default" not in ds.json_schema
+
+        # Case 2: Valid Null Default (nullable: true)
+        # Should keep default
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        valid_nullable: dict[str, Any] = {"type": "string", "default": None, "nullable": True}
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds2 = DataSchema(json_schema=valid_nullable)
+        assert ds2.json_schema["default"] is None
+
+        # Case 3: Valid Null Default (union type)
+        # Should keep default
+        mock_check.side_effect = [SchemaError("Simulated"), None]
+        valid_union: dict[str, Any] = {"type": ["string", "null"], "default": None}
+
+        with pytest.warns(UserWarning, match="Schema repaired"):
+            ds3 = DataSchema(json_schema=valid_union)
+        assert ds3.json_schema["default"] is None
+
+
+def test_jinja2_filter_validation() -> None:
+    """
+    Test that Jinja2 filters in templates are correctly handled by the validator.
+    The validator should strip filters and only check the variable name.
+    """
+    from coreason_manifest.spec.core.flow import (
+        Blackboard,
+        DataSchema,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+        VariableDef,
+    )
+    from coreason_manifest.utils.validator import validate_flow
+
+    agent = AgentNode(
+        id="n1",
+        type="agent",
+        metadata={"desc": "Hello {{ user.name | upper }}"},
+        resilience=None,
+        profile=CognitiveProfile(
+            role="Role",
+            persona="Persona",
+            reasoning=None,
+            fast_path=None,
+        ),
+        tools=[],
+    )
+
+    # Define 'user.name' in blackboard
+    blackboard = Blackboard(variables={"user.name": VariableDef(type="string")}, persistence=False)
+
+    graph = Graph(nodes={"n1": agent}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+    )
+
+    # Should pass validation
+    errors = validate_flow(flow)
+    assert not errors, f"Validation failed with errors: {errors}"
+
+    # Now verify failure if variable is missing
+    agent_fail = AgentNode(
+        id="n1",
+        type="agent",
+        metadata={"desc": "Hello {{ missing | upper }}"},
+        resilience=None,
+        profile=CognitiveProfile(role="R", persona="P", reasoning=None, fast_path=None),
+        tools=[],
+    )
+    graph_fail = Graph(nodes={"n1": agent_fail}, edges=[])
+    flow_fail = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph_fail,
+    )
+
+    errors_fail = validate_flow(flow_fail)
+    assert any("references missing variable 'missing'" in e for e in errors_fail)
+
+
+def test_swarm_type_safety() -> None:
+    """Test MVP type safety for SwarmNode."""
+    # Define a string variable
+    from coreason_manifest.spec.core.flow import (
+        Blackboard,
+        DataSchema,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+        VariableDef,
+    )
+    from coreason_manifest.utils.validator import validate_flow
+
+    blackboard = Blackboard(variables={"text_var": VariableDef(type="string")}, persistence=False)
+
+    # SwarmNode expects a list, but points to a string
+    from coreason_manifest.spec.core.nodes import SwarmNode
+
+    swarm = SwarmNode(
+        id="s1",
+        type="swarm",
+        metadata={},
+        resilience=None,
+        worker_profile="p1",
+        workload_variable="text_var",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="concat",
+        output_variable="out",
+    )
+
+    graph = Graph(nodes={"s1": swarm}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    assert any("Type Mismatch" in e and "expects a list" in e for e in errors)
+
+
+def test_inspector_regex_warning() -> None:
+    """Test warning when InspectorNode uses regex mode on complex types."""
+    from coreason_manifest.spec.core.flow import (
+        Blackboard,
+        DataSchema,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+        VariableDef,
+    )
+    from coreason_manifest.spec.core.nodes import InspectorNode
+    from coreason_manifest.utils.validator import validate_flow
+
+    blackboard = Blackboard(variables={"obj_var": VariableDef(type="object")}, persistence=False)
+
+    inspector = InspectorNode(
+        id="i1",
+        type="inspector",
+        metadata={},
+        resilience=None,
+        target_variable="obj_var",
+        criteria="regex:.*",
+        mode="programmatic",  # This triggers the check
+        pass_threshold=0.5,
+        output_variable="out",
+    )
+
+    graph = Graph(nodes={"i1": inspector}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=blackboard,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    assert any("Type Warning" in e and "complex type" in e for e in errors)
+
+
+def test_validator_union_type_normalization() -> None:
+    """Test that union types (list) in input schema are normalized in symbol table."""
+    from coreason_manifest.spec.core.flow import (
+        DataSchema,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+    )
+    from coreason_manifest.spec.core.nodes import SwarmNode
+    from coreason_manifest.utils.validator import validate_flow
+
+    # Input with union type ["string", "null"] and fallback case ["null"]
+    inputs = DataSchema(
+        json_schema={
+            "type": "object",
+            "properties": {
+                "union_var": {"type": ["string", "null"]},
+                "null_var": {"type": ["null"]},
+            },
+        }
+    )
+
+    # SwarmNode expects list/array, but we give it a string (via union normalization)
+    # This should trigger a Type Mismatch error, confirming normalization worked.
+    swarm = SwarmNode(
+        id="s1",
+        type="swarm",
+        metadata={},
+        resilience=None,
+        worker_profile="p1",
+        workload_variable="union_var",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="concat",
+        output_variable="out",
+    )
+
+    # Inspector targeting "null_var" (normalized to "union") in regex mode (complex type warning logic)
+    # Wait, "union" is not "object" or "array", so it shouldn't trigger warning unless I change the check.
+    # But testing "union" normalization execution path is key.
+
+    graph = Graph(nodes={"s1": swarm}, edges=[])
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=inputs, outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    # If normalization picked "string", SwarmNode check (expects array) should fail with Type Mismatch.
+    # If normalization picked "string", SwarmNode check (expects array) should fail with Type Mismatch.
+    # If it failed to normalize or crashed, we wouldn't get this specific error.
+    assert any("Type Mismatch" in e and "expects a list" in e for e in errors)
+
+
+def test_loader_duplicate_keys_error(tmp_path: object) -> None:
+    """Ensure the loader rejects YAML with duplicate keys to prevent ghost logic."""
+    from pathlib import Path
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    path = Path(str(tmp_path))
+    # Create a YAML file with duplicate 'step_1' keys in a GraphFlow (where nodes is a dict)
+    dup_yaml = path / "duplicate.yaml"
+    dup_yaml.write_text(
+        """
+        kind: GraphFlow
+        metadata:
+          name: bad-flow
+          version: "1"
+          description: test
+          tags: []
+        interface:
+          inputs:
+            json_schema: {}
+          outputs:
+            json_schema: {}
+        blackboard: null
+        graph:
+          edges: []
+          nodes:
+            step_1:
+              id: step_1
+              type: placeholder
+              metadata: {}
+            step_1:  # Duplicate Key
+              id: step_1
+              type: placeholder
+              metadata: {}
+        """,
+        encoding="utf-8",
+    )
+
+    # Must raise a constructor error (wrapped in ValueError by our loader)
+    with pytest.raises(ValueError, match="found duplicate key"):
+        load_flow_from_file(str(dup_yaml))
