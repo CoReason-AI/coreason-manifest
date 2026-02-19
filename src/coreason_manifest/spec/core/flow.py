@@ -1,6 +1,8 @@
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
+import warnings
+
 import jsonschema
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -74,6 +76,13 @@ class DataSchema(BaseModel):
                 # Always repair first to guarantee finite structure and correct types
                 try:
                     repaired_schema = cls._attempt_repair(schema)
+
+                    if repaired_schema != schema:
+                        warnings.warn(
+                            "Schema repaired automatically during pre-flight sanitization.",
+                            category=UserWarning,
+                            stacklevel=2,
+                        )
 
                     # Now validate the safe schema
                     jsonschema.Draft7Validator.check_schema(repaired_schema)
