@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 import yaml
-from jsonschema.exceptions import SchemaError
 
 from coreason_manifest.spec.core.flow import (
     Blackboard,
@@ -175,100 +174,102 @@ def test_agent_loading_log(tmp_path: Any) -> None:
 def test_schema_repair() -> None:
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
         # Case 1: Missing Type
-        mock_check.side_effect = [SchemaError("Simulated"), None]
+        # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
+        mock_check.return_value = None
         bad_schema: dict[str, Any] = {"properties": {"foo": {}}}
 
         # PT031: Simplified warns block
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=bad_schema)
 
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["type"] == "object"
 
         # Case 2: Bad Default
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_schema_2: dict[str, Any] = {"type": "integer", "default": "bad"}
 
         ds = DataSchema(json_schema=bad_schema_2)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
 
 def test_schema_repair_extended() -> None:
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
+        mock_check.return_value = None
+
         # String mismatch: "123" (int) -> "123"
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_str: dict[str, Any] = {"type": "string", "default": 123}
         ds = DataSchema(json_schema=bad_str)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] == "123"
 
         # Boolean mismatch: "true" -> True
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_bool: dict[str, Any] = {"type": "boolean", "default": "true"}
         ds = DataSchema(json_schema=bad_bool)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] is True
 
         # Boolean mismatch: "false" -> False
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_bool_f: dict[str, Any] = {"type": "boolean", "default": "FALSE"}
         ds = DataSchema(json_schema=bad_bool_f)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] is False
 
         # Boolean fail
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_bool_x: dict[str, Any] = {"type": "boolean", "default": "notbool"}
         ds = DataSchema(json_schema=bad_bool_x)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Integer mismatch: "123" -> 123
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_int: dict[str, Any] = {"type": "integer", "default": "123"}
         ds = DataSchema(json_schema=bad_int)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] == 123
 
         # Integer fail
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_int_x: dict[str, Any] = {"type": "integer", "default": "abc"}
         ds = DataSchema(json_schema=bad_int_x)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Integer bool conflict (bool is int subclass but should not auto-cast)
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_int_bool: dict[str, Any] = {"type": "integer", "default": True}
         ds = DataSchema(json_schema=bad_int_bool)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Float mismatch: "12.5" -> 12.5
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_float: dict[str, Any] = {"type": "float", "default": "12.5"}
         ds = DataSchema(json_schema=bad_float)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] == 12.5
 
         # Float fail
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_float_x: dict[str, Any] = {"type": "float", "default": "abc"}
         ds = DataSchema(json_schema=bad_float_x)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Object mismatch
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_obj: dict[str, Any] = {"type": "object", "default": []}
         ds = DataSchema(json_schema=bad_obj)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Array mismatch
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_arr: dict[str, Any] = {"type": "array", "default": {}}
         ds = DataSchema(json_schema=bad_arr)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
 
 def test_recursive_schema_repair() -> None:
     """Verify that schema repair traverses nested properties and arrays."""
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        # We need check_schema to fail on the nested structure to trigger repair?
-        # Actually _attempt_repair is called ONLY if check_schema fails at root.
-        # But if the error is deep, check_schema will fail.
-        # The mocked validator should simulate a failure initially.
-        mock_check.side_effect = [SchemaError("Deep Error"), None]
+        # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
+        mock_check.return_value = None
 
         # Nested structure:
         # properties -> user -> default "bad_int" for integer
@@ -294,6 +295,7 @@ def test_recursive_schema_repair() -> None:
             ds = DataSchema(json_schema=nested_schema)
 
         # Assertions
+        assert isinstance(ds.json_schema, dict)
         user_schema = ds.json_schema["properties"]["user"]
         assert "default" not in user_schema
 
@@ -304,7 +306,8 @@ def test_recursive_schema_repair() -> None:
 def test_recursive_schema_repair_definitions() -> None:
     """Verify that schema repair traverses definitions/$defs."""
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.side_effect = [SchemaError("Def Error"), None]
+        # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
+        mock_check.return_value = None
 
         defs_schema: dict[str, Any] = {
             "definitions": {
@@ -324,6 +327,7 @@ def test_recursive_schema_repair_definitions() -> None:
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=defs_schema)
 
+        assert isinstance(ds.json_schema, dict)
         shared = ds.json_schema["definitions"]["shared"]
         assert "default" not in shared
 

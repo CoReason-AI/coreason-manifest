@@ -10,6 +10,7 @@ def test_flow_interface_schema() -> None:
     output_schema = DataSchema(json_schema={"type": "object", "properties": {"response": {"type": "string"}}})
 
     interface = FlowInterface(inputs=input_schema, outputs=output_schema)
+    assert isinstance(interface.inputs.json_schema, dict)
     assert interface.inputs.json_schema["properties"]["user_query"]["type"] == "string"
 
 
@@ -36,5 +37,7 @@ def test_builder_interface_construction() -> None:
     flow = builder.build()
 
     assert isinstance(flow.interface.inputs, DataSchema)
+    assert isinstance(flow.interface.inputs.json_schema, dict)
     assert flow.interface.inputs.json_schema["properties"]["query"]["type"] == "string"
+    assert isinstance(flow.interface.outputs.json_schema, dict)
     assert flow.interface.outputs.json_schema["properties"]["answer"]["type"] == "string"

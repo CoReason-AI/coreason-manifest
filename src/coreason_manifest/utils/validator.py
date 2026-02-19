@@ -86,7 +86,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
             for name, var_def in flow.blackboard.variables.items():
                 # SOTA Fix: Normalize to lowercase to handle "List", "ARRAY", etc.
                 symbol_table[name] = var_def.type.lower()
-        if flow.interface and flow.interface.inputs.json_schema:
+        if flow.interface and isinstance(flow.interface.inputs.json_schema, dict):
             # Extract properties from input schema
             # Heuristic: extract property type if simple, else "unknown"
             props = flow.interface.inputs.json_schema.get("properties", {})

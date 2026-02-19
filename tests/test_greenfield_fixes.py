@@ -332,15 +332,15 @@ def test_recursive_schema_repair() -> None:
 
     from unittest.mock import patch
 
-    from jsonschema.exceptions import SchemaError
-
+    # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.side_effect = [SchemaError("Simulated"), None]
+        mock_check.return_value = None
 
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=nested_schema)
 
     # Assert repair happened deep in the tree
+    assert isinstance(ds.json_schema, dict)
     user_props = ds.json_schema["properties"]["user"]["properties"]
     assert "default" not in user_props["name"]
 
@@ -408,36 +408,45 @@ def test_schema_repair_null_default() -> None:
     from typing import Any
     from unittest.mock import patch
 
-    from jsonschema.exceptions import SchemaError
-
     from coreason_manifest.spec.core.flow import DataSchema
 
+    # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        mock_check.return_value = None
+
         # Case 1: Invalid Null Default (type string, default null, not nullable)
         # Should remove default
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         bad_null: dict[str, Any] = {"type": "string", "default": None}
 
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=bad_null)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Case 2: Valid Null Default (nullable: true)
         # Should keep default
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         valid_nullable: dict[str, Any] = {"type": "string", "default": None, "nullable": True}
+        # Repair logic shouldn't modify this, so NO warning should be emitted.
+        # But wait, if it doesn't modify, 'repaired == schema'.
+        # So we should expect NO warning.
 
-        with pytest.warns(UserWarning, match="Schema repaired"):
-            ds2 = DataSchema(json_schema=valid_nullable)
+        # The previous test asserted a warning even for valid cases?
+        # "mock_check.side_effect = [SchemaError("Simulated"), None]" implies previous logic ALWAYS
+        # triggered repair path if validation failed.
+        # But if validation (via mock) forced failure, then repair ran.
+        # If repair returns same object, my new code checks `if repaired != schema`.
+        # So for Case 2 and 3, if no repair is needed, no warning is emitted.
+
+        # We must change expectations: NO warning for valid cases.
+        ds2 = DataSchema(json_schema=valid_nullable)
+        assert isinstance(ds2.json_schema, dict)
         assert ds2.json_schema["default"] is None
 
         # Case 3: Valid Null Default (union type)
         # Should keep default
-        mock_check.side_effect = [SchemaError("Simulated"), None]
         valid_union: dict[str, Any] = {"type": ["string", "null"], "default": None}
-
-        with pytest.warns(UserWarning, match="Schema repaired"):
-            ds3 = DataSchema(json_schema=valid_union)
+        ds3 = DataSchema(json_schema=valid_union)
+        assert isinstance(ds3.json_schema, dict)
         assert ds3.json_schema["default"] is None
 
 
