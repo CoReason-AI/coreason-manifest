@@ -1,11 +1,14 @@
 import pytest
 from pydantic import BaseModel, ValidationError
+
 from coreason_manifest.spec.core.flow import DataSchema
+
 
 class Wrapper(BaseModel):
     ds: DataSchema
 
-def test_dataschema_idempotency_via_wrapper():
+
+def test_dataschema_idempotency_via_wrapper() -> None:
     """
     Test line 69: Idempotency Guard.
     When a DataSchema instance is passed to a field expecting DataSchema,
@@ -17,15 +20,18 @@ def test_dataschema_idempotency_via_wrapper():
     assert w.ds is ds
     assert w.ds.json_schema == {"type": "string"}
 
-def test_dataschema_idempotency_direct_call():
+
+def test_dataschema_idempotency_direct_call() -> None:
     """
     Directly call the classmethod to ensure line 69 coverage if Pydantic optimizes it away.
     """
     ds = DataSchema(json_schema={"type": "integer"})
-    result = DataSchema.validate_meta_schema(ds)
+    # mypy complains because validate_meta_schema is wrapped by Pydantic
+    result = DataSchema.validate_meta_schema(ds)  # type: ignore[operator]
     assert result is ds
 
-def test_dataschema_invalid_type():
+
+def test_dataschema_invalid_type() -> None:
     """
     Test line 87: Explicit Type Guarding.
     Ensures that if json_schema is not a dict and not a bool, a ValueError is raised.
@@ -37,7 +43,8 @@ def test_dataschema_invalid_type():
     # The message from line 88 should be present.
     assert "JSON Schema must be a dictionary or a boolean" in str(excinfo.value)
 
-def test_dataschema_invalid_type_string():
+
+def test_dataschema_invalid_type_string() -> None:
     """
     Test line 87 with string (which is not dict or bool).
     """
