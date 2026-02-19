@@ -250,3 +250,50 @@ class GraphFlow(BaseModel):
             return self
         validate_integrity(self.definitions, self.graph.nodes.values())
         return self
+
+    @model_validator(mode="after")
+    def validate_dag(self) -> "GraphFlow":
+        """
+        Pillar 5: DAG Formal Verification.
+        Enforces reachability and structural integrity.
+        """
+        # 1. Edge Integrity (always check)
+        node_ids = set(self.graph.nodes.keys())
+        for i, edge in enumerate(self.graph.edges):
+            if edge.source not in node_ids:
+                raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
+            if edge.target not in node_ids:
+                raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
+
+        if self.graph.entry_point not in node_ids:
+            raise ValueError(f"Entry point '{self.graph.entry_point}' not found in nodes.")
+
+        # 2. Reachability (only if published)
+        if self.status == "published":
+            # BFS Reachability Analysis
+            reachable = {self.graph.entry_point}
+            queue = [self.graph.entry_point]
+
+            # Build adjacency list
+            adj = {nid: [] for nid in node_ids}
+            for edge in self.graph.edges:
+                adj[edge.source].append(edge.target)
+
+            while queue:
+                curr = queue.pop(0)
+                for neighbor in adj[curr]:
+                    if neighbor not in reachable:
+                        reachable.add(neighbor)
+                        queue.append(neighbor)
+
+            unreachable = node_ids - reachable
+            if unreachable:
+                # SOTA: Return exact path of fracture
+                # e.g. /graph/nodes/island_node
+                first_unreachable = sorted(list(unreachable))[0]
+                raise ValueError(
+                    f"Topological fracture: Node '{first_unreachable}' is unreachable from entry point "
+                    f"'{self.graph.entry_point}'. Path: /graph/nodes/{first_unreachable}"
+                )
+
+        return self

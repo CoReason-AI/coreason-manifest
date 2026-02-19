@@ -72,7 +72,30 @@ class Governance(BaseModel):
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:
-        return [d.lower().rstrip(".") for d in v]
+        # SOTA Fix: Enforce strict canonicalization (RFC 8785 / IDNA 2008)
+        # We import here to avoid circular dependency with gatekeeper.py
+        # which imports Flow -> Governance.
+        try:
+            from coreason_manifest.utils.gatekeeper import canonicalize_domain
+        except ImportError:
+            # Fallback if gatekeeper is not yet available (e.g. during partial init)
+            # Duplicate minimal logic or raise?
+            # Ideally we rely on idna directly if needed, but DRY is better.
+            # But gatekeeper depends on Flow which depends on Governance.
+            # This is a hard cycle.
+            # We should probably duplicate the logic or move canonicalize_domain to a common util.
+            # Since I cannot create new files easily, I will duplicate logic using idna directly.
+            import idna
+
+            def canonicalize_domain(d: str) -> str:
+                if not d: return ""
+                d = d.rstrip(".").lower()
+                try:
+                    return idna.encode(d).decode("ascii")
+                except idna.IDNAError:
+                    return d
+
+        return [canonicalize_domain(d) for d in v]
 
 
 class CircuitState(BaseModel):

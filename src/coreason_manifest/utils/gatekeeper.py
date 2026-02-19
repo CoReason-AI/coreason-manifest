@@ -4,6 +4,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
+import idna
+
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 from coreason_manifest.spec.interop.compliance import (
@@ -16,6 +18,34 @@ if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
 
 
+def canonicalize_domain(domain: str) -> str:
+    """
+    Canonicalizes a domain name for strict comparison.
+    1. Strips trailing dot.
+    2. Lowercases.
+    3. IDNA encodes to ASCII (Punycode) using strict IDNA 2008 rules.
+    """
+    if not domain:
+        return ""
+
+    # 1. Strip trailing dot
+    domain = domain.rstrip(".")
+
+    # 2. Lowercase (for IDNA pre-processing)
+    domain = domain.lower()
+
+    try:
+        # 3. IDNA Encode
+        # idna.encode returns bytes, we decode to ascii string
+        return idna.encode(domain).decode("ascii")
+    except idna.IDNAError:
+        # If encoding fails, it's likely an invalid domain.
+        # We return the lowercased version but it won't be punycode.
+        # The caller should handle validation if needed, but for comparison
+        # against valid domains, this is safe (it won't match).
+        return domain
+
+
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
@@ -23,7 +53,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     1. Capability Analysis: Ensures high-risk capabilities are declared.
     2. Topology Check (Red Button Rule): Critical nodes must be guarded by HumanNode.
     3. Swarm Safety: Recursively checks worker profiles in Swarms.
-    4. Domain Policy: Checks tool URLs against allowed domains.
+    4. Domain Policy: Checks tool URLs against allowed domains (Strict Canonicalization).
     5. Topology Analysis: Checks for hazardous utility islands using Tarjan's algorithm.
     """
     reports: list[ComplianceReport] = []
@@ -63,10 +93,13 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             for tool in pack.tools:
                 tool_map[tool.name] = tool
 
-    # 0. Domain Policy Check
-    allowed_domains = []
+    # 0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)
+    allowed_domains_raw = []
     if flow.governance and flow.governance.allowed_domains:
-        allowed_domains = flow.governance.allowed_domains
+        allowed_domains_raw = flow.governance.allowed_domains
+
+    # Canonicalize allowed domains
+    allowed_domains = {canonicalize_domain(d) for d in allowed_domains_raw}
 
     if allowed_domains:
         for tool_obj in tool_map.values():
@@ -76,38 +109,43 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 if "://" not in url_to_parse:
                     url_to_parse = "https://" + url_to_parse
 
-                parsed = urlparse(url_to_parse)
-                domain = parsed.netloc.lower()
-                if ":" in domain:
-                    domain = domain.split(":")[0]
+                try:
+                    parsed = urlparse(url_to_parse)
+                    # Extract domain (netloc), handle port
+                    domain_raw = parsed.netloc
+                    if ":" in domain_raw:
+                        domain_raw = domain_raw.split(":")[0]
 
-                allowed = False
-                for allowed_d in allowed_domains:
-                    if domain == allowed_d or domain.endswith("." + allowed_d):
-                        allowed = True
-                        break
+                    # Strict Canonicalization
+                    domain = canonicalize_domain(domain_raw)
 
-                if allowed:
-                    continue
+                    allowed = False
+                    for allowed_d in allowed_domains:
+                        # Exact match or subdomain
+                        if domain == allowed_d or domain.endswith("." + allowed_d):
+                            allowed = True
+                            break
 
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
-                        severity="violation",
-                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
-                        details={"domain": domain, "tool_name": tool_obj.name},
-                        remediation=RemediationAction(
-                            type="whitelist_domain",
-                            format="json_patch",
-                            # JSON Patch for array update is complex if we don't know the index in tool_packs.
-                            # For simplicity/robustness in this specific case,
-                            # we might just describe the operation or assume appending to governance.
-                            # Governance allowed_domains is a list.
-                            patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
-                            description=f"Add '{domain}' to allowed_domains",
-                        ),
+                    if allowed:
+                        continue
+
+                    reports.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
+                            severity="violation",
+                            message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
+                            details={"domain": domain, "tool_name": tool_obj.name},
+                            remediation=RemediationAction(
+                                type="whitelist_domain",
+                                format="json_patch",
+                                patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
+                                description=f"Add '{domain}' to allowed_domains",
+                            ),
+                        )
                     )
-                )
+                except ValueError:
+                    # Invalid URL parsing
+                    pass
 
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:
@@ -159,8 +197,6 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         break
                 patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
             elif isinstance(flow, GraphFlow):
-                # For graph, we just add the node to the nodes map.
-                # Rewiring edges is complex and context-dependent.
                 patch_ops.append(
                     {"op": "add", "path": f"/graph/nodes/{human_node_id}", "value": human_node.model_dump(mode="json")}
                 )
@@ -193,7 +229,6 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             adj[edge.source].append(edge.target)
 
         # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
-        # While strict SCC isn't solely needed for "utility islands", it's the SOTA mandate for analysis.
         visited: set[str] = set()
         stack: list[str] = []
         on_stack: set[str] = set()
@@ -233,14 +268,12 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 dfs(node_id)
 
         # Build map of node_id -> SCC info
-        # If SCC has size > 1 or (size==1 and self loop), it's a cycle.
         node_cycle_map = {}
         for comp in sccs:
             is_cycle = False
             if len(comp) > 1:
                 is_cycle = True
             elif len(comp) == 1:
-                # Check self-loop
                 node_id_in_comp = comp[0]
                 if node_id_in_comp in adj.get(node_id_in_comp, []):
                     is_cycle = True

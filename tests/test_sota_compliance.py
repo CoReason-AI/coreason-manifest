@@ -31,9 +31,11 @@ from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, comp
 
 def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> GraphFlow:
     entry_point = nodes_list[0].id if nodes_list else "unknown"
+    # Use "draft" status to allow unreachable nodes during testing of Gatekeeper policy.
+    # "published" flows enforce strict DAG reachability via validate_dag.
     return GraphFlow(
         kind="GraphFlow",
-        status="published",
+        status="draft",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=Blackboard(variables={}, persistence=False),
