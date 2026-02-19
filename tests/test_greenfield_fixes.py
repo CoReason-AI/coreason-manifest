@@ -165,7 +165,7 @@ def test_compute_hash_pydantic_exclusion() -> None:
 
 
 class MockDumpable:
-    def model_dump(self, exclude_none: bool = True, mode: str = "json") -> dict[str, int]:
+    def model_dump(self, exclude_none: bool = True, mode: str = "json") -> dict[str, int]:  # noqa: ARG002
         if exclude_none:
             return {"a": 1}
         return {"a": 1}
