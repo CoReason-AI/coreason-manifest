@@ -106,7 +106,7 @@ def test_graph_builder_invalid() -> None:
     # This triggers "Entry point 'missing_entry_point' not found" because
     # build() sets default entry point if empty?
     # Actually, if nodes empty, entry_point defaults to "missing_entry_point"?
-    # No, logic says `entry_point = self._entry_point or (next(iter(self._nodes)) if self._nodes else "missing_entry_point")`
+    # No, logic says `entry_point = self._entry_point or (next(iter(self._nodes)) ... else "missing_entry_point")`
     # So it becomes "missing_entry_point".
     # Then `validate_dag` runs (if published? no, draft).
     # Wait, `validate_dag` checks edge integrity ALWAYS.

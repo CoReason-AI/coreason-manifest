@@ -96,7 +96,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
     # Wait, the code says:
     # # 1. Edge Integrity (always check)
     # So this raises ValidationError on init.
-    with pytest.raises(ValidationError, match="Edge .* target 'missing' not found"):
+    with pytest.raises(ValidationError, match=r"Edge .* target 'missing' not found"):
         GraphFlow(
             kind="GraphFlow",
             metadata=create_metadata(),
