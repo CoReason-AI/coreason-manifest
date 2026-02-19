@@ -1,5 +1,8 @@
 import json
 import logging
+import sys
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +14,17 @@ from coreason_manifest.spec.core.flow import DataSchema
 # Import Stream components directly. If they don't exist, tests should fail.
 from coreason_manifest.spec.interop.stream import PacketContainer, StreamError
 from coreason_manifest.utils.loader import RuntimeSecurityWarning, load_agent_from_ref
+
+
+@contextmanager
+def recursion_limit(limit: int) -> Generator[None, None, None]:
+    old_limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(limit)
+    try:
+        yield
+    finally:
+        sys.setrecursionlimit(old_limit)
+
 
 # ------------------------------------------------------------------------
 # Task 1: Cycle-Aware Topological Repair
@@ -37,38 +51,117 @@ def test_schema_cycle_repair() -> None:
     # The _attempt_repair method is called inside the validator
 
     # We use a large recursion depth to trigger RecursionError if not handled
-    import sys
+    with recursion_limit(2000):
+        try:
+            # Measure time - strictly < 10ms is hard in a test env, but "under 10ms" implies fast.
+            # We focus on functionality first.
+            import time
 
-    sys.setrecursionlimit(2000)
+            start_time = time.perf_counter()
 
-    try:
-        # Measure time - strictly < 10ms is hard in a test env, but "under 10ms" implies fast.
-        # We focus on functionality first.
-        import time
+            # Instantiate DataSchema with cyclic input
+            # Note: DataSchema has a validator that calls _attempt_repair
+            ds = DataSchema(json_schema=cyclic_schema)
 
-        start_time = time.perf_counter()
+            duration = (time.perf_counter() - start_time) * 1000
 
-        # Instantiate DataSchema with cyclic input
-        # Note: DataSchema has a validator that calls _attempt_repair
-        ds = DataSchema(json_schema=cyclic_schema)
+            # Check if repair worked
+            repaired = ds.json_schema
 
-        duration = (time.perf_counter() - start_time) * 1000
+            # Assertions
+            assert duration < 500, f"Repair took too long: {duration:.2f}ms"  # relaxed for CI environment
+            assert "properties" in repaired
+            assert "self" in repaired["properties"]
+            # The cycle should be broken with a $ref
+            assert "$ref" in repaired["properties"]["self"]
+            # SOTA Fix: Check for correct nested path pointer.
+            # Since 'self' points to the root, path is "#"
+            assert repaired["properties"]["self"]["$ref"] == "#"
 
-        # Check if repair worked
-        repaired = ds.json_schema
+        except RecursionError:
+            pytest.fail("RecursionError raised during schema repair")
+        except Exception as e:
+            pytest.fail(f"Unexpected error during schema repair: {e}")
 
-        # Assertions
-        assert duration < 500, f"Repair took too long: {duration:.2f}ms"  # relaxed for CI environment
-        assert "properties" in repaired
-        assert "self" in repaired["properties"]
-        # The cycle should be broken with a $ref
-        assert "$ref" in repaired["properties"]["self"]
-        assert repaired["properties"]["self"]["$ref"] == "#"
 
-    except RecursionError:
-        pytest.fail("RecursionError raised during schema repair")
-    except Exception as e:
-        pytest.fail(f"Unexpected error during schema repair: {e}")
+def test_nested_schema_cycle_repair() -> None:
+    """
+    Assert that a nested cycle is resolved with the correct JSON pointer, not just '#'.
+    """
+    # Create a nested cycle
+    # Root -> wrapper -> inner -> wrapper (cycle)
+    schema: dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "wrapper": {
+                "type": "object",
+                "properties": {"inner": {}},
+            }
+        },
+    }
+    # Create cycle: inner -> wrapper
+    wrapper = schema["properties"]["wrapper"]
+    wrapper["properties"]["inner"] = wrapper
+
+    ds = DataSchema(json_schema=schema)
+    repaired = ds.json_schema
+
+    # Path to wrapper: #/properties/wrapper
+    # Inner points to wrapper.
+    # So inner should be {"$ref": "#/properties/wrapper"}
+
+    inner = repaired["properties"]["wrapper"]["properties"]["inner"]
+    assert "$ref" in inner
+    assert inner["$ref"] == "#/properties/wrapper"
+
+
+def test_schema_dag_memoization() -> None:
+    """
+    Assert that a Directed Acyclic Graph (DAG) with heavy reuse is handled efficiently
+    and does NOT trigger cycle detection.
+    """
+    # Create a reusable leaf node
+    leaf = {"type": "string"}
+
+    # Create a structure that reuses 'leaf' many times
+    # This is a DAG, not a cycle.
+    # Level 1: 10 items pointing to leaf
+    level1 = {"type": "object", "properties": {f"k{i}": leaf for i in range(10)}}
+
+    # Level 2: 10 items pointing to level1
+    level2 = {"type": "object", "properties": {f"k{i}": level1 for i in range(10)}}
+
+    # This structure has 100 paths to 'leaf'.
+    # Without memoization, it visits 'leaf' 100 times.
+    # With memoization, it visits 'leaf' once.
+
+    import time
+
+    start_time = time.perf_counter()
+
+    ds = DataSchema(json_schema=level2)
+
+    duration = (time.perf_counter() - start_time) * 1000
+
+    # Verification
+    # It should be fast
+    assert duration < 200, f"DAG processing took too long: {duration:.2f}ms"
+
+    # It should be valid
+    # And NO $ref should be injected because there are no cycles
+    repaired = ds.json_schema
+
+    # Deep check to ensure no unexpected $ref
+    def check_no_ref(obj: Any) -> bool:
+        if isinstance(obj, dict):
+            if "$ref" in obj:
+                return False
+            for v in obj.values():
+                if not check_no_ref(v):
+                    return False
+        return True
+
+    assert check_no_ref(repaired), "Unexpected $ref found in DAG structure"
 
 
 # ------------------------------------------------------------------------
