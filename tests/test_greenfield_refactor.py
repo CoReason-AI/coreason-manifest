@@ -1,4 +1,3 @@
-import json
 import logging
 import sys
 from collections.abc import Generator
@@ -127,8 +126,6 @@ def test_strict_internal_mutation() -> None:
         error.code = 200  # type: ignore[misc]
 
 
-
-
 def test_schema_error_handling() -> None:
     """
     Test that invalid schema (not fixed by repair) raises ValueError wrapping SchemaError.
@@ -171,8 +168,6 @@ def test_boolean_schema() -> None:
     # False is a valid schema (always fails)
     ds_false = DataSchema(json_schema=False)
     assert ds_false.json_schema is False
-
-
 
 
 def test_schema_error_path_reporting() -> None:

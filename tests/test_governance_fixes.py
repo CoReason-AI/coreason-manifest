@@ -392,3 +392,57 @@ def test_unknown_flow_type() -> None:
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+def test_circuit_breaker_timeout_logic() -> None:
+    """Cover lines 125-126 and 129 in governance.py."""
+    import time
+    from coreason_manifest.spec.core.governance import (
+        CircuitBreaker,
+        CircuitOpenError,
+        CircuitState,
+        check_circuit,
+    )
+
+    policy = CircuitBreaker(error_threshold_count=1, reset_timeout_seconds=2)
+    state_store = {"node_1": CircuitState(state="open", failure_count=1, last_failure_time=time.time())}
+
+    # Case 1: Timeout NOT expired
+    with pytest.raises(CircuitOpenError):
+        check_circuit("node_1", policy, state_store)
+
+    # Case 2: Timeout EXPIRED
+    # Force unwrap optional for test logic, or assert it's not None
+    last_failure = state_store["node_1"].last_failure_time
+    assert last_failure is not None
+    state_store["node_1"].last_failure_time = last_failure - 3
+    check_circuit("node_1", policy, state_store)
+    assert state_store["node_1"].state == "half-open"
+
+
+def test_circuit_breaker_record_failure_coverage() -> None:
+    """Cover initialization and early return in record_failure."""
+    import time
+    from coreason_manifest.spec.core.governance import (
+        CircuitBreaker,
+        CircuitState,
+        record_failure,
+    )
+
+    policy = CircuitBreaker(error_threshold_count=2, reset_timeout_seconds=1)
+    state_store: dict[str, CircuitState] = {}
+
+    # 1. New Node (Init logic)
+    record_failure("new_node", policy, state_store)
+    assert "new_node" in state_store
+    assert state_store["new_node"].failure_count == 1
+
+    # 2. Open Circuit (Early return logic)
+    # Trip it
+    record_failure("new_node", policy, state_store)  # count=2 -> open
+    assert state_store["new_node"].state == "open"
+    last_fail = state_store["new_node"].last_failure_time
+
+    # Call again - should return early and NOT update time or count
+    time.sleep(0.1)
+    record_failure("new_node", policy, state_store)
+    assert state_store["new_node"].last_failure_time == last_fail  # Unchanged

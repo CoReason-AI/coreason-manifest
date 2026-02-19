@@ -390,7 +390,6 @@ def test_mock_factory_coverage() -> None:
     assert no_schema_data["mock_key"] == "mock_value"
 
 
-
 def test_visualizer_layout_coverage() -> None:
     # Test 1: Pure Cycle (No roots) to trigger fallback logic
     # A -> B -> A
@@ -460,3 +459,30 @@ def test_visualizer_layout_coverage() -> None:
     pos_c = next(n["position"]["x"] for n in rf_data_mixed["nodes"] if n["id"] == "c")
     pos_a = next(n["position"]["x"] for n in rf_data_mixed["nodes"] if n["id"] == "a")
     assert pos_a > pos_c
+
+def test_mock_factory_empty_graph() -> None:
+    """Cover MockFactory with empty graph (line 66)."""
+    from coreason_manifest.spec.core.flow import (
+        DataSchema,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+    )
+    from coreason_manifest.utils.mock import MockFactory
+
+    graph_empty = Graph.model_construct(nodes={}, edges=[], entry_point="missing")
+
+    flow = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="Empty", version="1", description="", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph_empty,
+    )
+
+    factory = MockFactory()
+    trace = factory.simulate_trace(flow)
+
+    # Should return empty list (hitting line 66)
+    assert trace == []

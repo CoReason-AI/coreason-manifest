@@ -365,11 +365,7 @@ class NewGraphFlow(BaseFlowBuilder):
         # Determine entry point
         ep = self._entry_point
         if not ep:
-            if self._nodes:
-                # Default to the first added node if strict entry point not set
-                ep = next(iter(self._nodes.keys()))
-            else:
-                ep = "missing_entry_point"
+            ep = next(iter(self._nodes.keys())) if self._nodes else "missing_entry_point"
 
         graph = Graph(nodes=self._nodes, edges=self._edges, entry_point=ep)
 
