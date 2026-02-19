@@ -60,11 +60,6 @@ class DataSchema(BaseModel):
         description="Full JSON Schema (Draft 7) definition for validation.",
     )
 
-    @staticmethod
-    def _escape_ptr(key: str) -> str:
-        """Escape JSON Pointer components per RFC 6901."""
-        return key.replace("~", "~0").replace("/", "~1")
-
     @model_validator(mode="before")
     @classmethod
     def validate_meta_schema(cls, data: Any) -> Any:
@@ -124,6 +119,11 @@ class DataSchema(BaseModel):
                     raise ValueError(f"Invalid JSON Schema definition: {e}") from e
 
         return data
+
+    @staticmethod
+    def _escape_ptr(key: str) -> str:
+        """Escape JSON Pointer components per RFC 6901."""
+        return key.replace("~", "~0").replace("/", "~1")
 
     @classmethod
     def _attempt_repair(

@@ -129,3 +129,16 @@ def test_schema_repair_failure() -> None:
 
         with pytest.raises(ValueError, match="Invalid JSON Schema"):
             DataSchema(json_schema=bad_schema)
+
+
+def test_boolean_schema_validation_error() -> None:
+    """Cover lines 80-86 in flow.py: validate_meta_schema boolean exception path."""
+    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+        # Mock an error with a path
+        error = SchemaError("Boolean schema invalid")
+        error.path = ["nested", "path"]
+        mock_check.side_effect = error
+
+        # We pass a boolean, which triggers lines 74-86
+        with pytest.raises(ValueError, match=r"Invalid JSON Schema at '/nested/path': Boolean schema invalid"):
+            DataSchema(json_schema=True)
