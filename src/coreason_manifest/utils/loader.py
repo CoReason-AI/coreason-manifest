@@ -271,7 +271,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
                         "ruleId": "SEC001",
                         "level": "warning",
                         "message": {"text": "Dynamic Code Execution Detected"},
-                        "locations": [{"physicalLocation": {"artifactLocation": {"uri": str(file_path)}}}],
+                        "locations": [{"physicalLocation": {"artifactLocation": {"uri": file_path.as_uri()}}}],
                         "fingerprints": {"execution_hash": checksum},
                         "properties": {"verification": "AST_PASSED"},
                     }
