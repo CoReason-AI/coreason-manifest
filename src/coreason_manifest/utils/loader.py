@@ -242,43 +242,42 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     module_name = Path(file_ref).stem
 
     # Use context manager to enable jailed imports during spec finding and loading
-    with sandbox_context(root_dir):
-        # SOTA: Enforce thread safety during global sys.modules mutation
-        with _loader_lock:
-            # Track pre-existing modules to identify new ones for cleanup
-            pre_existing_modules = set(sys.modules.keys())
+    # SOTA: Enforce thread safety during global sys.modules mutation
+    with sandbox_context(root_dir), _loader_lock:
+        # Track pre-existing modules to identify new ones for cleanup
+        pre_existing_modules = set(sys.modules.keys())
 
-            # We use spec_from_file_location, but imports INSIDE the module need the finder.
-            spec = importlib.util.spec_from_file_location(module_name, file_path)
-            if spec is None or spec.loader is None:
-                raise ValueError(f"Could not load spec for {file_ref}")
+        # We use spec_from_file_location, but imports INSIDE the module need the finder.
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec is None or spec.loader is None:
+            raise ValueError(f"Could not load spec for {file_ref}")
 
-            module = importlib.util.module_from_spec(spec)
+        module = importlib.util.module_from_spec(spec)
 
-            # We must register in sys.modules for relative imports to work (if any)
-            # and for the module to be valid.
-            sys.modules[module_name] = module
+        # We must register in sys.modules for relative imports to work (if any)
+        # and for the module to be valid.
+        sys.modules[module_name] = module
 
-            try:
-                spec.loader.exec_module(module)
-            except Exception as e:
-                # Cleanup on failure
-                if module_name in sys.modules:
-                    del sys.modules[module_name]
-                # Also cleanup dependencies that might have been loaded
-                new_modules = set(sys.modules.keys()) - pre_existing_modules
-                for mod in new_modules:
-                    if mod in sys.modules:
-                        del sys.modules[mod]
-                raise ValueError(f"Failed to execute agent code in {file_ref}: {e}") from e
-
-            agent_class = getattr(module, class_name, None)
-
-            # SOTA Cleanup: Remove loaded modules to prevent pollution and collision.
+        try:
+            spec.loader.exec_module(module)
+        except Exception as e:
+            # Cleanup on failure
+            if module_name in sys.modules:
+                del sys.modules[module_name]
+            # Also cleanup dependencies that might have been loaded
             new_modules = set(sys.modules.keys()) - pre_existing_modules
             for mod in new_modules:
                 if mod in sys.modules:
                     del sys.modules[mod]
+            raise ValueError(f"Failed to execute agent code in {file_ref}: {e}") from e
+
+        agent_class = getattr(module, class_name, None)
+
+        # SOTA Cleanup: Remove loaded modules to prevent pollution and collision.
+        new_modules = set(sys.modules.keys()) - pre_existing_modules
+        for mod in new_modules:
+            if mod in sys.modules:
+                del sys.modules[mod]
 
     if agent_class is None:
         raise ValueError(f"Agent class '{class_name}' not found in {file_ref}")
