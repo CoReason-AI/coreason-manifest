@@ -402,6 +402,7 @@ def test_validator_definitions_profile_scanning() -> None:
 # Since I'm appending, I can't easily add imports at the top.
 # But I can add them inside the function.
 
+
 def test_schema_repair_null_default() -> None:
     """Test schema repair for null defaults."""
     from typing import Any
@@ -555,7 +556,6 @@ def test_swarm_type_safety() -> None:
 
 def test_inspector_regex_warning() -> None:
     """Test warning when InspectorNode uses regex mode on complex types."""
-    from coreason_manifest.spec.core.nodes import InspectorNode
     from coreason_manifest.spec.core.flow import (
         Blackboard,
         DataSchema,
@@ -565,6 +565,7 @@ def test_inspector_regex_warning() -> None:
         GraphFlow,
         VariableDef,
     )
+    from coreason_manifest.spec.core.nodes import InspectorNode
     from coreason_manifest.utils.validator import validate_flow
 
     blackboard = Blackboard(variables={"obj_var": VariableDef(type="object")}, persistence=False)
@@ -596,7 +597,6 @@ def test_inspector_regex_warning() -> None:
 
 def test_validator_union_type_normalization() -> None:
     """Test that union types (list) in input schema are normalized in symbol table."""
-    from coreason_manifest.spec.core.nodes import SwarmNode
     from coreason_manifest.spec.core.flow import (
         DataSchema,
         FlowInterface,
@@ -604,6 +604,7 @@ def test_validator_union_type_normalization() -> None:
         Graph,
         GraphFlow,
     )
+    from coreason_manifest.spec.core.nodes import SwarmNode
     from coreason_manifest.utils.validator import validate_flow
 
     # Input with union type ["string", "null"] and fallback case ["null"]
