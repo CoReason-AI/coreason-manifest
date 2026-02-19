@@ -74,9 +74,11 @@ def _classify_path(path: str) -> Literal["resource", "topology", "governance"]:
     return "resource"
 
 
-def _create_mutation(op: str, path: str, value: Any = None) -> ChangeOperation:
+def _create_mutation(
+    op: Literal["add", "remove", "replace", "move", "copy", "test"], path: str, value: Any = None
+) -> ChangeOperation:
     category = _classify_path(path)
-    mutation_cls: type[ChangeOperation] = {
+    mutation_cls: Any = {
         "resource": ResourceMutation,
         "topology": TopologyMutation,
         "governance": GovernanceMutation,

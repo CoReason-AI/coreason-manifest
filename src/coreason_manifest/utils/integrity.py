@@ -147,7 +147,7 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     # Fallback for other objects (shouldn't happen with strict types)
     try:
         return dict(node)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as e:
         # Mypy: Returning Any from function declared to return "dict[str, Any]"
         # If conversion fails, we return an empty dict or raise?
         # The prompt "Return as is" causes Mypy error.
@@ -155,7 +155,7 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
         # Returning `node` as is implies `Any`.
         # We'll cast it to satisfy Mypy, knowing it might be invalid at runtime but handled by caller?
         # Or better: raise TypeError since `reconstruct_payload` expects something dict-like.
-        raise TypeError(f"Could not reconstruct payload from {type(node)}")
+        raise TypeError(f"Could not reconstruct payload from {type(node)}") from e
 
 
 def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
