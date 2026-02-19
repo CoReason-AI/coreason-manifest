@@ -460,6 +460,7 @@ def test_visualizer_layout_coverage() -> None:
     pos_a = next(n["position"]["x"] for n in rf_data_mixed["nodes"] if n["id"] == "a")
     assert pos_a > pos_c
 
+
 def test_mock_factory_empty_graph() -> None:
     """Cover MockFactory with empty graph (line 66)."""
     from coreason_manifest.spec.core.flow import (

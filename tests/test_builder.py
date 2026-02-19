@@ -228,6 +228,7 @@ def test_agent_builder() -> None:
 #     with pytest.raises(ValidationError):
 #         builder.with_supervision(retries=3, strategy="fallback")
 
+
 def test_builder_validation_failure() -> None:
     """Cover NewLinearFlow.build() failure (lines 297-298)."""
     from coreason_manifest.spec.core.resilience import FallbackStrategy

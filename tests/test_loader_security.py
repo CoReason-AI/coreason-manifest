@@ -52,6 +52,7 @@ def test_posix_permissions(jail_dir: Path) -> None:
     with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
         loader.load("unsafe.yaml")
 
+
 def test_manifest_io_eloop_enoent() -> None:
     """Cover lines 60-63 in io.py: ELOOP and ENOENT handling."""
     import errno
@@ -94,6 +95,7 @@ def test_loader_ast_import_from_banned(tmp_path: Path) -> None:
 def test_loader_ast_relative_import(tmp_path: Path) -> None:
     """Cover relative imports which have no node.module."""
     import contextlib
+
     from coreason_manifest.utils.loader import load_agent_from_ref
 
     file_path = tmp_path / "relative.py"

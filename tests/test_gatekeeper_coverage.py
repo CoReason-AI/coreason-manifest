@@ -32,10 +32,11 @@ def test_gatekeeper_capability_error_handling() -> None:
     # Should be empty reports as no policies violated (empty caps due to exception)
     assert isinstance(reports, list)
 
+
 def test_gatekeeper_schemeless_url() -> None:
     """Cover line 93 in gatekeeper.py: schemeless URL handling."""
-    from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
     from coreason_manifest.spec.core.governance import Governance
+    from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
     # Define a tool with a schemeless URL
     tool = ToolCapability(
@@ -68,8 +69,8 @@ def test_gatekeeper_schemeless_url() -> None:
 
 def test_gatekeeper_port_stripping() -> None:
     """Cover port stripping logic (line 93)."""
-    from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
     from coreason_manifest.spec.core.governance import Governance
+    from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
     tool = ToolCapability(
         name="port_tool",

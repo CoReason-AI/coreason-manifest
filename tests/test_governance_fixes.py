@@ -393,9 +393,11 @@ def test_unknown_flow_type() -> None:
 if __name__ == "__main__":
     pytest.main([__file__])
 
+
 def test_circuit_breaker_timeout_logic() -> None:
     """Cover lines 125-126 and 129 in governance.py."""
     import time
+
     from coreason_manifest.spec.core.governance import (
         CircuitBreaker,
         CircuitOpenError,
@@ -422,6 +424,7 @@ def test_circuit_breaker_timeout_logic() -> None:
 def test_circuit_breaker_record_failure_coverage() -> None:
     """Cover initialization and early return in record_failure."""
     import time
+
     from coreason_manifest.spec.core.governance import (
         CircuitBreaker,
         CircuitState,
