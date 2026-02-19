@@ -11,6 +11,7 @@
 import ast
 import hashlib
 import importlib.util
+import json
 import re
 import warnings
 from pathlib import Path
@@ -241,15 +242,47 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # Domain 2: Observable Security - Audit Log and Warning
     checksum = hashlib.sha256(source_code.encode("utf-8")).hexdigest()
-    logger.warning(
-        "Dynamic Code Execution Detected",
-        extra={
-            "event": "dynamic_exec",
-            "source": str(file_path),
-            "checksum": checksum,
-            "verification": "AST_PASSED",
-        },
-    )
+
+    # SOTA: Strictly typed SARIF JSON payload
+    sarif_payload = {
+        "version": "2.1.0",
+        "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "coreason-security-audit",
+                        "informationUri": "https://github.com/CoReason-AI/coreason-manifest",
+                        "rules": [
+                            {
+                                "id": "SEC001",
+                                "shortDescription": {"text": "Dynamic Code Execution"},
+                                "fullDescription": {
+                                    "text": "Runtime execution of dynamically loaded code from an external reference."
+                                },
+                                "defaultConfiguration": {"level": "warning"},
+                            }
+                        ],
+                    }
+                },
+                "results": [
+                    {
+                        "ruleId": "SEC001",
+                        "level": "warning",
+                        "message": {"text": "Dynamic Code Execution Detected"},
+                        "locations": [
+                            {"physicalLocation": {"artifactLocation": {"uri": str(file_path)}}}
+                        ],
+                        "fingerprints": {"execution_hash": checksum},
+                        "properties": {"verification": "AST_PASSED"},
+                    }
+                ],
+            }
+        ],
+    }
+
+    # Emit as a JSON string for downstream log aggregation
+    logger.warning(json.dumps(sarif_payload))
 
     warnings.warn(
         f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",

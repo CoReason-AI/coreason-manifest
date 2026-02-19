@@ -70,7 +70,7 @@ class DataSchema(BaseModel):
                 try:
                     # SOTA: Validates that the dictionary is ACTUALLY a valid JSON Schema.
                     jsonschema.Draft7Validator.check_schema(schema)
-                except SchemaError as e:
+                except (SchemaError, RecursionError) as e:
                     # Domain 3: Adaptive Schema Repair
                     try:
                         repaired_schema = cls._attempt_repair(schema)
@@ -79,8 +79,9 @@ class DataSchema(BaseModel):
                         jsonschema.Draft7Validator.check_schema(repaired_schema)
 
                         # Log warning
+                        error_msg = getattr(e, "message", str(e))
                         warnings.warn(
-                            f"Schema repaired automatically. Original error: {e.message}",
+                            f"Schema repaired automatically. Original error: {error_msg}",
                             category=UserWarning,
                             stacklevel=2,
                         )
@@ -88,38 +89,55 @@ class DataSchema(BaseModel):
                         # Update data dict with repaired schema
                         data["json_schema"] = repaired_schema
 
-                    except Exception:
+                    except Exception as repair_err:
                         # Repair failed or verification failed
-                        raise ValueError(f"Invalid JSON Schema definition: {e.message}") from e
+                        error_msg = getattr(e, "message", str(e))
+                        raise ValueError(f"Invalid JSON Schema definition: {error_msg}") from repair_err
         return data
 
     @classmethod
-    def _attempt_repair(cls, schema: dict[str, Any]) -> dict[str, Any]:
+    def _attempt_repair(cls, schema: dict[str, Any], visited_ids: set[int] | None = None) -> dict[str, Any]:
         """
         Recursively repairs common schema errors.
         Returns a NEW dict with repairs applied.
         """
-        repaired = schema.copy()
+        if visited_ids is None:
+            visited_ids = set()
 
-        # --- Recursion Step ---
-        # 1. Properties (Objects)
-        if "properties" in repaired and isinstance(repaired["properties"], dict):
-            repaired["properties"] = {
-                k: cls._attempt_repair(v) if isinstance(v, dict) else v for k, v in repaired["properties"].items()
-            }
+        # Cycle Detection: If we have seen this object ID in the current recursion stack,
+        # it is a cycle. We inject a self-reference to break the loop.
+        schema_id = id(schema)
+        if schema_id in visited_ids:
+            return {"$ref": "#"}
 
-        # 2. Items (Arrays)
-        if "items" in repaired and isinstance(repaired["items"], dict):
-            repaired["items"] = cls._attempt_repair(repaired["items"])
+        visited_ids.add(schema_id)
 
-        # 3. Definitions (Reuse)
-        for def_key in ["definitions", "$defs"]:
-            if def_key in repaired and isinstance(repaired[def_key], dict):
-                repaired[def_key] = {
-                    k: cls._attempt_repair(v) if isinstance(v, dict) else v for k, v in repaired[def_key].items()
+        try:
+            repaired = schema.copy()
+
+            # --- Recursion Step ---
+            # 1. Properties (Objects)
+            if "properties" in repaired and isinstance(repaired["properties"], dict):
+                repaired["properties"] = {
+                    k: cls._attempt_repair(v, visited_ids) if isinstance(v, dict) else v
+                    for k, v in repaired["properties"].items()
                 }
 
-        # --- Heuristic Repairs (Same logic as before, applied to current node) ---
+            # 2. Items (Arrays)
+            if "items" in repaired and isinstance(repaired["items"], dict):
+                repaired["items"] = cls._attempt_repair(repaired["items"], visited_ids)
+
+            # 3. Definitions (Reuse)
+            for def_key in ["definitions", "$defs"]:
+                if def_key in repaired and isinstance(repaired[def_key], dict):
+                    repaired[def_key] = {
+                        k: cls._attempt_repair(v, visited_ids) if isinstance(v, dict) else v
+                        for k, v in repaired[def_key].items()
+                    }
+
+            # --- Heuristic Repairs (Same logic as before, applied to current node) ---
+        finally:
+            visited_ids.remove(schema_id)
         # Fix 1: Missing "type": "object" when "properties" exists
         if "properties" in repaired and "type" not in repaired:
             repaired["type"] = "object"
