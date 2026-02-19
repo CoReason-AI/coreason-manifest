@@ -1,10 +1,7 @@
-import pytest
-from coreason_manifest.utils.diff import compare_flows, ResourceMutation, TopologyMutation, GovernanceMutation, ChangeOperation
-from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, DataSchema
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.engines import StandardReasoning
+from coreason_manifest.spec.core.flow import AnyNode, FlowMetadata, LinearFlow
+from coreason_manifest.spec.core.nodes import AgentNode
+from coreason_manifest.utils.diff import GovernanceMutation, ResourceMutation, TopologyMutation, compare_flows
 
-from coreason_manifest.spec.core.flow import AnyNode
 
 def create_flow(name: str = "test", nodes: list[AnyNode] | None = None) -> LinearFlow:
     return LinearFlow(
@@ -12,6 +9,7 @@ def create_flow(name: str = "test", nodes: list[AnyNode] | None = None) -> Linea
         metadata=FlowMetadata(name=name, version="1.0", description="desc", tags=[]),
         sequence=nodes or [],
     )
+
 
 def test_diff_metadata_resource() -> None:
     f1 = create_flow(name="A")
@@ -25,6 +23,7 @@ def test_diff_metadata_resource() -> None:
     assert op.path == "/metadata/name"
     assert op.value == "B"
 
+
 def test_diff_topology_add_node() -> None:
     n1 = AgentNode(id="a1", type="agent", metadata={}, profile="p1", tools=[])
     f1 = create_flow(nodes=[])
@@ -33,10 +32,11 @@ def test_diff_topology_add_node() -> None:
     diff = compare_flows(f1, f2)
     assert len(diff) == 1
     op = diff[0]
-    assert isinstance(op, TopologyMutation) # /sequence/0 -> Topology?
+    assert isinstance(op, TopologyMutation)  # /sequence/0 -> Topology?
     assert op.op == "add"
     assert op.path == "/sequence/0"
     assert op.value["id"] == "a1"
+
 
 def test_diff_governance() -> None:
     # Helper to add governance
@@ -61,10 +61,10 @@ def test_diff_governance() -> None:
     assert op.path == "/governance/allowed_domains/1"
     assert op.value == "foo.com"
 
+
 def test_diff_list_replace() -> None:
     # List: [A, B] -> [A, C]
     # Expect: replace /1
-    pass
     # Logic in _generate_diff handles list elements recursively if index matches.
     # So index 1 differs.
 

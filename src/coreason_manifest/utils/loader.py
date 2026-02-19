@@ -5,11 +5,11 @@ import importlib.util
 import re
 import sys
 import warnings
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from types import ModuleType
-from typing import Any, Protocol, cast, Generator
+from typing import Any, Protocol, cast
 
 import yaml
 from yaml.nodes import MappingNode
@@ -226,7 +226,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     file_path = (root_dir / file_ref).resolve()
     if not file_path.is_file():
-         raise ValueError(f"Agent file not found: {file_path}")
+        raise ValueError(f"Agent file not found: {file_path}")
 
     # Explicit warning for audit logs
     warnings.warn(

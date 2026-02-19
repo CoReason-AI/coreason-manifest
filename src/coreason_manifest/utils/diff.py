@@ -1,6 +1,6 @@
 # src/coreason_manifest/utils/diff.py
 
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,6 +11,7 @@ class BaseOperation(BaseModel):
     """
     Base class for RFC 6902 JSON Patch operations.
     """
+
     model_config = ConfigDict(extra="ignore", strict=True, frozen=True)
 
     op: Literal["add", "remove", "replace", "move", "copy", "test"]
@@ -21,22 +22,24 @@ class BaseOperation(BaseModel):
 
 class ResourceMutation(BaseOperation):
     """Mutation affecting resources or content (e.g. prompts, profiles)."""
+
     mutation_type: Literal["resource"] = "resource"
 
 
 class TopologyMutation(BaseOperation):
     """Mutation affecting graph structure (nodes, edges)."""
+
     mutation_type: Literal["topology"] = "topology"
 
 
 class GovernanceMutation(BaseOperation):
     """Mutation affecting governance policies."""
+
     mutation_type: Literal["governance"] = "governance"
 
 
 ChangeOperation = Annotated[
-    Union[ResourceMutation, TopologyMutation, GovernanceMutation],
-    Field(discriminator="mutation_type")
+    ResourceMutation | TopologyMutation | GovernanceMutation, Field(discriminator="mutation_type")
 ]
 
 
@@ -54,7 +57,7 @@ def _classify_path(path: str) -> Literal["resource", "topology", "governance"]:
             # Check if it's the node itself or a property
             parts = path.split("/")
             # /graph/nodes/NODE_ID -> Topology (add/remove)
-            if len(parts) == 4: # ['', 'graph', 'nodes', 'id']
+            if len(parts) == 4:  # ['', 'graph', 'nodes', 'id']
                 return "topology"
             # /graph/nodes/id/PROPERTY -> Resource
             return "resource"
@@ -62,7 +65,7 @@ def _classify_path(path: str) -> Literal["resource", "topology", "governance"]:
             # Linear flow
             # /sequence/INDEX
             parts = path.split("/")
-            if len(parts) == 3: # ['', 'sequence', '0']
+            if len(parts) == 3:  # ['', 'sequence', '0']
                 return "topology"
             return "resource"
 
@@ -103,13 +106,9 @@ def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
         for key in sorted(all_keys):
             new_path = f"{path}/{key}"
             if key not in obj1:
-                changes.append(
-                    _create_mutation(op="add", path=new_path, value=obj2[key])
-                )
+                changes.append(_create_mutation(op="add", path=new_path, value=obj2[key]))
             elif key not in obj2:
-                changes.append(
-                    _create_mutation(op="remove", path=new_path)
-                )
+                changes.append(_create_mutation(op="remove", path=new_path))
             else:
                 changes.extend(_generate_diff(new_path, obj1[key], obj2[key]))
     elif isinstance(obj1, list) and isinstance(obj2, list):
@@ -124,23 +123,16 @@ def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
                 changes.extend(_generate_diff(new_path, obj1[i], obj2[i]))
             elif i >= len1:
                 # Add
-                changes.append(
-                    _create_mutation(op="add", path=new_path, value=obj2[i])
-                )
+                changes.append(_create_mutation(op="add", path=new_path, value=obj2[i]))
             else:
                 pass
 
         # Correct handling of removals:
         if len1 > len2:
-            changes.extend(
-                _create_mutation(op="remove", path=f"{path}/{i}")
-                for i in range(len1 - 1, len2 - 1, -1)
-            )
+            changes.extend(_create_mutation(op="remove", path=f"{path}/{i}") for i in range(len1 - 1, len2 - 1, -1))
     else:
         # Primitive replacement
-        changes.append(
-            _create_mutation(op="replace", path=path, value=obj2)
-        )
+        changes.append(_create_mutation(op="replace", path=path, value=obj2))
 
     return changes
 

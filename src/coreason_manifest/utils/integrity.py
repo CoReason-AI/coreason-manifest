@@ -115,11 +115,7 @@ def compute_hash(obj: Any) -> str:
     # The integer check in _prepare_for_canonical_json handles the 1.0 -> 1 case.
 
     json_bytes = json.dumps(
-        sanitized,
-        sort_keys=True,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        allow_nan=False
+        sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
     ).encode("utf-8")
 
     # 3. Hash
@@ -139,10 +135,10 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
 
     # SOTA Fix: Handle list of tuples (as seen in tests)
     if isinstance(node, (list, tuple)):
-         try:
-             return dict(node)
-         except (ValueError, TypeError):
-             pass
+        try:
+            return dict(node)
+        except (ValueError, TypeError):
+            pass
 
     # Fallback for other objects (shouldn't happen with strict types)
     try:

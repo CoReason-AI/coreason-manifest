@@ -1,7 +1,10 @@
 import sys
 from pathlib import Path
+
 import pytest
+
 from coreason_manifest.utils.loader import load_agent_from_ref
+
 
 def test_sandboxed_import_resolution(tmp_path: Path) -> None:
     jail = tmp_path / "jail_sandbox"
@@ -21,6 +24,7 @@ def test_sandboxed_import_resolution(tmp_path: Path) -> None:
     # Ensure jail is STILL not in sys.path
     assert str(jail) not in sys.path
 
+
 def test_sandboxed_import_isolation(tmp_path: Path) -> None:
     jail1 = tmp_path / "jail1"
     jail1.mkdir()
@@ -35,11 +39,11 @@ def test_sandboxed_import_isolation(tmp_path: Path) -> None:
     # Load from jail1
     agent1_cls = load_agent_from_ref("agent.py:Agent", root_dir=jail1)
     # Use getattr because Mypy sees agent1_cls as 'type' which doesn't have 'val'
-    assert getattr(agent1_cls, "val") == 1
+    assert getattr(agent1_cls, "val") == 1  # noqa: B009
 
     # Load from jail2
     try:
         agent2_cls = load_agent_from_ref("agent.py:Agent", root_dir=jail2)
-        assert getattr(agent2_cls, "val") == 2
+        assert getattr(agent2_cls, "val") == 2  # noqa: B009
     except AssertionError:
         pytest.fail("Sandboxed isolation failed: Module collision in sys.modules")
