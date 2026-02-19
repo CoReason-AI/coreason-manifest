@@ -13,6 +13,7 @@ import hashlib
 import importlib.util
 import json
 import re
+import sys
 import warnings
 from pathlib import Path
 from typing import Any, Protocol, cast
@@ -281,6 +282,8 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # Emit as a JSON string for downstream log aggregation
     logger.warning(json.dumps(sarif_payload))
+    sys.stderr.write(f"⚠️ SECURITY WARNING: Executing code from {file_ref}\n")
+    sys.stderr.flush()
 
     warnings.warn(
         f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",

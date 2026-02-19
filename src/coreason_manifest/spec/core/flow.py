@@ -1,3 +1,4 @@
+import copy
 import warnings
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
@@ -153,7 +154,7 @@ class DataSchema(BaseModel):
 
         # Directive 2: Graph Memoization
         if schema_id in memo:
-            return memo[schema_id].copy()
+            return copy.deepcopy(memo[schema_id])
 
         # Track path for ancestors (Cycle Detection)
         path_map[schema_id] = current_path
