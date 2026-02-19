@@ -340,6 +340,7 @@ def test_recursive_schema_repair() -> None:
             ds = DataSchema(json_schema=nested_schema)
 
     # Assert repair happened deep in the tree
+    assert isinstance(ds.json_schema, dict)
     user_props = ds.json_schema["properties"]["user"]["properties"]
     assert "default" not in user_props["name"]
 
@@ -419,6 +420,7 @@ def test_schema_repair_null_default() -> None:
 
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=bad_null)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Case 2: Valid Null Default (nullable: true)
@@ -437,12 +439,14 @@ def test_schema_repair_null_default() -> None:
 
         # We must change expectations: NO warning for valid cases.
         ds2 = DataSchema(json_schema=valid_nullable)
+        assert isinstance(ds2.json_schema, dict)
         assert ds2.json_schema["default"] is None
 
         # Case 3: Valid Null Default (union type)
         # Should keep default
         valid_union: dict[str, Any] = {"type": ["string", "null"], "default": None}
         ds3 = DataSchema(json_schema=valid_union)
+        assert isinstance(ds3.json_schema, dict)
         assert ds3.json_schema["default"] is None
 
 

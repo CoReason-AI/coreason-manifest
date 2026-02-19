@@ -70,6 +70,7 @@ def test_schema_cycle_repair() -> None:
 
             # Assertions
             assert duration < 500, f"Repair took too long: {duration:.2f}ms"  # relaxed for CI environment
+            assert isinstance(repaired, dict)
             assert "properties" in repaired
             assert "self" in repaired["properties"]
             # The cycle should be broken with a $ref
@@ -110,6 +111,7 @@ def test_nested_schema_cycle_repair() -> None:
     # Inner points to wrapper.
     # So inner should be {"$ref": "#/properties/wrapper"}
 
+    assert isinstance(repaired, dict)
     inner = repaired["properties"]["wrapper"]["properties"]["inner"]
     assert "$ref" in inner
     assert inner["$ref"] == "#/properties/wrapper"
@@ -196,6 +198,7 @@ def test_rfc6901_escaping() -> None:
     # The 'self' property inside 'auth/token' points back to 'auth/token'.
     # So expected $ref is "#/properties/auth~1token"
 
+    assert isinstance(repaired, dict)
     self_ref = repaired["properties"]["auth/token"]["properties"]["self"]
     assert "$ref" in self_ref
     # Verify strict RFC 6901 escaping
@@ -218,6 +221,7 @@ def test_combinator_traversal() -> None:
 
     ds_any = DataSchema(json_schema=schema_anyof)
     # Recursion check: #/anyOf/0 points to #
+    assert isinstance(ds_any.json_schema, dict)
     assert ds_any.json_schema["anyOf"][0]["$ref"] == "#"
 
     # 2. patternProperties cycle
@@ -228,6 +232,7 @@ def test_combinator_traversal() -> None:
     ds_pattern = DataSchema(json_schema=schema_pattern)
     # Recursion check: #/patternProperties/^foo points to #
     # Note: ^ does not need escaping.
+    assert isinstance(ds_pattern.json_schema, dict)
     assert ds_pattern.json_schema["patternProperties"]["^foo"]["$ref"] == "#"
 
     # 3. items (list) cycle
@@ -239,6 +244,7 @@ def test_combinator_traversal() -> None:
     schema_items_list["items"][0] = schema_items_list
 
     ds_items_list = DataSchema(json_schema=schema_items_list)
+    assert isinstance(ds_items_list.json_schema, dict)
     assert ds_items_list.json_schema["items"][0]["$ref"] == "#"
 
 
@@ -400,6 +406,7 @@ def test_additional_properties_traversal() -> None:
     # Path: #/additionalProperties
     # Inner properties path: #/additionalProperties/properties/cycle
     # Cycle points to #
+    assert isinstance(repaired, dict)
     assert repaired["additionalProperties"]["properties"]["cycle"]["$ref"] == "#"
 
 
@@ -439,11 +446,11 @@ def test_boolean_schema() -> None:
     Test support for boolean schemas (Draft 7 allows true/false).
     """
     # True is a valid schema (always passes)
-    ds_true = DataSchema(json_schema=True)  # type: ignore[arg-type]
+    ds_true = DataSchema(json_schema=True)
     assert ds_true.json_schema is True
 
     # False is a valid schema (always fails)
-    ds_false = DataSchema(json_schema=False)  # type: ignore[arg-type]
+    ds_false = DataSchema(json_schema=False)
     assert ds_false.json_schema is False
 
 
@@ -463,6 +470,7 @@ def test_draft7_keywords_traversal() -> None:
     repaired = ds.json_schema
 
     # Path: #/not/if
+    assert isinstance(repaired, dict)
     assert repaired["not"]["if"]["$ref"] == "#"
 
 
@@ -483,6 +491,7 @@ def test_dependencies_traversal() -> None:
     repaired = ds.json_schema
 
     # Path: #/dependencies/foo
+    assert isinstance(repaired, dict)
     assert repaired["dependencies"]["foo"]["$ref"] == "#"
     # Ensure list wasn't touched/broken
     assert repaired["dependencies"]["bar"] == ["a", "b"]

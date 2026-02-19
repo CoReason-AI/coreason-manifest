@@ -182,12 +182,14 @@ def test_schema_repair() -> None:
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=bad_schema)
 
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["type"] == "object"
 
         # Case 2: Bad Default
         bad_schema_2: dict[str, Any] = {"type": "integer", "default": "bad"}
 
         ds = DataSchema(json_schema=bad_schema_2)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
 
@@ -199,56 +201,67 @@ def test_schema_repair_extended() -> None:
         # String mismatch: "123" (int) -> "123"
         bad_str: dict[str, Any] = {"type": "string", "default": 123}
         ds = DataSchema(json_schema=bad_str)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] == "123"
 
         # Boolean mismatch: "true" -> True
         bad_bool: dict[str, Any] = {"type": "boolean", "default": "true"}
         ds = DataSchema(json_schema=bad_bool)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] is True
 
         # Boolean mismatch: "false" -> False
         bad_bool_f: dict[str, Any] = {"type": "boolean", "default": "FALSE"}
         ds = DataSchema(json_schema=bad_bool_f)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] is False
 
         # Boolean fail
         bad_bool_x: dict[str, Any] = {"type": "boolean", "default": "notbool"}
         ds = DataSchema(json_schema=bad_bool_x)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Integer mismatch: "123" -> 123
         bad_int: dict[str, Any] = {"type": "integer", "default": "123"}
         ds = DataSchema(json_schema=bad_int)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] == 123
 
         # Integer fail
         bad_int_x: dict[str, Any] = {"type": "integer", "default": "abc"}
         ds = DataSchema(json_schema=bad_int_x)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Integer bool conflict (bool is int subclass but should not auto-cast)
         bad_int_bool: dict[str, Any] = {"type": "integer", "default": True}
         ds = DataSchema(json_schema=bad_int_bool)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Float mismatch: "12.5" -> 12.5
         bad_float: dict[str, Any] = {"type": "float", "default": "12.5"}
         ds = DataSchema(json_schema=bad_float)
+        assert isinstance(ds.json_schema, dict)
         assert ds.json_schema["default"] == 12.5
 
         # Float fail
         bad_float_x: dict[str, Any] = {"type": "float", "default": "abc"}
         ds = DataSchema(json_schema=bad_float_x)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Object mismatch
         bad_obj: dict[str, Any] = {"type": "object", "default": []}
         ds = DataSchema(json_schema=bad_obj)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
         # Array mismatch
         bad_arr: dict[str, Any] = {"type": "array", "default": {}}
         ds = DataSchema(json_schema=bad_arr)
+        assert isinstance(ds.json_schema, dict)
         assert "default" not in ds.json_schema
 
 
@@ -282,6 +295,7 @@ def test_recursive_schema_repair() -> None:
             ds = DataSchema(json_schema=nested_schema)
 
         # Assertions
+        assert isinstance(ds.json_schema, dict)
         user_schema = ds.json_schema["properties"]["user"]
         assert "default" not in user_schema
 
@@ -313,6 +327,7 @@ def test_recursive_schema_repair_definitions() -> None:
         with pytest.warns(UserWarning, match="Schema repaired"):
             ds = DataSchema(json_schema=defs_schema)
 
+        assert isinstance(ds.json_schema, dict)
         shared = ds.json_schema["definitions"]["shared"]
         assert "default" not in shared
 
