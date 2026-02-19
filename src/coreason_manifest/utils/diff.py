@@ -78,12 +78,15 @@ def _create_mutation(
     op: Literal["add", "remove", "replace", "move", "copy", "test"], path: str, value: Any = None
 ) -> ChangeOperation:
     category = _classify_path(path)
-    mutation_cls: Any = {
+    # Explicit typing to satisfy Mypy
+    mutation_cls = {
         "resource": ResourceMutation,
         "topology": TopologyMutation,
         "governance": GovernanceMutation,
     }[category]
-    return mutation_cls(op=op, path=path, value=value)
+
+    # Cast to ensure return type matches Union
+    return mutation_cls(op=op, path=path, value=value)  # type: ignore[return-value]
 
 
 def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:

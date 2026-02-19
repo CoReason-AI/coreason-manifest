@@ -34,6 +34,7 @@ def test_sandboxed_import_isolation(tmp_path: Path) -> None:
 
     # Load from jail1
     agent1_cls = load_agent_from_ref("agent.py:Agent", root_dir=jail1)
+    # Use getattr because Mypy sees agent1_cls as 'type' which doesn't have 'val'
     assert getattr(agent1_cls, "val") == 1
 
     # Load from jail2
