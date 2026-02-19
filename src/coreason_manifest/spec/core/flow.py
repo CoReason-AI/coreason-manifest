@@ -64,6 +64,10 @@ class DataSchema(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_meta_schema(cls, data: Any) -> Any:
+        # Idempotency Guard: Prevent crashes if data is already instantiated
+        if isinstance(data, cls):
+            return data
+
         # Check if we have json_schema key in the input dict
         if isinstance(data, dict) and "json_schema" in data:
             schema = data["json_schema"]
@@ -75,49 +79,42 @@ class DataSchema(BaseModel):
                     return data
                 except SchemaError as e:
                     error_msg = getattr(e, "message", str(e)).split("\n")[0]
-                    # Format path context if available
-                    path_str = ""
-                    if hasattr(e, "path") and e.path:
-                        path_str = f" at '/{'/'.join(map(str, e.path))}'"
+                    path_str = f" at '/{'/'.join(map(str, e.path))}'" if hasattr(e, "path") and e.path else ""
                     raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
 
-            if schema:
-                # Directive 4: Immutability Safety
-                # Create a mutable copy of the input dictionary if needed
-                if isinstance(data, dict):
-                    data = data.copy()
+            # Directive 1: Explicit Type Guarding & Falsy Tolerance (REPLACES `if schema:`)
+            if not isinstance(schema, dict):
+                raise ValueError("JSON Schema must be a dictionary or a boolean.")
 
-                # Directive 3: Pre-Flight Sanitization
-                # Always repair first to guarantee finite structure and correct types
-                try:
-                    repaired_schema = cls._attempt_repair(schema)
+            # Directive 4: Immutability Safety
+            # Create a mutable copy of the input dictionary to avoid Frozen mutations
+            data = data.copy()
 
-                    if repaired_schema != schema:
-                        warnings.warn(
-                            "Schema repaired automatically during pre-flight sanitization.",
-                            category=UserWarning,
-                            stacklevel=2,
-                        )
+            # Directive 3: Pre-Flight Sanitization
+            try:
+                repaired_schema = cls._attempt_repair(schema)
 
-                    # Now validate the safe schema
-                    jsonschema.Draft7Validator.check_schema(repaired_schema)
+                if repaired_schema != schema:
+                    warnings.warn(
+                        "Schema repaired automatically during pre-flight sanitization.",
+                        category=UserWarning,
+                        stacklevel=2,
+                    )
 
-                    # Update data with repaired schema
-                    data["json_schema"] = repaired_schema
+                # Now validate the safe schema
+                jsonschema.Draft7Validator.check_schema(repaired_schema)
 
-                except SchemaError as e:
-                    # Directive 3: Robust Error Unwrapping
-                    # Extract only the first line or message to prevent log bloat
-                    error_msg = getattr(e, "message", str(e)).split("\n")[0]
+                # Update data with repaired schema
+                data["json_schema"] = repaired_schema
 
-                    # Directive 4: High-Fidelity Error Context
-                    path_str = ""
-                    if hasattr(e, "path") and e.path:
-                        path_str = f" at '/{'/'.join(map(str, e.path))}'"
-
-                    raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
-                except Exception as e:
-                    raise ValueError(f"Invalid JSON Schema definition: {e}") from e
+            except SchemaError as e:
+                # Directive 3: Robust Error Unwrapping
+                error_msg = getattr(e, "message", str(e)).split("\n")[0]
+                # Directive 4: High-Fidelity Error Context
+                path_str = f" at '/{'/'.join(map(str, e.path))}'" if hasattr(e, "path") and e.path else ""
+                raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
+            except Exception as e:
+                raise ValueError(f"Invalid JSON Schema definition: {e}") from e
 
         return data
 
