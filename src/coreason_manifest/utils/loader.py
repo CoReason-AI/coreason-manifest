@@ -8,14 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import ast
-import hashlib
 import importlib.util
-import json
 import re
-import sys
 import warnings
 from pathlib import Path
+from types import ModuleType
 from typing import Any, Protocol, cast
 
 import yaml
@@ -23,25 +20,8 @@ from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
-from coreason_manifest.utils.logger import logger
 
 __all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
-
-
-BANNED_IMPORTS = (
-    "os",
-    "subprocess",
-    "sys",
-    "importlib",
-    "pickle",
-    "shutil",
-    "socket",
-    "requests",
-    "urllib",
-    "inspect",
-)
-
-BANNED_CALLS = ("__import__", "eval", "exec", "compile")
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
@@ -181,42 +161,10 @@ def load_flow_from_file(
     raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
 
 
-def _validate_ast(source_code: str, filename: str) -> None:
-    """
-    Scan source code for banned imports and dangerous calls using AST.
-    """
-    try:
-        tree = ast.parse(source_code, filename=filename)
-    except SyntaxError as e:  # pragma: no cover
-        raise ValueError(f"Syntax error in {filename}: {e}") from e
-
-    for node in ast.walk(tree):
-        # 1. Import Check
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                root_pkg = alias.name.split(".")[0]
-                if root_pkg in BANNED_IMPORTS:
-                    raise SecurityViolationError(f"Banned import '{alias.name}' detected in {filename}")
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:  # pragma: no cover
-                root_pkg = node.module.split(".")[0]
-                if root_pkg in BANNED_IMPORTS:
-                    raise SecurityViolationError(f"Banned import '{node.module}' detected in {filename}")
-
-        # 2. Call Check (Ban __import__, eval, exec, compile)
-        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in BANNED_CALLS:
-            raise SecurityViolationError(f"Banned call '{node.func.id}' detected in {filename}")
-
-        # 3. Attribute Check (Gadget Chain)
-        elif isinstance(node, ast.Attribute) and node.attr == "__subclasses__":
-            raise SecurityViolationError(f"Banned attribute access '__subclasses__' detected in {filename}")
-
-
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     """
     Load an Agent class from a Python file reference (file.py:ClassName).
-    Enforces security checks (AST validation, world-writable check).
-    Avoids sys.path pollution and sys.modules injection.
+    WARNING: Executes arbitrary code. Ensure source is trusted.
 
     Args:
         reference: string in format "path/to/file.py:ClassName"
@@ -238,53 +186,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     file_path = (root_dir / file_ref).resolve()
 
-    # AST Validation
-    _validate_ast(source_code, str(file_path))
-
-    # Domain 2: Observable Security - Audit Log and Warning
-    checksum = hashlib.sha256(source_code.encode("utf-8")).hexdigest()
-
-    # SOTA: Strictly typed SARIF JSON payload
-    sarif_payload = {
-        "version": "2.1.0",
-        "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
-        "runs": [
-            {
-                "tool": {
-                    "driver": {
-                        "name": "coreason-security-audit",
-                        "informationUri": "https://github.com/CoReason-AI/coreason-manifest",
-                        "rules": [
-                            {
-                                "id": "SEC001",
-                                "shortDescription": {"text": "Dynamic Code Execution"},
-                                "fullDescription": {
-                                    "text": "Runtime execution of dynamically loaded code from an external reference."
-                                },
-                                "defaultConfiguration": {"level": "warning"},
-                            }
-                        ],
-                    }
-                },
-                "results": [
-                    {
-                        "ruleId": "SEC001",
-                        "level": "warning",
-                        "message": {"text": "Dynamic Code Execution Detected"},
-                        "locations": [{"physicalLocation": {"artifactLocation": {"uri": file_path.as_uri()}}}],
-                        "fingerprints": {"execution_hash": checksum},
-                        "properties": {"verification": "AST_PASSED"},
-                    }
-                ],
-            }
-        ],
-    }
-
-    # Emit as a JSON string for downstream log aggregation
-    logger.warning(json.dumps(sarif_payload))
-    sys.stderr.write(f"⚠️ SECURITY WARNING: Executing code from {file_ref}\n")
-    sys.stderr.flush()
-
+    # Explicit warning for audit logs
     warnings.warn(
         f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",
         category=RuntimeSecurityWarning,
@@ -293,68 +195,16 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # Dynamic Loading without sys.modules/sys.path side effects
     spec = importlib.util.spec_from_file_location(file_ref, file_path)
-    if spec is None or spec.loader is None:  # pragma: no cover
-        raise ValueError(f"Could not create module spec for {file_ref}")
+    if spec is None:  # pragma: no cover
+        # Should not happen if file exists, but for safety
+        pass
 
-    module = importlib.util.module_from_spec(spec)
-
-    # Set metadata manually for correct behavior in exec
+    module = ModuleType(Path(file_ref).stem)
     module.__file__ = str(file_path)
-    module.__name__ = spec.name or "coreason_agent"
-
-    # Restrict builtins in the module's dict before execution
-    safe_builtins = {
-        "__build_class__": __build_class__,
-        "__name__": "__main__",
-        "__import__": __import__,  # Required for import statements
-        "abs": abs,
-        "all": all,
-        "any": any,
-        "bool": bool,
-        "dict": dict,
-        "divmod": divmod,
-        "enumerate": enumerate,
-        "filter": filter,
-        "float": float,
-        "getattr": getattr,
-        "hasattr": hasattr,
-        "hash": hash,
-        "id": id,
-        "int": int,
-        "isinstance": isinstance,
-        "issubclass": issubclass,
-        "iter": iter,
-        "len": len,
-        "list": list,
-        "map": map,
-        "max": max,
-        "min": min,
-        "next": next,
-        "object": object,
-        "pow": pow,
-        "print": print,
-        "property": property,
-        "range": range,
-        "repr": repr,
-        "reversed": reversed,
-        "round": round,
-        "set": set,
-        "slice": slice,
-        "sorted": sorted,
-        "str": str,
-        "sum": sum,
-        "super": super,
-        "tuple": tuple,
-        "type": type,
-        "zip": zip,
-    }
-
-    module.__dict__["__builtins__"] = safe_builtins
 
     try:
-        # Execute the module manually with restricted globals
-        code = compile(source_code, str(file_path), "exec")
-        exec(code, module.__dict__)
+        # SOTA Fix: Full Privileged Execution (No Sandbox Illusion)
+        exec(compile(source_code, str(file_path), "exec"), module.__dict__)
     except Exception as e:
         raise ValueError(f"Failed to execute agent code in {file_ref}: {e}") from e
 
@@ -365,4 +215,4 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     if isinstance(agent_class, type):
         return agent_class
 
-    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")  # pragma: no cover
+    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")

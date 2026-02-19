@@ -100,7 +100,9 @@ def test_langchain_adapter() -> None:
 
     # GraphFlow
     graph = Graph(
-        nodes={"agent1": node1, "agent2": node2}, edges=[Edge(source="agent1", target="agent2", condition="success")]
+        nodes={"agent1": node1, "agent2": node2},
+        edges=[Edge(source="agent1", target="agent2", condition="success")],
+        entry_point="agent1",
     )
     graph_flow = GraphFlow(
         kind="GraphFlow",

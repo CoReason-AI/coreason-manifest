@@ -127,7 +127,7 @@ def test_graph_flow_to_mermaid() -> None:
         Edge(source="decision", target="start"),  # Case: retry (implicit via switch logic)
     ]
 
-    graph = Graph(nodes=nodes, edges=edges)
+    graph = Graph(nodes=nodes, edges=edges, entry_point="start")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -168,7 +168,7 @@ def test_switch_default_path() -> None:
         Edge(source="decision", target="fallback"),  # Case: default
     ]
 
-    graph = Graph(nodes=nodes, edges=edges)
+    graph = Graph(nodes=nodes, edges=edges, entry_point="decision")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
@@ -193,7 +193,7 @@ def test_explicit_edge_labels() -> None:
     edges = [
         Edge(source="A", target="B", condition="explicit_cond"),
     ]
-    graph = Graph(nodes=nodes, edges=edges)
+    graph = Graph(nodes=nodes, edges=edges, entry_point="A")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
@@ -249,7 +249,7 @@ def test_react_flow_output() -> None:
     # The Graph model expects AnyNode which is a union of specific node types.
     # Casting to Any or explicitly using the union might be needed if MyPy complains about covariance.
     # For now, let's try casting the dict values to Any to bypass strict invariance check on the Union type
-    graph = Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
+    graph = Graph(nodes=nodes, edges=edges, entry_point="start")  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
@@ -315,7 +315,7 @@ def test_visualizer_coverage_extras() -> None:
     nodes = {"agent-cov": agent, "end": _get_placeholder_node("end")}
     edges = [Edge(source="agent-cov", target="end", condition="go")]
 
-    graph = Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
+    graph = Graph(nodes=nodes, edges=edges, entry_point="agent-cov")  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),
@@ -357,7 +357,7 @@ def test_visualizer_grouping() -> None:
     nodes = {"agent-group": agent, "other": other}
     edges: list[Edge] = []
 
-    graph = Graph(nodes=nodes, edges=edges)  # type: ignore[arg-type]
+    graph = Graph(nodes=nodes, edges=edges, entry_point="agent-group")  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=_get_metadata(),

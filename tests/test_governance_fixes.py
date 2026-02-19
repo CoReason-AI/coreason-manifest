@@ -180,7 +180,7 @@ def test_graph_unguarded_path() -> None:
     # No human
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": agent}, edges=[])
+    graph = Graph(nodes={"a1": agent}, edges=[], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -204,7 +204,7 @@ def test_graph_guarded_path() -> None:
     human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(source="h1", target="a1")])
+    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(source="h1", target="a1")], entry_point="h1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -222,13 +222,13 @@ def test_graph_guarded_path() -> None:
     assert len(errors) == 0
 
 
-def test_graph_cycle_no_entry() -> None:
-    # Cyclic graph with no entry points
+def test_graph_cycle_explicit_entry() -> None:
+    # Cyclic graph with explicit entry point
     # a1(comp) -> a1
     defs = get_defs()
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")])
+    graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -242,7 +242,7 @@ def test_graph_cycle_no_entry() -> None:
         graph=graph,
     )
 
-    # Should fail closed (return False in _is_guarded because no entry_ids but nodes exist)
+    # a1 is entry and unguarded.
     errors = validate_policy(flow)
     assert len(errors) == 1
 
@@ -276,7 +276,9 @@ def test_integrity_compute_hash_variants() -> None:
         def __str__(self) -> str:
             return "plain"
 
-    assert compute_hash(PlainObj()) == compute_hash("plain")
+    # SOTA Fix: Strict integrity ensures we don't silently fallback to str()
+    with pytest.raises(TypeError, match="is not deterministically serializable"):
+        compute_hash(PlainObj())
 
 
 def test_gatekeeper_inline_profile() -> None:
@@ -360,7 +362,7 @@ def test_graph_traversal_unguarded() -> None:
     a1 = AgentNode(id="a1", metadata={}, type="agent", profile="safe", tools=[])
     a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a2")])
+    graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a2")], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -390,3 +392,60 @@ def test_unknown_flow_type() -> None:
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+
+def test_circuit_breaker_timeout_logic() -> None:
+    """Cover lines 125-126 and 129 in governance.py."""
+    import time
+
+    from coreason_manifest.spec.core.governance import (
+        CircuitBreaker,
+        CircuitOpenError,
+        CircuitState,
+        check_circuit,
+    )
+
+    policy = CircuitBreaker(error_threshold_count=1, reset_timeout_seconds=2)
+    state_store = {"node_1": CircuitState(state="open", failure_count=1, last_failure_time=time.time())}
+
+    # Case 1: Timeout NOT expired
+    with pytest.raises(CircuitOpenError):
+        check_circuit("node_1", policy, state_store)
+
+    # Case 2: Timeout EXPIRED
+    # Force unwrap optional for test logic, or assert it's not None
+    last_failure = state_store["node_1"].last_failure_time
+    assert last_failure is not None
+    state_store["node_1"].last_failure_time = last_failure - 3
+    check_circuit("node_1", policy, state_store)
+    assert state_store["node_1"].state == "half-open"
+
+
+def test_circuit_breaker_record_failure_coverage() -> None:
+    """Cover initialization and early return in record_failure."""
+    import time
+
+    from coreason_manifest.spec.core.governance import (
+        CircuitBreaker,
+        CircuitState,
+        record_failure,
+    )
+
+    policy = CircuitBreaker(error_threshold_count=2, reset_timeout_seconds=1)
+    state_store: dict[str, CircuitState] = {}
+
+    # 1. New Node (Init logic)
+    record_failure("new_node", policy, state_store)
+    assert "new_node" in state_store
+    assert state_store["new_node"].failure_count == 1
+
+    # 2. Open Circuit (Early return logic)
+    # Trip it
+    record_failure("new_node", policy, state_store)  # count=2 -> open
+    assert state_store["new_node"].state == "open"
+    last_fail = state_store["new_node"].last_failure_time
+
+    # Call again - should return early and NOT update time or count
+    time.sleep(0.1)
+    record_failure("new_node", policy, state_store)
+    assert state_store["new_node"].last_failure_time == last_fail  # Unchanged

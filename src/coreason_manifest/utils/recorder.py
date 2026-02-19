@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from typing import Any
+from uuid import uuid4
 
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import compute_hash, to_canonical_timestamp
@@ -54,6 +55,13 @@ class BlackBoxRecorder:
         # We construct a partial model or dict to hash.
         # It MUST include previous_hashes (sorted for determinism) to enforce the chain.
         # We exclude execution_hash (which we are computing) and signature (optional/external).
+
+        # SOTA: Generate Trace IDs explicitly to ensure hash consistency.
+        # NodeExecution would auto-generate them, but we need them for the hash calculation.
+        request_id = str(uuid4())
+        # Default behavior: If we don't know parent, we are root.
+        root_request_id = request_id
+
         payload = {
             "node_id": node_id,
             "state": state,
@@ -64,6 +72,9 @@ class BlackBoxRecorder:
             "duration_ms": duration_ms,
             "attributes": attributes,
             "previous_hashes": sorted(previous_hashes),
+            "hash_version": "v1",
+            "request_id": request_id,
+            "root_request_id": root_request_id,
         }
 
         # 3. Compute Hash
@@ -81,4 +92,6 @@ class BlackBoxRecorder:
             attributes=attributes,
             previous_hashes=sorted(previous_hashes),
             execution_hash=execution_hash,
+            request_id=request_id,
+            root_request_id=root_request_id,
         )

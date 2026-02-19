@@ -35,13 +35,19 @@ class MerkleNode(TypedDict):
 def _recursive_sort_and_sanitize(obj: Any) -> Any:
     """
     Recursively sorts dictionary keys and sanitizes values for consistent hashing.
-    - Dicts: Sorted by key. None values removed.
+    - Dicts: Sorted by key. None values removed. Keys sanitized.
     - Lists: Processed recursively.
     - Datetime: Converted to canonical string.
     - Models: Converted to dicts.
     """
     if isinstance(obj, dict):
-        return {k: _recursive_sort_and_sanitize(v) for k, v in sorted(obj.items()) if v is not None}
+        # Universal Hash Sanitization:
+        # Strip legacy keys (integrity_hash) and modern keys (execution_hash, signature, __*)
+        return {
+            k: _recursive_sort_and_sanitize(v)
+            for k, v in sorted(obj.items())
+            if v is not None and k not in {"integrity_hash", "execution_hash", "signature"} and not k.startswith("__")
+        }
     if isinstance(obj, (list, tuple)):
         return [_recursive_sort_and_sanitize(x) for x in obj]
     if isinstance(obj, set):
@@ -64,7 +70,12 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
             return _recursive_sort_and_sanitize(json.loads(obj.json()))
         except (ValueError, TypeError):  # pragma: no cover
             pass
-    return obj
+
+    # SOTA Fix: Enforce strict deterministic types.
+    if isinstance(obj, (int, float, str, bool)) or obj is None:
+        return obj
+
+    raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
 
 
 def compute_hash(obj: Any) -> str:
@@ -79,7 +90,8 @@ def compute_hash(obj: Any) -> str:
     sanitized = _recursive_sort_and_sanitize(obj)
 
     # json.dumps with sort_keys=True ensures consistent ordering (redundant but safe)
-    data = json.dumps(sanitized, sort_keys=True, default=str)
+    # SOTA Fix: Remove default=str to force failure on non-serializable objects
+    data = json.dumps(sanitized, sort_keys=True)
 
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
@@ -87,34 +99,16 @@ def compute_hash(obj: Any) -> str:
 def reconstruct_payload(node: Any) -> dict[str, Any]:
     """
     Reconstructs the payload dictionary used for hashing from a NodeExecution object.
+    Automatically handles SOTA fields by using model_dump if available.
     """
-    # Extract fields assuming node is NodeExecution or dict
-    d = node if isinstance(node, dict) else node.model_dump()
+    if isinstance(node, BaseModel):
+        return node.model_dump()
 
-    # Replicate recorder.py payload construction
-    timestamp = d.get("timestamp")
-    if timestamp:
-        if isinstance(timestamp, datetime):
-            timestamp = to_canonical_timestamp(timestamp)
-        elif isinstance(timestamp, str):
-            # Already a string, assume canonical or close enough?
-            # Ideally we parse and re-canonicalize if we want strictness,
-            # but if it's already stored as string in DB, use as is.
-            pass
-        else:
-            timestamp = str(timestamp)
+    if isinstance(node, dict):
+        return node
 
-    return {
-        "node_id": d.get("node_id"),
-        "state": d.get("state"),
-        "inputs": d.get("inputs"),
-        "outputs": d.get("outputs"),
-        "error": d.get("error"),
-        "timestamp": timestamp,
-        "duration_ms": d.get("duration_ms"),
-        "attributes": d.get("attributes", {}),
-        "previous_hashes": sorted(d.get("previous_hashes", [])),
-    }
+    # Fallback for other objects (shouldn't happen with strict types)
+    return dict(node)
 
 
 def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
@@ -142,7 +136,7 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
             return False
 
         # 2. Extract declared parents
-        previous_hashes = payload["previous_hashes"]
+        previous_hashes = payload.get("previous_hashes", [])
 
         # 3. Verify Linkage
         if not previous_hashes:

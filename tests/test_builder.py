@@ -227,3 +227,112 @@ def test_agent_builder() -> None:
 #     builder = AgentBuilder("agent_fallback")
 #     with pytest.raises(ValidationError):
 #         builder.with_supervision(retries=3, strategy="fallback")
+
+
+def test_builder_validation_failure() -> None:
+    """Cover NewLinearFlow.build() failure (lines 297-298)."""
+    from coreason_manifest.spec.core.resilience import FallbackStrategy
+
+    # Create builder
+    builder = NewLinearFlow("Invalid Flow")
+
+    # Define a valid profile so construction passes integrity check
+    builder.define_profile("p1", "role", "persona")
+
+    # Add agent with valid profile but invalid resilience fallback
+    # Resilience fallback_node_id points to "missing_node"
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p1",
+        tools=[],
+        resilience=FallbackStrategy(fallback_node_id="missing_node"),
+    )
+    builder.add_step(node)
+
+    # Build should raise ValueError because of validate_flow finding missing fallback node
+    with pytest.raises(ValueError, match="Validation failed") as exc:
+        builder.build()
+
+    assert "missing ID 'missing_node'" in str(exc.value)
+
+
+def test_builder_graph_entry_point_coverage() -> None:
+    """Cover NewGraphFlow.set_entry_point (lines 297-298)."""
+    from coreason_manifest.builder import NewGraphFlow
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
+
+    builder = NewGraphFlow("Graph Flow")
+
+    node = PlaceholderNode(id="start", metadata={}, required_capabilities=[])
+    builder.add_node(node)
+
+    # Use set_entry_point
+    builder.set_entry_point("start")
+
+    flow = builder.build()
+    assert flow.graph.entry_point == "start"
+
+
+def test_builder_graph_auto_entry_point() -> None:
+    """Cover NewGraphFlow.build() auto entry point (line 368)."""
+    from coreason_manifest.builder import NewGraphFlow
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
+
+    builder = NewGraphFlow("Auto Entry")
+
+    # Add one node
+    node = PlaceholderNode(id="auto_start", metadata={}, required_capabilities=[])
+    builder.add_node(node)
+
+    # Do NOT call set_entry_point
+
+    flow = builder.build()
+    assert flow.graph.entry_point == "auto_start"
+
+
+def test_builder_graph_missing_entry_point() -> None:
+    """Cover NewGraphFlow.build() missing entry point logic."""
+    from coreason_manifest.builder import NewGraphFlow
+
+    builder = NewGraphFlow("Empty Graph")
+    # No nodes added
+
+    # Should build with "missing_entry_point" as entry_point
+    # (And fail validation if we checked validity, but we just want to cover the line)
+    # But validate_flow will be called.
+    # Graph validation checks if entry_point exists in nodes.
+    # "missing_entry_point" is not in nodes (which is empty).
+    # So it should raise ValueError.
+
+    with pytest.raises(ValueError, match="Validation failed"):
+        builder.build()
+
+
+def test_builder_graph_validation_failure() -> None:
+    """Cover NewGraphFlow.build() failure (line 385)."""
+    from coreason_manifest.builder import NewGraphFlow
+    from coreason_manifest.spec.core.resilience import FallbackStrategy
+
+    builder = NewGraphFlow("Invalid Graph")
+
+    # Define valid profile
+    builder.define_profile("p1", "role", "persona")
+
+    # Add agent with valid profile but invalid resilience
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p1",
+        tools=[],
+        resilience=FallbackStrategy(fallback_node_id="missing_node"),
+    )
+    builder.add_node(node)
+    builder.set_entry_point("a1")
+
+    with pytest.raises(ValueError, match="Validation failed") as exc:
+        builder.build()
+
+    assert "missing ID 'missing_node'" in str(exc.value)
