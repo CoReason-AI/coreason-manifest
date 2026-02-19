@@ -1,31 +1,19 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
-
-from pydantic import BaseModel
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.interop.compliance import (
+    ComplianceReport,
+    ErrorCatalog,
+    RemediationAction,
+)
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
-
-
-class RemediationAction(BaseModel):
-    type: Literal["add_guard_node", "whitelist_domain"]
-    target_node_id: str | None = None
-    format: Literal["json_patch", "merge_patch"] = "json_patch"
-    patch_data: list[dict[str, Any]] | dict[str, Any]
-    description: str
-
-
-class ComplianceReport(BaseModel):
-    severity: Literal["violation", "warning", "info"]
-    message: str
-    node_id: str | None = None
-    remediation: RemediationAction | None = None
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
@@ -36,6 +24,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     2. Topology Check (Red Button Rule): Critical nodes must be guarded by HumanNode.
     3. Swarm Safety: Recursively checks worker profiles in Swarms.
     4. Domain Policy: Checks tool URLs against allowed domains.
+    5. Topology Analysis: Checks for hazardous utility islands using Tarjan's algorithm.
     """
     reports: list[ComplianceReport] = []
 
@@ -103,8 +92,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
                 reports.append(
                     ComplianceReport(
+                        code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
                         severity="violation",
                         message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
+                        details={"domain": domain, "tool_name": tool_obj.name},
                         remediation=RemediationAction(
                             type="whitelist_domain",
                             format="json_patch",
@@ -176,12 +167,14 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
             reports.append(
                 ComplianceReport(
+                    code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
                     severity="violation",
                     message=(
                         f"Policy Violation: Node '{node.id}' requires high-risk features "
                         f"({', '.join(violation_reason)}) but is not guarded by a HumanNode."
                     ),
                     node_id=node.id,
+                    details={"reason": ", ".join(violation_reason)},
                     remediation=RemediationAction(
                         type="add_guard_node",
                         target_node_id=node.id,
@@ -191,6 +184,132 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                     ),
                 )
             )
+
+    # 5. Topology Analysis (GraphFlow Only)
+    if isinstance(flow, GraphFlow):
+        # Build Adjacency List
+        adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
+        for edge in flow.graph.edges:
+            adj[edge.source].append(edge.target)
+
+        # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
+        # While strict SCC isn't solely needed for "utility islands", it's the SOTA mandate for analysis.
+        visited: set[str] = set()
+        stack: list[str] = []
+        on_stack: set[str] = set()
+        ids: dict[str, int] = {}
+        low: dict[str, int] = {}
+        sccs: list[list[str]] = []
+        id_counter = 0
+
+        def dfs(at: str):
+            nonlocal id_counter
+            stack.append(at)
+            on_stack.add(at)
+            visited.add(at)
+            ids[at] = low[at] = id_counter
+            id_counter += 1
+
+            for to in adj.get(at, []):
+                if to not in visited:
+                    dfs(to)
+                    low[at] = min(low[at], low[to])
+                elif to in on_stack:
+                    low[at] = min(low[at], ids[to])
+
+            if ids[at] == low[at]:
+                component = []
+                while stack:
+                    node = stack.pop()
+                    on_stack.remove(node)
+                    component.append(node)
+                    if node == at:
+                        break
+                sccs.append(component)
+
+        # Run Tarjan's
+        for node_id in flow.graph.nodes:
+            if node_id not in visited:
+                dfs(node_id)
+
+        # Build map of node_id -> SCC info
+        # If SCC has size > 1 or (size==1 and self loop), it's a cycle.
+        node_cycle_map = {}
+        for comp in sccs:
+            is_cycle = False
+            if len(comp) > 1:
+                is_cycle = True
+            elif len(comp) == 1:
+                # Check self-loop
+                node = comp[0]
+                if node in adj.get(node, []):
+                    is_cycle = True
+
+            for nid in comp:
+                node_cycle_map[nid] = is_cycle
+
+        # 5b. Utility Island Detection (Unreachable from Entry)
+        # Identify entry nodes (in-degree 0)
+        in_degree = {nid: 0 for nid in flow.graph.nodes}
+        for edge in flow.graph.edges:
+            in_degree[edge.target] += 1
+
+        entry_nodes = [nid for nid, d in in_degree.items() if d == 0]
+
+        # BFS from entry nodes to find reachable set
+        reachable = set(entry_nodes)
+        queue = list(entry_nodes)
+
+        while queue:
+            curr = queue.pop(0)
+            for neighbor in adj.get(curr, []):
+                if neighbor not in reachable:
+                    reachable.add(neighbor)
+                    queue.append(neighbor)
+
+        # Identify Unreachable Nodes
+        all_nodes = set(flow.graph.nodes.keys())
+        unreachable = all_nodes - reachable
+
+        # 5c. Fail Open but Guarded
+        for node_id in unreachable:
+            node = flow.graph.nodes[node_id]
+            caps = get_capabilities(node)
+
+            # Check for high-risk capabilities
+            risk_reasons = []
+            if "computer_use" in caps:
+                risk_reasons.append("computer_use")
+            if "code_execution" in caps:
+                risk_reasons.append("code_execution")
+
+            if risk_reasons:
+                is_cycle = node_cycle_map.get(node_id, False)
+                structure_type = "cyclic island" if is_cycle else "island"
+
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
+                        severity="violation",
+                        message=(
+                            f"Topology Violation: Node '{node.id}' is unreachable ({structure_type}) "
+                            f"but requires high-risk capabilities: {', '.join(risk_reasons)}."
+                        ),
+                        node_id=node.id,
+                        details={
+                            "reason": ", ".join(risk_reasons),
+                            "component": "unreachable",
+                            "structure": structure_type
+                        },
+                        remediation=RemediationAction(
+                            type="prune_node",
+                            target_node_id=node.id,
+                            format="json_patch",
+                            patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
+                            description=f"Remove dangerous unreachable node '{node.id}'",
+                        )
+                    )
+                )
 
     return reports
 
@@ -227,9 +346,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
         # Fail Closed: If no clear entry point but graph exists, assume unsafe (cyclic or disconnected).
         if not entry_ids and flow.graph.nodes:
-            # We could try to check cycles, but for security, deny by default is safer.
-            # However, if the target is in a cycle with a human, it might be safe.
-            # But the algorithm below assumes traversal from entry.
+            # If everything is a cycle, and no entry, it's ambiguous.
             return False
 
         # We need to find if there is a path from ANY entry node to target_node.id

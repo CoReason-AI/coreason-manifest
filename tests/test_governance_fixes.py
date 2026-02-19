@@ -244,7 +244,7 @@ def test_graph_cycle_no_entry() -> None:
 
     # Should fail closed (return False in _is_guarded because no entry_ids but nodes exist)
     errors = validate_policy(flow)
-    assert len(errors) == 1
+    assert len(errors) == 2
 
 
 def test_integrity_compute_hash_variants() -> None:

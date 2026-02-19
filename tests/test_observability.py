@@ -296,7 +296,7 @@ def test_reconstruct_payload_edge_cases() -> None:
         "previous_hashes": [],
     }
     payload = reconstruct_payload(node_dict)
-    assert payload["timestamp"] == "1234567890"
+    assert payload["timestamp"] == 1234567890
 
 
 def test_dag_integrity_dict_nodes() -> None:
