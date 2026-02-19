@@ -91,13 +91,10 @@ def test_graph_builder() -> None:
 
 
 def test_linear_builder_invalid() -> None:
-    # Empty sequence is allowed in draft mode, so no error expected during build().
-    # Previously this test expected "Validation failed", but since status=draft by default
-    # and linear flows don't require entry points, it passes.
-    # We verify it builds an empty sequence.
+    # Empty sequence is invalid because FlowBuilder calls validate_flow() which enforces it.
     builder = NewLinearFlow("Invalid")
-    flow = builder.build()
-    assert len(flow.sequence) == 0
+    with pytest.raises(ValueError, match="Validation failed"):
+        builder.build()
 
 
 def test_graph_builder_invalid() -> None:

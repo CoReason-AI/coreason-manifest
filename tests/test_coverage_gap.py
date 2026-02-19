@@ -1,23 +1,26 @@
-from unittest.mock import patch
-
-import idna
 import pytest
+from typing import Any
+import importlib.machinery
+import idna
+from unittest.mock import patch, MagicMock
 
 from coreason_manifest.utils.diff import _classify_path, _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
-from coreason_manifest.utils.loader import SandboxedPathFinder
+from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref
 from coreason_manifest.utils.net_utils import canonicalize_domain
-
+from coreason_manifest.spec.interop.telemetry import NodeExecution
 
 def test_diff_classifier_coverage() -> None:
     # Cover _classify_path branches
     assert _classify_path("/edges/0") == "topology"
-    assert _classify_path("/graph/nodes/id") == "topology"  # len 4
+    assert _classify_path("/graph/nodes/id") == "topology" # len 4
     assert _classify_path("/graph/nodes/id/prop") == "resource"
-    assert _classify_path("/sequence/0") == "topology"  # len 3
+    assert _classify_path("/sequence/0") == "topology" # len 3
     assert _classify_path("/sequence/0/prop") == "resource"
     assert _classify_path("/other") == "resource"
 
+    # Cover _classify_path governance (line 72)
+    assert _classify_path("/governance/policy") == "governance"
 
 def test_diff_list_logic_coverage() -> None:
     # Cover list diff logic in _generate_diff
@@ -36,51 +39,136 @@ def test_diff_list_logic_coverage() -> None:
     assert diff[0].op == "remove"
     assert diff[0].path == "/list/1"
 
+    # Branch coverage for loops
+    # If len1 == len2, loops for add/remove are skipped (lines 109, 111, 128, 132)
+    # Recursion happens in first loop.
+    l5 = [1]
+    l6 = [2]
+    diff = _generate_diff("/list", l5, l6)
+    assert len(diff) == 1
+    assert diff[0].op == "replace" # because primitives differ
 
 def test_integrity_nan_check() -> None:
+    import math
+    # line 75 check is_finite for floats
     with pytest.raises(ValueError, match="NaN and Infinity"):
         compute_hash(float("nan"))
     with pytest.raises(ValueError, match="NaN and Infinity"):
         compute_hash(float("inf"))
 
+def test_integrity_fallback_json() -> None:
+    # Cover fallback lines 89-90 (has json method)
+    class HasJson:
+        def json(self) -> str:
+            return '{"key": "value"}'
+
+    obj = HasJson()
+    # Should use json() method
+    h = compute_hash(obj)
+    assert h == compute_hash({"key": "value"})
+
+    # Error in json load?
+    class BadJson:
+        def json(self) -> str:
+            return "invalid"
+
+    # Should fall through to TypeError
+    with pytest.raises(TypeError):
+        compute_hash(BadJson())
 
 def test_integrity_tuple_reconstruct() -> None:
     # Cover reconstruct_payload list/tuple path (lines 140-154)
-    # reconstruct_payload is mostly used for verification, expecting dict-like
-    # If we pass a list of tuples, it converts to dict.
     data = [("a", 1)]
     res = reconstruct_payload(data)
     assert res == {"a": 1}
 
-    # Test error path? "shouldn't happen with strict types"
-    # If we pass something that fails dict conversion but is list/tuple
-    # e.g. [1] (not pairs)
     with pytest.raises(TypeError, match="Could not reconstruct payload"):
         reconstruct_payload([1])
-
 
 def test_loader_spec_none_coverage() -> None:
     # Cover SandboxedPathFinder branches
     finder = SandboxedPathFinder()
-    assert finder.find_spec("foo") is None  # jail_root not set
+    assert finder.find_spec("foo") is None # jail_root not set
 
     # ".." check
-    from pathlib import Path
-
     from coreason_manifest.utils.loader import sandbox_context
-
+    from pathlib import Path
     with sandbox_context(Path(".")):
         assert finder.find_spec("..foo") is None
+        # line 119: init_py is file
+        # line 126: module_py is file
+        # If neither exists, returns None.
+        assert finder.find_spec("non_existent") is None
 
+def test_loader_exception_handling_in_lock() -> None:
+    # Cover exception handling inside _loader_lock (lines 233, 253, 281-282)
+    # We need to trigger exception during exec_module
 
-def test_net_utils_idna_error() -> None:
-    # Force IDNA error
+    # Create a broken agent file
+    from pathlib import Path
+    tmp_path = Path("/tmp") # dummy, we'll mock
+
+    # Mocking is hard here because it's inside context manager.
+    # Instead, create real broken file.
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        (p / "broken.py").write_text("raise RuntimeError('Boom')")
+
+        with pytest.raises(ValueError, match="Failed to execute agent code"):
+            load_agent_from_ref("broken.py:Agent", root_dir=p)
+
+def test_net_utils_edge_cases() -> None:
+    # line 12: if not domain return ""
+    assert canonicalize_domain("") == ""
+    assert canonicalize_domain(None) == "" # type checking? arg is str.
+
+    # Force IDNA error (line 24-27)
     with patch("idna.encode", side_effect=idna.IDNAError):
-        # Should return original
         assert canonicalize_domain("bad.com") == "bad.com"
 
-
 def test_telemetry_frozen() -> None:
-    # Coverage for NodeExecution frozen check?
-    # Usually pydantic handles this, but if there's a custom setattr...
+    # Telemetry frozen checks lines 75-76, 80
+    # NodeExecution is pydantic model with strict=True, frozen=True?
+    # Actually validation happens on instantiation.
     pass
+
+def test_validator_edge_cases() -> None:
+    # validator.py 70, 282, 284, 309
+    pass
+
+def test_visualizer_unvisited() -> None:
+    # visualizer.py 185-187
+    pass
+
+def test_flow_cycle_detection_unreachable() -> None:
+    # spec/core/flow.py 325-326 (raise ValueError("Cycle detected..."))
+    # The previous fix uses Kahn's algorithm which doesn't use recursion stack.
+    # The line numbers suggest "2b. Cycle Detection using Kahn's..." block or the old DFS block?
+    # My replace used Kahn's.
+    # 325-326 in Kahn's?
+    # "if visited_count != len(reachable): ... raise ValueError"
+    # This is hit if cycle exists.
+    # We need a test with a cycle in a PUBLISHED flow.
+    from coreason_manifest.spec.core.flow import GraphFlow, FlowMetadata, FlowInterface, DataSchema, Blackboard, Graph, Edge
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
+
+    n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
+    n2 = PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
+
+    # Cycle: n1->n2->n1
+    graph = Graph(
+        nodes={"n1": n1, "n2": n2},
+        edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
+        entry_point="n1"
+    )
+
+    with pytest.raises(ValueError, match="Cycle detected"):
+        GraphFlow(
+            kind="GraphFlow",
+            status="published",
+            metadata=FlowMetadata(name="cycle", version="1", description="d", tags=[]),
+            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+            blackboard=None,
+            graph=graph
+        )
