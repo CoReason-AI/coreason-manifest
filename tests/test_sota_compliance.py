@@ -1,4 +1,3 @@
-
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
@@ -29,6 +28,7 @@ from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, comp
 
 # --- Mocks for Flow ---
 
+
 def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> GraphFlow:
     return GraphFlow(
         kind="GraphFlow",
@@ -36,39 +36,36 @@ def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=Blackboard(variables={}, persistence=False),
-        graph=Graph(
-            nodes={n.id: n for n in nodes_list},
-            edges=[Edge(source=s, target=t) for s, t in edges_list]
-        )
+        graph=Graph(nodes={n.id: n for n in nodes_list}, edges=[Edge(source=s, target=t) for s, t in edges_list]),
     )
+
 
 # --- HELPER FACTORIES ---
 
+
 def create_safe_profile() -> CognitiveProfile:
     return CognitiveProfile(
-        role="tester",
-        persona="safe",
-        reasoning=StandardReasoning(model="gpt-4-turbo"),
-        fast_path=None
+        role="tester", persona="safe", reasoning=StandardReasoning(model="gpt-4-turbo"), fast_path=None
     )
+
 
 def create_unsafe_profile() -> CognitiveProfile:
     return CognitiveProfile(
-        role="hacker",
-        persona="unsafe",
-        reasoning=ComputerUseReasoning(model="claude-3-5-sonnet"),
-        fast_path=None
+        role="hacker", persona="unsafe", reasoning=ComputerUseReasoning(model="claude-3-5-sonnet"), fast_path=None
     )
+
 
 def create_code_exec_profile() -> CognitiveProfile:
     return CognitiveProfile(
         role="coder",
         persona="unsafe_coder",
         reasoning=CodeExecutionReasoning(model="gpt-4", allow_network=True, timeout_seconds=10),
-        fast_path=None
+        fast_path=None,
     )
 
+
 # --- TESTS ---
+
 
 def test_topology_utility_island_safe() -> None:
     """
@@ -86,6 +83,7 @@ def test_topology_utility_island_safe() -> None:
     topology_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topology_errors) == 0
 
+
 def test_topology_utility_island_unsafe() -> None:
     """
     Test that a disconnected node with HIGH RISK capabilities is BLOCKED.
@@ -98,10 +96,7 @@ def test_topology_utility_island_unsafe() -> None:
     )  # Unsafe
     node_island2 = AgentNode(id="island2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
 
-    edges = [
-        ("island1", "island2"),
-        ("island2", "island1")
-    ]
+    edges = [("island1", "island2"), ("island2", "island1")]
 
     # Graph: main (entry), island1<->island2 (cycle, no entry)
     flow = create_mock_flow([node_main, node_island1, node_island2], edges)
@@ -115,6 +110,7 @@ def test_topology_utility_island_unsafe() -> None:
     unsafe_errors = [r for r in topology_errors if r.node_id == "island1"]
     assert len(unsafe_errors) == 1
     assert "computer_use" in unsafe_errors[0].message
+
 
 def test_telemetry_request_auto_rooting() -> None:
     """
@@ -133,6 +129,7 @@ def test_telemetry_request_auto_rooting() -> None:
     assert req2.parent_request_id == parent_id
     assert req2.root_request_id == root_id
 
+
 def test_telemetry_request_orphaned_trace() -> None:
     """
     Test AgentRequest orphaned trace detection.
@@ -146,6 +143,7 @@ def test_telemetry_request_orphaned_trace() -> None:
             # root_request_id missing
         )
 
+
 def test_telemetry_node_execution_trace_validation() -> None:
     """
     Test NodeExecution trace validation.
@@ -153,16 +151,31 @@ def test_telemetry_node_execution_trace_validation() -> None:
     ts = datetime.now(UTC)
     # Success case
     NodeExecution(
-        node_id="n1", state=NodeState.COMPLETED, inputs={}, outputs={}, timestamp=ts, duration_ms=10,
-        request_id="req1", parent_request_id="p1", root_request_id="r1"
+        node_id="n1",
+        state=NodeState.COMPLETED,
+        inputs={},
+        outputs={},
+        timestamp=ts,
+        duration_ms=10,
+        request_id="req1",
+        parent_request_id="p1",
+        root_request_id="r1",
     )
 
     # Failure case
     with pytest.raises(ValueError, match="Orphaned trace detected"):
         NodeExecution(
-            node_id="n1", state=NodeState.COMPLETED, inputs={}, outputs={}, timestamp=ts, duration_ms=10,
-            request_id="req1", parent_request_id="p1", root_request_id=None
+            node_id="n1",
+            state=NodeState.COMPLETED,
+            inputs={},
+            outputs={},
+            timestamp=ts,
+            duration_ms=10,
+            request_id="req1",
+            parent_request_id="p1",
+            root_request_id=None,
         )
+
 
 def test_integrity_sanitization() -> None:
     """
@@ -177,12 +190,7 @@ def test_integrity_sanitization() -> None:
         "execution_hash": "modern",
         "signature": "sig",
         "__private": "secret",
-        "nested": {
-            "d": 4,
-            "c": 3,
-            "execution_hash": "nested_bad",
-            "timestamp": dt
-        }
+        "nested": {"d": 4, "c": 3, "execution_hash": "nested_bad", "timestamp": dt},
     }
 
     sanitized = _recursive_sort_and_sanitize(data)
@@ -206,16 +214,13 @@ def test_integrity_sanitization() -> None:
     data_reordered = {
         "a": 1,
         "b": 2,
-        "nested": {
-            "c": 3,
-            "d": 4,
-            "timestamp": dt
-        },
-        "integrity_hash": "different" # Should be stripped
+        "nested": {"c": 3, "d": 4, "timestamp": dt},
+        "integrity_hash": "different",  # Should be stripped
     }
     h2 = compute_hash(data_reordered)
 
     assert h1 == h2
+
 
 def test_compliance_legacy_adapter() -> None:
     """
@@ -236,6 +241,7 @@ def test_compliance_legacy_adapter() -> None:
     # Legacy consumer
     legacy_out = legacy_error_adapter(report, consumer_version="v0.24.0")
     assert legacy_out == "Tool 'curl' uses blocked domain: bad.com"
+
 
 def test_compliance_legacy_adapter_extended() -> None:
     """Cover all branches of legacy_error_adapter."""
@@ -268,21 +274,16 @@ def test_compliance_legacy_adapter_extended() -> None:
     )
     assert "Warning: missing tool (Code: ERR_CAP_MISSING_TOOL_001)" in legacy_error_adapter(report_other, "v0.24.0")
 
+
 def test_topology_utility_island_acyclic_unsafe() -> None:
     """
     Test a node downstream of a cycle (unreachable tail).
     Exercises line 284 in gatekeeper.py (structure_type="island").
     Graph: Safe1 <-> Safe2 -> Unsafe
     """
-    node_safe1 = AgentNode(
-        id="safe1", type="agent", metadata={}, profile=create_safe_profile(), tools=[]
-    )
-    node_safe2 = AgentNode(
-        id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[]
-    )
-    node_unsafe = AgentNode(
-        id="unsafe", type="agent", metadata={}, profile=create_unsafe_profile(), tools=[]
-    )
+    node_safe1 = AgentNode(id="safe1", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
+    node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
+    node_unsafe = AgentNode(id="unsafe", type="agent", metadata={}, profile=create_unsafe_profile(), tools=[])
 
     edges = [("safe1", "safe2"), ("safe2", "safe1"), ("safe2", "unsafe")]
 
@@ -294,12 +295,11 @@ def test_topology_utility_island_acyclic_unsafe() -> None:
     # 1. Unguarded critical (because no entry point -> fail closed default)
     # 2. Topology unreachable risk
 
-    topo_errors = [
-        r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003
-    ]
+    topo_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topo_errors) == 1
     assert topo_errors[0].node_id == "unsafe"
     assert topo_errors[0].details["structure"] == "island"
+
 
 def test_integrity_reconstruct_payload_fallback() -> None:
     """Cover the fallback case in reconstruct_payload (line 105)."""
@@ -312,17 +312,14 @@ def test_integrity_reconstruct_payload_fallback() -> None:
     res = reconstruct_payload(obj)
     assert res == {"a": 1, "b": 2}
 
+
 def test_topology_utility_island_code_exec() -> None:
     """
     Test unreachable island with code_execution capability.
     Exercises line 284 in gatekeeper.py.
     """
-    node_safe1 = AgentNode(
-        id="safe1", type="agent", metadata={}, profile=create_safe_profile(), tools=[]
-    )
-    node_safe2 = AgentNode(
-        id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[]
-    )
+    node_safe1 = AgentNode(id="safe1", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
+    node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
     node_unsafe = AgentNode(
         id="code_island",
         type="agent",
@@ -337,8 +334,6 @@ def test_topology_utility_island_code_exec() -> None:
 
     reports = validate_policy(flow)
     # Expect error about code_execution
-    topo_errors = [
-        r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003
-    ]
+    topo_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topo_errors) == 1
     assert "code_execution" in topo_errors[0].message
