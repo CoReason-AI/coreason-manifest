@@ -114,19 +114,15 @@ def test_flow_integrity_coverage() -> None:
         )
 
 
-def test_schema_repair_failure() -> None:
-    """Cover lines 91-93 in flow.py: validate_meta_schema exception handling."""
-    # We want check_schema to fail, then _attempt_repair to return something that ALSO fails check_schema
-    # causing an exception.
+def test_schema_strict_validation_failure() -> None:
+    """Cover strict validation exception handling in flow.py: validate_meta_schema."""
+    # We want check_schema to fail, causing an immediate exception.
 
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.side_effect = SchemaError("Persistent Error")
+        mock_check.side_effect = SchemaError("Strict Validation Error")
 
         # We need a schema that triggers the logic
         bad_schema = {"type": "bad_type"}  # This calls check_schema
-
-        # When _attempt_repair returns, it calls check_schema again.
-        # If mock always raises, it fails the second time too.
 
         with pytest.raises(ValueError, match="Invalid JSON Schema"):
             DataSchema(json_schema=bad_schema)

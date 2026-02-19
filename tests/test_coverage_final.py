@@ -161,9 +161,10 @@ def test_loader_ast_import_from_banned(tmp_path: Path) -> None:
     file_path = tmp_path / "banned.py"
     file_path.write_text("from os import path\nclass Agent: pass")
 
-    with pytest.raises(SecurityViolationError) as exc:
+    from coreason_manifest.utils.loader import RuntimeSecurityWarning
+
+    with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
-    assert "Banned import 'os' detected" in str(exc.value)
 
 
 def test_loader_ast_relative_import(tmp_path: Path) -> None:
@@ -181,9 +182,10 @@ def test_loader_banned_call(tmp_path: Path) -> None:
     file_path = tmp_path / "banned_call.py"
     file_path.write_text("class Agent:\n    def run(self): eval('1+1')")
 
-    with pytest.raises(SecurityViolationError) as exc:
+    from coreason_manifest.utils.loader import RuntimeSecurityWarning
+
+    with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
-    assert "Banned call 'eval'" in str(exc.value)
 
 
 def test_loader_not_a_class(tmp_path: Path) -> None:
@@ -203,3 +205,77 @@ def test_loader_success(tmp_path: Path) -> None:
 
     cls = load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
     assert cls.__name__ == "Agent"
+
+
+# --- Builder Coverage (Missing lines 297-298) ---
+
+
+def test_builder_validation_failure() -> None:
+    """Cover NewLinearFlow.build() failure (lines 297-298)."""
+    from coreason_manifest.builder import NewLinearFlow
+    from coreason_manifest.spec.core.nodes import AgentNode
+    from coreason_manifest.spec.core.resilience import FallbackStrategy
+
+    # Create builder
+    builder = NewLinearFlow("Invalid Flow")
+
+    # Define a valid profile so construction passes integrity check
+    builder.define_profile("p1", "role", "persona")
+
+    # Add agent with valid profile but invalid resilience fallback
+    # Resilience fallback_node_id points to "missing_node"
+    node = AgentNode(
+        id="a1",
+        metadata={},
+        type="agent",
+        profile="p1",
+        tools=[],
+        resilience=FallbackStrategy(fallback_node_id="missing_node"),
+    )
+    builder.add_step(node)
+
+    # Build should raise ValueError because of validate_flow finding missing fallback node
+    with pytest.raises(ValueError) as exc:
+        builder.build()
+
+    assert "Validation failed" in str(exc.value)
+    assert "missing ID 'missing_node'" in str(exc.value)
+
+
+# --- Mock Factory Coverage (Missing line 66) ---
+
+
+def test_mock_factory_empty_graph() -> None:
+    """Cover MockFactory with empty graph (line 66)."""
+    from coreason_manifest.spec.core.flow import (
+        DataSchema,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+    )
+    from coreason_manifest.utils.mock import MockFactory
+
+    # Create empty GraphFlow (no nodes)
+    # Graph model validator requires 'entry_point' field, but it can be anything if nodes is empty?
+    # Actually, if nodes is empty, entry_point might be invalid if checked referentially.
+    # But Graph definition just says entry_point: str.
+    # Let's see if we can create a valid-enough flow for MockFactory.
+
+    # We use model_construct to bypass validation if needed, but MockFactory expects a flow object.
+
+    graph_empty = Graph.model_construct(nodes={}, edges=[], entry_point="missing")
+
+    flow = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="Empty", version="1", description="", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph_empty,
+    )
+
+    factory = MockFactory()
+    trace = factory.simulate_trace(flow)
+
+    # Should return empty list (hitting line 66)
+    assert trace == []

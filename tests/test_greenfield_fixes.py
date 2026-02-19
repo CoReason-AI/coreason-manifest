@@ -77,7 +77,7 @@ def test_graph_flow_draft_mode() -> None:
         metadata={},
         resilience=None,
     )
-    graph = Graph(nodes={"agent-1": agent}, edges=[])
+    graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
 
     # Draft mode (default) should pass validation
     flow = GraphFlow(
@@ -115,7 +115,7 @@ def test_graph_flow_draft_mode() -> None:
         metadata={},
         resilience=None,
     )
-    valid_graph = Graph(nodes={"agent-1": valid_agent}, edges=[])
+    valid_graph = Graph(nodes={"agent-1": valid_agent}, edges=[], entry_point="agent-1")
 
     flow_valid = GraphFlow(
         kind="GraphFlow",
@@ -313,8 +313,10 @@ def test_fallback_cycle_complex_policy() -> None:
     assert any("Fallback cycle detected" in e for e in errors)
 
 
-def test_recursive_schema_repair() -> None:
-    """Ensure schema repair traverses nested properties."""
+def test_recursive_schema_strict_validation() -> None:
+    """Ensure strict validation checks nested properties."""
+    from jsonschema.exceptions import SchemaError
+
     from coreason_manifest.spec.core.flow import DataSchema
 
     # Schema with nested invalid default (type string, default null)
@@ -332,17 +334,12 @@ def test_recursive_schema_repair() -> None:
 
     from unittest.mock import patch
 
-    # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
+    # SOTA: Validation runs directly. We mock check_schema to raise error to verify it is called.
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.return_value = None
+        mock_check.side_effect = SchemaError("Invalid default")
 
-        with pytest.warns(UserWarning, match="Schema repaired"):
-            ds = DataSchema(json_schema=nested_schema)
-
-    # Assert repair happened deep in the tree
-    assert isinstance(ds.json_schema, dict)
-    user_props = ds.json_schema["properties"]["user"]["properties"]
-    assert "default" not in user_props["name"]
+        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+            DataSchema(json_schema=nested_schema)
 
 
 def test_validator_definitions_profile_scanning() -> None:
@@ -382,7 +379,7 @@ def test_validator_definitions_profile_scanning() -> None:
 
     # Flow with empty blackboard (so role_var is missing)
     blackboard = Blackboard(variables={}, persistence=False)
-    graph = Graph(nodes={"a1": agent}, edges=[])
+    graph = Graph(nodes={"a1": agent}, edges=[], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -403,51 +400,33 @@ def test_validator_definitions_profile_scanning() -> None:
 # But I can add them inside the function.
 
 
-def test_schema_repair_null_default() -> None:
-    """Test schema repair for null defaults."""
+def test_schema_strict_null_default() -> None:
+    """Test strict validation for null defaults."""
     from typing import Any
     from unittest.mock import patch
 
+    from jsonschema.exceptions import SchemaError
+
     from coreason_manifest.spec.core.flow import DataSchema
 
-    # SOTA: Validation runs AFTER repair, so check_schema should succeed on the first call.
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.return_value = None
-
-        # Case 1: Invalid Null Default (type string, default null, not nullable)
-        # Should remove default
+        # Case 1: Invalid Null Default -> Should Raise
+        mock_check.side_effect = SchemaError("Invalid default")
         bad_null: dict[str, Any] = {"type": "string", "default": None}
 
-        with pytest.warns(UserWarning, match="Schema repaired"):
-            ds = DataSchema(json_schema=bad_null)
-        assert isinstance(ds.json_schema, dict)
-        assert "default" not in ds.json_schema
+        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+            DataSchema(json_schema=bad_null)
 
-        # Case 2: Valid Null Default (nullable: true)
-        # Should keep default
+        # Case 2: Valid Null Default (nullable: true) -> Should Pass
+        mock_check.side_effect = None  # Reset to success
         valid_nullable: dict[str, Any] = {"type": "string", "default": None, "nullable": True}
-        # Repair logic shouldn't modify this, so NO warning should be emitted.
-        # But wait, if it doesn't modify, 'repaired == schema'.
-        # So we should expect NO warning.
-
-        # The previous test asserted a warning even for valid cases?
-        # "mock_check.side_effect = [SchemaError("Simulated"), None]" implies previous logic ALWAYS
-        # triggered repair path if validation failed.
-        # But if validation (via mock) forced failure, then repair ran.
-        # If repair returns same object, my new code checks `if repaired != schema`.
-        # So for Case 2 and 3, if no repair is needed, no warning is emitted.
-
-        # We must change expectations: NO warning for valid cases.
         ds2 = DataSchema(json_schema=valid_nullable)
         assert isinstance(ds2.json_schema, dict)
-        assert ds2.json_schema["default"] is None
 
-        # Case 3: Valid Null Default (union type)
-        # Should keep default
+        # Case 3: Valid Null Default (union type) -> Should Pass
         valid_union: dict[str, Any] = {"type": ["string", "null"], "default": None}
         ds3 = DataSchema(json_schema=valid_union)
         assert isinstance(ds3.json_schema, dict)
-        assert ds3.json_schema["default"] is None
 
 
 def test_jinja2_filter_validation() -> None:
@@ -483,7 +462,7 @@ def test_jinja2_filter_validation() -> None:
     # Define 'user.name' in blackboard
     blackboard = Blackboard(variables={"user.name": VariableDef(type="string")}, persistence=False)
 
-    graph = Graph(nodes={"n1": agent}, edges=[])
+    graph = Graph(nodes={"n1": agent}, edges=[], entry_point="n1")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
@@ -505,7 +484,7 @@ def test_jinja2_filter_validation() -> None:
         profile=CognitiveProfile(role="R", persona="P", reasoning=None, fast_path=None),
         tools=[],
     )
-    graph_fail = Graph(nodes={"n1": agent_fail}, edges=[])
+    graph_fail = Graph(nodes={"n1": agent_fail}, edges=[], entry_point="n1")
     flow_fail = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
@@ -550,7 +529,7 @@ def test_swarm_type_safety() -> None:
         output_variable="out",
     )
 
-    graph = Graph(nodes={"s1": swarm}, edges=[])
+    graph = Graph(nodes={"s1": swarm}, edges=[], entry_point="s1")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
@@ -591,7 +570,7 @@ def test_inspector_regex_warning() -> None:
         output_variable="out",
     )
 
-    graph = Graph(nodes={"i1": inspector}, edges=[])
+    graph = Graph(nodes={"i1": inspector}, edges=[], entry_point="i1")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
@@ -646,7 +625,7 @@ def test_validator_union_type_normalization() -> None:
     # Wait, "union" is not "object" or "array", so it shouldn't trigger warning unless I change the check.
     # But testing "union" normalization execution path is key.
 
-    graph = Graph(nodes={"s1": swarm}, edges=[])
+    graph = Graph(nodes={"s1": swarm}, edges=[], entry_point="s1")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
@@ -686,6 +665,7 @@ def test_loader_duplicate_keys_error(tmp_path: object) -> None:
             json_schema: {}
         blackboard: null
         graph:
+          entry_point: step_1
           edges: []
           nodes:
             step_1:

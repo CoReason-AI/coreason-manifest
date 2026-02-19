@@ -43,7 +43,7 @@ def test_swarm_simulation_expansion() -> None:
         ),
         blackboard=None,
         definitions=definitions,
-        graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
+        graph=Graph(nodes=nodes, edges=edges, entry_point="swarm-1"),  # type: ignore[arg-type]
     )
 
     # 2. Simulate
@@ -78,7 +78,7 @@ def test_deep_diff_granularity() -> None:
             outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
-        graph=Graph(nodes={"a": node_a}, edges=[]),
+        graph=Graph(nodes={"a": node_a}, edges=[], entry_point="a"),
     )
 
     # 2. Modified Flow
@@ -87,7 +87,7 @@ def test_deep_diff_granularity() -> None:
 
     flow_2 = flow_1.model_copy()
     # Deep copy graph to modify node
-    new_graph = Graph(nodes={"a": node_b}, edges=[])
+    new_graph = Graph(nodes={"a": node_b}, edges=[], entry_point="a")
     flow_2 = flow_2.model_copy(update={"graph": new_graph})
 
     # 3. Diff

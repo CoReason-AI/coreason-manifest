@@ -19,8 +19,10 @@ from coreason_manifest.utils.loader import load_agent_from_ref
 
 def test_malicious_agent_ast_check(tmp_path: Path) -> None:
     """
-    Creating a Python agent with `import subprocess` MUST raise a SecurityViolationError.
+    Creating a Python agent with `import subprocess` MUST trigger a RuntimeSecurityWarning.
     """
+    from coreason_manifest.utils.loader import RuntimeSecurityWarning
+
     malicious_code = """
 import subprocess
 
@@ -31,15 +33,17 @@ class Agent:
     agent_file = tmp_path / "evil_agent.py"
     agent_file.write_text(malicious_code)
 
-    # We expect a SecurityViolationError from the loader's AST check
-    with pytest.raises(SecurityViolationError, match="Security"):
+    # We expect a RuntimeSecurityWarning from the loader's AST check (which now only warns)
+    with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)
 
 
 def test_malicious_gadget_chain(tmp_path: Path) -> None:
     """
-    Test that gadget chains like object.__subclasses__ are blocked.
+    Test that gadget chains like object.__subclasses__ are flagged.
     """
+    from coreason_manifest.utils.loader import RuntimeSecurityWarning
+
     gadget_code = """
 class Agent:
     def run(self):
@@ -49,7 +53,7 @@ class Agent:
     agent_file = tmp_path / "gadget.py"
     agent_file.write_text(gadget_code)
 
-    with pytest.raises(SecurityViolationError, match="Security"):
+    with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)
 
 

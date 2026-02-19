@@ -54,6 +54,11 @@ def test_deep_diff_helpers() -> None:
 def test_diff_engine_coverage() -> None:
     # Interface
     meta = _get_base_metadata()
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
+
+    p_node = PlaceholderNode(id="start", metadata={}, required_capabilities=[])
+    graph_valid = Graph(nodes={"start": p_node}, edges=[], entry_point="start")
+
     flow1 = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -62,7 +67,7 @@ def test_diff_engine_coverage() -> None:
             outputs=DataSchema(json_schema={"type": "object"}),
         ),
         blackboard=None,
-        graph=Graph(nodes={}, edges=[]),
+        graph=graph_valid,
     )
     flow2 = flow1.model_copy(
         update={
@@ -102,8 +107,8 @@ def test_diff_engine_coverage() -> None:
     )
     s2 = s1.model_copy(update={"worker_profile": "wp2"})
 
-    graph1 = Graph(nodes={"a": node1, "h": h1, "s": s1}, edges=[])
-    graph2 = Graph(nodes={"a": node2, "h": h2, "s": s2}, edges=[])
+    graph1 = Graph(nodes={"a": node1, "h": h1, "s": s1}, edges=[], entry_point="a")
+    graph2 = Graph(nodes={"a": node2, "h": h2, "s": s2}, edges=[], entry_point="a")
 
     # We need definitions for SwarmNode validation AND AgentNode tool validation
     defs = FlowDefinitions(
@@ -156,7 +161,7 @@ def test_diff_engine_coverage() -> None:
 
     # Metadata Change
     node1_meta = node1.model_copy(update={"metadata": {"changed": True}})
-    graph_meta = Graph(nodes={"a": node1_meta, "h": h1, "s": s1}, edges=[])
+    graph_meta = Graph(nodes={"a": node1_meta, "h": h1, "s": s1}, edges=[], entry_point="a")
     f_meta = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -173,7 +178,7 @@ def test_diff_engine_coverage() -> None:
 
     # Presentation Change
     node1_pres = node1.model_copy(update={"presentation": PresentationHints(label="new")})
-    graph_pres = Graph(nodes={"a": node1_pres, "h": h1, "s": s1}, edges=[])
+    graph_pres = Graph(nodes={"a": node1_pres, "h": h1, "s": s1}, edges=[], entry_point="a")
     f_pres = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -201,7 +206,7 @@ def test_diff_engine_coverage() -> None:
         ),
         blackboard=None,
         definitions=defs,
-        graph=Graph(nodes={"a": node1_ref}, edges=[]),
+        graph=Graph(nodes={"a": node1_ref}, edges=[], entry_point="a"),
     )
     f_ref2 = GraphFlow(
         kind="GraphFlow",
@@ -212,7 +217,7 @@ def test_diff_engine_coverage() -> None:
         ),
         blackboard=None,
         definitions=defs,
-        graph=Graph(nodes={"a": node2_ref}, edges=[]),
+        graph=Graph(nodes={"a": node2_ref}, edges=[], entry_point="a"),
     )
 
     changes = ManifestDiff.compare(f_ref1, f_ref2)
@@ -221,7 +226,7 @@ def test_diff_engine_coverage() -> None:
     # Node Type Change
     # Change 'a' from AgentNode to PlannerNode
     planner = PlannerNode(id="a", metadata={}, goal="g", optimizer=None, output_schema={})
-    graph_type = Graph(nodes={"a": planner, "h": h1, "s": s1}, edges=[])
+    graph_type = Graph(nodes={"a": planner, "h": h1, "s": s1}, edges=[], entry_point="a")
     f_type = GraphFlow(
         kind="GraphFlow",
         metadata=meta,
@@ -242,8 +247,8 @@ def test_diff_engine_coverage() -> None:
     node1_p = AgentNode(id="a", metadata={}, profile=p1, tools=[])
     node2_p = AgentNode(id="a", metadata={}, profile=p2, tools=[])
 
-    graph_p1 = Graph(nodes={"a": node1_p}, edges=[])
-    graph_p2 = Graph(nodes={"a": node2_p}, edges=[])
+    graph_p1 = Graph(nodes={"a": node1_p}, edges=[], entry_point="a")
+    graph_p2 = Graph(nodes={"a": node2_p}, edges=[], entry_point="a")
 
     f_p1 = GraphFlow(
         kind="GraphFlow",
@@ -329,7 +334,7 @@ def test_mock_factory_coverage() -> None:
 
     edges = [Edge(source="a", target="b"), Edge(source="b", target="a")]
 
-    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges)
+    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges, entry_point="a")
     flow_g = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
@@ -374,7 +379,7 @@ def test_mock_factory_coverage() -> None:
         ),
         blackboard=None,
         definitions=defs,
-        graph=Graph(nodes={"s": s}, edges=[]),
+        graph=Graph(nodes={"s": s}, edges=[], entry_point="s"),
     )
     trace_s = factory.simulate_trace(flow_swarm)
     # 2 workers + 1 aggregator
@@ -384,20 +389,6 @@ def test_mock_factory_coverage() -> None:
     no_schema_data = factory._generate_schema_data(None)
     assert no_schema_data["mock_key"] == "mock_value"
 
-    # Empty Graph (disconnected/no roots)
-    graph_empty = Graph(nodes={}, edges=[])
-    flow_empty = GraphFlow(
-        kind="GraphFlow",
-        metadata=_get_base_metadata(),
-        interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
-        ),
-        blackboard=None,
-        graph=graph_empty,
-    )
-    trace_empty = factory.simulate_trace(flow_empty)
-    assert len(trace_empty) == 0
 
 
 def test_visualizer_layout_coverage() -> None:
@@ -419,7 +410,7 @@ def test_visualizer_layout_coverage() -> None:
     from coreason_manifest.spec.core.flow import Edge
 
     edges = [Edge(source="a", target="b"), Edge(source="b", target="a")]
-    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges)
+    graph = Graph(nodes={"a": n_a, "b": n_b}, edges=edges, entry_point="a")
     flow_cycle = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),
@@ -447,7 +438,7 @@ def test_visualizer_layout_coverage() -> None:
     )
 
     edges_mixed = [Edge(source="a", target="b"), Edge(source="b", target="a")]  # C is isolated
-    graph_mixed = Graph(nodes={"a": n_a, "b": n_b, "c": n_c}, edges=edges_mixed)
+    graph_mixed = Graph(nodes={"a": n_a, "b": n_b, "c": n_c}, edges=edges_mixed, entry_point="c")
     flow_mixed = GraphFlow(
         kind="GraphFlow",
         metadata=_get_base_metadata(),

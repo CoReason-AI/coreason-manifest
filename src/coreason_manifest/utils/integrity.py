@@ -70,7 +70,12 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
             return _recursive_sort_and_sanitize(json.loads(obj.json()))
         except (ValueError, TypeError):  # pragma: no cover
             pass
-    return obj
+
+    # SOTA Fix: Enforce strict deterministic types.
+    if isinstance(obj, (int, float, str, bool)) or obj is None:
+        return obj
+
+    raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
 
 
 def compute_hash(obj: Any) -> str:
@@ -85,7 +90,8 @@ def compute_hash(obj: Any) -> str:
     sanitized = _recursive_sort_and_sanitize(obj)
 
     # json.dumps with sort_keys=True ensures consistent ordering (redundant but safe)
-    data = json.dumps(sanitized, sort_keys=True, default=str)
+    # SOTA Fix: Remove default=str to force failure on non-serializable objects
+    data = json.dumps(sanitized, sort_keys=True)
 
     return hashlib.sha256(data.encode("utf-8")).hexdigest()
 

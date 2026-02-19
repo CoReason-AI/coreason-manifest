@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Any, ClassVar, Literal
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -53,6 +54,32 @@ class NodeExecution(BaseModel):
     signature: Annotated[str | None, Field(description="Optional cryptographic signature of the event.")] = None
 
     _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
+
+    @model_validator(mode="before")
+    @classmethod
+    def enforce_lineage_rooting(cls, data: Any) -> Any:
+        """
+        Auto-Rooting: If no root is provided and no parent exists,
+        promote current request_id to root_request_id.
+        """
+        if isinstance(data, dict):
+            # COPY data to avoid side effects on the input dict
+            data = data.copy()
+
+            req_id = data.get("request_id")
+            parent = data.get("parent_request_id")
+            root = data.get("root_request_id")
+
+            # If request_id is not provided, generate it.
+            if not req_id:
+                req_id = str(uuid4())
+                data["request_id"] = req_id
+
+            # Case 1: No parent, no root -> New Root
+            if not parent and not root:
+                data["root_request_id"] = req_id
+
+        return data
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "NodeExecution":

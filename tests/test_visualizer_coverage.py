@@ -160,7 +160,7 @@ def test_switch_edge_inference() -> None:
             outputs=DataSchema(json_schema={}),
         ),
         blackboard=None,
-        graph=Graph(nodes=nodes, edges=edges),  # type: ignore[arg-type]
+        graph=Graph(nodes=nodes, edges=edges, entry_point="switch-1"),  # type: ignore[arg-type]
     )
 
     mermaid = to_mermaid(flow)

@@ -249,12 +249,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 node_cycle_map[nid] = is_cycle
 
         # 5b. Utility Island Detection (Unreachable from Entry)
-        # Identify entry nodes (in-degree 0)
-        in_degree = dict.fromkeys(flow.graph.nodes, 0)
-        for edge in flow.graph.edges:
-            in_degree[edge.target] += 1
-
-        entry_nodes = [nid for nid, d in in_degree.items() if d == 0]
+        # SOTA Fix: Use explicit entry point
+        entry_nodes = [flow.graph.entry_point]
 
         # BFS from entry nodes to find reachable set
         reachable = set(entry_nodes)
@@ -341,16 +337,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         # Reachability Analysis
 
         all_ids = set(flow.graph.nodes.keys())
-        target_ids = {edge.target for edge in flow.graph.edges}
-        entry_ids = all_ids - target_ids
-
-        # Fail Closed: If no clear entry point but graph exists, assume unsafe (cyclic or disconnected).
-        if not entry_ids and flow.graph.nodes:
-            # If everything is a cycle, and no entry, it's ambiguous.
-            return False
-
-        # We need to find if there is a path from ANY entry node to target_node.id
-        # that does NOT visit a HumanNode.
+        entry_id = flow.graph.entry_point
 
         # Valid guards: HumanNode only.
         valid_guards = (HumanNode,)
@@ -362,13 +349,31 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
         guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
 
-        queue = list(entry_ids)
-        visited = set(entry_ids)
+        queue = [entry_id]
+        visited = {entry_id}
 
-        # Handle case where target is an entry node
-        if target_node.id in entry_ids:
+        # Handle case where target is the entry node
+        if target_node.id == entry_id:
             return False
 
+        # 1. Check strict reachability (ignoring guards) to identify Islands
+        full_queue = [entry_id]
+        full_visited = {entry_id}
+        reachable = False
+        while full_queue:
+            curr = full_queue.pop(0)
+            if curr == target_node.id:
+                reachable = True
+                break
+            for n in adj.get(curr, []):
+                if n not in full_visited:
+                    full_visited.add(n)
+                    full_queue.append(n)
+
+        if not reachable:
+            return False  # Island -> Fail Closed
+
+        # 2. Check guarded reachability
         while queue:
             curr_id = queue.pop(0)
 
@@ -386,6 +391,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
                     visited.add(neighbor)
                     queue.append(neighbor)
 
+        # If reachable but not via unguarded path -> Guarded
         return True
 
     return False

@@ -1,4 +1,3 @@
-import copy
 import warnings
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
@@ -64,7 +63,7 @@ class DataSchema(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_meta_schema(cls, data: Any) -> Any:
-        # Idempotency Guard: Prevent crashes if data is already instantiated
+        # Idempotency Guard
         if isinstance(data, cls):
             return data
 
@@ -82,31 +81,13 @@ class DataSchema(BaseModel):
                     path_str = f" at '/{'/'.join(map(str, e.path))}'" if hasattr(e, "path") and e.path else ""
                     raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
 
-            # Directive 1: Explicit Type Guarding & Falsy Tolerance (REPLACES `if schema:`)
+            # Directive 1: Explicit Type Guarding
             if not isinstance(schema, dict):
                 raise ValueError("JSON Schema must be a dictionary or a boolean.")
 
-            # Directive 4: Immutability Safety
-            # Create a mutable copy of the input dictionary to avoid Frozen mutations
-            data = data.copy()
-
-            # Directive 3: Pre-Flight Sanitization
+            # Directive 3: Strict Validation (No Heuristic Repair)
             try:
-                repaired_schema = cls._attempt_repair(schema)
-
-                if repaired_schema != schema:
-                    warnings.warn(
-                        "Schema repaired automatically during pre-flight sanitization.",
-                        category=UserWarning,
-                        stacklevel=2,
-                    )
-
-                # Now validate the safe schema
-                jsonschema.Draft7Validator.check_schema(repaired_schema)
-
-                # Update data with repaired schema
-                data["json_schema"] = repaired_schema
-
+                jsonschema.Draft7Validator.check_schema(schema)
             except SchemaError as e:
                 # Directive 3: Robust Error Unwrapping
                 error_msg = getattr(e, "message", str(e)).split("\n")[0]
@@ -117,254 +98,6 @@ class DataSchema(BaseModel):
                 raise ValueError(f"Invalid JSON Schema definition: {e}") from e
 
         return data
-
-    @staticmethod
-    def _escape_ptr(key: str) -> str:
-        """Escape JSON Pointer components per RFC 6901."""
-        return key.replace("~", "~0").replace("/", "~1")
-
-    @classmethod
-    def _attempt_repair(
-        cls,
-        schema: dict[str, Any],
-        current_path: str = "#",
-        path_map: dict[int, str] | None = None,
-        memo: dict[int, dict[str, Any]] | None = None,
-    ) -> dict[str, Any]:
-        """
-        Recursively repairs schema with:
-        1. Cycle detection using JSON Pointer paths (Directive 1).
-        2. DAG Memoization for O(N) complexity (Directive 2).
-        3. Heuristic repairs for common errors.
-        4. Comprehensive combinator traversal (Directive 2).
-        """
-        if path_map is None:
-            path_map = {}
-        if memo is None:
-            memo = {}
-
-        schema_id = id(schema)
-
-        # Directive 1: Path-Aware Cycle Resolution
-        if schema_id in path_map:
-            return {"$ref": path_map[schema_id]}
-
-        # Directive 2: Graph Memoization
-        if schema_id in memo:
-            return copy.deepcopy(memo[schema_id])
-
-        # Track path for ancestors (Cycle Detection)
-        path_map[schema_id] = current_path
-
-        try:
-            repaired = schema.copy()
-
-            # --- Recursion Step: Schema Mappings ---
-            # 1. Properties
-            if "properties" in repaired and isinstance(repaired["properties"], dict):
-                repaired["properties"] = {
-                    k: cls._attempt_repair(
-                        v,
-                        current_path=f"{current_path}/properties/{cls._escape_ptr(k)}",
-                        path_map=path_map,
-                        memo=memo,
-                    )
-                    if isinstance(v, dict)
-                    else v
-                    for k, v in repaired["properties"].items()
-                }
-
-            # 2. Pattern Properties
-            if "patternProperties" in repaired and isinstance(repaired["patternProperties"], dict):
-                repaired["patternProperties"] = {
-                    k: cls._attempt_repair(
-                        v,
-                        current_path=f"{current_path}/patternProperties/{cls._escape_ptr(k)}",
-                        path_map=path_map,
-                        memo=memo,
-                    )
-                    if isinstance(v, dict)
-                    else v
-                    for k, v in repaired["patternProperties"].items()
-                }
-
-            # 3. Definitions & $defs
-            for def_key in ["definitions", "$defs"]:
-                if def_key in repaired and isinstance(repaired[def_key], dict):
-                    repaired[def_key] = {
-                        k: cls._attempt_repair(
-                            v,
-                            current_path=f"{current_path}/{def_key}/{cls._escape_ptr(k)}",
-                            path_map=path_map,
-                            memo=memo,
-                        )
-                        if isinstance(v, dict)
-                        else v
-                        for k, v in repaired[def_key].items()
-                    }
-
-            # 4. Additional Properties (if dict)
-            if "additionalProperties" in repaired and isinstance(repaired["additionalProperties"], dict):
-                repaired["additionalProperties"] = cls._attempt_repair(
-                    repaired["additionalProperties"],
-                    current_path=f"{current_path}/additionalProperties",
-                    path_map=path_map,
-                    memo=memo,
-                )
-
-            # Directive 1: Exhaustive Draft 7 Schema Traversal (Single Schemas)
-            for key in ["if", "then", "else", "not", "contains", "propertyNames", "additionalItems"]:
-                if key in repaired and isinstance(repaired[key], dict):
-                    repaired[key] = cls._attempt_repair(
-                        repaired[key],
-                        current_path=f"{current_path}/{key}",
-                        path_map=path_map,
-                        memo=memo,
-                    )
-
-            # Directive 1: Dependencies (Map)
-            if "dependencies" in repaired and isinstance(repaired["dependencies"], dict):
-                repaired["dependencies"] = {
-                    k: cls._attempt_repair(
-                        v,
-                        current_path=f"{current_path}/dependencies/{cls._escape_ptr(k)}",
-                        path_map=path_map,
-                        memo=memo,
-                    )
-                    if isinstance(v, dict)
-                    else v
-                    for k, v in repaired["dependencies"].items()
-                }
-
-            # --- Recursion Step: Schema Arrays ---
-            # 5. Combinators (anyOf, allOf, oneOf)
-            for comb in ["anyOf", "allOf", "oneOf"]:
-                if comb in repaired and isinstance(repaired[comb], list):
-                    repaired[comb] = [
-                        cls._attempt_repair(
-                            sub,
-                            current_path=f"{current_path}/{comb}/{idx}",
-                            path_map=path_map,
-                            memo=memo,
-                        )
-                        if isinstance(sub, dict)
-                        else sub
-                        for idx, sub in enumerate(repaired[comb])
-                    ]
-
-            # 6. Items (Polymorphic: Dict or List)
-            if "items" in repaired:
-                if isinstance(repaired["items"], dict):
-                    repaired["items"] = cls._attempt_repair(
-                        repaired["items"],
-                        current_path=f"{current_path}/items",
-                        path_map=path_map,
-                        memo=memo,
-                    )
-                elif isinstance(repaired["items"], list):
-                    repaired["items"] = [
-                        cls._attempt_repair(
-                            sub,
-                            current_path=f"{current_path}/items/{idx}",
-                            path_map=path_map,
-                            memo=memo,
-                        )
-                        if isinstance(sub, dict)
-                        else sub
-                        for idx, sub in enumerate(repaired["items"])
-                    ]
-
-            # --- Heuristic Repairs ---
-            # Fix 1: Missing "type": "object" when "properties" exists
-            if "properties" in repaired and "type" not in repaired:
-                repaired["type"] = "object"
-
-            # Fix 2: Conflict between "default" and "type"
-            if "default" in repaired and "type" in repaired:
-                t = repaired["type"]
-                d = repaired["default"]
-
-                # Directive 3: Defensive Heuristic Typing (Unhashable Trap)
-                if isinstance(t, list):
-                    types = {str(x) for x in t if isinstance(x, (str, int, bool))}
-                elif isinstance(t, (str, int, bool)):
-                    types = {str(t)}
-                else:
-                    types = set()
-
-                is_conflict = False
-                new_default = d
-
-                # Handle Null Default Logic (SOTA Hardening)
-                if d is None:
-                    # Allow null if explicitly nullable or union type includes "null"
-                    nullable = repaired.get("nullable", False)
-                    is_union_null = "null" in types
-                    if not (nullable or is_union_null):
-                        # Invalid null default -> remove it
-                        is_conflict = True
-                else:
-                    # Smart Casting for non-null values
-                    if "integer" in types and not isinstance(d, int):
-                        try:
-                            new_default = int(d)
-                        except (ValueError, TypeError):
-                            if len(types) == 1:
-                                is_conflict = True
-
-                    # 1. Integer
-                    if "integer" in types and (not isinstance(d, int) or isinstance(d, bool)):
-                        if isinstance(d, bool):
-                            if len(types) == 1:
-                                is_conflict = True
-                        else:
-                            try:
-                                new_default = int(d)
-                            except (ValueError, TypeError):
-                                if len(types) == 1:
-                                    is_conflict = True
-
-                    # 2. String
-                    elif "string" in types and not isinstance(d, str):
-                        new_default = str(d)
-
-                    # 3. Boolean
-                    elif "boolean" in types and not isinstance(d, bool):
-                        if str(d).lower() == "true":
-                            new_default = True
-                        elif str(d).lower() == "false":
-                            new_default = False
-                        else:
-                            if len(types) == 1:
-                                is_conflict = True
-
-                    # 4. Float
-                    elif "float" in types and not isinstance(d, float):
-                        try:
-                            new_default = float(d)
-                        except (ValueError, TypeError):
-                            if len(types) == 1:
-                                is_conflict = True
-
-                    # 5. Object & 6. Array
-                    elif (
-                        ("object" in types and not isinstance(d, dict))
-                        or ("array" in types and not isinstance(d, list))
-                    ) and len(types) == 1:
-                        is_conflict = True
-
-                if is_conflict:
-                    del repaired["default"]
-                elif new_default != d:
-                    repaired["default"] = new_default
-
-            # Directive 2: Store in Memo (fully processed)
-            memo[schema_id] = repaired
-            return repaired
-
-        finally:
-            # Backtrack path map (exit recursion stack)
-            del path_map[schema_id]
 
 
 class FlowInterface(BaseModel):
@@ -411,6 +144,7 @@ class Graph(BaseModel):
 
     nodes: dict[str, AnyNode]
     edges: list[Edge]
+    entry_point: str = Field(..., description="The ID of the starting node.")
 
 
 class FlowDefinitions(BaseModel):

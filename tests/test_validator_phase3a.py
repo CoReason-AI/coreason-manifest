@@ -67,7 +67,7 @@ def create_tool_pack(namespace: str, tools: list[str]) -> ToolPack:
 def test_validate_graph_flow_valid() -> None:
     agent = create_agent_node("agent1", ["tool1"])
     tp = create_tool_pack("ns", ["tool1"])
-    graph = Graph(nodes={"agent1": agent}, edges=[])
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
@@ -89,6 +89,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
             Edge(source="agent1", target="missing"),
             Edge(source="missing", target="agent1"),
         ],
+        entry_point="agent1",
     )
     flow = GraphFlow(
         kind="GraphFlow",
@@ -105,7 +106,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
 
 def test_validate_switch_node_invalid_targets() -> None:
     switch = create_switch_node("switch1", "var", {"case1": "missing1"}, "missing2")
-    graph = Graph(nodes={"switch1": switch}, edges=[])
+    graph = Graph(nodes={"switch1": switch}, edges=[], entry_point="switch1")
     blackboard = Blackboard(
         variables={"var": VariableDef(type="string")},
         persistence=False,
@@ -127,7 +128,7 @@ def test_validate_missing_tool() -> None:
     agent = create_agent_node("agent1", ["tool1"])
     # Tool pack has no tools
     tp = create_tool_pack("ns", [])
-    graph = Graph(nodes={"agent1": agent}, edges=[])
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
 
     # Expect ValidationError during instantiation due to Runtime Integrity
     with pytest.raises(ValidationError, match="requires missing tool 'tool1'"):
@@ -144,7 +145,7 @@ def test_validate_missing_tool() -> None:
 
 def test_validate_governance_sanity() -> None:
     agent = create_agent_node("agent1", [])
-    graph = Graph(nodes={"agent1": agent}, edges=[])
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
     gov = Governance(rate_limit_rpm=-1, cost_limit_usd=-5.0)
     flow = GraphFlow(
         kind="GraphFlow",
@@ -226,7 +227,7 @@ def test_validate_duplicate_node_ids() -> None:
 
 def test_validate_graph_flow_empty() -> None:
     """Test validation for empty graph."""
-    graph = Graph(nodes={}, edges=[])
+    graph = Graph(nodes={}, edges=[], entry_point="missing")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
@@ -242,7 +243,7 @@ def test_validate_graph_flow_key_id_mismatch() -> None:
     """Test validation for mismatch between graph node key and node ID."""
     agent = create_agent_node("agent1", [])
     # Key is "wrong_key", ID is "agent1"
-    graph = Graph(nodes={"wrong_key": agent}, edges=[])
+    graph = Graph(nodes={"wrong_key": agent}, edges=[], entry_point="wrong_key")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
@@ -263,7 +264,11 @@ def test_validate_orphan_nodes() -> None:
     node2 = create_agent_node("node2", [])
     node3 = create_agent_node("node3", [])
 
-    graph = Graph(nodes={"node1": node1, "node2": node2, "node3": node3}, edges=[Edge(source="node1", target="node2")])
+    graph = Graph(
+        nodes={"node1": node1, "node2": node2, "node3": node3},
+        edges=[Edge(source="node1", target="node2")],
+        entry_point="node1",
+    )
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),

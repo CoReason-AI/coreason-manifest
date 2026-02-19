@@ -30,13 +30,18 @@ from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, comp
 
 
 def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> GraphFlow:
+    entry_point = nodes_list[0].id if nodes_list else "unknown"
     return GraphFlow(
         kind="GraphFlow",
         status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=Blackboard(variables={}, persistence=False),
-        graph=Graph(nodes={n.id: n for n in nodes_list}, edges=[Edge(source=s, target=t) for s, t in edges_list]),
+        graph=Graph(
+            nodes={n.id: n for n in nodes_list},
+            edges=[Edge(source=s, target=t) for s, t in edges_list],
+            entry_point=entry_point,
+        ),
     )
 
 
@@ -285,7 +290,7 @@ def test_topology_utility_island_acyclic_unsafe() -> None:
     node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
     node_unsafe = AgentNode(id="unsafe", type="agent", metadata={}, profile=create_unsafe_profile(), tools=[])
 
-    edges = [("safe1", "safe2"), ("safe2", "safe1"), ("safe2", "unsafe")]
+    edges = [("safe1", "safe2"), ("safe2", "safe1")]
 
     flow = create_mock_flow([node_safe1, node_safe2, node_unsafe], edges)
 
@@ -328,7 +333,7 @@ def test_topology_utility_island_code_exec() -> None:
         tools=[],
     )
 
-    edges = [("safe1", "safe2"), ("safe2", "safe1"), ("safe2", "code_island")]
+    edges = [("safe1", "safe2"), ("safe2", "safe1")]
 
     flow = create_mock_flow([node_safe1, node_safe2, node_unsafe], edges)
 

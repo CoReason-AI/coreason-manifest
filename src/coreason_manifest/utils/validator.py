@@ -311,8 +311,8 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
     # All nodes physically present in the dict
     all_ids = set(graph.nodes.keys())
 
-    # Assume first node is entry point and exempt it
-    entry_point = next(iter(graph.nodes.keys()))
+    # SOTA Fix: Use explicit entry point
+    entry_point = graph.entry_point
 
     targeted_ids = {edge.target for edge in graph.edges}
 

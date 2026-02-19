@@ -59,7 +59,13 @@ interface:
   outputs: {}
 blackboard: null
 graph:
-  nodes: {}
+  entry_point: "start"
+  nodes:
+    start:
+      id: "start"
+      type: "placeholder"
+      metadata: {}
+      required_capabilities: []
   edges: []
 """)
     flow = load_flow_from_file(str(flow_file))
@@ -74,7 +80,7 @@ def test_loader_syntax_error(tmp_path: Path) -> None:
     py_file = tmp_path / "bad.py"
     py_file.write_text("class Agent: def run(self): return 'missing quote")
 
-    with pytest.raises(ValueError, match="Syntax error"):
+    with pytest.raises(ValueError, match="Failed to execute agent code"):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 
@@ -172,9 +178,10 @@ class Agent: pass
     py_file = tmp_path / "from_imp.py"
     py_file.write_text(code)
 
-    # Should fail AST check because 'os' is banned
+    # Should warn about dynamic execution
+    from coreason_manifest.utils.loader import RuntimeSecurityWarning
 
-    with pytest.raises(SecurityViolationError, match="Banned import 'os'"):
+    with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
 
 

@@ -108,6 +108,7 @@ def test_core_kernel_instantiation() -> None:
             "place-1": placeholder,
         },
         edges=[edge],
+        entry_point="agent-1",
     )
 
     linear_flow = LinearFlow(

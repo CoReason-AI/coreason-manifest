@@ -105,7 +105,7 @@ def test_graph_flow_definitions() -> None:
         inputs=DataSchema(json_schema={}),
         outputs=DataSchema(json_schema={}),
     )
-    graph = Graph(nodes={"agent-1": agent}, edges=[])
+    graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -200,7 +200,7 @@ def test_tool_integrity_failure_graph() -> None:
         resilience=None,
     )
 
-    graph = Graph(nodes={"agent-1": agent}, edges=[])
+    graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
 
     with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
         GraphFlow(

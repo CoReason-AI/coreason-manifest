@@ -180,7 +180,7 @@ def test_graph_unguarded_path() -> None:
     # No human
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": agent}, edges=[])
+    graph = Graph(nodes={"a1": agent}, edges=[], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -204,7 +204,7 @@ def test_graph_guarded_path() -> None:
     human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(source="h1", target="a1")])
+    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(source="h1", target="a1")], entry_point="h1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -222,13 +222,13 @@ def test_graph_guarded_path() -> None:
     assert len(errors) == 0
 
 
-def test_graph_cycle_no_entry() -> None:
-    # Cyclic graph with no entry points
+def test_graph_cycle_explicit_entry() -> None:
+    # Cyclic graph with explicit entry point
     # a1(comp) -> a1
     defs = get_defs()
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")])
+    graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -242,9 +242,9 @@ def test_graph_cycle_no_entry() -> None:
         graph=graph,
     )
 
-    # Should fail closed (return False in _is_guarded because no entry_ids but nodes exist)
+    # a1 is entry and unguarded.
     errors = validate_policy(flow)
-    assert len(errors) == 2
+    assert len(errors) == 1
 
 
 def test_integrity_compute_hash_variants() -> None:
@@ -276,7 +276,9 @@ def test_integrity_compute_hash_variants() -> None:
         def __str__(self) -> str:
             return "plain"
 
-    assert compute_hash(PlainObj()) == compute_hash("plain")
+    # SOTA Fix: Strict integrity ensures we don't silently fallback to str()
+    with pytest.raises(TypeError, match="is not deterministically serializable"):
+        compute_hash(PlainObj())
 
 
 def test_gatekeeper_inline_profile() -> None:
@@ -360,7 +362,7 @@ def test_graph_traversal_unguarded() -> None:
     a1 = AgentNode(id="a1", metadata={}, type="agent", profile="safe", tools=[])
     a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a2")])
+    graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a2")], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",

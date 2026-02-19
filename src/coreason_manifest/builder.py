@@ -284,12 +284,18 @@ class NewGraphFlow(BaseFlowBuilder):
         super().__init__(name, version, description)
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []
+        self._entry_point: str | None = None
         # Defaults
         self.interface = FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         )
         self.blackboard: Blackboard | None = None
+
+    def set_entry_point(self, node_id: str) -> "NewGraphFlow":
+        """Sets the explicit entry point for the graph."""
+        self._entry_point = node_id
+        return self
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
         """Adds a node to the graph."""
@@ -356,7 +362,16 @@ class NewGraphFlow(BaseFlowBuilder):
 
     def build(self) -> GraphFlow:
         """Constructs and validates the GraphFlow object."""
-        graph = Graph(nodes=self._nodes, edges=self._edges)
+        # Determine entry point
+        ep = self._entry_point
+        if not ep:
+            if self._nodes:
+                # Default to the first added node if strict entry point not set
+                ep = next(iter(self._nodes.keys()))
+            else:
+                ep = "missing_entry_point"
+
+        graph = Graph(nodes=self._nodes, edges=self._edges, entry_point=ep)
 
         flow = GraphFlow(
             kind="GraphFlow",

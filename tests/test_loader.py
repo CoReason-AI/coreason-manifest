@@ -36,7 +36,18 @@ def test_load_graph_flow() -> None:
             "outputs": {"json_schema": {}},
         },
         "blackboard": None,
-        "graph": {"nodes": {}, "edges": []},
+        "graph": {
+            "nodes": {
+                "start": {
+                    "id": "start",
+                    "type": "placeholder",
+                    "metadata": {},
+                    "required_capabilities": [],
+                }
+            },
+            "edges": [],
+            "entry_point": "start",
+        },
     }
     with NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
         # JSON is also valid YAML
