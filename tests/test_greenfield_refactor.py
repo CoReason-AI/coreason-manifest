@@ -27,7 +27,7 @@ def recursion_limit(limit: int) -> Generator[None, None, None]:
 
 
 # ------------------------------------------------------------------------
-# Task 1: Cycle-Aware Topological Repair
+# Task 1: Cycle-Aware Topological Repair (Directives 1 & 2)
 # ------------------------------------------------------------------------
 
 
@@ -159,9 +159,87 @@ def test_schema_dag_memoization() -> None:
             for v in obj.values():
                 if not check_no_ref(v):
                     return False
+        if isinstance(obj, list):
+            for v in obj:
+                if not check_no_ref(v):
+                    return False
         return True
 
     assert check_no_ref(repaired), "Unexpected $ref found in DAG structure"
+
+
+def test_rfc6901_escaping() -> None:
+    """
+    Directive 1: Verify RFC 6901 strict escaping for keys with '/' and '~'.
+    """
+    schema: dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "auth/token": {"type": "string"},
+            "user~id": {"type": "string"},
+            "cycle": {},  # Will point to auth/token
+        },
+    }
+    # Create cycle: cycle -> root
+    # Wait, lets create a cycle to 'auth/token'
+    auth_token = schema["properties"]["auth/token"]
+    schema["properties"]["cycle"] = auth_token
+    # auth_token points to 'user~id' to make it a deep cycle?
+    # No, let's just make 'auth/token' contain a cycle back to itself to test the path generation.
+    auth_token["properties"] = {"self": auth_token}
+
+    ds = DataSchema(json_schema=schema)
+    repaired = ds.json_schema
+
+    # Path to 'auth/token': #/properties/auth~1token
+    # Path to 'auth/token/properties/self': #/properties/auth~1token/properties/self
+    # The 'self' property inside 'auth/token' points back to 'auth/token'.
+    # So expected $ref is "#/properties/auth~1token"
+
+    self_ref = repaired["properties"]["auth/token"]["properties"]["self"]
+    assert "$ref" in self_ref
+    # Verify strict RFC 6901 escaping
+    assert self_ref["$ref"] == "#/properties/auth~1token"
+
+
+def test_combinator_traversal() -> None:
+    """
+    Directive 2: Verify recursion into anyOf, allOf, oneOf, items (list/dict), patternProperties.
+    """
+    # 1. anyOf cycle
+    # Root -> anyOf[0] -> Root
+    schema_anyof: dict[str, Any] = {
+        "anyOf": [
+            {},  # Will point to root
+            {"type": "string"},
+        ]
+    }
+    schema_anyof["anyOf"][0] = schema_anyof
+
+    ds_any = DataSchema(json_schema=schema_anyof)
+    # Recursion check: #/anyOf/0 points to #
+    assert ds_any.json_schema["anyOf"][0]["$ref"] == "#"
+
+    # 2. patternProperties cycle
+    # Root -> patternProperties["^foo"] -> Root
+    schema_pattern: dict[str, Any] = {"patternProperties": {"^foo": {}}}
+    schema_pattern["patternProperties"]["^foo"] = schema_pattern
+
+    ds_pattern = DataSchema(json_schema=schema_pattern)
+    # Recursion check: #/patternProperties/^foo points to #
+    # Note: ^ does not need escaping.
+    assert ds_pattern.json_schema["patternProperties"]["^foo"]["$ref"] == "#"
+
+    # 3. items (list) cycle
+    # Root -> items[0] -> Root
+    schema_items_list: dict[str, Any] = {
+        "type": "array",
+        "items": [{}, {"type": "string"}],  # Tuple validation
+    }
+    schema_items_list["items"][0] = schema_items_list
+
+    ds_items_list = DataSchema(json_schema=schema_items_list)
+    assert ds_items_list.json_schema["items"][0]["$ref"] == "#"
 
 
 # ------------------------------------------------------------------------

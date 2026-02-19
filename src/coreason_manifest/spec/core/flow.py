@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
 import jsonschema
+from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.core.governance import Governance
@@ -59,6 +60,11 @@ class DataSchema(BaseModel):
         description="Full JSON Schema (Draft 7) definition for validation.",
     )
 
+    @staticmethod
+    def _escape_ptr(key: str) -> str:
+        """Escape JSON Pointer components per RFC 6901."""
+        return key.replace("~", "~0").replace("/", "~1")
+
     @model_validator(mode="before")
     @classmethod
     def validate_meta_schema(cls, data: Any) -> Any:
@@ -89,6 +95,11 @@ class DataSchema(BaseModel):
                     # Update data with repaired schema
                     data["json_schema"] = repaired_schema
 
+                except SchemaError as e:
+                    # Directive 3: Robust Error Unwrapping
+                    # Extract only the first line or message to prevent log bloat
+                    error_msg = getattr(e, "message", str(e)).split("\n")[0]
+                    raise ValueError(f"Invalid JSON Schema definition: {error_msg}") from e
                 except Exception as e:
                     raise ValueError(f"Invalid JSON Schema definition: {e}") from e
 
@@ -107,6 +118,7 @@ class DataSchema(BaseModel):
         1. Cycle detection using JSON Pointer paths (Directive 1).
         2. DAG Memoization for O(N) complexity (Directive 2).
         3. Heuristic repairs for common errors.
+        4. Comprehensive combinator traversal (Directive 2).
         """
         if path_map is None:
             path_map = {}
@@ -116,12 +128,10 @@ class DataSchema(BaseModel):
         schema_id = id(schema)
 
         # Directive 1: Path-Aware Cycle Resolution
-        # If we are visiting an ancestor in the current stack, it's a cycle.
         if schema_id in path_map:
             return {"$ref": path_map[schema_id]}
 
         # Directive 2: Graph Memoization
-        # If we have already fully processed this node, return the cached result.
         if schema_id in memo:
             return memo[schema_id].copy()
 
@@ -131,13 +141,13 @@ class DataSchema(BaseModel):
         try:
             repaired = schema.copy()
 
-            # --- Recursion Step ---
-            # 1. Properties (Objects)
+            # --- Recursion Step: Schema Mappings ---
+            # 1. Properties
             if "properties" in repaired and isinstance(repaired["properties"], dict):
                 repaired["properties"] = {
                     k: cls._attempt_repair(
                         v,
-                        current_path=f"{current_path}/properties/{k}",
+                        current_path=f"{current_path}/properties/{cls._escape_ptr(k)}",
                         path_map=path_map,
                         memo=memo,
                     )
@@ -146,22 +156,27 @@ class DataSchema(BaseModel):
                     for k, v in repaired["properties"].items()
                 }
 
-            # 2. Items (Arrays)
-            if "items" in repaired and isinstance(repaired["items"], dict):
-                repaired["items"] = cls._attempt_repair(
-                    repaired["items"],
-                    current_path=f"{current_path}/items",
-                    path_map=path_map,
-                    memo=memo,
-                )
+            # 2. Pattern Properties
+            if "patternProperties" in repaired and isinstance(repaired["patternProperties"], dict):
+                repaired["patternProperties"] = {
+                    k: cls._attempt_repair(
+                        v,
+                        current_path=f"{current_path}/patternProperties/{cls._escape_ptr(k)}",
+                        path_map=path_map,
+                        memo=memo,
+                    )
+                    if isinstance(v, dict)
+                    else v
+                    for k, v in repaired["patternProperties"].items()
+                }
 
-            # 3. Definitions (Reuse)
+            # 3. Definitions & $defs
             for def_key in ["definitions", "$defs"]:
                 if def_key in repaired and isinstance(repaired[def_key], dict):
                     repaired[def_key] = {
                         k: cls._attempt_repair(
                             v,
-                            current_path=f"{current_path}/{def_key}/{k}",
+                            current_path=f"{current_path}/{def_key}/{cls._escape_ptr(k)}",
                             path_map=path_map,
                             memo=memo,
                         )
@@ -169,6 +184,56 @@ class DataSchema(BaseModel):
                         else v
                         for k, v in repaired[def_key].items()
                     }
+
+            # 4. Additional Properties (if dict)
+            if (
+                "additionalProperties" in repaired
+                and isinstance(repaired["additionalProperties"], dict)
+            ):
+                repaired["additionalProperties"] = cls._attempt_repair(
+                    repaired["additionalProperties"],
+                    current_path=f"{current_path}/additionalProperties",
+                    path_map=path_map,
+                    memo=memo,
+                )
+
+            # --- Recursion Step: Schema Arrays ---
+            # 5. Combinators (anyOf, allOf, oneOf)
+            for comb in ["anyOf", "allOf", "oneOf"]:
+                if comb in repaired and isinstance(repaired[comb], list):
+                    repaired[comb] = [
+                        cls._attempt_repair(
+                            sub,
+                            current_path=f"{current_path}/{comb}/{idx}",
+                            path_map=path_map,
+                            memo=memo,
+                        )
+                        if isinstance(sub, dict)
+                        else sub
+                        for idx, sub in enumerate(repaired[comb])
+                    ]
+
+            # 6. Items (Polymorphic: Dict or List)
+            if "items" in repaired:
+                if isinstance(repaired["items"], dict):
+                    repaired["items"] = cls._attempt_repair(
+                        repaired["items"],
+                        current_path=f"{current_path}/items",
+                        path_map=path_map,
+                        memo=memo,
+                    )
+                elif isinstance(repaired["items"], list):
+                    repaired["items"] = [
+                        cls._attempt_repair(
+                            sub,
+                            current_path=f"{current_path}/items/{idx}",
+                            path_map=path_map,
+                            memo=memo,
+                        )
+                        if isinstance(sub, dict)
+                        else sub
+                        for idx, sub in enumerate(repaired["items"])
+                    ]
 
             # --- Heuristic Repairs ---
             # Fix 1: Missing "type": "object" when "properties" exists
