@@ -1,5 +1,6 @@
 import idna
 
+
 def canonicalize_domain(domain: str) -> str:
     """
     Canonicalizes a domain name for strict comparison.

@@ -310,7 +310,7 @@ class GraphFlow(BaseModel):
                         dfs_cycle(neighbor, path)
                     elif neighbor in recursion_stack:
                         # Cycle detected
-                        cycle_path = " -> ".join(path + [neighbor])
+                        cycle_path = " -> ".join([*path, neighbor])
                         raise ValueError(f"Cycle detected: {cycle_path}")
 
                 recursion_stack.remove(node)
