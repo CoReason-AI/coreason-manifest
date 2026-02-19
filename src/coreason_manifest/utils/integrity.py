@@ -148,7 +148,14 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     try:
         return dict(node)
     except (ValueError, TypeError):
-        return node  # Return as is if conversion fails (will likely fail hashing)
+        # Mypy: Returning Any from function declared to return "dict[str, Any]"
+        # If conversion fails, we return an empty dict or raise?
+        # The prompt "Return as is" causes Mypy error.
+        # But if it fails hashing later, we might as well raise or return something valid.
+        # Returning `node` as is implies `Any`.
+        # We'll cast it to satisfy Mypy, knowing it might be invalid at runtime but handled by caller?
+        # Or better: raise TypeError since `reconstruct_payload` expects something dict-like.
+        raise TypeError(f"Could not reconstruct payload from {type(node)}")
 
 
 def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:

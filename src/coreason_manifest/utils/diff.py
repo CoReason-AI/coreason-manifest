@@ -44,7 +44,7 @@ def _classify_path(path: str) -> Literal["resource", "topology", "governance"]:
     """
     Classifies a JSON path into a mutation domain.
     """
-    if path.startswith("/graph") or path.startswith("/sequence") or path.startswith("/edges"):
+    if path.startswith(("/graph", "/sequence", "/edges")):
         # Determine if it's structural or content.
 
         # Heuristic:
@@ -76,12 +76,12 @@ def _classify_path(path: str) -> Literal["resource", "topology", "governance"]:
 
 def _create_mutation(op: str, path: str, value: Any = None) -> ChangeOperation:
     category = _classify_path(path)
-    MutationClass = {
+    mutation_cls: type[ChangeOperation] = {
         "resource": ResourceMutation,
         "topology": TopologyMutation,
-        "governance": GovernanceMutation
+        "governance": GovernanceMutation,
     }[category]
-    return MutationClass(op=op, path=path, value=value)
+    return mutation_cls(op=op, path=path, value=value)
 
 
 def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
@@ -127,10 +127,10 @@ def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
 
         # Correct handling of removals:
         if len1 > len2:
-            for i in range(len1 - 1, len2 - 1, -1):
-                changes.append(
-                    _create_mutation(op="remove", path=f"{path}/{i}")
-                )
+            changes.extend(
+                _create_mutation(op="remove", path=f"{path}/{i}")
+                for i in range(len1 - 1, len2 - 1, -1)
+            )
     else:
         # Primitive replacement
         changes.append(

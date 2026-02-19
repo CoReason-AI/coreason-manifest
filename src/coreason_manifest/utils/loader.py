@@ -85,8 +85,8 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
     def find_spec(
         self,
         fullname: str,
-        path: Any = None,
-        target: Any = None,
+        _path: Any = None,
+        _target: Any = None,
     ) -> importlib.machinery.ModuleSpec | None:
         """
         Attempt to find the module in the current jail root.
@@ -100,8 +100,8 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
             return None
 
         # Determine path relative to jail
-        # Logic: If 'path' is None, it's a top-level import.
-        # If 'path' is set, it's a sub-module import.
+        # Logic: If '_path' is None, it's a top-level import.
+        # If '_path' is set, it's a sub-module import.
         # But our jail_root acts as a PYTHONPATH root.
 
         # We try to find:

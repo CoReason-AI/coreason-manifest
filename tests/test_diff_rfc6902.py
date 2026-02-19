@@ -4,14 +4,16 @@ from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, DataSchem
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.engines import StandardReasoning
 
-def create_flow(name="test", nodes=[]):
+from coreason_manifest.spec.core.flow import AnyNode
+
+def create_flow(name: str = "test", nodes: list[AnyNode] | None = None) -> LinearFlow:
     return LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name=name, version="1.0", description="desc", tags=[]),
-        sequence=nodes
+        sequence=nodes or [],
     )
 
-def test_diff_metadata_resource():
+def test_diff_metadata_resource() -> None:
     f1 = create_flow(name="A")
     f2 = create_flow(name="B")
 
@@ -23,7 +25,7 @@ def test_diff_metadata_resource():
     assert op.path == "/metadata/name"
     assert op.value == "B"
 
-def test_diff_topology_add_node():
+def test_diff_topology_add_node() -> None:
     n1 = AgentNode(id="a1", type="agent", metadata={}, profile="p1", tools=[])
     f1 = create_flow(nodes=[])
     f2 = create_flow(nodes=[n1])
@@ -36,7 +38,7 @@ def test_diff_topology_add_node():
     assert op.path == "/sequence/0"
     assert op.value["id"] == "a1"
 
-def test_diff_governance():
+def test_diff_governance() -> None:
     # Helper to add governance
     f1 = create_flow()
     # Pydantic models are immutable (frozen), so we rely on constructor
@@ -59,7 +61,7 @@ def test_diff_governance():
     assert op.path == "/governance/allowed_domains/1"
     assert op.value == "foo.com"
 
-def test_diff_list_replace():
+def test_diff_list_replace() -> None:
     # List: [A, B] -> [A, C]
     # Expect: replace /1
     pass

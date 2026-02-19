@@ -275,7 +275,7 @@ class GraphFlow(BaseModel):
             queue = [self.graph.entry_point]
 
             # Build adjacency list
-            adj = {nid: [] for nid in node_ids}
+            adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
             for edge in self.graph.edges:
                 adj[edge.source].append(edge.target)
 
@@ -290,7 +290,7 @@ class GraphFlow(BaseModel):
             if unreachable:
                 # SOTA: Return exact path of fracture
                 # e.g. /graph/nodes/island_node
-                first_unreachable = sorted(list(unreachable))[0]
+                first_unreachable = sorted(unreachable)[0]
                 raise ValueError(
                     f"Topological fracture: Node '{first_unreachable}' is unreachable from entry point "
                     f"'{self.graph.entry_point}'. Path: /graph/nodes/{first_unreachable}"

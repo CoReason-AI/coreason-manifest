@@ -34,25 +34,11 @@ def test_sandboxed_import_isolation(tmp_path: Path) -> None:
 
     # Load from jail1
     agent1_cls = load_agent_from_ref("agent.py:Agent", root_dir=jail1)
-    assert agent1_cls.val == 1
+    assert getattr(agent1_cls, "val") == 1
 
     # Load from jail2
-    # Note: If 'config' is in sys.modules, jail2 might reuse it if we are not careful about cleaning sys.modules
-    # My implementation puts 'config' in sys.modules.
-    # So if I load jail1/agent.py, it loads jail1/config.py as 'config' in sys.modules.
-    # Then loading jail2/agent.py imports 'config'. usage standard import. It finds 'config' in sys.modules.
-    # It uses jail1's config!
-    # SOTA "Secure Contextual Sandboxing" requires isolation.
-    # My implementation FAILED to provide isolation if module names collide.
-    # I noted this in my thought process.
-
-    # If this test fails, I need to fix it by removing modules from sys.modules after load?
-    # But if I remove it, the agent class might break if it relies on the module object being consistent.
-    # However, for the purpose of "loading", maybe we can force reload?
-
-    # Let's see if it fails.
     try:
         agent2_cls = load_agent_from_ref("agent.py:Agent", root_dir=jail2)
-        assert agent2_cls.val == 2
+        assert getattr(agent2_cls, "val") == 2
     except AssertionError:
         pytest.fail("Sandboxed isolation failed: Module collision in sys.modules")

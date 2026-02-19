@@ -37,7 +37,7 @@ def canonicalize_domain(domain: str) -> str:
     try:
         # 3. IDNA Encode
         # idna.encode returns bytes, we decode to ascii string
-        return idna.encode(domain).decode("ascii")
+        return str(idna.encode(domain).decode("ascii"))
     except idna.IDNAError:
         # If encoding fails, it's likely an invalid domain.
         # We return the lowercased version but it won't be punycode.

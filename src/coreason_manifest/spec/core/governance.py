@@ -87,13 +87,17 @@ class Governance(BaseModel):
             # Since I cannot create new files easily, I will duplicate logic using idna directly.
             import idna
 
-            def canonicalize_domain(d: str) -> str:
-                if not d: return ""
+            def _fallback_canonicalize(d: str) -> str:
+                if not d:
+                    return ""
                 d = d.rstrip(".").lower()
                 try:
-                    return idna.encode(d).decode("ascii")
+                    # idna.encode returns bytes, we decode to str
+                    return str(idna.encode(d).decode("ascii"))
                 except idna.IDNAError:
                     return d
+
+            return [_fallback_canonicalize(d) for d in v]
 
         return [canonicalize_domain(d) for d in v]
 
