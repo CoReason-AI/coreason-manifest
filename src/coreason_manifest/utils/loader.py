@@ -258,6 +258,17 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         # and for the module to be valid.
         sys.modules[module_name] = module
 
+        # TODO(Architecture-Spike): Transition to True Process Sandboxing.
+        # Current implementation relies on namespace sandboxing via importlib.
+        # To safely execute untrusted LLM-generated code, this execution block
+        # MUST be transitioned to an isolated WebAssembly (Wasm) runtime or microVM.
+        warnings.warn(
+            f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
+            "Ensure strict governance until Wasm sandboxing is implemented.",
+            category=RuntimeSecurityWarning,
+            stacklevel=2,
+        )
+
         try:
             spec.loader.exec_module(module)
         except Exception as e:

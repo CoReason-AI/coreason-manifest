@@ -297,7 +297,7 @@ class GraphFlow(BaseModel):
                 )
 
             # 2b. Cycle Detection using Kahn's Algorithm (O(V+E), Zero Recursion)
-            in_degree = {nid: 0 for nid in reachable}
+            in_degree = dict.fromkeys(reachable, 0)
 
             # Calculate in-degrees for reachable nodes only
             for node in reachable:
@@ -321,6 +321,11 @@ class GraphFlow(BaseModel):
 
             # If visited count doesn't match reachable nodes, a cycle exists
             if visited_count != len(reachable):
-                raise ValueError("Topological fracture: Cycle detected in the execution graph.")
+                # Extract nodes trapped in the cycle
+                cyclic_nodes = [n for n, deg in in_degree.items() if deg > 0]
+                raise ValueError(
+                    f"Topological fracture: Cycle detected involving nodes: {sorted(cyclic_nodes)}. "
+                    "Execution graphs must be strictly acyclic."
+                )
 
         return self
