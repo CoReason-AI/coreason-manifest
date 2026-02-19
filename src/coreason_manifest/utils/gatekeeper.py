@@ -1,7 +1,7 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
@@ -202,7 +202,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         sccs: list[list[str]] = []
         id_counter = 0
 
-        def dfs(at: str):
+        def dfs(at: str) -> None:
             nonlocal id_counter
             stack.append(at)
             on_stack.add(at)
@@ -241,8 +241,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 is_cycle = True
             elif len(comp) == 1:
                 # Check self-loop
-                node = comp[0]
-                if node in adj.get(node, []):
+                node_id_in_comp = comp[0]
+                if node_id_in_comp in adj.get(node_id_in_comp, []):
                     is_cycle = True
 
             for nid in comp:
@@ -250,7 +250,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
         # 5b. Utility Island Detection (Unreachable from Entry)
         # Identify entry nodes (in-degree 0)
-        in_degree = {nid: 0 for nid in flow.graph.nodes}
+        in_degree = dict.fromkeys(flow.graph.nodes, 0)
         for edge in flow.graph.edges:
             in_degree[edge.target] += 1
 

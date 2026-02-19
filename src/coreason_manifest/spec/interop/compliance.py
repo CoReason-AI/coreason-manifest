@@ -50,7 +50,7 @@ class ComplianceReport(BaseModel):
     details: dict[str, Any] = Field(default_factory=dict)
 
 
-def LegacyErrorAdapter(report: ComplianceReport, consumer_version: str = "v0.24.0") -> str:
+def legacy_error_adapter(report: ComplianceReport, consumer_version: str = "v0.24.0") -> str:
     """
     Adapts a modern ComplianceReport into a legacy error string format.
 
