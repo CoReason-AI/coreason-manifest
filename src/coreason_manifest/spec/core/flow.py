@@ -296,4 +296,29 @@ class GraphFlow(BaseModel):
                     f"'{self.graph.entry_point}'. Path: /graph/nodes/{first_unreachable}"
                 )
 
+            # 2b. Cycle Detection (DFS)
+            visited = set()
+            recursion_stack = set()
+
+            def dfs_cycle(node: str, path: list[str]) -> None:
+                visited.add(node)
+                recursion_stack.add(node)
+                path.append(node)
+
+                for neighbor in adj[node]:
+                    if neighbor not in visited:
+                        dfs_cycle(neighbor, path)
+                    elif neighbor in recursion_stack:
+                        # Cycle detected
+                        cycle_path = " -> ".join(path + [neighbor])
+                        raise ValueError(f"Cycle detected: {cycle_path}")
+
+                recursion_stack.remove(node)
+                path.pop()
+
+            try:
+                dfs_cycle(self.graph.entry_point, [])
+            except ValueError:
+                raise
+
         return self

@@ -61,10 +61,10 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
     if isinstance(obj, BaseModel):
         # Pydantic v2
         excludes = getattr(obj, "_hash_exclude_", None)
-        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="json"))
+        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="python"))
     if hasattr(obj, "model_dump"):
         # Pydantic v2 or compatible
-        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="json"))
+        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
     if isinstance(obj, float):
         # RFC 8785: If number is integer, represent as integer.
         if obj.is_integer():

@@ -4,6 +4,7 @@ import importlib.abc
 import importlib.util
 import re
 import sys
+import threading
 import warnings
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -127,6 +128,9 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
 
 # Singleton instance of the finder
 _SANDBOXED_FINDER = SandboxedPathFinder()
+
+# Global lock to prevent race conditions when modifying sys.modules
+_loader_lock = threading.Lock()
 
 
 @contextmanager

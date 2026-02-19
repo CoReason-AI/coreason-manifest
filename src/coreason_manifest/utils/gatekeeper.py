@@ -4,8 +4,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
-import idna
-
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 from coreason_manifest.spec.interop.compliance import (
@@ -13,6 +11,7 @@ from coreason_manifest.spec.interop.compliance import (
     ErrorCatalog,
     RemediationAction,
 )
+from coreason_manifest.utils.net_utils import canonicalize_domain
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
