@@ -1,6 +1,5 @@
 import json
 import logging
-import warnings
 from pathlib import Path
 from typing import Any
 
@@ -8,33 +7,28 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import DataSchema
-from coreason_manifest.utils.loader import load_agent_from_ref, RuntimeSecurityWarning
 
-# Try to import Stream components, might fail if not implemented yet
-try:
-    from coreason_manifest.spec.interop.stream import StreamError, StreamPacket, PacketContainer
-except ImportError:
-    StreamError = None
-    StreamPacket = None
-    PacketContainer = None
-
+# Import Stream components directly. If they don't exist, tests should fail.
+from coreason_manifest.spec.interop.stream import PacketContainer, StreamError
+from coreason_manifest.utils.loader import RuntimeSecurityWarning, load_agent_from_ref
 
 # ------------------------------------------------------------------------
 # Task 1: Cycle-Aware Topological Repair
 # ------------------------------------------------------------------------
 
-def test_schema_cycle_repair():
+
+def test_schema_cycle_repair() -> None:
     """
     Assert that passing a deeply nested, cyclic dictionary to DataSchema resolves
     in under 10ms, raises no recursion errors, and outputs a valid schema containing a $ref key.
     """
     # Create a cyclic dictionary structure
-    cyclic_schema = {
+    cyclic_schema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "name": {"type": "string"},
-            "self": {}  # Will point to itself
-        }
+            "self": {},  # Will point to itself
+        },
     }
     # Create the cycle
     cyclic_schema["properties"]["self"] = cyclic_schema
@@ -44,12 +38,14 @@ def test_schema_cycle_repair():
 
     # We use a large recursion depth to trigger RecursionError if not handled
     import sys
+
     sys.setrecursionlimit(2000)
 
     try:
         # Measure time - strictly < 10ms is hard in a test env, but "under 10ms" implies fast.
         # We focus on functionality first.
         import time
+
         start_time = time.perf_counter()
 
         # Instantiate DataSchema with cyclic input
@@ -62,7 +58,7 @@ def test_schema_cycle_repair():
         repaired = ds.json_schema
 
         # Assertions
-        assert duration < 500, f"Repair took too long: {duration:.2f}ms" # relaxed for CI environment
+        assert duration < 500, f"Repair took too long: {duration:.2f}ms"  # relaxed for CI environment
         assert "properties" in repaired
         assert "self" in repaired["properties"]
         # The cycle should be broken with a $ref
@@ -79,7 +75,8 @@ def test_schema_cycle_repair():
 # Task 2: Observable Security via SARIF Telemetry
 # ------------------------------------------------------------------------
 
-def test_sarif_audit_log_format(tmp_path, caplog):
+
+def test_sarif_audit_log_format(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """
     Intercept the logging stream during a dynamic load_agent_from_ref execution.
     Assert that the emitted JSON strictly conforms to the SARIF structure and contains the valid execution_hash.
@@ -94,6 +91,7 @@ class TestAgent:
 
     # Calculate expected hash
     import hashlib
+
     expected_hash = hashlib.sha256(agent_code.encode("utf-8")).hexdigest()
 
     # Setup capturing logger
@@ -105,24 +103,6 @@ class TestAgent:
         load_agent_from_ref(f"{agent_file.name}:TestAgent", root_dir=tmp_path)
 
     # Find the SARIF log record
-    sarif_record = None
-    for record in caplog.records:
-        if hasattr(record, "sarif") and record.sarif: # If implementation uses 'sarif' attribute
-             sarif_record = record.sarif
-        elif isinstance(record.msg, dict) and "runs" in record.msg: # If message itself is dict
-             sarif_record = record.msg
-        elif isinstance(record.msg, str) and "runs" in record.msg: # If message is json string
-             try:
-                 data = json.loads(record.msg)
-                 if "runs" in data:
-                     sarif_record = data
-             except json.JSONDecodeError:
-                 pass
-        # Fallback: check extra dict if implementation puts it there
-        elif hasattr(record, "verification") and record.verification == "AST_PASSED":
-             # This is the current implementation, we need to assert it CHANGES to SARIF
-             pass
-
     # For the SOTA requirement, we expect a structured object that LOOKS like SARIF.
     # The most standard way is a log message that is a JSON string or a dict.
     # Let's assume the implementation will log a dictionary (or JSON string) that has 'runs'.
@@ -136,7 +116,7 @@ class TestAgent:
         elif isinstance(record.msg, str):
             try:
                 payload = json.loads(record.msg)
-            except:
+            except Exception:
                 continue
 
         if payload and isinstance(payload, dict) and "runs" in payload:
@@ -166,14 +146,12 @@ class TestAgent:
 # Task 3: Tolerant Ingress via Smart Discriminators
 # ------------------------------------------------------------------------
 
-def test_stream_error_duck_typing():
+
+def test_stream_error_duck_typing() -> None:
     """
     Inject a raw, untyped dictionary into the stream packet parser.
     Assert that it is successfully deserialized into a frozen StreamError object.
     """
-    if StreamError is None or PacketContainer is None:
-        pytest.fail("Stream components not implemented")
-
     raw_payload = {"code": 500, "message": "Failure", "severity": "high"}
 
     # Simulate receiving this payload in a StreamPacket container
@@ -190,19 +168,17 @@ def test_stream_error_duck_typing():
 
         # Verify frozen
         with pytest.raises(ValidationError):
-            packet.code = 200
+            packet.code = 200  # type: ignore[misc]
 
     except ValidationError as e:
         pytest.fail(f"Duck typing failed: {e}")
 
-def test_stream_error_duck_typing_fallback():
+
+def test_stream_error_duck_typing_fallback() -> None:
     """
     Inject a dictionary that matches signature but has wrong types.
     Should fallback to dict.
     """
-    if StreamError is None or PacketContainer is None:
-        pytest.fail("Stream components not implemented")
-
     # 'code' is string, but StreamError requires int. strict=True means no coercion?
     # Actually Pydantic v2 strict=True might allow str->int if it looks like int?
     # No, strict=True means strict types.
@@ -220,15 +196,12 @@ def test_stream_error_duck_typing_fallback():
     assert packet["code"] == "500"
 
 
-def test_strict_internal_mutation():
+def test_strict_internal_mutation() -> None:
     """
     Assert that once the stream data passes the ingress layer,
     any attempt to execute packet.error.code = 200 immediately raises a FrozenInstanceError.
     """
-    if StreamError is None:
-        pytest.fail("Stream components not implemented")
-
     error = StreamError(code=500, message="Failure", severity="high")
 
     with pytest.raises(ValidationError, match="frozen"):
-        error.code = 200
+        error.code = 200  # type: ignore[misc]
