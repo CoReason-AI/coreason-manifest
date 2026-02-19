@@ -296,29 +296,31 @@ class GraphFlow(BaseModel):
                     f"'{self.graph.entry_point}'. Path: /graph/nodes/{first_unreachable}"
                 )
 
-            # 2b. Cycle Detection (DFS)
-            visited = set()
-            recursion_stack = set()
+            # 2b. Cycle Detection using Kahn's Algorithm (O(V+E), Zero Recursion)
+            in_degree = {nid: 0 for nid in reachable}
 
-            def dfs_cycle(node: str, path: list[str]) -> None:
-                visited.add(node)
-                recursion_stack.add(node)
-                path.append(node)
+            # Calculate in-degrees for reachable nodes only
+            for node in reachable:
+                for neighbor in adj[node]:
+                    if neighbor in in_degree:
+                        in_degree[neighbor] += 1
+
+            # Initialize queue with nodes having 0 in-degree
+            zero_in_degree_queue = [n for n in reachable if in_degree[n] == 0]
+            visited_count = 0
+
+            while zero_in_degree_queue:
+                node = zero_in_degree_queue.pop(0)
+                visited_count += 1
 
                 for neighbor in adj[node]:
-                    if neighbor not in visited:
-                        dfs_cycle(neighbor, path)
-                    elif neighbor in recursion_stack:
-                        # Cycle detected
-                        cycle_path = " -> ".join([*path, neighbor])
-                        raise ValueError(f"Cycle detected: {cycle_path}")
+                    if neighbor in in_degree:
+                        in_degree[neighbor] -= 1
+                        if in_degree[neighbor] == 0:
+                            zero_in_degree_queue.append(neighbor)
 
-                recursion_stack.remove(node)
-                path.pop()
-
-            try:
-                dfs_cycle(self.graph.entry_point, [])
-            except ValueError:
-                raise
+            # If visited count doesn't match reachable nodes, a cycle exists
+            if visited_count != len(reachable):
+                raise ValueError("Topological fracture: Cycle detected in the execution graph.")
 
         return self
