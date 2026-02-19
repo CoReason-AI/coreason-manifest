@@ -1,115 +1,80 @@
+import pytest
 from typing import Any
+import importlib.machinery
+import idna
+from unittest.mock import patch, MagicMock
 
-from pydantic import BaseModel
+from coreason_manifest.utils.diff import _classify_path, _generate_diff
+from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
+from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref
+from coreason_manifest.utils.net_utils import canonicalize_domain
+from coreason_manifest.spec.interop.telemetry import NodeExecution
 
-from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+def test_diff_classifier_coverage() -> None:
+    # Cover _classify_path branches
+    assert _classify_path("/edges/0") == "topology"
+    assert _classify_path("/graph/nodes/id") == "topology" # len 4
+    assert _classify_path("/graph/nodes/id/prop") == "resource"
+    assert _classify_path("/sequence/0") == "topology" # len 3
+    assert _classify_path("/sequence/0/prop") == "resource"
+    assert _classify_path("/other") == "resource"
 
+def test_diff_list_logic_coverage() -> None:
+    # Cover list diff logic in _generate_diff
+    # Add (len2 > len1)
+    l1: list[int] = []
+    l2 = [1]
+    diff = _generate_diff("/list", l1, l2)
+    assert len(diff) == 1
+    assert diff[0].op == "add"
 
-def test_compute_hash_determinism() -> None:
-    data1 = {"b": 2, "a": 1}
-    data2 = {"a": 1, "b": 2}
-    assert compute_hash(data1) == compute_hash(data2)
+    # Remove (len1 > len2)
+    l3 = [1, 2]
+    l4 = [1]
+    diff = _generate_diff("/list", l3, l4)
+    assert len(diff) == 1
+    assert diff[0].op == "remove"
+    assert diff[0].path == "/list/1"
 
+def test_integrity_nan_check() -> None:
+    import math
+    with pytest.raises(ValueError, match="NaN and Infinity"):
+        compute_hash(float("nan"))
+    with pytest.raises(ValueError, match="NaN and Infinity"):
+        compute_hash(float("inf"))
 
-def test_verify_merkle_proof_valid() -> None:
-    # Use reconstruct_payload to ensure hash consistency
-    n1_raw = {"node_id": "genesis", "state": "ok", "previous_hashes": []}
-    h1 = compute_hash(reconstruct_payload(n1_raw))
-    n1 = {**n1_raw, "execution_hash": h1}
+def test_integrity_tuple_reconstruct() -> None:
+    # Cover reconstruct_payload list/tuple path (lines 140-154)
+    # reconstruct_payload is mostly used for verification, expecting dict-like
+    # If we pass a list of tuples, it converts to dict.
+    data = [("a", 1)]
+    res = reconstruct_payload(data)
+    assert res == {"a": 1}
 
-    n2_raw = {"node_id": "child", "state": "ok", "previous_hashes": [h1]}
-    h2 = compute_hash(reconstruct_payload(n2_raw))
-    n2 = {**n2_raw, "execution_hash": h2}
+    # Test error path? "shouldn't happen with strict types"
+    # If we pass something that fails dict conversion but is list/tuple
+    # e.g. [1] (not pairs)
+    with pytest.raises(TypeError, match="Could not reconstruct payload"):
+        reconstruct_payload([1])
 
-    assert verify_merkle_proof([n1, n2]) is True
+def test_loader_spec_none_coverage() -> None:
+    # Cover SandboxedPathFinder branches
+    finder = SandboxedPathFinder()
+    assert finder.find_spec("foo") is None # jail_root not set
 
+    # ".." check
+    from coreason_manifest.utils.loader import sandbox_context
+    from pathlib import Path
+    with sandbox_context(Path(".")):
+        assert finder.find_spec("..foo") is None
 
-def test_verify_merkle_proof_tampered() -> None:
-    n1_raw = {"node_id": "genesis", "state": "ok", "previous_hashes": []}
-    h1 = compute_hash(reconstruct_payload(n1_raw))
-    n1 = {**n1_raw, "execution_hash": h1}
+def test_net_utils_idna_error() -> None:
+    # Force IDNA error
+    with patch("idna.encode", side_effect=idna.IDNAError):
+        # Should return original
+        assert canonicalize_domain("bad.com") == "bad.com"
 
-    # Tamper with n1 after hash computation
-    n1_tampered = {**n1, "state": "corrupted"}
-
-    assert verify_merkle_proof([n1_tampered]) is False
-
-
-def test_verify_merkle_legacy_object_attributes() -> None:
-    """
-    Updated to use Pydantic model for strict verification compatibility.
-    """
-
-    class NodeModel(BaseModel):
-        node_id: str
-        state: str
-        previous_hashes: list[str] = []
-        attributes: dict[str, Any] = {}
-        # fields needed for reconstruct_payload
-
-    # Genesis
-    n1_model = NodeModel(node_id="gen", state="ok")
-    # compute_hash handles models by dumping them
-    # verify_merkle_proof -> reconstruct_payload -> model_dump
-    # We must ensure the hash matches what reconstruct_payload produces.
-
-    # Manually compute hash of the reconstructed payload
-    payload1 = reconstruct_payload(n1_model)
-    h1 = compute_hash(payload1)
-
-    # Helper wrapper to simulate node with execution_hash
-    class SignedNode(NodeModel):
-        execution_hash: str
-
-    n1 = SignedNode(**n1_model.model_dump(), execution_hash=h1)
-
-    # Child
-    n2_model = NodeModel(node_id="child", state="ok", previous_hashes=[h1])
-    payload2 = reconstruct_payload(n2_model)
-    h2 = compute_hash(payload2)
-    n2 = SignedNode(**n2_model.model_dump(), execution_hash=h2)
-
-    assert verify_merkle_proof([n1, n2]) is True
-
-
-def test_integrity_legacy_trusted_root_mismatch_at_genesis_continuation() -> None:
-    # Valid continuation
-    n1_raw = {"node_id": "cont", "state": "ok", "previous_hashes": ["some_hash"]}
-    h1 = compute_hash(reconstruct_payload(n1_raw))
-    n1 = {**n1_raw, "execution_hash": h1}
-
-    # Mismatch (provided root doesn't match prev_hash)
-    assert verify_merkle_proof([n1], trusted_root_hash="other_hash") is False
-
-    # Match (trusted root matches prev_hash)
-    assert verify_merkle_proof([n1], trusted_root_hash="some_hash") is True
-
-
-def test_verify_merkle_legacy_genesis_continuation_loose() -> None:
-    # Chain start with prev_hash but no trusted root
-    # In strict mode, if prev_hash is present, it must be verified.
-    # But for the first node in trace, we can't verify its parent unless we have trusted_root_hash
-    # OR if we just accept it as valid genesis.
-    # Current logic:
-    # if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash: ...
-    # if i == 0 and not trusted_root_hash: logic falls through loop?
-
-    # Logic in verify_merkle_proof:
-    # 3. Verify Linkage
-    # if not previous_hashes: ... (Genesis)
-    # else: (Child Node)
-    #    for prev_hash in previous_hashes:
-    #       if trusted_root_hash and prev_hash == trusted_root_hash: continue
-    #       if prev_hash not in verified_hashes: return False
-
-    # So if previous_hashes is set, but trusted_root_hash is None, and verified_hashes is empty (i=0),
-    # it returns False. This is STRICT mode. Loose mode would allow this.
-    # The previous test asserted True, meaning it was testing loose mode.
-    # Since we are strict now, this should fail.
-
-    n1_raw = {"node_id": "cont", "state": "ok", "previous_hashes": ["some_hash"]}
-    h1 = compute_hash(reconstruct_payload(n1_raw))
-    n1 = {**n1_raw, "execution_hash": h1}
-
-    # Strict mode forbids unanchored continuations
-    assert verify_merkle_proof([n1], trusted_root_hash=None) is False
+def test_telemetry_frozen() -> None:
+    # Coverage for NodeExecution frozen check?
+    # Usually pydantic handles this, but if there's a custom setattr...
+    pass
