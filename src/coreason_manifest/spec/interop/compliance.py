@@ -8,6 +8,7 @@ class ErrorCatalog(StrEnum):
     """
     Strict catalog of error codes for machine-remediable compliance reports.
     """
+
     # Security / Governance
     ERR_SEC_PATH_ESCAPE_001 = "ERR_SEC_PATH_ESCAPE_001"
     ERR_SEC_DOMAIN_BLOCKED_002 = "ERR_SEC_DOMAIN_BLOCKED_002"
@@ -27,6 +28,7 @@ class RemediationAction(BaseModel):
     """
     Standard remediation payload using JSON Patch (RFC 6902).
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal["add_guard_node", "whitelist_domain", "prune_node"]
@@ -40,6 +42,7 @@ class ComplianceReport(BaseModel):
     """
     A strong-typed compliance violation report.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     code: ErrorCatalog

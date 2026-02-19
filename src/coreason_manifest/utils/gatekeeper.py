@@ -299,7 +299,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         details={
                             "reason": ", ".join(risk_reasons),
                             "component": "unreachable",
-                            "structure": structure_type
+                            "structure": structure_type,
                         },
                         remediation=RemediationAction(
                             type="prune_node",
@@ -307,7 +307,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             format="json_patch",
                             patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
                             description=f"Remove dangerous unreachable node '{node.id}'",
-                        )
+                        ),
                     )
                 )
 

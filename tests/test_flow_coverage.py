@@ -1,3 +1,4 @@
+from collections import deque
 from unittest.mock import patch
 
 import pytest
@@ -136,7 +137,7 @@ def test_boolean_schema_validation_error() -> None:
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
         # Mock an error with a path
         error = SchemaError("Boolean schema invalid")
-        error.path = ["nested", "path"]
+        error.path = deque(["nested", "path"])
         mock_check.side_effect = error
 
         # We pass a boolean, which triggers lines 74-86

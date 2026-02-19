@@ -9,6 +9,7 @@ class AgentRequest(BaseModel):
     Standard envelope for agent interaction requests.
     Enforces W3C Trace Context and strict lineage.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     request_id: str = Field(default_factory=lambda: str(uuid4()))
@@ -19,7 +20,7 @@ class AgentRequest(BaseModel):
     traceparent: str | None = Field(
         default=None,
         pattern=r"^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$",
-        description="W3C Trace Context: traceparent header"
+        description="W3C Trace Context: traceparent header",
     )
     tracestate: str | None = Field(default=None, description="W3C Trace Context: tracestate header")
 

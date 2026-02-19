@@ -46,9 +46,7 @@ def _recursive_sort_and_sanitize(obj: Any) -> Any:
         return {
             k: _recursive_sort_and_sanitize(v)
             for k, v in sorted(obj.items())
-            if v is not None
-            and k not in {"integrity_hash", "execution_hash", "signature"}
-            and not k.startswith("__")
+            if v is not None and k not in {"integrity_hash", "execution_hash", "signature"} and not k.startswith("__")
         }
     if isinstance(obj, (list, tuple)):
         return [_recursive_sort_and_sanitize(x) for x in obj]

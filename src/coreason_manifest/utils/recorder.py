@@ -64,6 +64,7 @@ class BlackBoxRecorder:
             "duration_ms": duration_ms,
             "attributes": attributes,
             "previous_hashes": sorted(previous_hashes),
+            "hash_version": "v1",
         }
 
         # 3. Compute Hash
