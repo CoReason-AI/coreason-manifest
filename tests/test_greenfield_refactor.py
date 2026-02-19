@@ -376,3 +376,54 @@ def test_strict_internal_mutation() -> None:
 
     with pytest.raises(ValidationError, match="frozen"):
         error.code = 200  # type: ignore[misc]
+
+
+def test_additional_properties_traversal() -> None:
+    """
+    Test recursion into 'additionalProperties' when it is a schema dict.
+    """
+    schema: dict[str, Any] = {
+        "type": "object",
+        "additionalProperties": {
+            "type": "object",
+            "properties": {
+                "cycle": {}  # Point back to root
+            }
+        }
+    }
+    # Create cycle
+    schema["additionalProperties"]["properties"]["cycle"] = schema
+
+    ds = DataSchema(json_schema=schema)
+    repaired = ds.json_schema
+
+    # Path: #/additionalProperties
+    # Inner properties path: #/additionalProperties/properties/cycle
+    # Cycle points to #
+    assert repaired["additionalProperties"]["properties"]["cycle"]["$ref"] == "#"
+
+
+def test_schema_error_handling() -> None:
+    """
+    Test that invalid schema (not fixed by repair) raises ValueError wrapping SchemaError.
+    """
+    # 'type' must be string or list of strings. Integer is invalid.
+    invalid_schema = {"type": 123}
+
+    with pytest.raises(ValueError, match="Invalid JSON Schema definition"):
+        DataSchema(json_schema=invalid_schema)
+
+
+def test_unexpected_exception_handling(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Test catch-all exception handler in validate_meta_schema.
+    """
+    import jsonschema
+
+    def mock_check_schema(_schema: Any) -> None:
+        raise RuntimeError("Unexpected boom")
+
+    monkeypatch.setattr(jsonschema.Draft7Validator, "check_schema", mock_check_schema)
+
+    with pytest.raises(ValueError, match="Invalid JSON Schema definition: Unexpected boom"):
+        DataSchema(json_schema={"type": "string"})
