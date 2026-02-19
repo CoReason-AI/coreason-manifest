@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 import yaml
-from jsonschema.exceptions import SchemaError
 
 from coreason_manifest.spec.core.flow import (
     Blackboard,

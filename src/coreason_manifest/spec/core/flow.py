@@ -1,7 +1,6 @@
+import warnings
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
-
-import warnings
 
 import jsonschema
 from pydantic import BaseModel, ConfigDict, Field, model_validator
