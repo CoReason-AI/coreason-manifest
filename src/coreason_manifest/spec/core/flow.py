@@ -55,7 +55,7 @@ class DataSchema(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     schema_ref: Annotated[str | None, Field(description="URI to JSON Schema")] = None
-    json_schema: dict[str, Any] = Field(
+    json_schema: dict[str, Any] | bool = Field(
         default_factory=dict,
         description="Full JSON Schema (Draft 7) definition for validation.",
     )
@@ -71,6 +71,20 @@ class DataSchema(BaseModel):
         # Check if we have json_schema key in the input dict
         if isinstance(data, dict) and "json_schema" in data:
             schema = data["json_schema"]
+
+            # Directive 2: Boolean Schema Tolerance
+            if isinstance(schema, bool):
+                try:
+                    jsonschema.Draft7Validator.check_schema(schema)
+                    return data
+                except SchemaError as e:
+                    error_msg = getattr(e, "message", str(e)).split("\n")[0]
+                    # Format path context if available
+                    path_str = ""
+                    if hasattr(e, "path") and e.path:
+                        path_str = f" at '/{'/'.join(map(str, e.path))}'"
+                    raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
+
             if schema:
                 # Directive 4: Immutability Safety
                 # Create a mutable copy of the input dictionary if needed
@@ -99,7 +113,13 @@ class DataSchema(BaseModel):
                     # Directive 3: Robust Error Unwrapping
                     # Extract only the first line or message to prevent log bloat
                     error_msg = getattr(e, "message", str(e)).split("\n")[0]
-                    raise ValueError(f"Invalid JSON Schema definition: {error_msg}") from e
+
+                    # Directive 4: High-Fidelity Error Context
+                    path_str = ""
+                    if hasattr(e, "path") and e.path:
+                        path_str = f" at '/{'/'.join(map(str, e.path))}'"
+
+                    raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
                 except Exception as e:
                     raise ValueError(f"Invalid JSON Schema definition: {e}") from e
 
@@ -194,6 +214,30 @@ class DataSchema(BaseModel):
                     memo=memo,
                 )
 
+            # Directive 1: Exhaustive Draft 7 Schema Traversal (Single Schemas)
+            for key in ["if", "then", "else", "not", "contains", "propertyNames"]:
+                if key in repaired and isinstance(repaired[key], dict):
+                    repaired[key] = cls._attempt_repair(
+                        repaired[key],
+                        current_path=f"{current_path}/{key}",
+                        path_map=path_map,
+                        memo=memo,
+                    )
+
+            # Directive 1: Dependencies (Map)
+            if "dependencies" in repaired and isinstance(repaired["dependencies"], dict):
+                repaired["dependencies"] = {
+                    k: cls._attempt_repair(
+                        v,
+                        current_path=f"{current_path}/dependencies/{cls._escape_ptr(k)}",
+                        path_map=path_map,
+                        memo=memo,
+                    )
+                    if isinstance(v, dict)
+                    else v
+                    for k, v in repaired["dependencies"].items()
+                }
+
             # --- Recursion Step: Schema Arrays ---
             # 5. Combinators (anyOf, allOf, oneOf)
             for comb in ["anyOf", "allOf", "oneOf"]:
@@ -242,8 +286,13 @@ class DataSchema(BaseModel):
                 t = repaired["type"]
                 d = repaired["default"]
 
-                # Normalize type to set for consistent union handling
-                types = set(t) if isinstance(t, list) else {t}
+                # Directive 3: Defensive Heuristic Typing (Unhashable Trap)
+                if isinstance(t, list):
+                    types = {str(x) for x in t if isinstance(x, (str, int, bool))}
+                elif isinstance(t, (str, int, bool)):
+                    types = {str(t)}
+                else:
+                    types = set()
 
                 is_conflict = False
                 new_default = d

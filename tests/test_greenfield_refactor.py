@@ -410,7 +410,7 @@ def test_schema_error_handling() -> None:
     # 'type' must be string or list of strings. Integer is invalid.
     invalid_schema = {"type": 123}
 
-    with pytest.raises(ValueError, match="Invalid JSON Schema definition"):
+    with pytest.raises(ValueError, match="Invalid JSON Schema"):
         DataSchema(json_schema=invalid_schema)
 
 
@@ -427,3 +427,111 @@ def test_unexpected_exception_handling(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(ValueError, match="Invalid JSON Schema definition: Unexpected boom"):
         DataSchema(json_schema={"type": "string"})
+
+
+# ------------------------------------------------------------------------
+# Final Hardening Tests (New Directives)
+# ------------------------------------------------------------------------
+
+
+def test_boolean_schema() -> None:
+    """
+    Test support for boolean schemas (Draft 7 allows true/false).
+    """
+    # True is a valid schema (always passes)
+    ds_true = DataSchema(json_schema=True)  # type: ignore[arg-type]
+    assert ds_true.json_schema is True
+
+    # False is a valid schema (always fails)
+    ds_false = DataSchema(json_schema=False)  # type: ignore[arg-type]
+    assert ds_false.json_schema is False
+
+
+def test_draft7_keywords_traversal() -> None:
+    """
+    Test recursion into 'not', 'if', 'then', 'else' with cycles.
+    """
+    schema: dict[str, Any] = {
+        "not": {
+            "if": {},  # Will point to root
+        },
+    }
+    # Cycle: root -> not -> if -> root
+    schema["not"]["if"] = schema
+
+    ds = DataSchema(json_schema=schema)
+    repaired = ds.json_schema
+
+    # Path: #/not/if
+    assert repaired["not"]["if"]["$ref"] == "#"
+
+
+def test_dependencies_traversal() -> None:
+    """
+    Test recursion into 'dependencies' which can be a schema map.
+    """
+    schema: dict[str, Any] = {
+        "dependencies": {
+            "foo": {},  # Schema dependency (dict), points to root
+            "bar": ["a", "b"],  # Property dependency (list), ignored
+        }
+    }
+    # Cycle
+    schema["dependencies"]["foo"] = schema
+
+    ds = DataSchema(json_schema=schema)
+    repaired = ds.json_schema
+
+    # Path: #/dependencies/foo
+    assert repaired["dependencies"]["foo"]["$ref"] == "#"
+    # Ensure list wasn't touched/broken
+    assert repaired["dependencies"]["bar"] == ["a", "b"]
+
+
+def test_malformed_type_heuristics() -> None:
+    """
+    Test that unhashable types in 'type' field don't crash the heuristic repair.
+    """
+    # 'type' is a dict (invalid, but shouldn't crash with TypeError during set() creation)
+    # AND 'default' is present to trigger the heuristic check
+    schema = {"type": {"bad": "type"}, "default": "value"}
+
+    # This should probably fail validation eventually, but it MUST NOT crash inside _attempt_repair
+    # The heuristic logic tries to do `set(t)` or `{t}`. If `t` is a dict, `{t}` crashes.
+    # The fix we implemented should prevent this.
+
+    # It will fail validation because "type" must be string/list, but we want to assert ValueError (from SchemaError)
+    # NOT TypeError or RecursionError.
+    with pytest.raises(ValueError, match="Invalid JSON Schema"):
+        DataSchema(json_schema=schema)
+
+
+def test_schema_error_path_reporting() -> None:
+    """
+    Test that validation errors include the path context.
+    """
+    # Create a schema that fails validation deep inside
+    schema = {
+        "properties": {
+            "user": {
+                "type": "object",
+                "properties": {
+                    "age": {
+                        "type": "integer",
+                        "minimum": "not_a_number",  # Invalid type for minimum
+                    }
+                },
+            }
+        }
+    }
+
+    with pytest.raises(ValueError, match="Invalid JSON Schema") as excinfo:
+        DataSchema(json_schema=schema)
+
+    msg = str(excinfo.value)
+    # The path should be present in the error message
+    # Path: /properties/user/properties/age/minimum
+    # Note: jsonschema might report path slightly differently depending on where it stops.
+    # But it should contain 'minimum' or 'age'.
+    assert "Invalid JSON Schema" in msg
+    assert "at '/properties/user/properties/age/minimum'" in msg or "at '/properties/user/properties/age'" in msg
