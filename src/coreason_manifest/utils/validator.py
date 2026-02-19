@@ -95,8 +95,11 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
                 if isinstance(raw_type, list):
                     # Sort to ensure deterministic symbol table regardless of input order
                     # Result: "array|string"
-                    types = sorted(x for x in raw_type if x != "null")
-                    symbol_table[name] = "|".join(types) if types else "union"
+                    types = sorted([x for x in raw_type if x != "null"])
+                    if types:
+                        symbol_table[name] = "|".join(types)
+                    else:
+                        symbol_table[name] = "union"
                 else:
                     symbol_table[name] = str(raw_type)
 
