@@ -1,9 +1,7 @@
-import warnings
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
 import jsonschema
-from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.core.governance import Governance
