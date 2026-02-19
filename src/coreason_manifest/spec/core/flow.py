@@ -186,10 +186,7 @@ class DataSchema(BaseModel):
                     }
 
             # 4. Additional Properties (if dict)
-            if (
-                "additionalProperties" in repaired
-                and isinstance(repaired["additionalProperties"], dict)
-            ):
+            if "additionalProperties" in repaired and isinstance(repaired["additionalProperties"], dict):
                 repaired["additionalProperties"] = cls._attempt_repair(
                     repaired["additionalProperties"],
                     current_path=f"{current_path}/additionalProperties",
