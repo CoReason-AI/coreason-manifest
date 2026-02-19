@@ -1,14 +1,13 @@
-import pytest
-from typing import Any
-import importlib.machinery
+from unittest.mock import patch
+
 import idna
-from unittest.mock import patch, MagicMock
+import pytest
 
 from coreason_manifest.utils.diff import _classify_path, _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
-from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref
+from coreason_manifest.utils.loader import SandboxedPathFinder
 from coreason_manifest.utils.net_utils import canonicalize_domain
-from coreason_manifest.spec.interop.telemetry import NodeExecution
+
 
 def test_diff_classifier_coverage() -> None:
     # Cover _classify_path branches
@@ -37,7 +36,6 @@ def test_diff_list_logic_coverage() -> None:
     assert diff[0].path == "/list/1"
 
 def test_integrity_nan_check() -> None:
-    import math
     with pytest.raises(ValueError, match="NaN and Infinity"):
         compute_hash(float("nan"))
     with pytest.raises(ValueError, match="NaN and Infinity"):
@@ -63,8 +61,9 @@ def test_loader_spec_none_coverage() -> None:
     assert finder.find_spec("foo") is None # jail_root not set
 
     # ".." check
-    from coreason_manifest.utils.loader import sandbox_context
     from pathlib import Path
+
+    from coreason_manifest.utils.loader import sandbox_context
     with sandbox_context(Path(".")):
         assert finder.find_spec("..foo") is None
 
