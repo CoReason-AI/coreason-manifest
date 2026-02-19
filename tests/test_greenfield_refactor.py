@@ -387,9 +387,9 @@ def test_additional_properties_traversal() -> None:
         "additionalProperties": {
             "type": "object",
             "properties": {
-                "cycle": {}  # Point back to root
-            }
-        }
+                "cycle": {},  # Point back to root
+            },
+        },
     }
     # Create cycle
     schema["additionalProperties"]["properties"]["cycle"] = schema
