@@ -112,7 +112,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         if isinstance(node, AgentNode):
             for tool_name in node.tools:
                 resolved_tool = tool_map.get(tool_name)
-                risk = resolved_tool.risk_level if resolved_tool else "standard"
+                # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown
+                risk = resolved_tool.risk_level if resolved_tool else "critical"
                 if risk == "critical":
                     critical_tools.append(tool_name)
 
@@ -153,8 +154,27 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         break
                 patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
             elif isinstance(flow, GraphFlow):
+                # Fix 1: Ghost Guard Graph Injection Failure - Rewire edges
+
+                # 1. Add Guard Node
                 patch_ops.append(
                     {"op": "add", "path": f"/graph/nodes/{human_node_id}", "value": human_node.model_dump(mode="json")}
+                )
+
+                # 2. Rewire incoming edges (Target -> Guard)
+                for edge_idx, edge in enumerate(flow.graph.edges):
+                    if edge.target == node.id:
+                        patch_ops.append(
+                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
+                        )
+
+                # 3. Add edge (Guard -> Target)
+                patch_ops.append(
+                    {
+                        "op": "add",
+                        "path": "/graph/edges/-",
+                        "value": {"source": human_node_id, "target": node.id}
+                    }
                 )
 
             reports.append(
@@ -258,108 +278,92 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         all_nodes = set(flow.graph.nodes.keys())
         unreachable = all_nodes - reachable
 
-        # 5c. Fail Open but Guarded (SOTA: Tree Shaking Policy)
-        safe_nodes = []
+        # Fix 2: Sequential Patch Index Corruption - Aggregate ALL unreachable nodes
+        if unreachable:
+            safe_node_ids = set()
+            dangerous_node_ids = set()
+            risk_details = {}  # Map node_id -> list of risk reasons
 
-        for node_id in unreachable:
-            node = flow.graph.nodes[node_id]
-            caps = get_capabilities(node)
+            for node_id in unreachable:
+                node = flow.graph.nodes[node_id]
+                caps = get_capabilities(node)
 
-            # Check for high-risk capabilities
-            risk_reasons = []
-            if "computer_use" in caps:
-                risk_reasons.append("computer_use")
-            if "code_execution" in caps:
-                risk_reasons.append("code_execution")
+                risk_reasons = []
+                if "computer_use" in caps:
+                    risk_reasons.append("computer_use")
+                if "code_execution" in caps:
+                    risk_reasons.append("code_execution")
 
-            is_cycle = node_cycle_map.get(node_id, False)
-            structure_type = "cyclic island" if is_cycle else "island"
+                if risk_reasons:
+                    dangerous_node_ids.add(node_id)
+                    risk_details[node_id] = risk_reasons
+                else:
+                    safe_node_ids.add(node_id)
 
-            if risk_reasons:
-                # Critical Violation: Dangerous Unreachable Code
-                # We report these individually as they require manual review
-
-                # Calculate removal patches for this specific node (and its connected edges)
-                # Note: This has index volatility if mixed with other patches,
-                # but critical violations usually stop deployment.
-                edge_indices_to_remove = []
-                for idx, edge in enumerate(flow.graph.edges):
-                    if edge.source == node.id or edge.target == node.id:
-                        edge_indices_to_remove.append(idx)
-
-                edge_indices_to_remove.sort(reverse=True)
-
-                patch_list = [{"op": "remove", "path": f"/graph/nodes/{node.id}"}]
-                patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in edge_indices_to_remove])
-
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
-                        severity="violation",
-                        message=(
-                            f"Topology Violation: Node '{node.id}' is unreachable ({structure_type}) "
-                            f"but requires high-risk capabilities: {', '.join(risk_reasons)}."
-                        ),
-                        node_id=node.id,
-                        details={
-                            "reason": ", ".join(risk_reasons),
-                            "component": "unreachable",
-                            "structure": structure_type,
-                        },
-                        remediation=RemediationAction(
-                            type="prune_node",
-                            target_node_id=node.id,
-                            format="json_patch",
-                            patch_data=patch_list,
-                            description=f"Remove dangerous unreachable node '{node.id}' and connected edges.",
-                        ),
-                    )
-                )
-            else:
-                # Safe to remove
-                safe_nodes.append((node, structure_type))
-
-        # Bulk Remediation for Safe Nodes
-        if safe_nodes:
-            nodes_to_remove = [n[0] for n in safe_nodes]
-            node_ids_to_remove = {n.id for n in nodes_to_remove}
-
-            # Find all edges connected to ANY safe node
+            # Gather all edges connected to ANY unreachable node
             bulk_edge_indices = set()
             for idx, edge in enumerate(flow.graph.edges):
-                if edge.source in node_ids_to_remove or edge.target in node_ids_to_remove:
+                if edge.source in unreachable or edge.target in unreachable:
                     bulk_edge_indices.add(idx)
 
-            # Sort descending to prevent index invalidation during sequential removal
+            # Sort descending to prevent index invalidation
             sorted_edge_indices = sorted(bulk_edge_indices, reverse=True)
 
             patch_list = []
-
             # 1. Remove Edges (must be done by index, high to low)
             for idx in sorted_edge_indices:
                 patch_list.append({"op": "remove", "path": f"/graph/edges/{idx}"})
 
             # 2. Remove Nodes (by key, safe order)
-            for node in nodes_to_remove:
-                patch_list.append({"op": "remove", "path": f"/graph/nodes/{node.id}"})
+            for node_id in unreachable:
+                patch_list.append({"op": "remove", "path": f"/graph/nodes/{node_id}"})
 
-            reports.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
-                    severity="warning",
-                    message=f"Topology Warning: Found {len(safe_nodes)} unreachable nodes (Dead Code).",
-                    details={"node_ids": list(node_ids_to_remove)},
-                    remediation=RemediationAction(
-                        type="prune_node",
-                        format="json_patch",
-                        patch_data=patch_list,
-                        description=(
-                            f"Tree Shake: Remove {len(safe_nodes)} dead code nodes "
-                            f"and {len(sorted_edge_indices)} edges."
+            if dangerous_node_ids:
+                # Severity violation if any dangerous nodes are present
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
+                        severity="violation",
+                        message=(
+                            f"Topology Violation: Found {len(dangerous_node_ids)} dangerous unreachable nodes "
+                            f"and {len(safe_node_ids)} dead code nodes. "
+                            "Pruning all unreachable topology to restore integrity."
                         ),
-                    ),
+                        details={
+                            "dangerous_nodes": list(dangerous_node_ids),
+                            "safe_nodes": list(safe_node_ids),
+                            "risk_details": risk_details,
+                        },
+                        remediation=RemediationAction(
+                            type="prune_topology",
+                            format="json_patch",
+                            patch_data=patch_list,
+                            description=(
+                                f"Atomic Prune: Remove {len(unreachable)} unreachable nodes "
+                                f"and {len(sorted_edge_indices)} connected edges."
+                            ),
+                        ),
+                    )
                 )
-            )
+            elif safe_node_ids:
+                # Just warning if only safe nodes
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                        severity="warning",
+                        message=f"Topology Warning: Found {len(safe_node_ids)} unreachable nodes (Dead Code).",
+                        details={"node_ids": list(safe_node_ids)},
+                        remediation=RemediationAction(
+                            type="prune_node",
+                            format="json_patch",
+                            patch_data=patch_list,
+                            description=(
+                                f"Tree Shake: Remove {len(safe_node_ids)} dead code nodes "
+                                f"and {len(sorted_edge_indices)} edges."
+                            ),
+                        ),
+                    )
+                )
 
     return reports
 

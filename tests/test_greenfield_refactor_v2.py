@@ -31,11 +31,39 @@ def test_magic_number_coercion_human_node() -> None:
         metadata={},
         type="human",
         prompt="test",
-        timeout_seconds=300,
+        timeout_seconds=None,  # SOTA Fix: Must be None for shadow mode
         interaction_mode="shadow",
         shadow_timeout_seconds=-1,
     )
     assert node_shadow.shadow_timeout_seconds == "infinite"
+
+
+def test_human_node_mutual_exclusion() -> None:
+    """Fix 4: Enforce temporal isolation."""
+
+    # 1. Shadow mode with timeout_seconds -> Error
+    with pytest.raises(ValidationError, match="must not have 'timeout_seconds'"):
+        HumanNode(
+            id="h1",
+            metadata={},
+            type="human",
+            prompt="test",
+            interaction_mode="shadow",
+            shadow_timeout_seconds=300,
+            timeout_seconds=300, # Invalid
+        )
+
+    # 2. Blocking mode with shadow_timeout_seconds -> Error
+    with pytest.raises(ValidationError, match="must not have 'shadow_timeout_seconds'"):
+        HumanNode(
+            id="h2",
+            metadata={},
+            type="human",
+            prompt="test",
+            interaction_mode="blocking",
+            timeout_seconds=300,
+            shadow_timeout_seconds=300, # Invalid
+        )
 
 
 def test_magic_number_coercion_swarm_node() -> None:
@@ -64,7 +92,7 @@ def test_domain_validation_error_remediation() -> None:
             metadata={},
             type="human",
             prompt="test",
-            timeout_seconds=300,
+            timeout_seconds=None, # Valid for shadow
             interaction_mode="shadow",
             shadow_timeout_seconds=None,  # Missing required field for shadow mode
         )
@@ -74,7 +102,7 @@ def test_domain_validation_error_remediation() -> None:
     err = errors[0]
 
     # Actually, for the purpose of this test, verifying the message contains remediation description is good.
-    assert "Set 'shadow_timeout_seconds' to a valid value" in err["msg"]
+    assert "HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'" in err["msg"]
     assert "[Remediation:" in err["msg"]
     assert "[Payload:" in err["msg"]
     # Check that paths are relative

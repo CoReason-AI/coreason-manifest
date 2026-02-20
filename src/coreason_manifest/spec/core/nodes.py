@@ -155,6 +155,9 @@ class HumanNode(Node):
         Intercepts legacy '-1' magic numbers and converts them to 'infinite'.
         """
         if isinstance(data, dict):
+            # Fix 5: Functional Purity - Copy data to avoid side-effects
+            data = data.copy()
+
             # Check timeout_seconds
             val_timeout = data.get("timeout_seconds")
             if val_timeout in (-1, "-1"):
@@ -178,37 +181,56 @@ class HumanNode(Node):
 
     @model_validator(mode="after")
     def validate_interaction_config(self) -> "HumanNode":
-        if self.interaction_mode == "shadow" and self.shadow_timeout_seconds is None:
-            raise DomainValidationError(
-                message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
-                remediation=RemediationAction(
-                    type="update_field",
-                    target_node_id=self.id,
-                    description="Set 'shadow_timeout_seconds' to a valid value.",
-                    patch_data=[
-                        {
-                            "op": "add",
-                            "path": "/shadow_timeout_seconds",
-                            "value": 300,
-                        }
-                    ],
-                ),
-            )
-        if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
-            raise DomainValidationError(
-                message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
-                remediation=RemediationAction(
-                    type="update_field",
-                    target_node_id=self.id,
-                    description="Remove 'shadow_timeout_seconds'.",
-                    patch_data=[
-                        {
-                            "op": "remove",
-                            "path": "/shadow_timeout_seconds",
-                        }
-                    ],
-                ),
-            )
+        # Fix 4: Temporal Collision - Enforce mutual exclusion
+        if self.interaction_mode == "shadow":
+            if self.shadow_timeout_seconds is None:
+                raise DomainValidationError(
+                    message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
+                    remediation=RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Set 'shadow_timeout_seconds' to a valid value.",
+                        patch_data=[
+                            {
+                                "op": "add",
+                                "path": "/shadow_timeout_seconds",
+                                "value": 300,
+                            }
+                        ],
+                    ),
+                )
+            if self.timeout_seconds is not None:
+                raise DomainValidationError(
+                    message="HumanNode in 'shadow' mode must not have 'timeout_seconds'.",
+                    remediation=RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Remove 'timeout_seconds'.",
+                        patch_data=[
+                            {
+                                "op": "remove",
+                                "path": "/timeout_seconds",
+                            }
+                        ],
+                    ),
+                )
+
+        if self.interaction_mode == "blocking":
+            if self.shadow_timeout_seconds is not None:
+                raise DomainValidationError(
+                    message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
+                    remediation=RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Remove 'shadow_timeout_seconds'.",
+                        patch_data=[
+                            {
+                                "op": "remove",
+                                "path": "/shadow_timeout_seconds",
+                            }
+                        ],
+                    ),
+                )
         return self
 
 
@@ -261,6 +283,8 @@ class SwarmNode(Node):
     @classmethod
     def coerce_magic_numbers(cls, data: Any) -> Any:
         if isinstance(data, dict):
+            # Fix 5: Functional Purity - Copy data
+            data = data.copy()
             val = data.get("max_concurrency")
             if val in (-1, "-1"):
                 warnings.warn(
