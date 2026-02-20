@@ -1,7 +1,7 @@
 import time
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.types import NodeID, ToolID
@@ -167,7 +167,6 @@ def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, 
     state = state_store.get(node_id)
     if not state:
         state = CircuitState()
-        # state_store[node_id] = state # Wait, we need to update after modification if it was mutable, but now we create new
         # Just continue to calculate new state
 
     if state.state == "open":

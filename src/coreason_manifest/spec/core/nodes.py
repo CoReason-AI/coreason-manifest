@@ -66,17 +66,19 @@ class AgentNode(Node):
         examples=["profile_1", {"role": "Assistant", "persona": "..."}],
     )
     tools: list[str] = Field(
-        default_factory=list, description="List of tool names available to this agent.", examples=[["calculator", "web_search"]]
+        default_factory=list,
+        description="List of tool names available to this agent.",
+        examples=[["calculator", "web_search"]],
     )
 
 
 class SwitchNode(Node):
     type: Literal["switch"] = "switch"
-    variable: VariableID = Field(
-        ..., description="The blackboard variable to evaluate.", examples=["user_sentiment"]
-    )
+    variable: VariableID = Field(..., description="The blackboard variable to evaluate.", examples=["user_sentiment"])
     cases: dict[str, NodeID] = Field(
-        ..., description="Map of variable values to next node IDs.", examples=[{"positive": "thank_user", "negative": "apologize"}]
+        ...,
+        description="Map of variable values to next node IDs.",
+        examples=[{"positive": "thank_user", "negative": "apologize"}],
     )
     default: NodeID = Field(..., description="Default next node ID if no case matches.", examples=["default_handler"])
 
@@ -84,13 +86,9 @@ class SwitchNode(Node):
 class InspectorNodeBase(Node):
     """Shared logic for all inspection/judgement nodes."""
 
-    target_variable: VariableID = Field(
-        ..., description="The variable to inspect.", examples=["generated_content"]
-    )
+    target_variable: VariableID = Field(..., description="The variable to inspect.", examples=["generated_content"])
     criteria: str = Field(..., description="The criteria to evaluate against.", examples=["Is the content safe?"])
-    output_variable: VariableID = Field(
-        ..., description="The variable to store the result.", examples=["is_safe"]
-    )
+    output_variable: VariableID = Field(..., description="The variable to store the result.", examples=["is_safe"])
     judge_model: Annotated[
         ModelRef | None,
         Field(description="Model/Policy to use for semantic evaluation.", examples=["gpt-4"]),
@@ -110,9 +108,7 @@ class InspectorNode(InspectorNodeBase):
         "programmatic", description="Evaluation mode.", examples=["semantic"]
     )
 
-    pass_threshold: float | None = Field(
-        None, description="Threshold for passing the check (0.0-1.0).", examples=[0.8]
-    )
+    pass_threshold: float | None = Field(None, description="Threshold for passing the check (0.0-1.0).", examples=[0.8])
 
 
 class EmergenceInspectorNode(InspectorNodeBase):
@@ -137,7 +133,9 @@ class PlannerNode(Node):
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
     optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
     output_schema: dict[str, Any] = Field(
-        ..., description="JSON Schema for the plan output.", examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}]
+        ...,
+        description="JSON Schema for the plan output.",
+        examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
     )
 
 
@@ -152,7 +150,10 @@ class HumanNode(Node):
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
     timeout_seconds: Annotated[
         int | Literal["infinite"] | None,
-        Field(description="Max wait time for blocking/steering. Use 'infinite' for no timeout.", examples=[300, "infinite"]),
+        Field(
+            description="Max wait time for blocking/steering. Use 'infinite' for no timeout.",
+            examples=[300, "infinite"],
+        ),
     ]
     input_schema: dict[str, Any] | None = Field(
         None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
@@ -304,7 +305,10 @@ class SwarmNode(Node):
     )
     aggregator_model: Annotated[
         ModelRef | None,
-        Field(description="If set, uses this model to summarize the worker outputs into a single string.", examples=["gpt-4"]),
+        Field(
+            description="If set, uses this model to summarize the worker outputs into a single string.",
+            examples=["gpt-4"],
+        ),
     ] = None
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
