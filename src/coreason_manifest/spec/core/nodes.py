@@ -1,9 +1,10 @@
 import warnings
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import PresentationHints
+from coreason_manifest.spec.core_base import ObservableModel
 
 # IMPORT ModelRef to link the new routing capability
 from coreason_manifest.spec.core.engines import (
@@ -17,7 +18,7 @@ from coreason_manifest.spec.core.resilience import ResilienceConfig
 from coreason_manifest.spec.interop.compliance import RemediationAction
 
 
-class Node(BaseModel):
+class Node(ObservableModel):
     """Base class for vertices of the execution graph."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -29,7 +30,7 @@ class Node(BaseModel):
     type: str
 
 
-class CognitiveProfile(BaseModel):
+class CognitiveProfile(ObservableModel):
     """The active processing unit of an agent."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)

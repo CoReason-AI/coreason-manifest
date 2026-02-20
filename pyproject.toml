@@ -21,6 +21,10 @@ dependencies = [
     "jsonschema>=4.23.0",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "httpx>=0.25.0",
+    "boto3>=1.28.0",
 ]
 
 [project.urls]

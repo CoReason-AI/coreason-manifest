@@ -271,3 +271,14 @@ class SupervisionPolicy(BaseModel):
 
 
 ResilienceConfig = Annotated[RecoveryStrategy | SupervisionPolicy, Field(discriminator="type")]
+
+
+class RecoveryReceipt(BaseModel):
+    """
+    Log of auto-healing actions performed on the input data.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    mutations: list[str] = Field(default_factory=list, description="List of changes applied to the input.")
+    original_checksum: str | None = None
+    healed_checksum: str | None = None

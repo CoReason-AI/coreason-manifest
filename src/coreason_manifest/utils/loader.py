@@ -1,78 +1,31 @@
-# src/coreason_manifest/utils/loader.py
-
 import hashlib
 import importlib.abc
 import importlib.util
 import re
 import sys
 import warnings
-from collections.abc import Generator
+import json
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any, Protocol, cast
+from typing import Any, cast
+import asyncio
+from urllib.parse import urlparse
 
-import yaml
-from yaml.nodes import MappingNode
+import httpx
+from pydantic import AnyUrl, HttpUrl, validate_call
+from opentelemetry import trace
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
-
-__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
+from coreason_manifest.spec.core.manifest import Manifest
+from coreason_manifest.spec.core.resilience import RecoveryReceipt
+from coreason_manifest.utils.resolver import ReferenceResolver
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
     """Warning for runtime security risks."""
 
 
-class YamlLoaderProtocol(Protocol):
-    def construct_object(self, node: yaml.Node, deep: bool = False) -> Any: ...
-    def flatten_mapping(self, node: MappingNode) -> None: ...
-
-
-class UniqueKeyLoader(yaml.SafeLoader):
-    """
-    Custom YAML loader that disallows duplicate keys.
-    Prevents "Ghost Logic" where duplicate keys are silently overwritten.
-    """
-
-
-def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: bool = False) -> dict[Any, Any]:
-    """
-    Construct a mapping while checking for duplicate keys.
-    """
-    if not isinstance(node, MappingNode):
-        # Cast node to Any to access attributes not in base Node but expected by ConstructorError format
-        node_any = cast(Any, node)  # noqa: TC006
-        raise yaml.constructor.ConstructorError(
-            None,
-            None,
-            f"expected a mapping node, but found {node_any.id}",
-            node.start_mark,
-        )
-
-    mapping_node = node
-    loader_typed = cast(YamlLoaderProtocol, loader)  # noqa: TC006
-    loader_typed.flatten_mapping(mapping_node)
-    mapping = {}
-    for key_node, value_node in mapping_node.value:
-        key = loader_typed.construct_object(key_node, deep=deep)
-        if key in mapping:
-            raise yaml.constructor.ConstructorError(
-                "while constructing a mapping",
-                node.start_mark,
-                f"found duplicate key {key!r}",
-                key_node.start_mark,
-            )
-        mapping[key] = loader_typed.construct_object(value_node, deep=deep)
-    return mapping
-
-
-UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping_unique)
-
-
 # SOTA Security: Context-aware jail root for import resolution.
-# Uses ContextVar to handle async concurrency safely without race conditions.
 _jail_root_var: ContextVar[Path | None] = ContextVar("jail_root", default=None)
 _jail_modules_var: ContextVar[set[str] | None] = ContextVar("jail_modules", default=None)
 
@@ -80,8 +33,7 @@ _jail_modules_var: ContextVar[set[str] | None] = ContextVar("jail_modules", defa
 class SandboxedPathFinder(importlib.abc.MetaPathFinder):
     """
     A custom MetaPathFinder that resolves imports relative to a 'jail' directory
-    without modifying sys.path. It uses a ContextVar to determine the current
-    jail, ensuring thread/task safety.
+    without modifying sys.path.
     """
 
     def find_spec(
@@ -90,10 +42,6 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         _path: Any = None,
         _target: Any = None,
     ) -> importlib.machinery.ModuleSpec | None:
-        """
-        Attempt to find the module in the current jail root.
-        """
-        # Security: Prevent standard library shadowing (Dependency Confusion)
         if fullname in sys.stdlib_module_names:
             return None
 
@@ -101,36 +49,20 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         if not jail_root:
             return None
 
-        # Security: Prevent directory traversal via package names
         if ".." in fullname:
             return None
 
-        # Determine path relative to jail
-        # Logic: If '_path' is None, it's a top-level import.
-        # If '_path' is set, it's a sub-module import.
-        # But our jail_root acts as a PYTHONPATH root.
-
-        # We try to find:
-        # 1. jail_root/fullname.py
-        # 2. jail_root/fullname/__init__.py
-
-        # Convert dotted name to path
         parts = fullname.split(".")
         potential_path = jail_root.joinpath(*parts)
 
         spec = None
-        # Check for package (directory with __init__.py)
         init_py = potential_path / "__init__.py"
         if init_py.is_file():
             spec = importlib.util.spec_from_file_location(fullname, init_py)
-
-        # Check for module (file.py)
         elif potential_path.with_suffix(".py").is_file():
             spec = importlib.util.spec_from_file_location(fullname, potential_path.with_suffix(".py"))
 
         if spec:
-            # SOTA Fix: Track module as managed by this sandbox context to enable precise cleanup.
-            # This avoids the race condition of diffing sys.modules globally.
             modules = _jail_modules_var.get()
             if modules is not None:
                 modules.add(fullname)
@@ -139,22 +71,15 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         return None
 
 
-# Singleton instance of the finder
 _SANDBOXED_FINDER = SandboxedPathFinder()
 
 
 @contextmanager
-def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
-    """
-    Context manager to activate the sandboxed finder for the given jail root.
-    Ensures the finder is registered in sys.meta_path.
-    """
-    # Register finder if not present (idempotent)
+def sandbox_context(jail_root: Path):
     if _SANDBOXED_FINDER not in sys.meta_path:
         sys.meta_path.insert(0, _SANDBOXED_FINDER)
 
     token_root = _jail_root_var.set(jail_root.resolve())
-    # SOTA Fix: Initialize a fresh set for this context to track loaded modules.
     token_modules = _jail_modules_var.set(set())
     try:
         yield
@@ -163,75 +88,125 @@ def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
         _jail_modules_var.reset(token_modules)
 
 
-def _scan_for_dynamic_references(data: Any) -> bool:
+class Loader:
     """
-    Recursively scan the data structure for potential dynamic code execution references.
+    SOTA Manifest Loader.
+    Ingestion is Liquid: Accepts strings, URLs, Paths, S3 URIs.
     """
-    if isinstance(data, dict):
-        for value in data.values():
-            if _scan_for_dynamic_references(value):
-                return True
-    elif isinstance(data, list):
-        for item in data:
-            if _scan_for_dynamic_references(item):
-                return True
-    elif isinstance(data, str) and re.match(r"^[a-zA-Z0-9_\-\./]+\.py:[a-zA-Z_]\w+$", data):
-        return True
-    return False
 
+    @classmethod
+    @validate_call
+    async def load(cls, source: str | Path | HttpUrl | AnyUrl, auto_heal: bool = True) -> Manifest:
+        """
+        Loads a manifest from various sources, resolves references, and validates.
+        Wraps the process in an OTEL span.
+        """
+        tracer = trace.get_tracer(__name__)
 
-def load_flow_from_file(
-    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False
-) -> LinearFlow | GraphFlow:
-    """
-    Load a flow manifest from a YAML or JSON file.
-    """
-    file_path = Path(path).resolve()
-    jail_root = root_dir or file_path.parent
+        with tracer.start_as_current_span("Loader.load", attributes={"source": str(source)}) as span:
+            # Determine base URI and fetch content
+            content, base_uri = await cls._fetch_source(source)
 
-    # Initialize secure loader confined to the file's directory
-    loader = ManifestIO(root_dir=jail_root)
+            resolver = ReferenceResolver(base_uri=base_uri)
 
-    try:
-        rel_path = file_path.relative_to(jail_root)
-        load_path = str(rel_path)
-    except ValueError:
-        load_path = file_path.name
+            initial_receipt = None
 
-    content_str = loader.read_text(load_path)
+            try:
+                raw_data = resolver._parse_content(content, str(source))
+            except ValueError as e:
+                # If parsing fails, try auto-healing the string
+                cleaned_data, receipt = Manifest._perform_auto_healing(content)
+                initial_receipt = receipt
 
-    try:
-        data = yaml.load(content_str, Loader=UniqueKeyLoader)
-    except yaml.YAMLError as e:
-        raise ValueError(f"Failed to parse manifest file: {e}") from e
+                if isinstance(cleaned_data, str):
+                     try:
+                        raw_data = resolver._parse_content(cleaned_data, str(source))
+                     except ValueError:
+                        span.record_exception(e)
+                        raise e
+                else:
+                    raw_data = cleaned_data
 
-    if not isinstance(data, dict):
-        raise ValueError("Manifest content must be a dictionary.")
+            # Resolve References
+            resolved_data = await resolver.resolve(raw_data)
 
-    if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
-        raise SecurityViolationError(
-            "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
-        )
+            # Validate
+            try:
+                manifest = Manifest.model_validate(resolved_data, auto_heal=auto_heal)
+            except Exception as e:
+                span.record_exception(e)
+                raise e
 
-    kind = data.get("kind")
-    if kind == "LinearFlow":
-        return LinearFlow.model_validate(data)
-    if kind == "GraphFlow":
-        return GraphFlow.model_validate(data)
-    raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
+            # Merge initial receipt from string healing if present
+            if initial_receipt and initial_receipt.mutations:
+                current_receipt = manifest.recovery_receipt
+                if current_receipt:
+                    all_mutations = initial_receipt.mutations + current_receipt.mutations
+                    new_receipt = RecoveryReceipt(mutations=all_mutations)
+                    object.__setattr__(manifest, "_recovery_receipt", new_receipt)
+                else:
+                    object.__setattr__(manifest, "_recovery_receipt", initial_receipt)
+
+            # Attach RecoveryReceipt as Span Event if present
+            if manifest.recovery_receipt and manifest.recovery_receipt.mutations:
+                span.add_event(
+                    "auto_heal_applied",
+                    attributes={
+                        "mutations": json.dumps(manifest.recovery_receipt.mutations),
+                        "original_checksum": manifest.recovery_receipt.original_checksum or "",
+                    }
+                )
+
+            return manifest
+
+    @staticmethod
+    async def _fetch_source(source: str | Path | HttpUrl | AnyUrl) -> tuple[str, str | Path]:
+        source_str = str(source)
+
+        # Check if URL
+        if source_str.startswith(("http://", "https://")):
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(source_str)
+                resp.raise_for_status()
+                return resp.text, source_str
+
+        # Check if S3
+        if source_str.startswith("s3://"):
+            import boto3
+            parsed = urlparse(source_str)
+            bucket = parsed.netloc
+            key = parsed.path.lstrip("/")
+
+            def fetch_s3():
+                s3 = boto3.client("s3")
+                response = s3.get_object(Bucket=bucket, Key=key)
+                return response["Body"].read().decode("utf-8")
+
+            try:
+                loop = asyncio.get_running_loop()
+                content = await loop.run_in_executor(None, fetch_s3)
+            except RuntimeError:
+                content = fetch_s3()
+
+            return content, source_str
+
+        # Check if local path
+        try:
+            path = Path(source_str)
+            if path.exists():
+                return path.read_text(encoding="utf-8"), path.resolve()
+        except OSError:
+            pass
+
+        # Treat as raw content (String)
+        # Base URI defaults to CWD
+        return source_str, Path.cwd()
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     """
     Load an Agent class from a Python file reference (file.py:ClassName).
     WARNING: Executes arbitrary code. Ensure source is trusted.
-
-    Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Agent class.
     """
     if ":" not in reference:
         raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
@@ -242,22 +217,16 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     if not file_path.is_file():
         raise ValueError(f"Agent file not found: {file_path}")
 
-    # Explicit warning for audit logs
     warnings.warn(
         f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",
         category=RuntimeSecurityWarning,
         stacklevel=2,
     )
 
-    # Generate cryptographically unique module name to prevent collisions and remove need for global lock
     path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
     module_name = f"agent_{path_hash}"
 
-    # Use context manager to enable jailed imports during spec finding and loading
     with sandbox_context(root_dir):
-        # Note: we no longer track pre_existing_modules via sys.modules keys
-        # because the SandboxedPathFinder now self-reports loaded modules.
-
         spec = importlib.util.spec_from_file_location(module_name, file_path)
         if spec is None or spec.loader is None:
             raise ValueError(f"Could not load spec for {file_ref}")
@@ -265,21 +234,11 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
 
-        # TODO(Architecture-Spike): Transition to True Process Sandboxing.
-        warnings.warn(
-            f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
-            "Ensure strict governance until Wasm sandboxing is implemented.",
-            category=RuntimeSecurityWarning,
-            stacklevel=2,
-        )
-
         try:
             spec.loader.exec_module(module)
         except Exception as e:
-            # Cleanup on failure
             if module_name in sys.modules:
                 del sys.modules[module_name]
-            # Precise cleanup of dependencies
             cleanup_modules = _jail_modules_var.get()
             if cleanup_modules:
                 for mod in cleanup_modules:
@@ -289,8 +248,6 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
         agent_class = getattr(module, class_name, None)
 
-        # Cleanup dependencies to prevent pollution
-        # SOTA Fix: Only remove modules explicitly loaded by our finder or this function.
         if module_name in sys.modules:
             del sys.modules[module_name]
 

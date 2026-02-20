@@ -3,7 +3,7 @@ from typing import Annotated, Any, Literal
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.core.engines import AttentionReasoning
 from coreason_manifest.spec.core.exceptions import DomainValidationError
@@ -21,6 +21,7 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core_base import ObservableModel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 
 # Polymorphic Node Type
@@ -37,7 +38,7 @@ AnyNode = Annotated[
 ]
 
 
-class FlowMetadata(BaseModel):
+class FlowMetadata(ObservableModel):
     """Standard metadata fields."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -48,7 +49,7 @@ class FlowMetadata(BaseModel):
     tags: list[str]
 
 
-class DataSchema(BaseModel):
+class DataSchema(ObservableModel):
     """
     Strict data contract for inputs/outputs.
     Mandate 5: Contract-First Data I/O.
@@ -127,7 +128,7 @@ class DataSchema(BaseModel):
         return data
 
 
-class FlowInterface(BaseModel):
+class FlowInterface(ObservableModel):
     """Input/Output JSON schema contracts."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -136,7 +137,7 @@ class FlowInterface(BaseModel):
     outputs: DataSchema
 
 
-class VariableDef(BaseModel):
+class VariableDef(ObservableModel):
     """Definition of a blackboard variable."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -145,7 +146,7 @@ class VariableDef(BaseModel):
     description: str | None = None
 
 
-class Blackboard(BaseModel):
+class Blackboard(ObservableModel):
     """Shared, observable memory space."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -154,7 +155,7 @@ class Blackboard(BaseModel):
     persistence: bool
 
 
-class Edge(BaseModel):
+class Edge(ObservableModel):
     """Directed connection between nodes."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -164,7 +165,7 @@ class Edge(BaseModel):
     condition: str | None = None
 
 
-class Graph(BaseModel):
+class Graph(ObservableModel):
     """Directed execution graph."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -212,7 +213,7 @@ class Graph(BaseModel):
         # Policy enforcement (e.g. banning dead code) is now the sole responsibility of the Gatekeeper.
 
 
-class FlowDefinitions(BaseModel):
+class FlowDefinitions(ObservableModel):
     """
     Registry for reusable components (The Blueprint).
     Separates 'definition' from 'usage' to reduce payload size.
@@ -274,7 +275,7 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
                 )
 
 
-class LinearFlow(BaseModel):
+class LinearFlow(ObservableModel):
     """A deterministic script."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -295,7 +296,7 @@ class LinearFlow(BaseModel):
         return self
 
 
-class GraphFlow(BaseModel):
+class GraphFlow(ObservableModel):
     """Cyclic Graph structure."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)

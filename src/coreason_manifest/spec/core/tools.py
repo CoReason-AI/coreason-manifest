@@ -1,9 +1,11 @@
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, HttpUrl, model_validator
+from pydantic import ConfigDict, Field, HttpUrl, model_validator
+
+from coreason_manifest.spec.core_base import ObservableModel
 
 
-class Dependency(BaseModel):
+class Dependency(ObservableModel):
     """Dependency definition for a tool."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -13,9 +15,9 @@ class Dependency(BaseModel):
     manager: Literal["pip", "npm", "apt", "mcp"]
 
 
-class ToolCapability(BaseModel):
+class ToolBase(ObservableModel):
     """
-    Definition of a tool's capabilities and risk profile.
+    Base definition of a tool's capabilities and risk profile.
     Mandate 3: Semantic Tool Governance.
     """
 
@@ -25,11 +27,9 @@ class ToolCapability(BaseModel):
     risk_level: Literal["safe", "standard", "critical"] = "standard"
     description: str | None = None
     requires_approval: bool = False
-    # SOTA Fix: Strict URL validation
-    url: HttpUrl | None = None
 
     @model_validator(mode="after")
-    def validate_critical_description(self) -> "ToolCapability":
+    def validate_critical_description(self) -> "ToolBase":
         if self.risk_level == "critical" and not self.description:
             raise ValueError(
                 f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
@@ -37,13 +37,35 @@ class ToolCapability(BaseModel):
         return self
 
 
-class ToolPack(BaseModel):
+class ApiTool(ToolBase):
+    """Tool that calls an external API."""
+    type: Literal["api"] = "api"
+    url: HttpUrl
+    method: Literal["GET", "POST", "PUT", "DELETE"] = "POST"
+
+
+class FunctionTool(ToolBase):
+    """Tool that executes a local function."""
+    type: Literal["function"] = "function"
+    entrypoint: str  # e.g. "my_module.my_function"
+
+
+class McpTool(ToolBase):
+    """Tool exposed via Model Context Protocol."""
+    type: Literal["mcp"] = "mcp"
+    server_name: str
+
+
+AnyTool = Annotated[ApiTool | FunctionTool | McpTool, Field(discriminator="type")]
+
+
+class ToolPack(ObservableModel):
     """A bundle of tools."""
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     kind: Literal["ToolPack"]
     namespace: str
-    tools: list[ToolCapability]
+    tools: list[AnyTool]
     dependencies: list[Dependency]
     env_vars: list[str]

@@ -10,8 +10,6 @@ def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:
     """
     attributes: dict[str, Any] = {
         "gen_ai.system": execution.node_id,
-        # OTel attributes must be primitives or arrays of primitives.
-        # Inputs/Outputs are dicts, so we serialize them to JSON strings.
         "gen_ai.request.content": json.dumps(execution.inputs, default=str),
         "gen_ai.response.content": json.dumps(execution.outputs, default=str),
         "duration": execution.duration_ms,
@@ -19,12 +17,19 @@ def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:
 
     if execution.error:
         attributes["error.message"] = execution.error
-        attributes["error.type"] = "NodeExecutionError"  # Generic error type
+        attributes["error.type"] = "NodeExecutionError"
 
-    # Merge custom attributes
-    # We might need to handle naming collisions, but for now we trust the user/recorder.
-    # Also ensure types are compatible with OTel (str, bool, int, float).
+    # Lineage support: Propagate trace IDs if present in attributes
+    # The caller is responsible for ensuring 'trace_id' or 'parent_span_id' are in execution.attributes if needed.
+
     if execution.attributes:
+        # Filter/Redact attributes here if necessary, though ObservableModel handles its own redaction.
         attributes.update(execution.attributes)
+
+    # SOTA: Diagnosis Report Attachment
+    # If a diagnosis report is present in attributes (e.g. from resilience), ensure it's serialized properly
+    if "diagnosis_report" in attributes:
+        if not isinstance(attributes["diagnosis_report"], (str, int, float, bool)):
+             attributes["diagnosis_report"] = json.dumps(attributes["diagnosis_report"], default=str)
 
     return attributes
