@@ -2,7 +2,7 @@
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 
@@ -18,6 +18,7 @@ class BaseOperation(BaseModel):
     path: str
     value: Any = None
     from_: Annotated[str | None, Field(alias="from")] = None
+    category: Literal["BREAKING", "FEATURE", "GOVERNANCE", "RESOURCE"] = "FEATURE"
 
 
 class ResourceMutation(BaseOperation):
@@ -43,6 +44,48 @@ ChangeOperation = Annotated[
 ]
 
 
+class SemanticPatchReport(BaseModel):
+    """
+    SOTA Semantic Patch Report containing RFC 6902 operations.
+    Computes breaking changes and semantic categories.
+    """
+
+    model_config = ConfigDict(extra="ignore", strict=True, frozen=True)
+
+    changes: list[ChangeOperation]
+
+    @computed_field
+    @property
+    def has_breaking(self) -> bool:
+        """
+        Determines if the patch contains breaking changes.
+        """
+        return any(op.category == "BREAKING" for op in self.changes)
+
+
+def _determine_category(
+    op: str, path: str, domain: Literal["resource", "topology", "governance"]
+) -> Literal["BREAKING", "FEATURE", "GOVERNANCE", "RESOURCE"]:
+    """
+    Determines the semantic category of an operation.
+    """
+    if domain == "governance" or "/policy" in path or "/governance" in path:
+        return "GOVERNANCE"
+
+    if domain == "resource":
+        return "RESOURCE"
+
+    # Topology and other structural changes
+    if op == "remove":
+        return "BREAKING"
+    if op == "replace":
+        # Replacing a value might be breaking depending on what it is, assume breaking for safety in topology
+        return "BREAKING"
+
+    # Additions are generally features
+    return "FEATURE"
+
+
 def _create_mutation(
     op: Literal["add", "remove", "replace", "move", "copy", "test"],
     path: str,
@@ -55,8 +98,10 @@ def _create_mutation(
         "governance": GovernanceMutation,
     }[domain]
 
+    category = _determine_category(op, path, domain)
+
     # Cast to ensure return type matches Union
-    return mutation_cls(op=op, path=path, value=value)  # type: ignore[no-any-return]
+    return mutation_cls(op=op, path=path, value=value, category=category)  # type: ignore[no-any-return]
 
 
 def _escape_json_pointer(key: str) -> str:
@@ -149,7 +194,7 @@ def _generate_diff(
     return changes
 
 
-def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> list[ChangeOperation]:
+def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> SemanticPatchReport:
     """
     Compares two flows and returns a list of semantic JSON Patch operations.
     """
@@ -157,4 +202,5 @@ def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> l
     d1 = old.model_dump(mode="json", exclude_none=True)
     d2 = new.model_dump(mode="json", exclude_none=True)
 
-    return _generate_diff("", d1, d2)
+    changes = _generate_diff("", d1, d2)
+    return SemanticPatchReport(changes=changes)

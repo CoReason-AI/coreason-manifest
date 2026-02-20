@@ -4,6 +4,7 @@ import hashlib
 import importlib.abc
 import importlib.util
 import re
+import stat
 import sys
 import warnings
 from collections.abc import Generator
@@ -16,6 +17,7 @@ import yaml
 from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolation
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
 __all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
@@ -101,36 +103,41 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         if not jail_root:
             return None
 
-        # Security: Prevent directory traversal via package names
-        if ".." in fullname:
-            raise SecurityViolationError(f"Security Error: Reference {fullname} escapes the root directory.")
-
-        # Determine path relative to jail
-        # Logic: If '_path' is None, it's a top-level import.
-        # If '_path' is set, it's a sub-module import.
-        # But our jail_root acts as a PYTHONPATH root.
-
-        # We try to find:
-        # 1. jail_root/fullname.py
-        # 2. jail_root/fullname/__init__.py
-
-        # Convert dotted name to path
+        # SOTA Fix: Pathlib based validation
         parts = fullname.split(".")
-        potential_path = jail_root.joinpath(*parts)
+        try:
+            potential_path = jail_root.joinpath(*parts)
+
+            # Resolve to check if it escapes (handling '..' in parts if any, though unlikely in fullname)
+            # strict=False because file might not exist yet, we are just looking
+            resolved_potential = potential_path.resolve()
+
+            # Double check against jail root
+            if not resolved_potential.is_relative_to(jail_root.resolve()):
+                 # This is a critical security violation if a module name resolves outside jail
+                 raise SecurityJailViolation(f"Security Error: Reference {fullname} escapes the root directory.")
+
+        except RuntimeError as e:
+            # Symlink loop or similar
+            if "Symlink" in str(e):
+                 raise SecurityJailViolation(f"Security Error: Symlink loop in {fullname}") from e
+            return None
+        except Exception:
+             # Other errors (e.g. invalid path chars) -> not found
+             return None
 
         spec = None
         # Check for package (directory with __init__.py)
-        init_py = potential_path / "__init__.py"
+        init_py = resolved_potential / "__init__.py"
         if init_py.is_file():
             spec = importlib.util.spec_from_file_location(fullname, init_py)
 
         # Check for module (file.py)
-        elif potential_path.with_suffix(".py").is_file():
-            spec = importlib.util.spec_from_file_location(fullname, potential_path.with_suffix(".py"))
+        elif resolved_potential.with_suffix(".py").is_file():
+            spec = importlib.util.spec_from_file_location(fullname, resolved_potential.with_suffix(".py"))
 
         if spec:
             # SOTA Fix: Track module as managed by this sandbox context to enable precise cleanup.
-            # This avoids the race condition of diffing sys.modules globally.
             modules = _jail_modules_var.get()
             if modules is not None:
                 modules.add(fullname)
@@ -193,7 +200,7 @@ def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[str] 
 
             target_path = (root_dir / ref_path).resolve()
             if not target_path.is_relative_to(root_dir.resolve()):
-                raise SecurityViolationError(f"Security Error: Reference {ref_path} escapes the root directory.")
+                raise SecurityJailViolation(f"Security Error: Reference {ref_path} escapes the root directory.")
 
             seen.add(ref_path)
             try:
@@ -244,7 +251,7 @@ def load_flow_from_file(
         raise ValueError("Manifest content must be a dictionary.")
 
     if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
-        raise SecurityViolationError(
+        raise SecurityJailViolation(
             "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
         )
 
@@ -273,13 +280,24 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     file_ref, class_name = reference.rsplit(":", 1)
 
-    file_path = (root_dir / file_ref).resolve()
+    # SOTA Fix: Strict Pathlib Resolution
+    try:
+        # Resolve path strictly (must exist) and canonicalize
+        file_path = (root_dir / file_ref).resolve(strict=True)
 
-    if not file_path.is_relative_to(root_dir.resolve()):
-        raise SecurityViolationError(f"Security Error: Reference {file_ref} escapes the root directory.")
+        # Jail boundary check
+        if not file_path.is_relative_to(root_dir.resolve()):
+            raise SecurityJailViolation(f"Security Error: Reference {file_ref} escapes the root directory.")
 
-    if not file_path.is_file():
-        raise ValueError(f"Agent file not found: {file_path}")
+        # Permission check: Reject world-writable files
+        st = file_path.stat()
+        if st.st_mode & stat.S_IWOTH:
+            raise SecurityJailViolation(f"Security Error: {file_ref} possesses unsafe world-writable permissions (S_IWOTH).")
+
+    except FileNotFoundError:
+        raise ValueError(f"Agent file not found: {file_ref}")
+    except RuntimeError as e:
+        raise SecurityJailViolation(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
 
     # Explicit warning for audit logs
     warnings.warn(
@@ -288,15 +306,12 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         stacklevel=2,
     )
 
-    # Generate cryptographically unique module name to prevent collisions and remove need for global lock
+    # Generate cryptographically unique module name to prevent collisions
     path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
     module_name = f"agent_{path_hash}"
 
     # Use context manager to enable jailed imports during spec finding and loading
     with sandbox_context(root_dir):
-        # Note: we no longer track pre_existing_modules via sys.modules keys
-        # because the SandboxedPathFinder now self-reports loaded modules.
-
         spec = importlib.util.spec_from_file_location(module_name, file_path)
         if spec is None or spec.loader is None:
             raise ValueError(f"Could not load spec for {file_ref}")
@@ -304,7 +319,6 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
 
-        # TODO(Architecture-Spike): Transition to True Process Sandboxing.
         warnings.warn(
             f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
             "Ensure strict governance until Wasm sandboxing is implemented.",
@@ -329,7 +343,6 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         agent_class = getattr(module, class_name, None)
 
         # Cleanup dependencies to prevent pollution
-        # SOTA Fix: Only remove modules explicitly loaded by our finder or this function.
         if module_name in sys.modules:
             del sys.modules[module_name]
 

@@ -3,6 +3,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.interop.exceptions import LineageIntegrityError
+
 
 class AgentRequest(BaseModel):
     """
@@ -83,7 +85,11 @@ class AgentRequest(BaseModel):
         """
         # Rule: Orphaned trace check
         if self.parent_request_id and not self.root_request_id:
-            raise ValueError("Broken Lineage: parent_request_id is set but root_request_id is missing.")
+            # SOTA Fix: Structured Exception Contracts
+            err = LineageIntegrityError("Broken Lineage: parent_request_id is set but root_request_id is missing.")
+            err.add_note(f"Request ID: {self.request_id}")
+            err.add_note(f"Parent Request ID: {self.parent_request_id}")
+            raise err
 
         # W3C consistency (Optional but good):
         # If traceparent is present, it should ideally align with IDs,

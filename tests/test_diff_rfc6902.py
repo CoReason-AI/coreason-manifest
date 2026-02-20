@@ -15,13 +15,20 @@ def test_diff_metadata_resource() -> None:
     f1 = create_flow(name="A")
     f2 = create_flow(name="B")
 
-    diff = compare_flows(f1, f2)
+    report = compare_flows(f1, f2)
+    diff = report.changes
     assert len(diff) == 1
     op = diff[0]
     assert isinstance(op, ResourceMutation)
     assert op.op == "replace"
     assert op.path == "/metadata/name"
     assert op.value == "B"
+    # SOTA check
+    assert report.has_breaking is False # Metadata name change is arguably not breaking topology/governance, depending on policy.
+    # But currently category defaults to FEATURE for resource changes unless mapped otherwise.
+    # _determine_category returns RESOURCE for resource domain.
+    # And has_breaking checks for "BREAKING".
+    assert op.category == "RESOURCE"
 
 
 def test_diff_topology_add_node() -> None:
@@ -29,13 +36,17 @@ def test_diff_topology_add_node() -> None:
     f1 = create_flow(nodes=[])
     f2 = create_flow(nodes=[n1])
 
-    diff = compare_flows(f1, f2)
+    report = compare_flows(f1, f2)
+    diff = report.changes
     assert len(diff) == 1
     op = diff[0]
     assert isinstance(op, TopologyMutation)  # /sequence/0 -> Topology?
     assert op.op == "add"
     assert op.path == "/sequence/0"
     assert op.value["id"] == "a1"
+
+    # Topology ADD is FEATURE
+    assert op.category == "FEATURE"
 
 
 def test_diff_governance() -> None:
@@ -53,13 +64,16 @@ def test_diff_governance() -> None:
     f1_gov = f1.model_copy(update={"governance": gov1})
     f2_gov = f1.model_copy(update={"governance": gov2})
 
-    diff = compare_flows(f1_gov, f2_gov)
+    report = compare_flows(f1_gov, f2_gov)
+    diff = report.changes
     assert len(diff) == 1
     op = diff[0]
     assert isinstance(op, GovernanceMutation)
     assert op.op == "add"
     assert op.path == "/governance/allowed_domains/1"
     assert op.value == "foo.com"
+
+    assert op.category == "GOVERNANCE"
 
 
 def test_diff_list_replace() -> None:
@@ -74,7 +88,8 @@ def test_diff_list_replace() -> None:
     f1 = create_flow(nodes=[n1, n1])
     f2 = create_flow(nodes=[n1, n2])
 
-    diff = compare_flows(f1, f2)
+    report = compare_flows(f1, f2)
+    diff = report.changes
     assert len(diff) > 0
     # It might be multiple ops if node fields differ
     # id changed: a1 -> a2.
