@@ -357,7 +357,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             f"Tree Shake: Remove {len(safe_nodes)} dead code nodes "
                             f"and {len(sorted_edge_indices)} edges."
                         ),
-                    )
+                    ),
                 )
             )
 
