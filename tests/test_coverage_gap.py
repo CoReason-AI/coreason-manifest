@@ -692,12 +692,14 @@ def test_flow_cycle_detection_unreachable() -> None:
     )
 
     # Cycle detection is now in Published GraphFlow validation (verify_integrity)
-    with pytest.raises(ValidationError, match="Topological fracture"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            graph=graph,
-        )
+    # SOTA Update: Cycle detection is relaxed in Graph model. It is now handled by Gatekeeper policy.
+    # Therefore, verify_integrity(strict=True) should NO LONGER raise for cycles.
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+    assert flow.status == "published"
