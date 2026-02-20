@@ -1,6 +1,6 @@
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class StreamError(BaseModel):
@@ -15,29 +15,28 @@ class StreamError(BaseModel):
     severity: Literal["low", "medium", "high", "critical"]
 
 
-def _duck_type_stream_error(v: Any) -> Any:
-    """
-    SOTA Ingress: Duck-type inference to upgrade raw dicts to rigid objects.
-    """
-    if isinstance(v, dict):
-        # Check signature
-        required_keys = {"code", "message", "severity"}
-        if required_keys <= v.keys():
-            try:
-                # Attempt to cast to StreamError.
-                # Use model_validate to allow Pydantic to handle strict validation.
-                return StreamError.model_validate(v)
-            except ValidationError:
-                # If validation fails (e.g. types wrong), we return unmodified
-                # and let the Union fallback to dict[str, Any]
-                pass
-    return v
+class StreamErrorEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    op: Literal["error"]
+    p: StreamError
 
 
-# Union type for stream with intrinsic self-healing
+class StreamDeltaEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    op: Literal["delta"]
+    p: str
+
+
+class StreamCloseEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    op: Literal["close"]
+    p: None = None
+
+
+# SOTA Python 3.12 Union syntax mapped to a Pydantic Discriminator
 StreamPacket = Annotated[
-    StreamError | dict[str, Any] | str,
-    BeforeValidator(_duck_type_stream_error),
+    StreamErrorEnvelope | StreamDeltaEnvelope | StreamCloseEnvelope,
+    Field(discriminator="op"),
 ]
 
 

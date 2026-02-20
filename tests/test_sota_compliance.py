@@ -126,7 +126,7 @@ def test_telemetry_request_auto_rooting() -> None:
     Test AgentRequest auto-rooting logic.
     """
     # Case A: No root, no parent -> Auto-promote
-    req = AgentRequest(agent_id="test", inputs={})
+    req = AgentRequest(agent_id="test", session_id="s1", inputs={})
     assert req.request_id is not None
     assert req.root_request_id == req.request_id
     assert req.parent_request_id is None
@@ -134,9 +134,25 @@ def test_telemetry_request_auto_rooting() -> None:
     # Case C: Parent and Root -> OK
     parent_id = str(uuid4())
     root_id = str(uuid4())
-    req2 = AgentRequest(agent_id="test", inputs={}, parent_request_id=parent_id, root_request_id=root_id)
+    req2 = AgentRequest(
+        agent_id="test", session_id="s1", inputs={}, parent_request_id=parent_id, root_request_id=root_id
+    )
     assert req2.parent_request_id == parent_id
     assert req2.root_request_id == root_id
+
+
+def test_telemetry_request_create_child() -> None:
+    """
+    Test create_child factory method.
+    """
+    req = AgentRequest(agent_id="root", session_id="s1", inputs={})
+    child = req.create_child(metadata={"step": 1})
+
+    assert child.request_id != req.request_id
+    assert child.parent_request_id == req.request_id
+    assert child.root_request_id == req.root_request_id
+    assert child.session_id == req.session_id
+    assert child.metadata["step"] == 1
 
 
 def test_telemetry_request_orphaned_trace() -> None:
@@ -144,9 +160,10 @@ def test_telemetry_request_orphaned_trace() -> None:
     Test AgentRequest orphaned trace detection.
     """
     # Case B: Parent but no root -> Error
-    with pytest.raises(ValueError, match="Orphaned trace detected"):
+    with pytest.raises(ValueError, match="Broken Lineage"):
         AgentRequest(
             agent_id="test",
+            session_id="s1",
             inputs={},
             parent_request_id="some-parent",
             # root_request_id missing
@@ -217,6 +234,12 @@ def test_integrity_sanitization() -> None:
 
     # Check timestamp
     assert sanitized["nested"]["timestamp"] == "2023-01-01T12:00:00Z"
+
+    # Check UUID fast-path
+    uid = uuid4()
+    data_uuid = {"id": uid}
+    sanitized_uuid = strategy._recursive_sort_and_sanitize(data_uuid)
+    assert sanitized_uuid["id"] == str(uid)
 
     # Determinism check
     h1 = compute_hash(data)

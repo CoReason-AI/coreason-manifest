@@ -264,10 +264,11 @@ def test_loader_spec_none_coverage() -> None:
     assert finder.find_spec("foo") is None  # jail_root not set
 
     # ".." check
-    from coreason_manifest.utils.loader import sandbox_context
+    from coreason_manifest.utils.loader import SecurityViolationError, sandbox_context
 
     with sandbox_context(Path(".")):
-        assert finder.find_spec("..foo") is None
+        with pytest.raises(SecurityViolationError, match=r"Security Error: Reference ..foo escapes"):
+            finder.find_spec("..foo")
         # line 119: init_py is file -> create dummy init
         # line 126: module_py is file
 
@@ -707,3 +708,159 @@ def test_flow_cycle_detection_unreachable() -> None:
         graph=graph,
     )
     assert flow.status == "published"
+
+
+def test_loader_resolve_refs_complex() -> None:
+    """Test recursive $ref resolution in loader."""
+    import tempfile
+    from pathlib import Path
+
+    import yaml
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+
+        # main.yaml -> nested ref -> list ref -> leaf
+        main = {
+            "kind": "LinearFlow",
+            "metadata": {"name": "main", "version": "1.0.0", "description": "d", "tags": []},
+            "interface": {
+                "inputs": {"json_schema": {"type": "object"}},
+                "outputs": {"json_schema": {"type": "object"}},
+            },
+            "sequence": [{"$ref": "step1.yaml"}],
+            "definitions": {"shared": {"$ref": "shared.yaml"}},
+        }
+
+        step1 = {
+            "id": "s1",
+            "type": "agent",
+            "metadata": {},
+            "profile": {"role": "tester", "persona": "p", "reasoning": {"type": "standard", "model": "gpt-4"}},
+            "tools": [],
+        }
+
+        shared = {"key": "value"}
+
+        (p / "main.yaml").write_text(yaml.dump(main))
+        (p / "step1.yaml").write_text(yaml.dump(step1))
+        (p / "shared.yaml").write_text(yaml.dump(shared))
+
+        flow = load_flow_from_file(str(p / "main.yaml"))
+        # Verify resolution
+        from coreason_manifest.spec.core.flow import LinearFlow
+
+        assert isinstance(flow, LinearFlow)
+        assert flow.sequence[0].id == "s1"
+
+        # Test circular dependency
+        (p / "cycle1.yaml").write_text(yaml.dump({"$ref": "cycle2.yaml"}))
+        (p / "cycle2.yaml").write_text(yaml.dump({"$ref": "cycle1.yaml"}))
+
+        cycle_flow = main.copy()
+        cycle_flow["sequence"] = [{"$ref": "cycle1.yaml"}]
+        (p / "cycle_main.yaml").write_text(yaml.dump(cycle_flow))
+
+        with pytest.raises(RecursionError, match="Circular dependency detected"):
+            load_flow_from_file(str(p / "cycle_main.yaml"))
+
+
+def test_loader_execution_exception_propagation() -> None:
+    """Verify that exceptions during module execution are propagated correctly as ValueErrors."""
+    import tempfile
+
+    from coreason_manifest.utils.loader import load_agent_from_ref
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        (p / "fail.py").write_text("raise RuntimeError('Boom')")
+
+        with pytest.raises(ValueError, match="Failed to execute agent code"):
+            load_agent_from_ref("fail.py:Agent", root_dir=p)
+
+
+def test_loader_dynamic_ref_recursion() -> None:
+    """Cover list recursion in _scan_for_dynamic_references."""
+    import tempfile
+    from pathlib import Path
+
+    import yaml
+
+    from coreason_manifest.utils.loader import SecurityViolationError, load_flow_from_file
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        # Manifest with dynamic ref inside a list
+        manifest = {
+            "kind": "LinearFlow",
+            "metadata": {"name": "test", "version": "1.0.0", "description": "d", "tags": []},
+            "interface": {"inputs": {}, "outputs": {}},
+            "sequence": ["unsafe.py:Agent"],
+            "definitions": {},
+        }
+        (p / "list_unsafe.yaml").write_text(yaml.dump(manifest))
+
+        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+            load_flow_from_file(str(p / "list_unsafe.yaml"), allow_dynamic_execution=False)
+
+        # Manifest with dynamic ref inside a nested dict
+        manifest_dict = {
+            "kind": "LinearFlow",
+            "metadata": {"name": "test", "version": "1.0.0", "description": "d", "tags": []},
+            "interface": {"inputs": {}, "outputs": {}},
+            "sequence": [],
+            "definitions": {"agent": "unsafe.py:Agent"},
+        }
+        (p / "dict_unsafe.yaml").write_text(yaml.dump(manifest_dict))
+
+        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+            load_flow_from_file(str(p / "dict_unsafe.yaml"), allow_dynamic_execution=False)
+
+
+def test_loader_security_escapes() -> None:
+    """Test path traversal checks in loader."""
+    import tempfile
+    from pathlib import Path
+
+    import yaml
+
+    from coreason_manifest.utils.loader import SecurityViolationError, load_agent_from_ref, load_flow_from_file
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        jail = p / "jail"
+        jail.mkdir()
+
+        # 1. $ref escape
+        manifest = {"$ref": "../outside.yaml"}
+        (jail / "bad_ref.yaml").write_text(yaml.dump(manifest))
+        (p / "outside.yaml").write_text("content: 1")
+
+        with pytest.raises(SecurityViolationError, match="escapes the root directory"):
+            load_flow_from_file(str(jail / "bad_ref.yaml"))
+
+        # 2. agent ref escape
+        (p / "outside.py").write_text("class Agent: pass")
+
+        with pytest.raises(SecurityViolationError, match="escapes the root directory"):
+            load_agent_from_ref("../outside.py:Agent", root_dir=jail)
+
+
+def test_loader_ref_load_failure() -> None:
+    """Test failure to load $ref."""
+    import tempfile
+    from pathlib import Path
+
+    import yaml
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        manifest = {"$ref": "missing.yaml"}
+        (p / "main.yaml").write_text(yaml.dump(manifest))
+
+        with pytest.raises(ValueError, match="Failed to load reference"):
+            load_flow_from_file(str(p / "main.yaml"))

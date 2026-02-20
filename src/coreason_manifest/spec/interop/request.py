@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Literal, Self
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -26,11 +26,21 @@ class AgentRequest(BaseModel):
 
     # Payload
     agent_id: str
+    session_id: str
     inputs: dict[str, Any]
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Versioning
     hash_version: Literal["v1"] = Field(default="v1", description="Versioning for integrity strategies.")
+
+    def create_child(self, metadata: dict[str, Any]) -> Self:
+        return self.model_copy(
+            update={
+                "request_id": str(uuid4()),
+                "parent_request_id": self.request_id,
+                "metadata": metadata,
+            }
+        )
 
     @model_validator(mode="before")
     @classmethod
@@ -73,7 +83,7 @@ class AgentRequest(BaseModel):
         """
         # Rule: Orphaned trace check
         if self.parent_request_id and not self.root_request_id:
-            raise ValueError("Orphaned trace detected: parent_request_id is set but root_request_id is missing.")
+            raise ValueError("Broken Lineage: parent_request_id is set but root_request_id is missing.")
 
         # W3C consistency (Optional but good):
         # If traceparent is present, it should ideally align with IDs,

@@ -103,7 +103,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
 
         # Security: Prevent directory traversal via package names
         if ".." in fullname:
-            return None
+            raise SecurityViolationError(f"Security Error: Reference {fullname} escapes the root directory.")
 
         # Determine path relative to jail
         # Logic: If '_path' is None, it's a top-level import.
@@ -180,6 +180,38 @@ def _scan_for_dynamic_references(data: Any) -> bool:
     return False
 
 
+def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[str] | None = None) -> Any:
+    """Recursively resolves JSON/YAML $refs while guarding against circular dependencies and jail escapes."""
+    if seen is None:
+        seen = set()
+
+    if isinstance(data, dict):
+        if "$ref" in data:
+            ref_path = data["$ref"]
+            if ref_path in seen:
+                raise RecursionError(f"Circular dependency detected: {ref_path}")
+
+            target_path = (root_dir / ref_path).resolve()
+            if not target_path.is_relative_to(root_dir.resolve()):
+                raise SecurityViolationError(f"Security Error: Reference {ref_path} escapes the root directory.")
+
+            seen.add(ref_path)
+            try:
+                ref_content_str = loader.read_text(str(target_path.relative_to(root_dir)))
+                ref_data = yaml.load(ref_content_str, Loader=UniqueKeyLoader)
+            except Exception as e:
+                raise ValueError(f"Failed to load reference {ref_path}: {e}") from e
+
+            return _resolve_refs(ref_data, root_dir, loader, seen)
+
+        return {k: _resolve_refs(v, root_dir, loader, seen.copy()) for k, v in data.items()}
+
+    if isinstance(data, list):
+        return [_resolve_refs(item, root_dir, loader, seen.copy()) for item in data]
+
+    return data
+
+
 def load_flow_from_file(
     path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False
 ) -> LinearFlow | GraphFlow:
@@ -204,6 +236,9 @@ def load_flow_from_file(
         data = yaml.load(content_str, Loader=UniqueKeyLoader)
     except yaml.YAMLError as e:
         raise ValueError(f"Failed to parse manifest file: {e}") from e
+
+    # Resolve pointers before schema validation
+    data = _resolve_refs(data, jail_root, loader)
 
     if not isinstance(data, dict):
         raise ValueError("Manifest content must be a dictionary.")
@@ -239,6 +274,10 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
     file_ref, class_name = reference.rsplit(":", 1)
 
     file_path = (root_dir / file_ref).resolve()
+
+    if not file_path.is_relative_to(root_dir.resolve()):
+        raise SecurityViolationError(f"Security Error: Reference {file_ref} escapes the root directory.")
+
     if not file_path.is_file():
         raise ValueError(f"Agent file not found: {file_path}")
 

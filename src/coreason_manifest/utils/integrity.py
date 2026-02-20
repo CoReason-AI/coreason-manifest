@@ -3,6 +3,7 @@
 import hashlib
 import json
 import math
+import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from typing import Any, Literal, TypedDict
@@ -99,6 +100,8 @@ class CanonicalV2Strategy(HashingStrategy):
         if isinstance(obj, (set, frozenset)):
             # Sets should be sorted lists
             return sorted([self._recursive_sort_and_sanitize(x) for x in obj])
+        if isinstance(obj, uuid.UUID):
+            return str(obj)
         if isinstance(obj, datetime):
             return to_canonical_timestamp(obj)
         if isinstance(obj, BaseModel):
