@@ -1,12 +1,15 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import idna
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.utils.diff import _classify_path, _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
 from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref
 from coreason_manifest.utils.net_utils import canonicalize_domain
+from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
+from datetime import datetime
 
 
 def test_diff_classifier_coverage() -> None:
@@ -40,7 +43,7 @@ def test_diff_list_logic_coverage() -> None:
     assert diff[0].path == "/list/1"
 
     # Branch coverage for loops
-    # If len1 == len2, loops for add/remove are skipped (lines 109, 111, 128, 132)
+    # If len1 == len2, loops for add/remove are skipped
     # Recursion happens in first loop.
     l5 = [1]
     l6 = [2]
@@ -100,8 +103,29 @@ def test_loader_spec_none_coverage() -> None:
 
     with sandbox_context(Path(".")):
         assert finder.find_spec("..foo") is None
-        # line 119: init_py is file
+        # line 119: init_py is file -> create dummy init
         # line 126: module_py is file
+
+        # Test package loading (init.py exists)
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d)
+            (p / "mypkg").mkdir()
+            (p / "mypkg" / "__init__.py").touch()
+            with sandbox_context(p):
+                spec = finder.find_spec("mypkg")
+                assert spec is not None
+                assert spec.origin.endswith("__init__.py")
+
+        # Test module loading (file.py exists)
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d)
+            (p / "mymod.py").touch()
+            with sandbox_context(p):
+                spec = finder.find_spec("mymod")
+                assert spec is not None
+                assert spec.origin.endswith("mymod.py")
+
         # If neither exists, returns None.
         assert finder.find_spec("non_existent") is None
 
@@ -130,8 +154,7 @@ def test_net_utils_edge_cases() -> None:
     # Test runtime None handling (mypy prevents direct None passing)
     # We must cast None to Any to bypass static type checking, validating runtime resilience.
     from typing import Any, cast
-
-    assert canonicalize_domain(cast("Any", None)) == ""
+    assert canonicalize_domain(cast(Any, None)) == ""
 
     # Force IDNA error (line 24-27)
     with patch("idna.encode", side_effect=idna.IDNAError):
@@ -140,14 +163,29 @@ def test_net_utils_edge_cases() -> None:
 
 def test_telemetry_frozen() -> None:
     # Telemetry frozen checks lines 75-76, 80
-    # NodeExecution is pydantic model with strict=True, frozen=True?
-    # Actually validation happens on instantiation.
-    pass
+    ne = NodeExecution(
+        node_id="n1",
+        state=NodeState.COMPLETED,
+        inputs={},
+        outputs={},
+        timestamp=datetime.now(),
+        duration_ms=10,
+        request_id="req",
+        root_request_id="req"
+    )
+    # Attempt to mutate frozen field
+    with pytest.raises(ValidationError):
+        ne.state = NodeState.FAILED # type: ignore
 
 
 def test_validator_edge_cases() -> None:
     # validator.py 70, 282, 284, 309
-    pass
+    # line 70: check schema if boolean
+    pass # covered by test_schema_boolean
+
+    # line 282: GraphFlow Error: Graph must contain at least one node.
+    # line 284: Graph Integrity Error: Node key matches ID.
+    pass # covered by tests/test_validator_phase3a.py
 
 
 def test_visualizer_unvisited() -> None:
