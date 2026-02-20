@@ -170,11 +170,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
                 # 3. Add edge (Guard -> Target)
                 patch_ops.append(
-                    {
-                        "op": "add",
-                        "path": "/graph/edges/-",
-                        "value": {"source": human_node_id, "target": node.id}
-                    }
+                    {"op": "add", "path": "/graph/edges/-", "value": {"source": human_node_id, "target": node.id}}
                 )
 
             reports.append(
@@ -306,17 +302,15 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 if edge.source in unreachable or edge.target in unreachable:
                     bulk_edge_indices.add(idx)
 
-            # Sort descending to prevent index invalidation
+            # Sort descending to prevent index invalidation during sequential removal
             sorted_edge_indices = sorted(bulk_edge_indices, reverse=True)
 
             patch_list = []
             # 1. Remove Edges (must be done by index, high to low)
-            for idx in sorted_edge_indices:
-                patch_list.append({"op": "remove", "path": f"/graph/edges/{idx}"})
+            patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices])
 
             # 2. Remove Nodes (by key, safe order)
-            for node_id in unreachable:
-                patch_list.append({"op": "remove", "path": f"/graph/nodes/{node_id}"})
+            patch_list.extend([{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable])
 
             if dangerous_node_ids:
                 # Severity violation if any dangerous nodes are present

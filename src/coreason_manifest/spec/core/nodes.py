@@ -215,22 +215,21 @@ class HumanNode(Node):
                     ),
                 )
 
-        if self.interaction_mode == "blocking":
-            if self.shadow_timeout_seconds is not None:
-                raise DomainValidationError(
-                    message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
-                    remediation=RemediationAction(
-                        type="update_field",
-                        target_node_id=self.id,
-                        description="Remove 'shadow_timeout_seconds'.",
-                        patch_data=[
-                            {
-                                "op": "remove",
-                                "path": "/shadow_timeout_seconds",
-                            }
-                        ],
-                    ),
-                )
+        if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
+            raise DomainValidationError(
+                message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
+                remediation=RemediationAction(
+                    type="update_field",
+                    target_node_id=self.id,
+                    description="Remove 'shadow_timeout_seconds'.",
+                    patch_data=[
+                        {
+                            "op": "remove",
+                            "path": "/shadow_timeout_seconds",
+                        }
+                    ],
+                ),
+            )
         return self
 
 
