@@ -28,8 +28,9 @@ def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:
 
     # SOTA: Diagnosis Report Attachment
     # If a diagnosis report is present in attributes (e.g. from resilience), ensure it's serialized properly
-    if "diagnosis_report" in attributes:
-        if not isinstance(attributes["diagnosis_report"], (str, int, float, bool)):
-             attributes["diagnosis_report"] = json.dumps(attributes["diagnosis_report"], default=str)
+    if "diagnosis_report" in attributes and not isinstance(
+        attributes["diagnosis_report"], (str, int, float, bool)
+    ):
+        attributes["diagnosis_report"] = json.dumps(attributes["diagnosis_report"], default=str)
 
     return attributes
