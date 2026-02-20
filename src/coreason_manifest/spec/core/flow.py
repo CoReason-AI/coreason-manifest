@@ -99,24 +99,22 @@ class DataSchema(BaseModel):
                 # We package the error into an AttentionReasoning payload for future LLM repair.
                 # Since we cannot call LLM here, we stub the hook and fail with high-fidelity diagnostics.
 
-                # 1. Instantiate the repair configuration
-                repair_config = AttentionReasoning(
+                # 1. Instantiate the repair configuration (Stubbed usage)
+                _repair_config = AttentionReasoning(
                     model="gpt-4-turbo",  # Default repair model
                     attention_mode="rephrase",
-                    focus_model="gpt-3.5-turbo"
+                    focus_model="gpt-3.5-turbo",
                 )
 
                 # 2. Stubbed Hook
-                # In a real system, we would call: _attempt_repair(schema, error_msg, repair_config)
+                # In a real system, we would call: _attempt_repair(schema, error_msg, _repair_config)
                 # and if it returns a repaired schema, use it.
 
                 # 3. Raise DomainValidationError with context
-                raise DomainValidationError(
-                    message=final_error_msg,
-                    # We don't have a RemediationAction for schema repair yet as it's complex,
-                    # but we could provide one if we had the patch.
-                    # For now, we just ensure we are using the new exception type and acknowledging the healing architecture.
-                ) from e
+                # For now, we just ensure we are using the new exception type and acknowledging the
+                # healing architecture. The 'repair_config' would be passed to the remediation
+                # strategy in a real implementation.
+                raise DomainValidationError(message=final_error_msg) from e
             except Exception as e:
                 raise DomainValidationError(f"Invalid JSON Schema definition: {e}") from e
 
@@ -205,7 +203,6 @@ class Graph(BaseModel):
         # We NO LONGER enforce reachability or acyclic properties in the structural parser.
         # This allows "utility islands" and complex cyclic patterns to exist syntactically.
         # Policy enforcement (e.g. banning dead code) is now the sole responsibility of the Gatekeeper.
-        pass
 
 
 class FlowDefinitions(BaseModel):

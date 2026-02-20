@@ -3,7 +3,6 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.spec.common.presentation import PresentationHints
-from coreason_manifest.spec.core.exceptions import DomainValidationError
 
 # IMPORT ModelRef to link the new routing capability
 from coreason_manifest.spec.core.engines import (
@@ -12,6 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
+from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.resilience import ResilienceConfig
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.utils.logger import logger
@@ -252,13 +252,12 @@ class SwarmNode(Node):
     @model_validator(mode="before")
     @classmethod
     def coerce_magic_numbers(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if "max_concurrency" in data and data["max_concurrency"] == -1:
-                logger.warning(
-                    "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. "
-                    "Coercing to 'infinite'."
-                )
-                data["max_concurrency"] = "infinite"
+        if isinstance(data, dict) and "max_concurrency" in data and data["max_concurrency"] == -1:
+            logger.warning(
+                "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. "
+                "Coercing to 'infinite'."
+            )
+            data["max_concurrency"] = "infinite"
         return data
 
     @model_validator(mode="after")
