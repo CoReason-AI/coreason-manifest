@@ -2,8 +2,9 @@ import pytest
 from pydantic import ValidationError
 from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.manifest import Manifest
+from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 
-def test_auto_heal_markdown():
+def test_auto_heal_markdown() -> None:
     """
     Test that markdown JSON is automatically healed.
     """
@@ -31,15 +32,17 @@ def test_auto_heal_markdown():
     """
 
     # Test auto-heal
-    # Note: Manifest.model_validate(str) works because of our auto_heal logic parsing string to dict
-    manifest = Manifest.model_validate(manifest_input, auto_heal=True)
+    # Pass auto_heal in context (or rely on Loader usually, but here we test model directly)
+    # Since we updated Manifest.model_validate to look at context
+    manifest = Manifest.model_validate(manifest_input, context={"auto_heal": True})
+    assert isinstance(manifest.flow, LinearFlow)
     assert manifest.flow.kind == "LinearFlow"
     assert manifest.recovery_receipt is not None
     # Flexible assertion on mutation message
     mutations = str(manifest.recovery_receipt.mutations)
     assert "Stripped markdown code blocks" in mutations
 
-def test_diagnosis_report_missing_field():
+def test_diagnosis_report_missing_field() -> None:
     """
     Test that validation error produces a DiagnosisReport and Prompt.
     """
@@ -73,7 +76,7 @@ def test_diagnosis_report_missing_field():
     assert "## Instruction" in prompt
     assert "metadata" in domain_err.diagnosis.json_path or "name" in domain_err.diagnosis.json_path
 
-def test_diagnosis_report_typo():
+def test_diagnosis_report_typo() -> None:
     """
     Test that typo in key triggers Levenshtein suggestion.
     """
@@ -106,7 +109,7 @@ def test_diagnosis_report_typo():
     # Should suggest 'nmae' if missing 'name' or suggest 'name' if extra 'nmae'
     assert "nmae" in fix or "name" in fix
 
-def test_auto_heal_trailing_commas():
+def test_auto_heal_trailing_commas() -> None:
     # Construct invalid JSON with trailing comma
     invalid_json = """
     {
@@ -123,11 +126,13 @@ def test_auto_heal_trailing_commas():
         }
     }
     """
-    manifest = Manifest.model_validate(invalid_json, auto_heal=True)
+    manifest = Manifest.model_validate(invalid_json, context={"auto_heal": True})
+    assert isinstance(manifest.flow, LinearFlow)
     assert manifest.flow.kind == "LinearFlow"
+    assert manifest.recovery_receipt is not None
     assert "Stripped trailing commas" in str(manifest.recovery_receipt.mutations)
 
-def test_auto_heal_booleans():
+def test_auto_heal_booleans() -> None:
     raw_json = """
     {
         "kind": "GraphFlow",
@@ -160,7 +165,9 @@ def test_auto_heal_booleans():
     }}
     """
 
-    manifest = Manifest.model_validate(manifest_input, auto_heal=True)
-    assert isinstance(manifest.flow, object)
+    manifest = Manifest.model_validate(manifest_input, context={"auto_heal": True})
+    assert isinstance(manifest.flow, GraphFlow)
+    assert manifest.flow.blackboard is not None
     assert manifest.flow.blackboard.persistence is True
+    assert manifest.recovery_receipt is not None
     assert "Coerced stringified booleans" in str(manifest.recovery_receipt.mutations)

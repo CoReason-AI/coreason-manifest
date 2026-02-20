@@ -55,8 +55,16 @@ class McpTool(ToolBase):
     type: Literal["mcp"] = "mcp"
     server_name: str
 
+class ToolCapability(ToolBase):
+    """
+    Legacy/Abstract tool capability for governance checks.
+    Preserved for backward compatibility in tests.
+    """
+    type: Literal["capability"] = "capability"
+    url: HttpUrl | None = None
 
-AnyTool = Annotated[ApiTool | FunctionTool | McpTool, Field(discriminator="type")]
+
+AnyTool = Annotated[ApiTool | FunctionTool | McpTool | ToolCapability, Field(discriminator="type")]
 
 
 class ToolPack(ObservableModel):

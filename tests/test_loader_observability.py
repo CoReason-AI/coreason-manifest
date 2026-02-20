@@ -7,7 +7,7 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 from coreason_manifest.utils.loader import Loader
 
 @pytest.mark.asyncio
-async def test_loader_trace():
+async def test_loader_trace() -> None:
     # Setup OTEL
     provider = TracerProvider()
     exporter = InMemorySpanExporter()
@@ -41,7 +41,7 @@ async def test_loader_trace():
     assert loader_span.status.is_ok
 
 @pytest.mark.asyncio
-async def test_loader_trace_with_auto_heal_event():
+async def test_loader_trace_with_auto_heal_event() -> None:
     # Setup OTEL
     provider = TracerProvider()
     exporter = InMemorySpanExporter()

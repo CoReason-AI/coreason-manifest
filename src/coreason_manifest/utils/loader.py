@@ -8,21 +8,26 @@ import json
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, cast, Protocol
 import asyncio
 from urllib.parse import urlparse
 
 import httpx
 from pydantic import AnyUrl, HttpUrl, validate_call
 from opentelemetry import trace
+import yaml
+from yaml.nodes import MappingNode
 
-from coreason_manifest.spec.core.manifest import Manifest
+from coreason_manifest.spec.core.manifest import AnyFlow, Manifest
 from coreason_manifest.spec.core.resilience import RecoveryReceipt
 from coreason_manifest.utils.resolver import ReferenceResolver
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
     """Warning for runtime security risks."""
+
+class SecurityViolationError(Exception):
+    """Raised when a security policy is violated."""
 
 
 # SOTA Security: Context-aware jail root for import resolution.
@@ -88,6 +93,41 @@ def sandbox_context(jail_root: Path):
         _jail_modules_var.reset(token_modules)
 
 
+class YamlLoaderProtocol(Protocol):
+    def construct_object(self, node: yaml.Node, deep: bool = False) -> Any: ...
+    def flatten_mapping(self, node: MappingNode) -> None: ...
+
+
+def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: bool = False) -> dict[Any, Any]:
+    """
+    Construct a mapping while checking for duplicate keys.
+    """
+    if not isinstance(node, MappingNode):
+        node_any = cast(Any, node)
+        raise yaml.constructor.ConstructorError(
+            None,
+            None,
+            f"expected a mapping node, but found {node_any.id}",
+            node.start_mark,
+        )
+
+    mapping_node = node
+    loader_typed = cast(YamlLoaderProtocol, loader)
+    loader_typed.flatten_mapping(mapping_node)
+    mapping = {}
+    for key_node, value_node in mapping_node.value:
+        key = loader_typed.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader_typed.construct_object(value_node, deep=deep)
+    return mapping
+
+
 class Loader:
     """
     SOTA Manifest Loader.
@@ -132,7 +172,8 @@ class Loader:
 
             # Validate
             try:
-                manifest = Manifest.model_validate(resolved_data, auto_heal=auto_heal)
+                # Pass auto_heal via context
+                manifest = Manifest.model_validate(resolved_data, context={"auto_heal": auto_heal})
             except Exception as e:
                 span.record_exception(e)
                 raise e
@@ -143,6 +184,7 @@ class Loader:
                 if current_receipt:
                     all_mutations = initial_receipt.mutations + current_receipt.mutations
                     new_receipt = RecoveryReceipt(mutations=all_mutations)
+                    # Use object.__setattr__ to bypass frozen check
                     object.__setattr__(manifest, "_recovery_receipt", new_receipt)
                 else:
                     object.__setattr__(manifest, "_recovery_receipt", initial_receipt)
@@ -177,7 +219,7 @@ class Loader:
             bucket = parsed.netloc
             key = parsed.path.lstrip("/")
 
-            def fetch_s3():
+            def fetch_s3() -> str:
                 s3 = boto3.client("s3")
                 response = s3.get_object(Bucket=bucket, Key=key)
                 return response["Body"].read().decode("utf-8")
@@ -201,6 +243,23 @@ class Loader:
         # Treat as raw content (String)
         # Base URI defaults to CWD
         return source_str, Path.cwd()
+
+
+def load_flow_from_file(
+    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False
+) -> AnyFlow:
+    """
+    Synchronous wrapper for Loader.load to support legacy CLI/Tests.
+    Ignores root_dir and allow_dynamic_execution for now as new loader handles it differently.
+    """
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    manifest = loop.run_until_complete(Loader.load(path, auto_heal=True))
+    return manifest.flow
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:

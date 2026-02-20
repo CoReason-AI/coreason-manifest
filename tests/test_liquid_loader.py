@@ -1,11 +1,10 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from coreason_manifest.utils.loader import Loader
-from coreason_manifest.spec.core.manifest import Manifest
 from coreason_manifest.spec.core.flow import LinearFlow
+from coreason_manifest.utils.loader import Loader
 
 @pytest.mark.asyncio
-async def test_liquid_loader_remote_ref():
+async def test_liquid_loader_remote_ref() -> None:
     """
     Test loading markdown with remote $ref using mocked HTTP.
     """

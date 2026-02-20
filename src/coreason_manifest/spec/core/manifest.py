@@ -1,10 +1,10 @@
-from typing import Annotated, Any, ClassVar
+from typing import Annotated, Any, ClassVar, Literal
 import re
 import json
 
 from pydantic import ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.core.flow import LinearFlow, GraphFlow
+from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.resilience import RecoveryReceipt
 from coreason_manifest.spec.core_base import ObservableModel
 
@@ -32,11 +32,14 @@ class Manifest(ObservableModel):
         strict: bool | None = None,
         from_attributes: bool | None = None,
         context: dict[str, Any] | None = None,
-        auto_heal: bool = False,
     ) -> "Manifest":
         """
-        Custom model_validate with auto_heal support.
+        Custom model_validate with auto_heal support via context.
         """
+        auto_heal = False
+        if context and "auto_heal" in context:
+            auto_heal = context["auto_heal"]
+
         if auto_heal:
             obj, receipt = cls._perform_auto_healing(obj)
             if context is None:
@@ -69,15 +72,12 @@ class Manifest(ObservableModel):
                     cleaned_data = match.group(1)
                     mutations.append("Stripped markdown code blocks (```json)")
             elif "```" in cleaned_data:
-                 match = re.search(r"```\s*(.*?)\s*```", cleaned_data, re.DOTALL)
-                 if match:
+                match = re.search(r"```\s*(.*?)\s*```", cleaned_data, re.DOTALL)
+                if match:
                     cleaned_data = match.group(1)
                     mutations.append("Stripped markdown code blocks (```)")
 
             # 2. Strip trailing commas
-            # A simple regex approach for trailing commas before } or ]
-            # Note: This is a heuristic and might affect string content if not careful.
-            # But usually acceptable for "Auto-Heal" of generated JSON.
             cleaned_no_commas = re.sub(r",\s*([}\]])", r"\1", cleaned_data)
             if cleaned_no_commas != cleaned_data:
                 cleaned_data = cleaned_no_commas
@@ -87,8 +87,6 @@ class Manifest(ObservableModel):
             try:
                 cleaned_data = json.loads(cleaned_data)
             except json.JSONDecodeError:
-                # If parsing fails, we return whatever we have, validation will likely fail later
-                # unless mutations fixed it.
                 pass
 
         # 3. Coerce stringified booleans
@@ -110,7 +108,7 @@ class Manifest(ObservableModel):
                 if v_changed:
                     changed = True
             return new_obj, changed
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             new_list = []
             for v in obj:
                 v_new, v_changed = cls._recursive_coerce(v)
@@ -118,7 +116,7 @@ class Manifest(ObservableModel):
                 if v_changed:
                     changed = True
             return new_list, changed
-        elif isinstance(obj, str):
+        if isinstance(obj, str):
             if obj.lower() == "true":
                 return True, True
             if obj.lower() == "false":
