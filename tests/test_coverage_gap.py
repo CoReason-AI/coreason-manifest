@@ -18,6 +18,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
@@ -263,40 +264,48 @@ def test_loader_spec_none_coverage() -> None:
     finder = SandboxedPathFinder()
     assert finder.find_spec("foo") is None  # jail_root not set
 
-    # ".." check
-    from coreason_manifest.utils.loader import SecurityViolationError, sandbox_context
+    # ".." check via symlink escape
+    import tempfile
 
-    with sandbox_context(Path(".")):
-        with pytest.raises(SecurityViolationError, match=r"Security Error: Reference ..foo escapes"):
-            finder.find_spec("..foo")
-        # line 119: init_py is file -> create dummy init
-        # line 126: module_py is file
+    from coreason_manifest.utils.loader import sandbox_context
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        jail = p / "jail"
+        jail.mkdir()
+        outside = p / "outside.py"
+        outside.write_text("x=1")
+
+        # Symlink inside jail pointing outside
+        # Note: Symlink creation might require privileges on Windows, but this is Linux environment
+        try:
+            (jail / "escaped.py").symlink_to(outside)
+        except OSError:
+            pytest.skip("Symlinks not supported")
+
+        with sandbox_context(jail), pytest.raises(SecurityJailViolationError, match="outside jail"):
+            finder.find_spec("escaped")
 
         # Test package loading (init.py exists)
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d)
-            (p / "mypkg").mkdir()
-            (p / "mypkg" / "__init__.py").touch()
-            with sandbox_context(p):
-                spec = finder.find_spec("mypkg")
-                assert spec is not None
-                assert spec.origin is not None
-                assert spec.origin.endswith("__init__.py")
+        (jail / "mypkg").mkdir()
+        (jail / "mypkg" / "__init__.py").touch()
+        with sandbox_context(jail):
+            spec = finder.find_spec("mypkg")
+            assert spec is not None
+            assert spec.origin is not None
+            assert spec.origin.endswith("__init__.py")
 
         # Test module loading (file.py exists)
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d)
-            (p / "mymod.py").touch()
-            with sandbox_context(p):
-                spec = finder.find_spec("mymod")
-                assert spec is not None
-                assert spec.origin is not None
-                assert spec.origin.endswith("mymod.py")
+        (jail / "mymod.py").touch()
+        with sandbox_context(jail):
+            spec = finder.find_spec("mymod")
+            assert spec is not None
+            assert spec.origin is not None
+            assert spec.origin.endswith("mymod.py")
 
         # If neither exists, returns None.
-        assert finder.find_spec("non_existent") is None
+        with sandbox_context(jail):
+            assert finder.find_spec("non_existent") is None
 
 
 def test_loader_stdlib_shadowing() -> None:
@@ -788,7 +797,7 @@ def test_loader_dynamic_ref_recursion() -> None:
 
     import yaml
 
-    from coreason_manifest.utils.loader import SecurityViolationError, load_flow_from_file
+    from coreason_manifest.utils.loader import load_flow_from_file
 
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
@@ -802,7 +811,7 @@ def test_loader_dynamic_ref_recursion() -> None:
         }
         (p / "list_unsafe.yaml").write_text(yaml.dump(manifest))
 
-        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+        with pytest.raises(SecurityJailViolationError, match="Dynamic code execution"):
             load_flow_from_file(str(p / "list_unsafe.yaml"), allow_dynamic_execution=False)
 
         # Manifest with dynamic ref inside a nested dict
@@ -815,7 +824,7 @@ def test_loader_dynamic_ref_recursion() -> None:
         }
         (p / "dict_unsafe.yaml").write_text(yaml.dump(manifest_dict))
 
-        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+        with pytest.raises(SecurityJailViolationError, match="Dynamic code execution"):
             load_flow_from_file(str(p / "dict_unsafe.yaml"), allow_dynamic_execution=False)
 
 
@@ -826,7 +835,7 @@ def test_loader_security_escapes() -> None:
 
     import yaml
 
-    from coreason_manifest.utils.loader import SecurityViolationError, load_agent_from_ref, load_flow_from_file
+    from coreason_manifest.utils.loader import load_agent_from_ref, load_flow_from_file
 
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
@@ -838,13 +847,13 @@ def test_loader_security_escapes() -> None:
         (jail / "bad_ref.yaml").write_text(yaml.dump(manifest))
         (p / "outside.yaml").write_text("content: 1")
 
-        with pytest.raises(SecurityViolationError, match="escapes the root directory"):
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
             load_flow_from_file(str(jail / "bad_ref.yaml"))
 
         # 2. agent ref escape
         (p / "outside.py").write_text("class Agent: pass")
 
-        with pytest.raises(SecurityViolationError, match="escapes the root directory"):
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
             load_agent_from_ref("../outside.py:Agent", root_dir=jail)
 
 

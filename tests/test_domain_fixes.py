@@ -13,6 +13,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode, SwitchNode
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO
 from coreason_manifest.utils.loader import (
     RuntimeSecurityWarning,
@@ -84,14 +85,14 @@ definitions:
     f.write_text(yaml_content)
 
     # 1. Default: fail
-    with pytest.raises(SecurityViolationError, match="Dynamic code execution references detected"):
+    with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
         load_flow_from_file(str(f))
 
     # 2. Allow: pass
     try:
         load_flow_from_file(str(f), allow_dynamic_execution=True)
-    except SecurityViolationError:
-        pytest.fail("SecurityViolationError raised despite allow_dynamic_execution=True")
+    except SecurityJailViolationError:
+        pytest.fail("SecurityJailViolationError raised despite allow_dynamic_execution=True")
     except Exception:
         # Pydantic might complain about other things, but security check passed
         pass
@@ -114,7 +115,7 @@ definitions:
     f = tmp_path / "dynamic_list.yaml"
     f.write_text(yaml_content)
 
-    with pytest.raises(SecurityViolationError, match="Dynamic code execution references detected"):
+    with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
         load_flow_from_file(str(f))
 
 
@@ -138,7 +139,7 @@ definitions:
     f = tmp_path / "win.yaml"
     f.write_text(yaml_content)
 
-    # Should NOT raise SecurityViolationError because regex doesn't match
+    # Should NOT raise SecurityJailViolationError because regex doesn't match
     load_flow_from_file(str(f))
 
     # POSIX path should be detected
@@ -157,7 +158,7 @@ definitions:
     f2 = tmp_path / "posix.yaml"
     f2.write_text(yaml_content_posix)
 
-    with pytest.raises(SecurityViolationError, match="Dynamic code execution references detected"):
+    with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
         load_flow_from_file(str(f2))
 
 

@@ -130,11 +130,22 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         # Check for package (directory with __init__.py)
         init_py = resolved_potential / "__init__.py"
         if init_py.is_file():
+            # Check actual path for symlink escape
+            if not init_py.resolve().is_relative_to(jail_root.resolve()):
+                raise SecurityJailViolationError(
+                    f"Security Error: Module {fullname} resolves to {init_py.resolve()} outside jail."
+                )
             spec = importlib.util.spec_from_file_location(fullname, init_py)
 
         # Check for module (file.py)
         elif resolved_potential.with_suffix(".py").is_file():
-            spec = importlib.util.spec_from_file_location(fullname, resolved_potential.with_suffix(".py"))
+            found_py = resolved_potential.with_suffix(".py")
+            # Check actual path for symlink escape
+            if not found_py.resolve().is_relative_to(jail_root.resolve()):
+                raise SecurityJailViolationError(
+                    f"Security Error: Module {fullname} resolves to {found_py.resolve()} outside jail."
+                )
+            spec = importlib.util.spec_from_file_location(fullname, found_py)
 
         if spec:
             # SOTA Fix: Track module as managed by this sandbox context to enable precise cleanup.
