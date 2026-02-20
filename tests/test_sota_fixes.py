@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     DataSchema,
