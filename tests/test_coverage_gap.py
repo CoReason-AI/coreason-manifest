@@ -17,6 +17,7 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import PlaceholderNode
+from coreason_manifest.spec.interop.compliance import ErrorCatalog
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
@@ -222,8 +223,11 @@ def test_topology_self_loop_island() -> None:
     )
 
     reports = validate_policy(flow)
-    # Should report cyclic island for a1
-    assert any("cyclic island" in r.message for r in reports)
+    # SOTA Fix: Unreachable nodes are now aggregated.
+    # a1 is dangerous (computer_use), so it triggers ERR_TOPOLOGY_UNREACHABLE_RISK_003.
+    risk_reports = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
+    assert len(risk_reports) == 1
+    assert "a1" in risk_reports[0].details["dangerous_nodes"]
 
 
 def test_integrity_tuple_reconstruct() -> None:
@@ -692,12 +696,14 @@ def test_flow_cycle_detection_unreachable() -> None:
     )
 
     # Cycle detection is now in Published GraphFlow validation (verify_integrity)
-    with pytest.raises(ValidationError, match="Topological fracture"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            graph=graph,
-        )
+    # SOTA Update: Cycle detection is relaxed in Graph model. It is now handled by Gatekeeper policy.
+    # Therefore, verify_integrity(strict=True) should NO LONGER raise for cycles.
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+    assert flow.status == "published"

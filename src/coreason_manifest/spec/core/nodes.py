@@ -1,3 +1,4 @@
+import warnings
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -11,7 +12,9 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
+from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.resilience import ResilienceConfig
+from coreason_manifest.spec.interop.compliance import RemediationAction
 
 
 class Node(BaseModel):
@@ -128,7 +131,10 @@ class HumanNode(Node):
 
     type: Literal["human"] = "human"
     prompt: str
-    timeout_seconds: int = Field(..., gt=0, description="Max wait time for blocking/steering.")
+    timeout_seconds: Annotated[
+        int | Literal["infinite"] | None,
+        Field(description="Max wait time for blocking/steering. Use 'infinite' for no timeout."),
+    ]
     input_schema: dict[str, Any] | None = None
     options: list[str] | None = None
 
@@ -137,15 +143,94 @@ class HumanNode(Node):
         Literal["blocking", "shadow", "steering"], Field(description="Wait for input vs shadow execution.")
     ] = "blocking"
     shadow_timeout_seconds: Annotated[
-        int | None, Field(gt=0, description="Time window for intervention in shadow mode.")
+        int | Literal["infinite"] | None,
+        Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout."),
     ] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def coerce_magic_numbers(cls, data: Any) -> Any:
+        """
+        Directive 1: Semantic Coercion.
+        Intercepts legacy '-1' magic numbers and converts them to 'infinite'.
+        """
+        if isinstance(data, dict):
+            # Fix 5: Functional Purity - Copy data to avoid side-effects
+            data = data.copy()
+
+            # Check timeout_seconds
+            val_timeout = data.get("timeout_seconds")
+            if val_timeout in (-1, "-1"):
+                warnings.warn(
+                    "Magic number '-1' detected in 'timeout_seconds'. Coercing to 'infinite'.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
+                )
+                data["timeout_seconds"] = "infinite"
+
+            # Check shadow_timeout_seconds
+            val_shadow = data.get("shadow_timeout_seconds")
+            if val_shadow in (-1, "-1"):
+                warnings.warn(
+                    "Magic number '-1' detected in 'shadow_timeout_seconds'. Coercing to 'infinite'.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
+                )
+                data["shadow_timeout_seconds"] = "infinite"
+        return data
 
     @model_validator(mode="after")
     def validate_interaction_config(self) -> "HumanNode":
-        if self.interaction_mode == "shadow" and self.shadow_timeout_seconds is None:
-            raise ValueError("HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.")
+        # Fix 4: Temporal Collision - Enforce mutual exclusion
+        if self.interaction_mode == "shadow":
+            if self.shadow_timeout_seconds is None:
+                raise DomainValidationError(
+                    message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
+                    remediation=RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Set 'shadow_timeout_seconds' to a valid value.",
+                        patch_data=[
+                            {
+                                "op": "add",
+                                "path": "/shadow_timeout_seconds",
+                                "value": 300,
+                            }
+                        ],
+                    ),
+                )
+            if self.timeout_seconds is not None:
+                raise DomainValidationError(
+                    message="HumanNode in 'shadow' mode must not have 'timeout_seconds'.",
+                    remediation=RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Remove 'timeout_seconds'.",
+                        patch_data=[
+                            {
+                                "op": "remove",
+                                "path": "/timeout_seconds",
+                            }
+                        ],
+                    ),
+                )
+
+        # SIM102: Combine nested if statements
         if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
-            raise ValueError("HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.")
+            raise DomainValidationError(
+                message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
+                remediation=RemediationAction(
+                    type="update_field",
+                    target_node_id=self.id,
+                    description="Remove 'shadow_timeout_seconds'.",
+                    patch_data=[
+                        {
+                            "op": "remove",
+                            "path": "/shadow_timeout_seconds",
+                        }
+                    ],
+                ),
+            )
         return self
 
 
@@ -167,7 +252,10 @@ class SwarmNode(Node):
     distribution_strategy: Literal["sharded", "replicated"] = Field(
         ..., description="Sharded=split data; Replicated=same data, many attempts."
     )
-    max_concurrency: int = Field(..., gt=0, description="Limit parallel workers.")
+    max_concurrency: Annotated[
+        int | Literal["infinite"] | None,
+        Field(description="Limit parallel workers. Use 'infinite' for no limit."),
+    ]
 
     # SOTA: Reliability (Partial Failure)
     failure_tolerance_percent: Annotated[
@@ -191,10 +279,40 @@ class SwarmNode(Node):
     ] = None
     output_variable: str = Field(..., description="Variable to store the aggregated result.")
 
+    @model_validator(mode="before")
+    @classmethod
+    def coerce_magic_numbers(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Fix 5: Functional Purity - Copy data
+            data = data.copy()
+            val = data.get("max_concurrency")
+            if val in (-1, "-1"):
+                warnings.warn(
+                    "Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
+                )
+                data["max_concurrency"] = "infinite"
+        return data
+
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":
         if self.reducer_function == "summarize" and not self.aggregator_model:
-            raise ValueError("SwarmNode with reducer='summarize' requires an 'aggregator_model'.")
+            raise DomainValidationError(
+                message="SwarmNode with reducer='summarize' requires an 'aggregator_model'.",
+                remediation=RemediationAction(
+                    type="update_field",
+                    target_node_id=self.id,
+                    description="Add a default 'aggregator_model'.",
+                    patch_data=[
+                        {
+                            "op": "add",
+                            "path": "/aggregator_model",
+                            "value": "gpt-4-turbo",  # Reasonable default
+                        }
+                    ],
+                ),
+            )
         return self
 
 

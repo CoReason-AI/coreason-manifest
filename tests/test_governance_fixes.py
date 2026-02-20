@@ -231,16 +231,18 @@ def test_graph_cycle_explicit_entry() -> None:
     graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")], entry_point="a1")
 
     # Should fail when publishing
-    with pytest.raises(ValidationError, match="Topological fracture"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=get_meta(),
-            definitions=defs,
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            graph=graph,
-        )
+    # SOTA Update: Cycles are no longer strictly banned by GraphFlow validation.
+    # They are flagged by Gatekeeper.
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=get_meta(),
+        definitions=defs,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+    assert flow.status == "published"
 
 
 def test_integrity_compute_hash_variants() -> None:

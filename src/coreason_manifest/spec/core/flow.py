@@ -5,6 +5,8 @@ import jsonschema
 from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.core.engines import AttentionReasoning
+from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
@@ -19,6 +21,7 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.interop.compliance import RemediationAction
 
 # Polymorphic Node Type
 AnyNode = Annotated[
@@ -84,17 +87,42 @@ class DataSchema(BaseModel):
             if not isinstance(schema, dict):
                 raise ValueError("JSON Schema must be a dictionary or a boolean.")
 
-            # Directive 3: Strict Validation (No Heuristic Repair)
+            # Directive 3: The "Healing" Ingestion Pipeline
             try:
                 jsonschema.Draft7Validator.check_schema(schema)
             except SchemaError as e:
                 # Directive 3: Robust Error Unwrapping
                 error_msg = getattr(e, "message", str(e)).split("\n")[0]
-                # Directive 4: High-Fidelity Error Context
                 path_str = f" at '/{'/'.join(map(str, e.path))}'" if hasattr(e, "path") and e.path else ""
-                raise ValueError(f"Invalid JSON Schema{path_str}: {error_msg}") from e
+                final_error_msg = f"Invalid JSON Schema{path_str}: {error_msg}"
+
+                # SOTA: Attempt Healing (Stubbed)
+                # We package the error into an AttentionReasoning payload for future LLM repair.
+                # Since we cannot call LLM here, we stub the hook and fail with high-fidelity diagnostics.
+
+                # 1. Instantiate the repair configuration (Stubbed usage)
+                _repair_config = AttentionReasoning(
+                    model="gpt-4-turbo",  # Default repair model
+                    attention_mode="rephrase",
+                    focus_model="gpt-3.5-turbo",
+                )
+
+                # 2. Stubbed Hook
+                # In a real system, we would call: _attempt_repair(schema, error_msg, _repair_config)
+                # and if it returns a repaired schema, use it.
+
+                # 3. Raise DomainValidationError with context
+                # Package repair intent as requested in Fix 3
+                raise DomainValidationError(
+                    message=final_error_msg,
+                    remediation=RemediationAction(
+                        type="semantic_repair",
+                        description="Route payload to LLM for syntactic repair of the JSON Schema.",
+                        patch_data=_repair_config.model_dump(),
+                    ),
+                ) from e
             except Exception as e:
-                raise ValueError(f"Invalid JSON Schema definition: {e}") from e
+                raise DomainValidationError(f"Invalid JSON Schema definition: {e}") from e
 
         return data
 
@@ -159,7 +187,7 @@ class Graph(BaseModel):
 
         return self
 
-    def verify_integrity(self, strict: bool = True) -> None:
+    def verify_integrity(self, strict: bool = True) -> None:  # noqa: ARG002
         """
         Verifies full structural integrity (Reachability, Dangling Edges).
         Strict mode (Published) enforces no dangling edges and full reachability.
@@ -167,71 +195,21 @@ class Graph(BaseModel):
         node_ids = set(self.nodes.keys())
 
         # 1. Edge Integrity (Dangling Checks)
-        if strict:
-            for i, edge in enumerate(self.edges):
-                if edge.source not in node_ids:
-                    raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
-                if edge.target not in node_ids:
-                    raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
+        # SOTA Directive 1: Referential integrity must be guaranteed universally, even in DRAFT mode.
+        # An edge pointing to non-existent memory is a syntax error, not a policy violation.
+        for i, edge in enumerate(self.edges):
+            if edge.source not in node_ids:
+                raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
+            if edge.target not in node_ids:
+                raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
 
-            if self.entry_point not in node_ids:
-                raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
+        if self.entry_point not in node_ids:
+            raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
 
-        # 2. Cycle Detection (Strict Only)
-        # SOTA Directive: Moved from model_validator to allow cycles in Draft mode.
-        if strict:
-            adj_cycle: dict[str, list[str]] = {nid: [] for nid in node_ids}
-            in_degree: dict[str, int] = dict.fromkeys(node_ids, 0)
-
-            for edge in self.edges:
-                if edge.source in node_ids and edge.target in node_ids:
-                    adj_cycle[edge.source].append(edge.target)
-                    in_degree[edge.target] += 1
-
-            queue_cycle = [n for n in node_ids if in_degree[n] == 0]
-            visited_count = 0
-
-            while queue_cycle:
-                u = queue_cycle.pop(0)
-                visited_count += 1
-                for v in adj_cycle[u]:
-                    in_degree[v] -= 1
-                    if in_degree[v] == 0:
-                        queue_cycle.append(v)
-
-            if visited_count != len(node_ids):
-                cyclic_nodes = [n for n, deg in in_degree.items() if deg > 0]
-                raise ValueError(
-                    f"Topological fracture: Cycle detected involving nodes: {sorted(cyclic_nodes)}. "
-                    "Execution graphs must be strictly acyclic."
-                )
-
-        # 3. Reachability (Strict Only)
-        if strict:
-            reachable = {self.entry_point}
-            queue = [self.entry_point]
-
-            # Build adjacency
-            adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
-            for edge in self.edges:
-                # We assume edges are valid if we passed step 1
-                if edge.source in node_ids and edge.target in node_ids:
-                    adj[edge.source].append(edge.target)
-
-            while queue:
-                curr = queue.pop(0)
-                for neighbor in adj[curr]:
-                    if neighbor not in reachable:
-                        reachable.add(neighbor)
-                        queue.append(neighbor)
-
-            unreachable = node_ids - reachable
-            if unreachable:
-                first_unreachable = sorted(unreachable)[0]
-                raise ValueError(
-                    f"Topological fracture: Node '{first_unreachable}' is unreachable from entry point "
-                    f"'{self.entry_point}'. Path: /graph/nodes/{first_unreachable}"
-                )
+        # SOTA Directive 2: Decoupled Topological Governance.
+        # We NO LONGER enforce reachability or acyclic properties in the structural parser.
+        # This allows "utility islands" and complex cyclic patterns to exist syntactically.
+        # Policy enforcement (e.g. banning dead code) is now the sole responsibility of the Gatekeeper.
 
 
 class FlowDefinitions(BaseModel):

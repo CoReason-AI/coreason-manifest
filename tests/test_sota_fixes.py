@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     DataSchema,
@@ -95,16 +93,18 @@ def test_published_flow_forbids_cycles() -> None:
     # We must provide definitions for p1 profile validation (status=published triggers strict checks)
     defs = FlowDefinitions(profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)})
 
-    with pytest.raises(ValueError, match="Topological fracture"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="cycle", version="1.0", description="desc", tags=[]),
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            definitions=defs,
-            graph=graph,
-        )
+    # SOTA Update: Cycles are no longer strictly banned by GraphFlow validation.
+    # They are flagged by Gatekeeper.
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="cycle", version="1.0", description="desc", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        definitions=defs,
+        graph=graph,
+    )
+    assert flow.status == "published"
 
 
 # ------------------------------------------------------------------------
@@ -138,20 +138,21 @@ def test_diff_classification_via_context() -> None:
     Verify 'add agent' -> Topology, 'change profile' -> Resource.
     """
     # Create a flow
+    entry_node = AgentNode(id="entry", type="agent", profile="p1", tools=[], metadata={})
     base_flow = GraphFlow(
         kind="GraphFlow",
         status="draft",
         metadata=FlowMetadata(name="diff", version="1.0", description="desc", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
-        graph=Graph(nodes={}, edges=[], entry_point="entry"),
+        graph=Graph(nodes={"entry": entry_node}, edges=[], entry_point="entry"),
     )
 
     # 1. Add a Node (Topology Change)
     node = AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={})
     new_flow_1 = base_flow.model_copy(deep=True)
     # We update the dict directly.
-    new_graph_1 = Graph(nodes={"A": node}, edges=[], entry_point="entry")
+    new_graph_1 = Graph(nodes={"entry": entry_node, "A": node}, edges=[], entry_point="entry")
     new_flow_1 = base_flow.model_copy(update={"graph": new_graph_1})
 
     diffs_1 = compare_flows(base_flow, new_flow_1)
@@ -165,7 +166,7 @@ def test_diff_classification_via_context() -> None:
 
     # 2. Modify Node Profile (Resource Change)
     new_node = node.model_copy(update={"profile": "p2"})
-    new_graph_2 = Graph(nodes={"A": new_node}, edges=[], entry_point="entry")
+    new_graph_2 = Graph(nodes={"entry": entry_node, "A": new_node}, edges=[], entry_point="entry")
     new_flow_2 = new_flow_1.model_copy(update={"graph": new_graph_2})
 
     diffs_2 = compare_flows(new_flow_1, new_flow_2)

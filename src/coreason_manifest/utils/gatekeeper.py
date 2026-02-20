@@ -112,7 +112,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         if isinstance(node, AgentNode):
             for tool_name in node.tools:
                 resolved_tool = tool_map.get(tool_name)
-                risk = resolved_tool.risk_level if resolved_tool else "standard"
+                # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown
+                risk = resolved_tool.risk_level if resolved_tool else "critical"
                 if risk == "critical":
                     critical_tools.append(tool_name)
 
@@ -153,8 +154,23 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         break
                 patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
             elif isinstance(flow, GraphFlow):
+                # Fix 1: Ghost Guard Graph Injection Failure - Rewire edges
+
+                # 1. Add Guard Node
                 patch_ops.append(
                     {"op": "add", "path": f"/graph/nodes/{human_node_id}", "value": human_node.model_dump(mode="json")}
+                )
+
+                # 2. Rewire incoming edges (Target -> Guard)
+                for edge_idx, edge in enumerate(flow.graph.edges):
+                    if edge.target == node.id:
+                        patch_ops.append(
+                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
+                        )
+
+                # 3. Add edge (Guard -> Target)
+                patch_ops.append(
+                    {"op": "add", "path": "/graph/edges/-", "value": {"source": human_node_id, "target": node.id}}
                 )
 
             reports.append(
@@ -182,7 +198,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         # Build Adjacency List
         adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
         for edge in flow.graph.edges:
-            adj[edge.source].append(edge.target)
+            # SOTA Fix 1: Defensive check for Draft Mode Fatality
+            if edge.source in adj:
+                adj[edge.source].append(edge.target)
 
         # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
         visited: set[str] = set()
@@ -256,42 +274,87 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         all_nodes = set(flow.graph.nodes.keys())
         unreachable = all_nodes - reachable
 
-        # 5c. Fail Open but Guarded
-        for node_id in unreachable:
-            node = flow.graph.nodes[node_id]
-            caps = get_capabilities(node)
+        # Fix 2: Sequential Patch Index Corruption - Aggregate ALL unreachable nodes
+        if unreachable:
+            safe_node_ids = set()
+            dangerous_node_ids = set()
+            risk_details = {}  # Map node_id -> list of risk reasons
 
-            # Check for high-risk capabilities
-            risk_reasons = []
-            if "computer_use" in caps:
-                risk_reasons.append("computer_use")
-            if "code_execution" in caps:
-                risk_reasons.append("code_execution")
+            for node_id in unreachable:
+                node = flow.graph.nodes[node_id]
+                caps = get_capabilities(node)
 
-            if risk_reasons:
-                is_cycle = node_cycle_map.get(node_id, False)
-                structure_type = "cyclic island" if is_cycle else "island"
+                risk_reasons = []
+                if "computer_use" in caps:
+                    risk_reasons.append("computer_use")
+                if "code_execution" in caps:
+                    risk_reasons.append("code_execution")
 
+                if risk_reasons:
+                    dangerous_node_ids.add(node_id)
+                    risk_details[node_id] = risk_reasons
+                else:
+                    safe_node_ids.add(node_id)
+
+            # Gather all edges connected to ANY unreachable node
+            bulk_edge_indices = set()
+            for idx, edge in enumerate(flow.graph.edges):
+                if edge.source in unreachable or edge.target in unreachable:
+                    bulk_edge_indices.add(idx)
+
+            # Sort descending to prevent index invalidation during sequential removal
+            sorted_edge_indices = sorted(bulk_edge_indices, reverse=True)
+
+            patch_list = []
+            # 1. Remove Edges (must be done by index, high to low)
+            patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices])
+
+            # 2. Remove Nodes (by key, safe order)
+            patch_list.extend([{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable])
+
+            if dangerous_node_ids:
+                # Severity violation if any dangerous nodes are present
                 reports.append(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
                         severity="violation",
                         message=(
-                            f"Topology Violation: Node '{node.id}' is unreachable ({structure_type}) "
-                            f"but requires high-risk capabilities: {', '.join(risk_reasons)}."
+                            f"Topology Violation: Found {len(dangerous_node_ids)} dangerous unreachable nodes "
+                            f"and {len(safe_node_ids)} dead code nodes. "
+                            "Pruning all unreachable topology to restore integrity."
                         ),
-                        node_id=node.id,
                         details={
-                            "reason": ", ".join(risk_reasons),
-                            "component": "unreachable",
-                            "structure": structure_type,
+                            "dangerous_nodes": list(dangerous_node_ids),
+                            "safe_nodes": list(safe_node_ids),
+                            "risk_details": risk_details,
                         },
                         remediation=RemediationAction(
-                            type="prune_node",
-                            target_node_id=node.id,
+                            type="prune_topology",
                             format="json_patch",
-                            patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
-                            description=f"Remove dangerous unreachable node '{node.id}'",
+                            patch_data=patch_list,
+                            description=(
+                                f"Atomic Prune: Remove {len(unreachable)} unreachable nodes "
+                                f"and {len(sorted_edge_indices)} connected edges."
+                            ),
+                        ),
+                    )
+                )
+            elif safe_node_ids:
+                # Just warning if only safe nodes
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                        severity="warning",
+                        message=f"Topology Warning: Found {len(safe_node_ids)} unreachable nodes (Dead Code).",
+                        details={"node_ids": list(safe_node_ids)},
+                        remediation=RemediationAction(
+                            type="prune_node",
+                            format="json_patch",
+                            patch_data=patch_list,
+                            description=(
+                                f"Tree Shake: Remove {len(safe_node_ids)} dead code nodes "
+                                f"and {len(sorted_edge_indices)} edges."
+                            ),
                         ),
                     )
                 )
