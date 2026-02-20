@@ -103,7 +103,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
 
         # Security: Prevent directory traversal via package names
         if ".." in fullname:
-            return None
+            raise SecurityViolationError(f"Security Error: Reference {fullname} escapes the root directory.")
 
         # Determine path relative to jail
         # Logic: If '_path' is None, it's a top-level import.

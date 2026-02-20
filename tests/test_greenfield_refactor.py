@@ -66,53 +66,37 @@ class TestAgent:
 # ------------------------------------------------------------------------
 
 
-def test_stream_error_duck_typing() -> None:
+def test_stream_packet_strict_envelope() -> None:
     """
-    Inject a raw, untyped dictionary into the stream packet parser.
-    Assert that it is successfully deserialized into a frozen StreamError object.
+    Verify strict envelope handling with discriminated unions.
+    Duck typing is removed; explicit 'op' is required.
     """
-    raw_payload = {"code": 500, "message": "Failure", "severity": "high"}
-
-    # Simulate receiving this payload in a StreamPacket container
-    # We need a model that uses StreamPacket
-    try:
-        # If StreamPacket is a Union, we might need a container to trigger validation
-        container = PacketContainer(packet=raw_payload)
-        packet = container.packet
-
-        assert isinstance(packet, StreamError)
-        assert packet.code == 500
-        assert packet.message == "Failure"
-        assert packet.severity == "high"
-
-        # Verify frozen
-        with pytest.raises(ValidationError):
-            packet.code = 200  # type: ignore[misc]
-
-    except ValidationError as e:
-        pytest.fail(f"Duck typing failed: {e}")
-
-
-def test_stream_error_duck_typing_fallback() -> None:
-    """
-    Inject a dictionary that matches signature but has wrong types.
-    Should fallback to dict.
-    """
-    # 'code' is string, but StreamError requires int. strict=True means no coercion?
-    # Actually Pydantic v2 strict=True might allow str->int if it looks like int?
-    # No, strict=True means strict types.
-    raw_payload = {"code": "500", "message": "Failure", "severity": "high"}
-
-    container = PacketContainer(packet=raw_payload)
+    # 1. Valid Error Envelope
+    payload = {
+        "op": "error",
+        "p": {"code": 500, "message": "Failure", "severity": "high"}
+    }
+    container = PacketContainer(packet=payload)
     packet = container.packet
+    # Packet is StreamErrorEnvelope
+    assert packet.op == "error"
+    assert packet.p.code == 500
+    assert packet.p.message == "Failure"
 
-    # Should remain a dict because StreamError validation failed (strict)
-    # OR if Pydantic casts it?
-    # If the validator code does StreamError.model_validate(raw_pkt), it raises ValidationError.
-    # The except block catches it and passes.
-    # So it remains a dict.
-    assert isinstance(packet, dict)
-    assert packet["code"] == "500"
+    # Verify frozen
+    with pytest.raises(ValidationError, match="frozen"):
+        packet.p.code = 200 # type: ignore
+
+    # 2. Invalid Payload (Old Duck Typing Format) -> Should Fail
+    raw_payload = {"code": 500, "message": "Failure", "severity": "high"}
+    with pytest.raises(ValidationError):
+        PacketContainer(packet=raw_payload)
+
+    # 3. Delta Envelope
+    delta_payload = {"op": "delta", "p": "some content"}
+    container_delta = PacketContainer(packet=delta_payload)
+    assert container_delta.packet.op == "delta"
+    assert container_delta.packet.p == "some content"
 
 
 def test_strict_internal_mutation() -> None:
