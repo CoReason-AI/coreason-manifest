@@ -280,7 +280,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 # We report these individually as they require manual review
 
                 # Calculate removal patches for this specific node (and its connected edges)
-                # Note: This has index volatility if mixed with other patches, but critical violations usually stop deployment.
+                # Note: This has index volatility if mixed with other patches,
+                # but critical violations usually stop deployment.
                 edge_indices_to_remove = []
                 for idx, edge in enumerate(flow.graph.edges):
                     if edge.source == node.id or edge.target == node.id:
@@ -324,13 +325,13 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             node_ids_to_remove = {n.id for n in nodes_to_remove}
 
             # Find all edges connected to ANY safe node
-            edge_indices_to_remove = set()
+            bulk_edge_indices = set()
             for idx, edge in enumerate(flow.graph.edges):
                 if edge.source in node_ids_to_remove or edge.target in node_ids_to_remove:
-                    edge_indices_to_remove.add(idx)
+                    bulk_edge_indices.add(idx)
 
             # Sort descending to prevent index invalidation during sequential removal
-            sorted_edge_indices = sorted(list(edge_indices_to_remove), reverse=True)
+            sorted_edge_indices = sorted(bulk_edge_indices, reverse=True)
 
             patch_list = []
 
@@ -352,7 +353,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         type="prune_node",
                         format="json_patch",
                         patch_data=patch_list,
-                        description=f"Tree Shake: Remove {len(safe_nodes)} dead code nodes and {len(sorted_edge_indices)} edges.",
+                        description=(
+                            f"Tree Shake: Remove {len(safe_nodes)} dead code nodes "
+                            f"and {len(sorted_edge_indices)} edges."
+                        ),
                     )
                 )
             )
