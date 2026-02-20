@@ -1,6 +1,7 @@
 from typing import Annotated, Any, ClassVar, Literal
 import re
 import json
+import contextlib
 
 from pydantic import ConfigDict, Field, model_validator
 
@@ -31,24 +32,25 @@ class Manifest(ObservableModel):
         *,
         strict: bool | None = None,
         from_attributes: bool | None = None,
-        context: dict[str, Any] | None = None,
+        context: Any | None = None,
     ) -> "Manifest":
         """
         Custom model_validate with auto_heal support via context.
         """
         auto_heal = False
-        if context and "auto_heal" in context:
+        if isinstance(context, dict) and "auto_heal" in context:
             auto_heal = context["auto_heal"]
 
         if auto_heal:
             obj, receipt = cls._perform_auto_healing(obj)
             if context is None:
                 context = {}
-            context["recovery_receipt"] = receipt
+            if isinstance(context, dict):
+                context["recovery_receipt"] = receipt
 
         instance = super().model_validate(obj, strict=strict, from_attributes=from_attributes, context=context)
 
-        if auto_heal and context and "recovery_receipt" in context:
+        if auto_heal and isinstance(context, dict) and "recovery_receipt" in context:
             # Bypass frozen attribute check using object.__setattr__
             object.__setattr__(instance, "_recovery_receipt", context["recovery_receipt"])
 
@@ -65,7 +67,6 @@ class Manifest(ObservableModel):
 
         # 1. Strip Markdown JSON blocks if input is string
         if isinstance(cleaned_data, str):
-            original_str = cleaned_data
             if "```json" in cleaned_data:
                 match = re.search(r"```json\s*(.*?)\s*```", cleaned_data, re.DOTALL)
                 if match:
@@ -84,10 +85,8 @@ class Manifest(ObservableModel):
                 mutations.append("Stripped trailing commas")
 
             # Parse JSON if it was a string
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 cleaned_data = json.loads(cleaned_data)
-            except json.JSONDecodeError:
-                pass
 
         # 3. Coerce stringified booleans
         if isinstance(cleaned_data, (dict, list)):

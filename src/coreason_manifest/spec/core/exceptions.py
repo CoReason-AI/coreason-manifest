@@ -124,7 +124,10 @@ The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis 
                         best_match = k
 
                 if best_match and best_dist <= 3:
-                    suggested_fix = f"Field '{missing_field}' is missing. Found similar key '{best_match}'. Did you mean to rename it?"
+                    suggested_fix = (
+                        f"Field '{missing_field}' is missing. Found similar key '{best_match}'. "
+                        "Did you mean to rename it?"
+                    )
 
         elif typ == "extra_forbidden" and root_model:
             try:

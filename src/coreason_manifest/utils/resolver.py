@@ -111,7 +111,7 @@ class ReferenceResolver:
                 def fetch_s3() -> str:
                     s3 = boto3.client("s3")
                     response = s3.get_object(Bucket=bucket, Key=key)
-                    return response["Body"].read().decode("utf-8")
+                    return str(response["Body"].read().decode("utf-8"))
 
                 loop = asyncio.get_running_loop()
                 text = await loop.run_in_executor(None, fetch_s3)

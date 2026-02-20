@@ -163,7 +163,7 @@ class Loader:
                         raw_data = resolver._parse_content(cleaned_data, str(source))
                      except ValueError:
                         span.record_exception(e)
-                        raise e
+                        raise e from e
                 else:
                     raw_data = cleaned_data
 
@@ -176,7 +176,7 @@ class Loader:
                 manifest = Manifest.model_validate(resolved_data, context={"auto_heal": auto_heal})
             except Exception as e:
                 span.record_exception(e)
-                raise e
+                raise e from e
 
             # Merge initial receipt from string healing if present
             if initial_receipt and initial_receipt.mutations:
@@ -213,19 +213,11 @@ class Loader:
             loop = None
 
         if loop and loop.is_running():
-            # We are already in an async context, we must create a task or warn
-            # Technically, blocking the loop here is bad practice.
-            # But to support sync calls from sync wrappers inside async apps (like fastAPI without async def),
-            # we might need nest_asyncio or just error out.
-            # However, for CLI usage, there is no loop.
-            # For this SOTA implementation, if loop is running, we assume the user should have used aload.
-            # But we can try to run_until_complete if we weren't *inside* a callback.
-            # Actually, `run_until_complete` fails if loop is running.
             raise RuntimeError(
                 "Async event loop is already running. Use 'await Loader.aload(...)' instead of 'Loader.load(...)'."
             )
-        else:
-            return asyncio.run(cls.aload(source, auto_heal=auto_heal))
+
+        return asyncio.run(cls.aload(source, auto_heal=auto_heal))
 
     @staticmethod
     async def _fetch_source(source: str | Path | HttpUrl | AnyUrl) -> tuple[str, str | Path]:
@@ -272,7 +264,7 @@ class Loader:
 
 
 def load_flow_from_file(
-    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False
+    path: str, _root_dir: Path | None = None, _allow_dynamic_execution: bool = False
 ) -> AnyFlow:
     """
     Synchronous wrapper for Loader.load to support legacy CLI/Tests.

@@ -5,13 +5,15 @@ from typing import TYPE_CHECKING
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
-from coreason_manifest.spec.core.tools import ToolCapability, AnyTool
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,
     RemediationAction,
 )
 from coreason_manifest.utils.net_utils import canonicalize_domain
+
+if TYPE_CHECKING:
+    from coreason_manifest.spec.core.tools import AnyTool
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
