@@ -126,7 +126,9 @@ def test_topology_tolerance_and_gatekeeper() -> None:
     # Check for orphan warning
     orphan_reports = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001]
     assert len(orphan_reports) == 1
-    assert orphan_reports[0].node_id == "n2"
+
+    # Bulk remediation reports do not set single node_id, but detail the list
+    assert "n2" in orphan_reports[0].details["node_ids"]
     assert orphan_reports[0].severity == "warning"
     assert orphan_reports[0].remediation is not None
     assert orphan_reports[0].remediation.type == "prune_node"
