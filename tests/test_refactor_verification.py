@@ -134,7 +134,7 @@ def test_exfiltration_blocked_domain() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -168,7 +168,7 @@ def test_allowed_url() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -191,7 +191,7 @@ def test_allowed_url() -> None:
 
     flow_sub = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -225,7 +225,7 @@ def test_schemeless_url_handling() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         governance=gov,
         definitions=Definitions(
             tool_packs={
@@ -264,7 +264,7 @@ def test_auto_fix_computer_use() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="unsafe", version="1.0", description="unsafe", tags=[]),
+        metadata=FlowMetadata(name="unsafe", version="1.0.0", description="unsafe", tags=[]),
         definitions=Definitions(profiles={"hacker": profile}),
         sequence=[AgentNode(id="attacker", metadata={}, type="agent", profile="hacker", tools=[])],
     )
@@ -297,7 +297,7 @@ def test_verify_remediation_patch_structure() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="unsafe", version="1.0", description="unsafe", tags=[]),
+        metadata=FlowMetadata(name="unsafe", version="1.0.0", description="unsafe", tags=[]),
         definitions=Definitions(profiles={"coder": profile}),
         sequence=[AgentNode(id="coder_agent", metadata={}, type="agent", profile="coder", tools=[])],
     )

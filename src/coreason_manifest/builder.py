@@ -213,7 +213,7 @@ class BaseFlowBuilder:
 class NewLinearFlow(BaseFlowBuilder):
     """Fluent API to construct LinearFlows programmatically."""
 
-    def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
+    def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
         super().__init__(name, version, description)
         self.sequence: list[AnyNode] = []
 
@@ -280,7 +280,7 @@ class NewLinearFlow(BaseFlowBuilder):
 class NewGraphFlow(BaseFlowBuilder):
     """Fluent API to construct GraphFlows programmatically."""
 
-    def __init__(self, name: str, version: str = "0.1", description: str = "") -> None:
+    def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
         super().__init__(name, version, description)
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []

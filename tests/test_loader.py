@@ -12,7 +12,7 @@ from coreason_manifest.utils.loader import load_flow_from_file
 def test_load_linear_flow() -> None:
     data: dict[str, Any] = {
         "kind": "LinearFlow",
-        "metadata": {"name": "TestLinear", "version": "1.0", "description": "Test", "tags": []},
+        "metadata": {"name": "TestLinear", "version": "1.0.0", "description": "Test", "tags": []},
         "sequence": [],
     }
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
@@ -30,7 +30,7 @@ def test_load_linear_flow() -> None:
 def test_load_graph_flow() -> None:
     data: dict[str, Any] = {
         "kind": "GraphFlow",
-        "metadata": {"name": "TestGraph", "version": "1.0", "description": "Test", "tags": []},
+        "metadata": {"name": "TestGraph", "version": "1.0.0", "description": "Test", "tags": []},
         "interface": {
             "inputs": {"json_schema": {}},
             "outputs": {"json_schema": {}},

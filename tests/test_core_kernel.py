@@ -80,7 +80,7 @@ def test_core_kernel_instantiation() -> None:
     )
 
     # Test Flow
-    metadata = FlowMetadata(name="test-flow", version="1.0", description="test", tags=["test"])
+    metadata = FlowMetadata(name="test-flow", version="1.0.0", description="test", tags=["test"])
     interface = FlowInterface(
         inputs=DataSchema(json_schema={"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}),
         outputs=DataSchema(json_schema={"type": "object", "properties": {"a": {"type": "string"}}, "required": ["a"]}),

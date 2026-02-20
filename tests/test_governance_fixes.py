@@ -21,7 +21,7 @@ from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
 # Helper to create common metadata
 def get_meta() -> FlowMetadata:
-    return FlowMetadata(name="test", version="1.0", description="test", tags=[])
+    return FlowMetadata(name="test", version="1.0.0", description="test", tags=[])
 
 
 def get_defs() -> FlowDefinitions:
@@ -414,7 +414,7 @@ def test_circuit_breaker_timeout_logic() -> None:
     # Force unwrap optional for test logic, or assert it's not None
     last_failure = state_store["node_1"].last_failure_time
     assert last_failure is not None
-    state_store["node_1"].last_failure_time = last_failure - 3
+    state_store["node_1"] = state_store["node_1"].model_copy(update={"last_failure_time": last_failure - 3})
     check_circuit("node_1", policy, state_store)
     assert state_store["node_1"].state == "half-open"
 

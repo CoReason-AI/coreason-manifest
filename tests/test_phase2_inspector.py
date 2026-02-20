@@ -6,12 +6,12 @@ from coreason_manifest.utils.visualizer import to_mermaid
 
 def test_inspector_lifecycle_graph() -> None:
     # 1. Use NewGraphFlow builder to construct a flow
-    flow_builder = NewGraphFlow(name="inspector-test-graph", version="0.25")
+    flow_builder = NewGraphFlow(name="inspector-test-graph", version="0.25.0")
 
     # Domain 4: Add Blackboard variables for data flow validation
     flow_builder.set_blackboard(
         {
-            "result.score": VariableDef(type="float", description="Score"),
+            "result_score": VariableDef(type="float", description="Score"),
             "verification_result": VariableDef(type="boolean", description="Result"),
         }
     )
@@ -19,7 +19,7 @@ def test_inspector_lifecycle_graph() -> None:
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
         node_id="inspector-1",
-        target="result.score",
+        target="result_score",
         criteria="Score must be > 0.8",
         output="verification_result",
         pass_threshold=0.8,
@@ -39,7 +39,7 @@ def test_inspector_lifecycle_graph() -> None:
 
     # Verify pass_threshold is set correctly
     assert node.pass_threshold == 0.8
-    assert node.target_variable == "result.score"
+    assert node.target_variable == "result_score"
     assert node.criteria == "Score must be > 0.8"
 
     # Run to_mermaid(flow) and verify the classDef inspector is present
@@ -60,12 +60,12 @@ def test_inspector_lifecycle_graph() -> None:
 
 def test_inspector_lifecycle_linear() -> None:
     # 1. Use NewLinearFlow builder to construct a flow
-    flow_builder = NewLinearFlow(name="inspector-test-linear", version="0.25")
+    flow_builder = NewLinearFlow(name="inspector-test-linear", version="0.25.0")
 
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
         node_id="inspector-2",
-        target="result.quality",
+        target="result_quality",
         criteria="Quality must be high",
         output="quality_check",
         pass_threshold=0.9,
@@ -85,7 +85,7 @@ def test_inspector_lifecycle_linear() -> None:
 
     # Verify properties
     assert node.pass_threshold == 0.9
-    assert node.target_variable == "result.quality"
+    assert node.target_variable == "result_quality"
 
     # Run to_mermaid(flow) to verify visualization for linear flow
     mermaid_code = to_mermaid(flow)

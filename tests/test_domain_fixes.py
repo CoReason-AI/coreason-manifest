@@ -30,7 +30,7 @@ def test_duplicate_keys(tmp_path: Any) -> None:
 kind: LinearFlow
 metadata:
   name: "Dup"
-  version: "1.0"
+  version: "1.0.0"
   description: "Desc"
   tags: []
 sequence: []
@@ -71,7 +71,7 @@ def test_dynamic_execution_check(tmp_path: Any) -> None:
 kind: LinearFlow
 metadata:
   name: "Dynamic"
-  version: "1.0"
+  version: "1.0.0"
   description: "Desc"
   tags: ["test"]
 sequence: []
@@ -102,7 +102,7 @@ def test_dynamic_execution_check_list(tmp_path: Any) -> None:
 kind: LinearFlow
 metadata:
   name: "DynamicList"
-  version: "1.0"
+  version: "1.0.0"
   description: "Desc"
   tags: []
 sequence: []
@@ -127,7 +127,7 @@ def test_dynamic_execution_posix_path_strictness(tmp_path: Any) -> None:
 kind: LinearFlow
 metadata:
   name: "WinPath"
-  version: "1.0"
+  version: "1.0.0"
   description: "Desc"
   tags: []
 sequence: []
@@ -146,7 +146,7 @@ definitions:
 kind: LinearFlow
 metadata:
   name: "PosixPath"
-  version: "1.0"
+  version: "1.0.0"
   description: "Desc"
   tags: []
 sequence: []
@@ -191,7 +191,7 @@ def test_validator_coverage() -> None:
         graph = Graph(nodes={"n1": node}, edges=[], entry_point="n1")
         flow = GraphFlow(
             kind="GraphFlow",
-            metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=Blackboard(variables={}, persistence=False),
             graph=graph,

@@ -23,7 +23,7 @@ from coreason_manifest.utils.validator import validate_flow
 
 # Helpers to create dummy objects
 def create_metadata() -> FlowMetadata:
-    return FlowMetadata(name="test", version="1.0", description="test", tags=[])
+    return FlowMetadata(name="test", version="1.0.0", description="test", tags=[])
 
 
 def create_interface() -> FlowInterface:

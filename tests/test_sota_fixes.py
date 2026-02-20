@@ -69,7 +69,7 @@ def test_draft_flow_allows_cycles() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="cycle", version="1.0", description="desc", tags=[]),
+        metadata=FlowMetadata(name="cycle", version="1.0.0", description="desc", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,
@@ -98,7 +98,7 @@ def test_published_flow_forbids_cycles() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         status="published",
-        metadata=FlowMetadata(name="cycle", version="1.0", description="desc", tags=[]),
+        metadata=FlowMetadata(name="cycle", version="1.0.0", description="desc", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         definitions=defs,
@@ -142,7 +142,7 @@ def test_diff_classification_via_context() -> None:
     base_flow = GraphFlow(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="diff", version="1.0", description="desc", tags=[]),
+        metadata=FlowMetadata(name="diff", version="1.0.0", description="desc", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=Graph(nodes={"entry": entry_node}, edges=[], entry_point="entry"),
