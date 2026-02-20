@@ -127,7 +127,11 @@ def test_loader_exception_handling_in_lock() -> None:
 def test_net_utils_edge_cases() -> None:
     # line 12: if not domain return ""
     assert canonicalize_domain("") == ""
-    assert canonicalize_domain(None) == ""  # type checking? arg is str.
+    # Test runtime None handling (mypy prevents direct None passing)
+    # We must cast None to Any to bypass static type checking, validating runtime resilience.
+    from typing import Any, cast
+
+    assert canonicalize_domain(cast("Any", None)) == ""
 
     # Force IDNA error (line 24-27)
     with patch("idna.encode", side_effect=idna.IDNAError):
