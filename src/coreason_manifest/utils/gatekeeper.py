@@ -259,6 +259,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         unreachable = all_nodes - reachable
 
         # 5c. Fail Open but Guarded (SOTA: Tree Shaking Policy)
+        safe_nodes = []
+
         for node_id in unreachable:
             node = flow.graph.nodes[node_id]
             caps = get_capabilities(node)
@@ -273,21 +275,22 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             is_cycle = node_cycle_map.get(node_id, False)
             structure_type = "cyclic island" if is_cycle else "island"
 
-            # SOTA Fix 1: The "Dangling Edge" Trap
-            # We must remove edges connected to this node to preserve referential integrity.
-            edge_indices_to_remove = []
-            for idx, edge in enumerate(flow.graph.edges):
-                if edge.source == node.id or edge.target == node.id:
-                    edge_indices_to_remove.append(idx)
-
-            # Sort descending to keep indices valid during removal if applied sequentially
-            edge_indices_to_remove.sort(reverse=True)
-
-            patch_list = [{"op": "remove", "path": f"/graph/nodes/{node.id}"}]
-            patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in edge_indices_to_remove])
-
             if risk_reasons:
                 # Critical Violation: Dangerous Unreachable Code
+                # We report these individually as they require manual review
+
+                # Calculate removal patches for this specific node (and its connected edges)
+                # Note: This has index volatility if mixed with other patches, but critical violations usually stop deployment.
+                edge_indices_to_remove = []
+                for idx, edge in enumerate(flow.graph.edges):
+                    if edge.source == node.id or edge.target == node.id:
+                        edge_indices_to_remove.append(idx)
+
+                edge_indices_to_remove.sort(reverse=True)
+
+                patch_list = [{"op": "remove", "path": f"/graph/nodes/{node.id}"}]
+                patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in edge_indices_to_remove])
+
                 reports.append(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
@@ -312,29 +315,47 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                     )
                 )
             else:
-                # Warning: Dead Code (Tree Shaking Candidate)
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
-                        severity="warning",
-                        message=(
-                            f"Topology Warning: Node '{node.id}' is unreachable ({structure_type}). "
-                            "It contains no high-risk capabilities but adds noise."
-                        ),
-                        node_id=node.id,
-                        details={
-                            "component": "unreachable",
-                            "structure": structure_type,
-                        },
-                        remediation=RemediationAction(
-                            type="prune_node",
-                            target_node_id=node.id,
-                            format="json_patch",
-                            patch_data=patch_list,
-                            description=f"Tree Shake: Remove dead code node '{node.id}' and connected edges.",
-                        ),
+                # Safe to remove
+                safe_nodes.append((node, structure_type))
+
+        # Bulk Remediation for Safe Nodes
+        if safe_nodes:
+            nodes_to_remove = [n[0] for n in safe_nodes]
+            node_ids_to_remove = {n.id for n in nodes_to_remove}
+
+            # Find all edges connected to ANY safe node
+            edge_indices_to_remove = set()
+            for idx, edge in enumerate(flow.graph.edges):
+                if edge.source in node_ids_to_remove or edge.target in node_ids_to_remove:
+                    edge_indices_to_remove.add(idx)
+
+            # Sort descending to prevent index invalidation during sequential removal
+            sorted_edge_indices = sorted(list(edge_indices_to_remove), reverse=True)
+
+            patch_list = []
+
+            # 1. Remove Edges (must be done by index, high to low)
+            for idx in sorted_edge_indices:
+                patch_list.append({"op": "remove", "path": f"/graph/edges/{idx}"})
+
+            # 2. Remove Nodes (by key, safe order)
+            for node in nodes_to_remove:
+                patch_list.append({"op": "remove", "path": f"/graph/nodes/{node.id}"})
+
+            reports.append(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                    severity="warning",
+                    message=f"Topology Warning: Found {len(safe_nodes)} unreachable nodes (Dead Code).",
+                    details={"node_ids": list(node_ids_to_remove)},
+                    remediation=RemediationAction(
+                        type="prune_node",
+                        format="json_patch",
+                        patch_data=patch_list,
+                        description=f"Tree Shake: Remove {len(safe_nodes)} dead code nodes and {len(sorted_edge_indices)} edges.",
                     )
                 )
+            )
 
     return reports
 
