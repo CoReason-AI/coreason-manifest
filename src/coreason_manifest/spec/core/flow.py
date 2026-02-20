@@ -195,15 +195,16 @@ class Graph(BaseModel):
         node_ids = set(self.nodes.keys())
 
         # 1. Edge Integrity (Dangling Checks)
-        if strict:
-            for i, edge in enumerate(self.edges):
-                if edge.source not in node_ids:
-                    raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
-                if edge.target not in node_ids:
-                    raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
+        # SOTA Directive 1: Referential integrity must be guaranteed universally, even in DRAFT mode.
+        # An edge pointing to non-existent memory is a syntax error, not a policy violation.
+        for i, edge in enumerate(self.edges):
+            if edge.source not in node_ids:
+                raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
+            if edge.target not in node_ids:
+                raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
 
-            if self.entry_point not in node_ids:
-                raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
+        if self.entry_point not in node_ids:
+            raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
 
         # SOTA Directive 2: Decoupled Topological Governance.
         # We NO LONGER enforce reachability or acyclic properties in the structural parser.

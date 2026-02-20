@@ -1,3 +1,4 @@
+import warnings
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -14,7 +15,6 @@ from coreason_manifest.spec.core.engines import (
 from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.resilience import ResilienceConfig
 from coreason_manifest.spec.interop.compliance import RemediationAction
-from coreason_manifest.utils.logger import logger
 
 
 class Node(BaseModel):
@@ -158,17 +158,20 @@ class HumanNode(Node):
             # Check timeout_seconds
             val_timeout = data.get("timeout_seconds")
             if val_timeout in (-1, "-1"):
-                logger.warning(
-                    "Deprecation Warning: Magic number '-1' detected in 'timeout_seconds'. Coercing to 'infinite'."
+                warnings.warn(
+                    "Magic number '-1' detected in 'timeout_seconds'. Coercing to 'infinite'.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
                 )
                 data["timeout_seconds"] = "infinite"
 
             # Check shadow_timeout_seconds
             val_shadow = data.get("shadow_timeout_seconds")
             if val_shadow in (-1, "-1"):
-                logger.warning(
-                    "Deprecation Warning: Magic number '-1' detected in 'shadow_timeout_seconds'. "
-                    "Coercing to 'infinite'."
+                warnings.warn(
+                    "Magic number '-1' detected in 'shadow_timeout_seconds'. Coercing to 'infinite'.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
                 )
                 data["shadow_timeout_seconds"] = "infinite"
         return data
@@ -185,7 +188,7 @@ class HumanNode(Node):
                     patch_data=[
                         {
                             "op": "add",
-                            "path": f"/graph/nodes/{self.id}/shadow_timeout_seconds",
+                            "path": "/shadow_timeout_seconds",
                             "value": 300,
                         }
                     ],
@@ -201,7 +204,7 @@ class HumanNode(Node):
                     patch_data=[
                         {
                             "op": "remove",
-                            "path": f"/graph/nodes/{self.id}/shadow_timeout_seconds",
+                            "path": "/shadow_timeout_seconds",
                         }
                     ],
                 ),
@@ -260,8 +263,10 @@ class SwarmNode(Node):
         if isinstance(data, dict):
             val = data.get("max_concurrency")
             if val in (-1, "-1"):
-                logger.warning(
-                    "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'."
+                warnings.warn(
+                    "Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
                 )
                 data["max_concurrency"] = "infinite"
         return data
@@ -278,7 +283,7 @@ class SwarmNode(Node):
                     patch_data=[
                         {
                             "op": "add",
-                            "path": f"/graph/nodes/{self.id}/aggregator_model",
+                            "path": "/aggregator_model",
                             "value": "gpt-4-turbo",  # Reasonable default
                         }
                     ],

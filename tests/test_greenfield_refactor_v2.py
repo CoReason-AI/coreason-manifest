@@ -76,6 +76,9 @@ def test_domain_validation_error_remediation() -> None:
     # Actually, for the purpose of this test, verifying the message contains remediation description is good.
     assert "Set 'shadow_timeout_seconds' to a valid value" in err["msg"]
     assert "[Remediation:" in err["msg"]
+    assert "[Payload:" in err["msg"]
+    # Check that paths are relative
+    assert '"path": "/shadow_timeout_seconds"' in err["msg"]
 
 
 def test_healing_ingestion_stub() -> None:

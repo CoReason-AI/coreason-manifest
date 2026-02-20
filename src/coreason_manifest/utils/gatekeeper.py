@@ -182,7 +182,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         # Build Adjacency List
         adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
         for edge in flow.graph.edges:
-            adj[edge.source].append(edge.target)
+            # SOTA Fix 1: Defensive check for Draft Mode Fatality
+            if edge.source in adj:
+                adj[edge.source].append(edge.target)
 
         # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
         visited: set[str] = set()
