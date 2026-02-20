@@ -104,11 +104,7 @@ class MockFactory:
         if isinstance(node, SwarmNode):
             # Swarm Expansion Logic
             # Handle 'infinite' or None for concurrency
-            limit = (
-                100
-                if node.max_concurrency == "infinite" or node.max_concurrency is None
-                else node.max_concurrency
-            )
+            limit = 100 if node.max_concurrency == "infinite" or node.max_concurrency is None else node.max_concurrency
 
             concurrency = min(limit, 3)  # Use 3 as typical sample
             workers = []

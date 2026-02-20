@@ -1,5 +1,3 @@
-from typing import Any
-
 from coreason_manifest.spec.interop.compliance import ComplianceReport, RemediationAction
 
 

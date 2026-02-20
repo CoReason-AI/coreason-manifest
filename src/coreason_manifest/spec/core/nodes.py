@@ -158,8 +158,7 @@ class HumanNode(Node):
             # Check timeout_seconds
             if "timeout_seconds" in data and data["timeout_seconds"] == -1:
                 logger.warning(
-                    "Deprecation Warning: Magic number '-1' detected in 'timeout_seconds'. "
-                    "Coercing to 'infinite'."
+                    "Deprecation Warning: Magic number '-1' detected in 'timeout_seconds'. Coercing to 'infinite'."
                 )
                 data["timeout_seconds"] = "infinite"
 
@@ -254,8 +253,7 @@ class SwarmNode(Node):
     def coerce_magic_numbers(cls, data: Any) -> Any:
         if isinstance(data, dict) and "max_concurrency" in data and data["max_concurrency"] == -1:
             logger.warning(
-                "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. "
-                "Coercing to 'infinite'."
+                "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'."
             )
             data["max_concurrency"] = "infinite"
         return data
