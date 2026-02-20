@@ -1,5 +1,4 @@
-import json
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 from opentelemetry import trace
 from pydantic import BaseModel, ConfigDict, SecretStr
@@ -20,12 +19,17 @@ class ObservableModel(BaseModel):
     # Class-level exclusion list for fields that shouldn't be traced (if any)
     _trace_exclude: ClassVar[list[str]] = []
 
-    def model_dump(self, **kwargs) -> dict[str, Any]:
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
         """
         Override model_dump to ensure secrets are redacted.
         """
         data = super().model_dump(**kwargs)
-        return self._redact_secrets(data)
+        # Ensure the result is a dict before returning, _redact_secrets handles recursion
+        result = self._redact_secrets(data)
+        if isinstance(result, dict):
+            return result
+        # Fallback if model_dump somehow returned non-dict (unlikely for BaseModel unless custom root)
+        return cast(dict[str, Any], result)
 
     def _redact_secrets(self, data: Any) -> Any:
         """
@@ -33,9 +37,9 @@ class ObservableModel(BaseModel):
         """
         if isinstance(data, dict):
             return {k: self._redact_secrets(v) for k, v in data.items()}
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return [self._redact_secrets(item) for item in data]
-        elif isinstance(data, SecretStr):
+        if isinstance(data, SecretStr):
             return "***"
         return data
 
@@ -48,7 +52,7 @@ class ObservableModel(BaseModel):
             attributes={
                 "code.function": "__init__",
                 "code.namespace": self.__class__.__module__,
-            }
+            },
         ) as span:
             try:
                 super().__init__(**data)

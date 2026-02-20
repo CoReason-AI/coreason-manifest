@@ -5,15 +5,13 @@ from typing import TYPE_CHECKING
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.tools import ToolCapability, AnyTool
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,
     RemediationAction,
 )
 from coreason_manifest.utils.net_utils import canonicalize_domain
-
-if TYPE_CHECKING:
-    from coreason_manifest.spec.core.tools import ToolCapability
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
@@ -57,7 +55,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         return []
 
     # Build tool map: name -> tool_object
-    tool_map: dict[str, ToolCapability] = {}
+    tool_map: dict[str, AnyTool] = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:
@@ -73,9 +71,16 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     if allowed_domains:
         for tool_obj in tool_map.values():
-            # SOTA Fix: Utilize strict Pydantic HttpUrl object instead of manual string parsing
-            if tool_obj.url and tool_obj.url.host:
-                domain_raw = str(tool_obj.url.host)
+            # Check if tool is capable of URL access
+            # AnyTool is Union[ApiTool, FunctionTool, McpTool, ToolCapability]
+            # Only ApiTool and ToolCapability have 'url' field.
+
+            tool_url = None
+            if hasattr(tool_obj, "url"):
+                tool_url = getattr(tool_obj, "url", None)
+
+            if tool_url and tool_url.host:
+                domain_raw = str(tool_url.host)
                 domain = canonicalize_domain(domain_raw)
 
                 allowed = False

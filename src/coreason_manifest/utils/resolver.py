@@ -17,7 +17,7 @@ class ReferenceResolver:
 
     def __init__(self, base_uri: str | Path | None = None):
         if base_uri is None:
-            self.base_uri = Path.cwd()
+            self.base_uri: str | Path = Path.cwd()
         else:
             self.base_uri = base_uri
 
@@ -52,7 +52,7 @@ class ReferenceResolver:
                 resolved_dict[k] = await self._traverse(v, base_uri)
             return resolved_dict
 
-        elif isinstance(node, list):
+        if isinstance(node, list):
             # Resolve items in parallel
             tasks = [self._traverse(item, base_uri) for item in node]
             return await asyncio.gather(*tasks)
@@ -79,10 +79,7 @@ class ReferenceResolver:
         # Treat as file path
         base_path = Path(base)
         # If base_path is a file, take its parent
-        if base_path.suffix or base_path.is_file(): # suffix check is heuristic
-             base_dir = base_path.parent
-        else:
-             base_dir = base_path
+        base_dir = base_path.parent if base_path.suffix or base_path.is_file() else base_path
 
         # Resolve ref
         target = (base_dir / ref).resolve()
@@ -93,7 +90,7 @@ class ReferenceResolver:
         Fetches content from uri and returns (content, new_base_uri).
         """
         if uri in self.visited_paths:
-             raise ValueError(f"Circular reference detected: {uri}")
+            raise ValueError(f"Circular reference detected: {uri}")
 
         if uri in self.cache:
             return self.cache[uri], uri
@@ -111,7 +108,7 @@ class ReferenceResolver:
                 bucket = parsed.netloc
                 key = parsed.path.lstrip("/")
 
-                def fetch_s3():
+                def fetch_s3() -> str:
                     s3 = boto3.client("s3")
                     response = s3.get_object(Bucket=bucket, Key=key)
                     return response["Body"].read().decode("utf-8")
@@ -138,4 +135,4 @@ class ReferenceResolver:
             try:
                 return yaml.safe_load(text)
             except yaml.YAMLError as e:
-                raise ValueError(f"Failed to parse content from {source}: {e}")
+                raise ValueError(f"Failed to parse content from {source}: {e}") from e

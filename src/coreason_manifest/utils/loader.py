@@ -222,7 +222,7 @@ class Loader:
             def fetch_s3() -> str:
                 s3 = boto3.client("s3")
                 response = s3.get_object(Bucket=bucket, Key=key)
-                return response["Body"].read().decode("utf-8")
+                return str(response["Body"].read().decode("utf-8"))
 
             try:
                 loop = asyncio.get_running_loop()

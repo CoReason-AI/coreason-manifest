@@ -56,7 +56,7 @@ class DomainValidationError(ValueError):
         Generates a few-shot prompt for an LLM to fix the error.
         """
         prompt = f"""## Error Diagnosis
-The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis else 'unknown location'}`.
+The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis else "unknown location"}`.
 
 **Error Message:** {super().__str__()}
 
@@ -92,20 +92,20 @@ The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis 
         suggested_fix = None
 
         if typ == "missing":
-             # Handle missing field typo detection
-             missing_field = str(e.get("loc", [])[-1])
-             if isinstance(invalid_val, dict):
-                 existing_keys = invalid_val.keys()
-                 best_match = None
-                 best_dist = float("inf")
-                 for k in existing_keys:
-                     dist = levenshtein_distance(missing_field, k)
-                     if dist < best_dist:
-                         best_dist = dist
-                         best_match = k
+            # Handle missing field typo detection
+            missing_field = str(e.get("loc", [])[-1])
+            if isinstance(invalid_val, dict):
+                existing_keys = invalid_val.keys()
+                best_match = None
+                best_dist = float("inf")
+                for k in existing_keys:
+                    dist = levenshtein_distance(missing_field, k)
+                    if dist < best_dist:
+                        best_dist = dist
+                        best_match = k
 
-                 if best_match and best_dist <= 3:
-                     suggested_fix = f"Field '{missing_field}' is missing. Found similar key '{best_match}'. Did you mean to rename it?"
+                if best_match and best_dist <= 3:
+                    suggested_fix = f"Field '{missing_field}' is missing. Found similar key '{best_match}'. Did you mean to rename it?"
 
         elif typ == "extra_forbidden" and root_model:
             try:
@@ -114,7 +114,7 @@ The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis 
                 defs = schema.get("$defs", {})
 
                 current = schema
-                path = e.get("loc", [])[:-1] # path to parent of error
+                path = e.get("loc", [])[:-1]  # path to parent of error
 
                 for part in path:
                     # Resolve Ref
