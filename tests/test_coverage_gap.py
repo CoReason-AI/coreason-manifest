@@ -195,7 +195,6 @@ def test_visualizer_unvisited() -> None:
     # visualizer.py 185-187, 213-215
     from coreason_manifest.spec.core.flow import DataSchema, FlowInterface, FlowMetadata, Graph, GraphFlow
     from coreason_manifest.spec.core.nodes import PlaceholderNode
-    from coreason_manifest.utils.visualizer import FlowVisualizer
 
     # Create disjoint graph to have unvisited nodes?
     # But validate_dag bans unreachable nodes in published flow.
@@ -213,14 +212,12 @@ def test_visualizer_unvisited() -> None:
         graph=graph,
     )
 
-    vis = FlowVisualizer(flow)
-    # render() logic might iterate nodes.
-    # If we have execution trace, unvisited logic applies.
-    # For now just render to cover basic graph iteration.
-    import contextlib
+    # Use to_mermaid which triggers _compute_layout (for React Flow logic in visualizer.py)
+    # Wait, to_mermaid generates text. to_react_flow generates layout with unvisited check.
+    from coreason_manifest.utils.visualizer import to_react_flow
 
-    with contextlib.suppress(ImportError):
-        vis.render()
+    data = to_react_flow(flow)
+    assert len(data["nodes"]) == 2
 
 
 def test_net_utils_edge_cases() -> None:
