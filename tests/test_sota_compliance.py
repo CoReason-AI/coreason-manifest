@@ -141,6 +141,20 @@ def test_telemetry_request_auto_rooting() -> None:
     assert req2.root_request_id == root_id
 
 
+def test_telemetry_request_create_child() -> None:
+    """
+    Test create_child factory method.
+    """
+    req = AgentRequest(agent_id="root", session_id="s1", inputs={})
+    child = req.create_child(metadata={"step": 1})
+
+    assert child.request_id != req.request_id
+    assert child.parent_request_id == req.request_id
+    assert child.root_request_id == req.root_request_id
+    assert child.session_id == req.session_id
+    assert child.metadata["step"] == 1
+
+
 def test_telemetry_request_orphaned_trace() -> None:
     """
     Test AgentRequest orphaned trace detection.
@@ -220,6 +234,12 @@ def test_integrity_sanitization() -> None:
 
     # Check timestamp
     assert sanitized["nested"]["timestamp"] == "2023-01-01T12:00:00Z"
+
+    # Check UUID fast-path
+    uid = uuid4()
+    data_uuid = {"id": uid}
+    sanitized_uuid = strategy._recursive_sort_and_sanitize(data_uuid)
+    assert sanitized_uuid["id"] == str(uid)
 
     # Determinism check
     h1 = compute_hash(data)
