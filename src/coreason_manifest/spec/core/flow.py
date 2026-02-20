@@ -3,8 +3,9 @@ from typing import Annotated, Any, Literal
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, RootModel, model_validator
 
+from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.engines import AttentionReasoning
 from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.governance import Governance
@@ -21,6 +22,7 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.types import NodeID, ProfileID, SemanticVersion, VariableID
 from coreason_manifest.spec.interop.compliance import RemediationAction
 
 # Polymorphic Node Type
@@ -37,29 +39,26 @@ AnyNode = Annotated[
 ]
 
 
-class FlowMetadata(BaseModel):
+class FlowMetadata(CoreasonModel):
     """Standard metadata fields."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    name: str
-    version: str
-    description: str
-    tags: list[str]
+    name: str = Field(..., description="Name of the flow.", examples=["My Agent Flow"])
+    version: SemanticVersion = Field(..., description="Semantic version.", examples=["1.0.0"])
+    description: str = Field(..., description="Description of what the flow does.", examples=["A flow that scrapes and summarizes."])
+    tags: list[str] = Field(default_factory=list, description="Tags for categorization.", examples=[["research", "scraper"]])
 
 
-class DataSchema(BaseModel):
+class DataSchema(CoreasonModel):
     """
     Strict data contract for inputs/outputs.
     Mandate 5: Contract-First Data I/O.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     schema_ref: Annotated[str | None, Field(description="URI to JSON Schema")] = None
     json_schema: dict[str, Any] | bool = Field(
         default_factory=dict,
         description="Full JSON Schema (Draft 7) definition for validation.",
+        examples=[{"type": "object", "properties": {"query": {"type": "string"}}}]
     )
 
     @model_validator(mode="before")
@@ -97,22 +96,12 @@ class DataSchema(BaseModel):
                 final_error_msg = f"Invalid JSON Schema{path_str}: {error_msg}"
 
                 # SOTA: Attempt Healing (Stubbed)
-                # We package the error into an AttentionReasoning payload for future LLM repair.
-                # Since we cannot call LLM here, we stub the hook and fail with high-fidelity diagnostics.
-
-                # 1. Instantiate the repair configuration (Stubbed usage)
                 _repair_config = AttentionReasoning(
                     model="gpt-4-turbo",  # Default repair model
                     attention_mode="rephrase",
                     focus_model="gpt-3.5-turbo",
                 )
 
-                # 2. Stubbed Hook
-                # In a real system, we would call: _attempt_repair(schema, error_msg, _repair_config)
-                # and if it returns a repaired schema, use it.
-
-                # 3. Raise DomainValidationError with context
-                # Package repair intent as requested in Fix 3
                 raise DomainValidationError(
                     message=final_error_msg,
                     remediation=RemediationAction(
@@ -127,51 +116,43 @@ class DataSchema(BaseModel):
         return data
 
 
-class FlowInterface(BaseModel):
+class FlowInterface(CoreasonModel):
     """Input/Output JSON schema contracts."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    inputs: DataSchema
-    outputs: DataSchema
+    inputs: DataSchema = Field(..., description="Input schema.")
+    outputs: DataSchema = Field(..., description="Output schema.")
 
 
-class VariableDef(BaseModel):
+class VariableDef(CoreasonModel):
     """Definition of a blackboard variable."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    type: str
-    description: str | None = None
+    type: str = Field(..., description="Data type description.", examples=["string", "list[str]"])
+    description: str | None = Field(None, description="Description of the variable usage.", examples=["User query"])
 
 
-class Blackboard(BaseModel):
+class Blackboard(CoreasonModel):
     """Shared, observable memory space."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    variables: dict[VariableID, VariableDef] = Field(
+        ..., description="Variables defined in the blackboard.", examples=[{"query": {"type": "string"}}]
+    )
+    persistence: bool = Field(False, description="Whether state persists across sessions.")
 
-    variables: dict[str, VariableDef]
-    persistence: bool
 
-
-class Edge(BaseModel):
+class Edge(CoreasonModel):
     """Directed connection between nodes."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    source: str
-    target: str
-    condition: str | None = None
+    source: NodeID = Field(..., description="Source node ID.", examples=["start"])
+    target: NodeID = Field(..., description="Target node ID.", examples=["end"])
+    condition: str | None = Field(None, description="Condition expression for traversal.", examples=["result == 'success'"])
 
 
-class Graph(BaseModel):
+class Graph(CoreasonModel):
     """Directed execution graph."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    nodes: dict[str, AnyNode]
-    edges: list[Edge]
-    entry_point: str = Field(..., description="The ID of the starting node.")
+    nodes: dict[NodeID, AnyNode] = Field(..., description="Map of Node ID to Node configuration.")
+    edges: list[Edge] = Field(..., description="List of directed edges.")
+    entry_point: NodeID = Field(..., description="The ID of the starting node.", examples=["start"])
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
@@ -206,22 +187,15 @@ class Graph(BaseModel):
         if self.entry_point not in node_ids:
             raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
 
-        # SOTA Directive 2: Decoupled Topological Governance.
-        # We NO LONGER enforce reachability or acyclic properties in the structural parser.
-        # This allows "utility islands" and complex cyclic patterns to exist syntactically.
-        # Policy enforcement (e.g. banning dead code) is now the sole responsibility of the Gatekeeper.
 
-
-class FlowDefinitions(BaseModel):
+class FlowDefinitions(CoreasonModel):
     """
     Registry for reusable components (The Blueprint).
     Separates 'definition' from 'usage' to reduce payload size.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     # Maps ID -> Configuration
-    profiles: dict[str, CognitiveProfile] = Field(
+    profiles: dict[ProfileID, CognitiveProfile] = Field(
         default_factory=dict, description="Reusable cognitive configurations."
     )
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict, description="Reusable tool dependencies.")
@@ -274,16 +248,14 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
                 )
 
 
-class LinearFlow(BaseModel):
+class LinearFlow(CoreasonModel):
     """A deterministic script."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    kind: Literal["LinearFlow"]
+    kind: Literal["LinearFlow"] = "LinearFlow"
     status: Annotated[Literal["draft", "published", "archived"], Field(description="Life-cycle state.")] = "draft"
-    metadata: FlowMetadata
+    metadata: FlowMetadata = Field(..., description="Metadata for the flow.")
     definitions: Annotated[FlowDefinitions | None, Field(description="Shared registry for reusable components.")] = None
-    sequence: list[AnyNode]
+    sequence: list[AnyNode] = Field(..., description="Ordered list of nodes to execute.")
     governance: Annotated[Governance | None, Field(description="Governance policy.")] = None
 
     @model_validator(mode="after")
@@ -295,18 +267,16 @@ class LinearFlow(BaseModel):
         return self
 
 
-class GraphFlow(BaseModel):
+class GraphFlow(CoreasonModel):
     """Cyclic Graph structure."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    kind: Literal["GraphFlow"]
+    kind: Literal["GraphFlow"] = "GraphFlow"
     status: Annotated[Literal["draft", "published", "archived"], Field(description="Life-cycle state.")] = "draft"
-    metadata: FlowMetadata
+    metadata: FlowMetadata = Field(..., description="Metadata for the flow.")
     definitions: Annotated[FlowDefinitions | None, Field(description="Shared registry for reusable components.")] = None
-    interface: FlowInterface
-    blackboard: Blackboard | None
-    graph: Graph
+    interface: FlowInterface = Field(..., description="Input/Output contract.")
+    blackboard: Blackboard | None = Field(None, description="Shared memory configuration.")
+    graph: Graph = Field(..., description="The execution graph.")
     governance: Annotated[Governance | None, Field(description="Governance policy.")] = None
 
     @model_validator(mode="after")
@@ -326,3 +296,18 @@ class GraphFlow(BaseModel):
         is_published = self.status == "published"
         self.graph.verify_integrity(strict=is_published)
         return self
+
+
+class Manifest(RootModel):
+    """
+    The Sovereign Domain Gatekeeper.
+    Wrapper around any valid Flow type.
+    """
+    root: Annotated[LinearFlow | GraphFlow, Field(discriminator="kind")]
+
+    @classmethod
+    def export_json_schema(cls) -> dict[str, Any]:
+        """
+        Dumps a structurally perfect OpenAPI/JSON-Schema representation of the library.
+        """
+        return cls.model_json_schema()

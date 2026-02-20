@@ -1,49 +1,48 @@
 import time
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.types import NodeID, ToolID
 
 
-class Safety(BaseModel):
+class Safety(CoreasonModel):
     """Safety and filtering configuration."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    input_filtering: bool = Field(..., description="Enable input filtering.", examples=[True])
+    pii_redaction: bool = Field(..., description="Enable PII redaction.", examples=[True])
+    content_safety: Literal["high", "medium", "low"] = Field(
+        ..., description="Content safety level.", examples=["high"]
+    )
 
-    input_filtering: bool
-    pii_redaction: bool
-    content_safety: Literal["high", "medium", "low"]
 
-
-class Audit(BaseModel):
+class Audit(CoreasonModel):
     """Audit and logging configuration."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    trace_retention_days: int
-    log_payloads: bool
+    trace_retention_days: int = Field(..., description="Days to retain traces.", examples=[30])
+    log_payloads: bool = Field(..., description="Log full payloads.", examples=[False])
 
 
-class CircuitBreaker(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    error_threshold_count: int = Field(..., description="Number of errors before opening the circuit.")
-    reset_timeout_seconds: int = Field(..., description="Seconds to wait before attempting half-open state.")
-    fallback_node_id: str | None = Field(None, description="Optional node to jump to when circuit opens.")
+class CircuitBreaker(CoreasonModel):
+    error_threshold_count: int = Field(..., description="Number of errors before opening the circuit.", examples=[5])
+    reset_timeout_seconds: int = Field(..., description="Seconds to wait before attempting half-open state.", examples=[60])
+    fallback_node_id: NodeID | None = Field(None, description="Optional node to jump to when circuit opens.", examples=["fallback_agent"])
 
 
-class ToolAccessPolicy(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    risk_level: Literal["critical", "standard", "minimal"]
-    require_auth: bool | None = None
+class ToolAccessPolicy(CoreasonModel):
+    risk_level: Literal["critical", "standard", "minimal"] = Field(..., description="Risk level.", examples=["standard"])
+    require_auth: bool | None = Field(None, description="Require authentication.", examples=[True])
     allowed_roles: list[str] | None = Field(
-        None, description="If None, allow all. If list, allow only these. Empty list implies deny-all."
+        None, description="If None, allow all. If list, allow only these. Empty list implies deny-all.", examples=[["admin"]]
     )
 
     @model_validator(mode="before")
     @classmethod
     def set_defaults(cls, data: Any) -> Any:
         if isinstance(data, dict):
+            # Functional purity: copy data
+            data = data.copy()
             if data.get("risk_level") == "critical":
                 if data.get("require_auth") is False:
                     raise ValueError("Critical tools must require authentication.")
@@ -54,20 +53,18 @@ class ToolAccessPolicy(BaseModel):
         return data
 
 
-class Governance(BaseModel):
+class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    rate_limit_rpm: int | None = None
-    timeout_seconds: int | None = None
-    cost_limit_usd: float | None = None
-    safety: Safety | None = None
-    audit: Audit | None = None
-    circuit_breaker: CircuitBreaker | None = None
-    tool_policy: dict[str, ToolAccessPolicy] | None = None
-    default_tool_policy: ToolAccessPolicy | None = None
-    allowed_domains: list[str] = Field(default_factory=list)
+    rate_limit_rpm: int | None = Field(None, description="Rate limit in requests per minute.", examples=[60])
+    timeout_seconds: int | None = Field(None, description="Global execution timeout.", examples=[300])
+    cost_limit_usd: float | None = Field(None, description="Cost limit in USD.", examples=[10.0])
+    safety: Safety | None = Field(None, description="Safety configuration.", examples=[{"input_filtering": True, "pii_redaction": True, "content_safety": "high"}])
+    audit: Audit | None = Field(None, description="Audit configuration.", examples=[{"trace_retention_days": 7, "log_payloads": True}])
+    circuit_breaker: CircuitBreaker | None = Field(None, description="Circuit breaker policy.", examples=[{"error_threshold_count": 3, "reset_timeout_seconds": 30}])
+    tool_policy: dict[ToolID, ToolAccessPolicy] | None = Field(None, description="Per-tool access policies.", examples=[{"web_search": {"risk_level": "standard", "require_auth": False}}])
+    default_tool_policy: ToolAccessPolicy | None = Field(None, description="Default tool policy.", examples=[{"risk_level": "minimal", "require_auth": False}])
+    allowed_domains: list[str] = Field(default_factory=list, description="Allowed external domains.", examples=[["example.com"]])
 
     @field_validator("allowed_domains")
     @classmethod
@@ -96,12 +93,12 @@ class Governance(BaseModel):
         return cleaned
 
 
-class CircuitState(BaseModel):
+class CircuitState(CoreasonModel):
     """Runtime state of a circuit breaker for a specific node."""
 
-    state: Literal["open", "closed", "half-open"] = "closed"
-    failure_count: int = 0
-    last_failure_time: float | None = None
+    state: Literal["open", "closed", "half-open"] = Field("closed", description="Current state.")
+    failure_count: int = Field(0, description="Consecutive failure count.")
+    last_failure_time: float | None = Field(None, description="Timestamp of last failure.")
 
 
 class CircuitOpenError(Exception):
@@ -129,7 +126,9 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
     if state.state == "open":
         if state.last_failure_time and (time.time() - state.last_failure_time > policy.reset_timeout_seconds):
             # Timeout expired, try half-open
-            state.state = "half-open"
+            # Immutability: Create new state and update store
+            new_state = state.model_copy(update={"state": "half-open"})
+            state_store[node_id] = new_state
             # We don't reset failure_count here; usually we wait for a success to close and reset.
         else:
             raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")
@@ -142,16 +141,25 @@ def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, 
     state = state_store.get(node_id)
     if not state:
         state = CircuitState()
-        state_store[node_id] = state
+        # state_store[node_id] = state # Wait, we need to update after modification if it was mutable, but now we create new
+        # Just continue to calculate new state
 
     if state.state == "open":
         return
 
-    state.failure_count += 1
-    state.last_failure_time = time.time()
+    new_failure_count = state.failure_count + 1
+    new_last_failure_time = time.time()
+    new_status = state.state
 
-    if state.failure_count >= policy.error_threshold_count:
-        state.state = "open"
+    if new_failure_count >= policy.error_threshold_count:
+        new_status = "open"
+
+    new_state = state.model_copy(update={
+        "failure_count": new_failure_count,
+        "last_failure_time": new_last_failure_time,
+        "state": new_status
+    })
+    state_store[node_id] = new_state
 
 
 def record_success(node_id: str, state_store: dict[str, CircuitState]) -> None:
@@ -160,6 +168,9 @@ def record_success(node_id: str, state_store: dict[str, CircuitState]) -> None:
     """
     state = state_store.get(node_id)
     if state:
-        state.state = "closed"
-        state.failure_count = 0
-        state.last_failure_time = None
+        new_state = state.model_copy(update={
+            "state": "closed",
+            "failure_count": 0,
+            "last_failure_time": None
+        })
+        state_store[node_id] = new_state

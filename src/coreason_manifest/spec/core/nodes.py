@@ -1,11 +1,10 @@
 import warnings
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
 from coreason_manifest.spec.common.presentation import PresentationHints
-
-# IMPORT ModelRef to link the new routing capability
+from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.engines import (
     FastPath,
     ModelRef,
@@ -14,30 +13,41 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.resilience import ResilienceConfig
+from coreason_manifest.spec.core.types import NodeID, ProfileID, VariableID
 from coreason_manifest.spec.interop.compliance import RemediationAction
 
 
-class Node(BaseModel):
+class Node(CoreasonModel):
     """Base class for vertices of the execution graph."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    id: NodeID = Field(..., description="Unique identifier for the node.", examples=["start_node", "agent_1"])
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
+    )
+    resilience: Annotated[
+        ResilienceConfig | str | None,
+        Field(description="Error handling policy or reference ID.", examples=["retry_policy_1"]),
+    ] = None
+    presentation: Annotated[
+        PresentationHints | None,
+        Field(description="UI rendering hints.", examples=[{"x": 100, "y": 200}]),
+    ] = None
+    type: str = Field(..., description="The type of the node.")
 
-    id: str
-    metadata: dict[str, Any]
-    resilience: Annotated[ResilienceConfig | str | None, Field(description="Error handling policy.")] = None
-    presentation: Annotated[PresentationHints | None, Field(description="UI rendering hints.")] = None
-    type: str
 
-
-class CognitiveProfile(BaseModel):
+class CognitiveProfile(CoreasonModel):
     """The active processing unit of an agent."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    role: str
-    persona: str
-    reasoning: ReasoningConfig | None
-    fast_path: FastPath | None
+    role: str = Field(..., description="The role of the agent.", examples=["Assistant", "Researcher"])
+    persona: str = Field(
+        ..., description="The system prompt/persona description.", examples=["You are a helpful assistant."]
+    )
+    reasoning: ReasoningConfig | None = Field(
+        None, description="The reasoning engine configuration.", examples=[{"type": "standard", "model": "gpt-4"}]
+    )
+    fast_path: FastPath | None = Field(
+        None, description="Fast path configuration for low-latency responses.", examples=[{"model": "gpt-3.5-turbo"}]
+    )
 
 
 class AgentNode(Node):
@@ -49,32 +59,43 @@ class AgentNode(Node):
     - Pass a string ID to reference 'definitions.profiles' (Production mode).
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["agent"] = "agent"
-    profile: CognitiveProfile | str
-    tools: list[str]
+    profile: CognitiveProfile | ProfileID = Field(
+        ...,
+        description="The cognitive profile configuration or a reference ID.",
+        examples=["profile_1", {"role": "Assistant", "persona": "..."}],
+    )
+    tools: list[str] = Field(
+        default_factory=list, description="List of tool names available to this agent.", examples=[["calculator", "web_search"]]
+    )
 
 
 class SwitchNode(Node):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["switch"] = "switch"
-    variable: str = Field(..., description="The blackboard variable to evaluate.")
-    cases: dict[str, str]
-    default: str
+    variable: VariableID = Field(
+        ..., description="The blackboard variable to evaluate.", examples=["user_sentiment"]
+    )
+    cases: dict[str, NodeID] = Field(
+        ..., description="Map of variable values to next node IDs.", examples=[{"positive": "thank_user", "negative": "apologize"}]
+    )
+    default: NodeID = Field(..., description="Default next node ID if no case matches.", examples=["default_handler"])
 
 
 class InspectorNodeBase(Node):
     """Shared logic for all inspection/judgement nodes."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    target_variable: str
-    criteria: str
-    output_variable: str
-    judge_model: Annotated[ModelRef | None, Field(description="Model/Policy to use for semantic evaluation.")] = None
-    optimizer: Optimizer | None = None
+    target_variable: VariableID = Field(
+        ..., description="The variable to inspect.", examples=["generated_content"]
+    )
+    criteria: str = Field(..., description="The criteria to evaluate against.", examples=["Is the content safe?"])
+    output_variable: VariableID = Field(
+        ..., description="The variable to store the result.", examples=["is_safe"]
+    )
+    judge_model: Annotated[
+        ModelRef | None,
+        Field(description="Model/Policy to use for semantic evaluation.", examples=["gpt-4"]),
+    ] = None
+    optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
 
 
 class InspectorNode(InspectorNodeBase):
@@ -83,13 +104,15 @@ class InspectorNode(InspectorNodeBase):
     Can operate in deterministic mode (regex/numeric) or semantic mode (LLM Judge).
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["inspector"] = "inspector"
 
-    mode: Literal["programmatic", "semantic"] = "programmatic"
+    mode: Literal["programmatic", "semantic"] = Field(
+        "programmatic", description="Evaluation mode.", examples=["semantic"]
+    )
 
-    pass_threshold: float | None = None
+    pass_threshold: float | None = Field(
+        None, description="Threshold for passing the check (0.0-1.0).", examples=[0.8]
+    )
 
 
 class EmergenceInspectorNode(InspectorNodeBase):
@@ -97,14 +120,12 @@ class EmergenceInspectorNode(InspectorNodeBase):
     Specialized inspector for detecting novel/emergent behaviors.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["emergence_inspector"] = "emergence_inspector"
 
     # Pre-defined behavioral markers to scan for
-    detect_sycophancy: bool = True
-    detect_power_seeking: bool = True
-    detect_deception: bool = True
+    detect_sycophancy: bool = Field(True, description="Detect if the agent is being sycophantic.")
+    detect_power_seeking: bool = Field(True, description="Detect power-seeking behavior.")
+    detect_deception: bool = Field(True, description="Detect deceptive behavior.")
 
     # Override defaults - Forced semantic mode
     mode: Literal["semantic"] = "semantic"
@@ -112,12 +133,12 @@ class EmergenceInspectorNode(InspectorNodeBase):
 
 
 class PlannerNode(Node):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["planner"] = "planner"
-    goal: str
-    optimizer: Optimizer | None
-    output_schema: dict[str, Any]
+    goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
+    optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
+    output_schema: dict[str, Any] = Field(
+        ..., description="JSON Schema for the plan output.", examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}]
+    )
 
 
 class HumanNode(Node):
@@ -127,24 +148,27 @@ class HumanNode(Node):
     and proceeds if no signal is received, while 'steering' allows mid-flight plan alteration.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["human"] = "human"
-    prompt: str
+    prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
     timeout_seconds: Annotated[
         int | Literal["infinite"] | None,
-        Field(description="Max wait time for blocking/steering. Use 'infinite' for no timeout."),
+        Field(description="Max wait time for blocking/steering. Use 'infinite' for no timeout.", examples=[300, "infinite"]),
     ]
-    input_schema: dict[str, Any] | None = None
-    options: list[str] | None = None
+    input_schema: dict[str, Any] | None = Field(
+        None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
+    )
+    options: list[str] | None = Field(
+        None, description="List of valid options for the human.", examples=[["approve", "reject"]]
+    )
 
     # *** UPGRADE: SHADOW MODE ***
     interaction_mode: Annotated[
-        Literal["blocking", "shadow", "steering"], Field(description="Wait for input vs shadow execution.")
+        Literal["blocking", "shadow", "steering"],
+        Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
     ] = "blocking"
     shadow_timeout_seconds: Annotated[
         int | Literal["infinite"] | None,
-        Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout."),
+        Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout.", examples=[60]),
     ] = None
 
     @model_validator(mode="before")
@@ -240,21 +264,23 @@ class SwarmNode(Node):
     Spins up N ephemeral worker agents to process a dataset/workload in parallel.
     """
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["swarm"] = "swarm"
 
     # Worker Config
-    worker_profile: str = Field(..., min_length=1, description="Reference to a CognitiveProfile ID.")
-    workload_variable: str = Field(..., min_length=1, description="The Blackboard list/dataset to process.")
+    worker_profile: ProfileID = Field(
+        ..., description="Reference to a CognitiveProfile ID.", examples=["researcher_profile"]
+    )
+    workload_variable: VariableID = Field(
+        ..., description="The Blackboard list/dataset to process.", examples=["urls_to_scrape"]
+    )
 
     # Topology
     distribution_strategy: Literal["sharded", "replicated"] = Field(
-        ..., description="Sharded=split data; Replicated=same data, many attempts."
+        ..., description="Sharded=split data; Replicated=same data, many attempts.", examples=["sharded"]
     )
     max_concurrency: Annotated[
         int | Literal["infinite"] | None,
-        Field(description="Limit parallel workers. Use 'infinite' for no limit."),
+        Field(description="Limit parallel workers. Use 'infinite' for no limit.", examples=[10]),
     ]
 
     # SOTA: Reliability (Partial Failure)
@@ -268,16 +294,21 @@ class SwarmNode(Node):
                 "Executed AFTER the Node's 'resilience' strategy. "
                 "E.g., if retries exhaust, this tolerance allows the Swarm to still succeed partially."
             ),
+            examples=[0.1],
         ),
     ] = 0.0
 
     # Aggregation
-    reducer_function: Literal["concat", "vote", "summarize"] = Field(..., description="How to combine results.")
+    reducer_function: Literal["concat", "vote", "summarize"] = Field(
+        ..., description="How to combine results.", examples=["concat"]
+    )
     aggregator_model: Annotated[
         ModelRef | None,
-        Field(description="If set, uses this model to summarize the worker outputs into a single string."),
+        Field(description="If set, uses this model to summarize the worker outputs into a single string.", examples=["gpt-4"]),
     ] = None
-    output_variable: str = Field(..., description="Variable to store the aggregated result.")
+    output_variable: VariableID = Field(
+        ..., description="Variable to store the aggregated result.", examples=["final_report"]
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -317,10 +348,10 @@ class SwarmNode(Node):
 
 
 class PlaceholderNode(Node):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
     type: Literal["placeholder"] = "placeholder"
-    required_capabilities: list[str]
+    required_capabilities: list[str] = Field(
+        ..., description="List of required capabilities.", examples=[["image_generation"]]
+    )
 
 
 __all__ = [

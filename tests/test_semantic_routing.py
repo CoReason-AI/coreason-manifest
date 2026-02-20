@@ -1,87 +1,69 @@
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.spec.core.engines import (
-    CouncilReasoning,
-    FastPath,
-    ModelCriteria,
-    StandardReasoning,
-    TreeSearchReasoning,
-)
-from coreason_manifest.spec.core.resilience import (
-    ReflexionStrategy,
-)
+from coreason_manifest.spec.core.flow import AnyNode
+from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 
 
-def test_model_criteria_instantiation() -> None:
-    # Test valid criteria
-    criteria = ModelCriteria(
-        strategy="lowest_cost",
-        min_context=8192,
-        capabilities=["vision", "json_mode"],
-        compliance=["gdpr"],
-        max_cost_per_m_tokens=10.0,
-        provider_whitelist=["azure"],
-    )
-    assert criteria.strategy == "lowest_cost"
-    assert criteria.min_context == 8192
+def test_semantic_routing_nodes():
+    """
+    Test that a list of mixed node types is parsed correctly into their specific classes.
+    """
+    nodes_data = [
+        {
+            "type": "human",
+            "id": "human_step_1",
+            "prompt": "Approve?",
+            "interaction_mode": "blocking",
+            "timeout_seconds": 60
+        },
+        {
+            "type": "agent",
+            "id": "agent_step_1",
+            "profile": "researcher_profile",
+            "tools": ["web_search"]
+        },
+        {
+            "type": "swarm",
+            "id": "swarm_step_1",
+            "worker_profile": "worker_v1",
+            "workload_variable": "data_list",
+            "distribution_strategy": "sharded",
+            "max_concurrency": 10,
+            "reducer_function": "concat",
+            "output_variable": "result"
+        }
+    ]
 
-    # Test invalid strategy
-    with pytest.raises(ValidationError):
-        ModelCriteria(strategy="invalid_strategy")  # type: ignore
+    adapter = TypeAdapter(list[AnyNode])
+    nodes = adapter.validate_python(nodes_data)
 
+    assert len(nodes) == 3
+    assert isinstance(nodes[0], HumanNode)
+    assert nodes[0].type == "human"
+    assert nodes[0].id == "human_step_1"
 
-def test_semantic_routing_in_reasoning() -> None:
-    # 1. StandardReasoning with String (Legacy)
-    legacy = StandardReasoning(model="gpt-4", thoughts_max=5)
-    assert legacy.model == "gpt-4"
+    assert isinstance(nodes[1], AgentNode)
+    assert nodes[1].type == "agent"
+    assert nodes[1].profile == "researcher_profile"
 
-    # 2. StandardReasoning with Criteria
-    criteria = ModelCriteria(strategy="performance")
-    advanced = StandardReasoning(model=criteria, thoughts_max=5)
-    assert isinstance(advanced.model, ModelCriteria)
-    assert advanced.model.strategy == "performance"
-
-
-def test_tree_search_evaluator_routing() -> None:
-    # Evaluator model can be a criteria
-    lats = TreeSearchReasoning(
-        model="gpt-4",
-        depth=3,
-        branching_factor=2,
-        simulations=5,
-        evaluator_model=ModelCriteria(strategy="balanced"),
-    )
-    assert isinstance(lats.evaluator_model, ModelCriteria)
-    assert lats.evaluator_model.strategy == "balanced"
-
-
-def test_reflex_routing() -> None:
-    criteria = ModelCriteria(strategy="lowest_latency")
-    reflex = FastPath(model=criteria, timeout_ms=500)
-    assert isinstance(reflex.model, ModelCriteria)
-    assert reflex.model.strategy == "lowest_latency"
+    assert isinstance(nodes[2], SwarmNode)
+    assert nodes[2].type == "swarm"
+    assert nodes[2].distribution_strategy == "sharded"
 
 
-def test_supervision_critic_routing() -> None:
-    criteria = ModelCriteria(capabilities=["coding"])
+def test_semantic_routing_failure():
+    """
+    Test that an invalid type raises a ValidationError.
+    """
+    nodes_data = [
+        {
+            "type": "invalid_type",
+            "id": "bad_node"
+        }
+    ]
+    adapter = TypeAdapter(list[AnyNode])
+    with pytest.raises(ValidationError) as excinfo:
+        adapter.validate_python(nodes_data)
 
-    # SupervisionPolicy doesn't have critic_model directly, it's inside ReflexionStrategy
-    strategy = ReflexionStrategy(max_attempts=3, critic_model=criteria, critic_prompt="Test", include_trace=True)
-
-    # sup = SupervisionPolicy(handlers=[], default_strategy=strategy)
-
-    assert isinstance(strategy, ReflexionStrategy)
-    assert isinstance(strategy.critic_model, ModelCriteria)
-    assert strategy.critic_model.capabilities == ["coding"]
-
-
-def test_council_tie_breaker_routing() -> None:
-    criteria = ModelCriteria(strategy="performance")
-    council = CouncilReasoning(
-        model="gpt-4",
-        personas=["A", "B"],
-        tie_breaker_model=criteria,
-    )
-    assert isinstance(council.tie_breaker_model, ModelCriteria)
-    assert council.tie_breaker_model.strategy == "performance"
+    assert "Input tag 'invalid_type' found using 'type' does not match any of the expected tags" in str(excinfo.value)

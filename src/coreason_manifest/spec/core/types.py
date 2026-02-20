@@ -1,0 +1,83 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason-manifest
+
+from typing import Annotated
+
+from pydantic import Field
+
+# =========================================================================
+#  DOMAIN VOCABULARY (Living Standard)
+# =========================================================================
+
+# Strict Semantic Versioning (X.Y.Z)
+SemanticVersion = Annotated[
+    str,
+    Field(
+        pattern=r"^\d+\.\d+\.\d+$",
+        description="A semantic version string (e.g., '1.0.0').",
+        examples=["1.0.0", "0.1.0", "2.12.5"],
+    ),
+]
+
+# Git SHA-1 Hash
+GitSHA = Annotated[
+    str,
+    Field(
+        pattern=r"^[a-f0-9]{40}$",
+        description="A full 40-character Git SHA-1 hash.",
+        examples=["a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0"],
+        min_length=40,
+        max_length=40,
+    ),
+]
+
+# Node Identifiers (Must be URL-safe, no spaces)
+NodeID = Annotated[
+    str,
+    Field(
+        pattern=r"^[a-zA-Z0-9_-]+$",
+        min_length=1,
+        max_length=128,
+        description="Unique identifier for a node in the graph. Alphanumeric, underscores, hyphens only.",
+        examples=["agent_1", "start-node", "MyNode"],
+    ),
+]
+
+# Variable Identifiers (Must be valid Python identifiers or close to it)
+VariableID = Annotated[
+    str,
+    Field(
+        pattern=r"^[a-zA-Z_][a-zA-Z0-9_]*$",
+        min_length=1,
+        max_length=64,
+        description="Identifier for a variable in the blackboard. Must be a valid identifier format.",
+        examples=["user_input", "result_data", "_internal_state"],
+    ),
+]
+
+# Tool Identifiers
+ToolID = Annotated[
+    str,
+    Field(
+        min_length=1,
+        description="Identifier for a tool or capability.",
+        examples=["calculator", "web_search"],
+    ),
+]
+
+# Profile Identifiers
+ProfileID = Annotated[
+    str,
+    Field(
+        min_length=1,
+        description="Identifier for a cognitive profile.",
+        examples=["default_assistant", "code_expert"],
+    ),
+]
