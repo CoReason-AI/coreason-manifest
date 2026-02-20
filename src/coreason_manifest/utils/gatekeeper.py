@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from urllib.parse import urlparse
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
@@ -74,49 +73,35 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     if allowed_domains:
         for tool_obj in tool_map.values():
-            if tool_obj.url:
-                # SOTA Fix: Handle schemeless URLs and strict netloc parsing
-                url_to_parse = tool_obj.url
-                if "://" not in url_to_parse:
-                    url_to_parse = "https://" + url_to_parse
+            # SOTA Fix: Utilize strict Pydantic HttpUrl object instead of manual string parsing
+            if tool_obj.url and tool_obj.url.host:
+                domain_raw = str(tool_obj.url.host)
+                domain = canonicalize_domain(domain_raw)
 
-                try:
-                    parsed = urlparse(url_to_parse)
-                    # Extract domain (netloc), handle port
-                    domain_raw = parsed.netloc
-                    if ":" in domain_raw:
-                        domain_raw = domain_raw.split(":")[0]
+                allowed = False
+                for allowed_d in allowed_domains:
+                    # Exact match or subdomain
+                    if domain == allowed_d or domain.endswith("." + allowed_d):
+                        allowed = True
+                        break
 
-                    # Strict Canonicalization
-                    domain = canonicalize_domain(domain_raw)
+                if allowed:
+                    continue
 
-                    allowed = False
-                    for allowed_d in allowed_domains:
-                        # Exact match or subdomain
-                        if domain == allowed_d or domain.endswith("." + allowed_d):
-                            allowed = True
-                            break
-
-                    if allowed:
-                        continue
-
-                    reports.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
-                            severity="violation",
-                            message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
-                            details={"domain": domain, "tool_name": tool_obj.name},
-                            remediation=RemediationAction(
-                                type="whitelist_domain",
-                                format="json_patch",
-                                patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
-                                description=f"Add '{domain}' to allowed_domains",
-                            ),
-                        )
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
+                        severity="violation",
+                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
+                        details={"domain": domain, "tool_name": tool_obj.name},
+                        remediation=RemediationAction(
+                            type="whitelist_domain",
+                            format="json_patch",
+                            patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
+                            description=f"Add '{domain}' to allowed_domains",
+                        ),
                     )
-                except ValueError:
-                    # Invalid URL parsing
-                    pass
+                )
 
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:

@@ -35,36 +35,20 @@ def test_gatekeeper_capability_error_handling() -> None:
 
 def test_gatekeeper_schemeless_url() -> None:
     """Cover line 93 in gatekeeper.py: schemeless URL handling."""
-    from coreason_manifest.spec.core.governance import Governance
-    from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+    import pytest
+    from pydantic import ValidationError
 
-    # Define a tool with a schemeless URL
-    tool = ToolCapability(
-        name="schemeless_tool",
-        description="A tool without schema",
-        url="evil.com/api",  # No https://
-        risk_level="standard",
-    )
+    from coreason_manifest.spec.core.tools import ToolCapability
 
-    flow = LinearFlow(
-        kind="LinearFlow",
-        status="draft",
-        metadata=FlowMetadata(name="Schemeless Test", version="1.0", description="desc", tags=[]),
-        definitions=Definitions(
-            tool_packs={
-                "pack1": ToolPack(kind="ToolPack", namespace="pack1", tools=[tool], dependencies=[], env_vars=[])
-            }
-        ),
-        sequence=[],
-        governance=Governance(allowed_domains=["good.com"]),  # evil.com should fail
-    )
-
-    reports = validate_policy(flow)
-
-    # Should find a violation for evil.com
-    violation = next((r for r in reports if "blocked domain" in r.message), None)
-    assert violation is not None
-    assert "evil.com" in violation.message
+    # SOTA Change: ToolCapability.url is strictly typed as HttpUrl.
+    # Schemeless URLs must raise ValidationError during instantiation.
+    with pytest.raises(ValidationError):
+        ToolCapability(
+            name="schemeless_tool",
+            description="A tool without schema",
+            url="evil.com/api",  # No https://
+            risk_level="standard",
+        )
 
 
 def test_gatekeeper_port_stripping() -> None:

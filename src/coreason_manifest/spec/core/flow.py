@@ -145,6 +145,100 @@ class Graph(BaseModel):
     edges: list[Edge]
     entry_point: str = Field(..., description="The ID of the starting node.")
 
+    @model_validator(mode="after")
+    def validate_graph_structure(self) -> "Graph":
+        """
+        Validates internal graph consistency.
+        Always enforced (DAG property, Node ID matching).
+        Dangling edges are allowed in DRAFT mode (enforced by parent Flow or verify_integrity).
+        """
+        # 1. Key/ID Consistency
+        for key, node in self.nodes.items():
+            if key != node.id:
+                raise ValueError(f"Graph Integrity Error: Node key '{key}' does not match Node ID '{node.id}'")
+
+        # 2. Cycle Detection (Kahn's Algorithm)
+        # Construct adjacency for cycle check
+        # Note: We only consider edges where both source and target exist in nodes.
+        # Dangling edges are ignored for cycle check (they can't form a cycle if target is missing).
+
+        node_ids = set(self.nodes.keys())
+        adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
+        in_degree: dict[str, int] = dict.fromkeys(node_ids, 0)
+
+        valid_edges = []
+        for edge in self.edges:
+            if edge.source in node_ids and edge.target in node_ids:
+                valid_edges.append(edge)
+                adj[edge.source].append(edge.target)
+                in_degree[edge.target] += 1
+
+        queue = [n for n in node_ids if in_degree[n] == 0]
+        visited_count = 0
+
+        while queue:
+            u = queue.pop(0)
+            visited_count += 1
+            for v in adj[u]:
+                in_degree[v] -= 1
+                if in_degree[v] == 0:
+                    queue.append(v)
+
+        if visited_count != len(node_ids):
+             # Extract nodes trapped in the cycle
+            cyclic_nodes = [n for n, deg in in_degree.items() if deg > 0]
+            raise ValueError(
+                f"Topological fracture: Cycle detected involving nodes: {sorted(cyclic_nodes)}. "
+                "Execution graphs must be strictly acyclic."
+            )
+
+        return self
+
+    def verify_integrity(self, strict: bool = True) -> None:
+        """
+        Verifies full structural integrity (Reachability, Dangling Edges).
+        Strict mode (Published) enforces no dangling edges and full reachability.
+        """
+        node_ids = set(self.nodes.keys())
+
+        # 1. Edge Integrity (Dangling Checks)
+        if strict:
+            for i, edge in enumerate(self.edges):
+                if edge.source not in node_ids:
+                    raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
+                if edge.target not in node_ids:
+                    raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
+
+            if self.entry_point not in node_ids:
+                raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
+
+        # 2. Reachability (Strict Only)
+        if strict:
+            reachable = {self.entry_point}
+            queue = [self.entry_point]
+
+            # Build adjacency
+            adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
+            for edge in self.edges:
+                # We assume edges are valid if we passed step 1
+                if edge.source in node_ids and edge.target in node_ids:
+                    adj[edge.source].append(edge.target)
+
+            while queue:
+                curr = queue.pop(0)
+                for neighbor in adj[curr]:
+                    if neighbor not in reachable:
+                        reachable.add(neighbor)
+                        queue.append(neighbor)
+
+            unreachable = node_ids - reachable
+            if unreachable:
+                first_unreachable = sorted(unreachable)[0]
+                raise ValueError(
+                    f"Topological fracture: Node '{first_unreachable}' is unreachable from entry point "
+                    f"'{self.entry_point}'. Path: /graph/nodes/{first_unreachable}"
+                )
+
 
 class FlowDefinitions(BaseModel):
     """
@@ -252,80 +346,11 @@ class GraphFlow(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def validate_dag(self) -> "GraphFlow":
+    def enforce_graph_integrity(self) -> "GraphFlow":
         """
-        Pillar 5: DAG Formal Verification.
-        Enforces reachability and structural integrity.
+        Enforces strict integrity if published.
+        Calls Graph.verify_integrity(strict=True).
         """
-        # 1. Edge Integrity (always check)
-        node_ids = set(self.graph.nodes.keys())
-        for i, edge in enumerate(self.graph.edges):
-            if edge.source not in node_ids:
-                raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
-            if edge.target not in node_ids:
-                raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
-
-        if self.graph.entry_point not in node_ids:
-            raise ValueError(f"Entry point '{self.graph.entry_point}' not found in nodes.")
-
-        # 2. Reachability (only if published)
-        if self.status == "published":
-            # BFS Reachability Analysis
-            reachable = {self.graph.entry_point}
-            queue = [self.graph.entry_point]
-
-            # Build adjacency list
-            adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
-            for edge in self.graph.edges:
-                adj[edge.source].append(edge.target)
-
-            while queue:
-                curr = queue.pop(0)
-                for neighbor in adj[curr]:
-                    if neighbor not in reachable:
-                        reachable.add(neighbor)
-                        queue.append(neighbor)
-
-            unreachable = node_ids - reachable
-            if unreachable:
-                # SOTA: Return exact path of fracture
-                # e.g. /graph/nodes/island_node
-                first_unreachable = sorted(unreachable)[0]
-                raise ValueError(
-                    f"Topological fracture: Node '{first_unreachable}' is unreachable from entry point "
-                    f"'{self.graph.entry_point}'. Path: /graph/nodes/{first_unreachable}"
-                )
-
-            # 2b. Cycle Detection using Kahn's Algorithm (O(V+E), Zero Recursion)
-            in_degree = dict.fromkeys(reachable, 0)
-
-            # Calculate in-degrees for reachable nodes only
-            for node in reachable:
-                for neighbor in adj[node]:
-                    if neighbor in in_degree:
-                        in_degree[neighbor] += 1
-
-            # Initialize queue with nodes having 0 in-degree
-            zero_in_degree_queue = [n for n in reachable if in_degree[n] == 0]
-            visited_count = 0
-
-            while zero_in_degree_queue:
-                node = zero_in_degree_queue.pop(0)
-                visited_count += 1
-
-                for neighbor in adj[node]:
-                    if neighbor in in_degree:
-                        in_degree[neighbor] -= 1
-                        if in_degree[neighbor] == 0:
-                            zero_in_degree_queue.append(neighbor)
-
-            # If visited count doesn't match reachable nodes, a cycle exists
-            if visited_count != len(reachable):
-                # Extract nodes trapped in the cycle
-                cyclic_nodes = [n for n, deg in in_degree.items() if deg > 0]
-                raise ValueError(
-                    f"Topological fracture: Cycle detected involving nodes: {sorted(cyclic_nodes)}. "
-                    "Execution graphs must be strictly acyclic."
-                )
-
+        is_published = (self.status == "published")
+        self.graph.verify_integrity(strict=is_published)
         return self

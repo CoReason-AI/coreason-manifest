@@ -225,26 +225,12 @@ def test_graph_guarded_path() -> None:
 def test_graph_cycle_explicit_entry() -> None:
     # Cyclic graph with explicit entry point
     # a1(comp) -> a1
-    defs = get_defs()
+    # This now fails structurally due to Cycle Detection in Graph validator
+    get_defs()
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")], entry_point="a1")
-
-    flow = GraphFlow(
-        kind="GraphFlow",
-        metadata=get_meta(),
-        definitions=defs,
-        interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
-        ),
-        blackboard=None,
-        graph=graph,
-    )
-
-    # a1 is entry and unguarded.
-    errors = validate_policy(flow)
-    assert len(errors) == 1
+    with pytest.raises(ValidationError, match="Cycle detected"):
+        Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")], entry_point="a1")
 
 
 def test_integrity_compute_hash_variants() -> None:

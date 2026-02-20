@@ -1,10 +1,10 @@
 # src/coreason_manifest/utils/loader.py
 
+import hashlib
 import importlib.abc
 import importlib.util
 import re
 import sys
-import threading
 import warnings
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -92,6 +92,10 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         """
         Attempt to find the module in the current jail root.
         """
+        # Security: Prevent standard library shadowing (Dependency Confusion)
+        if fullname in sys.stdlib_module_names:
+            return None
+
         jail_root = _jail_root_var.get()
         if not jail_root:
             return None
@@ -129,9 +133,6 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
 # Singleton instance of the finder
 _SANDBOXED_FINDER = SandboxedPathFinder()
 
-# Global lock to prevent race conditions when modifying sys.modules
-_loader_lock = threading.Lock()
-
 
 @contextmanager
 def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
@@ -139,8 +140,7 @@ def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
     Context manager to activate the sandboxed finder for the given jail root.
     Ensures the finder is registered in sys.meta_path.
     """
-    # Register finder if not present (idempotent, somewhat race-prone on insert but harmless if duplicated in logic)
-    # To be safer, we check if it's there.
+    # Register finder if not present (idempotent)
     if _SANDBOXED_FINDER not in sys.meta_path:
         sys.meta_path.insert(0, _SANDBOXED_FINDER)
 
@@ -149,8 +149,6 @@ def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
         yield
     finally:
         _jail_root_var.reset(token)
-        # We generally don't remove the finder to avoid race conditions with other threads using it.
-        # It's benign when jail_root is None.
 
 
 def _scan_for_dynamic_references(data: Any) -> bool:
@@ -239,29 +237,23 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         stacklevel=2,
     )
 
-    module_name = Path(file_ref).stem
+    # Generate cryptographically unique module name to prevent collisions and remove need for global lock
+    path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
+    module_name = f"agent_{path_hash}"
 
     # Use context manager to enable jailed imports during spec finding and loading
-    # SOTA: Enforce thread safety during global sys.modules mutation
-    with sandbox_context(root_dir), _loader_lock:
-        # Track pre-existing modules to identify new ones for cleanup
+    with sandbox_context(root_dir):
+        # Track pre-existing modules to identify new ones for cleanup (dependencies)
         pre_existing_modules = set(sys.modules.keys())
 
-        # We use spec_from_file_location, but imports INSIDE the module need the finder.
         spec = importlib.util.spec_from_file_location(module_name, file_path)
         if spec is None or spec.loader is None:
             raise ValueError(f"Could not load spec for {file_ref}")
 
         module = importlib.util.module_from_spec(spec)
-
-        # We must register in sys.modules for relative imports to work (if any)
-        # and for the module to be valid.
         sys.modules[module_name] = module
 
         # TODO(Architecture-Spike): Transition to True Process Sandboxing.
-        # Current implementation relies on namespace sandboxing via importlib.
-        # To safely execute untrusted LLM-generated code, this execution block
-        # MUST be transitioned to an isolated WebAssembly (Wasm) runtime or microVM.
         warnings.warn(
             f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
             "Ensure strict governance until Wasm sandboxing is implemented.",
@@ -273,9 +265,6 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
             spec.loader.exec_module(module)
         except Exception as e:
             # Cleanup on failure
-            if module_name in sys.modules:
-                del sys.modules[module_name]
-            # Also cleanup dependencies that might have been loaded
             new_modules = set(sys.modules.keys()) - pre_existing_modules
             for mod in new_modules:
                 if mod in sys.modules:
@@ -284,7 +273,9 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
         agent_class = getattr(module, class_name, None)
 
-        # SOTA Cleanup: Remove loaded modules to prevent pollution and collision.
+        # Cleanup dependencies to prevent pollution
+        # Note: This is aggressive and might affect other threads if they just loaded the same dependency.
+        # But without a global lock or process isolation, this is the trade-off for "removing pollution".
         new_modules = set(sys.modules.keys()) - pre_existing_modules
         for mod in new_modules:
             if mod in sys.modules:

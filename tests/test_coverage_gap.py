@@ -135,8 +135,106 @@ def test_integrity_fallback_json() -> None:
     # Actually if json.loads fails, it raises JSONDecodeError, which is a ValueError.
     # The code might catch it or let it bubble up.
     # If compute_hash doesn't catch it, test expects it.
-    with pytest.raises(TypeError):  # Fallback to default serialization which fails for BadJson
+    with pytest.raises(TypeError): # Fallback to default serialization which fails for BadJson
         compute_hash(BadJson())
+
+def test_integrity_set_sorting() -> None:
+    # Test set/frozenset sorting in CanonicalV2
+    s = {3, 1, 2}
+    h_set = compute_hash(s)
+    h_list = compute_hash([1, 2, 3])
+    assert h_set == h_list
+
+    fs = frozenset({3, 1, 2})
+    h_fs = compute_hash(fs)
+    assert h_fs == h_list
+
+def test_loader_sys_version_mock() -> None:
+    # Mock sys.version_info to cover fallback path
+    with patch("sys.version_info", (3, 9)):
+        finder = SandboxedPathFinder()
+        # Should not crash, and should attempt to find (returning None if no jail)
+        assert finder.find_spec("os") is None
+
+def test_integrity_invalid_version() -> None:
+    with pytest.raises(ValueError, match="Unknown hashing version"):
+        compute_hash({}, version="v99") # type: ignore
+
+def test_integrity_payload_fallback() -> None:
+    # reconstruct_payload(1) -> dict(1) -> TypeError
+    with pytest.raises(TypeError):
+        reconstruct_payload(1)
+
+def test_integrity_legacy_v1_model() -> None:
+    from pydantic import BaseModel
+    class M(BaseModel):
+        x: int
+
+    # Covers LegacyV1Strategy model_dump path
+    h = compute_hash(M(x=1), version="v1")
+    assert len(h) == 64
+
+def test_verify_proof_fallback_version() -> None:
+    from coreason_manifest.utils.integrity import verify_merkle_proof
+    # Payload with invalid hash_version -> fallback to v2
+    # We construct a node where hash matches v2 hash
+    data = {"x": 1, "hash_version": "invalid"}
+    h = compute_hash(data, version="v2")
+    node = data.copy()
+    node["execution_hash"] = h
+    # verify should use v2 despite invalid version string, so it passes
+    assert verify_merkle_proof([node]) is True
+
+def test_topology_self_loop_island() -> None:
+    # Cover single-node cycle (self-loop) in Tarjan's algorithm (gatekeeper.py line 235)
+    # Must use model_construct to bypass Graph strict cycle check
+    from coreason_manifest.spec.core.engines import ComputerUseReasoning
+    from coreason_manifest.spec.core.flow import (
+        DataSchema,
+        Edge,
+        FlowDefinitions,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+    )
+    from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+    from coreason_manifest.utils.gatekeeper import validate_policy
+
+    # Unsafe profile to trigger risk check
+    p_comp = CognitiveProfile(
+        role="worker",
+        persona="worker",
+        reasoning=ComputerUseReasoning(model="gpt-4"),
+        fast_path=None,
+    )
+    defs = FlowDefinitions(profiles={"comp": p_comp})
+
+    # Unreachable self-loop node
+    a1 = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
+
+    # Graph: Entry (a2) -> End.  a1 (island) -> a1
+    a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
+
+    graph = Graph.model_construct(
+        nodes={"a1": a1, "a2": a2},
+        edges=[Edge(source="a1", target="a1")],
+        entry_point="a2"
+    )
+
+    flow = GraphFlow.model_construct(
+        kind="GraphFlow",
+        status="draft",
+        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+        definitions=defs,
+    )
+
+    reports = validate_policy(flow)
+    # Should report cyclic island for a1
+    assert any("cyclic island" in r.message for r in reports)
 
 
 def test_integrity_tuple_reconstruct() -> None:
@@ -147,6 +245,24 @@ def test_integrity_tuple_reconstruct() -> None:
 
     with pytest.raises(TypeError, match="Could not reconstruct payload"):
         reconstruct_payload([1])
+
+
+def test_integrity_legacy_v1() -> None:
+    # Cover LegacyV1Strategy (dead code otherwise)
+    data = {"b": 2, "a": 1}
+    h_v1 = compute_hash(data, version="v1")
+    # Verify deterministic
+    assert h_v1 == compute_hash(data, version="v1")
+
+    # Verify different from v2 (maybe? json.dumps differs in spacing?)
+    # V2 uses separators=(',', ':'). V1 uses same?
+    # My impl of V1 uses separators=(',', ':') too.
+    # So for simple dict, they might be same if no None/float/etc.
+    # But V2 strips None. V1 keeps None?
+    data_none = {"a": None}
+    h_v1_none = compute_hash(data_none, version="v1") # {"a": null}
+    h_v2_none = compute_hash(data_none, version="v2") # {}
+    assert h_v1_none != h_v2_none
 
 
 def test_loader_spec_none_coverage() -> None:
@@ -189,6 +305,14 @@ def test_loader_spec_none_coverage() -> None:
         assert finder.find_spec("non_existent") is None
 
 
+def test_loader_stdlib_shadowing() -> None:
+    # Cover stdlib check (loader.py 98-102)
+    finder = SandboxedPathFinder()
+    # "os" is in stdlib
+    assert finder.find_spec("os") is None
+    assert finder.find_spec("sys") is None
+
+
 def test_loader_exception_handling_in_lock() -> None:
     # Cover exception handling inside _loader_lock (lines 233, 253, 281-282)
     # We need to trigger exception during exec_module
@@ -212,15 +336,15 @@ def test_loader_exception_handling_in_lock() -> None:
         assert "broken" not in sys.modules
 
 
-def test_gatekeeper_domain_type_check() -> None:
-    # Coverage for gatekeeper.py 117-119
+def test_gatekeeper_blocked_domain() -> None:
+    # Test that domains are blocked correctly using HttpUrl validation
     from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
     from coreason_manifest.spec.core.nodes import AgentNode
     from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
     from coreason_manifest.utils.gatekeeper import validate_policy
 
-    tool = ToolCapability(name="BadUrl", url="http://example.com")
-    gov = Governance(allowed_domains=["example.com"])
+    tool = ToolCapability(name="BadUrl", url="http://evil.com/path")
+    gov = Governance(allowed_domains=["good.com"])
 
     flow = LinearFlow(
         kind="LinearFlow",
@@ -229,12 +353,11 @@ def test_gatekeeper_domain_type_check() -> None:
         governance=gov,
         definitions=FlowDefinitions(
             tool_packs={"tp": ToolPack(kind="ToolPack", namespace="n", tools=[tool], dependencies=[], env_vars=[])}
-        ),
+        )
     )
 
-    with patch("coreason_manifest.utils.gatekeeper.urlparse", side_effect=ValueError("Invalid URL")):
-        # This execution path hits the except ValueError block
-        validate_policy(flow)
+    reports = validate_policy(flow)
+    assert any("uses blocked domain" in r.message for r in reports)
 
 
 def test_visualizer_pure_cycle() -> None:
@@ -246,13 +369,17 @@ def test_visualizer_pure_cycle() -> None:
     n_c1 = PlaceholderNode(id="c1", type="placeholder", metadata={}, required_capabilities=[])
     n_c2 = PlaceholderNode(id="c2", type="placeholder", metadata={}, required_capabilities=[])
 
-    graph = Graph(
+    # Use model_construct to bypass cycle detection in Graph validation
+    graph = Graph.model_construct(
         nodes={"c1": n_c1, "c2": n_c2},
-        edges=[Edge(source="c1", target="c2"), Edge(source="c2", target="c1")],
-        entry_point="c1",
+        edges=[
+            Edge(source="c1", target="c2"),
+            Edge(source="c2", target="c1")
+        ],
+        entry_point="c1"
     )
 
-    flow = GraphFlow(
+    flow = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
         metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
@@ -279,15 +406,19 @@ def test_visualizer_disconnected_cycle() -> None:
     n_c1 = PlaceholderNode(id="c1", type="placeholder", metadata={}, required_capabilities=[])
     n_c2 = PlaceholderNode(id="c2", type="placeholder", metadata={}, required_capabilities=[])
 
-    graph = Graph(
+    # Bypass cycle detection
+    graph = Graph.model_construct(
         nodes={"r1": n_r1, "c1": n_c1, "c2": n_c2},
-        edges=[Edge(source="c1", target="c2"), Edge(source="c2", target="c1")],
-        entry_point="r1",
+        edges=[
+            Edge(source="c1", target="c2"),
+            Edge(source="c2", target="c1")
+        ],
+        entry_point="r1"
     )
 
-    flow = GraphFlow(
+    flow = GraphFlow.model_construct(
         kind="GraphFlow",
-        status="draft",  # Allow disconnected
+        status="draft", # Allow disconnected
         metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
@@ -338,7 +469,7 @@ def test_telemetry_frozen() -> None:
         # request_id missing -> line 75 hit
     )
     assert ne.request_id is not None
-    assert ne.root_request_id == ne.request_id  # line 80 hit (no parent, no root)
+    assert ne.root_request_id == ne.request_id # line 80 hit (no parent, no root)
 
     # Case 2: request_id provided
     ne2 = NodeExecution(
@@ -348,14 +479,14 @@ def test_telemetry_frozen() -> None:
         outputs={},
         timestamp=datetime.now(),
         duration_ms=10,
-        request_id="my_id",
+        request_id="my_id"
     )
     assert ne2.request_id == "my_id"
 
     # Case 3: Verify immutability (frozen=True)
     # We catch whatever exception happens.
     try:
-        ne.state = NodeState.FAILED  # type: ignore
+        ne.state = NodeState.FAILED # type: ignore
     except (ValidationError, TypeError):
         # Success, it raised.
         pass
@@ -394,7 +525,7 @@ def test_validator_edge_cases() -> None:
     graph_dangling = Graph.model_construct(
         nodes={"n1": n1},
         edges=[Edge(source="n1", target="missing"), Edge(source="missing", target="n1")],
-        entry_point="n1",
+        entry_point="n1"
     )
     flow_dangling = GraphFlow.model_construct(
         kind="GraphFlow",
@@ -408,12 +539,12 @@ def test_validator_edge_cases() -> None:
     assert any("Dangling Edge Error" in r for r in reports)
 
     # Node key mismatch
-    Graph(nodes={"wrong_key": n1}, edges=[], entry_point="wrong_key")
+    Graph.model_construct(nodes={"wrong_key": n1}, edges=[], entry_point="wrong_key")
     # This might fail validate_dag "Entry point 'wrong_key' not found".
     # But if entry point matches key, but key != node.id?
-    graph_mismatch_2 = Graph(nodes={"key": n1}, edges=[], entry_point="key")
+    graph_mismatch_2 = Graph.model_construct(nodes={"key": n1}, edges=[], entry_point="key")
 
-    flow_mismatch = GraphFlow(
+    flow_mismatch = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
         metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
@@ -430,7 +561,6 @@ def test_validator_edge_cases() -> None:
 def test_loader_file_not_found() -> None:
     # loader.py line 233 (file not found)
     import tempfile
-
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         with pytest.raises(ValueError, match="Agent file not found"):
@@ -512,13 +642,12 @@ def test_flow_edge_source_missing() -> None:
     with pytest.raises(ValueError, match="Edge 0 source 'unknown' not found in nodes"):
         GraphFlow(
             kind="GraphFlow",
-            status="published",  # or draft, edge check runs always
+            status="published",
             metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
             graph=graph,
         )
-
 
 def test_flow_edge_target_missing() -> None:
     # flow.py edge target missing coverage
@@ -552,16 +681,11 @@ def test_flow_entry_point_missing() -> None:
             graph=graph,
         )
 
-
 def test_flow_cycle_detection_unreachable() -> None:
     # spec/core/flow.py 325-326 (raise ValueError("Cycle detected..."))
     from coreason_manifest.spec.core.flow import (
-        DataSchema,
         Edge,
-        FlowInterface,
-        FlowMetadata,
         Graph,
-        GraphFlow,
     )
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
@@ -569,18 +693,20 @@ def test_flow_cycle_detection_unreachable() -> None:
     n2 = PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
 
     # Cycle: n1->n2->n1
-    graph = Graph(
+    Graph.model_construct(
         nodes={"n1": n1, "n2": n2},
         edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
         entry_point="n1",
     )
 
-    with pytest.raises(ValueError, match="Topological fracture: Cycle detected"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="cycle", version="1", description="d", tags=[]),
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            graph=graph,
+    # Use model_construct to create graph, then call validate_graph_structure logic manually
+    # OR create Graph normally which calls it.
+    # We want to coverage cycle detection.
+    # Graph validation calls it.
+
+    with pytest.raises(ValidationError, match="Cycle detected"):
+        Graph(
+            nodes={"n1": n1, "n2": n2},
+            edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
+            entry_point="n1",
         )

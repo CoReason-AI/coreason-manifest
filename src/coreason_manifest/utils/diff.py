@@ -57,6 +57,8 @@ def _classify_path(path: str) -> Literal["resource", "topology", "governance"]:
             # Check if it's the node itself or a property
             parts = path.split("/")
             # /graph/nodes/NODE_ID -> Topology (add/remove)
+            # Note: IDs might contain escaped chars (~1), so splitting by / works if we assume standard structure.
+            # But "graph" "nodes" "id" is 4 parts (empty string first).
             if len(parts) == 4:  # ['', 'graph', 'nodes', 'id']
                 return "topology"
             # /graph/nodes/id/PROPERTY -> Resource
@@ -92,6 +94,15 @@ def _create_mutation(
     return mutation_cls(op=op, path=path, value=value)  # type: ignore[no-any-return]
 
 
+def _escape_json_pointer(key: str) -> str:
+    """
+    Escapes a dictionary key for use in a JSON Pointer (RFC 6901).
+    ~ -> ~0
+    / -> ~1
+    """
+    return key.replace("~", "~0").replace("/", "~1")
+
+
 def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
     """
     Recursively generates JSON Patch operations.
@@ -104,7 +115,10 @@ def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
     if isinstance(obj1, dict) and isinstance(obj2, dict):
         all_keys = set(obj1.keys()) | set(obj2.keys())
         for key in sorted(all_keys):
-            new_path = f"{path}/{key}"
+            # SOTA Fix: RFC 6901 Escaping
+            escaped_key = _escape_json_pointer(key)
+            new_path = f"{path}/{escaped_key}"
+
             if key not in obj1:
                 changes.append(_create_mutation(op="add", path=new_path, value=obj2[key]))
             elif key not in obj2:
@@ -114,6 +128,7 @@ def _generate_diff(path: str, obj1: Any, obj2: Any) -> list[ChangeOperation]:
     elif isinstance(obj1, list) and isinstance(obj2, list):
         # List diffing is complex for optimal patching.
         # Simple strategy: strict index comparison (replace/add/remove at end).
+        # We explicitly document this behavior as requested.
         len1 = len(obj1)
         len2 = len(obj2)
 

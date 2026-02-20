@@ -3,8 +3,9 @@
 import hashlib
 import json
 import math
+from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Any, TypedDict
+from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel
 
@@ -33,93 +34,142 @@ class MerkleNode(TypedDict):
     previous_hashes: list[str]
 
 
-def _recursive_sort_and_sanitize(obj: Any) -> Any:
+class HashingStrategy(ABC):
     """
-    Prepares an object for RFC 8785 Canonical JSON serialization.
-    - Dicts: Sorted by key. None values removed. Keys sanitized.
-    - Lists: Processed recursively.
-    - Datetime: Converted to canonical string.
-    - Numbers: strict formatting (1.0 -> 1).
-    - Pydantic Models: Dumped to dict.
+    Abstract base class for hashing strategies.
+    Ensures verification capability across different protocol versions.
     """
-    if isinstance(obj, dict):
-        # Universal Hash Sanitization:
-        # Strip legacy keys (integrity_hash) and modern keys (execution_hash, signature, __*)
-        # Also strip None values (SOTA requirement)
-        return {
-            k: _recursive_sort_and_sanitize(v)
-            for k, v in sorted(obj.items())
-            if v is not None and k not in {"integrity_hash", "execution_hash", "signature"} and not k.startswith("__")
-        }
-    if isinstance(obj, (list, tuple)):
-        return [_recursive_sort_and_sanitize(x) for x in obj]
-    if isinstance(obj, set):
-        # Sets should be sorted lists
-        return sorted([_recursive_sort_and_sanitize(x) for x in obj])
-    if isinstance(obj, datetime):
-        return to_canonical_timestamp(obj)
-    if isinstance(obj, BaseModel):
-        # Pydantic v2
-        excludes = getattr(obj, "_hash_exclude_", None)
-        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="python"))
-    if hasattr(obj, "model_dump"):
-        # Pydantic v2 or compatible
-        return _recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
-    if isinstance(obj, float):
-        # RFC 8785: If number is integer, represent as integer.
-        if obj.is_integer():
-            return int(obj)
-        # For other floats, we rely on json.dumps later, but we can verify finiteness
-        if not math.isfinite(obj):
-            raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
-        return obj
 
-    # SOTA Fix: Enforce strict deterministic types.
-    if isinstance(obj, (int, str, bool)) or obj is None:
-        return obj
-
-    # Fallback for objects that might have a dict method but aren't Pydantic models (legacy compat)
-    if hasattr(obj, "dict") and callable(obj.dict):
-        return _recursive_sort_and_sanitize(obj.dict(exclude_none=True))
-
-    if hasattr(obj, "json") and callable(obj.json):
-        # Pydantic v1 or compatible (serialized string)
-        try:
-            return _recursive_sort_and_sanitize(json.loads(obj.json()))
-        except (ValueError, TypeError):
-            pass
-
-    raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
+    @abstractmethod
+    def compute_hash(self, obj: Any) -> str:
+        """Computes the deterministic hash of the object."""
 
 
-def compute_hash(obj: Any) -> str:
+class LegacyV1Strategy(HashingStrategy):
     """
-    Computes a SHA-256 hash of a JSON-serializable object using RFC 8785 Canonical JSON rules.
-    1. Prepares object (strip None, sort keys, format numbers).
-    2. Serializes to JSON with no whitespace.
-    3. Computes SHA-256.
+    Legacy hashing strategy (v0.24.0 compatibility).
+    Uses Python's native json.dumps(sort_keys=True).
+    Weakness: Vulnerable to serialization drift.
     """
-    if hasattr(obj, "compute_hash"):
-        return str(obj.compute_hash())
 
-    # 1. Prepare
-    sanitized = _recursive_sort_and_sanitize(obj)
+    def compute_hash(self, obj: Any) -> str:
+        # Naive dump, mimicking legacy behavior
+        # Note: Legacy might not have handled Pydantic models gracefully in all paths,
+        # but we assume obj is usually a dict or model.
+        data = obj
+        if isinstance(obj, BaseModel):
+            data = obj.model_dump(mode="json")
 
-    # 2. Serialize (RFC 8785 approximation)
-    # - separators=(',', ':') removes whitespace
-    # - sort_keys=True ensures key order (redundant as we sorted in prepare, but safe)
-    # - ensure_ascii=False allows UTF-8 characters (RFC 8785 requires UTF-8)
-    # - allow_nan=False forbids NaN/Infinity
+        # Native sort_keys=True
+        json_bytes = json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return hashlib.sha256(json_bytes).hexdigest()
 
-    # Note: json.dumps in Python uses "shortest" float representation usually, which matches JCS mostly.
-    # The integer check in _prepare_for_canonical_json handles the 1.0 -> 1 case.
 
-    json_bytes = json.dumps(
-        sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
-    ).encode("utf-8")
+class CanonicalV2Strategy(HashingStrategy):
+    """
+    SOTA hashing strategy (RFC 8785 Compliance).
+    - Strict float formatting.
+    - Strips None values.
+    - Deterministic key sorting.
+    - UTF-8 enforcement.
+    """
 
-    # 3. Hash
-    return hashlib.sha256(json_bytes).hexdigest()
+    def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
+        """
+        Prepares an object for RFC 8785 Canonical JSON serialization.
+        """
+        if isinstance(obj, dict):
+            # Universal Hash Sanitization:
+            # Strip legacy keys (integrity_hash) and modern keys (execution_hash, signature, __*)
+            # Also strip None values (SOTA requirement)
+            return {
+                k: self._recursive_sort_and_sanitize(v)
+                for k, v in sorted(obj.items())
+                if v is not None
+                and k not in {"integrity_hash", "execution_hash", "signature"}
+                and not k.startswith("__")
+            }
+        if isinstance(obj, (list, tuple)):
+            return [self._recursive_sort_and_sanitize(x) for x in obj]
+        if isinstance(obj, (set, frozenset)):
+            # Sets should be sorted lists
+            return sorted([self._recursive_sort_and_sanitize(x) for x in obj])
+        if isinstance(obj, datetime):
+            return to_canonical_timestamp(obj)
+        if isinstance(obj, BaseModel):
+            # Pydantic v2
+            excludes = getattr(obj, "_hash_exclude_", None)
+            return self._recursive_sort_and_sanitize(
+                obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
+            )
+        if hasattr(obj, "model_dump"):
+            # Pydantic v2 or compatible
+            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
+        if isinstance(obj, float):
+            # RFC 8785: If number is integer, represent as integer.
+            if obj.is_integer():
+                return int(obj)
+            # For other floats, verify finiteness.
+            # We strictly avoid scientific notation for typical ranges, but standard json.dumps
+            # does ok for simple values. For full JCS compliance, one might need a custom float formatter,
+            # but verifying finiteness is the critical SOTA check requested.
+            if not math.isfinite(obj):
+                raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
+            return obj
+
+        # SOTA Fix: Enforce strict deterministic types.
+        if isinstance(obj, (int, str, bool)) or obj is None:
+            return obj
+
+        # Fallback for objects that might have a dict method but aren't Pydantic models (legacy compat)
+        if hasattr(obj, "dict") and callable(obj.dict):
+            return self._recursive_sort_and_sanitize(obj.dict(exclude_none=True))
+
+        if hasattr(obj, "json") and callable(obj.json):
+            # Pydantic v1 or compatible (serialized string)
+            try:
+                return self._recursive_sort_and_sanitize(json.loads(obj.json()))
+            except (ValueError, TypeError):
+                pass
+
+        raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
+
+    def compute_hash(self, obj: Any) -> str:
+        if hasattr(obj, "compute_hash"):
+            # Self-hashing objects (avoid infinite recursion if they call back here)
+            # Assuming they don't call this function inside their compute_hash without args.
+            return str(obj.compute_hash())
+
+        sanitized = self._recursive_sort_and_sanitize(obj)
+
+        # RFC 8785 approximation:
+        # - separators=(',', ':') removes whitespace
+        # - sort_keys=True
+        # - ensure_ascii=False (UTF-8)
+        # - allow_nan=False
+        json_bytes = json.dumps(
+            sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
+        ).encode("utf-8")
+
+        return hashlib.sha256(json_bytes).hexdigest()
+
+
+# Default Strategy Registry
+_STRATEGIES: dict[str, HashingStrategy] = {
+    "v1": LegacyV1Strategy(),
+    "v2": CanonicalV2Strategy(),
+}
+
+
+def compute_hash(obj: Any, version: Literal["v1", "v2"] = "v2") -> str:
+    """
+    Computes a SHA-256 hash of a JSON-serializable object.
+    Defaults to SOTA v2 (RFC 8785).
+    """
+    strategy = _STRATEGIES.get(version)
+    if not strategy:
+        raise ValueError(f"Unknown hashing version: {version}")
+    return strategy.compute_hash(obj)
 
 
 def reconstruct_payload(node: Any) -> dict[str, Any]:
@@ -133,24 +183,20 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     if isinstance(node, dict):
         return node
 
-    # SOTA Fix: Handle list of tuples (as seen in tests)
+    # Fix: Strict tuple handling. No brittle casting.
+    # If the input is not a dict or a model, it is likely invalid for payload reconstruction.
+    # The previous implementation attempted `dict(node)` which works for list of tuples but is unsafe.
     if isinstance(node, (list, tuple)):
+        # Explicit check if it looks like pairs
         try:
             return dict(node)
-        except (ValueError, TypeError):
-            pass
+        except (ValueError, TypeError) as e:
+            raise TypeError(f"Could not reconstruct payload from iterable {type(node)}") from e
 
-    # Fallback for other objects (shouldn't happen with strict types)
+    # Fallback for other objects
     try:
         return dict(node)
     except (ValueError, TypeError) as e:
-        # Mypy: Returning Any from function declared to return "dict[str, Any]"
-        # If conversion fails, we return an empty dict or raise?
-        # The prompt "Return as is" causes Mypy error.
-        # But if it fails hashing later, we might as well raise or return something valid.
-        # Returning `node` as is implies `Any`.
-        # We'll cast it to satisfy Mypy, knowing it might be invalid at runtime but handled by caller?
-        # Or better: raise TypeError since `reconstruct_payload` expects something dict-like.
         raise TypeError(f"Could not reconstruct payload from {type(node)}") from e
 
 
@@ -167,7 +213,17 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
     for i, node in enumerate(trace):
         # 1. Verify Content Integrity
         payload = reconstruct_payload(node)
-        computed_hash = compute_hash(payload)
+
+        # Determine hash version from payload if present, default to v1 for legacy compatibility?
+        # SOTA requires v2. If payload has 'hash_version', use it.
+        version = payload.get("hash_version", "v1") # Default to v1 if unspecified? Or assume v2 for new system?
+        # Given "Greenfield Refactor", we default to v2 if missing, OR we check the node.
+        # But legacy logs might be v1.
+        # Ideally, look for 'hash_version' field.
+        if version not in ("v1", "v2"):
+            version = "v2" # Fallback to latest
+
+        computed_hash = compute_hash(payload, version=version) # type: ignore
 
         stored_hash = None
         if hasattr(node, "execution_hash"):

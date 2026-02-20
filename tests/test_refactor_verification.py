@@ -177,7 +177,9 @@ def test_allowed_url() -> None:
 
     # Test subdomain allow
     # Using model_copy to update frozen instance
-    tool_sub = tool.model_copy(update={"url": "https://sub.api.coreason.com/v1"})
+    # Must provide HttpUrl object because model_copy doesn't run validation/coercion
+    from pydantic import HttpUrl
+    tool_sub = tool.model_copy(update={"url": HttpUrl("https://sub.api.coreason.com/v1")})
 
     flow_sub = LinearFlow(
         kind="LinearFlow",
@@ -198,13 +200,15 @@ def test_allowed_url() -> None:
 
 def test_schemeless_url_handling() -> None:
     """
-    Test that schemeless URLs (evil.com/google.com) are parsed correctly.
+    Test that tricky URLs (http://evil.com/google.com) are blocked.
+    Schemeless URLs are now rejected by Pydantic validation, so we test strict URL parsing.
     """
     gov = Governance(allowed_domains=["google.com"])
 
     # This URL looks like it might be google.com if naive parsing is used,
     # but strictly it is evil.com/google.com
-    tool = ToolCapability(name="TrickyTool", risk_level="standard", description="Tricky", url="evil.com/google.com")
+    # We must use http:// because HttpUrl requires scheme.
+    tool = ToolCapability(name="TrickyTool", risk_level="standard", description="Tricky", url="http://evil.com/google.com")
 
     flow = LinearFlow(
         kind="LinearFlow",
@@ -363,7 +367,8 @@ def test_strict_integrity() -> None:
     # We must construct payload exactly as reconstruct_payload does to get matching hashes.
     # reconstruct_payload adds 'attributes': {} and sorts 'previous_hashes'
 
-    data1_raw = {"node_id": "n1", "state": "success", "previous_hashes": []}
+    # SOTA: defaults to v2. We must be explicit or match default.
+    data1_raw = {"node_id": "n1", "state": "success", "previous_hashes": [], "hash_version": "v2"}
     # Use reconstruct_payload to normalize before hashing, to match verification logic
     payload1 = reconstruct_payload(data1_raw)
     h1 = compute_hash(payload1)
@@ -371,7 +376,7 @@ def test_strict_integrity() -> None:
     node1 = data1_raw.copy()
     node1["execution_hash"] = h1
 
-    data2_raw = {"node_id": "n2", "state": "success", "previous_hashes": [h1]}
+    data2_raw = {"node_id": "n2", "state": "success", "previous_hashes": [h1], "hash_version": "v2"}
     payload2 = reconstruct_payload(data2_raw)
     h2 = compute_hash(payload2)
 

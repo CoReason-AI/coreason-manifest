@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, HttpUrl, model_validator
 
 
 class Dependency(BaseModel):
@@ -24,10 +24,9 @@ class ToolCapability(BaseModel):
     name: str
     risk_level: Literal["safe", "standard", "critical"] = "standard"
     description: str | None = None
-    # From prompt description: "If risk_level == critical, strictly enforce..."
-    # Code snippet in prompt showed `requires_approval` too.
     requires_approval: bool = False
-    url: str | None = None
+    # SOTA Fix: Strict URL validation
+    url: HttpUrl | None = None
 
     @model_validator(mode="after")
     def validate_critical_description(self) -> "ToolCapability":
@@ -45,6 +44,6 @@ class ToolPack(BaseModel):
 
     kind: Literal["ToolPack"]
     namespace: str
-    tools: list[ToolCapability]  # Replaces list[str]
+    tools: list[ToolCapability]
     dependencies: list[Dependency]
     env_vars: list[str]

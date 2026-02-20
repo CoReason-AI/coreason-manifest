@@ -24,7 +24,7 @@ from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCat
 from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.gatekeeper import validate_policy
-from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash, reconstruct_payload
+from coreason_manifest.utils.integrity import CanonicalV2Strategy, compute_hash, reconstruct_payload
 
 # --- Mocks for Flow ---
 
@@ -33,13 +33,14 @@ def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]
     entry_point = nodes_list[0].id if nodes_list else "unknown"
     # Use "draft" status to allow unreachable nodes during testing of Gatekeeper policy.
     # "published" flows enforce strict DAG reachability via validate_dag.
-    return GraphFlow(
+    # Use model_construct for Graph to allow cycles/invalid topology during policy testing
+    return GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=Blackboard(variables={}, persistence=False),
-        graph=Graph(
+        graph=Graph.model_construct(
             nodes={n.id: n for n in nodes_list},
             edges=[Edge(source=s, target=t) for s, t in edges_list],
             entry_point=entry_point,
@@ -200,7 +201,8 @@ def test_integrity_sanitization() -> None:
         "nested": {"d": 4, "c": 3, "execution_hash": "nested_bad", "timestamp": dt},
     }
 
-    sanitized = _recursive_sort_and_sanitize(data)
+    strategy = CanonicalV2Strategy()
+    sanitized = strategy._recursive_sort_and_sanitize(data)
 
     # Check stripped keys
     assert "integrity_hash" not in sanitized

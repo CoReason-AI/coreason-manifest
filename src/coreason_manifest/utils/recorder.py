@@ -72,7 +72,7 @@ class BlackBoxRecorder:
             "duration_ms": duration_ms,
             "attributes": attributes,
             "previous_hashes": sorted(previous_hashes),
-            "hash_version": "v1",
+            "hash_version": "v2",
             "request_id": request_id,
             "root_request_id": root_request_id,
         }
