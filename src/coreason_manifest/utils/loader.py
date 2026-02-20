@@ -136,14 +136,14 @@ class Loader:
 
     @classmethod
     @validate_call
-    async def load(cls, source: str | Path | HttpUrl | AnyUrl, auto_heal: bool = True) -> Manifest:
+    async def aload(cls, source: str | Path | HttpUrl | AnyUrl, auto_heal: bool = True) -> Manifest:
         """
-        Loads a manifest from various sources, resolves references, and validates.
+        Asynchronously loads a manifest from various sources, resolves references, and validates.
         Wraps the process in an OTEL span.
         """
         tracer = trace.get_tracer(__name__)
 
-        with tracer.start_as_current_span("Loader.load", attributes={"source": str(source)}) as span:
+        with tracer.start_as_current_span("Loader.aload", attributes={"source": str(source)}) as span:
             # Determine base URI and fetch content
             content, base_uri = await cls._fetch_source(source)
 
@@ -201,6 +201,32 @@ class Loader:
 
             return manifest
 
+    @classmethod
+    def load(cls, source: str | Path | HttpUrl | AnyUrl, auto_heal: bool = True) -> Manifest:
+        """
+        Synchronously loads a manifest by bridging to the async `aload` method.
+        Intelligently handles event loop management.
+        """
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            # We are already in an async context, we must create a task or warn
+            # Technically, blocking the loop here is bad practice.
+            # But to support sync calls from sync wrappers inside async apps (like fastAPI without async def),
+            # we might need nest_asyncio or just error out.
+            # However, for CLI usage, there is no loop.
+            # For this SOTA implementation, if loop is running, we assume the user should have used aload.
+            # But we can try to run_until_complete if we weren't *inside* a callback.
+            # Actually, `run_until_complete` fails if loop is running.
+            raise RuntimeError(
+                "Async event loop is already running. Use 'await Loader.aload(...)' instead of 'Loader.load(...)'."
+            )
+        else:
+            return asyncio.run(cls.aload(source, auto_heal=auto_heal))
+
     @staticmethod
     async def _fetch_source(source: str | Path | HttpUrl | AnyUrl) -> tuple[str, str | Path]:
         source_str = str(source)
@@ -252,13 +278,7 @@ def load_flow_from_file(
     Synchronous wrapper for Loader.load to support legacy CLI/Tests.
     Ignores root_dir and allow_dynamic_execution for now as new loader handles it differently.
     """
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    manifest = loop.run_until_complete(Loader.load(path, auto_heal=True))
+    manifest = Loader.load(path, auto_heal=True)
     return manifest.flow
 
 

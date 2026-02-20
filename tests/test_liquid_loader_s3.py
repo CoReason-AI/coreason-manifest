@@ -35,7 +35,7 @@ async def test_loader_s3() -> None:
     mock_s3_client.get_object.return_value = mock_response
 
     with patch.dict("sys.modules", {"boto3": mock_boto3}):
-        manifest = await Loader.load(s3_uri)
+        manifest = await Loader.aload(s3_uri)
 
         assert isinstance(manifest.flow, LinearFlow)
         assert manifest.flow.kind == "LinearFlow"

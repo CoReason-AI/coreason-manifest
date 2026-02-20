@@ -7,6 +7,22 @@ from coreason_manifest.spec.interop.compliance import ComplianceReport, Remediat
 from coreason_manifest.utils.string_utils import levenshtein_distance
 
 
+def map_pydantic_type_to_python(pydantic_err_type: str) -> str:
+    """Translates internal Pydantic error signatures to human/LLM readable types."""
+    mapping = {
+        "string_type": "str",
+        "dict_type": "dict",
+        "list_type": "list",
+        "bool_type": "bool",
+        "int_type": "int",
+        "float_type": "float",
+        "missing": "Required Field",
+        "value_error.missing": "Required Field"
+    }
+    # Fallback to the raw string if not mapped, removing generic prefixes
+    return mapping.get(pydantic_err_type, pydantic_err_type.replace("type_error.", ""))
+
+
 class DiagnosisReport(BaseModel):
     """
     SOTA: Structured diagnosis of a validation error.
@@ -89,6 +105,9 @@ The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis 
         typ = e.get("type", "unknown")
         invalid_val = e.get("input", "unknown")
 
+        # Translate type
+        human_readable_type = map_pydantic_type_to_python(typ)
+
         suggested_fix = None
 
         if typ == "missing":
@@ -166,7 +185,7 @@ The parser encountered an error at `{self.diagnosis.json_path if self.diagnosis 
         diagnosis = DiagnosisReport(
             json_path=json_path,
             invalid_value=invalid_val,
-            expected_type=typ,
+            expected_type=human_readable_type,
             suggested_fix=suggested_fix
         )
 

@@ -1,4 +1,5 @@
 from typing import Any, ClassVar, cast
+import json
 
 from opentelemetry import trace
 from pydantic import BaseModel, ConfigDict, SecretStr
@@ -43,10 +44,44 @@ class ObservableModel(BaseModel):
             return "***"
         return data
 
+    def dump_for_telemetry(self) -> str:
+        """Safely dumps state for OTEL attributes, masking all secrets."""
+        # Pydantic v2 natively masks SecretStr if converted to JSON, but we ensure
+        # it is a pure string payload to prevent OTEL primitive type crashes.
+        dumped_dict = self.model_dump(
+            mode="json",
+            exclude_none=True,
+            # Force serialization of secrets to '**********'
+            round_trip=False
+        )
+        return json.dumps(dumped_dict)
+
+    def model_copy(self, *, update: dict[str, Any] | None = None, deep: bool = False, **kwargs: Any) -> "ObservableModel":
+        """Intercepts state cloning to emit an OTEL transition span."""
+
+        # Get tracer again or rely on module level. Module level is fine.
+        tracer = trace.get_tracer(__name__)
+
+        with tracer.start_as_current_span(f"{self.__class__.__name__}.transition") as span:
+            # Generate the new state
+            new_instance = super().model_copy(update=update, deep=deep, **kwargs)
+
+            # Record the exact diff in the span natively
+            if update:
+                span.set_attribute(
+                    "state.transition.diff",
+                    # Must stringify to JSON, OTEL attributes do not accept dicts natively
+                    json.dumps({k: str(v) for k, v in update.items()}, default=str)
+                )
+
+            return new_instance
+
     def __init__(self, **data: Any):
         """
         Wraps initialization in an OTEL span.
         """
+        tracer = trace.get_tracer(__name__)
+
         with tracer.start_as_current_span(
             f"{self.__class__.__name__}.__init__",
             attributes={
@@ -61,10 +96,6 @@ class ObservableModel(BaseModel):
                 # Maybe just record the ID if available.
                 if hasattr(self, "id"):
                     span.set_attribute("gen_ai.system", getattr(self, "id"))
-
-                # Optional: Record the full state diff (redacted)
-                # serialized_state = json.dumps(self.model_dump(), default=str)
-                # span.set_attribute("gen_ai.state", serialized_state)
 
             except Exception as e:
                 span.record_exception(e)

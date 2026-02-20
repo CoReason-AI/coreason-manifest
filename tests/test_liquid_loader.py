@@ -45,7 +45,7 @@ async def test_liquid_loader_remote_ref() -> None:
     mock_client_instance.__aexit__.return_value = None
 
     with patch("httpx.AsyncClient", return_value=mock_client_instance):
-        manifest = await Loader.load(manifest_md, auto_heal=True)
+        manifest = await Loader.aload(manifest_md, auto_heal=True)
 
         assert manifest.manifest_version == "v1"
         assert isinstance(manifest.flow, LinearFlow)

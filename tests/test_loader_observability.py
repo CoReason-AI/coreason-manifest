@@ -33,10 +33,10 @@ async def test_loader_trace() -> None:
     """
 
     with patch("opentelemetry.trace.get_tracer", return_value=tracer):
-        await Loader.load(manifest_str, auto_heal=True)
+        await Loader.aload(manifest_str, auto_heal=True)
 
     spans = exporter.get_finished_spans()
-    loader_span = next((s for s in spans if s.name == "Loader.load"), None)
+    loader_span = next((s for s in spans if s.name == "Loader.aload"), None)
     assert loader_span is not None
     assert loader_span.status.is_ok
 
@@ -69,10 +69,10 @@ async def test_loader_trace_with_auto_heal_event() -> None:
     """
 
     with patch("opentelemetry.trace.get_tracer", return_value=tracer):
-        await Loader.load(manifest_md, auto_heal=True)
+        await Loader.aload(manifest_md, auto_heal=True)
 
     spans = exporter.get_finished_spans()
-    loader_span = next((s for s in spans if s.name == "Loader.load"), None)
+    loader_span = next((s for s in spans if s.name == "Loader.aload"), None)
     assert loader_span is not None
 
     # Check for event
@@ -82,3 +82,23 @@ async def test_loader_trace_with_auto_heal_event() -> None:
     assert event is not None
     assert "mutations" in event.attributes
     assert "Stripped markdown code blocks" in event.attributes["mutations"]
+
+def test_sync_loader_load() -> None:
+    """Test sync Loader.load wrapper."""
+    manifest_str = """
+    {
+        "manifest_version": "v1",
+        "flow": {
+            "kind": "LinearFlow",
+            "metadata": {
+                "name": "sync-test",
+                "version": "1.0",
+                "description": "sync",
+                "tags": []
+            },
+            "sequence": []
+        }
+    }
+    """
+    manifest = Loader.load(manifest_str, auto_heal=True)
+    assert manifest.flow.metadata.name == "sync-test"
