@@ -24,7 +24,8 @@ def test_diff_metadata_resource() -> None:
     assert op.path == "/metadata/name"
     assert op.value == "B"
     # SOTA check
-    assert report.has_breaking is False # Metadata name change is arguably not breaking topology/governance, depending on policy.
+    # Metadata name change is arguably not breaking topology/governance, depending on policy.
+    assert report.has_breaking is False
     # But currently category defaults to FEATURE for resource changes unless mapped otherwise.
     # _determine_category returns RESOURCE for resource domain.
     # And has_breaking checks for "BREAKING".

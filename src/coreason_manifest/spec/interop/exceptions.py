@@ -6,12 +6,8 @@ class LineageIntegrityError(DomainValidationError):
     Raised when trace lineage integrity is compromised (e.g. orphaned requests).
     """
 
-    pass
 
-
-class SecurityJailViolation(DomainValidationError):
+class SecurityJailViolationError(DomainValidationError):
     """
     Raised when a security jail boundary is violated (e.g. path traversal, permission error).
     """
-
-    pass

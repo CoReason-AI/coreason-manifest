@@ -26,9 +26,9 @@ class MockFactory:
         visited: frozenset[int] | None = None,
         depth: int = 0,
     ) -> Any:
-        MAX_DEPTH = 10
+        max_depth = 10
 
-        if depth > MAX_DEPTH:
+        if depth > max_depth:
             return ""
 
         if not schema:

@@ -17,7 +17,7 @@ import yaml
 from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.interop.exceptions import SecurityJailViolation
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
 __all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
@@ -114,17 +114,17 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
 
             # Double check against jail root
             if not resolved_potential.is_relative_to(jail_root.resolve()):
-                 # This is a critical security violation if a module name resolves outside jail
-                 raise SecurityJailViolation(f"Security Error: Reference {fullname} escapes the root directory.")
+                # This is a critical security violation if a module name resolves outside jail
+                raise SecurityJailViolationError(f"Security Error: Reference {fullname} escapes the root directory.")
 
         except RuntimeError as e:
             # Symlink loop or similar
             if "Symlink" in str(e):
-                 raise SecurityJailViolation(f"Security Error: Symlink loop in {fullname}") from e
+                raise SecurityJailViolationError(f"Security Error: Symlink loop in {fullname}") from e
             return None
         except Exception:
-             # Other errors (e.g. invalid path chars) -> not found
-             return None
+            # Other errors (e.g. invalid path chars) -> not found
+            return None
 
         spec = None
         # Check for package (directory with __init__.py)
@@ -200,7 +200,7 @@ def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[str] 
 
             target_path = (root_dir / ref_path).resolve()
             if not target_path.is_relative_to(root_dir.resolve()):
-                raise SecurityJailViolation(f"Security Error: Reference {ref_path} escapes the root directory.")
+                raise SecurityJailViolationError(f"Security Error: Reference {ref_path} escapes the root directory.")
 
             seen.add(ref_path)
             try:
@@ -251,7 +251,7 @@ def load_flow_from_file(
         raise ValueError("Manifest content must be a dictionary.")
 
     if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
-        raise SecurityJailViolation(
+        raise SecurityJailViolationError(
             "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
         )
 
@@ -287,17 +287,19 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
         # Jail boundary check
         if not file_path.is_relative_to(root_dir.resolve()):
-            raise SecurityJailViolation(f"Security Error: Reference {file_ref} escapes the root directory.")
+            raise SecurityJailViolationError(f"Security Error: Reference {file_ref} escapes the root directory.")
 
         # Permission check: Reject world-writable files
         st = file_path.stat()
         if st.st_mode & stat.S_IWOTH:
-            raise SecurityJailViolation(f"Security Error: {file_ref} possesses unsafe world-writable permissions (S_IWOTH).")
+            raise SecurityJailViolationError(
+                f"Security Error: {file_ref} possesses unsafe world-writable permissions (S_IWOTH)."
+            )
 
     except FileNotFoundError:
-        raise ValueError(f"Agent file not found: {file_ref}")
+        raise ValueError(f"Agent file not found: {file_ref}") from None
     except RuntimeError as e:
-        raise SecurityJailViolation(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
+        raise SecurityJailViolationError(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
 
     # Explicit warning for audit logs
     warnings.warn(

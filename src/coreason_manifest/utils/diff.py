@@ -54,7 +54,7 @@ class SemanticPatchReport(BaseModel):
 
     changes: list[ChangeOperation]
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def has_breaking(self) -> bool:
         """

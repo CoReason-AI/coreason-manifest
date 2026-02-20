@@ -155,7 +155,8 @@ def test_diff_classification_via_context() -> None:
     new_graph_1 = Graph(nodes={"entry": entry_node, "A": node}, edges=[], entry_point="entry")
     new_flow_1 = base_flow.model_copy(update={"graph": new_graph_1})
 
-    diffs_1 = compare_flows(base_flow, new_flow_1)
+    report_1 = compare_flows(base_flow, new_flow_1)
+    diffs_1 = report_1.changes
 
     # Check that adding node "A" is a Topology mutation
     # Path: /graph/nodes/A
@@ -169,7 +170,8 @@ def test_diff_classification_via_context() -> None:
     new_graph_2 = Graph(nodes={"entry": entry_node, "A": new_node}, edges=[], entry_point="entry")
     new_flow_2 = new_flow_1.model_copy(update={"graph": new_graph_2})
 
-    diffs_2 = compare_flows(new_flow_1, new_flow_2)
+    report_2 = compare_flows(new_flow_1, new_flow_2)
+    diffs_2 = report_2.changes
 
     # Check that changing profile is Resource mutation
     # Path: /graph/nodes/A/profile
