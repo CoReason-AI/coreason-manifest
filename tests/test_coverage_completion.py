@@ -27,7 +27,7 @@ def test_loader_root_dir_mismatch(tmp_path: Path) -> None:
 kind: LinearFlow
 metadata:
   name: test
-  version: "1.0"
+  version: "1.0.0"
   description: test
   tags: []
 sequence: []
@@ -51,7 +51,7 @@ def test_loader_graph_flow(tmp_path: Path) -> None:
 kind: GraphFlow
 metadata:
   name: graph
-  version: "1.0"
+  version: "1.0.0"
   description: graph
   tags: []
 interface:
@@ -363,9 +363,10 @@ def test_governance_circuit_breaker_branches() -> None:
         check_circuit(node_id, cb, store)
 
     # 2. Open State, Expired
-    state.last_failure_time = time.time() - 200
+    new_state = state.model_copy(update={"last_failure_time": time.time() - 200})
+    store[node_id] = new_state
     check_circuit(node_id, cb, store)
-    assert state.state == "half-open"
+    assert store[node_id].state == "half-open"
 
     # 3. Open State, No Failure Time (Should raise)
     state = CircuitState(state="open", last_failure_time=None)

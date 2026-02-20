@@ -44,8 +44,12 @@ class FlowMetadata(CoreasonModel):
 
     name: str = Field(..., description="Name of the flow.", examples=["My Agent Flow"])
     version: SemanticVersion = Field(..., description="Semantic version.", examples=["1.0.0"])
-    description: str = Field(..., description="Description of what the flow does.", examples=["A flow that scrapes and summarizes."])
-    tags: list[str] = Field(default_factory=list, description="Tags for categorization.", examples=[["research", "scraper"]])
+    description: str = Field(
+        ..., description="Description of what the flow does.", examples=["A flow that scrapes and summarizes."]
+    )
+    tags: list[str] = Field(
+        default_factory=list, description="Tags for categorization.", examples=[["research", "scraper"]]
+    )
 
 
 class DataSchema(CoreasonModel):
@@ -58,7 +62,7 @@ class DataSchema(CoreasonModel):
     json_schema: dict[str, Any] | bool = Field(
         default_factory=dict,
         description="Full JSON Schema (Draft 7) definition for validation.",
-        examples=[{"type": "object", "properties": {"query": {"type": "string"}}}]
+        examples=[{"type": "object", "properties": {"query": {"type": "string"}}}],
     )
 
     @model_validator(mode="before")
@@ -144,7 +148,9 @@ class Edge(CoreasonModel):
 
     source: NodeID = Field(..., description="Source node ID.", examples=["start"])
     target: NodeID = Field(..., description="Target node ID.", examples=["end"])
-    condition: str | None = Field(None, description="Condition expression for traversal.", examples=["result == 'success'"])
+    condition: str | None = Field(
+        None, description="Condition expression for traversal.", examples=["result == 'success'"]
+    )
 
 
 class Graph(CoreasonModel):
@@ -298,12 +304,16 @@ class GraphFlow(CoreasonModel):
         return self
 
 
-class Manifest(RootModel):
+ManifestType = Annotated[LinearFlow | GraphFlow, Field(discriminator="kind")]
+
+
+class Manifest(RootModel[ManifestType]):
     """
     The Sovereign Domain Gatekeeper.
     Wrapper around any valid Flow type.
     """
-    root: Annotated[LinearFlow | GraphFlow, Field(discriminator="kind")]
+
+    root: ManifestType
 
     @classmethod
     def export_json_schema(cls) -> dict[str, Any]:

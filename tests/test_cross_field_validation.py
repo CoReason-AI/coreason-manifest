@@ -5,7 +5,7 @@ from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability
 
 
-def test_human_node_shadow_mode_requirements():
+def test_human_node_shadow_mode_requirements() -> None:
     """
     If interaction_mode is 'shadow', shadow_timeout_seconds is required.
     """
@@ -15,26 +15,28 @@ def test_human_node_shadow_mode_requirements():
             type="human",
             prompt="Shadow?",
             interaction_mode="shadow",
-            timeout_seconds=None
+            timeout_seconds=None,
             # Missing shadow_timeout_seconds
         )
     # Check that one of the errors contains our message
     errors = excinfo.value.errors()
     assert any("HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'" in e["msg"] for e in errors)
 
-def test_human_node_shadow_mode_valid():
+
+def test_human_node_shadow_mode_valid() -> None:
     h = HumanNode(
         id="h1",
         type="human",
         prompt="Shadow?",
         interaction_mode="shadow",
         shadow_timeout_seconds=60,
-        timeout_seconds=None
+        timeout_seconds=None,
     )
     assert h.interaction_mode == "shadow"
     assert h.shadow_timeout_seconds == 60
 
-def test_human_node_blocking_mode_invalid_field():
+
+def test_human_node_blocking_mode_invalid_field() -> None:
     """
     If interaction_mode is 'blocking', shadow_timeout_seconds should not be set.
     """
@@ -45,12 +47,13 @@ def test_human_node_blocking_mode_invalid_field():
             prompt="Block?",
             interaction_mode="blocking",
             shadow_timeout_seconds=60,
-            timeout_seconds=10
+            timeout_seconds=10,
         )
     errors = excinfo.value.errors()
     assert any("HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'" in e["msg"] for e in errors)
 
-def test_swarm_node_summarize_requires_aggregator():
+
+def test_swarm_node_summarize_requires_aggregator() -> None:
     """
     If reducer_function is 'summarize', aggregator_model is required.
     """
@@ -69,7 +72,8 @@ def test_swarm_node_summarize_requires_aggregator():
     errors = excinfo.value.errors()
     assert any("SwarmNode with reducer='summarize' requires an 'aggregator_model'" in e["msg"] for e in errors)
 
-def test_tool_critical_description():
+
+def test_tool_critical_description() -> None:
     """
     If risk_level is 'critical', description is required.
     """

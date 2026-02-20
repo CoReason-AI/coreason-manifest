@@ -26,15 +26,23 @@ class Audit(CoreasonModel):
 
 class CircuitBreaker(CoreasonModel):
     error_threshold_count: int = Field(..., description="Number of errors before opening the circuit.", examples=[5])
-    reset_timeout_seconds: int = Field(..., description="Seconds to wait before attempting half-open state.", examples=[60])
-    fallback_node_id: NodeID | None = Field(None, description="Optional node to jump to when circuit opens.", examples=["fallback_agent"])
+    reset_timeout_seconds: int = Field(
+        ..., description="Seconds to wait before attempting half-open state.", examples=[60]
+    )
+    fallback_node_id: NodeID | None = Field(
+        None, description="Optional node to jump to when circuit opens.", examples=["fallback_agent"]
+    )
 
 
 class ToolAccessPolicy(CoreasonModel):
-    risk_level: Literal["critical", "standard", "minimal"] = Field(..., description="Risk level.", examples=["standard"])
+    risk_level: Literal["critical", "standard", "minimal"] = Field(
+        ..., description="Risk level.", examples=["standard"]
+    )
     require_auth: bool | None = Field(None, description="Require authentication.", examples=[True])
     allowed_roles: list[str] | None = Field(
-        None, description="If None, allow all. If list, allow only these. Empty list implies deny-all.", examples=[["admin"]]
+        None,
+        description="If None, allow all. If list, allow only these. Empty list implies deny-all.",
+        examples=[["admin"]],
     )
 
     @model_validator(mode="before")
@@ -59,12 +67,30 @@ class Governance(CoreasonModel):
     rate_limit_rpm: int | None = Field(None, description="Rate limit in requests per minute.", examples=[60])
     timeout_seconds: int | None = Field(None, description="Global execution timeout.", examples=[300])
     cost_limit_usd: float | None = Field(None, description="Cost limit in USD.", examples=[10.0])
-    safety: Safety | None = Field(None, description="Safety configuration.", examples=[{"input_filtering": True, "pii_redaction": True, "content_safety": "high"}])
-    audit: Audit | None = Field(None, description="Audit configuration.", examples=[{"trace_retention_days": 7, "log_payloads": True}])
-    circuit_breaker: CircuitBreaker | None = Field(None, description="Circuit breaker policy.", examples=[{"error_threshold_count": 3, "reset_timeout_seconds": 30}])
-    tool_policy: dict[ToolID, ToolAccessPolicy] | None = Field(None, description="Per-tool access policies.", examples=[{"web_search": {"risk_level": "standard", "require_auth": False}}])
-    default_tool_policy: ToolAccessPolicy | None = Field(None, description="Default tool policy.", examples=[{"risk_level": "minimal", "require_auth": False}])
-    allowed_domains: list[str] = Field(default_factory=list, description="Allowed external domains.", examples=[["example.com"]])
+    safety: Safety | None = Field(
+        None,
+        description="Safety configuration.",
+        examples=[{"input_filtering": True, "pii_redaction": True, "content_safety": "high"}],
+    )
+    audit: Audit | None = Field(
+        None, description="Audit configuration.", examples=[{"trace_retention_days": 7, "log_payloads": True}]
+    )
+    circuit_breaker: CircuitBreaker | None = Field(
+        None,
+        description="Circuit breaker policy.",
+        examples=[{"error_threshold_count": 3, "reset_timeout_seconds": 30}],
+    )
+    tool_policy: dict[ToolID, ToolAccessPolicy] | None = Field(
+        None,
+        description="Per-tool access policies.",
+        examples=[{"web_search": {"risk_level": "standard", "require_auth": False}}],
+    )
+    default_tool_policy: ToolAccessPolicy | None = Field(
+        None, description="Default tool policy.", examples=[{"risk_level": "minimal", "require_auth": False}]
+    )
+    allowed_domains: list[str] = Field(
+        default_factory=list, description="Allowed external domains.", examples=[["example.com"]]
+    )
 
     @field_validator("allowed_domains")
     @classmethod
@@ -149,16 +175,14 @@ def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, 
 
     new_failure_count = state.failure_count + 1
     new_last_failure_time = time.time()
-    new_status = state.state
+    new_status: Literal["open", "closed", "half-open"] = state.state
 
     if new_failure_count >= policy.error_threshold_count:
         new_status = "open"
 
-    new_state = state.model_copy(update={
-        "failure_count": new_failure_count,
-        "last_failure_time": new_last_failure_time,
-        "state": new_status
-    })
+    new_state = state.model_copy(
+        update={"failure_count": new_failure_count, "last_failure_time": new_last_failure_time, "state": new_status}
+    )
     state_store[node_id] = new_state
 
 
@@ -168,9 +192,5 @@ def record_success(node_id: str, state_store: dict[str, CircuitState]) -> None:
     """
     state = state_store.get(node_id)
     if state:
-        new_state = state.model_copy(update={
-            "state": "closed",
-            "failure_count": 0,
-            "last_failure_time": None
-        })
+        new_state = state.model_copy(update={"state": "closed", "failure_count": 0, "last_failure_time": None})
         state_store[node_id] = new_state

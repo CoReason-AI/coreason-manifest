@@ -1,7 +1,7 @@
 from coreason_manifest.spec.core.flow import Manifest
 
 
-def test_json_schema_export():
+def test_json_schema_export() -> None:
     """
     Test that Manifest.export_json_schema() returns a valid JSON Schema dict.
     """

@@ -10,14 +10,15 @@ class VocabularyTestModel(BaseModel):
     node: NodeID | None = None
 
 
-def test_semantic_version_valid():
+def test_semantic_version_valid() -> None:
     m = VocabularyTestModel(version="1.0.0")
     assert m.version == "1.0.0"
 
     m = VocabularyTestModel(version="0.1.2")
     assert m.version == "0.1.2"
 
-def test_semantic_version_invalid():
+
+def test_semantic_version_invalid() -> None:
     with pytest.raises(ValidationError) as excinfo:
         VocabularyTestModel(version="v1.0")
     assert "String should match pattern" in str(excinfo.value)
@@ -28,12 +29,14 @@ def test_semantic_version_invalid():
     with pytest.raises(ValidationError):
         VocabularyTestModel(version="1.a.2")
 
-def test_git_sha_valid():
+
+def test_git_sha_valid() -> None:
     valid_sha = "a" * 40
     m = VocabularyTestModel(sha=valid_sha)
     assert m.sha == valid_sha
 
-def test_git_sha_invalid():
+
+def test_git_sha_invalid() -> None:
     with pytest.raises(ValidationError):
         VocabularyTestModel(sha="bad")  # Too short
 
@@ -43,11 +46,13 @@ def test_git_sha_invalid():
     with pytest.raises(ValidationError):
         VocabularyTestModel(sha="a" * 41)  # Too long
 
-def test_node_id_valid():
+
+def test_node_id_valid() -> None:
     m = VocabularyTestModel(node="valid_node_1")
     assert m.node == "valid_node_1"
 
-def test_node_id_invalid():
+
+def test_node_id_invalid() -> None:
     with pytest.raises(ValidationError):
         VocabularyTestModel(node="invalid node")  # Space not allowed
 
