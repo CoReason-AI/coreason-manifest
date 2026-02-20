@@ -33,15 +33,12 @@ class Canonicalizer:
         - Datetime: ISO formatted.
         - Floats: Integer check.
         - None: Stripped (SOTA requirement from context, though RFC 8785 handles null).
-          (The previous code stripped None. I will continue to strip None for consistency with 'SOTA' context unless RFC says otherwise.
-           Actually, RFC 8785 treats null as null. But the prompt said 'Do not rely on Pydantic...'.
-           The previous code had 'exclude_none=True'. I'll stick to 'exclude_none=True' logic for Pydantic/dicts as it's cleaner for manifests.)
         """
         if isinstance(obj, BaseModel):
             # Pydantic v2
             # Use model_dump to get a dict, then process recursively
             # exclude_none=True is a common SOTA practice for manifests to keep hash stable across defaults
-            return self._prepare_object(obj.model_dump(exclude_none=True, mode='python'))
+            return self._prepare_object(obj.model_dump(exclude_none=True, mode="python"))
 
         if isinstance(obj, dict):
             # Sort keys and recurse
@@ -79,7 +76,7 @@ class Canonicalizer:
         # RFC 8785:
         # - UTF-8 (ensure_ascii=False)
         # - No whitespace (separators=(',', ':'))
-        # - Sorted keys (handled in _prepare_object for stability, but json.dumps sort_keys=True is also good as safeguard)
+        # - Sorted keys (handled in _prepare_object, but sort_keys=True is a safeguard)
         return json.dumps(
             prepared,
             ensure_ascii=False,
@@ -100,8 +97,83 @@ class Canonicalizer:
 canonicalizer = Canonicalizer()
 
 
-def compute_hash(obj: Any) -> str:
+def compute_hash(obj: Any, **_kwargs: Any) -> str:
     """
     Convenience function to compute the canonical hash of an object.
+    Accepts kwargs to maintain compatibility with legacy tests passing 'version'.
     """
     return canonicalizer.compute_hash(obj)
+
+
+def reconstruct_payload(node: Any) -> dict[str, Any]:
+    """
+    Reconstructs the payload dictionary used for hashing from a NodeExecution object.
+    Automatically handles SOTA fields by using model_dump if available.
+    """
+    if isinstance(node, BaseModel):
+        return node.model_dump()
+
+    if isinstance(node, dict):
+        return node
+
+    # Fix: Strict tuple handling. No brittle casting.
+    if isinstance(node, (list, tuple)):
+        # Explicit check if it looks like pairs
+        try:
+            return dict(node)
+        except (ValueError, TypeError) as e:
+            raise TypeError(f"Could not reconstruct payload from iterable {type(node)}") from e
+
+    # Fallback for other objects
+    try:
+        return dict(node)
+    except (ValueError, TypeError) as e:
+        raise TypeError(f"Could not reconstruct payload from {type(node)}") from e
+
+
+def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
+    """
+    Verifies the cryptographic integrity of a DAG trace.
+    Strictly enforcing NodeExecution structure.
+    """
+    if not trace:
+        return False
+
+    verified_hashes = set()
+
+    for i, node in enumerate(trace):
+        # 1. Verify Content Integrity
+        payload = reconstruct_payload(node)
+
+        # SOTA: Always use canonicalizer v2 (Greenfield)
+        computed_hash = compute_hash(payload)
+
+        stored_hash = None
+        if hasattr(node, "execution_hash"):
+            stored_hash = node.execution_hash
+        elif isinstance(node, dict):
+            stored_hash = node.get("execution_hash")
+
+        if not stored_hash or stored_hash != computed_hash:
+            return False
+
+        # 2. Extract declared parents
+        previous_hashes = payload.get("previous_hashes", [])
+
+        # 3. Verify Linkage
+        if not previous_hashes:
+            # Genesis Node
+            if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
+                return False
+        else:
+            # Child Node
+            for prev_hash in previous_hashes:
+                if trusted_root_hash and prev_hash == trusted_root_hash:
+                    continue
+                if prev_hash not in verified_hashes:
+                    return False
+
+        # 4. Add to verified set
+        verified_hashes.add(stored_hash)
+
+    return True

@@ -1,15 +1,18 @@
 import pytest
-from coreason_manifest.utils.resolver import ResolutionContext, CircularReferenceError
+from typing import Any, cast
 
-def test_dag_cycle_detection():
+from coreason_manifest.utils.resolver import CircularReferenceError, ResolutionContext
+
+
+def test_dag_cycle_detection() -> None:
     # Mock loader
-    mock_files = {
+    mock_files: dict[str, Any] = {
         "a": {"$ref": "b"},
         "b": {"$ref": "a"},
     }
 
-    def loader(uri):
-        return mock_files[uri]
+    def loader(uri: str) -> dict[str, Any]:
+        return cast(dict[str, Any], mock_files[uri])
 
     ctx = ResolutionContext(loader)
 
@@ -40,19 +43,19 @@ def test_dag_cycle_detection():
     # Path: b -> a -> b
     assert "b -> a -> b" in str(excinfo.value)
 
-def test_dag_diamond():
+def test_dag_diamond() -> None:
     # Diamond is fine: Root -> B, Root -> C, B -> D, C -> D
     # But here we test resolution
-    mock_files = {
+    mock_files: dict[str, Any] = {
         "root": {"b": {"$ref": "d"}, "c": {"$ref": "d"}},
         "d": {"val": 1}
     }
 
     call_count = 0
-    def loader(uri):
+    def loader(uri: str) -> dict[str, Any]:
         nonlocal call_count
         call_count += 1
-        return mock_files[uri]
+        return cast(dict[str, Any], mock_files[uri])
 
     ctx = ResolutionContext(loader)
     # Start resolving root content manually

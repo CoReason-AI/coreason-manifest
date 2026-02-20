@@ -10,7 +10,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any, Protocol, cast, Type
+from typing import Any, Literal, Protocol, cast
 
 import yaml
 from pydantic import ValidationError
@@ -18,13 +18,21 @@ from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.exceptions import (
     ManifestSyntaxError,
-    SecurityException,
+    SecurityExceptionError,
 )
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
-from coreason_manifest.utils.resolver import ResolutionContext, CircularReferenceError
+from coreason_manifest.utils.resolver import CircularReferenceError, ResolutionContext
 
-__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
+__all__ = [
+    "CircularReferenceError",
+    "ManifestSyntaxError",
+    "RuntimeSecurityWarning",
+    "SecurityExceptionError",
+    "SecurityViolationError",
+    "load_agent_from_ref",
+    "load_flow_from_file",
+]
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
@@ -42,10 +50,10 @@ class ExceptionTranslator:
 
     def __exit__(
         self,
-        exc_type: Type[BaseException] | None,
+        exc_type: type[BaseException] | None,
         exc_value: BaseException | None,
         traceback: Any,
-    ) -> bool:
+    ) -> Literal[False]:
         if exc_type is None:
             return False
 
@@ -74,13 +82,13 @@ class ExceptionTranslator:
             ) from exc_value
 
         if isinstance(exc_value, CircularReferenceError):
-            raise SecurityException(
+            raise SecurityExceptionError(
                 message=str(exc_value),
                 context={"cycle_path": exc_value.path}
             ) from exc_value
 
         if isinstance(exc_value, SecurityViolationError):
-            raise SecurityException(
+            raise SecurityExceptionError(
                 message=exc_value.message,
                 context={"code": exc_value.code}
             ) from exc_value
@@ -293,7 +301,7 @@ def load_flow_from_file(
 
         # 5. Dynamic Code Scan
         if _scan_for_dynamic_references(resolved_data) and not allow_dynamic_execution:
-            raise SecurityException(
+            raise SecurityExceptionError(
                 "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
             )
 

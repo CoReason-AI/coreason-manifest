@@ -114,7 +114,7 @@ def _generate_diff(
                 # Otherwise, propagate the current next_domain.
                 # However, if 'recurse_domain_override' was passed to US (e.g. we are inside 'nodes'),
                 # we must use it for OUR children (the agents).
-                effective_domain = recurse_domain_override if recurse_domain_override else next_domain
+                effective_domain = recurse_domain_override or next_domain
                 changes.extend(_generate_diff(new_path, obj1[key], obj2[key], effective_domain, next_override))
 
     elif isinstance(obj1, list) and isinstance(obj2, list):
@@ -125,7 +125,7 @@ def _generate_diff(
 
         # For lists (like 'sequence' or 'edges'), the list itself inherited a domain.
         # If 'recurse_domain_override' is set (e.g. for sequence items), use it for recursion.
-        child_domain = recurse_domain_override if recurse_domain_override else domain
+        child_domain = recurse_domain_override or domain
 
         for i in range(max(len1, len2)):
             new_path = f"{path}/{i}"

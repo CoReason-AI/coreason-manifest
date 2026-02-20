@@ -39,7 +39,7 @@ class ManifestSyntaxError(ValueError):
         super().__init__(f"{message} (at {json_path})")
 
 
-class GovernanceViolation(ValueError):
+class GovernanceViolationError(ValueError):
     """
     Raised when a governance policy is violated.
     """
@@ -50,7 +50,7 @@ class GovernanceViolation(ValueError):
         super().__init__(f"Governance Policy Violation: {message} (at {json_path})")
 
 
-class SecurityException(ValueError):
+class SecurityExceptionError(ValueError):
     """
     Raised when a security constraint is violated (e.g., cycle, bomb, illegal access).
     """

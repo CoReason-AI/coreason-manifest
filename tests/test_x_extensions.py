@@ -1,12 +1,14 @@
-import pytest
+from typing import Any
+
 from coreason_manifest.spec.common_base import CommonBase
 
-def test_x_extensions_funnel():
+
+def test_x_extensions_funnel() -> None:
     class MyModel(CommonBase):
         field: str
 
     # Extra field
-    data = {"field": "val", "x-custom": 123, "random": "stuff"}
+    data: dict[str, Any] = {"field": "val", "x-custom": 123, "random": "stuff"}
 
     model = MyModel(**data)
 

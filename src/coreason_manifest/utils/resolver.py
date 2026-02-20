@@ -1,6 +1,8 @@
 # src/coreason_manifest/utils/resolver.py
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
+
 
 class CircularReferenceError(Exception):
     """Raised when a circular reference is detected during resolution."""
@@ -92,11 +94,11 @@ class ResolutionContext:
                 if uri:
                     # Remote Ref
                     # In real implementation, resolve 'uri' against 'base_uri'.
-                    full_ref_key = uri + (fragment if fragment else "")
+                    full_ref_key = uri + (fragment or "")
 
                     # Cycle Detection (Remote + Fragment)
                     if full_ref_key in self._active_refs:
-                         raise CircularReferenceError(self._active_refs + [full_ref_key])
+                         raise CircularReferenceError([*self._active_refs, full_ref_key])
 
                     # Check Cache (for document level)
                     # We cache resolved DOCUMENTS, not fragments?
@@ -106,7 +108,7 @@ class ResolutionContext:
                         doc = self._cache[uri]
                     else:
                         if uri in self._active_refs: # Check if document itself is being resolved
-                             raise CircularReferenceError(self._active_refs + [uri])
+                             raise CircularReferenceError([*self._active_refs, uri])
 
                         self._active_refs.append(uri)
                         try:
@@ -128,27 +130,26 @@ class ResolutionContext:
 
                     return doc
 
-                else:
-                    # Local Ref (uri is empty)
-                    full_ref_key = f"{base_uri}{fragment}"
+                # Local Ref (uri is empty)
+                full_ref_key = f"{base_uri}{fragment}"
 
-                    if full_ref_key in self._cache:
-                        return self._cache[full_ref_key]
+                if full_ref_key in self._cache:
+                    return self._cache[full_ref_key]
 
-                    if full_ref_key in self._active_refs:
-                        raise CircularReferenceError(self._active_refs + [full_ref_key])
+                if full_ref_key in self._active_refs:
+                    raise CircularReferenceError([*self._active_refs, full_ref_key])
 
-                    self._active_refs.append(full_ref_key)
-                    try:
-                        # Resolve pointer in current root_doc
-                        target = self._resolve_pointer(root_doc, fragment)
+                self._active_refs.append(full_ref_key)
+                try:
+                    # Resolve pointer in current root_doc
+                    target = self._resolve_pointer(root_doc, fragment)
 
-                        # Recurse to resolve the target
-                        result = self.resolve(target, base_uri=base_uri, root_doc=root_doc)
-                        self._cache[full_ref_key] = result
-                        return result
-                    finally:
-                         self._active_refs.pop()
+                    # Recurse to resolve the target
+                    result = self.resolve(target, base_uri=base_uri, root_doc=root_doc)
+                    self._cache[full_ref_key] = result
+                    return result
+                finally:
+                     self._active_refs.pop()
 
             # Recurse for children
             return {k: self.resolve(v, base_uri, root_doc) for k, v in data.items()}
