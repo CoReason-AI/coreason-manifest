@@ -72,11 +72,8 @@ def test_stream_packet_strict_envelope() -> None:
     Duck typing is removed; explicit 'op' is required.
     """
     # 1. Valid Error Envelope
-    payload = {
-        "op": "error",
-        "p": {"code": 500, "message": "Failure", "severity": "high"}
-    }
-    container = PacketContainer(packet=payload)
+    payload = {"op": "error", "p": {"code": 500, "message": "Failure", "severity": "high"}}
+    container = PacketContainer.model_validate({"packet": payload})
     packet = container.packet
     # Packet is StreamErrorEnvelope
     assert packet.op == "error"
@@ -90,11 +87,11 @@ def test_stream_packet_strict_envelope() -> None:
     # 2. Invalid Payload (Old Duck Typing Format) -> Should Fail
     raw_payload = {"code": 500, "message": "Failure", "severity": "high"}
     with pytest.raises(ValidationError):
-        PacketContainer(packet=raw_payload)
+        PacketContainer.model_validate({"packet": raw_payload})
 
     # 3. Delta Envelope
     delta_payload = {"op": "delta", "p": "some content"}
-    container_delta = PacketContainer(packet=delta_payload)
+    container_delta = PacketContainer.model_validate({"packet": delta_payload})
     assert container_delta.packet.op == "delta"
     assert container_delta.packet.p == "some content"
 

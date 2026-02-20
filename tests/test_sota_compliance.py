@@ -134,7 +134,9 @@ def test_telemetry_request_auto_rooting() -> None:
     # Case C: Parent and Root -> OK
     parent_id = str(uuid4())
     root_id = str(uuid4())
-    req2 = AgentRequest(agent_id="test", session_id="s1", inputs={}, parent_request_id=parent_id, root_request_id=root_id)
+    req2 = AgentRequest(
+        agent_id="test", session_id="s1", inputs={}, parent_request_id=parent_id, root_request_id=root_id
+    )
     assert req2.parent_request_id == parent_id
     assert req2.root_request_id == root_id
 

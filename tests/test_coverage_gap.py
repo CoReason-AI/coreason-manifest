@@ -264,10 +264,10 @@ def test_loader_spec_none_coverage() -> None:
     assert finder.find_spec("foo") is None  # jail_root not set
 
     # ".." check
-    from coreason_manifest.utils.loader import sandbox_context, SecurityViolationError
+    from coreason_manifest.utils.loader import SecurityViolationError, sandbox_context
 
     with sandbox_context(Path(".")):
-        with pytest.raises(SecurityViolationError, match="Security Error: Reference ..foo escapes"):
+        with pytest.raises(SecurityViolationError, match=r"Security Error: Reference ..foo escapes"):
             finder.find_spec("..foo")
         # line 119: init_py is file -> create dummy init
         # line 126: module_py is file
