@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Literal, Self
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -33,7 +33,7 @@ class AgentRequest(BaseModel):
     # Versioning
     hash_version: Literal["v1"] = Field(default="v1", description="Versioning for integrity strategies.")
 
-    def create_child(self, metadata: dict[str, Any]) -> "AgentRequest":
+    def create_child(self, metadata: dict[str, Any]) -> Self:
         return self.model_copy(
             update={
                 "request_id": str(uuid4()),
