@@ -215,6 +215,7 @@ class HumanNode(Node):
                     ),
                 )
 
+        # SIM102: Combine nested if statements
         if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
             raise DomainValidationError(
                 message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
