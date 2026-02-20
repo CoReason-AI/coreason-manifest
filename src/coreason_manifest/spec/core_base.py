@@ -56,7 +56,9 @@ class ObservableModel(BaseModel):
         )
         return json.dumps(dumped_dict)
 
-    def model_copy(self, *, update: dict[str, Any] | None = None, deep: bool = False, **kwargs: Any) -> "ObservableModel":
+    def model_copy(
+        self, *, update: dict[str, Any] | None = None, deep: bool = False, **kwargs: Any
+    ) -> "ObservableModel":
         """Intercepts state cloning to emit an OTEL transition span."""
 
         # Get tracer again or rely on module level. Module level is fine.
