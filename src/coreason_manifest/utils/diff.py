@@ -106,9 +106,7 @@ def _generate_diff(
                 next_domain = "governance"
 
             if key not in obj1:
-                changes.append(
-                    _create_mutation(op="add", path=new_path, value=obj2[key], domain=next_domain)
-                )
+                changes.append(_create_mutation(op="add", path=new_path, value=obj2[key], domain=next_domain))
             elif key not in obj2:
                 changes.append(_create_mutation(op="remove", path=new_path, domain=next_domain))
             else:
@@ -117,9 +115,7 @@ def _generate_diff(
                 # However, if 'recurse_domain_override' was passed to US (e.g. we are inside 'nodes'),
                 # we must use it for OUR children (the agents).
                 effective_domain = recurse_domain_override if recurse_domain_override else next_domain
-                changes.extend(
-                    _generate_diff(new_path, obj1[key], obj2[key], effective_domain, next_override)
-                )
+                changes.extend(_generate_diff(new_path, obj1[key], obj2[key], effective_domain, next_override))
 
     elif isinstance(obj1, list) and isinstance(obj2, list):
         # List diffing is complex for optimal patching.
@@ -134,22 +130,17 @@ def _generate_diff(
         for i in range(max(len1, len2)):
             new_path = f"{path}/{i}"
             if i < len1 and i < len2:
-                changes.extend(
-                    _generate_diff(new_path, obj1[i], obj2[i], child_domain, None)
-                )
+                changes.extend(_generate_diff(new_path, obj1[i], obj2[i], child_domain, None))
             elif i >= len1:
                 # Add item. This is a structural change to the list, so use 'domain'.
-                changes.append(
-                    _create_mutation(op="add", path=new_path, value=obj2[i], domain=domain)
-                )
+                changes.append(_create_mutation(op="add", path=new_path, value=obj2[i], domain=domain))
             else:
                 pass
 
         # Correct handling of removals:
         if len1 > len2:
             changes.extend(
-                _create_mutation(op="remove", path=f"{path}/{i}", domain=domain)
-                for i in range(len1 - 1, len2 - 1, -1)
+                _create_mutation(op="remove", path=f"{path}/{i}", domain=domain) for i in range(len1 - 1, len2 - 1, -1)
             )
     else:
         # Primitive replacement

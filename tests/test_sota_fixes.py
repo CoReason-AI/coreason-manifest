@@ -3,6 +3,7 @@ import json
 import pytest
 
 from coreason_manifest.spec.core.flow import (
+    AnyNode,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -20,6 +21,7 @@ from coreason_manifest.utils.integrity import LegacyV1Strategy
 # Pillar 1: Integrity
 # ------------------------------------------------------------------------
 
+
 def test_legacy_v1_unicode_handling() -> None:
     """
     Directive: LegacyV1Strategy must use ensure_ascii=False.
@@ -32,6 +34,7 @@ def test_legacy_v1_unicode_handling() -> None:
     json_bytes_utf8 = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
 
     import hashlib
+
     expected_hash = hashlib.sha256(json_bytes_utf8).hexdigest()
 
     actual_hash = strategy.compute_hash(data)
@@ -45,9 +48,11 @@ def test_legacy_v1_unicode_handling() -> None:
 
     assert actual_hash == expected_hash, f"LegacyV1Strategy mismatch. Expected {expected_hash}, got {actual_hash}"
 
+
 # ------------------------------------------------------------------------
 # Pillar 3: Graph Topology (Draft Cycles)
 # ------------------------------------------------------------------------
+
 
 def test_draft_flow_allows_cycles() -> None:
     """
@@ -56,12 +61,9 @@ def test_draft_flow_allows_cycles() -> None:
     # A simple cycle: A -> B -> A
     nodes: dict[str, AnyNode] = {
         "A": AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={}),
-        "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={})
+        "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={}),
     }
-    edges = [
-        Edge(source="A", target="B"),
-        Edge(source="B", target="A")
-    ]
+    edges = [Edge(source="A", target="B"), Edge(source="B", target="A")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
 
@@ -72,10 +74,11 @@ def test_draft_flow_allows_cycles() -> None:
         metadata=FlowMetadata(name="cycle", version="1.0", description="desc", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
-        graph=graph
+        graph=graph,
     )
 
     assert flow.status == "draft"
+
 
 def test_published_flow_forbids_cycles() -> None:
     """
@@ -83,21 +86,14 @@ def test_published_flow_forbids_cycles() -> None:
     """
     nodes: dict[str, AnyNode] = {
         "A": AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={}),
-        "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={})
+        "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={}),
     }
-    edges = [
-        Edge(source="A", target="B"),
-        Edge(source="B", target="A")
-    ]
+    edges = [Edge(source="A", target="B"), Edge(source="B", target="A")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
 
     # We must provide definitions for p1 profile validation (status=published triggers strict checks)
-    defs = FlowDefinitions(
-        profiles={
-            "p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)
-        }
-    )
+    defs = FlowDefinitions(profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)})
 
     with pytest.raises(ValueError, match="Topological fracture"):
         GraphFlow(
@@ -107,12 +103,14 @@ def test_published_flow_forbids_cycles() -> None:
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
             definitions=defs,
-            graph=graph
+            graph=graph,
         )
+
 
 # ------------------------------------------------------------------------
 # Pillar 5: Governance (Allowed Domains)
 # ------------------------------------------------------------------------
+
 
 def test_governance_allowed_domains_cleanup() -> None:
     """
@@ -128,9 +126,11 @@ def test_governance_allowed_domains_cleanup() -> None:
     # Ensure raw inputs are gone
     assert "https://example.com/api/v1" not in gov.allowed_domains
 
+
 # ------------------------------------------------------------------------
 # Pillar 4: Diff Classification
 # ------------------------------------------------------------------------
+
 
 def test_diff_classification_via_context() -> None:
     """
@@ -144,7 +144,7 @@ def test_diff_classification_via_context() -> None:
         metadata=FlowMetadata(name="diff", version="1.0", description="desc", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
-        graph=Graph(nodes={}, edges=[], entry_point="entry")
+        graph=Graph(nodes={}, edges=[], entry_point="entry"),
     )
 
     # 1. Add a Node (Topology Change)

@@ -672,12 +672,12 @@ def test_flow_entry_point_missing() -> None:
 def test_flow_cycle_detection_unreachable() -> None:
     # spec/core/flow.py (raise ValueError("Cycle detected..."))
     from coreason_manifest.spec.core.flow import (
+        DataSchema,
         Edge,
+        FlowInterface,
+        FlowMetadata,
         Graph,
         GraphFlow,
-        FlowMetadata,
-        FlowInterface,
-        DataSchema,
     )
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
