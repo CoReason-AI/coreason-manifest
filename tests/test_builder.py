@@ -91,7 +91,7 @@ def test_graph_builder() -> None:
 
 
 def test_linear_builder_invalid() -> None:
-    # Empty sequence is invalid
+    # Empty sequence is invalid because FlowBuilder calls validate_flow() which enforces it.
     builder = NewLinearFlow("Invalid")
     with pytest.raises(ValueError, match="Validation failed"):
         builder.build()
@@ -100,7 +100,18 @@ def test_linear_builder_invalid() -> None:
 def test_graph_builder_invalid() -> None:
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
-    with pytest.raises(ValueError, match="Validation failed"):
+    # This triggers "Entry point 'missing_entry_point' not found" because
+    # build() sets default entry point if empty?
+    # Actually, if nodes empty, entry_point defaults to "missing_entry_point"?
+    # No, logic says `entry_point = self._entry_point or (next(iter(self._nodes)) ... else "missing_entry_point")`
+    # So it becomes "missing_entry_point".
+    # Then `validate_dag` runs (if published? no, draft).
+    # Wait, `validate_dag` checks edge integrity ALWAYS.
+    # `if self.graph.entry_point not in node_ids: raise ValueError(...)`
+    # So it raises "Entry point 'missing_entry_point' not found in nodes."
+    # The original test expected "Validation failed".
+    # I will update the match string.
+    with pytest.raises(ValueError, match="Entry point 'missing_entry_point' not found in nodes"):
         builder.build()
 
 
@@ -299,14 +310,7 @@ def test_builder_graph_missing_entry_point() -> None:
     builder = NewGraphFlow("Empty Graph")
     # No nodes added
 
-    # Should build with "missing_entry_point" as entry_point
-    # (And fail validation if we checked validity, but we just want to cover the line)
-    # But validate_flow will be called.
-    # Graph validation checks if entry_point exists in nodes.
-    # "missing_entry_point" is not in nodes (which is empty).
-    # So it should raise ValueError.
-
-    with pytest.raises(ValueError, match="Validation failed"):
+    with pytest.raises(ValueError, match="Entry point 'missing_entry_point' not found in nodes"):
         builder.build()
 
 

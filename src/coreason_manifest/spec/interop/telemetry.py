@@ -46,7 +46,7 @@ class NodeExecution(BaseModel):
     tracestate: str | None = Field(default=None, description="W3C Trace Context: tracestate header")
 
     # --- VERITAS INTEGRITY RESTORATION ---
-    hash_version: Literal["v1"] = Field(default="v1", description="Versioning for the hashing strategy.")
+    hash_version: Literal["v1", "v2"] = Field(default="v2", description="Versioning for the hashing strategy.")
     execution_hash: Annotated[str | None, Field(description="SHA-256 hash of inputs+outputs+config.")] = None
     previous_hashes: list[str] = Field(
         default_factory=list, description="Hashes of preceding executions (DAG parents)."

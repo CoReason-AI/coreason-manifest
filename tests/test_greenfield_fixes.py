@@ -21,7 +21,7 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.utils.integrity import _recursive_sort_and_sanitize, compute_hash
+from coreason_manifest.utils.integrity import CanonicalV2Strategy, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
 
 
@@ -158,14 +158,15 @@ def test_compute_hash_pydantic_exclusion() -> None:
 
     # Ensure integrity_hash would change hash if included
     # We can verify _recursive_sort_and_sanitize logic
-    sanitized = _recursive_sort_and_sanitize(m)
+    strategy = CanonicalV2Strategy()
+    sanitized = strategy._recursive_sort_and_sanitize(m)
     assert "integrity_hash" not in sanitized
     assert "signature" not in sanitized
     assert sanitized["name"] == "test"
 
 
 class MockDumpable:
-    def model_dump(self, exclude_none: bool = True) -> dict[str, int]:
+    def model_dump(self, exclude_none: bool = True, mode: str = "json") -> dict[str, int]:  # noqa: ARG002
         if exclude_none:
             return {"a": 1}
         return {"a": 1}

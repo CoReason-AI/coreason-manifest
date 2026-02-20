@@ -304,6 +304,7 @@ def test_dag_integrity_dict_nodes() -> None:
     from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 
     # 1. Genesis dict
+    # SOTA: Set hash_version="v2" explicitly to match default compute_hash strategy
     n1_dict = {
         "node_id": "n1",
         "state": "COMPLETED",
@@ -312,6 +313,7 @@ def test_dag_integrity_dict_nodes() -> None:
         "timestamp": "2023-01-01T00:00:00",
         "duration_ms": 1.0,
         "previous_hashes": [],
+        "hash_version": "v2",
     }
     # Compute execution_hash for it
     payload_n1 = reconstruct_payload(n1_dict)
@@ -326,6 +328,7 @@ def test_dag_integrity_dict_nodes() -> None:
         "timestamp": "2023-01-01T00:00:01",
         "duration_ms": 1.0,
         "previous_hashes": [n1_dict["execution_hash"]],
+        "hash_version": "v2",
     }
     payload_n2 = reconstruct_payload(n2_dict)
     n2_dict["execution_hash"] = compute_hash(payload_n2)
@@ -348,6 +351,7 @@ def test_dag_child_links_to_trusted_root() -> None:
         "timestamp": "2023-01-01T00:00:00",
         "duration_ms": 1.0,
         "previous_hashes": [root_hash],
+        "hash_version": "v2",
     }
     payload_n1 = reconstruct_payload(n1_dict)
     n1_dict["execution_hash"] = compute_hash(payload_n1)

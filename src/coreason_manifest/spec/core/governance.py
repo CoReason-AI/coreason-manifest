@@ -72,7 +72,28 @@ class Governance(BaseModel):
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:
-        return [d.lower().rstrip(".") for d in v]
+        # SOTA Fix: Enforce strict canonicalization (RFC 8785 / IDNA 2008)
+        from urllib.parse import urlparse
+
+        from coreason_manifest.utils.net_utils import canonicalize_domain
+
+        cleaned = []
+        for d in v:
+            # SOTA Fix: Extract host from URL-like strings to prevent policy bypass via paths/schemes.
+            # Handle "https://example.com/api" -> "example.com"
+            # Handle "example.com/api" -> "example.com"
+            candidate = d
+            if "://" in candidate:
+                parsed = urlparse(candidate)
+                candidate = parsed.hostname or candidate
+            elif "/" in candidate:
+                # Schemeless path heuristic
+                parsed = urlparse(f"http://{candidate}")
+                candidate = parsed.hostname or candidate
+
+            cleaned.append(canonicalize_domain(candidate))
+
+        return cleaned
 
 
 class CircuitState(BaseModel):

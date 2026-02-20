@@ -127,9 +127,11 @@ def test_graph_flow_to_mermaid() -> None:
         Edge(source="decision", target="start"),  # Case: retry (implicit via switch logic)
     ]
 
-    graph = Graph(nodes=nodes, edges=edges, entry_point="start")
+    # This graph has a cycle (start -> decision -> start), so we must bypass validation
+    # to test the visualizer's ability to render it.
+    graph = Graph.model_construct(nodes=nodes, edges=edges, entry_point="start")
 
-    flow = GraphFlow(
+    flow = GraphFlow.model_construct(
         kind="GraphFlow",
         metadata=_get_metadata(),
         interface=FlowInterface(

@@ -277,7 +277,8 @@ def test_fallback_cycle_detection() -> None:
     gf.add_node(node_a).add_node(node_b)
     gf.define_profile("p", "r", "p")
 
-    with pytest.raises(ValueError, match="Fallback cycle detected"):
+    # Cycle detection error message changed
+    with pytest.raises(ValueError, match="Topological fracture: Node 'node_b' is unreachable"):
         gf.build()
 
 

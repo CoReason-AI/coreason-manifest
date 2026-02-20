@@ -145,6 +145,94 @@ class Graph(BaseModel):
     edges: list[Edge]
     entry_point: str = Field(..., description="The ID of the starting node.")
 
+    @model_validator(mode="after")
+    def validate_graph_structure(self) -> "Graph":
+        """
+        Validates internal graph consistency.
+        Always enforced (Node ID matching).
+        Dangling edges are allowed in DRAFT mode (enforced by parent Flow or verify_integrity).
+        """
+        # 1. Key/ID Consistency
+        for key, node in self.nodes.items():
+            if key != node.id:
+                raise ValueError(f"Graph Integrity Error: Node key '{key}' does not match Node ID '{node.id}'")
+
+        return self
+
+    def verify_integrity(self, strict: bool = True) -> None:
+        """
+        Verifies full structural integrity (Reachability, Dangling Edges).
+        Strict mode (Published) enforces no dangling edges and full reachability.
+        """
+        node_ids = set(self.nodes.keys())
+
+        # 1. Edge Integrity (Dangling Checks)
+        if strict:
+            for i, edge in enumerate(self.edges):
+                if edge.source not in node_ids:
+                    raise ValueError(f"Edge {i} source '{edge.source}' not found in nodes.")
+                if edge.target not in node_ids:
+                    raise ValueError(f"Edge {i} target '{edge.target}' not found in nodes.")
+
+            if self.entry_point not in node_ids:
+                raise ValueError(f"Entry point '{self.entry_point}' not found in nodes.")
+
+        # 2. Cycle Detection (Strict Only)
+        # SOTA Directive: Moved from model_validator to allow cycles in Draft mode.
+        if strict:
+            adj_cycle: dict[str, list[str]] = {nid: [] for nid in node_ids}
+            in_degree: dict[str, int] = dict.fromkeys(node_ids, 0)
+
+            for edge in self.edges:
+                if edge.source in node_ids and edge.target in node_ids:
+                    adj_cycle[edge.source].append(edge.target)
+                    in_degree[edge.target] += 1
+
+            queue_cycle = [n for n in node_ids if in_degree[n] == 0]
+            visited_count = 0
+
+            while queue_cycle:
+                u = queue_cycle.pop(0)
+                visited_count += 1
+                for v in adj_cycle[u]:
+                    in_degree[v] -= 1
+                    if in_degree[v] == 0:
+                        queue_cycle.append(v)
+
+            if visited_count != len(node_ids):
+                cyclic_nodes = [n for n, deg in in_degree.items() if deg > 0]
+                raise ValueError(
+                    f"Topological fracture: Cycle detected involving nodes: {sorted(cyclic_nodes)}. "
+                    "Execution graphs must be strictly acyclic."
+                )
+
+        # 3. Reachability (Strict Only)
+        if strict:
+            reachable = {self.entry_point}
+            queue = [self.entry_point]
+
+            # Build adjacency
+            adj: dict[str, list[str]] = {nid: [] for nid in node_ids}
+            for edge in self.edges:
+                # We assume edges are valid if we passed step 1
+                if edge.source in node_ids and edge.target in node_ids:
+                    adj[edge.source].append(edge.target)
+
+            while queue:
+                curr = queue.pop(0)
+                for neighbor in adj[curr]:
+                    if neighbor not in reachable:
+                        reachable.add(neighbor)
+                        queue.append(neighbor)
+
+            unreachable = node_ids - reachable
+            if unreachable:
+                first_unreachable = sorted(unreachable)[0]
+                raise ValueError(
+                    f"Topological fracture: Node '{first_unreachable}' is unreachable from entry point "
+                    f"'{self.entry_point}'. Path: /graph/nodes/{first_unreachable}"
+                )
+
 
 class FlowDefinitions(BaseModel):
     """
@@ -249,4 +337,14 @@ class GraphFlow(BaseModel):
         if self.status == "draft":
             return self
         validate_integrity(self.definitions, self.graph.nodes.values())
+        return self
+
+    @model_validator(mode="after")
+    def enforce_graph_integrity(self) -> "GraphFlow":
+        """
+        Enforces strict integrity if published.
+        Calls Graph.verify_integrity(strict=True).
+        """
+        is_published = self.status == "published"
+        self.graph.verify_integrity(strict=is_published)
         return self
