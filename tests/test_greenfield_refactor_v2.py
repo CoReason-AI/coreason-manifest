@@ -50,7 +50,7 @@ def test_human_node_mutual_exclusion() -> None:
             prompt="test",
             interaction_mode="shadow",
             shadow_timeout_seconds=300,
-            timeout_seconds=300, # Invalid
+            timeout_seconds=300,  # Invalid
         )
 
     # 2. Blocking mode with shadow_timeout_seconds -> Error
@@ -62,7 +62,7 @@ def test_human_node_mutual_exclusion() -> None:
             prompt="test",
             interaction_mode="blocking",
             timeout_seconds=300,
-            shadow_timeout_seconds=300, # Invalid
+            shadow_timeout_seconds=300,  # Invalid
         )
 
 
@@ -92,7 +92,7 @@ def test_domain_validation_error_remediation() -> None:
             metadata={},
             type="human",
             prompt="test",
-            timeout_seconds=None, # Valid for shadow
+            timeout_seconds=None,  # Valid for shadow
             interaction_mode="shadow",
             shadow_timeout_seconds=None,  # Missing required field for shadow mode
         )
