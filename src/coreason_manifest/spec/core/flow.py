@@ -21,6 +21,7 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.interop.compliance import RemediationAction
 
 # Polymorphic Node Type
 AnyNode = Annotated[
@@ -111,10 +112,15 @@ class DataSchema(BaseModel):
                 # and if it returns a repaired schema, use it.
 
                 # 3. Raise DomainValidationError with context
-                # For now, we just ensure we are using the new exception type and acknowledging the
-                # healing architecture. The 'repair_config' would be passed to the remediation
-                # strategy in a real implementation.
-                raise DomainValidationError(message=final_error_msg) from e
+                # Package repair intent as requested in Fix 3
+                raise DomainValidationError(
+                    message=final_error_msg,
+                    remediation=RemediationAction(
+                        type="semantic_repair",
+                        description="Route payload to LLM for syntactic repair of the JSON Schema.",
+                        patch_data=_repair_config.model_dump(),
+                    ),
+                ) from e
             except Exception as e:
                 raise DomainValidationError(f"Invalid JSON Schema definition: {e}") from e
 

@@ -156,14 +156,16 @@ class HumanNode(Node):
         """
         if isinstance(data, dict):
             # Check timeout_seconds
-            if "timeout_seconds" in data and data["timeout_seconds"] == -1:
+            val_timeout = data.get("timeout_seconds")
+            if val_timeout in (-1, "-1"):
                 logger.warning(
                     "Deprecation Warning: Magic number '-1' detected in 'timeout_seconds'. Coercing to 'infinite'."
                 )
                 data["timeout_seconds"] = "infinite"
 
             # Check shadow_timeout_seconds
-            if "shadow_timeout_seconds" in data and data["shadow_timeout_seconds"] == -1:
+            val_shadow = data.get("shadow_timeout_seconds")
+            if val_shadow in (-1, "-1"):
                 logger.warning(
                     "Deprecation Warning: Magic number '-1' detected in 'shadow_timeout_seconds'. "
                     "Coercing to 'infinite'."
@@ -177,27 +179,31 @@ class HumanNode(Node):
             raise DomainValidationError(
                 message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
                 remediation=RemediationAction(
-                    type="prune_node",  # Or update_node if supported, but defaulting to JSON patch on the node
+                    type="update_field",
                     target_node_id=self.id,
                     description="Set 'shadow_timeout_seconds' to a valid value.",
-                    patch_data={
-                        "op": "add",
-                        "path": f"/graph/nodes/{self.id}/shadow_timeout_seconds",
-                        "value": 300,
-                    },
+                    patch_data=[
+                        {
+                            "op": "add",
+                            "path": f"/graph/nodes/{self.id}/shadow_timeout_seconds",
+                            "value": 300,
+                        }
+                    ],
                 ),
             )
         if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
             raise DomainValidationError(
                 message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
                 remediation=RemediationAction(
-                    type="prune_node",  # Using generic patch mechanism
+                    type="update_field",
                     target_node_id=self.id,
                     description="Remove 'shadow_timeout_seconds'.",
-                    patch_data={
-                        "op": "remove",
-                        "path": f"/graph/nodes/{self.id}/shadow_timeout_seconds",
-                    },
+                    patch_data=[
+                        {
+                            "op": "remove",
+                            "path": f"/graph/nodes/{self.id}/shadow_timeout_seconds",
+                        }
+                    ],
                 ),
             )
         return self
@@ -251,11 +257,13 @@ class SwarmNode(Node):
     @model_validator(mode="before")
     @classmethod
     def coerce_magic_numbers(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "max_concurrency" in data and data["max_concurrency"] == -1:
-            logger.warning(
-                "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'."
-            )
-            data["max_concurrency"] = "infinite"
+        if isinstance(data, dict):
+            val = data.get("max_concurrency")
+            if val in (-1, "-1"):
+                logger.warning(
+                    "Deprecation Warning: Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'."
+                )
+                data["max_concurrency"] = "infinite"
         return data
 
     @model_validator(mode="after")
@@ -264,14 +272,16 @@ class SwarmNode(Node):
             raise DomainValidationError(
                 message="SwarmNode with reducer='summarize' requires an 'aggregator_model'.",
                 remediation=RemediationAction(
-                    type="prune_node",  # Or update/patch
+                    type="update_field",
                     target_node_id=self.id,
                     description="Add a default 'aggregator_model'.",
-                    patch_data={
-                        "op": "add",
-                        "path": f"/graph/nodes/{self.id}/aggregator_model",
-                        "value": "gpt-4-turbo",  # Reasonable default
-                    },
+                    patch_data=[
+                        {
+                            "op": "add",
+                            "path": f"/graph/nodes/{self.id}/aggregator_model",
+                            "value": "gpt-4-turbo",  # Reasonable default
+                        }
+                    ],
                 ),
             )
         return self

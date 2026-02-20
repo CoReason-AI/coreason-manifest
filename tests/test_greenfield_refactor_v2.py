@@ -127,3 +127,6 @@ def test_topology_tolerance_and_gatekeeper() -> None:
     assert orphan_reports[0].severity == "warning"
     assert orphan_reports[0].remediation is not None
     assert orphan_reports[0].remediation.type == "prune_node"
+    # Ensure patch data is a list (list of patches for node + edges)
+    assert isinstance(orphan_reports[0].remediation.patch_data, list)
+    assert orphan_reports[0].remediation.patch_data[0]["op"] == "remove"

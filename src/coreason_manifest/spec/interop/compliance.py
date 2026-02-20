@@ -31,7 +31,7 @@ class RemediationAction(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    type: Literal["add_guard_node", "whitelist_domain", "prune_node"]
+    type: Literal["add_guard_node", "whitelist_domain", "prune_node", "update_field", "semantic_repair"]
     target_node_id: str | None = None
     format: Literal["json_patch", "merge_patch"] = "json_patch"
     patch_data: list[dict[str, Any]] | dict[str, Any]

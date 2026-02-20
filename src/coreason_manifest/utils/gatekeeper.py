@@ -271,6 +271,19 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             is_cycle = node_cycle_map.get(node_id, False)
             structure_type = "cyclic island" if is_cycle else "island"
 
+            # SOTA Fix 1: The "Dangling Edge" Trap
+            # We must remove edges connected to this node to preserve referential integrity.
+            edge_indices_to_remove = []
+            for idx, edge in enumerate(flow.graph.edges):
+                if edge.source == node.id or edge.target == node.id:
+                    edge_indices_to_remove.append(idx)
+
+            # Sort descending to keep indices valid during removal if applied sequentially
+            edge_indices_to_remove.sort(reverse=True)
+
+            patch_list = [{"op": "remove", "path": f"/graph/nodes/{node.id}"}]
+            patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in edge_indices_to_remove])
+
             if risk_reasons:
                 # Critical Violation: Dangerous Unreachable Code
                 reports.append(
@@ -291,8 +304,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             type="prune_node",
                             target_node_id=node.id,
                             format="json_patch",
-                            patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
-                            description=f"Remove dangerous unreachable node '{node.id}'",
+                            patch_data=patch_list,
+                            description=f"Remove dangerous unreachable node '{node.id}' and connected edges.",
                         ),
                     )
                 )
@@ -315,8 +328,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             type="prune_node",
                             target_node_id=node.id,
                             format="json_patch",
-                            patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
-                            description=f"Tree Shake: Remove dead code node '{node.id}'",
+                            patch_data=patch_list,
+                            description=f"Tree Shake: Remove dead code node '{node.id}' and connected edges.",
                         ),
                     )
                 )
