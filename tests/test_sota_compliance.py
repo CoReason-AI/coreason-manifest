@@ -113,11 +113,12 @@ def test_topology_utility_island_unsafe() -> None:
 
     topology_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topology_errors) >= 1
-    # island1 is unsafe and unreachable. island2 is safe and unreachable (no error for island2).
-
-    unsafe_errors = [r for r in topology_errors if r.node_id == "island1"]
-    assert len(unsafe_errors) == 1
-    assert "computer_use" in unsafe_errors[0].message
+    # island1 is unsafe and unreachable. island2 is safe and unreachable.
+    # New logic: aggregated into one report.
+    report = topology_errors[0]
+    assert "island1" in report.details["dangerous_nodes"]
+    assert "island2" in report.details["safe_nodes"]
+    assert "computer_use" in report.details["risk_details"]["island1"]
 
 
 def test_telemetry_request_auto_rooting() -> None:
@@ -306,8 +307,11 @@ def test_topology_utility_island_acyclic_unsafe() -> None:
 
     topo_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topo_errors) == 1
-    assert topo_errors[0].node_id == "unsafe"
-    assert topo_errors[0].details["structure"] == "island"
+
+    # SOTA Fix: Aggregated reporting
+    report = topo_errors[0]
+    assert "unsafe" in report.details["dangerous_nodes"]
+    assert report.details["risk_details"]["unsafe"] is not None
 
 
 def test_integrity_reconstruct_payload_fallback() -> None:
@@ -345,4 +349,5 @@ def test_topology_utility_island_code_exec() -> None:
     # Expect error about code_execution
     topo_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topo_errors) == 1
-    assert "code_execution" in topo_errors[0].message
+    assert "code_island" in topo_errors[0].details["dangerous_nodes"]
+    assert "code_execution" in topo_errors[0].details["risk_details"]["code_island"]
