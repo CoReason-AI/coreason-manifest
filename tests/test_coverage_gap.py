@@ -708,3 +708,112 @@ def test_flow_cycle_detection_unreachable() -> None:
         graph=graph,
     )
     assert flow.status == "published"
+
+
+def test_loader_resolve_refs_complex() -> None:
+    """Test recursive $ref resolution in loader."""
+    from pathlib import Path
+    import tempfile
+    import yaml
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+
+        # main.yaml -> nested ref -> list ref -> leaf
+        main = {
+            "kind": "LinearFlow",
+            "metadata": {"name": "main", "version": "1.0.0", "description": "d", "tags": []},
+            "interface": {"inputs": {"json_schema": {"type": "object"}}, "outputs": {"json_schema": {"type": "object"}}},
+            "sequence": [
+                {"$ref": "step1.yaml"}
+            ],
+            "definitions": {
+                "shared": {"$ref": "shared.yaml"}
+            }
+        }
+
+        step1 = {
+            "id": "s1",
+            "type": "agent",
+            "metadata": {},
+            "profile": {"role": "tester", "persona": "p", "reasoning": {"type": "standard", "model": "gpt-4"}},
+            "tools": []
+        }
+
+        shared = {"key": "value"}
+
+        (p / "main.yaml").write_text(yaml.dump(main))
+        (p / "step1.yaml").write_text(yaml.dump(step1))
+        (p / "shared.yaml").write_text(yaml.dump(shared))
+
+        flow = load_flow_from_file(str(p / "main.yaml"))
+        # Verify resolution
+        assert flow.sequence[0].id == "s1"
+        # Since definitions is not part of LinearFlow model, it might be dropped if extra="ignore".
+        # But we validated that load_flow_from_file parsed it successfully.
+
+        # Test circular dependency
+        (p / "cycle1.yaml").write_text(yaml.dump({"$ref": "cycle2.yaml"}))
+        (p / "cycle2.yaml").write_text(yaml.dump({"$ref": "cycle1.yaml"}))
+
+        with pytest.raises(RecursionError, match="Circular dependency detected"):
+            # We call the internal resolver or mock load_flow to hit just this part?
+            # Or construct a flow that points to cycle1.
+            cycle_flow = main.copy()
+            cycle_flow["sequence"] = [{"$ref": "cycle1.yaml"}]
+            (p / "cycle_main.yaml").write_text(yaml.dump(cycle_flow))
+            load_flow_from_file(str(p / "cycle_main.yaml"))
+
+
+def test_loader_execution_exception_propagation() -> None:
+    """Verify that exceptions during module execution are propagated correctly as ValueErrors."""
+    import tempfile
+    from coreason_manifest.utils.loader import load_agent_from_ref
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        (p / "fail.py").write_text("raise RuntimeError('Boom')")
+
+        with pytest.raises(ValueError, match="Failed to execute agent code"):
+             load_agent_from_ref("fail.py:Agent", root_dir=p)
+
+
+def test_loader_dynamic_ref_recursion() -> None:
+    """Cover list recursion in _scan_for_dynamic_references."""
+    import yaml
+    import tempfile
+    from pathlib import Path
+    from coreason_manifest.utils.loader import load_flow_from_file, SecurityViolationError
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        # Manifest with dynamic ref inside a list
+        manifest = {
+            "kind": "LinearFlow",
+            "metadata": {"name": "test", "version": "1.0.0", "description": "d", "tags": []},
+            "interface": {"inputs": {}, "outputs": {}},
+            "sequence": [
+                "unsafe.py:Agent"
+            ],
+            "definitions": {}
+        }
+        (p / "list_unsafe.yaml").write_text(yaml.dump(manifest))
+
+        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+            load_flow_from_file(str(p / "list_unsafe.yaml"), allow_dynamic_execution=False)
+
+        # Manifest with dynamic ref inside a nested dict
+        manifest_dict = {
+             "kind": "LinearFlow",
+            "metadata": {"name": "test", "version": "1.0.0", "description": "d", "tags": []},
+            "interface": {"inputs": {}, "outputs": {}},
+            "sequence": [],
+            "definitions": {
+                "agent": "unsafe.py:Agent"
+            }
+        }
+        (p / "dict_unsafe.yaml").write_text(yaml.dump(manifest_dict))
+
+        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+            load_flow_from_file(str(p / "dict_unsafe.yaml"), allow_dynamic_execution=False)
