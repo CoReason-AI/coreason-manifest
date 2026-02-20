@@ -34,11 +34,13 @@ class AgentRequest(BaseModel):
     hash_version: Literal["v1"] = Field(default="v1", description="Versioning for integrity strategies.")
 
     def create_child(self, metadata: dict[str, Any]) -> "AgentRequest":
-        return self.model_copy(update={
-            "request_id": str(uuid4()),
-            "parent_request_id": self.request_id,
-            "metadata": metadata,
-        })
+        return self.model_copy(
+            update={
+                "request_id": str(uuid4()),
+                "parent_request_id": self.request_id,
+                "metadata": metadata,
+            }
+        )
 
     @model_validator(mode="before")
     @classmethod

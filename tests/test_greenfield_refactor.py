@@ -82,7 +82,7 @@ def test_stream_packet_strict_envelope() -> None:
 
     # Verify frozen
     with pytest.raises(ValidationError, match="frozen"):
-        packet.p.code = 200 # type: ignore
+        packet.p.code = 200  # type: ignore
 
     # 2. Invalid Payload (Old Duck Typing Format) -> Should Fail
     raw_payload = {"code": 500, "message": "Failure", "severity": "high"}
