@@ -256,7 +256,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         all_nodes = set(flow.graph.nodes.keys())
         unreachable = all_nodes - reachable
 
-        # 5c. Fail Open but Guarded
+        # 5c. Fail Open but Guarded (SOTA: Tree Shaking Policy)
         for node_id in unreachable:
             node = flow.graph.nodes[node_id]
             caps = get_capabilities(node)
@@ -268,10 +268,11 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             if "code_execution" in caps:
                 risk_reasons.append("code_execution")
 
-            if risk_reasons:
-                is_cycle = node_cycle_map.get(node_id, False)
-                structure_type = "cyclic island" if is_cycle else "island"
+            is_cycle = node_cycle_map.get(node_id, False)
+            structure_type = "cyclic island" if is_cycle else "island"
 
+            if risk_reasons:
+                # Critical Violation: Dangerous Unreachable Code
                 reports.append(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
@@ -292,6 +293,30 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             format="json_patch",
                             patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
                             description=f"Remove dangerous unreachable node '{node.id}'",
+                        ),
+                    )
+                )
+            else:
+                # Warning: Dead Code (Tree Shaking Candidate)
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                        severity="warning",
+                        message=(
+                            f"Topology Warning: Node '{node.id}' is unreachable ({structure_type}). "
+                            "It contains no high-risk capabilities but adds noise."
+                        ),
+                        node_id=node.id,
+                        details={
+                            "component": "unreachable",
+                            "structure": structure_type,
+                        },
+                        remediation=RemediationAction(
+                            type="prune_node",
+                            target_node_id=node.id,
+                            format="json_patch",
+                            patch_data={"op": "remove", "path": f"/graph/nodes/{node.id}"},
+                            description=f"Tree Shake: Remove dead code node '{node.id}'",
                         ),
                     )
                 )
