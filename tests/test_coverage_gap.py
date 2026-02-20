@@ -778,7 +778,7 @@ def test_loader_execution_exception_propagation() -> None:
         (p / "fail.py").write_text("raise RuntimeError('Boom')")
 
         with pytest.raises(ValueError, match="Failed to execute agent code"):
-             load_agent_from_ref("fail.py:Agent", root_dir=p)
+            load_agent_from_ref("fail.py:Agent", root_dir=p)
 
 
 def test_loader_dynamic_ref_recursion() -> None:
@@ -797,10 +797,8 @@ def test_loader_dynamic_ref_recursion() -> None:
             "kind": "LinearFlow",
             "metadata": {"name": "test", "version": "1.0.0", "description": "d", "tags": []},
             "interface": {"inputs": {}, "outputs": {}},
-            "sequence": [
-                "unsafe.py:Agent"
-            ],
-            "definitions": {}
+            "sequence": ["unsafe.py:Agent"],
+            "definitions": {},
         }
         (p / "list_unsafe.yaml").write_text(yaml.dump(manifest))
 
@@ -809,13 +807,11 @@ def test_loader_dynamic_ref_recursion() -> None:
 
         # Manifest with dynamic ref inside a nested dict
         manifest_dict = {
-             "kind": "LinearFlow",
+            "kind": "LinearFlow",
             "metadata": {"name": "test", "version": "1.0.0", "description": "d", "tags": []},
             "interface": {"inputs": {}, "outputs": {}},
             "sequence": [],
-            "definitions": {
-                "agent": "unsafe.py:Agent"
-            }
+            "definitions": {"agent": "unsafe.py:Agent"},
         }
         (p / "dict_unsafe.yaml").write_text(yaml.dump(manifest_dict))
 
@@ -826,9 +822,11 @@ def test_loader_dynamic_ref_recursion() -> None:
 def test_loader_security_escapes() -> None:
     """Test path traversal checks in loader."""
     import tempfile
-    import yaml
     from pathlib import Path
-    from coreason_manifest.utils.loader import load_flow_from_file, SecurityViolationError, load_agent_from_ref
+
+    import yaml
+
+    from coreason_manifest.utils.loader import SecurityViolationError, load_agent_from_ref, load_flow_from_file
 
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
@@ -853,8 +851,10 @@ def test_loader_security_escapes() -> None:
 def test_loader_ref_load_failure() -> None:
     """Test failure to load $ref."""
     import tempfile
-    import yaml
     from pathlib import Path
+
+    import yaml
+
     from coreason_manifest.utils.loader import load_flow_from_file
 
     with tempfile.TemporaryDirectory() as d:
