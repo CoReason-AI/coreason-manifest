@@ -1,26 +1,26 @@
-import pytest
-from typing import Any
-import importlib.machinery
+from unittest.mock import patch
+
 import idna
-from unittest.mock import patch, MagicMock
+import pytest
 
 from coreason_manifest.utils.diff import _classify_path, _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
 from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref
 from coreason_manifest.utils.net_utils import canonicalize_domain
-from coreason_manifest.spec.interop.telemetry import NodeExecution
+
 
 def test_diff_classifier_coverage() -> None:
     # Cover _classify_path branches
     assert _classify_path("/edges/0") == "topology"
-    assert _classify_path("/graph/nodes/id") == "topology" # len 4
+    assert _classify_path("/graph/nodes/id") == "topology"  # len 4
     assert _classify_path("/graph/nodes/id/prop") == "resource"
-    assert _classify_path("/sequence/0") == "topology" # len 3
+    assert _classify_path("/sequence/0") == "topology"  # len 3
     assert _classify_path("/sequence/0/prop") == "resource"
     assert _classify_path("/other") == "resource"
 
     # Cover _classify_path governance (line 72)
     assert _classify_path("/governance/policy") == "governance"
+
 
 def test_diff_list_logic_coverage() -> None:
     # Cover list diff logic in _generate_diff
@@ -46,15 +46,16 @@ def test_diff_list_logic_coverage() -> None:
     l6 = [2]
     diff = _generate_diff("/list", l5, l6)
     assert len(diff) == 1
-    assert diff[0].op == "replace" # because primitives differ
+    assert diff[0].op == "replace"  # because primitives differ
+
 
 def test_integrity_nan_check() -> None:
-    import math
     # line 75 check is_finite for floats
     with pytest.raises(ValueError, match="NaN and Infinity"):
         compute_hash(float("nan"))
     with pytest.raises(ValueError, match="NaN and Infinity"):
         compute_hash(float("inf"))
+
 
 def test_integrity_fallback_json() -> None:
     # Cover fallback lines 89-90 (has json method)
@@ -76,6 +77,7 @@ def test_integrity_fallback_json() -> None:
     with pytest.raises(TypeError):
         compute_hash(BadJson())
 
+
 def test_integrity_tuple_reconstruct() -> None:
     # Cover reconstruct_payload list/tuple path (lines 140-154)
     data = [("a", 1)]
@@ -85,14 +87,17 @@ def test_integrity_tuple_reconstruct() -> None:
     with pytest.raises(TypeError, match="Could not reconstruct payload"):
         reconstruct_payload([1])
 
+
 def test_loader_spec_none_coverage() -> None:
     # Cover SandboxedPathFinder branches
     finder = SandboxedPathFinder()
-    assert finder.find_spec("foo") is None # jail_root not set
+    assert finder.find_spec("foo") is None  # jail_root not set
 
     # ".." check
-    from coreason_manifest.utils.loader import sandbox_context
     from pathlib import Path
+
+    from coreason_manifest.utils.loader import sandbox_context
+
     with sandbox_context(Path(".")):
         assert finder.find_spec("..foo") is None
         # line 119: init_py is file
@@ -100,17 +105,17 @@ def test_loader_spec_none_coverage() -> None:
         # If neither exists, returns None.
         assert finder.find_spec("non_existent") is None
 
+
 def test_loader_exception_handling_in_lock() -> None:
     # Cover exception handling inside _loader_lock (lines 233, 253, 281-282)
     # We need to trigger exception during exec_module
 
     # Create a broken agent file
-    from pathlib import Path
-    tmp_path = Path("/tmp") # dummy, we'll mock
-
     # Mocking is hard here because it's inside context manager.
     # Instead, create real broken file.
     import tempfile
+    from pathlib import Path
+
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "broken.py").write_text("raise RuntimeError('Boom')")
@@ -118,14 +123,16 @@ def test_loader_exception_handling_in_lock() -> None:
         with pytest.raises(ValueError, match="Failed to execute agent code"):
             load_agent_from_ref("broken.py:Agent", root_dir=p)
 
+
 def test_net_utils_edge_cases() -> None:
     # line 12: if not domain return ""
     assert canonicalize_domain("") == ""
-    assert canonicalize_domain(None) == "" # type checking? arg is str.
+    assert canonicalize_domain(None) == ""  # type checking? arg is str.
 
     # Force IDNA error (line 24-27)
     with patch("idna.encode", side_effect=idna.IDNAError):
         assert canonicalize_domain("bad.com") == "bad.com"
+
 
 def test_telemetry_frozen() -> None:
     # Telemetry frozen checks lines 75-76, 80
@@ -133,13 +140,16 @@ def test_telemetry_frozen() -> None:
     # Actually validation happens on instantiation.
     pass
 
+
 def test_validator_edge_cases() -> None:
     # validator.py 70, 282, 284, 309
     pass
 
+
 def test_visualizer_unvisited() -> None:
     # visualizer.py 185-187
     pass
+
 
 def test_flow_cycle_detection_unreachable() -> None:
     # spec/core/flow.py 325-326 (raise ValueError("Cycle detected..."))
@@ -150,7 +160,14 @@ def test_flow_cycle_detection_unreachable() -> None:
     # "if visited_count != len(reachable): ... raise ValueError"
     # This is hit if cycle exists.
     # We need a test with a cycle in a PUBLISHED flow.
-    from coreason_manifest.spec.core.flow import GraphFlow, FlowMetadata, FlowInterface, DataSchema, Blackboard, Graph, Edge
+    from coreason_manifest.spec.core.flow import (
+        DataSchema,
+        Edge,
+        FlowInterface,
+        FlowMetadata,
+        Graph,
+        GraphFlow,
+    )
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
@@ -160,7 +177,7 @@ def test_flow_cycle_detection_unreachable() -> None:
     graph = Graph(
         nodes={"n1": n1, "n2": n2},
         edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
-        entry_point="n1"
+        entry_point="n1",
     )
 
     with pytest.raises(ValueError, match="Cycle detected"):
@@ -170,5 +187,5 @@ def test_flow_cycle_detection_unreachable() -> None:
             metadata=FlowMetadata(name="cycle", version="1", description="d", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
-            graph=graph
+            graph=graph,
         )
