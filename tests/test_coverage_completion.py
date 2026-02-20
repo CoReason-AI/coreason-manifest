@@ -254,8 +254,10 @@ def test_tool_critical_no_desc() -> None:
     Test critical tool validation.
     Coverage for tools.py line 35.
     """
+    from pydantic import HttpUrl
+
     with pytest.raises(ValueError, match="Critical tools must be documented"):
-        ToolCapability(name="crit", risk_level="critical", url="http://x.com")
+        ToolCapability(name="crit", risk_level="critical", url=HttpUrl("http://x.com"))
 
 
 # -------------------------------------------------------------------------

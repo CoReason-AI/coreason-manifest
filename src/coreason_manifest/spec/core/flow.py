@@ -185,7 +185,7 @@ class Graph(BaseModel):
                     queue.append(v)
 
         if visited_count != len(node_ids):
-             # Extract nodes trapped in the cycle
+            # Extract nodes trapped in the cycle
             cyclic_nodes = [n for n, deg in in_degree.items() if deg > 0]
             raise ValueError(
                 f"Topological fracture: Cycle detected involving nodes: {sorted(cyclic_nodes)}. "
@@ -351,6 +351,6 @@ class GraphFlow(BaseModel):
         Enforces strict integrity if published.
         Calls Graph.verify_integrity(strict=True).
         """
-        is_published = (self.status == "published")
+        is_published = self.status == "published"
         self.graph.verify_integrity(strict=is_published)
         return self

@@ -135,8 +135,9 @@ def test_integrity_fallback_json() -> None:
     # Actually if json.loads fails, it raises JSONDecodeError, which is a ValueError.
     # The code might catch it or let it bubble up.
     # If compute_hash doesn't catch it, test expects it.
-    with pytest.raises(TypeError): # Fallback to default serialization which fails for BadJson
+    with pytest.raises(TypeError):  # Fallback to default serialization which fails for BadJson
         compute_hash(BadJson())
+
 
 def test_integrity_set_sorting() -> None:
     # Test set/frozenset sorting in CanonicalV2
@@ -149,6 +150,7 @@ def test_integrity_set_sorting() -> None:
     h_fs = compute_hash(fs)
     assert h_fs == h_list
 
+
 def test_loader_sys_version_mock() -> None:
     # Mock sys.version_info to cover fallback path
     with patch("sys.version_info", (3, 9)):
@@ -156,17 +158,21 @@ def test_loader_sys_version_mock() -> None:
         # Should not crash, and should attempt to find (returning None if no jail)
         assert finder.find_spec("os") is None
 
+
 def test_integrity_invalid_version() -> None:
     with pytest.raises(ValueError, match="Unknown hashing version"):
-        compute_hash({}, version="v99") # type: ignore
+        compute_hash({}, version="v99")  # type: ignore
+
 
 def test_integrity_payload_fallback() -> None:
     # reconstruct_payload(1) -> dict(1) -> TypeError
     with pytest.raises(TypeError):
         reconstruct_payload(1)
 
+
 def test_integrity_legacy_v1_model() -> None:
     from pydantic import BaseModel
+
     class M(BaseModel):
         x: int
 
@@ -174,8 +180,10 @@ def test_integrity_legacy_v1_model() -> None:
     h = compute_hash(M(x=1), version="v1")
     assert len(h) == 64
 
+
 def test_verify_proof_fallback_version() -> None:
     from coreason_manifest.utils.integrity import verify_merkle_proof
+
     # Payload with invalid hash_version -> fallback to v2
     # We construct a node where hash matches v2 hash
     data = {"x": 1, "hash_version": "invalid"}
@@ -184,6 +192,7 @@ def test_verify_proof_fallback_version() -> None:
     node["execution_hash"] = h
     # verify should use v2 despite invalid version string, so it passes
     assert verify_merkle_proof([node]) is True
+
 
 def test_topology_self_loop_island() -> None:
     # Cover single-node cycle (self-loop) in Tarjan's algorithm (gatekeeper.py line 235)
@@ -216,11 +225,7 @@ def test_topology_self_loop_island() -> None:
     # Graph: Entry (a2) -> End.  a1 (island) -> a1
     a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph.model_construct(
-        nodes={"a1": a1, "a2": a2},
-        edges=[Edge(source="a1", target="a1")],
-        entry_point="a2"
-    )
+    graph = Graph.model_construct(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a1")], entry_point="a2")
 
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
@@ -260,8 +265,8 @@ def test_integrity_legacy_v1() -> None:
     # So for simple dict, they might be same if no None/float/etc.
     # But V2 strips None. V1 keeps None?
     data_none = {"a": None}
-    h_v1_none = compute_hash(data_none, version="v1") # {"a": null}
-    h_v2_none = compute_hash(data_none, version="v2") # {}
+    h_v1_none = compute_hash(data_none, version="v1")  # {"a": null}
+    h_v2_none = compute_hash(data_none, version="v2")  # {}
     assert h_v1_none != h_v2_none
 
 
@@ -338,12 +343,14 @@ def test_loader_exception_handling_in_lock() -> None:
 
 def test_gatekeeper_blocked_domain() -> None:
     # Test that domains are blocked correctly using HttpUrl validation
+    from pydantic import HttpUrl
+
     from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
     from coreason_manifest.spec.core.nodes import AgentNode
     from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
     from coreason_manifest.utils.gatekeeper import validate_policy
 
-    tool = ToolCapability(name="BadUrl", url="http://evil.com/path")
+    tool = ToolCapability(name="BadUrl", url=HttpUrl("http://example.com"))
     gov = Governance(allowed_domains=["good.com"])
 
     flow = LinearFlow(
@@ -353,7 +360,7 @@ def test_gatekeeper_blocked_domain() -> None:
         governance=gov,
         definitions=FlowDefinitions(
             tool_packs={"tp": ToolPack(kind="ToolPack", namespace="n", tools=[tool], dependencies=[], env_vars=[])}
-        )
+        ),
     )
 
     reports = validate_policy(flow)
@@ -372,11 +379,8 @@ def test_visualizer_pure_cycle() -> None:
     # Use model_construct to bypass cycle detection in Graph validation
     graph = Graph.model_construct(
         nodes={"c1": n_c1, "c2": n_c2},
-        edges=[
-            Edge(source="c1", target="c2"),
-            Edge(source="c2", target="c1")
-        ],
-        entry_point="c1"
+        edges=[Edge(source="c1", target="c2"), Edge(source="c2", target="c1")],
+        entry_point="c1",
     )
 
     flow = GraphFlow.model_construct(
@@ -409,16 +413,13 @@ def test_visualizer_disconnected_cycle() -> None:
     # Bypass cycle detection
     graph = Graph.model_construct(
         nodes={"r1": n_r1, "c1": n_c1, "c2": n_c2},
-        edges=[
-            Edge(source="c1", target="c2"),
-            Edge(source="c2", target="c1")
-        ],
-        entry_point="r1"
+        edges=[Edge(source="c1", target="c2"), Edge(source="c2", target="c1")],
+        entry_point="r1",
     )
 
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
-        status="draft", # Allow disconnected
+        status="draft",  # Allow disconnected
         metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
@@ -469,7 +470,7 @@ def test_telemetry_frozen() -> None:
         # request_id missing -> line 75 hit
     )
     assert ne.request_id is not None
-    assert ne.root_request_id == ne.request_id # line 80 hit (no parent, no root)
+    assert ne.root_request_id == ne.request_id  # line 80 hit (no parent, no root)
 
     # Case 2: request_id provided
     ne2 = NodeExecution(
@@ -479,14 +480,14 @@ def test_telemetry_frozen() -> None:
         outputs={},
         timestamp=datetime.now(),
         duration_ms=10,
-        request_id="my_id"
+        request_id="my_id",
     )
     assert ne2.request_id == "my_id"
 
     # Case 3: Verify immutability (frozen=True)
     # We catch whatever exception happens.
     try:
-        ne.state = NodeState.FAILED # type: ignore
+        ne.state = NodeState.FAILED  # type: ignore
     except (ValidationError, TypeError):
         # Success, it raised.
         pass
@@ -525,7 +526,7 @@ def test_validator_edge_cases() -> None:
     graph_dangling = Graph.model_construct(
         nodes={"n1": n1},
         edges=[Edge(source="n1", target="missing"), Edge(source="missing", target="n1")],
-        entry_point="n1"
+        entry_point="n1",
     )
     flow_dangling = GraphFlow.model_construct(
         kind="GraphFlow",
@@ -561,6 +562,7 @@ def test_validator_edge_cases() -> None:
 def test_loader_file_not_found() -> None:
     # loader.py line 233 (file not found)
     import tempfile
+
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         with pytest.raises(ValueError, match="Agent file not found"):
@@ -649,6 +651,7 @@ def test_flow_edge_source_missing() -> None:
             graph=graph,
         )
 
+
 def test_flow_edge_target_missing() -> None:
     # flow.py edge target missing coverage
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
@@ -680,6 +683,7 @@ def test_flow_entry_point_missing() -> None:
             blackboard=None,
             graph=graph,
         )
+
 
 def test_flow_cycle_detection_unreachable() -> None:
     # spec/core/flow.py 325-326 (raise ValueError("Cycle detected..."))

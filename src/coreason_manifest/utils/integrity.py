@@ -99,9 +99,7 @@ class CanonicalV2Strategy(HashingStrategy):
         if isinstance(obj, BaseModel):
             # Pydantic v2
             excludes = getattr(obj, "_hash_exclude_", None)
-            return self._recursive_sort_and_sanitize(
-                obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
-            )
+            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="python"))
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
@@ -216,14 +214,14 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
 
         # Determine hash version from payload if present, default to v1 for legacy compatibility?
         # SOTA requires v2. If payload has 'hash_version', use it.
-        version = payload.get("hash_version", "v1") # Default to v1 if unspecified? Or assume v2 for new system?
+        version = payload.get("hash_version", "v1")  # Default to v1 if unspecified? Or assume v2 for new system?
         # Given "Greenfield Refactor", we default to v2 if missing, OR we check the node.
         # But legacy logs might be v1.
         # Ideally, look for 'hash_version' field.
         if version not in ("v1", "v2"):
-            version = "v2" # Fallback to latest
+            version = "v2"  # Fallback to latest
 
-        computed_hash = compute_hash(payload, version=version) # type: ignore
+        computed_hash = compute_hash(payload, version=version)
 
         stored_hash = None
         if hasattr(node, "execution_hash"):

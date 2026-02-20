@@ -99,7 +99,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        status="draft"
+        status="draft",
     )
 
     # validate_flow should catch dangling edges

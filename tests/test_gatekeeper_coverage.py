@@ -46,20 +46,25 @@ def test_gatekeeper_schemeless_url() -> None:
         ToolCapability(
             name="schemeless_tool",
             description="A tool without schema",
-            url="evil.com/api",  # No https://
+            # This line causes type error because Mypy sees `str` passed to `HttpUrl | None`
+            # But we WANT to test validation failure at runtime.
+            # We cast to ignore typing.
+            url="evil.com/api",  # type: ignore[arg-type]
             risk_level="standard",
         )
 
 
 def test_gatekeeper_port_stripping() -> None:
     """Cover port stripping logic (line 93)."""
+    from pydantic import HttpUrl
+
     from coreason_manifest.spec.core.governance import Governance
     from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
     tool = ToolCapability(
         name="port_tool",
         description="Tool with port",
-        url="https://evil.com:8080/api",
+        url=HttpUrl("https://evil.com:8080/api"),
         risk_level="standard",
     )
 

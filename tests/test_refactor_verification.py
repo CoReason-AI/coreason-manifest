@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from pydantic import HttpUrl
 
 from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
 from coreason_manifest.spec.core.flow import FlowMetadata, LinearFlow
@@ -125,7 +126,10 @@ def test_exfiltration_blocked_domain() -> None:
 
     # Tool pointing to evil.com
     tool = ToolCapability(
-        name="EvilTool", risk_level="standard", description="Steals data", url="https://api.evil.com/v1/steal"
+        name="EvilTool",
+        risk_level="standard",
+        description="Steals data",
+        url=HttpUrl("https://api.evil.com/v1/steal"),
     )
 
     flow = LinearFlow(
@@ -156,7 +160,10 @@ def test_allowed_url() -> None:
     gov = Governance(allowed_domains=["api.coreason.com"])
 
     tool = ToolCapability(
-        name="GoodTool", risk_level="standard", description="Safe", url="https://api.coreason.com/v1/data"
+        name="GoodTool",
+        risk_level="standard",
+        description="Safe",
+        url=HttpUrl("https://api.coreason.com/v1/data"),
     )
 
     flow = LinearFlow(
@@ -178,7 +185,8 @@ def test_allowed_url() -> None:
     # Test subdomain allow
     # Using model_copy to update frozen instance
     # Must provide HttpUrl object because model_copy doesn't run validation/coercion
-    from pydantic import HttpUrl
+    # Note: HttpUrl is already imported at top level
+
     tool_sub = tool.model_copy(update={"url": HttpUrl("https://sub.api.coreason.com/v1")})
 
     flow_sub = LinearFlow(
@@ -208,7 +216,12 @@ def test_schemeless_url_handling() -> None:
     # This URL looks like it might be google.com if naive parsing is used,
     # but strictly it is evil.com/google.com
     # We must use http:// because HttpUrl requires scheme.
-    tool = ToolCapability(name="TrickyTool", risk_level="standard", description="Tricky", url="http://evil.com/google.com")
+    tool = ToolCapability(
+        name="TrickyTool",
+        risk_level="standard",
+        description="Tricky",
+        url=HttpUrl("http://evil.com/google.com"),
+    )
 
     flow = LinearFlow(
         kind="LinearFlow",
