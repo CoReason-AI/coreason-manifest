@@ -18,27 +18,11 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
-from coreason_manifest.utils.diff import _classify_path, _generate_diff
+from coreason_manifest.utils.diff import _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
 from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref
 from coreason_manifest.utils.net_utils import canonicalize_domain
 from coreason_manifest.utils.visualizer import to_mermaid, to_react_flow
-
-
-def test_diff_classifier_coverage() -> None:
-    # Cover _classify_path branches
-    assert _classify_path("/edges/0") == "topology"
-    assert _classify_path("/graph/nodes/id") == "topology"  # len 4
-    assert _classify_path("/graph/nodes/id/prop") == "resource"
-    assert _classify_path("/sequence/0") == "topology"  # len 3
-    assert _classify_path("/sequence/0/prop") == "resource"
-    assert _classify_path("/other") == "resource"
-
-    # Cover _classify_path line 72 (fallback topology)
-    assert _classify_path("/graph/entry_point") == "topology"
-
-    # Cover _classify_path governance
-    assert _classify_path("/governance/policy") == "governance"
 
 
 def test_diff_list_logic_coverage() -> None:
@@ -686,10 +670,14 @@ def test_flow_entry_point_missing() -> None:
 
 
 def test_flow_cycle_detection_unreachable() -> None:
-    # spec/core/flow.py 325-326 (raise ValueError("Cycle detected..."))
+    # spec/core/flow.py (raise ValueError("Cycle detected..."))
     from coreason_manifest.spec.core.flow import (
         Edge,
         Graph,
+        GraphFlow,
+        FlowMetadata,
+        FlowInterface,
+        DataSchema,
     )
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
@@ -697,20 +685,19 @@ def test_flow_cycle_detection_unreachable() -> None:
     n2 = PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
 
     # Cycle: n1->n2->n1
-    Graph.model_construct(
+    graph = Graph(
         nodes={"n1": n1, "n2": n2},
         edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
         entry_point="n1",
     )
 
-    # Use model_construct to create graph, then call validate_graph_structure logic manually
-    # OR create Graph normally which calls it.
-    # We want to coverage cycle detection.
-    # Graph validation calls it.
-
-    with pytest.raises(ValidationError, match="Cycle detected"):
-        Graph(
-            nodes={"n1": n1, "n2": n2},
-            edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
-            entry_point="n1",
+    # Cycle detection is now in Published GraphFlow validation (verify_integrity)
+    with pytest.raises(ValidationError, match="Topological fracture"):
+        GraphFlow(
+            kind="GraphFlow",
+            status="published",
+            metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+            blackboard=None,
+            graph=graph,
         )

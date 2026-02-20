@@ -61,17 +61,22 @@ class LegacyV1Strategy(HashingStrategy):
             data = obj.model_dump(mode="json")
 
         # Native sort_keys=True
-        json_bytes = json.dumps(data, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        # SOTA Directive: Re-enable ensure_ascii=False to match v0.24.0 legacy behavior.
+        # This prevents unicode escape sequences (e.g. \uXXXX) from altering the hash.
+        json_bytes = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
         return hashlib.sha256(json_bytes).hexdigest()
 
 
 class CanonicalV2Strategy(HashingStrategy):
     """
     SOTA hashing strategy (RFC 8785 Compliance).
-    - Strict float formatting.
+    Note: This implementation approximates true JCS (RFC 8785) compliance.
+    Specific ECMA-262 double-precision float formatting is approximated by Python's
+    standard library. Full compliance would require a custom dtoa implementation.
+    - Strict float formatting (no NaN/Inf).
     - Strips None values.
     - Deterministic key sorting.
-    - UTF-8 enforcement.
+    - UTF-8 enforcement (no escapes).
     """
 
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
