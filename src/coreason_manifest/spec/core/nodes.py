@@ -13,7 +13,12 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.resilience import ResilienceConfig
-from coreason_manifest.spec.core.types import NodeID, ProfileID, VariableID
+from coreason_manifest.spec.core.types import (
+    CoercibleStringList,
+    NodeID,
+    ProfileID,
+    VariableID,
+)
 from coreason_manifest.spec.interop.compliance import RemediationAction
 
 
@@ -65,7 +70,7 @@ class AgentNode(Node):
         description="The cognitive profile configuration or a reference ID.",
         examples=["profile_1", {"role": "Assistant", "persona": "..."}],
     )
-    tools: list[str] = Field(
+    tools: CoercibleStringList = Field(
         default_factory=list,
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
@@ -353,7 +358,7 @@ class SwarmNode(Node):
 
 class PlaceholderNode(Node):
     type: Literal["placeholder"] = "placeholder"
-    required_capabilities: list[str] = Field(
+    required_capabilities: CoercibleStringList = Field(
         ..., description="List of required capabilities.", examples=[["image_generation"]]
     )
 

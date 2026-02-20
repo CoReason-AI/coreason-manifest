@@ -17,13 +17,13 @@ def test_flow_interface_schema() -> None:
 def test_flow_interface_validation_error() -> None:
     with pytest.raises(ValidationError):
         FlowInterface(
-            inputs={"bad": "dict"},  # type: ignore[arg-type]
+            inputs={"json_schema": "invalid-type"},  # type: ignore[arg-type]
             outputs=DataSchema(json_schema={}),
         )
 
 
 def test_builder_interface_construction() -> None:
-    builder = NewGraphFlow("test", "1.0", "desc")
+    builder = NewGraphFlow("test", "1.0.0", "desc")
     # Builder now accepts raw dicts for schema
     input_s = {"type": "object", "properties": {"query": {"type": "string"}}}
     output_s = {"type": "object", "properties": {"answer": {"type": "string"}}}

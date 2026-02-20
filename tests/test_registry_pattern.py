@@ -68,7 +68,7 @@ def test_linear_flow_definitions() -> None:
         tools=[],
     )
 
-    metadata = FlowMetadata(name="test-linear", version="1.0", description="test", tags=[])
+    metadata = FlowMetadata(name="test-linear", version="1.0.0", description="test", tags=[])
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=metadata,
@@ -100,7 +100,7 @@ def test_graph_flow_definitions() -> None:
         tools=[],
     )
 
-    metadata = FlowMetadata(name="test-graph", version="1.0", description="test", tags=[])
+    metadata = FlowMetadata(name="test-graph", version="1.0.0", description="test", tags=[])
     interface = FlowInterface(
         inputs=DataSchema(json_schema={}),
         outputs=DataSchema(json_schema={}),
@@ -142,7 +142,7 @@ def test_referential_integrity_failure() -> None:
         resilience=None,
     )
 
-    metadata = FlowMetadata(name="broken-flow", version="1.0", description="fail", tags=[])
+    metadata = FlowMetadata(name="broken-flow", version="1.0.0", description="fail", tags=[])
 
     # 3. Expect a ValueError during initialization
     with pytest.raises(ValueError, match="references undefined profile ID 'ghost-brain'"):
@@ -177,7 +177,7 @@ def test_tool_integrity_failure() -> None:
         LinearFlow(
             kind="LinearFlow",
             status="published",
-            metadata=FlowMetadata(name="fail", version="1", description="", tags=[]),
+            metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
             definitions=definitions,
             sequence=[agent],
         )
@@ -206,7 +206,7 @@ def test_tool_integrity_failure_graph() -> None:
         GraphFlow(
             kind="GraphFlow",
             status="published",
-            metadata=FlowMetadata(name="fail", version="1", description="", tags=[]),
+            metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
             definitions=definitions,
             interface=FlowInterface(
                 inputs=DataSchema(json_schema={}),

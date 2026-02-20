@@ -6,7 +6,7 @@ from coreason_manifest.utils.diff import GovernanceMutation, ResourceMutation, T
 def create_flow(name: str = "test", nodes: list[AnyNode] | None = None) -> LinearFlow:
     return LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name=name, version="1.0", description="desc", tags=[]),
+        metadata=FlowMetadata(name=name, version="1.0.0", description="desc", tags=[]),
         sequence=nodes or [],
     )
 

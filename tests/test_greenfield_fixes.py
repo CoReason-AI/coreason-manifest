@@ -83,7 +83,7 @@ def test_graph_flow_draft_mode() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         # status="draft", # default
-        metadata=FlowMetadata(name="test", version="1", description="", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
@@ -99,7 +99,7 @@ def test_graph_flow_draft_mode() -> None:
         GraphFlow(
             kind="GraphFlow",
             status="published",
-            metadata=FlowMetadata(name="test", version="1", description="", tags=[]),
+            metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
             definitions=definitions,
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
@@ -120,7 +120,7 @@ def test_graph_flow_draft_mode() -> None:
     flow_valid = GraphFlow(
         kind="GraphFlow",
         status="published",
-        metadata=FlowMetadata(name="test", version="1", description="", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
@@ -218,7 +218,7 @@ def test_coverage_linear_flow_published() -> None:
     LinearFlow(
         kind="LinearFlow",
         status="published",
-        metadata=FlowMetadata(name="test", version="1", description="", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
         sequence=[agent],
     )
@@ -384,7 +384,7 @@ def test_validator_definitions_profile_scanning() -> None:
 
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
         graph=graph,
@@ -449,7 +449,7 @@ def test_jinja2_filter_validation() -> None:
     agent = AgentNode(
         id="n1",
         type="agent",
-        metadata={"desc": "Hello {{ user.name | upper }}"},
+        metadata={"desc": "Hello {{ user_name | upper }}"},
         resilience=None,
         profile=CognitiveProfile(
             role="Role",
@@ -460,13 +460,13 @@ def test_jinja2_filter_validation() -> None:
         tools=[],
     )
 
-    # Define 'user.name' in blackboard
-    blackboard = Blackboard(variables={"user.name": VariableDef(type="string")}, persistence=False)
+    # Define 'user_name' in blackboard
+    blackboard = Blackboard(variables={"user_name": VariableDef(type="string")}, persistence=False)
 
     graph = Graph(nodes={"n1": agent}, edges=[], entry_point="n1")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
         graph=graph,
@@ -488,7 +488,7 @@ def test_jinja2_filter_validation() -> None:
     graph_fail = Graph(nodes={"n1": agent_fail}, edges=[], entry_point="n1")
     flow_fail = GraphFlow(
         kind="GraphFlow",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
         graph=graph_fail,
@@ -533,7 +533,7 @@ def test_swarm_type_safety() -> None:
     graph = Graph(nodes={"s1": swarm}, edges=[], entry_point="s1")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
         graph=graph,
@@ -574,7 +574,7 @@ def test_inspector_regex_warning() -> None:
     graph = Graph(nodes={"i1": inspector}, edges=[], entry_point="i1")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
         graph=graph,
@@ -629,7 +629,7 @@ def test_validator_union_type_normalization() -> None:
     graph = Graph(nodes={"s1": swarm}, edges=[], entry_point="s1")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=inputs, outputs=DataSchema()),
         blackboard=None,
         graph=graph,
@@ -656,7 +656,7 @@ def test_loader_duplicate_keys_error(tmp_path: object) -> None:
         kind: GraphFlow
         metadata:
           name: bad-flow
-          version: "1"
+          version: "1.0.0"
           description: test
           tags: []
         interface:

@@ -212,13 +212,14 @@ def test_explicit_edge_labels() -> None:
 
 
 def test_special_characters_escaping() -> None:
+    # Use model_construct to bypass strict validation for testing visualizer escaping logic
     nodes: list[Any] = [
-        _get_agent_node("agent 1"),  # Space in ID
-        _get_agent_node('agent"2"'),  # Quote in ID
-        _get_agent_node("agent-3"),  # Hyphen in ID
+        AgentNode.model_construct(id="agent 1", type="agent", profile="p", tools=[]),
+        AgentNode.model_construct(id='agent"2"', type="agent", profile="p", tools=[]),
+        AgentNode.model_construct(id="agent-3", type="agent", profile="p", tools=[]),
     ]
 
-    flow = LinearFlow(
+    flow = LinearFlow.model_construct(
         kind="LinearFlow",
         metadata=_get_metadata(),
         sequence=nodes,

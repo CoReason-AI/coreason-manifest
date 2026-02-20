@@ -14,7 +14,7 @@ from coreason_manifest.cli import main
 def create_valid_flow(path: str) -> None:
     data = {
         "kind": "LinearFlow",
-        "metadata": {"name": "ValidFlow", "version": "1.0", "description": "Test", "tags": []},
+        "metadata": {"name": "ValidFlow", "version": "1.0.0", "description": "Test", "tags": []},
         "sequence": [{"id": "step1", "type": "placeholder", "metadata": {}, "required_capabilities": []}],
     }
     with open(path, "w") as f:
@@ -24,7 +24,7 @@ def create_valid_flow(path: str) -> None:
 def create_invalid_flow(path: str) -> None:
     data = {
         "kind": "LinearFlow",
-        "metadata": {"name": "InvalidFlow", "version": "1.0", "description": "Test", "tags": []},
+        "metadata": {"name": "InvalidFlow", "version": "1.0.0", "description": "Test", "tags": []},
         "sequence": [],  # Empty sequence is invalid
     }
     with open(path, "w") as f:
@@ -166,7 +166,7 @@ def test_visualize_unexpected_error(capsys: CaptureFixture[str]) -> None:
 def test_version(capsys: CaptureFixture[str]) -> None:
     """Test that the version command works."""
     test_args = ["coreason", "--version"]
-    with patch.object(sys, "argv", test_args):
+    with patch.object(sys, "argv", test_args), patch("coreason_manifest.cli.version", return_value="0.25.0"):
         with pytest.raises(SystemExit) as exc:
             main()
         assert exc.value.code == 0

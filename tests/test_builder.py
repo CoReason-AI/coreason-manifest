@@ -8,7 +8,7 @@ from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
 
 def test_linear_builder() -> None:
-    builder = NewLinearFlow("MyLinear", version="1.0", description="Desc")
+    builder = NewLinearFlow("MyLinear", version="1.0.0", description="Desc")
     builder.add_step(PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[]))
     builder.add_step(PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[]))
 
@@ -43,7 +43,7 @@ def test_linear_builder() -> None:
 
 
 def test_graph_builder() -> None:
-    builder = NewGraphFlow("MyGraph", version="1.0", description="Desc")
+    builder = NewGraphFlow("MyGraph", version="1.0.0", description="Desc")
     builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
     builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[]))
     builder.connect("n1", "n2", condition="ok")
@@ -117,7 +117,7 @@ def test_graph_builder_invalid() -> None:
 
 def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
     """Test setting circuit breaker when governance is already set."""
-    builder = NewLinearFlow("Test", "1.0", "Desc")
+    builder = NewLinearFlow("Test", "1.0.0", "Desc")
     gov = Governance(rate_limit_rpm=10)
     builder.set_governance(gov)
 
@@ -132,7 +132,7 @@ def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None
 
 def test_builder_coverage_set_circuit_breaker_without_governance() -> None:
     """Test setting circuit breaker when governance is NOT set."""
-    builder = NewLinearFlow("Test", "1.0", "Desc")
+    builder = NewLinearFlow("Test", "1.0.0", "Desc")
     # No governance set
 
     # This should trigger the `else:` branch in set_circuit_breaker
@@ -145,7 +145,7 @@ def test_builder_coverage_set_circuit_breaker_without_governance() -> None:
 
 def test_builder_coverage_add_inspector_linear() -> None:
     """Test add_inspector method in NewLinearFlow."""
-    builder = NewLinearFlow("Test", "1.0", "Desc")
+    builder = NewLinearFlow("Test", "1.0.0", "Desc")
     builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
     assert len(builder.sequence) == 1
     node = builder.sequence[0]
@@ -155,7 +155,7 @@ def test_builder_coverage_add_inspector_linear() -> None:
 
 def test_builder_coverage_add_inspector_graph() -> None:
     """Test add_inspector method in NewGraphFlow."""
-    builder = NewGraphFlow("Test", "1.0", "Desc")
+    builder = NewGraphFlow("Test", "1.0.0", "Desc")
     builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
     assert "inspector1" in builder._nodes
     node = builder._nodes["inspector1"]
@@ -165,7 +165,7 @@ def test_builder_coverage_add_inspector_graph() -> None:
 def test_builder_coverage_add_agent_ref_defaults() -> None:
     """Test add_agent_ref with default tools=None."""
     # Linear
-    builder_l = NewLinearFlow("Test", "1.0", "Desc")
+    builder_l = NewLinearFlow("Test", "1.0.0", "Desc")
     builder_l.define_profile("brain1", "role", "persona")
     builder_l.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
     assert len(builder_l.sequence) == 1
@@ -174,7 +174,7 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
     assert node_l.tools == []
 
     # Graph
-    builder_g = NewGraphFlow("Test", "1.0", "Desc")
+    builder_g = NewGraphFlow("Test", "1.0.0", "Desc")
     builder_g.define_profile("brain1", "role", "persona")
     builder_g.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
     assert "agent1" in builder_g._nodes
@@ -189,12 +189,12 @@ def test_builder_coverage_explicit_add_agent() -> None:
     agent = AgentNode(id="agent1", type="agent", profile=brain, tools=[], metadata={}, resilience=None)
 
     # Linear
-    builder_l = NewLinearFlow("Test", "1.0", "Desc")
+    builder_l = NewLinearFlow("Test", "1.0.0", "Desc")
     builder_l.add_agent(agent)
     assert len(builder_l.sequence) == 1
 
     # Graph
-    builder_g = NewGraphFlow("Test", "1.0", "Desc")
+    builder_g = NewGraphFlow("Test", "1.0.0", "Desc")
     builder_g.add_agent(agent)
     assert "agent1" in builder_g._nodes
 

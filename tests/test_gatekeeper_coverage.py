@@ -22,7 +22,7 @@ def test_gatekeeper_capability_error_handling() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=Definitions(profiles={"broken": profile}),
         sequence=[AgentNode(id="a1", metadata={}, type="agent", profile="broken", tools=[])],
     )
@@ -71,7 +71,7 @@ def test_gatekeeper_port_stripping() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         status="draft",
-        metadata=FlowMetadata(name="Port Test", version="1.0", description="desc", tags=[]),
+        metadata=FlowMetadata(name="Port Test", version="1.0.0", description="desc", tags=[]),
         definitions=Definitions(
             tool_packs={
                 "pack1": ToolPack(kind="ToolPack", namespace="pack1", tools=[tool], dependencies=[], env_vars=[])

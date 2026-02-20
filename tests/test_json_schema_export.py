@@ -1,3 +1,5 @@
+import json
+
 from coreason_manifest.spec.core.flow import Manifest
 
 
@@ -5,7 +7,10 @@ def test_json_schema_export() -> None:
     """
     Test that Manifest.export_json_schema() returns a valid JSON Schema dict.
     """
-    schema = Manifest.export_json_schema()
+    schema_str = Manifest.export_json_schema()
+    assert isinstance(schema_str, str)
+
+    schema = json.loads(schema_str)
 
     assert isinstance(schema, dict)
     assert "$defs" in schema  # Definitions should be present for complex types
@@ -32,5 +37,5 @@ def test_json_schema_export() -> None:
     assert "anyOf" in node_schema or "oneOf" in node_schema
 
     # Check that custom descriptions are present (random check)
-    assert "Unique identifier for the node." in str(schema)
-    assert "Description of what the flow does." in str(schema)
+    assert "Unique identifier for the node." in schema_str
+    assert "Description of what the flow does." in schema_str

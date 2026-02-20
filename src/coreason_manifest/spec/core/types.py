@@ -8,9 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Annotated
+from typing import Annotated, Any
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
@@ -80,4 +80,19 @@ ProfileID = Annotated[
         description="Identifier for a cognitive profile.",
         examples=["default_assistant", "code_expert"],
     ),
+]
+
+
+def _coerce_comma_strings(v: Any) -> Any:
+    """Coerces 'a, b' into ['a', 'b'] before strict validation."""
+    if isinstance(v, str):
+        return [item.strip() for item in v.split(",") if item.strip()]
+    return v
+
+
+# Apply this to all fields expecting lists of strings (like tags, tools, capabilities)
+CoercibleStringList = Annotated[
+    list[str],
+    BeforeValidator(_coerce_comma_strings),
+    Field(default_factory=list),
 ]

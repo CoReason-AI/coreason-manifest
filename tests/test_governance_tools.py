@@ -26,7 +26,7 @@ def test_critical_tool_requires_guard() -> None:
     # Unguarded Flow
     flow_unguarded = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
         sequence=[agent],
     )
@@ -48,7 +48,7 @@ def test_critical_tool_requires_guard() -> None:
 
     flow_guarded = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
         sequence=[human, agent],
     )
@@ -75,7 +75,7 @@ def test_safe_tool_allowed() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
         sequence=[agent],
     )

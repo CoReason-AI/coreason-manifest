@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import Field, HttpUrl, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.types import ToolID
+from coreason_manifest.spec.core.types import CoercibleStringList, ToolID
 
 
 class Dependency(CoreasonModel):
@@ -62,6 +62,6 @@ class ToolPack(CoreasonModel):
         description="External package dependencies.",
         examples=[[{"name": "numpy", "manager": "pip"}]],
     )
-    env_vars: list[str] = Field(
+    env_vars: CoercibleStringList = Field(
         default_factory=list, description="Required environment variables.", examples=[["API_KEY"]]
     )

@@ -22,7 +22,13 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import ToolPack
-from coreason_manifest.spec.core.types import NodeID, ProfileID, SemanticVersion, VariableID
+from coreason_manifest.spec.core.types import (
+    CoercibleStringList,
+    NodeID,
+    ProfileID,
+    SemanticVersion,
+    VariableID,
+)
 from coreason_manifest.spec.interop.compliance import RemediationAction
 
 # Polymorphic Node Type
@@ -47,7 +53,7 @@ class FlowMetadata(CoreasonModel):
     description: str = Field(
         ..., description="Description of what the flow does.", examples=["A flow that scrapes and summarizes."]
     )
-    tags: list[str] = Field(
+    tags: CoercibleStringList = Field(
         default_factory=list, description="Tags for categorization.", examples=[["research", "scraper"]]
     )
 
@@ -316,8 +322,14 @@ class Manifest(RootModel[ManifestType]):
     root: ManifestType
 
     @classmethod
-    def export_json_schema(cls) -> dict[str, Any]:
-        """
-        Dumps a structurally perfect OpenAPI/JSON-Schema representation of the library.
-        """
-        return cls.model_json_schema()
+    def export_json_schema(cls) -> str:
+        """Exports a pristine, IDE-ready JSON Schema resolving deep $defs."""
+        import json
+
+        schema = cls.model_json_schema(by_alias=True)
+
+        # Inject standard JSON Schema meta-tags for SOTA LSP compliance
+        schema["$schema"] = "http://json-schema.org/draft-07/schema#"
+        schema["title"] = "Coreason Manifest Specification v2"
+
+        return json.dumps(schema, indent=2)

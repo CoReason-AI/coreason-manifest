@@ -215,7 +215,7 @@ def test_topology_self_loop_island() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,
@@ -343,7 +343,7 @@ def test_gatekeeper_blocked_domain() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         sequence=[AgentNode(id="a", type="agent", metadata={}, profile="p", tools=["BadUrl"])],
         governance=gov,
         definitions=FlowDefinitions(
@@ -374,7 +374,7 @@ def test_visualizer_pure_cycle() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,
@@ -408,7 +408,7 @@ def test_visualizer_disconnected_cycle() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",  # Allow disconnected
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,
@@ -500,7 +500,7 @@ def test_validator_edge_cases() -> None:
     flow_empty = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph_empty,
@@ -519,7 +519,7 @@ def test_validator_edge_cases() -> None:
     flow_dangling = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph_dangling,
@@ -536,7 +536,7 @@ def test_validator_edge_cases() -> None:
     flow_mismatch = GraphFlow.model_construct(
         kind="GraphFlow",
         status="draft",
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph_mismatch_2,
@@ -633,7 +633,7 @@ def test_flow_edge_source_missing() -> None:
         GraphFlow(
             kind="GraphFlow",
             status="published",
-            metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+            metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
             graph=graph,
@@ -650,7 +650,7 @@ def test_flow_edge_target_missing() -> None:
         GraphFlow(
             kind="GraphFlow",
             status="published",
-            metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+            metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
             graph=graph,
@@ -666,7 +666,7 @@ def test_flow_entry_point_missing() -> None:
         GraphFlow(
             kind="GraphFlow",
             status="published",
-            metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+            metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=None,
             graph=graph,
@@ -701,7 +701,7 @@ def test_flow_cycle_detection_unreachable() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         status="published",
-        metadata=FlowMetadata(name="test", version="1", description="d", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,

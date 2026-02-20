@@ -70,7 +70,7 @@ def test_openai_adapter() -> None:
 
 
 def test_langchain_adapter() -> None:
-    meta = FlowMetadata(name="test", version="1.0", description="desc", tags=[])
+    meta = FlowMetadata(name="test", version="1.0.0", description="desc", tags=[])
     pack = ToolPack(
         kind="ToolPack",
         namespace="utils",

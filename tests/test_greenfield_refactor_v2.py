@@ -139,7 +139,7 @@ def test_topology_tolerance_and_gatekeeper() -> None:
     flow = GraphFlow(
         kind="GraphFlow",
         status="published",
-        metadata=FlowMetadata(name="test", version="1.0", description="test", tags=[]),
+        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,

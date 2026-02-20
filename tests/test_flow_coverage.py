@@ -33,7 +33,7 @@ def test_flow_integrity_coverage() -> None:
     LinearFlow(
         kind="LinearFlow",
         status="published",
-        metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         definitions=definitions,
         sequence=[agent],
     )
@@ -52,7 +52,7 @@ def test_flow_integrity_coverage() -> None:
         LinearFlow(
             kind="LinearFlow",
             status="published",
-            metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
             sequence=[agent_bad_ref],
         )
@@ -71,7 +71,7 @@ def test_flow_integrity_coverage() -> None:
         LinearFlow(
             kind="LinearFlow",
             status="published",
-            metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
             sequence=[agent_missing_ref],
         )
@@ -85,7 +85,7 @@ def test_flow_integrity_coverage() -> None:
         LinearFlow(
             kind="LinearFlow",
             status="published",
-            metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
             sequence=[agent_missing_profile],
         )
@@ -108,7 +108,7 @@ def test_flow_integrity_coverage() -> None:
         LinearFlow(
             kind="LinearFlow",
             status="published",
-            metadata=FlowMetadata(name="T", version="1", description="D", tags=[]),
+            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
             sequence=[swarm_missing],
         )
