@@ -1,3 +1,5 @@
+# src/coreason_manifest/utils/io.py
+
 import contextlib
 import errno
 import os
@@ -27,6 +29,9 @@ class ManifestIO:
     Acts as a 'Jail' to prevent Path Traversal attacks.
     """
 
+    MAX_PAYLOAD_SIZE = 5 * 1024 * 1024  # 5MB
+    MAX_DEPTH = 50
+
     def __init__(self, root_dir: Path, allow_external_refs: bool = False):
         """
         Initialize the secure loader.
@@ -51,7 +56,15 @@ class ManifestIO:
         # Wrap the descriptor in a Python file object
         # Note: os.fdopen takes ownership of the fd, so closing 'f' closes 'fd'
         with os.fdopen(fd, "r", encoding="utf-8") as f:
-            return f.read()
+            # SOTA: Read with limit to prevent DoS
+            # We read strictly up to limit + 1 char to detect overflow eagerly.
+            # Note: This is a character count check, effectively limiting memory usage.
+            content = f.read(self.MAX_PAYLOAD_SIZE + 1)
+            if len(content) > self.MAX_PAYLOAD_SIZE:
+                raise SecurityViolationError(
+                    f"Manifest payload exceeds limit of {self.MAX_PAYLOAD_SIZE} characters."
+                )
+            return content
 
     def read_text(self, path: str) -> str:
         """
@@ -114,6 +127,20 @@ class ManifestIO:
                 os.close(fd)
             raise
 
+    def _enforce_depth_limit(self, data: Any, current_depth: int = 0) -> None:
+        """
+        Recursively checks the depth of the data structure.
+        """
+        if current_depth > self.MAX_DEPTH:
+            raise SecurityViolationError(f"Manifest depth exceeds limit of {self.MAX_DEPTH}.")
+
+        if isinstance(data, dict):
+            for v in data.values():
+                self._enforce_depth_limit(v, current_depth + 1)
+        elif isinstance(data, list):
+            for v in data:
+                self._enforce_depth_limit(v, current_depth + 1)
+
     def load(self, path: str) -> dict[str, Any]:
         """
         Load a YAML/JSON file securely using low-level OS calls to prevent TOCTOU.
@@ -135,6 +162,9 @@ class ManifestIO:
 
             if not isinstance(content, dict):
                 raise ValueError("Manifest content must be a dictionary.")
+
+            # Enforce depth limit
+            self._enforce_depth_limit(content)
 
             return content
 

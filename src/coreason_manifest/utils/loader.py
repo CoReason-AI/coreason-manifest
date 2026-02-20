@@ -10,19 +10,82 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any, Protocol, cast
+from typing import Any, Protocol, cast, Type
 
 import yaml
+from pydantic import ValidationError
 from yaml.nodes import MappingNode
 
+from coreason_manifest.spec.core.exceptions import (
+    ManifestSyntaxError,
+    SecurityException,
+)
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
+from coreason_manifest.utils.resolver import ResolutionContext, CircularReferenceError
 
 __all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
     """Warning for runtime security risks."""
+
+
+class ExceptionTranslator:
+    """
+    Sovereign boundary that translates external errors into Domain Exceptions.
+    Intercepts Pydantic ValidationError, YAMLError, and network errors.
+    """
+
+    def __enter__(self) -> "ExceptionTranslator":
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: Any,
+    ) -> bool:
+        if exc_type is None:
+            return False
+
+        if isinstance(exc_value, ValidationError):
+            # Translate Pydantic errors to ManifestSyntaxError
+            errors = exc_value.errors()
+            if errors:
+                first_err = errors[0]
+                loc = first_err["loc"]
+                # Convert loc tuple (str|int) to JSON path
+                json_path = "#/" + "/".join(str(p) for p in loc)
+                msg = first_err["msg"]
+                ctx = first_err.get("ctx", {})
+
+                raise ManifestSyntaxError(
+                    message=f"{msg}",
+                    json_path=json_path,
+                    context=ctx,
+                ) from exc_value
+            return False
+
+        if isinstance(exc_value, yaml.YAMLError):
+            raise ManifestSyntaxError(
+                message=f"YAML parsing failed: {exc_value}",
+                json_path="$"
+            ) from exc_value
+
+        if isinstance(exc_value, CircularReferenceError):
+            raise SecurityException(
+                message=str(exc_value),
+                context={"cycle_path": exc_value.path}
+            ) from exc_value
+
+        if isinstance(exc_value, SecurityViolationError):
+            raise SecurityException(
+                message=exc_value.message,
+                context={"code": exc_value.code}
+            ) from exc_value
+
+        return False
 
 
 class YamlLoaderProtocol(Protocol):
@@ -190,35 +253,61 @@ def load_flow_from_file(
     jail_root = root_dir or file_path.parent
 
     # Initialize secure loader confined to the file's directory
-    loader = ManifestIO(root_dir=jail_root)
+    # SOTA: Enable external refs to allow loading fragments via $ref
+    loader = ManifestIO(root_dir=jail_root, allow_external_refs=True)
 
-    try:
-        rel_path = file_path.relative_to(jail_root)
-        load_path = str(rel_path)
-    except ValueError:
-        load_path = file_path.name
+    def remote_loader(uri: str) -> dict[str, Any]:
+        # Use secure loader recursively
+        # NOTE: This assumes uri is a relative path in the jail.
+        return loader.load(uri)
 
-    content_str = loader.read_text(load_path)
+    resolver = ResolutionContext(loader=remote_loader)
 
-    try:
-        data = yaml.load(content_str, Loader=UniqueKeyLoader)
-    except yaml.YAMLError as e:
-        raise ValueError(f"Failed to parse manifest file: {e}") from e
+    with ExceptionTranslator():
+        try:
+            rel_path = file_path.relative_to(jail_root)
+            load_path = str(rel_path)
+        except ValueError:
+            load_path = file_path.name
 
-    if not isinstance(data, dict):
-        raise ValueError("Manifest content must be a dictionary.")
+        # 1. Secure Read (Size Limit Enforced by ManifestIO)
+        content_str = loader.read_text(load_path)
 
-    if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
-        raise SecurityViolationError(
-            "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
+        # 2. Parse (Duplicate Key Check)
+        # We manually use UniqueKeyLoader here to prevent "Ghost Logic",
+        # but rely on ManifestIO for size/depth/permissions.
+        try:
+            data = yaml.load(content_str, Loader=UniqueKeyLoader)
+        except yaml.YAMLError as e:
+            # ExceptionTranslator will catch this, but we raise it here to be explicit
+            raise ManifestSyntaxError(f"YAML parsing failed: {e}", json_path="$") from e
+
+        if not isinstance(data, dict):
+            raise ManifestSyntaxError("Manifest content must be a dictionary.", json_path="$")
+
+        # 3. Depth Limit
+        loader._enforce_depth_limit(data)
+
+        # 4. Resolve (Cycle Detection + Graph Awareness)
+        resolved_data = resolver.resolve(data, base_uri=load_path)
+
+        # 5. Dynamic Code Scan
+        if _scan_for_dynamic_references(resolved_data) and not allow_dynamic_execution:
+            raise SecurityException(
+                "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
+            )
+
+        # 6. Validate
+        kind = resolved_data.get("kind")
+        if kind == "LinearFlow":
+            return LinearFlow.model_validate(resolved_data)
+        if kind == "GraphFlow":
+            return GraphFlow.model_validate(resolved_data)
+
+        raise ManifestSyntaxError(
+            f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.",
+            json_path="$/kind"
         )
-
-    kind = data.get("kind")
-    if kind == "LinearFlow":
-        return LinearFlow.model_validate(data)
-    if kind == "GraphFlow":
-        return GraphFlow.model_validate(data)
-    raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:

@@ -5,6 +5,7 @@ import jsonschema
 from jsonschema.exceptions import SchemaError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.common_base import CommonBase
 from coreason_manifest.spec.core.engines import AttentionReasoning
 from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.governance import Governance
@@ -274,10 +275,10 @@ def validate_integrity(definitions: FlowDefinitions | None, nodes: Iterable[AnyN
                 )
 
 
-class LinearFlow(BaseModel):
+class LinearFlow(CommonBase):
     """A deterministic script."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    model_config = ConfigDict(extra="allow", strict=True, frozen=True)
 
     kind: Literal["LinearFlow"]
     status: Annotated[Literal["draft", "published", "archived"], Field(description="Life-cycle state.")] = "draft"
@@ -295,10 +296,10 @@ class LinearFlow(BaseModel):
         return self
 
 
-class GraphFlow(BaseModel):
+class GraphFlow(CommonBase):
     """Cyclic Graph structure."""
 
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    model_config = ConfigDict(extra="allow", strict=True, frozen=True)
 
     kind: Literal["GraphFlow"]
     status: Annotated[Literal["draft", "published", "archived"], Field(description="Life-cycle state.")] = "draft"
