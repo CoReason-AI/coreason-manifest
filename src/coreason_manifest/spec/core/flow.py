@@ -187,7 +187,7 @@ class Graph(BaseModel):
 
         return self
 
-    def verify_integrity(self, strict: bool = True) -> None:
+    def verify_integrity(self, strict: bool = True) -> None:  # noqa: ARG002
         """
         Verifies full structural integrity (Reachability, Dangling Edges).
         Strict mode (Published) enforces no dangling edges and full reachability.
