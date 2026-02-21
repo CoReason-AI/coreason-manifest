@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.interop.antibody import AntibodyBase
+
 
 class NodeState(StrEnum):
     PENDING = "PENDING"
@@ -16,10 +18,11 @@ class NodeState(StrEnum):
     CANCELLED = "CANCELLED"
 
 
-class NodeExecution(BaseModel):
+class NodeExecution(AntibodyBase):
     """
     Telemetry record for a single node execution attempt.
     Includes Veritas integrity fields for cryptographic chaining.
+    Inherits AntibodyBase for Zero-Trust validation (NaN/Inf quarantine).
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)

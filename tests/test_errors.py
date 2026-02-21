@@ -1,5 +1,5 @@
 from coreason_manifest.spec.core.exceptions import DomainValidationError, ManifestError, SemanticFault
-from coreason_manifest.spec.interop.exceptions import LineageIntegrityError
+from coreason_manifest.spec.interop.exceptions import LineageIntegrityError, SecurityJailViolationError
 
 
 def test_semantic_fault_structure() -> None:
@@ -29,3 +29,9 @@ def test_legacy_validation_adapter() -> None:
     assert err.fault.error_code == str(ErrorCatalog.ERR_SEC_PATH_ESCAPE_001)
     # Check context contains the full report
     assert err.fault.context["report"]["code"] == str(ErrorCatalog.ERR_SEC_PATH_ESCAPE_001)
+
+
+def test_security_jail_error() -> None:
+    err = SecurityJailViolationError("Jailbreak!")
+    assert err.fault.error_code == "CRSN-SEC-JAIL-002"
+    assert "Jailbreak" in err.fault.message

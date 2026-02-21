@@ -18,38 +18,40 @@ class DataAnomaly(BaseModel):
     description: str
 
 
-class AnomalyDetectedError(ValueError):
+def _scan_and_quarantine(data: Any, path: str) -> None:
     """
-    Raised when the Antibody layer intercepts dangerous data.
-    Carries the payload of detected anomalies for telemetry.
-    """
-
-    def __init__(self, anomalies: list[DataAnomaly]):
-        self.anomalies = anomalies
-        super().__init__(f"Antibody intercepted {len(anomalies)} data anomalies.")
-
-
-def _scan_recursive(data: Any, path: str, anomalies: list[DataAnomaly]) -> None:
-    """
-    Recursively scans the raw input structure for anomalies.
+    Recursively scans the raw input structure and MUTATES it in-place
+    to replace anomalies (NaN, Inf) with DataAnomaly objects.
     """
     if isinstance(data, dict):
         for k, v in data.items():
-            _scan_recursive(v, f"{path}.{k}" if path else k, anomalies)
+            current_path = f"{path}.{k}" if path else k
+
+            # Check value
+            if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+                data[k] = DataAnomaly(
+                    code="CRSN-ANTIBODY-FLOAT",
+                    path=current_path,
+                    value_repr=str(v),
+                    description="Floating point value is not finite (NaN/Inf).",
+                )
+            elif isinstance(v, (dict, list)):
+                _scan_and_quarantine(v, current_path)
+
     elif isinstance(data, list):
         for i, v in enumerate(data):
-            _scan_recursive(v, f"{path}[{i}]", anomalies)
-    elif isinstance(data, float) and (math.isnan(data) or math.isinf(data)):
-        anomalies.append(
-            DataAnomaly(
-                code="CRSN-ANTIBODY-FLOAT",
-                path=path,
-                value_repr=str(data),
-                description="Floating point value is not finite (NaN/Inf).",
-            )
-        )
-    # Additional checks for un-serializable objects could go here
-    # e.g. checking for complex numbers, or arbitrary objects if strict JSON is required.
+            current_path = f"{path}[{i}]"
+
+            # Check item
+            if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+                data[i] = DataAnomaly(
+                    code="CRSN-ANTIBODY-FLOAT",
+                    path=current_path,
+                    value_repr=str(v),
+                    description="Floating point value is not finite (NaN/Inf).",
+                )
+            elif isinstance(v, (dict, list)):
+                _scan_and_quarantine(v, current_path)
 
 
 class AntibodyBase(BaseModel):
@@ -65,13 +67,12 @@ class AntibodyBase(BaseModel):
     def run_quarantine(cls, data: Any) -> Any:
         """
         Stage 1: Quarantine.
-        Scans for anomalies before Pydantic attempts strict validation.
+        Scans for anomalies and MUTATES them into DataAnomaly objects
+        before Pydantic attempts strict validation.
         """
         if isinstance(data, (dict, list)):
-            anomalies: list[DataAnomaly] = []
-            _scan_recursive(data, "$", anomalies)
-
-            if anomalies:
-                raise AnomalyDetectedError(anomalies)
+            # We must mutate the data in-place.
+            # If data is a dict (likely for a Model), we scan it.
+            _scan_and_quarantine(data, "$")
 
         return data
