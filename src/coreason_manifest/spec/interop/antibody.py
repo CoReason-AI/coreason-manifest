@@ -37,16 +37,15 @@ def _scan_recursive(data: Any, path: str, anomalies: list[DataAnomaly]) -> None:
     elif isinstance(data, list):
         for i, v in enumerate(data):
             _scan_recursive(v, f"{path}[{i}]", anomalies)
-    elif isinstance(data, float):
-        if math.isnan(data) or math.isinf(data):
-            anomalies.append(
-                DataAnomaly(
-                    code="CRSN-ANTIBODY-FLOAT",
-                    path=path,
-                    value_repr=str(data),
-                    description="Floating point value is not finite (NaN/Inf).",
-                )
+    elif isinstance(data, float) and (math.isnan(data) or math.isinf(data)):
+        anomalies.append(
+            DataAnomaly(
+                code="CRSN-ANTIBODY-FLOAT",
+                path=path,
+                value_repr=str(data),
+                description="Floating point value is not finite (NaN/Inf).",
             )
+        )
     # Additional checks for un-serializable objects could go here
     # e.g. checking for complex numbers, or arbitrary objects if strict JSON is required.
 

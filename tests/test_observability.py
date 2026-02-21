@@ -122,10 +122,10 @@ def test_recorder_stateless_dag() -> None:
         inputs={"a": 1},
         outputs={"b": 2},
         duration_ms=10.0,
-        previous_hashes=[],  # Genesis
+        parent_hashes=[],  # Genesis
     )
     assert rec1.execution_hash is not None
-    assert rec1.previous_hashes == []
+    assert rec1.parent_hashes == []
 
     # Step 2: Parallel Node A (links to Genesis)
     rec2a = recorder.record(
@@ -134,9 +134,9 @@ def test_recorder_stateless_dag() -> None:
         inputs={"in": "a"},
         outputs={"out": "a"},
         duration_ms=5.0,
-        previous_hashes=[rec1.execution_hash],  # Link to rec1
+        parent_hashes=[rec1.execution_hash],  # Link to rec1
     )
-    assert rec2a.previous_hashes == [rec1.execution_hash]
+    assert rec2a.parent_hashes == [rec1.execution_hash]
 
     # Step 3: Parallel Node B (links to Genesis)
     rec2b = recorder.record(
@@ -145,9 +145,9 @@ def test_recorder_stateless_dag() -> None:
         inputs={"in": "b"},
         outputs={"out": "b"},
         duration_ms=5.0,
-        previous_hashes=[rec1.execution_hash],  # Link to rec1
+        parent_hashes=[rec1.execution_hash],  # Link to rec1
     )
-    assert rec2b.previous_hashes == [rec1.execution_hash]
+    assert rec2b.parent_hashes == [rec1.execution_hash]
 
     # Step 4: Aggregator Node (links to A and B) - The DAG Merge
     rec3 = recorder.record(
@@ -156,12 +156,12 @@ def test_recorder_stateless_dag() -> None:
         inputs={"results": ["a", "b"]},
         outputs={"final": "done"},
         duration_ms=20.0,
-        previous_hashes=[cast("str", rec2a.execution_hash), cast("str", rec2b.execution_hash)],  # Merge
+        parent_hashes=[cast("str", rec2a.execution_hash), cast("str", rec2b.execution_hash)],  # Merge
     )
 
-    assert len(rec3.previous_hashes) == 2
-    assert rec2a.execution_hash in rec3.previous_hashes
-    assert rec2b.execution_hash in rec3.previous_hashes
+    assert len(rec3.parent_hashes) == 2
+    assert rec2a.execution_hash in rec3.parent_hashes
+    assert rec2b.execution_hash in rec3.parent_hashes
 
 
 def test_dag_integrity() -> None:
@@ -169,11 +169,11 @@ def test_dag_integrity() -> None:
     recorder = BlackBoxRecorder()
 
     # 1. Genesis
-    n1 = recorder.record("n1", NodeState.COMPLETED, {}, {}, 1.0, previous_hashes=[])
+    n1 = recorder.record("n1", NodeState.COMPLETED, {}, {}, 1.0, parent_hashes=[])
     # 2. Branch A
-    n2a = recorder.record("n2a", NodeState.COMPLETED, {}, {}, 1.0, previous_hashes=[cast("str", n1.execution_hash)])
+    n2a = recorder.record("n2a", NodeState.COMPLETED, {}, {}, 1.0, parent_hashes=[cast("str", n1.execution_hash)])
     # 3. Branch B
-    n2b = recorder.record("n2b", NodeState.COMPLETED, {}, {}, 1.0, previous_hashes=[cast("str", n1.execution_hash)])
+    n2b = recorder.record("n2b", NodeState.COMPLETED, {}, {}, 1.0, parent_hashes=[cast("str", n1.execution_hash)])
     # 4. Merge
     n3 = recorder.record(
         "n3",
@@ -181,7 +181,7 @@ def test_dag_integrity() -> None:
         {},
         {},
         1.0,
-        previous_hashes=[cast("str", n2a.execution_hash), cast("str", n2b.execution_hash)],
+        parent_hashes=[cast("str", n2a.execution_hash), cast("str", n2b.execution_hash)],
     )
 
     trace = [n1, n2a, n2b, n3]
@@ -190,7 +190,7 @@ def test_dag_integrity() -> None:
     assert verify_merkle_proof(trace) is True
 
     # Verify Broken Link
-    n3_bad = n3.model_copy(update={"previous_hashes": ["bad_hash", n2b.execution_hash]})
+    n3_bad = n3.model_copy(update={"parent_hashes": ["bad_hash", n2b.execution_hash]})
     trace_bad = [n1, n2a, n2b, n3_bad]
     assert verify_merkle_proof(trace_bad) is False
 
@@ -213,7 +213,7 @@ def test_recorder_sanitization_integration() -> None:
         inputs={"password": "secret"},
         outputs={"result": "ok"},
         duration_ms=5.0,
-        previous_hashes=[],
+        parent_hashes=[],
     )
 
     assert rec.inputs["password"] != "secret"
@@ -230,7 +230,7 @@ def test_otel_bridge() -> None:
         duration_ms=100.0,
         error="Something went wrong",
         attributes={"custom.tag": "value"},
-        previous_hashes=[],
+        parent_hashes=[],
     )
 
     otel_attrs = to_otel_attributes(rec)
@@ -274,7 +274,7 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
         inputs={"a": 1},
         outputs={"b": 2},
         duration_ms=10.0,
-        previous_hashes=[],
+        parent_hashes=[],
     )
 
     # The recorder should have wrapped the string result in a dict
@@ -293,7 +293,7 @@ def test_reconstruct_payload_edge_cases() -> None:
         "outputs": {},
         "duration_ms": 1.0,
         "timestamp": 1234567890,  # Integer timestamp
-        "previous_hashes": [],
+        "parent_hashes": [],
     }
     payload = reconstruct_payload(node_dict)
     assert payload["timestamp"] == 1234567890
@@ -312,7 +312,7 @@ def test_dag_integrity_dict_nodes() -> None:
         "outputs": {},
         "timestamp": "2023-01-01T00:00:00",
         "duration_ms": 1.0,
-        "previous_hashes": [],
+        "parent_hashes": [],
         "hash_version": "v2",
     }
     # Compute execution_hash for it
@@ -327,7 +327,7 @@ def test_dag_integrity_dict_nodes() -> None:
         "outputs": {},
         "timestamp": "2023-01-01T00:00:01",
         "duration_ms": 1.0,
-        "previous_hashes": [n1_dict["execution_hash"]],
+        "parent_hashes": [n1_dict["execution_hash"]],
         "hash_version": "v2",
     }
     payload_n2 = reconstruct_payload(n2_dict)
@@ -350,7 +350,7 @@ def test_dag_child_links_to_trusted_root() -> None:
         "outputs": {},
         "timestamp": "2023-01-01T00:00:00",
         "duration_ms": 1.0,
-        "previous_hashes": [root_hash],
+        "parent_hashes": [root_hash],
         "hash_version": "v2",
     }
     payload_n1 = reconstruct_payload(n1_dict)

@@ -117,7 +117,7 @@ def test_simulate_trace_linear_flow() -> None:
     assert len(trace) == 2
     assert trace[0].node_id == "n1"
     assert trace[1].node_id == "n2"
-    assert trace[1].previous_hashes == [trace[0].execution_hash]
+    assert trace[1].parent_hashes == [trace[0].execution_hash]
 
 
 def test_simulate_trace_graph_flow() -> None:

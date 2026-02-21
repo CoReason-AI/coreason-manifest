@@ -1,23 +1,31 @@
 import pytest
+from typing import Any
 from uuid import uuid4
 from datetime import datetime, UTC
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
 
-def create_node(node_id, parent=None, previous=None, inputs=None, outputs=None):
-    if inputs is None: inputs = {}
-    if outputs is None: outputs = {}
-    if previous is None: previous = []
+def create_node(
+    node_id: str,
+    parent: str | None = None,
+    previous: list[str] | None = None,
+    inputs: dict[str, Any] | None = None,
+    outputs: dict[str, Any] | None = None
+) -> NodeExecution:
+    if inputs is None:
+        inputs = {}
+    if outputs is None:
+        outputs = {}
+    if previous is None:
+        previous = []
 
     # Generate IDs
     req_id = str(uuid4())
     root_id = str(uuid4()) # Simplification
 
     # Construct initial data to compute hash
-    # We use a dict first to avoid Pydantic validation until we have the hash?
-    # Or just use the model without hash, compute it, then recreate.
 
-    data = {
+    data: dict[str, Any] = {
         "node_id": node_id,
         "state": NodeState.COMPLETED,
         "inputs": inputs,
@@ -48,7 +56,7 @@ def create_node(node_id, parent=None, previous=None, inputs=None, outputs=None):
 
     return NodeExecution(**final_data)
 
-def test_linear_chain_verification():
+def test_linear_chain_verification() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2", parent=n1.execution_hash)
     n3 = create_node("n3", parent=n2.execution_hash)
@@ -56,24 +64,24 @@ def test_linear_chain_verification():
     trace = [n1, n2, n3]
     assert verify_merkle_proof(trace), "Linear chain should verify"
 
-def test_dag_fan_in_verification():
+def test_dag_fan_in_verification() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2")
 
     # n3 depends on n1 and n2
-    n3 = create_node("n3", previous=[n1.execution_hash, n2.execution_hash])
+    n3 = create_node("n3", previous=[n1.execution_hash, n2.execution_hash]) # type: ignore
 
     trace = [n1, n2, n3]
     assert verify_merkle_proof(trace), "DAG fan-in should verify"
 
-def test_topology_violation_hallucinated_parent():
+def test_topology_violation_hallucinated_parent() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2", parent="sha256:fakehash")
 
     trace = [n1, n2]
     assert not verify_merkle_proof(trace), "Hallucinated parent should fail verification"
 
-def test_topology_violation_order():
+def test_topology_violation_order() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2", parent=n1.execution_hash)
 
@@ -81,7 +89,7 @@ def test_topology_violation_order():
     trace = [n2, n1]
     assert not verify_merkle_proof(trace), "Out-of-order trace should fail verification"
 
-def test_content_tampering():
+def test_content_tampering() -> None:
     n1 = create_node("n1")
 
     # Tamper with content but keep hash

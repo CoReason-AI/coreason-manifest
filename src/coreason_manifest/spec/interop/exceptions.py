@@ -1,11 +1,12 @@
 from coreason_manifest.spec.core.exceptions import DomainValidationError
+from coreason_manifest.spec.interop.compliance import ComplianceReport, RemediationAction
 
 
 class LineageIntegrityError(DomainValidationError):
     """
     Raised when trace lineage integrity is compromised (e.g. orphaned requests).
     """
-    def __init__(self, message: str, report=None, remediation=None):
+    def __init__(self, message: str, report: ComplianceReport | None = None, remediation: RemediationAction | None = None) -> None:
         super().__init__(
             message=message,
             report=report,
@@ -18,7 +19,7 @@ class SecurityJailViolationError(DomainValidationError):
     """
     Raised when a security jail boundary is violated (e.g. path traversal, permission error).
     """
-    def __init__(self, message: str, report=None, remediation=None):
+    def __init__(self, message: str, report: ComplianceReport | None = None, remediation: RemediationAction | None = None) -> None:
         super().__init__(
             message=message,
             report=report,

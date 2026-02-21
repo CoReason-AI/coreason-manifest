@@ -24,7 +24,7 @@ class BlackBoxRecorder:
         inputs: dict[str, Any],
         outputs: dict[str, Any],
         duration_ms: float,
-        previous_hashes: list[str],
+        parent_hashes: list[str],
         timestamp: datetime | None = None,
         error: str | None = None,
         attributes: dict[str, Any] | None = None,
@@ -53,7 +53,7 @@ class BlackBoxRecorder:
 
         # 2. Prepare payload for hashing
         # We construct a partial model or dict to hash.
-        # It MUST include previous_hashes (sorted for determinism) to enforce the chain.
+        # It MUST include parent_hashes (sorted for determinism) to enforce the chain.
         # We exclude execution_hash (which we are computing) and signature (optional/external).
 
         # SOTA: Generate Trace IDs explicitly to ensure hash consistency.
@@ -71,7 +71,7 @@ class BlackBoxRecorder:
             "timestamp": to_canonical_timestamp(timestamp),
             "duration_ms": duration_ms,
             "attributes": attributes,
-            "previous_hashes": sorted(previous_hashes),
+            "parent_hashes": sorted(parent_hashes),
             "hash_version": "v2",
             "request_id": request_id,
             "root_request_id": root_request_id,
@@ -90,7 +90,7 @@ class BlackBoxRecorder:
             timestamp=timestamp,
             duration_ms=duration_ms,
             attributes=attributes,
-            previous_hashes=sorted(previous_hashes),
+            parent_hashes=sorted(parent_hashes),
             execution_hash=execution_hash,
             request_id=request_id,
             root_request_id=root_request_id,

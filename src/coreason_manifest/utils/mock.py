@@ -160,7 +160,7 @@ class MockFactory:
                         timestamp=timestamp,
                         duration_ms=w_duration,
                         execution_hash=w_hash,
-                        previous_hashes=prev_hashes or [],
+                        parent_hashes=prev_hashes or [],
                         attributes={"mock": True, "worker": True},
                     )
                 )
@@ -182,7 +182,7 @@ class MockFactory:
                 timestamp=timestamp,
                 duration_ms=agg_duration,
                 execution_hash=agg_hash,
-                previous_hashes=worker_hashes,
+                parent_hashes=worker_hashes,
                 attributes={"mock": True, "role": "aggregator"},
             )
 
@@ -216,7 +216,7 @@ class MockFactory:
                 timestamp=timestamp,
                 duration_ms=duration,
                 execution_hash=exec_hash,
-                previous_hashes=prev_hashes or [],
+                parent_hashes=prev_hashes or [],
                 attributes={"mock": True},
             )
         ]
