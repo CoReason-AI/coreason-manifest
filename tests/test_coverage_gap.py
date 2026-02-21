@@ -170,14 +170,20 @@ def test_integrity_legacy_v1_model() -> None:
 def test_verify_proof_fallback_version() -> None:
     from coreason_manifest.utils.integrity import verify_merkle_proof
 
-    # Payload with invalid hash_version -> fallback to v2
-    # We construct a node where hash matches v2 hash
+    # Payload with invalid hash_version -> fallback to v2 (handled in compute_hash)
+    # Actually, compute_hash raises ValueError for unknown version.
+    # So if payload has invalid version, verification should fail or raise.
+    # In current implementation, verify_merkle_proof reads version from payload.
+    # If version is invalid, compute_hash will raise ValueError.
+    # verify_merkle_proof does NOT catch ValueError from compute_hash.
+
     data = {"x": 1, "hash_version": "invalid"}
-    h = compute_hash(data, version="v2")
-    node = data.copy()
-    node["execution_hash"] = h
-    # verify should use v2 despite invalid version string, so it passes
-    assert verify_merkle_proof([node]) is True
+    # We can't compute hash with invalid version using compute_hash directly unless we mock
+    # But verify_merkle_proof calls compute_hash(payload, version=version)
+
+    # So we expect ValueError
+    with pytest.raises(ValueError, match="Unknown hashing version"):
+        verify_merkle_proof([data])
 
 
 def test_topology_self_loop_island() -> None:
@@ -232,10 +238,13 @@ def test_topology_self_loop_island() -> None:
 
 
 def test_integrity_tuple_reconstruct() -> None:
-    # Cover reconstruct_payload list/tuple path (lines 140-154)
+    # reconstruct_payload no longer supports list/tuple casting strictly.
+    # It requires dict or BaseModel.
+
     data = [("a", 1)]
-    res = reconstruct_payload(data)
-    assert res == {"a": 1}
+    # This should now raise TypeError
+    with pytest.raises(TypeError, match="Could not reconstruct payload"):
+        reconstruct_payload(data)
 
     with pytest.raises(TypeError, match="Could not reconstruct payload"):
         reconstruct_payload([1])

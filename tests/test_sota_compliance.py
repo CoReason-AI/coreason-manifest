@@ -343,12 +343,12 @@ def test_integrity_reconstruct_payload_fallback() -> None:
     """Cover the fallback case in reconstruct_payload (line 105)."""
     # reconstruct_payload(dict) returns dict.
     # reconstruct_payload(BaseModel) returns model_dump.
-    # reconstruct_payload(other) returns dict(other).
+    # reconstruct_payload(other) raises TypeError in strict mode.
 
-    # We pass a list of tuples which dict() accepts.
+    # We pass a list of tuples which dict() accepts, but should be rejected in SOTA.
     obj = [("a", 1), ("b", 2)]
-    res = reconstruct_payload(obj)
-    assert res == {"a": 1, "b": 2}
+    with pytest.raises(TypeError, match="Could not reconstruct payload"):
+        reconstruct_payload(obj)
 
 
 def test_topology_utility_island_code_exec() -> None:
