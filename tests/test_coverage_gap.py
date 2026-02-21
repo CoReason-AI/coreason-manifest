@@ -1021,7 +1021,7 @@ def test_integrity_custom_objects() -> None:
     compute_hash(WithDict())
 
     class WithComputeHash:
-        def compute_hash(self):
+        def compute_hash(self) -> str:
             return "manual_hash"
 
     assert compute_hash(WithComputeHash()) == "manual_hash"
