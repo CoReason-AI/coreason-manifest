@@ -1002,16 +1002,20 @@ def test_integrity_pydantic_model() -> None:
 
 
 def test_integrity_custom_objects() -> None:
+    from typing import Any
+
     from coreason_manifest.utils.integrity import compute_hash
 
     class WithModelDump:
-        def model_dump(self, **kwargs):
+        def model_dump(self, **kwargs: Any) -> dict[str, int]:
+            del kwargs  # Unused
             return {"x": 1}
 
     compute_hash(WithModelDump())
 
     class WithDict:
-        def dict(self, **kwargs):
+        def dict(self, **kwargs: Any) -> dict[str, int]:
+            del kwargs  # Unused
             return {"y": 2}
 
     compute_hash(WithDict())
@@ -1064,6 +1068,7 @@ def test_verify_merkle_child_trusted_root() -> None:
 
 def test_integrity_datetime_in_struct() -> None:
     from datetime import datetime
+
     from coreason_manifest.utils.integrity import compute_hash
 
     # Covers to_canonical_timestamp called from _recursive_sort_and_sanitize
@@ -1071,13 +1076,17 @@ def test_integrity_datetime_in_struct() -> None:
     data = {"dt": dt}
     compute_hash(data)
 
+
 def test_integrity_float_int() -> None:
     from coreason_manifest.utils.integrity import compute_hash
+
     # Covers return int(obj) for float
     compute_hash(1.0)
 
+
 def test_integrity_reconstruct_base_model() -> None:
     from pydantic import BaseModel
+
     from coreason_manifest.utils.integrity import reconstruct_payload
 
     class M(BaseModel):
@@ -1087,8 +1096,9 @@ def test_integrity_reconstruct_base_model() -> None:
     res = reconstruct_payload(m)
     assert res == {"x": 1}
 
+
 def test_verify_merkle_parent_hash() -> None:
-    from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash, reconstruct_payload
+    from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 
     # Genesis
     n1 = {"id": "n1", "hash_version": "v2"}
@@ -1104,8 +1114,9 @@ def test_verify_merkle_parent_hash() -> None:
 
     assert verify_merkle_proof([n1, n2]) is True
 
+
 def test_verify_merkle_missing_parent() -> None:
-    from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash, reconstruct_payload
+    from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 
     # Child with unknown parent
     n2 = {"id": "n2", "parent_hash": "unknown", "hash_version": "v2"}
