@@ -1,11 +1,14 @@
 from enum import StrEnum
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class FaultSeverity(StrEnum):
     CRITICAL = "CRITICAL"
     RECOVERABLE = "RECOVERABLE"
     WARNING = "WARNING"
+
 
 class RecoveryAction(StrEnum):
     HALT = "HALT"
@@ -13,8 +16,10 @@ class RecoveryAction(StrEnum):
     FALLBACK = "FALLBACK"
     QUARANTINE = "QUARANTINE"
 
+
 class SemanticFault(BaseModel):
     """Machine-readable error envelope."""
+
     model_config = ConfigDict(frozen=True, strict=True)
 
     error_code: str
@@ -23,11 +28,14 @@ class SemanticFault(BaseModel):
     recovery_action: RecoveryAction
     context: dict[str, Any] = Field(default_factory=dict)
 
+
 class ManifestError(Exception):
     """Base exception for all Manifest protocol errors."""
+
     def __init__(self, fault: SemanticFault) -> None:
         super().__init__(fault.message)
         self.fault = fault
+
 
 class LineageIntegrityError(ManifestError):
     def __init__(self, message: str, context: dict[str, Any] | None = None) -> None:
@@ -36,9 +44,10 @@ class LineageIntegrityError(ManifestError):
             message=message,
             severity=FaultSeverity.CRITICAL,
             recovery_action=RecoveryAction.HALT,
-            context=context or {}
+            context=context or {},
         )
         super().__init__(fault)
+
 
 class SecurityJailViolationError(ManifestError):
     def __init__(self, message: str, context: dict[str, Any] | None = None) -> None:
@@ -47,22 +56,24 @@ class SecurityJailViolationError(ManifestError):
             message=message,
             severity=FaultSeverity.CRITICAL,
             recovery_action=RecoveryAction.HALT,
-            context=context or {}
+            context=context or {},
         )
         super().__init__(fault)
+
 
 class DomainValidationError(ManifestError):
     """
     Validation error for domain constraints.
     Added to support existing code expecting this exception.
     """
+
     def __init__(
         self,
         message: str,
         report: Any | None = None,
         remediation: Any | None = None,
         error_code: str = "CRSN-VAL-GENERIC",
-        context: dict[str, Any] | None = None
+        context: dict[str, Any] | None = None,
     ) -> None:
         ctx = context or {}
         severity = FaultSeverity.CRITICAL
@@ -80,10 +91,6 @@ class DomainValidationError(ManifestError):
             ctx["remediation"] = remediation.model_dump() if hasattr(remediation, "model_dump") else remediation
 
         fault = SemanticFault(
-            error_code=error_code,
-            message=message,
-            severity=severity,
-            recovery_action=RecoveryAction.HALT,
-            context=ctx
+            error_code=error_code, message=message, severity=severity, recovery_action=RecoveryAction.HALT, context=ctx
         )
         super().__init__(fault)

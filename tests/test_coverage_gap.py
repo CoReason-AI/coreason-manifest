@@ -7,6 +7,7 @@ import idna
 import pytest
 from pydantic import ValidationError
 
+from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     Edge,
@@ -18,7 +19,6 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
-from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload

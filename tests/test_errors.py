@@ -1,4 +1,10 @@
-from coreason_manifest.spec.core.exceptions import DomainValidationError, ManifestError, SemanticFault, SecurityJailViolationError, LineageIntegrityError
+from coreason_manifest.spec.core.exceptions import (
+    DomainValidationError,
+    LineageIntegrityError,
+    ManifestError,
+    SecurityJailViolationError,
+    SemanticFault,
+)
 
 
 def test_semantic_fault_structure() -> None:

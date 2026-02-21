@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, PropertyMock, patch
 import pytest
 import yaml
 
+from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
@@ -13,7 +14,6 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode, SwitchNode
-from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO
 from coreason_manifest.utils.loader import (
     RuntimeSecurityWarning,

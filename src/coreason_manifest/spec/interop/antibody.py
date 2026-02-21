@@ -1,6 +1,6 @@
 import math
-from typing import Any
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -19,14 +19,15 @@ class DataAnomaly(BaseModel):
     description: str
 
 
+VALID_PRIMITIVES = (str, int, bool, type(None), datetime)
+
+
 def _scan_and_quarantine(data: Any, path: str) -> None:
     """
     Recursively scans the raw input structure and MUTATES it in-place
     to replace anomalies (NaN, Inf) or un-serializable types with
     DataAnomaly dictionaries.
     """
-    VALID_PRIMITIVES = (str, int, bool, type(None), datetime)
-
     if isinstance(data, dict):
         for k, v in list(data.items()):
             current_path = f"{path}.{k}" if path else k
