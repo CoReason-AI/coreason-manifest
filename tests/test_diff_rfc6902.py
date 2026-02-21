@@ -1,6 +1,8 @@
 from coreason_manifest.spec.core.flow import (
     AnyNode,
+    DataSchema,
     Edge,
+    FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
@@ -128,10 +130,16 @@ def test_diff_topology_replace_entry_point() -> None:
     # We need full GraphFlow to satisfy validation
     # Use model_construct to avoid validation errors for missing nodes
     f1 = GraphFlow.model_construct(
-        kind="GraphFlow", metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]), graph=graph1
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph1,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
     )
     f2 = GraphFlow.model_construct(
-        kind="GraphFlow", metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]), graph=graph2
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph2,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
     )
 
     report = compare_flows(f1, f2)
@@ -214,10 +222,16 @@ def test_diff_topology_remove_edge() -> None:
     graph2 = Graph(nodes={}, edges=[], entry_point="a")
 
     f1 = GraphFlow.model_construct(
-        kind="GraphFlow", metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]), graph=graph1
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph1,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
     )
     f2 = GraphFlow.model_construct(
-        kind="GraphFlow", metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]), graph=graph2
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph2,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
     )
 
     report = compare_flows(f1, f2)
