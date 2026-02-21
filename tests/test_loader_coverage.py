@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -6,7 +7,7 @@ from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import SandboxedPathFinder, _jail_root_var, load_agent_from_ref, sandbox_context
 
 
-def test_loader_symlink_loop_in_find_spec(tmp_path) -> None:
+def test_loader_symlink_loop_in_find_spec(tmp_path: Path) -> None:
     """
     Cover lines 124-125 in loader.py: Symlink loop in potential_path.resolve()
     """
@@ -29,7 +30,7 @@ def test_loader_symlink_loop_in_find_spec(tmp_path) -> None:
         _jail_root_var.reset(token)
 
 
-def test_loader_runtime_error_in_find_spec(tmp_path) -> None:
+def test_loader_runtime_error_in_find_spec(tmp_path: Path) -> None:
     """
     Cover line 127 in loader.py: Other RuntimeError (not Symlink) -> returns None
     """
@@ -45,7 +46,7 @@ def test_loader_runtime_error_in_find_spec(tmp_path) -> None:
         _jail_root_var.reset(token)
 
 
-def test_loader_agent_symlink_resolution_failure(tmp_path) -> None:
+def test_loader_agent_symlink_resolution_failure(tmp_path: Path) -> None:
     """
     Cover line 319 in loader.py: RuntimeError during file_path resolution (Symlink loop)
     """
@@ -62,7 +63,7 @@ def test_loader_agent_symlink_resolution_failure(tmp_path) -> None:
         load_agent_from_ref("foo.py:Agent", root_dir=jail)
 
 
-def test_loader_agent_unsafe_permissions(tmp_path) -> None:
+def test_loader_agent_unsafe_permissions(tmp_path: Path) -> None:
     """
     Cover line 312: SecurityJailViolationError for unsafe permissions (S_IWOTH | S_IWGRP)
     """
@@ -86,7 +87,7 @@ def test_loader_agent_unsafe_permissions(tmp_path) -> None:
             load_agent_from_ref("agent.py:Agent", root_dir=jail)
 
 
-def test_loader_path_traversal_in_find_spec(tmp_path) -> None:
+def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     """
     Cover line 124 in loader.py: Reference escapes root directory in find_spec
     """

@@ -31,14 +31,14 @@ def test_trace_integrity_rule3_self_parenting() -> None:
     """
     req_id = str(uuid4())
 
-    with pytest.raises(ExceptionGroup) as excinfo:
-        # parent = self
-        # root must be set to something else to avoid Rule 2 trigger (or rule 1 if missing)
-        # If root is missing, it's rule 1.
-        # If root == self, it's rule 2.
-        # So root must be some other ID.
-        root_id = str(uuid4())
+    # parent = self
+    # root must be set to something else to avoid Rule 2 trigger (or rule 1 if missing)
+    # If root is missing, it's rule 1.
+    # If root == self, it's rule 2.
+    # So root must be some other ID.
+    root_id = str(uuid4())
 
+    with pytest.raises(ExceptionGroup) as excinfo:
         AgentRequest(
             agent_id="agent1",
             session_id="session1",
