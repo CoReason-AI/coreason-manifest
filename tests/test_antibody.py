@@ -57,6 +57,7 @@ def test_antibody_list_mutation() -> None:
     """
     If a list contains NaN, it is mutated.
     """
+
     class ListPayload(AntibodyBase):
         # We use list[Any] to allow the mutated DataAnomaly to be accepted
         items: list[Any]
@@ -75,6 +76,7 @@ def test_antibody_nested_list_recursion() -> None:
     """
     If a list contains a dict which contains NaN, it is mutated.
     """
+
     class ListPayload(AntibodyBase):
         items: list[Any]
 
