@@ -247,6 +247,7 @@ def test_diff_topology_remove_edge() -> None:
     assert mutation.category == "BREAKING"
     assert report.has_breaking is True
 
+
 def test_diff_primitive_list() -> None:
     """Test diffing lists of primitives (no identity)."""
     # Just use _generate_diff directly or use a model with primitive list

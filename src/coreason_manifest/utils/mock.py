@@ -77,7 +77,7 @@ class MockFactory:
                 last_record = exec_records[-1]
                 execution_map[node.id] = last_record
                 # Next node depends on this one
-                prev_hashes = [last_record.execution_hash]
+                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
         elif isinstance(flow, GraphFlow):
             # Find start nodes (indegree 0)
@@ -108,7 +108,7 @@ class MockFactory:
 
                 # Update prev_hashes for next iteration
                 # We know execution_hash is generated
-                prev_hashes = [last_record.execution_hash]
+                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
                 # Find next node
                 outgoing_edges = [e for e in graph.edges if e.source == current_node.id]
