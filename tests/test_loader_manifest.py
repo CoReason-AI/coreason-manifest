@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 from coreason_manifest.spec.core.flow import LinearFlow
-from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import (
     SandboxedPathFinder,
     UniqueKeyLoader,

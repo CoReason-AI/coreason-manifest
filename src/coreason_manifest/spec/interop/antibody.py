@@ -1,5 +1,6 @@
 import math
 from typing import Any
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -21,37 +22,55 @@ class DataAnomaly(BaseModel):
 def _scan_and_quarantine(data: Any, path: str) -> None:
     """
     Recursively scans the raw input structure and MUTATES it in-place
-    to replace anomalies (NaN, Inf) with DataAnomaly objects.
+    to replace anomalies (NaN, Inf) or un-serializable types with
+    DataAnomaly dictionaries.
     """
+    VALID_PRIMITIVES = (str, int, bool, type(None), datetime)
+
     if isinstance(data, dict):
-        for k, v in data.items():
+        for k, v in list(data.items()):
             current_path = f"{path}.{k}" if path else k
 
-            # Check value
-            if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
-                data[k] = DataAnomaly(
-                    code="CRSN-ANTIBODY-FLOAT",
-                    path=current_path,
-                    value_repr=str(v),
-                    description="Floating point value is not finite (NaN/Inf).",
-                )
+            if isinstance(v, float):
+                if math.isnan(v) or math.isinf(v):
+                    data[k] = DataAnomaly(
+                        code="CRSN-ANTIBODY-FLOAT",
+                        path=current_path,
+                        value_repr=str(v),
+                        description="Floating point value is not finite (NaN/Inf).",
+                    ).model_dump()
             elif isinstance(v, (dict, list)):
                 _scan_and_quarantine(v, current_path)
+            elif not isinstance(v, VALID_PRIMITIVES):
+                # Un-serializable object capture
+                data[k] = DataAnomaly(
+                    code="CRSN-ANTIBODY-UNSERIALIZABLE",
+                    path=current_path,
+                    value_repr=str(type(v)),
+                    description="Object is not deterministically serializable.",
+                ).model_dump()
 
     elif isinstance(data, list):
         for i, v in enumerate(data):
             current_path = f"{path}[{i}]"
 
-            # Check item
-            if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
-                data[i] = DataAnomaly(
-                    code="CRSN-ANTIBODY-FLOAT",
-                    path=current_path,
-                    value_repr=str(v),
-                    description="Floating point value is not finite (NaN/Inf).",
-                )
+            if isinstance(v, float):
+                if math.isnan(v) or math.isinf(v):
+                    data[i] = DataAnomaly(
+                        code="CRSN-ANTIBODY-FLOAT",
+                        path=current_path,
+                        value_repr=str(v),
+                        description="Floating point value is not finite (NaN/Inf).",
+                    ).model_dump()
             elif isinstance(v, (dict, list)):
                 _scan_and_quarantine(v, current_path)
+            elif not isinstance(v, VALID_PRIMITIVES):
+                data[i] = DataAnomaly(
+                    code="CRSN-ANTIBODY-UNSERIALIZABLE",
+                    path=current_path,
+                    value_repr=str(type(v)),
+                    description="Object is not deterministically serializable.",
+                ).model_dump()
 
 
 class AntibodyBase(BaseModel):

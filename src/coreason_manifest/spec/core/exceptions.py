@@ -1,91 +1,89 @@
-import json
 from enum import StrEnum
 from typing import Any
-
 from pydantic import BaseModel, ConfigDict, Field
 
-from coreason_manifest.spec.interop.compliance import ComplianceReport, RemediationAction
-
-
-class Severity(StrEnum):
+class FaultSeverity(StrEnum):
     CRITICAL = "CRITICAL"
     RECOVERABLE = "RECOVERABLE"
     WARNING = "WARNING"
 
-
 class RecoveryAction(StrEnum):
-    PROMPT_RETRY = "PROMPT_RETRY"
-    HALT_GRAPH = "HALT_GRAPH"
-    SKIP_NODE = "SKIP_NODE"
-    RETRY_NODE = "RETRY_NODE"
-    NONE = "NONE"
-
+    HALT = "HALT"
+    RETRY = "RETRY"
+    FALLBACK = "FALLBACK"
+    QUARANTINE = "QUARANTINE"
 
 class SemanticFault(BaseModel):
-    """
-    Structured error envelope for all Manifest exceptions.
-    """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    """Machine-readable error envelope."""
+    model_config = ConfigDict(frozen=True, strict=True)
 
     error_code: str
-    severity: Severity
-    recovery_action: RecoveryAction | str
     message: str
+    severity: FaultSeverity
+    recovery_action: RecoveryAction
     context: dict[str, Any] = Field(default_factory=dict)
 
-
-class ManifestError(ValueError):
-    """
-    Base class for all library exceptions, carrying a SemanticFault payload.
-    Inherits from ValueError to maintain backward compatibility with pydantic validation logic.
-    """
-
-    def __init__(self, fault: SemanticFault):
+class ManifestError(Exception):
+    """Base exception for all Manifest protocol errors."""
+    def __init__(self, fault: SemanticFault) -> None:
+        super().__init__(fault.message)
         self.fault = fault
-        super().__init__(f"[{fault.error_code}] {fault.message}")
 
+class LineageIntegrityError(ManifestError):
+    def __init__(self, message: str, context: dict[str, Any] | None = None) -> None:
+        fault = SemanticFault(
+            error_code="CRSN-SEC-LINEAGE-001",
+            message=message,
+            severity=FaultSeverity.CRITICAL,
+            recovery_action=RecoveryAction.HALT,
+            context=context or {}
+        )
+        super().__init__(fault)
+
+class SecurityJailViolationError(ManifestError):
+    def __init__(self, message: str, context: dict[str, Any] | None = None) -> None:
+        fault = SemanticFault(
+            error_code="CRSN-SEC-JAIL-002",
+            message=message,
+            severity=FaultSeverity.CRITICAL,
+            recovery_action=RecoveryAction.HALT,
+            context=context or {}
+        )
+        super().__init__(fault)
 
 class DomainValidationError(ManifestError):
     """
-    A domain-specific validation error that includes structured diagnostics.
-    Refactored to inherit from ManifestError.
+    Validation error for domain constraints.
+    Added to support existing code expecting this exception.
     """
-
     def __init__(
         self,
         message: str,
-        report: ComplianceReport | None = None,
-        remediation: RemediationAction | None = None,
+        report: Any | None = None,
+        remediation: Any | None = None,
         error_code: str = "CRSN-VAL-GENERIC",
-    ):
-        # Map legacy inputs to SemanticFault
-        severity = Severity.CRITICAL
-        recovery = RecoveryAction.HALT_GRAPH
+        context: dict[str, Any] | None = None
+    ) -> None:
+        ctx = context or {}
+        severity = FaultSeverity.CRITICAL
 
-        context = {}
         if report:
-            context["report"] = report.model_dump()
-            # Map severity
-            if report.severity == "warning" or report.severity == "info":
-                severity = Severity.WARNING
-
-            error_code = report.code
+            # Assuming report has model_dump or similar if it's a model
+            ctx["report"] = report.model_dump() if hasattr(report, "model_dump") else report
+            # Map severity if possible
+            if hasattr(report, "severity"):
+                sev_str = str(report.severity).upper()
+                if sev_str in ("WARNING", "INFO"):
+                    severity = FaultSeverity.WARNING
 
         if remediation:
-            context["remediation"] = remediation.model_dump()
+            ctx["remediation"] = remediation.model_dump() if hasattr(remediation, "model_dump") else remediation
 
         fault = SemanticFault(
-            error_code=error_code, severity=severity, recovery_action=recovery, message=message, context=context
+            error_code=error_code,
+            message=message,
+            severity=severity,
+            recovery_action=RecoveryAction.HALT,
+            context=ctx
         )
         super().__init__(fault)
-        self.report = report
-        self.remediation = remediation
-
-    def __str__(self) -> str:
-        base_msg = super().__str__()
-        if self.remediation:
-            # Directive 5: Serialize remediation payload so it survives Pydantic exception masking
-            payload = json.dumps(self.remediation.model_dump())
-            return f"{base_msg} [Remediation: {self.remediation.description}] [Payload: {payload}]"
-        return base_msg

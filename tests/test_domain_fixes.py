@@ -13,7 +13,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode, SwitchNode
-from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO
 from coreason_manifest.utils.loader import (
     RuntimeSecurityWarning,

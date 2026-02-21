@@ -18,7 +18,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
-from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
@@ -911,7 +911,7 @@ def test_loader_find_spec_exceptions() -> None:
 
     token = _jail_root_var.set(mock_root)
     try:
-        from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+        from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
 
         with pytest.raises(SecurityJailViolationError, match="Symlink loop"):
             finder.find_spec("foo")
@@ -932,7 +932,7 @@ def test_loader_init_symlink_escape() -> None:
     # Cover __init__.py symlink escape
     import tempfile
 
-    from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+    from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
     from coreason_manifest.utils.loader import sandbox_context
 
     with tempfile.TemporaryDirectory() as d:
