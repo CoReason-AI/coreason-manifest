@@ -123,6 +123,9 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
                 # This is a critical security violation if a module name resolves outside jail
                 raise SecurityJailViolationError(f"Security Error: Reference {fullname} escapes the root directory.")
 
+        except SecurityJailViolationError:
+            # Prevent the security exception from being swallowed
+            raise
         except RuntimeError as e:
             # Symlink loop or similar
             if "Symlink" in str(e):
