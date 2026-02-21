@@ -59,9 +59,9 @@ def test_trace_integrity_multiple_violations() -> None:
     """
     req_id = str(uuid4())
 
+    # Rule 2 (Root=Self but Parent set) AND Rule 3 (Parent=Self)
+    # parent = self, root = self
     with pytest.raises(ExceptionGroup) as excinfo:
-        # Rule 2 (Root=Self but Parent set) AND Rule 3 (Parent=Self)
-        # parent = self, root = self
         AgentRequest(
             agent_id="agent1",
             session_id="session1",
