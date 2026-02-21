@@ -77,7 +77,7 @@ class MockFactory:
                 last_record = exec_records[-1]
                 execution_map[node.id] = last_record
                 # Next node depends on this one
-                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
+                prev_hashes = [last_record.execution_hash]
 
         elif isinstance(flow, GraphFlow):
             # Find start nodes (indegree 0)
@@ -107,7 +107,8 @@ class MockFactory:
                 steps += 1
 
                 # Update prev_hashes for next iteration
-                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
+                # We know execution_hash is generated
+                prev_hashes = [last_record.execution_hash]
 
                 # Find next node
                 outgoing_edges = [e for e in graph.edges if e.source == current_node.id]
@@ -192,9 +193,11 @@ class MockFactory:
         outputs: Any = {}
 
         if isinstance(node, PlannerNode):
-            outputs = self._generate_schema_data(node.output_schema)
+            raw_output = self._generate_schema_data(node.output_schema)
+            outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         elif isinstance(node, HumanNode):
-            outputs = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
+            raw_output = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
+            outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         else:
             outputs = {"result": "mock_output"}
 

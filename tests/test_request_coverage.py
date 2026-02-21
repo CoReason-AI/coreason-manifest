@@ -74,3 +74,26 @@ def test_trace_integrity_multiple_violations() -> None:
     assert len(errors) >= 2
     assert any("Root request cannot imply a parent" in str(e) for e in errors)
     assert any("Self-referential parent_request_id detected" in str(e) for e in errors)
+
+def test_create_child() -> None:
+    req = AgentRequest(
+        agent_id="agent1",
+        session_id="session1",
+        inputs={},
+    )
+    child = req.create_child(metadata={"foo": "bar"})
+    assert child.parent_request_id == req.request_id
+    assert child.root_request_id == req.root_request_id
+    assert child.metadata["foo"] == "bar"
+    assert child.request_id != req.request_id
+
+def test_auto_root_generation_missing_id() -> None:
+    req = AgentRequest(
+        agent_id="agent1",
+        session_id="session1",
+        inputs={},
+        # request_id missing
+    )
+    assert req.request_id is not None
+    assert req.root_request_id == req.request_id
+    assert req.parent_request_id is None

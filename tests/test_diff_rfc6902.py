@@ -246,3 +246,21 @@ def test_diff_topology_remove_edge() -> None:
     assert mutation.mutation_type == "topology"
     assert mutation.category == "BREAKING"
     assert report.has_breaking is True
+
+def test_diff_primitive_list() -> None:
+    """Test diffing lists of primitives (no identity)."""
+    # Just use _generate_diff directly or use a model with primitive list
+    from coreason_manifest.utils.diff import _generate_diff
+
+    l1 = ["a", "b"]
+    l2 = ["a", "c"]
+
+    changes = _generate_diff("/list", l1, l2)
+    # Should fall back to index diffing.
+    # index 0: "a" == "a" -> no change
+    # index 1: "b" != "c" -> replace
+
+    assert len(changes) == 1
+    assert changes[0].op == "replace"
+    assert changes[0].path == "/list/1"
+    assert changes[0].value == "c"
