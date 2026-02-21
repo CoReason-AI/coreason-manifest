@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from coreason_manifest.utils.loader import load_agent_from_ref
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref, sandbox_context
 
 
 def test_sandboxed_import_resolution(tmp_path: Path) -> None:
@@ -53,3 +54,23 @@ def test_sandboxed_import_isolation(tmp_path: Path) -> None:
         assert getattr(agent2_cls, "val") == 2  # noqa: B009
     except AssertionError:
         pytest.fail("Sandboxed isolation failed: Module collision in sys.modules")
+
+
+def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
+    """Ensure SandboxedPathFinder strictly prevents path traversal via symlinks."""
+    jail = tmp_path / "jail"
+    jail.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+
+    # Create a malicious symlink inside the jail that points outside
+    malicious_link = jail / "malicious_module"
+    malicious_link.symlink_to(outside, target_is_directory=True)
+
+    finder = SandboxedPathFinder()
+
+    # Execute the finder within the sandbox context
+    with sandbox_context(jail):
+        # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
+            finder.find_spec("malicious_module")
