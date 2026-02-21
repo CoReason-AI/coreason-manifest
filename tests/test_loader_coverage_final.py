@@ -178,3 +178,14 @@ def test_loader_package_success(tmp_path: Path) -> None:
         spec = finder.find_spec("mypkg")
         assert spec is not None
         assert spec.origin == str(pkg / "__init__.py")
+
+
+def test_load_agent_not_a_class(tmp_path: Path) -> None:
+    jail = tmp_path / "jail"
+    jail.mkdir()
+    agent_file = jail / "not_class.py"
+    agent_file.write_text("Agent = 'I am not a class'")
+    agent_file.chmod(0o600)
+
+    with pytest.raises(TypeError, match="is not a class"):
+        load_agent_from_ref("not_class.py:Agent", root_dir=jail)
