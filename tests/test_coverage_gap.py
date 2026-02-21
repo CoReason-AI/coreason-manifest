@@ -885,6 +885,7 @@ def test_loader_ref_load_failure() -> None:
 def test_loader_find_spec_exceptions() -> None:
     # Cover find_spec exceptions
     from coreason_manifest.utils.loader import _jail_root_var
+
     finder = SandboxedPathFinder()
 
     # 1. RuntimeError("Symlink")
@@ -901,24 +902,27 @@ def test_loader_find_spec_exceptions() -> None:
 
     token = _jail_root_var.set(mock_root)
     try:
-         from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
-         with pytest.raises(SecurityJailViolationError, match="Symlink loop"):
-             finder.find_spec("foo")
+        from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+
+        with pytest.raises(SecurityJailViolationError, match="Symlink loop"):
+            finder.find_spec("foo")
     finally:
-         _jail_root_var.reset(token)
+        _jail_root_var.reset(token)
 
     # 2. Other Exception -> returns None
     # Reset side effect
     mock_potential.resolve.side_effect = ValueError("Random error")
     token = _jail_root_var.set(mock_root)
     try:
-         assert finder.find_spec("foo") is None
+        assert finder.find_spec("foo") is None
     finally:
-         _jail_root_var.reset(token)
+        _jail_root_var.reset(token)
+
 
 def test_loader_init_symlink_escape() -> None:
     # Cover __init__.py symlink escape
     import tempfile
+
     from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
     from coreason_manifest.utils.loader import sandbox_context
 
@@ -938,6 +942,6 @@ def test_loader_init_symlink_escape() -> None:
             pytest.skip("Symlinks not supported")
 
         with sandbox_context(jail):
+            finder = SandboxedPathFinder()
             with pytest.raises(SecurityJailViolationError, match="outside jail"):
-                finder = SandboxedPathFinder()
                 finder.find_spec("pkg")

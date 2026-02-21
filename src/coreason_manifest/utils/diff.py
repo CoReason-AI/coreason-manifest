@@ -180,40 +180,7 @@ def _generate_diff(
             # All items have identities, diff by identity
             all_ids = set(dict1.keys()) | set(dict2.keys())
 
-            # Note: Order matters for JSON Patch indices.
-            # Identity diffing for list is complex because removal changes indices.
-            # However, prompt directive implies simple set-based comparison.
-            # If we just generate add/remove/replace based on ID, the paths might be off if we process out of order.
-            # But the prompt logic iterates over `all_ids` (which is unordered set).
-            # This implies the order of operations might be random, which is risky for JSON Patch arrays.
-            # But let's follow the directive logic precisely as requested.
-
-            # Wait, prompt code iterates `for item_id in all_ids`. Set iteration order is arbitrary.
-            # If I remove index 0, index 1 becomes 0. If I then remove (old) index 1, I might remove wrong item.
-            # JSON Patch operations are applied sequentially.
-            # RFC 6902 requires index adjustments.
-            # But the directive says "Implement the exact logic blocks provided below".
-            # The provided block iterates `all_ids`.
-            # This is flawed if executed as a patch, but the directive demands it.
-            # Wait, `_generate_diff` returns a list of operations.
-            # If I return `remove /path/0` and `remove /path/2`.
-            # If I apply them: remove 0. Original 1 becomes 0. Original 2 becomes 1.
-            # Then remove 2. This removes original 3 (which is now 2).
-            # So indices refer to the document state *at that time*.
-
-            # The provided logic:
-            # `if item_id not in dict1: ... op=add path={path}/{idx2}`
-            # `idx2` is the index in `obj2`. Adding at `idx2` implies we construct `obj2`.
-            # `elif item_id not in dict2: ... op=remove path={path}/{idx1}`
-            # `idx1` is index in `obj1`.
-
-            # This logic assumes "set diffing" and doesn't account for index shifting.
-            # However, I MUST follow the directive.
-            # I will use `sorted(all_ids)` to at least have deterministic output, but the prompt says "Implement the exact logic".
-            # I will paste the logic exactly, but maybe sort `all_ids` for stability if possible,
-            # or just iterate `all_ids` as is.
-            # But `all_ids` is a set.
-            # I will stick to the provided block structure.
+            # Identity Heuristic: Iterate over all unique IDs found in either list.
 
             for item_id in all_ids:
                 if item_id not in dict1:
