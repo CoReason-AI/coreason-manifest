@@ -873,3 +873,64 @@ def test_loader_ref_load_failure() -> None:
 
         with pytest.raises(ValueError, match="Failed to load reference"):
             load_flow_from_file(str(p / "main.yaml"))
+
+
+def test_loader_find_spec_exceptions() -> None:
+    # Cover find_spec exceptions
+    from coreason_manifest.utils.loader import _jail_root_var
+    finder = SandboxedPathFinder()
+
+    # 1. RuntimeError("Symlink")
+    # We must mock _jail_root_var.get() to return a mock Path whose resolve raises error
+    # Or mock jail_root.joinpath to return a mock whose resolve raises error.
+
+    mock_root = MagicMock()
+    mock_potential = MagicMock()
+
+    # When joinpath is called, return mock_potential
+    mock_root.joinpath.return_value = mock_potential
+    # When resolve is called on potential, raise RuntimeError
+    mock_potential.resolve.side_effect = RuntimeError("Symlink loop")
+
+    token = _jail_root_var.set(mock_root)
+    try:
+         from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+         with pytest.raises(SecurityJailViolationError, match="Symlink loop"):
+             finder.find_spec("foo")
+    finally:
+         _jail_root_var.reset(token)
+
+    # 2. Other Exception -> returns None
+    # Reset side effect
+    mock_potential.resolve.side_effect = ValueError("Random error")
+    token = _jail_root_var.set(mock_root)
+    try:
+         assert finder.find_spec("foo") is None
+    finally:
+         _jail_root_var.reset(token)
+
+def test_loader_init_symlink_escape() -> None:
+    # Cover __init__.py symlink escape
+    import tempfile
+    from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+    from coreason_manifest.utils.loader import sandbox_context
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        jail = p / "jail"
+        jail.mkdir()
+        outside = p / "outside.py"
+        outside.touch()
+
+        # Create package dir
+        (jail / "pkg").mkdir()
+        # Symlink __init__.py to outside
+        try:
+            (jail / "pkg" / "__init__.py").symlink_to(outside)
+        except OSError:
+            pytest.skip("Symlinks not supported")
+
+        with sandbox_context(jail):
+            with pytest.raises(SecurityJailViolationError, match="outside jail"):
+                finder = SandboxedPathFinder()
+                finder.find_spec("pkg")

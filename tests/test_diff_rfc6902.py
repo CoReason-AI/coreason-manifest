@@ -1,4 +1,12 @@
-from coreason_manifest.spec.core.flow import AnyNode, FlowMetadata, LinearFlow
+from coreason_manifest.spec.core.flow import (
+    AnyNode,
+    Edge,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.utils.diff import GovernanceMutation, ResourceMutation, TopologyMutation, compare_flows
 
@@ -110,3 +118,67 @@ def test_diff_list_replace() -> None:
     #    return "resource"
 
     assert isinstance(op, ResourceMutation)
+
+
+def test_diff_topology_replace_entry_point() -> None:
+    """Test replacing a primitive field in Topology domain (entry_point)."""
+    # Create GraphFlows
+    graph1 = Graph(nodes={}, edges=[], entry_point="a")
+    graph2 = Graph(nodes={}, edges=[], entry_point="b")
+
+    # We need full GraphFlow to satisfy validation
+    # Use model_construct to avoid validation errors for missing nodes
+    f1 = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph1
+    )
+    f2 = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph2
+    )
+
+    report = compare_flows(f1, f2)
+    diff = report.changes
+    # path: /graph/entry_point
+    # op: replace
+    # domain: topology
+
+    mutation = next((d for d in diff if d.path == "/graph/entry_point"), None)
+    assert mutation is not None
+    assert mutation.op == "replace"
+    assert mutation.mutation_type == "topology"
+    assert mutation.category == "BREAKING"
+    assert report.has_breaking is True
+
+
+def test_diff_topology_remove_edge() -> None:
+    """Test removing an item from a Topology list (edges)."""
+    e1 = Edge(source="a", target="b")
+    graph1 = Graph(nodes={}, edges=[e1], entry_point="a")
+    graph2 = Graph(nodes={}, edges=[], entry_point="a")
+
+    f1 = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph1
+    )
+    f2 = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="d", tags=[]),
+        graph=graph2
+    )
+
+    report = compare_flows(f1, f2)
+    diff = report.changes
+    # path: /graph/edges/0
+    # op: remove
+    # domain: topology
+
+    mutation = next((d for d in diff if d.path == "/graph/edges/0"), None)
+    assert mutation is not None
+    assert mutation.op == "remove"
+    assert mutation.mutation_type == "topology"
+    assert mutation.category == "BREAKING"
+    assert report.has_breaking is True
