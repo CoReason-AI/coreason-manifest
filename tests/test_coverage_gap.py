@@ -954,3 +954,163 @@ def test_loader_init_symlink_escape() -> None:
             finder = SandboxedPathFinder()
             with pytest.raises(SecurityJailViolationError, match="outside jail"):
                 finder.find_spec("pkg")
+
+
+def test_verify_merkle_missing_stored_hash() -> None:
+    from coreason_manifest.utils.integrity import verify_merkle_proof
+
+    # Node without execution_hash
+    # We pass a dict that acts as the node.
+    # reconstruct_payload(dict) returns the dict itself.
+    node = {"inputs": {}, "outputs": {}, "hash_version": "v2"}
+
+    # verify_merkle_proof will call reconstruct_payload(node) -> node
+    # Then compute_hash(node)
+    # Then stored_hash = node.get("execution_hash") -> None
+    # if not stored_hash -> return False
+
+    assert verify_merkle_proof([node]) is False
+
+
+def test_integrity_naive_datetime() -> None:
+    from datetime import datetime
+
+    from coreason_manifest.utils.integrity import to_canonical_timestamp
+
+    dt = datetime(2023, 1, 1, 12, 0, 0)  # Naive
+    ts = to_canonical_timestamp(dt)
+    assert ts.endswith("Z")
+
+
+def test_integrity_uuid_coverage() -> None:
+    from uuid import uuid4
+
+    from coreason_manifest.utils.integrity import compute_hash
+
+    compute_hash(uuid4())
+
+
+def test_integrity_pydantic_model() -> None:
+    from pydantic import BaseModel
+
+    from coreason_manifest.utils.integrity import compute_hash
+
+    class M(BaseModel):
+        x: int
+
+    compute_hash(M(x=1))
+
+
+def test_integrity_custom_objects() -> None:
+    from coreason_manifest.utils.integrity import compute_hash
+
+    class WithModelDump:
+        def model_dump(self, **kwargs):
+            return {"x": 1}
+
+    compute_hash(WithModelDump())
+
+    class WithDict:
+        def dict(self, **kwargs):
+            return {"y": 2}
+
+    compute_hash(WithDict())
+
+    class WithComputeHash:
+        def compute_hash(self):
+            return "manual_hash"
+
+    assert compute_hash(WithComputeHash()) == "manual_hash"
+
+
+def test_verify_merkle_empty() -> None:
+    from coreason_manifest.utils.integrity import verify_merkle_proof
+
+    assert verify_merkle_proof([]) is False
+
+
+def test_verify_merkle_invalid_type() -> None:
+    from coreason_manifest.utils.integrity import verify_merkle_proof
+
+    # reconstruct_payload(1) raises TypeError -> returns False
+    assert verify_merkle_proof([1]) is False
+
+
+def test_verify_merkle_trusted_root_mismatch() -> None:
+    from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+
+    node = {"x": 1, "previous_hashes": [], "hash_version": "v2"}
+    payload = reconstruct_payload(node)
+    h = compute_hash(payload)
+    node["execution_hash"] = h
+
+    # Mismatch with trusted root
+    assert verify_merkle_proof([node], trusted_root_hash="wrong") is False
+
+
+def test_verify_merkle_child_trusted_root() -> None:
+    from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
+
+    root_hash = "trusted"
+
+    # Child linking to trusted root
+    child = {"x": 2, "parent_hashes": [root_hash], "hash_version": "v2"}
+    payload = reconstruct_payload(child)
+    h = compute_hash(payload)
+    child["execution_hash"] = h
+
+    assert verify_merkle_proof([child], trusted_root_hash=root_hash) is True
+
+
+def test_integrity_datetime_in_struct() -> None:
+    from datetime import datetime
+    from coreason_manifest.utils.integrity import compute_hash
+
+    # Covers to_canonical_timestamp called from _recursive_sort_and_sanitize
+    dt = datetime(2023, 1, 1, 12, 0, 0)
+    data = {"dt": dt}
+    compute_hash(data)
+
+def test_integrity_float_int() -> None:
+    from coreason_manifest.utils.integrity import compute_hash
+    # Covers return int(obj) for float
+    compute_hash(1.0)
+
+def test_integrity_reconstruct_base_model() -> None:
+    from pydantic import BaseModel
+    from coreason_manifest.utils.integrity import reconstruct_payload
+
+    class M(BaseModel):
+        x: int
+
+    m = M(x=1)
+    res = reconstruct_payload(m)
+    assert res == {"x": 1}
+
+def test_verify_merkle_parent_hash() -> None:
+    from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash, reconstruct_payload
+
+    # Genesis
+    n1 = {"id": "n1", "hash_version": "v2"}
+    p1 = reconstruct_payload(n1)
+    h1 = compute_hash(p1)
+    n1["execution_hash"] = h1
+
+    # Child with parent_hash (linear)
+    n2 = {"id": "n2", "parent_hash": h1, "hash_version": "v2"}
+    p2 = reconstruct_payload(n2)
+    h2 = compute_hash(p2)
+    n2["execution_hash"] = h2
+
+    assert verify_merkle_proof([n1, n2]) is True
+
+def test_verify_merkle_missing_parent() -> None:
+    from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash, reconstruct_payload
+
+    # Child with unknown parent
+    n2 = {"id": "n2", "parent_hash": "unknown", "hash_version": "v2"}
+    p2 = reconstruct_payload(n2)
+    h2 = compute_hash(p2)
+    n2["execution_hash"] = h2
+
+    assert verify_merkle_proof([n2]) is False

@@ -35,9 +35,10 @@ class SemanticFault(BaseModel):
     context: dict[str, Any] = Field(default_factory=dict)
 
 
-class ManifestError(Exception):
+class ManifestError(ValueError):
     """
     Base class for all library exceptions, carrying a SemanticFault payload.
+    Inherits from ValueError to maintain backward compatibility with pydantic validation logic.
     """
 
     def __init__(self, fault: SemanticFault):
