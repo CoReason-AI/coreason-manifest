@@ -3,6 +3,7 @@
 import hashlib
 import importlib.abc
 import importlib.util
+import os
 import re
 import stat
 import sys
@@ -310,11 +311,13 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
             raise SecurityJailViolationError(f"Security Error: Reference {file_ref} escapes the root directory.")
 
         # Permission check: Reject world-writable files
-        st = file_path.stat()
-        if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
-            raise SecurityJailViolationError(
-                f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
-            )
+        # Only enforce strict POSIX permissions on POSIX systems
+        if os.name == "posix":
+            st = file_path.stat()
+            if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
+                raise SecurityJailViolationError(
+                    f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
+                )
 
     except FileNotFoundError:
         raise ValueError(f"Agent file not found: {file_ref}") from None

@@ -75,16 +75,18 @@ def test_loader_agent_unsafe_permissions(tmp_path: Path) -> None:
     agent_file.write_text("class Agent: pass")
 
     # Simulate S_IWOTH
-    with patch("pathlib.Path.stat") as mock_stat:
-        mock_stat.return_value.st_mode = stat.S_IWOTH
-        with pytest.raises(SecurityJailViolationError, match="unsafe writable permissions"):
-            load_agent_from_ref("agent.py:Agent", root_dir=jail)
+    # Force os.name="posix" so logic runs even on Windows
+    with patch("os.name", "posix"):
+        with patch("pathlib.Path.stat") as mock_stat:
+            mock_stat.return_value.st_mode = stat.S_IWOTH
+            with pytest.raises(SecurityJailViolationError, match="unsafe writable permissions"):
+                load_agent_from_ref("agent.py:Agent", root_dir=jail)
 
-    # Simulate S_IWGRP
-    with patch("pathlib.Path.stat") as mock_stat:
-        mock_stat.return_value.st_mode = stat.S_IWGRP
-        with pytest.raises(SecurityJailViolationError, match="unsafe writable permissions"):
-            load_agent_from_ref("agent.py:Agent", root_dir=jail)
+        # Simulate S_IWGRP
+        with patch("pathlib.Path.stat") as mock_stat:
+            mock_stat.return_value.st_mode = stat.S_IWGRP
+            with pytest.raises(SecurityJailViolationError, match="unsafe writable permissions"):
+                load_agent_from_ref("agent.py:Agent", root_dir=jail)
 
 
 def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
