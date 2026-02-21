@@ -105,6 +105,12 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
 
         # SOTA Fix: Pathlib based validation
         parts = fullname.split(".")
+
+        # Security: Module Isolation via Namespacing
+        # Prevent sys.modules poisoning by namespacing the module name with the jail hash.
+        jail_hash = hashlib.sha256(str(jail_root).encode("utf-8")).hexdigest()[:8]
+        namespaced_name = f"_jail_{jail_hash}.{fullname}"
+
         try:
             potential_path = jail_root.joinpath(*parts)
 
@@ -135,7 +141,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
                 raise SecurityJailViolationError(
                     f"Security Error: Module {fullname} resolves to {init_py.resolve()} outside jail."
                 )
-            spec = importlib.util.spec_from_file_location(fullname, init_py)
+            spec = importlib.util.spec_from_file_location(namespaced_name, init_py)
 
         # Check for module (file.py)
         elif resolved_potential.with_suffix(".py").is_file():
@@ -145,13 +151,13 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
                 raise SecurityJailViolationError(
                     f"Security Error: Module {fullname} resolves to {found_py.resolve()} outside jail."
                 )
-            spec = importlib.util.spec_from_file_location(fullname, found_py)
+            spec = importlib.util.spec_from_file_location(namespaced_name, found_py)
 
         if spec:
             # SOTA Fix: Track module as managed by this sandbox context to enable precise cleanup.
             modules = _jail_modules_var.get()
             if modules is not None:
-                modules.add(fullname)
+                modules.add(namespaced_name)
             return spec
 
         return None
@@ -302,9 +308,9 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
         # Permission check: Reject world-writable files
         st = file_path.stat()
-        if st.st_mode & stat.S_IWOTH:
+        if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
             raise SecurityJailViolationError(
-                f"Security Error: {file_ref} possesses unsafe world-writable permissions (S_IWOTH)."
+                f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
             )
 
     except FileNotFoundError:

@@ -83,17 +83,31 @@ class AgentRequest(BaseModel):
         """
         Enforces strict lineage integrity.
         """
-        # Rule: Orphaned trace check
+        errors = []
+
+        # Rule 1: Orphaned trace check (Parent exists, but Root missing)
         if self.parent_request_id and not self.root_request_id:
             # SOTA Fix: Structured Exception Contracts
-            err = LineageIntegrityError("Broken Lineage: parent_request_id is set but root_request_id is missing.")
+            err = LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing).")
             err.add_note(f"Request ID: {self.request_id}")
             err.add_note(f"Parent Request ID: {self.parent_request_id}")
-            raise err
+            errors.append(err)
 
-        # W3C consistency (Optional but good):
-        # If traceparent is present, it should ideally align with IDs,
-        # but we treat them as separate opaque identifiers for now as per prompt instructions
-        # focusing on the specific validation rule.
+        # Rule 2: Root Consistency (If root == self, parent must be None)
+        # This prevents cyclic root references where root points to self but parent is someone else (contradiction)
+        if self.root_request_id == self.request_id and self.parent_request_id is not None:
+            err = LineageIntegrityError("Broken Lineage: Root request cannot imply a parent.")
+            err.add_note(f"Request ID: {self.request_id}")
+            err.add_note(f"Parent Request ID: {self.parent_request_id}")
+            errors.append(err)
+
+        # Rule 3: Self-Parenting Cycle
+        if self.parent_request_id and self.parent_request_id == self.request_id:
+            err = LineageIntegrityError("Broken Lineage: Self-referential parent_request_id detected.")
+            err.add_note(f"Request ID: {self.request_id}")
+            errors.append(err)
+
+        if errors:
+            raise ExceptionGroup("Trace Integrity Violations", errors)
 
         return self

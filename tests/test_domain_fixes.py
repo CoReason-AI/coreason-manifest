@@ -165,6 +165,7 @@ definitions:
 def test_agent_loading_log(tmp_path: Any) -> None:
     py_file = tmp_path / "my_agent.py"
     py_file.write_text("class MyAgent: pass")
+    py_file.chmod(0o600)
 
     # Verify warning
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):

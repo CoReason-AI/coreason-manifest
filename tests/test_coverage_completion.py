@@ -79,6 +79,7 @@ def test_loader_syntax_error(tmp_path: Path) -> None:
     """
     py_file = tmp_path / "bad.py"
     py_file.write_text("class Agent: def run(self): return 'missing quote")
+    py_file.chmod(0o600)
 
     with pytest.raises(ValueError, match="Failed to execute agent code"):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
@@ -97,10 +98,13 @@ class Agent: pass
 """
     py_file = tmp_path / "rel.py"
     py_file.write_text(code)
+    py_file.chmod(0o600)
 
     # To avoid ImportErrors, we can create a dummy sibling.
     (tmp_path / "sibling.py").touch()
+    (tmp_path / "sibling.py").chmod(0o600)
     (tmp_path / "__init__.py").touch()
+    (tmp_path / "__init__.py").chmod(0o600)
 
     # Expected: AST check passes. Runtime might fail.
     with contextlib.suppress(ImportError, ValueError):
@@ -127,6 +131,7 @@ class Agent: pass
 """
     py_file = tmp_path / "crash.py"
     py_file.write_text(code)
+    py_file.chmod(0o600)
 
     with pytest.raises(ValueError, match="Failed to execute agent code"):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
@@ -139,6 +144,7 @@ def test_loader_class_not_found(tmp_path: Path) -> None:
     code = "class Other: pass"
     py_file = tmp_path / "miss.py"
     py_file.write_text(code)
+    py_file.chmod(0o600)
 
     with pytest.raises(ValueError, match="Agent class 'Agent' not found"):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
@@ -151,6 +157,7 @@ def test_loader_not_a_class(tmp_path: Path) -> None:
     code = "Agent = 1"
     py_file = tmp_path / "not_class.py"
     py_file.write_text(code)
+    py_file.chmod(0o600)
 
     with pytest.raises(TypeError, match="is not a class"):
         load_agent_from_ref(f"{py_file}:Agent", root_dir=tmp_path)
@@ -177,6 +184,7 @@ class Agent: pass
 """
     py_file = tmp_path / "from_imp.py"
     py_file.write_text(code)
+    py_file.chmod(0o600)
 
     # Should warn about dynamic execution
     from coreason_manifest.utils.loader import RuntimeSecurityWarning

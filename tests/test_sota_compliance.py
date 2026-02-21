@@ -160,7 +160,8 @@ def test_telemetry_request_orphaned_trace() -> None:
     Test AgentRequest orphaned trace detection.
     """
     # Case B: Parent but no root -> Error
-    with pytest.raises(ValueError, match="Broken Lineage"):
+    # SOTA Fix: Expect ExceptionGroup wrapping LineageIntegrityError
+    with pytest.raises(ExceptionGroup) as excinfo:
         AgentRequest(
             agent_id="test",
             session_id="s1",
@@ -168,6 +169,7 @@ def test_telemetry_request_orphaned_trace() -> None:
             parent_request_id="some-parent",
             # root_request_id missing
         )
+    assert any("Broken Lineage" in str(e) for e in excinfo.value.exceptions)
 
 
 def test_telemetry_node_execution_trace_validation() -> None:

@@ -326,6 +326,7 @@ def test_loader_exception_handling_in_lock() -> None:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "broken.py").write_text("raise RuntimeError('Boom')")
+        (p / "broken.py").chmod(0o600)
 
         # Ensure we catch the error, but also that cleanup code runs.
         # The cleanup code checks if module_name in sys.modules.
@@ -574,6 +575,7 @@ def test_loader_exception_paths() -> None:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "dummy.py").touch()
+        (p / "dummy.py").chmod(0o600)
 
         # Mock spec_from_file_location to return None
         with (
@@ -602,8 +604,10 @@ def test_loader_cleanup_deps() -> None:
         p = Path(d)
         # dep1.py
         (p / "dep1.py").write_text("x = 1")
+        (p / "dep1.py").chmod(0o600)
         # agent1.py imports dep1
         (p / "agent1.py").write_text("import dep1\nclass Agent:\n    pass")
+        (p / "agent1.py").chmod(0o600)
 
         # Load
         # We need to ensure dep1 is NOT in sys.modules before
@@ -620,8 +624,10 @@ def test_loader_cleanup_deps() -> None:
         p = Path(d)
         # dep2.py
         (p / "dep2.py").write_text("x = 1")
+        (p / "dep2.py").chmod(0o600)
         # agent2.py imports dep2 then fails
         (p / "agent2.py").write_text("import dep2\nraise RuntimeError('fail')")
+        (p / "agent2.py").chmod(0o600)
 
         if "dep2" in sys.modules:
             del sys.modules["dep2"]
@@ -785,6 +791,7 @@ def test_loader_execution_exception_propagation() -> None:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "fail.py").write_text("raise RuntimeError('Boom')")
+        (p / "fail.py").chmod(0o600)
 
         with pytest.raises(ValueError, match="Failed to execute agent code"):
             load_agent_from_ref("fail.py:Agent", root_dir=p)

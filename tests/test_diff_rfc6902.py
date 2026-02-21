@@ -153,6 +153,65 @@ def test_diff_topology_replace_entry_point() -> None:
     assert report.has_breaking is True
 
 
+def test_diff_identity_list_behavior() -> None:
+    """Test identity-based diffing logic (remove+add vs replace)."""
+    n1 = AgentNode(id="a1", type="agent", metadata={}, profile="p1", tools=[])
+    n2 = AgentNode(id="a2", type="agent", metadata={}, profile="p1", tools=[])
+    n3 = AgentNode(id="a3", type="agent", metadata={}, profile="p1", tools=[])
+
+    # Case: [A, B] -> [A, C]
+    # Naive: replace /1
+    # Identity: remove B, add C (since B and C have different IDs)
+    f1 = create_flow(nodes=[n1, n2])
+    f2 = create_flow(nodes=[n1, n3])
+
+    report = compare_flows(f1, f2)
+    diff = report.changes
+
+    # We expect remove and add, OR replace if identity fallback triggered (but here IDs are unique)
+    # len(dict) == len(list) -> Identity logic used.
+
+    # Order of iteration in set(all_ids) is undefined.
+    # Logic:
+    # a1 matches -> no diff.
+    # a2 not in new -> remove /sequence/1 (idx in old)
+    # a3 not in old -> add /sequence/1 (idx in new)
+
+    ops = {d.op for d in diff}
+    assert "remove" in ops
+    assert "add" in ops
+    # Depending on implementation details, replace might NOT be generated.
+    assert "replace" not in ops
+
+    # Verify paths
+    rem_op = next(d for d in diff if d.op == "remove")
+    add_op = next(d for d in diff if d.op == "add")
+
+    # Remove index might be 1 (index in old)
+    assert rem_op.path.endswith("/1")
+    # Add index might be 1 (index in new)
+    assert add_op.path.endswith("/1")
+
+
+def test_diff_reordering_ignored() -> None:
+    """Test that reordering of identified items generates minimal/no diff."""
+    n1 = AgentNode(id="a1", type="agent", metadata={}, profile="p1", tools=[])
+    n2 = AgentNode(id="a2", type="agent", metadata={}, profile="p1", tools=[])
+
+    # Case: [A, B] -> [B, A]
+    f1 = create_flow(nodes=[n1, n2])
+    f2 = create_flow(nodes=[n2, n1])
+
+    report = compare_flows(f1, f2)
+    diff = report.changes
+
+    # Identity logic:
+    # a1 in both. Diff(a1, a1) -> None.
+    # a2 in both. Diff(a2, a2) -> None.
+    # Result: Empty diff.
+    assert len(diff) == 0
+
+
 def test_diff_topology_remove_edge() -> None:
     """Test removing an item from a Topology list (edges)."""
     e1 = Edge(source="a", target="b")
