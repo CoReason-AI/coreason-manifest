@@ -1,9 +1,11 @@
-
-import pytest
-from coreason_manifest.spec.interop.request import AgentRequest
 from uuid import uuid4
 
-def test_trace_integrity_rule2_root_consistency():
+import pytest
+
+from coreason_manifest.spec.interop.request import AgentRequest
+
+
+def test_trace_integrity_rule2_root_consistency() -> None:
     """
     Test Rule 2: Root Consistency (If root == self, parent must be None)
     """
@@ -17,12 +19,13 @@ def test_trace_integrity_rule2_root_consistency():
             inputs={},
             request_id=req_id,
             parent_request_id=parent_id,
-            root_request_id=req_id
+            root_request_id=req_id,
         )
 
     assert any("Root request cannot imply a parent" in str(e) for e in excinfo.value.exceptions)
 
-def test_trace_integrity_rule3_self_parenting():
+
+def test_trace_integrity_rule3_self_parenting() -> None:
     """
     Test Rule 3: Self-Parenting Cycle
     """
@@ -42,12 +45,13 @@ def test_trace_integrity_rule3_self_parenting():
             inputs={},
             request_id=req_id,
             parent_request_id=req_id,
-            root_request_id=root_id
+            root_request_id=root_id,
         )
 
     assert any("Self-referential parent_request_id detected" in str(e) for e in excinfo.value.exceptions)
 
-def test_trace_integrity_multiple_violations():
+
+def test_trace_integrity_multiple_violations() -> None:
     """
     Test multiple violations aggregating in ExceptionGroup.
     """
@@ -62,7 +66,7 @@ def test_trace_integrity_multiple_violations():
             inputs={},
             request_id=req_id,
             parent_request_id=req_id,
-            root_request_id=req_id
+            root_request_id=req_id,
         )
 
     errors = excinfo.value.exceptions
