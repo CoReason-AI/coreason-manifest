@@ -70,7 +70,9 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     finder = SandboxedPathFinder()
 
     # Execute the finder within the sandbox context
-    with sandbox_context(jail):
+    with (
+        sandbox_context(jail),
+        pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
+    ):
         # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
-        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
-            finder.find_spec("malicious_module")
+        finder.find_spec("malicious_module")
