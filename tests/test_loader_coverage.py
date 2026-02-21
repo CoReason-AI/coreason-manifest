@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -110,3 +110,18 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     ):
         # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
         finder.find_spec("malicious_module")
+
+
+def test_loader_execution_success(tmp_path: Path) -> None:
+    """
+    Explicitly cover the module execution block (lines 325-383) in loader.py.
+    This ensures 100% coverage even if other integration tests are skipped.
+    """
+    jail = tmp_path / "jail"
+    jail.mkdir()
+    (jail / "agent.py").write_text("class Agent:\n    def run(self): return 'ok'")
+    (jail / "agent.py").chmod(0o600)
+
+    # Run
+    cls = load_agent_from_ref("agent.py:Agent", root_dir=jail)
+    assert cls().run() == "ok"
