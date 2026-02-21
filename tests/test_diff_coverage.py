@@ -1,5 +1,5 @@
-from coreason_manifest.utils.diff import compare_flows, _generate_diff
-from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata
+from coreason_manifest.utils.diff import _generate_diff
+
 
 def test_diff_identity_by_name() -> None:
     # Use raw _generate_diff to avoid constructing complex Flows
@@ -13,6 +13,7 @@ def test_diff_identity_by_name() -> None:
     assert changes[0].op == "replace"
     assert changes[0].path == "/list/1/val"
 
+
 def test_diff_identity_by_key() -> None:
     l1 = [{"key": "k1", "val": 1}]
     l2 = [{"key": "k1", "val": 2}]
@@ -22,10 +23,11 @@ def test_diff_identity_by_key() -> None:
     assert changes[0].op == "replace"
     assert changes[0].path == "/list/0/val"
 
+
 def test_diff_identity_mixed_missing() -> None:
     # List of dicts, some have ID, some don't.
     # Should fall back to index diffing.
-    l1 = [{"id": "i1"}, {"val": 2}] # 2nd item has no ID
+    l1 = [{"id": "i1"}, {"val": 2}]  # 2nd item has no ID
     l2 = [{"id": "i1"}, {"val": 3}]
 
     # get_identity({"val": 2}) returns None.
@@ -38,6 +40,7 @@ def test_diff_identity_mixed_missing() -> None:
     assert len(changes) == 1
     assert changes[0].op == "replace"
     assert changes[0].path == "/list/1/val"
+
 
 def test_diff_identity_all_missing() -> None:
     # List of dicts, none have ID

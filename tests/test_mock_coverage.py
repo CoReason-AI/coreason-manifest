@@ -243,15 +243,13 @@ def test_execute_node_human() -> None:
     results2 = factory._execute_node(human2, {})
     assert results2[0].outputs == {"approved": True}
 
+
 def test_simulate_trace_empty_graph() -> None:
     factory = MockFactory()
     # Use model_construct to bypass validation that requires entry_point to exist
     graph = Graph.model_construct(nodes={}, edges=[], entry_point="n1")
     flow = GraphFlow.model_construct(
-        kind="GraphFlow",
-        metadata=_create_metadata(),
-        interface=_create_interface(),
-        graph=graph
+        kind="GraphFlow", metadata=_create_metadata(), interface=_create_interface(), graph=graph
     )
 
     trace = factory.simulate_trace(flow)

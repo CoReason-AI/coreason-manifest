@@ -2,6 +2,7 @@ from uuid import uuid4
 
 import pytest
 
+from coreason_manifest.spec.interop.exceptions import LineageIntegrityError
 from coreason_manifest.spec.interop.request import AgentRequest
 
 # --- test_request_coverage.py content ---
@@ -100,7 +101,6 @@ def test_auto_root_generation_missing_id() -> None:
     assert req.root_request_id == req.request_id
     assert req.parent_request_id is None
 
-from coreason_manifest.spec.interop.exceptions import LineageIntegrityError
 
 def test_trace_integrity_rule1_orphaned() -> None:
     """
