@@ -11,7 +11,6 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.exceptions import DomainValidationError
 from coreason_manifest.spec.core.resilience import ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
@@ -20,6 +19,7 @@ from coreason_manifest.spec.core.types import (
     VariableID,
 )
 from coreason_manifest.spec.interop.compliance import RemediationAction
+from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
 
 class Node(CoreasonModel):
@@ -214,52 +214,73 @@ class HumanNode(Node):
         # Fix 4: Temporal Collision - Enforce mutual exclusion
         if self.interaction_mode == "shadow":
             if self.shadow_timeout_seconds is None:
-                raise DomainValidationError(
-                    message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
-                    remediation=RemediationAction(
-                        type="update_field",
-                        target_node_id=self.id,
-                        description="Set 'shadow_timeout_seconds' to a valid value.",
-                        patch_data=[
-                            {
-                                "op": "add",
-                                "path": "/shadow_timeout_seconds",
-                                "value": 300,
-                            }
-                        ],
-                    ),
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-HUMAN-SHADOW",
+                        message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                target_node_id=self.id,
+                                description="Set 'shadow_timeout_seconds' to a valid value.",
+                                patch_data=[
+                                    {
+                                        "op": "add",
+                                        "path": "/shadow_timeout_seconds",
+                                        "value": 300,
+                                    }
+                                ],
+                            ).model_dump()
+                        },
+                    )
                 )
             if self.timeout_seconds is not None:
-                raise DomainValidationError(
-                    message="HumanNode in 'shadow' mode must not have 'timeout_seconds'.",
-                    remediation=RemediationAction(
-                        type="update_field",
-                        target_node_id=self.id,
-                        description="Remove 'timeout_seconds'.",
-                        patch_data=[
-                            {
-                                "op": "remove",
-                                "path": "/timeout_seconds",
-                            }
-                        ],
-                    ),
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-HUMAN-TIMEOUT",
+                        message="HumanNode in 'shadow' mode must not have 'timeout_seconds'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                target_node_id=self.id,
+                                description="Remove 'timeout_seconds'.",
+                                patch_data=[
+                                    {
+                                        "op": "remove",
+                                        "path": "/timeout_seconds",
+                                    }
+                                ],
+                            ).model_dump()
+                        },
+                    )
                 )
 
         # SIM102: Combine nested if statements
         if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
-            raise DomainValidationError(
-                message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
-                remediation=RemediationAction(
-                    type="update_field",
-                    target_node_id=self.id,
-                    description="Remove 'shadow_timeout_seconds'.",
-                    patch_data=[
-                        {
-                            "op": "remove",
-                            "path": "/shadow_timeout_seconds",
-                        }
-                    ],
-                ),
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-HUMAN-BLOCKING",
+                    message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            target_node_id=self.id,
+                            description="Remove 'shadow_timeout_seconds'.",
+                            patch_data=[
+                                {
+                                    "op": "remove",
+                                    "path": "/shadow_timeout_seconds",
+                                }
+                            ],
+                        ).model_dump()
+                    },
+                )
             )
         return self
 
@@ -338,20 +359,27 @@ class SwarmNode(Node):
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":
         if self.reducer_function == "summarize" and not self.aggregator_model:
-            raise DomainValidationError(
-                message="SwarmNode with reducer='summarize' requires an 'aggregator_model'.",
-                remediation=RemediationAction(
-                    type="update_field",
-                    target_node_id=self.id,
-                    description="Add a default 'aggregator_model'.",
-                    patch_data=[
-                        {
-                            "op": "add",
-                            "path": "/aggregator_model",
-                            "value": "gpt-4-turbo",  # Reasonable default
-                        }
-                    ],
-                ),
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-SWARM-REDUCER",
+                    message="SwarmNode with reducer='summarize' requires an 'aggregator_model'.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            target_node_id=self.id,
+                            description="Add a default 'aggregator_model'.",
+                            patch_data=[
+                                {
+                                    "op": "add",
+                                    "path": "/aggregator_model",
+                                    "value": "gpt-4-turbo",  # Reasonable default
+                                }
+                            ],
+                        ).model_dump()
+                    },
+                )
             )
         return self
 

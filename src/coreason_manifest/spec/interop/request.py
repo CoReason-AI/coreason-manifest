@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from coreason_manifest.spec.core.exceptions import LineageIntegrityError
+from coreason_manifest.spec.interop.exceptions import LineageIntegrityError
 
 
 class AgentRequest(BaseModel):

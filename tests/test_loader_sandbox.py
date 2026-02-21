@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from coreason_manifest.spec.core.exceptions import SecurityJailViolationError
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref, sandbox_context
 
 

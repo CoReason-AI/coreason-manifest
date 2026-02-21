@@ -3,11 +3,16 @@ from typing import Any
 
 import pytest
 
-from coreason_manifest.spec.core.exceptions import DomainValidationError, FaultSeverity
-from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
+from coreason_manifest.spec.interop.exceptions import (
+    FaultSeverity,
+    LineageIntegrityError,
+    ManifestError,
+    RecoveryAction,
+    SemanticFault,
+)
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
-# --- TELEMETRY TESTS ---\n
+# --- TELEMETRY TESTS ---
 
 
 def test_telemetry_parent_hash_auto_init() -> None:
@@ -83,7 +88,6 @@ def test_node_execution_antibody_integration() -> None:
     node = NodeExecution.model_validate(raw_data)
 
     # Check that the input was converted to a dict (via .model_dump())
-    # Note: mypy might complain about inputs being dict[str, Any], so we cast or ignore
     assert isinstance(node.inputs["bad_val"], dict)
     assert node.inputs["bad_val"]["code"] == "CRSN-ANTIBODY-FLOAT"
     assert node.outputs["good_val"] == 1.0
@@ -92,41 +96,35 @@ def test_node_execution_antibody_integration() -> None:
 # --- EXCEPTIONS TESTS ---
 
 
-def test_exception_severity_mapping() -> None:
-    # Case: Warning severity
-    report_warn = ComplianceReport(code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001, severity="warning", message="warn msg")
-
-    err = DomainValidationError("msg", report=report_warn)
-    # My simplified implementation doesn't map severity yet, need to fix that if I want this to pass.
-    # Or update the expectation if "CRITICAL" is the default.
-    # The user instruction was STRICT about `exceptions.py` content, but didn't provide `DomainValidationError`.
-    # I added `DomainValidationError` to support existing code. I should make it map severity.
-    assert err.fault.severity == FaultSeverity.WARNING  # I will update impl to pass this.
-
-    # Case: Info severity
-    report_info = ComplianceReport(code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001, severity="info", message="info msg")
-
-    err_info = DomainValidationError("msg", report=report_info)
-    assert err_info.fault.severity == FaultSeverity.WARNING
-
-
-def test_exception_remediation_payload() -> None:
-    # Case: With remediation
-    remediation = RemediationAction(
-        type="update_field", description="Fix it", patch_data=[{"op": "replace", "path": "/foo", "value": "bar"}]
+def test_exception_structure() -> None:
+    # Verify semantic fault fields
+    fault = SemanticFault(
+        error_code="TEST-ERR-001",
+        message="Test Message",
+        severity=FaultSeverity.WARNING,
+        recovery_action=RecoveryAction.RETRY,
+        context={"foo": "bar"},
     )
-
-    err = DomainValidationError("error msg", remediation=remediation)
-
-    # Check context population
-    assert err.fault.context["remediation"]["type"] == "update_field"
-
-    # Check __str__ serialization fallback
-    str_repr = str(err)
-    assert "error msg" in str_repr
+    assert fault.severity == FaultSeverity.WARNING
+    assert fault.context["foo"] == "bar"
 
 
-def test_exception_str_fallback() -> None:
-    # Case: No remediation
-    err = DomainValidationError("simple error")
-    assert str(err) == "simple error"
+def test_manifest_error_wrapping() -> None:
+    # Verify exception wrapping
+    fault = SemanticFault(
+        error_code="TEST-ERR-002",
+        message="Wrapped Error",
+        severity=FaultSeverity.CRITICAL,
+        recovery_action=RecoveryAction.HALT,
+    )
+    err = ManifestError(fault)
+    assert str(err) == "Wrapped Error"
+    assert err.fault.error_code == "TEST-ERR-002"
+
+
+def test_lineage_error_defaults() -> None:
+    # Verify specialized error defaults
+    err = LineageIntegrityError("Broken chain")
+    assert err.fault.error_code == "CRSN-SEC-LINEAGE-001"
+    assert err.fault.severity == FaultSeverity.CRITICAL
+    assert err.fault.recovery_action == RecoveryAction.HALT

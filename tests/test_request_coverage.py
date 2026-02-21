@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from coreason_manifest.spec.core.exceptions import LineageIntegrityError
+from coreason_manifest.spec.interop.exceptions import LineageIntegrityError
 from coreason_manifest.spec.interop.request import AgentRequest
 
 # --- test_request_coverage.py content ---

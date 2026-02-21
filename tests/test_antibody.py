@@ -35,11 +35,9 @@ def test_antibody_strict_float_failure() -> None:
     assert errors[0]["type"] == "float_type" or "Input should be a valid number" in errors[0]["msg"]
 
 
-def test_antibody_any_field_mutation() -> None:
+def test_antibody_any_field_mutation_dict_in_dict() -> None:
     """
-    If an 'Any' field (like inputs/outputs) receives NaN inside a structure,
-    Antibody converts it to DataAnomaly dict, and Pydantic accepts it.
-    This allows us to capture the anomaly payload safely.
+    Test recursive dict inside dict.
     """
     data = {"foo": "valid", "nested": {"deep": float("nan")}}
 
@@ -53,28 +51,24 @@ def test_antibody_any_field_mutation() -> None:
     assert anomaly["value_repr"] == "nan"
 
 
-def test_antibody_list_mutation() -> None:
+def test_antibody_any_field_mutation_list_in_dict() -> None:
     """
-    If a list contains NaN, it is mutated.
+    Test recursive list inside dict.
     """
+    data = {"foo": "valid", "nested": {"list": [float("nan")]}}
 
-    class ListPayload(AntibodyBase):
-        # We use list[Any] to allow the mutated DataAnomaly to be accepted
-        items: list[Any]
+    model = PayloadModel.model_validate(data)
 
-    data = {"items": [1.0, float("nan"), 3.0]}
-
-    model = ListPayload.model_validate(data)
-
-    assert model.items[0] == 1.0
-    assert isinstance(model.items[1], dict)
-    assert model.items[2] == 3.0
-    assert model.items[1]["path"] == "$.items[1]"
+    assert model.nested is not None
+    anomaly = model.nested["list"][0]
+    assert isinstance(anomaly, dict)
+    assert anomaly["code"] == "CRSN-ANTIBODY-FLOAT"
+    assert anomaly["path"] == "$.nested.list[0]"
 
 
-def test_antibody_nested_list_recursion() -> None:
+def test_antibody_list_mutation_dict_in_list() -> None:
     """
-    If a list contains a dict which contains NaN, it is mutated.
+    Test recursive dict inside list.
     """
 
     class ListPayload(AntibodyBase):
@@ -87,3 +81,20 @@ def test_antibody_nested_list_recursion() -> None:
     anomaly = model.items[0]["val"]
     assert isinstance(anomaly, dict)
     assert anomaly["path"] == "$.items[0].val"
+
+
+def test_antibody_list_mutation_list_in_list() -> None:
+    """
+    Test recursive list inside list.
+    """
+
+    class ListPayload(AntibodyBase):
+        items: list[Any]
+
+    data = {"items": [[float("nan")]]}
+
+    model = ListPayload.model_validate(data)
+
+    anomaly = model.items[0][0]
+    assert isinstance(anomaly, dict)
+    assert anomaly["path"] == "$.items[0][0]"
