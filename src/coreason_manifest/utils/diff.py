@@ -159,11 +159,11 @@ def _generate_diff(
                 # Otherwise, propagate the current next_domain.
                 # However, if 'recurse_domain_override' was passed to US (e.g. we are inside 'nodes'),
                 # we must use it for OUR children (the agents).
-                effective_domain = recurse_domain_override if recurse_domain_override else next_domain
+                effective_domain = recurse_domain_override or next_domain
                 changes.extend(_generate_diff(new_path, obj1[key], obj2[key], effective_domain, next_override))
 
     elif isinstance(obj1, list) and isinstance(obj2, list):
-        child_domain = recurse_domain_override if recurse_domain_override else domain
+        child_domain = recurse_domain_override or domain
 
         # SOTA Fix: Identity-based alignment to prevent semantic destruction
         def get_identity(item: Any) -> Any:

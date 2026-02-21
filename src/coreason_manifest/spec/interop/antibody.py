@@ -9,6 +9,7 @@ class DataAnomaly(BaseModel):
     Represents a quarantined data segment that failed strict validation
     due to non-computable values (NaN, Inf) or un-serializable types.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     code: str
@@ -22,6 +23,7 @@ class AnomalyDetectedError(ValueError):
     Raised when the Antibody layer intercepts dangerous data.
     Carries the payload of detected anomalies for telemetry.
     """
+
     def __init__(self, anomalies: list[DataAnomaly]):
         self.anomalies = anomalies
         super().__init__(f"Antibody intercepted {len(anomalies)} data anomalies.")
@@ -55,6 +57,7 @@ class AntibodyBase(BaseModel):
     Base class for Zero-Trust Boundary objects.
     Enforces a 'Quarantine' stage (Stage 1) before standard Pydantic Validation (Stage 2).
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     @model_validator(mode="before")

@@ -1,18 +1,22 @@
-import pytest
-import math
 from typing import Any
+
+import pytest
 from pydantic import ValidationError
-from coreason_manifest.spec.interop.antibody import AntibodyBase, AnomalyDetectedError, DataAnomaly
+
+from coreason_manifest.spec.interop.antibody import AnomalyDetectedError, AntibodyBase
+
 
 class PayloadModel(AntibodyBase):
     foo: str
     bar: float | None = None
     nested: dict[str, Any] | None = None
 
+
 def test_antibody_clean_data() -> None:
     data = {"foo": "valid", "bar": 1.23}
     model = PayloadModel.model_validate(data)
     assert model.foo == "valid"
+
 
 def test_antibody_nan_detection() -> None:
     data = {"foo": "invalid", "bar": float("nan")}
@@ -31,6 +35,7 @@ def test_antibody_nan_detection() -> None:
     # Expected path starts with $
     assert original_err.anomalies[0].path == "$.bar"
 
+
 def test_antibody_inf_detection() -> None:
     data = {"foo": "invalid", "bar": float("inf")}
 
@@ -42,13 +47,9 @@ def test_antibody_inf_detection() -> None:
     assert isinstance(original_err, AnomalyDetectedError)
     assert len(original_err.anomalies) == 1
 
+
 def test_antibody_nested_detection() -> None:
-    data = {
-        "foo": "valid",
-        "nested": {
-            "deep": float("nan")
-        }
-    }
+    data = {"foo": "valid", "nested": {"deep": float("nan")}}
 
     with pytest.raises(ValidationError) as exc:
         PayloadModel.model_validate(data)
@@ -59,6 +60,7 @@ def test_antibody_nested_detection() -> None:
 
     # Path: "$.nested.deep"
     assert original_err.anomalies[0].path == "$.nested.deep"
+
 
 def test_antibody_list_detection() -> None:
     class ListPayload(AntibodyBase):

@@ -1,16 +1,17 @@
-import pytest
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
-from datetime import datetime, UTC
+
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
-from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
+from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
+
 
 def create_node(
     node_id: str,
     parent: str | None = None,
     previous: list[str] | None = None,
     inputs: dict[str, Any] | None = None,
-    outputs: dict[str, Any] | None = None
+    outputs: dict[str, Any] | None = None,
 ) -> NodeExecution:
     if inputs is None:
         inputs = {}
@@ -21,7 +22,7 @@ def create_node(
 
     # Generate IDs
     req_id = str(uuid4())
-    root_id = str(uuid4()) # Simplification
+    root_id = str(uuid4())  # Simplification
 
     # Construct initial data to compute hash
 
@@ -36,7 +37,7 @@ def create_node(
         "root_request_id": root_id,
         "parent_hashes": previous,
         "parent_hash": parent,
-        "hash_version": "v2"
+        "hash_version": "v2",
     }
 
     # Helper to clean None
@@ -56,6 +57,7 @@ def create_node(
 
     return NodeExecution(**final_data)
 
+
 def test_linear_chain_verification() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2", parent=n1.execution_hash)
@@ -64,15 +66,17 @@ def test_linear_chain_verification() -> None:
     trace = [n1, n2, n3]
     assert verify_merkle_proof(trace), "Linear chain should verify"
 
+
 def test_dag_fan_in_verification() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2")
 
     # n3 depends on n1 and n2
-    n3 = create_node("n3", previous=[n1.execution_hash, n2.execution_hash]) # type: ignore
+    n3 = create_node("n3", previous=[n1.execution_hash, n2.execution_hash])  # type: ignore
 
     trace = [n1, n2, n3]
     assert verify_merkle_proof(trace), "DAG fan-in should verify"
+
 
 def test_topology_violation_hallucinated_parent() -> None:
     n1 = create_node("n1")
@@ -81,6 +85,7 @@ def test_topology_violation_hallucinated_parent() -> None:
     trace = [n1, n2]
     assert not verify_merkle_proof(trace), "Hallucinated parent should fail verification"
 
+
 def test_topology_violation_order() -> None:
     n1 = create_node("n1")
     n2 = create_node("n2", parent=n1.execution_hash)
@@ -88,6 +93,7 @@ def test_topology_violation_order() -> None:
     # Topological sort violation (child before parent)
     trace = [n2, n1]
     assert not verify_merkle_proof(trace), "Out-of-order trace should fail verification"
+
 
 def test_content_tampering() -> None:
     n1 = create_node("n1")

@@ -25,6 +25,7 @@ class SemanticFault(BaseModel):
     """
     Structured error envelope for all Manifest exceptions.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     error_code: str
@@ -38,6 +39,7 @@ class ManifestError(Exception):
     """
     Base class for all library exceptions, carrying a SemanticFault payload.
     """
+
     def __init__(self, fault: SemanticFault):
         self.fault = fault
         super().__init__(f"[{fault.error_code}] {fault.message}")
@@ -64,9 +66,7 @@ class DomainValidationError(ManifestError):
         if report:
             context["report"] = report.model_dump()
             # Map severity
-            if report.severity == "warning":
-                severity = Severity.WARNING
-            elif report.severity == "info":
+            if report.severity == "warning" or report.severity == "info":
                 severity = Severity.WARNING
 
             error_code = report.code
@@ -75,11 +75,7 @@ class DomainValidationError(ManifestError):
             context["remediation"] = remediation.model_dump()
 
         fault = SemanticFault(
-            error_code=error_code,
-            severity=severity,
-            recovery_action=recovery,
-            message=message,
-            context=context
+            error_code=error_code, severity=severity, recovery_action=recovery, message=message, context=context
         )
         super().__init__(fault)
         self.report = report

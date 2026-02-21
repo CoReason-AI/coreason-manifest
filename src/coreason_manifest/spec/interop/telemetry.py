@@ -51,9 +51,7 @@ class NodeExecution(BaseModel):
 
     # Topology: Support both Linear (parent_hash) and DAG (parent_hashes)
     parent_hash: str | None = Field(default=None, description="Hash of the single parent execution (Linear).")
-    parent_hashes: list[str] = Field(
-        default_factory=list, description="Hashes of preceding executions (DAG parents)."
-    )
+    parent_hashes: list[str] = Field(default_factory=list, description="Hashes of preceding executions (DAG parents).")
 
     signature: Annotated[str | None, Field(description="Optional cryptographic signature of the event.")] = None
 
