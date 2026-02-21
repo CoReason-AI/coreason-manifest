@@ -51,6 +51,7 @@ class TestAgent:
 """
     agent_file = tmp_path / "test_agent.py"
     agent_file.write_text(agent_code)
+    agent_file.chmod(0o600)
 
     # Setup capturing logger
     caplog.set_level(logging.WARNING, logger="coreason_manifest")

@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from coreason_manifest.utils.loader import load_agent_from_ref
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.utils.loader import SandboxedPathFinder, load_agent_from_ref, sandbox_context
 
 
 def test_sandboxed_import_resolution(tmp_path: Path) -> None:
@@ -11,7 +12,9 @@ def test_sandboxed_import_resolution(tmp_path: Path) -> None:
     jail.mkdir()
 
     (jail / "utils.py").write_text("def helper(): return 'helped'")
+    (jail / "utils.py").chmod(0o600)
     (jail / "agent.py").write_text("import utils\nclass Agent:\n    def run(self): return utils.helper()")
+    (jail / "agent.py").chmod(0o600)
 
     # Ensure jail is NOT in sys.path
     assert str(jail) not in sys.path
@@ -29,12 +32,16 @@ def test_sandboxed_import_isolation(tmp_path: Path) -> None:
     jail1 = tmp_path / "jail1"
     jail1.mkdir()
     (jail1 / "config.py").write_text("VALUE = 1")
+    (jail1 / "config.py").chmod(0o600)
     (jail1 / "agent.py").write_text("import config\nclass Agent:\n    val = config.VALUE")
+    (jail1 / "agent.py").chmod(0o600)
 
     jail2 = tmp_path / "jail2"
     jail2.mkdir()
     (jail2 / "config.py").write_text("VALUE = 2")
+    (jail2 / "config.py").chmod(0o600)
     (jail2 / "agent.py").write_text("import config\nclass Agent:\n    val = config.VALUE")
+    (jail2 / "agent.py").chmod(0o600)
 
     # Load from jail1
     agent1_cls = load_agent_from_ref("agent.py:Agent", root_dir=jail1)
@@ -47,3 +54,25 @@ def test_sandboxed_import_isolation(tmp_path: Path) -> None:
         assert getattr(agent2_cls, "val") == 2  # noqa: B009
     except AssertionError:
         pytest.fail("Sandboxed isolation failed: Module collision in sys.modules")
+
+
+def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
+    """Ensure SandboxedPathFinder strictly prevents path traversal via symlinks."""
+    jail = tmp_path / "jail"
+    jail.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+
+    # Create a malicious symlink inside the jail that points outside
+    malicious_link = jail / "malicious_module"
+    malicious_link.symlink_to(outside, target_is_directory=True)
+
+    finder = SandboxedPathFinder()
+
+    # Execute the finder within the sandbox context
+    with (
+        sandbox_context(jail),
+        pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
+    ):
+        # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
+        finder.find_spec("malicious_module")

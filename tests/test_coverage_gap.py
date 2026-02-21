@@ -18,6 +18,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload
@@ -263,40 +264,48 @@ def test_loader_spec_none_coverage() -> None:
     finder = SandboxedPathFinder()
     assert finder.find_spec("foo") is None  # jail_root not set
 
-    # ".." check
-    from coreason_manifest.utils.loader import SecurityViolationError, sandbox_context
+    # ".." check via symlink escape
+    import tempfile
 
-    with sandbox_context(Path(".")):
-        with pytest.raises(SecurityViolationError, match=r"Security Error: Reference ..foo escapes"):
-            finder.find_spec("..foo")
-        # line 119: init_py is file -> create dummy init
-        # line 126: module_py is file
+    from coreason_manifest.utils.loader import sandbox_context
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        jail = p / "jail"
+        jail.mkdir()
+        outside = p / "outside.py"
+        outside.write_text("x=1")
+
+        # Symlink inside jail pointing outside
+        # Note: Symlink creation might require privileges on Windows, but this is Linux environment
+        try:
+            (jail / "escaped.py").symlink_to(outside)
+        except OSError:
+            pytest.skip("Symlinks not supported")
+
+        with sandbox_context(jail), pytest.raises(SecurityJailViolationError, match="outside jail"):
+            finder.find_spec("escaped")
 
         # Test package loading (init.py exists)
-        import tempfile
-
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d)
-            (p / "mypkg").mkdir()
-            (p / "mypkg" / "__init__.py").touch()
-            with sandbox_context(p):
-                spec = finder.find_spec("mypkg")
-                assert spec is not None
-                assert spec.origin is not None
-                assert spec.origin.endswith("__init__.py")
+        (jail / "mypkg").mkdir()
+        (jail / "mypkg" / "__init__.py").touch()
+        with sandbox_context(jail):
+            spec = finder.find_spec("mypkg")
+            assert spec is not None
+            assert spec.origin is not None
+            assert spec.origin.endswith("__init__.py")
 
         # Test module loading (file.py exists)
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d)
-            (p / "mymod.py").touch()
-            with sandbox_context(p):
-                spec = finder.find_spec("mymod")
-                assert spec is not None
-                assert spec.origin is not None
-                assert spec.origin.endswith("mymod.py")
+        (jail / "mymod.py").touch()
+        with sandbox_context(jail):
+            spec = finder.find_spec("mymod")
+            assert spec is not None
+            assert spec.origin is not None
+            assert spec.origin.endswith("mymod.py")
 
         # If neither exists, returns None.
-        assert finder.find_spec("non_existent") is None
+        with sandbox_context(jail):
+            assert finder.find_spec("non_existent") is None
 
 
 def test_loader_stdlib_shadowing() -> None:
@@ -317,6 +326,7 @@ def test_loader_exception_handling_in_lock() -> None:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "broken.py").write_text("raise RuntimeError('Boom')")
+        (p / "broken.py").chmod(0o600)
 
         # Ensure we catch the error, but also that cleanup code runs.
         # The cleanup code checks if module_name in sys.modules.
@@ -565,6 +575,7 @@ def test_loader_exception_paths() -> None:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "dummy.py").touch()
+        (p / "dummy.py").chmod(0o600)
 
         # Mock spec_from_file_location to return None
         with (
@@ -593,8 +604,10 @@ def test_loader_cleanup_deps() -> None:
         p = Path(d)
         # dep1.py
         (p / "dep1.py").write_text("x = 1")
+        (p / "dep1.py").chmod(0o600)
         # agent1.py imports dep1
         (p / "agent1.py").write_text("import dep1\nclass Agent:\n    pass")
+        (p / "agent1.py").chmod(0o600)
 
         # Load
         # We need to ensure dep1 is NOT in sys.modules before
@@ -611,8 +624,10 @@ def test_loader_cleanup_deps() -> None:
         p = Path(d)
         # dep2.py
         (p / "dep2.py").write_text("x = 1")
+        (p / "dep2.py").chmod(0o600)
         # agent2.py imports dep2 then fails
         (p / "agent2.py").write_text("import dep2\nraise RuntimeError('fail')")
+        (p / "agent2.py").chmod(0o600)
 
         if "dep2" in sys.modules:
             del sys.modules["dep2"]
@@ -776,6 +791,7 @@ def test_loader_execution_exception_propagation() -> None:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
         (p / "fail.py").write_text("raise RuntimeError('Boom')")
+        (p / "fail.py").chmod(0o600)
 
         with pytest.raises(ValueError, match="Failed to execute agent code"):
             load_agent_from_ref("fail.py:Agent", root_dir=p)
@@ -788,7 +804,7 @@ def test_loader_dynamic_ref_recursion() -> None:
 
     import yaml
 
-    from coreason_manifest.utils.loader import SecurityViolationError, load_flow_from_file
+    from coreason_manifest.utils.loader import load_flow_from_file
 
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
@@ -802,7 +818,7 @@ def test_loader_dynamic_ref_recursion() -> None:
         }
         (p / "list_unsafe.yaml").write_text(yaml.dump(manifest))
 
-        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+        with pytest.raises(SecurityJailViolationError, match="Dynamic code execution"):
             load_flow_from_file(str(p / "list_unsafe.yaml"), allow_dynamic_execution=False)
 
         # Manifest with dynamic ref inside a nested dict
@@ -815,7 +831,7 @@ def test_loader_dynamic_ref_recursion() -> None:
         }
         (p / "dict_unsafe.yaml").write_text(yaml.dump(manifest_dict))
 
-        with pytest.raises(SecurityViolationError, match="Dynamic code execution"):
+        with pytest.raises(SecurityJailViolationError, match="Dynamic code execution"):
             load_flow_from_file(str(p / "dict_unsafe.yaml"), allow_dynamic_execution=False)
 
 
@@ -826,7 +842,7 @@ def test_loader_security_escapes() -> None:
 
     import yaml
 
-    from coreason_manifest.utils.loader import SecurityViolationError, load_agent_from_ref, load_flow_from_file
+    from coreason_manifest.utils.loader import load_agent_from_ref, load_flow_from_file
 
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
@@ -838,13 +854,13 @@ def test_loader_security_escapes() -> None:
         (jail / "bad_ref.yaml").write_text(yaml.dump(manifest))
         (p / "outside.yaml").write_text("content: 1")
 
-        with pytest.raises(SecurityViolationError, match="escapes the root directory"):
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
             load_flow_from_file(str(jail / "bad_ref.yaml"))
 
         # 2. agent ref escape
         (p / "outside.py").write_text("class Agent: pass")
 
-        with pytest.raises(SecurityViolationError, match="escapes the root directory"):
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
             load_agent_from_ref("../outside.py:Agent", root_dir=jail)
 
 
@@ -864,3 +880,68 @@ def test_loader_ref_load_failure() -> None:
 
         with pytest.raises(ValueError, match="Failed to load reference"):
             load_flow_from_file(str(p / "main.yaml"))
+
+
+def test_loader_find_spec_exceptions() -> None:
+    # Cover find_spec exceptions
+    from coreason_manifest.utils.loader import _jail_root_var
+
+    finder = SandboxedPathFinder()
+
+    # 1. RuntimeError("Symlink")
+    # We must mock _jail_root_var.get() to return a mock Path whose resolve raises error
+    # Or mock jail_root.joinpath to return a mock whose resolve raises error.
+
+    mock_root = MagicMock()
+    mock_potential = MagicMock()
+
+    # When joinpath is called, return mock_potential
+    mock_root.joinpath.return_value = mock_potential
+    # When resolve is called on potential, raise RuntimeError
+    mock_potential.resolve.side_effect = RuntimeError("Symlink loop")
+
+    token = _jail_root_var.set(mock_root)
+    try:
+        from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+
+        with pytest.raises(SecurityJailViolationError, match="Symlink loop"):
+            finder.find_spec("foo")
+    finally:
+        _jail_root_var.reset(token)
+
+    # 2. Other Exception -> returns None
+    # Reset side effect
+    mock_potential.resolve.side_effect = ValueError("Random error")
+    token = _jail_root_var.set(mock_root)
+    try:
+        assert finder.find_spec("foo") is None
+    finally:
+        _jail_root_var.reset(token)
+
+
+def test_loader_init_symlink_escape() -> None:
+    # Cover __init__.py symlink escape
+    import tempfile
+
+    from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+    from coreason_manifest.utils.loader import sandbox_context
+
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d)
+        jail = p / "jail"
+        jail.mkdir()
+        outside = p / "outside.py"
+        outside.touch()
+
+        # Create package dir
+        (jail / "pkg").mkdir()
+        # Symlink __init__.py to outside
+        try:
+            (jail / "pkg" / "__init__.py").symlink_to(outside)
+        except OSError:
+            pytest.skip("Symlinks not supported")
+
+        with sandbox_context(jail):
+            finder = SandboxedPathFinder()
+            with pytest.raises(SecurityJailViolationError, match="outside jail"):
+                finder.find_spec("pkg")

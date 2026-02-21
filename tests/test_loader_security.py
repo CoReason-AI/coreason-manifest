@@ -87,6 +87,7 @@ def test_loader_ast_import_from_banned(tmp_path: Path) -> None:
 
     file_path = tmp_path / "banned.py"
     file_path.write_text("from os import path\nclass Agent: pass")
+    file_path.chmod(0o600)  # Secure permissions
 
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
@@ -101,6 +102,7 @@ def test_loader_ast_relative_import(tmp_path: Path) -> None:
     file_path = tmp_path / "relative.py"
     # 'from . import sibling' -> node.module is None
     file_path.write_text("from . import sibling\nclass Agent: pass")
+    file_path.chmod(0o600)  # Secure permissions
 
     with contextlib.suppress(ValueError, ImportError, ModuleNotFoundError):
         load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
@@ -112,6 +114,7 @@ def test_loader_banned_call(tmp_path: Path) -> None:
 
     file_path = tmp_path / "banned_call.py"
     file_path.write_text("class Agent:\n    def run(self): eval('1+1')")
+    file_path.chmod(0o600)  # Secure permissions
 
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
@@ -123,6 +126,7 @@ def test_loader_not_a_class(tmp_path: Path) -> None:
 
     file_path = tmp_path / "not_class.py"
     file_path.write_text("NotAgent = 'just a string'")
+    file_path.chmod(0o600)  # Secure permissions
 
     with pytest.raises(TypeError) as exc:
         load_agent_from_ref(f"{file_path.name}:NotAgent", root_dir=tmp_path)
@@ -135,6 +139,7 @@ def test_loader_success(tmp_path: Path) -> None:
 
     file_path = tmp_path / "good.py"
     file_path.write_text("class Agent:\n    pass")
+    file_path.chmod(0o600)  # Secure permissions
 
     cls = load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
     assert cls.__name__ == "Agent"

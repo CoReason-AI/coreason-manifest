@@ -33,6 +33,7 @@ class Agent:
 """
     agent_file = tmp_path / "evil_agent.py"
     agent_file.write_text(malicious_code)
+    agent_file.chmod(0o600)
 
     # We expect a RuntimeSecurityWarning from the loader's AST check (which now only warns)
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
@@ -53,6 +54,7 @@ class Agent:
 """
     agent_file = tmp_path / "gadget.py"
     agent_file.write_text(gadget_code)
+    agent_file.chmod(0o600)
 
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
         load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)

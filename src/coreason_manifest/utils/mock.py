@@ -1,6 +1,7 @@
 import hashlib
 import json
 import random
+import secrets
 from datetime import UTC, datetime
 from typing import Any
 
@@ -10,15 +11,38 @@ from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
 
 class MockFactory:
-    def __init__(self, seed: int = 42):
-        self.rng = random.Random(seed)
+    def __init__(self, seed: int | None = None):
+        if seed is not None:
+            self.rng = random.Random(seed)
+        else:
+            self.rng = secrets.SystemRandom()
 
     def _generate_hash(self, data: str) -> str:
         return hashlib.sha256(data.encode()).hexdigest()
 
-    def _generate_schema_data(self, schema: dict[str, Any] | None) -> Any:
+    def _generate_schema_data(
+        self,
+        schema: dict[str, Any] | None,
+        visited: frozenset[int] | None = None,
+        depth: int = 0,
+    ) -> Any:
+        max_depth = 10
+
+        if depth > max_depth:
+            return ""
+
         if not schema:
             return {"mock_key": "mock_value"}
+
+        # Cycle detection
+        schema_id = id(schema)
+        if visited is None:
+            visited = frozenset()
+
+        if schema_id in visited:
+            return ""
+
+        visited = visited | {schema_id}
 
         # Simple schema support
         type_ = schema.get("type", "string")
@@ -32,9 +56,12 @@ class MockFactory:
             return self.rng.choice([True, False])
         if type_ == "object":
             props = schema.get("properties", {})
-            return {k: self._generate_schema_data(v) for k, v in props.items()}
+            return {k: self._generate_schema_data(v, visited, depth + 1) for k, v in props.items()}
         if type_ == "array":
-            return [self._generate_schema_data(schema.get("items"))]
+            items_schema = schema.get("items")
+            if items_schema:
+                return [self._generate_schema_data(items_schema, visited, depth + 1)]
+            return []
         return "mock_data"
 
     def simulate_trace(self, flow: GraphFlow | LinearFlow, max_steps: int = 20) -> list[NodeExecution]:
@@ -80,6 +107,7 @@ class MockFactory:
                 steps += 1
 
                 # Update prev_hashes for next iteration
+                # We know execution_hash is generated
                 prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
                 # Find next node
@@ -104,7 +132,10 @@ class MockFactory:
         if isinstance(node, SwarmNode):
             # Swarm Expansion Logic
             # Handle 'infinite' or None for concurrency
-            limit = 100 if node.max_concurrency == "infinite" or node.max_concurrency is None else node.max_concurrency
+            if node.max_concurrency == "infinite" or node.max_concurrency is None:
+                limit = 100
+            else:
+                limit = int(node.max_concurrency)
 
             concurrency = min(limit, 3)  # Use 3 as typical sample
             workers = []
@@ -162,9 +193,11 @@ class MockFactory:
         outputs: Any = {}
 
         if isinstance(node, PlannerNode):
-            outputs = self._generate_schema_data(node.output_schema)
+            raw_output = self._generate_schema_data(node.output_schema)
+            outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         elif isinstance(node, HumanNode):
-            outputs = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
+            raw_output = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
+            outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         else:
             outputs = {"result": "mock_output"}
 
