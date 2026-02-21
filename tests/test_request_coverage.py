@@ -7,7 +7,6 @@ from coreason_manifest.spec.interop.request import AgentRequest
 
 # --- test_request_coverage.py content ---
 
-
 def test_trace_integrity_rule2_root_consistency() -> None:
     """
     Test Rule 2: Root Consistency (If root == self, parent must be None)
