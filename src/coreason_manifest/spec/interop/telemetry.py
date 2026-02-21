@@ -48,12 +48,40 @@ class NodeExecution(BaseModel):
     # --- VERITAS INTEGRITY RESTORATION ---
     hash_version: Literal["v1", "v2"] = Field(default="v2", description="Versioning for the hashing strategy.")
     execution_hash: Annotated[str | None, Field(description="SHA-256 hash of inputs+outputs+config.")] = None
-    previous_hashes: list[str] = Field(
+
+    # Topology: Support both Linear (parent_hash) and DAG (parent_hashes)
+    parent_hash: str | None = Field(default=None, description="Hash of the single parent execution (Linear).")
+    parent_hashes: list[str] = Field(
         default_factory=list, description="Hashes of preceding executions (DAG parents)."
     )
+
     signature: Annotated[str | None, Field(description="Optional cryptographic signature of the event.")] = None
 
     _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
+
+    @model_validator(mode="before")
+    @classmethod
+    def enforce_topology_consistency(cls, data: Any) -> Any:
+        """
+        Ensures consistency between parent_hash and parent_hashes.
+        If parent_hash is set, it is automatically added to parent_hashes.
+        """
+        if isinstance(data, dict):
+            # Check if we need to modify
+            p_hash = data.get("parent_hash")
+            prev_hashes = data.get("parent_hashes")
+
+            if p_hash:
+                # Copy data to avoid side effects
+                data = data.copy()
+                if prev_hashes is None:
+                    data["parent_hashes"] = [p_hash]
+                elif isinstance(prev_hashes, list) and p_hash not in prev_hashes:
+                    # COPY list to avoid mutating shared state if any
+                    new_prev = prev_hashes.copy()
+                    new_prev.append(p_hash)
+                    data["parent_hashes"] = new_prev
+        return data
 
     @model_validator(mode="before")
     @classmethod

@@ -32,7 +32,7 @@ class MerkleNode(TypedDict):
     """
 
     execution_hash: str
-    previous_hashes: list[str]
+    parent_hashes: list[str]
 
 
 class HashingStrategy(ABC):
@@ -189,27 +189,14 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     if isinstance(node, dict):
         return node
 
-    # Fix: Strict tuple handling. No brittle casting.
-    # If the input is not a dict or a model, it is likely invalid for payload reconstruction.
-    # The previous implementation attempted `dict(node)` which works for list of tuples but is unsafe.
-    if isinstance(node, (list, tuple)):
-        # Explicit check if it looks like pairs
-        try:
-            return dict(node)
-        except (ValueError, TypeError) as e:
-            raise TypeError(f"Could not reconstruct payload from iterable {type(node)}") from e
-
-    # Fallback for other objects
-    try:
-        return dict(node)
-    except (ValueError, TypeError) as e:
-        raise TypeError(f"Could not reconstruct payload from {type(node)}") from e
+    # Strict SOTA Directive: No implicit casting.
+    raise TypeError(f"Could not reconstruct payload from {type(node)}. Must be dict or Pydantic model.")
 
 
 def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
     """
     Verifies the cryptographic integrity of a DAG trace.
-    Strictly enforcing NodeExecution structure.
+    Mathematically reconstructs the DAG topology to prove absence of parallel hallucinations.
     """
     if not trace:
         return False
@@ -218,45 +205,46 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
 
     for i, node in enumerate(trace):
         # 1. Verify Content Integrity
-        payload = reconstruct_payload(node)
+        try:
+            payload = reconstruct_payload(node)
+        except TypeError:
+            return False
 
-        # Determine hash version from payload if present, default to v1 for legacy compatibility?
-        # SOTA requires v2. If payload has 'hash_version', use it.
-        version = payload.get("hash_version", "v1")  # Default to v1 if unspecified? Or assume v2 for new system?
-        # Given "Greenfield Refactor", we default to v2 if missing, OR we check the node.
-        # But legacy logs might be v1.
-        # Ideally, look for 'hash_version' field.
-        if version not in ("v1", "v2"):
-            version = "v2"  # Fallback to latest
-
+        # SOTA Directive: Default to v2
+        version = payload.get("hash_version", "v2")
         computed_hash = compute_hash(payload, version=version)
 
-        stored_hash = None
-        if hasattr(node, "execution_hash"):
-            stored_hash = node.execution_hash
-        elif isinstance(node, dict):
-            stored_hash = node.get("execution_hash")
+        stored_hash = payload.get("execution_hash")
 
         if not stored_hash or stored_hash != computed_hash:
             return False
 
-        # 2. Extract declared parents
-        previous_hashes = payload.get("previous_hashes", [])
+        # 2. Extract declared parents (Topology Verification)
+        # Support both Linear (parent_hash) and DAG (parent_hashes)
+        parent_hashes = payload.get("parent_hashes", [])
+        parent_hash = payload.get("parent_hash")
+
+        expected_parents = set()
+        if parent_hashes:
+            expected_parents.update(parent_hashes)
+        if parent_hash:
+            expected_parents.add(parent_hash)
 
         # 3. Verify Linkage
-        if not previous_hashes:
+        if not expected_parents:
             # Genesis Node
             if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
                 return False
         else:
-            # Child Node
-            for prev_hash in previous_hashes:
+            # Child Node: Every declared parent must be present in the VERIFIED pool.
+            for prev_hash in expected_parents:
                 if trusted_root_hash and prev_hash == trusted_root_hash:
                     continue
                 if prev_hash not in verified_hashes:
+                    # Topology Violation: Node claims a parent that hasn't been verified.
                     return False
 
-        # 4. Add to verified set
+        # 4. Add to verified set (Topological Progress)
         verified_hashes.add(stored_hash)
 
     return True
