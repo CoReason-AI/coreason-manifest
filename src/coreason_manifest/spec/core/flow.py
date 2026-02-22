@@ -34,26 +34,16 @@ class FlowMetadata(CoreasonModel):
 
 class DataSchema(CoreasonModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
-    schema: dict[str, Any] = Field(
-        default_factory=dict,
-    )
+    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
 
     @property
     def schema(self) -> dict[str, Any]:
-        return self.schema
-
-    @model_validator(mode="before")
-    @classmethod
-    def compat_schema(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if "json_schema" in data and "schema" not in data:
-                data["schema"] = data.pop("json_schema")
-        return data
+        return self.json_schema
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
         try:
-            jsonschema.validators.validator_for(self.schema).check_schema(self.schema)
+            jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
         except SchemaError as e:
             raise ManifestError(
                 fault=SemanticFault(
@@ -128,7 +118,7 @@ class FlowDefinitions(CoreasonModel):
 
 
 class VariableDef(CoreasonModel):
-    id: str = Field(..., alias="name")
+    id: str = Field(default_factory=lambda: str(uuid4()), alias="name")
     type: str
     description: str | None = None
 

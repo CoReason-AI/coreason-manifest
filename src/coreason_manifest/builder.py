@@ -287,8 +287,8 @@ class NewGraphFlow(BaseFlowBuilder):
         self._entry_point: str | None = None
         # Defaults
         self.interface = FlowInterface(
-            inputs=DataSchema(schema={}),
-            outputs=DataSchema(schema={}),
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
         )
         self.blackboard: Blackboard | None = None
 
@@ -350,8 +350,8 @@ class NewGraphFlow(BaseFlowBuilder):
         # Mandate says: "Replace the naive dict with a full JSON Schema definition"
         # The builder might accept the full schema dict.
         self.interface = FlowInterface(
-            inputs=DataSchema(schema=inputs),
-            outputs=DataSchema(schema=outputs),
+            inputs=DataSchema(json_schema=inputs),
+            outputs=DataSchema(json_schema=outputs),
         )
         return self
 

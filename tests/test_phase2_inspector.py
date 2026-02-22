@@ -11,8 +11,8 @@ def test_inspector_lifecycle_graph() -> None:
     # Domain 4: Add Blackboard variables for data flow validation
     flow_builder.set_blackboard(
         {
-            "result_score": VariableDef(type="float", description="Score"),
-            "verification_result": VariableDef(type="boolean", description="Result"),
+            "result_score": VariableDef(id="unknown", type="float", description="Score"),
+            "verification_result": VariableDef(id="unknown", type="boolean", description="Result"),
         }
     )
 
