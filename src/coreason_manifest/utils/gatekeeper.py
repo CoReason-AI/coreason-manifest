@@ -1,7 +1,7 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
@@ -53,7 +53,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             reasoning = profile.reasoning
 
         if reasoning and hasattr(reasoning, "required_capabilities"):
-            return reasoning.required_capabilities()
+            return cast("list[str]", reasoning.required_capabilities())
         return []
 
     # Build tool map: name -> tool_object
@@ -265,7 +265,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
         while queue:
             curr = queue.pop(0)
-            for neighbor in adj.get(curr, []):
+            for neighbor in adj.get(curr or "", []):
                 if neighbor not in reachable:
                     reachable.add(neighbor)
                     queue.append(neighbor)
@@ -417,7 +417,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             if curr == target_node.id:
                 reachable = True
                 break
-            for n in adj.get(curr, []):
+            for n in adj.get(curr or "", []):
                 if n not in full_visited:
                     full_visited.add(n)
                     full_queue.append(n)
@@ -438,7 +438,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
                 continue
 
             # Expand neighbors
-            for neighbor in adj.get(curr_id, []):
+            for neighbor in adj.get(curr_id or "", []):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     queue.append(neighbor)
