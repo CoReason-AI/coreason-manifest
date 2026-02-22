@@ -281,7 +281,7 @@ class SwarmNode(Node):
         Field(description="Limit parallel workers. Use 'infinite' for no limit.", examples=[10]),
     ]
 
-    # SOTA: Reliability (Partial Failure)
+    # Architecture: Reliability (Partial Failure)
     failure_tolerance_percent: Annotated[
         float,
         Field(

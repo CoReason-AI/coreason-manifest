@@ -24,7 +24,7 @@ from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCat
 from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.gatekeeper import validate_policy
-from coreason_manifest.utils.integrity import CanonicalV2Strategy, compute_hash, reconstruct_payload
+from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash, reconstruct_payload
 
 # --- Mocks for Flow ---
 
@@ -160,7 +160,7 @@ def test_telemetry_request_orphaned_trace() -> None:
     Test AgentRequest orphaned trace detection.
     """
     # Case B: Parent but no root -> Error
-    # SOTA Fix: Expect ExceptionGroup wrapping LineageIntegrityError
+    # Architectural Note: Expect ExceptionGroup wrapping LineageIntegrityError
     with pytest.raises(ExceptionGroup) as excinfo:
         AgentRequest(
             agent_id="test",
@@ -220,7 +220,7 @@ def test_integrity_sanitization() -> None:
         "nested": {"d": 4, "c": 3, "execution_hash": "nested_bad", "timestamp": dt},
     }
 
-    strategy = CanonicalV2Strategy()
+    strategy = CanonicalHashingStrategy()
     sanitized = strategy._recursive_sort_and_sanitize(data)
 
     # Check stripped keys
@@ -280,7 +280,7 @@ def test_topology_utility_island_acyclic_unsafe() -> None:
     topo_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topo_errors) == 1
 
-    # SOTA Fix: Aggregated reporting
+    # Architectural Note: Aggregated reporting
     report = topo_errors[0]
     assert "unsafe" in report.details["dangerous_nodes"]
     assert report.details["risk_details"]["unsafe"] is not None

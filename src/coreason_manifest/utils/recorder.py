@@ -56,7 +56,7 @@ class BlackBoxRecorder:
         # It MUST include parent_hashes (sorted for determinism) to enforce the chain.
         # We exclude execution_hash (which we are computing) and signature (optional/external).
 
-        # SOTA: Generate Trace IDs explicitly to ensure hash consistency.
+        # Architecture: Generate Trace IDs explicitly to ensure hash consistency.
         # NodeExecution would auto-generate them, but we need them for the hash calculation.
         request_id = str(uuid4())
         # Default behavior: If we don't know parent, we are root.

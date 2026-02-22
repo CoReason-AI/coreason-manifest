@@ -532,7 +532,7 @@ def test_flow_cycle_detection_unreachable() -> None:
     )
 
     # Cycle detection is now in Published GraphFlow validation (verify_integrity)
-    # SOTA Update: Cycle detection is relaxed in Graph model. It is now handled by Gatekeeper policy.
+    # Architectural Update: Cycle detection is relaxed in Graph model. It is now handled by Gatekeeper policy.
     # Therefore, verify_integrity(strict=True) should NO LONGER raise for cycles.
     flow = GraphFlow(
         kind="GraphFlow",

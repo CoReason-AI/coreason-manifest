@@ -46,7 +46,7 @@ class HashingStrategy(ABC):
         """Computes the deterministic hash of the object."""
 
 
-class CanonicalV2Strategy(HashingStrategy):
+class CanonicalHashingStrategy(HashingStrategy):
     """
     SOTA hashing strategy (RFC 8785 Compliance).
     Note: This implementation approximates true JCS (RFC 8785) compliance.
@@ -65,7 +65,7 @@ class CanonicalV2Strategy(HashingStrategy):
         if isinstance(obj, dict):
             # Universal Hash Sanitization:
             # Strip modern keys (execution_hash, signature, __*)
-            # Also strip None values (SOTA requirement)
+            # Also strip None values (Architectural requirement)
             return {
                 k: self._recursive_sort_and_sanitize(v)
                 for k, v in sorted(obj.items())
@@ -96,7 +96,7 @@ class CanonicalV2Strategy(HashingStrategy):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
             return obj
 
-        # SOTA Fix: Enforce strict deterministic types.
+        # Architectural Note: Enforce strict deterministic types.
         if isinstance(obj, (int, str, bool)) or obj is None:
             return obj
 
@@ -123,10 +123,10 @@ class CanonicalV2Strategy(HashingStrategy):
 
 def compute_hash(obj: Any) -> str:
     """
-    Computes a SHA-256 hash of a JSON-serializable object using SOTA v2 (RFC 8785).
+    Computes a SHA-256 hash of a JSON-serializable object using the CanonicalHashingStrategy (RFC 8785).
     """
-    # Inherently use CanonicalV2Strategy
-    return CanonicalV2Strategy().compute_hash(obj)
+    # Inherently use CanonicalHashingStrategy
+    return CanonicalHashingStrategy().compute_hash(obj)
 
 
 def reconstruct_payload(node: Any) -> dict[str, Any]:
@@ -140,7 +140,7 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     if isinstance(node, dict):
         return node
 
-    # Strict SOTA Directive: No implicit casting.
+    # Strict Design Rule: No implicit casting.
     raise TypeError(f"Could not reconstruct payload from {type(node)}. Must be dict or Pydantic model.")
 
 
@@ -161,7 +161,7 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
         except TypeError:
             return False
 
-        # SOTA Directive: Always use v2
+        # Design Rule: Always use v2
         computed_hash = compute_hash(payload)
 
         stored_hash = payload.get("execution_hash")

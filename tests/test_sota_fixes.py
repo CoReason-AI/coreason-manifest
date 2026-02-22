@@ -58,7 +58,7 @@ def test_published_flow_forbids_cycles() -> None:
     # We must provide definitions for p1 profile validation (status=published triggers strict checks)
     defs = FlowDefinitions(profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)})
 
-    # SOTA Update: Cycles are no longer strictly banned by GraphFlow validation.
+    # Architectural Update: Cycles are no longer strictly banned by GraphFlow validation.
     # They are flagged by Gatekeeper.
     flow = GraphFlow(
         kind="GraphFlow",

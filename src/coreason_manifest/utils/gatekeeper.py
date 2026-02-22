@@ -73,7 +73,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     if allowed_domains:
         for tool_obj in tool_map.values():
-            # SOTA Fix: Utilize strict Pydantic HttpUrl object instead of manual string parsing
+            # Architectural Note: Utilize strict Pydantic HttpUrl object instead of manual string parsing
             if tool_obj.url and tool_obj.url.host:
                 domain_raw = str(tool_obj.url.host)
                 domain = canonicalize_domain(domain_raw)
@@ -256,7 +256,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 node_cycle_map[nid] = is_cycle
 
         # 5b. Utility Island Detection (Unreachable from Entry)
-        # SOTA Fix: Use explicit entry point
+        # Architectural Note: Use explicit entry point
         entry_nodes = []
         if flow.graph.entry_point:
             entry_nodes.append(flow.graph.entry_point)
@@ -373,7 +373,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     """
     if isinstance(flow, LinearFlow):
         # Scan sequence backwards from target
-        # SOTA Fix: Match by ID to verify identity, not just value equality
+        # Architectural Note: Match by ID to verify identity, not just value equality
         target_idx = -1
         for i, node in enumerate(flow.steps):
             if node.id == target_node.id:

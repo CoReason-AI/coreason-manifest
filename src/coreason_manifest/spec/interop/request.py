@@ -87,7 +87,7 @@ class AgentRequest(BaseModel):
 
         # Rule 1: Orphaned trace check (Parent exists, but Root missing)
         if self.parent_request_id and not self.root_request_id:
-            # SOTA Fix: Structured Exception Contracts
+            # Architectural Note: Structured Exception Contracts
             err = LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing).")
             err.add_note(f"Request ID: {self.request_id}")
             err.add_note(f"Parent Request ID: {self.parent_request_id}")

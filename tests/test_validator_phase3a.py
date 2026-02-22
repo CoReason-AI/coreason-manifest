@@ -92,7 +92,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
         entry_point="agent1",
     )
 
-    # SOTA Update: Referential integrity is strictly enforced during model validation.
+    # Architectural Update: Referential integrity is strictly enforced during model validation.
     # We expect ValidationError immediately upon instantiation.
     with pytest.raises(ValidationError) as excinfo:
         GraphFlow(
@@ -236,7 +236,7 @@ def test_validate_graph_flow_empty() -> None:
     # Entry point missing is checked in verify_integrity (strict) or validate_flow
     graph = Graph(nodes={}, edges=[], entry_point="missing")
 
-    # SOTA Update: Strict referential integrity enforcement causes validation error on instantiation.
+    # Architectural Update: Strict referential integrity enforcement causes validation error on instantiation.
     with pytest.raises(ValidationError, match="Entry point 'missing' not found in nodes"):
         GraphFlow(
             kind="GraphFlow",

@@ -84,7 +84,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
         symbol_table: dict[str, str] = {}
         if flow.blackboard:
             for name, var_def in flow.blackboard.variables.items():
-                # SOTA Fix: Normalize to lowercase to handle "List", "ARRAY", etc.
+                # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
                 symbol_table[name] = var_def.type.lower()
         if flow.interface:
             inputs = flow.interface.inputs
@@ -314,7 +314,7 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
     # All nodes physically present in the dict
     all_ids = set(graph.nodes.keys())
 
-    # SOTA Fix: Use explicit entry point
+    # Architectural Note: Use explicit entry point
     entry_point = graph.entry_point
 
     targeted_ids = {edge.to_node for edge in graph.edges}

@@ -95,14 +95,14 @@ class Governance(CoreasonModel):
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:
-        # SOTA Fix: Enforce strict canonicalization (RFC 8785 / IDNA 2008)
+        # Architectural Note: Enforce strict canonicalization (RFC 8785 / IDNA 2008)
         from urllib.parse import urlparse
 
         from coreason_manifest.utils.net_utils import canonicalize_domain
 
         cleaned = []
         for d in v:
-            # SOTA Fix: Extract host from URL-like strings to prevent policy bypass via paths/schemes.
+            # Architectural Note: Extract host from URL-like strings to prevent policy bypass via paths/schemes.
             # Handle "https://example.com/api" -> "example.com"
             # Handle "example.com/api" -> "example.com"
             candidate = d

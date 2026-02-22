@@ -74,7 +74,7 @@ def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: boo
 UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping_unique)
 
 
-# SOTA Security: Context-aware jail root for import resolution.
+# Security Requirement: Context-aware jail root for import resolution.
 # Uses ContextVar to handle async concurrency safely without race conditions.
 _jail_root_var: ContextVar[Path | None] = ContextVar("jail_root", default=None)
 _jail_modules_var: ContextVar[set[str] | None] = ContextVar("jail_modules", default=None)
@@ -104,7 +104,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         if not jail_root:
             return None
 
-        # SOTA Fix: Pathlib based validation
+        # Architectural Note: Pathlib based validation
         parts = fullname.split(".")
 
         # Security: Module Isolation via Namespacing
@@ -158,7 +158,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
             spec = importlib.util.spec_from_file_location(namespaced_name, found_py)
 
         if spec:
-            # SOTA Fix: Track module as managed by this sandbox context to enable precise cleanup.
+            # Architectural Note: Track module as managed by this sandbox context to enable precise cleanup.
             modules = _jail_modules_var.get()
             if modules is not None:
                 modules.add(namespaced_name)
@@ -182,7 +182,7 @@ def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
         sys.meta_path.insert(0, _SANDBOXED_FINDER)
 
     token_root = _jail_root_var.set(jail_root.resolve())
-    # SOTA Fix: Initialize a fresh set for this context to track loaded modules.
+    # Architectural Note: Initialize a fresh set for this context to track loaded modules.
     token_modules = _jail_modules_var.set(set())
     try:
         yield
@@ -301,7 +301,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     file_ref, class_name = reference.rsplit(":", 1)
 
-    # SOTA Fix: Strict Pathlib Resolution
+    # Architectural Note: Strict Pathlib Resolution
     try:
         # Resolve path strictly (must exist) and canonicalize
         file_path = (root_dir / file_ref).resolve(strict=True)

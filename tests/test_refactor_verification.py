@@ -382,7 +382,7 @@ def test_strict_integrity() -> None:
     # We must construct payload exactly as reconstruct_payload does to get matching hashes.
     # reconstruct_payload adds 'attributes': {} and sorts 'previous_hashes'
 
-    # SOTA: defaults to v2. We must be explicit or match default.
+    # Architecture: defaults to v2. We must be explicit or match default.
     data1_raw = {"node_id": "n1", "state": "success", "previous_hashes": [], "hash_version": "v2"}
     # Use reconstruct_payload to normalize before hashing, to match verification logic
     payload1 = reconstruct_payload(data1_raw)

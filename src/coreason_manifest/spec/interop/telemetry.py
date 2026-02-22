@@ -36,7 +36,7 @@ class NodeExecution(AntibodyBase):
     duration_ms: float
     attributes: dict[str, str | int | float | bool] = Field(default_factory=dict)
 
-    # --- TRACE CONTEXT (SOTA Telemetry) ---
+    # --- TRACE CONTEXT (Standard Telemetry) ---
     request_id: str | None = Field(default=None, description="Current execution ID (Span ID).")
     parent_request_id: str | None = Field(default=None, description="Parent execution ID.")
     root_request_id: str | None = Field(default=None, description="Trace ID (Root).")
@@ -49,7 +49,7 @@ class NodeExecution(AntibodyBase):
     tracestate: str | None = Field(default=None, description="W3C Trace Context: tracestate header")
 
     # --- VERITAS INTEGRITY RESTORATION ---
-    hash_version: Literal["v2"] = Field(default="v2", description="Enforced V2 Merkle hashing strategy.")
+    hash_version: Literal["v2"] = Field(default="v2", description="Cryptographic hashing protocol version.")
     execution_hash: Annotated[str | None, Field(description="SHA-256 hash of inputs+outputs+config.")] = None
 
     # Topology: Support both Linear (parent_hash) and DAG (parent_hashes)

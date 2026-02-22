@@ -231,7 +231,7 @@ def test_graph_cycle_explicit_entry() -> None:
     graph = Graph(nodes={"a1": agent}, edges=[Edge(from_node="a1", to_node="a1")], entry_point="a1")
 
     # Should fail when publishing
-    # SOTA Update: Cycles are no longer strictly banned by GraphFlow validation.
+    # Architectural Update: Cycles are no longer strictly banned by GraphFlow validation.
     # They are flagged by Gatekeeper.
     flow = GraphFlow(
         kind="GraphFlow",
@@ -274,7 +274,7 @@ def test_integrity_compute_hash_variants() -> None:
         def __str__(self) -> str:
             return "plain"
 
-    # SOTA Fix: Strict integrity ensures we don't silently fallback to str()
+    # Architectural Note: Strict integrity ensures we don't silently fallback to str()
     with pytest.raises(TypeError, match="is not deterministically serializable"):
         compute_hash(PlainObj())
 

@@ -21,7 +21,7 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.utils.integrity import CanonicalV2Strategy, compute_hash
+from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
 
 
@@ -158,7 +158,7 @@ def test_compute_hash_pydantic_exclusion() -> None:
 
     # Ensure integrity_hash would change hash if included
     # We can verify _recursive_sort_and_sanitize logic
-    strategy = CanonicalV2Strategy()
+    strategy = CanonicalHashingStrategy()
     sanitized = strategy._recursive_sort_and_sanitize(m)
     assert "integrity_hash" not in sanitized
     assert "signature" not in sanitized
@@ -335,7 +335,7 @@ def test_recursive_schema_strict_validation() -> None:
 
     from unittest.mock import patch
 
-    # SOTA: Validation runs directly. We mock check_schema to raise error to verify it is called.
+    # Architecture: Validation runs directly. We mock check_schema to raise error to verify it is called.
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
         mock_check.side_effect = SchemaError("Invalid default")
 

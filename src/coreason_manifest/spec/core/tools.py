@@ -29,7 +29,7 @@ class ToolCapability(CoreasonModel):
         None, description="Human-readable description of what the tool does.", examples=["Performs basic arithmetic."]
     )
     requires_approval: bool = Field(False, description="If True, human approval is required before execution.")
-    # SOTA Fix: Strict URL validation
+    # Architectural Note: Strict URL validation
     url: HttpUrl | None = Field(
         None, description="Documentation or endpoint URL.", examples=["https://example.com/docs"]
     )

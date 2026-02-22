@@ -304,7 +304,7 @@ def test_dag_integrity_dict_nodes() -> None:
     from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 
     # 1. Genesis dict
-    # SOTA: Set hash_version="v2" explicitly to match default compute_hash strategy
+    # Architecture: Set hash_version="v2" explicitly to match default compute_hash strategy
     n1_dict = {
         "node_id": "n1",
         "state": "COMPLETED",
