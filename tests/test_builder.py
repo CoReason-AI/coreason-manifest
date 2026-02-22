@@ -35,7 +35,7 @@ def test_linear_builder() -> None:
 
     assert flow.kind == "LinearFlow"
     assert flow.metadata.name == "MyLinear"
-    assert len(flow.sequence) == 2
+    assert len(flow.steps) == 2
     assert flow.definitions is not None
     assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
@@ -111,7 +111,7 @@ def test_graph_builder_invalid() -> None:
     # So it raises "Entry point 'missing_entry_point' not found in nodes."
     # The original test expected "Validation failed".
     # I will update the match string.
-    with pytest.raises(ValueError, match="Entry point 'missing_entry_point' not found in nodes"):
+    with pytest.raises(ValueError, match="Graph must contain at least one node"):
         builder.build()
 
 
@@ -146,9 +146,9 @@ def test_builder_coverage_set_circuit_breaker_without_governance() -> None:
 def test_builder_coverage_add_inspector_linear() -> None:
     """Test add_inspector method in NewLinearFlow."""
     builder = NewLinearFlow("Test", "1.0.0", "Desc")
-    builder.add_inspector(node_id="inspector1", to_node="var1", criteria="criteria1", output="out1")
-    assert len(builder.sequence) == 1
-    node = builder.sequence[0]
+    builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
+    assert len(builder.steps) == 1
+    node = builder.steps[0]
     assert node.id == "inspector1"
     assert node.type == "inspector"
 
@@ -156,7 +156,7 @@ def test_builder_coverage_add_inspector_linear() -> None:
 def test_builder_coverage_add_inspector_graph() -> None:
     """Test add_inspector method in NewGraphFlow."""
     builder = NewGraphFlow("Test", "1.0.0", "Desc")
-    builder.add_inspector(node_id="inspector1", to_node="var1", criteria="criteria1", output="out1")
+    builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
     assert "inspector1" in builder._nodes
     node = builder._nodes["inspector1"]
     assert node.type == "inspector"
@@ -168,8 +168,8 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
     builder_l = NewLinearFlow("Test", "1.0.0", "Desc")
     builder_l.define_profile("brain1", "role", "persona")
     builder_l.add_agent_ref("agent1", "brain1")  # Default tools=None -> []
-    assert len(builder_l.sequence) == 1
-    node_l = builder_l.sequence[0]
+    assert len(builder_l.steps) == 1
+    node_l = builder_l.steps[0]
     assert isinstance(node_l, AgentNode)
     assert node_l.tools == []
 
@@ -191,7 +191,7 @@ def test_builder_coverage_explicit_add_agent() -> None:
     # Linear
     builder_l = NewLinearFlow("Test", "1.0.0", "Desc")
     builder_l.add_agent(agent)
-    assert len(builder_l.sequence) == 1
+    assert len(builder_l.steps) == 1
 
     # Graph
     builder_g = NewGraphFlow("Test", "1.0.0", "Desc")
@@ -310,7 +310,7 @@ def test_builder_graph_missing_entry_point() -> None:
     builder = NewGraphFlow("Empty Graph")
     # No nodes added
 
-    with pytest.raises(ValueError, match="Entry point 'missing_entry_point' not found in nodes"):
+    with pytest.raises(ValueError, match="Graph must contain at least one node"):
         builder.build()
 
 

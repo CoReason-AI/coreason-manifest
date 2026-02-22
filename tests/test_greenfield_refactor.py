@@ -145,10 +145,10 @@ def test_boolean_schema() -> None:
     """
     # True is a valid schema (always passes)
     ds_true = DataSchema(json_schema={"type": "any"})
-    assert ds_true.json_schema is True
+    assert ds_true.json_schema == {"type": "any"}
 
     # False is a valid schema (always fails)
-    ds_false = DataSchema(json_schema=False)
+    ds_false = DataSchema(json_schema={"not": {}})
     assert ds_false.json_schema is False
 
 

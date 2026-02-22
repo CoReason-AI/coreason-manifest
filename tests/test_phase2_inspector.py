@@ -19,7 +19,7 @@ def test_inspector_lifecycle_graph() -> None:
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
         node_id="inspector-1",
-        to_node="result_score",
+        target="result_score",
         criteria="Score must be > 0.8",
         output="verification_result",
         pass_threshold=0.8,
@@ -65,7 +65,7 @@ def test_inspector_lifecycle_linear() -> None:
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
         node_id="inspector-2",
-        to_node="result_quality",
+        target="result_quality",
         criteria="Quality must be high",
         output="quality_check",
         pass_threshold=0.9,

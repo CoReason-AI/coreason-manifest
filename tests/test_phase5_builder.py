@@ -96,10 +96,10 @@ def test_linear_flow_integration() -> None:
     flow_builder.add_agent(agent)
 
     # Verify it was added to sequence
-    assert agent in flow_builder.sequence
+    assert agent in flow_builder.steps
 
     # 3. Build Flow
     flow = flow_builder.build()
 
     assert flow is not None
-    assert flow.sequence[0] == agent
+    assert flow.steps[0] == agent
