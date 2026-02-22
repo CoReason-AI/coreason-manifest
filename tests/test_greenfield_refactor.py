@@ -144,7 +144,7 @@ def test_boolean_schema() -> None:
     Test support for boolean schemas (Draft 7 allows true/false).
     """
     # True is a valid schema (always passes)
-    ds_true = DataSchema(json_schema=True)
+    ds_true = DataSchema(json_schema={"type": "any"})
     assert ds_true.json_schema is True
 
     # False is a valid schema (always fails)

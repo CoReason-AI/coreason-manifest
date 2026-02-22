@@ -73,7 +73,7 @@ def test_coercion_string_list() -> None:
 def test_json_schema_export_meta() -> None:
     """Test that export_json_schema includes meta tags."""
     schema_str = Manifest.export_json_schema()
-    schema = json.loads(schema_str)
+    schema = schema_str
 
     assert schema["$schema"] == "http://json-schema.org/draft-07/schema#"
     assert schema["title"] == "Coreason Manifest Specification v2"

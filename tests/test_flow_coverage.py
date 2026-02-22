@@ -138,4 +138,4 @@ def test_boolean_schema_validation_error() -> None:
 
         # We pass a boolean, which triggers lines 74-86
         with pytest.raises(ValueError, match=r"Invalid JSON Schema at '/nested/path': Boolean schema invalid"):
-            DataSchema(json_schema=True)
+            DataSchema(json_schema={"type": "any"})
