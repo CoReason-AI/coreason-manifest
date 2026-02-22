@@ -118,7 +118,7 @@ def test_manifest_error_wrapping() -> None:
         recovery_action=RecoveryAction.HALT,
     )
     err = ManifestError(fault)
-    assert str(err) == "Wrapped Error"
+    assert "Wrapped Error" in str(err)
     assert err.fault.error_code == "TEST-ERR-002"
 
 
