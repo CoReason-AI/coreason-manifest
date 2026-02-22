@@ -1,4 +1,3 @@
-import warnings
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
@@ -181,38 +180,6 @@ class HumanNode(Node):
         Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout.", examples=[60]),
     ] = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def coerce_magic_numbers(cls, data: Any) -> Any:
-        """
-        Directive 1: Semantic Coercion.
-        Intercepts legacy '-1' magic numbers and converts them to 'infinite'.
-        """
-        if isinstance(data, dict):
-            # Fix 5: Functional Purity - Copy data to avoid side-effects
-            data = data.copy()
-
-            # Check timeout_seconds
-            val_timeout = data.get("timeout_seconds")
-            if val_timeout in (-1, "-1"):
-                warnings.warn(
-                    "Magic number '-1' detected in 'timeout_seconds'. Coercing to 'infinite'.",
-                    category=DeprecationWarning,
-                    stacklevel=2,
-                )
-                data["timeout_seconds"] = "infinite"
-
-            # Check shadow_timeout_seconds
-            val_shadow = data.get("shadow_timeout_seconds")
-            if val_shadow in (-1, "-1"):
-                warnings.warn(
-                    "Magic number '-1' detected in 'shadow_timeout_seconds'. Coercing to 'infinite'.",
-                    category=DeprecationWarning,
-                    stacklevel=2,
-                )
-                data["shadow_timeout_seconds"] = "infinite"
-        return data
-
     @model_validator(mode="after")
     def validate_interaction_config(self) -> "HumanNode":
         # Fix 4: Temporal Collision - Enforce mutual exclusion
@@ -343,22 +310,6 @@ class SwarmNode(Node):
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def coerce_magic_numbers(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            # Fix 5: Functional Purity - Copy data
-            data = data.copy()
-            val = data.get("max_concurrency")
-            if val in (-1, "-1"):
-                warnings.warn(
-                    "Magic number '-1' detected in 'max_concurrency'. Coercing to 'infinite'.",
-                    category=DeprecationWarning,
-                    stacklevel=2,
-                )
-                data["max_concurrency"] = "infinite"
-        return data
 
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":

@@ -192,11 +192,6 @@ class GraphFlow(CoreasonModel):
                 )
         return self
 
-    @classmethod
-    def export_json_schema(cls) -> dict[str, Any]:
-        """Legacy shim for schema export."""
-        return cls.model_json_schema()
-
 
 class LinearFlow(CoreasonModel):
     """

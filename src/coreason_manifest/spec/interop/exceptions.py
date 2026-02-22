@@ -8,19 +8,22 @@ class FaultSeverity(StrEnum):
     CRITICAL = "CRITICAL"
     RECOVERABLE = "RECOVERABLE"
     WARNING = "WARNING"
+    INFO = "INFO"
 
 
 class RecoveryAction(StrEnum):
-    HALT = "HALT"
-    RETRY = "RETRY"
-    FALLBACK = "FALLBACK"
-    QUARANTINE = "QUARANTINE"
+    HALT = "HALT_GRAPH"
+    RETRY = "PROMPT_RETRY"
+    SKIP = "SKIP_NODE"
+    IGNORE = "IGNORE"
 
 
 class SemanticFault(BaseModel):
-    """Machine-readable error envelope."""
+    """
+    Immutable error state envelope.
+    """
 
-    model_config = ConfigDict(frozen=True, strict=True)
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     error_code: str
     message: str
@@ -30,32 +33,21 @@ class SemanticFault(BaseModel):
 
 
 class ManifestError(Exception):
-    """Base exception for all Manifest protocol errors."""
+    """
+    Base exception for Coreason Manifest.
+    Backed by a SemanticFault model.
+    """
 
     def __init__(self, fault: SemanticFault) -> None:
-        super().__init__(fault.message)
         self.fault = fault
+        super().__init__(fault.message)
+
+    def __str__(self) -> str:
+        return f"[{self.fault.error_code}] {self.fault.message} (Severity: {self.fault.severity})"
 
 
-class LineageIntegrityError(ManifestError):
-    def __init__(self, message: str, context: dict[str, Any] | None = None) -> None:
-        fault = SemanticFault(
-            error_code="CRSN-SEC-LINEAGE-001",
-            message=message,
-            severity=FaultSeverity.CRITICAL,
-            recovery_action=RecoveryAction.HALT,
-            context=context or {},
-        )
-        super().__init__(fault)
-
-
-class SecurityJailViolationError(ManifestError):
-    def __init__(self, message: str, context: dict[str, Any] | None = None) -> None:
-        fault = SemanticFault(
-            error_code="CRSN-SEC-JAIL-002",
-            message=message,
-            severity=FaultSeverity.CRITICAL,
-            recovery_action=RecoveryAction.HALT,
-            context=context or {},
-        )
-        super().__init__(fault)
+class SecurityJailViolationError(Exception):
+    """
+    Raised when a file operation attempts to escape the sandbox jail.
+    Legacy exception retained for compatibility with loader.py.
+    """

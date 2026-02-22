@@ -33,7 +33,7 @@ class AgentRequest(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Versioning
-    hash_version: Literal["v1"] = Field(default="v1", description="Versioning for integrity strategies.")
+    hash_version: Literal["v2"] = Field(default="v2", description="Versioning for integrity strategies.")
 
     def create_child(self, metadata: dict[str, Any]) -> Self:
         return self.model_copy(
