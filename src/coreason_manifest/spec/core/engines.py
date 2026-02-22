@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -268,6 +268,10 @@ class RedTeamingReasoning(BaseReasoning):
     success_criteria: Annotated[
         str, Field(description="Natural language definition of a successful break (e.g. 'PII Leakage').")
     ]
+
+    @property
+    def to_node_model(self) -> Any:
+        return None
 
 
 class ComputerUseReasoning(BaseReasoning):

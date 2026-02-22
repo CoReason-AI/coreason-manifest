@@ -116,7 +116,7 @@ def test_schema_error_handling() -> None:
     invalid_schema = {"type": 123}
 
     with pytest.raises(ValueError, match="Invalid JSON Schema"):
-        DataSchema(schema=invalid_schema)
+        DataSchema(json_schema=invalid_schema)
 
 
 def test_unexpected_exception_handling(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -131,7 +131,7 @@ def test_unexpected_exception_handling(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(jsonschema.Draft7Validator, "check_schema", mock_check_schema)
 
     with pytest.raises(ValueError, match="Invalid JSON Schema definition: Unexpected boom"):
-        DataSchema(schema={"type": "string"})
+        DataSchema(json_schema={"type": "string"})
 
 
 # ------------------------------------------------------------------------
@@ -144,12 +144,12 @@ def test_boolean_schema() -> None:
     Test support for boolean schemas (Draft 7 allows true/false).
     """
     # True is a valid schema (always passes)
-    ds_true = DataSchema(schema=True)
-    assert ds_true.schema is True
+    ds_true = DataSchema(json_schema=True)
+    assert ds_true.json_schema is True
 
     # False is a valid schema (always fails)
-    ds_false = DataSchema(schema=False)
-    assert ds_false.schema is False
+    ds_false = DataSchema(json_schema=False)
+    assert ds_false.json_schema is False
 
 
 def test_schema_error_path_reporting() -> None:
@@ -172,7 +172,7 @@ def test_schema_error_path_reporting() -> None:
     }
 
     with pytest.raises(ValueError, match="Invalid JSON Schema") as excinfo:
-        DataSchema(schema=schema)
+        DataSchema(json_schema=schema)
 
     msg = str(excinfo.value)
     # The path should be present in the error message

@@ -249,7 +249,7 @@ def test_flow_schema_invalid_json_schema() -> None:
     Coverage for flow.py lines 69-70.
     """
     with pytest.raises(ValueError, match="Invalid JSON Schema"):
-        DataSchema(schema={"type": "invalid_type"})
+        DataSchema(json_schema={"type": "invalid_type"})
 
 
 # -------------------------------------------------------------------------

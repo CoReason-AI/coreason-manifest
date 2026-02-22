@@ -12,7 +12,9 @@ def _create_metadata() -> FlowMetadata:
 
 
 def _create_interface() -> FlowInterface:
-    return FlowInterface(inputs=DataSchema(schema={"type": "object"}), outputs=DataSchema(schema={"type": "object"}))
+    return FlowInterface(
+        inputs=DataSchema(json_schema={"type": "object"}), outputs=DataSchema(json_schema={"type": "object"})
+    )
 
 
 def test_mock_factory_init() -> None:

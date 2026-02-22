@@ -102,8 +102,8 @@ def test_graph_flow_definitions() -> None:
 
     metadata = FlowMetadata(name="test-graph", version="1.0.0", description="test", tags=[])
     interface = FlowInterface(
-        inputs=DataSchema(schema={}),
-        outputs=DataSchema(schema={}),
+        inputs=DataSchema(json_schema={}),
+        outputs=DataSchema(json_schema={}),
     )
     graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
 
@@ -209,8 +209,8 @@ def test_tool_integrity_failure_graph() -> None:
             metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
             definitions=definitions,
             interface=FlowInterface(
-                inputs=DataSchema(schema={}),
-                outputs=DataSchema(schema={}),
+                inputs=DataSchema(json_schema={}),
+                outputs=DataSchema(json_schema={}),
             ),
             blackboard=None,
             graph=graph,

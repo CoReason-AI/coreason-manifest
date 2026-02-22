@@ -32,30 +32,21 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
-    # Compatibility: field name 'schema' satisfies mypy when tests use schema=...
+    # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
-    schema: dict[str, Any] = Field(default_factory=dict, alias="json_schema")
-    # Alias json_schema allows loading from json_schema=... via Pydantic.
-    # Tests using schema=... match field name.
+    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
 
     @model_validator(mode="before")
     @classmethod
     def compat_json_schema(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            # If "json_schema" is passed, alias handles it?
-            # If "schema" is passed, field match handles it?
-            # We want to support BOTH.
-            pass
+        if isinstance(data, dict) and "schema" in data and "json_schema" not in data:
+            data["json_schema"] = data.pop("schema")
         return data
-
-    @property
-    def json_schema(self) -> dict[str, Any]:
-        return self.schema
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
         try:
-            jsonschema.validators.validator_for(self.schema).check_schema(self.schema)
+            jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
         except SchemaError as e:
             raise ManifestError(
                 fault=SemanticFault(
@@ -126,7 +117,7 @@ class FlowDefinitions(CoreasonModel):
     schemas: dict[str, Any] = Field(default_factory=dict)
     tools: dict[str, Any] = Field(default_factory=dict)
     tool_packs: dict[str, Any] = Field(default_factory=dict)
-    skills: dict[str, Any] = Field(default_factory=dict)  # Added skills
+    skills: dict[str, Any] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
 
@@ -200,6 +191,11 @@ class GraphFlow(CoreasonModel):
                     )
                 )
         return self
+
+    @classmethod
+    def export_json_schema(cls) -> dict[str, Any]:
+        """Legacy shim for schema export."""
+        return cls.model_json_schema()
 
 
 class LinearFlow(CoreasonModel):
