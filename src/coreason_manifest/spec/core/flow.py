@@ -1,4 +1,5 @@
 from typing import Annotated, Any, Literal
+from uuid import uuid4
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
@@ -31,8 +32,20 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
-    id: str
-    schema_def: dict[str, Any] = Field(..., alias="schema")
+    # Compatibility: default ID, alias json_schema to schema_def
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    schema_def: dict[str, Any] = Field(default_factory=dict, alias="schema")
+
+    @model_validator(mode="before")
+    @classmethod
+    def compat_json_schema(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "json_schema" in data and "schema" not in data:
+            data["schema"] = data.pop("json_schema")
+        return data
+
+    @property
+    def json_schema(self) -> dict[str, Any]:
+        return self.schema_def
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -60,6 +73,7 @@ class DataSchema(CoreasonModel):
 class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
+    persistence: Any | None = None  # Compatibility
 
 
 AnyNode = Annotated[
@@ -80,6 +94,16 @@ class Edge(CoreasonModel):
     to_node: NodeID = Field(..., alias="to")
     condition: str | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def compat_source_target(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "source" in data:
+                data["from"] = data.pop("source")
+            if "target" in data:
+                data["to"] = data.pop("target")
+        return data
+
 
 class Graph(CoreasonModel):
     nodes: dict[str, AnyNode]
@@ -96,7 +120,8 @@ class FlowDefinitions(CoreasonModel):
     profiles: dict[str, Any] = Field(default_factory=dict)
     schemas: dict[str, Any] = Field(default_factory=dict)
     tools: dict[str, Any] = Field(default_factory=dict)
-    tool_packs: dict[str, Any] = Field(default_factory=dict)  # Added based on Gatekeeper usage
+    tool_packs: dict[str, Any] = Field(default_factory=dict)
+    supervision_templates: Any | None = None  # Compatibility
 
 
 class VariableDef(CoreasonModel):
@@ -120,11 +145,17 @@ class GraphFlow(CoreasonModel):
     definitions: FlowDefinitions | None = None
     graph: Graph
 
+    @model_validator(mode="before")
+    @classmethod
+    def compat_blackboard(cls, data: Any) -> Any:
+        if isinstance(data, dict) and data.get("blackboard") is None:
+            data["blackboard"] = Blackboard()
+        return data
+
     @model_validator(mode="after")
     def validate_swarm_variables(self) -> "GraphFlow":
         variable_names = set(self.blackboard.variables.keys())
 
-        # graph.nodes is dict[str, AnyNode]
         nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
 
         for node in nodes_iter:
@@ -161,6 +192,16 @@ class LinearFlow(CoreasonModel):
     """
 
     type: Literal["linear"] = "linear"
+    kind: Literal["LinearFlow"] = "LinearFlow"  # Compatibility
+    status: Literal["draft", "published", "archived"] = "draft"  # Compatibility
     metadata: FlowMetadata
-    steps: list[AnyNode]
+    steps: list[AnyNode] = Field(default_factory=list, alias="sequence")
     governance: Governance | None = None
+    definitions: FlowDefinitions | None = None  # Compatibility
+
+    @model_validator(mode="before")
+    @classmethod
+    def compat_sequence(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "sequence" in data:
+            data["steps"] = data.pop("sequence")
+        return data
