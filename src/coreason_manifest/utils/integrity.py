@@ -48,7 +48,7 @@ class HashingStrategy(ABC):
 
 class CanonicalHashingStrategy(HashingStrategy):
     """
-    SOTA hashing strategy (RFC 8785 Compliance).
+    Canonical hashing strategy enforcing RFC 8785 compliance.
     Note: This implementation approximates true JCS (RFC 8785) compliance.
     Specific ECMA-262 double-precision float formatting is approximated by Python's
     standard library. Full compliance would require a custom dtoa implementation.
