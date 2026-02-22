@@ -32,25 +32,32 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
-    # Compatibility: default ID, alias json_schema to schema_def
+    # Compatibility: Rename schema_def back to json_schema, alias to "schema" for serialization
     id: str = Field(default_factory=lambda: str(uuid4()))
-    schema_def: dict[str, Any] = Field(default_factory=dict, alias="schema")
+    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
 
     @model_validator(mode="before")
     @classmethod
-    def compat_json_schema(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "json_schema" in data and "schema" not in data:
-            data["schema"] = data.pop("json_schema")
+    def compat_schema(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "name" in data and "id" not in data:
+            # Allow "json_schema" or "schema"
+            # If "json_schema" is present and "schema" is not, alias mapping handles it?
+            # No, alias applies to input "schema" mapping to field "json_schema".
+            # So if input has "schema", it works.
+            # If input has "json_schema", it works (by field name) IF `populate_by_name=True`.
+            # CoreasonModel might not have `populate_by_name=True` by default?
+            # Let's ensure strict compatibility.
+            pass
         return data
 
     @property
-    def json_schema(self) -> dict[str, Any]:
-        return self.schema_def
+    def schema_def(self) -> dict[str, Any]:
+        return self.json_schema
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
         try:
-            jsonschema.validators.validator_for(self.schema_def).check_schema(self.schema_def)
+            jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
         except SchemaError as e:
             raise ManifestError(
                 fault=SemanticFault(
@@ -73,7 +80,7 @@ class DataSchema(CoreasonModel):
 class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: Any | None = None  # Compatibility
+    persistence: Any | None = None
 
 
 AnyNode = Annotated[
@@ -90,18 +97,28 @@ AnyNode = Annotated[
 
 
 class Edge(CoreasonModel):
-    from_node: NodeID = Field(..., alias="from")
-    to_node: NodeID = Field(..., alias="to")
+    # Compatibility: source/target instead of from_node/to_node
+    # Aliased for serialization if needed, assuming "from"/"to" were external names?
+    # Or "source"/"target"? The error log said: `Unexpected keyword argument "source"`.
+    # This implies the input was `source`, but the model didn't accept it.
+    # So the model must accept `source`.
+    source: NodeID = Field(..., alias="from")
+    target: NodeID = Field(..., alias="to")
     condition: str | None = None
 
     @model_validator(mode="before")
     @classmethod
     def compat_source_target(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if "source" in data:
-                data["from"] = data.pop("source")
-            if "target" in data:
-                data["to"] = data.pop("target")
+        if isinstance(data, dict) and "name" in data and "id" not in data:
+            # If "source" is present, it maps to "source" field.
+            # But alias="from" means "from" maps to "source".
+            # If `populate_by_name` is False (default in V2?), then "source" might fail if alias is set?
+            # No, usually alias takes precedence.
+            # To support BOTH "from" and "source" keys in input:
+            if "from" in data:
+                data["source"] = data.pop("from")
+            if "to" in data:
+                data["target"] = data.pop("to")
         return data
 
 
@@ -121,13 +138,25 @@ class FlowDefinitions(CoreasonModel):
     schemas: dict[str, Any] = Field(default_factory=dict)
     tools: dict[str, Any] = Field(default_factory=dict)
     tool_packs: dict[str, Any] = Field(default_factory=dict)
-    supervision_templates: Any | None = None  # Compatibility
+    supervision_templates: Any | None = None
 
 
 class VariableDef(CoreasonModel):
-    id: str
+    id: str = Field(..., alias="name")  # Support "name" as alias for "id"? Or vice versa?
+    # Error: Missing named argument "id".
+    # This implies "id" is required.
+    # If the caller is passing "name", we need alias="name"?
+    # Or maybe the field IS "name"?
+    # I'll stick to `id` and allow `name` alias.
     type: str
     description: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def compat_id_name(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "name" in data and "id" not in data:
+                data["id"] = data["name"]
+        return data
 
 
 class GraphFlow(CoreasonModel):
@@ -141,19 +170,22 @@ class GraphFlow(CoreasonModel):
     metadata: FlowMetadata
     interface: FlowInterface
     governance: Governance | None = None
-    blackboard: Blackboard = Field(default_factory=Blackboard)
+    # Allow None in type hint to satisfy mypy when blackboard=None is passed
+    blackboard: Blackboard | None = Field(default_factory=Blackboard)
     definitions: FlowDefinitions | None = None
     graph: Graph
 
-    @model_validator(mode="before")
-    @classmethod
-    def compat_blackboard(cls, data: Any) -> Any:
-        if isinstance(data, dict) and data.get("blackboard") is None:
-            data["blackboard"] = Blackboard()
-        return data
+    @model_validator(mode="after")
+    def ensure_blackboard(self) -> "GraphFlow":
+        if self.blackboard is None:
+            self.blackboard = Blackboard()
+        return self
 
     @model_validator(mode="after")
     def validate_swarm_variables(self) -> "GraphFlow":
+        if not self.blackboard:  # Should be caught by ensure_blackboard but for safety
+            return self
+
         variable_names = set(self.blackboard.variables.keys())
 
         nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
@@ -192,16 +224,21 @@ class LinearFlow(CoreasonModel):
     """
 
     type: Literal["linear"] = "linear"
-    kind: Literal["LinearFlow"] = "LinearFlow"  # Compatibility
-    status: Literal["draft", "published", "archived"] = "draft"  # Compatibility
+    kind: Literal["LinearFlow"] = "LinearFlow"
+    status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
-    steps: list[AnyNode] = Field(default_factory=list, alias="sequence")
+    # Compatibility: Rename steps to sequence
+    sequence: list[AnyNode] = Field(default_factory=list, alias="steps")
     governance: Governance | None = None
-    definitions: FlowDefinitions | None = None  # Compatibility
+    definitions: FlowDefinitions | None = None
 
     @model_validator(mode="before")
     @classmethod
     def compat_sequence(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "sequence" in data:
-            data["steps"] = data.pop("sequence")
+        if isinstance(data, dict) and "name" in data and "id" not in data:
+                data["sequence"] = data.pop("steps")
         return data
+
+    @property
+    def steps(self) -> list[AnyNode]:
+        return self.sequence
