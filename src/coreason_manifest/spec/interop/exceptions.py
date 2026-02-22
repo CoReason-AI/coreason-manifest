@@ -46,8 +46,32 @@ class ManifestError(Exception):
         return f"[{self.fault.error_code}] {self.fault.message} (Severity: {self.fault.severity})"
 
 
-class SecurityJailViolationError(Exception):
+class SecurityJailViolationError(ManifestError):
     """
     Raised when a file operation attempts to escape the sandbox jail.
-    Legacy exception retained for compatibility with loader.py.
+    Legacy exception retained for compatibility with loader.py but upgraded to SOTA.
     """
+    def __init__(self, message: str) -> None:
+        super().__init__(
+            SemanticFault(
+                error_code="CRSN-SEC-JAIL-002",
+                message=message,
+                severity=FaultSeverity.CRITICAL,
+                recovery_action=RecoveryAction.HALT,
+            )
+        )
+
+
+class LineageIntegrityError(ManifestError):
+    """
+    Raised when a trace lineage violation is detected.
+    """
+    def __init__(self, message: str) -> None:
+        super().__init__(
+            SemanticFault(
+                error_code="CRSN-SEC-LINEAGE-001",
+                message=message,
+                severity=FaultSeverity.CRITICAL,
+                recovery_action=RecoveryAction.HALT,
+            )
+        )

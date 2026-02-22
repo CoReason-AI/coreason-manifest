@@ -49,7 +49,7 @@ def create_node(
 
     # Compute hash
     payload = temp_node.model_dump()
-    h = compute_hash(payload, version="v2")
+    h = compute_hash(payload)
 
     # Final node
     final_data = temp_node.model_dump()

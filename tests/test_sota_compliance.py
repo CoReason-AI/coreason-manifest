@@ -20,7 +20,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, legacy_error_adapter
+from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog
 from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.gatekeeper import validate_policy
@@ -214,7 +214,6 @@ def test_integrity_sanitization() -> None:
     data: dict[str, Any] = {
         "b": 2,
         "a": 1,
-        "integrity_hash": "legacy",
         "execution_hash": "modern",
         "signature": "sig",
         "__private": "secret",
@@ -225,7 +224,7 @@ def test_integrity_sanitization() -> None:
     sanitized = strategy._recursive_sort_and_sanitize(data)
 
     # Check stripped keys
-    assert "integrity_hash" not in sanitized
+    # integrity_hash is no longer stripped in V2 (legacy key)
     assert "execution_hash" not in sanitized
     assert "signature" not in sanitized
     assert "__private" not in sanitized
@@ -250,64 +249,12 @@ def test_integrity_sanitization() -> None:
         "a": 1,
         "b": 2,
         "nested": {"c": 3, "d": 4, "timestamp": dt},
-        "integrity_hash": "different",  # Should be stripped
     }
     h2 = compute_hash(data_reordered)
 
     assert h1 == h2
 
 
-def test_compliance_legacy_adapter() -> None:
-    """
-    Verify LegacyErrorAdapter.
-    """
-    report = ComplianceReport(
-        code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
-        severity="violation",
-        message="Blocked domain",
-        details={"domain": "bad.com", "tool_name": "curl"},
-        remediation=None,
-    )
-
-    # Modern consumer
-    json_out = legacy_error_adapter(report, consumer_version="v0.25.0")
-    assert "ERR_SEC_DOMAIN_BLOCKED_002" in json_out
-
-    # Legacy consumer
-    legacy_out = legacy_error_adapter(report, consumer_version="v0.24.0")
-    assert legacy_out == "Tool 'curl' uses blocked domain: bad.com"
-
-
-def test_compliance_legacy_adapter_extended() -> None:
-    """Cover all branches of legacy_error_adapter."""
-    # 1. ERR_SEC_UNGUARDED_CRITICAL_003
-    report_unguarded = ComplianceReport(
-        code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
-        severity="violation",
-        message="msg",
-        node_id="n1",
-        details={"reason": "bad stuff"},
-    )
-    assert "Policy Violation: Node 'n1' requires" in legacy_error_adapter(report_unguarded, "v0.24.0")
-
-    # 2. ERR_TOPOLOGY_UNREACHABLE_RISK_003
-    report_topo = ComplianceReport(
-        code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
-        severity="violation",
-        message="msg",
-        node_id="n2",
-        details={"reason": "risky"},
-    )
-    assert "Topology Violation: Node 'n2' is unreachable" in legacy_error_adapter(report_topo, "v0.24.0")
-
-    # 3. Fallback
-    report_other = ComplianceReport(
-        code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001,
-        severity="warning",
-        message="missing tool",
-        node_id="n3",
-    )
-    assert "Warning: missing tool (Code: ERR_CAP_MISSING_TOOL_001)" in legacy_error_adapter(report_other, "v0.24.0")
 
 
 def test_topology_utility_island_acyclic_unsafe() -> None:

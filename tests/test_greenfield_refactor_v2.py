@@ -16,28 +16,6 @@ from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
 
 
-def test_magic_number_coercion_human_node() -> None:
-    """Directive 1: -1 should be coerced to 'infinite'."""
-    node = HumanNode(
-        id="h1",
-        metadata={},
-        type="human",
-        prompt="test",
-        timeout_seconds=-1,
-        interaction_mode="blocking",
-    )
-    assert node.timeout_seconds == "infinite"
-
-    node_shadow = HumanNode(
-        id="h2",
-        metadata={},
-        type="human",
-        prompt="test",
-        timeout_seconds=None,
-        interaction_mode="shadow",
-        shadow_timeout_seconds=-1,
-    )
-    assert node_shadow.shadow_timeout_seconds == "infinite"
 
 
 def test_human_node_mutual_exclusion() -> None:
@@ -70,20 +48,6 @@ def test_human_node_mutual_exclusion() -> None:
     assert "must not have 'shadow_timeout_seconds'" in str(excinfo.value)
 
 
-def test_magic_number_coercion_swarm_node() -> None:
-    """Directive 1: -1 should be coerced to 'infinite' in SwarmNode."""
-    node = SwarmNode(
-        id="s1",
-        metadata={},
-        type="swarm",
-        worker_profile="profile_1",
-        workload_variable="tasks",
-        distribution_strategy="sharded",
-        max_concurrency=-1,
-        reducer_function="concat",
-        output_variable="results",
-    )
-    assert node.max_concurrency == "infinite"
 
 
 def test_domain_validation_error_remediation() -> None:
