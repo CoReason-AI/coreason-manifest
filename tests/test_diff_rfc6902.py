@@ -16,7 +16,7 @@ def create_flow(name: str = "test", nodes: list[AnyNode] | None = None) -> Linea
     return LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name=name, version="1.0.0", description="desc", tags=[]),
-        sequence=nodes or [],
+        steps=nodes or [],
     )
 
 
@@ -217,7 +217,7 @@ def test_diff_reordering_ignored() -> None:
 
 def test_diff_topology_remove_edge() -> None:
     """Test removing an item from a Topology list (edges)."""
-    e1 = Edge(source="a", target="b")
+    e1 = Edge(from_node="a", to_node="b")
     graph1 = Graph(nodes={}, edges=[e1], entry_point="a")
     graph2 = Graph(nodes={}, edges=[], entry_point="a")
 

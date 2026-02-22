@@ -86,8 +86,8 @@ def test_validate_graph_flow_invalid_edges() -> None:
     graph = Graph(
         nodes={"agent1": agent},
         edges=[
-            Edge(source="agent1", target="missing"),
-            Edge(source="missing", target="agent1"),
+            Edge(from_node="agent1", to_node="missing"),
+            Edge(from_node="missing", to_node="agent1"),
         ],
         entry_point="agent1",
     )
@@ -172,7 +172,7 @@ def test_validate_linear_flow_valid() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=create_metadata(),
-        sequence=[agent],
+        steps=[agent],
         definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
     errors = validate_flow(flow)
@@ -183,7 +183,7 @@ def test_validate_linear_flow_empty() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=create_metadata(),
-        sequence=[],
+        steps=[],
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
@@ -196,7 +196,7 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=create_metadata(),
-        sequence=[switch],  # switch is the only node
+        steps=[switch],  # switch is the only node
     )
     errors = validate_flow(flow)
     # Target IDs must be present in the sequence
@@ -224,7 +224,7 @@ def test_validate_duplicate_node_ids() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=create_metadata(),
-        sequence=[agent1, agent2],
+        steps=[agent1, agent2],
     )
     errors = validate_flow(flow)
     assert "ID Collision Error: Duplicate Node ID 'agent1' found." in errors
@@ -267,7 +267,7 @@ def test_validate_orphan_nodes() -> None:
 
     graph = Graph(
         nodes={"node1": node1, "node2": node2, "node3": node3},
-        edges=[Edge(source="node1", target="node2")],
+        edges=[Edge(from_node="node1", to_node="node2")],
         entry_point="node1",
     )
     flow = GraphFlow(

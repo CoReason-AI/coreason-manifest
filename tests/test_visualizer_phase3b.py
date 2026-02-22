@@ -71,7 +71,7 @@ def _get_planner_node(node_id: str) -> PlannerNode:
         metadata={},
         goal="Solve problems",
         optimizer=None,
-        output_schema={"type": "object"},
+        output_json_schema={"type": "object"},
     )
 
 
@@ -94,7 +94,7 @@ def test_linear_flow_to_mermaid() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes,
+        steps=nodes,
     )
 
     mermaid_code = to_mermaid(flow)
@@ -122,9 +122,9 @@ def test_graph_flow_to_mermaid() -> None:
     }
 
     edges = [
-        Edge(source="start", target="decision"),
-        Edge(source="decision", target="end"),  # Case: success (implicit via switch logic)
-        Edge(source="decision", target="start"),  # Case: retry (implicit via switch logic)
+        Edge(from_node="start", to_node="decision"),
+        Edge(from_node="decision", to_node="end"),  # Case: success (implicit via switch logic)
+        Edge(from_node="decision", to_node="start"),  # Case: retry (implicit via switch logic)
     ]
 
     # This graph has a cycle (start -> decision -> start), so we must bypass validation
@@ -166,8 +166,8 @@ def test_switch_default_path() -> None:
     }
 
     edges = [
-        Edge(source="decision", target="end"),  # Case: success
-        Edge(source="decision", target="fallback"),  # Case: default
+        Edge(from_node="decision", to_node="end"),  # Case: success
+        Edge(from_node="decision", to_node="fallback"),  # Case: default
     ]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="decision")
@@ -193,7 +193,7 @@ def test_explicit_edge_labels() -> None:
         "B": _get_agent_node("B"),
     }
     edges = [
-        Edge(source="A", target="B", condition="explicit_cond"),
+        Edge(from_node="A", to_node="B", condition="explicit_cond"),
     ]
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
     flow = GraphFlow(
@@ -222,7 +222,7 @@ def test_special_characters_escaping() -> None:
     flow = LinearFlow.model_construct(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes,
+        steps=nodes,
     )
 
     mermaid_code = to_mermaid(flow)
@@ -247,7 +247,7 @@ def test_react_flow_output() -> None:
         "end": _get_placeholder_node("end"),
     }
     edges: list[Edge] = [
-        Edge(source="start", target="end"),
+        Edge(from_node="start", to_node="end"),
     ]
     # The Graph model expects AnyNode which is a union of specific node types.
     # Casting to Any or explicitly using the union might be needed if MyPy complains about covariance.
@@ -297,7 +297,7 @@ def test_react_flow_linear() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes,  # type: ignore[arg-type]
+        steps=nodes,  # type: ignore[arg-type]
     )
 
     rf = to_react_flow(flow)
@@ -316,7 +316,7 @@ def test_visualizer_coverage_extras() -> None:
 
     # 2. Setup Flow
     nodes = {"agent-cov": agent, "end": _get_placeholder_node("end")}
-    edges = [Edge(source="agent-cov", target="end", condition="go")]
+    edges = [Edge(from_node="agent-cov", to_node="end", condition="go")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="agent-cov")  # type: ignore[arg-type]
     flow = GraphFlow(

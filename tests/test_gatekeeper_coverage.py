@@ -24,7 +24,7 @@ def test_gatekeeper_capability_error_handling() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=Definitions(profiles={"broken": profile}),
-        sequence=[AgentNode(id="a1", metadata={}, type="agent", profile="broken", tools=[])],
+        steps=[AgentNode(id="a1", metadata={}, type="agent", profile="broken", tools=[])],
     )
 
     # Should not crash
@@ -77,7 +77,7 @@ def test_gatekeeper_port_stripping() -> None:
                 "pack1": ToolPack(kind="ToolPack", namespace="pack1", tools=[tool], dependencies=[], env_vars=[])
             }
         ),
-        sequence=[],
+        steps=[],
         governance=Governance(allowed_domains=["good.com"]),
     )
 

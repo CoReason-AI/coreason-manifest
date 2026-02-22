@@ -32,15 +32,14 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
-    # Compatibility: default ID, alias json_schema to schema_def
     id: str = Field(default_factory=lambda: str(uuid4()))
     json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
 
     @model_validator(mode="before")
     @classmethod
     def compat_json_schema(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "json_schema" in data and "schema" not in data:
-            data["schema"] = data.pop("json_schema")
+        if isinstance(data, dict) and "schema" in data and "json_schema" not in data:
+            data["json_schema"] = data.pop("schema")
         return data
 
     @property
@@ -73,7 +72,7 @@ class DataSchema(CoreasonModel):
 class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: Any | None = None  # Compatibility
+    persistence: Any | None = None
 
 
 AnyNode = Annotated[
@@ -99,9 +98,9 @@ class Edge(CoreasonModel):
     def compat_source_target(cls, data: Any) -> Any:
         if isinstance(data, dict):
             if "source" in data:
-                data["from"] = data.pop("source")
+                data["from_node"] = data.pop("source")
             if "target" in data:
-                data["to"] = data.pop("target")
+                data["to_node"] = data.pop("target")
         return data
 
 
@@ -121,7 +120,7 @@ class FlowDefinitions(CoreasonModel):
     schemas: dict[str, Any] = Field(default_factory=dict)
     tools: dict[str, Any] = Field(default_factory=dict)
     tool_packs: dict[str, Any] = Field(default_factory=dict)
-    supervision_templates: Any | None = None  # Compatibility
+    supervision_templates: Any | None = None
 
 
 class VariableDef(CoreasonModel):
@@ -202,12 +201,12 @@ class LinearFlow(CoreasonModel):
     """
 
     type: Literal["linear"] = "linear"
-    kind: Literal["LinearFlow"] = "LinearFlow"  # Compatibility
-    status: Literal["draft", "published", "archived"] = "draft"  # Compatibility
+    kind: Literal["LinearFlow"] = "LinearFlow"
+    status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     steps: list[AnyNode] = Field(default_factory=list, alias="sequence")
     governance: Governance | None = None
-    definitions: FlowDefinitions | None = None  # Compatibility
+    definitions: FlowDefinitions | None = None
 
     @model_validator(mode="before")
     @classmethod

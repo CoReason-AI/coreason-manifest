@@ -217,7 +217,9 @@ def test_topology_self_loop_island() -> None:
     # Graph: Entry (a2) -> End.  a1 (island) -> a1
     a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph.model_construct(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a1")], entry_point="a2")
+    graph = Graph.model_construct(
+        nodes={"a1": a1, "a2": a2}, edges=[Edge(from_node="a1", to_node="a1")], entry_point="a2"
+    )
 
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
@@ -364,7 +366,7 @@ def test_gatekeeper_blocked_domain() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
-        sequence=[AgentNode(id="a", type="agent", metadata={}, profile="p", tools=["BadUrl"])],
+        steps=[AgentNode(id="a", type="agent", metadata={}, profile="p", tools=["BadUrl"])],
         governance=gov,
         definitions=FlowDefinitions(
             tool_packs={"tp": ToolPack(kind="ToolPack", namespace="n", tools=[tool], dependencies=[], env_vars=[])}
@@ -387,7 +389,7 @@ def test_visualizer_pure_cycle() -> None:
     # Use model_construct to bypass cycle detection in Graph validation
     graph = Graph.model_construct(
         nodes={"c1": n_c1, "c2": n_c2},
-        edges=[Edge(source="c1", target="c2"), Edge(source="c2", target="c1")],
+        edges=[Edge(from_node="c1", to_node="c2"), Edge(from_node="c2", to_node="c1")],
         entry_point="c1",
     )
 
@@ -421,7 +423,7 @@ def test_visualizer_disconnected_cycle() -> None:
     # Bypass cycle detection
     graph = Graph.model_construct(
         nodes={"r1": n_r1, "c1": n_c1, "c2": n_c2},
-        edges=[Edge(source="c1", target="c2"), Edge(source="c2", target="c1")],
+        edges=[Edge(from_node="c1", to_node="c2"), Edge(from_node="c2", to_node="c1")],
         entry_point="r1",
     )
 
@@ -533,7 +535,7 @@ def test_validator_edge_cases() -> None:
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
     graph_dangling = Graph.model_construct(
         nodes={"n1": n1},
-        edges=[Edge(source="n1", target="missing"), Edge(source="missing", target="n1")],
+        edges=[Edge(from_node="n1", to_node="missing"), Edge(from_node="missing", to_node="n1")],
         entry_point="n1",
     )
     flow_dangling = GraphFlow.model_construct(
@@ -652,7 +654,7 @@ def test_flow_edge_source_missing() -> None:
     # flow.py line 264 coverage (edge source not in nodes)
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
     # Edge from "unknown" to "n1"
-    graph = Graph(nodes={"n1": n1}, edges=[Edge(source="unknown", target="n1")], entry_point="n1")
+    graph = Graph(nodes={"n1": n1}, edges=[Edge(from_node="unknown", to_node="n1")], entry_point="n1")
 
     with pytest.raises(ValueError, match="Edge 0 source 'unknown' not found in nodes"):
         GraphFlow(
@@ -669,7 +671,7 @@ def test_flow_edge_target_missing() -> None:
     # flow.py edge target missing coverage
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
     # Edge from "n1" to "unknown"
-    graph = Graph(nodes={"n1": n1}, edges=[Edge(source="n1", target="unknown")], entry_point="n1")
+    graph = Graph(nodes={"n1": n1}, edges=[Edge(from_node="n1", to_node="unknown")], entry_point="n1")
 
     with pytest.raises(ValueError, match="Edge 0 target 'unknown' not found in nodes"):
         GraphFlow(
@@ -716,7 +718,7 @@ def test_flow_cycle_detection_unreachable() -> None:
     # Cycle: n1->n2->n1
     graph = Graph(
         nodes={"n1": n1, "n2": n2},
-        edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
+        edges=[Edge(from_node="n1", to_node="n2"), Edge(from_node="n2", to_node="n1")],
         entry_point="n1",
     )
 

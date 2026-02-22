@@ -111,7 +111,7 @@ def test_simulate_trace_linear_flow() -> None:
     node1 = PlaceholderNode(id="n1", type="placeholder", required_capabilities=["c1"])
     node2 = PlaceholderNode(id="n2", type="placeholder", required_capabilities=["c2"])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=_create_metadata(), sequence=[node1, node2])
+    flow = LinearFlow(kind="LinearFlow", metadata=_create_metadata(), steps=[node1, node2])
 
     trace = factory.simulate_trace(flow)
     assert len(trace) == 2
@@ -130,7 +130,7 @@ def test_simulate_trace_graph_flow() -> None:
     # n1 -> n2 -> n3
     graph = Graph(
         nodes={"n1": n1, "n2": n2, "n3": n3},
-        edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n3")],
+        edges=[Edge(from_node="n1", to_node="n2"), Edge(from_node="n2", to_node="n3")],
         entry_point="n1",
     )
 
@@ -153,7 +153,7 @@ def test_simulate_trace_graph_cycle() -> None:
     # n1 <-> n2
     graph = Graph(
         nodes={"n1": n1, "n2": n2},
-        edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
+        edges=[Edge(from_node="n1", to_node="n2"), Edge(from_node="n2", to_node="n1")],
         entry_point="n1",
     )
 
@@ -219,7 +219,7 @@ def test_execute_node_swarm() -> None:
 
 def test_execute_node_planner() -> None:
     factory = MockFactory(seed=1)
-    planner = PlannerNode(id="planner1", type="planner", output_schema={"type": "string"}, goal="make plan")
+    planner = PlannerNode(id="planner1", type="planner", output_json_schema={"type": "string"}, goal="make plan")
     exec_map: dict[str, Any] = {}
 
     results = factory._execute_node(planner, exec_map)
@@ -232,14 +232,14 @@ def test_execute_node_human() -> None:
 
     # With input schema
     human = HumanNode(
-        id="human1", type="human", input_schema={"type": "boolean"}, prompt="approve?", timeout_seconds=300
+        id="human1", type="human", input_json_schema={"type": "boolean"}, prompt="approve?", timeout_seconds=300
     )
     results = factory._execute_node(human, {})
     assert isinstance(results[0].outputs, dict)
     assert isinstance(results[0].outputs["result"], bool)
 
     # Without input schema
-    human2 = HumanNode(id="human2", type="human", input_schema=None, prompt="approve?", timeout_seconds=300)
+    human2 = HumanNode(id="human2", type="human", input_json_schema=None, prompt="approve?", timeout_seconds=300)
     results2 = factory._execute_node(human2, {})
     assert results2[0].outputs == {"approved": True}
 

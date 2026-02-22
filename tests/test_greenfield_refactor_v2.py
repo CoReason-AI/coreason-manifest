@@ -113,7 +113,7 @@ def test_healing_ingestion_stub() -> None:
 
     # Fix: DataSchema requires id and schema
     with pytest.raises((ValidationError, ManifestError)) as excinfo:
-        DataSchema(id="test_id", schema=invalid_schema)
+        DataSchema(id="test_id", json_schema=invalid_schema)
     assert "Invalid JSON Schema" in str(excinfo.value)
 
 
@@ -132,8 +132,8 @@ def test_topology_tolerance_and_gatekeeper() -> None:
         status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         interface=FlowInterface(
-            inputs=DataSchema(id="in", schema={"type": "object"}),
-            outputs=DataSchema(id="out", schema={"type": "object"}),
+            inputs=DataSchema(id="in", json_schema={"type": "object"}),
+            outputs=DataSchema(id="out", json_schema={"type": "object"}),
         ),
         blackboard=Blackboard(),
         graph=graph,

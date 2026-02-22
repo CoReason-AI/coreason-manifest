@@ -42,7 +42,7 @@ def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]
         blackboard=Blackboard(variables={}, persistence=False),
         graph=Graph.model_construct(
             nodes={n.id: n for n in nodes_list},
-            edges=[Edge(source=s, target=t) for s, t in edges_list],
+            edges=[Edge(from_node=s, to_node=t) for s, t in edges_list],
             entry_point=entry_point,
         ),
     )

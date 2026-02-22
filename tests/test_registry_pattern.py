@@ -73,7 +73,7 @@ def test_linear_flow_definitions() -> None:
         kind="LinearFlow",
         metadata=metadata,
         definitions=definitions,
-        sequence=[agent],
+        steps=[agent],
     )
 
     assert flow.definitions is not None
@@ -151,7 +151,7 @@ def test_referential_integrity_failure() -> None:
             status="published",
             metadata=metadata,
             definitions=FlowDefinitions(),  # Empty registry
-            sequence=[agent],
+            steps=[agent],
         )
 
 
@@ -179,7 +179,7 @@ def test_tool_integrity_failure() -> None:
             status="published",
             metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
             definitions=definitions,
-            sequence=[agent],
+            steps=[agent],
         )
 
 

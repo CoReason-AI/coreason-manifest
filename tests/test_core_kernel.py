@@ -63,7 +63,7 @@ def test_core_kernel_instantiation() -> None:
         goal="solve problem",
         optimizer=optimizer,
         type="planner",
-        output_schema={"type": "object", "properties": {"plan": {"type": "string"}}},
+        output_json_schema={"type": "object", "properties": {"plan": {"type": "string"}}},
     )
     human_node = HumanNode(
         id="human-1",
@@ -98,7 +98,7 @@ def test_core_kernel_instantiation() -> None:
     )
     definitions = FlowDefinitions(tool_packs={"core": tool_pack})
 
-    edge = Edge(source="agent-1", target="switch-1")
+    edge = Edge(from_node="agent-1", to_node="switch-1")
     graph = Graph(
         nodes={
             "agent-1": agent_node,
@@ -114,7 +114,7 @@ def test_core_kernel_instantiation() -> None:
     linear_flow = LinearFlow(
         kind="LinearFlow",
         metadata=metadata,
-        sequence=[agent_node, switch_node, planner_node, human_node, placeholder],
+        steps=[agent_node, switch_node, planner_node, human_node, placeholder],
         definitions=definitions,
     )
     graph_flow = GraphFlow(

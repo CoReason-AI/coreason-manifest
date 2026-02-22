@@ -27,7 +27,7 @@ def test_immutable_flow() -> None:
         kind="LinearFlow",
         status="draft",
         metadata=FlowMetadata(name="Test Flow", version="1.0.0", description="Test", tags=[]),
-        sequence=[],
+        steps=[],
     )
 
     with pytest.raises(ValidationError):

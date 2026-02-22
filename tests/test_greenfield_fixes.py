@@ -220,7 +220,7 @@ def test_coverage_linear_flow_published() -> None:
         status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
-        sequence=[agent],
+        steps=[agent],
     )
 
 

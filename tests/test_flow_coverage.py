@@ -35,7 +35,7 @@ def test_flow_integrity_coverage() -> None:
         status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         definitions=definitions,
-        sequence=[agent],
+        steps=[agent],
     )
 
     # 2. Invalid Resilience Ref Format (lines 313)
@@ -54,7 +54,7 @@ def test_flow_integrity_coverage() -> None:
             status="published",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
-            sequence=[agent_bad_ref],
+            steps=[agent_bad_ref],
         )
 
     # 3. Invalid Resilience Ref ID (lines 310-311)
@@ -73,7 +73,7 @@ def test_flow_integrity_coverage() -> None:
             status="published",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
-            sequence=[agent_missing_ref],
+            steps=[agent_missing_ref],
         )
 
     # 4. Invalid Profile Ref (lines 319-320)
@@ -87,7 +87,7 @@ def test_flow_integrity_coverage() -> None:
             status="published",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
-            sequence=[agent_missing_profile],
+            steps=[agent_missing_profile],
         )
 
     # 5. SwarmNode Invalid Profile Ref (lines 330-333)
@@ -110,7 +110,7 @@ def test_flow_integrity_coverage() -> None:
             status="published",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
-            sequence=[swarm_missing],
+            steps=[swarm_missing],
         )
 
 

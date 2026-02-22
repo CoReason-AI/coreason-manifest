@@ -73,8 +73,8 @@ def test_graph_builder() -> None:
     assert flow.metadata.name == "MyGraph"
     assert len(flow.graph.nodes) == 2
     assert len(flow.graph.edges) == 1
-    assert flow.graph.edges[0].source == "n1"
-    assert flow.graph.edges[0].target == "n2"
+    assert flow.graph.edges[0].from_node == "n1"
+    assert flow.graph.edges[0].to_node == "n2"
     assert flow.graph.edges[0].condition == "ok"
     assert flow.definitions is not None
     assert len(flow.definitions.tool_packs) == 1
@@ -146,7 +146,7 @@ def test_builder_coverage_set_circuit_breaker_without_governance() -> None:
 def test_builder_coverage_add_inspector_linear() -> None:
     """Test add_inspector method in NewLinearFlow."""
     builder = NewLinearFlow("Test", "1.0.0", "Desc")
-    builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
+    builder.add_inspector(node_id="inspector1", to_node="var1", criteria="criteria1", output="out1")
     assert len(builder.sequence) == 1
     node = builder.sequence[0]
     assert node.id == "inspector1"
@@ -156,7 +156,7 @@ def test_builder_coverage_add_inspector_linear() -> None:
 def test_builder_coverage_add_inspector_graph() -> None:
     """Test add_inspector method in NewGraphFlow."""
     builder = NewGraphFlow("Test", "1.0.0", "Desc")
-    builder.add_inspector(node_id="inspector1", target="var1", criteria="criteria1", output="out1")
+    builder.add_inspector(node_id="inspector1", to_node="var1", criteria="criteria1", output="out1")
     assert "inspector1" in builder._nodes
     node = builder._nodes["inspector1"]
     assert node.type == "inspector"

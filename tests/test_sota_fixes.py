@@ -61,7 +61,7 @@ def test_draft_flow_allows_cycles() -> None:
         "A": AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={}),
         "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={}),
     }
-    edges = [Edge(source="A", target="B"), Edge(source="B", target="A")]
+    edges = [Edge(from_node="A", to_node="B"), Edge(from_node="B", to_node="A")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
 
@@ -86,7 +86,7 @@ def test_published_flow_forbids_cycles() -> None:
         "A": AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={}),
         "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={}),
     }
-    edges = [Edge(source="A", target="B"), Edge(source="B", target="A")]
+    edges = [Edge(from_node="A", to_node="B"), Edge(from_node="B", to_node="A")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
 

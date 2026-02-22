@@ -42,7 +42,7 @@ def test_visualizer_state_application() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=[node],
+        steps=[node],
     )
 
     # Snapshot with state
@@ -64,7 +64,7 @@ def test_visualizer_node_types_coverage() -> None:
     nodes: list[Node] = []
 
     # Planner
-    planner = PlannerNode(id="plan", metadata={}, goal="g", optimizer=None, output_schema={}, type="planner")
+    planner = PlannerNode(id="plan", metadata={}, goal="g", optimizer=None, output_json_schema={}, type="planner")
     nodes.append(planner)
 
     # Inspector
@@ -100,7 +100,7 @@ def test_visualizer_node_types_coverage() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
         metadata=_get_metadata(),
-        sequence=nodes,  # type: ignore[arg-type]
+        steps=nodes,  # type: ignore[arg-type]
     )
 
     mermaid = to_mermaid(flow)
@@ -148,8 +148,8 @@ def test_switch_edge_inference() -> None:
     }
 
     edges = [
-        Edge(source="switch-1", target="target-1"),
-        Edge(source="switch-1", target="target-2"),
+        Edge(from_node="switch-1", to_node="target-1"),
+        Edge(from_node="switch-1", to_node="target-2"),
     ]
 
     flow = GraphFlow(

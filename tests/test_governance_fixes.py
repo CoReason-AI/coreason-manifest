@@ -48,7 +48,7 @@ def test_code_execution_unguarded() -> None:
     defs = get_defs()
     node = AgentNode(id="a1", metadata={}, type="agent", profile="code", tools=[])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[node])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[node])
 
     errors = validate_policy(flow)
     assert len(errors) == 1
@@ -60,7 +60,7 @@ def test_base_reasoning_capabilities() -> None:
     defs = get_defs()
     node = AgentNode(id="a1", metadata={}, type="agent", profile="safe", tools=[])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[node])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[node])
 
     # Should call StandardReasoning.required_capabilities() -> []
     errors = validate_policy(flow)
@@ -72,7 +72,7 @@ def test_linear_unguarded_computer_use() -> None:
     # Unguarded AgentNode using "comp" profile
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[node])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[node])
 
     errors = validate_policy(flow)
     assert len(errors) == 1
@@ -85,7 +85,7 @@ def test_linear_guarded_computer_use() -> None:
     human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[human, node])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[human, node])
 
     errors = validate_policy(flow)
     assert len(errors) == 0
@@ -97,7 +97,7 @@ def test_linear_switch_bypass_fails() -> None:
     switch = SwitchNode(id="s1", metadata={}, type="switch", variable="x", cases={}, default="a1")
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[switch, node])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[switch, node])
 
     errors = validate_policy(flow)
     assert len(errors) == 1  # Still fails because Switch is not Human
@@ -123,7 +123,7 @@ def test_swarm_unguarded() -> None:
         output_variable="out",
     )
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[swarm])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[swarm])
 
     errors = validate_policy(flow)
     assert len(errors) == 1
@@ -150,7 +150,7 @@ def test_swarm_missing_profile_validation() -> None:
             status="published",
             metadata=get_meta(),
             definitions=defs,
-            sequence=[swarm],
+            steps=[swarm],
         )
 
 
@@ -168,7 +168,7 @@ def test_gatekeeper_robustness_missing_profile() -> None:
         reducer_function="vote",
         output_variable="out",
     )
-    flow = LinearFlow.model_construct(kind="LinearFlow", metadata=get_meta(), definitions=defs, sequence=[swarm])
+    flow = LinearFlow.model_construct(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[swarm])
     # Gatekeeper handles missing profile gracefully (no capabilities found)
     errors = validate_policy(flow)
     assert len(errors) == 0
@@ -204,7 +204,7 @@ def test_graph_guarded_path() -> None:
     human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(source="h1", target="a1")], entry_point="h1")
+    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(from_node="h1", to_node="a1")], entry_point="h1")
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -228,7 +228,7 @@ def test_graph_cycle_explicit_entry() -> None:
     # Cycle detection is now enforced only for Published flows.
     defs = get_defs()
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
-    graph = Graph(nodes={"a1": agent}, edges=[Edge(source="a1", target="a1")], entry_point="a1")
+    graph = Graph(nodes={"a1": agent}, edges=[Edge(from_node="a1", to_node="a1")], entry_point="a1")
 
     # Should fail when publishing
     # SOTA Update: Cycles are no longer strictly banned by GraphFlow validation.
@@ -292,7 +292,7 @@ def test_gatekeeper_inline_profile() -> None:
         tools=[],
     )
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=None, sequence=[node])
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=None, steps=[node])
 
     errors = validate_policy(flow)
     assert len(errors) == 0
@@ -305,7 +305,7 @@ def test_gatekeeper_is_guarded_value_error() -> None:
 
     # Use model_construct to bypass referential integrity validation (missing profile p1)
     flow = LinearFlow.model_construct(
-        kind="LinearFlow", metadata=get_meta(), definitions=FlowDefinitions(), sequence=[node1]
+        kind="LinearFlow", metadata=get_meta(), definitions=FlowDefinitions(), steps=[node1]
     )
 
     # Check node2 which is NOT in flow.sequence
@@ -338,7 +338,7 @@ def test_gatekeeper_attribute_error() -> None:
         tools=[],
     )
 
-    flow = LinearFlow.model_construct(kind="LinearFlow", metadata=get_meta(), definitions=None, sequence=[node])
+    flow = LinearFlow.model_construct(kind="LinearFlow", metadata=get_meta(), definitions=None, steps=[node])
 
     errors = validate_policy(flow)
     assert len(errors) == 0
@@ -360,7 +360,7 @@ def test_graph_traversal_unguarded() -> None:
     a1 = AgentNode(id="a1", metadata={}, type="agent", profile="safe", tools=[])
     a2 = AgentNode(id="a2", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(source="a1", target="a2")], entry_point="a1")
+    graph = Graph(nodes={"a1": a1, "a2": a2}, edges=[Edge(from_node="a1", to_node="a2")], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",

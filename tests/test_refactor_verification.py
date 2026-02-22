@@ -143,7 +143,7 @@ def test_exfiltration_blocked_domain() -> None:
                 "default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])
             }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["EvilTool"])],
+        steps=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["EvilTool"])],
     )
 
     reports = validate_policy(flow)
@@ -177,7 +177,7 @@ def test_allowed_url() -> None:
                 "default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])
             }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])],
+        steps=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])],
     )
 
     reports = validate_policy(flow)
@@ -202,7 +202,7 @@ def test_allowed_url() -> None:
                 )
             }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])],
+        steps=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["GoodTool"])],
     )
     reports = validate_policy(flow_sub)
     assert len([r for r in reports if r.severity == "violation"]) == 0
@@ -234,7 +234,7 @@ def test_schemeless_url_handling() -> None:
                 "default": ToolPack(kind="ToolPack", namespace="default", tools=[tool], dependencies=[], env_vars=[])
             }
         ),
-        sequence=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["TrickyTool"])],
+        steps=[AgentNode(id="agent1", metadata={}, type="agent", profile="p1", tools=["TrickyTool"])],
     )
 
     reports = validate_policy(flow)
@@ -268,7 +268,7 @@ def test_auto_fix_computer_use() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="unsafe", version="1.0.0", description="unsafe", tags=[]),
         definitions=Definitions(profiles={"hacker": profile}),
-        sequence=[AgentNode(id="attacker", metadata={}, type="agent", profile="hacker", tools=[])],
+        steps=[AgentNode(id="attacker", metadata={}, type="agent", profile="hacker", tools=[])],
     )
 
     reports = validate_policy(flow)
@@ -301,7 +301,7 @@ def test_verify_remediation_patch_structure() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="unsafe", version="1.0.0", description="unsafe", tags=[]),
         definitions=Definitions(profiles={"coder": profile}),
-        sequence=[AgentNode(id="coder_agent", metadata={}, type="agent", profile="coder", tools=[])],
+        steps=[AgentNode(id="coder_agent", metadata={}, type="agent", profile="coder", tools=[])],
     )
 
     reports = validate_policy(flow)
