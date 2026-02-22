@@ -1,3 +1,4 @@
+import warnings
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
@@ -33,23 +34,26 @@ class FlowMetadata(CoreasonModel):
 
 class DataSchema(CoreasonModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
-    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
+    schema: dict[str, Any] = Field(
+        default_factory=dict,
+    )
+
+    @property
+    def schema(self) -> dict[str, Any]:
+        return self.schema
 
     @model_validator(mode="before")
     @classmethod
-    def compat_json_schema(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "schema" in data and "json_schema" not in data:
-            data["json_schema"] = data.pop("schema")
+    def compat_schema(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "json_schema" in data and "schema" not in data:
+                data["schema"] = data.pop("json_schema")
         return data
-
-    @property
-    def schema_def(self) -> dict[str, Any]:
-        return self.json_schema
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
         try:
-            jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
+            jsonschema.validators.validator_for(self.schema).check_schema(self.schema)
         except SchemaError as e:
             raise ManifestError(
                 fault=SemanticFault(
@@ -98,9 +102,9 @@ class Edge(CoreasonModel):
     def compat_source_target(cls, data: Any) -> Any:
         if isinstance(data, dict):
             if "source" in data:
-                data["from_node"] = data.pop("source")
+                data["from"] = data.pop("source")
             if "target" in data:
-                data["to_node"] = data.pop("target")
+                data["to"] = data.pop("target")
         return data
 
 

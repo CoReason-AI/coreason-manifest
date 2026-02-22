@@ -183,7 +183,7 @@ def test_schema_strict_validation() -> None:
         bad_schema: dict[str, Any] = {"type": "integer", "default": "bad"}
 
         with pytest.raises(ValueError, match="Invalid JSON Schema"):
-            DataSchema(json_schema=bad_schema)
+            DataSchema(schema=bad_schema)
 
 
 # Domain 4: Validator Coverage

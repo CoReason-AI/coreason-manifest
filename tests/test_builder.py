@@ -82,8 +82,8 @@ def test_graph_builder() -> None:
     assert flow.governance.rate_limit_rpm == 10
 
     # Assert new features
-    assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}
-    assert flow.interface.outputs.json_schema == {"type": "object", "properties": {"out": {"type": "integer"}}}
+    assert flow.interface.inputs.schema == {"type": "object", "properties": {"in": {"type": "string"}}}
+    assert flow.interface.outputs.schema == {"type": "object", "properties": {"out": {"type": "integer"}}}
     assert flow.blackboard is not None
     assert flow.blackboard.persistence is True
     assert "var1" in flow.blackboard.variables

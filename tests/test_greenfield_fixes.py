@@ -340,7 +340,7 @@ def test_recursive_schema_strict_validation() -> None:
         mock_check.side_effect = SchemaError("Invalid default")
 
         with pytest.raises(ValueError, match="Invalid JSON Schema"):
-            DataSchema(json_schema=nested_schema)
+            DataSchema(schema=nested_schema)
 
 
 def test_validator_definitions_profile_scanning() -> None:
@@ -416,18 +416,18 @@ def test_schema_strict_null_default() -> None:
         bad_null: dict[str, Any] = {"type": "string", "default": None}
 
         with pytest.raises(ValueError, match="Invalid JSON Schema"):
-            DataSchema(json_schema=bad_null)
+            DataSchema(schema=bad_null)
 
         # Case 2: Valid Null Default (nullable: true) -> Should Pass
         mock_check.side_effect = None  # Reset to success
         valid_nullable: dict[str, Any] = {"type": "string", "default": None, "nullable": True}
-        ds2 = DataSchema(json_schema=valid_nullable)
-        assert isinstance(ds2.json_schema, dict)
+        ds2 = DataSchema(schema=valid_nullable)
+        assert isinstance(ds2.schema, dict)
 
         # Case 3: Valid Null Default (union type) -> Should Pass
         valid_union: dict[str, Any] = {"type": ["string", "null"], "default": None}
-        ds3 = DataSchema(json_schema=valid_union)
-        assert isinstance(ds3.json_schema, dict)
+        ds3 = DataSchema(schema=valid_union)
+        assert isinstance(ds3.schema, dict)
 
 
 def test_jinja2_filter_validation() -> None:
@@ -598,7 +598,7 @@ def test_validator_union_type_normalization() -> None:
 
     # Input with union type ["string", "null"] and fallback case ["null"]
     inputs = DataSchema(
-        json_schema={
+        schema={
             "type": "object",
             "properties": {
                 "union_var": {"type": ["string", "null"]},

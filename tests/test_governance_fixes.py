@@ -187,8 +187,8 @@ def test_graph_unguarded_path() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
+            inputs=DataSchema(schema={}),
+            outputs=DataSchema(schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -211,8 +211,8 @@ def test_graph_guarded_path() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
+            inputs=DataSchema(schema={}),
+            outputs=DataSchema(schema={}),
         ),
         blackboard=None,
         graph=graph,
@@ -367,8 +367,8 @@ def test_graph_traversal_unguarded() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
+            inputs=DataSchema(schema={}),
+            outputs=DataSchema(schema={}),
         ),
         blackboard=None,
         graph=graph,

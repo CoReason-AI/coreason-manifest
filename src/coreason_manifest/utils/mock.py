@@ -69,7 +69,7 @@ class MockFactory:
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
         if isinstance(flow, LinearFlow):
-            nodes = flow.sequence
+            nodes = flow.steps
             prev_hashes: list[str] = []
             for node in nodes:
                 exec_records = self._execute_node(node, execution_map, prev_hashes)
@@ -82,7 +82,7 @@ class MockFactory:
         elif isinstance(flow, GraphFlow):
             # Find start nodes (indegree 0)
             graph = flow.graph
-            all_targets = {e.target for e in graph.edges}
+            all_targets = {e.to_node for e in graph.edges}
             start_nodes = [n for n_id, n in graph.nodes.items() if n_id not in all_targets]
 
             if not start_nodes:
@@ -111,13 +111,13 @@ class MockFactory:
                 prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
                 # Find next node
-                outgoing_edges = [e for e in graph.edges if e.source == current_node.id]
+                outgoing_edges = [e for e in graph.edges if e.from_node == current_node.id]
                 if not outgoing_edges:
                     break
 
                 # Pick one edge randomly
                 chosen_edge = self.rng.choice(outgoing_edges)
-                current_node = graph.nodes.get(chosen_edge.target)
+                current_node = graph.nodes.get(chosen_edge.to_node)
 
         return trace
 

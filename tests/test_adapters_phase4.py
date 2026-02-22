@@ -108,8 +108,8 @@ def test_langchain_adapter() -> None:
         kind="GraphFlow",
         metadata=meta,
         interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
+            inputs=DataSchema(schema={}),
+            outputs=DataSchema(schema={}),
         ),
         blackboard=None,
         graph=graph,

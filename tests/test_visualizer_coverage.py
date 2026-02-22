@@ -64,7 +64,7 @@ def test_visualizer_node_types_coverage() -> None:
     nodes: list[Node] = []
 
     # Planner
-    planner = PlannerNode(id="plan", metadata={}, goal="g", optimizer=None, output_json_schema={}, type="planner")
+    planner = PlannerNode(id="plan", metadata={}, goal="g", optimizer=None, output_schema={}, type="planner")
     nodes.append(planner)
 
     # Inspector
@@ -156,8 +156,8 @@ def test_switch_edge_inference() -> None:
         kind="GraphFlow",
         metadata=_get_metadata(),
         interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
+            inputs=DataSchema(schema={}),
+            outputs=DataSchema(schema={}),
         ),
         blackboard=None,
         graph=Graph(nodes=nodes, edges=edges, entry_point="switch-1"),  # type: ignore[arg-type]

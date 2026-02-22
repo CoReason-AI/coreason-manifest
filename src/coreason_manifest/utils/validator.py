@@ -39,7 +39,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     if isinstance(flow, GraphFlow):
         nodes = list(flow.graph.nodes.values())
     elif isinstance(flow, LinearFlow):
-        nodes = flow.sequence
+        nodes = flow.steps
 
     valid_ids = {n.id for n in nodes}
 
@@ -60,9 +60,9 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
         errors.extend(_validate_linear_integrity(flow))
-        node_ids = {n.id for n in flow.sequence}
-        errors.extend(_validate_unique_ids(flow.sequence))
-        errors.extend(_validate_switch_logic(flow.sequence, node_ids))
+        node_ids = {n.id for n in flow.steps}
+        errors.extend(_validate_unique_ids(flow.steps))
+        errors.extend(_validate_switch_logic(flow.steps, node_ids))
 
     # 3. GraphFlow Specific Checks
     if isinstance(flow, GraphFlow):
@@ -86,10 +86,10 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
             for name, var_def in flow.blackboard.variables.items():
                 # SOTA Fix: Normalize to lowercase to handle "List", "ARRAY", etc.
                 symbol_table[name] = var_def.type.lower()
-        if flow.interface and isinstance(flow.interface.inputs.json_schema, dict):
+        if flow.interface and isinstance(flow.interface.inputs.schema, dict):
             # Extract properties from input schema
             # Heuristic: extract property type if simple, else "unknown"
-            props = flow.interface.inputs.json_schema.get("properties", {})
+            props = flow.interface.inputs.schema.get("properties", {})
             for name, schema in props.items():
                 raw_type = schema.get("type", "unknown")
                 if isinstance(raw_type, list):
@@ -184,22 +184,22 @@ def _validate_data_flow(
                 errors.append(f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'.")
 
         elif isinstance(node, (InspectorNode, EmergenceInspectorNode)):
-            if node.target_variable not in available_vars:
+            if node.to_node_variable not in available_vars:
                 errors.append(
-                    f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.target_variable}'."
+                    f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.to_node_variable}'."
                 )
             # MVP Type Safety: Regex matching on complex objects is risky
             elif (
-                node.target_variable in symbol_table
+                node.to_node_variable in symbol_table
                 and hasattr(node, "mode")
                 and node.mode == "programmatic"
-                and symbol_table[node.target_variable] in ("object", "array")
+                and symbol_table[node.to_node_variable] in ("object", "array")
             ):
-                var_type = symbol_table[node.target_variable]
+                var_type = symbol_table[node.to_node_variable]
                 # Just a warning for now
                 errors.append(
                     f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
-                    f"variable '{node.target_variable}'. Matching may fail."
+                    f"variable '{node.to_node_variable}'. Matching may fail."
                 )
 
             if node.output_variable not in available_vars:
@@ -252,7 +252,7 @@ def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[str]:
 
 
 def _validate_linear_integrity(flow: LinearFlow) -> list[str]:
-    if not flow.sequence:
+    if not flow.steps:
         return ["LinearFlow Error: Sequence cannot be empty."]
     return []
 
@@ -278,10 +278,10 @@ def _validate_graph_integrity(graph: Graph) -> list[str]:
 
     # Check 2: Edge Validity
     for edge in graph.edges:
-        if edge.source not in valid_ids:
-            errors.append(f"Dangling Edge Error: Source '{edge.source}' not found in graph nodes.")
-        if edge.target not in valid_ids:
-            errors.append(f"Dangling Edge Error: Target '{edge.target}' not found in graph nodes.")
+        if edge.from_node not in valid_ids:
+            errors.append(f"Dangling Edge Error: Source '{edge.from_node}' not found in graph nodes.")
+        if edge.to_node not in valid_ids:
+            errors.append(f"Dangling Edge Error: Target '{edge.to_node}' not found in graph nodes.")
 
     return errors
 
@@ -314,7 +314,7 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
     # SOTA Fix: Use explicit entry point
     entry_point = graph.entry_point
 
-    targeted_ids = {edge.target for edge in graph.edges}
+    targeted_ids = {edge.to_node for edge in graph.edges}
 
     orphans = all_ids - targeted_ids
 

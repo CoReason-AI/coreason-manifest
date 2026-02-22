@@ -200,7 +200,7 @@ def test_human_node_options_and_visualizer() -> None:
         prompt="Approve or Reject?",
         timeout_seconds=600,
         options=["Approve", "Reject"],
-        input_json_schema={"type": "object", "properties": {"reason": {"type": "string"}}},
+        input_schema={"type": "object", "properties": {"reason": {"type": "string"}}},
     )
 
     assert human.options == ["Approve", "Reject"]
@@ -313,7 +313,7 @@ def test_reflexion_structured_output() -> None:
         critic_model="gpt-4",
         critic_prompt="Fix",
         include_trace=True,
-        critic_json_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+        critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
     )
     assert strategy.critic_schema is not None
     assert strategy.critic_schema["properties"]["fix"]["type"] == "string"
@@ -454,7 +454,7 @@ def test_reflexion_invalid_schema() -> None:
             critic_model="gpt-4",
             critic_prompt="Fix",
             include_trace=True,
-            critic_json_schema={"invalid": "schema"},  # Missing type/properties/$ref
+            critic_schema={"invalid": "schema"},  # Missing type/properties/$ref
         )
 
 
@@ -495,7 +495,7 @@ def test_reflexion_capability_requirement() -> None:
             max_attempts=3,
             critic_model=model_without_json,
             critic_prompt="Fix",
-            critic_json_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+            critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
         )
 
     # Case 2: Has json_mode
@@ -504,7 +504,7 @@ def test_reflexion_capability_requirement() -> None:
         max_attempts=3,
         critic_model=model_with_json,
         critic_prompt="Fix",
-        critic_json_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+        critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
     )
     assert strategy.critic_model == model_with_json
 
@@ -539,7 +539,7 @@ def test_reflexion_schema_object_properties() -> None:
         critic_model="gpt-4",
         critic_prompt="Fix",
         include_trace=True,
-        critic_json_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
+        critic_schema={"type": "object", "properties": {"fix": {"type": "string"}}},
     )
 
     # Invalid schema (missing properties for object)
@@ -549,5 +549,5 @@ def test_reflexion_schema_object_properties() -> None:
             critic_model="gpt-4",
             critic_prompt="Fix",
             include_trace=True,
-            critic_json_schema={"type": "object"},
+            critic_schema={"type": "object"},
         )

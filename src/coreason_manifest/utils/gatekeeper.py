@@ -31,7 +31,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # Extract all nodes
     nodes: list[AnyNode] = []
     if isinstance(flow, LinearFlow):
-        nodes = flow.sequence
+        nodes = flow.steps
     elif isinstance(flow, GraphFlow):
         nodes = list(flow.graph.nodes.values())
 
@@ -148,7 +148,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             if isinstance(flow, LinearFlow):
                 # Find index
                 idx = 0
-                for i, n in enumerate(flow.sequence):
+                for i, n in enumerate(flow.steps):
                     if n.id == node.id:
                         idx = i
                         break
@@ -163,7 +163,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
                 # 2. Rewire incoming edges (Target -> Guard)
                 for edge_idx, edge in enumerate(flow.graph.edges):
-                    if edge.target == node.id:
+                    if edge.to_node == node.id:
                         patch_ops.append(
                             {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
                         )
@@ -199,8 +199,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
         for edge in flow.graph.edges:
             # SOTA Fix 1: Defensive check for Draft Mode Fatality
-            if edge.source in adj:
-                adj[edge.source].append(edge.target)
+            if edge.from_node in adj:
+                adj[edge.from_node].append(edge.to_node)
 
         # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
         visited: set[str] = set()
@@ -299,7 +299,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             # Gather all edges connected to ANY unreachable node
             bulk_edge_indices = set()
             for idx, edge in enumerate(flow.graph.edges):
-                if edge.source in unreachable or edge.target in unreachable:
+                if edge.from_node in unreachable or edge.to_node in unreachable:
                     bulk_edge_indices.add(idx)
 
             # Sort descending to prevent index invalidation during sequential removal
@@ -371,7 +371,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         # Scan sequence backwards from target
         # SOTA Fix: Match by ID to verify identity, not just value equality
         target_idx = -1
-        for i, node in enumerate(flow.sequence):
+        for i, node in enumerate(flow.steps):
             if node.id == target_node.id:
                 target_idx = i
                 break
@@ -380,7 +380,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             return False
 
         for i in range(target_idx - 1, -1, -1):
-            node = flow.sequence[i]
+            node = flow.steps[i]
             if isinstance(node, HumanNode):
                 return True
         return False
@@ -397,7 +397,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         # Construct adjacency map
         adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
         for edge in flow.graph.edges:
-            adj[edge.source].append(edge.target)
+            adj[edge.from_node].append(edge.to_node)
 
         guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
 

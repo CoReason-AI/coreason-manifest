@@ -63,7 +63,7 @@ def test_core_kernel_instantiation() -> None:
         goal="solve problem",
         optimizer=optimizer,
         type="planner",
-        output_json_schema={"type": "object", "properties": {"plan": {"type": "string"}}},
+        output_schema={"type": "object", "properties": {"plan": {"type": "string"}}},
     )
     human_node = HumanNode(
         id="human-1",
@@ -82,8 +82,8 @@ def test_core_kernel_instantiation() -> None:
     # Test Flow
     metadata = FlowMetadata(name="test-flow", version="1.0.0", description="test", tags=["test"])
     interface = FlowInterface(
-        inputs=DataSchema(json_schema={"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}),
-        outputs=DataSchema(json_schema={"type": "object", "properties": {"a": {"type": "string"}}, "required": ["a"]}),
+        inputs=DataSchema(schema={"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}),
+        outputs=DataSchema(schema={"type": "object", "properties": {"a": {"type": "string"}}, "required": ["a"]}),
     )
     variable_def = VariableDef(type="string", description="User context")
     blackboard = Blackboard(variables={"context": variable_def}, persistence=False)

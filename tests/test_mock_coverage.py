@@ -12,9 +12,7 @@ def _create_metadata() -> FlowMetadata:
 
 
 def _create_interface() -> FlowInterface:
-    return FlowInterface(
-        inputs=DataSchema(json_schema={"type": "object"}), outputs=DataSchema(json_schema={"type": "object"})
-    )
+    return FlowInterface(inputs=DataSchema(schema={"type": "object"}), outputs=DataSchema(schema={"type": "object"}))
 
 
 def test_mock_factory_init() -> None:
@@ -219,7 +217,7 @@ def test_execute_node_swarm() -> None:
 
 def test_execute_node_planner() -> None:
     factory = MockFactory(seed=1)
-    planner = PlannerNode(id="planner1", type="planner", output_json_schema={"type": "string"}, goal="make plan")
+    planner = PlannerNode(id="planner1", type="planner", output_schema={"type": "string"}, goal="make plan")
     exec_map: dict[str, Any] = {}
 
     results = factory._execute_node(planner, exec_map)
@@ -232,14 +230,14 @@ def test_execute_node_human() -> None:
 
     # With input schema
     human = HumanNode(
-        id="human1", type="human", input_json_schema={"type": "boolean"}, prompt="approve?", timeout_seconds=300
+        id="human1", type="human", input_schema={"type": "boolean"}, prompt="approve?", timeout_seconds=300
     )
     results = factory._execute_node(human, {})
     assert isinstance(results[0].outputs, dict)
     assert isinstance(results[0].outputs["result"], bool)
 
     # Without input schema
-    human2 = HumanNode(id="human2", type="human", input_json_schema=None, prompt="approve?", timeout_seconds=300)
+    human2 = HumanNode(id="human2", type="human", input_schema=None, prompt="approve?", timeout_seconds=300)
     results2 = factory._execute_node(human2, {})
     assert results2[0].outputs == {"approved": True}
 
