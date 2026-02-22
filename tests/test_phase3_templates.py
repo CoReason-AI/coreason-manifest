@@ -32,6 +32,7 @@ def test_global_supervision_template() -> None:
     flow = lf.build()
     assert flow.sequence[0].resilience == "ref:standard-retry"
     assert isinstance(flow.definitions, FlowDefinitions)
+    assert flow.definitions.supervision_templates is not None
     assert flow.definitions.supervision_templates["standard-retry"] == shared_policy
 
 

@@ -149,7 +149,7 @@ def test_boolean_schema() -> None:
 
     # False is a valid schema (always fails)
     ds_false = DataSchema(json_schema={"not": {}})
-    assert ds_false.json_schema is False
+    assert ds_false.json_schema == {"not": {}}
 
 
 def test_schema_error_path_reporting() -> None:
