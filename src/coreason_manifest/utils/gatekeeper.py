@@ -81,7 +81,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 allowed = False
                 for allowed_d in allowed_domains:
                     # Exact match or subdomain
-                    if domain == allowed_d or domain.endswith("." + allowed_d):
+                    if domain == allowed_d or (domain and domain.endswith("." + allowed_d)):
                         allowed = True
                         break
 
@@ -257,7 +257,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
         # 5b. Utility Island Detection (Unreachable from Entry)
         # SOTA Fix: Use explicit entry point
-        entry_nodes = [flow.graph.entry_point]
+        entry_nodes = []
+        if flow.graph.entry_point:
+            entry_nodes.append(flow.graph.entry_point)
 
         # BFS from entry nodes to find reachable set
         reachable = set(entry_nodes)
@@ -265,6 +267,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
         while queue:
             curr = queue.pop(0)
+            # Mypy fix: handle None key (if curr is None? no entry_nodes are str)
+            # but adj dict expects str.
             for neighbor in adj.get(curr or "", []):
                 if neighbor not in reachable:
                     reachable.add(neighbor)
@@ -401,16 +405,25 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
         guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
 
-        queue = [entry_id]
-        visited = {entry_id}
+        if entry_id:
+            queue = [entry_id]
+            visited = {entry_id}
+        else:
+            queue = []
+            visited = set()
 
         # Handle case where target is the entry node
         if target_node.id == entry_id:
             return False
 
         # 1. Check strict reachability (ignoring guards) to identify Islands
-        full_queue = [entry_id]
-        full_visited = {entry_id}
+        if entry_id:
+            full_queue = [entry_id]
+            full_visited = {entry_id}
+        else:
+            full_queue = []
+            full_visited = set()
+
         reachable = False
         while full_queue:
             curr = full_queue.pop(0)

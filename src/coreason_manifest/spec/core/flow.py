@@ -130,7 +130,7 @@ class VariableDef(CoreasonModel):
     @classmethod
     def compat_id_name(cls, data: Any) -> Any:
         if isinstance(data, dict) and "name" in data and "id" not in data:
-            data["id"] = data["name"]
+            data["id"] = data.pop("name")
         return data
 
 

@@ -99,7 +99,7 @@ class CanonicalV2Strategy(HashingStrategy):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
         if isinstance(obj, (set, frozenset)):
             # Sets should be sorted lists
-            return sorted([self._recursive_sort_and_sanitize(x) for x in obj])
+            return sorted([self._recursive_sort_and_sanitize(x) for x in obj], key=str)
         if isinstance(obj, uuid.UUID):
             return str(obj)
         if isinstance(obj, datetime):

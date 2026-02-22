@@ -102,7 +102,7 @@ class InspectorNodeBase(Node):
 
     @property
     def to_node_variable(self) -> VariableID:
-        return self.output_variable
+        return self.target_variable
 
 
 class InspectorNode(InspectorNodeBase):

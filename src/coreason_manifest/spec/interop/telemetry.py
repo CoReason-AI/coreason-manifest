@@ -62,51 +62,38 @@ class NodeExecution(AntibodyBase):
 
     @model_validator(mode="before")
     @classmethod
-    def enforce_topology_consistency(cls, data: Any) -> Any:
+    def enforce_envelope_consistency(cls, data: Any) -> Any:
         """
-        Ensures consistency between parent_hash and parent_hashes.
-        If parent_hash is set, it is automatically added to parent_hashes.
-        """
-        if isinstance(data, dict):
-            # Check if we need to modify
-            p_hash = data.get("parent_hash")
-            prev_hashes = data.get("parent_hashes")
-
-            if p_hash:
-                # Copy data to avoid side effects
-                data = data.copy()
-                if prev_hashes is None:
-                    data["parent_hashes"] = [p_hash]
-                elif isinstance(prev_hashes, list) and p_hash not in prev_hashes:
-                    # COPY list to avoid mutating shared state if any
-                    new_prev = prev_hashes.copy()
-                    new_prev.append(p_hash)
-                    data["parent_hashes"] = new_prev
-        return data
-
-    @model_validator(mode="before")
-    @classmethod
-    def enforce_lineage_rooting(cls, data: Any) -> Any:
-        """
-        Auto-Rooting: If no root is provided and no parent exists,
-        promote current request_id to root_request_id.
+        Single-pass pre-validation to enforce both lineage rooting
+        and DAG topology consistency, minimizing dict.copy() overhead.
         """
         if isinstance(data, dict):
-            # COPY data to avoid side effects on the input dict
+            # One copy for all mutations
             data = data.copy()
 
+            # 1. Lineage Auto-Rooting
             req_id = data.get("request_id")
             parent = data.get("parent_request_id")
             root = data.get("root_request_id")
 
-            # If request_id is not provided, generate it.
             if not req_id:
                 req_id = str(uuid4())
                 data["request_id"] = req_id
 
-            # Case 1: No parent, no root -> New Root
             if not parent and not root:
                 data["root_request_id"] = req_id
+
+            # 2. Topology Consistency
+            p_hash = data.get("parent_hash")
+            prev_hashes = data.get("parent_hashes")
+
+            if p_hash:
+                if prev_hashes is None:
+                    data["parent_hashes"] = [p_hash]
+                elif isinstance(prev_hashes, list) and p_hash not in prev_hashes:
+                    new_prev = prev_hashes.copy()
+                    new_prev.append(p_hash)
+                    data["parent_hashes"] = new_prev
 
         return data
 
