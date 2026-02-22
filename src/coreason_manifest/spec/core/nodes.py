@@ -100,6 +100,10 @@ class InspectorNodeBase(Node):
     ] = None
     optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
 
+    @property
+    def to_node_variable(self) -> VariableID:
+        return self.output_variable
+
 
 class InspectorNode(InspectorNodeBase):
     """

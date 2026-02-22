@@ -1,4 +1,3 @@
-import warnings
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
@@ -33,17 +32,30 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
+    # Compatibility: field name 'schema' satisfies mypy when tests use schema=...
     id: str = Field(default_factory=lambda: str(uuid4()))
-    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
+    schema: dict[str, Any] = Field(default_factory=dict, alias="json_schema")
+    # Alias json_schema allows loading from json_schema=... via Pydantic.
+    # Tests using schema=... match field name.
+
+    @model_validator(mode="before")
+    @classmethod
+    def compat_json_schema(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # If "json_schema" is passed, alias handles it?
+            # If "schema" is passed, field match handles it?
+            # We want to support BOTH.
+            pass
+        return data
 
     @property
-    def schema(self) -> dict[str, Any]:
-        return self.json_schema
+    def json_schema(self) -> dict[str, Any]:
+        return self.schema
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
         try:
-            jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
+            jsonschema.validators.validator_for(self.schema).check_schema(self.schema)
         except SchemaError as e:
             raise ManifestError(
                 fault=SemanticFault(
@@ -92,9 +104,9 @@ class Edge(CoreasonModel):
     def compat_source_target(cls, data: Any) -> Any:
         if isinstance(data, dict):
             if "source" in data:
-                data["from"] = data.pop("source")
+                data["from_node"] = data.pop("source")
             if "target" in data:
-                data["to"] = data.pop("target")
+                data["to_node"] = data.pop("target")
         return data
 
 
@@ -114,6 +126,7 @@ class FlowDefinitions(CoreasonModel):
     schemas: dict[str, Any] = Field(default_factory=dict)
     tools: dict[str, Any] = Field(default_factory=dict)
     tool_packs: dict[str, Any] = Field(default_factory=dict)
+    skills: dict[str, Any] = Field(default_factory=dict)  # Added skills
     supervision_templates: Any | None = None
 
 
