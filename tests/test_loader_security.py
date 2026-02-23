@@ -174,8 +174,8 @@ class TestManifestIOStrictSecurity:
             if orig_nofollow is not None:
                 delattr(os, "O_NOFOLLOW")
 
-            # 1. Strict Mode: Should raise EnvironmentError
-            with pytest.raises(EnvironmentError, match="Host OS lacks O_NOFOLLOW support"):
+            # 1. Strict Mode: Should raise OSError (EnvironmentError)
+            with pytest.raises(OSError, match="Host OS lacks O_NOFOLLOW support"):
                 ManifestIO(tmp_path, strict_security=True)
 
             # 2. Permissive Mode: Should warn
@@ -186,6 +186,13 @@ class TestManifestIOStrictSecurity:
             # Restore O_NOFOLLOW
             if orig_nofollow is not None:
                 os.O_NOFOLLOW = orig_nofollow  # type: ignore[misc]
+
+    def test_init_with_nofollow_present(self, tmp_path: Path) -> None:
+        """Cover the 'else' (implicit) branch of checking O_NOFOLLOW existence."""
+        # Force O_NOFOLLOW to exist (simulating Linux on Windows)
+        with patch.object(os, "O_NOFOLLOW", 0, create=True):
+            # Should not raise or warn even with strict=True
+            ManifestIO(tmp_path, strict_security=True)
 
     def test_toctou_race_detected_inode_mismatch(self, tmp_path: Path) -> None:
         """Test that mismatched inodes between lstat and fstat raises SecurityViolationError."""
