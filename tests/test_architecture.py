@@ -4,7 +4,6 @@ from typing import Any
 from pydantic import AliasChoices, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.flow import Manifest
 from coreason_manifest.spec.core.types import CoercibleStringList
 
 

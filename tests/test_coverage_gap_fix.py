@@ -286,10 +286,10 @@ def test_gatekeeper_is_guarded() -> None:
     human = HumanNode(id="h1", type="human", prompt="p", timeout_seconds=100)
     agent = AgentNode(id="a1", type="agent", profile="p1")
 
-    lf = LinearFlow(metadata=FlowMetadata(name="t", version="1"), interface=FlowInterface(), steps=[human, agent])
+    lf = LinearFlow(metadata=FlowMetadata(name="t", version="1"), steps=[human, agent])
     assert _is_guarded(agent, lf) is True
 
-    lf2 = LinearFlow(metadata=FlowMetadata(name="t", version="1"), interface=FlowInterface(), steps=[agent, human])
+    lf2 = LinearFlow(metadata=FlowMetadata(name="t", version="1"), steps=[agent, human])
     assert _is_guarded(agent, lf2) is False
 
 

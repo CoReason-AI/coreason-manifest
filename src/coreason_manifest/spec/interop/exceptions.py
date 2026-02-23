@@ -51,6 +51,7 @@ class SecurityJailViolationError(ManifestError):
     Raised when a file operation attempts to escape the sandbox jail.
     Legacy exception retained for compatibility with loader.py but upgraded to SOTA.
     """
+
     def __init__(self, message: str) -> None:
         super().__init__(
             SemanticFault(
@@ -66,6 +67,7 @@ class LineageIntegrityError(ManifestError):
     """
     Raised when a trace lineage violation is detected.
     """
+
     def __init__(self, message: str) -> None:
         super().__init__(
             SemanticFault(

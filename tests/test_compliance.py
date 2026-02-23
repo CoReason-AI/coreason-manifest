@@ -20,7 +20,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog
+from coreason_manifest.spec.interop.compliance import ErrorCatalog
 from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.gatekeeper import validate_policy
@@ -253,8 +253,6 @@ def test_integrity_sanitization() -> None:
     h2 = compute_hash(data_reordered)
 
     assert h1 == h2
-
-
 
 
 def test_topology_utility_island_acyclic_unsafe() -> None:

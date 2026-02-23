@@ -10,12 +10,10 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
 )
-from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
+from coreason_manifest.spec.core.nodes import HumanNode
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
-
-
 
 
 def test_human_node_mutual_exclusion() -> None:
@@ -46,8 +44,6 @@ def test_human_node_mutual_exclusion() -> None:
             shadow_timeout_seconds=300,  # Invalid
         )
     assert "must not have 'shadow_timeout_seconds'" in str(excinfo.value)
-
-
 
 
 def test_domain_validation_error_remediation() -> None:
