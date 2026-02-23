@@ -320,9 +320,11 @@ class TestManifestIOStrictSecurity:
             patch("os.fstat", return_value=stat_after),
             patch("os.fdopen"),
             patch("os.close") as mock_close,
-            pytest.warns(RuntimeWarning, match="Inode heuristic blindspot"),
         ):
-            with pytest.raises(SecurityViolationError, match="mtime/size mismatch"):
+            with (
+                pytest.warns(RuntimeWarning, match="Inode heuristic blindspot"),
+                pytest.raises(SecurityViolationError, match="mtime/size mismatch"),
+            ):
                 io.read_text("test.txt")
 
             mock_close.assert_called_with(10)
