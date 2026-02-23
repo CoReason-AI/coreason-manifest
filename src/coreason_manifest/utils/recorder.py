@@ -28,7 +28,7 @@ class BlackBoxRecorder:
         timestamp: datetime | None = None,
         error: str | None = None,
         attributes: dict[str, Any] | None = None,
-        # Trace Context
+        *,  # Force Keyword-Only Args for Trace Context
         request_id: str | None = None,
         parent_request_id: str | None = None,
         root_request_id: str | None = None,
@@ -81,15 +81,10 @@ class BlackBoxRecorder:
             "hash_version": "v2",
             "request_id": resolved_request_id,
             "root_request_id": resolved_root_request_id,
+            "parent_request_id": parent_request_id,
+            "traceparent": traceparent,
+            "tracestate": tracestate,
         }
-
-        # Veritas Integrity Payload Construction: Add Context
-        if parent_request_id:
-            payload["parent_request_id"] = parent_request_id
-        if traceparent:
-            payload["traceparent"] = traceparent
-        if tracestate:
-            payload["tracestate"] = tracestate
 
         # 3. Compute Hash
         execution_hash = compute_hash(payload)
