@@ -89,12 +89,12 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
 
     if isinstance(flow, LinearFlow):
         lines.append("graph TD")
-        nodes = flow.sequence
+        nodes = flow.steps
         edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
         nodes = list(flow.graph.nodes.values())
-        edges = [(e.source, e.target, e.condition) for e in flow.graph.edges]
+        edges = [(e.from_node, e.to_node, e.condition) for e in flow.graph.edges]
     else:
         return ""  # pragma: no cover
 
@@ -240,11 +240,11 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
     edges: list[tuple[str, str, str | None]] = []
 
     if isinstance(flow, LinearFlow):
-        nodes = flow.sequence
+        nodes = flow.steps
         edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
     else:
         nodes = list(flow.graph.nodes.values())
-        edges = [(e.source, e.target, e.condition) for e in flow.graph.edges]
+        edges = [(e.from_node, e.to_node, e.condition) for e in flow.graph.edges]
 
     # Compute Layout
     positions = _compute_layout(nodes, edges)

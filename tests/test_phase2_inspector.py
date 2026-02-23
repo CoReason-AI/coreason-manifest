@@ -11,8 +11,8 @@ def test_inspector_lifecycle_graph() -> None:
     # Domain 4: Add Blackboard variables for data flow validation
     flow_builder.set_blackboard(
         {
-            "result_score": VariableDef(type="float", description="Score"),
-            "verification_result": VariableDef(type="boolean", description="Result"),
+            "result_score": VariableDef(id="unknown", type="float", description="Score"),
+            "verification_result": VariableDef(id="unknown", type="boolean", description="Result"),
         }
     )
 
@@ -39,7 +39,7 @@ def test_inspector_lifecycle_graph() -> None:
 
     # Verify pass_threshold is set correctly
     assert node.pass_threshold == 0.8
-    assert node.target_variable == "result_score"
+    assert node.to_node_variable == "result_score"
     assert node.criteria == "Score must be > 0.8"
 
     # Run to_mermaid(flow) and verify the classDef inspector is present
@@ -85,7 +85,7 @@ def test_inspector_lifecycle_linear() -> None:
 
     # Verify properties
     assert node.pass_threshold == 0.9
-    assert node.target_variable == "result_quality"
+    assert node.to_node_variable == "result_quality"
 
     # Run to_mermaid(flow) to verify visualization for linear flow
     mermaid_code = to_mermaid(flow)

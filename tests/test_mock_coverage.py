@@ -111,13 +111,13 @@ def test_simulate_trace_linear_flow() -> None:
     node1 = PlaceholderNode(id="n1", type="placeholder", required_capabilities=["c1"])
     node2 = PlaceholderNode(id="n2", type="placeholder", required_capabilities=["c2"])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=_create_metadata(), sequence=[node1, node2])
+    flow = LinearFlow(kind="LinearFlow", metadata=_create_metadata(), steps=[node1, node2])
 
     trace = factory.simulate_trace(flow)
     assert len(trace) == 2
     assert trace[0].node_id == "n1"
     assert trace[1].node_id == "n2"
-    assert trace[1].previous_hashes == [trace[0].execution_hash]
+    assert trace[1].parent_hashes == [trace[0].execution_hash]
 
 
 def test_simulate_trace_graph_flow() -> None:
@@ -130,7 +130,7 @@ def test_simulate_trace_graph_flow() -> None:
     # n1 -> n2 -> n3
     graph = Graph(
         nodes={"n1": n1, "n2": n2, "n3": n3},
-        edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n3")],
+        edges=[Edge(from_node="n1", to_node="n2"), Edge(from_node="n2", to_node="n3")],
         entry_point="n1",
     )
 
@@ -153,7 +153,7 @@ def test_simulate_trace_graph_cycle() -> None:
     # n1 <-> n2
     graph = Graph(
         nodes={"n1": n1, "n2": n2},
-        edges=[Edge(source="n1", target="n2"), Edge(source="n2", target="n1")],
+        edges=[Edge(from_node="n1", to_node="n2"), Edge(from_node="n2", to_node="n1")],
         entry_point="n1",
     )
 

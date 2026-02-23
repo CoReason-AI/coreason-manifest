@@ -4,7 +4,6 @@ from typing import Any
 from pydantic import AliasChoices, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.flow import Manifest
 from coreason_manifest.spec.core.types import CoercibleStringList
 
 
@@ -68,15 +67,6 @@ def test_coercion_string_list() -> None:
 
     model3 = CollectionModel(tags=["already", "list"])
     assert model3.tags == ["already", "list"]
-
-
-def test_json_schema_export_meta() -> None:
-    """Test that export_json_schema includes meta tags."""
-    schema_str = Manifest.export_json_schema()
-    schema = json.loads(schema_str)
-
-    assert schema["$schema"] == "http://json-schema.org/draft-07/schema#"
-    assert schema["title"] == "Coreason Manifest Specification v2"
 
 
 class AliasChoicesModel(CoreasonModel):

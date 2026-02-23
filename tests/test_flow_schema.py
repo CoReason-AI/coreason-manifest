@@ -10,14 +10,14 @@ def test_flow_interface_schema() -> None:
     output_schema = DataSchema(json_schema={"type": "object", "properties": {"response": {"type": "string"}}})
 
     interface = FlowInterface(inputs=input_schema, outputs=output_schema)
-    assert isinstance(interface.inputs.json_schema, dict)
-    assert interface.inputs.json_schema["properties"]["user_query"]["type"] == "string"
+    assert isinstance(interface.inputs.json_schema, dict)  # type: ignore[union-attr]
+    assert interface.inputs.json_schema["properties"]["user_query"]["type"] == "string"  # type: ignore[union-attr]
 
 
 def test_flow_interface_validation_error() -> None:
     with pytest.raises(ValidationError):
         FlowInterface(
-            inputs={"json_schema": "invalid-type"},  # type: ignore[arg-type]
+            inputs={"json_schema": "invalid-type"},
             outputs=DataSchema(json_schema={}),
         )
 
@@ -39,5 +39,5 @@ def test_builder_interface_construction() -> None:
     assert isinstance(flow.interface.inputs, DataSchema)
     assert isinstance(flow.interface.inputs.json_schema, dict)
     assert flow.interface.inputs.json_schema["properties"]["query"]["type"] == "string"
-    assert isinstance(flow.interface.outputs.json_schema, dict)
-    assert flow.interface.outputs.json_schema["properties"]["answer"]["type"] == "string"
+    assert isinstance(flow.interface.outputs.json_schema, dict)  # type: ignore[union-attr]
+    assert flow.interface.outputs.json_schema["properties"]["answer"]["type"] == "string"  # type: ignore[union-attr]

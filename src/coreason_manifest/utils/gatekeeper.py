@@ -1,7 +1,7 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
@@ -31,7 +31,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # Extract all nodes
     nodes: list[AnyNode] = []
     if isinstance(flow, LinearFlow):
-        nodes = flow.sequence
+        nodes = flow.steps
     elif isinstance(flow, GraphFlow):
         nodes = list(flow.graph.nodes.values())
 
@@ -53,7 +53,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             reasoning = profile.reasoning
 
         if reasoning and hasattr(reasoning, "required_capabilities"):
-            return reasoning.required_capabilities()
+            return cast("list[str]", reasoning.required_capabilities())
         return []
 
     # Build tool map: name -> tool_object
@@ -73,7 +73,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     if allowed_domains:
         for tool_obj in tool_map.values():
-            # SOTA Fix: Utilize strict Pydantic HttpUrl object instead of manual string parsing
+            # Architectural Note: Utilize strict Pydantic HttpUrl object instead of manual string parsing
             if tool_obj.url and tool_obj.url.host:
                 domain_raw = str(tool_obj.url.host)
                 domain = canonicalize_domain(domain_raw)
@@ -81,7 +81,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 allowed = False
                 for allowed_d in allowed_domains:
                     # Exact match or subdomain
-                    if domain == allowed_d or domain.endswith("." + allowed_d):
+                    if domain == allowed_d or (domain and domain.endswith("." + allowed_d)):
                         allowed = True
                         break
 
@@ -148,7 +148,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             if isinstance(flow, LinearFlow):
                 # Find index
                 idx = 0
-                for i, n in enumerate(flow.sequence):
+                for i, n in enumerate(flow.steps):
                     if n.id == node.id:
                         idx = i
                         break
@@ -163,7 +163,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
                 # 2. Rewire incoming edges (Target -> Guard)
                 for edge_idx, edge in enumerate(flow.graph.edges):
-                    if edge.target == node.id:
+                    if edge.to_node == node.id:
                         patch_ops.append(
                             {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
                         )
@@ -199,8 +199,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
         for edge in flow.graph.edges:
             # SOTA Fix 1: Defensive check for Draft Mode Fatality
-            if edge.source in adj:
-                adj[edge.source].append(edge.target)
+            if edge.from_node in adj:
+                adj[edge.from_node].append(edge.to_node)
 
         # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
         visited: set[str] = set()
@@ -256,8 +256,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 node_cycle_map[nid] = is_cycle
 
         # 5b. Utility Island Detection (Unreachable from Entry)
-        # SOTA Fix: Use explicit entry point
-        entry_nodes = [flow.graph.entry_point]
+        # Architectural Note: Use explicit entry point
+        entry_nodes = []
+        if flow.graph.entry_point:
+            entry_nodes.append(flow.graph.entry_point)
 
         # BFS from entry nodes to find reachable set
         reachable = set(entry_nodes)
@@ -265,7 +267,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
         while queue:
             curr = queue.pop(0)
-            for neighbor in adj.get(curr, []):
+            # Mypy fix: handle None key (if curr is None? no entry_nodes are str)
+            # but adj dict expects str.
+            for neighbor in adj.get(curr or "", []):
                 if neighbor not in reachable:
                     reachable.add(neighbor)
                     queue.append(neighbor)
@@ -299,7 +303,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             # Gather all edges connected to ANY unreachable node
             bulk_edge_indices = set()
             for idx, edge in enumerate(flow.graph.edges):
-                if edge.source in unreachable or edge.target in unreachable:
+                if edge.from_node in unreachable or edge.to_node in unreachable:
                     bulk_edge_indices.add(idx)
 
             # Sort descending to prevent index invalidation during sequential removal
@@ -369,9 +373,9 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     """
     if isinstance(flow, LinearFlow):
         # Scan sequence backwards from target
-        # SOTA Fix: Match by ID to verify identity, not just value equality
+        # Architectural Note: Match by ID to verify identity, not just value equality
         target_idx = -1
-        for i, node in enumerate(flow.sequence):
+        for i, node in enumerate(flow.steps):
             if node.id == target_node.id:
                 target_idx = i
                 break
@@ -380,7 +384,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             return False
 
         for i in range(target_idx - 1, -1, -1):
-            node = flow.sequence[i]
+            node = flow.steps[i]
             if isinstance(node, HumanNode):
                 return True
         return False
@@ -397,27 +401,36 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         # Construct adjacency map
         adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
         for edge in flow.graph.edges:
-            adj[edge.source].append(edge.target)
+            adj[edge.from_node].append(edge.to_node)
 
         guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
 
-        queue = [entry_id]
-        visited = {entry_id}
+        if entry_id:
+            queue = [entry_id]
+            visited = {entry_id}
+        else:
+            queue = []
+            visited = set()
 
         # Handle case where target is the entry node
         if target_node.id == entry_id:
             return False
 
         # 1. Check strict reachability (ignoring guards) to identify Islands
-        full_queue = [entry_id]
-        full_visited = {entry_id}
+        if entry_id:
+            full_queue = [entry_id]
+            full_visited = {entry_id}
+        else:
+            full_queue = []
+            full_visited = set()
+
         reachable = False
         while full_queue:
             curr = full_queue.pop(0)
             if curr == target_node.id:
                 reachable = True
                 break
-            for n in adj.get(curr, []):
+            for n in adj.get(curr or "", []):
                 if n not in full_visited:
                     full_visited.add(n)
                     full_queue.append(n)
@@ -438,7 +451,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
                 continue
 
             # Expand neighbors
-            for neighbor in adj.get(curr_id, []):
+            for neighbor in adj.get(curr_id or "", []):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     queue.append(neighbor)

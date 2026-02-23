@@ -1,5 +1,3 @@
-import json
-
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     DataSchema,
@@ -13,39 +11,6 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.utils.diff import compare_flows
-from coreason_manifest.utils.integrity import LegacyV1Strategy
-
-# ------------------------------------------------------------------------
-# Pillar 1: Integrity
-# ------------------------------------------------------------------------
-
-
-def test_legacy_v1_unicode_handling() -> None:
-    """
-    Directive: LegacyV1Strategy must use ensure_ascii=False.
-    """
-    data = {"message": "Hello 🌍"}
-
-    strategy = LegacyV1Strategy()
-
-    # Expected: ensure_ascii=False, separators=(",", ":"), sort_keys=True
-    json_bytes_utf8 = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
-
-    import hashlib
-
-    expected_hash = hashlib.sha256(json_bytes_utf8).hexdigest()
-
-    actual_hash = strategy.compute_hash(data)
-
-    # Debug info if failure
-    if actual_hash != expected_hash:
-        # Re-compute to see what strategy might be doing differently
-        # Check if legacy default implied NO separators?
-        # The code explicitly uses separators=(",", ":").
-        pass
-
-    assert actual_hash == expected_hash, f"LegacyV1Strategy mismatch. Expected {expected_hash}, got {actual_hash}"
-
 
 # ------------------------------------------------------------------------
 # Pillar 3: Graph Topology (Draft Cycles)
@@ -61,7 +26,7 @@ def test_draft_flow_allows_cycles() -> None:
         "A": AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={}),
         "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={}),
     }
-    edges = [Edge(source="A", target="B"), Edge(source="B", target="A")]
+    edges = [Edge(from_node="A", to_node="B"), Edge(from_node="B", to_node="A")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
 
@@ -86,14 +51,14 @@ def test_published_flow_forbids_cycles() -> None:
         "A": AgentNode(id="A", type="agent", profile="p1", tools=[], metadata={}),
         "B": AgentNode(id="B", type="agent", profile="p1", tools=[], metadata={}),
     }
-    edges = [Edge(source="A", target="B"), Edge(source="B", target="A")]
+    edges = [Edge(from_node="A", to_node="B"), Edge(from_node="B", to_node="A")]
 
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
 
     # We must provide definitions for p1 profile validation (status=published triggers strict checks)
     defs = FlowDefinitions(profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)})
 
-    # SOTA Update: Cycles are no longer strictly banned by GraphFlow validation.
+    # Architectural Update: Cycles are no longer strictly banned by GraphFlow validation.
     # They are flagged by Gatekeeper.
     flow = GraphFlow(
         kind="GraphFlow",

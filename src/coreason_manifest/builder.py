@@ -215,16 +215,16 @@ class NewLinearFlow(BaseFlowBuilder):
 
     def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
         super().__init__(name, version, description)
-        self.sequence: list[AnyNode] = []
+        self.steps: list[AnyNode] = []
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence."""
-        self.sequence.append(node)
+        self.steps.append(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
         """Appends an agent node to the sequence."""
-        self.sequence.append(agent)
+        self.steps.append(agent)
         return self
 
     def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> "NewLinearFlow":
@@ -239,7 +239,7 @@ class NewLinearFlow(BaseFlowBuilder):
             profile=profile_id,
             tools=tools,
         )
-        self.sequence.append(node)
+        self.steps.append(node)
         return self
 
     def add_inspector(
@@ -256,7 +256,7 @@ class NewLinearFlow(BaseFlowBuilder):
             optimizer=None,
             type="inspector",
         )
-        self.sequence.append(node)
+        self.steps.append(node)
         return self
 
     def build(self) -> LinearFlow:
@@ -265,7 +265,7 @@ class NewLinearFlow(BaseFlowBuilder):
             kind="LinearFlow",
             status="published",
             metadata=self.metadata,
-            sequence=self.sequence,
+            steps=self.steps,
             definitions=self._build_definitions(),
             governance=self.governance,
         )
@@ -341,7 +341,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
         """Adds an edge to the graph."""
-        self._edges.append(Edge(source=source, target=target, condition=condition))
+        self._edges.append(Edge(from_node=source, to_node=target, condition=condition))
         return self
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":

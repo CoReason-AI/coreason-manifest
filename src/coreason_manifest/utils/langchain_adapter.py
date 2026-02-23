@@ -14,12 +14,12 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
         A dictionary representing the LangChain configuration.
     """
     if isinstance(flow, LinearFlow):
-        return {"type": "chain", "steps": [node.id for node in flow.sequence]}
+        return {"type": "chain", "steps": [node.id for node in flow.steps]}
     if isinstance(flow, GraphFlow):
         return {
             "type": "graph",
             "nodes": list(flow.graph.nodes.keys()),
-            "edges": [(edge.source, edge.target, edge.condition) for edge in flow.graph.edges],
+            "edges": [(edge.from_node, edge.to_node, edge.condition) for edge in flow.graph.edges],
         }
     # This case should ideally not be reachable if type hints are respected
     raise ValueError(f"Unknown flow type: {type(flow)}")

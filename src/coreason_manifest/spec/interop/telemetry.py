@@ -5,6 +5,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.interop.antibody import AntibodyBase
+
 
 class NodeState(StrEnum):
     PENDING = "PENDING"
@@ -16,10 +18,11 @@ class NodeState(StrEnum):
     CANCELLED = "CANCELLED"
 
 
-class NodeExecution(BaseModel):
+class NodeExecution(AntibodyBase):
     """
     Telemetry record for a single node execution attempt.
     Includes Veritas integrity fields for cryptographic chaining.
+    Inherits AntibodyBase for Zero-Trust validation (NaN/Inf quarantine).
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -33,7 +36,7 @@ class NodeExecution(BaseModel):
     duration_ms: float
     attributes: dict[str, str | int | float | bool] = Field(default_factory=dict)
 
-    # --- TRACE CONTEXT (SOTA Telemetry) ---
+    # --- TRACE CONTEXT (Standard Telemetry) ---
     request_id: str | None = Field(default=None, description="Current execution ID (Span ID).")
     parent_request_id: str | None = Field(default=None, description="Parent execution ID.")
     root_request_id: str | None = Field(default=None, description="Trace ID (Root).")
@@ -46,38 +49,51 @@ class NodeExecution(BaseModel):
     tracestate: str | None = Field(default=None, description="W3C Trace Context: tracestate header")
 
     # --- VERITAS INTEGRITY RESTORATION ---
-    hash_version: Literal["v1", "v2"] = Field(default="v2", description="Versioning for the hashing strategy.")
+    hash_version: Literal["v2"] = Field(default="v2", description="Cryptographic hashing protocol version.")
     execution_hash: Annotated[str | None, Field(description="SHA-256 hash of inputs+outputs+config.")] = None
-    previous_hashes: list[str] = Field(
-        default_factory=list, description="Hashes of preceding executions (DAG parents)."
-    )
+
+    # Topology: Support both Linear (parent_hash) and DAG (parent_hashes)
+    parent_hash: str | None = Field(default=None, description="Hash of the single parent execution (Linear).")
+    parent_hashes: list[str] = Field(default_factory=list, description="Hashes of preceding executions (DAG parents).")
+
     signature: Annotated[str | None, Field(description="Optional cryptographic signature of the event.")] = None
 
     _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
 
     @model_validator(mode="before")
     @classmethod
-    def enforce_lineage_rooting(cls, data: Any) -> Any:
+    def enforce_envelope_consistency(cls, data: Any) -> Any:
         """
-        Auto-Rooting: If no root is provided and no parent exists,
-        promote current request_id to root_request_id.
+        Single-pass pre-validation to enforce both lineage rooting
+        and DAG topology consistency, minimizing dict.copy() overhead.
         """
         if isinstance(data, dict):
-            # COPY data to avoid side effects on the input dict
+            # One copy for all mutations
             data = data.copy()
 
+            # 1. Lineage Auto-Rooting
             req_id = data.get("request_id")
             parent = data.get("parent_request_id")
             root = data.get("root_request_id")
 
-            # If request_id is not provided, generate it.
             if not req_id:
                 req_id = str(uuid4())
                 data["request_id"] = req_id
 
-            # Case 1: No parent, no root -> New Root
             if not parent and not root:
                 data["root_request_id"] = req_id
+
+            # 2. Topology Consistency
+            p_hash = data.get("parent_hash")
+            prev_hashes = data.get("parent_hashes")
+
+            if p_hash:
+                if prev_hashes is None:
+                    data["parent_hashes"] = [p_hash]
+                elif isinstance(prev_hashes, list) and p_hash not in prev_hashes:
+                    new_prev = prev_hashes.copy()
+                    new_prev.append(p_hash)
+                    data["parent_hashes"] = new_prev
 
         return data
 

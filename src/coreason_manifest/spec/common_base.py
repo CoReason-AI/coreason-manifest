@@ -40,7 +40,7 @@ class CoreasonModel(BaseModel):
     def _funnel_unknown_fields(cls, data: Any) -> Any:
         """Intercepts the raw dict before instantiation to funnel unknown keys safely."""
         if isinstance(data, dict):
-            # SOTA Fix: Must account for both field names AND aliases
+            # Architectural Note: Must account for both field names AND aliases
             known_keys = set()
             for name, field in cls.model_fields.items():
                 known_keys.add(name)
@@ -94,7 +94,7 @@ class CoreasonModel(BaseModel):
         """RFC-8785 strict canonical serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
 
-        # SOTA Fix: Recursively sort lists to prevent non-deterministic set-to-list casting
+        # Architectural Note: Recursively sort lists to prevent non-deterministic set-to-list casting
         def _sort_collections(obj: Any) -> Any:
             if isinstance(obj, dict):
                 return {k: _sort_collections(v) for k, v in obj.items()}

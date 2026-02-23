@@ -46,7 +46,7 @@ ChangeOperation = Annotated[
 
 class SemanticPatchReport(BaseModel):
     """
-    SOTA Semantic Patch Report containing RFC 6902 operations.
+    Semantic Patch Report containing RFC 6902 operations.
     Computes breaking changes and semantic categories.
     """
 
@@ -131,11 +131,11 @@ def _generate_diff(
     if isinstance(obj1, dict) and isinstance(obj2, dict):
         all_keys = set(obj1.keys()) | set(obj2.keys())
         for key in sorted(all_keys):
-            # SOTA Fix: RFC 6901 Escaping
+            # Architectural Note: RFC 6901 Escaping
             escaped_key = _escape_json_pointer(key)
             new_path = f"{path}/{escaped_key}"
 
-            # SOTA Fix: Contextual Domain Switching
+            # Architectural Note: Contextual Domain Switching
             # Determine domain for the current key and subsequent recursion.
             next_domain = domain
             next_override: Literal["resource", "topology", "governance"] | None = None
@@ -159,13 +159,13 @@ def _generate_diff(
                 # Otherwise, propagate the current next_domain.
                 # However, if 'recurse_domain_override' was passed to US (e.g. we are inside 'nodes'),
                 # we must use it for OUR children (the agents).
-                effective_domain = recurse_domain_override if recurse_domain_override else next_domain
+                effective_domain = recurse_domain_override or next_domain
                 changes.extend(_generate_diff(new_path, obj1[key], obj2[key], effective_domain, next_override))
 
     elif isinstance(obj1, list) and isinstance(obj2, list):
-        child_domain = recurse_domain_override if recurse_domain_override else domain
+        child_domain = recurse_domain_override or domain
 
-        # SOTA Fix: Identity-based alignment to prevent semantic destruction
+        # Architectural Note: Identity-based alignment to prevent semantic destruction
         def get_identity(item: Any) -> Any:
             if isinstance(item, dict):
                 return item.get("id") or item.get("name") or item.get("key")

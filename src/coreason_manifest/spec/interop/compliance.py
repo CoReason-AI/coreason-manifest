@@ -58,37 +58,3 @@ class ComplianceReport(BaseModel):
     node_id: str | None = None
     remediation: RemediationAction | None = None
     details: dict[str, Any] = Field(default_factory=dict)
-
-
-def legacy_error_adapter(report: ComplianceReport, consumer_version: str = "v0.24.0") -> str:
-    """
-    Adapts a modern ComplianceReport into a legacy error string format.
-
-    Legacy Format Example: "Security Error: Reference '{ref}' escapes the root directory."
-    """
-    if consumer_version >= "v0.25.0":
-        # Return strict JSON representation for modern clients
-        return report.model_dump_json()
-
-    # Legacy mapping
-    if report.code == ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002:
-        domain = report.details.get("domain", "unknown")
-        tool_name = report.details.get("tool_name", "unknown")
-        return f"Tool '{tool_name}' uses blocked domain: {domain}"
-
-    if report.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003:
-        reason = report.details.get("reason", "unknown")
-        return (
-            f"Policy Violation: Node '{report.node_id}' requires high-risk features "
-            f"({reason}) but is not guarded by a HumanNode."
-        )
-
-    if report.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003:
-        reason = report.details.get("reason", "unknown")
-        return (
-            f"Topology Violation: Node '{report.node_id}' is unreachable (utility island) "
-            f"but requires high-risk capabilities: {reason}."
-        )
-
-    # Fallback for unknown codes or generic errors
-    return f"{report.severity.title()}: {report.message} (Code: {report.code})"

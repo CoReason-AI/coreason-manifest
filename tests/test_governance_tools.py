@@ -28,7 +28,7 @@ def test_critical_tool_requires_guard() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
-        sequence=[agent],
+        steps=[agent],
     )
 
     errors = validate_policy(flow_unguarded)
@@ -50,7 +50,7 @@ def test_critical_tool_requires_guard() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
-        sequence=[human, agent],
+        steps=[human, agent],
     )
 
     errors = validate_policy(flow_guarded)
@@ -77,7 +77,7 @@ def test_safe_tool_allowed() -> None:
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
-        sequence=[agent],
+        steps=[agent],
     )
 
     errors = validate_policy(flow)

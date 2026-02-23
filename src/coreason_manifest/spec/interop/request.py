@@ -33,7 +33,7 @@ class AgentRequest(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     # Versioning
-    hash_version: Literal["v1"] = Field(default="v1", description="Versioning for integrity strategies.")
+    hash_version: Literal["v2"] = Field(default="v2", description="Versioning for integrity strategies.")
 
     def create_child(self, metadata: dict[str, Any]) -> Self:
         return self.model_copy(
@@ -87,7 +87,7 @@ class AgentRequest(BaseModel):
 
         # Rule 1: Orphaned trace check (Parent exists, but Root missing)
         if self.parent_request_id and not self.root_request_id:
-            # SOTA Fix: Structured Exception Contracts
+            # Architectural Note: Structured Exception Contracts
             err = LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing).")
             err.add_note(f"Request ID: {self.request_id}")
             err.add_note(f"Parent Request ID: {self.parent_request_id}")
