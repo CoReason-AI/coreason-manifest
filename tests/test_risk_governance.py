@@ -176,3 +176,42 @@ def test_inline_tool_bypass_prevention() -> None:
 
     assert "Security Violation" in str(exc_info.value)
     assert "inline_nuke" in str(exc_info.value)
+
+
+def test_scan_raw_dicts_fail_closed() -> None:
+    """
+    Test fail-closed behavior for raw dicts missing risk_level.
+    """
+    from typing import Any, Literal
+
+    from pydantic import Field
+
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    from coreason_manifest.spec.core.nodes import Node
+
+    class RawToolNode(Node):
+        type: Literal["raw_tool_node"] = "raw_tool_node"
+        inline_tools: list[Any] = Field(default_factory=list)
+
+    # Tool with NO risk level -> Should default to CRITICAL
+    raw_tool_missing_risk = {
+        "type": "capability",
+        "name": "mystery_tool",
+        # risk_level MISSING
+    }
+
+    node = RawToolNode(id="raw_1", inline_tools=[raw_tool_missing_risk])
+
+    # Set limit to STANDARD. If mystery_tool defaults to CRITICAL, this should raise.
+    max_risk = RiskLevel.STANDARD
+
+    with pytest.raises(ManifestError) as exc_info:
+        _scan_for_kill_switch_violations(
+            max_risk=max_risk,
+            definitions=None,
+            nodes=[node],  # type: ignore[list-item]
+        )
+
+    assert "Security Violation" in str(exc_info.value)
+    assert "mystery_tool" in str(exc_info.value)
+    assert "critical" in str(exc_info.value)  # Defaulted value

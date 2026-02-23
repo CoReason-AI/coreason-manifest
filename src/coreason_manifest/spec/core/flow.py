@@ -173,19 +173,45 @@ def _scan_for_kill_switch_violations(
             # Ignore strings (references)
             if isinstance(tool, ToolCapability):
                 tools_to_check.append(tool)
-            elif isinstance(tool, dict) and "risk_level" in tool:
+            elif isinstance(tool, dict):
                 # Attempt to parse dict as ToolCapability if it looks like one
                 try:
-                    parsed_tool = ToolCapability(**tool)
+                    # If risk_level is missing, force default to "standard" via Pydantic model
+                    # BUT if we want fail-closed for raw dicts that MIGHT be tools but are malformed,
+                    # we need to be careful.
+                    # Current requirement: "If a tool's risk level is missing... it MUST default to ... critical"
+                    # ToolCapability default is "standard".
+                    # So we must override if missing.
+                    if "risk_level" not in tool:
+                        # We create a copy to avoid mutating input
+                        tool_copy = tool.copy()
+                        tool_copy["risk_level"] = RiskLevel.CRITICAL
+                        parsed_tool = ToolCapability(**tool_copy)
+                    else:
+                        parsed_tool = ToolCapability(**tool)
+
                     tools_to_check.append(parsed_tool)
                 except Exception:
-                    # If parsing fails, we treat it as critical to be safe, or skip?
-                    # Fail-closed: If we see a dict that looks like a tool but fails validation,
-                    # we should probably flag it or default to critical.
-                    # However, 'tools' in AgentNode are strings. A dict there would be a schema violation
-                    # unless the field is Any/Union.
-                    # For now, strict check:
-                    pass
+                    # Fail-closed: If it looks like a tool (is a dict in a tools list) but fails parsing,
+                    # we treat it as a Critical risk object to trigger a halt if necessary.
+                    # We create a dummy critical tool wrapper.
+                    # Use a safe name if missing.
+                    name = tool.get("name", "unknown_malformed_tool")
+                    # We can't easily instantiate ToolCapability if it failed validation.
+                    # So we can't append it to tools_to_check if that expects ToolCapability objects.
+                    # BUT we can check risk immediately here or create a mock.
+                    # Let's construct a valid Critical tool representing this failure.
+                    try:
+                        fallback = ToolCapability(
+                            name=str(name),
+                            type="capability",
+                            risk_level=RiskLevel.CRITICAL,
+                            description="Malformed tool definition defaulted to Critical.",
+                        )
+                        tools_to_check.append(fallback)
+                    except Exception:
+                        # Should not happen
+                        pass
 
     # 3. Enforcement
     for tool in tools_to_check:
