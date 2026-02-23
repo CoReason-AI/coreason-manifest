@@ -3,7 +3,7 @@ import os
 import stat
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
@@ -41,19 +41,27 @@ def test_path_traversal_detection(jail_dir: Path) -> None:
 
 
 def test_posix_permissions(jail_dir: Path) -> None:
-    if os.name != "posix":
-        pytest.skip("Skipping POSIX permission test on non-POSIX OS")
-
     unsafe_file = jail_dir / "unsafe.yaml"
     unsafe_file.write_text("danger: true")
 
-    # Make world-writable
-    mode = unsafe_file.stat().st_mode
-    unsafe_file.chmod(mode | stat.S_IWOTH)
+    # Mock stats to simulate POSIX world-writable permissions
+    mock_stat = MagicMock()
+    mock_stat.st_mode = stat.S_IFREG | stat.S_IWOTH
+    mock_stat.st_ino = 1
+    mock_stat.st_dev = 1
 
     loader = ManifestIO(root_dir=jail_dir, strict_security=False)
-    with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
-        loader.load("unsafe.yaml")
+
+    # We need to mock _is_posix to True, and lstat/fstat to return the unsafe mode
+    # lstat and fstat must match to pass the TOCTOU check
+    with (
+        patch("coreason_manifest.utils.io.ManifestIO._is_posix", new_callable=PropertyMock) as mock_is_posix,
+        patch("os.lstat", return_value=mock_stat),
+        patch("os.fstat", return_value=mock_stat),
+    ):
+        mock_is_posix.return_value = True
+        with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
+            loader.load("unsafe.yaml")
 
 
 def test_manifest_io_eloop_enoent() -> None:
