@@ -115,9 +115,7 @@ class ManifestIO:
                 raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
             if e.errno == errno.ENOENT:
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            # Re-raise other OSErrors (e.g. EACCES)
-            # pragma: no cover
-            raise
+            raise  # pragma: no cover
 
         try:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
