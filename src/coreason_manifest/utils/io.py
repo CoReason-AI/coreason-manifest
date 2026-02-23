@@ -2,6 +2,7 @@ import contextlib
 import errno
 import os
 import stat
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -27,16 +28,29 @@ class ManifestIO:
     Acts as a 'Jail' to prevent Path Traversal attacks.
     """
 
-    def __init__(self, root_dir: Path, allow_external_refs: bool = False):
+    def __init__(self, root_dir: Path, allow_external_refs: bool = False, strict_security: bool = True):
         """
         Initialize the secure loader.
 
         Args:
             root_dir: The root directory to confine file access to.
             allow_external_refs: Whether to allow loading files outside the root directory.
+            strict_security: If True, enforce strict TOCTOU protections (requires O_NOFOLLOW).
         """
         self.jail = root_dir.resolve()
         self.allow_external = allow_external_refs
+
+        if not hasattr(os, "O_NOFOLLOW"):
+            if strict_security:
+                raise EnvironmentError(
+                    "Host OS lacks O_NOFOLLOW support. Strict TOCTOU security cannot be guaranteed. "
+                    "Set strict_security=False to bypass this check at your own risk."
+                )
+            else:
+                warnings.warn(
+                    "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
+                    RuntimeWarning,
+                )
 
     @property
     def _is_posix(self) -> bool:
@@ -82,6 +96,14 @@ class ManifestIO:
             raise SecurityViolationError(f"Path Traversal Detected: {path}")
 
         # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
+        # Defense in Depth: Check stats before opening to detect swaps
+        try:
+            stat_before = os.lstat(target_path)
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
+            raise e
+
         try:
             # O_NOFOLLOW ensures we don't follow symlinks at the end of the path
             # O_RDONLY ensures read-only access
@@ -100,7 +122,13 @@ class ManifestIO:
             # This guarantees we are checking the actual file we just opened.
             st = os.fstat(fd)
 
+            # Post-Open Defense: Verify inode and device match lstat
+            if stat_before.st_ino != st.st_ino or stat_before.st_dev != st.st_dev:
+                os.close(fd)
+                raise SecurityViolationError("File swapped during open operation (TOCTOU attack detected).")
+
             if self._is_posix and (st.st_mode & stat.S_IWOTH):
+                os.close(fd)
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
 
             # 4. READ CONTENT

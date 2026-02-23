@@ -60,22 +60,30 @@ def test_manifest_io_eloop_enoent() -> None:
 
     loader = ManifestIO(root_dir=Path("/tmp"))
 
-    # Mock os.open to raise ELOOP
-    with patch("os.open") as mock_open:
+    # Mock os.lstat (new first check) AND os.open to ensure coverage
+    with patch("os.lstat") as mock_lstat, patch("os.open") as mock_open:
+        # 1. ELOOP (Simulate Loop)
+        # Note: os.lstat typically doesn't raise ELOOP unless path components loop.
+        # But if we want to test the ELOOP catch block around os.open, we need lstat to succeed.
+        mock_lstat.return_value = os.stat_result((0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
         mock_open.side_effect = OSError(errno.ELOOP, "Too many symlinks")
+
         with pytest.raises(SecurityViolationError) as exc_sec:
             loader.read_text("loop.txt")
         assert "Symlink detected" in str(exc_sec.value)
 
-    # Mock os.open to raise ENOENT
-    with patch("os.open") as mock_open:
-        mock_open.side_effect = OSError(errno.ENOENT, "No such file")
+    # 2. ENOENT (Missing File)
+    # This will now be caught by os.lstat first
+    with patch("os.lstat") as mock_lstat:
+        mock_lstat.side_effect = OSError(errno.ENOENT, "No such file")
         with pytest.raises(FileNotFoundError):
             loader.read_text("missing.txt")
 
-    # Mock os.open to raise EACCES (other error)
-    with patch("os.open") as mock_open:
+    # 3. EACCES (Permission Denied) - let lstat succeed, fail at open
+    with patch("os.lstat") as mock_lstat, patch("os.open") as mock_open:
+        mock_lstat.return_value = os.stat_result((0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
         mock_open.side_effect = OSError(errno.EACCES, "Permission denied")
+
         with pytest.raises(OSError, match="Permission denied") as exc_os:
             loader.read_text("locked.txt")
         assert exc_os.value.errno == errno.EACCES
@@ -143,3 +151,112 @@ def test_loader_success(tmp_path: Path) -> None:
 
     cls = load_agent_from_ref(f"{file_path.name}:Agent", root_dir=tmp_path)
     assert cls.__name__ == "Agent"
+
+
+class TestManifestIOStrictSecurity:
+
+    def test_strict_security_enforcement(self, tmp_path: Path) -> None:
+        # Save original O_NOFOLLOW
+        orig_nofollow = getattr(os, "O_NOFOLLOW", None)
+
+        try:
+            # Simulate missing O_NOFOLLOW
+            if orig_nofollow is not None:
+                delattr(os, "O_NOFOLLOW")
+
+            # 1. Strict Mode: Should raise EnvironmentError
+            with pytest.raises(EnvironmentError, match="Host OS lacks O_NOFOLLOW support"):
+                ManifestIO(tmp_path, strict_security=True)
+
+            # 2. Permissive Mode: Should warn
+            with pytest.warns(RuntimeWarning, match="TOCTOU protections disabled"):
+                ManifestIO(tmp_path, strict_security=False)
+
+        finally:
+            # Restore O_NOFOLLOW
+            if orig_nofollow is not None:
+                setattr(os, "O_NOFOLLOW", orig_nofollow)
+
+    def test_toctou_race_detected_inode_mismatch(self, tmp_path: Path) -> None:
+        """Test that mismatched inodes between lstat and fstat raises SecurityViolationError."""
+        from unittest.mock import MagicMock, patch
+
+        jail = tmp_path
+        test_file = jail / "test.txt"
+        test_file.touch()
+
+        io = ManifestIO(jail)
+
+        # Prepare mocks
+        stat_before = MagicMock()
+        stat_before.st_ino = 12345
+        stat_before.st_dev = 99
+        stat_before.st_mode = stat.S_IFREG | 0o644
+
+        stat_after = MagicMock()
+        stat_after.st_ino = 67890 # Mismatch
+        stat_after.st_dev = 99
+        stat_after.st_mode = stat.S_IFREG | 0o644
+
+        # We need to capture the real lstat for other files
+        real_lstat = os.lstat
+
+        def lstat_side_effect(path, *args, **kwargs):
+            p = str(path)
+            if p.endswith("test.txt"):
+                return stat_before
+            return real_lstat(path, *args, **kwargs)
+
+        with patch("os.lstat", side_effect=lstat_side_effect) as mock_lstat, \
+             patch("os.open", return_value=10) as mock_open, \
+             patch("os.fstat", return_value=stat_after) as mock_fstat, \
+             patch("os.fdopen") as mock_fdopen, \
+             patch("os.close") as mock_close:
+
+             # Execute
+            with pytest.raises(SecurityViolationError, match="File swapped during open operation"):
+                io.read_text("test.txt")
+
+            mock_close.assert_called_with(10)
+
+    def test_toctou_race_detected_device_mismatch(self, tmp_path: Path) -> None:
+        """Test that mismatched device IDs between lstat and fstat raises SecurityViolationError."""
+        from unittest.mock import MagicMock, patch
+
+        jail = tmp_path
+        test_file = jail / "test.txt"
+        test_file.touch()
+
+        io = ManifestIO(jail)
+
+        # Prepare mocks
+        stat_before = MagicMock()
+        stat_before.st_ino = 12345
+        stat_before.st_dev = 99
+        stat_before.st_mode = stat.S_IFREG | 0o644
+
+        stat_after = MagicMock()
+        stat_after.st_ino = 12345
+        stat_after.st_dev = 88 # Mismatch
+        stat_after.st_mode = stat.S_IFREG | 0o644
+
+        real_lstat = os.lstat
+
+        def lstat_side_effect(path, *args, **kwargs):
+            p = str(path)
+            if p.endswith("test.txt"):
+                return stat_before
+            return real_lstat(path, *args, **kwargs)
+
+        with patch("os.lstat", side_effect=lstat_side_effect) as mock_lstat, \
+             patch("os.open", return_value=10) as mock_open, \
+             patch("os.fstat", return_value=stat_after) as mock_fstat, \
+             patch("os.fdopen") as mock_fdopen, \
+             patch("os.close") as mock_close:
+
+            # Execute
+            with pytest.raises(SecurityViolationError, match="File swapped during open operation"):
+                io.read_text("test.txt")
+
+            # Verify fd close was called
+            mock_close.assert_called_with(10)
