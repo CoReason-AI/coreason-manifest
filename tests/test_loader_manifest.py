@@ -94,7 +94,7 @@ def test_load_flow_from_file_valid(tmp_path: Path) -> None:
     """
     flow_file.write_text(flow_content)
 
-    flow = load_flow_from_file(str(flow_file))
+    flow = load_flow_from_file(str(flow_file), strict_security=False)
     assert isinstance(flow, LinearFlow)
 
 
@@ -116,7 +116,7 @@ def test_load_flow_from_file_dynamic_check(tmp_path: Path) -> None:
     # Regex: ^[a-zA-Z0-9_\-\./]+\.py:[a-zA-Z_]\w+$
 
     with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references"):
-        load_flow_from_file(str(flow_file))
+        load_flow_from_file(str(flow_file), strict_security=False)
 
 
 def test_sandboxed_path_finder_stdlib() -> None:

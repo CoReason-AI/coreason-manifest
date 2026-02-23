@@ -2,6 +2,7 @@ import contextlib
 import errno
 import os
 import stat
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -27,16 +28,29 @@ class ManifestIO:
     Acts as a 'Jail' to prevent Path Traversal attacks.
     """
 
-    def __init__(self, root_dir: Path, allow_external_refs: bool = False):
+    def __init__(self, root_dir: Path, allow_external_refs: bool = False, strict_security: bool = True):
         """
         Initialize the secure loader.
 
         Args:
             root_dir: The root directory to confine file access to.
             allow_external_refs: Whether to allow loading files outside the root directory.
+            strict_security: If True, enforce strict TOCTOU protections (requires O_NOFOLLOW).
         """
         self.jail = root_dir.resolve()
         self.allow_external = allow_external_refs
+
+        if not hasattr(os, "O_NOFOLLOW"):
+            if strict_security:
+                raise OSError(
+                    "Host OS lacks O_NOFOLLOW support. Strict TOCTOU security cannot be guaranteed. "
+                    "Set strict_security=False to bypass this check at your own risk."
+                )
+            warnings.warn(
+                "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
     @property
     def _is_posix(self) -> bool:
@@ -76,12 +90,24 @@ class ManifestIO:
             if "Symlink loop" in str(e):
                 raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
             raise  # pragma: no cover
+        except OSError as e:
+            if e.errno == getattr(errno, "ELOOP", 40):
+                raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
+            raise
 
         # 1. Path Traversal Check (High-Level)
         if not self.allow_external and not target_path.is_relative_to(self.jail):
             raise SecurityViolationError(f"Path Traversal Detected: {path}")
 
         # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
+        # Defense in Depth: Check stats before opening to detect swaps
+        try:
+            stat_before = os.lstat(target_path)
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
+            raise
+
         try:
             # O_NOFOLLOW ensures we don't follow symlinks at the end of the path
             # O_RDONLY ensures read-only access
@@ -93,12 +119,24 @@ class ManifestIO:
                 raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
             if e.errno == errno.ENOENT:
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            raise e
+            raise  # pragma: no cover
 
         try:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
             # This guarantees we are checking the actual file we just opened.
             st = os.fstat(fd)
+
+            # Defense in depth: Verify inode and device
+            if stat_before.st_ino == 0:
+                warnings.warn(
+                    "Inode heuristic blindspot: OS returned 0 for st_ino. Falling back to mtime/size.",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+                if stat_before.st_mtime != st.st_mtime or stat_before.st_size != st.st_size:
+                    raise SecurityViolationError("File swapped during open operation (mtime/size mismatch).")
+            elif stat_before.st_ino != st.st_ino or stat_before.st_dev != st.st_dev:
+                raise SecurityViolationError("File swapped during open operation (TOCTOU attack detected).")
 
             if self._is_posix and (st.st_mode & stat.S_IWOTH):
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")

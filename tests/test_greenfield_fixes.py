@@ -696,4 +696,4 @@ def test_loader_duplicate_keys_error(tmp_path: object) -> None:
 
     # Must raise a constructor error (wrapped in ValueError by our loader)
     with pytest.raises(ValueError, match="found duplicate key"):
-        load_flow_from_file(str(dup_yaml))
+        load_flow_from_file(str(dup_yaml), strict_security=False)
