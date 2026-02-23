@@ -198,7 +198,7 @@ class GraphFlow(CoreasonModel):
             return self
 
         # Ensure safe iteration whether it's parsed as a dict or list
-        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
+        nodes_iter = self.graph.nodes.values()
 
         for node in nodes_iter:
             if isinstance(node, PlaceholderNode):

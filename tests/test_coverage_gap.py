@@ -16,7 +16,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
@@ -251,8 +251,8 @@ def test_visualizer_pure_cycle() -> None:
 
     from coreason_manifest.spec.core.flow import Edge
 
-    n_c1 = PlaceholderNode(id="c1", type="placeholder", metadata={}, required_capabilities=[])
-    n_c2 = PlaceholderNode(id="c2", type="placeholder", metadata={}, required_capabilities=[])
+    n_c1 = AgentNode(id="c1", type="agent", metadata={}, profile="p", tools=[])
+    n_c2 = AgentNode(id="c2", type="agent", metadata={}, profile="p", tools=[])
 
     # Use model_construct to bypass cycle detection in Graph validation
     graph = Graph.model_construct(
@@ -283,9 +283,9 @@ def test_visualizer_disconnected_cycle() -> None:
 
     from coreason_manifest.spec.core.flow import Edge
 
-    n_r1 = PlaceholderNode(id="r1", type="placeholder", metadata={}, required_capabilities=[])
-    n_c1 = PlaceholderNode(id="c1", type="placeholder", metadata={}, required_capabilities=[])
-    n_c2 = PlaceholderNode(id="c2", type="placeholder", metadata={}, required_capabilities=[])
+    n_r1 = AgentNode(id="r1", type="agent", metadata={}, profile="p", tools=[])
+    n_c1 = AgentNode(id="c1", type="agent", metadata={}, profile="p", tools=[])
+    n_c2 = AgentNode(id="c2", type="agent", metadata={}, profile="p", tools=[])
 
     # Bypass cycle detection
     graph = Graph.model_construct(
@@ -386,7 +386,7 @@ def test_validator_edge_cases() -> None:
     graph_empty = Graph.model_construct(nodes={}, edges=[], entry_point="n1")
     flow_empty = GraphFlow.model_construct(
         kind="GraphFlow",
-        status="draft",
+        status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
@@ -397,19 +397,25 @@ def test_validator_edge_cases() -> None:
     assert any("GraphFlow Error: Graph must contain at least one node" in r for r in reports)
 
     # Dangling edges (validator.py 282, 284 check)
-    n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
+    n1 = AgentNode(id="n1", type="agent", metadata={}, profile="p", tools=[])
     graph_dangling = Graph.model_construct(
         nodes={"n1": n1},
         edges=[Edge(from_node="n1", to_node="missing"), Edge(from_node="missing", to_node="n1")],
         entry_point="n1",
     )
+    # NOTE: When using model_construct, defaults (like status="draft") are NOT applied unless specified.
+    # We must explicitly set status="published" to trigger graph integrity checks.
+    # We also add a definition for profile "p" to avoid integrity error masking the edge error (though multiple errors should be returned).
+    from coreason_manifest.spec.core.flow import FlowDefinitions
+
     flow_dangling = GraphFlow.model_construct(
         kind="GraphFlow",
-        status="draft",
+        status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph_dangling,
+        definitions=FlowDefinitions(profiles={"p": CognitiveProfile(role="r", persona="p")}),
     )
     reports = validate_flow(flow_dangling)
     assert any("Dangling Edge Error" in r for r in reports)
@@ -422,7 +428,7 @@ def test_validator_edge_cases() -> None:
 
     flow_mismatch = GraphFlow.model_construct(
         kind="GraphFlow",
-        status="draft",
+        status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,

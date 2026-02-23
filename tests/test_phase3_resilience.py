@@ -277,12 +277,14 @@ def test_fallback_cycle_detection() -> None:
     gf.add_node(node_a).add_node(node_b)
     gf.define_profile("p", "r", "p")
 
-    # Cycle detection error message changed
-    # Architectural Update: The error message changed because builders might now invoke strict Gatekeeper policies
-    # or the underlying graph validation behavior shifted.
-    # The actual failure log showed: "Resilience Error: Fallback cycle detected..."
-    with pytest.raises(ValueError, match="Resilience Error: Fallback cycle detected"):
-        gf.build()
+    # Manually build and set to published to trigger validation
+    # Builders default to draft, which bypasses fallback cycle check
+    flow_draft = gf.build()
+    flow = flow_draft.model_copy(update={"status": "published"})
+
+    from coreason_manifest.utils.validator import validate_flow
+    errors = validate_flow(flow)
+    assert any("Resilience Error: Fallback cycle detected" in e for e in errors)
 
 
 def test_error_handler_criteria_existence() -> None:

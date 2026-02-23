@@ -95,7 +95,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        status="draft",
+        status="published",
     )
     errors = validate_flow(flow)
     assert any("Dangling Edge Error" in e and "missing" in e for e in errors)
@@ -110,6 +110,7 @@ def test_validate_switch_node_invalid_targets() -> None:
     )
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=blackboard,
@@ -174,6 +175,7 @@ def test_validate_linear_flow_valid() -> None:
 def test_validate_linear_flow_empty() -> None:
     flow = LinearFlow(
         kind="LinearFlow",
+        status="published",
         metadata=create_metadata(),
         steps=[],
     )
@@ -187,6 +189,7 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
     switch = create_switch_node("switch1", "var", {"case1": "missing1"}, "missing2")
     flow = LinearFlow(
         kind="LinearFlow",
+        status="published",
         metadata=create_metadata(),
         steps=[switch],  # switch is the only node
     )
@@ -203,6 +206,7 @@ def test_validate_flow_invalid_type() -> None:
     class DummyFlow:
         governance = None
         definitions = None
+        status = "draft"
 
     # Should not raise error and return empty list (checks skipped)
     errors = validate_flow(cast("LinearFlow", DummyFlow()))
@@ -230,6 +234,7 @@ def test_validate_graph_flow_empty() -> None:
 
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=None,
@@ -247,6 +252,7 @@ def test_validate_graph_flow_key_id_mismatch() -> None:
     graph = Graph(nodes={"wrong_key": agent}, edges=[], entry_point="wrong_key")
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=None,
@@ -272,6 +278,7 @@ def test_validate_orphan_nodes() -> None:
     )
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=None,

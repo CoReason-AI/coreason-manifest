@@ -24,6 +24,7 @@ def create_valid_flow(path: str) -> None:
 def create_invalid_flow(path: str) -> None:
     data = {
         "kind": "LinearFlow",
+        "status": "published",  # Validation checks are strict for published flows
         "metadata": {"name": "InvalidFlow", "version": "1.0.0", "description": "Test", "tags": []},
         "sequence": [],  # Empty sequence is invalid
     }
