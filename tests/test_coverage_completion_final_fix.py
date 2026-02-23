@@ -1,8 +1,10 @@
 from datetime import datetime
+import pytest
 
 from coreason_manifest.builder import NewGraphFlow
 from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.nodes import AgentNode
+from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
@@ -11,14 +13,15 @@ def test_builder_graph_flow_empty_entry_point() -> None:
     """
     Test builder behavior when graph is empty (triggers 'missing_entry_point' branch)
     and validation failure coverage (builder.py:391).
+    We inject an invalid governance to force validation error even in draft mode.
     """
     gf = NewGraphFlow(name="Empty Graph")
-    # No nodes added
 
-    try:
+    # Set governance with negative rate limit to trigger validation error
+    gf.set_governance(Governance(rate_limit_rpm=-10))
+
+    with pytest.raises(ValueError, match="Governance Error: rate_limit_rpm cannot be negative"):
         gf.build()
-    except ValueError as e:
-        assert "GraphFlow Error: Graph must contain at least one node" in str(e)
 
 
 def test_gatekeeper_coverage_complex() -> None:
@@ -104,5 +107,5 @@ def test_integrity_reconstruct_payload_error() -> None:
     """
     # Pass a string instead of dict/model
     trace = ["invalid_node"]
-    result = verify_merkle_proof(trace) # type: ignore
+    result = verify_merkle_proof(trace)  # type: ignore[arg-type]
     assert result is False
