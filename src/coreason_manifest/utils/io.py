@@ -50,6 +50,7 @@ class ManifestIO:
                 warnings.warn(
                     "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
                     RuntimeWarning,
+                    stacklevel=2,
                 )
 
     @property

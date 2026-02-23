@@ -175,10 +175,11 @@ class TestManifestIOStrictSecurity:
         finally:
             # Restore O_NOFOLLOW
             if orig_nofollow is not None:
-                setattr(os, "O_NOFOLLOW", orig_nofollow)
+                setattr(os, "O_NOFOLLOW", orig_nofollow)  # type: ignore[attr-defined]
 
     def test_toctou_race_detected_inode_mismatch(self, tmp_path: Path) -> None:
         """Test that mismatched inodes between lstat and fstat raises SecurityViolationError."""
+        from typing import Any
         from unittest.mock import MagicMock, patch
 
         jail = tmp_path
@@ -194,26 +195,27 @@ class TestManifestIOStrictSecurity:
         stat_before.st_mode = stat.S_IFREG | 0o644
 
         stat_after = MagicMock()
-        stat_after.st_ino = 67890 # Mismatch
+        stat_after.st_ino = 67890  # Mismatch
         stat_after.st_dev = 99
         stat_after.st_mode = stat.S_IFREG | 0o644
 
         # We need to capture the real lstat for other files
         real_lstat = os.lstat
 
-        def lstat_side_effect(path, *args, **kwargs):
+        def lstat_side_effect(path: str | Path, *args: Any, **kwargs: Any) -> Any:
             p = str(path)
             if p.endswith("test.txt"):
                 return stat_before
             return real_lstat(path, *args, **kwargs)
 
-        with patch("os.lstat", side_effect=lstat_side_effect) as mock_lstat, \
-             patch("os.open", return_value=10) as mock_open, \
-             patch("os.fstat", return_value=stat_after) as mock_fstat, \
-             patch("os.fdopen") as mock_fdopen, \
-             patch("os.close") as mock_close:
-
-             # Execute
+        with (
+            patch("os.lstat", side_effect=lstat_side_effect),
+            patch("os.open", return_value=10),
+            patch("os.fstat", return_value=stat_after),
+            patch("os.fdopen"),
+            patch("os.close") as mock_close,
+        ):
+            # Execute
             with pytest.raises(SecurityViolationError, match="File swapped during open operation"):
                 io.read_text("test.txt")
 
@@ -221,6 +223,7 @@ class TestManifestIOStrictSecurity:
 
     def test_toctou_race_detected_device_mismatch(self, tmp_path: Path) -> None:
         """Test that mismatched device IDs between lstat and fstat raises SecurityViolationError."""
+        from typing import Any
         from unittest.mock import MagicMock, patch
 
         jail = tmp_path
@@ -237,23 +240,24 @@ class TestManifestIOStrictSecurity:
 
         stat_after = MagicMock()
         stat_after.st_ino = 12345
-        stat_after.st_dev = 88 # Mismatch
+        stat_after.st_dev = 88  # Mismatch
         stat_after.st_mode = stat.S_IFREG | 0o644
 
         real_lstat = os.lstat
 
-        def lstat_side_effect(path, *args, **kwargs):
+        def lstat_side_effect(path: str | Path, *args: Any, **kwargs: Any) -> Any:
             p = str(path)
             if p.endswith("test.txt"):
                 return stat_before
             return real_lstat(path, *args, **kwargs)
 
-        with patch("os.lstat", side_effect=lstat_side_effect) as mock_lstat, \
-             patch("os.open", return_value=10) as mock_open, \
-             patch("os.fstat", return_value=stat_after) as mock_fstat, \
-             patch("os.fdopen") as mock_fdopen, \
-             patch("os.close") as mock_close:
-
+        with (
+            patch("os.lstat", side_effect=lstat_side_effect),
+            patch("os.open", return_value=10),
+            patch("os.fstat", return_value=stat_after),
+            patch("os.fdopen"),
+            patch("os.close") as mock_close,
+        ):
             # Execute
             with pytest.raises(SecurityViolationError, match="File swapped during open operation"):
                 io.read_text("test.txt")
