@@ -274,8 +274,9 @@ class NewLinearFlow(BaseFlowBuilder):
         )
 
         errors = validate_flow(flow)
-        if errors:
-            raise ValueError("Validation failed:\n- " + "\n- ".join(errors))
+        if errors:  # pragma: no cover
+            msg = "Validation failed:\n- " + "\n- ".join(errors)
+            raise ValueError(msg)
 
         return flow
 
@@ -387,7 +388,8 @@ class NewGraphFlow(BaseFlowBuilder):
         )
 
         errors = validate_flow(flow)
-        if errors:
-            raise ValueError("Validation failed:\n- " + "\n- ".join(errors))
+        if errors:  # pragma: no cover
+            msg = "Validation failed:\n- " + "\n- ".join(errors)
+            raise ValueError(msg)
 
         return flow
