@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import Field, HttpUrl, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.types import CoercibleStringList, ToolID
+from coreason_manifest.spec.core.types import CoercibleStringList, RiskLevel, ToolID
 
 
 class Dependency(CoreasonModel):
@@ -22,7 +22,7 @@ class ToolCapability(CoreasonModel):
 
     type: Literal["capability"] = Field("capability", description="Discriminator for polymorphic tools.")
     name: ToolID = Field(..., description="Unique identifier for the tool.", examples=["calculator"])
-    risk_level: Literal["safe", "standard", "critical"] = Field(
+    risk_level: RiskLevel = Field(
         "standard", description="Risk classification for governance.", examples=["safe"]
     )
     description: str | None = Field(

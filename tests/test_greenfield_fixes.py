@@ -54,7 +54,7 @@ def test_granular_governance_structure() -> None:
     gov = Governance(
         tool_policy={
             "sql_tool": ToolAccessPolicy(risk_level="critical"),
-            "calc_tool": ToolAccessPolicy(risk_level="minimal"),
+            "calc_tool": ToolAccessPolicy(risk_level="safe"),
         },
         default_tool_policy=ToolAccessPolicy(risk_level="standard"),
     )

@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, Field
 
@@ -71,6 +71,9 @@ ToolID = Annotated[
         examples=["calculator", "web_search"],
     ),
 ]
+
+# Risk Level
+RiskLevel = Literal["safe", "standard", "critical"]
 
 # Profile Identifiers
 ProfileID = Annotated[

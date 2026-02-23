@@ -7,6 +7,7 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.tools import ToolPack, ToolCapability
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     EmergenceInspectorNode,
@@ -17,7 +18,7 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.types import NodeID
+from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
@@ -192,6 +193,56 @@ class GraphFlow(CoreasonModel):
                 )
         return self
 
+    @model_validator(mode="after")
+    def enforce_global_kill_switch(self) -> "GraphFlow":
+        if not self.governance or not self.governance.max_risk_level:
+            return self
+
+        max_risk = self.governance.max_risk_level
+        risk_hierarchy = {"safe": 0, "standard": 1, "critical": 2}
+        max_risk_val = risk_hierarchy.get(max_risk, 0)
+
+        if not self.definitions or not self.definitions.tool_packs:
+            return self
+
+        for pack in self.definitions.tool_packs.values():
+            tools = []
+            if isinstance(pack, ToolPack):
+                tools = pack.tools
+            elif isinstance(pack, dict):
+                tools = pack.get("tools", [])
+
+            for tool in tools:
+                risk: RiskLevel = "standard"
+                name = "unknown"
+
+                if isinstance(tool, ToolCapability):
+                    risk = tool.risk_level
+                    name = tool.name
+                elif isinstance(tool, dict):
+                    # Fail-closed: if risk_level is missing, default to critical (handled below by fallback)
+                    # But here we try to extract it.
+                    r = tool.get("risk_level")
+                    if r:
+                        risk = r
+                    else:
+                        risk = "critical" # Missing risk level
+                    name = tool.get("name", "unknown")
+
+                # Verify risk is valid
+                if risk not in risk_hierarchy:
+                    risk = "critical"
+
+                tool_risk_val = risk_hierarchy.get(risk, 2)
+
+                if tool_risk_val > max_risk_val:
+                    raise ValueError(
+                        f"Security Violation: Tool '{name}' has risk level '{risk}' "
+                        f"which exceeds the global max_risk_level '{max_risk}'."
+                    )
+
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -216,6 +267,53 @@ class LinearFlow(CoreasonModel):
     @property
     def sequence(self) -> list[AnyNode]:
         return self.steps
+
+    @model_validator(mode="after")
+    def enforce_global_kill_switch(self) -> "LinearFlow":
+        if not self.governance or not self.governance.max_risk_level:
+            return self
+
+        max_risk = self.governance.max_risk_level
+        risk_hierarchy = {"safe": 0, "standard": 1, "critical": 2}
+        max_risk_val = risk_hierarchy.get(max_risk, 0)
+
+        if not self.definitions or not self.definitions.tool_packs:
+            return self
+
+        for pack in self.definitions.tool_packs.values():
+            tools = []
+            if isinstance(pack, ToolPack):
+                tools = pack.tools
+            elif isinstance(pack, dict):
+                tools = pack.get("tools", [])
+
+            for tool in tools:
+                risk: RiskLevel = "standard"
+                name = "unknown"
+
+                if isinstance(tool, ToolCapability):
+                    risk = tool.risk_level
+                    name = tool.name
+                elif isinstance(tool, dict):
+                    r = tool.get("risk_level")
+                    if r:
+                        risk = r
+                    else:
+                        risk = "critical"
+                    name = tool.get("name", "unknown")
+
+                if risk not in risk_hierarchy:
+                    risk = "critical"
+
+                tool_risk_val = risk_hierarchy.get(risk, 2)
+
+                if tool_risk_val > max_risk_val:
+                    raise ValueError(
+                        f"Security Violation: Tool '{name}' has risk level '{risk}' "
+                        f"which exceeds the global max_risk_level '{max_risk}'."
+                    )
+
+        return self
 
 
 Manifest = GraphFlow
