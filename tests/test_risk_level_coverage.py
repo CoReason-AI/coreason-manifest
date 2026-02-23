@@ -1,5 +1,4 @@
-import contextlib
-
+import pytest
 from coreason_manifest.spec.core.types import RiskLevel
 
 
@@ -20,13 +19,15 @@ def test_risk_level_comparisons() -> None:
     assert RiskLevel.CRITICAL >= RiskLevel.STANDARD
 
     # Test equality (StrEnum default behavior)
-    assert RiskLevel.SAFE == "safe"
-    assert RiskLevel.STANDARD == "standard"
-    assert RiskLevel.CRITICAL == "critical"
+    assert RiskLevel.SAFE.value == "safe"
+    assert RiskLevel.STANDARD.value == "standard"
+    assert RiskLevel.CRITICAL.value == "critical"
 
     # Test invalid comparisons to cover NotImplemented paths (lines 93, 98, 103, 111)
     # We catch TypeError because that's what Python usually raises when __lt__ returns NotImplemented
     # and the other side also returns NotImplemented.
+
+    import contextlib
 
     with contextlib.suppress(TypeError):
         _ = RiskLevel.SAFE < 10

@@ -345,18 +345,8 @@ def test_scan_skips_string_references() -> None:
     from coreason_manifest.spec.core.nodes import AgentNode
 
     # AgentNode has tools: list[str]
-    agent = AgentNode(
-        id="agent1",
-        type="agent",
-        role="assistant",
-        profile="default",
-        tools=["some_tool_ref", "another_tool_ref"]
-    )
+    agent = AgentNode(id="agent1", type="agent", profile="default", tools=["some_tool_ref", "another_tool_ref"])
 
     # Should run without error and without checking these strings
     # (since they are references, not inline definitions)
-    _scan_for_kill_switch_violations(
-        max_risk=RiskLevel.SAFE,
-        definitions=None,
-        nodes=[agent]
-    )
+    _scan_for_kill_switch_violations(max_risk=RiskLevel.SAFE, definitions=None, nodes=[agent])
