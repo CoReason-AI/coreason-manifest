@@ -254,3 +254,42 @@ def test_scan_raw_dicts_malformed() -> None:
     # Should catch the "unknown_malformed_tool" fallback
     assert "Security Violation" in str(exc_info.value)
     assert "unknown_malformed_tool" in str(exc_info.value)
+
+
+def test_scan_raw_dicts_valid_with_risk() -> None:
+    """
+    Test scanning of a valid raw dict that explicitly includes risk_level.
+    This covers the code path where parsing succeeds without defaulting.
+    """
+    from typing import Any, Literal
+
+    from pydantic import Field
+
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    from coreason_manifest.spec.core.nodes import Node
+
+    class RawToolNode(Node):
+        type: Literal["raw_tool_node"] = "raw_tool_node"
+        inline_tools: list[Any] = Field(default_factory=list)
+
+    # Valid tool with CRITICAL risk
+    raw_tool_critical = {
+        "type": "capability",
+        "name": "explicit_critical_tool",
+        "risk_level": "critical",
+        "description": "Explicit critical tool",
+    }
+
+    node = RawToolNode(id="raw_valid", inline_tools=[raw_tool_critical])
+
+    max_risk = RiskLevel.STANDARD
+
+    with pytest.raises(ManifestError) as exc_info:
+        _scan_for_kill_switch_violations(
+            max_risk=max_risk,
+            definitions=None,
+            nodes=[node],  # type: ignore[list-item]
+        )
+
+    assert "Security Violation" in str(exc_info.value)
+    assert "explicit_critical_tool" in str(exc_info.value)
