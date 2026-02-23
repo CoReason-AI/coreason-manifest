@@ -233,5 +233,3 @@ def test_gatekeeper_bfs_traversal() -> None:
     # Should report unsafe because B is not guarded by HumanNode
     unguarded_errors = [r for r in reports if r.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003]
     assert len(unguarded_errors) > 0
-
-
