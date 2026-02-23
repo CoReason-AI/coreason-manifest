@@ -43,7 +43,7 @@ metadata:
 
     # PT011: Added match
     with pytest.raises(ValueError, match="found duplicate key"):
-        load_flow_from_file(str(f))
+        load_flow_from_file(str(f), strict_security=False)
 
 
 def test_duplicate_keys_raises_error(tmp_path: Any) -> None:
@@ -52,7 +52,7 @@ def test_duplicate_keys_raises_error(tmp_path: Any) -> None:
     # Create a YAML file with duplicate keys
     p.write_text("step1: {}\nstep1: {}", encoding="utf-8")
     with pytest.raises(ValueError, match="found duplicate key"):
-        load_flow_from_file(str(p))
+        load_flow_from_file(str(p), strict_security=False)
 
 
 def test_construct_mapping_unique_validation() -> None:
