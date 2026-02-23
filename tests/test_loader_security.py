@@ -175,7 +175,7 @@ class TestManifestIOStrictSecurity:
         finally:
             # Restore O_NOFOLLOW
             if orig_nofollow is not None:
-                setattr(os, "O_NOFOLLOW", orig_nofollow)  # type: ignore[attr-defined]
+                os.O_NOFOLLOW = orig_nofollow  # type: ignore[misc]
 
     def test_toctou_race_detected_inode_mismatch(self, tmp_path: Path) -> None:
         """Test that mismatched inodes between lstat and fstat raises SecurityViolationError."""

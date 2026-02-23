@@ -42,7 +42,7 @@ class ManifestIO:
 
         if not hasattr(os, "O_NOFOLLOW"):
             if strict_security:
-                raise EnvironmentError(
+                raise OSError(
                     "Host OS lacks O_NOFOLLOW support. Strict TOCTOU security cannot be guaranteed. "
                     "Set strict_security=False to bypass this check at your own risk."
                 )
