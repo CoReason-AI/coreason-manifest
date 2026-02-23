@@ -86,11 +86,11 @@ definitions:
 
     # 1. Default: fail
     with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
-        load_flow_from_file(str(f))
+        load_flow_from_file(str(f), strict_security=False)
 
     # 2. Allow: pass
     try:
-        load_flow_from_file(str(f), allow_dynamic_execution=True)
+        load_flow_from_file(str(f), allow_dynamic_execution=True, strict_security=False)
     except SecurityJailViolationError:
         pytest.fail("SecurityJailViolationError raised despite allow_dynamic_execution=True")
     except Exception:
@@ -116,7 +116,7 @@ definitions:
     f.write_text(yaml_content)
 
     with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
-        load_flow_from_file(str(f))
+        load_flow_from_file(str(f), strict_security=False)
 
 
 def test_dynamic_execution_posix_path_strictness(tmp_path: Any) -> None:
@@ -140,7 +140,7 @@ definitions:
     f.write_text(yaml_content)
 
     # Should NOT raise SecurityJailViolationError because regex doesn't match
-    load_flow_from_file(str(f))
+    load_flow_from_file(str(f), strict_security=False)
 
     # POSIX path should be detected
     yaml_content_posix = """
@@ -159,7 +159,7 @@ definitions:
     f2.write_text(yaml_content_posix)
 
     with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
-        load_flow_from_file(str(f2))
+        load_flow_from_file(str(f2), strict_security=False)
 
 
 def test_agent_loading_log(tmp_path: Any) -> None:
@@ -259,7 +259,7 @@ def test_validator_coverage() -> None:
 
 
 def test_manifest_io_coverage(tmp_path: Any) -> None:
-    loader = ManifestIO(root_dir=tmp_path)
+    loader = ManifestIO(root_dir=tmp_path, strict_security=False)
 
     # Not a dict
     f1 = tmp_path / "list.yaml"
@@ -275,7 +275,7 @@ def test_manifest_io_coverage(tmp_path: Any) -> None:
 
 
 def test_manifest_io_symlink_loop_coverage(tmp_path: Any) -> None:
-    loader = ManifestIO(root_dir=tmp_path)
+    loader = ManifestIO(root_dir=tmp_path, strict_security=False)
 
     # Mock pathlib.Path.resolve to raise RuntimeError("Symlink loop")
     # This covers lines 60-62 in io.py
@@ -289,7 +289,7 @@ def test_manifest_io_symlink_loop_coverage(tmp_path: Any) -> None:
 def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
     import stat
 
-    loader = ManifestIO(root_dir=tmp_path)
+    loader = ManifestIO(root_dir=tmp_path, strict_security=False)
     f = tmp_path / "world_writable.yaml"
     f.write_text("content")
 
@@ -313,7 +313,7 @@ def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
 
 
 def test_manifest_io_fdopen_error(tmp_path: Any) -> None:
-    loader = ManifestIO(root_dir=tmp_path)
+    loader = ManifestIO(root_dir=tmp_path, strict_security=False)
     f = tmp_path / "test.yaml"
     f.write_text("content")
 

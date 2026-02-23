@@ -19,7 +19,7 @@ def jail_dir(tmp_path: Path) -> Path:
 
 def test_load_valid_file(jail_dir: Path) -> None:
     (jail_dir / "valid.yaml").write_text("key: value")
-    loader = ManifestIO(root_dir=jail_dir)
+    loader = ManifestIO(root_dir=jail_dir, strict_security=False)
     data = loader.load("valid.yaml")
     assert data == {"key": "value"}
 
@@ -29,7 +29,7 @@ def test_path_traversal_detection(jail_dir: Path) -> None:
     outside = jail_dir.parent / "outside.yaml"
     outside.write_text("secret: data")
 
-    loader = ManifestIO(root_dir=jail_dir)
+    loader = ManifestIO(root_dir=jail_dir, strict_security=False)
 
     # Try relative path traversal
     with pytest.raises(SecurityViolationError, match="Path Traversal Detected"):
@@ -51,7 +51,7 @@ def test_posix_permissions(jail_dir: Path) -> None:
     mode = unsafe_file.stat().st_mode
     unsafe_file.chmod(mode | stat.S_IWOTH)
 
-    loader = ManifestIO(root_dir=jail_dir)
+    loader = ManifestIO(root_dir=jail_dir, strict_security=False)
     with pytest.raises(SecurityViolationError, match="Unsafe Permissions"):
         loader.load("unsafe.yaml")
 
@@ -61,7 +61,7 @@ def test_manifest_io_eloop_enoent() -> None:
     import errno
     from unittest.mock import patch
 
-    loader = ManifestIO(root_dir=Path("/tmp"))
+    loader = ManifestIO(root_dir=Path("/tmp"), strict_security=False)
 
     # Mock os.lstat (new first check) AND os.open to ensure coverage
     with patch("os.lstat") as mock_lstat, patch("os.open") as mock_open:
@@ -188,7 +188,7 @@ class TestManifestIOStrictSecurity:
         test_file = jail / "test.txt"
         test_file.touch()
 
-        io = ManifestIO(jail)
+        io = ManifestIO(jail, strict_security=False)
 
         # Prepare mocks
         stat_before = MagicMock()
@@ -232,7 +232,7 @@ class TestManifestIOStrictSecurity:
         test_file = jail / "test.txt"
         test_file.touch()
 
-        io = ManifestIO(jail)
+        io = ManifestIO(jail, strict_security=False)
 
         # Prepare mocks
         stat_before = MagicMock()
@@ -271,7 +271,7 @@ class TestManifestIOStrictSecurity:
 class TestManifestIOCoverage:
     def test_symlink_loop_in_resolve(self, tmp_path: Path) -> None:
         """Cover line 90-92: RuntimeError('Symlink loop') in resolve."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
 
         # We need to mock Path.resolve.
         with (
@@ -282,7 +282,7 @@ class TestManifestIOCoverage:
 
     def test_lstat_generic_oserror(self, tmp_path: Path) -> None:
         """Cover line 105: lstat raises OSError != ENOENT."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
 
         # We must allow initial resolution calls to succeed if they use lstat
         # But here we want the lstat inside read_text (after resolution) to fail.
@@ -300,7 +300,7 @@ class TestManifestIOCoverage:
 
     def test_open_generic_oserror(self, tmp_path: Path) -> None:
         """Cover line 118: open raises OSError != ELOOP != ENOENT."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
         test_file = tmp_path / "file.txt"
         test_file.touch()
 
@@ -322,7 +322,7 @@ class TestManifestIOCoverage:
 
     def test_open_enoent_race_condition(self, tmp_path: Path) -> None:
         """Cover line 115-116: open raises ENOENT (file deleted after lstat)."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
         (tmp_path / "race.txt").touch()
 
         # Mock lstat to succeed, open to fail with ENOENT
@@ -335,7 +335,7 @@ class TestManifestIOCoverage:
 
     def test_fdopen_failure_closes_fd(self, tmp_path: Path) -> None:
         """Cover line 165: os.close(fd) called when os.fdopen fails."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
         (tmp_path / "file.txt").touch()
 
         fd_val = 10
@@ -363,7 +363,7 @@ class TestManifestIOCoverage:
 
     def test_load_invalid_yaml_structure(self, tmp_path: Path) -> None:
         """Cover line 166: content is not a dict."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
         (tmp_path / "list.yaml").write_text("- item1\n- item2")
 
         with pytest.raises(ValueError, match="Manifest content must be a dictionary"):
@@ -371,7 +371,7 @@ class TestManifestIOCoverage:
 
     def test_load_yaml_parse_error(self, tmp_path: Path) -> None:
         """Cover line 170: yaml.YAMLError."""
-        io = ManifestIO(tmp_path)
+        io = ManifestIO(tmp_path, strict_security=False)
         # Tabs are not allowed in YAML and usually cause a ScannerError (subclass of YAMLError)
         (tmp_path / "bad.yaml").write_text("key: value\n\tbad_indent: value")
 
