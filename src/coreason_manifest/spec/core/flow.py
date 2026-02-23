@@ -163,7 +163,7 @@ class GraphFlow(CoreasonModel):
 
         variable_names = set(self.blackboard.variables.keys())
 
-        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
+        nodes_iter = self.graph.nodes.values()
 
         for node in nodes_iter:
             if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
@@ -265,7 +265,7 @@ class LinearFlow(CoreasonModel):
                         error_code="CRSN-VAL-LIFECYCLE-LEAK",
                         severity=FaultSeverity.CRITICAL,
                         recovery_action=RecoveryAction.HALT,
-                        message=f"Cannot publish flow: Contains abstract PlaceholderNode '{node.id}'.",
+                        message=f"Cannot publish linear flow: Contains abstract PlaceholderNode '{node.id}'.",
                         context={
                             "remediation": RemediationAction(
                                 type="replace_node",

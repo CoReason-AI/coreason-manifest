@@ -51,5 +51,5 @@ def test_linear_flow_lifecycle_validation() -> None:
     assert fault.error_code == "CRSN-VAL-LIFECYCLE-LEAK"
     assert fault.severity == FaultSeverity.CRITICAL
     assert fault.recovery_action == RecoveryAction.HALT
-    assert "Cannot publish flow: Contains abstract PlaceholderNode 'placeholder_1'" in fault.message
+    assert "Cannot publish linear flow: Contains abstract PlaceholderNode 'placeholder_1'" in fault.message
     assert fault.context["remediation"]["type"] == "replace_node"
