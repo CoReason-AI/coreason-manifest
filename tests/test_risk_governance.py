@@ -37,15 +37,6 @@ def test_risk_governance_graph_flow() -> None:
     assert flow.governance.max_risk_level is None
 
     # Case 2: Kill switch set to 'standard'
-    # Expect ManifestError (ValidationError wrapping ManifestError in model_validator?
-    # Or strict ManifestError depending on how it's raised.
-    # Validators raise ValueError/AssertionError/PydanticCustomError normally.
-    # We raised ManifestError directly. Pydantic might wrap it if it's not a PydanticKnownError.)
-
-    # Since we raise ManifestError inside the validator, and it inherits from Exception (likely),
-    # Pydantic usually wraps exceptions in ValidationError unless we use specific Pydantic patterns.
-    # However, for now let's catch ValidationError and check the cause or message.
-
     with pytest.raises(ManifestError) as exc_info:
         GraphFlow(
             metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
@@ -55,7 +46,6 @@ def test_risk_governance_graph_flow() -> None:
             governance=Governance(max_risk_level=RiskLevel.STANDARD),
         )
 
-    # Check that it contains our security message
     assert "Security Violation" in str(exc_info.value)
     assert "nuke_database" in str(exc_info.value)
 
@@ -67,27 +57,6 @@ def test_risk_governance_graph_flow() -> None:
         definitions=definitions,
         governance=Governance(max_risk_level=RiskLevel.CRITICAL),
     )
-
-    # Case 4: Tool with MISSING risk level with max_risk_level='standard' (should FAIL)
-    # Note: With strong typing `AnyTool`, raw dicts are parsed into ToolCapability.
-    # ToolCapability defaults risk_level to "standard".
-    # So "missing risk level" in a dict passed to `AnyTool` field becomes "standard".
-    # To test fail-closed for "missing/unknown", we need to simulate a tool that somehow bypasses default
-    # or explicitly sets an invalid one (which enum prevents).
-    #
-    # However, if we pass a dict that DOES NOT match ToolCapability schema (e.g. invalid type),
-    # Pydantic validation will fail before our validator runs.
-    #
-    # To test the `_scan_for_kill_switch_violations` logic for raw dicts, we need a place where raw dicts are allowed.
-    # `FlowDefinitions.tools` is now `dict[str, AnyTool]`, so raw dicts get parsed.
-    #
-    # The only place raw dicts might exist unparsed is if we inject them into a Node's `inline_tools`
-    # (if that field existed and was `Any`) or if we mock the object.
-    #
-    # But wait, `_scan_for_kill_switch_violations` iterates over `nodes` and checks `tools`/`inline_tools`.
-    # AgentNode.tools is list[str].
-    # Let's create a FakeNode with inline tools to test the scanner's raw dict handling
-    # (if we can't instantiate it via Pydantic).
 
 
 def test_risk_governance_linear_flow() -> None:
@@ -145,7 +114,6 @@ def test_inline_tool_bypass_prevention() -> None:
     """
     from typing import Literal
 
-    # Define a custom node that supports inline tools
     from pydantic import Field
 
     from coreason_manifest.spec.core.nodes import Node
@@ -164,7 +132,6 @@ def test_inline_tool_bypass_prevention() -> None:
     # and test the scanner directly.
     from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
 
-    # Flow with standard governance limit
     max_risk = RiskLevel.STANDARD
 
     with pytest.raises(ManifestError) as exc_info:
@@ -202,7 +169,6 @@ def test_scan_raw_dicts_fail_closed() -> None:
 
     node = RawToolNode(id="raw_1", inline_tools=[raw_tool_missing_risk])
 
-    # Set limit to STANDARD. If mystery_tool defaults to CRITICAL, this should raise.
     max_risk = RiskLevel.STANDARD
 
     with pytest.raises(ManifestError) as exc_info:
@@ -214,12 +180,12 @@ def test_scan_raw_dicts_fail_closed() -> None:
 
     assert "Security Violation" in str(exc_info.value)
     assert "mystery_tool" in str(exc_info.value)
-    assert "critical" in str(exc_info.value)  # Defaulted value
+    assert "critical" in str(exc_info.value)
 
 
 def test_scan_raw_dicts_malformed() -> None:
     """
-    Test fail-closed behavior for malformed raw dicts (missing required fields like name/type)
+    Test fail-closed behavior for malformed raw dicts (missing required fields)
     that cause ToolCapability validation to fail.
     """
     from typing import Any, Literal
@@ -259,7 +225,6 @@ def test_scan_raw_dicts_malformed() -> None:
 def test_scan_raw_dicts_valid_with_risk() -> None:
     """
     Test scanning of a valid raw dict that explicitly includes risk_level.
-    This covers the code path where parsing succeeds without defaulting.
     """
     from typing import Any, Literal
 
@@ -293,3 +258,105 @@ def test_scan_raw_dicts_valid_with_risk() -> None:
 
     assert "Security Violation" in str(exc_info.value)
     assert "explicit_critical_tool" in str(exc_info.value)
+
+
+def test_scan_raw_dicts_valid_safe() -> None:
+    """
+    Test scanning of a valid raw dict with safe risk (should not raise).
+    Ensures the happy path for raw dict parsing is covered.
+    """
+    from typing import Any, Literal
+
+    from pydantic import Field
+
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    from coreason_manifest.spec.core.nodes import Node
+
+    class RawToolNode(Node):
+        type: Literal["raw_tool_node"] = "raw_tool_node"
+        inline_tools: list[Any] = Field(default_factory=list)
+
+    # Valid tool with SAFE risk
+    raw_tool_safe = {
+        "type": "capability",
+        "name": "safe_tool",
+        "risk_level": "safe",
+        "description": "Safe tool",
+    }
+
+    node = RawToolNode(id="raw_safe", inline_tools=[raw_tool_safe])
+
+    max_risk = RiskLevel.STANDARD
+
+    # Should NOT raise
+    _scan_for_kill_switch_violations(
+        max_risk=max_risk,
+        definitions=None,
+        nodes=[node],  # type: ignore[list-item]
+    )
+
+
+def test_scan_raw_dicts_invalid_risk() -> None:
+    """
+    Test scanning of a raw dict with invalid risk string.
+    Should fail enum conversion, pass, then fail validation, then fallback to critical.
+    """
+    from typing import Any, Literal
+
+    from pydantic import Field
+
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    from coreason_manifest.spec.core.nodes import Node
+
+    class RawToolNode(Node):
+        type: Literal["raw_tool_node"] = "raw_tool_node"
+        inline_tools: list[Any] = Field(default_factory=list)
+
+    raw_tool_invalid = {
+        "type": "capability",
+        "name": "invalid_risk_tool",
+        "risk_level": "extreme",  # Invalid enum value
+        "description": "Invalid risk tool",
+    }
+
+    node = RawToolNode(id="raw_invalid", inline_tools=[raw_tool_invalid])
+
+    max_risk = RiskLevel.STANDARD
+
+    # Should raise ManifestError because it falls back to CRITICAL
+    with pytest.raises(ManifestError) as exc_info:
+        _scan_for_kill_switch_violations(
+            max_risk=max_risk,
+            definitions=None,
+            nodes=[node],  # type: ignore[list-item]
+        )
+
+    assert "Security Violation" in str(exc_info.value)
+    assert "invalid_risk_tool" in str(exc_info.value)
+    assert "critical" in str(exc_info.value)  # Fallback risk
+
+
+def test_scan_skips_string_references() -> None:
+    """
+    Test that the scanner ignores string references in node tools,
+    covering the 'else' path of the type check.
+    """
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    from coreason_manifest.spec.core.nodes import AgentNode
+
+    # AgentNode has tools: list[str]
+    agent = AgentNode(
+        id="agent1",
+        type="agent",
+        role="assistant",
+        profile="default",
+        tools=["some_tool_ref", "another_tool_ref"]
+    )
+
+    # Should run without error and without checking these strings
+    # (since they are references, not inline definitions)
+    _scan_for_kill_switch_violations(
+        max_risk=RiskLevel.SAFE,
+        definitions=None,
+        nodes=[agent]
+    )

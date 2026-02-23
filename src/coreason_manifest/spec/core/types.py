@@ -91,29 +91,28 @@ class RiskLevel(StrEnum):
             return 0
         if self == RiskLevel.STANDARD:
             return 1
-        if self == RiskLevel.CRITICAL:
-            return 2
-        return 2  # Fail-safe default
+        # RiskLevel.CRITICAL
+        return 2
 
     def __ge__(self, other: Any) -> bool:
-        if isinstance(other, RiskLevel):
-            return self.weight >= other.weight
-        return NotImplemented
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self.weight >= other.weight
 
     def __gt__(self, other: Any) -> bool:
-        if isinstance(other, RiskLevel):
-            return self.weight > other.weight
-        return NotImplemented
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self.weight > other.weight
 
     def __le__(self, other: Any) -> bool:
-        if isinstance(other, RiskLevel):
-            return self.weight <= other.weight
-        return NotImplemented
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self.weight <= other.weight
 
     def __lt__(self, other: Any) -> bool:
-        if isinstance(other, RiskLevel):
-            return self.weight < other.weight
-        return NotImplemented
+        if not isinstance(other, RiskLevel):
+            return NotImplemented
+        return self.weight < other.weight
 
 
 # Profile Identifiers

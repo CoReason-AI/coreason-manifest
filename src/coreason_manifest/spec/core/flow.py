@@ -173,23 +173,25 @@ def _scan_for_kill_switch_violations(
             # Ignore strings (references)
             if isinstance(tool, ToolCapability):
                 tools_to_check.append(tool)
-            elif isinstance(tool, dict):
+                continue
+
+            if isinstance(tool, dict):
                 # Attempt to parse dict as ToolCapability if it looks like one
                 try:
-                    # If risk_level is missing, force default to "standard" via Pydantic model
-                    # BUT if we want fail-closed for raw dicts that MIGHT be tools but are malformed,
-                    # we need to be careful.
-                    # Current requirement: "If a tool's risk level is missing... it MUST default to ... critical"
-                    # ToolCapability default is "standard".
-                    # So we must override if missing.
-                    if "risk_level" not in tool:
-                        # We create a copy to avoid mutating input
-                        tool_copy = tool.copy()
-                        tool_copy["risk_level"] = RiskLevel.CRITICAL
-                        parsed_tool = ToolCapability(**tool_copy)
-                    else:
-                        parsed_tool = ToolCapability(**tool)
+                    tool_copy = tool.copy()
 
+                    # Handle RiskLevel conversion for strict mode
+                    if "risk_level" in tool_copy and isinstance(tool_copy["risk_level"], str):
+                        try:
+                            tool_copy["risk_level"] = RiskLevel(tool_copy["risk_level"])
+                        except ValueError:
+                            # Invalid enum value; let validation fail naturally or use as is
+                            pass
+                    elif "risk_level" not in tool_copy:
+                        # Default to CRITICAL if missing
+                        tool_copy["risk_level"] = RiskLevel.CRITICAL
+
+                    parsed_tool = ToolCapability(**tool_copy)
                     tools_to_check.append(parsed_tool)
                 except Exception:
                     # Fail-closed: If it looks like a tool (is a dict in a tools list) but fails parsing,
