@@ -13,7 +13,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode, SwitchNode
-from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.spec.interop.exceptions import ManifestError, SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO
 from coreason_manifest.utils.loader import (
     RuntimeSecurityWarning,
@@ -177,12 +177,14 @@ def test_schema_strict_validation() -> None:
     """Ensure invalid schemas raise ValueError immediately."""
     from jsonschema.exceptions import SchemaError
 
-    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.side_effect = SchemaError("Invalid schema")
+    with patch("jsonschema.validators.validator_for") as mock_validator_for:
+        mock_validator_cls = MagicMock()
+        mock_validator_cls.check_schema.side_effect = SchemaError("Invalid schema")
+        mock_validator_for.return_value = mock_validator_cls
 
         bad_schema: dict[str, Any] = {"type": "integer", "default": "bad"}
 
-        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+        with pytest.raises(ManifestError, match="Invalid JSON Schema"):
             DataSchema(json_schema=bad_schema)
 
 
@@ -191,8 +193,10 @@ def test_validator_coverage() -> None:
     # Helper to validate a node isolated in a graph with empty blackboard
     def check_node(node: Any, expected_error: str) -> None:
         graph = Graph(nodes={"n1": node}, edges=[], entry_point="n1")
-        flow = GraphFlow(
+        flow = GraphFlow.model_construct(
+            type="graph",
             kind="GraphFlow",
+            status="draft",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=Blackboard(variables={}, persistence=False),

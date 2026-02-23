@@ -2,6 +2,7 @@ import pytest
 
 from coreason_manifest.spec.core.flow import FlowDefinitions, validate_integrity
 from coreason_manifest.spec.core.nodes import CognitiveProfile, SwarmNode
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_swarm_integrity_validation() -> None:
@@ -44,7 +45,7 @@ def test_swarm_integrity_validation() -> None:
         output_variable="out",
     )
 
-    with pytest.raises(ValueError, match="SwarmNode 's2' references undefined worker profile ID 'ghost-worker'"):
+    with pytest.raises(ManifestError, match="SwarmNode 's2' references missing profile 'ghost-worker'"):
         validate_integrity(definitions, [invalid_swarm])
 
 

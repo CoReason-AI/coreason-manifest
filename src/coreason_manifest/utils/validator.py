@@ -47,10 +47,14 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     if flow.governance:
         errors.extend(_validate_governance(flow.governance, valid_ids))
 
-    if flow.definitions and flow.definitions.tool_packs:
+    if flow.definitions:
         # Convert dict to list for backward compatibility with _validate_tools
-        tool_packs = list(flow.definitions.tool_packs.values())
+        tool_packs = list(flow.definitions.tool_packs.values()) if flow.definitions.tool_packs else []
         errors.extend(_validate_tools(nodes, tool_packs))
+        errors.extend(_validate_referential_integrity(nodes, flow.definitions))
+    else:
+        # If no definitions, ensure no references exist
+        errors.extend(_validate_referential_integrity(nodes, None))
 
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids))
@@ -326,6 +330,46 @@ def _validate_orphan_nodes(graph: Graph) -> list[str]:
         orphans.remove(entry_point)
 
     return [f"Orphan Node Warning: Node '{oid}' has no incoming edges." for oid in orphans]
+
+
+def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefinitions | None) -> list[str]:
+    """
+    Validates string references (e.g. resilience templates, profiles).
+    """
+    errors: list[str] = []
+
+    # Check supervision templates
+    templates = definitions.supervision_templates if definitions and definitions.supervision_templates else {}
+    profile_ids = set(definitions.profiles.keys()) if definitions and definitions.profiles else set()
+
+    for node in nodes:
+        # Check resilience references
+        if isinstance(node.resilience, str):
+            ref = node.resilience
+            if not ref.startswith("ref:"):
+                errors.append(
+                    f"Resilience Error: Node '{node.id}' has invalid resilience reference '{ref}'. "
+                    "Must start with 'ref:'."
+                )
+            else:
+                tmpl_id = ref[4:]
+                if tmpl_id not in templates:
+                    errors.append(
+                        f"Resilience Error: Node '{node.id}' references undefined supervision template ID '{tmpl_id}'."
+                    )
+
+        # Check profile references (AgentNode)
+        if isinstance(node, AgentNode) and isinstance(node.profile, str) and node.profile not in profile_ids:
+            errors.append(f"Integrity Error: AgentNode '{node.id}' references undefined profile ID '{node.profile}'.")
+
+        # Check worker profile references (SwarmNode)
+        if isinstance(node, SwarmNode) and node.worker_profile not in profile_ids:
+            errors.append(
+                f"Integrity Error: SwarmNode '{node.id}' references undefined worker profile ID "
+                f"'{node.worker_profile}'."
+            )
+
+    return errors
 
 
 def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:

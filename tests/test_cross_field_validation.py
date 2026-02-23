@@ -3,13 +3,14 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_human_node_shadow_mode_requirements() -> None:
     """
     If interaction_mode is 'shadow', shadow_timeout_seconds is required.
     """
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(ManifestError) as excinfo:
         HumanNode(
             id="h1",
             type="human",
@@ -19,8 +20,7 @@ def test_human_node_shadow_mode_requirements() -> None:
             # Missing shadow_timeout_seconds
         )
     # Check that one of the errors contains our message
-    errors = excinfo.value.errors()
-    assert any("HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'" in e["msg"] for e in errors)
+    assert "HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'" in excinfo.value.fault.message
 
 
 def test_human_node_shadow_mode_valid() -> None:
@@ -40,7 +40,7 @@ def test_human_node_blocking_mode_invalid_field() -> None:
     """
     If interaction_mode is 'blocking', shadow_timeout_seconds should not be set.
     """
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(ManifestError) as excinfo:
         HumanNode(
             id="h1",
             type="human",
@@ -49,15 +49,14 @@ def test_human_node_blocking_mode_invalid_field() -> None:
             shadow_timeout_seconds=60,
             timeout_seconds=10,
         )
-    errors = excinfo.value.errors()
-    assert any("HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'" in e["msg"] for e in errors)
+    assert "HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'" in excinfo.value.fault.message
 
 
 def test_swarm_node_summarize_requires_aggregator() -> None:
     """
     If reducer_function is 'summarize', aggregator_model is required.
     """
-    with pytest.raises(ValidationError) as excinfo:
+    with pytest.raises(ManifestError) as excinfo:
         SwarmNode(
             id="s1",
             type="swarm",
@@ -69,8 +68,7 @@ def test_swarm_node_summarize_requires_aggregator() -> None:
             output_variable="result",
             # Missing aggregator_model
         )
-    errors = excinfo.value.errors()
-    assert any("SwarmNode with reducer='summarize' requires an 'aggregator_model'" in e["msg"] for e in errors)
+    assert "SwarmNode with reducer='summarize' requires an 'aggregator_model'" in excinfo.value.fault.message
 
 
 def test_tool_critical_description() -> None:

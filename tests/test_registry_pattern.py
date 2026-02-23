@@ -1,5 +1,3 @@
-import pytest
-
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     FlowDefinitions,
@@ -10,6 +8,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.utils.validator import validate_flow
 
 
 def test_agent_node_brain_string() -> None:
@@ -144,15 +143,16 @@ def test_referential_integrity_failure() -> None:
 
     metadata = FlowMetadata(name="broken-flow", version="1.0.0", description="fail", tags=[])
 
-    # 3. Expect a ValueError during initialization
-    with pytest.raises(ValueError, match="references undefined profile ID 'ghost-brain'"):
-        LinearFlow(
-            kind="LinearFlow",
-            status="published",
-            metadata=metadata,
-            definitions=FlowDefinitions(),  # Empty registry
-            steps=[agent],
-        )
+    # 3. Expect an error string from validate_flow
+    flow = LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=metadata,
+        definitions=FlowDefinitions(),  # Empty registry
+        steps=[agent],
+    )
+    errors = validate_flow(flow)
+    assert any("references undefined profile ID 'ghost-brain'" in e for e in errors)
 
 
 def test_tool_integrity_failure() -> None:
@@ -173,14 +173,16 @@ def test_tool_integrity_failure() -> None:
         resilience=None,
     )
 
-    with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
-        LinearFlow(
-            kind="LinearFlow",
-            status="published",
-            metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
-            definitions=definitions,
-            steps=[agent],
-        )
+    flow = LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
+        definitions=definitions,
+        steps=[agent],
+    )
+
+    errors = validate_flow(flow)
+    assert any("requires tool 'missing-tool'" in e for e in errors)
 
 
 def test_tool_integrity_failure_graph() -> None:
@@ -202,16 +204,18 @@ def test_tool_integrity_failure_graph() -> None:
 
     graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
 
-    with pytest.raises(ValueError, match="requires missing tool 'missing-tool'"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
-            definitions=definitions,
-            interface=FlowInterface(
-                inputs=DataSchema(json_schema={}),
-                outputs=DataSchema(json_schema={}),
-            ),
-            blackboard=None,
-            graph=graph,
-        )
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
+        definitions=definitions,
+        interface=FlowInterface(
+            inputs=DataSchema(json_schema={}),
+            outputs=DataSchema(json_schema={}),
+        ),
+        blackboard=None,
+        graph=graph,
+    )
+
+    errors = validate_flow(flow)
+    assert any("requires tool 'missing-tool'" in e for e in errors)

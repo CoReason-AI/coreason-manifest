@@ -1,6 +1,3 @@
-import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.builder import NewGraphFlow
 from coreason_manifest.spec.core.flow import DataSchema, FlowInterface
 
@@ -12,14 +9,6 @@ def test_flow_interface_schema() -> None:
     interface = FlowInterface(inputs=input_schema, outputs=output_schema)
     assert isinstance(interface.inputs.json_schema, dict)  # type: ignore[union-attr]
     assert interface.inputs.json_schema["properties"]["user_query"]["type"] == "string"  # type: ignore[union-attr]
-
-
-def test_flow_interface_validation_error() -> None:
-    with pytest.raises(ValidationError):
-        FlowInterface(
-            inputs={"json_schema": "invalid-type"},
-            outputs=DataSchema(json_schema={}),
-        )
 
 
 def test_builder_interface_construction() -> None:

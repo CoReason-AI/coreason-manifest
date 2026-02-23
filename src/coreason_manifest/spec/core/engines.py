@@ -2,6 +2,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from coreason_manifest.spec.core.constants import NodeCapability
+
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
 # =========================================================================
@@ -314,7 +316,7 @@ class ComputerUseReasoning(BaseReasoning):
     ] = 1000
 
     def required_capabilities(self) -> list[str]:
-        return ["computer_use"]
+        return [NodeCapability.COMPUTER_USE.value]
 
 
 class CodeExecutionReasoning(BaseReasoning):
@@ -329,7 +331,7 @@ class CodeExecutionReasoning(BaseReasoning):
     timeout_seconds: Annotated[float, Field(description="Max execution time.")] = 30.0
 
     def required_capabilities(self) -> list[str]:
-        return ["code_execution"]
+        return [NodeCapability.CODE_EXECUTION.value]
 
 
 class GraphReasoning(BaseReasoning):
