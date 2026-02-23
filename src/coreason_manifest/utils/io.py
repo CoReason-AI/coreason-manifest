@@ -46,12 +46,11 @@ class ManifestIO:
                     "Host OS lacks O_NOFOLLOW support. Strict TOCTOU security cannot be guaranteed. "
                     "Set strict_security=False to bypass this check at your own risk."
                 )
-            else:
-                warnings.warn(
-                    "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
-                    RuntimeWarning,
-                    stacklevel=2,
-                )
+            warnings.warn(
+                "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
     @property
     def _is_posix(self) -> bool:

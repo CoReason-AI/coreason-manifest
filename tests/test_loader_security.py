@@ -154,7 +154,6 @@ def test_loader_success(tmp_path: Path) -> None:
 
 
 class TestManifestIOStrictSecurity:
-
     def test_strict_security_enforcement(self, tmp_path: Path) -> None:
         # Save original O_NOFOLLOW
         orig_nofollow = getattr(os, "O_NOFOLLOW", None)
