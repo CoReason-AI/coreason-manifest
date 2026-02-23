@@ -6,7 +6,6 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-import yaml
 
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
@@ -275,9 +274,11 @@ class TestManifestIOCoverage:
         io = ManifestIO(tmp_path)
 
         # We need to mock Path.resolve.
-        with patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop")):
-            with pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"):
-                io.read_text("loop.txt")
+        with (
+            patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop")),
+            pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"),
+        ):
+            io.read_text("loop.txt")
 
     def test_lstat_generic_oserror(self, tmp_path: Path) -> None:
         """Cover line 105: lstat raises OSError != ENOENT."""
@@ -293,7 +294,7 @@ class TestManifestIOCoverage:
         # So we should construct ManifestIO first.
 
         with patch("os.lstat", side_effect=OSError(errno.EACCES, "Permission denied")):
-            with pytest.raises(OSError) as exc:
+            with pytest.raises(OSError, match="Permission denied") as exc:
                 io.read_text("file.txt")
             assert exc.value.errno == errno.EACCES
 
@@ -315,7 +316,7 @@ class TestManifestIOCoverage:
             return real_open(path, flags, *args, **kwargs)
 
         with patch("os.open", side_effect=open_side_effect):
-            with pytest.raises(OSError) as exc:
+            with pytest.raises(OSError, match="Permission denied") as exc:
                 io.read_text("file.txt")
             assert exc.value.errno == errno.EACCES
 
