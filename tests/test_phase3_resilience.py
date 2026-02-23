@@ -283,6 +283,7 @@ def test_fallback_cycle_detection() -> None:
     flow = flow_draft.model_copy(update={"status": "published"})
 
     from coreason_manifest.utils.validator import validate_flow
+
     errors = validate_flow(flow)
     assert any("Resilience Error: Fallback cycle detected" in e for e in errors)
 

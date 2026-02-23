@@ -405,7 +405,8 @@ def test_validator_edge_cases() -> None:
     )
     # NOTE: When using model_construct, defaults (like status="draft") are NOT applied unless specified.
     # We must explicitly set status="published" to trigger graph integrity checks.
-    # We also add a definition for profile "p" to avoid integrity error masking the edge error (though multiple errors should be returned).
+    # We also add a definition for profile "p" to avoid integrity error masking the edge error
+    # (though multiple errors should be returned).
     from coreason_manifest.spec.core.flow import FlowDefinitions
 
     flow_dangling = GraphFlow.model_construct(
