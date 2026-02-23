@@ -49,7 +49,7 @@ class ToolAccessPolicy(CoreasonModel):
         if isinstance(data, dict):
             # Functional purity: copy data
             data = data.copy()
-            if data.get("risk_level") == "critical":
+            if data.get("risk_level") in ("critical", RiskLevel.CRITICAL):
                 if data.get("require_auth") is False:
                     raise ValueError("Critical tools must require authentication.")
                 if data.get("require_auth") is None:

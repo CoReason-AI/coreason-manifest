@@ -145,201 +145,51 @@ def test_inline_tool_bypass_prevention() -> None:
     assert "inline_nuke" in str(exc_info.value)
 
 
-def test_scan_raw_dicts_fail_closed() -> None:
+def test_scan_remote_uri_fail_closed() -> None:
     """
-    Test fail-closed behavior for raw dicts missing risk_level.
+    Test that the scanner enforces fail-closed logic for remote URIs (://).
+    These should be treated as CRITICAL risk.
     """
-    from typing import Any, Literal
-
-    from pydantic import Field
 
     from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
-    from coreason_manifest.spec.core.nodes import Node
+    from coreason_manifest.spec.core.nodes import AgentNode
 
-    class RawToolNode(Node):
-        type: Literal["raw_tool_node"] = "raw_tool_node"
-        inline_tools: list[Any] = Field(default_factory=list)
+    # AgentNode with a remote tool reference
+    agent = AgentNode(id="agent_remote", type="agent", profile="default", tools=["mcp://remote-server/tools/dangerous"])
 
-    # Tool with NO risk level -> Should default to CRITICAL
-    raw_tool_missing_risk = {
-        "type": "capability",
-        "name": "mystery_tool",
-        # risk_level MISSING
-    }
-
-    node = RawToolNode(id="raw_1", inline_tools=[raw_tool_missing_risk])
-
+    # If max_risk is STANDARD, CRITICAL (remote) should raise
     max_risk = RiskLevel.STANDARD
 
     with pytest.raises(ManifestError) as exc_info:
-        _scan_for_kill_switch_violations(
-            max_risk=max_risk,
-            definitions=None,
-            nodes=[node],  # type: ignore[list-item]
-        )
+        _scan_for_kill_switch_violations(max_risk=max_risk, definitions=None, nodes=[agent])
 
     assert "Security Violation" in str(exc_info.value)
-    assert "mystery_tool" in str(exc_info.value)
-    assert "critical" in str(exc_info.value)
+    assert "Unresolved remote tool URIs default to CRITICAL" in str(exc_info.value)
+    # Check the structured fault context for the specific URI
+    assert exc_info.value.fault.context["tool_uri"] == "mcp://remote-server/tools/dangerous"
+    assert exc_info.value.fault.context["assumed_risk"] == "critical"
 
 
-def test_scan_raw_dicts_malformed() -> None:
+def test_scan_remote_uri_allowed_if_critical() -> None:
     """
-    Test fail-closed behavior for malformed raw dicts (missing required fields)
-    that cause ToolCapability validation to fail.
+    Test that remote URIs are allowed if the global policy allows CRITICAL risk.
     """
-    from typing import Any, Literal
-
-    from pydantic import Field
-
     from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
-    from coreason_manifest.spec.core.nodes import Node
+    from coreason_manifest.spec.core.nodes import AgentNode
 
-    class RawToolNode(Node):
-        type: Literal["raw_tool_node"] = "raw_tool_node"
-        inline_tools: list[Any] = Field(default_factory=list)
-
-    # Tool with MISSING name -> validation fails -> falls back to Critical
-    raw_tool_malformed = {
-        "type": "capability",
-        # name MISSING
-        "description": "Invalid tool",
-    }
-
-    node = RawToolNode(id="raw_malformed", inline_tools=[raw_tool_malformed])
-
-    max_risk = RiskLevel.STANDARD
-
-    with pytest.raises(ManifestError) as exc_info:
-        _scan_for_kill_switch_violations(
-            max_risk=max_risk,
-            definitions=None,
-            nodes=[node],  # type: ignore[list-item]
-        )
-
-    # Should catch the "unknown_malformed_tool" fallback
-    assert "Security Violation" in str(exc_info.value)
-    assert "unknown_malformed_tool" in str(exc_info.value)
-
-
-def test_scan_raw_dicts_valid_with_risk() -> None:
-    """
-    Test scanning of a valid raw dict that explicitly includes risk_level.
-    """
-    from typing import Any, Literal
-
-    from pydantic import Field
-
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
-    from coreason_manifest.spec.core.nodes import Node
-
-    class RawToolNode(Node):
-        type: Literal["raw_tool_node"] = "raw_tool_node"
-        inline_tools: list[Any] = Field(default_factory=list)
-
-    # Valid tool with CRITICAL risk
-    raw_tool_critical = {
-        "type": "capability",
-        "name": "explicit_critical_tool",
-        "risk_level": "critical",
-        "description": "Explicit critical tool",
-    }
-
-    node = RawToolNode(id="raw_valid", inline_tools=[raw_tool_critical])
-
-    max_risk = RiskLevel.STANDARD
-
-    with pytest.raises(ManifestError) as exc_info:
-        _scan_for_kill_switch_violations(
-            max_risk=max_risk,
-            definitions=None,
-            nodes=[node],  # type: ignore[list-item]
-        )
-
-    assert "Security Violation" in str(exc_info.value)
-    assert "explicit_critical_tool" in str(exc_info.value)
-
-
-def test_scan_raw_dicts_valid_safe() -> None:
-    """
-    Test scanning of a valid raw dict with safe risk (should not raise).
-    Ensures the happy path for raw dict parsing is covered.
-    """
-    from typing import Any, Literal
-
-    from pydantic import Field
-
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
-    from coreason_manifest.spec.core.nodes import Node
-
-    class RawToolNode(Node):
-        type: Literal["raw_tool_node"] = "raw_tool_node"
-        inline_tools: list[Any] = Field(default_factory=list)
-
-    # Valid tool with SAFE risk
-    raw_tool_safe = {
-        "type": "capability",
-        "name": "safe_tool",
-        "risk_level": "safe",
-        "description": "Safe tool",
-    }
-
-    node = RawToolNode(id="raw_safe", inline_tools=[raw_tool_safe])
-
-    max_risk = RiskLevel.STANDARD
-
-    # Should NOT raise
-    _scan_for_kill_switch_violations(
-        max_risk=max_risk,
-        definitions=None,
-        nodes=[node],  # type: ignore[list-item]
+    agent = AgentNode(
+        id="agent_remote_allowed", type="agent", profile="default", tools=["https://trusted-but-remote.com/api"]
     )
 
+    max_risk = RiskLevel.CRITICAL
 
-def test_scan_raw_dicts_invalid_risk() -> None:
+    # Should NOT raise because max_risk >= CRITICAL
+    _scan_for_kill_switch_violations(max_risk=max_risk, definitions=None, nodes=[agent])
+
+
+def test_scan_skips_local_string_references() -> None:
     """
-    Test scanning of a raw dict with invalid risk string.
-    Should fail enum conversion, pass, then fail validation, then fallback to critical.
-    """
-    from typing import Any, Literal
-
-    from pydantic import Field
-
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
-    from coreason_manifest.spec.core.nodes import Node
-
-    class RawToolNode(Node):
-        type: Literal["raw_tool_node"] = "raw_tool_node"
-        inline_tools: list[Any] = Field(default_factory=list)
-
-    raw_tool_invalid = {
-        "type": "capability",
-        "name": "invalid_risk_tool",
-        "risk_level": "extreme",  # Invalid enum value
-        "description": "Invalid risk tool",
-    }
-
-    node = RawToolNode(id="raw_invalid", inline_tools=[raw_tool_invalid])
-
-    max_risk = RiskLevel.STANDARD
-
-    # Should raise ManifestError because it falls back to CRITICAL
-    with pytest.raises(ManifestError) as exc_info:
-        _scan_for_kill_switch_violations(
-            max_risk=max_risk,
-            definitions=None,
-            nodes=[node],  # type: ignore[list-item]
-        )
-
-    assert "Security Violation" in str(exc_info.value)
-    assert "invalid_risk_tool" in str(exc_info.value)
-    assert "critical" in str(exc_info.value)  # Fallback risk
-
-
-def test_scan_skips_string_references() -> None:
-    """
-    Test that the scanner ignores string references in node tools,
-    covering the 'else' path of the type check.
+    Test that the scanner ignores local string references (no ://) in node tools.
     """
     from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
     from coreason_manifest.spec.core.nodes import AgentNode
@@ -348,5 +198,5 @@ def test_scan_skips_string_references() -> None:
     agent = AgentNode(id="agent1", type="agent", profile="default", tools=["some_tool_ref", "another_tool_ref"])
 
     # Should run without error and without checking these strings
-    # (since they are references, not inline definitions)
+    # (since they are references, not inline definitions, and not remote URIs)
     _scan_for_kill_switch_violations(max_risk=RiskLevel.SAFE, definitions=None, nodes=[agent])

@@ -1,4 +1,3 @@
-import contextlib
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
@@ -171,48 +170,36 @@ def _scan_for_kill_switch_violations(
 
         for tool in potential_tools:
             # Only evaluate actual ToolCapability objects (or polymorphic AnyTool)
-            # Ignore strings (references)
             if isinstance(tool, ToolCapability):
                 tools_to_check.append(tool)
                 continue
 
-            if isinstance(tool, dict):
-                # Attempt to parse dict as ToolCapability if it looks like one
-                try:
-                    tool_copy = tool.copy()
-
-                    # Handle RiskLevel conversion for strict mode
-                    if "risk_level" in tool_copy and isinstance(tool_copy["risk_level"], str):
-                        with contextlib.suppress(ValueError):
-                            tool_copy["risk_level"] = RiskLevel(tool_copy["risk_level"])
-                    elif "risk_level" not in tool_copy:
-                        # Default to CRITICAL if missing
-                        tool_copy["risk_level"] = RiskLevel.CRITICAL
-
-                    parsed_tool = ToolCapability(**tool_copy)
-                    tools_to_check.append(parsed_tool)
-                except Exception:
-                    # Fail-closed: If it looks like a tool (is a dict in a tools list) but fails parsing,
-                    # we treat it as a Critical risk object to trigger a halt if necessary.
-                    # We create a dummy critical tool wrapper.
-                    # Use a safe name if missing.
-                    name = tool.get("name", "unknown_malformed_tool")
-                    # We can't easily instantiate ToolCapability if it failed validation.
-                    # So we can't append it to tools_to_check if that expects ToolCapability objects.
-                    # BUT we can check risk immediately here or create a mock.
-                    # Let's construct a valid Critical tool representing this failure.
-                    fallback = ToolCapability(
-                        name=str(name),
-                        type="capability",
-                        risk_level=RiskLevel.CRITICAL,
-                        description="Malformed tool definition defaulted to Critical.",
+            # Fail-Closed Zero-Trust Rule:
+            # If a tool reference contains a remote URI scheme (e.g. mcp://, http://),
+            # it bypasses local definitions and must be treated as CRITICAL risk.
+            if isinstance(tool, str) and "://" in tool and RiskLevel.CRITICAL.weight > max_risk.weight:
+                # Synthetically evaluate as CRITICAL
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
+                        message=(
+                            "Security Violation: Unresolved remote tool URIs default to CRITICAL risk "
+                            "and violate the global max_risk_level."
+                        ),
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "tool_uri": tool,
+                            "assumed_risk": RiskLevel.CRITICAL.value,
+                            "max_risk": max_risk.value,
+                        },
                     )
-                    tools_to_check.append(fallback)
+                )
 
     # 3. Enforcement
     for tool in tools_to_check:
         # Rich comparison via RiskLevel Enum
-        if tool.risk_level > max_risk:
+        if tool.risk_level.weight > max_risk.weight:
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",

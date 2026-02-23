@@ -94,26 +94,6 @@ class RiskLevel(StrEnum):
         # RiskLevel.CRITICAL
         return 2
 
-    def __ge__(self, other: Any) -> bool:
-        if not isinstance(other, RiskLevel):
-            return NotImplemented
-        return self.weight >= other.weight
-
-    def __gt__(self, other: Any) -> bool:
-        if not isinstance(other, RiskLevel):
-            return NotImplemented
-        return self.weight > other.weight
-
-    def __le__(self, other: Any) -> bool:
-        if not isinstance(other, RiskLevel):
-            return NotImplemented
-        return self.weight <= other.weight
-
-    def __lt__(self, other: Any) -> bool:
-        if not isinstance(other, RiskLevel):
-            return NotImplemented
-        return self.weight < other.weight
-
 
 # Profile Identifiers
 ProfileID = Annotated[
