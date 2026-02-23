@@ -100,11 +100,14 @@ def test_validate_graph_flow_invalid_edges() -> None:
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        status="published", # Must be published to trigger strict checks
+        status="published",  # Must be published to trigger strict checks
     )
 
     errors = validate_flow(flow)
-    assert any("target 'missing' not found" in e or "source 'missing' not found" in e or "Dangling Edge Error" in e for e in errors)
+    assert any(
+        "target 'missing' not found" in e or "source 'missing' not found" in e or "Dangling Edge Error" in e
+        for e in errors
+    )
 
 
 def test_validate_switch_node_invalid_targets() -> None:
@@ -120,7 +123,7 @@ def test_validate_switch_node_invalid_targets() -> None:
         interface=create_interface(),
         blackboard=blackboard,
         graph=graph,
-        status="published", # Strict checks
+        status="published",  # Strict checks
     )
     errors = validate_flow(flow)
     assert len(errors) == 2
@@ -187,7 +190,7 @@ def test_validate_linear_flow_empty() -> None:
         kind="LinearFlow",
         metadata=create_metadata(),
         steps=[],
-        status="published", # Required for empty check
+        status="published",  # Required for empty check
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
@@ -201,7 +204,7 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
         kind="LinearFlow",
         metadata=create_metadata(),
         steps=[switch],  # switch is the only node
-        status="published", # Required for switch logic check
+        status="published",  # Required for switch logic check
     )
     errors = validate_flow(flow)
     # Target IDs must be present in the sequence
@@ -216,7 +219,7 @@ def test_validate_flow_invalid_type() -> None:
     class DummyFlow:
         governance = None
         definitions = None
-        status = "draft" # Add status
+        status = "draft"  # Add status
 
     # Should not raise error and return empty list (checks skipped)
     errors = validate_flow(cast("LinearFlow", DummyFlow()))
@@ -298,7 +301,7 @@ def test_validate_orphan_nodes() -> None:
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        status="published", # Required for orphan check
+        status="published",  # Required for orphan check
     )
     errors = validate_flow(flow)
 

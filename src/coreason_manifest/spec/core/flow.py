@@ -168,9 +168,7 @@ class GraphFlow(CoreasonModel):
                 raise ManifestError(
                     fault=SemanticFault(
                         error_code="CRSN-VAL-LIFECYCLE-LEAK",
-                        message=(
-                            f"Published flow cannot contain PlaceholderNode '{node.id}'."
-                        ),
+                        message=(f"Published flow cannot contain PlaceholderNode '{node.id}'."),
                         severity=FaultSeverity.CRITICAL,
                         recovery_action=RecoveryAction.HALT,
                         context={
@@ -255,9 +253,7 @@ class LinearFlow(CoreasonModel):
                 raise ManifestError(
                     fault=SemanticFault(
                         error_code="CRSN-VAL-LIFECYCLE-LEAK",
-                        message=(
-                            f"Published flow cannot contain PlaceholderNode '{node.id}'."
-                        ),
+                        message=(f"Published flow cannot contain PlaceholderNode '{node.id}'."),
                         severity=FaultSeverity.CRITICAL,
                         recovery_action=RecoveryAction.HALT,
                         context={

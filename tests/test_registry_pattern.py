@@ -146,7 +146,7 @@ def test_referential_integrity_failure() -> None:
     metadata = FlowMetadata(name="broken-flow", version="1.0.0", description="fail", tags=[])
 
     # 3. Expect errors during validation
-    flow = LinearFlow(
+    LinearFlow(
         kind="LinearFlow",
         status="published",
         metadata=metadata,
@@ -156,8 +156,8 @@ def test_referential_integrity_failure() -> None:
     # Note: LinearFlow constructor doesn't validate profile refs. validate_flow does?
     # Actually, validate_flow calls _validate_agent_templates which scans profiles.
     # But does it check if profile exists?
-    # _scan_agent_templates: if isinstance(node.profile, str): if definitions and node.profile in definitions.profiles: ...
-    # It doesn't raise error if missing.
+    # _scan_agent_templates: if isinstance(node.profile, str): if definitions and node.profile in definitions.profiles:
+    # ... It doesn't raise error if missing.
 
     # Wait, check validator.py
     # def _scan_agent_templates(node: AgentNode, definitions: FlowDefinitions | None) -> set[str]:

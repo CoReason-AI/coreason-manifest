@@ -107,6 +107,7 @@ def test_graph_flow_draft_mode() -> None:
         graph=graph,
     )
     from coreason_manifest.utils.validator import validate_flow
+
     errors = validate_flow(flow_pub_fail)
     assert any("requires missing tool" in e for e in errors)
 

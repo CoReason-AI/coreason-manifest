@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 from coreason_manifest.spec.core.engines import (
     FastPath,
@@ -158,9 +158,9 @@ class BaseFlowBuilder:
         self._tool_packs: dict[str, ToolPack] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
-        self.status: str = "published"
+        self.status: Literal["draft", "published", "archived"] = "published"
 
-    def set_status(self, status: str) -> Self:
+    def set_status(self, status: Literal["draft", "published", "archived"]) -> Self:
         """Sets the flow status (draft, published, archived)."""
         self.status = status
         return self

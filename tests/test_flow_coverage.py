@@ -51,7 +51,7 @@ def test_flow_integrity_coverage() -> None:
         resilience="invalid_format",
     )
 
-    flow_bad_ref = LinearFlow(
+    LinearFlow(
         kind="LinearFlow",
         status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
@@ -74,7 +74,7 @@ def test_flow_integrity_coverage() -> None:
         resilience="ref:missing",
     )
 
-    flow_missing_ref = LinearFlow(
+    LinearFlow(
         kind="LinearFlow",
         status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
@@ -90,7 +90,7 @@ def test_flow_integrity_coverage() -> None:
         id="a4", type="agent", metadata={}, profile="missing-profile", tools=[], resilience=None
     )
 
-    flow_missing_profile = LinearFlow(
+    LinearFlow(
         kind="LinearFlow",
         status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),

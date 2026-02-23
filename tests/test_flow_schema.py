@@ -17,7 +17,7 @@ def test_flow_interface_schema() -> None:
 def test_flow_interface_validation_error() -> None:
     with pytest.raises(ValidationError):
         FlowInterface(
-            inputs=123, # Definitely invalid
+            inputs=123,  # type: ignore[arg-type] # Definitely invalid
             outputs=DataSchema(json_schema={}),
         )
 
