@@ -9,6 +9,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.utils.validator import validate_flow
 
+
 def test_draft_relaxation_semantics() -> None:
     """
     Verify that Phase 3 refactor correctly relaxes semantic checks for draft flows
@@ -21,7 +22,7 @@ def test_draft_relaxation_semantics() -> None:
         id="agent-1",
         type="agent",
         profile="my-brain",
-        tools=["missing-tool"], # Semantic error
+        tools=["missing-tool"],  # Semantic error
         metadata={},
         resilience=None,
     )
@@ -45,6 +46,7 @@ def test_draft_relaxation_semantics() -> None:
     errors_pub = validate_flow(flow_pub)
     assert any("requires tool 'missing-tool'" in e for e in errors_pub), "Published flow should detect missing tool"
 
+
 def test_draft_relaxation_governance() -> None:
     """
     Verify governance validation (fallback references) is relaxed for drafts.
@@ -56,7 +58,7 @@ def test_draft_relaxation_governance() -> None:
         circuit_breaker=CircuitBreaker(
             error_threshold_count=5,
             reset_timeout_seconds=60,
-            fallback_node_id="missing_node" # Semantic error
+            fallback_node_id="missing_node",  # Semantic error
         )
     )
 

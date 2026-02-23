@@ -1,5 +1,3 @@
-import pytest
-
 from coreason_manifest.builder import NewLinearFlow
 from coreason_manifest.spec.core.flow import FlowDefinitions
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
@@ -57,6 +55,7 @@ def test_missing_supervision_template() -> None:
     # Manually validate as published
     flow = flow.model_copy(update={"status": "published"})
     from coreason_manifest.utils.validator import validate_flow
+
     errors = validate_flow(flow)
     assert any("references undefined supervision template ID 'missing-policy'" in e for e in errors)
 
@@ -76,5 +75,6 @@ def test_malformed_supervision_reference() -> None:
     flow_draft = lf.build()
     flow = flow_draft.model_copy(update={"status": "published"})
     from coreason_manifest.utils.validator import validate_flow
+
     errors = validate_flow(flow)
     assert any("invalid resilience reference" in e for e in errors)

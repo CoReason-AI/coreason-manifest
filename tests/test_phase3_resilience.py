@@ -160,14 +160,9 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     )
     lf.add_step(node)
 
-    # Build as draft (default) should succeed
-    flow = lf.build()
-
-    # Manually validate published flow
-    flow = flow.model_copy(update={"status": "published"})
-    from coreason_manifest.utils.validator import validate_flow
-    errors = validate_flow(flow)
-    assert any("Circuit Breaker Error: 'fallback_node_id' points to missing ID 'missing_node'" in e for e in errors)
+    # Build as draft should fail because governance validation is strict
+    with pytest.raises(ValueError, match="Circuit Breaker Error: 'fallback_node_id' points to missing ID"):
+        lf.build()
 
     # 2. Invalid Supervision Fallback
     # policy = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node"))
@@ -186,6 +181,8 @@ def test_validator_catch_invalid_fallback_ids() -> None:
 
     flow2_draft = lf2.build()
     flow2 = flow2_draft.model_copy(update={"status": "published"})
+    from coreason_manifest.utils.validator import validate_flow
+
     errors2 = validate_flow(flow2)
     assert any("Resilience Error" in e and "missing ID 'missing_sup_node'" in e for e in errors2)
 
