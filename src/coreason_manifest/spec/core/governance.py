@@ -35,9 +35,7 @@ class CircuitBreaker(CoreasonModel):
 
 
 class ToolAccessPolicy(CoreasonModel):
-    risk_level: RiskLevel = Field(
-        ..., description="Risk level.", examples=["standard"]
-    )
+    risk_level: RiskLevel = Field(..., description="Risk level.", examples=["standard"])
     require_auth: bool | None = Field(None, description="Require authentication.", examples=[True])
     allowed_roles: list[str] | None = Field(
         None,
@@ -66,7 +64,10 @@ class Governance(CoreasonModel):
 
     max_risk_level: RiskLevel | None = Field(
         None,
-        description="Global kill switch. No tool exceeding this risk level can be executed across the entire manifest, regardless of individual tool policies.",
+        description=(
+            "Global kill switch. No tool exceeding this risk level can be executed across the "
+            "entire manifest, regardless of individual tool policies."
+        ),
     )
     rate_limit_rpm: int | None = Field(None, description="Rate limit in requests per minute.", examples=[60])
     timeout_seconds: int | None = Field(None, description="Global execution timeout.", examples=[300])

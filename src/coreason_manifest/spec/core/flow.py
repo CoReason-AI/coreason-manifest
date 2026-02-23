@@ -7,7 +7,6 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.tools import ToolPack, ToolCapability
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     EmergenceInspectorNode,
@@ -18,6 +17,7 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
@@ -223,10 +223,7 @@ class GraphFlow(CoreasonModel):
                     # Fail-closed: if risk_level is missing, default to critical (handled below by fallback)
                     # But here we try to extract it.
                     r = tool.get("risk_level")
-                    if r:
-                        risk = r
-                    else:
-                        risk = "critical" # Missing risk level
+                    risk = r or "critical"  # Missing risk level
                     name = tool.get("name", "unknown")
 
                 # Verify risk is valid
@@ -296,10 +293,7 @@ class LinearFlow(CoreasonModel):
                     name = tool.name
                 elif isinstance(tool, dict):
                     r = tool.get("risk_level")
-                    if r:
-                        risk = r
-                    else:
-                        risk = "critical"
+                    risk = r or "critical"
                     name = tool.get("name", "unknown")
 
                 if risk not in risk_hierarchy:
