@@ -1,13 +1,13 @@
 from collections import deque
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from jsonschema.exceptions import SchemaError
 
 from coreason_manifest.spec.core.flow import DataSchema, FlowDefinitions, FlowMetadata, LinearFlow
-from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.validator import validate_flow
 
 

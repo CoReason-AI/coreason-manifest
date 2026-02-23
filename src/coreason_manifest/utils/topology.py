@@ -39,6 +39,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
 
     return sccs
 
+
 def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> set[str]:
     """BFS to find all nodes reachable from the entry points."""
     reachable = set(entry_nodes)

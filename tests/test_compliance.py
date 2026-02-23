@@ -4,13 +4,13 @@ from uuid import uuid4
 
 import pytest
 
+from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
 from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash, reconstruct_payload
-from coreason_manifest.spec.core.constants import NodeCapability
 
 # --- TESTS ---
 
@@ -41,9 +41,7 @@ def test_topology_utility_island_unsafe(
     So we create a cycle: island1 -> island2 -> island1.
     """
     node_main = AgentNode(id="main", type="agent", metadata={}, profile=safe_profile, tools=[])
-    node_island1 = AgentNode(
-        id="island1", type="agent", metadata={}, profile=unsafe_profile, tools=[]
-    )  # Unsafe
+    node_island1 = AgentNode(id="island1", type="agent", metadata={}, profile=unsafe_profile, tools=[])  # Unsafe
     node_island2 = AgentNode(id="island2", type="agent", metadata={}, profile=safe_profile, tools=[])
 
     edges = [("island1", "island2"), ("island2", "island1")]

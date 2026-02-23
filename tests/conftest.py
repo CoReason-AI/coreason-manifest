@@ -1,8 +1,20 @@
+from collections.abc import Callable
+
 import pytest
-from typing import Any, Callable
+
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
-from coreason_manifest.spec.core.flow import AnyNode, Blackboard, DataSchema, Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.spec.core.flow import (
+    AnyNode,
+    Blackboard,
+    DataSchema,
+    Edge,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+)
 from coreason_manifest.spec.core.nodes import CognitiveProfile
+
 
 @pytest.fixture
 def mock_flow_factory() -> Callable[[list[AnyNode], list[tuple[str, str]]], GraphFlow]:
@@ -20,13 +32,16 @@ def mock_flow_factory() -> Callable[[list[AnyNode], list[tuple[str, str]]], Grap
                 entry_point=entry_point,
             ),
         )
+
     return _create
+
 
 @pytest.fixture
 def safe_profile() -> CognitiveProfile:
     return CognitiveProfile(
         role="tester", persona="safe", reasoning=StandardReasoning(model="gpt-4-turbo"), fast_path=None
     )
+
 
 @pytest.fixture
 def unsafe_profile() -> CognitiveProfile:
@@ -36,6 +51,7 @@ def unsafe_profile() -> CognitiveProfile:
         reasoning=ComputerUseReasoning(model="claude-3-5-sonnet"),
         fast_path=None,
     )
+
 
 @pytest.fixture
 def code_exec_profile() -> CognitiveProfile:

@@ -1,7 +1,7 @@
 # tests/test_governance_fixes.py
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.flow import (

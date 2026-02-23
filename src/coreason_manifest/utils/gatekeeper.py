@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 from coreason_manifest.spec.interop.compliance import (
@@ -11,8 +12,7 @@ from coreason_manifest.spec.interop.compliance import (
     RemediationAction,
 )
 from coreason_manifest.utils.net_utils import canonicalize_domain
-from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.utils.topology import get_strongly_connected_components, get_reachable_nodes
+from coreason_manifest.utils.topology import get_reachable_nodes, get_strongly_connected_components
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability

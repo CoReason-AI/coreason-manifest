@@ -22,7 +22,6 @@ from coreason_manifest.spec.core.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.spec.interop.exceptions import ManifestError
-from coreason_manifest.spec.core.flow import validate_integrity
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
 
@@ -107,6 +106,7 @@ def test_graph_flow_draft_mode() -> None:
         graph=graph,
     )
     from coreason_manifest.utils.validator import validate_flow
+
     errors = validate_flow(flow_pub)
     assert any("requires tool 'missing-tool'" in e for e in errors)
 
@@ -337,7 +337,7 @@ def test_recursive_schema_strict_validation() -> None:
         },
     }
 
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
 
     # Architecture: Validation runs directly. We mock check_schema to raise error to verify it is called.
     with patch("jsonschema.validators.validator_for") as mock_validator_for:
@@ -410,7 +410,7 @@ def test_validator_definitions_profile_scanning() -> None:
 def test_schema_strict_null_default() -> None:
     """Test strict validation for null defaults."""
     from typing import Any
-    from unittest.mock import patch, MagicMock
+    from unittest.mock import MagicMock, patch
 
     from jsonschema.exceptions import SchemaError
 

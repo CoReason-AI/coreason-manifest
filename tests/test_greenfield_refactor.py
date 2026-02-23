@@ -3,10 +3,9 @@ import sys
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import DataSchema

@@ -355,15 +355,12 @@ def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefin
                 tmpl_id = ref[4:]
                 if tmpl_id not in templates:
                     errors.append(
-                        f"Resilience Error: Node '{node.id}' references undefined supervision template ID "
-                        f"'{tmpl_id}'."
+                        f"Resilience Error: Node '{node.id}' references undefined supervision template ID '{tmpl_id}'."
                     )
 
         # Check profile references (AgentNode)
         if isinstance(node, AgentNode) and isinstance(node.profile, str) and node.profile not in profile_ids:
-            errors.append(
-                f"Integrity Error: AgentNode '{node.id}' references undefined profile ID '{node.profile}'."
-            )
+            errors.append(f"Integrity Error: AgentNode '{node.id}' references undefined profile ID '{node.profile}'.")
 
         # Check worker profile references (SwarmNode)
         if isinstance(node, SwarmNode) and node.worker_profile not in profile_ids:

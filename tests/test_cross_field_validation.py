@@ -2,8 +2,8 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
-from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.spec.core.tools import ToolCapability
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_human_node_shadow_mode_requirements() -> None:
