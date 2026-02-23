@@ -211,7 +211,10 @@ class GraphFlow(CoreasonModel):
                         context={
                             "remediation": RemediationAction(
                                 type="replace_node",
-                                description=f"Replace PlaceholderNode '{node.id}' (requires {node.required_capabilities}) or revert to draft.",
+                                description=(
+                                    f"Replace PlaceholderNode '{node.id}' (requires {node.required_capabilities}) "
+                                    "or revert to draft."
+                                ),
                                 patch_data=[
                                     {
                                         "op": "replace",
@@ -267,7 +270,10 @@ class LinearFlow(CoreasonModel):
                         context={
                             "remediation": RemediationAction(
                                 type="replace_node",
-                                description=f"Replace PlaceholderNode '{node.id}' (requires {node.required_capabilities}) or revert to draft.",
+                                description=(
+                                    f"Replace PlaceholderNode '{node.id}' (requires {node.required_capabilities}) "
+                                    "or revert to draft."
+                                ),
                                 patch_data=[
                                     {
                                         "op": "replace",
