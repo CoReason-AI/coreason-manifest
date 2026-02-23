@@ -1,8 +1,12 @@
+import errno
 import os
 import stat
 from pathlib import Path
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 import pytest
+import yaml
 
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
@@ -263,3 +267,99 @@ class TestManifestIOStrictSecurity:
 
             # Verify fd close was called
             mock_close.assert_called_with(10)
+
+
+class TestManifestIOCoverage:
+    def test_symlink_loop_in_resolve(self, tmp_path: Path) -> None:
+        """Cover line 90-92: RuntimeError('Symlink loop') in resolve."""
+        io = ManifestIO(tmp_path)
+
+        # We need to mock Path.resolve.
+        with patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop")):
+            with pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"):
+                io.read_text("loop.txt")
+
+    def test_lstat_generic_oserror(self, tmp_path: Path) -> None:
+        """Cover line 105: lstat raises OSError != ENOENT."""
+        io = ManifestIO(tmp_path)
+
+        # We must allow initial resolution calls to succeed if they use lstat
+        # But here we want the lstat inside read_text (after resolution) to fail.
+        # The resolution happens *before* the lstat call we want to test.
+        # So we can just mock os.lstat globally if we assume resolution doesn't rely on it *inside* the function
+        # (resolution happens before step 2).
+
+        # However, ManifestIO.__init__ calls resolve(). And read_text calls resolve().
+        # So we should construct ManifestIO first.
+
+        with patch("os.lstat", side_effect=OSError(errno.EACCES, "Permission denied")):
+            with pytest.raises(OSError) as exc:
+                io.read_text("file.txt")
+            assert exc.value.errno == errno.EACCES
+
+    def test_open_generic_oserror(self, tmp_path: Path) -> None:
+        """Cover line 118: open raises OSError != ELOOP != ENOENT."""
+        io = ManifestIO(tmp_path)
+        test_file = tmp_path / "file.txt"
+        test_file.touch()
+
+        # We need lstat to succeed (real or mock) but open to fail.
+        # Real lstat is fine.
+        # We mock os.open.
+
+        real_open = os.open
+
+        def open_side_effect(path: str | Path, flags: int, *args: Any, **kwargs: Any) -> int:
+            if str(path).endswith("file.txt"):
+                raise OSError(errno.EACCES, "Permission denied")
+            return real_open(path, flags, *args, **kwargs)
+
+        with patch("os.open", side_effect=open_side_effect):
+            with pytest.raises(OSError) as exc:
+                io.read_text("file.txt")
+            assert exc.value.errno == errno.EACCES
+
+    def test_fdopen_failure_closes_fd(self, tmp_path: Path) -> None:
+        """Cover line 165: os.close(fd) called when os.fdopen fails."""
+        io = ManifestIO(tmp_path)
+        (tmp_path / "file.txt").touch()
+
+        fd_val = 10
+
+        # Mock lstat to return valid stat result
+        stat_mock = MagicMock()
+        stat_mock.st_ino = 1
+        stat_mock.st_dev = 1
+        stat_mock.st_mode = 0o644
+
+        # We use side_effect for lstat to allow other calls if needed,
+        # but here we can just return the mock.
+
+        with (
+            patch("os.lstat", return_value=stat_mock),
+            patch("os.open", return_value=fd_val),
+            patch("os.fstat", return_value=stat_mock),
+            patch("os.fdopen", side_effect=Exception("fdopen failed")),
+            patch("os.close") as mock_close,
+        ):
+            with pytest.raises(Exception, match="fdopen failed"):
+                io.read_text("file.txt")
+
+            mock_close.assert_called_with(fd_val)
+
+    def test_load_invalid_yaml_structure(self, tmp_path: Path) -> None:
+        """Cover line 166: content is not a dict."""
+        io = ManifestIO(tmp_path)
+        (tmp_path / "list.yaml").write_text("- item1\n- item2")
+
+        with pytest.raises(ValueError, match="Manifest content must be a dictionary"):
+            io.load("list.yaml")
+
+    def test_load_yaml_parse_error(self, tmp_path: Path) -> None:
+        """Cover line 170: yaml.YAMLError."""
+        io = ManifestIO(tmp_path)
+        # Tabs are not allowed in YAML and usually cause a ScannerError (subclass of YAMLError)
+        (tmp_path / "bad.yaml").write_text("key: value\n\tbad_indent: value")
+
+        with pytest.raises(ValueError, match="Failed to parse manifest file"):
+            io.load("bad.yaml")
