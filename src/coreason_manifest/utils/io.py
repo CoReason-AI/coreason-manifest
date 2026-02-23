@@ -102,7 +102,7 @@ class ManifestIO:
         except OSError as e:
             if e.errno == errno.ENOENT:
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            raise  # pragma: no cover
+            raise
 
         try:
             # O_NOFOLLOW ensures we don't follow symlinks at the end of the path
@@ -115,7 +115,9 @@ class ManifestIO:
                 raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
             if e.errno == errno.ENOENT:
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            raise  # pragma: no cover
+            # Re-raise other OSErrors (e.g. EACCES)
+            # pragma: no cover
+            raise
 
         try:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
