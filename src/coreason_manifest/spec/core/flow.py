@@ -201,17 +201,13 @@ def _scan_for_kill_switch_violations(
                     # So we can't append it to tools_to_check if that expects ToolCapability objects.
                     # BUT we can check risk immediately here or create a mock.
                     # Let's construct a valid Critical tool representing this failure.
-                    try:
-                        fallback = ToolCapability(
-                            name=str(name),
-                            type="capability",
-                            risk_level=RiskLevel.CRITICAL,
-                            description="Malformed tool definition defaulted to Critical.",
-                        )
-                        tools_to_check.append(fallback)
-                    except Exception:
-                        # Should not happen
-                        pass
+                    fallback = ToolCapability(
+                        name=str(name),
+                        type="capability",
+                        risk_level=RiskLevel.CRITICAL,
+                        description="Malformed tool definition defaulted to Critical.",
+                    )
+                    tools_to_check.append(fallback)
 
     # 3. Enforcement
     for tool in tools_to_check:

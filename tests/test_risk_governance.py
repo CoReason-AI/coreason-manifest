@@ -215,3 +215,42 @@ def test_scan_raw_dicts_fail_closed() -> None:
     assert "Security Violation" in str(exc_info.value)
     assert "mystery_tool" in str(exc_info.value)
     assert "critical" in str(exc_info.value)  # Defaulted value
+
+
+def test_scan_raw_dicts_malformed() -> None:
+    """
+    Test fail-closed behavior for malformed raw dicts (missing required fields like name/type)
+    that cause ToolCapability validation to fail.
+    """
+    from typing import Any, Literal
+
+    from pydantic import Field
+
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    from coreason_manifest.spec.core.nodes import Node
+
+    class RawToolNode(Node):
+        type: Literal["raw_tool_node"] = "raw_tool_node"
+        inline_tools: list[Any] = Field(default_factory=list)
+
+    # Tool with MISSING name -> validation fails -> falls back to Critical
+    raw_tool_malformed = {
+        "type": "capability",
+        # name MISSING
+        "description": "Invalid tool",
+    }
+
+    node = RawToolNode(id="raw_malformed", inline_tools=[raw_tool_malformed])
+
+    max_risk = RiskLevel.STANDARD
+
+    with pytest.raises(ManifestError) as exc_info:
+        _scan_for_kill_switch_violations(
+            max_risk=max_risk,
+            definitions=None,
+            nodes=[node],  # type: ignore[list-item]
+        )
+
+    # Should catch the "unknown_malformed_tool" fallback
+    assert "Security Violation" in str(exc_info.value)
+    assert "unknown_malformed_tool" in str(exc_info.value)
