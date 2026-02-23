@@ -68,28 +68,36 @@ def test_manifest_io_eloop_enoent() -> None:
     mock_stat.st_ino = 12345
     mock_stat.st_dev = 1
 
-    with patch("os.lstat", return_value=mock_stat) as mock_lstat:
-        # Mock os.open to raise ELOOP
-        with patch("os.open") as mock_open:
-            mock_open.side_effect = OSError(errno.ELOOP, "Too many symlinks")
-            with pytest.raises(SecurityViolationError) as exc_sec:
-                loader.read_text("loop.txt")
-            assert "Symlink detected" in str(exc_sec.value)
+    # Fix SIM117: Combine nested with statements
+    with (
+        patch("os.lstat", return_value=mock_stat),
+        patch("os.open") as mock_open,
+    ):
+        mock_open.side_effect = OSError(errno.ELOOP, "Too many symlinks")
+        with pytest.raises(SecurityViolationError) as exc_sec:
+            loader.read_text("loop.txt")
+        assert "Symlink detected" in str(exc_sec.value)
 
     # Mock os.lstat to succeed (race condition simulation where file vanishes)
-    with patch("os.lstat", return_value=mock_stat) as mock_lstat:
-        with patch("os.open") as mock_open:
-            mock_open.side_effect = OSError(errno.ENOENT, "No such file")
-            with pytest.raises(FileNotFoundError):
-                loader.read_text("missing.txt")
+    # Fix SIM117 and F841: Combine contexts, remove unused assignment
+    with (
+        patch("os.lstat", return_value=mock_stat),
+        patch("os.open") as mock_open,
+    ):
+        mock_open.side_effect = OSError(errno.ENOENT, "No such file")
+        with pytest.raises(FileNotFoundError):
+            loader.read_text("missing.txt")
 
     # Mock os.lstat to succeed
-    with patch("os.lstat", return_value=mock_stat) as mock_lstat:
-        with patch("os.open") as mock_open:
-            mock_open.side_effect = OSError(errno.EACCES, "Permission denied")
-            with pytest.raises(OSError, match="Permission denied") as exc_os:
-                loader.read_text("locked.txt")
-            assert exc_os.value.errno == errno.EACCES
+    # Fix SIM117 and F841
+    with (
+        patch("os.lstat", return_value=mock_stat),
+        patch("os.open") as mock_open,
+    ):
+        mock_open.side_effect = OSError(errno.EACCES, "Permission denied")
+        with pytest.raises(OSError, match="Permission denied") as exc_os:
+            loader.read_text("locked.txt")
+        assert exc_os.value.errno == errno.EACCES
 
 
 def test_loader_ast_import_from_banned(tmp_path: Path) -> None:
@@ -215,7 +223,10 @@ def test_post_open_check_detects_swap(jail_dir: Path) -> None:
     bad_stat.st_mode = real_stat.st_mode
 
     # We patch os.lstat and os.fstat in coreason_manifest.utils.io
-    with patch("coreason_manifest.utils.io.os.lstat", return_value=real_stat) as mock_lstat:
-        with patch("coreason_manifest.utils.io.os.fstat", return_value=bad_stat) as mock_fstat:
-             with pytest.raises(SecurityViolationError, match="File swapped during open operation"):
-                 loader.read_text("test.txt")
+    # Fix SIM117 and F841: Combine contexts, remove unused assignment
+    with (
+        patch("coreason_manifest.utils.io.os.lstat", return_value=real_stat),
+        patch("coreason_manifest.utils.io.os.fstat", return_value=bad_stat),
+    ):
+         with pytest.raises(SecurityViolationError, match="File swapped during open operation"):
+             loader.read_text("test.txt")

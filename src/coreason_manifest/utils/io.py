@@ -47,16 +47,15 @@ class ManifestIO:
 
         if not hasattr(os, "O_NOFOLLOW"):
             if self.strict_security:
-                raise EnvironmentError(
+                raise OSError(
                     "Host OS lacks O_NOFOLLOW support. Strict TOCTOU security cannot be guaranteed. "
                     "Set strict_security=False to bypass this check at your own risk."
                 )
-            else:
-                warnings.warn(
-                    "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
-                    RuntimeSecurityWarning,
-                    stacklevel=2,
-                )
+            warnings.warn(
+                "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
+                RuntimeSecurityWarning,
+                stacklevel=2,
+            )
 
     @property
     def _is_posix(self) -> bool:
@@ -132,7 +131,7 @@ class ManifestIO:
 
             # Post-Open Defense in Depth Check
             if stat_before.st_ino != st.st_ino or stat_before.st_dev != st.st_dev:
-                 raise SecurityViolationError("File swapped during open operation.")
+                raise SecurityViolationError("File swapped during open operation.")
 
             if self._is_posix and (st.st_mode & stat.S_IWOTH):
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
