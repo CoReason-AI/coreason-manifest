@@ -113,10 +113,9 @@ class ManifestIO:
             # Handle specific error codes
             if e.errno == getattr(errno, "ELOOP", 40):  # ELOOP = Too many symbolic links
                 raise SecurityViolationError(f"Symlink detected (possible TOCTOU attack): {path}") from e
-            elif e.errno == errno.ENOENT:
+            if e.errno == errno.ENOENT:
                 raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
-            else:
-                raise  # pragma: no cover
+            raise  # pragma: no cover
 
         try:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
