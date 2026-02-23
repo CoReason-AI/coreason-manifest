@@ -1,10 +1,10 @@
 from datetime import datetime
+
 import pytest
 
 from coreason_manifest.builder import NewGraphFlow
-from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
@@ -45,14 +45,7 @@ def test_gatekeeper_coverage_complex() -> None:
     gf.add_node(safe)
 
     # Add a risky agent
-    risky = AgentNode(
-        id="risky",
-        metadata={},
-        resilience=None,
-        type="agent",
-        profile="dummy",
-        tools=["rm_rf_tool"]
-    )
+    risky = AgentNode(id="risky", metadata={}, resilience=None, type="agent", profile="dummy", tools=["rm_rf_tool"])
     gf.add_node(risky)
 
     # Connect safe -> risky (Unguarded)
@@ -76,7 +69,7 @@ def test_integrity_naive_datetime() -> None:
     """
     Test canonical hashing of naive datetime objects.
     """
-    dt = datetime(2023, 1, 1, 12, 0, 0) # Naive
+    dt = datetime(2023, 1, 1, 12, 0, 0)  # Naive
     assert dt.tzinfo is None
 
     # Should not raise
@@ -88,9 +81,7 @@ def test_integrity_merkle_genesis_mismatch() -> None:
     """
     Test verify_merkle_proof with genesis node mismatch against trusted root.
     """
-    trace = [
-        {"execution_hash": "hash1", "parent_hashes": []}
-    ]
+    trace = [{"execution_hash": "hash1", "parent_hashes": []}]
 
     # Correct hash
     computed = compute_hash(trace[0])
@@ -107,5 +98,5 @@ def test_integrity_reconstruct_payload_error() -> None:
     """
     # Pass a string instead of dict/model
     trace = ["invalid_node"]
-    result = verify_merkle_proof(trace)  # type: ignore[arg-type]
+    result = verify_merkle_proof(trace)
     assert result is False
