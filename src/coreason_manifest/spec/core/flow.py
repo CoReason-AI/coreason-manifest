@@ -166,8 +166,9 @@ class GraphFlow(CoreasonModel):
         nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
 
         for node in nodes_iter:
-            if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
-                raise ManifestError(
+            if isinstance(node, SwarmNode):
+                if node.workload_variable not in variable_names:
+                    raise ManifestError(
                     fault=SemanticFault(
                         error_code="CRSN-VAL-SWARM-VAR-MISSING",
                         message=(
