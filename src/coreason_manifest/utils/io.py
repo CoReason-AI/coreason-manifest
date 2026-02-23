@@ -90,6 +90,10 @@ class ManifestIO:
             if "Symlink loop" in str(e):
                 raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
             raise  # pragma: no cover
+        except OSError as e:
+            if e.errno == getattr(errno, "ELOOP", 40):
+                raise SecurityViolationError(f"Symlink detected during path resolution: {path}") from e
+            raise
 
         # 1. Path Traversal Check (High-Level)
         if not self.allow_external and not target_path.is_relative_to(self.jail):
@@ -122,13 +126,19 @@ class ManifestIO:
             # This guarantees we are checking the actual file we just opened.
             st = os.fstat(fd)
 
-            # Post-Open Defense: Verify inode and device match lstat
-            if stat_before.st_ino != st.st_ino or stat_before.st_dev != st.st_dev:
-                os.close(fd)
+            # Defense in depth: Verify inode and device
+            if stat_before.st_ino == 0:
+                warnings.warn(
+                    "Inode heuristic blindspot: OS returned 0 for st_ino. Falling back to mtime/size.",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+                if stat_before.st_mtime != st.st_mtime or stat_before.st_size != st.st_size:
+                    raise SecurityViolationError("File swapped during open operation (mtime/size mismatch).")
+            elif stat_before.st_ino != st.st_ino or stat_before.st_dev != st.st_dev:
                 raise SecurityViolationError("File swapped during open operation (TOCTOU attack detected).")
 
             if self._is_posix and (st.st_mode & stat.S_IWOTH):
-                os.close(fd)
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
 
             # 4. READ CONTENT

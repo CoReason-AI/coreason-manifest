@@ -282,6 +282,51 @@ class TestManifestIOStrictSecurity:
             # Verify fd close was called
             mock_close.assert_called_with(10)
 
+    def test_zero_inode_handling(self, tmp_path: Path) -> None:
+        """Test that 0 inode triggers mtime/size check."""
+        from typing import Any
+        from unittest.mock import MagicMock, patch
+
+        jail = tmp_path
+        test_file = jail / "test.txt"
+        test_file.touch()
+
+        io = ManifestIO(jail, strict_security=False)
+
+        # Prepare mocks
+        stat_before = MagicMock()
+        stat_before.st_ino = 0  # Trigger zero inode logic
+        stat_before.st_mtime = 100
+        stat_before.st_size = 50
+        stat_before.st_mode = stat.S_IFREG | 0o644
+
+        stat_after = MagicMock()
+        stat_after.st_ino = 0
+        stat_after.st_mtime = 101  # Mismatch
+        stat_after.st_size = 50
+        stat_after.st_mode = stat.S_IFREG | 0o644
+
+        real_lstat = os.lstat
+
+        def lstat_side_effect(path: str | Path, *args: Any, **kwargs: Any) -> Any:
+            p = str(path)
+            if p.endswith("test.txt"):
+                return stat_before
+            return real_lstat(path, *args, **kwargs)
+
+        with (
+            patch("os.lstat", side_effect=lstat_side_effect),
+            patch("os.open", return_value=10),
+            patch("os.fstat", return_value=stat_after),
+            patch("os.fdopen"),
+            patch("os.close") as mock_close,
+            pytest.warns(RuntimeWarning, match="Inode heuristic blindspot"),
+        ):
+            with pytest.raises(SecurityViolationError, match="mtime/size mismatch"):
+                io.read_text("test.txt")
+
+            mock_close.assert_called_with(10)
+
 
 class TestManifestIOCoverage:
     def test_symlink_loop_in_resolve(self, tmp_path: Path) -> None:
@@ -294,6 +339,27 @@ class TestManifestIOCoverage:
             pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"),
         ):
             io.read_text("loop.txt")
+
+    def test_symlink_loop_in_resolve_oserror(self, tmp_path: Path) -> None:
+        """Cover OSError(ELOOP) in resolve."""
+        io = ManifestIO(tmp_path, strict_security=False)
+
+        with (
+            patch("pathlib.Path.resolve", side_effect=OSError(errno.ELOOP, "Loop")),
+            pytest.raises(SecurityViolationError, match="Symlink detected during path resolution"),
+        ):
+            io.read_text("loop.txt")
+
+    def test_resolve_generic_oserror(self, tmp_path: Path) -> None:
+        """Cover generic OSError in resolve."""
+        io = ManifestIO(tmp_path, strict_security=False)
+
+        with (
+            patch("pathlib.Path.resolve", side_effect=OSError(errno.EACCES, "Permission denied")),
+            pytest.raises(OSError, match="Permission denied") as exc,
+        ):
+            io.read_text("file.txt")
+        assert exc.value.errno == errno.EACCES
 
     def test_lstat_generic_oserror(self, tmp_path: Path) -> None:
         """Cover line 105: lstat raises OSError != ENOENT."""
