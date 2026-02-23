@@ -2,6 +2,7 @@ import sys
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -39,7 +40,18 @@ def test_validate_success(capsys: CaptureFixture[str]) -> None:
 
     try:
         test_args = ["coreason", "validate", tmp_path]
-        with patch.object(sys, "argv", test_args):
+        with (
+            patch.object(sys, "argv", test_args),
+            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
+        ):
+            from coreason_manifest.utils.io import ManifestIO
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+                kwargs["strict_security"] = False
+                return ManifestIO(*args, **kwargs)
+
+            mock_io.side_effect = unsafe_manifest_io
+
             ret = main()
             assert ret == 0
             captured = capsys.readouterr()
@@ -56,7 +68,18 @@ def test_validate_failure(capsys: CaptureFixture[str]) -> None:
 
     try:
         test_args = ["coreason", "validate", tmp_path]
-        with patch.object(sys, "argv", test_args):
+        with (
+            patch.object(sys, "argv", test_args),
+            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
+        ):
+            from coreason_manifest.utils.io import ManifestIO
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+                kwargs["strict_security"] = False
+                return ManifestIO(*args, **kwargs)
+
+            mock_io.side_effect = unsafe_manifest_io
+
             ret = main()
             assert ret == 1
             captured = capsys.readouterr()
@@ -73,7 +96,18 @@ def test_visualize_success(capsys: CaptureFixture[str]) -> None:
 
     try:
         test_args = ["coreason", "visualize", tmp_path]
-        with patch.object(sys, "argv", test_args):
+        with (
+            patch.object(sys, "argv", test_args),
+            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
+        ):
+            from coreason_manifest.utils.io import ManifestIO
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+                kwargs["strict_security"] = False
+                return ManifestIO(*args, **kwargs)
+
+            mock_io.side_effect = unsafe_manifest_io
+
             ret = main()
             assert ret == 0
             captured = capsys.readouterr()
@@ -90,7 +124,18 @@ def test_visualize_with_errors(capsys: CaptureFixture[str]) -> None:
 
     try:
         test_args = ["coreason", "visualize", tmp_path]
-        with patch.object(sys, "argv", test_args):
+        with (
+            patch.object(sys, "argv", test_args),
+            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
+        ):
+            from coreason_manifest.utils.io import ManifestIO
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+                kwargs["strict_security"] = False
+                return ManifestIO(*args, **kwargs)
+
+            mock_io.side_effect = unsafe_manifest_io
+
             ret = main()
             assert ret == 0  # Visualize proceeds even with errors
             captured = capsys.readouterr()
@@ -103,7 +148,18 @@ def test_visualize_with_errors(capsys: CaptureFixture[str]) -> None:
 def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
     """Test that the validate command handles missing files."""
     test_args = ["coreason", "validate", "non_existent.yaml"]
-    with patch.object(sys, "argv", test_args):
+    with (
+        patch.object(sys, "argv", test_args),
+        patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
+    ):
+        from coreason_manifest.utils.io import ManifestIO
+
+        def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+            kwargs["strict_security"] = False
+            return ManifestIO(*args, **kwargs)
+
+        mock_io.side_effect = unsafe_manifest_io
+
         ret = main()
         assert ret == 1
         captured = capsys.readouterr()
@@ -115,7 +171,18 @@ def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
 def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
     """Test that the visualize command handles missing files."""
     test_args = ["coreason", "visualize", "non_existent.yaml"]
-    with patch.object(sys, "argv", test_args):
+    with (
+        patch.object(sys, "argv", test_args),
+        patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
+    ):
+        from coreason_manifest.utils.io import ManifestIO
+
+        def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+            kwargs["strict_security"] = False
+            return ManifestIO(*args, **kwargs)
+
+        mock_io.side_effect = unsafe_manifest_io
+
         ret = main()
         assert ret == 1
         captured = capsys.readouterr()

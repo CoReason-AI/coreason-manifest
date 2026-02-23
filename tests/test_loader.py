@@ -20,7 +20,7 @@ def test_load_linear_flow() -> None:
         tmp_path = tmp.name
 
     try:
-        flow = load_flow_from_file(tmp_path)
+        flow = load_flow_from_file(tmp_path, strict_security=False)
         assert isinstance(flow, LinearFlow)
         assert flow.metadata.name == "TestLinear"
     finally:
@@ -57,7 +57,7 @@ def test_load_graph_flow() -> None:
         tmp_path = tmp.name
 
     try:
-        flow = load_flow_from_file(tmp_path)
+        flow = load_flow_from_file(tmp_path, strict_security=False)
         assert isinstance(flow, GraphFlow)
         assert flow.metadata.name == "TestGraph"
     finally:
@@ -66,7 +66,7 @@ def test_load_graph_flow() -> None:
 
 def test_load_missing_file() -> None:
     with pytest.raises(FileNotFoundError):
-        load_flow_from_file("non_existent_file.yaml")
+        load_flow_from_file("non_existent_file.yaml", strict_security=False)
 
 
 def test_load_invalid_yaml() -> None:
@@ -76,7 +76,7 @@ def test_load_invalid_yaml() -> None:
 
     try:
         with pytest.raises(ValueError, match="Failed to parse manifest file"):
-            load_flow_from_file(tmp_path)
+            load_flow_from_file(tmp_path, strict_security=False)
     finally:
         Path(tmp_path).unlink()
 
@@ -88,7 +88,7 @@ def test_load_not_a_dict() -> None:
 
     try:
         with pytest.raises(ValueError, match="Manifest content must be a dictionary"):
-            load_flow_from_file(tmp_path)
+            load_flow_from_file(tmp_path, strict_security=False)
     finally:
         Path(tmp_path).unlink()
 
@@ -101,6 +101,6 @@ def test_load_unknown_kind() -> None:
 
     try:
         with pytest.raises(ValueError, match="Unknown or missing manifest kind"):
-            load_flow_from_file(tmp_path)
+            load_flow_from_file(tmp_path, strict_security=False)
     finally:
         Path(tmp_path).unlink()

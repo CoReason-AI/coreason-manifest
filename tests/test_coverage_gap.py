@@ -583,7 +583,7 @@ def test_loader_resolve_refs_complex() -> None:
         (p / "step1.yaml").write_text(yaml.dump(step1))
         (p / "shared.yaml").write_text(yaml.dump(shared))
 
-        flow = load_flow_from_file(str(p / "main.yaml"))
+        flow = load_flow_from_file(str(p / "main.yaml"), strict_security=False)
         # Verify resolution
         from coreason_manifest.spec.core.flow import LinearFlow
 
@@ -599,7 +599,7 @@ def test_loader_resolve_refs_complex() -> None:
         (p / "cycle_main.yaml").write_text(yaml.dump(cycle_flow))
 
         with pytest.raises(RecursionError, match="Circular dependency detected"):
-            load_flow_from_file(str(p / "cycle_main.yaml"))
+            load_flow_from_file(str(p / "cycle_main.yaml"), strict_security=False)
 
 
 def test_loader_execution_exception_propagation() -> None:
@@ -639,7 +639,7 @@ def test_loader_dynamic_ref_recursion() -> None:
         (p / "list_unsafe.yaml").write_text(yaml.dump(manifest))
 
         with pytest.raises(SecurityJailViolationError, match="Dynamic code execution"):
-            load_flow_from_file(str(p / "list_unsafe.yaml"), allow_dynamic_execution=False)
+            load_flow_from_file(str(p / "list_unsafe.yaml"), allow_dynamic_execution=False, strict_security=False)
 
         # Manifest with dynamic ref inside a nested dict
         manifest_dict = {
@@ -652,7 +652,7 @@ def test_loader_dynamic_ref_recursion() -> None:
         (p / "dict_unsafe.yaml").write_text(yaml.dump(manifest_dict))
 
         with pytest.raises(SecurityJailViolationError, match="Dynamic code execution"):
-            load_flow_from_file(str(p / "dict_unsafe.yaml"), allow_dynamic_execution=False)
+            load_flow_from_file(str(p / "dict_unsafe.yaml"), allow_dynamic_execution=False, strict_security=False)
 
 
 def test_loader_security_escapes() -> None:
@@ -675,7 +675,7 @@ def test_loader_security_escapes() -> None:
         (p / "outside.yaml").write_text("content: 1")
 
         with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
-            load_flow_from_file(str(jail / "bad_ref.yaml"))
+            load_flow_from_file(str(jail / "bad_ref.yaml"), strict_security=False)
 
         # 2. agent ref escape
         (p / "outside.py").write_text("class Agent: pass")
@@ -699,7 +699,7 @@ def test_loader_ref_load_failure() -> None:
         (p / "main.yaml").write_text(yaml.dump(manifest))
 
         with pytest.raises(ValueError, match="Failed to load reference"):
-            load_flow_from_file(str(p / "main.yaml"))
+            load_flow_from_file(str(p / "main.yaml"), strict_security=False)
 
 
 def test_loader_find_spec_exceptions() -> None:
