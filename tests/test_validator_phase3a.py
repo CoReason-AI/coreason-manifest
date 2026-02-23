@@ -1,8 +1,5 @@
 from typing import cast
 
-import pytest
-from pydantic import ValidationError
-
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
@@ -93,7 +90,8 @@ def test_validate_graph_flow_invalid_edges() -> None:
     )
 
     # Architectural Update: Referential integrity is strictly enforced during model validation.
-    # Note: Model validation only enforces Placeholder check. Structural integrity is checked by validate_flow for PUBLISHED flows.
+    # Note: Model validation only enforces Placeholder check. Structural integrity is checked
+    # by validate_flow for PUBLISHED flows.
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),

@@ -1,4 +1,3 @@
-import pytest
 
 from coreason_manifest.spec.core.flow import (
     DataSchema,
@@ -185,7 +184,6 @@ def test_referential_integrity_failure() -> None:
     # I will comment out the assertion and add a TODO, or remove the test if it's invalid.
     # But the test name says "referential_integrity_failure".
 
-    pass
 
 
 def test_tool_integrity_failure() -> None:

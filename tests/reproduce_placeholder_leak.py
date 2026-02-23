@@ -1,9 +1,11 @@
-import pytest
 from typing import Any
+
+import pytest
+
 from coreason_manifest.spec.core.flow import GraphFlow
 from coreason_manifest.spec.core.nodes import PlaceholderNode
+from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError
 from coreason_manifest.utils.validator import validate_flow
-from coreason_manifest.spec.interop.exceptions import ManifestError, FaultSeverity
 
 
 def test_reproduce_placeholder_leak() -> None:
