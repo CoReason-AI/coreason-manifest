@@ -12,6 +12,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance, ToolAccessPolicy
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_risk_governance_graph_flow() -> None:
@@ -45,7 +46,7 @@ def test_risk_governance_graph_flow() -> None:
     # Pydantic usually wraps exceptions in ValidationError unless we use specific Pydantic patterns.
     # However, for now let's catch ValidationError and check the cause or message.
 
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(ManifestError) as exc_info:
         GraphFlow(
             metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
             interface=FlowInterface(),
@@ -108,7 +109,7 @@ def test_risk_governance_linear_flow() -> None:
     )
 
     # Case 2: Kill switch set to 'standard'
-    with pytest.raises(ValidationError) as exc_info:
+    with pytest.raises(ManifestError) as exc_info:
         LinearFlow(
             metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
             steps=[],
@@ -159,17 +160,18 @@ def test_inline_tool_bypass_prevention() -> None:
 
     hacker_node = HackerNode(id="hacker_1", inline_tools=[critical_tool])
 
-    # Construct graph with this node
-    # Cast HackerNode to AnyNode to bypass Mypy strict typing for Graph.nodes
-    graph = Graph(nodes={"h1": hacker_node}, edges=[], entry_point="h1")  # type: ignore[dict-item]
+    # Bypass GraphFlow validation (which strictly checks AnyNode types)
+    # and test the scanner directly.
+    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
 
-    # Flow with standard governance
-    with pytest.raises(ValidationError) as exc_info:
-        GraphFlow(
-            metadata=FlowMetadata(name="HackedFlow", version="1.0.0"),
-            interface=FlowInterface(),
-            graph=graph,
-            governance=Governance(max_risk_level=RiskLevel.STANDARD),
+    # Flow with standard governance limit
+    max_risk = RiskLevel.STANDARD
+
+    with pytest.raises(ManifestError) as exc_info:
+        _scan_for_kill_switch_violations(
+            max_risk=max_risk,
+            definitions=None,
+            nodes=[hacker_node],  # type: ignore[list-item]
         )
 
     assert "Security Violation" in str(exc_info.value)
