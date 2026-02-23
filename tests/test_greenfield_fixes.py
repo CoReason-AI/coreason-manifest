@@ -390,6 +390,7 @@ def test_validator_definitions_profile_scanning() -> None:
 
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
@@ -476,6 +477,7 @@ def test_jinja2_filter_validation() -> None:
     graph = Graph(nodes={"n1": agent}, edges=[], entry_point="n1")
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
@@ -498,6 +500,7 @@ def test_jinja2_filter_validation() -> None:
     graph_fail = Graph(nodes={"n1": agent_fail}, edges=[], entry_point="n1")
     flow_fail = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
@@ -543,6 +546,7 @@ def test_swarm_type_safety() -> None:
     graph = Graph(nodes={"s1": swarm}, edges=[], entry_point="s1")
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,
@@ -640,7 +644,7 @@ def test_validator_union_type_normalization() -> None:
     flow = GraphFlow.model_construct(
         type="graph",
         kind="GraphFlow",
-        status="draft",
+        status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=inputs, outputs=DataSchema()),
         blackboard=None,

@@ -255,11 +255,10 @@ def test_builder_validation_failure() -> None:
     )
     builder.add_step(node)
 
-    # Build should raise ValueError because of validate_flow finding missing fallback node
-    with pytest.raises(ValueError, match="Validation failed") as exc:
-        builder.build()
-
-    assert "missing ID 'missing_node'" in str(exc.value)
+    # Build should succeed as draft, even with missing fallback node (semantic check)
+    flow = builder.build()
+    assert flow.status == "draft"
+    assert flow.steps[0].resilience.fallback_node_id == "missing_node"
 
 
 def test_builder_graph_entry_point_coverage() -> None:
@@ -331,7 +330,8 @@ def test_builder_graph_validation_failure() -> None:
     builder.add_node(node)
     builder.set_entry_point("a1")
 
-    with pytest.raises(ValueError, match="Validation failed") as exc:
-        builder.build()
-
-    assert "missing ID 'missing_node'" in str(exc.value)
+    # Build should succeed as draft
+    flow = builder.build()
+    assert flow.status == "draft"
+    # AgentNode is stored in graph.nodes
+    assert flow.graph.nodes["a1"].resilience.fallback_node_id == "missing_node"

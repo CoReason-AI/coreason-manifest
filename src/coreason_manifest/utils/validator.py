@@ -45,20 +45,21 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     valid_ids = {n.id for n in nodes}
 
     # 1. Common Checks
-    if flow.governance:
+    if is_published and flow.governance:
         errors.extend(_validate_governance(flow.governance, valid_ids))
 
-    if flow.definitions:
-        # Convert dict to list for backward compatibility with _validate_tools
-        tool_packs = list(flow.definitions.tool_packs.values()) if flow.definitions.tool_packs else []
-        errors.extend(_validate_tools(nodes, tool_packs))
-        errors.extend(_validate_referential_integrity(nodes, flow.definitions))
-    else:
-        # If no definitions, ensure no references exist
-        errors.extend(_validate_referential_integrity(nodes, None))
+    if is_published:
+        if flow.definitions:
+            # Convert dict to list for backward compatibility with _validate_tools
+            tool_packs = list(flow.definitions.tool_packs.values()) if flow.definitions.tool_packs else []
+            errors.extend(_validate_tools(nodes, tool_packs))
+            errors.extend(_validate_referential_integrity(nodes, flow.definitions))
+        else:
+            # If no definitions, ensure no references exist
+            errors.extend(_validate_referential_integrity(nodes, None))
 
-    for node in nodes:
-        errors.extend(_validate_supervision(node, valid_ids))
+        for node in nodes:
+            errors.extend(_validate_supervision(node, valid_ids))
 
     if is_published:
         errors.extend(_validate_fallback_cycles(nodes))
@@ -116,7 +117,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
                     else:
                         symbol_table[name] = str(raw_type)
 
-            errors.extend(_validate_data_flow(nodes_list, symbol_table, flow.definitions))
+            if is_published:
+                errors.extend(_validate_data_flow(nodes_list, symbol_table, flow.definitions))
 
     return errors
 

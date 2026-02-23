@@ -196,7 +196,7 @@ def test_validator_coverage() -> None:
         flow = GraphFlow.model_construct(
             type="graph",
             kind="GraphFlow",
-            status="draft",
+            status="published",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
             blackboard=Blackboard(variables={}, persistence=False),

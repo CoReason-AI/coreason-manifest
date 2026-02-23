@@ -50,8 +50,15 @@ def test_missing_supervision_template() -> None:
     )
     lf.add_step(node)
 
-    with pytest.raises(ValueError, match="references undefined supervision template ID 'missing-policy'"):
-        lf.build()
+    # Build as draft should succeed (reference validation is strict)
+    # Actually reference validation is also semantic check
+    flow = lf.build()
+
+    # Manually validate as published
+    flow = flow.model_copy(update={"status": "published"})
+    from coreason_manifest.utils.validator import validate_flow
+    errors = validate_flow(flow)
+    assert any("references undefined supervision template ID 'missing-policy'" in e for e in errors)
 
 
 def test_malformed_supervision_reference() -> None:
@@ -66,5 +73,8 @@ def test_malformed_supervision_reference() -> None:
     )
     lf.add_step(node)
 
-    with pytest.raises(ValueError, match="invalid resilience reference"):
-        lf.build()
+    flow_draft = lf.build()
+    flow = flow_draft.model_copy(update={"status": "published"})
+    from coreason_manifest.utils.validator import validate_flow
+    errors = validate_flow(flow)
+    assert any("invalid resilience reference" in e for e in errors)

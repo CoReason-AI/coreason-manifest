@@ -160,10 +160,14 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     )
     lf.add_step(node)
 
-    with pytest.raises(
-        ValueError, match="Circuit Breaker Error: 'fallback_node_id' points to missing ID 'missing_node'"
-    ):
-        lf.build()
+    # Build as draft (default) should succeed
+    flow = lf.build()
+
+    # Manually validate published flow
+    flow = flow.model_copy(update={"status": "published"})
+    from coreason_manifest.utils.validator import validate_flow
+    errors = validate_flow(flow)
+    assert any("Circuit Breaker Error: 'fallback_node_id' points to missing ID 'missing_node'" in e for e in errors)
 
     # 2. Invalid Supervision Fallback
     # policy = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node"))
@@ -180,12 +184,10 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     )
     lf2.add_step(node2)
 
-    # Note: Validation message might change or be absent if logic was in supervision validator.
-    # Assuming similar validation exists for recovery field or general graph integrity.
-    # If not, this test might fail.
-    # For now, let's assume validation is triggered.
-    with pytest.raises(ValueError, match=r"Resilience Error|Integrity Error"):
-        lf2.build()
+    flow2_draft = lf2.build()
+    flow2 = flow2_draft.model_copy(update={"status": "published"})
+    errors2 = validate_flow(flow2)
+    assert any("Resilience Error" in e and "missing ID 'missing_sup_node'" in e for e in errors2)
 
 
 def test_human_node_options_and_visualizer() -> None:

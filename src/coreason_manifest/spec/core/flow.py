@@ -197,7 +197,6 @@ class GraphFlow(CoreasonModel):
         if self.status != "published":
             return self
 
-        # Ensure safe iteration whether it's parsed as a dict or list
         nodes_iter = self.graph.nodes.values()
 
         for node in nodes_iter:
