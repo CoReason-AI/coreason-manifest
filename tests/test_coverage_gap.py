@@ -16,7 +16,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
 )
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import PlaceholderNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
@@ -521,8 +521,9 @@ def test_flow_cycle_detection_unreachable() -> None:
         Edge,
     )
 
-    n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
-    n2 = PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
+    p = CognitiveProfile(role="r", persona="p")
+    n1 = AgentNode(id="n1", type="agent", metadata={}, profile=p, tools=[])
+    n2 = AgentNode(id="n2", type="agent", metadata={}, profile=p, tools=[])
 
     # Cycle: n1->n2->n1
     graph = Graph(

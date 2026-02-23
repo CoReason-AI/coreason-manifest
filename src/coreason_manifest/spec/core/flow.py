@@ -192,6 +192,40 @@ class GraphFlow(CoreasonModel):
                 )
         return self
 
+    @model_validator(mode="after")
+    def validate_lifecycle_readiness(self) -> "GraphFlow":
+        if self.status != "published":
+            return self
+
+        # Ensure safe iteration whether it's parsed as a dict or list
+        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
+
+        for node in nodes_iter:
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-LIFECYCLE-LEAK",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        message=f"Cannot publish flow: Contains abstract PlaceholderNode '{node.id}'.",
+                        context={
+                            "remediation": RemediationAction(
+                                type="replace_node",
+                                description=f"Replace PlaceholderNode '{node.id}' (requires {node.required_capabilities}) or revert to draft.",
+                                patch_data=[
+                                    {
+                                        "op": "replace",
+                                        "path": "/status",
+                                        "value": "draft",
+                                    }
+                                ],
+                                target_node_id=node.id,
+                            ).model_dump()
+                        },
+                    )
+                )
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -216,6 +250,37 @@ class LinearFlow(CoreasonModel):
     @property
     def sequence(self) -> list[AnyNode]:
         return self.steps
+
+    @model_validator(mode="after")
+    def validate_lifecycle_readiness(self) -> "LinearFlow":
+        if self.status != "published":
+            return self
+
+        for node in self.steps:
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-LIFECYCLE-LEAK",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        message=f"Cannot publish flow: Contains abstract PlaceholderNode '{node.id}'.",
+                        context={
+                            "remediation": RemediationAction(
+                                type="replace_node",
+                                description=f"Replace PlaceholderNode '{node.id}' (requires {node.required_capabilities}) or revert to draft.",
+                                patch_data=[
+                                    {
+                                        "op": "replace",
+                                        "path": "/status",
+                                        "value": "draft",
+                                    }
+                                ],
+                                target_node_id=node.id,
+                            ).model_dump()
+                        },
+                    )
+                )
+        return self
 
 
 Manifest = GraphFlow

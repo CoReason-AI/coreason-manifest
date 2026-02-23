@@ -260,10 +260,13 @@ class NewLinearFlow(BaseFlowBuilder):
         return self
 
     def build(self) -> LinearFlow:
-        """Constructs and validates the LinearFlow object."""
+        """
+        Constructs and validates the LinearFlow object.
+        Returns a flow in 'draft' status by default.
+        """
         flow = LinearFlow(
             kind="LinearFlow",
-            status="published",
+            status="draft",
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),
@@ -361,7 +364,10 @@ class NewGraphFlow(BaseFlowBuilder):
         return self
 
     def build(self) -> GraphFlow:
-        """Constructs and validates the GraphFlow object."""
+        """
+        Constructs and validates the GraphFlow object.
+        Returns a flow in 'draft' status by default.
+        """
         # Determine entry point
         ep = self._entry_point
         if not ep:
@@ -371,7 +377,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         flow = GraphFlow(
             kind="GraphFlow",
-            status="published",
+            status="draft",
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,

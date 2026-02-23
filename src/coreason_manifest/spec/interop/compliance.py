@@ -35,6 +35,7 @@ class RemediationAction(BaseModel):
         "add_guard_node",
         "whitelist_domain",
         "prune_node",
+        "replace_node",
         "update_field",
         "semantic_repair",
         "prune_topology",
