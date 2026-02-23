@@ -1,3 +1,4 @@
+import contextlib
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
@@ -182,11 +183,8 @@ def _scan_for_kill_switch_violations(
 
                     # Handle RiskLevel conversion for strict mode
                     if "risk_level" in tool_copy and isinstance(tool_copy["risk_level"], str):
-                        try:
+                        with contextlib.suppress(ValueError):
                             tool_copy["risk_level"] = RiskLevel(tool_copy["risk_level"])
-                        except ValueError:
-                            # Invalid enum value; let validation fail naturally or use as is
-                            pass
                     elif "risk_level" not in tool_copy:
                         # Default to CRITICAL if missing
                         tool_copy["risk_level"] = RiskLevel.CRITICAL

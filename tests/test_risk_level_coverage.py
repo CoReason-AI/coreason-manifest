@@ -1,5 +1,7 @@
-import pytest
+import contextlib
+
 from coreason_manifest.spec.core.types import RiskLevel
+
 
 def test_risk_level_comparisons() -> None:
     # Test valid comparisons
@@ -26,25 +28,17 @@ def test_risk_level_comparisons() -> None:
     # We catch TypeError because that's what Python usually raises when __lt__ returns NotImplemented
     # and the other side also returns NotImplemented.
 
-    try:
+    with contextlib.suppress(TypeError):
         _ = RiskLevel.SAFE < 10
-    except TypeError:
-        pass
 
-    try:
+    with contextlib.suppress(TypeError):
         _ = RiskLevel.SAFE > "unknown"
-    except TypeError:
-        pass
 
-    try:
+    with contextlib.suppress(TypeError):
         _ = RiskLevel.SAFE <= None
-    except TypeError:
-        pass
 
-    try:
+    with contextlib.suppress(TypeError):
         _ = RiskLevel.SAFE >= []
-    except TypeError:
-        pass
 
     # Test weight property directly for coverage
     assert RiskLevel.SAFE.weight == 0
