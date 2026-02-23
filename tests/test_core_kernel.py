@@ -28,6 +28,7 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
 )
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.types import RiskLevel
 
 
 def test_core_kernel_instantiation() -> None:
@@ -92,7 +93,7 @@ def test_core_kernel_instantiation() -> None:
     tool_pack = ToolPack(
         kind="ToolPack",
         namespace="core",
-        tools=[ToolCapability(name="search", risk_level="standard")],
+        tools=[ToolCapability(name="search", risk_level=RiskLevel.STANDARD)],
         dependencies=[],
         env_vars=[],
     )

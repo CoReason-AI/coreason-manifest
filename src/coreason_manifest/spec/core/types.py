@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from enum import StrEnum
 from typing import Annotated, Any
 
 from pydantic import BeforeValidator, Field
@@ -71,6 +72,28 @@ ToolID = Annotated[
         examples=["calculator", "web_search"],
     ),
 ]
+
+
+# Risk Level
+class RiskLevel(StrEnum):
+    """
+    Risk classification for governance.
+    Order matters: safe < standard < critical.
+    """
+
+    SAFE = "safe"
+    STANDARD = "standard"
+    CRITICAL = "critical"
+
+    @property
+    def weight(self) -> int:
+        if self == RiskLevel.SAFE:
+            return 0
+        if self == RiskLevel.STANDARD:
+            return 1
+        # RiskLevel.CRITICAL
+        return 2
+
 
 # Profile Identifiers
 ProfileID = Annotated[

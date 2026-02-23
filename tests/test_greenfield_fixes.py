@@ -21,6 +21,7 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     SupervisionPolicy,
 )
+from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
@@ -28,23 +29,23 @@ from coreason_manifest.utils.io import SecurityViolationError
 
 def test_tool_access_policy_defaults() -> None:
     # Test critical defaults
-    p1 = ToolAccessPolicy(risk_level="critical")
+    p1 = ToolAccessPolicy(risk_level=RiskLevel.CRITICAL)
     assert p1.require_auth is True
 
     # Test explicit True
-    p2 = ToolAccessPolicy(risk_level="critical", require_auth=True)
+    p2 = ToolAccessPolicy(risk_level=RiskLevel.CRITICAL, require_auth=True)
     assert p2.require_auth is True
 
     # Test explicit False raises error
     with pytest.raises(ValueError, match="Critical tools must require authentication"):
-        ToolAccessPolicy(risk_level="critical", require_auth=False)
+        ToolAccessPolicy(risk_level=RiskLevel.CRITICAL, require_auth=False)
 
     # Test non-critical default
-    p3 = ToolAccessPolicy(risk_level="standard")
+    p3 = ToolAccessPolicy(risk_level=RiskLevel.STANDARD)
     assert p3.require_auth is False
 
     # Test explicit True for standard
-    p4 = ToolAccessPolicy(risk_level="standard", require_auth=True)
+    p4 = ToolAccessPolicy(risk_level=RiskLevel.STANDARD, require_auth=True)
     assert p4.require_auth is True
 
 
@@ -53,10 +54,10 @@ def test_granular_governance_structure() -> None:
 
     gov = Governance(
         tool_policy={
-            "sql_tool": ToolAccessPolicy(risk_level="critical"),
-            "calc_tool": ToolAccessPolicy(risk_level="minimal"),
+            "sql_tool": ToolAccessPolicy(risk_level=RiskLevel.CRITICAL),
+            "calc_tool": ToolAccessPolicy(risk_level=RiskLevel.SAFE),
         },
-        default_tool_policy=ToolAccessPolicy(risk_level="standard"),
+        default_tool_policy=ToolAccessPolicy(risk_level=RiskLevel.STANDARD),
     )
     assert gov.tool_policy is not None
     assert gov.tool_policy["sql_tool"].require_auth is True

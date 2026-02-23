@@ -17,7 +17,8 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.types import NodeID
+from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
+from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
@@ -115,8 +116,8 @@ class FlowInterface(CoreasonModel):
 class FlowDefinitions(CoreasonModel):
     profiles: dict[str, Any] = Field(default_factory=dict)
     schemas: dict[str, Any] = Field(default_factory=dict)
-    tools: dict[str, Any] = Field(default_factory=dict)
-    tool_packs: dict[str, Any] = Field(default_factory=dict)
+    tools: dict[str, AnyTool] = Field(default_factory=dict)
+    tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
@@ -132,6 +133,89 @@ class VariableDef(CoreasonModel):
         if isinstance(data, dict) and "name" in data and "id" not in data:
             data["id"] = data.pop("name")
         return data
+
+
+def _scan_for_kill_switch_violations(
+    max_risk: RiskLevel, definitions: FlowDefinitions | None, nodes: list[AnyNode]
+) -> None:
+    """
+    Centralized security scanner to enforce global risk governance.
+    Scans definitions and inline tools in nodes.
+    """
+    tools_to_check: list[AnyTool] = []
+
+    # 1. Collect tools from definitions
+    if definitions:
+        tools_to_check.extend(definitions.tools.values())
+        for pack in definitions.tool_packs.values():
+            tools_to_check.extend(pack.tools)
+
+    # 2. Collect inline tools from nodes (if any)
+    for node in nodes:
+        # Check for 'tools' attribute (common in AgentNode)
+        # Note: AgentNode.tools is currently list[str] (references), so we skip those.
+        # But if a node had inline tool objects, we'd catch them here.
+        # We also check 'inline_tools' if it exists in future node types.
+
+        # Safely extract potential tool lists
+        node_tools = getattr(node, "tools", [])
+        node_inline = getattr(node, "inline_tools", [])
+
+        # Combine potential sources
+        potential_tools = []
+        if isinstance(node_tools, list):
+            potential_tools.extend(node_tools)
+        if isinstance(node_inline, list):
+            potential_tools.extend(node_inline)
+
+        for tool in potential_tools:
+            # Only evaluate actual ToolCapability objects (or polymorphic AnyTool)
+            if isinstance(tool, ToolCapability):
+                tools_to_check.append(tool)
+                continue
+
+            # Fail-Closed Zero-Trust Rule:
+            # If a tool reference contains a remote URI scheme (e.g. mcp://, http://),
+            # it bypasses local definitions and must be treated as CRITICAL risk.
+            if isinstance(tool, str) and "://" in tool and RiskLevel.CRITICAL.weight > max_risk.weight:
+                # Synthetically evaluate as CRITICAL
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
+                        message=(
+                            "Security Violation: Unresolved remote tool URIs default to CRITICAL risk "
+                            "and violate the global max_risk_level."
+                        ),
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "tool_uri": tool,
+                            "assumed_risk": RiskLevel.CRITICAL.value,
+                            "max_risk": max_risk.value,
+                        },
+                    )
+                )
+
+    # 3. Enforcement
+    for tool in tools_to_check:
+        # Rich comparison via RiskLevel Enum
+        if tool.risk_level.weight > max_risk.weight:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
+                    message=(
+                        f"Security Violation: Tool '{tool.name}' has risk level '{tool.risk_level.value}' "
+                        f"which exceeds the global max_risk_level '{max_risk.value}'."
+                    ),
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "tool_name": tool.name,
+                        "tool_risk": tool.risk_level.value,
+                        "max_risk": max_risk.value,
+                    },
+                )
+            )
 
 
 class GraphFlow(CoreasonModel):
@@ -192,6 +276,18 @@ class GraphFlow(CoreasonModel):
                 )
         return self
 
+    @model_validator(mode="after")
+    def enforce_global_kill_switch(self) -> "GraphFlow":
+        if not self.governance or not self.governance.max_risk_level:
+            return self
+
+        _scan_for_kill_switch_violations(
+            self.governance.max_risk_level,
+            self.definitions,
+            list(self.graph.nodes.values()),
+        )
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -216,6 +312,18 @@ class LinearFlow(CoreasonModel):
     @property
     def sequence(self) -> list[AnyNode]:
         return self.steps
+
+    @model_validator(mode="after")
+    def enforce_global_kill_switch(self) -> "LinearFlow":
+        if not self.governance or not self.governance.max_risk_level:
+            return self
+
+        _scan_for_kill_switch_violations(
+            self.governance.max_risk_level,
+            self.definitions,
+            self.steps,
+        )
+        return self
 
 
 Manifest = GraphFlow

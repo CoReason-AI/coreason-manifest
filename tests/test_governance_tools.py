@@ -1,13 +1,14 @@
 from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
 
 
 def test_critical_tool_requires_guard() -> None:
     # Define a critical tool
-    critical_tool = ToolCapability(name="delete_db", risk_level="critical", description="Deletes the database")
-    safe_tool = ToolCapability(name="read_db", risk_level="safe")
+    critical_tool = ToolCapability(name="delete_db", risk_level=RiskLevel.CRITICAL, description="Deletes the database")
+    safe_tool = ToolCapability(name="read_db", risk_level=RiskLevel.SAFE)
 
     pack = ToolPack(
         kind="ToolPack", namespace="db_tools", tools=[critical_tool, safe_tool], dependencies=[], env_vars=[]
@@ -61,7 +62,7 @@ def test_critical_tool_requires_guard() -> None:
 
 def test_safe_tool_allowed() -> None:
     # Define tools
-    safe_tool = ToolCapability(name="read_db", risk_level="safe")
+    safe_tool = ToolCapability(name="read_db", risk_level=RiskLevel.SAFE)
 
     pack = ToolPack(kind="ToolPack", namespace="db_tools", tools=[safe_tool], dependencies=[], env_vars=[])
 
