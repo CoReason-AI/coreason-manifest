@@ -297,9 +297,14 @@ def test_manifest_io_posix_permissions(tmp_path: Any) -> None:
     mock_stat = MagicMock()
     mock_stat.st_mode = stat.S_IWOTH
 
-    # Mock _is_posix property and os.fstat
+    # Mock _is_posix property, os.lstat and os.fstat
+    # lstat and fstat must match inode/device to pass the swap check
+    mock_stat.st_ino = 12345
+    mock_stat.st_dev = 67890
+
     with (
         patch("coreason_manifest.utils.io.ManifestIO._is_posix", new_callable=PropertyMock) as mock_posix,
+        patch("os.lstat", return_value=mock_stat),
         patch("os.fstat", return_value=mock_stat),
     ):
         mock_posix.return_value = True
