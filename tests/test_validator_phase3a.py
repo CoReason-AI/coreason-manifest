@@ -67,6 +67,7 @@ def test_validate_graph_flow_valid() -> None:
     graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=None,
@@ -91,11 +92,11 @@ def test_validate_graph_flow_invalid_edges() -> None:
 
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=None,
         graph=graph,
-        status="published",
     )
     errors = validate_flow(flow)
     assert any("Dangling Edge Error" in e and "missing" in e for e in errors)
@@ -147,6 +148,7 @@ def test_validate_governance_sanity() -> None:
     gov = Governance(rate_limit_rpm=-1, cost_limit_usd=-5.0)
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=create_metadata(),
         interface=create_interface(),
         blackboard=None,
@@ -219,6 +221,7 @@ def test_validate_duplicate_node_ids() -> None:
     agent2 = create_agent_node("agent1", [])  # Duplicate ID
     flow = LinearFlow(
         kind="LinearFlow",
+        status="published",
         metadata=create_metadata(),
         steps=[agent1, agent2],
     )

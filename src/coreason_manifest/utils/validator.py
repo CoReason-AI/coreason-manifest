@@ -45,7 +45,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     valid_ids = {n.id for n in nodes}
 
     # 1. Common Checks
-    if is_published and flow.governance:
+    if flow.governance:
         errors.extend(_validate_governance(flow.governance, valid_ids))
 
     if is_published:

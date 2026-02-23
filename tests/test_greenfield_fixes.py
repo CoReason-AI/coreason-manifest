@@ -588,6 +588,7 @@ def test_inspector_regex_warning() -> None:
     graph = Graph(nodes={"i1": inspector}, edges=[], entry_point="i1")
     flow = GraphFlow(
         kind="GraphFlow",
+        status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=blackboard,

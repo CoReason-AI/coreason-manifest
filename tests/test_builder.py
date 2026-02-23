@@ -258,7 +258,9 @@ def test_builder_validation_failure() -> None:
     # Build should succeed as draft, even with missing fallback node (semantic check)
     flow = builder.build()
     assert flow.status == "draft"
-    assert flow.steps[0].resilience.fallback_node_id == "missing_node"
+    res = flow.steps[0].resilience
+    assert isinstance(res, FallbackStrategy)
+    assert res.fallback_node_id == "missing_node"
 
 
 def test_builder_graph_entry_point_coverage() -> None:
@@ -334,4 +336,6 @@ def test_builder_graph_validation_failure() -> None:
     flow = builder.build()
     assert flow.status == "draft"
     # AgentNode is stored in graph.nodes
-    assert flow.graph.nodes["a1"].resilience.fallback_node_id == "missing_node"
+    res = flow.graph.nodes["a1"].resilience
+    assert isinstance(res, FallbackStrategy)
+    assert res.fallback_node_id == "missing_node"
