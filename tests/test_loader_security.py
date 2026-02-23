@@ -329,9 +329,9 @@ class TestManifestIOCoverage:
         with (
             patch("os.lstat", return_value=os.stat_result((0, 0, 0, 0, 0, 0, 0, 0, 0, 0))),
             patch("os.open", side_effect=OSError(errno.ENOENT, "No such file")),
+            pytest.raises(FileNotFoundError, match="File not found or inaccessible"),
         ):
-            with pytest.raises(FileNotFoundError, match="File not found or inaccessible"):
-                io.read_text("race.txt")
+            io.read_text("race.txt")
 
     def test_fdopen_failure_closes_fd(self, tmp_path: Path) -> None:
         """Cover line 165: os.close(fd) called when os.fdopen fails."""
