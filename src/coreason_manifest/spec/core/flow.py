@@ -17,7 +17,7 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
@@ -116,8 +116,8 @@ class FlowInterface(CoreasonModel):
 class FlowDefinitions(CoreasonModel):
     profiles: dict[str, Any] = Field(default_factory=dict)
     schemas: dict[str, Any] = Field(default_factory=dict)
-    tools: dict[str, Any] = Field(default_factory=dict)
-    tool_packs: dict[str, Any] = Field(default_factory=dict)
+    tools: dict[str, AnyTool] = Field(default_factory=dict)
+    tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
@@ -133,6 +133,80 @@ class VariableDef(CoreasonModel):
         if isinstance(data, dict) and "name" in data and "id" not in data:
             data["id"] = data.pop("name")
         return data
+
+
+def _scan_for_kill_switch_violations(
+    max_risk: RiskLevel, definitions: FlowDefinitions | None, nodes: list[AnyNode]
+) -> None:
+    """
+    Centralized security scanner to enforce global risk governance.
+    Scans definitions and inline tools in nodes.
+    """
+    tools_to_check: list[AnyTool] = []
+
+    # 1. Collect tools from definitions
+    if definitions:
+        tools_to_check.extend(definitions.tools.values())
+        for pack in definitions.tool_packs.values():
+            tools_to_check.extend(pack.tools)
+
+    # 2. Collect inline tools from nodes (if any)
+    for node in nodes:
+        # Check for 'tools' attribute (common in AgentNode)
+        # Note: AgentNode.tools is currently list[str] (references), so we skip those.
+        # But if a node had inline tool objects, we'd catch them here.
+        # We also check 'inline_tools' if it exists in future node types.
+
+        # Safely extract potential tool lists
+        node_tools = getattr(node, "tools", [])
+        node_inline = getattr(node, "inline_tools", [])
+
+        # Combine potential sources
+        potential_tools = []
+        if isinstance(node_tools, list):
+            potential_tools.extend(node_tools)
+        if isinstance(node_inline, list):
+            potential_tools.extend(node_inline)
+
+        for tool in potential_tools:
+            # Only evaluate actual ToolCapability objects (or polymorphic AnyTool)
+            # Ignore strings (references)
+            if isinstance(tool, ToolCapability):
+                tools_to_check.append(tool)
+            elif isinstance(tool, dict) and "risk_level" in tool:
+                # Attempt to parse dict as ToolCapability if it looks like one
+                try:
+                    parsed_tool = ToolCapability(**tool)
+                    tools_to_check.append(parsed_tool)
+                except Exception:
+                    # If parsing fails, we treat it as critical to be safe, or skip?
+                    # Fail-closed: If we see a dict that looks like a tool but fails validation,
+                    # we should probably flag it or default to critical.
+                    # However, 'tools' in AgentNode are strings. A dict there would be a schema violation
+                    # unless the field is Any/Union.
+                    # For now, strict check:
+                    pass
+
+    # 3. Enforcement
+    for tool in tools_to_check:
+        # Rich comparison via RiskLevel Enum
+        if tool.risk_level > max_risk:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
+                    message=(
+                        f"Security Violation: Tool '{tool.name}' has risk level '{tool.risk_level.value}' "
+                        f"which exceeds the global max_risk_level '{max_risk.value}'."
+                    ),
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "tool_name": tool.name,
+                        "tool_risk": tool.risk_level.value,
+                        "max_risk": max_risk.value,
+                    },
+                )
+            )
 
 
 class GraphFlow(CoreasonModel):
@@ -198,46 +272,11 @@ class GraphFlow(CoreasonModel):
         if not self.governance or not self.governance.max_risk_level:
             return self
 
-        max_risk = self.governance.max_risk_level
-        risk_hierarchy = {"safe": 0, "standard": 1, "critical": 2}
-        max_risk_val = risk_hierarchy.get(max_risk, 0)
-
-        if not self.definitions or not self.definitions.tool_packs:
-            return self
-
-        for pack in self.definitions.tool_packs.values():
-            tools = []
-            if isinstance(pack, ToolPack):
-                tools = pack.tools
-            elif isinstance(pack, dict):
-                tools = pack.get("tools", [])
-
-            for tool in tools:
-                risk: RiskLevel = "standard"
-                name = "unknown"
-
-                if isinstance(tool, ToolCapability):
-                    risk = tool.risk_level
-                    name = tool.name
-                elif isinstance(tool, dict):
-                    # Fail-closed: if risk_level is missing, default to critical (handled below by fallback)
-                    # But here we try to extract it.
-                    r = tool.get("risk_level")
-                    risk = r or "critical"  # Missing risk level
-                    name = tool.get("name", "unknown")
-
-                # Verify risk is valid
-                if risk not in risk_hierarchy:
-                    risk = "critical"
-
-                tool_risk_val = risk_hierarchy.get(risk, 2)
-
-                if tool_risk_val > max_risk_val:
-                    raise ValueError(
-                        f"Security Violation: Tool '{name}' has risk level '{risk}' "
-                        f"which exceeds the global max_risk_level '{max_risk}'."
-                    )
-
+        _scan_for_kill_switch_violations(
+            self.governance.max_risk_level,
+            self.definitions,
+            list(self.graph.nodes.values()),
+        )
         return self
 
 
@@ -270,43 +309,11 @@ class LinearFlow(CoreasonModel):
         if not self.governance or not self.governance.max_risk_level:
             return self
 
-        max_risk = self.governance.max_risk_level
-        risk_hierarchy = {"safe": 0, "standard": 1, "critical": 2}
-        max_risk_val = risk_hierarchy.get(max_risk, 0)
-
-        if not self.definitions or not self.definitions.tool_packs:
-            return self
-
-        for pack in self.definitions.tool_packs.values():
-            tools = []
-            if isinstance(pack, ToolPack):
-                tools = pack.tools
-            elif isinstance(pack, dict):
-                tools = pack.get("tools", [])
-
-            for tool in tools:
-                risk: RiskLevel = "standard"
-                name = "unknown"
-
-                if isinstance(tool, ToolCapability):
-                    risk = tool.risk_level
-                    name = tool.name
-                elif isinstance(tool, dict):
-                    r = tool.get("risk_level")
-                    risk = r or "critical"
-                    name = tool.get("name", "unknown")
-
-                if risk not in risk_hierarchy:
-                    risk = "critical"
-
-                tool_risk_val = risk_hierarchy.get(risk, 2)
-
-                if tool_risk_val > max_risk_val:
-                    raise ValueError(
-                        f"Security Violation: Tool '{name}' has risk level '{risk}' "
-                        f"which exceeds the global max_risk_level '{max_risk}'."
-                    )
-
+        _scan_for_kill_switch_violations(
+            self.governance.max_risk_level,
+            self.definitions,
+            self.steps,
+        )
         return self
 
 

@@ -22,7 +22,9 @@ class ToolCapability(CoreasonModel):
 
     type: Literal["capability"] = Field("capability", description="Discriminator for polymorphic tools.")
     name: ToolID = Field(..., description="Unique identifier for the tool.", examples=["calculator"])
-    risk_level: RiskLevel = Field("standard", description="Risk classification for governance.", examples=["safe"])
+    risk_level: RiskLevel = Field(
+        RiskLevel.STANDARD, description="Risk classification for governance.", examples=["safe"]
+    )
     description: str | None = Field(
         None, description="Human-readable description of what the tool does.", examples=["Performs basic arithmetic."]
     )
