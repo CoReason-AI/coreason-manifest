@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 
-from coreason_manifest.spec.core.nodes import AgentNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
 from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
@@ -15,7 +15,7 @@ from coreason_manifest.spec.core.constants import NodeCapability
 # --- TESTS ---
 
 
-def test_topology_utility_island_safe(mock_flow_factory, safe_profile) -> None:
+def test_topology_utility_island_safe(mock_flow_factory: Any, safe_profile: CognitiveProfile) -> None:
     """
     Test that a disconnected node with standard capabilities is ALLOWED.
     """
@@ -32,7 +32,7 @@ def test_topology_utility_island_safe(mock_flow_factory, safe_profile) -> None:
     assert len(topology_errors) == 0
 
 
-def test_topology_utility_island_unsafe(mock_flow_factory, safe_profile, unsafe_profile) -> None:
+def test_topology_utility_island_unsafe(mock_flow_factory: Any, safe_profile: CognitiveProfile, unsafe_profile: CognitiveProfile) -> None:
     """
     Test that a disconnected node with HIGH RISK capabilities is BLOCKED.
     To be truly "unreachable", it must not be an entry node (in-degree > 0) but not reachable from valid entries.
@@ -195,7 +195,7 @@ def test_integrity_sanitization() -> None:
     assert h1 == h2
 
 
-def test_topology_utility_island_acyclic_unsafe(mock_flow_factory, safe_profile, unsafe_profile) -> None:
+def test_topology_utility_island_acyclic_unsafe(mock_flow_factory: Any, safe_profile: CognitiveProfile, unsafe_profile: CognitiveProfile) -> None:
     """
     Test a node downstream of a cycle (unreachable tail).
     Exercises line 284 in gatekeeper.py (structure_type="island").
@@ -236,7 +236,7 @@ def test_integrity_reconstruct_payload_fallback() -> None:
         reconstruct_payload(obj)
 
 
-def test_topology_utility_island_code_exec(mock_flow_factory, safe_profile, code_exec_profile) -> None:
+def test_topology_utility_island_code_exec(mock_flow_factory: Any, safe_profile: CognitiveProfile, code_exec_profile: CognitiveProfile) -> None:
     """
     Test unreachable island with code_execution capability.
     Exercises line 284 in gatekeeper.py.
