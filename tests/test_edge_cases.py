@@ -1,4 +1,3 @@
-
 from typing import Any
 
 import pytest
@@ -23,21 +22,33 @@ from coreason_manifest.utils.gatekeeper import validate_policy
 
 # --- Flow Compatibility Tests ---
 
-def test_flow_backwards_compatibility():
+
+def test_flow_backwards_compatibility() -> None:
     # DataSchema: schema -> json_schema
-    ds = DataSchema(schema={"type": "string"})
-    assert ds.json_schema == {"type": "string"}
+    # Use canonical field names because mypy doesn't support aliases in init without a plugin or config
+    ds = DataSchema(json_schema={"type": "string"})
+    # But wait, compat_json_schema is a mode='before' validator that handles "schema".
+    # Pydantic allows aliases in __init__.
+    # The mypy error "Unexpected keyword argument 'schema'" is because mypy sees the model definition.
+    # To fix this for mypy, we should use the field name 'json_schema' or 'alias' if populate_by_name is True.
+    # The compat validator handles it at runtime.
+    # But here we are testing the compat validator!
+    # So we MUST pass 'schema' to test the compatibility logic.
+    # We can silence mypy for this line.
+    ds_compat = DataSchema(schema={"type": "string"})  # type: ignore[call-arg]
+    assert ds_compat.json_schema == {"type": "string"}
 
     # Edge: source/target -> from_node/to_node
-    edge = Edge(source="a", target="b")
+    edge = Edge(source="a", target="b")  # type: ignore[call-arg]
     assert edge.from_node == "a"
     assert edge.to_node == "b"
 
     # VariableDef: name -> id
-    var = VariableDef(name="v1", type="string")
+    var = VariableDef(name="v1", type="string")  # type: ignore[call-arg]
     assert var.id == "v1"
 
-def test_swarm_variable_validation():
+
+def test_swarm_variable_validation() -> None:
     # Create a SwarmNode referencing a variable NOT in blackboard
     swarm_node = SwarmNode(
         id="swarm1",
@@ -48,7 +59,7 @@ def test_swarm_variable_validation():
         distribution_strategy="sharded",
         max_concurrency=5,
         reducer_function="concat",
-        output_variable="out_var"
+        output_variable="out_var",
     )
 
     # We need a valid GraphFlow structure
@@ -56,20 +67,24 @@ def test_swarm_variable_validation():
     # but here we want to trigger the GraphFlow validator.
 
     with pytest.raises(ManifestError, match="references missing workload variable"):
+        # GraphFlow instantiation validation
         GraphFlow(
             metadata=FlowMetadata(name="test", version="1.0"),
             interface=FlowInterface(),
             blackboard=Blackboard(variables={"existing_var": []}),
             graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
-            definitions=FlowDefinitions(profiles={})
+            definitions=FlowDefinitions(profiles={}),
         )
 
+
 # --- Antibody Tests ---
+
 
 class MyModel(AntibodyBase):
     val: Any
 
-def test_antibody_nan_inf():
+
+def test_antibody_nan_inf() -> None:
     # Test NaN
     data_nan = {"val": float("nan")}
     model_nan = MyModel(**data_nan)
@@ -84,7 +99,8 @@ def test_antibody_nan_inf():
     assert model_inf.val["code"] == "CRSN-ANTIBODY-FLOAT"
     assert "inf" in model_inf.val["value_repr"]
 
-def test_antibody_list_nan():
+
+def test_antibody_list_nan() -> None:
     # Test List with NaN
     data_list = {"val": [1.0, float("nan")]}
     model_list = MyModel(**data_list)
@@ -93,7 +109,8 @@ def test_antibody_list_nan():
     assert isinstance(model_list.val[1], dict)
     assert model_list.val[1]["code"] == "CRSN-ANTIBODY-FLOAT"
 
-def test_antibody_unserializable():
+
+def test_antibody_unserializable() -> None:
     # Test Unserializable (set)
     data_set = {"val": {1, 2}}
     # set is not in VALID_PRIMITIVES and not dict/list
@@ -101,7 +118,8 @@ def test_antibody_unserializable():
     assert isinstance(model_set.val, dict)
     assert model_set.val["code"] == "CRSN-ANTIBODY-UNSERIALIZABLE"
 
-def test_antibody_nested_list():
+
+def test_antibody_nested_list() -> None:
     # Test List containing Dict (recursive scan)
     data_nested = {"val": [{"inner": float("nan")}]}
     model_nested = MyModel(**data_nested)
@@ -110,7 +128,8 @@ def test_antibody_nested_list():
     assert isinstance(model_nested.val[0]["inner"], dict)
     assert model_nested.val[0]["inner"]["code"] == "CRSN-ANTIBODY-FLOAT"
 
-def test_swarm_variable_valid():
+
+def test_swarm_variable_valid() -> None:
     # Create a SwarmNode referencing a VALID variable
     swarm_node = SwarmNode(
         id="swarm1",
@@ -121,7 +140,7 @@ def test_swarm_variable_valid():
         distribution_strategy="sharded",
         max_concurrency=5,
         reducer_function="concat",
-        output_variable="out_var"
+        output_variable="out_var",
     )
 
     flow = GraphFlow.model_construct(
@@ -129,32 +148,35 @@ def test_swarm_variable_valid():
         interface=FlowInterface(),
         blackboard=Blackboard(variables={"existing_var": []}),
         graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
-        definitions=FlowDefinitions(profiles={})
+        definitions=FlowDefinitions(profiles={}),
     )
 
     # Should NOT raise
-    validated = flow.validate_swarm_variables()
+    validated = flow.validate_swarm_variables()  # type: ignore[operator]
     assert validated is flow
 
-def test_validate_swarm_variables_no_blackboard():
+
+def test_validate_swarm_variables_no_blackboard() -> None:
     # Construct GraphFlow without blackboard (simulating None)
     # Using model_construct allows bypassing defaults/validation
     flow = GraphFlow.model_construct(
         metadata=FlowMetadata(name="test", version="1.0"),
         interface=FlowInterface(),
-        blackboard=None, # Explicitly None
+        blackboard=None,  # Explicitly None
         graph=Graph(nodes={}, edges=[]),
-        definitions=FlowDefinitions(profiles={})
+        definitions=FlowDefinitions(profiles={}),
     )
 
     # Should return self immediately (line 162)
-    validated = flow.validate_swarm_variables()
+    validated = flow.validate_swarm_variables()  # type: ignore[operator]
     assert validated is flow
     assert flow.blackboard is None
 
+
 # --- Gatekeeper Tests ---
 
-def test_gatekeeper_no_entry_point():
+
+def test_gatekeeper_no_entry_point() -> None:
     """
     Test GraphFlow with entry_point=None containing an unsafe node.
     This triggers _is_guarded -> lines 368-369 (full_queue = []).
@@ -170,13 +192,11 @@ def test_gatekeeper_no_entry_point():
         graph=Graph.model_construct(
             nodes={"unsafe": node},
             edges=[],
-            entry_point=None # Explicitly None
+            entry_point=None,  # Explicitly None
         ),
-        definitions=FlowDefinitions(profiles={}) # To avoid profile lookup issues
+        definitions=FlowDefinitions(profiles={}),  # To avoid profile lookup issues
+        interface=FlowInterface(),
     )
-
-    if not flow.definitions:
-        flow.definitions = FlowDefinitions()
 
     reports = validate_policy(flow)
 
@@ -185,7 +205,8 @@ def test_gatekeeper_no_entry_point():
     unguarded_errors = [r for r in reports if r.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003]
     assert len(unguarded_errors) > 0
 
-def test_gatekeeper_bfs_traversal():
+
+def test_gatekeeper_bfs_traversal() -> None:
     """
     Test GraphFlow with A -> B (unsafe).
     Triggers _is_guarded -> BFS traversal -> lines 380-381.
@@ -200,11 +221,10 @@ def test_gatekeeper_bfs_traversal():
     flow = GraphFlow.model_construct(
         metadata=FlowMetadata(name="test", version="1.0"),
         graph=Graph.model_construct(
-            nodes={"A": node_a, "B": node_b},
-            edges=[Edge(from_node="A", to_node="B")],
-            entry_point="A"
+            nodes={"A": node_a, "B": node_b}, edges=[Edge(from_node="A", to_node="B")], entry_point="A"
         ),
-        definitions=FlowDefinitions(profiles={})
+        definitions=FlowDefinitions(profiles={}),
+        interface=FlowInterface(),  # Added missing required field
     )
 
     reports = validate_policy(flow)
@@ -212,6 +232,7 @@ def test_gatekeeper_bfs_traversal():
     # Should report unsafe because B is not guarded by HumanNode
     unguarded_errors = [r for r in reports if r.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003]
     assert len(unguarded_errors) > 0
+
 
 def test_flow_nodes_iter_list_coverage() -> None:
     # Cover flow.py line 162 else branch
@@ -224,29 +245,34 @@ def test_flow_nodes_iter_list_coverage() -> None:
         profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
         tools=[],
         metadata={},
-        resilience=None
+        resilience=None,
     )
 
     # Manually call the validator
     swarm = SwarmNode(
-        id="s1", type="swarm", worker_profile="p1", workload_variable="v",
-        distribution_strategy="sharded", max_concurrency=1, reducer_function="concat",
-        output_variable="out", metadata={}, resilience=None
+        id="s1",
+        type="swarm",
+        worker_profile="p1",
+        workload_variable="v",
+        distribution_strategy="sharded",
+        max_concurrency=1,
+        reducer_function="concat",
+        output_variable="out",
+        metadata={},
+        resilience=None,
     )
 
     # Construct with list nodes in graph (bypassing validation type check)
     # We use model_construct for Graph to inject list
-    graph_with_list = Graph.model_construct(
-        nodes=[agent, swarm],
-        edges=[],
-        entry_point="a1"
-    )
+    graph_with_list = Graph.model_construct(nodes=[agent, swarm], edges=[], entry_point="a1")  # type: ignore[arg-type]
 
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         blackboard=Blackboard(variables={"v": {"type": "list", "id": "v"}}),
-        graph=graph_with_list
+        graph=graph_with_list,
+        interface=FlowInterface(),  # Added missing required field
+        metadata=FlowMetadata(name="test", version="1.0"),  # Added missing required field
     )
 
     # Should pass (variable 'v' is in blackboard) and iterate over list
-    flow.validate_swarm_variables()
+    flow.validate_swarm_variables()  # type: ignore[operator]
