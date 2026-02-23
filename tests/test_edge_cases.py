@@ -1,40 +1,40 @@
 
-import pytest
-import math
 from typing import Any
+
+import pytest
+
+from coreason_manifest.spec.core.engines import ComputerUseReasoning
 from coreason_manifest.spec.core.flow import (
+    Blackboard,
     DataSchema,
     Edge,
-    VariableDef,
-    GraphFlow,
-    FlowMetadata,
-    FlowInterface,
-    Blackboard,
-    Graph,
     FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    VariableDef,
 )
-from coreason_manifest.spec.core.nodes import SwarmNode, AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.spec.interop.antibody import AntibodyBase, DataAnomaly
-from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
+from coreason_manifest.spec.interop.antibody import AntibodyBase
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
-from coreason_manifest.utils.gatekeeper import validate_policy, _is_guarded
-from coreason_manifest.spec.core.engines import ComputerUseReasoning
+from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.utils.gatekeeper import validate_policy
 
 # --- Flow Compatibility Tests ---
 
 def test_flow_backwards_compatibility():
     # DataSchema: schema -> json_schema
-    ds = DataSchema(**{"schema": {"type": "string"}})
+    ds = DataSchema(schema={"type": "string"})
     assert ds.json_schema == {"type": "string"}
 
     # Edge: source/target -> from_node/to_node
-    edge = Edge(**{"source": "a", "target": "b"})
+    edge = Edge(source="a", target="b")
     assert edge.from_node == "a"
     assert edge.to_node == "b"
 
     # VariableDef: name -> id
-    var = VariableDef(**{"name": "v1", "type": "string"})
+    var = VariableDef(name="v1", type="string")
     assert var.id == "v1"
 
 def test_swarm_variable_validation():
@@ -218,7 +218,14 @@ def test_flow_nodes_iter_list_coverage() -> None:
     # We need to construct GraphFlow such that graph.nodes is a list
     # This requires model_construct because Pydantic expects dict
 
-    agent = AgentNode(id="a1", type="agent", profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None), tools=[], metadata={}, resilience=None)
+    agent = AgentNode(
+        id="a1",
+        type="agent",
+        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
+        tools=[],
+        metadata={},
+        resilience=None
+    )
 
     # Manually call the validator
     swarm = SwarmNode(
