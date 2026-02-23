@@ -57,27 +57,33 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
     errors.extend(_validate_fallback_cycles(nodes))
 
+    is_published = flow.status == "published"
+
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
-        errors.extend(_validate_linear_integrity(flow))
+        if is_published:
+            errors.extend(_validate_linear_integrity(flow))
         node_ids = {n.id for n in flow.steps}
         errors.extend(_validate_unique_ids(flow.steps))
-        errors.extend(_validate_switch_logic(flow.steps, node_ids))
+        if is_published:
+            errors.extend(_validate_switch_logic(flow.steps, node_ids))
 
     # 3. GraphFlow Specific Checks
     if isinstance(flow, GraphFlow):
-        if not flow.graph.nodes:
+        if not flow.graph.nodes and is_published:
             errors.append("GraphFlow Error: Graph must contain at least one node.")
 
-        errors.extend(_validate_graph_integrity(flow.graph))
+        if is_published:
+            errors.extend(_validate_graph_integrity(flow.graph))
 
         # Helper for extracting nodes for generic logic checks
         nodes_list = list(flow.graph.nodes.values())
         node_ids = set(flow.graph.nodes.keys())
 
         errors.extend(_validate_unique_ids(nodes_list))
-        errors.extend(_validate_switch_logic(nodes_list, node_ids))
-        errors.extend(_validate_orphan_nodes(flow.graph))
+        if is_published:
+            errors.extend(_validate_switch_logic(nodes_list, node_ids))
+            errors.extend(_validate_orphan_nodes(flow.graph))
 
         # 4. Domain 4: Static Data-Flow Analysis
         # Construct Symbol Table: Map variable name -> type (str)

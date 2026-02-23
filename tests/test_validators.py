@@ -3,13 +3,14 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.engines import AdaptiveReasoning
 from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_human_node_validators_coverage() -> None:
     """Test validation logic in HumanNode to ensure 100% coverage."""
 
-    # Test 1: Shadow mode without shadow_timeout_seconds (Should raise ValueError)
-    with pytest.raises(ValidationError, match="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'"):
+    # Test 1: Shadow mode without shadow_timeout_seconds (Should raise ManifestError)
+    with pytest.raises(ManifestError, match="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'"):
         HumanNode(
             id="h1",
             metadata={},
@@ -20,8 +21,8 @@ def test_human_node_validators_coverage() -> None:
             shadow_timeout_seconds=None,
         )
 
-    # Test 2: Blocking mode with shadow_timeout_seconds (Should raise ValueError)
-    with pytest.raises(ValidationError, match="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'"):
+    # Test 2: Blocking mode with shadow_timeout_seconds (Should raise ManifestError)
+    with pytest.raises(ManifestError, match="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'"):
         HumanNode(
             id="h2",
             metadata={},
@@ -36,8 +37,8 @@ def test_human_node_validators_coverage() -> None:
 def test_swarm_node_validators_coverage() -> None:
     """Test validation logic in SwarmNode to ensure 100% coverage."""
 
-    # Test 1: Summarize reducer without aggregator_model (Should raise ValueError)
-    with pytest.raises(ValidationError, match="SwarmNode with reducer='summarize' requires an 'aggregator_model'"):
+    # Test 1: Summarize reducer without aggregator_model (Should raise ManifestError)
+    with pytest.raises(ManifestError, match="SwarmNode with reducer='summarize' requires an 'aggregator_model'"):
         SwarmNode(
             id="s1",
             metadata={},

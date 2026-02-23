@@ -157,6 +157,38 @@ class GraphFlow(CoreasonModel):
         return data
 
     @model_validator(mode="after")
+    def validate_lifecycle_readiness(self) -> "GraphFlow":
+        if self.status != "published":
+            return self
+
+        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
+
+        for node in nodes_iter:
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-LIFECYCLE-LEAK",
+                        message=(
+                            f"Published flow cannot contain PlaceholderNode '{node.id}'."
+                        ),
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                target_node_id=node.id,
+                                description=(
+                                    f"Replace placeholder '{node.id}' (requires: {node.required_capabilities}) "
+                                    "or revert flow status to 'draft'."
+                                ),
+                                patch_data=[],
+                            ).model_dump()
+                        },
+                    )
+                )
+        return self
+
+    @model_validator(mode="after")
     def validate_swarm_variables(self) -> "GraphFlow":
         if not self.blackboard:
             return self
@@ -212,6 +244,36 @@ class LinearFlow(CoreasonModel):
         if isinstance(data, dict) and "sequence" in data and "steps" not in data:
             data["steps"] = data.pop("sequence")
         return data
+
+    @model_validator(mode="after")
+    def validate_lifecycle_readiness(self) -> "LinearFlow":
+        if self.status != "published":
+            return self
+
+        for node in self.steps:
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-LIFECYCLE-LEAK",
+                        message=(
+                            f"Published flow cannot contain PlaceholderNode '{node.id}'."
+                        ),
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                target_node_id=node.id,
+                                description=(
+                                    f"Replace placeholder '{node.id}' (requires: {node.required_capabilities}) "
+                                    "or revert flow status to 'draft'."
+                                ),
+                                patch_data=[],
+                            ).model_dump()
+                        },
+                    )
+                )
+        return self
 
     @property
     def sequence(self) -> list[AnyNode]:

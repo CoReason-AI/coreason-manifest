@@ -158,6 +158,12 @@ class BaseFlowBuilder:
         self._tool_packs: dict[str, ToolPack] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
+        self.status: str = "published"
+
+    def set_status(self, status: str) -> Self:
+        """Sets the flow status (draft, published, archived)."""
+        self.status = status
+        return self
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
         """Registers a reusable supervision policy."""
@@ -263,7 +269,7 @@ class NewLinearFlow(BaseFlowBuilder):
         """Constructs and validates the LinearFlow object."""
         flow = LinearFlow(
             kind="LinearFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),
@@ -371,7 +377,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         flow = GraphFlow(
             kind="GraphFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,

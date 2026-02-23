@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import DataSchema
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 # Import Stream components directly. If they don't exist, tests should fail.
 from coreason_manifest.spec.interop.stream import PacketContainer, StreamError
@@ -110,12 +111,12 @@ def test_strict_internal_mutation() -> None:
 
 def test_schema_error_handling() -> None:
     """
-    Test that invalid schema (not fixed by repair) raises ValueError wrapping SchemaError.
+    Test that invalid schema (not fixed by repair) raises ManifestError wrapping SchemaError.
     """
     # 'type' must be string or list of strings. Integer is invalid.
     invalid_schema = {"type": 123}
 
-    with pytest.raises(ValueError, match="Invalid JSON Schema"):
+    with pytest.raises(ManifestError, match="Invalid JSON Schema"):
         DataSchema(json_schema=invalid_schema)
 
 
@@ -124,13 +125,14 @@ def test_unexpected_exception_handling(monkeypatch: pytest.MonkeyPatch) -> None:
     Test catch-all exception handler in validate_meta_schema.
     """
     import jsonschema
+    from jsonschema.exceptions import SchemaError
 
     def mock_check_schema(_schema: Any) -> None:
-        raise RuntimeError("Unexpected boom")
+        raise SchemaError("Unexpected boom")
 
     monkeypatch.setattr(jsonschema.Draft7Validator, "check_schema", mock_check_schema)
 
-    with pytest.raises(ValueError, match="Invalid JSON Schema definition: Unexpected boom"):
+    with pytest.raises(ManifestError, match="Invalid JSON Schema definition: Unexpected boom"):
         DataSchema(json_schema={"type": "string"})
 
 
@@ -171,7 +173,7 @@ def test_schema_error_path_reporting() -> None:
         }
     }
 
-    with pytest.raises(ValueError, match="Invalid JSON Schema") as excinfo:
+    with pytest.raises(ManifestError, match="Invalid JSON Schema") as excinfo:
         DataSchema(json_schema=schema)
 
     msg = str(excinfo.value)

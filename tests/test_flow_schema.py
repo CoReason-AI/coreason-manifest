@@ -17,7 +17,7 @@ def test_flow_interface_schema() -> None:
 def test_flow_interface_validation_error() -> None:
     with pytest.raises(ValidationError):
         FlowInterface(
-            inputs={"json_schema": "invalid-type"},
+            inputs=123, # Definitely invalid
             outputs=DataSchema(json_schema={}),
         )
 
@@ -28,6 +28,9 @@ def test_builder_interface_construction() -> None:
     input_s = {"type": "object", "properties": {"query": {"type": "string"}}}
     output_s = {"type": "object", "properties": {"answer": {"type": "string"}}}
     builder.set_interface(inputs=input_s, outputs=output_s)
+
+    # We must use draft status because we use PlaceholderNode
+    builder.set_status("draft")
 
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 

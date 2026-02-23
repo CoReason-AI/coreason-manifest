@@ -9,6 +9,7 @@ from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
 def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0.0", description="Desc")
+    builder.set_status("draft")
     builder.add_step(PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[]))
     builder.add_step(PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[]))
 
@@ -44,6 +45,7 @@ def test_linear_builder() -> None:
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0.0", description="Desc")
+    builder.set_status("draft")
     builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
     builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[]))
     builder.connect("n1", "n2", condition="ok")
@@ -275,6 +277,7 @@ def test_builder_graph_entry_point_coverage() -> None:
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     builder = NewGraphFlow("Graph Flow")
+    builder.set_status("draft")
 
     node = PlaceholderNode(id="start", metadata={}, required_capabilities=[])
     builder.add_node(node)
@@ -292,6 +295,7 @@ def test_builder_graph_auto_entry_point() -> None:
     from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     builder = NewGraphFlow("Auto Entry")
+    builder.set_status("draft")
 
     # Add one node
     node = PlaceholderNode(id="auto_start", metadata={}, required_capabilities=[])

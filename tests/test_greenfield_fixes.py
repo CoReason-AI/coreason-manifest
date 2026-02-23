@@ -21,6 +21,7 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     SupervisionPolicy,
 )
+from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
 
@@ -94,17 +95,20 @@ def test_graph_flow_draft_mode() -> None:
     # Validation is skipped, so no error raised.
     # To cover the "return self" line, we just need to instantiate it.
 
-    # Published mode should fail
-    with pytest.raises(ValueError, match="requires missing tool"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
-            definitions=definitions,
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            graph=graph,
-        )
+    # Published mode should fail validation (checked via validate_flow)
+    # GraphFlow constructor only validates lifecycle readiness (Placeholders)
+    flow_pub_fail = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
+        definitions=definitions,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+    from coreason_manifest.utils.validator import validate_flow
+    errors = validate_flow(flow_pub_fail)
+    assert any("requires missing tool" in e for e in errors)
 
     # Published mode success case to hit return self
     valid_agent = AgentNode(
@@ -339,7 +343,7 @@ def test_recursive_schema_strict_validation() -> None:
     with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
         mock_check.side_effect = SchemaError("Invalid default")
 
-        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+        with pytest.raises(ManifestError, match="Invalid JSON Schema"):
             DataSchema(json_schema=nested_schema)
 
 
@@ -415,7 +419,7 @@ def test_schema_strict_null_default() -> None:
         mock_check.side_effect = SchemaError("Invalid default")
         bad_null: dict[str, Any] = {"type": "string", "default": None}
 
-        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+        with pytest.raises(ManifestError, match="Invalid JSON Schema"):
             DataSchema(json_schema=bad_null)
 
         # Case 2: Valid Null Default (nullable: true) -> Should Pass
