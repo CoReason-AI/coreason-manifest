@@ -19,13 +19,9 @@ from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
-from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
+from coreason_manifest.utils.io import ManifestIO, RuntimeSecurityWarning, SecurityViolationError
 
 __all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
-
-
-class RuntimeSecurityWarning(RuntimeWarning):
-    """Warning for runtime security risks."""
 
 
 class YamlLoaderProtocol(Protocol):

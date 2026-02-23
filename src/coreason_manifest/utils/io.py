@@ -2,6 +2,7 @@ import contextlib
 import errno
 import os
 import stat
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -21,22 +22,41 @@ class SecurityViolationError(Exception):
         return f"{prefix}{self.message}"
 
 
+class RuntimeSecurityWarning(RuntimeWarning):
+    """Warning for runtime security risks."""
+
+
 class ManifestIO:
     """
     A secure file loader that enforces path confinement and permission checks.
     Acts as a 'Jail' to prevent Path Traversal attacks.
     """
 
-    def __init__(self, root_dir: Path, allow_external_refs: bool = False):
+    def __init__(self, root_dir: Path, allow_external_refs: bool = False, strict_security: bool = True):
         """
         Initialize the secure loader.
 
         Args:
             root_dir: The root directory to confine file access to.
             allow_external_refs: Whether to allow loading files outside the root directory.
+            strict_security: Whether to strictly enforce security checks (e.g. O_NOFOLLOW).
         """
         self.jail = root_dir.resolve()
         self.allow_external = allow_external_refs
+        self.strict_security = strict_security
+
+        if not hasattr(os, "O_NOFOLLOW"):
+            if self.strict_security:
+                raise EnvironmentError(
+                    "Host OS lacks O_NOFOLLOW support. Strict TOCTOU security cannot be guaranteed. "
+                    "Set strict_security=False to bypass this check at your own risk."
+                )
+            else:
+                warnings.warn(
+                    "WARNING: TOCTOU protections disabled. Running on an OS without O_NOFOLLOW.",
+                    RuntimeSecurityWarning,
+                    stacklevel=2,
+                )
 
     @property
     def _is_posix(self) -> bool:
@@ -81,10 +101,20 @@ class ManifestIO:
         if not self.allow_external and not target_path.is_relative_to(self.jail):
             raise SecurityViolationError(f"Path Traversal Detected: {path}")
 
+        # Post-Open Defense in Depth
+        # Stat BEFORE open
+        try:
+            stat_before = os.lstat(target_path)
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                raise FileNotFoundError(f"File not found or inaccessible: {path}") from e
+            raise e
+
         # 2. LOW-LEVEL ATOMIC OPEN (TOCTOU Mitigation)
         try:
             # O_NOFOLLOW ensures we don't follow symlinks at the end of the path
             # O_RDONLY ensures read-only access
+            # Safe to use getattr here ONLY because we gated it in __init__
             flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
             fd = os.open(str(target_path), flags)
         except OSError as e:
@@ -99,6 +129,10 @@ class ManifestIO:
             # 3. CHECK PERMISSIONS ON THE DESCRIPTOR (Not the path)
             # This guarantees we are checking the actual file we just opened.
             st = os.fstat(fd)
+
+            # Post-Open Defense in Depth Check
+            if stat_before.st_ino != st.st_ino or stat_before.st_dev != st.st_dev:
+                 raise SecurityViolationError("File swapped during open operation.")
 
             if self._is_posix and (st.st_mode & stat.S_IWOTH):
                 raise SecurityViolationError(f"Unsafe Permissions: {path} is world-writable.")
