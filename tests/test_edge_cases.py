@@ -27,6 +27,7 @@ def test_flow_backwards_compatibility() -> None:
     # DataSchema: schema -> json_schema
     # Use canonical field names because mypy doesn't support aliases in init without a plugin or config
     ds = DataSchema(json_schema={"type": "string"})
+    assert ds.json_schema == {"type": "string"}
     # But wait, compat_json_schema is a mode='before' validator that handles "schema".
     # Pydantic allows aliases in __init__.
     # The mypy error "Unexpected keyword argument 'schema'" is because mypy sees the model definition.
