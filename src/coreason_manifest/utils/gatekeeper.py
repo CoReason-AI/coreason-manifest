@@ -11,6 +11,8 @@ from coreason_manifest.spec.interop.compliance import (
     RemediationAction,
 )
 from coreason_manifest.utils.net_utils import canonicalize_domain
+from coreason_manifest.spec.core.constants import NodeCapability
+from coreason_manifest.utils.topology import get_strongly_connected_components, get_reachable_nodes
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
@@ -121,10 +123,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         needs_guard = False
         violation_reason = []
 
-        if "computer_use" in caps:
+        if NodeCapability.COMPUTER_USE in caps:
             needs_guard = True
             violation_reason.append("computer_use capability")
-        if "code_execution" in caps:
+        if NodeCapability.CODE_EXECUTION in caps:
             needs_guard = True
             violation_reason.append("code_execution capability")
 
@@ -203,43 +205,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 adj[edge.from_node].append(edge.to_node)
 
         # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
-        visited: set[str] = set()
-        stack: list[str] = []
-        on_stack: set[str] = set()
-        ids: dict[str, int] = {}
-        low: dict[str, int] = {}
-        sccs: list[list[str]] = []
-        id_counter = 0
-
-        def dfs(at: str) -> None:
-            nonlocal id_counter
-            stack.append(at)
-            on_stack.add(at)
-            visited.add(at)
-            ids[at] = low[at] = id_counter
-            id_counter += 1
-
-            for to in adj.get(at, []):
-                if to not in visited:
-                    dfs(to)
-                    low[at] = min(low[at], low[to])
-                elif to in on_stack:
-                    low[at] = min(low[at], ids[to])
-
-            if ids[at] == low[at]:
-                component = []
-                while stack:
-                    node = stack.pop()
-                    on_stack.remove(node)
-                    component.append(node)
-                    if node == at:
-                        break
-                sccs.append(component)
-
-        # Run Tarjan's
-        for node_id in flow.graph.nodes:
-            if node_id not in visited:
-                dfs(node_id)
+        sccs = get_strongly_connected_components(adj)
 
         # Build map of node_id -> SCC info
         node_cycle_map = {}
@@ -262,17 +228,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             entry_nodes.append(flow.graph.entry_point)
 
         # BFS from entry nodes to find reachable set
-        reachable = set(entry_nodes)
-        queue = list(entry_nodes)
-
-        while queue:
-            curr = queue.pop(0)
-            # Mypy fix: handle None key (if curr is None? no entry_nodes are str)
-            # but adj dict expects str.
-            for neighbor in adj.get(curr or "", []):
-                if neighbor not in reachable:
-                    reachable.add(neighbor)
-                    queue.append(neighbor)
+        reachable = get_reachable_nodes(adj, entry_nodes)
 
         # Identify Unreachable Nodes
         all_nodes = set(flow.graph.nodes.keys())
@@ -289,10 +245,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 caps = get_capabilities(node)
 
                 risk_reasons = []
-                if "computer_use" in caps:
-                    risk_reasons.append("computer_use")
-                if "code_execution" in caps:
-                    risk_reasons.append("code_execution")
+                if NodeCapability.COMPUTER_USE in caps:
+                    risk_reasons.append(NodeCapability.COMPUTER_USE)
+                if NodeCapability.CODE_EXECUTION in caps:
+                    risk_reasons.append(NodeCapability.CODE_EXECUTION)
 
                 if risk_reasons:
                     dangerous_node_ids.add(node_id)

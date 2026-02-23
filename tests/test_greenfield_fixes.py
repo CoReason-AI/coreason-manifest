@@ -21,6 +21,8 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     SupervisionPolicy,
 )
+from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.spec.core.flow import validate_integrity
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash
 from coreason_manifest.utils.io import SecurityViolationError
 
@@ -95,16 +97,18 @@ def test_graph_flow_draft_mode() -> None:
     # To cover the "return self" line, we just need to instantiate it.
 
     # Published mode should fail
-    with pytest.raises(ValueError, match="requires missing tool"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
-            definitions=definitions,
-            interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=None,
-            graph=graph,
-        )
+    flow_pub = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
+        definitions=definitions,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+    from coreason_manifest.utils.validator import validate_flow
+    errors = validate_flow(flow_pub)
+    assert any("requires tool 'missing-tool'" in e for e in errors)
 
     # Published mode success case to hit return self
     valid_agent = AgentNode(
@@ -333,13 +337,15 @@ def test_recursive_schema_strict_validation() -> None:
         },
     }
 
-    from unittest.mock import patch
+    from unittest.mock import patch, MagicMock
 
     # Architecture: Validation runs directly. We mock check_schema to raise error to verify it is called.
-    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
-        mock_check.side_effect = SchemaError("Invalid default")
+    with patch("jsonschema.validators.validator_for") as mock_validator_for:
+        mock_validator_cls = MagicMock()
+        mock_validator_cls.check_schema.side_effect = SchemaError("Invalid default")
+        mock_validator_for.return_value = mock_validator_cls
 
-        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+        with pytest.raises(ManifestError, match="Invalid JSON Schema"):
             DataSchema(json_schema=nested_schema)
 
 
@@ -404,22 +410,26 @@ def test_validator_definitions_profile_scanning() -> None:
 def test_schema_strict_null_default() -> None:
     """Test strict validation for null defaults."""
     from typing import Any
-    from unittest.mock import patch
+    from unittest.mock import patch, MagicMock
 
     from jsonschema.exceptions import SchemaError
 
     from coreason_manifest.spec.core.flow import DataSchema
 
-    with patch("jsonschema.Draft7Validator.check_schema") as mock_check:
+    with patch("jsonschema.validators.validator_for") as mock_validator_for:
         # Case 1: Invalid Null Default -> Should Raise
-        mock_check.side_effect = SchemaError("Invalid default")
+        mock_validator_cls = MagicMock()
+        mock_validator_cls.check_schema.side_effect = SchemaError("Invalid default")
+        mock_validator_for.return_value = mock_validator_cls
+
         bad_null: dict[str, Any] = {"type": "string", "default": None}
 
-        with pytest.raises(ValueError, match="Invalid JSON Schema"):
+        with pytest.raises(ManifestError, match="Invalid JSON Schema"):
             DataSchema(json_schema=bad_null)
 
         # Case 2: Valid Null Default (nullable: true) -> Should Pass
-        mock_check.side_effect = None  # Reset to success
+        mock_validator_cls.check_schema.side_effect = None
+
         valid_nullable: dict[str, Any] = {"type": "string", "default": None, "nullable": True}
         ds2 = DataSchema(json_schema=valid_nullable)
         assert isinstance(ds2.json_schema, dict)
@@ -627,12 +637,15 @@ def test_validator_union_type_normalization() -> None:
     # But testing "union" normalization execution path is key.
 
     graph = Graph(nodes={"s1": swarm}, edges=[], entry_point="s1")
-    flow = GraphFlow(
+    flow = GraphFlow.model_construct(
+        type="graph",
         kind="GraphFlow",
+        status="draft",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=inputs, outputs=DataSchema()),
         blackboard=None,
         graph=graph,
+        definitions=None,
     )
 
     errors = validate_flow(flow)

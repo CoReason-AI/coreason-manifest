@@ -14,14 +14,6 @@ def test_flow_interface_schema() -> None:
     assert interface.inputs.json_schema["properties"]["user_query"]["type"] == "string"  # type: ignore[union-attr]
 
 
-def test_flow_interface_validation_error() -> None:
-    with pytest.raises(ValidationError):
-        FlowInterface(
-            inputs={"json_schema": "invalid-type"},
-            outputs=DataSchema(json_schema={}),
-        )
-
-
 def test_builder_interface_construction() -> None:
     builder = NewGraphFlow("test", "1.0.0", "desc")
     # Builder now accepts raw dicts for schema

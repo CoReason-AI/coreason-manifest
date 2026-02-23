@@ -30,8 +30,8 @@ def test_red_teaming_reasoning_instantiation() -> None:
         success_criteria="Jailbreak successful",
     )
     assert rt.attacker_model == "claude-3-opus"
-    assert isinstance(rt.to_node_model, ModelCriteria)
-    assert rt.to_node_model.strategy == "performance"
+    assert isinstance(rt.target_model, ModelCriteria)
+    assert rt.target_model.strategy == "performance"
     assert rt.attack_strategy == "goat"
     assert rt.max_turns == 10
     assert rt.success_criteria == "Jailbreak successful"

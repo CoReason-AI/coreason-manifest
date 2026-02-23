@@ -218,8 +218,8 @@ def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> S
     Compares two flows and returns a list of semantic JSON Patch operations.
     """
     # Convert to dicts (using mode='json' to ensure serializable)
-    d1 = old.model_dump(mode="json", exclude_none=True)
-    d2 = new.model_dump(mode="json", exclude_none=True)
+    d1 = old.model_dump(mode="json", exclude_none=True, by_alias=True)
+    d2 = new.model_dump(mode="json", exclude_none=True, by_alias=True)
 
     changes = _generate_diff("", d1, d2)
     return SemanticPatchReport(changes=changes)

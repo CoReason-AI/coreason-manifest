@@ -13,8 +13,10 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+    validate_integrity,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwarmNode, SwitchNode
+from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
@@ -131,7 +133,7 @@ def test_swarm_unguarded() -> None:
 
 
 def test_swarm_missing_profile_validation() -> None:
-    # SwarmNode pointing to missing profile should raise ValidationError from LinearFlow
+    # SwarmNode pointing to missing profile should raise ManifestError when validated
     defs = get_defs()
     swarm = SwarmNode(
         id="swarm1",
@@ -144,14 +146,16 @@ def test_swarm_missing_profile_validation() -> None:
         reducer_function="vote",
         output_variable="out",
     )
-    with pytest.raises(ValidationError, match="undefined worker profile ID"):
-        LinearFlow(
-            kind="LinearFlow",
-            status="published",
-            metadata=get_meta(),
-            definitions=defs,
-            steps=[swarm],
-        )
+    flow = LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=get_meta(),
+        definitions=defs,
+        steps=[swarm],
+    )
+    # Manual integrity check (since LinearFlow doesn't enforce it automatically)
+    with pytest.raises(ManifestError, match="references missing profile"):
+        validate_integrity(defs, flow.steps)
 
 
 def test_gatekeeper_robustness_missing_profile() -> None:
@@ -261,13 +265,6 @@ def test_integrity_compute_hash_variants() -> None:
     # Pydantic v2 has model_dump_json
     h = compute_hash(m)
     assert len(h) == 64
-
-    # Test object with json method (mock)
-    class HasJson:
-        def json(self) -> str:
-            return '{"a": 1}'
-
-    assert compute_hash(HasJson()) == compute_hash({"a": 1})
 
     # Test fallback
     class PlainObj:

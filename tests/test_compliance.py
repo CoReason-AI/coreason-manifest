@@ -25,65 +25,20 @@ from coreason_manifest.spec.interop.request import AgentRequest
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash, reconstruct_payload
-
-# --- Mocks for Flow ---
-
-
-def create_mock_flow(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> GraphFlow:
-    entry_point = nodes_list[0].id if nodes_list else "unknown"
-    # Use "draft" status to allow unreachable nodes during testing of Gatekeeper policy.
-    # "published" flows enforce strict DAG reachability via validate_dag.
-    # Use model_construct for Graph to allow cycles/invalid topology during policy testing
-    return GraphFlow.model_construct(
-        kind="GraphFlow",
-        status="draft",
-        metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
-        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=Blackboard(variables={}, persistence=False),
-        graph=Graph.model_construct(
-            nodes={n.id: n for n in nodes_list},
-            edges=[Edge(from_node=s, to_node=t) for s, t in edges_list],
-            entry_point=entry_point,
-        ),
-    )
-
-
-# --- HELPER FACTORIES ---
-
-
-def create_safe_profile() -> CognitiveProfile:
-    return CognitiveProfile(
-        role="tester", persona="safe", reasoning=StandardReasoning(model="gpt-4-turbo"), fast_path=None
-    )
-
-
-def create_unsafe_profile() -> CognitiveProfile:
-    return CognitiveProfile(
-        role="hacker", persona="unsafe", reasoning=ComputerUseReasoning(model="claude-3-5-sonnet"), fast_path=None
-    )
-
-
-def create_code_exec_profile() -> CognitiveProfile:
-    return CognitiveProfile(
-        role="coder",
-        persona="unsafe_coder",
-        reasoning=CodeExecutionReasoning(model="gpt-4", allow_network=True, timeout_seconds=10),
-        fast_path=None,
-    )
-
+from coreason_manifest.spec.core.constants import NodeCapability
 
 # --- TESTS ---
 
 
-def test_topology_utility_island_safe() -> None:
+def test_topology_utility_island_safe(mock_flow_factory, safe_profile) -> None:
     """
     Test that a disconnected node with standard capabilities is ALLOWED.
     """
-    node_main = AgentNode(id="main", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
-    node_island = AgentNode(id="island", type="agent", metadata={}, profile=create_safe_profile(), tools=[])  # Safe
+    node_main = AgentNode(id="main", type="agent", metadata={}, profile=safe_profile, tools=[])
+    node_island = AgentNode(id="island", type="agent", metadata={}, profile=safe_profile, tools=[])  # Safe
 
     # Graph: main (entry), island (disconnected)
-    flow = create_mock_flow([node_main, node_island], [])
+    flow = mock_flow_factory([node_main, node_island], [])
 
     reports = validate_policy(flow)
 
@@ -92,22 +47,22 @@ def test_topology_utility_island_safe() -> None:
     assert len(topology_errors) == 0
 
 
-def test_topology_utility_island_unsafe() -> None:
+def test_topology_utility_island_unsafe(mock_flow_factory, safe_profile, unsafe_profile) -> None:
     """
     Test that a disconnected node with HIGH RISK capabilities is BLOCKED.
     To be truly "unreachable", it must not be an entry node (in-degree > 0) but not reachable from valid entries.
     So we create a cycle: island1 -> island2 -> island1.
     """
-    node_main = AgentNode(id="main", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
+    node_main = AgentNode(id="main", type="agent", metadata={}, profile=safe_profile, tools=[])
     node_island1 = AgentNode(
-        id="island1", type="agent", metadata={}, profile=create_unsafe_profile(), tools=[]
+        id="island1", type="agent", metadata={}, profile=unsafe_profile, tools=[]
     )  # Unsafe
-    node_island2 = AgentNode(id="island2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
+    node_island2 = AgentNode(id="island2", type="agent", metadata={}, profile=safe_profile, tools=[])
 
     edges = [("island1", "island2"), ("island2", "island1")]
 
     # Graph: main (entry), island1<->island2 (cycle, no entry)
-    flow = create_mock_flow([node_main, node_island1, node_island2], edges)
+    flow = mock_flow_factory([node_main, node_island1, node_island2], edges)
 
     reports = validate_policy(flow)
 
@@ -118,7 +73,7 @@ def test_topology_utility_island_unsafe() -> None:
     report = topology_errors[0]
     assert "island1" in report.details["dangerous_nodes"]
     assert "island2" in report.details["safe_nodes"]
-    assert "computer_use" in report.details["risk_details"]["island1"]
+    assert NodeCapability.COMPUTER_USE.value in report.details["risk_details"]["island1"]
 
 
 def test_telemetry_request_auto_rooting() -> None:
@@ -255,19 +210,19 @@ def test_integrity_sanitization() -> None:
     assert h1 == h2
 
 
-def test_topology_utility_island_acyclic_unsafe() -> None:
+def test_topology_utility_island_acyclic_unsafe(mock_flow_factory, safe_profile, unsafe_profile) -> None:
     """
     Test a node downstream of a cycle (unreachable tail).
     Exercises line 284 in gatekeeper.py (structure_type="island").
     Graph: Safe1 <-> Safe2 -> Unsafe
     """
-    node_safe1 = AgentNode(id="safe1", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
-    node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
-    node_unsafe = AgentNode(id="unsafe", type="agent", metadata={}, profile=create_unsafe_profile(), tools=[])
+    node_safe1 = AgentNode(id="safe1", type="agent", metadata={}, profile=safe_profile, tools=[])
+    node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=safe_profile, tools=[])
+    node_unsafe = AgentNode(id="unsafe", type="agent", metadata={}, profile=unsafe_profile, tools=[])
 
     edges = [("safe1", "safe2"), ("safe2", "safe1")]
 
-    flow = create_mock_flow([node_safe1, node_safe2, node_unsafe], edges)
+    flow = mock_flow_factory([node_safe1, node_safe2, node_unsafe], edges)
 
     reports = validate_policy(flow)
 
@@ -296,28 +251,28 @@ def test_integrity_reconstruct_payload_fallback() -> None:
         reconstruct_payload(obj)
 
 
-def test_topology_utility_island_code_exec() -> None:
+def test_topology_utility_island_code_exec(mock_flow_factory, safe_profile, code_exec_profile) -> None:
     """
     Test unreachable island with code_execution capability.
     Exercises line 284 in gatekeeper.py.
     """
-    node_safe1 = AgentNode(id="safe1", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
-    node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=create_safe_profile(), tools=[])
+    node_safe1 = AgentNode(id="safe1", type="agent", metadata={}, profile=safe_profile, tools=[])
+    node_safe2 = AgentNode(id="safe2", type="agent", metadata={}, profile=safe_profile, tools=[])
     node_unsafe = AgentNode(
         id="code_island",
         type="agent",
         metadata={},
-        profile=create_code_exec_profile(),
+        profile=code_exec_profile,
         tools=[],
     )
 
     edges = [("safe1", "safe2"), ("safe2", "safe1")]
 
-    flow = create_mock_flow([node_safe1, node_safe2, node_unsafe], edges)
+    flow = mock_flow_factory([node_safe1, node_safe2, node_unsafe], edges)
 
     reports = validate_policy(flow)
     # Expect error about code_execution
     topo_errors = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(topo_errors) == 1
     assert "code_island" in topo_errors[0].details["dangerous_nodes"]
-    assert "code_execution" in topo_errors[0].details["risk_details"]["code_island"]
+    assert NodeCapability.CODE_EXECUTION.value in topo_errors[0].details["risk_details"]["code_island"]

@@ -92,21 +92,16 @@ def test_validate_graph_flow_invalid_edges() -> None:
         entry_point="agent1",
     )
 
-    # Architectural Update: Referential integrity is strictly enforced during model validation.
-    # We expect ValidationError immediately upon instantiation.
-    with pytest.raises(ValidationError) as excinfo:
-        GraphFlow(
-            kind="GraphFlow",
-            metadata=create_metadata(),
-            interface=create_interface(),
-            blackboard=None,
-            graph=graph,
-            status="draft",
-        )
-
-    # Verify the error messages
-    error_str = str(excinfo.value)
-    assert "target 'missing' not found" in error_str or "source 'missing' not found" in error_str
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+        status="draft",
+    )
+    errors = validate_flow(flow)
+    assert any("Dangling Edge Error" in e and "missing" in e for e in errors)
 
 
 def test_validate_switch_node_invalid_targets() -> None:
@@ -135,17 +130,17 @@ def test_validate_missing_tool() -> None:
     tp = create_tool_pack("ns", [])
     graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
 
-    # Expect ValidationError during instantiation due to Runtime Integrity
-    with pytest.raises(ValidationError, match="requires missing tool 'tool1'"):
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=create_metadata(),
-            interface=create_interface(),
-            blackboard=None,
-            graph=graph,
-            definitions=FlowDefinitions(tool_packs={"tp": tp}),
-        )
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+        definitions=FlowDefinitions(tool_packs={"tp": tp}),
+    )
+    errors = validate_flow(flow)
+    assert any("requires tool 'tool1'" in e for e in errors)
 
 
 def test_validate_governance_sanity() -> None:
@@ -236,24 +231,32 @@ def test_validate_graph_flow_empty() -> None:
     # Entry point missing is checked in verify_integrity (strict) or validate_flow
     graph = Graph(nodes={}, edges=[], entry_point="missing")
 
-    # Architectural Update: Strict referential integrity enforcement causes validation error on instantiation.
-    with pytest.raises(ValidationError, match="Entry point 'missing' not found in nodes"):
-        GraphFlow(
-            kind="GraphFlow",
-            metadata=create_metadata(),
-            interface=create_interface(),
-            blackboard=None,
-            graph=graph,
-        )
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+    )
+    errors = validate_flow(flow)
+    assert any("Graph must contain at least one node" in e for e in errors)
 
 
 def test_validate_graph_flow_key_id_mismatch() -> None:
     """Test validation for mismatch between graph node key and node ID."""
     agent = create_agent_node("agent1", [])
     # Key is "wrong_key", ID is "agent1"
-    # This raises ValidationError in Graph validator immediately
-    with pytest.raises(ValidationError, match="Graph Integrity Error"):
-        Graph(nodes={"wrong_key": agent}, edges=[], entry_point="wrong_key")
+
+    graph = Graph(nodes={"wrong_key": agent}, edges=[], entry_point="wrong_key")
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+    )
+    errors = validate_flow(flow)
+    assert any("Graph Integrity Error" in e and "wrong_key" in e for e in errors)
 
 
 def test_validate_orphan_nodes() -> None:
