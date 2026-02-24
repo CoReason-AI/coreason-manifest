@@ -1,5 +1,5 @@
-import pytest
 from coreason_manifest.utils.integrity import CanonicalHashingStrategy
+
 
 def test_canonical_hashing_float_mutation() -> None:
     """
@@ -17,6 +17,7 @@ def test_canonical_hashing_float_mutation() -> None:
     # If the directive means "preserve float type", then sanitized should be float.
     assert isinstance(sanitized, float), f"Expected float, got {type(sanitized)}"
     assert sanitized == 1.0
+
 
 def test_canonical_hashing_float_vs_int_hash() -> None:
     """
