@@ -1,10 +1,18 @@
 import pytest
-from coreason_manifest.builder import NewGraphFlow
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow, FlowMetadata, FlowInterface, DataSchema, Graph, Blackboard
-from coreason_manifest.spec.core.nodes import PlaceholderNode, SwitchNode
-from coreason_manifest.spec.interop.exceptions import ManifestError, SemanticFault
 
-def test_graph_flow_published_placeholder_leak():
+from coreason_manifest.builder import NewGraphFlow
+from coreason_manifest.spec.core.flow import (
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
+from coreason_manifest.spec.core.nodes import PlaceholderNode
+from coreason_manifest.spec.interop.exceptions import ManifestError
+
+
+def test_graph_flow_published_placeholder_leak() -> None:
     """
     Test that a published GraphFlow containing a PlaceholderNode raises a ManifestError.
     """
@@ -27,7 +35,7 @@ def test_graph_flow_published_placeholder_leak():
     assert excinfo.value.fault.severity == "CRITICAL"
     assert excinfo.value.fault.recovery_action == "HALT_GRAPH"
 
-def test_linear_flow_published_placeholder_leak():
+def test_linear_flow_published_placeholder_leak() -> None:
     """
     Test that a published LinearFlow containing a PlaceholderNode raises a ManifestError.
     """
@@ -44,7 +52,7 @@ def test_linear_flow_published_placeholder_leak():
 
     assert excinfo.value.fault.error_code == "CRSN-VAL-LIFECYCLE-PLACEHOLDER"
 
-def test_graph_flow_published_missing_entrypoint():
+def test_graph_flow_published_missing_entrypoint() -> None:
     """
     Test that a published GraphFlow with missing or invalid entry_point raises ManifestError.
     """

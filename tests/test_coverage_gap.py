@@ -522,8 +522,12 @@ def test_flow_cycle_detection_unreachable() -> None:
     )
     from coreason_manifest.spec.core.nodes import InspectorNode
 
-    n1 = InspectorNode(id="n1", type="inspector", metadata={}, target_variable="v1", criteria="c1", output_variable="o1")
-    n2 = InspectorNode(id="n2", type="inspector", metadata={}, target_variable="v2", criteria="c2", output_variable="o2")
+    n1 = InspectorNode(
+        id="n1", type="inspector", metadata={}, target_variable="v1", criteria="c1", output_variable="o1"
+    )
+    n2 = InspectorNode(
+        id="n2", type="inspector", metadata={}, target_variable="v2", criteria="c2", output_variable="o2"
+    )
 
     # Cycle: n1->n2->n1
     graph = Graph(
