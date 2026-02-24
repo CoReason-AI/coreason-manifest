@@ -1,11 +1,13 @@
 import json
 from typing import Any, cast
 
+import pytest
 from coreason_manifest.spec.interop.otel import to_otel_attributes
-from coreason_manifest.spec.interop.telemetry import NodeState
+from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.utils.privacy import PrivacySentinel
 from coreason_manifest.utils.recorder import BlackBoxRecorder
+from datetime import datetime
 
 
 def test_privacy_sentinel_secrets() -> None:
@@ -357,3 +359,18 @@ def test_dag_child_links_to_trusted_root() -> None:
     n1_dict["execution_hash"] = compute_hash(payload_n1)
 
     assert verify_merkle_proof([n1_dict], trusted_root_hash=root_hash) is True
+
+def test_telemetry_orphan_trace() -> None:
+    """Cover NodeExecution.validate_trace_integrity (telemetry.py:92)."""
+    with pytest.raises(ValueError, match="Orphaned trace detected"):
+        NodeExecution(
+            node_id="n1",
+            state=NodeState.COMPLETED,
+            inputs={},
+            outputs={},
+            timestamp=datetime.now(),
+            duration_ms=1.0,
+            # Parent provided, but Root missing -> Orphan
+            parent_request_id="parent_id",
+            root_request_id=None
+        )
