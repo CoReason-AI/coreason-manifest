@@ -142,11 +142,10 @@ def _scan_for_kill_switch_violations(
 
     def _recursive_scan(obj: Any) -> None:
         # 1. Check ToolCapability objects
-        if isinstance(obj, ToolCapability):
-            if obj.risk_level.weight > max_risk.weight:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
+        if isinstance(obj, ToolCapability) and obj.risk_level.weight > max_risk.weight:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
                         message=(
                             f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
                             f"which exceeds the global max_risk_level '{max_risk.value}'."
@@ -247,7 +246,10 @@ class GraphFlow(CoreasonModel):
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-VAL-FALLBACK-MISSING",
-                    message=f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' not found in nodes.",
+                    message=(
+                        f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' "
+                        "not found in nodes."
+                    ),
                     severity=FaultSeverity.CRITICAL,
                     recovery_action=RecoveryAction.HALT,
                     context={"fallback_id": self.governance.circuit_breaker.fallback_node_id},

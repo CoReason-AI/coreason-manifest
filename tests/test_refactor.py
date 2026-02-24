@@ -1,8 +1,6 @@
 import asyncio
-import ast
-import hashlib
-import json
 import pytest
+from typing import Any
 from pathlib import Path
 from pydantic import ValidationError
 
@@ -13,20 +11,18 @@ from coreason_manifest.spec.core.flow import (
     AgentRequest,
     FlowMetadata,
     FlowInterface,
-    DataSchema,
-    LinearFlow
 )
-from coreason_manifest.spec.core.nodes import NodeID, AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.utils.loader import sandbox_context, _jail_root_var
 from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.io import SecurityViolationError
 
 # Helper to create minimal valid metadata
-def get_meta():
+def get_meta() -> FlowMetadata:
     return FlowMetadata(name="test", version="0.1.0", description="test")
 
-def get_agent_node(nid):
+def get_agent_node(nid: str) -> AgentNode:
     return AgentNode(
         id=nid,
         type="agent",
@@ -34,7 +30,7 @@ def get_agent_node(nid):
         tools=[]
     )
 
-def test_dangling_entry_point_rejected():
+def test_dangling_entry_point_rejected() -> None:
     """
     1. test_dangling_entry_point_rejected: Attempting to instantiate a GraphFlow
        where the entry_point is "node_a" but nodes only contains "node_b" throws a Pydantic ValidationError.
@@ -50,9 +46,11 @@ def test_dangling_entry_point_rejected():
                 entry_point="node_a"
             )
         )
-    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(excinfo.value) or "Entry point 'node_a' not found" in str(excinfo.value)
+    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(excinfo.value) or "Entry point 'node_a' not found" in str(
+        excinfo.value
+    )
 
-def test_ast_injection_blocked():
+def test_ast_injection_blocked() -> None:
     """
     2. test_ast_injection_blocked: Defining an Edge with
        condition="__import__('os').system('rm -rf /')" throws a Pydantic ValidationError.
@@ -67,7 +65,7 @@ def test_ast_injection_blocked():
     assert "Security Violation: forbidden AST node Call" in str(excinfo.value)
 
 @pytest.mark.asyncio
-async def test_sandboxed_loader_concurrent(tmp_path):
+async def test_sandboxed_loader_concurrent(tmp_path: Path) -> None:
     """
     3. test_sandboxed_loader_concurrent: Run two mocked agents concurrently using asyncio.gather.
        Prove that ContextVar successfully isolates their import paths.
@@ -77,14 +75,14 @@ async def test_sandboxed_loader_concurrent(tmp_path):
     jail_a.mkdir()
     jail_b.mkdir()
 
-    async def task_a():
+    async def task_a() -> Path | None:
         with sandbox_context(jail_a):
             # Simulate work
             await asyncio.sleep(0.01)
             assert _jail_root_var.get() == jail_a.resolve()
             return _jail_root_var.get()
 
-    async def task_b():
+    async def task_b() -> Path | None:
         with sandbox_context(jail_b):
             # Simulate work
             await asyncio.sleep(0.01)
@@ -95,29 +93,29 @@ async def test_sandboxed_loader_concurrent(tmp_path):
     assert results[0] == jail_a.resolve()
     assert results[1] == jail_b.resolve()
 
-def test_merkle_dag_parallel():
+def test_merkle_dag_parallel() -> None:
     """
     4. test_merkle_dag_parallel: Create a Swarm trace where Node A branches to Node B1 and B2,
        which then aggregate to Node C. Prove that verify_merkle_proof successfully validates the DAG topology.
     """
     # Create nodes
     # A (Genesis)
-    node_a = {"data": "A", "parent_hashes": []}
+    node_a: dict[str, Any] = {"data": "A", "parent_hashes": []}
     hash_a = compute_hash(node_a)
     node_a["execution_hash"] = hash_a
 
     # B1 (Parent: A)
-    node_b1 = {"data": "B1", "parent_hashes": [hash_a]}
+    node_b1: dict[str, Any] = {"data": "B1", "parent_hashes": [hash_a]}
     hash_b1 = compute_hash(node_b1)
     node_b1["execution_hash"] = hash_b1
 
     # B2 (Parent: A)
-    node_b2 = {"data": "B2", "parent_hashes": [hash_a]}
+    node_b2: dict[str, Any] = {"data": "B2", "parent_hashes": [hash_a]}
     hash_b2 = compute_hash(node_b2)
     node_b2["execution_hash"] = hash_b2
 
     # C (Parents: B1, B2)
-    node_c = {"data": "C", "parent_hashes": [hash_b1, hash_b2]}
+    node_c: dict[str, Any] = {"data": "C", "parent_hashes": [hash_b1, hash_b2]}
     hash_c = compute_hash(node_c)
     node_c["execution_hash"] = hash_c
 
@@ -139,7 +137,7 @@ def test_merkle_dag_parallel():
     trace_tampered = [node_a, node_b1, node_b2, tampered_node_c]
     assert verify_merkle_proof(trace_tampered) is False
 
-def test_extra_fields_forbidden():
+def test_extra_fields_forbidden() -> None:
     """
     5. test_extra_fields_forbidden: Attempt to pass tenant_id="123" at the root of an
        AgentRequest instantiation. Prove it crashes with a validation error.
@@ -162,7 +160,7 @@ def test_extra_fields_forbidden():
     with pytest.raises(ValidationError) as excinfo:
         AgentRequest(
             manifest=manifest,
-            tenant_id="123" # Extra field
+            tenant_id="123"  # type: ignore # Extra field
         )
     # Pydantic v2 error for extra fields
     assert "Extra inputs are not permitted" in str(excinfo.value)
