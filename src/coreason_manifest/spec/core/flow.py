@@ -376,6 +376,57 @@ class GraphFlow(CoreasonModel):
         )
         return self
 
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "GraphFlow":
+        # Only enforce for published flows
+        if self.status != "published":
+            return self
+
+        # 1. Entry Point Presence
+        if not self.graph.entry_point:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-ENTRY-POINT-MISSING",
+                    message="Published flow MUST have a defined entry_point.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            description="Set a valid entry_point.",
+                            patch_data=[{"op": "add", "path": "/graph/entry_point", "value": "start_node"}],
+                        ).model_dump()
+                    },
+                )
+            )
+
+        # 2. Concrete Resolution (No PlaceholderNode)
+        for node in self.graph.nodes.values():
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-ABSTRACT-NODE",
+                        message=f"Published flow cannot contain abstract PlaceholderNode '{node.id}'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "node_id": node.id,
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                description=f"Replace PlaceholderNode '{node.id}' with a concrete implementation.",
+                                patch_data=[
+                                    {
+                                        "op": "replace",
+                                        "path": f"/graph/nodes/{node.id}",
+                                        "value": {"type": "agent", "id": node.id, "profile": "default"},
+                                    }
+                                ],  # Example patch
+                            ).model_dump()
+                        },
+                    )
+                )
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """

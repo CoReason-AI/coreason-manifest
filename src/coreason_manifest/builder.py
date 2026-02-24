@@ -285,12 +285,18 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []
         self._entry_point: str | None = None
+        self._status: str = "draft"
         # Defaults
         self.interface = FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         )
         self.blackboard: Blackboard | None = None
+
+    def set_status(self, status: str) -> "NewGraphFlow":
+        """Sets the lifecycle status of the flow."""
+        self._status = status
+        return self
 
     def set_entry_point(self, node_id: str) -> "NewGraphFlow":
         """Sets the explicit entry point for the graph."""
@@ -371,7 +377,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         flow = GraphFlow(
             kind="GraphFlow",
-            status="published",
+            status=self._status,
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,

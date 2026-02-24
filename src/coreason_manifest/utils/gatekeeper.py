@@ -266,58 +266,129 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             sorted_edge_indices = sorted(bulk_edge_indices, reverse=True)
 
             patch_list = []
-            # 1. Remove Edges (must be done by index, high to low)
-            patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices])
 
-            # 2. Remove Nodes (by key, safe order)
-            patch_list.extend([{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable])
+            if flow.status == "draft":
+                # Draft Mode: Be Forgiving
+                if dangerous_node_ids:
+                    # Dangerous Islands: Must be secured (Add Guard)
+                    for d_node_id in dangerous_node_ids:
+                        guard_id = f"guard_{d_node_id}"
+                        human_node = HumanNode(
+                            id=guard_id,
+                            type="human",
+                            prompt=f"Approve unsafe draft node {d_node_id}",
+                            timeout_seconds=300,
+                            interaction_mode="blocking",
+                        )
+                        # 1. Add Guard Node
+                        patch_list.append(
+                            {
+                                "op": "add",
+                                "path": f"/graph/nodes/{guard_id}",
+                                "value": human_node.model_dump(mode="json"),
+                            }
+                        )
+                        # 2. Add Edge (Guard -> Target)
+                        patch_list.append(
+                            {
+                                "op": "add",
+                                "path": "/graph/edges/-",
+                                "value": {"source": guard_id, "target": d_node_id},
+                            }
+                        )
 
-            if dangerous_node_ids:
-                # Severity violation if any dangerous nodes are present
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
-                        severity="violation",
-                        message=(
-                            f"Topology Violation: Found {len(dangerous_node_ids)} dangerous unreachable nodes "
-                            f"and {len(safe_node_ids)} dead code nodes. "
-                            "Pruning all unreachable topology to restore integrity."
-                        ),
-                        details={
-                            "dangerous_nodes": list(dangerous_node_ids),
-                            "safe_nodes": list(safe_node_ids),
-                            "risk_details": risk_details,
-                        },
-                        remediation=RemediationAction(
-                            type="prune_topology",
-                            format="json_patch",
-                            patch_data=patch_list,
-                            description=(
-                                f"Atomic Prune: Remove {len(unreachable)} unreachable nodes "
-                                f"and {len(sorted_edge_indices)} connected edges."
+                    reports.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
+                            severity="warning",
+                            message=(
+                                f"Draft Topology Warning: Found {len(dangerous_node_ids)} dangerous unreachable nodes. "
+                                "Injecting guards to secure them."
                             ),
-                        ),
-                    )
-                )
-            elif safe_node_ids:
-                # Just warning if only safe nodes
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
-                        severity="warning",
-                        message=f"Topology Warning: Found {len(safe_node_ids)} unreachable nodes (Dead Code).",
-                        details={"node_ids": list(safe_node_ids)},
-                        remediation=RemediationAction(
-                            type="prune_node",
-                            format="json_patch",
-                            patch_data=patch_list,
-                            description=(
-                                f"Tree Shake: Remove {len(safe_node_ids)} dead code nodes "
-                                f"and {len(sorted_edge_indices)} edges."
+                            details={
+                                "dangerous_nodes": list(dangerous_node_ids),
+                                "risk_details": risk_details,
+                            },
+                            remediation=RemediationAction(
+                                type="add_guard_node",
+                                format="json_patch",
+                                patch_data=patch_list,
+                                description=f"Inject {len(dangerous_node_ids)} HumanNode guards for dangerous draft nodes.",
                             ),
-                        ),
+                        )
                     )
+
+                if safe_node_ids:
+                    # Safe Dead Code: Just warn, do NOT prune
+                    reports.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                            severity="info",  # Use info as requested ("info or warning")
+                            message=f"Draft Topology Info: Found {len(safe_node_ids)} disconnected nodes (Safe Dead Code).",
+                            details={"node_ids": list(safe_node_ids)},
+                            remediation=None,
+                        )
+                    )
+
+            else:
+                # Published Mode: Strict Pruning (Original Logic)
+
+                # 1. Remove Edges (must be done by index, high to low)
+                patch_list.extend(
+                    [{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices]
                 )
+
+                # 2. Remove Nodes (by key, safe order)
+                patch_list.extend(
+                    [{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable]
+                )
+
+                if dangerous_node_ids:
+                    # Severity violation if any dangerous nodes are present
+                    reports.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
+                            severity="violation",
+                            message=(
+                                f"Topology Violation: Found {len(dangerous_node_ids)} dangerous unreachable nodes "
+                                f"and {len(safe_node_ids)} dead code nodes. "
+                                "Pruning all unreachable topology to restore integrity."
+                            ),
+                            details={
+                                "dangerous_nodes": list(dangerous_node_ids),
+                                "safe_nodes": list(safe_node_ids),
+                                "risk_details": risk_details,
+                            },
+                            remediation=RemediationAction(
+                                type="prune_topology",
+                                format="json_patch",
+                                patch_data=patch_list,
+                                description=(
+                                    f"Atomic Prune: Remove {len(unreachable)} unreachable nodes "
+                                    f"and {len(sorted_edge_indices)} connected edges."
+                                ),
+                            ),
+                        )
+                    )
+                elif safe_node_ids:
+                    # Just warning if only safe nodes
+                    reports.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                            severity="warning",
+                            message=f"Topology Warning: Found {len(safe_node_ids)} unreachable nodes (Dead Code).",
+                            details={"node_ids": list(safe_node_ids)},
+                            remediation=RemediationAction(
+                                type="prune_node",
+                                format="json_patch",
+                                patch_data=patch_list,
+                                description=(
+                                    f"Tree Shake: Remove {len(safe_node_ids)} dead code nodes "
+                                    f"and {len(sorted_edge_indices)} edges."
+                                ),
+                            ),
+                        )
+                    )
 
     return reports
 
