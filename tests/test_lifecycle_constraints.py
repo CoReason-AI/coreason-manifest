@@ -9,7 +9,12 @@ from coreason_manifest.spec.interop.compliance import ErrorCatalog, RemediationA
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
 
-def create_flow(status: str = "draft", entry_point: str | None = None, nodes: dict[str, Any] | None = None, edges: list[Any] | None = None) -> GraphFlow:
+def create_flow(
+    status: str = "draft",
+    entry_point: str | None = None,
+    nodes: dict[str, Any] | None = None,
+    edges: list[Any] | None = None
+) -> GraphFlow:
     if nodes is None:
         nodes = {}
     if edges is None:
@@ -91,8 +96,14 @@ def test_draft_mode_disconnected_dangerous_node() -> None:
         patch = [report.remediation.patch_data] # Should not happen for this type but for typing sake
 
     # Should contain add node and add edge
-    adds_node = [op for op in patch if op["op"] == "add" and "nodes" in str(op["path"]) and "guard_node2" in str(op["path"])]
-    adds_edge = [op for op in patch if op["op"] == "add" and "edges" in str(op["path"])]
+    adds_node = [
+        op for op in patch
+        if op["op"] == "add" and "nodes" in str(op["path"]) and "guard_node2" in str(op["path"])
+    ]
+    adds_edge = [
+        op for op in patch
+        if op["op"] == "add" and "edges" in str(op["path"])
+    ]
 
     assert len(adds_node) > 0
     assert len(adds_edge) > 0
