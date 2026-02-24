@@ -313,7 +313,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                                 type="add_guard_node",
                                 format="json_patch",
                                 patch_data=patch_list,
-                                description=f"Inject {len(dangerous_node_ids)} HumanNode guards for dangerous draft nodes.",
+                                description=(
+                                    f"Inject {len(dangerous_node_ids)} HumanNode guards for dangerous draft nodes."
+                                ),
                             ),
                         )
                     )
@@ -324,7 +326,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                         ComplianceReport(
                             code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
                             severity="info",  # Use info as requested ("info or warning")
-                            message=f"Draft Topology Info: Found {len(safe_node_ids)} disconnected nodes (Safe Dead Code).",
+                            message=(
+                                f"Draft Topology Info: Found {len(safe_node_ids)} disconnected nodes (Safe Dead Code)."
+                            ),
                             details={"node_ids": list(safe_node_ids)},
                             remediation=None,
                         )

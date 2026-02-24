@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self
+from typing import Any, Literal, Self, cast
 
 from coreason_manifest.spec.core.engines import (
     FastPath,
@@ -377,7 +377,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         flow = GraphFlow(
             kind="GraphFlow",
-            status=self._status,
+            status=cast(Literal["draft", "published", "archived"], self._status),
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,
