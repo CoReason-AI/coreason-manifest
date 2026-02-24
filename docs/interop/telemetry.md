@@ -6,18 +6,31 @@ The schemas in `src/coreason_manifest/spec/interop/telemetry.py` define the **Wi
 
 ---
 
+## The `AgentRequest` Schema
+
+Before any node executes, a flow must be initiated. The `AgentRequest` schema defines this entry point.
+
+Crucially, it acts as the root carrier for distributed lineage, strictly adhering to the **W3C Trace Context** standard.
+*   **`traceparent`**: A globally unique Trace ID and the parent system's Span ID (e.g., coming from a frontend client or an API gateway).
+*   **`tracestate`**: Vendor-specific lineage routing data.
+
+By mandating these fields at the request level, the manifest ensures that an agent's internal thought process is correctly visualized as a subset of spans within a larger, enterprise-wide distributed transaction.
+
+---
+
 ## The `NodeExecution` Schema
 
 The atomic unit of observability is the `NodeExecution`. It represents the complete lifecycle of a single node's attempt to run.
 
 ```python
-class NodeExecution(AntibodyBase):
+class NodeExecution(CoreasonModel):
     node_id: str
     state: NodeState
     inputs: dict[str, Any]
     outputs: dict[str, Any]
-    traceparent: str | None
-    tracestate: str | None
+    started_at: datetime | None
+    completed_at: datetime | None
+    total_tokens_used: int = 0
     execution_hash: str | None
 ```
 
@@ -28,11 +41,6 @@ The `NodeState` enum strictly defines the valid lifecycle phases:
 *   `COMPLETED`: Successfully finished with valid outputs.
 *   `FAILED`: Terminated due to an error (see `ErrorDomain`).
 *   `SKIPPED`: Bypassed due to conditional logic or circuit breaking.
-
-### W3C Trace Context
-To ensure distributed tracing across microservices, the schema natively supports the **W3C Trace Context** standard.
-*   **`traceparent`**: Captures the Trace ID and Parent Span ID. This allows an agent's internal thought process to be visualized as a span within a larger distributed transaction.
-*   **`tracestate`**: Propagates vendor-specific lineage data.
 
 ---
 
