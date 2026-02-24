@@ -35,6 +35,7 @@ def test_graph_flow_published_placeholder_leak() -> None:
     assert excinfo.value.fault.severity == "CRITICAL"
     assert excinfo.value.fault.recovery_action == "HALT_GRAPH"
 
+
 def test_linear_flow_published_placeholder_leak() -> None:
     """
     Test that a published LinearFlow containing a PlaceholderNode raises a ManifestError.
@@ -44,13 +45,10 @@ def test_linear_flow_published_placeholder_leak() -> None:
     placeholder_node = PlaceholderNode(id="placeholder_1", metadata={}, type="placeholder", required_capabilities=[])
 
     with pytest.raises(ManifestError) as excinfo:
-        LinearFlow(
-            metadata=metadata,
-            steps=[placeholder_node],
-            status="published"
-        )
+        LinearFlow(metadata=metadata, steps=[placeholder_node], status="published")
 
     assert excinfo.value.fault.error_code == "CRSN-VAL-LIFECYCLE-PLACEHOLDER"
+
 
 def test_graph_flow_published_missing_entrypoint() -> None:
     """
@@ -64,12 +62,7 @@ def test_graph_flow_published_missing_entrypoint() -> None:
     graph = Graph(nodes={}, edges=[], entry_point=None)
 
     with pytest.raises(ManifestError) as excinfo:
-        GraphFlow(
-            metadata=metadata,
-            interface=interface,
-            graph=graph,
-            status="published"
-        )
+        GraphFlow(metadata=metadata, interface=interface, graph=graph, status="published")
 
     assert excinfo.value.fault.error_code == "CRSN-VAL-LIFECYCLE-ENTRYPOINT"
 
@@ -77,11 +70,6 @@ def test_graph_flow_published_missing_entrypoint() -> None:
     graph_bad_ep = Graph(nodes={}, edges=[], entry_point="non_existent_node")
 
     with pytest.raises(ManifestError) as excinfo:
-        GraphFlow(
-            metadata=metadata,
-            interface=interface,
-            graph=graph_bad_ep,
-            status="published"
-        )
+        GraphFlow(metadata=metadata, interface=interface, graph=graph_bad_ep, status="published")
 
     assert excinfo.value.fault.error_code == "CRSN-VAL-LIFECYCLE-ENTRYPOINT"

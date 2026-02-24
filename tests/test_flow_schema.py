@@ -22,6 +22,7 @@ def test_builder_interface_construction() -> None:
     builder.add_inspector("start", "var", "crit", "out")
 
     from coreason_manifest.spec.core.flow import VariableDef
+
     builder.set_blackboard({"var": VariableDef(type="string"), "out": VariableDef(type="string")})
 
     flow = builder.build()

@@ -3,7 +3,7 @@ import pytest
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
@@ -63,12 +63,15 @@ def test_graph_builder() -> None:
         inputs={"type": "object", "properties": {"in": {"type": "string"}}},
         outputs={"type": "object", "properties": {"out": {"type": "integer"}}},
     )
-    builder.set_blackboard(variables={
-        "var1": VariableDef(type="string", description="test var"),
-        "out1": VariableDef(type="string"),
-        "var2": VariableDef(type="string"),
-        "out2": VariableDef(type="string"),
-    }, persistence=True)
+    builder.set_blackboard(
+        variables={
+            "var1": VariableDef(type="string", description="test var"),
+            "out1": VariableDef(type="string"),
+            "var2": VariableDef(type="string"),
+            "out2": VariableDef(type="string"),
+        },
+        persistence=True,
+    )
 
     flow = builder.build()
 

@@ -1,6 +1,4 @@
 from coreason_manifest.builder import NewLinearFlow
-from coreason_manifest.spec.core.flow import VariableDef
-from coreason_manifest.spec.core.nodes import InspectorNode
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.validator import validate_flow
 from coreason_manifest.utils.visualizer import to_mermaid
