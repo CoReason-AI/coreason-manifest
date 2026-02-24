@@ -24,12 +24,13 @@ def test_telemetry_parent_hash_backfill() -> None:
         "outputs": {},
         "timestamp": datetime.now(),
         "duration_ms": 1.0,
-        "parent_hash": "some_hash"
+        "parent_hash": "some_hash",
         # parent_hashes missing
     }
 
     node = NodeExecution(**data)
     assert node.parent_hashes == ["some_hash"]
+
 
 def test_flow_fallback_orphan() -> None:
     """
@@ -39,13 +40,13 @@ def test_flow_fallback_orphan() -> None:
     graph = Graph(nodes={"n1": node}, edges=[], entry_point="n1")
 
     # Governance with fallback pointing to missing node
-    gov = Governance(circuit_breaker=CircuitBreaker(
-        error_threshold_count=1,
-        reset_timeout_seconds=1,
-        fallback_node_id="missing_node"
-    ))
+    gov = Governance(
+        circuit_breaker=CircuitBreaker(
+            error_threshold_count=1, reset_timeout_seconds=1, fallback_node_id="missing_node"
+        )
+    )
 
-    definitions = FlowDefinitions(profiles={"p1": "dummy"}) # Minimal
+    definitions = FlowDefinitions(profiles={"p1": "dummy"})  # Minimal
 
     with pytest.raises(ManifestError) as excinfo:
         GraphFlow(
@@ -55,9 +56,10 @@ def test_flow_fallback_orphan() -> None:
             interface=FlowInterface(),
             graph=graph,
             governance=gov,
-            definitions=definitions
+            definitions=definitions,
         )
     assert excinfo.value.fault.error_code == "CRSN-VAL-FALLBACK-MISSING"
+
 
 def test_edge_condition_security_violation_store() -> None:
     """

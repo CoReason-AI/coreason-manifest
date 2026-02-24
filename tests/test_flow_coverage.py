@@ -180,10 +180,12 @@ def test_boolean_schema_validation_error() -> None:
         with pytest.raises(ManifestError, match=r"Invalid JSON Schema"):
             DataSchema(json_schema={"type": "any"})
 
+
 def test_edge_syntax_error() -> None:
     """Cover Edge.validate_condition_ast SyntaxError path (flow.py:144)."""
     with pytest.raises(ValueError, match="Invalid Python syntax in condition"):
         Edge(from_node="a", to_node="b", condition="1 +")
+
 
 def test_validator_resilience_ref_format_and_missing() -> None:
     """
@@ -193,16 +195,14 @@ def test_validator_resilience_ref_format_and_missing() -> None:
     """
 
     # 1. Invalid Format (missing 'ref:')
-    node_bad_format = AgentNode(
-        id="n1", type="agent", metadata={}, profile="p1", tools=[], resilience="invalid_ref"
-    )
+    node_bad_format = AgentNode(id="n1", type="agent", metadata={}, profile="p1", tools=[], resilience="invalid_ref")
 
     # 2. Missing Template ID
-    node_missing_id = AgentNode(
-        id="n2", type="agent", metadata={}, profile="p1", tools=[], resilience="ref:missing"
-    )
+    node_missing_id = AgentNode(id="n2", type="agent", metadata={}, profile="p1", tools=[], resilience="ref:missing")
 
-    definitions = FlowDefinitions(profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)})
+    definitions = FlowDefinitions(
+        profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)}
+    )
 
     # Bypass validation
     flow = LinearFlow.model_construct(
@@ -211,7 +211,7 @@ def test_validator_resilience_ref_format_and_missing() -> None:
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         definitions=definitions,
         steps=[node_bad_format, node_missing_id],
-        governance=None
+        governance=None,
     )
 
     errors = validate_flow(flow)
@@ -221,6 +221,7 @@ def test_validator_resilience_ref_format_and_missing() -> None:
 
     # Check for undefined template error (validator.py:357)
     assert any("references undefined supervision template" in e and "n2" in e for e in errors)
+
 
 def test_graph_flow_swarm_variable_remediation() -> None:
     """Cover GraphFlow.validate_swarm_variables remediation generation (flow.py:316)."""
@@ -234,13 +235,15 @@ def test_graph_flow_swarm_variable_remediation() -> None:
         distribution_strategy="sharded",
         max_concurrency=1,
         reducer_function="concat",
-        output_variable="o"
+        output_variable="o",
     )
 
     graph = Graph(nodes={"s1": swarm_node}, edges=[], entry_point="s1")
-    blackboard = Blackboard(variables={}) # Empty blackboard
+    blackboard = Blackboard(variables={})  # Empty blackboard
 
-    definitions = FlowDefinitions(profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)})
+    definitions = FlowDefinitions(
+        profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)}
+    )
 
     with pytest.raises(ManifestError) as excinfo:
         GraphFlow(
@@ -251,7 +254,7 @@ def test_graph_flow_swarm_variable_remediation() -> None:
             interface=FlowInterface(),
             blackboard=blackboard,
             graph=graph,
-            governance=None
+            governance=None,
         )
 
     # Verify the remediation context structure

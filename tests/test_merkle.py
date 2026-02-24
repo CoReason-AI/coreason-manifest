@@ -112,21 +112,14 @@ def test_content_tampering() -> None:
     trace = [tampered_data]
     assert not verify_merkle_proof(trace), "Tampered content should fail hash check"
 
+
 def test_integrity_cycle_detection() -> None:
     """Cover verify_merkle_proof cycle detection (integrity.py:215)."""
     # Create a cycle: A -> B -> A
     # We mock the hashes to create a cycle in parent pointers
 
-    node_a = {
-        "execution_hash": "hash_a",
-        "parent_hashes": ["hash_b"],
-        "node_id": "a"
-    }
-    node_b = {
-        "execution_hash": "hash_b",
-        "parent_hashes": ["hash_a"],
-        "node_id": "b"
-    }
+    node_a = {"execution_hash": "hash_a", "parent_hashes": ["hash_b"], "node_id": "a"}
+    node_b = {"execution_hash": "hash_b", "parent_hashes": ["hash_a"], "node_id": "b"}
 
     trace = [node_a, node_b]
     # Should return False due to cycle

@@ -361,6 +361,7 @@ def test_dag_child_links_to_trusted_root() -> None:
 
     assert verify_merkle_proof([n1_dict], trusted_root_hash=root_hash) is True
 
+
 def test_telemetry_orphan_trace() -> None:
     """Cover NodeExecution.validate_trace_integrity (telemetry.py:92)."""
     with pytest.raises(ValueError, match="Orphaned trace detected"):
@@ -373,5 +374,5 @@ def test_telemetry_orphan_trace() -> None:
             duration_ms=1.0,
             # Parent provided, but Root missing -> Orphan
             parent_request_id="parent_id",
-            root_request_id=None
+            root_request_id=None,
         )
