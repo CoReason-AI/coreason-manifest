@@ -33,6 +33,10 @@ nav:
       - Node Types: orchestration/nodes.md
       - Resilience & Supervision: orchestration/resilience.md
       - Recovery Strategies: orchestration/strategies.md
+  - Governance & Safety:
+      - Organizational Guardrails: governance/policies.md
+  - Capabilities:
+      - Tooling & Actions: capabilities/tooling.md
   - Developer Guides:
       - Building Agents: builder_sdk.md
   - API Reference:
