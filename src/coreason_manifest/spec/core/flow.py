@@ -240,7 +240,7 @@ def _scan_for_kill_switch_violations(
                 _recursive_scan(v)
         elif isinstance(obj, BaseModel):
             # Efficiently iterate model fields
-            for name in obj.model_fields:
+            for name in type(obj).model_fields:
                 value = getattr(obj, name)
                 _recursive_scan(value)
 
@@ -280,16 +280,21 @@ class GraphFlow(CoreasonModel):
             template_ids = set(self.definitions.supervision_templates.keys())
 
         for node in self.graph.nodes.values():
-            if isinstance(node.resilience, str) and node.resilience not in template_ids:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-VAL-RESILIENCE-MISSING",
-                        message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={"node_id": node.id, "template_id": node.resilience},
+            if isinstance(node.resilience, str):
+                ref_id = node.resilience
+                if ref_id.startswith("ref:"):
+                    ref_id = ref_id[4:]
+
+                if ref_id not in template_ids:
+                    raise ManifestError(
+                        fault=SemanticFault(
+                            error_code="CRSN-VAL-RESILIENCE-MISSING",
+                            message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                            severity=FaultSeverity.CRITICAL,
+                            recovery_action=RecoveryAction.HALT,
+                            context={"node_id": node.id, "template_id": node.resilience},
+                        )
                     )
-                )
 
         # Rule A: Entry Point
         if self.graph.entry_point and self.graph.entry_point not in node_ids:
@@ -402,16 +407,21 @@ class LinearFlow(CoreasonModel):
             template_ids = set(self.definitions.supervision_templates.keys())
 
         for node in self.steps:
-            if isinstance(node.resilience, str) and node.resilience not in template_ids:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-VAL-RESILIENCE-MISSING",
-                        message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={"node_id": node.id, "template_id": node.resilience},
+            if isinstance(node.resilience, str):
+                ref_id = node.resilience
+                if ref_id.startswith("ref:"):
+                    ref_id = ref_id[4:]
+
+                if ref_id not in template_ids:
+                    raise ManifestError(
+                        fault=SemanticFault(
+                            error_code="CRSN-VAL-RESILIENCE-MISSING",
+                            message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                            severity=FaultSeverity.CRITICAL,
+                            recovery_action=RecoveryAction.HALT,
+                            context={"node_id": node.id, "template_id": node.resilience},
+                        )
                     )
-                )
         return self
 
     @model_validator(mode="after")

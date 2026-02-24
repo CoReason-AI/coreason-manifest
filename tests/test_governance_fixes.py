@@ -404,8 +404,9 @@ def test_circuit_breaker_timeout_logic() -> None:
     state_store = {"node_1": CircuitState(state="open", failure_count=1, last_failure_time=time.time())}
 
     # Case 1: Timeout NOT expired
-    with pytest.raises(CircuitOpenError):
+    with pytest.raises(ManifestError) as excinfo:
         check_circuit("node_1", policy, state_store)
+    assert excinfo.value.fault.error_code == "CRSN-EXEC-CIRCUIT-OPEN"
 
     # Case 2: Timeout EXPIRED
     # Force unwrap optional for test logic, or assert it's not None

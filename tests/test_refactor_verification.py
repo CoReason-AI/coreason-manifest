@@ -351,8 +351,11 @@ def test_circuit_breaker_logic() -> None:
     record_failure(node_id, cb, store)  # count=2 -> Open
 
     # 3. Verify Open
-    with pytest.raises(CircuitOpenError):
+    from coreason_manifest.spec.interop.exceptions import ManifestError
+
+    with pytest.raises(ManifestError) as excinfo:
         check_circuit(node_id, cb, store)
+    assert excinfo.value.fault.error_code == "CRSN-EXEC-CIRCUIT-OPEN"
 
     # 4. Wait for timeout
     import time
