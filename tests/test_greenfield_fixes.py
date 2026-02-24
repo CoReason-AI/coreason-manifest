@@ -314,7 +314,7 @@ def test_fallback_cycle_complex_policy() -> None:
     node_b = AgentNode(id="b", metadata={}, type="agent", profile="p", tools=[], resilience=policy_b)
 
     # Use unified cycle validation (mocking a GraphFlow with no explicit edges)
-    from coreason_manifest.spec.core.flow import Graph, GraphFlow, FlowMetadata, FlowInterface, DataSchema
+    from coreason_manifest.spec.core.flow import DataSchema, FlowInterface, FlowMetadata, Graph, GraphFlow
     from coreason_manifest.utils.validator import _validate_topology_cycles
 
     # Need a GraphFlow for unified validation

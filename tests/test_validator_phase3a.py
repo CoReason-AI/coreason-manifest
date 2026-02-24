@@ -1,6 +1,7 @@
 from typing import cast
 
 import pytest
+
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
