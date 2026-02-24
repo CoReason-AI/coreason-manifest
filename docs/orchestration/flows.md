@@ -51,7 +51,7 @@ flow = LinearFlow(
 
 ## `GraphFlow`
 
-The `GraphFlow` is the primary schema for defining sophisticated cognitive agents. It allows for arbitrary topologies, including parallel execution, conditional branching, and complex feedback loops (within the constraints of a DAG).
+The `GraphFlow` is the primary schema for defining sophisticated cognitive agents. It allows for arbitrary topologies, including parallel execution, conditional branching, and complex routing paths (within the constraints of a DAG).
 
 The topology is defined within the **`graph`** attribute.
 
@@ -86,9 +86,9 @@ graph = Graph(
         "worker_b": AgentNode(...)
     },
     edges=[
-        Edge(from="start", to="router"),
-        Edge(from="router", to="worker_a", condition="topic == 'tech'"),
-        Edge(from="router", to="worker_b", condition="topic == 'finance'")
+        Edge(from_node="start", to_node="router"),
+        Edge(from_node="router", to_node="worker_a", condition="topic == 'tech'"),
+        Edge(from_node="router", to_node="worker_b", condition="topic == 'finance'")
     ],
     entry_point="start"
 )
