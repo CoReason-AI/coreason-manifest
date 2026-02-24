@@ -22,10 +22,12 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
   - Home: index.md
+  - Architecture:
+      - Core Philosophy: architecture/core_philosophy.md
+      - Topology & State: architecture/topology_and_state.md
   - Getting Started:
       - Quick Start: usage.md
       - CLI Reference: cli.md
-      - Tutorial: VIGNETTE.md
   - Core Concepts:
       - Graph Orchestration: graph_recipes.md
       - Reasoning Patterns: episteme_reasoning.md
@@ -36,6 +38,4 @@ nav:
       - Agents & Tools: reference/agents.md
       - Orchestration: reference/orchestration.md
   - Internal Architecture:
-      - Contributor Protocols: architecture/contributor_protocols.md
-      - Shared Kernel Strategy: architecture/ADR-001-shared-kernel-boundaries.md
       - Compliance & Integrity: veritas_integrity.md

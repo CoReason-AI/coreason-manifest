@@ -1,20 +1,52 @@
-# Coreason Manifest: The Shared Kernel
+# Coreason Manifest
 
-Welcome to the **Coreason Manifest**, the central repository for the schemas, protocols, and governance models that power the Coreason AI ecosystem.
+**The Universal Shared Kernel for Cognitive Architectures**
 
-This library serves as the **Shared Kernel** for our agentic architecture, providing the definitive Pydantic models and JSON Schemas that ensure type safety, validation, and interoperability across all services.
+`coreason-manifest` is the foundational schema library that defines the *structure* and *intent* of cognitive workflows. It serves as the **Shared Kernel**—a ubiquitous language that binds together the various components of an AI system, from the builder SDKs to the runtime execution engines.
 
-## Quick Start
+## The Blueprint Philosophy
 
-Are you trying to build an Agent?
-👉 **[Go to Getting Started](usage.md)**
+The core doctrine of this package is strict separation of **definition** from **execution**.
 
----
+*   **What it is**: A collection of strictly typed, immutable Pydantic V2 models that define *what* a cognitive system should do.
+*   **What it is NOT**: It contains **zero runtime execution logic**, no active LLM calls, and no side effects.
 
-## Contributing & Architecture
+This "Blueprint Philosophy" ensures that a flow defined in `coreason-manifest` is:
+1.  **Portable**: Can be serialized, stored, and transported across different environments (cloud, edge, local).
+2.  **Verifiable**: Can be statically analyzed for structural integrity, security risks, and policy compliance before a single line of code is executed.
+3.  **Auditible**: Every change to a flow is a data change, allowing for perfect version control, diffing, and cryptographic signing.
 
-For internal Coreason engineers and architects contributing *to* this repository, please consult the **Internal Architecture** section.
+## Core Capabilities
 
-*   [Contributor Protocols](architecture/contributor_protocols.md)
-*   [Product Requirements](architecture/product_requirements.md)
-*   [Shared Kernel Strategy](architecture/ADR-001-shared-kernel-boundaries.md)
+The manifest provides the following architectural primitives:
+
+### 1. Flow Topologies
+*   **`LinearFlow`**: For sequential, deterministic pipelines where A leads to B leads to C.
+*   **`GraphFlow`**: For complex, non-linear cognitive architectures involving loops, conditional branching, and dynamic routing (DAGs).
+
+### 2. Cognitive Nodes
+The vertices of your cognitive graph, including:
+*   **`AgentNode`**: The primary worker unit, driven by a `CognitiveProfile` (persona + reasoning engine).
+*   **`SwitchNode`**: deterministic routing based on variable state.
+*   **`InspectorNode` & `EmergenceInspectorNode`**: Semantic evaluation and guardrails.
+*   **`SwarmNode`**: Massive parallel processing and map-reduce operations.
+*   **`HumanNode`**: Human-in-the-loop interactions for approval or steering.
+*   **`PlannerNode`**: High-level goal decomposition.
+
+### 3. Data & State
+*   **`Blackboard`**: An abstract shared memory space where nodes read and write variables.
+*   **`DataSchema`**: Strict JSON Schemas defining the shape of inputs, outputs, and intermediate state.
+
+### 4. Governance & Resilience
+*   **`Governance`**: Global policies for risk management, including kill switches and resource limits.
+*   **`ResilienceConfig`**: Error handling strategies like retries, fallbacks, and circuit breakers defined at the node level.
+
+### 5. Tools & Skills
+*   **`ToolPack`**: Collections of capabilities (functions, APIs) available to agents.
+
+## Usage
+
+This package is intended to be consumed by:
+*   **Builders**: SDKs and UIs that generate valid manifest files.
+*   **Runtimes**: Execution engines that interpret the manifest and orchestrate the actual LLM calls.
+*   **Auditors**: Compliance tools that verify the safety and integrity of a flow.
