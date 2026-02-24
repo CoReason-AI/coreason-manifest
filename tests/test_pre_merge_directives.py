@@ -1,21 +1,22 @@
-import ast
-import pytest
 from pathlib import Path
-from pydantic import ValidationError
 from typing import Any
 
-from coreason_manifest.spec.core.flow import Edge, GraphFlow, Graph, FlowMetadata, FlowInterface, FlowDefinitions
+import pytest
+from pydantic import ValidationError
+
+from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitState, ToolAccessPolicy, check_circuit
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.governance import ToolAccessPolicy, Governance, CircuitBreaker, CircuitState, check_circuit
-from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 from coreason_manifest.utils.io import SecurityViolationError
 from coreason_manifest.utils.loader import load_agent_from_ref
-from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash, reconstruct_payload
+
 
 def get_meta() -> FlowMetadata:
     return FlowMetadata(name="test", version="1.0.0", description="test")
+
 
 def test_ast_whitelist() -> None:
     # Allowed
@@ -30,9 +31,11 @@ def test_ast_whitelist() -> None:
     with pytest.raises((ValidationError, SecurityViolationError), match="forbidden AST node Dict"):
         Edge(from_node="a", to_node="b", condition="{'a': 1}")
 
+
 def test_loader_recursion_bypass(tmp_path: Path) -> None:
-    from coreason_manifest.utils.loader import load_flow_from_file
     import yaml
+
+    from coreason_manifest.utils.loader import load_flow_from_file
 
     # Create recursive structure using different relative paths
     (tmp_path / "a.yaml").write_text(yaml.dump({"$ref": "./b.yaml"}))
@@ -40,6 +43,7 @@ def test_loader_recursion_bypass(tmp_path: Path) -> None:
 
     with pytest.raises(RecursionError, match="Circular dependency detected"):
         load_flow_from_file(str(tmp_path / "a.yaml"), strict_security=False)
+
 
 def test_partial_dag_verification() -> None:
     # A -> B -> C
@@ -64,60 +68,38 @@ def test_partial_dag_verification() -> None:
     # Should pass with trusted parent
     assert verify_merkle_proof(trace, trusted_parent_hashes={h_b}) is True
 
+
 def test_resilience_reference_validation() -> None:
     # Node refers to missing template
     node = AgentNode(
-        id="a1",
-        type="agent",
-        profile=CognitiveProfile(role="r", persona="p"),
-        tools=[],
-        resilience="missing_template"
+        id="a1", type="agent", profile=CognitiveProfile(role="r", persona="p"), tools=[], resilience="missing_template"
     )
 
     graph = Graph(nodes={"a1": node}, edges=[], entry_point="a1")
 
     with pytest.raises(ManifestError, match="references missing resilience template"):
-        GraphFlow(
-            kind="GraphFlow",
-            metadata=get_meta(),
-            interface=FlowInterface(),
-            graph=graph
-        )
+        GraphFlow(kind="GraphFlow", metadata=get_meta(), interface=FlowInterface(), graph=graph)
 
     # Valid reference
-    from coreason_manifest.spec.core.resilience import RecoveryStrategy, RetryStrategy
-
     # Must use full valid SupervisionPolicy
     # handlers is list[ErrorHandler]
-    from coreason_manifest.spec.core.resilience import ErrorHandler, ErrorDomain
+    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, RetryStrategy
 
     strategy = RetryStrategy(max_attempts=3)
     handler = ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)
 
-    policy = SupervisionPolicy(
-        handlers=[handler],
-        default_strategy=strategy
-    )
+    policy = SupervisionPolicy(handlers=[handler], default_strategy=strategy)
     defs = FlowDefinitions(supervision_templates={"my_template": policy})
 
     # We must construct node WITH valid resilience ID since field is frozen/validated?
     # Or create a new node
     valid_node = AgentNode(
-        id="a1",
-        type="agent",
-        profile=CognitiveProfile(role="r", persona="p"),
-        tools=[],
-        resilience="my_template"
+        id="a1", type="agent", profile=CognitiveProfile(role="r", persona="p"), tools=[], resilience="my_template"
     )
     valid_graph = Graph(nodes={"a1": valid_node}, edges=[], entry_point="a1")
 
-    GraphFlow(
-        kind="GraphFlow",
-        metadata=get_meta(),
-        interface=FlowInterface(),
-        graph=valid_graph,
-        definitions=defs
-    )
+    GraphFlow(kind="GraphFlow", metadata=get_meta(), interface=FlowInterface(), graph=valid_graph, definitions=defs)
+
 
 def test_enum_case_insensitivity() -> None:
     # Uppercase "CRITICAL"
@@ -133,8 +115,10 @@ def test_enum_case_insensitivity() -> None:
     with pytest.raises(ValueError, match="Critical tools must require authentication"):
         ToolAccessPolicy.model_validate(data2)
 
+
 def test_circuit_breaker_exception_type() -> None:
     import time
+
     policy = CircuitBreaker(error_threshold_count=1, reset_timeout_seconds=100)
     # Use current time so timeout (current - last) < 100
     state_store: dict[str, Any] = {"n1": CircuitState(state="open", last_failure_time=time.time())}
@@ -144,6 +128,7 @@ def test_circuit_breaker_exception_type() -> None:
         check_circuit("n1", policy, state_store)
 
     assert exc.value.fault.error_code == "CRSN-EXEC-CIRCUIT-OPEN"
+
 
 def test_module_namespace_clean(tmp_path: Path) -> None:
     # File with invalid chars
@@ -156,7 +141,6 @@ def test_module_namespace_clean(tmp_path: Path) -> None:
 
     # Check module name in sys.modules
     # It should not contain "v1.2-agent"
-    import sys
 
     # We verify the module was registered with the hashed name
     # The loading function registers it, then potentially unregisters it or it stays in the jailed context
@@ -174,4 +158,3 @@ def test_module_namespace_clean(tmp_path: Path) -> None:
     # So we CANNOT access sys.modules[cls.__module__] after return.
 
     # The class still holds the module name reference.
-    pass

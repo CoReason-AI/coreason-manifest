@@ -5,7 +5,6 @@ from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
-from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
 
@@ -54,9 +53,9 @@ class ToolAccessPolicy(CoreasonModel):
 
             raw_risk = data.get("risk_level")
             is_critical = False
-            if isinstance(raw_risk, RiskLevel) and raw_risk == RiskLevel.CRITICAL:
-                is_critical = True
-            elif isinstance(raw_risk, str) and raw_risk.lower() == "critical":
+            if (isinstance(raw_risk, RiskLevel) and raw_risk == RiskLevel.CRITICAL) or (
+                isinstance(raw_risk, str) and raw_risk.lower() == "critical"
+            ):
                 is_critical = True
 
             if is_critical:
@@ -178,7 +177,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
                     error_code="CRSN-EXEC-CIRCUIT-OPEN",
                     message=f"Circuit is OPEN for node {node_id}. Execution halted.",
                     severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.RETRY,
+                    recovery_action=RecoveryAction.RETRY,
                     context={
                         "node_id": node_id,
                         "failure_count": state.failure_count,

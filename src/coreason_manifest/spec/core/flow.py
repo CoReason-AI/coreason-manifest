@@ -272,9 +272,12 @@ class GraphFlow(CoreasonModel):
 
         # Validate resilience references
         template_ids = set()
-        if self.definitions and self.definitions.supervision_templates:
-            if isinstance(self.definitions.supervision_templates, dict):
-                template_ids = set(self.definitions.supervision_templates.keys())
+        if (
+            self.definitions
+            and self.definitions.supervision_templates
+            and isinstance(self.definitions.supervision_templates, dict)
+        ):
+            template_ids = set(self.definitions.supervision_templates.keys())
 
         for node in self.graph.nodes.values():
             if isinstance(node.resilience, str) and node.resilience not in template_ids:
@@ -391,9 +394,12 @@ class LinearFlow(CoreasonModel):
     @model_validator(mode="after")
     def validate_resilience_references(self) -> "LinearFlow":
         template_ids = set()
-        if self.definitions and self.definitions.supervision_templates:
-            if isinstance(self.definitions.supervision_templates, dict):
-                template_ids = set(self.definitions.supervision_templates.keys())
+        if (
+            self.definitions
+            and self.definitions.supervision_templates
+            and isinstance(self.definitions.supervision_templates, dict)
+        ):
+            template_ids = set(self.definitions.supervision_templates.keys())
 
         for node in self.steps:
             if isinstance(node.resilience, str) and node.resilience not in template_ids:
