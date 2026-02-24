@@ -4,7 +4,7 @@ import os
 import stat
 import warnings
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any
 
 import yaml
 
@@ -178,60 +178,3 @@ class ManifestIO:
 
         except yaml.YAMLError as e:
             raise ValueError(f"Failed to parse manifest file: {e}") from e
-
-
-class ManifestDumper(yaml.SafeDumper):
-    """Custom PyYAML Dumper that enforces a strict 'Aesthetic Contract' for manifests."""
-
-    _PRIORITY_KEYS: ClassVar[list[str]] = [
-        "apiVersion",
-        "type",
-        "kind",
-        "id",
-        "name",
-        "status",
-        "metadata",
-        "interface",
-        "governance",
-    ]
-    _DEPRIORITY_KEYS: ClassVar[list[str]] = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
-
-    # SOTA: Pre-compute O(1) lookup maps to prevent O(N) list scans during sorting
-    _PRIORITY_MAP: ClassVar[dict[str, int]] = {k: i for i, k in enumerate(_PRIORITY_KEYS)}
-    _DEPRIORITY_MAP: ClassVar[dict[str, int]] = {k: i for i, k in enumerate(_DEPRIORITY_KEYS)}
-
-
-def _dict_representer(dumper: ManifestDumper, data: dict[str, Any]) -> yaml.MappingNode:
-    """Sorts dictionaries aesthetically before yielding them to the YAML engine."""
-
-    def sort_key(item: tuple[Any, Any]) -> tuple[int, int, str]:
-        key = str(item[0])
-        if key in ManifestDumper._PRIORITY_MAP:
-            return (0, ManifestDumper._PRIORITY_MAP[key], key)
-        if key in ManifestDumper._DEPRIORITY_MAP:
-            return (2, ManifestDumper._DEPRIORITY_MAP[key], key)
-        # Default middle priority. Use 0 as stable secondary sort index to maintain tuple symmetry.
-        return (1, 0, key)
-
-    # Python 3.7+ guarantees insertion order preservation
-    sorted_dict = dict(sorted(data.items(), key=sort_key))
-
-    # Safely delegate back to PyYAML's native node generation
-    return dumper.represent_mapping("tag:yaml.org,2002:map", sorted_dict)
-
-
-# Register strictly on our custom dumper to avoid polluting the global yaml.SafeDumper
-ManifestDumper.add_representer(dict, _dict_representer)
-
-
-def export_manifest(model: Any, filepath: str | Path) -> None:
-    payload = model.model_dump(exclude_none=True, by_alias=True)
-    with open(filepath, "w", encoding="utf-8") as f:
-        yaml.dump(
-            payload,
-            f,
-            Dumper=ManifestDumper,
-            default_flow_style=False,
-            sort_keys=False,
-            allow_unicode=True,
-        )

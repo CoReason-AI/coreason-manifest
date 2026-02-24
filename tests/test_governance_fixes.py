@@ -15,14 +15,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     validate_integrity,
 )
-from coreason_manifest.spec.core.nodes import (
-    AgentNode,
-    AuthorizationScope,
-    CognitiveProfile,
-    HumanNode,
-    SwarmNode,
-    SwitchNode,
-)
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwarmNode, SwitchNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
@@ -91,14 +84,7 @@ def test_linear_unguarded_computer_use() -> None:
 
 def test_linear_guarded_computer_use() -> None:
     defs = get_defs()
-    human = HumanNode(
-        id="h1",
-        metadata={},
-        type="human",
-        prompt="ok?",
-        timeout_seconds=10,
-        authorizations=[AuthorizationScope(target_node_id="a1", granted_capabilities="*")],
-    )
+    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[human, node])
@@ -219,14 +205,7 @@ def test_graph_unguarded_path() -> None:
 def test_graph_guarded_path() -> None:
     defs = get_defs()
     # Entry(Human) -> Agent(comp)
-    human = HumanNode(
-        id="h1",
-        metadata={},
-        type="human",
-        prompt="ok?",
-        timeout_seconds=10,
-        authorizations=[AuthorizationScope(target_node_id="a1", granted_capabilities="*")],
-    )
+    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(from_node="h1", to_node="a1")], entry_point="h1")
@@ -327,7 +306,7 @@ def test_gatekeeper_is_guarded_value_error() -> None:
     )
 
     # Check node2 which is NOT in flow.sequence
-    assert _is_guarded(node2, flow, required_caps=[]) is False
+    assert _is_guarded(node2, flow) is False
 
 
 def test_integrity_empty_chain() -> None:
@@ -403,7 +382,7 @@ def test_unknown_flow_type() -> None:
         pass
 
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
-    assert _is_guarded(node, UnknownFlow(), required_caps=[]) is False  # type: ignore
+    assert _is_guarded(node, UnknownFlow()) is False  # type: ignore
 
 
 if __name__ == "__main__":
@@ -416,7 +395,6 @@ def test_circuit_breaker_timeout_logic() -> None:
 
     from coreason_manifest.spec.core.governance import (
         CircuitBreaker,
-        CircuitOpenError,
         CircuitState,
         check_circuit,
     )
@@ -425,8 +403,9 @@ def test_circuit_breaker_timeout_logic() -> None:
     state_store = {"node_1": CircuitState(state="open", failure_count=1, last_failure_time=time.time())}
 
     # Case 1: Timeout NOT expired
-    with pytest.raises(CircuitOpenError):
+    with pytest.raises(ManifestError) as excinfo:
         check_circuit("node_1", policy, state_store)
+    assert excinfo.value.fault.error_code == "CRSN-EXEC-CIRCUIT-OPEN"
 
     # Case 2: Timeout EXPIRED
     # Force unwrap optional for test logic, or assert it's not None

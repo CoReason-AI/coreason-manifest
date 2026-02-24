@@ -520,14 +520,9 @@ def test_flow_cycle_detection_unreachable() -> None:
     from coreason_manifest.spec.core.flow import (
         Edge,
     )
-    from coreason_manifest.spec.core.nodes import InspectorNode
 
-    n1 = InspectorNode(
-        id="n1", type="inspector", metadata={}, target_variable="v1", criteria="c1", output_variable="o1"
-    )
-    n2 = InspectorNode(
-        id="n2", type="inspector", metadata={}, target_variable="v2", criteria="c2", output_variable="o2"
-    )
+    n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
+    n2 = PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
 
     # Cycle: n1->n2->n1
     graph = Graph(
@@ -566,12 +561,9 @@ def test_loader_resolve_refs_complex() -> None:
         main = {
             "kind": "LinearFlow",
             "metadata": {"name": "main", "version": "1.0.0", "description": "d", "tags": []},
-            "interface": {
-                "inputs": {"json_schema": {"type": "object"}},
-                "outputs": {"json_schema": {"type": "object"}},
-            },
+            # "interface" removed because LinearFlow doesn't support it in strict mode
             "sequence": [{"$ref": "step1.yaml"}],
-            "definitions": {"shared": {"$ref": "shared.yaml"}},
+            "definitions": {"schemas": {"shared": {"$ref": "shared.yaml"}}},
         }
 
         step1 = {

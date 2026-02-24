@@ -208,7 +208,7 @@ def _scan_for_dynamic_references(data: Any) -> bool:
     return False
 
 
-def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[str] | None = None) -> Any:
+def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[Path] | None = None) -> Any:
     """Recursively resolves JSON/YAML $refs while guarding against circular dependencies and jail escapes."""
     if seen is None:
         seen = set()
@@ -216,14 +216,16 @@ def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[str] 
     if isinstance(data, dict):
         if "$ref" in data:
             ref_path = data["$ref"]
-            if ref_path in seen:
-                raise RecursionError(f"Circular dependency detected: {ref_path}")
 
             target_path = (root_dir / ref_path).resolve()
+            if target_path in seen:
+                raise RecursionError(f"Circular dependency detected: {target_path}")
+
             if not target_path.is_relative_to(root_dir.resolve()):
                 raise SecurityJailViolationError(f"Security Error: Reference {ref_path} escapes the root directory.")
 
-            seen.add(ref_path)
+            # Track fully resolved path
+            seen.add(target_path)
             try:
                 ref_content_str = loader.read_text(str(target_path.relative_to(root_dir)))
                 ref_data = yaml.load(ref_content_str, Loader=UniqueKeyLoader)
@@ -333,7 +335,7 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # Generate cryptographically unique module name to prevent collisions
     path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
-    module_name = f"agent_{path_hash}"
+    module_name = f"_jail_{path_hash}"
 
     # Use context manager to enable jailed imports during spec finding and loading
     with sandbox_context(root_dir):

@@ -15,26 +15,20 @@ class StreamError(BaseModel):
     severity: Literal["low", "medium", "high", "critical"]
 
 
-class BaseStreamEnvelope(BaseModel):
-    """
-    Base class for all stream envelopes, enforcing strict configuration and stream ID.
-    """
-
+class StreamErrorEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    stream_id: str = Field(default="default", min_length=1, pattern=r"^[a-zA-Z0-9_\-\.:]+$")
-
-
-class StreamErrorEnvelope(BaseStreamEnvelope):
     op: Literal["error"]
     p: StreamError
 
 
-class StreamDeltaEnvelope(BaseStreamEnvelope):
+class StreamDeltaEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     op: Literal["delta"]
     p: str
 
 
-class StreamCloseEnvelope(BaseStreamEnvelope):
+class StreamCloseEnvelope(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     op: Literal["close"]
     p: None = None
 

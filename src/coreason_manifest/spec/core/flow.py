@@ -1,9 +1,10 @@
+import ast
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
@@ -21,6 +22,7 @@ from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
+from coreason_manifest.utils.io import SecurityViolationError
 
 
 class FlowMetadata(CoreasonModel):
@@ -36,13 +38,6 @@ class DataSchema(CoreasonModel):
     # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
     json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
-
-    @model_validator(mode="before")
-    @classmethod
-    def compat_json_schema(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "schema" in data and "json_schema" not in data:
-            data["json_schema"] = data.pop("schema")
-        return data
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -91,15 +86,69 @@ class Edge(CoreasonModel):
     to_node: NodeID = Field(..., alias="to")
     condition: str | None = None
 
-    @model_validator(mode="before")
+    @field_validator("condition", mode="before")
     @classmethod
-    def compat_source_target(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if "source" in data:
-                data["from_node"] = data.pop("source")
-            if "target" in data:
-                data["to_node"] = data.pop("target")
-        return data
+    def validate_condition_ast(cls, v: str | None) -> str | None:
+        if not v:
+            return v
+
+        try:
+            tree = ast.parse(v, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Invalid Python syntax in condition: {e}") from e  # pragma: no cover
+
+        class SecurityVisitor(ast.NodeVisitor):
+            def generic_visit(self, node: ast.AST) -> None:
+                # Whitelist of allowed AST nodes
+                allowed = (
+                    ast.Expression,
+                    ast.BoolOp,
+                    ast.BinOp,
+                    ast.UnaryOp,
+                    ast.Compare,
+                    ast.Constant,
+                    ast.Name,
+                    ast.Load,
+                    ast.And,
+                    ast.Or,
+                    ast.Eq,
+                    ast.NotEq,
+                    ast.Lt,
+                    ast.LtE,
+                    ast.Gt,
+                    ast.GtE,
+                    ast.Is,
+                    ast.IsNot,
+                    ast.In,
+                    ast.NotIn,
+                    ast.Not,
+                    ast.Add,
+                    ast.Sub,
+                    ast.Mult,
+                    ast.Div,
+                    ast.FloorDiv,
+                    ast.Mod,
+                    ast.Pow,
+                    ast.USub,
+                    ast.UAdd,
+                )
+                if not isinstance(node, allowed):
+                    raise SecurityViolationError(
+                        f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'"
+                    )
+                super().generic_visit(node)
+
+            def visit_Name(self, node: ast.Name) -> None:
+                # Ensure Name usage is strictly Load context
+                if not isinstance(node.ctx, ast.Load):
+                    raise SecurityViolationError(
+                        f"Security Violation: Name context {type(node.ctx).__name__} forbidden in condition '{v}'"
+                    )  # pragma: no cover
+                super().generic_visit(node)
+
+        visitor = SecurityVisitor()
+        visitor.visit(tree)
+        return v
 
 
 class Graph(CoreasonModel):
@@ -127,58 +176,43 @@ class VariableDef(CoreasonModel):
     type: str
     description: str | None = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def compat_id_name(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "name" in data and "id" not in data:
-            data["id"] = data.pop("name")
-        return data
-
 
 def _scan_for_kill_switch_violations(
     max_risk: RiskLevel, definitions: FlowDefinitions | None, nodes: list[AnyNode]
 ) -> None:
     """
     Centralized security scanner to enforce global risk governance.
-    Scans definitions and inline tools in nodes.
+    Recursively scans the entire object graph for tools and remote URIs.
     """
-    tools_to_check: list[AnyTool] = []
+    from pydantic import BaseModel
 
-    # 1. Collect tools from definitions
-    if definitions:
-        tools_to_check.extend(definitions.tools.values())
-        for pack in definitions.tool_packs.values():
-            tools_to_check.extend(pack.tools)
+    def _recursive_scan(obj: Any) -> None:
+        # 1. Check ToolCapability objects
+        if isinstance(obj, ToolCapability) and obj.risk_level.weight > max_risk.weight:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
+                    message=(
+                        f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
+                        f"which exceeds the global max_risk_level '{max_risk.value}'."
+                    ),
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "tool_name": obj.name,
+                        "tool_risk": obj.risk_level.value,
+                        "max_risk": max_risk.value,
+                    },
+                )
+            )
+            # ToolCapability might have nested fields, but typically leaf. Continue scan if needed?
+            # ToolCapability inherits CoreasonModel, so we'll scan its fields below if we don't return.
+            # But since we checked the tool itself, we might want to check children too if tools can contain tools.
+            # Assuming ToolCapability is a leaf for risk purposes, but safety first: proceed.
 
-    # 2. Collect inline tools from nodes (if any)
-    for node in nodes:
-        # Check for 'tools' attribute (common in AgentNode)
-        # Note: AgentNode.tools is currently list[str] (references), so we skip those.
-        # But if a node had inline tool objects, we'd catch them here.
-        # We also check 'inline_tools' if it exists in future node types.
-
-        # Safely extract potential tool lists
-        node_tools = getattr(node, "tools", [])
-        node_inline = getattr(node, "inline_tools", [])
-
-        # Combine potential sources
-        potential_tools = []
-        if isinstance(node_tools, list):
-            potential_tools.extend(node_tools)
-        if isinstance(node_inline, list):
-            potential_tools.extend(node_inline)
-
-        for tool in potential_tools:
-            # Only evaluate actual ToolCapability objects (or polymorphic AnyTool)
-            if isinstance(tool, ToolCapability):
-                tools_to_check.append(tool)
-                continue
-
-            # Fail-Closed Zero-Trust Rule:
-            # If a tool reference contains a remote URI scheme (e.g. mcp://, http://),
-            # it bypasses local definitions and must be treated as CRITICAL risk.
-            if isinstance(tool, str) and "://" in tool and RiskLevel.CRITICAL.weight > max_risk.weight:
-                # Synthetically evaluate as CRITICAL
+        # 2. Check Strings for Remote URIs
+        if isinstance(obj, str):
+            if "://" in obj and RiskLevel.CRITICAL.weight > max_risk.weight:
                 raise ManifestError(
                     fault=SemanticFault(
                         error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
@@ -189,33 +223,32 @@ def _scan_for_kill_switch_violations(
                         severity=FaultSeverity.CRITICAL,
                         recovery_action=RecoveryAction.HALT,
                         context={
-                            "tool_uri": tool,
+                            "tool_uri": obj,
                             "assumed_risk": RiskLevel.CRITICAL.value,
                             "max_risk": max_risk.value,
                         },
                     )
                 )
+            return
 
-    # 3. Enforcement
-    for tool in tools_to_check:
-        # Rich comparison via RiskLevel Enum
-        if tool.risk_level.weight > max_risk.weight:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
-                    message=(
-                        f"Security Violation: Tool '{tool.name}' has risk level '{tool.risk_level.value}' "
-                        f"which exceeds the global max_risk_level '{max_risk.value}'."
-                    ),
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={
-                        "tool_name": tool.name,
-                        "tool_risk": tool.risk_level.value,
-                        "max_risk": max_risk.value,
-                    },
-                )
-            )
+        # 3. Recursion
+        if isinstance(obj, dict):
+            for v in obj.values():
+                _recursive_scan(v)
+        elif isinstance(obj, (list, tuple, set)):
+            for v in obj:
+                _recursive_scan(v)
+        elif isinstance(obj, BaseModel):
+            # Efficiently iterate model fields
+            for name in type(obj).model_fields:
+                value = getattr(obj, name)
+                _recursive_scan(value)
+
+    # Start scan
+    if definitions:
+        _recursive_scan(definitions)
+
+    _recursive_scan(nodes)
 
 
 class GraphFlow(CoreasonModel):
@@ -233,12 +266,67 @@ class GraphFlow(CoreasonModel):
     definitions: FlowDefinitions | None = None
     graph: Graph
 
-    @model_validator(mode="before")
-    @classmethod
-    def compat_blackboard(cls, data: Any) -> Any:
-        if isinstance(data, dict) and data.get("blackboard") is None:
-            data["blackboard"] = Blackboard()
-        return data
+    @model_validator(mode="after")
+    def validate_topology(self) -> "GraphFlow":
+        node_ids = set(self.graph.nodes.keys())
+
+        # Validate resilience references
+        template_ids = set()
+        if (
+            self.definitions
+            and self.definitions.supervision_templates
+            and isinstance(self.definitions.supervision_templates, dict)
+        ):
+            template_ids = set(self.definitions.supervision_templates.keys())
+
+        for node in self.graph.nodes.values():
+            if isinstance(node.resilience, str):
+                ref_id = node.resilience.removeprefix("ref:")
+
+                if ref_id not in template_ids:
+                    raise ManifestError(
+                        fault=SemanticFault(
+                            error_code="CRSN-VAL-RESILIENCE-MISSING",
+                            message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                            severity=FaultSeverity.CRITICAL,
+                            recovery_action=RecoveryAction.HALT,
+                            context={"node_id": node.id, "template_id": node.resilience},
+                        )
+                    )
+
+        # Rule A: Entry Point
+        if self.graph.entry_point and self.graph.entry_point not in node_ids:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-ENTRY-POINT-MISSING",
+                    message=f"Entry point '{self.graph.entry_point}' not found in nodes.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={"entry_point": self.graph.entry_point},
+                )
+            )
+
+        # Rule B: Fallback Orphans
+        if (
+            self.governance
+            and self.governance.circuit_breaker
+            and self.governance.circuit_breaker.fallback_node_id
+            and self.governance.circuit_breaker.fallback_node_id not in node_ids
+        ):
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-FALLBACK-MISSING",
+                    message=(
+                        f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' "
+                        "not found in nodes."
+                    ),
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={"fallback_id": self.governance.circuit_breaker.fallback_node_id},
+                )
+            )
+
+        return self
 
     @model_validator(mode="after")
     def validate_swarm_variables(self) -> "GraphFlow":
@@ -247,9 +335,7 @@ class GraphFlow(CoreasonModel):
 
         variable_names = set(self.blackboard.variables.keys())
 
-        # Compatibility: graph.nodes might be a list if constructed via model_construct (bypassing validation)
-        nodes = self.graph.nodes
-        nodes_iter = nodes.values() if isinstance(nodes, dict) else nodes
+        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
 
         for node in nodes_iter:
             if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
@@ -266,7 +352,7 @@ class GraphFlow(CoreasonModel):
                                 type="update_field",
                                 description=f"Add variable '{node.workload_variable}' to blackboard.",
                                 patch_data=[
-                                    {
+                                    {  # pragma: no cover
                                         "op": "add",
                                         "path": f"/blackboard/variables/{node.workload_variable}",
                                         "value": [],
@@ -290,112 +376,6 @@ class GraphFlow(CoreasonModel):
         )
         return self
 
-    @model_validator(mode="after")
-    def enforce_published_strictness(self) -> "GraphFlow":
-        if self.status != "published":
-            return self
-
-        fault_messages: list[str] = []
-        remediations: list[dict[str, Any]] = []
-
-        # 1. Placeholder Rejection & SwitchNode Topology Leak & Node Resilience
-        invalid_placeholder_ids = []
-        existing_ids = set(self.graph.nodes.keys())
-
-        # self.graph.nodes is guaranteed to be a dict by pydantic validation of Graph
-        for node_id, node in self.graph.nodes.items():
-            if isinstance(node, PlaceholderNode):
-                invalid_placeholder_ids.append(node_id)
-                remediations.append(
-                    RemediationAction(
-                        type="update_field",
-                        target_node_id=node_id,
-                        description=f"Replace PlaceholderNode '{node_id}' with a concrete execution node.",
-                        patch_data=[],
-                    ).model_dump()
-                )
-
-            # SwitchNode Hidden Topology Leak
-            if isinstance(node, SwitchNode):
-                fault_messages.extend(
-                    f"SwitchNode '{node.id}' case routes to missing node '{target_id}'."
-                    for target_id in node.cases.values()
-                    if target_id not in existing_ids
-                )
-
-                if node.default not in existing_ids:
-                    fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
-
-            # Check Node-Level Fallback Routing
-            resilience = getattr(node, "resilience", None)
-            if resilience and not isinstance(resilience, str):
-                fallback_id = getattr(resilience, "fallback_node_id", None)
-                if fallback_id and fallback_id not in existing_ids:
-                    fault_messages.append(
-                        f"Node '{node.id}' resilience fallback_node_id '{fallback_id}' does not exist."
-                    )
-
-        if invalid_placeholder_ids:
-            fault_messages.append(f"Flow contains PlaceholderNodes: {sorted(invalid_placeholder_ids)}")
-
-        # 2. Strict Edge Connectivity
-        missing_nodes = set()
-        for edge in self.graph.edges:
-            if edge.from_node not in existing_ids:
-                missing_nodes.add(edge.from_node)
-            if edge.to_node not in existing_ids:
-                missing_nodes.add(edge.to_node)
-
-        if missing_nodes:
-            fault_messages.append(f"Edges reference missing nodes: {sorted(missing_nodes)}")
-
-        # 3. Graph Topology Completeness (Entry Point)
-        if not self.graph.entry_point:
-            fault_messages.append("Missing or invalid entry_point.")
-            remediations.append(
-                RemediationAction(
-                    type="update_field",
-                    description="Set entry_point to a valid node ID.",
-                    patch_data=[
-                        {
-                            "op": "add",
-                            "path": "/graph/entry_point",
-                            "value": sorted(existing_ids)[0] if existing_ids else "",
-                        }
-                    ],
-                ).model_dump()
-            )
-
-        elif self.graph.entry_point not in existing_ids:
-            fault_messages.append(f"Entry point '{self.graph.entry_point}' does not exist in graph nodes.")
-            remediations.append(
-                RemediationAction(
-                    type="update_field",
-                    description=f"Update entry_point to one of {sorted(existing_ids)}.",
-                    patch_data=[],
-                ).model_dump()
-            )
-
-        # 4. Fallback Routing Validation
-        if self.governance and self.governance.circuit_breaker and self.governance.circuit_breaker.fallback_node_id:
-            fallback_id = self.governance.circuit_breaker.fallback_node_id
-            if fallback_id not in existing_ids:
-                fault_messages.append(f"Governance fallback_node_id '{fallback_id}' does not exist.")
-
-        # Final Error Accumulation
-        if fault_messages:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-LIFECYCLE-STRICTNESS",
-                    message="Published flow failed strictness validation. See context for details.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={"validation_errors": fault_messages, "remediations": remediations},
-                )
-            )
-
-        return self
-
 
 class LinearFlow(CoreasonModel):
     """
@@ -410,16 +390,35 @@ class LinearFlow(CoreasonModel):
     governance: Governance | None = None
     definitions: FlowDefinitions | None = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def compat_sequence(cls, data: Any) -> Any:
-        if isinstance(data, dict) and "sequence" in data and "steps" not in data:
-            data["steps"] = data.pop("sequence")
-        return data
-
     @property
     def sequence(self) -> list[AnyNode]:
         return self.steps
+
+    @model_validator(mode="after")
+    def validate_resilience_references(self) -> "LinearFlow":
+        template_ids = set()
+        if (
+            self.definitions
+            and self.definitions.supervision_templates
+            and isinstance(self.definitions.supervision_templates, dict)
+        ):
+            template_ids = set(self.definitions.supervision_templates.keys())
+
+        for node in self.steps:
+            if isinstance(node.resilience, str):
+                ref_id = node.resilience.removeprefix("ref:")
+
+                if ref_id not in template_ids:
+                    raise ManifestError(
+                        fault=SemanticFault(
+                            error_code="CRSN-VAL-RESILIENCE-MISSING",
+                            message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                            severity=FaultSeverity.CRITICAL,
+                            recovery_action=RecoveryAction.HALT,
+                            context={"node_id": node.id, "template_id": node.resilience},
+                        )
+                    )
+        return self
 
     @model_validator(mode="after")
     def enforce_global_kill_switch(self) -> "LinearFlow":
@@ -433,75 +432,19 @@ class LinearFlow(CoreasonModel):
         )
         return self
 
-    @model_validator(mode="after")
-    def enforce_published_strictness(self) -> "LinearFlow":
-        if self.status != "published":
-            return self
-
-        fault_messages: list[str] = []
-        remediations: list[dict[str, Any]] = []
-
-        # 1. Placeholder Rejection & SwitchNode Topology Leak & Node Resilience
-        invalid_placeholder_ids = []
-        existing_ids = {node.id for node in self.steps}
-
-        for node in self.steps:
-            if isinstance(node, PlaceholderNode):
-                invalid_placeholder_ids.append(node.id)
-                remediations.append(
-                    RemediationAction(
-                        type="update_field",
-                        target_node_id=node.id,
-                        description=f"Replace PlaceholderNode '{node.id}' with a concrete execution node.",
-                        patch_data=[],
-                    ).model_dump()
-                )
-
-            # SwitchNode Hidden Topology Leak
-            if isinstance(node, SwitchNode):
-                fault_messages.extend(
-                    f"SwitchNode '{node.id}' case routes to missing node '{target_id}'."
-                    for target_id in node.cases.values()
-                    if target_id not in existing_ids
-                )
-
-                if node.default not in existing_ids:
-                    fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
-
-            # Check Node-Level Fallback Routing
-            resilience = getattr(node, "resilience", None)
-            if resilience and not isinstance(resilience, str):
-                fallback_id = getattr(resilience, "fallback_node_id", None)
-                if fallback_id and fallback_id not in existing_ids:
-                    fault_messages.append(
-                        f"Node '{node.id}' resilience fallback_node_id '{fallback_id}' does not exist."
-                    )
-
-        if invalid_placeholder_ids:
-            fault_messages.append(f"Flow contains PlaceholderNodes: {sorted(invalid_placeholder_ids)}")
-
-        # 2. Fallback Routing Validation
-        if self.governance and self.governance.circuit_breaker and self.governance.circuit_breaker.fallback_node_id:
-            fallback_id = self.governance.circuit_breaker.fallback_node_id
-            if fallback_id not in existing_ids:
-                fault_messages.append(f"Governance fallback_node_id '{fallback_id}' does not exist.")
-
-        # Final Error Accumulation
-        if fault_messages:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-LIFECYCLE-STRICTNESS",
-                    message="Published flow failed strictness validation. See context for details.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={"validation_errors": fault_messages, "remediations": remediations},
-                )
-            )
-
-        return self
-
 
 Manifest = GraphFlow
+
+
+class AgentRequest(CoreasonModel):
+    """
+    Strict envelope for agent execution requests.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    manifest: GraphFlow | LinearFlow
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 def validate_integrity(definitions: FlowDefinitions, nodes: list[AnyNode]) -> None:

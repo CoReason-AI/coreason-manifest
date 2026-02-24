@@ -5,8 +5,9 @@ import json
 import math
 import uuid
 from abc import ABC, abstractmethod
+from collections import defaultdict, deque
 from datetime import UTC, datetime
-from typing import Any, ClassVar, TypedDict
+from typing import Any, TypedDict
 
 from pydantic import BaseModel
 
@@ -58,8 +59,6 @@ class CanonicalHashingStrategy(HashingStrategy):
     - UTF-8 enforcement (no escapes).
     """
 
-    _EXCLUDED_KEYS: ClassVar[frozenset[str]] = frozenset({"execution_hash", "signature", "integrity_hash"})
-
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
         """
         Prepares an object for RFC 8785 Canonical JSON serialization.
@@ -68,18 +67,10 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Universal Hash Sanitization:
             # Strip modern keys (execution_hash, signature, __*)
             # Also strip None values (Architectural requirement)
-            excluded = self._EXCLUDED_KEYS
-
             return {
                 k: self._recursive_sort_and_sanitize(v)
-                # 1. Inline the generator to allow immediate Garbage Collection.
-                # 2. Pre-filter `None` values (O(N)) to prevent wasting CPU cycles sorting them (O(N log N)).
-                for k, v in sorted(
-                    ((str(orig_k), orig_v) for orig_k, orig_v in obj.items() if orig_v is not None),
-                    key=lambda item: item[0],
-                )
-                # 3. Apply final exclusion filters using the optimized local variable and safe string methods.
-                if k not in excluded and not k.startswith("__")
+                for k, v in sorted(obj.items())
+                if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
@@ -99,9 +90,8 @@ class CanonicalHashingStrategy(HashingStrategy):
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
         if isinstance(obj, float):
             # RFC 8785: If number is integer, represent as integer.
-            if obj.is_integer():
-                return int(obj)
-            # For other floats, verify finiteness.
+            # Directive: Avoid mutating floats to integers natively to preserve type info.
+            # However, ensure NaN/Inf are rejected.
             if not math.isfinite(obj):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
             return obj
@@ -154,7 +144,11 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     raise TypeError(f"Could not reconstruct payload from {type(node)}. Must be dict or Pydantic model.")
 
 
-def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
+def verify_merkle_proof(
+    trace: list[Any],
+    trusted_root_hash: str | None = None,
+    trusted_parent_hashes: set[str] | None = None,
+) -> bool:
     """
     Verifies the cryptographic integrity of a DAG trace.
     Mathematically reconstructs the DAG topology to prove absence of parallel hallucinations.
@@ -162,25 +156,76 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
     if not trace:
         return False
 
-    verified_hashes = set()
+    payloads = []
 
-    for i, node in enumerate(trace):
-        # 1. Verify Content Integrity
+    # 1. Reconstruct payloads
+    for node in trace:
         try:
             payload = reconstruct_payload(node)
+            payloads.append(payload)
         except TypeError:
             return False
 
-        # Design Rule: Always use v2
-        computed_hash = compute_hash(payload)
+    # 2. Build Dependency Graph for Topological Sort
+    nodes_by_hash = {}
+    for p in payloads:
+        h = p.get("execution_hash")
+        if h:
+            nodes_by_hash[h] = p
 
+    adj_list = defaultdict(list)
+    in_degree = defaultdict(int)
+
+    for p in payloads:
+        # Determine dependencies (parents)
+        parent_hashes = p.get("parent_hashes", [])
+        parent_hash = p.get("parent_hash")
+
+        parents = set()
+        if parent_hashes:
+            parents.update(parent_hashes)
+        if parent_hash:
+            parents.add(parent_hash)
+
+        # Only consider parents that are within the trace for sorting
+        internal_parents = [pid for pid in parents if pid in nodes_by_hash]
+
+        in_degree[id(p)] = len(internal_parents)
+
+        for pid in internal_parents:
+            adj_list[pid].append(p)
+
+    # 3. Topological Sort (Kahn's Algorithm)
+    queue = deque([p for p in payloads if in_degree[id(p)] == 0])
+    sorted_trace = []
+
+    while queue:
+        node = queue.popleft()
+        sorted_trace.append(node)
+
+        node_hash = node.get("execution_hash")
+        if node_hash and node_hash in adj_list:
+            for child in adj_list[node_hash]:
+                in_degree[id(child)] -= 1
+                if in_degree[id(child)] == 0:
+                    queue.append(child)
+
+    if len(sorted_trace) != len(payloads):
+        # Cycle detected
+        return False
+
+    # 4. Verification
+    verified_hashes = set()
+
+    for i, payload in enumerate(sorted_trace):
+        # Verify Content Integrity
+        computed_hash = compute_hash(payload)
         stored_hash = payload.get("execution_hash")
 
         if not stored_hash or stored_hash != computed_hash:
             return False
 
-        # 2. Extract declared parents (Topology Verification)
-        # Support both Linear (parent_hash) and DAG (parent_hashes)
+        # Verify Linkage
         parent_hashes = payload.get("parent_hashes", [])
         parent_hash = payload.get("parent_hash")
 
@@ -190,21 +235,22 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
         if parent_hash:
             expected_parents.add(parent_hash)
 
-        # 3. Verify Linkage
         if not expected_parents:
             # Genesis Node
             if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
                 return False
         else:
-            # Child Node: Every declared parent must be present in the VERIFIED pool.
+            # Child Node: Every declared parent must be present in the VERIFIED pool or be the trusted root.
             for prev_hash in expected_parents:
                 if trusted_root_hash and prev_hash == trusted_root_hash:
+                    continue
+                if trusted_parent_hashes and prev_hash in trusted_parent_hashes:
                     continue
                 if prev_hash not in verified_hashes:
                     # Topology Violation: Node claims a parent that hasn't been verified.
                     return False
 
-        # 4. Add to verified set (Topological Progress)
+        # Add to verified set
         verified_hashes.add(stored_hash)
 
     return True

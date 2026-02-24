@@ -91,8 +91,9 @@ def test_topology_violation_order() -> None:
     n2 = create_node("n2", parent=n1.execution_hash)
 
     # Topological sort violation (child before parent)
+    # verify_merkle_proof now topologically sorts the trace internally, so this should pass
     trace = [n2, n1]
-    assert not verify_merkle_proof(trace), "Out-of-order trace should fail verification"
+    assert verify_merkle_proof(trace), "Out-of-order trace should pass verification (sorted internally)"
 
 
 def test_content_tampering() -> None:
@@ -110,3 +111,16 @@ def test_content_tampering() -> None:
 
     trace = [tampered_data]
     assert not verify_merkle_proof(trace), "Tampered content should fail hash check"
+
+
+def test_integrity_cycle_detection() -> None:
+    """Cover verify_merkle_proof cycle detection (integrity.py:215)."""
+    # Create a cycle: A -> B -> A
+    # We mock the hashes to create a cycle in parent pointers
+
+    node_a = {"execution_hash": "hash_a", "parent_hashes": ["hash_b"], "node_id": "a"}
+    node_b = {"execution_hash": "hash_b", "parent_hashes": ["hash_a"], "node_id": "b"}
+
+    trace = [node_a, node_b]
+    # Should return False due to cycle
+    assert verify_merkle_proof(trace) is False

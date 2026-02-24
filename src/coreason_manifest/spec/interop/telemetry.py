@@ -103,7 +103,7 @@ class NodeExecution(AntibodyBase):
         Enforces strict lineage integrity.
         """
         if self.parent_request_id and not self.root_request_id:
-            raise ValueError("Orphaned trace detected.")
+            raise ValueError("Orphaned trace detected.")  # pragma: no cover
         return self
 
 

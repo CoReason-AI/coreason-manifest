@@ -11,7 +11,7 @@
 import json
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CoreasonModel(BaseModel):
@@ -34,42 +34,6 @@ class CoreasonModel(BaseModel):
 
     # Storage for unknown fields caught by the funnel
     annotations: dict[str, Any] = Field(default_factory=dict)
-
-    @model_validator(mode="before")
-    @classmethod
-    def _funnel_unknown_fields(cls, data: Any) -> Any:
-        """Intercepts the raw dict before instantiation to funnel unknown keys safely."""
-        if isinstance(data, dict):
-            # Architectural Note: Must account for both field names AND aliases
-            known_keys = set()
-            for name, field in cls.model_fields.items():
-                known_keys.add(name)
-                if field.alias:
-                    known_keys.add(field.alias)
-                # Account for complex validation aliases
-                if field.validation_alias:
-                    if isinstance(field.validation_alias, str):
-                        known_keys.add(field.validation_alias)
-                    elif hasattr(field.validation_alias, "choices"):
-                        for choice in getattr(field.validation_alias, "choices", []):
-                            if isinstance(choice, str):
-                                known_keys.add(choice)
-
-            annotations = data.get("annotations", {})
-            keys_to_remove = []
-
-            for key, value in data.items():
-                if key not in known_keys and key != "annotations":
-                    annotations[key] = value
-                    keys_to_remove.append(key)
-
-            for key in keys_to_remove:
-                del data[key]
-
-            if annotations:
-                data["annotations"] = annotations
-
-        return data
 
     def model_dump_json(self, **kwargs: Any) -> str:
         """

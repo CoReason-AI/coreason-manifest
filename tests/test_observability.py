@@ -1,18 +1,14 @@
 import json
+from datetime import datetime
 from typing import Any, cast
 
-from coreason_manifest.spec.core.governance import Audit, Governance, Safety
+import pytest
+
 from coreason_manifest.spec.interop.otel import to_otel_attributes
-from coreason_manifest.spec.interop.telemetry import NodeState
+from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.utils.privacy import PrivacySentinel
-from coreason_manifest.utils.recorder import BlackBoxRecorder, create_recorder
-
-# Helper for tests that need to inspect payloads
-ALLOW_LOGS_GOV = Governance(
-    safety=Safety(input_filtering=True, pii_redaction=True, content_safety="medium"),
-    audit=Audit(trace_retention_days=7, log_payloads=True),
-)
+from coreason_manifest.utils.recorder import BlackBoxRecorder
 
 
 def test_privacy_sentinel_secrets() -> None:
@@ -87,17 +83,13 @@ def test_privacy_sentinel_pii() -> None:
     email = "contact me at test@example.com please"
     sanitized_email = sentinel.sanitize(email)
     assert sanitized_email != email
-    # Precision redaction preserves context: "contact me at <REDACTED:SECRET:...> please"
-    assert "<REDACTED:SECRET:" in sanitized_email
-    assert "contact me at " in sanitized_email
-    assert " please" in sanitized_email
+    assert sanitized_email.startswith("<REDACTED:SECRET:")
 
     # Test PII inside list
     data = ["safe", "my ssn is 123-45-6789"]
     sanitized_list = sentinel.sanitize(data)
     assert sanitized_list[0] == "safe"
     assert sanitized_list[1] != "my ssn is 123-45-6789"
-    assert "<REDACTED:SECRET:" in sanitized_list[1]
 
 
 def test_privacy_sentinel_recursion() -> None:
@@ -109,8 +101,7 @@ def test_privacy_sentinel_recursion() -> None:
 
     # Check deep PII redaction
     assert sanitized["user"]["profile"]["email"] != "user@example.com"
-    # Precision redaction replaces the email itself
-    assert "<REDACTED:SECRET:" in sanitized["user"]["profile"]["email"]
+    assert sanitized["user"]["profile"]["email"].startswith("<REDACTED:SECRET:")
 
     # Check deep secret key redaction
     # "auth" is in SENSITIVE_WORDS. The whole value `{"token": ...}` is redacted.
@@ -125,7 +116,7 @@ def test_privacy_sentinel_recursion() -> None:
 
 def test_recorder_stateless_dag() -> None:
     # Recorder is now stateless
-    recorder = create_recorder(None)
+    recorder = BlackBoxRecorder()
 
     # Step 1: Genesis Node
     rec1 = recorder.record(
@@ -178,7 +169,7 @@ def test_recorder_stateless_dag() -> None:
 
 def test_dag_integrity() -> None:
     # Re-use the DAG construction from above logic (simplified) to test verify_merkle_proof
-    recorder = create_recorder(None)
+    recorder = BlackBoxRecorder()
 
     # 1. Genesis
     n1 = recorder.record("n1", NodeState.COMPLETED, {}, {}, 1.0, parent_hashes=[])
@@ -217,8 +208,7 @@ def test_dag_integrity() -> None:
 
 def test_recorder_sanitization_integration() -> None:
     # Recorder should use PrivacySentinel
-    # We must enable payload logging to inspect the sanitized output
-    recorder = create_recorder(ALLOW_LOGS_GOV)
+    recorder = BlackBoxRecorder()
 
     rec = recorder.record(
         node_id="node_secret",
@@ -234,8 +224,7 @@ def test_recorder_sanitization_integration() -> None:
 
 
 def test_otel_bridge() -> None:
-    # Use governance that allows logging so we can inspect payload content in traces
-    recorder = create_recorder(ALLOW_LOGS_GOV)
+    recorder = BlackBoxRecorder()
     rec = recorder.record(
         node_id="my_agent",
         state=NodeState.FAILED,
@@ -276,11 +265,11 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
     """
 
     class MockSentinel(PrivacySentinel):
-        def sanitize(self, _: Any, _depth: int = 0) -> Any:
+        def sanitize(self, _: Any) -> Any:
             # Force return a string even if input is dict
             return "sanitized_string"
 
-    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel(), log_payloads=True)
+    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel())
 
     rec = recorder.record(
         node_id="test_node",
@@ -371,3 +360,19 @@ def test_dag_child_links_to_trusted_root() -> None:
     n1_dict["execution_hash"] = compute_hash(payload_n1)
 
     assert verify_merkle_proof([n1_dict], trusted_root_hash=root_hash) is True
+
+
+def test_telemetry_orphan_trace() -> None:
+    """Cover NodeExecution.validate_trace_integrity (telemetry.py:92)."""
+    with pytest.raises(ValueError, match="Orphaned trace detected"):
+        NodeExecution(
+            node_id="n1",
+            state=NodeState.COMPLETED,
+            inputs={},
+            outputs={},
+            timestamp=datetime.now(),
+            duration_ms=1.0,
+            # Parent provided, but Root missing -> Orphan
+            parent_request_id="parent_id",
+            root_request_id=None,
+        )

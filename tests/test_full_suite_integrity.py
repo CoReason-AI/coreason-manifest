@@ -1,4 +1,5 @@
 from coreason_manifest.builder import NewLinearFlow
+from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.validator import validate_flow
 from coreason_manifest.utils.visualizer import to_mermaid
@@ -11,11 +12,11 @@ def test_full_suite_integrity() -> None:
     # 1. Build a simple LinearFlow using the Builder
     builder = NewLinearFlow("IntegrityCheck", version="1.0.0", description="Verifying Core Integrity")
 
-    # Use AgentNode to pass published flow validation
-    # LinearFlow lacks blackboard, so InspectorNode validation fails on missing variables.
-    builder.define_profile("p1", "role", "persona")
-    builder.add_agent_ref("step-1", "p1")
-    builder.add_agent_ref("step-2", "p1")
+    node1 = PlaceholderNode(id="step-1", metadata={}, required_capabilities=["logging"], type="placeholder")
+    node2 = PlaceholderNode(id="step-2", metadata={}, required_capabilities=["alerting"], type="placeholder")
+
+    builder.add_step(node1)
+    builder.add_step(node2)
 
     flow = builder.build()
 
