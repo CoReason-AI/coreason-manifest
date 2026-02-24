@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.nodes import AgentNode, AuthorizationScope, HumanNode, SwarmNode
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,
@@ -143,7 +143,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 timeout_seconds=300,
                 interaction_mode="blocking",
                 metadata={},
-                authorizes_node_id=node.id,
+                authorizations=[AuthorizationScope(target_node_id=node.id, granted_capabilities="*")],
             )
 
             # Construct Patch
@@ -340,10 +340,17 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         if target_idx == -1:
             return False
 
-        for i in range(target_idx - 1, -1, -1):
+        # SOTA Enforce Adjacency or strict distance
+        max_topological_distance = 3
+
+        start_scan = max(0, target_idx - max_topological_distance)
+        for i in range(target_idx - 1, start_scan - 1, -1):
             node = flow.steps[i]
-            if isinstance(node, HumanNode) and node.authorizes_node_id == target_node.id:
-                return True
+            if isinstance(node, HumanNode) and node.authorizations:
+                # Check if target_node.id is in authorizations
+                for auth in node.authorizations:
+                    if auth.target_node_id == target_node.id:
+                        return True
         return False
 
     if isinstance(flow, GraphFlow):
@@ -360,11 +367,13 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         for edge in flow.graph.edges:
             adj[edge.from_node].append(edge.to_node)
 
-        guards = {
-            nid
-            for nid, node in flow.graph.nodes.items()
-            if isinstance(node, valid_guards) and node.authorizes_node_id == target_node.id
-        }
+        guards = set()
+        for nid, node in flow.graph.nodes.items():
+            if isinstance(node, valid_guards) and node.authorizations:
+                for auth in node.authorizations:
+                    if auth.target_node_id == target_node.id:
+                        guards.add(nid)
+                        break
 
         if entry_id:
             queue = [entry_id]

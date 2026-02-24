@@ -1,5 +1,5 @@
 from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
+from coreason_manifest.spec.core.nodes import AgentNode, AuthorizationScope, CognitiveProfile, HumanNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
@@ -45,7 +45,7 @@ def test_critical_tool_requires_guard() -> None:
         prompt="Approve?",
         timeout_seconds=60,
         interaction_mode="blocking",
-        authorizes_node_id="agent-1",
+        authorizations=[AuthorizationScope(target_node_id="agent-1", granted_capabilities="*")],
     )
 
     flow_guarded = LinearFlow(

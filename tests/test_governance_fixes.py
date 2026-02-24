@@ -15,7 +15,14 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     validate_integrity,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwarmNode, SwitchNode
+from coreason_manifest.spec.core.nodes import (
+    AgentNode,
+    AuthorizationScope,
+    CognitiveProfile,
+    HumanNode,
+    SwarmNode,
+    SwitchNode,
+)
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
@@ -84,7 +91,14 @@ def test_linear_unguarded_computer_use() -> None:
 
 def test_linear_guarded_computer_use() -> None:
     defs = get_defs()
-    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10, authorizes_node_id="a1")
+    human = HumanNode(
+        id="h1",
+        metadata={},
+        type="human",
+        prompt="ok?",
+        timeout_seconds=10,
+        authorizations=[AuthorizationScope(target_node_id="a1", granted_capabilities="*")],
+    )
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[human, node])
@@ -205,7 +219,14 @@ def test_graph_unguarded_path() -> None:
 def test_graph_guarded_path() -> None:
     defs = get_defs()
     # Entry(Human) -> Agent(comp)
-    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10, authorizes_node_id="a1")
+    human = HumanNode(
+        id="h1",
+        metadata={},
+        type="human",
+        prompt="ok?",
+        timeout_seconds=10,
+        authorizations=[AuthorizationScope(target_node_id="a1", granted_capabilities="*")],
+    )
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(from_node="h1", to_node="a1")], entry_point="h1")

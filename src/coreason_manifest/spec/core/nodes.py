@@ -147,6 +147,14 @@ class PlannerNode(Node):
     )
 
 
+class AuthorizationScope(CoreasonModel):
+    target_node_id: str = Field(..., description="The ID of the node being authorized.")
+    granted_capabilities: list[str] | Literal["*"] = Field(
+        default="*",
+        description="Specific capabilities granted, or '*' for all.",
+    )
+
+
 class HumanNode(Node):
     """
     Human-in-the-Loop interaction node.
@@ -155,8 +163,9 @@ class HumanNode(Node):
     """
 
     type: Literal["human"] = "human"
-    authorizes_node_id: str | None = Field(
-        default=None, description="The specific Node ID this human interaction is authorizing."
+    authorizations: list[AuthorizationScope] | None = Field(
+        default=None,
+        description="List of nodes and specific capabilities this human interaction authorizes.",
     )
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
     timeout_seconds: Annotated[

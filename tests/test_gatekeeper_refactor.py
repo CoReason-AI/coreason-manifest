@@ -2,7 +2,7 @@ from typing import Any, cast
 
 from coreason_manifest.spec.core.engines import StandardReasoning
 from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
+from coreason_manifest.spec.core.nodes import AgentNode, AuthorizationScope, CognitiveProfile, HumanNode
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
 
 
@@ -22,13 +22,16 @@ def create_agent(node_id: str, tools: list[str] | None = None) -> AgentNode:
 
 
 def create_human(node_id: str, authorizes: str | None = None) -> HumanNode:
+    auth_list = None
+    if authorizes:
+        auth_list = [AuthorizationScope(target_node_id=authorizes, granted_capabilities="*")]
     return HumanNode(
         id=node_id,
         type="human",
         prompt="Approve?",
         timeout_seconds=300,
         interaction_mode="blocking",
-        authorizes_node_id=authorizes,
+        authorizations=auth_list,
     )
 
 
@@ -113,14 +116,16 @@ def test_validate_policy_auto_remediation() -> None:
     assert patch_data is not None
     assert isinstance(patch_data, list)
 
-    # Verify the inserted node has authorizes_node_id
+    # Verify the inserted node has authorizations
     # patch_data is a list of ops. For LinearFlow, it's an 'add' op.
     add_op = patch_data[0]
     # Use cast to help mypy know this dict has string keys
     inserted_node = cast("dict[str, Any]", add_op["value"])
 
     assert inserted_node["type"] == "human"
-    assert inserted_node["authorizes_node_id"] == "agent_crit"
+    auths = inserted_node["authorizations"]
+    assert len(auths) == 1
+    assert auths[0]["target_node_id"] == "agent_crit"
 
 
 def test_validate_policy_auto_remediation_graph() -> None:
@@ -152,4 +157,6 @@ def test_validate_policy_auto_remediation_graph() -> None:
     inserted_node = cast("dict[str, Any]", add_node_op["value"])
 
     assert inserted_node["type"] == "human"
-    assert inserted_node["authorizes_node_id"] == "agent_crit"
+    auths = inserted_node["authorizations"]
+    assert len(auths) == 1
+    assert auths[0]["target_node_id"] == "agent_crit"
