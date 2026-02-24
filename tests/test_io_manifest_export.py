@@ -9,12 +9,12 @@ import yaml
 # Import the code to test
 # Assuming src is in python path or installed
 try:
-    from coreason_manifest.utils.io import export_manifest, ManifestDumper
+    from coreason_manifest.utils.io import ManifestDumper, export_manifest
 except ImportError:
     import sys
 
     sys.path.append(str(Path(__file__).parents[2] / "src"))
-    from coreason_manifest.utils.io import export_manifest, ManifestDumper
+    from coreason_manifest.utils.io import ManifestDumper, export_manifest
 
 
 class MockPydanticModel:
@@ -175,15 +175,12 @@ def test_export_manifest_mixed_types() -> None:
             with contextlib.suppress(OSError):
                 os.remove(tmp_path)
 
+
 def test_manifest_dumper_coverage() -> None:
     """Test edge cases for ManifestDumper to ensure full coverage."""
     # Test 1: Trigger 'best_style = False'
     # Use a key that requires quoting/complexity
-    complex_key_data = {
-        "simple": "val",
-        "key:with:colons": "val2",
-        "multiline\nkey": "val3"
-    }
+    complex_key_data = {"simple": "val", "key:with:colons": "val2", "multiline\nkey": "val3"}
 
     with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmp:
         tmp_path = Path(tmp.name)
@@ -192,12 +189,7 @@ def test_manifest_dumper_coverage() -> None:
         tmp.close()
         # Direct dump with ManifestDumper
         with open(tmp_path, "w", encoding="utf-8") as f:
-            yaml.dump(
-                complex_key_data,
-                f,
-                Dumper=ManifestDumper,
-                sort_keys=False
-            )
+            yaml.dump(complex_key_data, f, Dumper=ManifestDumper, sort_keys=False)
 
         with open(tmp_path, encoding="utf-8") as f:
             content = f.read()
@@ -221,7 +213,7 @@ def test_manifest_dumper_coverage() -> None:
     try:
         tmp.close()
         with open(tmp_path, "w", encoding="utf-8") as f:
-            yaml.dump(data, f, Dumper=ManifestDumper) # default_flow_style is None implicitly
+            yaml.dump(data, f, Dumper=ManifestDumper)  # default_flow_style is None implicitly
 
         # Also try explicitly None
         with open(tmp_path, "w", encoding="utf-8") as f:
@@ -232,8 +224,10 @@ def test_manifest_dumper_coverage() -> None:
             with contextlib.suppress(OSError):
                 os.remove(tmp_path)
 
+
 class ComplexKey:
     """A custom class to serve as a non-scalar key."""
+
     def __init__(self, name: str):
         self.name = name
 
@@ -253,9 +247,11 @@ class ComplexKey:
     def __str__(self) -> str:
         return self.name
 
+
 def represent_complex_key(dumper: yaml.BaseDumper, data: ComplexKey) -> yaml.Node:
     # Represent as a sequence (non-scalar)
-    return dumper.represent_sequence('tag:yaml.org,2002:seq', [data.name])
+    return dumper.represent_sequence("tag:yaml.org,2002:seq", [data.name])
+
 
 def test_manifest_dumper_non_scalar_key() -> None:
     """Test with a non-scalar key to trigger 'best_style = False' via isinstance check."""
@@ -264,9 +260,7 @@ def test_manifest_dumper_non_scalar_key() -> None:
     yaml.add_representer(ComplexKey, represent_complex_key, Dumper=ManifestDumper)
 
     key = ComplexKey("my_complex_key")
-    data = {
-        key: "value"
-    }
+    data = {key: "value"}
 
     with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmp:
         tmp_path = Path(tmp.name)
