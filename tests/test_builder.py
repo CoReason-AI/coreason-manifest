@@ -106,11 +106,10 @@ def test_linear_builder_invalid() -> None:
 def test_graph_builder_invalid() -> None:
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
-    # This triggers "Entry point 'missing_entry_point' does not exist in graph nodes"
-    # which is raised by enforce_published_strictness (ManifestError)
+    # This triggers strict validation error
     with pytest.raises(ManifestError) as exc:
         builder.build()
-    assert "CRSN-VAL-LIFECYCLE-ENTRYPOINT" in str(exc.value)
+    assert "CRSN-VAL-LIFECYCLE-STRICTNESS" in str(exc.value)
 
 
 def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
@@ -316,7 +315,7 @@ def test_builder_graph_missing_entry_point() -> None:
     with pytest.raises(ManifestError) as exc:
         builder.build()
 
-    assert "CRSN-VAL-LIFECYCLE-ENTRYPOINT" in str(exc.value)
+    assert "CRSN-VAL-LIFECYCLE-STRICTNESS" in str(exc.value)
 
 
 def test_builder_graph_validation_failure() -> None:

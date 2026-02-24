@@ -166,7 +166,7 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     with pytest.raises(ManifestError) as exc:
         lf.build()
 
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-FALLBACK"
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
     assert "missing_node" in exc.value.fault.message
 
     # 2. Invalid Supervision Fallback

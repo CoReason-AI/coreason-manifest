@@ -2,7 +2,7 @@ import pytest
 
 from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
-from coreason_manifest.spec.core.nodes import AgentNode, PlaceholderNode
+from coreason_manifest.spec.core.nodes import AgentNode, PlaceholderNode, SwitchNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.validator import validate_flow
 
@@ -25,7 +25,8 @@ def test_graph_flow_strictness_accumulated_placeholders() -> None:
     msg = exc.value.fault.message
     assert "p1" in msg
     assert "p2" in msg
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-PLACEHOLDER"
+    assert "Flow contains PlaceholderNodes" in msg
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
     # Check context has remediation for both
     assert len(exc.value.fault.context["remediations"]) == 2
 
@@ -46,7 +47,8 @@ def test_graph_flow_strictness_dangling_edges() -> None:
             graph=graph,
         )
 
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-EDGE"
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+    assert "Edges reference missing nodes" in exc.value.fault.message
     assert "missing" in exc.value.fault.message
 
 
@@ -66,7 +68,8 @@ def test_graph_flow_entry_point_remediation() -> None:
             graph=graph,
         )
 
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-ENTRYPOINT"
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+    assert "Missing or invalid entry_point" in exc.value.fault.message
     # Check context for suggestion
     assert "a1" in str(exc.value.fault.context)
 
@@ -87,7 +90,8 @@ def test_graph_flow_entry_point_invalid() -> None:
             graph=graph,
         )
 
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-ENTRYPOINT"
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+    assert "does not exist in graph nodes" in exc.value.fault.message
 
 
 def test_graph_flow_fallback_validation() -> None:
@@ -111,8 +115,8 @@ def test_graph_flow_fallback_validation() -> None:
             governance=gov,
         )
 
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-FALLBACK"
-    assert "missing_fallback" in exc.value.fault.message
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+    assert "Governance fallback_node_id 'missing_fallback' does not exist" in exc.value.fault.message
 
 
 def test_linear_flow_strictness_accumulated_placeholders() -> None:
@@ -128,7 +132,8 @@ def test_linear_flow_strictness_accumulated_placeholders() -> None:
     msg = exc.value.fault.message
     assert "p1" in msg
     assert "p2" in msg
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-PLACEHOLDER"
+    assert "Flow contains PlaceholderNodes" in msg
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
 
 
 def test_linear_flow_fallback_validation() -> None:
@@ -150,7 +155,8 @@ def test_linear_flow_fallback_validation() -> None:
             governance=gov,
         )
 
-    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-FALLBACK"
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+    assert "Governance fallback_node_id 'missing_fallback' does not exist" in exc.value.fault.message
 
 
 def test_validator_dangling_edge_draft() -> None:
@@ -219,5 +225,60 @@ def test_graph_flow_strictness_dangling_edge_source() -> None:
             metadata=FlowMetadata(name="t", version="1"), interface=FlowInterface(), graph=graph, status="published"
         )
 
-    assert "CRSN-VAL-LIFECYCLE-DANGLING-EDGE" in str(excinfo.value)
+    assert "CRSN-VAL-LIFECYCLE-STRICTNESS" in str(excinfo.value)
+    assert "Edges reference missing nodes" in str(excinfo.value)
     assert "missing" in str(excinfo.value)
+
+def test_switch_node_topology_leak() -> None:
+    """
+    Test that SwitchNode case targets and default are validated in published flows.
+    """
+    s1 = SwitchNode(
+        id="s1",
+        type="switch",
+        metadata={},
+        variable="var1",
+        cases={"case1": "missing_target"},
+        default="missing_default"
+    )
+    graph = Graph(nodes={"s1": s1}, edges=[], entry_point="s1")
+
+    with pytest.raises(ManifestError) as exc:
+        GraphFlow(
+            kind="GraphFlow",
+            status="published",
+            metadata=FlowMetadata(name="test", version="1.0.0"),
+            interface=FlowInterface(),
+            graph=graph,
+        )
+
+    msg = exc.value.fault.message
+    assert "SwitchNode 's1' case routes to missing node 'missing_target'" in msg
+    assert "SwitchNode 's1' default routes to missing node 'missing_default'" in msg
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+
+def test_linear_flow_switch_node_topology_leak() -> None:
+    """
+    Test that LinearFlow validates SwitchNode targets.
+    """
+    s1 = SwitchNode(
+        id="s1",
+        type="switch",
+        metadata={},
+        variable="var1",
+        cases={"case1": "missing_target"},
+        default="missing_default"
+    )
+
+    with pytest.raises(ManifestError) as exc:
+        LinearFlow(
+            kind="LinearFlow",
+            status="published",
+            metadata=FlowMetadata(name="test", version="1.0.0"),
+            steps=[s1],
+        )
+
+    msg = exc.value.fault.message
+    assert "SwitchNode 's1' case routes to missing node 'missing_target'" in msg
+    assert "SwitchNode 's1' default routes to missing node 'missing_default'" in msg
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
