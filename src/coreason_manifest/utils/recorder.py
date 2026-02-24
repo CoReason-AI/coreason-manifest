@@ -120,9 +120,7 @@ class BlackBoxRecorder:
         )
 
 
-def create_recorder(
-    governance_config: Governance | None = None, system_salt: str | None = None
-) -> BlackBoxRecorder:
+def create_recorder(governance_config: Governance | None = None, system_salt: str | None = None) -> BlackBoxRecorder:
     """
     Factory function to create a BlackBoxRecorder with strict dependency injection.
     Resolves the privacy configuration from the Governance model.

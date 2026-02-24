@@ -39,7 +39,7 @@ def test_recorder_explicit_opt_in() -> None:
     """
     gov = Governance(
         safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
-        audit=Audit(trace_retention_days=7, log_payloads=True)
+        audit=Audit(trace_retention_days=7, log_payloads=True),
     )
     recorder = create_recorder(gov)
 
@@ -69,7 +69,7 @@ def test_recorder_explicit_opt_out() -> None:
     """
     gov = Governance(
         safety=Safety(input_filtering=True, pii_redaction=False, content_safety="medium"),
-        audit=Audit(trace_retention_days=7, log_payloads=True)
+        audit=Audit(trace_retention_days=7, log_payloads=True),
     )
     recorder = create_recorder(gov)
 
@@ -96,7 +96,7 @@ def test_recorder_omits_payloads() -> None:
     """
     gov = Governance(
         safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
-        audit=Audit(log_payloads=False, trace_retention_days=7)
+        audit=Audit(log_payloads=False, trace_retention_days=7),
     )
     recorder = create_recorder(gov)
 
@@ -106,7 +106,7 @@ def test_recorder_omits_payloads() -> None:
         inputs={"sensitive": "data"},
         outputs={"also": "sensitive"},
         duration_ms=10.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     expected = {"_omitted": "policy_log_payloads_false"}
@@ -122,7 +122,7 @@ def test_recorder_salts_hashes() -> None:
     """
     gov = Governance(
         safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
-        audit=Audit(log_payloads=True, trace_retention_days=7)
+        audit=Audit(log_payloads=True, trace_retention_days=7),
     )
 
     # Instance 1
@@ -133,7 +133,7 @@ def test_recorder_salts_hashes() -> None:
         inputs={"secret": "my_secret_value"},
         outputs={},
         duration_ms=1.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     # Instance 2
@@ -144,7 +144,7 @@ def test_recorder_salts_hashes() -> None:
         inputs={"secret": "my_secret_value"},
         outputs={},
         duration_ms=1.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     hash1 = rec1.inputs["secret"]
@@ -163,7 +163,7 @@ def test_recorder_deterministic_salt() -> None:
     """
     gov = Governance(
         safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
-        audit=Audit(log_payloads=True, trace_retention_days=7)
+        audit=Audit(log_payloads=True, trace_retention_days=7),
     )
     salt = "my_fixed_salt"
 
@@ -174,7 +174,7 @@ def test_recorder_deterministic_salt() -> None:
         inputs={"secret": "same_value"},
         outputs={},
         duration_ms=1.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     r2 = create_recorder(gov, system_salt=salt)
@@ -184,7 +184,7 @@ def test_recorder_deterministic_salt() -> None:
         inputs={"secret": "same_value"},
         outputs={},
         duration_ms=1.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     assert rec1.inputs["secret"] == rec2.inputs["secret"]
