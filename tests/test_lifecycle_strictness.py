@@ -229,6 +229,7 @@ def test_graph_flow_strictness_dangling_edge_source() -> None:
     assert "Edges reference missing nodes" in str(excinfo.value)
     assert "missing" in str(excinfo.value)
 
+
 def test_switch_node_topology_leak() -> None:
     """
     Test that SwitchNode case targets and default are validated in published flows.
@@ -239,7 +240,7 @@ def test_switch_node_topology_leak() -> None:
         metadata={},
         variable="var1",
         cases={"case1": "missing_target"},
-        default="missing_default"
+        default="missing_default",
     )
     graph = Graph(nodes={"s1": s1}, edges=[], entry_point="s1")
 
@@ -257,6 +258,7 @@ def test_switch_node_topology_leak() -> None:
     assert "SwitchNode 's1' default routes to missing node 'missing_default'" in msg
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
 
+
 def test_linear_flow_switch_node_topology_leak() -> None:
     """
     Test that LinearFlow validates SwitchNode targets.
@@ -267,7 +269,7 @@ def test_linear_flow_switch_node_topology_leak() -> None:
         metadata={},
         variable="var1",
         cases={"case1": "missing_target"},
-        default="missing_default"
+        default="missing_default",
     )
 
     with pytest.raises(ManifestError) as exc:

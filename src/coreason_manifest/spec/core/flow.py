@@ -317,9 +317,11 @@ class GraphFlow(CoreasonModel):
 
             # SwitchNode Hidden Topology Leak
             if isinstance(node, SwitchNode):
-                for target_id in node.cases.values():
-                    if target_id not in existing_ids:
-                        fault_messages.append(f"SwitchNode '{node.id}' case routes to missing node '{target_id}'.")
+                fault_messages.extend(
+                    f"SwitchNode '{node.id}' case routes to missing node '{target_id}'."
+                    for target_id in node.cases.values()
+                    if target_id not in existing_ids
+                )
 
                 if node.default not in existing_ids:
                     fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
@@ -448,9 +450,11 @@ class LinearFlow(CoreasonModel):
 
             # SwitchNode Hidden Topology Leak
             if isinstance(node, SwitchNode):
-                for target_id in node.cases.values():
-                    if target_id not in existing_ids:
-                        fault_messages.append(f"SwitchNode '{node.id}' case routes to missing node '{target_id}'.")
+                fault_messages.extend(
+                    f"SwitchNode '{node.id}' case routes to missing node '{target_id}'."
+                    for target_id in node.cases.values()
+                    if target_id not in existing_ids
+                )
 
                 if node.default not in existing_ids:
                     fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
