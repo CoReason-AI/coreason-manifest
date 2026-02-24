@@ -3,10 +3,31 @@ import pytest
 from coreason_manifest.builder import NewGraphFlow
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.utils.validator import validate_flow
+from coreason_manifest.spec.core.flow import Graph, GraphFlow
 
 
 def create_placeholder(node_id: str) -> PlaceholderNode:
     return PlaceholderNode(id=node_id, metadata={}, type="placeholder", required_capabilities=[])
+
+
+def build_flow_without_validation(builder: NewGraphFlow) -> GraphFlow:
+    # Helper to construct GraphFlow directly from builder state, bypassing builder.build() which validates
+    ep = builder._entry_point
+    if not ep:
+        ep = next(iter(builder._nodes.keys())) if builder._nodes else "missing_entry_point"
+
+    graph = Graph(nodes=builder._nodes, edges=builder._edges, entry_point=ep)
+
+    return GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=builder.metadata,
+        interface=builder.interface,
+        blackboard=builder.blackboard,
+        graph=graph,
+        definitions=builder._build_definitions(),
+        governance=builder.governance,
+    )
 
 
 def test_valid_dag_passes() -> None:
@@ -22,7 +43,7 @@ def test_valid_dag_passes() -> None:
     builder.connect("B", "C")
     builder.set_entry_point("A")
 
-    flow = builder.build()
+    flow = build_flow_without_validation(builder)
     errors = validate_flow(flow)
     assert not errors
 
@@ -39,12 +60,14 @@ def test_simple_execution_cycle() -> None:
     builder.connect("B", "A")
     builder.set_entry_point("A")
 
-    with pytest.raises(ValueError, match="Topology Integrity Error: Infinite execution cycle detected") as excinfo:
-        builder.build()
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
 
-    error_msg = str(excinfo.value)
-    assert "A" in error_msg
-    assert "B" in error_msg
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+
+    assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
+    assert "A" in cycle_errors[0]
+    assert "B" in cycle_errors[0]
 
 
 def test_self_referencing_node() -> None:
@@ -57,11 +80,12 @@ def test_self_referencing_node() -> None:
     builder.connect("A", "A")
     builder.set_entry_point("A")
 
-    with pytest.raises(ValueError, match="Topology Integrity Error: Infinite execution cycle detected") as excinfo:
-        builder.build()
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
 
-    error_msg = str(excinfo.value)
-    assert "A" in error_msg
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
+    assert "A" in cycle_errors[0]
 
 
 def test_isolated_cycle() -> None:
@@ -79,9 +103,10 @@ def test_isolated_cycle() -> None:
     builder.connect("D", "C")
     builder.set_entry_point("A")
 
-    with pytest.raises(ValueError, match="Topology Integrity Error: Infinite execution cycle detected") as excinfo:
-        builder.build()
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
 
-    error_msg = str(excinfo.value)
-    assert "C" in error_msg
-    assert "D" in error_msg
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
+    assert "C" in cycle_errors[0]
+    assert "D" in cycle_errors[0]

@@ -300,8 +300,6 @@ def test_validator_string_reference_skip() -> None:
 
 def test_fallback_cycle_complex_policy() -> None:
     """Test cycle detection with SupervisionPolicy (complex)."""
-    from coreason_manifest.utils.validator import _validate_fallback_cycles
-
     # A -> B (via default)
     # B -> A (via handler)
 
@@ -315,8 +313,15 @@ def test_fallback_cycle_complex_policy() -> None:
     node_a = AgentNode(id="a", metadata={}, type="agent", profile="p", tools=[], resilience=policy_a)
     node_b = AgentNode(id="b", metadata={}, type="agent", profile="p", tools=[], resilience=policy_b)
 
-    errors = _validate_fallback_cycles([node_a, node_b])
-    assert any("Fallback cycle detected" in e for e in errors)
+    # Use unified cycle validation (mocking a graph with no explicit edges)
+    from coreason_manifest.spec.core.flow import Graph
+    from coreason_manifest.utils.validator import _validate_unified_cycles
+
+    # Need a graph for unified validation
+    dummy_graph = Graph(nodes={"a": node_a, "b": node_b}, edges=[], entry_point="a")
+    errors = _validate_unified_cycles([node_a, node_b], dummy_graph)
+
+    assert any("Unified execution/fallback cycle detected" in e for e in errors)
 
 
 def test_recursive_schema_strict_validation() -> None:

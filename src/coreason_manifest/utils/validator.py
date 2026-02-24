@@ -60,10 +60,18 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids))
 
-    errors.extend(_validate_fallback_cycles(nodes))
-
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
+        # Implicitly construct a graph for linear flow to validate unified cycles (Switch + Fallback)
+        # Linear steps have implicit sequential edges, but SwitchNode can jump.
+        # However, LinearFlow validation traditionally relied on _validate_fallback_cycles.
+        # We will create a dummy graph with just nodes to validate implicit/fallback cycles.
+        # Note: Sequential cycles are not checked here but are impossible by definition unless Switch jumps back.
+        # Ideally we would map sequence to edges, but for now we follow the instruction to use the new function.
+        # We pass an empty edge list, so only implicit Switch/Fallback cycles are checked.
+        temp_graph = Graph(nodes={n.id: n for n in nodes}, edges=[])
+        errors.extend(_validate_unified_cycles(nodes, temp_graph))
+
         errors.extend(_validate_linear_integrity(flow))
         node_ids = {n.id for n in flow.steps}
         errors.extend(_validate_unique_ids(flow.steps))
@@ -75,10 +83,10 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
             errors.append("GraphFlow Error: Graph must contain at least one node.")
 
         errors.extend(_validate_graph_integrity(flow.graph))
-        errors.extend(_validate_execution_cycles(flow.graph))
 
         # Helper for extracting nodes for generic logic checks
         nodes_list = list(flow.graph.nodes.values())
+        errors.extend(_validate_unified_cycles(nodes_list, flow.graph))
         node_ids = set(flow.graph.nodes.keys())
 
         errors.extend(_validate_unique_ids(nodes_list))
@@ -423,81 +431,50 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     return errors
 
 
-def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
-    errors: list[str] = []
-    # Build adjacency list for fallback references
-    adj: dict[str, list[str]] = {n.id: [] for n in nodes}
-
-    for node in nodes:
-        if not node.resilience or isinstance(node.resilience, str):
-            continue
-
-        policy = node.resilience
-        strategies: list[ResilienceStrategy] = []
-
-        # Expand policy if complex
-        if hasattr(policy, "handlers"):
-            strategies.extend([h.strategy for h in policy.handlers])
-            if hasattr(policy, "default_strategy") and policy.default_strategy:
-                strategies.append(policy.default_strategy)
-        else:
-            strategies.append(policy)
-
-        for strategy in strategies:
-            if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
-                adj[node.id].append(strategy.fallback_node_id)
-
-    # Detect cycles using DFS
-    visited = set()
-    recursion_stack = set()
-
-    # Track cycle paths for reporting
-    path_stack: list[str] = []
-
-    def dfs(u: str) -> bool:
-        visited.add(u)
-        recursion_stack.add(u)
-        path_stack.append(u)
-
-        for v in adj[u]:
-            if v not in visited:
-                if dfs(v):
-                    return True
-            elif v in recursion_stack:
-                # Cycle detected
-                path_stack.append(v)
-                return True
-
-        path_stack.pop()
-        recursion_stack.remove(u)
-        return False
-
-    for node_id in adj:
-        if node_id not in visited and dfs(node_id):
-            # Extract the cycle portion
-            start_index = path_stack.index(path_stack[-1])
-            cycle = path_stack[start_index:]
-            cycle_str = " -> ".join(cycle)
-            errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
-            # Clear stacks for next component (optional, but DFS handles components)
-            path_stack.clear()
-
-    return errors
-
-
-def _validate_execution_cycles(graph: Graph) -> list[str]:
+def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
     """
-    Enforces Strict DAG Topology on the execution graph.
-    Uses Tarjan's algorithm to detect Strongly Connected Components (SCCs).
+    Enforces Strict DAG Topology on the unified execution graph.
+    Combines explicit edges, implicit routing edges (SwitchNode), and fallback edges.
+    Uses Tarjan's algorithm to detect unified cycles.
     """
     errors: list[str] = []
-    # Build adjacency list from edges
+    # Build adjacency list
     # Initialize all nodes to empty list to handle disconnected nodes safely
-    adj: dict[str, list[str]] = {node_id: [] for node_id in graph.nodes}
+    adj: dict[str, list[str]] = {node.id: [] for node in nodes}
+
+    # 1. Explicit Edges
     for edge in graph.edges:
         if edge.from_node in adj:
             adj[edge.from_node].append(edge.to_node)
-        # Note: If edge.from_node is not in adj (integrity error), it's handled by _validate_graph_integrity
+
+    # 2. Implicit & Fallback Edges
+    for node in nodes:
+        # SwitchNode routing
+        if isinstance(node, SwitchNode):
+            # Add all possible case transitions
+            for target_id in node.cases.values():
+                if target_id in adj:
+                    adj[node.id].append(target_id)
+            # Add default transition
+            if node.default in adj:
+                adj[node.id].append(node.default)
+
+        # Fallback routing
+        if node.resilience and not isinstance(node.resilience, str):
+            policy = node.resilience
+            strategies: list[ResilienceStrategy] = []
+
+            # Expand policy if complex
+            if hasattr(policy, "handlers"):
+                strategies.extend([h.strategy for h in policy.handlers])
+                if hasattr(policy, "default_strategy") and policy.default_strategy:
+                    strategies.append(policy.default_strategy)
+            else:
+                strategies.append(policy)  # type: ignore
+
+            for strategy in strategies:
+                if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
+                    adj[node.id].append(strategy.fallback_node_id)
 
     sccs = get_strongly_connected_components(adj)
 
@@ -509,15 +486,15 @@ def _validate_execution_cycles(graph: Graph) -> list[str]:
         if len(scc) > 1:
             is_cycle = True
         elif len(scc) == 1:
-            node = scc[0]
-            if node in adj and node in adj[node]:
+            node_id = scc[0]
+            if node_id in adj and node_id in adj[node_id]:
                 is_cycle = True
 
         if is_cycle:
             # Sort for deterministic error message
             cycle_nodes = ", ".join(sorted(scc))
             errors.append(
-                f"Topology Integrity Error: Infinite execution cycle detected involving nodes: [{cycle_nodes}]. "
+                f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: [{cycle_nodes}]. "
                 "Execution graphs must be strict Directed Acyclic Graphs (DAGs)."
             )
 

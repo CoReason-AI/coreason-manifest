@@ -281,7 +281,8 @@ def test_fallback_cycle_detection() -> None:
     # Architectural Update: The error message changed because builders might now invoke strict Gatekeeper policies
     # or the underlying graph validation behavior shifted.
     # The actual failure log showed: "Resilience Error: Fallback cycle detected..."
-    with pytest.raises(ValueError, match="Resilience Error: Fallback cycle detected"):
+    # Update: With unified cycle detection, the error message is now "Unified execution/fallback cycle detected"
+    with pytest.raises(ValueError, match="Unified execution/fallback cycle detected"):
         gf.build()
 
 
