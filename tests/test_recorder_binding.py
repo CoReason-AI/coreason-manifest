@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 from coreason_manifest.spec.core.governance import Audit, Governance, Safety
@@ -265,3 +267,60 @@ def test_recorder_precision_redaction_preserves_context() -> None:
     # The surrounding operational context MUST survive
     assert "Please contact " in sanitized_prompt
     assert " regarding order 12345." in sanitized_prompt
+
+
+# Test 9: Tuple and Set Sanitization
+def test_recorder_sanitizes_tuples_and_sets() -> None:
+    """Ensure tuples and sets do not silently bypass the sentinel."""
+    # Explicitly enable logging to verify content
+    gov = Governance(
+        safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
+        audit=Audit(log_payloads=True, trace_retention_days=7),
+    )
+    recorder = create_recorder(gov)
+
+    record = recorder.record(
+        node_id="iterable_node",
+        state=NodeState.COMPLETED,
+        inputs={"emails": ("admin@example.com", "user@example.com")},
+        outputs={},
+        duration_ms=5.0,
+        parent_hashes=[],
+    )
+
+    sanitized_list = record.inputs["emails"]
+    # Coerced to list during sanitization (or just returned as list of redacted strings)
+    # The current implementation returns a list comprehension: [self.sanitize(item) for item in data]
+    assert isinstance(sanitized_list, list)
+    assert "admin@example.com" not in sanitized_list[0]
+    assert "<REDACTED:SECRET:" in sanitized_list[0]
+
+
+# Test 10: Cyclic Recursion DoS Protection
+def test_recorder_prevents_cyclic_recursion_dos() -> None:
+    """Ensure self-referential dictionaries do not crash the telemetry layer."""
+    # Explicitly enable logging
+    gov = Governance(
+        safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
+        audit=Audit(log_payloads=True, trace_retention_days=7),
+    )
+    recorder = create_recorder(gov)
+
+    # Create a toxic self-referential payload
+    toxic_payload: dict[str, Any] = {"safe_key": "safe_value"}
+    toxic_payload["cycle"] = toxic_payload
+
+    record = recorder.record(
+        node_id="toxic_node",
+        state=NodeState.COMPLETED,
+        inputs=toxic_payload,
+        outputs={},
+        duration_ms=5.0,
+        parent_hashes=[],
+    )
+
+    # Assert the engine survived and truncated the depth
+    assert record.inputs["safe_key"] == "safe_value"
+    # The exact location of the truncation depends on the depth counter,
+    # but it must securely execute without a RecursionError.
+    assert "<REDACTED:MAX_DEPTH_EXCEEDED>" in str(record.inputs)

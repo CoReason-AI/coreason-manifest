@@ -47,10 +47,12 @@ class PrivacySentinel:
         if custom_sensitive_keys:
             self.sensitive_words.update(custom_sensitive_keys)
 
-    def sanitize(self, data: Any) -> Any:
-        """
-        Recursively sanitizes the input data.
-        """
+    def sanitize(self, data: Any, depth: int = 0) -> Any:
+        """Recursively sanitizes the input data with structural limits."""
+        # SOTA DoS Protection: Break infinite cyclic references
+        if depth > 100:
+            return "<REDACTED:MAX_DEPTH_EXCEEDED>"
+
         # Ensure Pydantic objects are converted to dicts before evaluation
         if hasattr(data, "model_dump") and callable(data.model_dump):
             data = data.model_dump()
@@ -60,14 +62,18 @@ class PrivacySentinel:
                 data = data.dict()
 
         if isinstance(data, dict):
-            return {k: self._sanitize_kv(k, v) for k, v in data.items()}
-        if isinstance(data, list):
-            return [self.sanitize(item) for item in data]
+            return {k: self._sanitize_kv(k, v, depth + 1) for k, v in data.items()}
+
+        # SOTA: Capture all iterables to prevent silent tuple/set bypasses
+        if isinstance(data, (list, tuple, set)):
+            return [self.sanitize(item, depth + 1) for item in data]
+
         if isinstance(data, str):
             return self._sanitize_string(data)
+
         return data
 
-    def _sanitize_kv(self, key: str, value: Any) -> Any:
+    def _sanitize_kv(self, key: str, value: Any, depth: int) -> Any:
         """
         Sanitizes a key-value pair.
         Checks the key for secret terms first.
@@ -90,8 +96,8 @@ class PrivacySentinel:
             if any(part in self.sensitive_words for part in parts):
                 return self._redact(str(value))
 
-        # 2. Recurse or check value
-        return self.sanitize(value)
+        # 2. Recurse or check value (pass the depth counter)
+        return self.sanitize(value, depth)
 
     def _sanitize_string(self, text: str) -> str:
         """Checks a string value for PII and precision-redacts only the matched data."""
