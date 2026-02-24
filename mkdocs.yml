@@ -24,7 +24,7 @@ nav:
   - Home: index.md
   - Getting Started:
       - Quick Start: usage.md
-      - CLI Reference: cli.md
+      - CLI Reference: tools/cli.md
   - Agents:
       - Cognitive Profiles: agents/cognitive_profiles.md
       - Reasoning Engines: agents/reasoning_engines.md
@@ -41,8 +41,10 @@ nav:
       - Telemetry & Lineage: interop/telemetry.md
       - Cryptographic Integrity: interop/integrity.md
       - Real-Time Streams: interop/streams.md
-  - Developer Guides:
-      - Building Agents: builder_sdk.md
+  - Developer Tools:
+      - Builder API: tools/builder_api.md
+      - Visualizer: tools/visualizer.md
+      - CLI: tools/cli.md
   - API Reference:
       - Agents & Tools: reference/agents.md
       - Orchestration: reference/orchestration.md

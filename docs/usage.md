@@ -116,7 +116,7 @@ from coreason_manifest import generate_mermaid_graph
 print(generate_mermaid_graph(manifest))
 ```
 
-For more details, see [Visualization Tools](visualization.md).
+For more details, see [Visualization Tools](tools/visualizer.md).
 
 ### Using the CLI
 
@@ -130,7 +130,7 @@ coreason viz examples/my_agent.py:agent
 coreason run examples/my_agent.py:agent --inputs '{"query": "hello"}' --mock
 ```
 
-For full documentation, see [CLI Reference](cli.md).
+For full documentation, see [CLI Reference](tools/cli.md).
 
 ## Advanced Documentation
 
