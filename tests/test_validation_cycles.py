@@ -1,6 +1,6 @@
 from coreason_manifest.builder import NewGraphFlow
 from coreason_manifest.spec.core.flow import Graph, GraphFlow
-from coreason_manifest.spec.core.nodes import PlaceholderNode
+from coreason_manifest.spec.core.nodes import PlaceholderNode, SwitchNode
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -108,3 +108,33 @@ def test_isolated_cycle() -> None:
     assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
     assert "C" in cycle_errors[0]
     assert "D" in cycle_errors[0]
+
+
+def test_switch_node_cycle() -> None:
+    """
+    Test cycle detection involving a SwitchNode via implicit routing.
+    A (Switch) -> B (via case) -> A
+    """
+    builder = NewGraphFlow("test_switch_cycle", "1.0.0", "desc")
+    # Need a variable for SwitchNode
+    from coreason_manifest.spec.core.flow import VariableDef
+
+    builder.set_blackboard(variables={"v": VariableDef(type="string")})
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
+
+    # A is SwitchNode: if v="x" -> B
+    builder.add_node(SwitchNode(id="A", metadata={}, type="switch", variable="v", cases={"x": "B"}, default="B"))
+
+    # B is Placeholder: B -> A
+    builder.add_node(create_placeholder("B"))
+    builder.connect("B", "A")
+
+    builder.set_entry_point("A")
+
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
+
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert len(cycle_errors) > 0, f"Expected cycle error involving SwitchNode, got: {errors}"
+    assert "A" in cycle_errors[0]
+    assert "B" in cycle_errors[0]
