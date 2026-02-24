@@ -244,7 +244,7 @@ def test_coverage_validator_reflexion_mismatch() -> None:
     # Run validation logic manually
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, set())
+    errors = _validate_supervision(node, set(), None)
     # Note: _validate_supervision checks node.resilience, which we set.
     assert any("uses ReflexionStrategy but is of type 'invalid_type'" in e for e in errors)
 
@@ -262,7 +262,7 @@ def test_coverage_validator_escalation_empty_queue() -> None:
 
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, set())
+    errors = _validate_supervision(node, set(), None)
     assert any("empty queue_name" in e for e in errors)
 
 
@@ -282,7 +282,7 @@ def test_supervision_policy_complex_validation() -> None:
 
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, {"a1"})
+    errors = _validate_supervision(node, {"a1"}, None)
 
     # Should catch both missing IDs
     assert any("missing ID 'missing_handler'" in e for e in errors)
@@ -294,7 +294,7 @@ def test_validator_string_reference_skip() -> None:
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], resilience="ref:template")
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, set())
+    errors = _validate_supervision(node, set(), None)
     assert len(errors) == 0
 
 
