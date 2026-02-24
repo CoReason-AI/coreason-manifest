@@ -489,7 +489,7 @@ def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[str]:
 
     adj_set = _build_unified_adjacency_map(flow)
     # SOTA FIX: Sort the sets into lists to guarantee 100% deterministic DFS traversal
-    adj_list = {k: sorted(list(adj_set[k])) for k in sorted(adj_set.keys())}
+    adj_list = {k: sorted(adj_set[k]) for k in sorted(adj_set.keys())}
 
     sccs = get_strongly_connected_components(adj_list)
 
