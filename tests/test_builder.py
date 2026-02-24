@@ -98,20 +98,12 @@ def test_linear_builder_invalid() -> None:
 
 
 def test_graph_builder_invalid() -> None:
+    from coreason_manifest.spec.interop.exceptions import ManifestError
+
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
-    # This triggers "Entry point 'missing_entry_point' not found" because
-    # build() sets default entry point if empty?
-    # Actually, if nodes empty, entry_point defaults to "missing_entry_point"?
-    # No, logic says `entry_point = self._entry_point or (next(iter(self._nodes)) ... else "missing_entry_point")`
-    # So it becomes "missing_entry_point".
-    # Then `validate_dag` runs (if published? no, draft).
-    # Wait, `validate_dag` checks edge integrity ALWAYS.
-    # `if self.graph.entry_point not in node_ids: raise ValueError(...)`
-    # So it raises "Entry point 'missing_entry_point' not found in nodes."
-    # The original test expected "Validation failed".
-    # I will update the match string.
-    with pytest.raises(ValueError, match="Graph must contain at least one node"):
+
+    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING"):
         builder.build()
 
 
@@ -306,11 +298,12 @@ def test_builder_graph_auto_entry_point() -> None:
 def test_builder_graph_missing_entry_point() -> None:
     """Cover NewGraphFlow.build() missing entry point logic."""
     from coreason_manifest.builder import NewGraphFlow
+    from coreason_manifest.spec.interop.exceptions import ManifestError
 
     builder = NewGraphFlow("Empty Graph")
     # No nodes added
 
-    with pytest.raises(ValueError, match="Graph must contain at least one node"):
+    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING"):
         builder.build()
 
 

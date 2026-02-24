@@ -561,12 +561,9 @@ def test_loader_resolve_refs_complex() -> None:
         main = {
             "kind": "LinearFlow",
             "metadata": {"name": "main", "version": "1.0.0", "description": "d", "tags": []},
-            "interface": {
-                "inputs": {"json_schema": {"type": "object"}},
-                "outputs": {"json_schema": {"type": "object"}},
-            },
+            # "interface" removed because LinearFlow doesn't support it in strict mode
             "sequence": [{"$ref": "step1.yaml"}],
-            "definitions": {"shared": {"$ref": "shared.yaml"}},
+            "definitions": {"schemas": {"shared": {"$ref": "shared.yaml"}}},
         }
 
         step1 = {

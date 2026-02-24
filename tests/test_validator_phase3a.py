@@ -224,19 +224,21 @@ def test_validate_duplicate_node_ids() -> None:
 
 def test_validate_graph_flow_empty() -> None:
     """Test validation for empty graph."""
+    import pytest
+    from coreason_manifest.spec.interop.exceptions import ManifestError
+
     # Graph allows empty nodes if structurally sound (no cycles possible)
     # Entry point missing is checked in verify_integrity (strict) or validate_flow
     graph = Graph(nodes={}, edges=[], entry_point="missing")
 
-    flow = GraphFlow(
-        kind="GraphFlow",
-        metadata=create_metadata(),
-        interface=create_interface(),
-        blackboard=None,
-        graph=graph,
-    )
-    errors = validate_flow(flow)
-    assert any("Graph must contain at least one node" in e for e in errors)
+    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING"):
+        GraphFlow(
+            kind="GraphFlow",
+            metadata=create_metadata(),
+            interface=create_interface(),
+            blackboard=None,
+            graph=graph,
+        )
 
 
 def test_validate_graph_flow_key_id_mismatch() -> None:

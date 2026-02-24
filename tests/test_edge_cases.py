@@ -40,9 +40,10 @@ def test_flow_backwards_compatibility() -> None:
     assert ds_compat.json_schema == {"type": "string"}
 
     # Edge: source/target -> from_node/to_node
-    edge = Edge(source="a", target="b")  # type: ignore[call-arg]
-    assert edge.from_node == "a"
-    assert edge.to_node == "b"
+    # Removed backward compatibility: source/target now raise ValidationError
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        Edge(source="a", target="b")  # type: ignore[call-arg]
 
     # VariableDef: name -> id
     var = VariableDef(name="v1", type="string")  # type: ignore[call-arg]
