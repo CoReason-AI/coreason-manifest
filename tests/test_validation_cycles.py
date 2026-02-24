@@ -264,3 +264,51 @@ def test_valid_global_circuit_breaker_passes() -> None:
     # SOTA FIX: With unified adjacency map, 'C' is reachable via global fallback,
     # so it shouldn't be an orphan. Assert absolutely NO errors are returned.
     assert not errors, f"Unexpected errors: {errors}"
+
+
+def test_referenced_template_cycle() -> None:
+    """Test that a cycle introduced via a referenced supervision template is caught."""
+    builder = NewGraphFlow("template_cycle", "1.0.0", "desc")
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
+
+    node_a = create_placeholder("A")
+    # Node B references a template
+    node_b = AgentNode(id="B", type="agent", metadata={}, resilience="ref:loop_to_a", profile="p", tools=[])
+
+    builder.add_node(node_a)
+    builder.add_node(node_b)
+    builder.connect("A", "B")
+    builder.set_entry_point("A")
+    builder.define_profile("p", "r", "p")
+
+    # Manually inject the supervision template BEFORE flow construction to satisfy Pydantic validation
+    from coreason_manifest.spec.core.resilience import FallbackStrategy, SupervisionPolicy
+
+    # We must construct definitions first because GraphFlow validator checks it
+    definitions = builder._build_definitions()
+    object.__setattr__(
+        definitions,
+        "supervision_templates",
+        {"loop_to_a": SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="A"))},
+    )
+
+    # Use a modified version of build_flow_without_validation that accepts pre-built definitions
+    ep = builder._entry_point
+    graph = Graph(nodes=builder._nodes, edges=builder._edges, entry_point=ep)
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=builder.metadata,
+        interface=builder.interface,
+        blackboard=builder.blackboard,
+        graph=graph,
+        definitions=definitions,
+        governance=builder.governance,
+    )
+
+    errors = validate_flow(flow)
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert len(cycle_errors) > 0, f"Failed to catch Trojan cycle in referenced template. Errors: {errors}"
+    assert "A" in cycle_errors[0]
+    assert "B" in cycle_errors[0]

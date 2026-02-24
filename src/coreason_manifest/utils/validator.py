@@ -59,7 +59,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
         errors.extend(_validate_referential_integrity(nodes, None))
 
     for node in nodes:
-        errors.extend(_validate_supervision(node, valid_ids))
+        errors.extend(_validate_supervision(node, valid_ids, flow.definitions))
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
@@ -384,7 +384,7 @@ def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefin
     return errors
 
 
-def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
+def _validate_supervision(node: AnyNode, valid_ids: set[str], definitions: FlowDefinitions | None) -> list[str]:
     errors: list[str] = []
 
     # Check unified resilience field on any node type
@@ -392,12 +392,12 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     if not policy:
         return errors
 
-    # If policy is a string reference, validation happens in validate_referential_integrity.
-    if isinstance(policy, str):
+    resolved_policy = _resolve_resilience_policy(policy, definitions)
+    if not resolved_policy:
         return errors
 
     # Collect strategies
-    strategies = _extract_strategies(policy)
+    strategies = _extract_strategies(resolved_policy)
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -421,6 +421,17 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
             errors.append(f"Resilience Error: Node '{node.id}' uses EscalationStrategy with empty queue_name.")
 
     return errors
+
+
+def _resolve_resilience_policy(policy: Any, definitions: FlowDefinitions | None) -> Any:
+    """Resolves string reference policies from the definitions block."""
+    if isinstance(policy, str):
+        if policy.startswith("ref:") and definitions and definitions.supervision_templates:
+            tmpl_id = policy.removeprefix("ref:")
+            # Return the resolved template, or None if it's missing (missing refs are caught by referential_integrity)
+            return definitions.supervision_templates.get(tmpl_id)
+        return None
+    return policy
 
 
 def _extract_strategies(policy: Any) -> list[ResilienceStrategy]:
@@ -487,12 +498,14 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
             if node.default in adj:
                 adj[node.id].add(node.default)
 
-        # Local Fallback routing
-        if node.resilience and not isinstance(node.resilience, str):
-            strategies = _extract_strategies(node.resilience)
-            for strategy in strategies:
-                if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
-                    adj[node.id].add(strategy.fallback_node_id)
+        # Local Fallback routing (Resolving templates to catch Trojan cycles)
+        if node.resilience:
+            resolved_policy = _resolve_resilience_policy(node.resilience, getattr(flow, "definitions", None))
+            if resolved_policy:
+                strategies = _extract_strategies(resolved_policy)
+                for strategy in strategies:
+                    if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
+                        adj[node.id].add(strategy.fallback_node_id)
 
     return adj
 
