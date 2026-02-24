@@ -1,12 +1,11 @@
 from coreason_manifest.builder import NewGraphFlow
-from coreason_manifest.spec.core.engines import ComputerUseReasoning
-from coreason_manifest.spec.core.flow import FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.interop.compliance import ErrorCatalog
+from coreason_manifest.spec.core.flow import GraphFlow, Graph, FlowMetadata, FlowInterface, AnyNode
+from coreason_manifest.spec.core.engines import ComputerUseReasoning
 from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.spec.interop.compliance import ErrorCatalog
 
-
-def test_builder_set_entry_point():
+def test_builder_set_entry_point() -> None:
     """Cover builder.py set_entry_point method."""
     builder = NewGraphFlow("test", "1.0.0", "desc")
     builder.add_agent(AgentNode(id="node1", profile=CognitiveProfile(role="r", persona="p")))
@@ -17,11 +16,10 @@ def test_builder_set_entry_point():
     flow = builder.build()
     assert flow.graph.entry_point == "node1"
 
-
-def test_gatekeeper_published_dangerous_unreachable():
+def test_gatekeeper_published_dangerous_unreachable() -> None:
     """Cover gatekeeper.py published mode with dangerous unreachable nodes."""
     # Create a flow manually to ensure status="published" and dangerous node
-    nodes = {
+    nodes: dict[str, AnyNode] = {
         "node1": AgentNode(id="node1", profile=CognitiveProfile(role="assistant", persona="p")),
         "node2": AgentNode(
             id="node2",
@@ -29,17 +27,23 @@ def test_gatekeeper_published_dangerous_unreachable():
                 role="hacker",
                 persona="p",
                 reasoning=ComputerUseReasoning(
-                    model="gpt-4", interaction_mode="native_os", coordinate_system="normalized_0_1"
-                ),
-            ),
-        ),
+                    model="gpt-4",
+                    interaction_mode="native_os",
+                    coordinate_system="normalized_0_1"
+                )
+            )
+        )
     }
 
     flow = GraphFlow(
         status="published",
         metadata=FlowMetadata(name="Test Flow", version="1.0.0"),
         interface=FlowInterface(),
-        graph=Graph(nodes=nodes, edges=[], entry_point="node1"),
+        graph=Graph(
+            nodes=nodes,
+            edges=[],
+            entry_point="node1"
+        )
     )
 
     reports = validate_policy(flow)
