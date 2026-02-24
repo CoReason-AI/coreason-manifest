@@ -324,3 +324,44 @@ def test_recorder_prevents_cyclic_recursion_dos() -> None:
     # The exact location of the truncation depends on the depth counter,
     # but it must securely execute without a RecursionError.
     assert "<REDACTED:MAX_DEPTH_EXCEEDED>" in str(record.inputs)
+
+
+# Test 11: Unserializable Crash Prevention (Boundary Test)
+def test_recorder_prevents_unserializable_crash() -> None:
+    """
+    Verify that BlackBoxRecorder does not crash the CanonicalHasher when
+    fed bytes, MagicMocks, or unknown custom classes.
+    """
+    from unittest.mock import MagicMock
+
+    class UnsafeDatabaseConnection:
+        pass
+
+    # Enable logging so inputs are processed by sentinel
+    gov = Governance(
+        safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
+        audit=Audit(log_payloads=True, trace_retention_days=7),
+    )
+    recorder = create_recorder(gov)
+
+    # The inputs contain objects that natively crash json.dumps / CanonicalHasher
+    toxic_inputs = {
+        "binary_data": b"secret_file_bytes",
+        "db_conn": UnsafeDatabaseConnection(),
+        "test_mock": MagicMock(),
+    }
+
+    # If the boundary fails, .record() will raise a TypeError from integrity.py
+    record = recorder.record(
+        node_id="boundary_test",
+        state=NodeState.COMPLETED,
+        inputs=toxic_inputs,
+        outputs={},
+        duration_ms=5.0,
+        parent_hashes=[],
+    )
+
+    sanitized = record.inputs
+    assert sanitized["binary_data"] == "<REDACTED:BYTES_PAYLOAD>"
+    assert sanitized["db_conn"] == "<UNSERIALIZABLE_TYPE: UnsafeDatabaseConnection>"
+    assert sanitized["test_mock"] == "<REDACTED:TEST_MOCK>"
