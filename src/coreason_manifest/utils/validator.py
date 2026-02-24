@@ -352,7 +352,7 @@ def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefin
                     "Must start with 'ref:'."
                 )
             else:
-                tmpl_id = ref[4:]
+                tmpl_id = ref.removeprefix("ref:")
                 if tmpl_id not in templates:
                     errors.append(
                         f"Resilience Error: Node '{node.id}' references undefined supervision template ID '{tmpl_id}'."
