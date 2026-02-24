@@ -1,19 +1,12 @@
 import uuid
 from datetime import datetime
 
-from coreason_manifest.spec.core.governance import Audit, Governance, Safety
 from coreason_manifest.spec.interop.telemetry import NodeState
-from coreason_manifest.utils.recorder import create_recorder
-
-# Helper for tests that require payload logging to verify hash sensitivity
-ALLOW_LOGS_GOV = Governance(
-    safety=Safety(input_filtering=True, pii_redaction=True, content_safety="medium"),
-    audit=Audit(trace_retention_days=7, log_payloads=True),
-)
+from coreason_manifest.utils.recorder import BlackBoxRecorder
 
 
 def test_explicit_context() -> None:
-    recorder = create_recorder(None)
+    recorder = BlackBoxRecorder()
     req_id = str(uuid.uuid4())
     root_id = str(uuid.uuid4())
     parent_id = str(uuid.uuid4())
@@ -42,7 +35,7 @@ def test_explicit_context() -> None:
 
 
 def test_default_behavior() -> None:
-    recorder = create_recorder(None)
+    recorder = BlackBoxRecorder()
     exec2 = recorder.record(
         node_id="test_node_2",
         state=NodeState.COMPLETED,
@@ -58,9 +51,7 @@ def test_default_behavior() -> None:
 
 
 def test_hash_sensitivity() -> None:
-    # Use governance that enables logging, otherwise inputs are replaced with omission marker
-    # and hashes collide because the payloads become identical.
-    recorder = create_recorder(ALLOW_LOGS_GOV)
+    recorder = BlackBoxRecorder()
     req_id = str(uuid.uuid4())
     root_id = str(uuid.uuid4())
     ts = datetime.now()
@@ -81,22 +72,21 @@ def test_hash_sensitivity() -> None:
     exec3b = recorder.record(
         node_id="test_node_3",
         state=NodeState.COMPLETED,
-        inputs={"a": 1},  # Same inputs
+        inputs={"a": 1},
         outputs={"b": 2},
         duration_ms=100.0,
         parent_hashes=[],
         timestamp=ts,
         request_id=req_id,
         root_request_id=root_id,
-        traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-02",  # Different trace context
+        traceparent="00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-02",  # Different
     )
 
-    # Hash should be different because traceparent is part of the hashed payload
     assert exec3a.execution_hash != exec3b.execution_hash
 
 
 def test_hash_stability() -> None:
-    recorder = create_recorder(ALLOW_LOGS_GOV)
+    recorder = BlackBoxRecorder()
     req_id = str(uuid.uuid4())
     root_id = str(uuid.uuid4())
     ts = datetime.now()

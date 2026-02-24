@@ -1,9 +1,5 @@
 import hashlib
-import hmac
 import re
-import uuid
-import warnings
-from datetime import datetime
 from typing import Any, ClassVar
 
 
@@ -13,11 +9,12 @@ class PrivacySentinel:
     from data structures before logging.
     """
 
-    # SOTA: Pre-compiled regex patterns for high-throughput telemetry
-    _EMAIL_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
-    _CREDIT_CARD_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\b(?:\d[ -]*?){13,16}\b")
-    _SSN_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
-    _WORD_BOUNDARY_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"[^a-z0-9]")
+    # Basic regex patterns for PII detection
+    EMAIL_REGEX = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+    # Simple Credit Card regex (13-19 digits, possibly with separators)
+    CREDIT_CARD_REGEX = r"\b(?:\d[ -]*?){13,16}\b"
+    # US SSN regex (AAA-GG-SSSS)
+    SSN_REGEX = r"\b\d{3}-\d{2}-\d{4}\b"
 
     # Terms that must appear as distinct words (separated by _) to trigger redaction
     SENSITIVE_WORDS: ClassVar[set[str]] = {"password", "token", "auth", "secret", "credential", "passcode"}
@@ -49,50 +46,19 @@ class PrivacySentinel:
         if custom_sensitive_keys:
             self.sensitive_words.update(custom_sensitive_keys)
 
-    def sanitize(self, data: Any, depth: int = 0) -> Any:
-        """Recursively sanitizes the input data with structural limits."""
-        # SOTA DoS Protection: Break infinite cyclic references
-        if depth > 100:
-            return "<REDACTED:MAX_DEPTH_EXCEEDED>"
-
-        try:
-            # SOTA CI/CD Protection: Ignore Pytest Mocks impersonating Pydantic objects
-            if getattr(type(data), "__name__", "") in ("MagicMock", "Mock"):
-                return "<REDACTED:TEST_MOCK>"
-
-            # Ensure Pydantic objects are converted to dicts before evaluation
-            if hasattr(data, "model_dump") and callable(data.model_dump):
-                data = data.model_dump()
-            elif hasattr(data, "dict") and callable(data.dict):
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=DeprecationWarning)
-                    data = data.dict()
-        except Exception as e:
-            # SOTA: Telemetry must NEVER crash the main execution thread
-            return f"<SERIALIZATION_ERROR: {type(e).__name__}>"
-
+    def sanitize(self, data: Any) -> Any:
+        """
+        Recursively sanitizes the input data.
+        """
         if isinstance(data, dict):
-            return {k: self._sanitize_kv(k, v, depth + 1) for k, v in data.items()}
-
-        # SOTA: Capture all iterables to prevent silent tuple/set bypasses
-        if isinstance(data, (list, tuple, set)):
-            return [self.sanitize(item, depth + 1) for item in data]
-
+            return {k: self._sanitize_kv(k, v) for k, v in data.items()}
+        if isinstance(data, list):
+            return [self.sanitize(item) for item in data]
         if isinstance(data, str):
             return self._sanitize_string(data)
+        return data
 
-        # SOTA: Ultimate fail-safe against the Canonical Hasher crashing.
-        # Allow safe primitives that `integrity.py` explicitly supports.
-        if isinstance(data, (int, float, bool, type(None), uuid.UUID, datetime)):
-            return data
-
-        if isinstance(data, bytes):
-            return "<REDACTED:BYTES_PAYLOAD>"
-
-        # Reject custom classes, memory locks, thread objects, etc.
-        return f"<UNSERIALIZABLE_TYPE: {type(data).__name__}>"
-
-    def _sanitize_kv(self, key: str, value: Any, depth: int) -> Any:
+    def _sanitize_kv(self, key: str, value: Any) -> Any:
         """
         Sanitizes a key-value pair.
         Checks the key for secret terms first.
@@ -111,31 +77,36 @@ class PrivacySentinel:
                 return self._redact(str(value))
 
             # Check for sensitive words (using instance merged set)
-            parts = self._WORD_BOUNDARY_PATTERN.split(lower_key)
+            parts = re.split(r"[^a-z0-9]", lower_key)
             if any(part in self.sensitive_words for part in parts):
                 return self._redact(str(value))
 
-        # 2. Recurse or check value (pass the depth counter)
-        return self.sanitize(value, depth)
+        # 2. Recurse or check value
+        return self.sanitize(value)
 
     def _sanitize_string(self, text: str) -> str:
-        """Checks a string value for PII and precision-redacts only the matched data."""
+        """
+        Checks a string value for PII.
+        """
         if not self.redact_pii:
             return text
 
-        # Apply precision substitutions
-        text = self._EMAIL_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
-        text = self._CREDIT_CARD_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
-        return self._SSN_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
+        if (
+            re.search(self.EMAIL_REGEX, text)
+            or re.search(self.CREDIT_CARD_REGEX, text)
+            or re.search(self.SSN_REGEX, text)
+        ):
+            return self._redact(text)
+
+        return text
 
     def _redact(self, value: str) -> str:
         """
         Returns a structured redaction string: <REDACTED:SECRET:{hash_prefix}>
         """
-        # Use HMAC-SHA256 which is mathematically resistant to length-extension and collision
-        salt_bytes = self.hashing_salt.encode("utf-8")
-        value_bytes = value.encode("utf-8")
-        full_hash = hmac.new(salt_bytes, value_bytes, hashlib.sha256).hexdigest()
+        # compute SHA256(value + salt)
+        combined = value + self.hashing_salt
+        full_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
         # Use first 8 chars of hash as prefix
         hash_prefix = full_hash[:8]
         return f"<REDACTED:SECRET:{hash_prefix}>"

@@ -4,7 +4,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 from jsonschema.exceptions import SchemaError
 
-from coreason_manifest.spec.core.flow import DataSchema, Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow, Blackboard
+from coreason_manifest.spec.core.flow import (
+    Blackboard,
+    DataSchema,
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.interop.exceptions import ManifestError
