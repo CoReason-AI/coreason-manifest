@@ -181,7 +181,9 @@ class ManifestIO:
 
 
 class ManifestDumper(yaml.SafeDumper):
-    PRIORITY_KEYS: ClassVar[list[str]] = [
+    """Custom PyYAML Dumper that enforces a strict 'Aesthetic Contract' for manifests."""
+
+    _PRIORITY_KEYS = [
         "apiVersion",
         "type",
         "kind",
@@ -192,50 +194,34 @@ class ManifestDumper(yaml.SafeDumper):
         "interface",
         "governance",
     ]
-    DEPRIORITY_KEYS: ClassVar[list[str]] = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
+    _DEPRIORITY_KEYS = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
 
-    def represent_mapping(self, tag: str, mapping: Any, flow_style: bool | None = None) -> yaml.MappingNode:
-        value: list[tuple[yaml.Node, yaml.Node]] = []
-        node = yaml.MappingNode(tag, value, flow_style=flow_style)
-        if self.alias_key is not None:
-            self.represented_objects[self.alias_key] = node
-        best_style = True
-
-        # We only support dict sorting for manifest export
-        mapping_list = list(mapping.items())
-
-        # Custom sorting logic
-        def sort_key(item: tuple[Any, Any]) -> tuple[int, int | str, str] | tuple[int, str]:
-            key = item[0]
-            # specific safe string conversion for sorting
-            key_str = str(key)
-
-            if key_str in self.PRIORITY_KEYS:
-                return (0, self.PRIORITY_KEYS.index(key_str), key_str)
-            if key_str in self.DEPRIORITY_KEYS:
-                return (2, self.DEPRIORITY_KEYS.index(key_str), key_str)
-            return (1, key_str)
-
-        mapping_list.sort(key=sort_key)
-
-        for item_key, item_value in mapping_list:
-            node_key = self.represent_data(item_key)
-            node_value = self.represent_data(item_value)
-            if not (isinstance(node_key, yaml.ScalarNode) and not node_key.style):
-                best_style = False
-            if not (isinstance(node_value, yaml.ScalarNode) and not node_value.style):
-                best_style = False
-            value.append((node_key, node_value))
-
-        if flow_style is None:
-            if self.default_flow_style is not None:
-                node.flow_style = self.default_flow_style
-            else:
-                node.flow_style = best_style
-        return node
+    # SOTA: Pre-compute O(1) lookup maps to prevent O(N) list scans during sorting
+    _PRIORITY_MAP: ClassVar[dict[str, int]] = {k: i for i, k in enumerate(_PRIORITY_KEYS)}
+    _DEPRIORITY_MAP: ClassVar[dict[str, int]] = {k: i for i, k in enumerate(_DEPRIORITY_KEYS)}
 
 
-yaml.add_representer(dict, ManifestDumper.represent_dict, Dumper=ManifestDumper)
+def _dict_representer(dumper: ManifestDumper, data: dict[str, Any]) -> yaml.MappingNode:
+    """Sorts dictionaries aesthetically before yielding them to the YAML engine."""
+
+    def sort_key(item: tuple[Any, Any]) -> tuple[int, int, str]:
+        key = str(item[0])
+        if key in ManifestDumper._PRIORITY_MAP:
+            return (0, ManifestDumper._PRIORITY_MAP[key], key)
+        if key in ManifestDumper._DEPRIORITY_MAP:
+            return (2, ManifestDumper._DEPRIORITY_MAP[key], key)
+        # Default middle priority. Use 0 as stable secondary sort index to maintain tuple symmetry.
+        return (1, 0, key)
+
+    # Python 3.7+ guarantees insertion order preservation
+    sorted_dict = dict(sorted(data.items(), key=sort_key))
+
+    # Safely delegate back to PyYAML's native node generation
+    return dumper.represent_mapping("tag:yaml.org,2002:map", sorted_dict)
+
+
+# Register strictly on our custom dumper to avoid polluting the global yaml.SafeDumper
+ManifestDumper.add_representer(dict, _dict_representer)
 
 
 def export_manifest(model: Any, filepath: str | Path) -> None:
