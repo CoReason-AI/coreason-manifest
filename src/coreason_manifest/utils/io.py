@@ -178,3 +178,74 @@ class ManifestIO:
 
         except yaml.YAMLError as e:
             raise ValueError(f"Failed to parse manifest file: {e}") from e
+
+
+class ManifestDumper(yaml.SafeDumper):
+    PRIORITY_KEYS = [
+        "apiVersion",
+        "type",
+        "kind",
+        "id",
+        "name",
+        "status",
+        "metadata",
+        "interface",
+        "governance",
+    ]
+    DEPRIORITY_KEYS = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
+
+    def represent_mapping(self, tag, mapping, flow_style=False):
+        value = []
+        node = yaml.MappingNode(tag, value, flow_style=flow_style)
+        if self.alias_key is not None:
+            self.represented_objects[self.alias_key] = node
+        best_style = True
+        if hasattr(mapping, "items"):
+            mapping = list(mapping.items())
+
+            # Custom sorting logic
+            def sort_key(item):
+                key = item[0]
+                # specific safe string conversion for sorting
+                key_str = str(key)
+
+                if key_str in self.PRIORITY_KEYS:
+                    return (0, self.PRIORITY_KEYS.index(key_str), key_str)
+                elif key_str in self.DEPRIORITY_KEYS:
+                    return (2, self.DEPRIORITY_KEYS.index(key_str), key_str)
+                else:
+                    return (1, key_str)
+
+            mapping.sort(key=sort_key)
+
+        for item_key, item_value in mapping:
+            node_key = self.represent_data(item_key)
+            node_value = self.represent_data(item_value)
+            if not (isinstance(node_key, yaml.ScalarNode) and not node_key.style):
+                best_style = False
+            if not (isinstance(node_value, yaml.ScalarNode) and not node_value.style):
+                best_style = False
+            value.append((node_key, node_value))
+
+        if flow_style is None:
+            if self.default_flow_style is not None:
+                node.flow_style = self.default_flow_style
+            else:
+                node.flow_style = best_style
+        return node
+
+
+yaml.add_representer(dict, ManifestDumper.represent_dict, Dumper=ManifestDumper)
+
+
+def export_manifest(model: Any, filepath: str | Path) -> None:
+    payload = model.model_dump(exclude_none=True, by_alias=True)
+    with open(filepath, "w", encoding="utf-8") as f:
+        yaml.dump(
+            payload,
+            f,
+            Dumper=ManifestDumper,
+            default_flow_style=False,
+            sort_keys=False,
+            allow_unicode=True,
+        )
