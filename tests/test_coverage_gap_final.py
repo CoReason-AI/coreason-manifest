@@ -1,9 +1,10 @@
 from coreason_manifest.builder import NewGraphFlow
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.flow import GraphFlow, Graph, FlowMetadata, FlowInterface
 from coreason_manifest.spec.core.engines import ComputerUseReasoning
-from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.spec.core.flow import FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
+from coreason_manifest.utils.gatekeeper import validate_policy
+
 
 def test_builder_set_entry_point():
     """Cover builder.py set_entry_point method."""
@@ -16,6 +17,7 @@ def test_builder_set_entry_point():
     flow = builder.build()
     assert flow.graph.entry_point == "node1"
 
+
 def test_gatekeeper_published_dangerous_unreachable():
     """Cover gatekeeper.py published mode with dangerous unreachable nodes."""
     # Create a flow manually to ensure status="published" and dangerous node
@@ -27,23 +29,17 @@ def test_gatekeeper_published_dangerous_unreachable():
                 role="hacker",
                 persona="p",
                 reasoning=ComputerUseReasoning(
-                    model="gpt-4",
-                    interaction_mode="native_os",
-                    coordinate_system="normalized_0_1"
-                )
-            )
-        )
+                    model="gpt-4", interaction_mode="native_os", coordinate_system="normalized_0_1"
+                ),
+            ),
+        ),
     }
 
     flow = GraphFlow(
         status="published",
         metadata=FlowMetadata(name="Test Flow", version="1.0.0"),
         interface=FlowInterface(),
-        graph=Graph(
-            nodes=nodes,
-            edges=[],
-            entry_point="node1"
-        )
+        graph=Graph(nodes=nodes, edges=[], entry_point="node1"),
     )
 
     reports = validate_policy(flow)
