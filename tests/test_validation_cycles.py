@@ -1,7 +1,10 @@
-from coreason_manifest.builder import NewGraphFlow
-from coreason_manifest.spec.core.flow import Graph, GraphFlow
-from coreason_manifest.spec.core.nodes import PlaceholderNode, SwitchNode
+import pytest
+
+from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
+from coreason_manifest.spec.core.nodes import PlaceholderNode, SwitchNode, AgentNode
 from coreason_manifest.utils.validator import validate_flow
+from coreason_manifest.spec.core.flow import Graph, GraphFlow, LinearFlow, VariableDef
+from coreason_manifest.spec.core.resilience import FallbackStrategy, ResilienceConfig
 
 
 def create_placeholder(node_id: str) -> PlaceholderNode:
@@ -117,8 +120,6 @@ def test_switch_node_cycle() -> None:
     """
     builder = NewGraphFlow("test_switch_cycle", "1.0.0", "desc")
     # Need a variable for SwitchNode
-    from coreason_manifest.spec.core.flow import VariableDef
-
     builder.set_blackboard(variables={"v": VariableDef(type="string")})
     builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
@@ -136,5 +137,111 @@ def test_switch_node_cycle() -> None:
 
     cycle_errors = [e for e in errors if "cycle detected" in e]
     assert len(cycle_errors) > 0, f"Expected cycle error involving SwitchNode, got: {errors}"
+    assert "A" in cycle_errors[0]
+    assert "B" in cycle_errors[0]
+
+
+def test_linear_flow_cycle() -> None:
+    """
+    Test linear flow implicit edges combined with SwitchNode cycle.
+    Linear: [A, B, C]
+    Edges: A -> B -> C
+    SwitchNode C: default -> A
+    Cycle: A -> B -> C -> A
+    """
+    lf = NewLinearFlow("linear_cycle_test")
+    lf.metadata = builder_metadata = lf.metadata
+
+    # Need variable for switch
+    # LinearFlow builder doesn't have set_blackboard in my mock?
+    # I'll construct it manually or assume NewLinearFlow can do it.
+    # NewLinearFlow inherits BaseFlowBuilder, so it doesn't have set_blackboard exposed?
+    # But LinearFlow model has blackboard.
+    # I'll construct the flow manually.
+
+    node_a = create_placeholder("A")
+    node_b = create_placeholder("B")
+    node_c = SwitchNode(id="C", metadata={}, type="switch", variable="v", cases={}, default="A")
+
+    flow = LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=lf.metadata,
+        steps=[node_a, node_b, node_c],
+        definitions=lf._build_definitions(),
+    )
+
+    # Need variable 'v' to pass data flow check, but we are testing cycles.
+    # Data flow check is separate.
+    # If I don't provide blackboard, data flow check might fail.
+    # But I care about cycle error.
+
+    errors = validate_flow(flow)
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+
+    assert len(cycle_errors) > 0, f"Expected cycle error in LinearFlow, got: {errors}"
+    assert "A" in cycle_errors[0]
+    assert "C" in cycle_errors[0]
+
+
+def test_hybrid_fallback_cycle() -> None:
+    """
+    Graph: A -> B
+    Fallback: B -> A
+    Cycle: A -> B -> (fail) -> A
+    """
+    builder = NewGraphFlow("hybrid_fallback", "1.0.0", "desc")
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
+
+    node_a = create_placeholder("A")
+
+    # Node B with fallback to A
+    fallback = FallbackStrategy(fallback_node_id="A")
+    node_b = AgentNode(
+        id="B",
+        type="agent",
+        metadata={},
+        resilience=fallback,
+        profile="p",
+        tools=[]
+    )
+
+    builder.add_node(node_a)
+    builder.add_node(node_b)
+    builder.connect("A", "B")
+    builder.set_entry_point("A")
+    builder.define_profile("p", "r", "p")
+
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
+
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert len(cycle_errors) > 0, f"Expected hybrid fallback cycle, got: {errors}"
+    assert "A" in cycle_errors[0]
+    assert "B" in cycle_errors[0]
+
+
+def test_global_circuit_breaker_cycle() -> None:
+    """
+    Graph: A -> B
+    Global Circuit Breaker: fallback -> A
+    Cycle: A -> B -> (global fail) -> A
+    """
+    builder = NewGraphFlow("global_cb_cycle", "1.0.0", "desc")
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
+
+    builder.add_node(create_placeholder("A"))
+    builder.add_node(create_placeholder("B"))
+    builder.connect("A", "B")
+    builder.set_entry_point("A")
+
+    # Set global circuit breaker pointing to A
+    builder.set_circuit_breaker(error_threshold=5, reset_timeout=30, fallback_node="A")
+
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
+
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert len(cycle_errors) > 0, f"Expected global circuit breaker cycle, got: {errors}"
     assert "A" in cycle_errors[0]
     assert "B" in cycle_errors[0]

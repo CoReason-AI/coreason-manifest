@@ -62,16 +62,6 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
-        # Implicitly construct a graph for linear flow to validate unified cycles (Switch + Fallback)
-        # Linear steps have implicit sequential edges, but SwitchNode can jump.
-        # However, LinearFlow validation traditionally relied on _validate_fallback_cycles.
-        # We will create a dummy graph with just nodes to validate implicit/fallback cycles.
-        # Note: Sequential cycles are not checked here but are impossible by definition unless Switch jumps back.
-        # Ideally we would map sequence to edges, but for now we follow the instruction to use the new function.
-        # We pass an empty edge list, so only implicit Switch/Fallback cycles are checked.
-        temp_graph = Graph(nodes={n.id: n for n in nodes}, edges=[])
-        errors.extend(_validate_unified_cycles(nodes, temp_graph))
-
         errors.extend(_validate_linear_integrity(flow))
         node_ids = {n.id for n in flow.steps}
         errors.extend(_validate_unique_ids(flow.steps))
@@ -86,41 +76,43 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
         # Helper for extracting nodes for generic logic checks
         nodes_list = list(flow.graph.nodes.values())
-        errors.extend(_validate_unified_cycles(nodes_list, flow.graph))
         node_ids = set(flow.graph.nodes.keys())
 
         errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
         errors.extend(_validate_orphan_nodes(flow.graph))
 
-        # 4. Domain 4: Static Data-Flow Analysis
-        # Construct Symbol Table: Map variable name -> type (str)
-        symbol_table: dict[str, str] = {}
-        if flow.blackboard:
-            for name, var_def in flow.blackboard.variables.items():
-                # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
-                symbol_table[name] = var_def.type.lower()
-        if flow.interface:
-            inputs = flow.interface.inputs
-            in_schema = getattr(inputs, "json_schema", inputs)
-            if isinstance(in_schema, dict):
-                # Extract properties from input schema
-                # Heuristic: extract property type if simple, else "unknown"
-                props = in_schema.get("properties", {})
-                for name, schema in props.items():
-                    raw_type = schema.get("type", "unknown")
-                    if isinstance(raw_type, list):
-                        # Sort to ensure deterministic symbol table regardless of input order
-                        # Result: "array|string"
-                        types = sorted([x for x in raw_type if x != "null"])
-                        if types:
-                            symbol_table[name] = "|".join(types)
-                        else:
-                            symbol_table[name] = "union"
-                    else:
-                        symbol_table[name] = str(raw_type)
+    # Global Unified Cycle Detection
+    errors.extend(_validate_topology_cycles(flow))
 
-            errors.extend(_validate_data_flow(nodes_list, symbol_table, flow.definitions))
+    # 4. Domain 4: Static Data-Flow Analysis
+    # Construct Symbol Table: Map variable name -> type (str)
+    symbol_table: dict[str, str] = {}
+    if hasattr(flow, "blackboard") and flow.blackboard:
+        for name, var_def in flow.blackboard.variables.items():
+            # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
+            symbol_table[name] = var_def.type.lower()
+    if hasattr(flow, "interface") and flow.interface:
+        inputs = flow.interface.inputs
+        in_schema = getattr(inputs, "json_schema", inputs)
+        if isinstance(in_schema, dict):
+            # Extract properties from input schema
+            # Heuristic: extract property type if simple, else "unknown"
+            props = in_schema.get("properties", {})
+            for name, schema in props.items():
+                raw_type = schema.get("type", "unknown")
+                if isinstance(raw_type, list):
+                    # Sort to ensure deterministic symbol table regardless of input order
+                    # Result: "array|string"
+                    types = sorted([x for x in raw_type if x != "null"])
+                    if types:
+                        symbol_table[name] = "|".join(types)
+                    else:
+                        symbol_table[name] = "union"
+                else:
+                    symbol_table[name] = str(raw_type)
+
+        errors.extend(_validate_data_flow(nodes, symbol_table, flow.definitions))
 
     return errors
 
@@ -431,35 +423,57 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     return errors
 
 
-def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
+def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list[str]]:
     """
-    Enforces Strict DAG Topology on the unified execution graph.
-    Combines explicit edges, implicit routing edges (SwitchNode), and fallback edges.
-    Uses Tarjan's algorithm to detect unified cycles.
+    Constructs a unified adjacency map for cycle detection.
+    Includes sequential/graph edges, implicit SwitchNode routing, fallback routing, and global circuit breaker.
     """
-    errors: list[str] = []
-    # Build adjacency list
-    # Initialize all nodes to empty list to handle disconnected nodes safely
+    # 1. Initialize Map
+    if isinstance(flow, LinearFlow):
+        nodes = flow.steps
+    else:
+        nodes = list(flow.graph.nodes.values())
+
     adj: dict[str, list[str]] = {node.id: [] for node in nodes}
 
-    # 1. Explicit Edges
-    for edge in graph.edges:
-        if edge.from_node in adj:
-            adj[edge.from_node].append(edge.to_node)
+    # 2. Add Flow Structure Edges
+    if isinstance(flow, LinearFlow):
+        # Sequential edges: step i -> step i+1
+        for i in range(len(flow.steps) - 1):
+            curr_id = flow.steps[i].id
+            next_id = flow.steps[i + 1].id
+            if curr_id in adj and next_id in adj:
+                adj[curr_id].append(next_id)
+    elif isinstance(flow, GraphFlow):
+        # Graph edges
+        for edge in flow.graph.edges:
+            if edge.from_node in adj and edge.to_node in adj:
+                adj[edge.from_node].append(edge.to_node)
 
-    # 2. Implicit & Fallback Edges
+    # 3. Add Global Governance Edges (Circuit Breaker)
+    global_fallback_id = None
+    if (
+        flow.governance
+        and flow.governance.circuit_breaker
+        and flow.governance.circuit_breaker.fallback_node_id
+    ):
+        global_fallback_id = flow.governance.circuit_breaker.fallback_node_id
+
+    # 4. Add Node-Level Implicit Edges
     for node in nodes:
+        # Global fallback applies to ALL nodes (any node can fail)
+        if global_fallback_id and global_fallback_id in adj:
+            adj[node.id].append(global_fallback_id)
+
         # SwitchNode routing
         if isinstance(node, SwitchNode):
-            # Add all possible case transitions
             for target_id in node.cases.values():
                 if target_id in adj:
                     adj[node.id].append(target_id)
-            # Add default transition
             if node.default in adj:
                 adj[node.id].append(node.default)
 
-        # Fallback routing
+        # Local Fallback routing
         if node.resilience and not isinstance(node.resilience, str):
             policy = node.resilience
             strategies: list[ResilienceStrategy] = []
@@ -470,12 +484,23 @@ def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
                 if hasattr(policy, "default_strategy") and policy.default_strategy:
                     strategies.append(policy.default_strategy)
             else:
-                strategies.append(policy)
+                strategies.append(policy)  # type: ignore
 
             for strategy in strategies:
                 if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
                     adj[node.id].append(strategy.fallback_node_id)
 
+    return adj
+
+
+def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[str]:
+    """
+    Enforces Strict DAG Topology on the unified execution graph.
+    Uses Tarjan's algorithm to detect unified cycles.
+    """
+    errors: list[str] = []
+
+    adj = _build_unified_adjacency_map(flow)
     sccs = get_strongly_connected_components(adj)
 
     for scc in sccs:
@@ -491,7 +516,6 @@ def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
                 is_cycle = True
 
         if is_cycle:
-            # Sort for deterministic error message
             cycle_nodes = ", ".join(sorted(scc))
             msg = (
                 "Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: "

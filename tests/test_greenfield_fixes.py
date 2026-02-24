@@ -313,13 +313,22 @@ def test_fallback_cycle_complex_policy() -> None:
     node_a = AgentNode(id="a", metadata={}, type="agent", profile="p", tools=[], resilience=policy_a)
     node_b = AgentNode(id="b", metadata={}, type="agent", profile="p", tools=[], resilience=policy_b)
 
-    # Use unified cycle validation (mocking a graph with no explicit edges)
-    from coreason_manifest.spec.core.flow import Graph
-    from coreason_manifest.utils.validator import _validate_unified_cycles
+    # Use unified cycle validation (mocking a GraphFlow with no explicit edges)
+    from coreason_manifest.spec.core.flow import Graph, GraphFlow, FlowMetadata, FlowInterface, DataSchema
+    from coreason_manifest.utils.validator import _validate_topology_cycles
 
-    # Need a graph for unified validation
+    # Need a GraphFlow for unified validation
     dummy_graph = Graph(nodes={"a": node_a, "b": node_b}, edges=[], entry_point="a")
-    errors = _validate_unified_cycles([node_a, node_b], dummy_graph)
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=dummy_graph,
+        definitions=None,
+    )
+    errors = _validate_topology_cycles(flow)
 
     assert any("Unified execution/fallback cycle detected" in e for e in errors)
 

@@ -1,5 +1,6 @@
 from typing import cast
 
+import pytest
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
@@ -204,9 +205,8 @@ def test_validate_flow_invalid_type() -> None:
         governance = None
         definitions = None
 
-    # Should not raise error and return empty list (checks skipped)
-    errors = validate_flow(cast("LinearFlow", DummyFlow()))
-    assert errors == []
+    with pytest.raises(AttributeError):
+        validate_flow(cast("LinearFlow", DummyFlow()))
 
 
 def test_validate_duplicate_node_ids() -> None:
