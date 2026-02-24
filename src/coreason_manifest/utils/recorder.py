@@ -1,10 +1,16 @@
+import os
+import secrets
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import compute_hash, to_canonical_timestamp
 from coreason_manifest.utils.privacy import PrivacySentinel
+
+# Process-scoped fallback salt for consistent intra-process correlation
+_PROCESS_FALLBACK_SALT = secrets.token_hex(16)
 
 
 class BlackBoxRecorder:
@@ -14,8 +20,9 @@ class BlackBoxRecorder:
     and structured logging (Telemetry).
     """
 
-    def __init__(self, privacy_sentinel: PrivacySentinel | None = None) -> None:
-        self.privacy = privacy_sentinel or PrivacySentinel()
+    def __init__(self, privacy_sentinel: PrivacySentinel, log_payloads: bool = False) -> None:
+        self.privacy = privacy_sentinel
+        self.log_payloads = log_payloads
 
     def record(
         self,
@@ -46,6 +53,13 @@ class BlackBoxRecorder:
 
         if attributes is None:
             attributes = {}
+
+        # 0. Enforce Audit Policy: Omit Payloads
+        # This happens BEFORE sanitization and BEFORE hashing.
+        if not self.log_payloads:
+            omitted_marker = {"_omitted": "policy_log_payloads_false"}
+            inputs = omitted_marker
+            outputs = omitted_marker
 
         # 1. Sanitize
         safe_inputs = self.privacy.sanitize(inputs)
@@ -107,3 +121,31 @@ class BlackBoxRecorder:
             traceparent=traceparent,
             tracestate=tracestate,
         )
+
+
+def create_recorder(governance_config: Governance | None = None, system_salt: str | None = None) -> BlackBoxRecorder:
+    """
+    Factory function to create a BlackBoxRecorder with strict dependency injection.
+    Resolves the privacy configuration from the Governance model.
+    """
+    # Fail-Safe Default: Most restrictive posture
+    redact_pii = True
+    log_payloads = False  # Default to False if strict/missing
+
+    if governance_config:
+        if governance_config.safety:
+            redact_pii = governance_config.safety.pii_redaction
+        if governance_config.audit:
+            log_payloads = governance_config.audit.log_payloads
+
+    # Salt Resolution Logic
+    # 1. Use system_salt if provided
+    # 2. Else, try OS env var
+    # 3. Else, use process-scoped fallback
+    final_salt = system_salt or os.getenv("COREASON_AUDIT_SALT") or _PROCESS_FALLBACK_SALT
+
+    # Instantiate Sentinel with explicit configuration
+    sentinel = PrivacySentinel(redact_pii=redact_pii, redact_secrets=True, hashing_salt=final_salt)
+
+    # Return Recorder injected with the sentinel
+    return BlackBoxRecorder(privacy_sentinel=sentinel, log_payloads=log_payloads)
