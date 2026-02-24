@@ -494,8 +494,8 @@ def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
             # Sort for deterministic error message
             cycle_nodes = ", ".join(sorted(scc))
             msg = (
-                f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: [{cycle_nodes}]. "
-                "Execution graphs must be strict Directed Acyclic Graphs (DAGs)."
+                "Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: "
+                f"[{cycle_nodes}]. Execution graphs must be strict Directed Acyclic Graphs (DAGs)."
             )
             errors.append(msg)
 
