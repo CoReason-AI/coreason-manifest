@@ -13,7 +13,7 @@ def create_flow(
     status: str = "draft",
     entry_point: str | None = None,
     nodes: dict[str, Any] | None = None,
-    edges: list[Any] | None = None
+    edges: list[Any] | None = None,
 ) -> GraphFlow:
     if nodes is None:
         nodes = {}
@@ -98,7 +98,9 @@ def test_draft_mode_disconnected_dangerous_node() -> None:
     # Should contain add node and add edge
     adds_node = [
         op for op in patch
-        if op["op"] == "add" and "nodes" in str(op["path"]) and "guard_node2" in str(op["path"])
+        if op["op"] == "add"
+        and "nodes" in str(op["path"])
+        and "guard_node2" in str(op["path"])
     ]
     adds_edge = [
         op for op in patch
