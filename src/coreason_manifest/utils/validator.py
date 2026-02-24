@@ -470,7 +470,7 @@ def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
                 if hasattr(policy, "default_strategy") and policy.default_strategy:
                     strategies.append(policy.default_strategy)
             else:
-                strategies.append(policy)  # type: ignore
+                strategies.append(policy)
 
             for strategy in strategies:
                 if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
@@ -493,9 +493,10 @@ def _validate_unified_cycles(nodes: list[AnyNode], graph: Graph) -> list[str]:
         if is_cycle:
             # Sort for deterministic error message
             cycle_nodes = ", ".join(sorted(scc))
-            errors.append(
+            msg = (
                 f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: [{cycle_nodes}]. "
                 "Execution graphs must be strict Directed Acyclic Graphs (DAGs)."
             )
+            errors.append(msg)
 
     return errors

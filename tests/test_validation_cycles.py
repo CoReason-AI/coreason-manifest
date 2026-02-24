@@ -1,9 +1,7 @@
-import pytest
-
 from coreason_manifest.builder import NewGraphFlow
+from coreason_manifest.spec.core.flow import Graph, GraphFlow
 from coreason_manifest.spec.core.nodes import PlaceholderNode
 from coreason_manifest.utils.validator import validate_flow
-from coreason_manifest.spec.core.flow import Graph, GraphFlow
 
 
 def create_placeholder(node_id: str) -> PlaceholderNode:
