@@ -1,11 +1,11 @@
 import pytest
-from coreason_manifest.spec.core.flow import (
-    GraphFlow, LinearFlow, FlowMetadata, FlowInterface, Graph, Edge, DataSchema
-)
-from coreason_manifest.spec.core.nodes import PlaceholderNode, AgentNode
-from coreason_manifest.spec.core.governance import Governance, CircuitBreaker
+
+from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
+from coreason_manifest.spec.core.nodes import AgentNode, PlaceholderNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.validator import validate_flow
+
 
 def test_graph_flow_strictness_accumulated_placeholders() -> None:
     """Test that GraphFlow collects multiple placeholder errors."""
@@ -19,25 +19,23 @@ def test_graph_flow_strictness_accumulated_placeholders() -> None:
             status="published",
             metadata=FlowMetadata(name="test", version="1.0.0"),
             interface=FlowInterface(),
-            graph=graph
+            graph=graph,
         )
 
     msg = exc.value.fault.message
-    assert "p1" in msg and "p2" in msg
+    assert "p1" in msg
+    assert "p2" in msg
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-PLACEHOLDER"
     # Check context has remediation for both
     assert len(exc.value.fault.context["remediations"]) == 2
+
 
 def test_graph_flow_strictness_dangling_edges() -> None:
     """Test that GraphFlow detects edges pointing to non-existent nodes."""
     n1 = AgentNode(id="a1", type="agent", metadata={}, profile="p1", tools=[])
 
     # Edge points to "missing"
-    graph = Graph(
-        nodes={"a1": n1},
-        edges=[Edge(from_node="a1", to_node="missing")],
-        entry_point="a1"
-    )
+    graph = Graph(nodes={"a1": n1}, edges=[Edge(from_node="a1", to_node="missing")], entry_point="a1")
 
     with pytest.raises(ManifestError) as exc:
         GraphFlow(
@@ -45,11 +43,12 @@ def test_graph_flow_strictness_dangling_edges() -> None:
             status="published",
             metadata=FlowMetadata(name="test", version="1.0.0"),
             interface=FlowInterface(),
-            graph=graph
+            graph=graph,
         )
 
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-EDGE"
     assert "missing" in exc.value.fault.message
+
 
 def test_graph_flow_entry_point_remediation() -> None:
     """Test that GraphFlow missing entry point suggests valid nodes."""
@@ -64,12 +63,13 @@ def test_graph_flow_entry_point_remediation() -> None:
             status="published",
             metadata=FlowMetadata(name="test", version="1.0.0"),
             interface=FlowInterface(),
-            graph=graph
+            graph=graph,
         )
 
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-ENTRYPOINT"
     # Check context for suggestion
     assert "a1" in str(exc.value.fault.context)
+
 
 def test_graph_flow_entry_point_invalid() -> None:
     """Test that GraphFlow invalid entry point raises error."""
@@ -84,10 +84,11 @@ def test_graph_flow_entry_point_invalid() -> None:
             status="published",
             metadata=FlowMetadata(name="test", version="1.0.0"),
             interface=FlowInterface(),
-            graph=graph
+            graph=graph,
         )
 
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-ENTRYPOINT"
+
 
 def test_graph_flow_fallback_validation() -> None:
     """Test that GraphFlow validates fallback node ID exists."""
@@ -96,9 +97,7 @@ def test_graph_flow_fallback_validation() -> None:
 
     gov = Governance(
         circuit_breaker=CircuitBreaker(
-            error_threshold_count=5,
-            reset_timeout_seconds=60,
-            fallback_node_id="missing_fallback"
+            error_threshold_count=5, reset_timeout_seconds=60, fallback_node_id="missing_fallback"
         )
     )
 
@@ -109,11 +108,12 @@ def test_graph_flow_fallback_validation() -> None:
             metadata=FlowMetadata(name="test", version="1.0.0"),
             interface=FlowInterface(),
             graph=graph,
-            governance=gov
+            governance=gov,
         )
 
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-FALLBACK"
     assert "missing_fallback" in exc.value.fault.message
+
 
 def test_linear_flow_strictness_accumulated_placeholders() -> None:
     """Test that LinearFlow collects multiple placeholder errors."""
@@ -122,15 +122,14 @@ def test_linear_flow_strictness_accumulated_placeholders() -> None:
 
     with pytest.raises(ManifestError) as exc:
         LinearFlow(
-            kind="LinearFlow",
-            status="published",
-            metadata=FlowMetadata(name="test", version="1.0.0"),
-            steps=[n1, n2]
+            kind="LinearFlow", status="published", metadata=FlowMetadata(name="test", version="1.0.0"), steps=[n1, n2]
         )
 
     msg = exc.value.fault.message
-    assert "p1" in msg and "p2" in msg
+    assert "p1" in msg
+    assert "p2" in msg
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-PLACEHOLDER"
+
 
 def test_linear_flow_fallback_validation() -> None:
     """Test that LinearFlow validates fallback node ID exists."""
@@ -138,9 +137,7 @@ def test_linear_flow_fallback_validation() -> None:
 
     gov = Governance(
         circuit_breaker=CircuitBreaker(
-            error_threshold_count=5,
-            reset_timeout_seconds=60,
-            fallback_node_id="missing_fallback"
+            error_threshold_count=5, reset_timeout_seconds=60, fallback_node_id="missing_fallback"
         )
     )
 
@@ -150,10 +147,11 @@ def test_linear_flow_fallback_validation() -> None:
             status="published",
             metadata=FlowMetadata(name="test", version="1.0.0"),
             steps=[n1],
-            governance=gov
+            governance=gov,
         )
 
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-FALLBACK"
+
 
 def test_validator_dangling_edge_draft() -> None:
     """
@@ -164,19 +162,16 @@ def test_validator_dangling_edge_draft() -> None:
     graph = Graph(
         nodes={"a1": n1},
         # Dangling edge from a1 to missing
-        edges=[
-            Edge(from_node="a1", to_node="missing"),
-            Edge(from_node="missing_source", to_node="a1")
-        ],
-        entry_point="a1"
+        edges=[Edge(from_node="a1", to_node="missing"), Edge(from_node="missing_source", to_node="a1")],
+        entry_point="a1",
     )
 
     flow = GraphFlow(
         kind="GraphFlow",
-        status="draft", # Draft allows creation, but validate_flow should report it
+        status="draft",  # Draft allows creation, but validate_flow should report it
         metadata=FlowMetadata(name="test", version="1.0.0"),
         interface=FlowInterface(),
-        graph=graph
+        graph=graph,
     )
 
     errors = validate_flow(flow)
