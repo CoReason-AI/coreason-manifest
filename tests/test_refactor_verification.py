@@ -330,7 +330,6 @@ def test_circuit_breaker_logic() -> None:
     Test CircuitState transitions and enforcement.
     """
     from coreason_manifest.spec.core.governance import (
-        CircuitOpenError,
         check_circuit,
         record_failure,
         record_success,

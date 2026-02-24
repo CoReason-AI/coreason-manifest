@@ -90,9 +90,8 @@ class CanonicalHashingStrategy(HashingStrategy):
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
         if isinstance(obj, float):
             # RFC 8785: If number is integer, represent as integer.
-            if obj.is_integer():
-                return int(obj)
-            # For other floats, verify finiteness.
+            # Directive: Avoid mutating floats to integers natively to preserve type info.
+            # However, ensure NaN/Inf are rejected.
             if not math.isfinite(obj):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
             return obj

@@ -395,7 +395,6 @@ def test_circuit_breaker_timeout_logic() -> None:
 
     from coreason_manifest.spec.core.governance import (
         CircuitBreaker,
-        CircuitOpenError,
         CircuitState,
         check_circuit,
     )

@@ -281,9 +281,7 @@ class GraphFlow(CoreasonModel):
 
         for node in self.graph.nodes.values():
             if isinstance(node.resilience, str):
-                ref_id = node.resilience
-                if ref_id.startswith("ref:"):
-                    ref_id = ref_id[4:]
+                ref_id = node.resilience.removeprefix("ref:")
 
                 if ref_id not in template_ids:
                     raise ManifestError(
@@ -408,9 +406,7 @@ class LinearFlow(CoreasonModel):
 
         for node in self.steps:
             if isinstance(node.resilience, str):
-                ref_id = node.resilience
-                if ref_id.startswith("ref:"):
-                    ref_id = ref_id[4:]
+                ref_id = node.resilience.removeprefix("ref:")
 
                 if ref_id not in template_ids:
                     raise ManifestError(

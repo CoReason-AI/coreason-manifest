@@ -8,7 +8,6 @@ from coreason_manifest.spec.core.flow import DataSchema, FlowDefinitions, FlowMe
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.interop.exceptions import ManifestError
-from coreason_manifest.utils.validator import validate_flow
 
 
 def test_flow_integrity_coverage() -> None:
@@ -115,25 +114,15 @@ def test_flow_integrity_coverage() -> None:
         output_variable="o",
     )
 
-    flow_swarm_missing = LinearFlow(
+    LinearFlow(
         kind="LinearFlow",
         status="published",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         definitions=definitions,
         steps=[swarm_missing],
     )
-    # We call validate_flow to trigger validate_integrity
-    errors = validate_flow(flow_swarm_missing)
-    # validate_integrity raises ManifestError, which validate_flow catches and returns?
-    # Or does it crash?
-    # If validate_flow catches, we assert 'errors' contains it.
-    # If it crashes, we need pytest.raises.
-    # Assuming validate_flow wraps exceptions.
-    # But wait, previous test expected strings in errors.
-    # If validate_integrity raises ManifestError, validate_flow probably catches it.
-    # Let's assume validate_flow is robust.
-    # However, validate_integrity is imported from flow.py.
-    # Let's just call validate_integrity directly to ensure coverage of that function.
+    # validate_integrity checks profile refs.
+    # We call validate_integrity directly to ensure coverage of that function.
     from coreason_manifest.spec.core.flow import validate_integrity
 
     with pytest.raises(ManifestError) as excinfo:
