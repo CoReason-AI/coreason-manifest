@@ -248,7 +248,7 @@ class ComplexKey:
         return self.name
 
 
-def represent_complex_key(dumper: yaml.BaseDumper, data: ComplexKey) -> yaml.Node:
+def represent_complex_key(dumper: ManifestDumper, data: ComplexKey) -> yaml.Node:
     # Represent as a sequence (non-scalar)
     return dumper.represent_sequence("tag:yaml.org,2002:seq", [data.name])
 
