@@ -14,10 +14,12 @@ def test_telemetry_parent_hash_backfill() -> None:
     """
     Cover telemetry.py:92: if prev_hashes is None: data["parent_hashes"] = [p_hash]
     """
+    from typing import Any
+
     # Use model_construct to control input exactly? No, enforce_envelope_consistency is a pre-validator.
     # We need to pass data such that parent_hashes is None (or missing) and parent_hash is present.
 
-    data = {
+    data: dict[str, Any] = {
         "node_id": "n1",
         "state": NodeState.COMPLETED,
         "inputs": {},
