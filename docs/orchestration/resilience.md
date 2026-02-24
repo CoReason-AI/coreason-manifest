@@ -20,7 +20,7 @@ This configuration can be attached at multiple levels:
 The core of the resilience system is the `SupervisionPolicy`. It functions as a **declarative router for errors**.
 
 ```python
-class SupervisionPolicy(BaseModel):
+class SupervisionPolicy(CoreasonModel):
     handlers: list[ErrorHandler]
     default_strategy: RecoveryStrategy | None = None
     max_cumulative_actions: int = 10

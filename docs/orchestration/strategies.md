@@ -39,7 +39,7 @@ A cognitive self-correction loop. The runtime feeds the generated error message 
 *   **`critic_schema`**: JSON Schema to enforce structured output from the critic.
 
 ## 4. `EscalationStrategy` (`type: escalate`)
-Explicitly bubbles the error up to a parent scope (e.g., from a Node up to the GraphFlow's supervision layer) or halts execution for human review.
+Explicitly bubbles the error up to a parent scope (e.g., from a Node up to the GraphFlow's supervision layer) when local recovery is impossible. The parent scope's policy will then dictate the next action.
 *   **`queue_name`**: The task queue where the suspended session will be parked.
 *   **`notification_level`**: Severity level (`info`, `warning`, `critical`).
 *   **`timeout_seconds`**: How long to wait for human intervention before failing completely.
