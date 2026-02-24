@@ -270,53 +270,21 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             if flow.status == "draft":
                 # Draft Mode: Be Forgiving
                 if dangerous_node_ids:
-                    # Dangerous Islands: Must be secured (Add Guard)
-                    for d_node_id in dangerous_node_ids:
-                        guard_id = f"guard_{d_node_id}"
-                        human_node = HumanNode(
-                            id=guard_id,
-                            type="human",
-                            prompt=f"Approve unsafe draft node {d_node_id}",
-                            timeout_seconds=300,
-                            interaction_mode="blocking",
-                        )
-                        # 1. Add Guard Node
-                        patch_list.append(
-                            {
-                                "op": "add",
-                                "path": f"/graph/nodes/{guard_id}",
-                                "value": human_node.model_dump(mode="json"),
-                            }
-                        )
-                        # 2. Add Edge (Guard -> Target)
-                        patch_list.append(
-                            {
-                                "op": "add",
-                                "path": "/graph/edges/-",
-                                "value": {"source": guard_id, "target": d_node_id},
-                            }
-                        )
-
+                    # Dangerous Islands: Step 1 (Red Button Rule) already handles guard injection.
+                    # Here we just warn about connectivity.
                     reports.append(
                         ComplianceReport(
                             code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
                             severity="warning",
                             message=(
                                 f"Draft Topology Warning: Found {len(dangerous_node_ids)} dangerous unreachable nodes. "
-                                "Injecting guards to secure them."
+                                "They will be guarded by the security policy, but remain disconnected."
                             ),
                             details={
                                 "dangerous_nodes": list(dangerous_node_ids),
                                 "risk_details": risk_details,
                             },
-                            remediation=RemediationAction(
-                                type="add_guard_node",
-                                format="json_patch",
-                                patch_data=patch_list,
-                                description=(
-                                    f"Inject {len(dangerous_node_ids)} HumanNode guards for dangerous draft nodes."
-                                ),
-                            ),
+                            remediation=None,
                         )
                     )
 

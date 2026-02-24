@@ -384,6 +384,11 @@ class GraphFlow(CoreasonModel):
 
         # 1. Entry Point Presence
         if not self.graph.entry_point:
+            # Try to suggest an existing node
+            suggested_entry = "start_node"
+            if self.graph.nodes:
+                suggested_entry = next(iter(self.graph.nodes.keys()))
+
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-VAL-ENTRY-POINT-MISSING",
@@ -394,7 +399,7 @@ class GraphFlow(CoreasonModel):
                         "remediation": RemediationAction(
                             type="update_field",
                             description="Set a valid entry_point.",
-                            patch_data=[{"op": "add", "path": "/graph/entry_point", "value": "start_node"}],
+                            patch_data=[{"op": "add", "path": "/graph/entry_point", "value": suggested_entry}],
                         ).model_dump()
                     },
                 )

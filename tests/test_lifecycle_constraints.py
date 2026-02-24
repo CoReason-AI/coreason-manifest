@@ -70,30 +70,38 @@ def test_draft_mode_disconnected_dangerous_node() -> None:
 
     reports = validate_policy(flow)
 
-    # Expect warning about dangerous unreachable node, and Guard Injection patch
+    # 1. Expect warning about dangerous unreachable node (Topology), but NO PATCH (handled by Red Button)
     risk_reports = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
     assert len(risk_reports) > 0
     report = risk_reports[0]
 
     assert report.severity == "warning"
-    assert report.remediation is not None
-    assert report.remediation.type == "add_guard_node"
+    assert report.remediation is None
+
+    # 2. Expect violation about unguarded dangerous node (Security), WITH PATCH
+    sec_reports = [r for r in reports if r.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003]
+    assert len(sec_reports) > 0
+    sec_report = sec_reports[0]
+
+    assert sec_report.severity == "violation"
+    assert sec_report.remediation is not None
+    assert sec_report.remediation.type == "add_guard_node"
 
     # Ensure patch_data is a list
     patch: list[dict[str, Any]]
-    if isinstance(report.remediation.patch_data, list):
-        patch = report.remediation.patch_data
+    if isinstance(sec_report.remediation.patch_data, list):
+        patch = sec_report.remediation.patch_data
     else:
-        patch = [report.remediation.patch_data]  # Should not happen for this type but for typing sake
+        patch = [sec_report.remediation.patch_data]  # Should not happen for this type but for typing sake
 
     # Should contain add node and add edge
     adds_node = [
-        op for op in patch if op["op"] == "add" and "nodes" in str(op["path"]) and "guard_node2" in str(op["path"])
+        op
+        for op in patch
+        if op["op"] == "add" and "nodes" in str(op["path"]) and "guard_node2" in str(op["path"])
     ]
-    adds_edge = [op for op in patch if op["op"] == "add" and "edges" in str(op["path"])]
 
     assert len(adds_node) > 0
-    assert len(adds_edge) > 0
 
 
 def test_published_mode_missing_entry_point() -> None:
