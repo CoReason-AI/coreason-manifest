@@ -34,6 +34,7 @@ from coreason_manifest.spec.core.governance import (
     Audit,
     CircuitBreaker,
     Governance,
+    OperationalPolicy,
     Safety,
 )
 from coreason_manifest.spec.core.nodes import (
@@ -99,6 +100,7 @@ __all__ = [
     "ModelCriteria",
     "ModelRef",
     "Node",
+    "OperationalPolicy",
     "Optimizer",
     "PlaceholderNode",
     "PlannerNode",

@@ -35,6 +35,19 @@ class CircuitBreaker(CoreasonModel):
     )
 
 
+class OperationalPolicy(CoreasonModel):
+    """Centralized operational and business thresholds."""
+
+    retry_counts: dict[str, int] = Field(default_factory=dict, description="Retry counts for operations.")
+    row_limits: dict[str, int] = Field(default_factory=dict, description="Row limits for data retrieval.")
+    search_limits: dict[str, int] = Field(default_factory=dict, description="Search result limits.")
+    timeout_durations: dict[str, int] = Field(default_factory=dict, description="Timeout durations in seconds.")
+    cost_multipliers: dict[str, float] = Field(default_factory=dict, description="Cost multipliers.")
+    model_switching: dict[str, float] = Field(default_factory=dict, description="Model switching thresholds.")
+    custom_thresholds: dict[str, float] = Field(default_factory=dict, description="Custom float thresholds.")
+    custom_limits: dict[str, int] = Field(default_factory=dict, description="Custom integer limits.")
+
+
 class ToolAccessPolicy(CoreasonModel):
     risk_level: RiskLevel = Field(..., description="Risk level.", examples=["standard"])
     require_auth: bool | None = Field(None, description="Require authentication.", examples=[True])
@@ -93,6 +106,9 @@ class Governance(CoreasonModel):
         None,
         description="Circuit breaker policy.",
         examples=[{"error_threshold_count": 3, "reset_timeout_seconds": 30}],
+    )
+    operational_policy: OperationalPolicy | None = Field(
+        None, description="Centralized operational and business thresholds."
     )
     tool_policy: dict[ToolID, ToolAccessPolicy] | None = Field(
         None,

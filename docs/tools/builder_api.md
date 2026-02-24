@@ -12,6 +12,7 @@ These helper classes act as the root context for building a workflow. They autom
 1.  **Topology Validation:** Ensuring `entry_point` exists and there are no disconnected islands.
 2.  **Type Safety:** Ensuring only valid `AnyNode` objects are added.
 3.  **Registry Management:** Automatically registering Profiles and Tool Packs in the `definitions` block.
+4.  **Policy Configuration:** Easily setting governance policies like `.set_operational_policy()` and `.set_circuit_breaker()`.
 
 ```python
 from coreason_manifest.builder import NewGraphFlow, AgentBuilder

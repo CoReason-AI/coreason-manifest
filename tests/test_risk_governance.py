@@ -9,7 +9,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.spec.core.governance import Governance, ToolAccessPolicy
+from coreason_manifest.spec.core.governance import Governance, OperationalPolicy, ToolAccessPolicy
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.exceptions import ManifestError
@@ -105,6 +105,34 @@ def test_risk_enum_update() -> None:
     # Test invalid value 'minimal'
     with pytest.raises(ValidationError):
         ToolAccessPolicy(risk_level="minimal")  # type: ignore[arg-type]
+
+
+def test_operational_policy() -> None:
+    # Instantiate an OperationalPolicy with mock data
+    policy = OperationalPolicy(
+        retry_counts={"default": 3},
+        row_limits={"max": 1000},
+        search_limits={"default": 10},
+        timeout_durations={"default": 60},
+        cost_multipliers={"gpt-4": 1.5},
+        model_switching={"confidence": 0.8},
+        custom_thresholds={"threshold1": 0.5},
+        custom_limits={"limit1": 100},
+    )
+
+    # Assign it to a Governance object
+    gov = Governance(operational_policy=policy)
+
+    # Assert the values match
+    assert gov.operational_policy is not None
+    assert gov.operational_policy.retry_counts["default"] == 3
+    assert gov.operational_policy.row_limits["max"] == 1000
+    assert gov.operational_policy.search_limits["default"] == 10
+    assert gov.operational_policy.timeout_durations["default"] == 60
+    assert gov.operational_policy.cost_multipliers["gpt-4"] == 1.5
+    assert gov.operational_policy.model_switching["confidence"] == 0.8
+    assert gov.operational_policy.custom_thresholds["threshold1"] == 0.5
+    assert gov.operational_policy.custom_limits["limit1"] == 100
 
 
 def test_inline_tool_bypass_prevention() -> None:

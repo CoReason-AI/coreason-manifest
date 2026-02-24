@@ -28,7 +28,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
+from coreason_manifest.spec.core.governance import CircuitBreaker, Governance, OperationalPolicy
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
@@ -186,6 +186,14 @@ class BaseFlowBuilder:
     def set_governance(self, gov: Governance) -> Self:
         """Sets the governance policy."""
         self.governance = gov
+        return self
+
+    def set_operational_policy(self, policy: OperationalPolicy) -> Self:
+        """Sets the operational policy."""
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"operational_policy": policy})
+        else:
+            self.governance = Governance(operational_policy=policy)
         return self
 
     def set_circuit_breaker(self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None) -> Self:

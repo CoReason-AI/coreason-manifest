@@ -36,6 +36,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import (
     Audit,
     Governance,
+    OperationalPolicy,
     Safety,
 )
 from coreason_manifest.spec.core.nodes import (
@@ -75,6 +76,7 @@ __all__ = [
     "NewGraphFlow",
     "NewLinearFlow",
     "Node",
+    "OperationalPolicy",
     "Optimizer",
     "PlaceholderNode",
     "PlannerNode",

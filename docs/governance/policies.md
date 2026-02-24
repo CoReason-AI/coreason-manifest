@@ -13,10 +13,23 @@ class Governance(CoreasonModel):
     max_risk_level: RiskLevel | None
     allowed_domains: list[str]
     circuit_breaker: CircuitBreaker | None
+    operational_policy: OperationalPolicy | None
     safety: Safety | None
     audit: Audit | None
     # ... additional constraints
 ```
+
+### OperationalPolicy Schema
+Centralizes business and operational thresholds to prevent hardcoding in downstream execution packages.
+
+*   **`retry_counts`**: Dictionary mapping operation types to retry limits (e.g., `{"http": 3}`).
+*   **`row_limits`**: Dictionary mapping data sources to row limits (e.g., `{"sql": 1000}`).
+*   **`search_limits`**: Dictionary mapping search providers to result limits.
+*   **`timeout_durations`**: Dictionary mapping operation types to timeouts in seconds.
+*   **`cost_multipliers`**: Dictionary mapping models to cost multipliers.
+*   **`model_switching`**: Dictionary mapping criteria to model switching thresholds.
+*   **`custom_thresholds`**: Dictionary for custom float thresholds.
+*   **`custom_limits`**: Dictionary for custom integer limits.
 
 ### Risk & Network Constraints
 

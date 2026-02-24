@@ -2,7 +2,7 @@ import pytest
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
-from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.governance import Governance, OperationalPolicy
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 
@@ -134,6 +134,34 @@ def test_builder_coverage_set_circuit_breaker_without_governance() -> None:
     assert builder.governance is not None
     assert builder.governance.circuit_breaker is not None
     assert builder.governance.circuit_breaker.error_threshold_count == 5
+
+
+def test_builder_coverage_set_operational_policy_with_existing_governance() -> None:
+    """Test setting operational policy when governance is already set."""
+    builder = NewLinearFlow("Test", "1.0.0", "Desc")
+    gov = Governance(rate_limit_rpm=10)
+    builder.set_governance(gov)
+
+    policy = OperationalPolicy(retry_counts={"default": 3})
+    builder.set_operational_policy(policy)
+
+    assert builder.governance is not None
+    assert builder.governance.rate_limit_rpm == 10
+    assert builder.governance.operational_policy is not None
+    assert builder.governance.operational_policy.retry_counts["default"] == 3
+
+
+def test_builder_coverage_set_operational_policy_without_governance() -> None:
+    """Test setting operational policy when governance is NOT set."""
+    builder = NewLinearFlow("Test", "1.0.0", "Desc")
+    # No governance set
+
+    policy = OperationalPolicy(retry_counts={"default": 3})
+    builder.set_operational_policy(policy)
+
+    assert builder.governance is not None
+    assert builder.governance.operational_policy is not None
+    assert builder.governance.operational_policy.retry_counts["default"] == 3
 
 
 def test_builder_coverage_add_inspector_linear() -> None:
