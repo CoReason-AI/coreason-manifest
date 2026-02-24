@@ -259,11 +259,13 @@ def test_builder_validation_failure() -> None:
     )
     builder.add_step(node)
 
-    # Build should raise ValueError because of validate_flow finding missing fallback node
-    with pytest.raises(ValueError, match="Validation failed") as exc:
+    # Build should raise ManifestError due to strict validation logic in flow.py
+    with pytest.raises(ManifestError) as exc:
         builder.build()
 
-    assert "missing ID 'missing_node'" in str(exc.value)
+    errors = exc.value.fault.context["validation_errors"]
+    # We check if context contains the specific error about missing node
+    assert any("resilience fallback_node_id 'missing_node' does not exist" in e for e in errors)
 
 
 def test_builder_graph_entry_point_coverage() -> None:
@@ -340,7 +342,8 @@ def test_builder_graph_validation_failure() -> None:
     builder.add_node(node)
     builder.set_entry_point("a1")
 
-    with pytest.raises(ValueError, match="Validation failed") as exc:
+    with pytest.raises(ManifestError) as exc:
         builder.build()
 
-    assert "missing ID 'missing_node'" in str(exc.value)
+    errors = exc.value.fault.context["validation_errors"]
+    assert any("resilience fallback_node_id 'missing_node' does not exist" in e for e in errors)

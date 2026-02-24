@@ -298,7 +298,7 @@ class GraphFlow(CoreasonModel):
         fault_messages: list[str] = []
         remediations: list[dict[str, Any]] = []
 
-        # 1. Placeholder Rejection & SwitchNode Topology Leak
+        # 1. Placeholder Rejection & SwitchNode Topology Leak & Node Resilience
         invalid_placeholder_ids = []
         existing_ids = set(self.graph.nodes.keys())
 
@@ -326,8 +326,17 @@ class GraphFlow(CoreasonModel):
                 if node.default not in existing_ids:
                     fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
 
+            # Check Node-Level Fallback Routing
+            resilience = getattr(node, "resilience", None)
+            if resilience and not isinstance(resilience, str):
+                fallback_id = getattr(resilience, "fallback_node_id", None)
+                if fallback_id and fallback_id not in existing_ids:
+                    fault_messages.append(
+                        f"Node '{node.id}' resilience fallback_node_id '{fallback_id}' does not exist."
+                    )
+
         if invalid_placeholder_ids:
-            fault_messages.append(f"Flow contains PlaceholderNodes: {invalid_placeholder_ids}")
+            fault_messages.append(f"Flow contains PlaceholderNodes: {sorted(invalid_placeholder_ids)}")
 
         # 2. Strict Edge Connectivity
         missing_nodes = set()
@@ -338,7 +347,7 @@ class GraphFlow(CoreasonModel):
                 missing_nodes.add(edge.to_node)
 
         if missing_nodes:
-            fault_messages.append(f"Edges reference missing nodes: {list(missing_nodes)}")
+            fault_messages.append(f"Edges reference missing nodes: {sorted(list(missing_nodes))}")
 
         # 3. Graph Topology Completeness (Entry Point)
         if not self.graph.entry_point:
@@ -351,7 +360,7 @@ class GraphFlow(CoreasonModel):
                         {
                             "op": "add",
                             "path": "/graph/entry_point",
-                            "value": next(iter(existing_ids), "") if existing_ids else "",
+                            "value": sorted(list(existing_ids))[0] if existing_ids else "",
                         }
                     ],
                 ).model_dump()
@@ -362,7 +371,7 @@ class GraphFlow(CoreasonModel):
             remediations.append(
                 RemediationAction(
                     type="update_field",
-                    description=f"Update entry_point to one of {list(existing_ids)}.",
+                    description=f"Update entry_point to one of {sorted(list(existing_ids))}.",
                     patch_data=[],
                 ).model_dump()
             )
@@ -378,10 +387,10 @@ class GraphFlow(CoreasonModel):
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-VAL-LIFECYCLE-STRICTNESS",
-                    message="Published flow failed strictness validation: " + " | ".join(fault_messages),
+                    message="Published flow failed strictness validation. See context for details.",
                     severity=FaultSeverity.CRITICAL,
                     recovery_action=RecoveryAction.HALT,
-                    context={"remediations": remediations},
+                    context={"validation_errors": fault_messages, "remediations": remediations},
                 )
             )
 
@@ -432,7 +441,7 @@ class LinearFlow(CoreasonModel):
         fault_messages: list[str] = []
         remediations: list[dict[str, Any]] = []
 
-        # 1. Placeholder Rejection & SwitchNode Topology Leak
+        # 1. Placeholder Rejection & SwitchNode Topology Leak & Node Resilience
         invalid_placeholder_ids = []
         existing_ids = {node.id for node in self.steps}
 
@@ -459,8 +468,17 @@ class LinearFlow(CoreasonModel):
                 if node.default not in existing_ids:
                     fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
 
+            # Check Node-Level Fallback Routing
+            resilience = getattr(node, "resilience", None)
+            if resilience and not isinstance(resilience, str):
+                fallback_id = getattr(resilience, "fallback_node_id", None)
+                if fallback_id and fallback_id not in existing_ids:
+                    fault_messages.append(
+                        f"Node '{node.id}' resilience fallback_node_id '{fallback_id}' does not exist."
+                    )
+
         if invalid_placeholder_ids:
-            fault_messages.append(f"Flow contains PlaceholderNodes: {invalid_placeholder_ids}")
+            fault_messages.append(f"Flow contains PlaceholderNodes: {sorted(invalid_placeholder_ids)}")
 
         # 2. Fallback Routing Validation
         if self.governance and self.governance.circuit_breaker and self.governance.circuit_breaker.fallback_node_id:
@@ -473,10 +491,10 @@ class LinearFlow(CoreasonModel):
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-VAL-LIFECYCLE-STRICTNESS",
-                    message="Published flow failed strictness validation: " + " | ".join(fault_messages),
+                    message="Published flow failed strictness validation. See context for details.",
                     severity=FaultSeverity.CRITICAL,
                     recovery_action=RecoveryAction.HALT,
-                    context={"remediations": remediations},
+                    context={"validation_errors": fault_messages, "remediations": remediations},
                 )
             )
 

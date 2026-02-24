@@ -167,7 +167,8 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         lf.build()
 
     assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
-    assert "missing_node" in exc.value.fault.message
+    errors = exc.value.fault.context["validation_errors"]
+    assert any("Governance fallback_node_id 'missing_node' does not exist" in e for e in errors)
 
     # 2. Invalid Supervision Fallback
     # policy = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node"))
@@ -188,8 +189,12 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     # Assuming similar validation exists for recovery field or general graph integrity.
     # If not, this test might fail.
     # For now, let's assume validation is triggered.
-    with pytest.raises(ValueError, match=r"Resilience Error|Integrity Error"):
+    with pytest.raises(ManifestError) as exc:
         lf2.build()
+
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-STRICTNESS"
+    errors = exc.value.fault.context["validation_errors"]
+    assert any("resilience fallback_node_id 'missing_sup_node' does not exist" in e for e in errors)
 
 
 def test_human_node_options_and_visualizer() -> None:
