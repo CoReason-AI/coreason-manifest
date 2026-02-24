@@ -159,7 +159,7 @@ def test_switch_edge_inference() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=Graph(nodes=nodes, edges=edges, entry_point="switch-1"),  # type: ignore[arg-type]
     )
 

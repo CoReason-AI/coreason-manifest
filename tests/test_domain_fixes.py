@@ -5,13 +5,13 @@ import pytest
 import yaml
 
 from coreason_manifest.spec.core.flow import (
-    Blackboard,
     DataSchema,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode, SwitchNode
 from coreason_manifest.spec.interop.exceptions import ManifestError, SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO
@@ -199,7 +199,7 @@ def test_validator_coverage() -> None:
             status="draft",
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=Blackboard(variables={}, persistence=False),
+            memory=MemorySubsystem(working=WorkingMemory(variables={})),
             graph=graph,
         )
         errors = validate_flow(flow)

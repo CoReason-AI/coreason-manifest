@@ -1,5 +1,7 @@
+from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
+from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
@@ -35,23 +37,16 @@ def test_critical_tool_requires_guard() -> None:
     errors = validate_policy(flow_unguarded)
     # Check for specific error message
     assert any("critical tools ['delete_db']" in e.message for e in errors)
-    assert any("not guarded by a HumanNode" in e.message for e in errors)
+    assert any("no Co-Intelligence Policy" in e.message for e in errors)
 
     # Guarded Flow
-    human = HumanNode(
-        id="human-1",
-        metadata={},
-        type="human",
-        prompt="Approve?",
-        timeout_seconds=60,
-        interaction_mode="blocking",
-    )
-
+    gov = Governance(co_intelligence=CoIntelligencePolicy())
     flow_guarded = LinearFlow(
         kind="LinearFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
         definitions=definitions,
-        steps=[human, agent],
+        steps=[agent],
+        governance=gov,
     )
 
     errors = validate_policy(flow_guarded)

@@ -266,7 +266,7 @@ def test_visualizer_pure_cycle() -> None:
         status="draft",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -299,7 +299,7 @@ def test_visualizer_disconnected_cycle() -> None:
         status="draft",  # Allow disconnected
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -389,7 +389,7 @@ def test_validator_edge_cases() -> None:
         status="draft",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph_empty,
     )
 
@@ -408,7 +408,7 @@ def test_validator_edge_cases() -> None:
         status="draft",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph_dangling,
     )
     reports = validate_flow(flow_dangling)
@@ -425,7 +425,7 @@ def test_validator_edge_cases() -> None:
         status="draft",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph_mismatch_2,
     )
 
@@ -539,7 +539,7 @@ def test_flow_cycle_detection_unreachable() -> None:
         status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
     assert flow.status == "published"
@@ -950,7 +950,7 @@ def test_topology_self_loop_island() -> None:
         status="published",
         metadata=FlowMetadata(name="cycle", version="1.0.0", description="d", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         definitions=defs,
         graph=graph,
     )

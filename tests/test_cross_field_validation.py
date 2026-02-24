@@ -1,56 +1,10 @@
 import pytest
 from pydantic import ValidationError
 
-from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
+from coreason_manifest.spec.core.nodes import SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.exceptions import ManifestError
-
-
-def test_human_node_shadow_mode_requirements() -> None:
-    """
-    If interaction_mode is 'shadow', shadow_timeout_seconds is required.
-    """
-    with pytest.raises(ManifestError) as excinfo:
-        HumanNode(
-            id="h1",
-            type="human",
-            prompt="Shadow?",
-            interaction_mode="shadow",
-            timeout_seconds=None,
-            # Missing shadow_timeout_seconds
-        )
-    # Check that one of the errors contains our message
-    assert "HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'" in excinfo.value.fault.message
-
-
-def test_human_node_shadow_mode_valid() -> None:
-    h = HumanNode(
-        id="h1",
-        type="human",
-        prompt="Shadow?",
-        interaction_mode="shadow",
-        shadow_timeout_seconds=60,
-        timeout_seconds=None,
-    )
-    assert h.interaction_mode == "shadow"
-    assert h.shadow_timeout_seconds == 60
-
-
-def test_human_node_blocking_mode_invalid_field() -> None:
-    """
-    If interaction_mode is 'blocking', shadow_timeout_seconds should not be set.
-    """
-    with pytest.raises(ManifestError) as excinfo:
-        HumanNode(
-            id="h1",
-            type="human",
-            prompt="Block?",
-            interaction_mode="blocking",
-            shadow_timeout_seconds=60,
-            timeout_seconds=10,
-        )
-    assert "HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'" in excinfo.value.fault.message
 
 
 def test_swarm_node_summarize_requires_aggregator() -> None:

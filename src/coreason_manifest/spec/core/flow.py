@@ -8,10 +8,10 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     EmergenceInspectorNode,
-    HumanNode,
     InspectorNode,
     PlaceholderNode,
     PlannerNode,
@@ -62,19 +62,12 @@ class DataSchema(CoreasonModel):
         return self
 
 
-class Blackboard(CoreasonModel):
-    variables: dict[str, Any] = Field(default_factory=dict)
-    schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: Any | None = None
-
-
 AnyNode = Annotated[
     AgentNode
     | SwitchNode
     | InspectorNode
     | EmergenceInspectorNode
     | PlannerNode
-    | HumanNode
     | SwarmNode
     | PlaceholderNode,
     Field(discriminator="type"),
@@ -262,7 +255,7 @@ class GraphFlow(CoreasonModel):
     metadata: FlowMetadata
     interface: FlowInterface
     governance: Governance | None = None
-    blackboard: Blackboard | None = Field(default_factory=Blackboard)
+    memory: MemorySubsystem | None = Field(default_factory=lambda: MemorySubsystem(working=WorkingMemory()))
     definitions: FlowDefinitions | None = None
     graph: Graph
 
@@ -330,10 +323,10 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_swarm_variables(self) -> "GraphFlow":
-        if not self.blackboard:
+        if not self.memory or not self.memory.working:
             return self
 
-        variable_names = set(self.blackboard.variables.keys())
+        variable_names = set(self.memory.working.variables.keys())
 
         nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
 
@@ -350,11 +343,11 @@ class GraphFlow(CoreasonModel):
                         context={
                             "remediation": RemediationAction(
                                 type="update_field",
-                                description=f"Add variable '{node.workload_variable}' to blackboard.",
+                                description=f"Add variable '{node.workload_variable}' to working memory.",
                                 patch_data=[
                                     {  # pragma: no cover
                                         "op": "add",
-                                        "path": f"/blackboard/variables/{node.workload_variable}",
+                                        "path": f"/memory/working/variables/{node.workload_variable}",
                                         "value": [],
                                     }
                                 ],
@@ -388,6 +381,7 @@ class LinearFlow(CoreasonModel):
     metadata: FlowMetadata
     steps: list[AnyNode] = Field(default_factory=list, alias="sequence")
     governance: Governance | None = None
+    memory: MemorySubsystem | None = Field(default_factory=lambda: MemorySubsystem(working=WorkingMemory()))
     definitions: FlowDefinitions | None = None
 
     @property
@@ -433,7 +427,43 @@ class LinearFlow(CoreasonModel):
         return self
 
 
-Manifest = GraphFlow
+class IntentFlow(CoreasonModel):
+    """
+    Intent-driven swarm execution flow.
+    Topology is dynamic, based on semantic bidding or routing.
+    """
+
+    type: Literal["intent"] = "intent"
+    kind: Literal["IntentFlow"] = "IntentFlow"
+    status: Literal["draft", "published", "archived"] = "draft"
+    metadata: FlowMetadata
+    interface: FlowInterface
+    governance: Governance | None = None
+    memory: MemorySubsystem | None = Field(default_factory=lambda: MemorySubsystem(working=WorkingMemory()))
+    definitions: FlowDefinitions | None = None
+
+    pool: dict[str, AgentNode] = Field(default_factory=dict, description="Pool of available agents.")
+    routing_strategy: Literal["semantic_bidding", "llm_router", "round_robin"] = Field(
+        ..., description="Strategy for dispatching tasks to agents."
+    )
+    termination_criteria: dict[str, Any] = Field(
+        ..., description="Conditions defining when the swarm has achieved its goal."
+    )
+
+    @model_validator(mode="after")
+    def enforce_global_kill_switch(self) -> "IntentFlow":
+        if not self.governance or not self.governance.max_risk_level:
+            return self
+
+        _scan_for_kill_switch_violations(
+            self.governance.max_risk_level,
+            self.definitions,
+            list(self.pool.values()),
+        )
+        return self
+
+
+Manifest = GraphFlow | IntentFlow
 
 
 class AgentRequest(CoreasonModel):
@@ -443,7 +473,7 @@ class AgentRequest(CoreasonModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    manifest: GraphFlow | LinearFlow
+    manifest: GraphFlow | LinearFlow | IntentFlow
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

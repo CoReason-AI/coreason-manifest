@@ -4,7 +4,6 @@ import pytest
 
 from coreason_manifest.spec.core.engines import ComputerUseReasoning
 from coreason_manifest.spec.core.flow import (
-    Blackboard,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -14,6 +13,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     VariableDef,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.interop.antibody import AntibodyBase
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
@@ -74,7 +74,7 @@ def test_swarm_variable_validation() -> None:
         GraphFlow(
             metadata=FlowMetadata(name="test", version="1.0"),
             interface=FlowInterface(),
-            blackboard=Blackboard(variables={"existing_var": []}),
+            memory=MemorySubsystem(working=WorkingMemory(variables={"existing_var": []})),
             graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
             definitions=FlowDefinitions(profiles={}),
         )
@@ -149,7 +149,7 @@ def test_swarm_variable_valid() -> None:
     flow = GraphFlow.model_construct(
         metadata=FlowMetadata(name="test", version="1.0"),
         interface=FlowInterface(),
-        blackboard=Blackboard(variables={"existing_var": []}),
+        memory=MemorySubsystem(working=WorkingMemory(variables={"existing_var": []})),
         graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
         definitions=FlowDefinitions(profiles={}),
     )
@@ -159,21 +159,21 @@ def test_swarm_variable_valid() -> None:
     assert validated is flow
 
 
-def test_validate_swarm_variables_no_blackboard() -> None:
-    # Construct GraphFlow without blackboard (simulating None)
+def test_validate_swarm_variables_no_memory() -> None:
+    # Construct GraphFlow without memory (simulating None)
     # Using model_construct allows bypassing defaults/validation
     flow = GraphFlow.model_construct(
         metadata=FlowMetadata(name="test", version="1.0"),
         interface=FlowInterface(),
-        blackboard=None,  # Explicitly None
+        memory=None,  # Explicitly None
         graph=Graph(nodes={}, edges=[]),
         definitions=FlowDefinitions(profiles={}),
     )
 
-    # Should return self immediately (line 162)
+    # Should return self immediately
     validated = flow.validate_swarm_variables()  # type: ignore[operator]
     assert validated is flow
-    assert flow.blackboard is None
+    assert flow.memory is None
 
 
 # --- Gatekeeper Tests ---
@@ -271,7 +271,7 @@ def test_flow_nodes_iter_list_coverage() -> None:
 
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
-        blackboard=Blackboard(variables={"v": {"type": "list", "id": "v"}}),
+        memory=MemorySubsystem(working=WorkingMemory(variables={"v": {"type": "list", "id": "v"}})),
         graph=graph_with_list,
         interface=FlowInterface(),  # Added missing required field
         metadata=FlowMetadata(name="test", version="1.0"),  # Added missing required field

@@ -4,6 +4,7 @@ import pytest
 from pydantic import BaseModel
 
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
+from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     Edge,
@@ -15,9 +16,10 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     validate_integrity,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwarmNode, SwitchNode
+from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode, SwitchNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
-from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
+from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
 
@@ -79,35 +81,18 @@ def test_linear_unguarded_computer_use() -> None:
     errors = validate_policy(flow)
     assert len(errors) == 1
     assert "requires high-risk features (computer_use capability)" in errors[0].message
-    assert "not guarded by a HumanNode" in errors[0].message
+    assert "no Co-Intelligence Policy is configured" in errors[0].message
 
 
 def test_linear_guarded_computer_use() -> None:
     defs = get_defs()
-    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[human, node])
+    gov = Governance(co_intelligence=CoIntelligencePolicy(shadow_mode=True))
+    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[node], governance=gov)
 
     errors = validate_policy(flow)
     assert len(errors) == 0
-
-
-def test_linear_switch_bypass_fails() -> None:
-    # SwitchNode should NOT count as guard
-    defs = get_defs()
-    switch = SwitchNode(id="s1", metadata={}, type="switch", variable="x", cases={}, default="a1")
-    node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
-
-    flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[switch, node])
-
-    errors = validate_policy(flow)
-    assert len(errors) == 1  # Still fails because Switch is not Human
-
-
-def test_linear_missing_node_exception() -> None:
-    # Force ValueError in _is_guarded by checking a node not in sequence
-    pass
 
 
 def test_swarm_unguarded() -> None:
@@ -181,7 +166,7 @@ def test_gatekeeper_robustness_missing_profile() -> None:
 def test_graph_unguarded_path() -> None:
     defs = get_defs()
     # Entry -> Agent(comp) -> End
-    # No human
+    # No policy
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
     graph = Graph(nodes={"a1": agent}, edges=[], entry_point="a1")
@@ -194,7 +179,7 @@ def test_graph_unguarded_path() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -204,11 +189,11 @@ def test_graph_unguarded_path() -> None:
 
 def test_graph_guarded_path() -> None:
     defs = get_defs()
-    # Entry(Human) -> Agent(comp)
-    human = HumanNode(id="h1", metadata={}, type="human", prompt="ok?", timeout_seconds=10)
+    # Policy set
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    graph = Graph(nodes={"h1": human, "a1": agent}, edges=[Edge(from_node="h1", to_node="a1")], entry_point="h1")
+    graph = Graph(nodes={"a1": agent}, edges=[], entry_point="a1")
+    gov = Governance(co_intelligence=CoIntelligencePolicy())
 
     flow = GraphFlow(
         kind="GraphFlow",
@@ -218,8 +203,9 @@ def test_graph_guarded_path() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
+        governance=gov,
     )
 
     errors = validate_policy(flow)
@@ -243,7 +229,7 @@ def test_graph_cycle_explicit_entry() -> None:
         metadata=get_meta(),
         definitions=defs,
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
     assert flow.status == "published"
@@ -295,18 +281,6 @@ def test_gatekeeper_inline_profile() -> None:
     assert len(errors) == 0
 
 
-def test_gatekeeper_is_guarded_value_error() -> None:
-    # Gatekeeper L78-79: except ValueError: return False
-    node1 = AgentNode(id="a1", metadata={}, type="agent", profile="p1", tools=[])
-    node2 = AgentNode(id="a2", metadata={}, type="agent", profile="p1", tools=[])
-
-    # Use model_construct to bypass referential integrity validation (missing profile p1)
-    flow = LinearFlow.model_construct(
-        kind="LinearFlow", metadata=get_meta(), definitions=FlowDefinitions(), steps=[node1]
-    )
-
-    # Check node2 which is NOT in flow.sequence
-    assert _is_guarded(node2, flow) is False
 
 
 def test_integrity_empty_chain() -> None:
@@ -367,22 +341,13 @@ def test_graph_traversal_unguarded() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
     errors = validate_policy(flow)
     assert len(errors) == 1
-    assert "not guarded" in errors[0].message
-
-
-def test_unknown_flow_type() -> None:
-    # Hit final return False in _is_guarded
-    class UnknownFlow:
-        pass
-
-    node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
-    assert _is_guarded(node, UnknownFlow()) is False  # type: ignore
+    assert "no Co-Intelligence Policy" in errors[0].message
 
 
 if __name__ == "__main__":

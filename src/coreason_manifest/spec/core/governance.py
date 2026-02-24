@@ -4,6 +4,7 @@ from typing import Any, Literal
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
@@ -109,6 +110,9 @@ class Governance(CoreasonModel):
     )
     operational_policy: OperationalPolicy | None = Field(
         None, description="Centralized operational and business thresholds."
+    )
+    co_intelligence: CoIntelligencePolicy | None = Field(
+        None, description="Policy for human-AI co-intelligence interaction."
     )
     tool_policy: dict[ToolID, ToolAccessPolicy] | None = Field(
         None,

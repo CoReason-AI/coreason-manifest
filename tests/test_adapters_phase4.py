@@ -111,7 +111,7 @@ def test_langchain_adapter() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
         definitions=FlowDefinitions(tool_packs={"pack": pack}),
     )

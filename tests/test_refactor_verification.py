@@ -254,7 +254,7 @@ def test_schemeless_url_handling() -> None:
 def test_auto_fix_computer_use() -> None:
     """
     A graph with an unguarded "Computer Use" node must return a validation report
-    containing a JSON patch to insert a HumanNode.
+    suggesting configuring Governance.
     """
     # Create a profile that requires computer_use
     from coreason_manifest.spec.core.engines import ComputerUseReasoning
@@ -277,13 +277,13 @@ def test_auto_fix_computer_use() -> None:
     violation = next((r for r in reports if "computer_use capability" in r.message), None)
     assert violation is not None
     assert violation.remediation is not None
-    assert violation.remediation.type == "add_guard_node"
+    assert violation.remediation.type == "configure_governance"
     assert violation.remediation.format == "json_patch"
 
     patch = violation.remediation.patch_data
     assert isinstance(patch, list)
     assert patch[0]["op"] == "add"
-    assert patch[0]["value"]["type"] == "human"
+    assert patch[0]["path"] == "/governance/co_intelligence"
 
 
 def test_verify_remediation_patch_structure() -> None:

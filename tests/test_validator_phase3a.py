@@ -3,7 +3,6 @@ from typing import cast
 import pytest
 
 from coreason_manifest.spec.core.flow import (
-    Blackboard,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -15,6 +14,7 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.validator import validate_flow
@@ -71,7 +71,7 @@ def test_validate_graph_flow_valid() -> None:
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        memory=None,
         graph=graph,
         definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
@@ -95,7 +95,7 @@ def test_validate_graph_flow_invalid_edges() -> None:
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        memory=None,
         graph=graph,
         status="draft",
     )
@@ -106,15 +106,12 @@ def test_validate_graph_flow_invalid_edges() -> None:
 def test_validate_switch_node_invalid_targets() -> None:
     switch = create_switch_node("switch1", "var", {"case1": "missing1"}, "missing2")
     graph = Graph(nodes={"switch1": switch}, edges=[], entry_point="switch1")
-    blackboard = Blackboard(
-        variables={"var": VariableDef(type="string")},
-        persistence=False,
-    )
+    memory = MemorySubsystem(working=WorkingMemory(variables={"var": "string"}))
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=blackboard,
+        memory=memory,
         graph=graph,
     )
     errors = validate_flow(flow)
@@ -134,7 +131,7 @@ def test_validate_missing_tool() -> None:
         status="published",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        memory=None,
         graph=graph,
         definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
@@ -150,7 +147,7 @@ def test_validate_governance_sanity() -> None:
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        memory=None,
         graph=graph,
         governance=gov,
     )
@@ -238,7 +235,7 @@ def test_validate_graph_flow_empty() -> None:
             kind="GraphFlow",
             metadata=create_metadata(),
             interface=create_interface(),
-            blackboard=None,
+            memory=None,
             graph=graph,
         )
 
@@ -253,7 +250,7 @@ def test_validate_graph_flow_key_id_mismatch() -> None:
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
     errors = validate_flow(flow)
@@ -278,7 +275,7 @@ def test_validate_orphan_nodes() -> None:
         kind="GraphFlow",
         metadata=create_metadata(),
         interface=create_interface(),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
     errors = validate_flow(flow)

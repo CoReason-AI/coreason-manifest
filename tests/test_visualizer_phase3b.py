@@ -13,7 +13,6 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
-    HumanNode,
     Node,
     PlaceholderNode,
     PlannerNode,
@@ -56,15 +55,6 @@ def _get_switch_node(node_id: str, cases: dict[str, str], default: str) -> Switc
     )
 
 
-def _get_human_node(node_id: str) -> HumanNode:
-    return HumanNode(
-        id=node_id,
-        metadata={},
-        prompt="Please approve",
-        timeout_seconds=3600,
-    )
-
-
 def _get_planner_node(node_id: str) -> PlannerNode:
     return PlannerNode(
         id=node_id,
@@ -86,7 +76,6 @@ def _get_placeholder_node(node_id: str) -> PlaceholderNode:
 def test_linear_flow_to_mermaid() -> None:
     nodes: list[Any] = [
         _get_agent_node("start"),
-        _get_human_node("review"),
         _get_planner_node("plan"),
         _get_placeholder_node("end"),
     ]
@@ -106,12 +95,8 @@ def test_linear_flow_to_mermaid() -> None:
     assert "start" in mermaid_code
 
     # Edges
-    assert "start --> review" in mermaid_code
-    assert "review --> plan" in mermaid_code
+    assert "start --> plan" in mermaid_code
     assert "plan --> end" in mermaid_code
-
-    # Styling
-    assert ":::human" in mermaid_code
 
 
 def test_graph_flow_to_mermaid() -> None:
@@ -138,7 +123,7 @@ def test_graph_flow_to_mermaid() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -178,7 +163,7 @@ def test_switch_default_path() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -203,7 +188,7 @@ def test_explicit_edge_labels() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -260,7 +245,7 @@ def test_react_flow_output() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -326,7 +311,7 @@ def test_visualizer_coverage_extras() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -368,7 +353,7 @@ def test_visualizer_grouping() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 

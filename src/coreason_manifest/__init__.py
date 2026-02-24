@@ -12,6 +12,7 @@ from coreason_manifest.builder import (
     NewGraphFlow,
     NewLinearFlow,
 )
+from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.engines import (
     BaseReasoning,
     CouncilReasoning,
@@ -24,12 +25,12 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.flow import (
     AnyNode,
-    Blackboard,
     Edge,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
+    IntentFlow,
     LinearFlow,
     VariableDef,
 )
@@ -39,10 +40,15 @@ from coreason_manifest.spec.core.governance import (
     OperationalPolicy,
     Safety,
 )
+from coreason_manifest.spec.core.memory import (
+    EpisodicMemory,
+    MemorySubsystem,
+    SemanticMemory,
+    WorkingMemory,
+)
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
-    HumanNode,
     Node,
     PlaceholderNode,
     PlannerNode,
@@ -51,6 +57,9 @@ from coreason_manifest.spec.core.nodes import (
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.core.tools import (
     Dependency,
+    MCPPrompt,
+    MCPResource,
+    MCPTool,
     ToolPack,
 )
 
@@ -59,20 +68,22 @@ __all__ = [
     "AnyNode",
     "Audit",
     "BaseReasoning",
-    "Blackboard",
+    "CoIntelligencePolicy",
     "CognitiveProfile",
     "CouncilReasoning",
     "DecompositionReasoning",
     "Dependency",
     "Edge",
+    "EpisodicMemory",
     "FastPath",
     "FlowInterface",
     "FlowMetadata",
     "Governance",
     "Graph",
     "GraphFlow",
-    "HumanNode",
+    "IntentFlow",
     "LinearFlow",
+    "MemorySubsystem",
     "NewGraphFlow",
     "NewLinearFlow",
     "Node",
@@ -82,10 +93,15 @@ __all__ = [
     "PlannerNode",
     "ReasoningConfig",
     "Safety",
+    "SemanticMemory",
     "StandardReasoning",
     "SupervisionPolicy",
+    "MCPPrompt",
+    "MCPResource",
+    "MCPTool",
     "SwitchNode",
     "ToolPack",
     "TreeSearchReasoning",
     "VariableDef",
+    "WorkingMemory",
 ]

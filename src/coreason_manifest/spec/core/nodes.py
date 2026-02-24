@@ -147,115 +147,6 @@ class PlannerNode(Node):
     )
 
 
-class HumanNode(Node):
-    """
-    Human-in-the-Loop interaction node.
-    Supports blocking approval, or 'shadow' mode where the agent streams intent
-    and proceeds if no signal is received, while 'steering' allows mid-flight plan alteration.
-    """
-
-    type: Literal["human"] = "human"
-    prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
-    timeout_seconds: Annotated[
-        int | Literal["infinite"] | None,
-        Field(
-            description="Max wait time for blocking/steering. Use 'infinite' for no timeout.",
-            examples=[300, "infinite"],
-        ),
-    ]
-    input_schema: dict[str, Any] | None = Field(
-        None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
-    )
-    options: list[str] | None = Field(
-        None, description="List of valid options for the human.", examples=[["approve", "reject"]]
-    )
-
-    # *** UPGRADE: SHADOW MODE ***
-    interaction_mode: Annotated[
-        Literal["blocking", "shadow", "steering"],
-        Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
-    ] = "blocking"
-    shadow_timeout_seconds: Annotated[
-        int | Literal["infinite"] | None,
-        Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout.", examples=[60]),
-    ] = None
-
-    @model_validator(mode="after")
-    def validate_interaction_config(self) -> "HumanNode":
-        # Fix 4: Temporal Collision - Enforce mutual exclusion
-        if self.interaction_mode == "shadow":
-            if self.shadow_timeout_seconds is None:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-VAL-HUMAN-SHADOW",
-                        message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={
-                            "remediation": RemediationAction(
-                                type="update_field",
-                                target_node_id=self.id,
-                                description="Set 'shadow_timeout_seconds' to a valid value.",
-                                patch_data=[
-                                    {
-                                        "op": "add",
-                                        "path": "/shadow_timeout_seconds",
-                                        "value": 300,
-                                    }
-                                ],
-                            ).model_dump()
-                        },
-                    )
-                )
-            if self.timeout_seconds is not None:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-VAL-HUMAN-TIMEOUT",
-                        message="HumanNode in 'shadow' mode must not have 'timeout_seconds'.",
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={
-                            "remediation": RemediationAction(
-                                type="update_field",
-                                target_node_id=self.id,
-                                description="Remove 'timeout_seconds'.",
-                                patch_data=[
-                                    {
-                                        "op": "remove",
-                                        "path": "/timeout_seconds",
-                                    }
-                                ],
-                            ).model_dump()
-                        },
-                    )
-                )
-
-        # SIM102: Combine nested if statements
-        if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-HUMAN-BLOCKING",
-                    message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            target_node_id=self.id,
-                            description="Remove 'shadow_timeout_seconds'.",
-                            patch_data=[
-                                {
-                                    "op": "remove",
-                                    "path": "/shadow_timeout_seconds",
-                                }
-                            ],
-                        ).model_dump()
-                    },
-                )
-            )
-        return self
-
-
 class SwarmNode(Node):
     """
     Dynamic Swarm Spawning (The "Hive").
@@ -350,7 +241,6 @@ __all__ = [
     "AgentNode",
     "CognitiveProfile",
     "EmergenceInspectorNode",
-    "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
     "Node",

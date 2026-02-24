@@ -5,7 +5,6 @@ import pytest
 from jsonschema.exceptions import SchemaError
 
 from coreason_manifest.spec.core.flow import (
-    Blackboard,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -15,6 +14,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     LinearFlow,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.interop.exceptions import ManifestError
@@ -239,7 +239,7 @@ def test_graph_flow_swarm_variable_remediation() -> None:
     )
 
     graph = Graph(nodes={"s1": swarm_node}, edges=[], entry_point="s1")
-    blackboard = Blackboard(variables={})  # Empty blackboard
+    memory = MemorySubsystem(working=WorkingMemory(variables={}))  # Empty memory
 
     definitions = FlowDefinitions(
         profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)}
@@ -252,7 +252,7 @@ def test_graph_flow_swarm_variable_remediation() -> None:
             metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
             definitions=definitions,
             interface=FlowInterface(),
-            blackboard=blackboard,
+            memory=memory,
             graph=graph,
             governance=None,
         )
@@ -264,4 +264,4 @@ def test_graph_flow_swarm_variable_remediation() -> None:
     assert remediation["type"] == "update_field"
     patch = remediation["patch_data"][0]
     assert patch["op"] == "add"
-    assert patch["path"] == "/blackboard/variables/missing_var"
+    assert patch["path"] == "/memory/working/variables/missing_var"

@@ -89,10 +89,14 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
     # 4. Domain 4: Static Data-Flow Analysis
     # Construct Symbol Table: Map variable name -> type (str)
     symbol_table: dict[str, str] = {}
-    if hasattr(flow, "blackboard") and flow.blackboard:
-        for name, var_def in flow.blackboard.variables.items():
-            # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
-            symbol_table[name] = var_def.type.lower()
+    if hasattr(flow, "memory") and flow.memory and flow.memory.working:
+        for name, val in flow.memory.working.variables.items():
+            # Architectural Note: Infer type from value since VariableDef is gone
+            if val is None:
+                symbol_table[name] = "any"
+            else:
+                symbol_table[name] = type(val).__name__.lower()
+
     if hasattr(flow, "interface") and flow.interface:
         inputs = flow.interface.inputs
         in_schema = getattr(inputs, "json_schema", inputs)

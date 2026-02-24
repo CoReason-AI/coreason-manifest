@@ -36,7 +36,6 @@ def _get_node_shape(node: Node) -> tuple[str, str]:
         "planner": ("{{", "}}"),
         "inspector": ("{{", "}}"),
         "emergence_inspector": ("{{", "}}"),
-        "human": ("[/", "/]"),
         "placeholder": ("(", ")"),
         "swarm": ("[[", "]]"),
     }
@@ -55,9 +54,6 @@ def _render_mermaid_node(node: Node, snapshot: ExecutionSnapshot | None = None) 
         # Legacy used "EmergenceInspectorNode", we stick to clean UI "Emergence Inspector"
 
         label += f"<br/>({type_label})"
-        if node.type == "human" and hasattr(node, "options") and node.options:
-            opts = ", ".join(node.options)
-            label += f"<br/>[{opts}]"
 
     shape_start, shape_end = _get_node_shape(node)
 
@@ -148,7 +144,6 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    %% Styling Classes")
     lines.append("    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;")
     lines.append("    classDef switch fill:#ffcc00,stroke:#333,stroke-width:2px;")
-    lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
     lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
     lines.append("    classDef emergence_inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
     lines.append("    classDef swarm fill:#aed6f1,stroke:#2e86c1,stroke-width:2px;")

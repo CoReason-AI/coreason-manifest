@@ -1,6 +1,6 @@
 import pytest
 
-from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
+from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow, NewSwarmFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance, OperationalPolicy
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
@@ -60,12 +60,16 @@ def test_graph_builder() -> None:
     gov = Governance(rate_limit_rpm=10)
     builder.set_governance(gov)
 
-    # Test set_interface and set_blackboard
+    # Test set_interface and memory
     builder.set_interface(
         inputs={"type": "object", "properties": {"in": {"type": "string"}}},
         outputs={"type": "object", "properties": {"out": {"type": "integer"}}},
     )
-    builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
+
+    # Use new memory config API
+    # Old: builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
+    builder.with_memory_tier("working", {"variables": {"var1": None}})
+    builder.with_memory_tier("episodic", {"retention_policy": "forever"})
 
     flow = builder.build()
 
@@ -84,10 +88,28 @@ def test_graph_builder() -> None:
     # Assert new features
     assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}  # type: ignore[union-attr]
     assert flow.interface.outputs.json_schema == {"type": "object", "properties": {"out": {"type": "integer"}}}  # type: ignore[union-attr]
-    assert flow.blackboard is not None
-    assert flow.blackboard.persistence is True
-    assert "var1" in flow.blackboard.variables
-    assert flow.blackboard.variables["var1"].type == "string"
+    assert flow.memory is not None
+    assert flow.memory.working is not None
+    assert "var1" in flow.memory.working.variables
+    assert flow.memory.episodic is not None
+    assert flow.memory.episodic.retention_policy == "forever"
+
+
+def test_swarm_builder() -> None:
+    builder = NewSwarmFlow("MySwarm", "1.0.0", "Desc")
+
+    agent = AgentBuilder("agent1").with_identity("worker", "worker").build()
+    builder.add_agent(agent)
+
+    builder.set_routing("round_robin")
+    builder.set_termination({"type": "schema_match"})
+
+    flow = builder.build()
+
+    assert flow.kind == "IntentFlow"
+    assert len(flow.pool) == 1
+    assert flow.routing_strategy == "round_robin"
+    assert flow.termination_criteria["type"] == "schema_match"
 
 
 def test_linear_builder_invalid() -> None:

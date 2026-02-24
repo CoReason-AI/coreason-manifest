@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode, SwarmNode
+from coreason_manifest.spec.core.nodes import Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
 
@@ -194,9 +194,6 @@ class MockFactory:
 
         if isinstance(node, PlannerNode):
             raw_output = self._generate_schema_data(node.output_schema)
-            outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
-        elif isinstance(node, HumanNode):
-            raw_output = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
             outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         else:
             outputs = {"result": "mock_output"}

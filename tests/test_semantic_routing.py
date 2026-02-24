@@ -2,7 +2,7 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.spec.core.flow import AnyNode
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.nodes import AgentNode, SwarmNode
 
 
 def test_semantic_routing_nodes() -> None:
@@ -10,13 +10,6 @@ def test_semantic_routing_nodes() -> None:
     Test that a list of mixed node types is parsed correctly into their specific classes.
     """
     nodes_data = [
-        {
-            "type": "human",
-            "id": "human_step_1",
-            "prompt": "Approve?",
-            "interaction_mode": "blocking",
-            "timeout_seconds": 60,
-        },
         {
             "type": "agent",
             "id": "agent_step_1",
@@ -38,18 +31,15 @@ def test_semantic_routing_nodes() -> None:
     adapter = TypeAdapter(list[AnyNode])
     nodes = adapter.validate_python(nodes_data)
 
-    assert len(nodes) == 3
-    assert isinstance(nodes[0], HumanNode)
-    assert nodes[0].type == "human"
-    assert nodes[0].id == "human_step_1"
+    assert len(nodes) == 2
 
-    assert isinstance(nodes[1], AgentNode)
-    assert nodes[1].type == "agent"
-    assert nodes[1].profile == "researcher_profile"
+    assert isinstance(nodes[0], AgentNode)
+    assert nodes[0].type == "agent"
+    assert nodes[0].profile == "researcher_profile"
 
-    assert isinstance(nodes[2], SwarmNode)
-    assert nodes[2].type == "swarm"
-    assert nodes[2].distribution_strategy == "sharded"
+    assert isinstance(nodes[1], SwarmNode)
+    assert nodes[1].type == "swarm"
+    assert nodes[1].distribution_strategy == "sharded"
 
 
 def test_semantic_routing_failure() -> None:

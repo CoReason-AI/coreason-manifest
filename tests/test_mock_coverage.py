@@ -3,7 +3,7 @@ import secrets
 from typing import Any
 
 from coreason_manifest.spec.core.flow import DataSchema, Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import HumanNode, PlaceholderNode, PlannerNode, SwarmNode
+from coreason_manifest.spec.core.nodes import PlaceholderNode, PlannerNode, SwarmNode
 from coreason_manifest.utils.mock import MockFactory
 
 
@@ -225,23 +225,6 @@ def test_execute_node_planner() -> None:
     results = factory._execute_node(planner, exec_map)
     assert len(results) == 1
     assert results[0].outputs == {"result": "lorem ipsum"}
-
-
-def test_execute_node_human() -> None:
-    factory = MockFactory(seed=1)
-
-    # With input schema
-    human = HumanNode(
-        id="human1", type="human", input_schema={"type": "boolean"}, prompt="approve?", timeout_seconds=300
-    )
-    results = factory._execute_node(human, {})
-    assert isinstance(results[0].outputs, dict)
-    assert isinstance(results[0].outputs["result"], bool)
-
-    # Without input schema
-    human2 = HumanNode(id="human2", type="human", input_schema=None, prompt="approve?", timeout_seconds=300)
-    results2 = factory._execute_node(human2, {})
-    assert results2[0].outputs == {"approved": True}
 
 
 def test_simulate_trace_empty_graph() -> None:

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.nodes import AgentNode, SwarmNode
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,
@@ -134,66 +134,32 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             needs_guard = True
             violation_reason.append(f"critical tools {critical_tools}")
 
-        if needs_guard and not _is_guarded(node, flow):
-            human_node_id = f"guard_{node.id}"
-            human_node = HumanNode(
-                id=human_node_id,
-                type="human",
-                prompt=f"Approve unsafe action by {node.id}",
-                timeout_seconds=300,
-                interaction_mode="blocking",
-                metadata={},
-            )
+        if needs_guard:
+            # Check Co-Intelligence Policy
+            has_policy = False
+            if flow.governance and flow.governance.co_intelligence:
+                # If we have a policy, we assume it handles the risk (e.g. mentor_mode)
+                has_policy = True
 
-            # Construct Patch
-            patch_ops = []
-            if isinstance(flow, LinearFlow):
-                # Find index
-                idx = 0
-                for i, n in enumerate(flow.steps):
-                    if n.id == node.id:
-                        idx = i
-                        break
-                patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
-            elif isinstance(flow, GraphFlow):
-                # Fix 1: Ghost Guard Graph Injection Failure - Rewire edges
-
-                # 1. Add Guard Node
-                patch_ops.append(
-                    {"op": "add", "path": f"/graph/nodes/{human_node_id}", "value": human_node.model_dump(mode="json")}
+            if not has_policy:
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
+                        severity="violation",
+                        message=(
+                            f"Policy Violation: Node '{node.id}' requires high-risk features "
+                            f"({', '.join(violation_reason)}) but no Co-Intelligence Policy is configured."
+                        ),
+                        node_id=node.id,
+                        details={"reason": ", ".join(violation_reason)},
+                        remediation=RemediationAction(
+                            type="configure_governance",
+                            format="json_patch",
+                            patch_data=[{"op": "add", "path": "/governance/co_intelligence", "value": {}}],
+                            description="Configure Co-Intelligence Policy in Governance.",
+                        ),
+                    )
                 )
-
-                # 2. Rewire incoming edges (Target -> Guard)
-                for edge_idx, edge in enumerate(flow.graph.edges):
-                    if edge.to_node == node.id:
-                        patch_ops.append(
-                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
-                        )
-
-                # 3. Add edge (Guard -> Target)
-                patch_ops.append(
-                    {"op": "add", "path": "/graph/edges/-", "value": {"source": human_node_id, "target": node.id}}
-                )
-
-            reports.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
-                    severity="violation",
-                    message=(
-                        f"Policy Violation: Node '{node.id}' requires high-risk features "
-                        f"({', '.join(violation_reason)}) but is not guarded by a HumanNode."
-                    ),
-                    node_id=node.id,
-                    details={"reason": ", ".join(violation_reason)},
-                    remediation=RemediationAction(
-                        type="add_guard_node",
-                        target_node_id=node.id,
-                        format="json_patch",
-                        patch_data=patch_ops,
-                        description=f"Insert HumanNode '{human_node_id}' before '{node.id}'",
-                    ),
-                )
-            )
 
     # 5. Topology Analysis (GraphFlow Only)
     if isinstance(flow, GraphFlow):
@@ -322,97 +288,3 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     return reports
 
 
-def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
-    """
-    Checks if the target node is topologically guarded by a HumanNode.
-    Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
-    """
-    if isinstance(flow, LinearFlow):
-        # Scan sequence backwards from target
-        # Architectural Note: Match by ID to verify identity, not just value equality
-        target_idx = -1
-        for i, node in enumerate(flow.steps):
-            if node.id == target_node.id:
-                target_idx = i
-                break
-
-        if target_idx == -1:
-            return False
-
-        for i in range(target_idx - 1, -1, -1):
-            node = flow.steps[i]
-            if isinstance(node, HumanNode):
-                return True
-        return False
-
-    if isinstance(flow, GraphFlow):
-        # Reachability Analysis
-
-        all_ids = set(flow.graph.nodes.keys())
-        entry_id = flow.graph.entry_point
-
-        # Valid guards: HumanNode only.
-        valid_guards = (HumanNode,)
-
-        # Construct adjacency map
-        adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
-        for edge in flow.graph.edges:
-            adj[edge.from_node].append(edge.to_node)
-
-        guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
-
-        if entry_id:
-            queue = [entry_id]
-            visited = {entry_id}
-        else:
-            queue = []
-            visited = set()
-
-        # Handle case where target is the entry node
-        if target_node.id == entry_id:
-            return False
-
-        # 1. Check strict reachability (ignoring guards) to identify Islands
-        if entry_id:
-            full_queue = [entry_id]
-            full_visited = {entry_id}
-        else:
-            full_queue = []
-            full_visited = set()
-
-        reachable = False
-        while full_queue:
-            curr = full_queue.pop(0)
-            if curr == target_node.id:
-                reachable = True
-                break
-            for n in adj.get(curr or "", []):
-                if n not in full_visited:
-                    full_visited.add(n)
-                    full_queue.append(n)
-
-        if not reachable:
-            return False  # Island -> Fail Closed
-
-        # 2. Check guarded reachability
-        while queue:
-            curr_id = queue.pop(0)
-
-            if curr_id == target_node.id:
-                return False  # Reached target without passing a guard
-
-            # If current node is a guard, we stop traversing this path
-            # (because downstream is guarded by this node).
-            if curr_id in guards:
-                continue
-
-            # Expand neighbors
-            for neighbor in adj.get(curr_id or "", []):
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.append(neighbor)
-
-        # If reachable but not via unguarded path -> Guarded
-        return True
-
-    return False

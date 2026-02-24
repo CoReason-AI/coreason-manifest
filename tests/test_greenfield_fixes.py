@@ -12,6 +12,7 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.governance import ToolAccessPolicy
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.resilience import (
     ErrorDomain,
@@ -88,7 +89,7 @@ def test_graph_flow_draft_mode() -> None:
         metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
     assert flow.status == "draft"
@@ -103,7 +104,7 @@ def test_graph_flow_draft_mode() -> None:
         metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
     from coreason_manifest.utils.validator import validate_flow
@@ -128,7 +129,7 @@ def test_graph_flow_draft_mode() -> None:
         metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         definitions=definitions,
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=valid_graph,
     )
     assert flow_valid.status == "published"
@@ -324,7 +325,7 @@ def test_fallback_cycle_complex_policy() -> None:
         status="published",
         metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=dummy_graph,
         definitions=None,
     )
@@ -367,7 +368,6 @@ def test_recursive_schema_strict_validation() -> None:
 def test_validator_definitions_profile_scanning() -> None:
     """Verify that the validator scans profiles stored in definitions."""
     from coreason_manifest.spec.core.flow import (
-        Blackboard,
         DataSchema,
         FlowDefinitions,
         FlowInterface,
@@ -399,15 +399,15 @@ def test_validator_definitions_profile_scanning() -> None:
         tools=[],
     )
 
-    # Flow with empty blackboard (so role_var is missing)
-    blackboard = Blackboard(variables={}, persistence=False)
+    # Flow with empty memory (so role_var is missing)
+    memory = MemorySubsystem(working=WorkingMemory(variables={}))
     graph = Graph(nodes={"a1": agent}, edges=[], entry_point="a1")
 
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=blackboard,
+        memory=memory,
         graph=graph,
         definitions=definitions,
     )
@@ -461,13 +461,11 @@ def test_jinja2_filter_validation() -> None:
     The validator should strip filters and only check the variable name.
     """
     from coreason_manifest.spec.core.flow import (
-        Blackboard,
         DataSchema,
         FlowInterface,
         FlowMetadata,
         Graph,
         GraphFlow,
-        VariableDef,
     )
     from coreason_manifest.utils.validator import validate_flow
 
@@ -485,15 +483,17 @@ def test_jinja2_filter_validation() -> None:
         tools=[],
     )
 
-    # Define 'user_name' in blackboard
-    blackboard = Blackboard(variables={"user_name": VariableDef(type="string")}, persistence=False)
+    # Define 'user_name' in memory
+    # VariableDef was used for types, but WorkingMemory uses values.
+    # Assuming validator checks keys.
+    memory = MemorySubsystem(working=WorkingMemory(variables={"user_name": "string"}))
 
     graph = Graph(nodes={"n1": agent}, edges=[], entry_point="n1")
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=blackboard,
+        memory=memory,
         graph=graph,
     )
 
@@ -515,7 +515,7 @@ def test_jinja2_filter_validation() -> None:
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=blackboard,
+        memory=memory,
         graph=graph_fail,
     )
 
@@ -527,17 +527,19 @@ def test_swarm_type_safety() -> None:
     """Test MVP type safety for SwarmNode."""
     # Define a string variable
     from coreason_manifest.spec.core.flow import (
-        Blackboard,
         DataSchema,
         FlowInterface,
         FlowMetadata,
         Graph,
         GraphFlow,
-        VariableDef,
     )
     from coreason_manifest.utils.validator import validate_flow
 
-    blackboard = Blackboard(variables={"text_var": VariableDef(type="string")}, persistence=False)
+    # We assume validator infers type from value or VariableDef
+    # If using WorkingMemory(variables={...}), types are inferred from values?
+    # Or VariableDef is still used somewhere? No, VariableDef was for Blackboard.
+    # We rely on validator's ability to check types in memory.
+    memory = MemorySubsystem(working=WorkingMemory(variables={"text_var": "string"}))
 
     # SwarmNode expects a list, but points to a string
     from coreason_manifest.spec.core.nodes import SwarmNode
@@ -560,10 +562,11 @@ def test_swarm_type_safety() -> None:
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=blackboard,
+        memory=memory,
         graph=graph,
     )
 
+    # Note: If validator uses runtime type check on values, "string" is str.
     errors = validate_flow(flow)
     assert any("Type Mismatch" in e and "expects a list" in e for e in errors)
 
@@ -571,18 +574,16 @@ def test_swarm_type_safety() -> None:
 def test_inspector_regex_warning() -> None:
     """Test warning when InspectorNode uses regex mode on complex types."""
     from coreason_manifest.spec.core.flow import (
-        Blackboard,
         DataSchema,
         FlowInterface,
         FlowMetadata,
         Graph,
         GraphFlow,
-        VariableDef,
     )
     from coreason_manifest.spec.core.nodes import InspectorNode
     from coreason_manifest.utils.validator import validate_flow
 
-    blackboard = Blackboard(variables={"obj_var": VariableDef(type="object")}, persistence=False)
+    memory = MemorySubsystem(working=WorkingMemory(variables={"obj_var": {"some": "object"}}))
 
     inspector = InspectorNode(
         id="i1",
@@ -601,7 +602,7 @@ def test_inspector_regex_warning() -> None:
         kind="GraphFlow",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=blackboard,
+        memory=memory,
         graph=graph,
     )
 
@@ -658,7 +659,7 @@ def test_validator_union_type_normalization() -> None:
         status="draft",
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
         interface=FlowInterface(inputs=inputs, outputs=DataSchema()),
-        blackboard=None,
+        memory=None,
         graph=graph,
         definitions=None,
     )
@@ -692,7 +693,7 @@ def test_loader_duplicate_keys_error(tmp_path: object) -> None:
             json_schema: {}
           outputs:
             json_schema: {}
-        blackboard: null
+        memory: null
         graph:
           entry_point: step_1
           edges: []

@@ -1,5 +1,6 @@
 # Core specification package
 
+from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.engines import (
     AttentionReasoning,
     BaseReasoning,
@@ -20,13 +21,13 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.flow import (
     AnyNode,
-    Blackboard,
     Edge,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
+    IntentFlow,
     LinearFlow,
     VariableDef,
 )
@@ -37,11 +38,16 @@ from coreason_manifest.spec.core.governance import (
     OperationalPolicy,
     Safety,
 )
+from coreason_manifest.spec.core.memory import (
+    EpisodicMemory,
+    MemorySubsystem,
+    SemanticMemory,
+    WorkingMemory,
+)
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
-    HumanNode,
     InspectorNode,
     InspectorNodeBase,
     Node,
@@ -59,7 +65,12 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import (
+    MCPPrompt,
+    MCPResource,
+    MCPTool,
+    ToolPack,
+)
 
 __all__ = [
     # Nodes
@@ -71,9 +82,9 @@ __all__ = [
     # Governance
     "Audit",
     "BaseReasoning",
-    "Blackboard",
     "BufferReasoning",
     "CircuitBreaker",
+    "CoIntelligencePolicy",
     "CognitiveProfile",
     "ComputerUseReasoning",
     "CouncilReasoning",
@@ -81,6 +92,7 @@ __all__ = [
     "Edge",
     "EmergenceInspectorNode",
     "EnsembleReasoning",
+    "EpisodicMemory",
     "ErrorDomain",
     "ErrorHandler",
     "EscalationStrategy",
@@ -93,10 +105,11 @@ __all__ = [
     "Graph",
     "GraphFlow",
     "GraphReasoning",
-    "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
+    "IntentFlow",
     "LinearFlow",
+    "MemorySubsystem",
     "ModelCriteria",
     "ModelRef",
     "Node",
@@ -110,11 +123,16 @@ __all__ = [
     "ResilienceStrategy",
     "RetryStrategy",
     "Safety",
+    "SemanticMemory",
     "StandardReasoning",
     "SupervisionPolicy",
     "SwitchNode",
     # Tools
+    "MCPPrompt",
+    "MCPResource",
+    "MCPTool",
     "ToolPack",
     "TreeSearchReasoning",
     "VariableDef",
+    "WorkingMemory",
 ]

@@ -5,7 +5,6 @@ import pytest
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.flow import (
     AnyNode,
-    Blackboard,
     DataSchema,
     Edge,
     FlowInterface,
@@ -13,6 +12,7 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import CognitiveProfile
 
 
@@ -25,7 +25,7 @@ def mock_flow_factory() -> Callable[[list[AnyNode], list[tuple[str, str]]], Grap
             status="draft",
             metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=Blackboard(variables={}, persistence=False),
+            memory=MemorySubsystem(working=WorkingMemory(variables={})),
             graph=Graph.model_construct(
                 nodes={n.id: n for n in nodes_list},
                 edges=[Edge(from_node=s, to_node=t) for s, t in edges_list],

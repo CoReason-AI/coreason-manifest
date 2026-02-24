@@ -1,4 +1,5 @@
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
+import warnings
 
 from pydantic import Field, HttpUrl, model_validator
 
@@ -16,6 +17,7 @@ class Dependency(CoreasonModel):
 
 class ToolCapability(CoreasonModel):
     """
+    DEPRECATED: Use MCPTool instead.
     Definition of a tool's capabilities and risk profile.
     Mandate 3: Semantic Tool Governance.
     """
@@ -42,9 +44,58 @@ class ToolCapability(CoreasonModel):
             )
         return self
 
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        warnings.warn(
+            "ToolCapability is deprecated. Use MCPTool, MCPResource, or MCPPrompt instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
-# Polymorphic Tool Type (Extensible for future)
-AnyTool = Annotated[ToolCapability, Field(discriminator="type")]
+
+class MCPTool(CoreasonModel):
+    """Native Model Context Protocol (MCP) Tool definition."""
+
+    type: Literal["mcp_tool"] = "mcp_tool"
+    name: str = Field(..., description="The name of the tool.")
+    description: str | None = Field(None, description="A description of the tool.")
+    input_schema: dict[str, Any] = Field(..., description="JSON Schema for the tool's input arguments.")
+
+    # Governance extensions
+    risk_level: RiskLevel = Field(RiskLevel.STANDARD, description="Risk classification.")
+    requires_approval: bool = Field(False, description="If True, human approval is required.")
+
+
+class MCPResource(CoreasonModel):
+    """Native Model Context Protocol (MCP) Resource definition."""
+
+    type: Literal["mcp_resource"] = "mcp_resource"
+    uri: str = Field(..., description="The URI of the resource.")
+    name: str = Field(..., description="The name of the resource.")
+    description: str | None = Field(None, description="A description of the resource.")
+    mime_type: str | None = Field(None, description="The MIME type of the resource.")
+
+
+class MCPPromptArgument(CoreasonModel):
+    name: str = Field(..., description="The name of the argument.")
+    description: str | None = Field(None, description="A description of the argument.")
+    required: bool = Field(False, description="Whether the argument is required.")
+
+
+class MCPPrompt(CoreasonModel):
+    """Native Model Context Protocol (MCP) Prompt definition."""
+
+    type: Literal["mcp_prompt"] = "mcp_prompt"
+    name: str = Field(..., description="The name of the prompt.")
+    description: str | None = Field(None, description="A description of the prompt.")
+    arguments: list[MCPPromptArgument] = Field(default_factory=list, description="Arguments for the prompt.")
+
+
+# Polymorphic Tool Type
+AnyTool = Annotated[
+    ToolCapability | MCPTool | MCPResource | MCPPrompt,
+    Field(discriminator="type")
+]
 
 
 class ToolPack(CoreasonModel):
@@ -54,8 +105,8 @@ class ToolPack(CoreasonModel):
     namespace: str = Field(..., description="Namespace prefix for tools in this pack.", examples=["std_utils"])
     tools: list[AnyTool] = Field(
         ...,
-        description="List of tool capabilities provided by this pack.",
-        examples=[[{"name": "calc", "type": "capability"}]],
+        description="List of tools/resources/prompts provided by this pack.",
+        examples=[[{"name": "calc", "type": "mcp_tool", "input_schema": {}}]],
     )
     dependencies: list[Dependency] = Field(
         default_factory=list,

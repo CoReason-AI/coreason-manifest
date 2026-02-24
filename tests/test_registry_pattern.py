@@ -111,7 +111,7 @@ def test_graph_flow_definitions() -> None:
         metadata=metadata,
         definitions=definitions,
         interface=interface,
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 
@@ -213,7 +213,7 @@ def test_tool_integrity_failure_graph() -> None:
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
         ),
-        blackboard=None,
+        memory=None,
         graph=graph,
     )
 

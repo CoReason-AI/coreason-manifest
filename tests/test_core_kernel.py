@@ -5,7 +5,6 @@ from coreason_manifest.spec.core.engines import (
     TreeSearchReasoning,
 )
 from coreason_manifest.spec.core.flow import (
-    Blackboard,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -16,10 +15,10 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
-    HumanNode,
     PlaceholderNode,
     PlannerNode,
     SwitchNode,
@@ -66,13 +65,6 @@ def test_core_kernel_instantiation() -> None:
         type="planner",
         output_schema={"type": "object", "properties": {"plan": {"type": "string"}}},
     )
-    human_node = HumanNode(
-        id="human-1",
-        metadata={},
-        prompt="Please approve",
-        timeout_seconds=60,
-        type="human",
-    )
     placeholder = PlaceholderNode(
         id="place-1",
         metadata={},
@@ -86,8 +78,7 @@ def test_core_kernel_instantiation() -> None:
         inputs=DataSchema(json_schema={"type": "object", "properties": {"q": {"type": "string"}}, "required": ["q"]}),
         outputs=DataSchema(json_schema={"type": "object", "properties": {"a": {"type": "string"}}, "required": ["a"]}),
     )
-    variable_def = VariableDef(type="string", description="User context")
-    blackboard = Blackboard(variables={"context": variable_def}, persistence=False)
+    memory = MemorySubsystem(working=WorkingMemory(variables={"context": "User context"}))
 
     # Define ToolPack for integrity
     tool_pack = ToolPack(
@@ -105,7 +96,6 @@ def test_core_kernel_instantiation() -> None:
             "agent-1": agent_node,
             "switch-1": switch_node,
             "planner-1": planner_node,
-            "human-1": human_node,
             "place-1": placeholder,
         },
         edges=[edge],
@@ -115,14 +105,14 @@ def test_core_kernel_instantiation() -> None:
     linear_flow = LinearFlow(
         kind="LinearFlow",
         metadata=metadata,
-        steps=[agent_node, switch_node, planner_node, human_node, placeholder],
+        steps=[agent_node, switch_node, planner_node, placeholder],
         definitions=definitions,
     )
     graph_flow = GraphFlow(
         kind="GraphFlow",
         metadata=metadata,
         interface=interface,
-        blackboard=blackboard,
+        memory=memory,
         graph=graph,
         definitions=definitions,
     )
