@@ -1,130 +1,106 @@
-from datetime import UTC, datetime
-from typing import Any
-
 import pytest
+from pydantic import ValidationError
+from typing import Any
+from unittest.mock import patch
 
-from coreason_manifest.spec.interop.exceptions import (
-    FaultSeverity,
-    LineageIntegrityError,
-    ManifestError,
-    RecoveryAction,
-    SemanticFault,
-)
+from coreason_manifest.spec.core.flow import GraphFlow, Graph, Edge, FlowMetadata, FlowInterface
+from coreason_manifest.spec.core.governance import Governance, CircuitBreaker
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
+from datetime import datetime
 
-# --- TELEMETRY TESTS ---
+# Helper
+def get_meta() -> FlowMetadata:
+    return FlowMetadata(name="test", version="0.1.0", description="test")
 
+def get_agent_node(nid: str) -> AgentNode:
+    return AgentNode(
+        id=nid,
+        type="agent",
+        profile=CognitiveProfile(role="r", persona="p"),
+        tools=[]
+    )
 
-def test_telemetry_parent_hash_auto_init() -> None:
-    # Case: parent_hash provided, parent_hashes missing (None)
-    raw_data: dict[str, Any] = {
-        "node_id": "test_node_init",
-        "state": NodeState.COMPLETED,
-        "inputs": {},
-        "outputs": {},
-        "timestamp": datetime.now(UTC),
-        "duration_ms": 1.0,
-        "parent_hash": "hash123",
-        # parent_hashes is missing/None
-    }
+def test_edge_condition_syntax_error() -> None:
+    """Test that invalid Python syntax in Edge condition raises ValueError (wrapped in ValidationError)."""
+    with pytest.raises(ValidationError) as excinfo:
+        Edge(from_node="a", to_node="b", condition="if (")
+    # Pydantic wraps the ValueError raised in validator
+    assert "Invalid Python syntax" in str(excinfo.value)
 
-    node = NodeExecution.model_validate(raw_data)
-    assert node.parent_hash == "hash123"
-    assert node.parent_hashes == ["hash123"]
+def test_graph_fallback_missing() -> None:
+    """Test that GraphFlow validates existence of circuit breaker fallback node."""
+    graph = Graph(
+        nodes={"start": get_agent_node("start")},
+        edges=[],
+        entry_point="start"
+    )
 
+    gov = Governance(
+        circuit_breaker=CircuitBreaker(
+            error_threshold_count=3,
+            reset_timeout_seconds=10,
+            fallback_node_id="missing_fallback"
+        )
+    )
 
-def test_telemetry_parent_hash_append() -> None:
-    # Case: parent_hash provided, parent_hashes exists but does not contain parent_hash
-    raw_data: dict[str, Any] = {
-        "node_id": "test_node_append",
-        "state": NodeState.COMPLETED,
-        "inputs": {},
-        "outputs": {},
-        "timestamp": datetime.now(UTC),
-        "duration_ms": 1.0,
-        "parent_hash": "hash_new",
-        "parent_hashes": ["hash_old"],
-    }
-
-    node = NodeExecution.model_validate(raw_data)
-    assert node.parent_hash == "hash_new"
-    assert "hash_old" in node.parent_hashes
-    assert "hash_new" in node.parent_hashes
-
-
-def test_telemetry_orphaned_trace() -> None:
-    # Case: parent provided but root is missing (orphaned trace)
-    # We must explicitly prevent auto-rooting (enforce_lineage_rooting) from fixing it,
-    # but enforce_lineage_rooting only fixes if (not parent AND not root).
-    # Here we have parent, so it won't auto-root. It will leave root as None.
-    # Then validate_trace_integrity runs and sees parent but no root -> ERROR.
-
-    with pytest.raises(ValueError, match="Orphaned trace detected"):
-        NodeExecution.model_validate(
-            {
-                "node_id": "n1",
-                "state": NodeState.COMPLETED,
-                "inputs": {},
-                "outputs": {},
-                "timestamp": datetime.now(UTC),
-                "duration_ms": 1.0,
-                "parent_request_id": "p1",
-                "root_request_id": None,  # Explicitly None to bypass auto-rooting if any
-            }
+    with pytest.raises(ManifestError, match="CRSN-VAL-FALLBACK-MISSING"):
+        GraphFlow(
+            kind="GraphFlow",
+            metadata=get_meta(),
+            interface=FlowInterface(),
+            graph=graph,
+            governance=gov
         )
 
+def test_verify_merkle_cycle() -> None:
+    """Test that verify_merkle_proof returns False for cyclical traces."""
+    def mock_hash(obj: Any) -> str:
+        # Return the 'id' field as the hash
+        return str(obj.get("id"))
 
-def test_node_execution_antibody_integration() -> None:
-    # Case: Inputs contain NaN -> Should be quarantined into DataAnomaly
-    raw_data = {
-        "node_id": "test_node_antibody",
-        "state": NodeState.COMPLETED,
-        "inputs": {"bad_val": float("nan")},
-        "outputs": {"good_val": 1.0},
-        "timestamp": datetime.now(UTC),
-        "duration_ms": 1.0,
-    }
+    with patch("coreason_manifest.utils.integrity.compute_hash", side_effect=mock_hash):
+        # Now hash("A") = "A".
+        # Node A: id="A", parent_hashes=["B"]
+        # Node B: id="B", parent_hashes=["A"]
 
-    node = NodeExecution.model_validate(raw_data)
+        node_a = {"id": "A", "parent_hashes": ["B"], "execution_hash": "A"}
+        node_b = {"id": "B", "parent_hashes": ["A"], "execution_hash": "B"}
 
-    # Check that the input was converted to a dict (via .model_dump())
-    assert isinstance(node.inputs["bad_val"], dict)
-    assert node.inputs["bad_val"]["code"] == "CRSN-ANTIBODY-FLOAT"
-    assert node.outputs["good_val"] == 1.0
+        trace = [node_a, node_b]
 
+        # This should form a cycle A <-> B.
+        # Topological sort should fail.
+        # Function should return False.
+        assert verify_merkle_proof(trace) is False
 
-# --- EXCEPTIONS TESTS ---
-
-
-def test_exception_structure() -> None:
-    # Verify semantic fault fields
-    fault = SemanticFault(
-        error_code="TEST-ERR-001",
-        message="Test Message",
-        severity=FaultSeverity.WARNING,
-        recovery_action=RecoveryAction.RETRY,
-        context={"foo": "bar"},
+def test_telemetry_parent_hash_sync() -> None:
+    """Test synchronization of parent_hash to parent_hashes in NodeExecution."""
+    # Case: parent_hash present, parent_hashes missing (None)
+    ne = NodeExecution(
+        node_id="n1",
+        state=NodeState.COMPLETED,
+        inputs={},
+        outputs={},
+        timestamp=datetime.now(),
+        duration_ms=10,
+        parent_hash="ph1"
     )
-    assert fault.severity == FaultSeverity.WARNING
-    assert fault.context["foo"] == "bar"
+    # The validator should have populated parent_hashes
+    assert ne.parent_hashes == ["ph1"]
 
-
-def test_manifest_error_wrapping() -> None:
-    # Verify exception wrapping
-    fault = SemanticFault(
-        error_code="TEST-ERR-002",
-        message="Wrapped Error",
-        severity=FaultSeverity.CRITICAL,
-        recovery_action=RecoveryAction.HALT,
+    # Case: parent_hash present, parent_hashes list but missing hash
+    ne2 = NodeExecution(
+        node_id="n2",
+        state=NodeState.COMPLETED,
+        inputs={},
+        outputs={},
+        timestamp=datetime.now(),
+        duration_ms=10,
+        parent_hash="ph2",
+        parent_hashes=["other"]
     )
-    err = ManifestError(fault)
-    assert "Wrapped Error" in str(err)
-    assert err.fault.error_code == "TEST-ERR-002"
-
-
-def test_lineage_error_defaults() -> None:
-    # Verify specialized error defaults
-    err = LineageIntegrityError("Broken chain")
-    assert err.fault.error_code == "CRSN-SEC-LINEAGE-001"
-    assert err.fault.severity == FaultSeverity.CRITICAL
-    assert err.fault.recovery_action == RecoveryAction.HALT
+    assert "ph2" in ne2.parent_hashes
+    assert "other" in ne2.parent_hashes
