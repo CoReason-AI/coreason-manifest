@@ -2,49 +2,6 @@
 
 **Note to Agent:** This file contains the **Supreme Law** for this repository. It defines the architectural constraints of a "Shared Kernel." Read this before planning or executing *any* task.
 
-# **Core Guidelines: Coreason Architectural Standard**
-
-**Status:** Immutable Constitution
-**Scope:** All Naming, Design, and Structural Decisions.
-
-## **1. Philosophy of Topological Determinism**
-
-* **The Philosophy:** We abandon generic names like "Manifest" or "Recipe" because they obscure the runtime behavior. We adopt names that describe the control flow topology.
-* **The Rule:** "If it is a list, name it a Sequence/Flow. If it loops, name it a Graph."
-    * A deterministic script must be a `Sequence` or `LinearFlow`.
-    * A cyclic, non-deterministic structure must be a `Graph` or `GraphFlow`.
-
-## **2. Functional Over Abstract Naming**
-
-* **The Philosophy:** Components must be named after their mechanical function, not an abstract concept or biological metaphor.
-* **The Rule:** "Use functional component names (`Switch`, `FastPath`) over abstract/biological names (`Router`, `Reflex`)."
-    * *Switch:* Routes traffic based on conditions (visual metaphor).
-    * *FastPath:* A heuristic bypass for high-latency reasoning (engineering term).
-
-## **3. SOTA Engineering Standards**
-
-* **The Philosophy:** We reject internal project code names in favor of industry-standard terms from Erlang, DSPy, and Multi-Agent Systems.
-* **The Rule:** "Use SOTA engineering terms (`Supervision`, `Blackboard`) over internal project names."
-    * *Supervision:* Active lifecycle management (Actor Model).
-    * *Blackboard:* Shared, observable memory (Multi-Agent Systems).
-    * *Optimizer:* Self-improvement/compilation (DSPy).
-
-## **4. Strict Ontological Suffixing (The "Greenfield" Rule)**
-
-* **The Philosophy:** A developer must know the architectural role of a class solely by its name.
-* **The Rules:**
-    * **Graph Vertices:** MUST end in `Node`. (e.g., `EmergenceInspectorNode`, `PlaceholderNode`).
-    * **Cognitive Engines:** MUST end in `Reasoning`. (e.g., `DecompositionReasoning`, `GraphReasoning`).
-    * **Base Classes:** MUST use `Base` prefix or `Base` suffix. (e.g., `InspectorNodeBase`).
-
-## **5. Anti-Anthropomorphism Directive**
-
-* **The Philosophy:** We build software, not synthetic life. Avoid nomenclature that implies biology.
-* **The Rule:** "Replace biological metaphors with cognitive engineering terms."
-    * `Brain` -> **`CognitiveProfile`** (A configuration of reasoning and persona).
-    * `Reflex` -> **`FastPath`** (A low-latency execution route).
-    * `Atom` -> **`Decomposition`** (Breaking tasks into DAGs).
-
 # **PRIMARY DIRECTIVE: THE SHARED KERNEL PROTOCOL**
 
 **Current Status:** Pure Data Library
@@ -99,3 +56,37 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Linting:** `ruff check --fix` (Strict).
 * **Formatting:** `ruff format`.
 * **Typing:** Strict `mypy`. Use `Pydantic` models for all data structures. Avoid `dict` or `Any` where a schema can be defined.
+
+### **Logging (Passive Pattern)**
+* **Library Responsibility:** Expose a logger object (`loguru.logger`) but **DO NOT** configure it.
+* **Consumer Responsibility:** The consuming application (Builder/Engine) will configure sinks, formats, and levels.
+* **Pattern:**
+    ```python
+    from coreason_manifest.utils.logger import logger
+    # usage is fine
+    logger.debug("Validating manifest...")
+    # configuration (logger.add) is FORBIDDEN in library code
+    ```
+
+## **4. File Structure Constraints**
+
+* **`src/coreason_manifest/`**:
+    * **`spec/`**: Pure Pydantic models (The "Blueprint").
+    * **`policies/`**: OPA Rego files (if applicable, treated as data).
+    * **`utils/`**: Pure utility functions (no side effects).
+* **Root**:
+    * **NO** `Dockerfile`.
+    * **NO** `app.py` or `server.py`.
+
+## **5. Testing Guidelines**
+
+* **Mock External Interactions:** Since this is a pure library, unit tests should mock *everything* external. There should be no need for integration tests against real databases or APIs within this repo.
+* **Schema Validation Tests:** Focus heavily on testing valid/invalid YAML configurations against the Pydantic models.
+* **"Passive" Tests:** specific tests (like `test_logger_creation.py`) must exist to PROVE that importing the library does not modify the system state.
+
+## **6. Human-in-the-Loop Triggers**
+
+**STOP and ASK the user if:**
+* You feel a feature requires adding a dependency that is not `pydantic` or `yaml`.
+* You are tempted to add a "helper script" that runs a server.
+* You encounter a requirement that seems to violate the "Shared Kernel" philosophy.
