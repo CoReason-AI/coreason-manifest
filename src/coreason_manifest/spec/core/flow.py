@@ -421,7 +421,7 @@ class GraphFlow(CoreasonModel):
                                         "value": {"type": "agent", "id": node.id, "profile": "default"},
                                     }
                                 ],  # Example patch
-                            ).model_dump()
+                            ).model_dump(),
                         },
                     )
                 )

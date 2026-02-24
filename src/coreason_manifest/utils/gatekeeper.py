@@ -338,14 +338,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 # Published Mode: Strict Pruning (Original Logic)
 
                 # 1. Remove Edges (must be done by index, high to low)
-                patch_list.extend(
-                    [{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices]
-                )
+                patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices])
 
                 # 2. Remove Nodes (by key, safe order)
-                patch_list.extend(
-                    [{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable]
-                )
+                patch_list.extend([{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable])
 
                 if dangerous_node_ids:
                     # Severity violation if any dangerous nodes are present

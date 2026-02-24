@@ -377,7 +377,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         flow = GraphFlow(
             kind="GraphFlow",
-            status=cast(Literal["draft", "published", "archived"], self._status),
+            status=cast("Literal['draft', 'published', 'archived']", self._status),
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,
