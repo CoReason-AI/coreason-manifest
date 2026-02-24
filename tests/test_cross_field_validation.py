@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
 from coreason_manifest.spec.core.tools import ToolCapability
+from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
@@ -79,7 +80,7 @@ def test_tool_critical_description() -> None:
         ToolCapability(
             name="nuke_db",
             type="capability",
-            risk_level="critical",
+            risk_level=RiskLevel.CRITICAL,
             # Missing description
         )
     errors = excinfo.value.errors()

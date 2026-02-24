@@ -2,6 +2,7 @@ from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
 from coreason_manifest.spec.core.flow import FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.nodes import CognitiveProfile as Profile
+from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
 
 
@@ -50,7 +51,7 @@ def test_gatekeeper_schemeless_url() -> None:
             # But we WANT to test validation failure at runtime.
             # We cast to ignore typing.
             url="evil.com/api",  # type: ignore[arg-type]
-            risk_level="standard",
+            risk_level=RiskLevel.STANDARD,
         )
 
 
@@ -65,7 +66,7 @@ def test_gatekeeper_port_stripping() -> None:
         name="port_tool",
         description="Tool with port",
         url=HttpUrl("https://evil.com:8080/api"),
-        risk_level="standard",
+        risk_level=RiskLevel.STANDARD,
     )
 
     flow = LinearFlow(

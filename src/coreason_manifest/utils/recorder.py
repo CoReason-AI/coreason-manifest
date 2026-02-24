@@ -28,6 +28,12 @@ class BlackBoxRecorder:
         timestamp: datetime | None = None,
         error: str | None = None,
         attributes: dict[str, Any] | None = None,
+        *,  # Force Keyword-Only Args for Trace Context
+        request_id: str | None = None,
+        parent_request_id: str | None = None,
+        root_request_id: str | None = None,
+        traceparent: str | None = None,
+        tracestate: str | None = None,
     ) -> NodeExecution:
         """
         Records a single execution step.
@@ -58,9 +64,9 @@ class BlackBoxRecorder:
 
         # Architecture: Generate Trace IDs explicitly to ensure hash consistency.
         # NodeExecution would auto-generate them, but we need them for the hash calculation.
-        request_id = str(uuid4())
+        resolved_request_id = request_id or str(uuid4())
         # Default behavior: If we don't know parent, we are root.
-        root_request_id = request_id
+        resolved_root_request_id = root_request_id or resolved_request_id
 
         payload = {
             "node_id": node_id,
@@ -73,8 +79,11 @@ class BlackBoxRecorder:
             "attributes": attributes,
             "parent_hashes": sorted(parent_hashes),
             "hash_version": "v2",
-            "request_id": request_id,
-            "root_request_id": root_request_id,
+            "request_id": resolved_request_id,
+            "root_request_id": resolved_root_request_id,
+            "parent_request_id": parent_request_id,
+            "traceparent": traceparent,
+            "tracestate": tracestate,
         }
 
         # 3. Compute Hash
@@ -92,6 +101,9 @@ class BlackBoxRecorder:
             attributes=attributes,
             parent_hashes=sorted(parent_hashes),
             execution_hash=execution_hash,
-            request_id=request_id,
-            root_request_id=root_request_id,
+            request_id=resolved_request_id,
+            parent_request_id=parent_request_id,
+            root_request_id=resolved_root_request_id,
+            traceparent=traceparent,
+            tracestate=tracestate,
         )

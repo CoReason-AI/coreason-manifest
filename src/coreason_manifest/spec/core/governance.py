@@ -4,7 +4,7 @@ from typing import Any, Literal
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.types import NodeID, ToolID
+from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
 
 
 class Safety(CoreasonModel):
@@ -35,9 +35,7 @@ class CircuitBreaker(CoreasonModel):
 
 
 class ToolAccessPolicy(CoreasonModel):
-    risk_level: Literal["critical", "standard", "minimal"] = Field(
-        ..., description="Risk level.", examples=["standard"]
-    )
+    risk_level: RiskLevel = Field(..., description="Risk level.", examples=["standard"])
     require_auth: bool | None = Field(None, description="Require authentication.", examples=[True])
     allowed_roles: list[str] | None = Field(
         None,
@@ -51,7 +49,7 @@ class ToolAccessPolicy(CoreasonModel):
         if isinstance(data, dict):
             # Functional purity: copy data
             data = data.copy()
-            if data.get("risk_level") == "critical":
+            if data.get("risk_level") in ("critical", RiskLevel.CRITICAL):
                 if data.get("require_auth") is False:
                     raise ValueError("Critical tools must require authentication.")
                 if data.get("require_auth") is None:
@@ -64,6 +62,13 @@ class ToolAccessPolicy(CoreasonModel):
 class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
+    max_risk_level: RiskLevel | None = Field(
+        None,
+        description=(
+            "Global kill switch. No tool exceeding this risk level can be executed across the "
+            "entire manifest, regardless of individual tool policies."
+        ),
+    )
     rate_limit_rpm: int | None = Field(None, description="Rate limit in requests per minute.", examples=[60])
     timeout_seconds: int | None = Field(None, description="Global execution timeout.", examples=[300])
     cost_limit_usd: float | None = Field(None, description="Cost limit in USD.", examples=[10.0])
@@ -86,7 +91,7 @@ class Governance(CoreasonModel):
         examples=[{"web_search": {"risk_level": "standard", "require_auth": False}}],
     )
     default_tool_policy: ToolAccessPolicy | None = Field(
-        None, description="Default tool policy.", examples=[{"risk_level": "minimal", "require_auth": False}]
+        None, description="Default tool policy.", examples=[{"risk_level": "safe", "require_auth": False}]
     )
     allowed_domains: list[str] = Field(
         default_factory=list, description="Allowed external domains.", examples=[["example.com"]]

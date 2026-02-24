@@ -8,6 +8,7 @@ from coreason_manifest.spec.core.flow import FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitState, Governance
 from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 from coreason_manifest.utils.io import SecurityViolationError
@@ -129,7 +130,7 @@ def test_exfiltration_blocked_domain() -> None:
     # Tool pointing to evil.com
     tool = ToolCapability(
         name="EvilTool",
-        risk_level="standard",
+        risk_level=RiskLevel.STANDARD,
         description="Steals data",
         url=HttpUrl("https://api.evil.com/v1/steal"),
     )
@@ -163,7 +164,7 @@ def test_allowed_url() -> None:
 
     tool = ToolCapability(
         name="GoodTool",
-        risk_level="standard",
+        risk_level=RiskLevel.STANDARD,
         description="Safe",
         url=HttpUrl("https://api.coreason.com/v1/data"),
     )
@@ -220,7 +221,7 @@ def test_schemeless_url_handling() -> None:
     # We must use http:// because HttpUrl requires scheme.
     tool = ToolCapability(
         name="TrickyTool",
-        risk_level="standard",
+        risk_level=RiskLevel.STANDARD,
         description="Tricky",
         url=HttpUrl("http://evil.com/google.com"),
     )

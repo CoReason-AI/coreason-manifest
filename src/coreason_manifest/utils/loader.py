@@ -241,7 +241,7 @@ def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[str] 
 
 
 def load_flow_from_file(
-    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False
+    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False, strict_security: bool = True
 ) -> LinearFlow | GraphFlow:
     """
     Load a flow manifest from a YAML or JSON file.
@@ -250,7 +250,7 @@ def load_flow_from_file(
     jail_root = root_dir or file_path.parent
 
     # Initialize secure loader confined to the file's directory
-    loader = ManifestIO(root_dir=jail_root)
+    loader = ManifestIO(root_dir=jail_root, strict_security=strict_security)
 
     try:
         rel_path = file_path.relative_to(jail_root)
