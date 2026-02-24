@@ -135,7 +135,7 @@ For full documentation, see [CLI Reference](cli.md).
 ## Advanced Documentation
 
 *   [Shared Kernel Architecture](architecture/shared_kernel.md): Secure Recursive Loader and `$ref` syntax.
-*   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.
+*   [Interoperability & Integrity](interop/integrity.md): Cryptographic guarantees and lineage.
 
 ## Shared Primitives
 

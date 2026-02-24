@@ -37,6 +37,10 @@ nav:
       - Organizational Guardrails: governance/policies.md
   - Capabilities:
       - Tooling & Actions: capabilities/tooling.md
+  - Interoperability:
+      - Telemetry & Lineage: interop/telemetry.md
+      - Cryptographic Integrity: interop/integrity.md
+      - Real-Time Streams: interop/streams.md
   - Developer Guides:
       - Building Agents: builder_sdk.md
   - API Reference:
@@ -44,4 +48,4 @@ nav:
       - Orchestration: reference/orchestration.md
   - Internal Architecture:
       - Shared Kernel Architecture: architecture/shared_kernel.md
-      - Compliance & Integrity: veritas_integrity.md
+      - Compliance & Integrity: interop/integrity.md
