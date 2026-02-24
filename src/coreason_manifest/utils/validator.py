@@ -207,7 +207,7 @@ def _validate_data_flow(
                 node.to_node_variable in symbol_table
                 and hasattr(node, "mode")
                 and node.mode == "programmatic"
-                and symbol_table[node.to_node_variable] in ("object", "array")
+                and symbol_table[node.to_node_variable] in ("object", "array", "dict", "list")
             ):
                 var_type = symbol_table[node.to_node_variable]
                 # Just a warning for now
