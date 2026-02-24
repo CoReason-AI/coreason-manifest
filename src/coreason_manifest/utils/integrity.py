@@ -68,10 +68,13 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Universal Hash Sanitization:
             # Strip modern keys (execution_hash, signature, __*)
             # Also strip None values (Architectural requirement)
+            excluded = self._EXCLUDED_KEYS
             return {
                 k: self._recursive_sort_and_sanitize(v)
-                for k, v in sorted(obj.items())
-                if v is not None and k not in self._EXCLUDED_KEYS and not k.startswith("__")
+                # 1. Cast keys to string to ensure stable sorting and prevent type crashes
+                for k, v in sorted((str(orig_k), orig_v) for orig_k, orig_v in obj.items())
+                # 2. Filter using the optimized local variable and safe string methods
+                if v is not None and k not in excluded and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]

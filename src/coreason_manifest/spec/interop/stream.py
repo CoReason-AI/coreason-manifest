@@ -21,7 +21,7 @@ class BaseStreamEnvelope(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    stream_id: str = Field(default="default", min_length=1)
+    stream_id: str = Field(default="default", min_length=1, pattern=r"^[a-zA-Z0-9_\-\.:]+$")
 
 
 class StreamErrorEnvelope(BaseStreamEnvelope):
