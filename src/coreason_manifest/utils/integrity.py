@@ -6,7 +6,7 @@ import math
 import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Any, TypedDict
+from typing import Any, ClassVar, TypedDict
 
 from pydantic import BaseModel
 
@@ -58,6 +58,8 @@ class CanonicalHashingStrategy(HashingStrategy):
     - UTF-8 enforcement (no escapes).
     """
 
+    _EXCLUDED_KEYS: ClassVar[frozenset[str]] = frozenset({"execution_hash", "signature", "integrity_hash"})
+
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
         """
         Prepares an object for RFC 8785 Canonical JSON serialization.
@@ -69,9 +71,7 @@ class CanonicalHashingStrategy(HashingStrategy):
             return {
                 k: self._recursive_sort_and_sanitize(v)
                 for k, v in sorted(obj.items())
-                if v is not None
-                and k not in {"execution_hash", "signature", "integrity_hash"}
-                and not k.startswith("__")
+                if v is not None and k not in self._EXCLUDED_KEYS and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
