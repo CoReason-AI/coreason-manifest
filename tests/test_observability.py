@@ -2,12 +2,19 @@ import json
 from typing import Any, cast
 
 import pytest
+from coreason_manifest.spec.core.governance import Audit, Governance, Safety
 from coreason_manifest.spec.interop.otel import to_otel_attributes
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.utils.privacy import PrivacySentinel
-from coreason_manifest.utils.recorder import BlackBoxRecorder
+from coreason_manifest.utils.recorder import BlackBoxRecorder, create_recorder
 from datetime import datetime
+
+# Helper for tests that need to inspect payloads
+ALLOW_LOGS_GOV = Governance(
+    safety=Safety(input_filtering=True, pii_redaction=True, content_safety="medium"),
+    audit=Audit(trace_retention_days=7, log_payloads=True),
+)
 
 
 def test_privacy_sentinel_secrets() -> None:
@@ -82,13 +89,17 @@ def test_privacy_sentinel_pii() -> None:
     email = "contact me at test@example.com please"
     sanitized_email = sentinel.sanitize(email)
     assert sanitized_email != email
-    assert sanitized_email.startswith("<REDACTED:SECRET:")
+    # Precision redaction preserves context: "contact me at <REDACTED:SECRET:...> please"
+    assert "<REDACTED:SECRET:" in sanitized_email
+    assert "contact me at " in sanitized_email
+    assert " please" in sanitized_email
 
     # Test PII inside list
     data = ["safe", "my ssn is 123-45-6789"]
     sanitized_list = sentinel.sanitize(data)
     assert sanitized_list[0] == "safe"
     assert sanitized_list[1] != "my ssn is 123-45-6789"
+    assert "<REDACTED:SECRET:" in sanitized_list[1]
 
 
 def test_privacy_sentinel_recursion() -> None:
@@ -100,7 +111,8 @@ def test_privacy_sentinel_recursion() -> None:
 
     # Check deep PII redaction
     assert sanitized["user"]["profile"]["email"] != "user@example.com"
-    assert sanitized["user"]["profile"]["email"].startswith("<REDACTED:SECRET:")
+    # Precision redaction replaces the email itself
+    assert "<REDACTED:SECRET:" in sanitized["user"]["profile"]["email"]
 
     # Check deep secret key redaction
     # "auth" is in SENSITIVE_WORDS. The whole value `{"token": ...}` is redacted.
@@ -115,7 +127,7 @@ def test_privacy_sentinel_recursion() -> None:
 
 def test_recorder_stateless_dag() -> None:
     # Recorder is now stateless
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
 
     # Step 1: Genesis Node
     rec1 = recorder.record(
@@ -168,7 +180,7 @@ def test_recorder_stateless_dag() -> None:
 
 def test_dag_integrity() -> None:
     # Re-use the DAG construction from above logic (simplified) to test verify_merkle_proof
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
 
     # 1. Genesis
     n1 = recorder.record("n1", NodeState.COMPLETED, {}, {}, 1.0, parent_hashes=[])
@@ -207,7 +219,8 @@ def test_dag_integrity() -> None:
 
 def test_recorder_sanitization_integration() -> None:
     # Recorder should use PrivacySentinel
-    recorder = BlackBoxRecorder()
+    # We must enable payload logging to inspect the sanitized output
+    recorder = create_recorder(ALLOW_LOGS_GOV)
 
     rec = recorder.record(
         node_id="node_secret",
@@ -223,7 +236,8 @@ def test_recorder_sanitization_integration() -> None:
 
 
 def test_otel_bridge() -> None:
-    recorder = BlackBoxRecorder()
+    # Use governance that allows logging so we can inspect payload content in traces
+    recorder = create_recorder(ALLOW_LOGS_GOV)
     rec = recorder.record(
         node_id="my_agent",
         state=NodeState.FAILED,
@@ -264,11 +278,11 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
     """
 
     class MockSentinel(PrivacySentinel):
-        def sanitize(self, _: Any) -> Any:
+        def sanitize(self, _: Any, _depth: int = 0) -> Any:
             # Force return a string even if input is dict
             return "sanitized_string"
 
-    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel())
+    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel(), log_payloads=True)
 
     rec = recorder.record(
         node_id="test_node",
