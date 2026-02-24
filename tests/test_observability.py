@@ -1,11 +1,18 @@
 import json
 from typing import Any, cast
 
+from coreason_manifest.spec.core.governance import Audit, Governance, Safety
 from coreason_manifest.spec.interop.otel import to_otel_attributes
 from coreason_manifest.spec.interop.telemetry import NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.utils.privacy import PrivacySentinel
 from coreason_manifest.utils.recorder import BlackBoxRecorder, create_recorder
+
+# Helper for tests that need to inspect payloads
+ALLOW_LOGS_GOV = Governance(
+    safety=Safety(input_filtering=True, pii_redaction=True, content_safety="medium"),
+    audit=Audit(trace_retention_days=7, log_payloads=True),
+)
 
 
 def test_privacy_sentinel_secrets() -> None:
@@ -205,7 +212,8 @@ def test_dag_integrity() -> None:
 
 def test_recorder_sanitization_integration() -> None:
     # Recorder should use PrivacySentinel
-    recorder = create_recorder(None)
+    # We must enable payload logging to inspect the sanitized output
+    recorder = create_recorder(ALLOW_LOGS_GOV)
 
     rec = recorder.record(
         node_id="node_secret",
@@ -221,7 +229,8 @@ def test_recorder_sanitization_integration() -> None:
 
 
 def test_otel_bridge() -> None:
-    recorder = create_recorder(None)
+    # Use governance that allows logging so we can inspect payload content in traces
+    recorder = create_recorder(ALLOW_LOGS_GOV)
     rec = recorder.record(
         node_id="my_agent",
         state=NodeState.FAILED,
@@ -266,7 +275,7 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
             # Force return a string even if input is dict
             return "sanitized_string"
 
-    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel())
+    recorder = BlackBoxRecorder(privacy_sentinel=MockSentinel(), log_payloads=True)
 
     rec = recorder.record(
         node_id="test_node",
