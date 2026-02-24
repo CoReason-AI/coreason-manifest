@@ -69,7 +69,7 @@ class CanonicalHashingStrategy(HashingStrategy):
             return {
                 k: self._recursive_sort_and_sanitize(v)
                 for k, v in sorted(obj.items())
-                if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
+                if v is not None and k not in {"execution_hash", "signature", "integrity_hash"} and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]

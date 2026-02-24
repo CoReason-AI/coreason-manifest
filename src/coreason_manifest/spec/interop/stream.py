@@ -19,18 +19,21 @@ class StreamErrorEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     op: Literal["error"]
     p: StreamError
+    stream_id: str = Field(default="default")
 
 
 class StreamDeltaEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     op: Literal["delta"]
     p: str
+    stream_id: str = Field(default="default")
 
 
 class StreamCloseEnvelope(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     op: Literal["close"]
     p: None = None
+    stream_id: str = Field(default="default")
 
 
 # SOTA Python 3.12 Union syntax mapped to a Pydantic Discriminator
