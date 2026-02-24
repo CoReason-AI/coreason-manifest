@@ -143,6 +143,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 timeout_seconds=300,
                 interaction_mode="blocking",
                 metadata={},
+                authorizes_node_id=node.id,
             )
 
             # Construct Patch
@@ -341,7 +342,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
         for i in range(target_idx - 1, -1, -1):
             node = flow.steps[i]
-            if isinstance(node, HumanNode):
+            if isinstance(node, HumanNode) and node.authorizes_node_id == target_node.id:
                 return True
         return False
 
@@ -359,7 +360,11 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         for edge in flow.graph.edges:
             adj[edge.from_node].append(edge.to_node)
 
-        guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
+        guards = {
+            nid
+            for nid, node in flow.graph.nodes.items()
+            if isinstance(node, valid_guards) and node.authorizes_node_id == target_node.id
+        }
 
         if entry_id:
             queue = [entry_id]

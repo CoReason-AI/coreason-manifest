@@ -155,6 +155,9 @@ class HumanNode(Node):
     """
 
     type: Literal["human"] = "human"
+    authorizes_node_id: str | None = Field(
+        default=None, description="The specific Node ID this human interaction is authorizing."
+    )
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
     timeout_seconds: Annotated[
         int | Literal["infinite"] | None,
