@@ -315,6 +315,10 @@ def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[st
 
 
 def _validate_orphan_nodes(flow: GraphFlow) -> list[str]:
+    """
+    Validates that no reachable nodes are isolated from the rest of the graph.
+    Uses unified adjacency map to check connectivity via edges, switches, or fallbacks.
+    """
     if not flow.graph.nodes:
         return []
 
@@ -322,6 +326,9 @@ def _validate_orphan_nodes(flow: GraphFlow) -> list[str]:
     entry_point = flow.graph.entry_point
 
     # Use our SOTA unified map to find ALL targets (explicit edges + switches + fallbacks)
+    # Bypass deep validation to construct a temporary flow for unified mapping if needed,
+    # though here we are already inside a valid flow context or partial flow.
+    # Note: _build_unified_adjacency_map handles flow.graph access safely.
     adj_set = _build_unified_adjacency_map(flow)
 
     targeted_ids = set()
@@ -417,7 +424,17 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
 
 
 def _extract_strategies(policy: Any) -> list[ResilienceStrategy]:
-    """Helper to extract flat list of strategies from a unified resilience config."""
+    """
+    Helper to extract flat list of strategies from a unified resilience config.
+
+    Args:
+        policy: Can be ResilienceConfig (duck-typed with 'handlers'), a single Strategy,
+               or SupervisionPolicy. We use Any here to avoid circular dependencies with
+               complex Pydantic unions in the core spec.
+
+    Returns:
+        List of strategies extracted from the policy.
+    """
     strategies: list[ResilienceStrategy] = []
     if hasattr(policy, "handlers"):
         strategies.extend([h.strategy for h in policy.handlers])
@@ -433,8 +450,8 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
     Constructs a unified adjacency map for cycle detection.
     Includes sequential/graph edges, implicit SwitchNode routing, fallback routing, and global circuit breaker.
     """
-    # 1. Initialize Map
-    nodes = flow.steps if isinstance(flow, LinearFlow) else list(flow.graph.nodes.values())
+    # 1. Initialize Map with strict type inference for node iteration
+    nodes: list[AnyNode] = flow.steps if isinstance(flow, LinearFlow) else list(flow.graph.nodes.values())
     adj: dict[str, set[str]] = {node.id: set() for node in nodes}
 
     # 2. Add Flow Structure Edges
@@ -452,7 +469,7 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
                 adj[edge.from_node].add(edge.to_node)
 
     # 3. Add Global Governance Edges (Circuit Breaker)
-    global_fallback_id = None
+    global_fallback_id: str | None = None
     if flow.governance and flow.governance.circuit_breaker and flow.governance.circuit_breaker.fallback_node_id:
         global_fallback_id = flow.governance.circuit_breaker.fallback_node_id
 
