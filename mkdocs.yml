@@ -31,9 +31,10 @@ nav:
   - Orchestration:
       - Flows & Topology: orchestration/flows.md
       - Node Types: orchestration/nodes.md
+      - Resilience & Supervision: orchestration/resilience.md
+      - Recovery Strategies: orchestration/strategies.md
   - Developer Guides:
       - Building Agents: builder_sdk.md
-      - Flow Governance: flow_governance.md
   - API Reference:
       - Agents & Tools: reference/agents.md
       - Orchestration: reference/orchestration.md
