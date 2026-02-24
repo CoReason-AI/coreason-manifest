@@ -353,7 +353,13 @@ class GraphFlow(CoreasonModel):
                         "remediation": RemediationAction(
                             type="update_field",
                             description="Set entry_point to a valid node ID.",
-                            patch_data=[{"op": "add", "path": "/graph/entry_point", "value": list(existing_ids)[0] if existing_ids else ""}],
+                            patch_data=[
+                                {
+                                    "op": "add",
+                                    "path": "/graph/entry_point",
+                                    "value": next(iter(existing_ids), ""),
+                                }
+                            ],
                         ).model_dump()
                     },
                 )
@@ -372,7 +378,7 @@ class GraphFlow(CoreasonModel):
                             type="update_field",
                             description=f"Update entry_point to one of {list(existing_ids)}.",
                             patch_data=[],
-                        ).model_dump()
+                        ).model_dump(),
                     },
                 )
             )
