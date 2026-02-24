@@ -25,8 +25,9 @@ nav:
   - Getting Started:
       - Quick Start: usage.md
       - CLI Reference: cli.md
-  - Core Concepts:
-      - Graph Orchestration: graph_recipes.md
+  - Orchestration:
+      - Flows & Topology: orchestration/flows.md
+      - Node Types: orchestration/nodes.md
       - Reasoning Patterns: episteme_reasoning.md
   - Developer Guides:
       - Building Agents: builder_sdk.md

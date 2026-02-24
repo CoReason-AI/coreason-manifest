@@ -2,7 +2,7 @@
 
 The **Coreason Agent Manifest (CAM)** is the "Human-Centric" Canonical YAML format designed for defining Agents and Linear Workflows in the Coreason ecosystem. It serves as the primary interface for defining individual agents and simple, sequential recipes.
 
-> **Note:** For complex, non-linear orchestration (loops, branching), see [Graph Recipes](../graph_recipes.md).
+> **Note:** For complex, non-linear orchestration (loops, branching), see [Orchestration Flows](../orchestration/flows.md).
 
 ## Root Object (`ManifestV2`)
 

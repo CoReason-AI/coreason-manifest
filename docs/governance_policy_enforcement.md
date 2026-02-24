@@ -108,4 +108,4 @@ It is important to distinguish between **Policy Governance** (this module) and *
     *   **Example**: "User must be admin", "Dataset must have > 500 rows".
     *   **Enforcement**: Runtime (Just before execution).
 
-See [Graph Recipes](graph_recipes.md#2-feasibility-constraints-constraint) for details on Feasibility Constraints.
+See [Orchestration Flows](orchestration/flows.md) for details on Feasibility Constraints.

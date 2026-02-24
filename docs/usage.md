@@ -37,7 +37,7 @@ print(f"Loaded {manifest.kind}: {manifest.metadata.name}")
 print(f"Inputs: {manifest.interface.inputs.keys()}")
 ```
 
-For details on composition, security constraints, and referencing syntax, see [Secure Composition](composition.md).
+For details on composition, security constraints, and referencing syntax, see [Shared Kernel Architecture](architecture/shared_kernel.md).
 
 ### Creating a Manifest Programmatically
 
@@ -134,7 +134,7 @@ For full documentation, see [CLI Reference](cli.md).
 
 ## Advanced Documentation
 
-*   [Secure Composition](composition.md): Secure Recursive Loader and `$ref` syntax.
+*   [Shared Kernel Architecture](architecture/shared_kernel.md): Secure Recursive Loader and `$ref` syntax.
 *   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.
 
 ## Shared Primitives
