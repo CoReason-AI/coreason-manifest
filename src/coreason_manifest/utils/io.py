@@ -183,7 +183,7 @@ class ManifestIO:
 class ManifestDumper(yaml.SafeDumper):
     """Custom PyYAML Dumper that enforces a strict 'Aesthetic Contract' for manifests."""
 
-    _PRIORITY_KEYS = [
+    _PRIORITY_KEYS: ClassVar[list[str]] = [
         "apiVersion",
         "type",
         "kind",
@@ -194,7 +194,7 @@ class ManifestDumper(yaml.SafeDumper):
         "interface",
         "governance",
     ]
-    _DEPRIORITY_KEYS = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
+    _DEPRIORITY_KEYS: ClassVar[list[str]] = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
 
     # SOTA: Pre-compute O(1) lookup maps to prevent O(N) list scans during sorting
     _PRIORITY_MAP: ClassVar[dict[str, int]] = {k: i for i, k in enumerate(_PRIORITY_KEYS)}
