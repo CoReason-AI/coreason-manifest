@@ -3,23 +3,30 @@ import pytest
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, CognitiveProfile
 from coreason_manifest.spec.core.flow import LinearFlow, GraphFlow, Graph, Edge, FlowMetadata, FlowInterface
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
-from coreason_manifest.spec.core.flow import FlowDefinitions as Definitions
+from coreason_manifest.spec.core.engines import StandardReasoning
+from typing import Any, cast
 
-def create_agent(id: str, tools: list[str] = []) -> AgentNode:
+def create_agent(node_id: str, tools: list[str] | None = None) -> AgentNode:
+    if tools is None:
+        tools = []
+
+    # Correctly construct reasoning using the Pydantic model
+    reasoning = StandardReasoning(type="standard", model="gpt-4")
+
     return AgentNode(
-        id=id,
+        id=node_id,
         type="agent",
         profile=CognitiveProfile(
             role="Worker",
             persona="Worker",
-            reasoning={"type": "standard", "model": "gpt-4"}
+            reasoning=reasoning
         ),
         tools=tools
     )
 
-def create_human(id: str, authorizes: str | None = None) -> HumanNode:
+def create_human(node_id: str, authorizes: str | None = None) -> HumanNode:
     return HumanNode(
-        id=id,
+        id=node_id,
         type="human",
         prompt="Approve?",
         timeout_seconds=300,
@@ -27,7 +34,7 @@ def create_human(id: str, authorizes: str | None = None) -> HumanNode:
         authorizes_node_id=authorizes
     )
 
-def test_linear_flow_explicit_guarding():
+def test_linear_flow_explicit_guarding() -> None:
     agent = create_agent("agent_1")
     human_unguarded = create_human("human_1", authorizes=None)
     human_guarded = create_human("human_2", authorizes="agent_1")
@@ -54,7 +61,7 @@ def test_linear_flow_explicit_guarding():
     )
     assert not _is_guarded(agent, flow3)
 
-def test_graph_flow_explicit_guarding():
+def test_graph_flow_explicit_guarding() -> None:
     agent = create_agent("agent_1")
     start = create_agent("start")
 
@@ -118,7 +125,7 @@ def test_graph_flow_explicit_guarding():
     )
     assert not _is_guarded(agent, flow3) # Should be FALSE because one path is unguarded
 
-def test_validate_policy_auto_remediation():
+def test_validate_policy_auto_remediation() -> None:
     # Test that auto-remediation inserts a HumanNode with correct authorization
     agent = create_agent("agent_crit", tools=["code_execution"])
 
@@ -134,18 +141,23 @@ def test_validate_policy_auto_remediation():
 
     # Check remediation patch
     remediation = report.remediation
+    assert remediation is not None
     assert remediation.type == "add_guard_node"
+
     patch_data = remediation.patch_data
+    assert patch_data is not None
+    assert isinstance(patch_data, list)
 
     # Verify the inserted node has authorizes_node_id
     # patch_data is a list of ops. For LinearFlow, it's an 'add' op.
     add_op = patch_data[0]
-    inserted_node = add_op["value"]
+    # Use cast to help mypy know this dict has string keys
+    inserted_node = cast(dict[str, Any], add_op["value"])
 
     assert inserted_node["type"] == "human"
     assert inserted_node["authorizes_node_id"] == "agent_crit"
 
-def test_validate_policy_auto_remediation_graph():
+def test_validate_policy_auto_remediation_graph() -> None:
     # Test that auto-remediation inserts a HumanNode with correct authorization in GraphFlow
     agent = create_agent("agent_crit", tools=["code_execution"])
     start = create_agent("start")
@@ -167,11 +179,15 @@ def test_validate_policy_auto_remediation_graph():
     report = reports[0]
 
     remediation = report.remediation
+    assert remediation is not None
+
     patch_data = remediation.patch_data
+    assert patch_data is not None
+    assert isinstance(patch_data, list)
 
     # Find the 'add' op for the node
-    add_node_op = next(op for op in patch_data if op["op"] == "add" and "nodes" in op["path"])
-    inserted_node = add_node_op["value"]
+    add_node_op = next(op for op in patch_data if op["op"] == "add" and "nodes" in str(op["path"]))
+    inserted_node = cast(dict[str, Any], add_node_op["value"])
 
     assert inserted_node["type"] == "human"
     assert inserted_node["authorizes_node_id"] == "agent_crit"
