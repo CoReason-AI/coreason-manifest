@@ -17,6 +17,8 @@ from coreason_manifest.utils.topology import get_reachable_nodes, get_strongly_c
 if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
 
+MAX_LINEAR_TOPOLOGICAL_DISTANCE = 3
+
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
@@ -122,19 +124,23 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         # Check for high-risk capabilities
         needs_guard = False
         violation_reason = []
+        dangerous_caps = []
 
         if NodeCapability.COMPUTER_USE in caps:
             needs_guard = True
             violation_reason.append("computer_use capability")
+            dangerous_caps.append(NodeCapability.COMPUTER_USE)
         if NodeCapability.CODE_EXECUTION in caps:
             needs_guard = True
             violation_reason.append("code_execution capability")
+            dangerous_caps.append(NodeCapability.CODE_EXECUTION)
 
         if critical_tools:
             needs_guard = True
             violation_reason.append(f"critical tools {critical_tools}")
+            dangerous_caps.extend(critical_tools)
 
-        if needs_guard and not _is_guarded(node, flow):
+        if needs_guard and not _is_guarded(node, flow, dangerous_caps):
             human_node_id = f"guard_{node.id}"
             human_node = HumanNode(
                 id=human_node_id,
@@ -143,7 +149,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 timeout_seconds=300,
                 interaction_mode="blocking",
                 metadata={},
-                authorizations=[AuthorizationScope(target_node_id=node.id, granted_capabilities="*")],
+                authorizations=[
+                    AuthorizationScope(target_node_id=node.id, granted_capabilities=dangerous_caps)
+                ],
             )
 
             # Construct Patch
@@ -323,7 +331,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     return reports
 
 
-def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
+def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_caps: list[str]) -> bool:
     """
     Checks if the target node is topologically guarded by a HumanNode.
     Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
@@ -341,16 +349,18 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             return False
 
         # SOTA Enforce Adjacency or strict distance
-        max_topological_distance = 3
-
-        start_scan = max(0, target_idx - max_topological_distance)
+        start_scan = max(0, target_idx - MAX_LINEAR_TOPOLOGICAL_DISTANCE)
         for i in range(target_idx - 1, start_scan - 1, -1):
             node = flow.steps[i]
             if isinstance(node, HumanNode) and node.authorizations:
                 # Check if target_node.id is in authorizations
                 for auth in node.authorizations:
                     if auth.target_node_id == target_node.id:
-                        return True
+                        # Check capabilities
+                        if auth.granted_capabilities == "*" or all(
+                            req in auth.granted_capabilities for req in required_caps
+                        ):
+                            return True
         return False
 
     if isinstance(flow, GraphFlow):
@@ -372,8 +382,12 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             if isinstance(node, valid_guards) and node.authorizations:
                 for auth in node.authorizations:
                     if auth.target_node_id == target_node.id:
-                        guards.add(nid)
-                        break
+                        # Check capabilities
+                        if auth.granted_capabilities == "*" or all(
+                            req in auth.granted_capabilities for req in required_caps
+                        ):
+                            guards.add(nid)
+                            break
 
         if entry_id:
             queue = [entry_id]

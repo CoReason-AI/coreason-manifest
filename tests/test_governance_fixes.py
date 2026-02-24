@@ -327,7 +327,7 @@ def test_gatekeeper_is_guarded_value_error() -> None:
     )
 
     # Check node2 which is NOT in flow.sequence
-    assert _is_guarded(node2, flow) is False
+    assert _is_guarded(node2, flow, required_caps=[]) is False
 
 
 def test_integrity_empty_chain() -> None:
@@ -403,7 +403,7 @@ def test_unknown_flow_type() -> None:
         pass
 
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
-    assert _is_guarded(node, UnknownFlow()) is False  # type: ignore
+    assert _is_guarded(node, UnknownFlow(), required_caps=[]) is False  # type: ignore
 
 
 if __name__ == "__main__":

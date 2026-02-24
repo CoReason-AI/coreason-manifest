@@ -43,15 +43,15 @@ def test_linear_flow_explicit_guarding() -> None:
 
     # Case 1: Unguarded
     flow1 = LinearFlow(metadata=FlowMetadata(name="test", version="1"), steps=[human_unguarded, agent])
-    assert not _is_guarded(agent, flow1)
+    assert not _is_guarded(agent, flow1, required_caps=[])
 
     # Case 2: Guarded
     flow2 = LinearFlow(metadata=FlowMetadata(name="test", version="1"), steps=[human_guarded, agent])
-    assert _is_guarded(agent, flow2)
+    assert _is_guarded(agent, flow2, required_caps=[])
 
     # Case 3: Wrong Guard
     flow3 = LinearFlow(metadata=FlowMetadata(name="test", version="1"), steps=[human_wrong, agent])
-    assert not _is_guarded(agent, flow3)
+    assert not _is_guarded(agent, flow3, required_caps=[])
 
 
 def test_graph_flow_explicit_guarding() -> None:
@@ -66,7 +66,7 @@ def test_graph_flow_explicit_guarding() -> None:
         entry_point="start",
     )
     flow1 = GraphFlow(metadata=FlowMetadata(name="test", version="1"), graph=graph1, interface=FlowInterface())
-    assert not _is_guarded(agent, flow1)
+    assert not _is_guarded(agent, flow1, required_caps=[])
 
     # Case 2: Simple Path, Guarded Human
     human_guarded = create_human("human_2", authorizes="agent_1")
@@ -76,7 +76,7 @@ def test_graph_flow_explicit_guarding() -> None:
         entry_point="start",
     )
     flow2 = GraphFlow(metadata=FlowMetadata(name="test", version="1"), graph=graph2, interface=FlowInterface())
-    assert _is_guarded(agent, flow2)
+    assert _is_guarded(agent, flow2, required_caps=[])
 
     # Case 3: Multipath, One path unguarded
     # start -> human_guarded -> agent_1 (Guarded path)
@@ -93,7 +93,7 @@ def test_graph_flow_explicit_guarding() -> None:
         entry_point="start",
     )
     flow3 = GraphFlow(metadata=FlowMetadata(name="test", version="1"), graph=graph3, interface=FlowInterface())
-    assert not _is_guarded(agent, flow3)  # Should be FALSE because one path is unguarded
+    assert not _is_guarded(agent, flow3, required_caps=[])  # Should be FALSE because one path is unguarded
 
 
 def test_validate_policy_auto_remediation() -> None:
