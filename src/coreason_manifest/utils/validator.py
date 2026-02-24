@@ -81,7 +81,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
         errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
-        errors.extend(_validate_orphan_nodes(flow.graph))
+        errors.extend(_validate_orphan_nodes(flow))
 
     # Global Unified Cycle Detection
     errors.extend(_validate_topology_cycles(flow))
@@ -314,25 +314,27 @@ def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[st
     return errors
 
 
-def _validate_orphan_nodes(graph: Graph) -> list[str]:
-    if not graph.nodes:
+def _validate_orphan_nodes(flow: GraphFlow) -> list[str]:
+    if not flow.graph.nodes:
         return []
 
-    # All nodes physically present in the dict
-    all_ids = set(graph.nodes.keys())
+    all_ids = set(flow.graph.nodes.keys())
+    entry_point = flow.graph.entry_point
 
-    # Architectural Note: Use explicit entry point
-    entry_point = graph.entry_point
+    # Use our SOTA unified map to find ALL targets (explicit edges + switches + fallbacks)
+    adj_set = _build_unified_adjacency_map(flow)
 
-    targeted_ids = {edge.to_node for edge in graph.edges}
+    targeted_ids = set()
+    for targets in adj_set.values():
+        targeted_ids.update(targets)
 
     orphans = all_ids - targeted_ids
 
-    # Remove entry point from orphans if present (it's expected to have no incoming edges)
+    # The entry point is expected to have no incoming edges
     if entry_point in orphans:
         orphans.remove(entry_point)
 
-    return [f"Orphan Node Warning: Node '{oid}' has no incoming edges." for oid in orphans]
+    return [f"Orphan Node Warning: Node '{oid}' has no incoming edges or implicit routes." for oid in orphans]
 
 
 def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefinitions | None) -> list[str]:
@@ -486,8 +488,9 @@ def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[str]:
     errors: list[str] = []
 
     adj_set = _build_unified_adjacency_map(flow)
-    # Convert sets to lists for Tarjan's algorithm compatibility
-    adj_list = {k: list(v) for k, v in adj_set.items()}
+    # SOTA FIX: Sort the sets into lists to guarantee 100% deterministic DFS traversal
+    adj_list = {k: sorted(list(adj_set[k])) for k in sorted(adj_set.keys())}
+
     sccs = get_strongly_connected_components(adj_list)
 
     for scc in sccs:

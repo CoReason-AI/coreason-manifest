@@ -252,5 +252,6 @@ def test_valid_global_circuit_breaker_passes() -> None:
 
     flow = build_flow_without_validation(builder)
     errors = validate_flow(flow)
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert not cycle_errors, f"False positive cycle detected: {cycle_errors}"
+    # SOTA FIX: With unified adjacency map, 'C' is reachable via global fallback, so it shouldn't be an orphan.
+    # Assert absolutely NO errors are returned.
+    assert not errors, f"Unexpected errors: {errors}"
