@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import compute_hash, to_canonical_timestamp
 from coreason_manifest.utils.privacy import PrivacySentinel
@@ -14,8 +15,8 @@ class BlackBoxRecorder:
     and structured logging (Telemetry).
     """
 
-    def __init__(self, privacy_sentinel: PrivacySentinel | None = None) -> None:
-        self.privacy = privacy_sentinel or PrivacySentinel()
+    def __init__(self, privacy_sentinel: PrivacySentinel) -> None:
+        self.privacy = privacy_sentinel
 
     def record(
         self,
@@ -107,3 +108,21 @@ class BlackBoxRecorder:
             traceparent=traceparent,
             tracestate=tracestate,
         )
+
+
+def create_recorder(governance_config: Governance | None = None) -> BlackBoxRecorder:
+    """
+    Factory function to create a BlackBoxRecorder with strict dependency injection.
+    Resolves the privacy configuration from the Governance model.
+    """
+    # Fail-Safe Default: Most restrictive posture
+    redact_pii = True
+
+    if governance_config and governance_config.safety:
+        redact_pii = governance_config.safety.pii_redaction
+
+    # Instantiate Sentinel with explicit configuration
+    sentinel = PrivacySentinel(redact_pii=redact_pii, redact_secrets=True)
+
+    # Return Recorder injected with the sentinel
+    return BlackBoxRecorder(privacy_sentinel=sentinel)
