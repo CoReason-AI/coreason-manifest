@@ -6,7 +6,7 @@ import math
 import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from typing import Any, TypedDict
+from typing import Any, ClassVar, TypedDict
 
 from pydantic import BaseModel
 
@@ -58,6 +58,8 @@ class CanonicalHashingStrategy(HashingStrategy):
     - UTF-8 enforcement (no escapes).
     """
 
+    _EXCLUDED_KEYS: ClassVar[frozenset[str]] = frozenset({"execution_hash", "signature", "integrity_hash"})
+
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
         """
         Prepares an object for RFC 8785 Canonical JSON serialization.
@@ -66,10 +68,18 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Universal Hash Sanitization:
             # Strip modern keys (execution_hash, signature, __*)
             # Also strip None values (Architectural requirement)
+            excluded = self._EXCLUDED_KEYS
+
             return {
                 k: self._recursive_sort_and_sanitize(v)
-                for k, v in sorted(obj.items())
-                if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
+                # 1. Inline the generator to allow immediate Garbage Collection.
+                # 2. Pre-filter `None` values (O(N)) to prevent wasting CPU cycles sorting them (O(N log N)).
+                for k, v in sorted(
+                    ((str(orig_k), orig_v) for orig_k, orig_v in obj.items() if orig_v is not None),
+                    key=lambda item: item[0],
+                )
+                # 3. Apply final exclusion filters using the optimized local variable and safe string methods.
+                if k not in excluded and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
