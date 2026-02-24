@@ -347,7 +347,7 @@ class GraphFlow(CoreasonModel):
                 missing_nodes.add(edge.to_node)
 
         if missing_nodes:
-            fault_messages.append(f"Edges reference missing nodes: {sorted(list(missing_nodes))}")
+            fault_messages.append(f"Edges reference missing nodes: {sorted(missing_nodes)}")
 
         # 3. Graph Topology Completeness (Entry Point)
         if not self.graph.entry_point:
@@ -360,7 +360,7 @@ class GraphFlow(CoreasonModel):
                         {
                             "op": "add",
                             "path": "/graph/entry_point",
-                            "value": sorted(list(existing_ids))[0] if existing_ids else "",
+                            "value": sorted(existing_ids)[0] if existing_ids else "",
                         }
                     ],
                 ).model_dump()
@@ -371,7 +371,7 @@ class GraphFlow(CoreasonModel):
             remediations.append(
                 RemediationAction(
                     type="update_field",
-                    description=f"Update entry_point to one of {sorted(list(existing_ids))}.",
+                    description=f"Update entry_point to one of {sorted(existing_ids)}.",
                     patch_data=[],
                 ).model_dump()
             )
