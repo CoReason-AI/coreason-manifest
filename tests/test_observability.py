@@ -87,13 +87,17 @@ def test_privacy_sentinel_pii() -> None:
     email = "contact me at test@example.com please"
     sanitized_email = sentinel.sanitize(email)
     assert sanitized_email != email
-    assert sanitized_email.startswith("<REDACTED:SECRET:")
+    # Precision redaction preserves context: "contact me at <REDACTED:SECRET:...> please"
+    assert "<REDACTED:SECRET:" in sanitized_email
+    assert "contact me at " in sanitized_email
+    assert " please" in sanitized_email
 
     # Test PII inside list
     data = ["safe", "my ssn is 123-45-6789"]
     sanitized_list = sentinel.sanitize(data)
     assert sanitized_list[0] == "safe"
     assert sanitized_list[1] != "my ssn is 123-45-6789"
+    assert "<REDACTED:SECRET:" in sanitized_list[1]
 
 
 def test_privacy_sentinel_recursion() -> None:
@@ -105,7 +109,8 @@ def test_privacy_sentinel_recursion() -> None:
 
     # Check deep PII redaction
     assert sanitized["user"]["profile"]["email"] != "user@example.com"
-    assert sanitized["user"]["profile"]["email"].startswith("<REDACTED:SECRET:")
+    # Precision redaction replaces the email itself
+    assert "<REDACTED:SECRET:" in sanitized["user"]["profile"]["email"]
 
     # Check deep secret key redaction
     # "auth" is in SENSITIVE_WORDS. The whole value `{"token": ...}` is redacted.

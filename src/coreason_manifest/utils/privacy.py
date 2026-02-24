@@ -101,9 +101,7 @@ class PrivacySentinel:
         # Apply precision substitutions
         text = self._EMAIL_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
         text = self._CREDIT_CARD_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
-        text = self._SSN_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
-
-        return text
+        return self._SSN_PATTERN.sub(lambda m: self._redact(m.group(0)), text)
 
     def _redact(self, value: str) -> str:
         """

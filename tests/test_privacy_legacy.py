@@ -37,11 +37,18 @@ def test_privacy_sentinel_legacy_model_support() -> None:
     # Assert it was converted to a dict
     assert isinstance(sanitized, dict)
 
-    # Check PII redaction
+    # Check PII redaction (precision redaction)
+    # The email will be replaced by <REDACTED:SECRET:...>
+    # Since the input is just the email string, and regex matches full string:
+    # "legacy@example.com" -> "<REDACTED:SECRET:...>"
+    # Wait, the precision redaction uses .sub().
+    # If the value IS the email, it replaces it.
     assert "legacy@example.com" not in sanitized["email"]
-    assert sanitized["email"].startswith("<REDACTED:SECRET:")
+    assert "<REDACTED:SECRET:" in sanitized["email"]
 
-    # Check Secret redaction
+    # Check Secret redaction (key-based)
+    # Key "api_key" matches SENSITIVE_SUBSTRINGS.
+    # Value "12345-secret" is FULLY redacted because key match redacts entire value string.
     assert "12345-secret" not in sanitized["api_key"]
     assert sanitized["api_key"].startswith("<REDACTED:SECRET:")
 
