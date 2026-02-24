@@ -233,3 +233,35 @@ def test_recorder_sanitizes_pydantic_models() -> None:
 
     # Check username is preserved
     assert sanitized_user["username"] == "safe_user"
+
+
+# Test 8: Context Preservation
+def test_recorder_precision_redaction_preserves_context() -> None:
+    """
+    Verify that when a string contains PII, only the PII is redacted,
+    and the surrounding text context is perfectly preserved.
+    """
+    gov = Governance(
+        safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
+        audit=Audit(log_payloads=True, trace_retention_days=7),
+    )
+    recorder = create_recorder(gov)
+
+    record = recorder.record(
+        node_id="context_node",
+        state=NodeState.COMPLETED,
+        inputs={"prompt": "Please contact admin@example.com regarding order 12345."},
+        outputs={},
+        duration_ms=5.0,
+        parent_hashes=[],
+    )
+
+    sanitized_prompt = record.inputs["prompt"]
+
+    # The exact PII should be gone and replaced with a hash
+    assert "admin@example.com" not in sanitized_prompt
+    assert "<REDACTED:SECRET:" in sanitized_prompt
+
+    # The surrounding operational context MUST survive
+    assert "Please contact " in sanitized_prompt
+    assert " regarding order 12345." in sanitized_prompt

@@ -20,7 +20,7 @@ class BlackBoxRecorder:
     and structured logging (Telemetry).
     """
 
-    def __init__(self, privacy_sentinel: PrivacySentinel, log_payloads: bool = True) -> None:
+    def __init__(self, privacy_sentinel: PrivacySentinel, log_payloads: bool = False) -> None:
         self.privacy = privacy_sentinel
         self.log_payloads = log_payloads
 
