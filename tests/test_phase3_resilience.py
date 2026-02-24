@@ -133,9 +133,12 @@ def test_builder_integration_circuit_breaker() -> None:
     )
     gf.add_node(node_g)
 
-    # Building should now fail due to self-reference via global fallback
-    with pytest.raises(ValueError, match="Unified execution/fallback cycle detected"):
-        gf.build()
+    flow_g = gf.build()
+    assert flow_g.governance is not None
+    assert flow_g.governance.circuit_breaker is not None
+    assert flow_g.governance.circuit_breaker.error_threshold_count == 10
+    assert flow_g.governance.circuit_breaker.reset_timeout_seconds == 60
+    assert flow_g.governance.circuit_breaker.fallback_node_id == "dummy"
 
 
 def test_supervision_logic() -> None:

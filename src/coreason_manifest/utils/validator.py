@@ -1,6 +1,7 @@
 # src/coreason_manifest/utils/validator.py
 
 import re
+from typing import Any
 
 from coreason_manifest.spec.core.flow import (
     AnyNode,
@@ -387,17 +388,7 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
         return errors
 
     # Collect strategies
-    strategies: list[ResilienceStrategy] = []
-
-    # If it's a SupervisionPolicy (complex)
-    if hasattr(policy, "handlers"):
-        strategies.extend([h.strategy for h in policy.handlers])
-        if hasattr(policy, "default_strategy") and policy.default_strategy:
-            strategies.append(policy.default_strategy)
-    # If it's a simple RecoveryStrategy (ResilienceConfig which is a Union)
-    else:
-        # It's a single strategy
-        strategies.append(policy)
+    strategies = _extract_strategies(policy)
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -423,14 +414,26 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     return errors
 
 
-def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list[str]]:
+def _extract_strategies(policy: Any) -> list[ResilienceStrategy]:
+    """Helper to extract flat list of strategies from a unified resilience config."""
+    strategies: list[ResilienceStrategy] = []
+    if hasattr(policy, "handlers"):
+        strategies.extend([h.strategy for h in policy.handlers])
+        if hasattr(policy, "default_strategy") and policy.default_strategy:
+            strategies.append(policy.default_strategy)
+    else:
+        strategies.append(policy)
+    return strategies
+
+
+def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[str]]:
     """
     Constructs a unified adjacency map for cycle detection.
     Includes sequential/graph edges, implicit SwitchNode routing, fallback routing, and global circuit breaker.
     """
     # 1. Initialize Map
     nodes = flow.steps if isinstance(flow, LinearFlow) else list(flow.graph.nodes.values())
-    adj: dict[str, list[str]] = {node.id: [] for node in nodes}
+    adj: dict[str, set[str]] = {node.id: set() for node in nodes}
 
     # 2. Add Flow Structure Edges
     if isinstance(flow, LinearFlow):
@@ -439,12 +442,12 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list
             curr_id = flow.steps[i].id
             next_id = flow.steps[i + 1].id
             if curr_id in adj and next_id in adj:
-                adj[curr_id].append(next_id)
+                adj[curr_id].add(next_id)
     elif isinstance(flow, GraphFlow):
         # Graph edges
         for edge in flow.graph.edges:
             if edge.from_node in adj and edge.to_node in adj:
-                adj[edge.from_node].append(edge.to_node)
+                adj[edge.from_node].add(edge.to_node)
 
     # 3. Add Global Governance Edges (Circuit Breaker)
     global_fallback_id = None
@@ -453,34 +456,24 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list
 
     # 4. Add Node-Level Implicit Edges
     for node in nodes:
-        # Global fallback applies to ALL nodes (any node can fail)
-        if global_fallback_id and global_fallback_id in adj:
-            adj[node.id].append(global_fallback_id)
+        # Global fallback applies to ALL nodes EXCEPT the fallback node itself
+        if global_fallback_id and global_fallback_id in adj and node.id != global_fallback_id:
+            adj[node.id].add(global_fallback_id)
 
         # SwitchNode routing
         if isinstance(node, SwitchNode):
             for target_id in node.cases.values():
                 if target_id in adj:
-                    adj[node.id].append(target_id)
+                    adj[node.id].add(target_id)
             if node.default in adj:
-                adj[node.id].append(node.default)
+                adj[node.id].add(node.default)
 
         # Local Fallback routing
         if node.resilience and not isinstance(node.resilience, str):
-            policy = node.resilience
-            strategies: list[ResilienceStrategy] = []
-
-            # Expand policy if complex
-            if hasattr(policy, "handlers"):
-                strategies.extend([h.strategy for h in policy.handlers])
-                if hasattr(policy, "default_strategy") and policy.default_strategy:
-                    strategies.append(policy.default_strategy)
-            else:
-                strategies.append(policy)
-
+            strategies = _extract_strategies(node.resilience)
             for strategy in strategies:
                 if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
-                    adj[node.id].append(strategy.fallback_node_id)
+                    adj[node.id].add(strategy.fallback_node_id)
 
     return adj
 
@@ -492,8 +485,10 @@ def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[str]:
     """
     errors: list[str] = []
 
-    adj = _build_unified_adjacency_map(flow)
-    sccs = get_strongly_connected_components(adj)
+    adj_set = _build_unified_adjacency_map(flow)
+    # Convert sets to lists for Tarjan's algorithm compatibility
+    adj_list = {k: list(v) for k, v in adj_set.items()}
+    sccs = get_strongly_connected_components(adj_list)
 
     for scc in sccs:
         # A cycle exists if:
@@ -504,7 +499,7 @@ def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[str]:
             is_cycle = True
         elif len(scc) == 1:
             node_id = scc[0]
-            if node_id in adj and node_id in adj[node_id]:
+            if node_id in adj_set and node_id in adj_set[node_id]:
                 is_cycle = True
 
         if is_cycle:

@@ -1,7 +1,9 @@
+import pytest
+
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
-from coreason_manifest.spec.core.flow import Graph, GraphFlow, LinearFlow, VariableDef
 from coreason_manifest.spec.core.nodes import AgentNode, PlaceholderNode, SwitchNode
 from coreason_manifest.spec.core.resilience import FallbackStrategy
+from coreason_manifest.spec.core.flow import Graph, GraphFlow, LinearFlow, VariableDef
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -235,3 +237,21 @@ def test_global_circuit_breaker_cycle() -> None:
     assert len(cycle_errors) > 0, f"Expected global circuit breaker cycle, got: {errors}"
     assert "A" in cycle_errors[0]
     assert "B" in cycle_errors[0]
+
+def test_valid_global_circuit_breaker_passes() -> None:
+    """A -> B. Global Fallback is C. Should NOT flag as a cycle."""
+    builder = NewGraphFlow("valid_global_cb", "1.0.0", "desc")
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
+
+    builder.add_node(create_placeholder("A"))
+    builder.add_node(create_placeholder("B"))
+    builder.add_node(create_placeholder("C")) # The Fallback Node
+    builder.connect("A", "B")
+    builder.set_entry_point("A")
+
+    builder.set_circuit_breaker(error_threshold=5, reset_timeout=30, fallback_node="C")
+
+    flow = build_flow_without_validation(builder)
+    errors = validate_flow(flow)
+    cycle_errors = [e for e in errors if "cycle detected" in e]
+    assert not cycle_errors, f"False positive cycle detected: {cycle_errors}"
