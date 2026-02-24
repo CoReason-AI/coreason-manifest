@@ -1,34 +1,33 @@
 import asyncio
-import pytest
-from typing import Any
 from pathlib import Path
+from typing import Any
+
+import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import (
-    GraphFlow,
-    Graph,
-    Edge,
     AgentRequest,
-    FlowMetadata,
+    Edge,
     FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.utils.loader import sandbox_context, _jail_root_var
-from coreason_manifest.utils.integrity import verify_merkle_proof, compute_hash
 from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 from coreason_manifest.utils.io import SecurityViolationError
+from coreason_manifest.utils.loader import _jail_root_var, sandbox_context
+
 
 # Helper to create minimal valid metadata
 def get_meta() -> FlowMetadata:
     return FlowMetadata(name="test", version="0.1.0", description="test")
 
+
 def get_agent_node(nid: str) -> AgentNode:
-    return AgentNode(
-        id=nid,
-        type="agent",
-        profile=CognitiveProfile(role="r", persona="p"),
-        tools=[]
-    )
+    return AgentNode(id=nid, type="agent", profile=CognitiveProfile(role="r", persona="p"), tools=[])
+
 
 def test_dangling_entry_point_rejected() -> None:
     """
@@ -40,15 +39,12 @@ def test_dangling_entry_point_rejected() -> None:
         GraphFlow(
             metadata=get_meta(),
             interface=FlowInterface(),
-            graph=Graph(
-                nodes={"node_b": get_agent_node("node_b")},
-                edges=[],
-                entry_point="node_a"
-            )
+            graph=Graph(nodes={"node_b": get_agent_node("node_b")}, edges=[], entry_point="node_a"),
         )
     assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(excinfo.value) or "Entry point 'node_a' not found" in str(
         excinfo.value
     )
+
 
 def test_ast_injection_blocked() -> None:
     """
@@ -57,12 +53,9 @@ def test_ast_injection_blocked() -> None:
     """
     # The framework raises a specific SecurityViolationError inside the validator
     with pytest.raises((ValidationError, SecurityViolationError)) as excinfo:
-        Edge(
-            from_node="a",
-            to_node="b",
-            condition="__import__('os').system('rm -rf /')"
-        )
+        Edge(from_node="a", to_node="b", condition="__import__('os').system('rm -rf /')")
     assert "Security Violation: forbidden AST node Call" in str(excinfo.value)
+
 
 @pytest.mark.asyncio
 async def test_sandboxed_loader_concurrent(tmp_path: Path) -> None:
@@ -92,6 +85,7 @@ async def test_sandboxed_loader_concurrent(tmp_path: Path) -> None:
     results = await asyncio.gather(task_a(), task_b())
     assert results[0] == jail_a.resolve()
     assert results[1] == jail_b.resolve()
+
 
 def test_merkle_dag_parallel() -> None:
     """
@@ -126,6 +120,7 @@ def test_merkle_dag_parallel() -> None:
 
     # Shuffle and verify (should sort internally)
     import random
+
     shuffled_trace = trace[:]
     random.shuffle(shuffled_trace)
     assert verify_merkle_proof(shuffled_trace) is True
@@ -137,6 +132,7 @@ def test_merkle_dag_parallel() -> None:
     trace_tampered = [node_a, node_b1, node_b2, tampered_node_c]
     assert verify_merkle_proof(trace_tampered) is False
 
+
 def test_extra_fields_forbidden() -> None:
     """
     5. test_extra_fields_forbidden: Attempt to pass tenant_id="123" at the root of an
@@ -146,11 +142,7 @@ def test_extra_fields_forbidden() -> None:
     manifest = GraphFlow(
         metadata=get_meta(),
         interface=FlowInterface(),
-        graph=Graph(
-            nodes={"start": get_agent_node("start")},
-            edges=[],
-            entry_point="start"
-        )
+        graph=Graph(nodes={"start": get_agent_node("start")}, edges=[], entry_point="start"),
     )
 
     # Valid request
@@ -160,7 +152,7 @@ def test_extra_fields_forbidden() -> None:
     with pytest.raises(ValidationError) as excinfo:
         AgentRequest(
             manifest=manifest,
-            tenant_id="123"  # type: ignore # Extra field
+            tenant_id="123",  # type: ignore # Extra field
         )
     # Pydantic v2 error for extra fields
     assert "Extra inputs are not permitted" in str(excinfo.value)

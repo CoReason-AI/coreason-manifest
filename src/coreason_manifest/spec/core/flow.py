@@ -7,7 +7,6 @@ from jsonschema.exceptions import SchemaError
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.utils.io import SecurityViolationError
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
@@ -23,6 +22,7 @@ from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
+from coreason_manifest.utils.io import SecurityViolationError
 
 
 class FlowMetadata(CoreasonModel):
@@ -146,19 +146,19 @@ def _scan_for_kill_switch_violations(
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
-                        message=(
-                            f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
-                            f"which exceeds the global max_risk_level '{max_risk.value}'."
-                        ),
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={
-                            "tool_name": obj.name,
-                            "tool_risk": obj.risk_level.value,
-                            "max_risk": max_risk.value,
-                        },
-                    )
+                    message=(
+                        f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
+                        f"which exceeds the global max_risk_level '{max_risk.value}'."
+                    ),
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "tool_name": obj.name,
+                        "tool_risk": obj.risk_level.value,
+                        "max_risk": max_risk.value,
+                    },
                 )
+            )
             # ToolCapability might have nested fields, but typically leaf. Continue scan if needed?
             # ToolCapability inherits CoreasonModel, so we'll scan its fields below if we don't return.
             # But since we checked the tool itself, we might want to check children too if tools can contain tools.
@@ -344,6 +344,7 @@ class AgentRequest(CoreasonModel):
     """
     Strict envelope for agent execution requests.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     manifest: GraphFlow | LinearFlow
