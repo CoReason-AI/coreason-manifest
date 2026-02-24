@@ -45,6 +45,7 @@ def test_critical_tool_requires_guard() -> None:
         prompt="Approve?",
         timeout_seconds=60,
         interaction_mode="blocking",
+        authorizes_node_id="agent-1",
     )
 
     flow_guarded = LinearFlow(
