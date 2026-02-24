@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 
 from coreason_manifest.spec.interop.telemetry import NodeState
-from coreason_manifest.utils.recorder import BlackBoxRecorder
+from coreason_manifest.utils.recorder import create_recorder
 
 
 def test_explicit_context() -> None:
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
     req_id = str(uuid.uuid4())
     root_id = str(uuid.uuid4())
     parent_id = str(uuid.uuid4())
@@ -35,7 +35,7 @@ def test_explicit_context() -> None:
 
 
 def test_default_behavior() -> None:
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
     exec2 = recorder.record(
         node_id="test_node_2",
         state=NodeState.COMPLETED,
@@ -51,7 +51,7 @@ def test_default_behavior() -> None:
 
 
 def test_hash_sensitivity() -> None:
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
     req_id = str(uuid.uuid4())
     root_id = str(uuid.uuid4())
     ts = datetime.now()
@@ -86,7 +86,7 @@ def test_hash_sensitivity() -> None:
 
 
 def test_hash_stability() -> None:
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
     req_id = str(uuid.uuid4())
     root_id = str(uuid.uuid4())
     ts = datetime.now()

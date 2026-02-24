@@ -1,7 +1,7 @@
-import pytest
 from coreason_manifest.spec.core.governance import Governance, Safety
-from coreason_manifest.utils.recorder import create_recorder
 from coreason_manifest.spec.interop.telemetry import NodeState
+from coreason_manifest.utils.recorder import create_recorder
+
 
 # Test 1: Fail-Safe Default
 def test_recorder_fail_safe_default() -> None:
@@ -24,7 +24,7 @@ def test_recorder_fail_safe_default() -> None:
         inputs=pii_input,
         outputs={},
         duration_ms=10.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     # Assert email is redacted
@@ -35,18 +35,13 @@ def test_recorder_fail_safe_default() -> None:
     assert isinstance(sanitized_email, str)
     assert sanitized_email.startswith("<REDACTED:SECRET:")
 
+
 # Test 2: Explicit Opt-In (Redaction Enabled)
 def test_recorder_explicit_opt_in() -> None:
     """
     Test that if governance explicitly enables PII redaction, it is respected.
     """
-    gov = Governance(
-        safety=Safety(
-            input_filtering=True,
-            pii_redaction=True,
-            content_safety="high"
-        )
-    )
+    gov = Governance(safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"))
     recorder = create_recorder(gov)
 
     assert recorder.privacy.redact_pii is True
@@ -58,7 +53,7 @@ def test_recorder_explicit_opt_in() -> None:
         inputs=pii_input,
         outputs={},
         duration_ms=10.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     sanitized_email = record.inputs["email"]
@@ -66,18 +61,13 @@ def test_recorder_explicit_opt_in() -> None:
     assert isinstance(sanitized_email, str)
     assert sanitized_email.startswith("<REDACTED:SECRET:")
 
+
 # Test 3: Explicit Opt-Out (Redaction Disabled)
 def test_recorder_explicit_opt_out() -> None:
     """
     Test that if governance explicitly disables PII redaction, PII passes through.
     """
-    gov = Governance(
-        safety=Safety(
-            input_filtering=True,
-            pii_redaction=False,
-            content_safety="medium"
-        )
-    )
+    gov = Governance(safety=Safety(input_filtering=True, pii_redaction=False, content_safety="medium"))
     recorder = create_recorder(gov)
 
     assert recorder.privacy.redact_pii is False
@@ -89,7 +79,7 @@ def test_recorder_explicit_opt_out() -> None:
         inputs=pii_input,
         outputs={},
         duration_ms=10.0,
-        parent_hashes=[]
+        parent_hashes=[],
     )
 
     # Assert email is NOT redacted

@@ -5,7 +5,7 @@ from coreason_manifest.spec.interop.otel import to_otel_attributes
 from coreason_manifest.spec.interop.telemetry import NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof
 from coreason_manifest.utils.privacy import PrivacySentinel
-from coreason_manifest.utils.recorder import BlackBoxRecorder
+from coreason_manifest.utils.recorder import BlackBoxRecorder, create_recorder
 
 
 def test_privacy_sentinel_secrets() -> None:
@@ -113,7 +113,7 @@ def test_privacy_sentinel_recursion() -> None:
 
 def test_recorder_stateless_dag() -> None:
     # Recorder is now stateless
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
 
     # Step 1: Genesis Node
     rec1 = recorder.record(
@@ -166,7 +166,7 @@ def test_recorder_stateless_dag() -> None:
 
 def test_dag_integrity() -> None:
     # Re-use the DAG construction from above logic (simplified) to test verify_merkle_proof
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
 
     # 1. Genesis
     n1 = recorder.record("n1", NodeState.COMPLETED, {}, {}, 1.0, parent_hashes=[])
@@ -205,7 +205,7 @@ def test_dag_integrity() -> None:
 
 def test_recorder_sanitization_integration() -> None:
     # Recorder should use PrivacySentinel
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
 
     rec = recorder.record(
         node_id="node_secret",
@@ -221,7 +221,7 @@ def test_recorder_sanitization_integration() -> None:
 
 
 def test_otel_bridge() -> None:
-    recorder = BlackBoxRecorder()
+    recorder = create_recorder(None)
     rec = recorder.record(
         node_id="my_agent",
         state=NodeState.FAILED,
