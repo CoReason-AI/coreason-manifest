@@ -160,10 +160,14 @@ def test_validator_catch_invalid_fallback_ids() -> None:
     )
     lf.add_step(node)
 
-    with pytest.raises(
-        ValueError, match="Circuit Breaker Error: 'fallback_node_id' points to missing ID 'missing_node'"
-    ):
+    from coreason_manifest.spec.interop.exceptions import ManifestError
+
+    # Now raises ManifestError due to stricter lifecycle validation in flow.py
+    with pytest.raises(ManifestError) as exc:
         lf.build()
+
+    assert exc.value.fault.error_code == "CRSN-VAL-LIFECYCLE-DANGLING-FALLBACK"
+    assert "missing_node" in exc.value.fault.message
 
     # 2. Invalid Supervision Fallback
     # policy = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="missing_sup_node"))
