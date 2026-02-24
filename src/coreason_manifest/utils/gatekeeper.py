@@ -124,16 +124,16 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         # Check for high-risk capabilities
         needs_guard = False
         violation_reason = []
-        dangerous_caps = []
+        dangerous_caps: list[str] = []
 
         if NodeCapability.COMPUTER_USE in caps:
             needs_guard = True
             violation_reason.append("computer_use capability")
-            dangerous_caps.append(NodeCapability.COMPUTER_USE)
+            dangerous_caps.append(str(NodeCapability.COMPUTER_USE))
         if NodeCapability.CODE_EXECUTION in caps:
             needs_guard = True
             violation_reason.append("code_execution capability")
-            dangerous_caps.append(NodeCapability.CODE_EXECUTION)
+            dangerous_caps.append(str(NodeCapability.CODE_EXECUTION))
 
         if critical_tools:
             needs_guard = True
@@ -149,9 +149,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 timeout_seconds=300,
                 interaction_mode="blocking",
                 metadata={},
-                authorizations=[
-                    AuthorizationScope(target_node_id=node.id, granted_capabilities=dangerous_caps)
-                ],
+                authorizations=[AuthorizationScope(target_node_id=node.id, granted_capabilities=dangerous_caps)],
             )
 
             # Construct Patch
@@ -355,12 +353,12 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_cap
             if isinstance(node, HumanNode) and node.authorizations:
                 # Check if target_node.id is in authorizations
                 for auth in node.authorizations:
-                    if auth.target_node_id == target_node.id:
-                        # Check capabilities
-                        if auth.granted_capabilities == "*" or all(
-                            req in auth.granted_capabilities for req in required_caps
-                        ):
-                            return True
+                    # Check capabilities
+                    if auth.target_node_id == target_node.id and (
+                        auth.granted_capabilities == "*"
+                        or all(req in auth.granted_capabilities for req in required_caps)
+                    ):
+                        return True
         return False
 
     if isinstance(flow, GraphFlow):
@@ -381,13 +379,13 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_cap
         for nid, node in flow.graph.nodes.items():
             if isinstance(node, valid_guards) and node.authorizations:
                 for auth in node.authorizations:
-                    if auth.target_node_id == target_node.id:
-                        # Check capabilities
-                        if auth.granted_capabilities == "*" or all(
-                            req in auth.granted_capabilities for req in required_caps
-                        ):
-                            guards.add(nid)
-                            break
+                    # Check capabilities
+                    if auth.target_node_id == target_node.id and (
+                        auth.granted_capabilities == "*"
+                        or all(req in auth.granted_capabilities for req in required_caps)
+                    ):
+                        guards.add(nid)
+                        break
 
         if entry_id:
             queue = [entry_id]
