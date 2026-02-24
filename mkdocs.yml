@@ -25,10 +25,10 @@ nav:
   - Architecture:
       - Core Philosophy: architecture/core_philosophy.md
       - Topology & State: architecture/topology_and_state.md
-  # PHASE 2-6 TARGET STRUCTURE (Commented out until written)
-  # - Core Primitives:
-  #     - Flows: core/flows.md
-  #     - Nodes: core/nodes.md
+  - Core Primitives:
+      - Flows: core/flows.md
+      - Nodes: core/nodes.md
+  # PHASE 3-6 TARGET STRUCTURE (Commented out until written)
   # - Cognitive Engines:
   #     - Profiles & Fast Paths: core/cognitive_profiles.md
   #     - Reasoning Engines: core/engines.md
