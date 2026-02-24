@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+
 from coreason_manifest.spec.core.governance import Audit, Governance, Safety
 from coreason_manifest.spec.interop.telemetry import NodeState
 from coreason_manifest.utils.recorder import create_recorder
@@ -114,11 +116,12 @@ def test_recorder_omits_payloads() -> None:
     assert record.outputs == expected
 
 
-# Test 5: Salting Hashes (Dynamic)
+# Test 5: Salting Hashes (Process-Scoped Stability)
 def test_recorder_salts_hashes() -> None:
     """
     Call create_recorder twice with same Governance config but *no* explicit salt.
-    Assert that redacted hashes are different (proving random fallback).
+    Assert that redacted hashes are THE SAME because the fallback salt is now process-scoped.
+    This ensures we can correlate logs from the same runtime session.
     """
     gov = Governance(
         safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
@@ -150,9 +153,9 @@ def test_recorder_salts_hashes() -> None:
     hash1 = rec1.inputs["secret"]
     hash2 = rec2.inputs["secret"]
 
-    assert hash1 != hash2
+    assert hash1 == hash2
+    assert isinstance(hash1, str)
     assert hash1.startswith("<REDACTED:SECRET:")
-    assert hash2.startswith("<REDACTED:SECRET:")
 
 
 # Test 6: Deterministic Salt
@@ -188,3 +191,45 @@ def test_recorder_deterministic_salt() -> None:
     )
 
     assert rec1.inputs["secret"] == rec2.inputs["secret"]
+
+
+# Test 7: Pydantic Model Sanitization
+def test_recorder_sanitizes_pydantic_models() -> None:
+    """
+    Verify that Pydantic models passed as inputs are properly dumped
+    to dicts and then sanitized.
+    """
+
+    class UserProfile(BaseModel):
+        email: str
+        username: str
+
+    gov = Governance(
+        safety=Safety(input_filtering=True, pii_redaction=True, content_safety="high"),
+        audit=Audit(log_payloads=True, trace_retention_days=7),
+    )
+    recorder = create_recorder(gov)
+
+    model_input = UserProfile(email="test@example.com", username="safe_user")
+
+    # Pass the Pydantic model as an input value
+    record = recorder.record(
+        node_id="pydantic_node",
+        state=NodeState.COMPLETED,
+        inputs={"user": model_input},
+        outputs={},
+        duration_ms=5.0,
+        parent_hashes=[],
+    )
+
+    # The recorder wraps non-dict inputs in {"_sanitized_value": ...} but here "user" is a key
+    # so inputs={"user": model} -> inputs={"user": {email: ..., username: ...}}
+    sanitized_user = record.inputs["user"]
+    assert isinstance(sanitized_user, dict)
+
+    # Check email is redacted
+    assert "test@example.com" not in sanitized_user["email"]
+    assert sanitized_user["email"].startswith("<REDACTED:SECRET:")
+
+    # Check username is preserved
+    assert sanitized_user["username"] == "safe_user"

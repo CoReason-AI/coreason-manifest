@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import re
 from typing import Any, ClassVar
 
@@ -50,6 +51,12 @@ class PrivacySentinel:
         """
         Recursively sanitizes the input data.
         """
+        # Ensure Pydantic objects are converted to dicts before evaluation
+        if hasattr(data, "model_dump") and callable(data.model_dump):
+            data = data.model_dump()
+        elif hasattr(data, "dict") and callable(data.dict):  # Fallback for older models
+            data = data.dict()
+
         if isinstance(data, dict):
             return {k: self._sanitize_kv(k, v) for k, v in data.items()}
         if isinstance(data, list):
@@ -104,9 +111,10 @@ class PrivacySentinel:
         """
         Returns a structured redaction string: <REDACTED:SECRET:{hash_prefix}>
         """
-        # compute SHA256(value + salt)
-        combined = value + self.hashing_salt
-        full_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+        # Use HMAC-SHA256 which is mathematically resistant to length-extension and collision
+        salt_bytes = self.hashing_salt.encode("utf-8")
+        value_bytes = value.encode("utf-8")
+        full_hash = hmac.new(salt_bytes, value_bytes, hashlib.sha256).hexdigest()
         # Use first 8 chars of hash as prefix
         hash_prefix = full_hash[:8]
         return f"<REDACTED:SECRET:{hash_prefix}>"

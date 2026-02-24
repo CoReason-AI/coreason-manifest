@@ -9,6 +9,9 @@ from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import compute_hash, to_canonical_timestamp
 from coreason_manifest.utils.privacy import PrivacySentinel
 
+# Process-scoped fallback salt for consistent intra-process correlation
+_PROCESS_FALLBACK_SALT = secrets.token_hex(16)
+
 
 class BlackBoxRecorder:
     """
@@ -138,8 +141,8 @@ def create_recorder(governance_config: Governance | None = None, system_salt: st
     # Salt Resolution Logic
     # 1. Use system_salt if provided
     # 2. Else, try OS env var
-    # 3. Else, generate random secure token
-    final_salt = system_salt or os.getenv("COREASON_AUDIT_SALT") or secrets.token_hex(16)
+    # 3. Else, use process-scoped fallback
+    final_salt = system_salt or os.getenv("COREASON_AUDIT_SALT") or _PROCESS_FALLBACK_SALT
 
     # Instantiate Sentinel with explicit configuration
     sentinel = PrivacySentinel(redact_pii=redact_pii, redact_secrets=True, hashing_salt=final_salt)
