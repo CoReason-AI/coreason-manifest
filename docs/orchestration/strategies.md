@@ -39,10 +39,9 @@ A cognitive self-correction loop. The runtime feeds the generated error message 
 *   **`critic_schema`**: JSON Schema to enforce structured output from the critic.
 
 ## 4. `EscalationStrategy` (`type: escalate`)
-Explicitly bubbles the error up to a parent scope (e.g., from a Node up to the GraphFlow's supervision layer) when local recovery is impossible. The parent scope's policy will then dictate the next action.
-*   **`queue_name`**: The task queue where the suspended session will be parked.
-*   **`notification_level`**: Severity level (`info`, `warning`, `critical`).
-*   **`timeout_seconds`**: How long to wait for human intervention before failing completely.
+Explicitly bubbles the error up to a parent scope (e.g., from a Node up to the GraphFlow's supervision layer) when local recovery is impossible.
+*   **`bubble_to`**: Optional target scope (e.g., `flow`, `graph`, `global`). If omitted, defaults to the immediate parent.
+*   **`enrich_context`**: Boolean flag to append the local node's blackboard state to the error trace before bubbling up.
 
 ## 5. `DiagnosisReasoning` (`type: diagnosis`)
 While technically a reasoning config, this schema is used as a specialized recovery step to perform **Root Cause Analysis (RCA)** on complex sub-graph failures.
@@ -51,5 +50,7 @@ While technically a reasoning config, this schema is used as a specialized recov
 
 ## 6. `HumanHandoffStrategy` (`type: human_handoff`)
 Safely suspends execution, persists state, and alerts a human operator for manual resolution before resuming the flow.
+*   **`queue_name`**: The task queue where the suspended session will be parked.
+*   **`timeout_seconds`**: How long to wait for human intervention before failing completely.
 *   **`urgency`**: `low`, `medium`, `high`, `critical`.
 *   **Use Case:** Critical business logic failures or high-risk security alerts where automated recovery is unsafe.
