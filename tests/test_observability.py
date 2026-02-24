@@ -276,7 +276,7 @@ def test_recorder_handles_non_dict_sanitized_data() -> None:
     """
 
     class MockSentinel(PrivacySentinel):
-        def sanitize(self, _: Any, depth: int = 0) -> Any:
+        def sanitize(self, _: Any, _depth: int = 0) -> Any:
             # Force return a string even if input is dict
             return "sanitized_string"
 
