@@ -5,6 +5,7 @@ import json
 import math
 import uuid
 from abc import ABC, abstractmethod
+from collections import defaultdict, deque
 from datetime import UTC, datetime
 from typing import Any, TypedDict
 
@@ -152,25 +153,76 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
     if not trace:
         return False
 
-    verified_hashes = set()
+    payloads = []
 
-    for i, node in enumerate(trace):
-        # 1. Verify Content Integrity
+    # 1. Reconstruct payloads
+    for node in trace:
         try:
             payload = reconstruct_payload(node)
+            payloads.append(payload)
         except TypeError:
             return False
 
-        # Design Rule: Always use v2
-        computed_hash = compute_hash(payload)
+    # 2. Build Dependency Graph for Topological Sort
+    nodes_by_hash = {}
+    for p in payloads:
+        h = p.get("execution_hash")
+        if h:
+            nodes_by_hash[h] = p
 
+    adj_list = defaultdict(list)
+    in_degree = defaultdict(int)
+
+    for p in payloads:
+        # Determine dependencies (parents)
+        parent_hashes = p.get("parent_hashes", [])
+        parent_hash = p.get("parent_hash")
+
+        parents = set()
+        if parent_hashes:
+            parents.update(parent_hashes)
+        if parent_hash:
+            parents.add(parent_hash)
+
+        # Only consider parents that are within the trace for sorting
+        internal_parents = [pid for pid in parents if pid in nodes_by_hash]
+
+        in_degree[id(p)] = len(internal_parents)
+
+        for pid in internal_parents:
+            adj_list[pid].append(p)
+
+    # 3. Topological Sort (Kahn's Algorithm)
+    queue = deque([p for p in payloads if in_degree[id(p)] == 0])
+    sorted_trace = []
+
+    while queue:
+        node = queue.popleft()
+        sorted_trace.append(node)
+
+        node_hash = node.get("execution_hash")
+        if node_hash and node_hash in adj_list:
+            for child in adj_list[node_hash]:
+                in_degree[id(child)] -= 1
+                if in_degree[id(child)] == 0:
+                    queue.append(child)
+
+    if len(sorted_trace) != len(payloads):
+        # Cycle detected
+        return False
+
+    # 4. Verification
+    verified_hashes = set()
+
+    for i, payload in enumerate(sorted_trace):
+        # Verify Content Integrity
+        computed_hash = compute_hash(payload)
         stored_hash = payload.get("execution_hash")
 
         if not stored_hash or stored_hash != computed_hash:
             return False
 
-        # 2. Extract declared parents (Topology Verification)
-        # Support both Linear (parent_hash) and DAG (parent_hashes)
+        # Verify Linkage
         parent_hashes = payload.get("parent_hashes", [])
         parent_hash = payload.get("parent_hash")
 
@@ -180,13 +232,12 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
         if parent_hash:
             expected_parents.add(parent_hash)
 
-        # 3. Verify Linkage
         if not expected_parents:
             # Genesis Node
             if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
                 return False
         else:
-            # Child Node: Every declared parent must be present in the VERIFIED pool.
+            # Child Node: Every declared parent must be present in the VERIFIED pool or be the trusted root.
             for prev_hash in expected_parents:
                 if trusted_root_hash and prev_hash == trusted_root_hash:
                     continue
@@ -194,7 +245,7 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
                     # Topology Violation: Node claims a parent that hasn't been verified.
                     return False
 
-        # 4. Add to verified set (Topological Progress)
+        # Add to verified set
         verified_hashes.add(stored_hash)
 
     return True

@@ -333,7 +333,8 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
     # Generate cryptographically unique module name to prevent collisions
     path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
-    module_name = f"agent_{path_hash}"
+    stem = file_path.stem
+    module_name = f"_jail_{path_hash}.{stem}"
 
     # Use context manager to enable jailed imports during spec finding and loading
     with sandbox_context(root_dir):
