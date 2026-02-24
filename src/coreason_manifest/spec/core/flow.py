@@ -288,6 +288,57 @@ class GraphFlow(CoreasonModel):
         )
         return self
 
+    @model_validator(mode="after")
+    def enforce_published_strictness(self) -> "GraphFlow":
+        if self.status != "published":
+            return self
+
+        # Placeholder Rejection
+        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
+        for node in nodes_iter:
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-LIFECYCLE-PLACEHOLDER",
+                        message=f"Published flow cannot contain PlaceholderNode '{node.id}'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                target_node_id=node.id,
+                                description=f"Replace PlaceholderNode '{node.id}' with a concrete execution node.",
+                                patch_data=[],
+                            ).model_dump()
+                        },
+                    )
+                )
+
+        # Graph Topology Completeness
+        if not self.graph.entry_point:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-LIFECYCLE-ENTRYPOINT",
+                    message="Published GraphFlow must have an entry_point.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={},
+                )
+            )
+
+        if self.graph.entry_point not in self.graph.nodes:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-LIFECYCLE-ENTRYPOINT",
+                    message=f"Entry point '{self.graph.entry_point}' does not exist in graph nodes.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={},
+                )
+            )
+
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -323,6 +374,32 @@ class LinearFlow(CoreasonModel):
             self.definitions,
             self.steps,
         )
+        return self
+
+    @model_validator(mode="after")
+    def enforce_published_strictness(self) -> "LinearFlow":
+        if self.status != "published":
+            return self
+
+        # Placeholder Rejection
+        for node in self.steps:
+            if isinstance(node, PlaceholderNode):
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-LIFECYCLE-PLACEHOLDER",
+                        message=f"Published flow cannot contain PlaceholderNode '{node.id}'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={
+                            "remediation": RemediationAction(
+                                type="update_field",
+                                target_node_id=node.id,
+                                description=f"Replace PlaceholderNode '{node.id}' with a concrete execution node.",
+                                patch_data=[],
+                            ).model_dump()
+                        },
+                    )
+                )
         return self
 
 

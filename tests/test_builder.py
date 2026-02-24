@@ -5,20 +5,17 @@ from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0.0", description="Desc")
-    builder.add_step(PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[]))
-    builder.add_step(PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[]))
+    # Use AgentNode instead of PlaceholderNode/InspectorNode to pass published validation
+    # LinearFlow lacks blackboard, so InspectorNode validation fails on missing variables.
+    builder.define_profile("p1", "role", "persona")
+    builder.add_agent_ref("step1", "p1")
+    builder.add_agent_ref("step2", "p1")
 
-    tp = ToolPack(
-        kind="ToolPack",
-        namespace="test",
-        tools=[ToolCapability(name="t1")],
-        dependencies=[],
-        env_vars=[],
-    )
     tp = ToolPack(
         kind="ToolPack",
         namespace="test",
@@ -44,8 +41,9 @@ def test_linear_builder() -> None:
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0.0", description="Desc")
-    builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
-    builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[]))
+    # Use InspectorNode via add_inspector
+    builder.add_inspector("n1", "var1", "crit1", "out1")
+    builder.add_inspector("n2", "var2", "crit2", "out2")
     builder.connect("n1", "n2", condition="ok")
 
     tp = ToolPack(
@@ -65,7 +63,12 @@ def test_graph_builder() -> None:
         inputs={"type": "object", "properties": {"in": {"type": "string"}}},
         outputs={"type": "object", "properties": {"out": {"type": "integer"}}},
     )
-    builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
+    builder.set_blackboard(variables={
+        "var1": VariableDef(type="string", description="test var"),
+        "out1": VariableDef(type="string"),
+        "var2": VariableDef(type="string"),
+        "out2": VariableDef(type="string"),
+    }, persistence=True)
 
     flow = builder.build()
 
@@ -100,19 +103,11 @@ def test_linear_builder_invalid() -> None:
 def test_graph_builder_invalid() -> None:
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
-    # This triggers "Entry point 'missing_entry_point' not found" because
-    # build() sets default entry point if empty?
-    # Actually, if nodes empty, entry_point defaults to "missing_entry_point"?
-    # No, logic says `entry_point = self._entry_point or (next(iter(self._nodes)) ... else "missing_entry_point")`
-    # So it becomes "missing_entry_point".
-    # Then `validate_dag` runs (if published? no, draft).
-    # Wait, `validate_dag` checks edge integrity ALWAYS.
-    # `if self.graph.entry_point not in node_ids: raise ValueError(...)`
-    # So it raises "Entry point 'missing_entry_point' not found in nodes."
-    # The original test expected "Validation failed".
-    # I will update the match string.
-    with pytest.raises(ValueError, match="Graph must contain at least one node"):
+    # This triggers "Entry point 'missing_entry_point' does not exist in graph nodes"
+    # which is raised by enforce_published_strictness (ManifestError)
+    with pytest.raises(ManifestError) as exc:
         builder.build()
+    assert "CRSN-VAL-LIFECYCLE-ENTRYPOINT" in str(exc.value)
 
 
 def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
@@ -272,12 +267,14 @@ def test_builder_validation_failure() -> None:
 def test_builder_graph_entry_point_coverage() -> None:
     """Cover NewGraphFlow.set_entry_point (lines 297-298)."""
     from coreason_manifest.builder import NewGraphFlow
-    from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     builder = NewGraphFlow("Graph Flow")
 
-    node = PlaceholderNode(id="start", metadata={}, required_capabilities=[])
-    builder.add_node(node)
+    # Use InspectorNode instead of PlaceholderNode
+    builder.add_inspector("start", "var", "crit", "out")
+
+    # Add variables to blackboard
+    builder.set_blackboard({"var": VariableDef(type="string"), "out": VariableDef(type="string")})
 
     # Use set_entry_point
     builder.set_entry_point("start")
@@ -289,13 +286,15 @@ def test_builder_graph_entry_point_coverage() -> None:
 def test_builder_graph_auto_entry_point() -> None:
     """Cover NewGraphFlow.build() auto entry point (line 368)."""
     from coreason_manifest.builder import NewGraphFlow
-    from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     builder = NewGraphFlow("Auto Entry")
 
     # Add one node
-    node = PlaceholderNode(id="auto_start", metadata={}, required_capabilities=[])
-    builder.add_node(node)
+    # Use InspectorNode instead of PlaceholderNode
+    builder.add_inspector("auto_start", "var", "crit", "out")
+
+    # Add variables to blackboard
+    builder.set_blackboard({"var": VariableDef(type="string"), "out": VariableDef(type="string")})
 
     # Do NOT call set_entry_point
 
@@ -310,8 +309,11 @@ def test_builder_graph_missing_entry_point() -> None:
     builder = NewGraphFlow("Empty Graph")
     # No nodes added
 
-    with pytest.raises(ValueError, match="Graph must contain at least one node"):
+    # Now raises ManifestError because missing_entry_point is not in nodes
+    with pytest.raises(ManifestError) as exc:
         builder.build()
+
+    assert "CRSN-VAL-LIFECYCLE-ENTRYPOINT" in str(exc.value)
 
 
 def test_builder_graph_validation_failure() -> None:
