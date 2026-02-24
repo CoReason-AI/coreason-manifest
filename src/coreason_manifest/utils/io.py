@@ -194,30 +194,29 @@ class ManifestDumper(yaml.SafeDumper):
     ]
     DEPRIORITY_KEYS: ClassVar[list[str]] = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
 
-    def represent_mapping(self, tag: str, mapping: Any, flow_style: bool | None = False) -> yaml.MappingNode:
+    def represent_mapping(self, tag: str, mapping: Any, flow_style: bool | None = None) -> yaml.MappingNode:
         value: list[tuple[yaml.Node, yaml.Node]] = []
         node = yaml.MappingNode(tag, value, flow_style=flow_style)
         if self.alias_key is not None:
             self.represented_objects[self.alias_key] = node
         best_style = True
-        if hasattr(mapping, "items"):
-            mapping_list = list(mapping.items())
 
-            # Custom sorting logic
-            def sort_key(item: tuple[Any, Any]) -> tuple[int, int | str, str] | tuple[int, str]:
-                key = item[0]
-                # specific safe string conversion for sorting
-                key_str = str(key)
+        # We only support dict sorting for manifest export
+        mapping_list = list(mapping.items())
 
-                if key_str in self.PRIORITY_KEYS:
-                    return (0, self.PRIORITY_KEYS.index(key_str), key_str)
-                if key_str in self.DEPRIORITY_KEYS:
-                    return (2, self.DEPRIORITY_KEYS.index(key_str), key_str)
-                return (1, key_str)
+        # Custom sorting logic
+        def sort_key(item: tuple[Any, Any]) -> tuple[int, int | str, str] | tuple[int, str]:
+            key = item[0]
+            # specific safe string conversion for sorting
+            key_str = str(key)
 
-            mapping_list.sort(key=sort_key)
-        else:
-            mapping_list = []
+            if key_str in self.PRIORITY_KEYS:
+                return (0, self.PRIORITY_KEYS.index(key_str), key_str)
+            if key_str in self.DEPRIORITY_KEYS:
+                return (2, self.DEPRIORITY_KEYS.index(key_str), key_str)
+            return (1, key_str)
+
+        mapping_list.sort(key=sort_key)
 
         for item_key, item_value in mapping_list:
             node_key = self.represent_data(item_key)

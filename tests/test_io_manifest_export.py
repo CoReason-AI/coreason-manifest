@@ -9,12 +9,12 @@ import yaml
 # Import the code to test
 # Assuming src is in python path or installed
 try:
-    from coreason_manifest.utils.io import export_manifest
+    from coreason_manifest.utils.io import export_manifest, ManifestDumper
 except ImportError:
     import sys
 
     sys.path.append(str(Path(__file__).parents[2] / "src"))
-    from coreason_manifest.utils.io import export_manifest
+    from coreason_manifest.utils.io import export_manifest, ManifestDumper
 
 
 class MockPydanticModel:
@@ -169,6 +169,63 @@ def test_export_manifest_mixed_types() -> None:
 
         keys = list(loaded.keys())
         assert keys == ["kind", "10", "2"]
+
+    finally:
+        if tmp_path.exists():
+            with contextlib.suppress(OSError):
+                os.remove(tmp_path)
+
+def test_manifest_dumper_coverage() -> None:
+    """Test edge cases for ManifestDumper to ensure full coverage."""
+    # Test 1: Trigger 'best_style = False'
+    # Use a key that requires quoting/complexity
+    complex_key_data = {
+        "simple": "val",
+        "key:with:colons": "val2",
+        "multiline\nkey": "val3"
+    }
+
+    with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmp:
+        tmp_path = Path(tmp.name)
+
+    try:
+        tmp.close()
+        # Direct dump with ManifestDumper
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            yaml.dump(
+                complex_key_data,
+                f,
+                Dumper=ManifestDumper,
+                sort_keys=False
+            )
+
+        with open(tmp_path, encoding="utf-8") as f:
+            content = f.read()
+            loaded = yaml.safe_load(content)
+
+        assert loaded["simple"] == "val"
+        assert loaded["key:with:colons"] == "val2"
+
+    finally:
+        if tmp_path.exists():
+            with contextlib.suppress(OSError):
+                os.remove(tmp_path)
+
+    # Test 2: Trigger 'flow_style is None' branches
+    # By default yaml.dump sets default_flow_style=None
+
+    data = {"a": 1, "b": 2}
+    with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmp:
+        tmp_path = Path(tmp.name)
+
+    try:
+        tmp.close()
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, Dumper=ManifestDumper) # default_flow_style is None implicitly
+
+        # Also try explicitly None
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, Dumper=ManifestDumper, default_flow_style=None)
 
     finally:
         if tmp_path.exists():
