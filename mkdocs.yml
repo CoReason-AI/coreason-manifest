@@ -25,7 +25,6 @@ nav:
   - Getting Started:
       - Quick Start: usage.md
       - CLI Reference: cli.md
-      - Tutorial: VIGNETTE.md
   - Core Concepts:
       - Graph Orchestration: graph_recipes.md
       - Reasoning Patterns: episteme_reasoning.md
@@ -36,6 +35,5 @@ nav:
       - Agents & Tools: reference/agents.md
       - Orchestration: reference/orchestration.md
   - Internal Architecture:
-      - Contributor Protocols: architecture/contributor_protocols.md
-      - Shared Kernel Strategy: architecture/ADR-001-shared-kernel-boundaries.md
+      - Shared Kernel Architecture: architecture/shared_kernel.md
       - Compliance & Integrity: veritas_integrity.md
