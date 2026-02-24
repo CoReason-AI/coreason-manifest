@@ -16,6 +16,15 @@ class MockLegacyModel:
         return self._data
 
 
+class MockBrokenModel:
+    """
+    Simulates a model that crashes during serialization.
+    """
+
+    def model_dump(self) -> dict[str, Any]:
+        raise ValueError("Simulated serialization crash")
+
+
 def test_privacy_sentinel_legacy_model_support() -> None:
     """
     Verify that PrivacySentinel supports legacy objects with a .dict() method
@@ -38,19 +47,28 @@ def test_privacy_sentinel_legacy_model_support() -> None:
     assert isinstance(sanitized, dict)
 
     # Check PII redaction (precision redaction)
-    # The email will be replaced by <REDACTED:SECRET:...>
-    # Since the input is just the email string, and regex matches full string:
-    # "legacy@example.com" -> "<REDACTED:SECRET:...>"
-    # Wait, the precision redaction uses .sub().
-    # If the value IS the email, it replaces it.
     assert "legacy@example.com" not in sanitized["email"]
     assert "<REDACTED:SECRET:" in sanitized["email"]
 
     # Check Secret redaction (key-based)
-    # Key "api_key" matches SENSITIVE_SUBSTRINGS.
-    # Value "12345-secret" is FULLY redacted because key match redacts entire value string.
     assert "12345-secret" not in sanitized["api_key"]
     assert sanitized["api_key"].startswith("<REDACTED:SECRET:")
 
     # Check Safe field
     assert sanitized["username"] == "legacy_user"
+
+
+def test_privacy_sentinel_serialization_error() -> None:
+    """
+    Verify that PrivacySentinel catches exceptions during model serialization
+    and returns a safe error string instead of crashing.
+    """
+    sentinel = PrivacySentinel()
+    broken_model = MockBrokenModel()
+
+    # Sanitize the broken model
+    sanitized = sentinel.sanitize(broken_model)
+
+    # Assert correct error handling
+    assert isinstance(sanitized, str)
+    assert sanitized == "<SERIALIZATION_ERROR: ValueError>"
