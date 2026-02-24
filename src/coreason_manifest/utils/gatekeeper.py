@@ -129,16 +129,19 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         if NodeCapability.COMPUTER_USE in caps:
             needs_guard = True
             violation_reason.append("computer_use capability")
-            dangerous_caps.append(str(NodeCapability.COMPUTER_USE))
+            dangerous_caps.append(str(NodeCapability.COMPUTER_USE.value))
         if NodeCapability.CODE_EXECUTION in caps:
             needs_guard = True
             violation_reason.append("code_execution capability")
-            dangerous_caps.append(str(NodeCapability.CODE_EXECUTION))
+            dangerous_caps.append(str(NodeCapability.CODE_EXECUTION.value))
 
         if critical_tools:
             needs_guard = True
             violation_reason.append(f"critical tools {critical_tools}")
             dangerous_caps.extend(critical_tools)
+
+        # Remove duplicates
+        dangerous_caps = list(set(dangerous_caps))
 
         if needs_guard and not _is_guarded(node, flow, dangerous_caps):
             human_node_id = f"guard_{node.id}"
@@ -174,12 +177,16 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 for edge_idx, edge in enumerate(flow.graph.edges):
                     if edge.to_node == node.id:
                         patch_ops.append(
-                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
+                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/to_node", "value": human_node_id}
                         )
 
                 # 3. Add edge (Guard -> Target)
                 patch_ops.append(
-                    {"op": "add", "path": "/graph/edges/-", "value": {"source": human_node_id, "target": node.id}}
+                    {
+                        "op": "add",
+                        "path": "/graph/edges/-",
+                        "value": {"from_node": human_node_id, "to_node": node.id},
+                    }
                 )
 
             reports.append(
@@ -353,10 +360,9 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_cap
             if isinstance(node, HumanNode) and node.authorizations:
                 # Check if target_node.id is in authorizations
                 for auth in node.authorizations:
-                    # Check capabilities
+                    is_wildcard = auth.granted_capabilities == "*" or "*" in auth.granted_capabilities
                     if auth.target_node_id == target_node.id and (
-                        auth.granted_capabilities == "*"
-                        or all(req in auth.granted_capabilities for req in required_caps)
+                        is_wildcard or all(req in auth.granted_capabilities for req in required_caps)
                     ):
                         return True
         return False
@@ -372,33 +378,53 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_cap
 
         # Construct adjacency map
         adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
+        # Reverse map for distance calculation
+        reverse_adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
+
         for edge in flow.graph.edges:
             adj[edge.from_node].append(edge.to_node)
+            reverse_adj[edge.to_node].append(edge.from_node)
+
+        # 1. Determine valid distance guards (Backward BFS)
+        valid_distance_nodes = set()
+        queue = [(target_node.id, 0)]
+        visited_back = {target_node.id}
+
+        while queue:
+            curr_id, dist = queue.pop(0)
+            if dist <= MAX_LINEAR_TOPOLOGICAL_DISTANCE:
+                valid_distance_nodes.add(curr_id)
+
+            if dist < MAX_LINEAR_TOPOLOGICAL_DISTANCE:
+                for neighbor in reverse_adj.get(curr_id, []):
+                    if neighbor not in visited_back:
+                        visited_back.add(neighbor)
+                        queue.append((neighbor, dist + 1))
 
         guards = set()
         for nid, node in flow.graph.nodes.items():
-            if isinstance(node, valid_guards) and node.authorizations:
+            # Check capability AND topological distance
+            if isinstance(node, valid_guards) and node.authorizations and nid in valid_distance_nodes:
                 for auth in node.authorizations:
-                    # Check capabilities
+                    is_wildcard = auth.granted_capabilities == "*" or "*" in auth.granted_capabilities
                     if auth.target_node_id == target_node.id and (
-                        auth.granted_capabilities == "*"
-                        or all(req in auth.granted_capabilities for req in required_caps)
+                        is_wildcard or all(req in auth.granted_capabilities for req in required_caps)
                     ):
                         guards.add(nid)
                         break
 
         if entry_id:
-            queue = [entry_id]
+            fwd_queue = [entry_id]
             visited = {entry_id}
         else:
-            queue = []
+            fwd_queue = []
             visited = set()
 
         # Handle case where target is the entry node
         if target_node.id == entry_id:
             return False
 
-        # 1. Check strict reachability (ignoring guards) to identify Islands
+        # 2. Check strict reachability (ignoring guards) to identify Islands
         if entry_id:
             full_queue = [entry_id]
             full_visited = {entry_id}
@@ -420,9 +446,9 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_cap
         if not reachable:
             return False  # Island -> Fail Closed
 
-        # 2. Check guarded reachability
-        while queue:
-            curr_id = queue.pop(0)
+        # 3. Check guarded reachability
+        while fwd_queue:
+            curr_id = fwd_queue.pop(0)
 
             if curr_id == target_node.id:
                 return False  # Reached target without passing a guard
@@ -436,7 +462,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow, required_cap
             for neighbor in adj.get(curr_id or "", []):
                 if neighbor not in visited:
                     visited.add(neighbor)
-                    queue.append(neighbor)
+                    fwd_queue.append(neighbor)
 
         # If reachable but not via unguarded path -> Guarded
         return True
