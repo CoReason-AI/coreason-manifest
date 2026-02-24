@@ -1,6 +1,7 @@
 # src/coreason_manifest/utils/validator.py
 
 import re
+from typing import Any
 
 from coreason_manifest.spec.core.flow import (
     AnyNode,
@@ -25,6 +26,7 @@ from coreason_manifest.spec.core.resilience import (
     ResilienceStrategy,
 )
 from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.utils.topology import get_strongly_connected_components
 
 
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
@@ -57,9 +59,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
         errors.extend(_validate_referential_integrity(nodes, None))
 
     for node in nodes:
-        errors.extend(_validate_supervision(node, valid_ids))
-
-    errors.extend(_validate_fallback_cycles(nodes))
+        errors.extend(_validate_supervision(node, valid_ids, flow.definitions))
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
@@ -81,36 +81,39 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
         errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
-        errors.extend(_validate_orphan_nodes(flow.graph))
+        errors.extend(_validate_orphan_nodes(flow))
 
-        # 4. Domain 4: Static Data-Flow Analysis
-        # Construct Symbol Table: Map variable name -> type (str)
-        symbol_table: dict[str, str] = {}
-        if flow.blackboard:
-            for name, var_def in flow.blackboard.variables.items():
-                # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
-                symbol_table[name] = var_def.type.lower()
-        if flow.interface:
-            inputs = flow.interface.inputs
-            in_schema = getattr(inputs, "json_schema", inputs)
-            if isinstance(in_schema, dict):
-                # Extract properties from input schema
-                # Heuristic: extract property type if simple, else "unknown"
-                props = in_schema.get("properties", {})
-                for name, schema in props.items():
-                    raw_type = schema.get("type", "unknown")
-                    if isinstance(raw_type, list):
-                        # Sort to ensure deterministic symbol table regardless of input order
-                        # Result: "array|string"
-                        types = sorted([x for x in raw_type if x != "null"])
-                        if types:
-                            symbol_table[name] = "|".join(types)
-                        else:
-                            symbol_table[name] = "union"
+    # Global Unified Cycle Detection
+    errors.extend(_validate_topology_cycles(flow))
+
+    # 4. Domain 4: Static Data-Flow Analysis
+    # Construct Symbol Table: Map variable name -> type (str)
+    symbol_table: dict[str, str] = {}
+    if hasattr(flow, "blackboard") and flow.blackboard:
+        for name, var_def in flow.blackboard.variables.items():
+            # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
+            symbol_table[name] = var_def.type.lower()
+    if hasattr(flow, "interface") and flow.interface:
+        inputs = flow.interface.inputs
+        in_schema = getattr(inputs, "json_schema", inputs)
+        if isinstance(in_schema, dict):
+            # Extract properties from input schema
+            # Heuristic: extract property type if simple, else "unknown"
+            props = in_schema.get("properties", {})
+            for name, schema in props.items():
+                raw_type = schema.get("type", "unknown")
+                if isinstance(raw_type, list):
+                    # Sort to ensure deterministic symbol table regardless of input order
+                    # Result: "array|string"
+                    types = sorted([x for x in raw_type if x != "null"])
+                    if types:
+                        symbol_table[name] = "|".join(types)
                     else:
-                        symbol_table[name] = str(raw_type)
+                        symbol_table[name] = "union"
+                else:
+                    symbol_table[name] = str(raw_type)
 
-            errors.extend(_validate_data_flow(nodes_list, symbol_table, flow.definitions))
+        errors.extend(_validate_data_flow(nodes, symbol_table, flow.definitions))
 
     return errors
 
@@ -311,25 +314,34 @@ def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[st
     return errors
 
 
-def _validate_orphan_nodes(graph: Graph) -> list[str]:
-    if not graph.nodes:
+def _validate_orphan_nodes(flow: GraphFlow) -> list[str]:
+    """
+    Validates that no reachable nodes are isolated from the rest of the graph.
+    Uses unified adjacency map to check connectivity via edges, switches, or fallbacks.
+    """
+    if not flow.graph.nodes:
         return []
 
-    # All nodes physically present in the dict
-    all_ids = set(graph.nodes.keys())
+    all_ids = set(flow.graph.nodes.keys())
+    entry_point = flow.graph.entry_point
 
-    # Architectural Note: Use explicit entry point
-    entry_point = graph.entry_point
+    # Use our SOTA unified map to find ALL targets (explicit edges + switches + fallbacks)
+    # Bypass deep validation to construct a temporary flow for unified mapping if needed,
+    # though here we are already inside a valid flow context or partial flow.
+    # Note: _build_unified_adjacency_map handles flow.graph access safely.
+    adj_set = _build_unified_adjacency_map(flow)
 
-    targeted_ids = {edge.to_node for edge in graph.edges}
+    targeted_ids = set()
+    for targets in adj_set.values():
+        targeted_ids.update(targets)
 
     orphans = all_ids - targeted_ids
 
-    # Remove entry point from orphans if present (it's expected to have no incoming edges)
+    # The entry point is expected to have no incoming edges
     if entry_point in orphans:
         orphans.remove(entry_point)
 
-    return [f"Orphan Node Warning: Node '{oid}' has no incoming edges." for oid in orphans]
+    return [f"Orphan Node Warning: Node '{oid}' has no incoming edges or implicit routes." for oid in orphans]
 
 
 def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefinitions | None) -> list[str]:
@@ -372,7 +384,7 @@ def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefin
     return errors
 
 
-def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
+def _validate_supervision(node: AnyNode, valid_ids: set[str], definitions: FlowDefinitions | None) -> list[str]:
     errors: list[str] = []
 
     # Check unified resilience field on any node type
@@ -380,22 +392,12 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     if not policy:
         return errors
 
-    # If policy is a string reference, validation happens in validate_referential_integrity.
-    if isinstance(policy, str):
+    resolved_policy = _resolve_resilience_policy(policy, definitions)
+    if not resolved_policy:
         return errors
 
     # Collect strategies
-    strategies: list[ResilienceStrategy] = []
-
-    # If it's a SupervisionPolicy (complex)
-    if hasattr(policy, "handlers"):
-        strategies.extend([h.strategy for h in policy.handlers])
-        if hasattr(policy, "default_strategy") and policy.default_strategy:
-            strategies.append(policy.default_strategy)
-    # If it's a simple RecoveryStrategy (ResilienceConfig which is a Union)
-    else:
-        # It's a single strategy
-        strategies.append(policy)
+    strategies = _extract_strategies(resolved_policy)
 
     for strategy in strategies:
         if isinstance(strategy, ReflexionStrategy) and node.type not in (
@@ -421,63 +423,124 @@ def _validate_supervision(node: AnyNode, valid_ids: set[str]) -> list[str]:
     return errors
 
 
-def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
-    errors: list[str] = []
-    # Build adjacency list for fallback references
-    adj: dict[str, list[str]] = {n.id: [] for n in nodes}
+def _resolve_resilience_policy(policy: Any, definitions: FlowDefinitions | None) -> Any:
+    """Resolves string reference policies from the definitions block."""
+    if isinstance(policy, str):
+        if policy.startswith("ref:") and definitions and definitions.supervision_templates:
+            tmpl_id = policy.removeprefix("ref:")
+            # Return the resolved template, or None if it's missing (missing refs are caught by referential_integrity)
+            return definitions.supervision_templates.get(tmpl_id)
+        return None
+    return policy
 
+
+def _extract_strategies(policy: Any) -> list[ResilienceStrategy]:
+    """
+    Helper to extract flat list of strategies from a unified resilience config.
+
+    Args:
+        policy: Can be ResilienceConfig (duck-typed with 'handlers'), a single Strategy,
+               or SupervisionPolicy. We use Any here to avoid circular dependencies with
+               complex Pydantic unions in the core spec.
+
+    Returns:
+        List of strategies extracted from the policy.
+    """
+    strategies: list[ResilienceStrategy] = []
+    if hasattr(policy, "handlers"):
+        strategies.extend([h.strategy for h in policy.handlers])
+        if hasattr(policy, "default_strategy") and policy.default_strategy:
+            strategies.append(policy.default_strategy)
+    else:
+        strategies.append(policy)
+    return strategies
+
+
+def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[str]]:
+    """
+    Constructs a unified adjacency map for cycle detection.
+    Includes sequential/graph edges, implicit SwitchNode routing, fallback routing, and global circuit breaker.
+    """
+    # 1. Initialize Map with strict type inference for node iteration
+    nodes: list[AnyNode] = flow.steps if isinstance(flow, LinearFlow) else list(flow.graph.nodes.values())
+    adj: dict[str, set[str]] = {node.id: set() for node in nodes}
+
+    # 2. Add Flow Structure Edges
+    if isinstance(flow, LinearFlow):
+        # Sequential edges: step i -> step i+1
+        for i in range(len(flow.steps) - 1):
+            curr_id = flow.steps[i].id
+            next_id = flow.steps[i + 1].id
+            if curr_id in adj and next_id in adj:
+                adj[curr_id].add(next_id)
+    elif isinstance(flow, GraphFlow):
+        # Graph edges
+        for edge in flow.graph.edges:
+            if edge.from_node in adj and edge.to_node in adj:
+                adj[edge.from_node].add(edge.to_node)
+
+    # 3. Add Global Governance Edges (Circuit Breaker)
+    global_fallback_id: str | None = None
+    if flow.governance and flow.governance.circuit_breaker and flow.governance.circuit_breaker.fallback_node_id:
+        global_fallback_id = flow.governance.circuit_breaker.fallback_node_id
+
+    # 4. Add Node-Level Implicit Edges
     for node in nodes:
-        if not node.resilience or isinstance(node.resilience, str):
-            continue
+        # Global fallback applies to ALL nodes EXCEPT the fallback node itself
+        if global_fallback_id and global_fallback_id in adj and node.id != global_fallback_id:
+            adj[node.id].add(global_fallback_id)
 
-        policy = node.resilience
-        strategies: list[ResilienceStrategy] = []
+        # SwitchNode routing
+        if isinstance(node, SwitchNode):
+            for target_id in node.cases.values():
+                if target_id in adj:
+                    adj[node.id].add(target_id)
+            if node.default in adj:
+                adj[node.id].add(node.default)
 
-        # Expand policy if complex
-        if hasattr(policy, "handlers"):
-            strategies.extend([h.strategy for h in policy.handlers])
-            if hasattr(policy, "default_strategy") and policy.default_strategy:
-                strategies.append(policy.default_strategy)
-        else:
-            strategies.append(policy)
+        # Local Fallback routing (Resolving templates to catch Trojan cycles)
+        if node.resilience:
+            resolved_policy = _resolve_resilience_policy(node.resilience, getattr(flow, "definitions", None))
+            if resolved_policy:
+                strategies = _extract_strategies(resolved_policy)
+                for strategy in strategies:
+                    if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
+                        adj[node.id].add(strategy.fallback_node_id)
 
-        for strategy in strategies:
-            if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
-                adj[node.id].append(strategy.fallback_node_id)
+    return adj
 
-    # Detect cycles using DFS
-    visited = set()
-    recursion_stack = set()
 
-    # Track cycle paths for reporting
-    path_stack: list[str] = []
+def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[str]:
+    """
+    Enforces Strict DAG Topology on the unified execution graph.
+    Uses Tarjan's algorithm to detect unified cycles.
+    """
+    errors: list[str] = []
 
-    def dfs(u: str) -> bool:
-        visited.add(u)
-        recursion_stack.add(u)
-        path_stack.append(u)
+    adj_set = _build_unified_adjacency_map(flow)
+    # SOTA FIX: Sort the sets into lists to guarantee 100% deterministic DFS traversal
+    adj_list = {k: sorted(adj_set[k]) for k in sorted(adj_set.keys())}
 
-        for v in adj[u]:
-            if v not in visited:
-                if dfs(v):
-                    return True
-            elif v in recursion_stack:
-                # Cycle detected
-                path_stack.append(v)
-                return True
+    sccs = get_strongly_connected_components(adj_list)
 
-        path_stack.pop()
-        recursion_stack.remove(u)
-        return False
+    for scc in sccs:
+        # A cycle exists if:
+        # 1. SCC has more than 1 node (A -> B -> A)
+        # 2. SCC has exactly 1 node AND it has a self-loop (A -> A)
+        is_cycle = False
+        if len(scc) > 1:
+            is_cycle = True
+        elif len(scc) == 1:
+            node_id = scc[0]
+            if node_id in adj_set and node_id in adj_set[node_id]:
+                is_cycle = True
 
-    for node_id in adj:
-        if node_id not in visited and dfs(node_id):
-            # Extract the cycle portion
-            start_index = path_stack.index(path_stack[-1])
-            cycle = path_stack[start_index:]
-            cycle_str = " -> ".join(cycle)
-            errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
-            # Clear stacks for next component (optional, but DFS handles components)
-            path_stack.clear()
+        if is_cycle:
+            cycle_nodes = ", ".join(sorted(scc))
+            msg = (
+                "Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: "
+                f"[{cycle_nodes}]. Execution graphs must be strict Directed Acyclic Graphs (DAGs)."
+            )
+            errors.append(msg)
 
     return errors

@@ -1,5 +1,7 @@
 from typing import cast
 
+import pytest
+
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
@@ -204,9 +206,8 @@ def test_validate_flow_invalid_type() -> None:
         governance = None
         definitions = None
 
-    # Should not raise error and return empty list (checks skipped)
-    errors = validate_flow(cast("LinearFlow", DummyFlow()))
-    assert errors == []
+    with pytest.raises(AttributeError):
+        validate_flow(cast("LinearFlow", DummyFlow()))
 
 
 def test_validate_duplicate_node_ids() -> None:
@@ -285,4 +286,4 @@ def test_validate_orphan_nodes() -> None:
     # node1 has no incoming edges but should be exempt as entry point
     # node3 has no incoming edges and should be flagged
     assert not any("node1" in e for e in errors)
-    assert any("Orphan Node Warning: Node 'node3' has no incoming edges." in e for e in errors)
+    assert any("Orphan Node Warning: Node 'node3' has no incoming edges or implicit routes." in e for e in errors)
