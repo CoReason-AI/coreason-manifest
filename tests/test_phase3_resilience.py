@@ -66,7 +66,8 @@ def test_builder_integration_circuit_breaker() -> None:
     # Then `fallback -> fallback` is added.
     # This is a self-loop.
     # So global circuit breaker ALWAYS creates a cycle if fallback is a valid node?
-    # This implies `_build_unified_adjacency_map` logic for global fallback is too aggressive or strict DAG is incompatible with global fallback to a graph node?
+    # This implies `_build_unified_adjacency_map` logic for global fallback is too aggressive
+    # or strict DAG is incompatible with global fallback to a graph node?
 
     # The requirement: "All execution graphs MUST be strictly acyclic."
     # "Denial of Wallet".
@@ -82,9 +83,11 @@ def test_builder_integration_circuit_breaker() -> None:
 
     # Solution: The fallback node itself should probably NOT be subject to the global circuit breaker?
     # Or we accept that risk?
-    # Agent instructions said: "Handle Global Governance Edges... add this global fallback ID to the adjacency list of EVERY node".
+    # Agent instructions said:
+    # "Handle Global Governance Edges... add this global fallback ID to the adjacency list of EVERY node".
     # This creates the cycle.
-    # If I must follow instructions, then `test_builder_integration_circuit_breaker` is testing a configuration that is now ILLEGAL.
+    # If I must follow instructions, then `test_builder_integration_circuit_breaker` is testing a configuration
+    # that is now ILLEGAL.
     # But the test just wants to verify builder sets the fields.
     # I should construct the builder but NOT build? Or catch the error?
     # The test asserts on `flow_g`. So it expects success.
@@ -95,10 +98,12 @@ def test_builder_integration_circuit_breaker() -> None:
     # If fallback must be in nodes, and all nodes get edge to fallback...
     # Then fallback gets edge to fallback.
     # ALWAYS a cycle.
-    # This means Global Circuit Breaker feature is effectively KILLED by this validator unless fallback is NOT in nodes (which fails Rule B).
+    # This means Global Circuit Breaker feature is effectively KILLED by this validator unless fallback is NOT in nodes
+    # (which fails Rule B).
 
     # Maybe the instructions meant "every node EXCEPT the fallback node"?
-    # "If present, add this global fallback ID to the adjacency list of **every** node in the flow, because any node can potentially trip to the global fallback."
+    # "If present, add this global fallback ID to the adjacency list of **every** node in the flow,
+    # because any node can potentially trip to the global fallback."
     # It doesn't say "except fallback".
     # But logically, if fallback trips, does it go to itself? Yes, if it's subject to the same policy.
     # Infinite loop.
@@ -106,7 +111,8 @@ def test_builder_integration_circuit_breaker() -> None:
     # So the test IS testing a vulnerable config.
 
     # I will update the test to assert that `gf.build()` raises ValueError (Cycle detected).
-    # And I will verify the builder state by inspecting `gf.governance` directly if possible, or accept that we can't build valid flow with global CB.
+    # And I will verify the builder state by inspecting `gf.governance` directly if possible,
+    # or accept that we can't build valid flow with global CB.
     # Actually, if I can't build, I can't verify the object properties.
     # But `gf` (builder) has the state.
 

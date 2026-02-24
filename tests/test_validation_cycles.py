@@ -1,10 +1,8 @@
-import pytest
-
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
-from coreason_manifest.spec.core.nodes import PlaceholderNode, SwitchNode, AgentNode
-from coreason_manifest.utils.validator import validate_flow
 from coreason_manifest.spec.core.flow import Graph, GraphFlow, LinearFlow, VariableDef
-from coreason_manifest.spec.core.resilience import FallbackStrategy, ResilienceConfig
+from coreason_manifest.spec.core.nodes import AgentNode, PlaceholderNode, SwitchNode
+from coreason_manifest.spec.core.resilience import FallbackStrategy
+from coreason_manifest.utils.validator import validate_flow
 
 
 def create_placeholder(node_id: str) -> PlaceholderNode:
@@ -150,7 +148,6 @@ def test_linear_flow_cycle() -> None:
     Cycle: A -> B -> C -> A
     """
     lf = NewLinearFlow("linear_cycle_test")
-    lf.metadata = builder_metadata = lf.metadata
 
     # Need variable for switch
     # LinearFlow builder doesn't have set_blackboard in my mock?
@@ -197,14 +194,7 @@ def test_hybrid_fallback_cycle() -> None:
 
     # Node B with fallback to A
     fallback = FallbackStrategy(fallback_node_id="A")
-    node_b = AgentNode(
-        id="B",
-        type="agent",
-        metadata={},
-        resilience=fallback,
-        profile="p",
-        tools=[]
-    )
+    node_b = AgentNode(id="B", type="agent", metadata={}, resilience=fallback, profile="p", tools=[])
 
     builder.add_node(node_a)
     builder.add_node(node_b)

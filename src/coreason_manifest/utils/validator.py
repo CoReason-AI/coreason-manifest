@@ -429,11 +429,7 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list
     Includes sequential/graph edges, implicit SwitchNode routing, fallback routing, and global circuit breaker.
     """
     # 1. Initialize Map
-    if isinstance(flow, LinearFlow):
-        nodes = flow.steps
-    else:
-        nodes = list(flow.graph.nodes.values())
-
+    nodes = flow.steps if isinstance(flow, LinearFlow) else list(flow.graph.nodes.values())
     adj: dict[str, list[str]] = {node.id: [] for node in nodes}
 
     # 2. Add Flow Structure Edges
@@ -452,11 +448,7 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list
 
     # 3. Add Global Governance Edges (Circuit Breaker)
     global_fallback_id = None
-    if (
-        flow.governance
-        and flow.governance.circuit_breaker
-        and flow.governance.circuit_breaker.fallback_node_id
-    ):
+    if flow.governance and flow.governance.circuit_breaker and flow.governance.circuit_breaker.fallback_node_id:
         global_fallback_id = flow.governance.circuit_breaker.fallback_node_id
 
     # 4. Add Node-Level Implicit Edges
@@ -484,7 +476,7 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, list
                 if hasattr(policy, "default_strategy") and policy.default_strategy:
                     strategies.append(policy.default_strategy)
             else:
-                strategies.append(policy)  # type: ignore
+                strategies.append(policy)
 
             for strategy in strategies:
                 if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
