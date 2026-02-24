@@ -4,7 +4,6 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-import pytest
 import yaml
 
 # Import the code to test

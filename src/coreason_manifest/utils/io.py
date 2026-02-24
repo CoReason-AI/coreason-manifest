@@ -211,10 +211,9 @@ class ManifestDumper(yaml.SafeDumper):
 
                 if key_str in self.PRIORITY_KEYS:
                     return (0, self.PRIORITY_KEYS.index(key_str), key_str)
-                elif key_str in self.DEPRIORITY_KEYS:
+                if key_str in self.DEPRIORITY_KEYS:
                     return (2, self.DEPRIORITY_KEYS.index(key_str), key_str)
-                else:
-                    return (1, key_str)
+                return (1, key_str)
 
             mapping_list.sort(key=sort_key)
         else:
