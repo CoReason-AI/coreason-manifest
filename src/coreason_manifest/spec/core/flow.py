@@ -97,11 +97,57 @@ class Edge(CoreasonModel):
         except SyntaxError as e:
             raise ValueError(f"Invalid Python syntax in condition: {e}") from e
 
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.Import, ast.ImportFrom, ast.Call, ast.Attribute)):
-                raise SecurityViolationError(
-                    f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'"
+        class SecurityVisitor(ast.NodeVisitor):
+            def generic_visit(self, node: ast.AST) -> None:
+                # Whitelist of allowed AST nodes
+                allowed = (
+                    ast.Expression,
+                    ast.BoolOp,
+                    ast.BinOp,
+                    ast.UnaryOp,
+                    ast.Compare,
+                    ast.Constant,
+                    ast.Name,
+                    ast.Load,
+                    ast.And,
+                    ast.Or,
+                    ast.Eq,
+                    ast.NotEq,
+                    ast.Lt,
+                    ast.LtE,
+                    ast.Gt,
+                    ast.GtE,
+                    ast.Is,
+                    ast.IsNot,
+                    ast.In,
+                    ast.NotIn,
+                    ast.Not,
+                    ast.Add,
+                    ast.Sub,
+                    ast.Mult,
+                    ast.Div,
+                    ast.FloorDiv,
+                    ast.Mod,
+                    ast.Pow,
+                    ast.USub,
+                    ast.UAdd,
                 )
+                if not isinstance(node, allowed):
+                    raise SecurityViolationError(
+                        f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'"
+                    )
+                super().generic_visit(node)
+
+            def visit_Name(self, node: ast.Name) -> None:
+                # Ensure Name usage is strictly Load context
+                if not isinstance(node.ctx, ast.Load):
+                    raise SecurityViolationError(
+                        f"Security Violation: Name context {type(node.ctx).__name__} forbidden in condition '{v}'"
+                    )
+                super().generic_visit(node)
+
+        visitor = SecurityVisitor()
+        visitor.visit(tree)
         return v
 
 
@@ -224,6 +270,24 @@ class GraphFlow(CoreasonModel):
     def validate_topology(self) -> "GraphFlow":
         node_ids = set(self.graph.nodes.keys())
 
+        # Validate resilience references
+        template_ids = set()
+        if self.definitions and self.definitions.supervision_templates:
+            if isinstance(self.definitions.supervision_templates, dict):
+                template_ids = set(self.definitions.supervision_templates.keys())
+
+        for node in self.graph.nodes.values():
+            if isinstance(node.resilience, str) and node.resilience not in template_ids:
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-RESILIENCE-MISSING",
+                        message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={"node_id": node.id, "template_id": node.resilience},
+                    )
+                )
+
         # Rule A: Entry Point
         if self.graph.entry_point and self.graph.entry_point not in node_ids:
             raise ManifestError(
@@ -323,6 +387,26 @@ class LinearFlow(CoreasonModel):
     @property
     def sequence(self) -> list[AnyNode]:
         return self.steps
+
+    @model_validator(mode="after")
+    def validate_resilience_references(self) -> "LinearFlow":
+        template_ids = set()
+        if self.definitions and self.definitions.supervision_templates:
+            if isinstance(self.definitions.supervision_templates, dict):
+                template_ids = set(self.definitions.supervision_templates.keys())
+
+        for node in self.steps:
+            if isinstance(node.resilience, str) and node.resilience not in template_ids:
+                raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-VAL-RESILIENCE-MISSING",
+                        message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                        severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.HALT,
+                        context={"node_id": node.id, "template_id": node.resilience},
+                    )
+                )
+        return self
 
     @model_validator(mode="after")
     def enforce_global_kill_switch(self) -> "LinearFlow":

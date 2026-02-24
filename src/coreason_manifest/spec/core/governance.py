@@ -5,6 +5,8 @@ from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
+from coreason_manifest.spec.interop.compliance import RemediationAction
+from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
 
 class Safety(CoreasonModel):
@@ -49,7 +51,15 @@ class ToolAccessPolicy(CoreasonModel):
         if isinstance(data, dict):
             # Functional purity: copy data
             data = data.copy()
-            if data.get("risk_level") in ("critical", RiskLevel.CRITICAL):
+
+            raw_risk = data.get("risk_level")
+            is_critical = False
+            if isinstance(raw_risk, RiskLevel) and raw_risk == RiskLevel.CRITICAL:
+                is_critical = True
+            elif isinstance(raw_risk, str) and raw_risk.lower() == "critical":
+                is_critical = True
+
+            if is_critical:
                 if data.get("require_auth") is False:
                     raise ValueError("Critical tools must require authentication.")
                 if data.get("require_auth") is None:
@@ -146,7 +156,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
         state_store: A mutable dictionary mapping node IDs to CircuitState objects.
 
     Raises:
-        CircuitOpenError: If the circuit is open and timeout has not expired.
+        ManifestError: If the circuit is open and timeout has not expired (ExecutionFault).
     """
     # Get or create state
     state = state_store.get(node_id)
@@ -162,7 +172,20 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
             state_store[node_id] = new_state
             # We don't reset failure_count here; usually we wait for a success to close and reset.
         else:
-            raise CircuitOpenError(f"Circuit is OPEN for node {node_id}")
+            # Raise strict structured error instead of raw exception
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-EXEC-CIRCUIT-OPEN",
+                    message=f"Circuit is OPEN for node {node_id}. Execution halted.",
+                    severity=FaultSeverity.CRITICAL,
+                        recovery_action=RecoveryAction.RETRY,
+                    context={
+                        "node_id": node_id,
+                        "failure_count": state.failure_count,
+                        "reset_timeout": policy.reset_timeout_seconds,
+                    },
+                )
+            )
 
 
 def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:

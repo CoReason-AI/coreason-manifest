@@ -145,7 +145,11 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     raise TypeError(f"Could not reconstruct payload from {type(node)}. Must be dict or Pydantic model.")
 
 
-def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) -> bool:
+def verify_merkle_proof(
+    trace: list[Any],
+    trusted_root_hash: str | None = None,
+    trusted_parent_hashes: set[str] | None = None,
+) -> bool:
     """
     Verifies the cryptographic integrity of a DAG trace.
     Mathematically reconstructs the DAG topology to prove absence of parallel hallucinations.
@@ -240,6 +244,8 @@ def verify_merkle_proof(trace: list[Any], trusted_root_hash: str | None = None) 
             # Child Node: Every declared parent must be present in the VERIFIED pool or be the trusted root.
             for prev_hash in expected_parents:
                 if trusted_root_hash and prev_hash == trusted_root_hash:
+                    continue
+                if trusted_parent_hashes and prev_hash in trusted_parent_hashes:
                     continue
                 if prev_hash not in verified_hashes:
                     # Topology Violation: Node claims a parent that hasn't been verified.
