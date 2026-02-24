@@ -520,9 +520,11 @@ def test_flow_cycle_detection_unreachable() -> None:
     from coreason_manifest.spec.core.flow import (
         Edge,
     )
+    from coreason_manifest.spec.core.nodes import AgentNode
 
-    n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
-    n2 = PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[])
+    # Use AgentNode instead of PlaceholderNode because Published flows forbid PlaceholderNode
+    n1 = AgentNode(id="n1", type="agent", metadata={}, profile="p", tools=[])
+    n2 = AgentNode(id="n2", type="agent", metadata={}, profile="p", tools=[])
 
     # Cycle: n1->n2->n1
     graph = Graph(

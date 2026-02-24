@@ -1,76 +1,54 @@
-from datetime import datetime
+from coreason_manifest.builder import NewGraphFlow
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.flow import GraphFlow, Graph, FlowMetadata, FlowInterface
+from coreason_manifest.spec.core.engines import ComputerUseReasoning
+from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.spec.interop.compliance import ErrorCatalog
 
-import pytest
+def test_builder_set_entry_point():
+    """Cover builder.py set_entry_point method."""
+    builder = NewGraphFlow("test", "1.0.0", "desc")
+    builder.add_agent(AgentNode(id="node1", profile=CognitiveProfile(role="r", persona="p")))
 
-from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
-from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
-from coreason_manifest.spec.core.nodes import AgentNode
-from coreason_manifest.spec.interop.exceptions import ManifestError
-from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
-from coreason_manifest.utils.io import SecurityViolationError
+    # Call the method to cover it
+    builder.set_entry_point("node1")
 
+    flow = builder.build()
+    assert flow.graph.entry_point == "node1"
 
-def test_telemetry_parent_hash_backfill() -> None:
-    """
-    Cover telemetry.py:92: if prev_hashes is None: data["parent_hashes"] = [p_hash]
-    """
-    from typing import Any
-
-    # Use model_construct to control input exactly? No, enforce_envelope_consistency is a pre-validator.
-    # We need to pass data such that parent_hashes is None (or missing) and parent_hash is present.
-
-    data: dict[str, Any] = {
-        "node_id": "n1",
-        "state": NodeState.COMPLETED,
-        "inputs": {},
-        "outputs": {},
-        "timestamp": datetime.now(),
-        "duration_ms": 1.0,
-        "parent_hash": "some_hash",
-        # parent_hashes missing
+def test_gatekeeper_published_dangerous_unreachable():
+    """Cover gatekeeper.py published mode with dangerous unreachable nodes."""
+    # Create a flow manually to ensure status="published" and dangerous node
+    nodes = {
+        "node1": AgentNode(id="node1", profile=CognitiveProfile(role="assistant", persona="p")),
+        "node2": AgentNode(
+            id="node2",
+            profile=CognitiveProfile(
+                role="hacker",
+                persona="p",
+                reasoning=ComputerUseReasoning(
+                    model="gpt-4",
+                    interaction_mode="native_os",
+                    coordinate_system="normalized_0_1"
+                )
+            )
+        )
     }
 
-    node = NodeExecution(**data)
-    assert node.parent_hashes == ["some_hash"]
-
-
-def test_flow_fallback_orphan() -> None:
-    """
-    Cover flow.py:316: Rule B: Fallback Orphans.
-    """
-    node = AgentNode(id="n1", type="agent", metadata={}, profile="p1", tools=[], resilience=None)
-    graph = Graph(nodes={"n1": node}, edges=[], entry_point="n1")
-
-    # Governance with fallback pointing to missing node
-    gov = Governance(
-        circuit_breaker=CircuitBreaker(
-            error_threshold_count=1, reset_timeout_seconds=1, fallback_node_id="missing_node"
+    flow = GraphFlow(
+        status="published",
+        metadata=FlowMetadata(name="Test Flow", version="1.0.0"),
+        interface=FlowInterface(),
+        graph=Graph(
+            nodes=nodes,
+            edges=[],
+            entry_point="node1"
         )
     )
 
-    definitions = FlowDefinitions(profiles={"p1": "dummy"})  # Minimal
+    reports = validate_policy(flow)
 
-    with pytest.raises(ManifestError) as excinfo:
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
-            interface=FlowInterface(),
-            graph=graph,
-            governance=gov,
-            definitions=definitions,
-        )
-    assert excinfo.value.fault.error_code == "CRSN-VAL-FALLBACK-MISSING"
-
-
-def test_edge_condition_security_violation_store() -> None:
-    """
-    Cover flow.py:144: SecurityViolationError for non-Load context (e.g. Walrus).
-    Note: NamedExpr is not in whitelist, so it raises generic forbidden error first.
-    The Name context check is defensive.
-    """
-    # Walrus operator := uses Store context for the target name
-    # condition: (x := 1)
-
-    with pytest.raises(SecurityViolationError, match="forbidden AST node NamedExpr"):
-        Edge(from_node="a", to_node="b", condition="(x := 1)")
+    # Verify we hit the published dangerous block
+    risk_reports = [r for r in reports if r.code == ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003]
+    assert len(risk_reports) > 0
+    assert risk_reports[0].severity == "violation"

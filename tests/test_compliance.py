@@ -48,6 +48,9 @@ def test_topology_utility_island_unsafe(
 
     # Graph: main (entry), island1<->island2 (cycle, no entry)
     flow = mock_flow_factory([node_main, node_island1, node_island2], edges)
+    # Enforce published mode to ensure strict checks (and avoid draft mode warnings)
+    # The new default is draft, but compliance tests usually expect strict/production behavior
+    flow = flow.model_copy(update={"status": "published"})
 
     reports = validate_policy(flow)
 
