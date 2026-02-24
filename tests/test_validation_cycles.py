@@ -48,9 +48,7 @@ def build_flow_without_validation(builder: NewGraphFlow) -> GraphFlow:
 def test_valid_dag_passes() -> None:
     """Test that a valid A -> B -> C Directed Acyclic Graph (DAG) passes validation."""
     builder = NewGraphFlow("test_dag", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
@@ -68,9 +66,7 @@ def test_valid_dag_passes() -> None:
 def test_simple_execution_cycle() -> None:
     """Test that a simple execution loop (A -> B -> A) is caught."""
     builder = NewGraphFlow("test_cycle", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
@@ -92,9 +88,7 @@ def test_simple_execution_cycle() -> None:
 def test_self_referencing_node() -> None:
     """Test that a direct self-loop (A -> A) is caught."""
     builder = NewGraphFlow("test_self_loop", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
 
@@ -112,9 +106,7 @@ def test_self_referencing_node() -> None:
 def test_isolated_cycle() -> None:
     """Test that an isolated cycle (C -> D -> C) unreachable from entry point is still caught."""
     builder = NewGraphFlow("test_isolated_cycle", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
@@ -143,14 +135,10 @@ def test_switch_node_cycle() -> None:
     builder = NewGraphFlow("test_switch_cycle", "1.0.0", "desc")
     # Need a variable for SwitchNode
     builder.set_blackboard(variables={"v": VariableDef(type="string")})
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     # A is SwitchNode: if v="x" -> B
-    builder.add_node(SwitchNode(
-        id="A", metadata={}, type="switch", variable="v", cases={"x": "B"}, default="B"
-    ))
+    builder.add_node(SwitchNode(id="A", metadata={}, type="switch", variable="v", cases={"x": "B"}, default="B"))
 
     # B is Placeholder: B -> A
     builder.add_node(create_placeholder("B"))
@@ -203,17 +191,13 @@ def test_hybrid_fallback_cycle() -> None:
     Cycle: A -> B -> (fail) -> A
     """
     builder = NewGraphFlow("hybrid_fallback", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     node_a = create_placeholder("A")
 
     # Node B with fallback to A
     fallback = FallbackStrategy(fallback_node_id="A")
-    node_b = AgentNode(
-        id="B", type="agent", metadata={}, resilience=fallback, profile="p", tools=[]
-    )
+    node_b = AgentNode(id="B", type="agent", metadata={}, resilience=fallback, profile="p", tools=[])
 
     builder.add_node(node_a)
     builder.add_node(node_b)
@@ -238,9 +222,7 @@ def test_global_circuit_breaker_cycle() -> None:
     Cycle: A -> B -> (global fail) -> A
     """
     builder = NewGraphFlow("global_cb_cycle", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
@@ -266,9 +248,7 @@ def test_valid_global_circuit_breaker_passes() -> None:
     A -> C, B -> C. No cycle.
     """
     builder = NewGraphFlow("valid_global_cb", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
