@@ -18,6 +18,9 @@ class CollectionModel(CoreasonModel):
 
 def test_alias_integrity() -> None:
     """Test that aliases are respected and not funneled into annotations."""
+    import pytest
+    from pydantic import ValidationError
+
     data = {"timeout-sec": 60, "name": "test"}
     model = AliasModel.model_validate(data)
     assert model.timeout_sec == 60
@@ -26,11 +29,10 @@ def test_alias_integrity() -> None:
     assert "timeout-sec" not in model.annotations
     assert "timeout_sec" not in model.annotations
 
-    # Test funneling of actual extra fields
+    # Test strict validation of actual extra fields
     data_extra = {"timeout-sec": 60, "name": "test", "extra_field": "val"}
-    model_extra = AliasModel.model_validate(data_extra)
-    assert model_extra.timeout_sec == 60
-    assert model_extra.annotations.get("extra_field") == "val"
+    with pytest.raises(ValidationError):
+        AliasModel.model_validate(data_extra)
 
 
 class CanonicalModel(CoreasonModel):
