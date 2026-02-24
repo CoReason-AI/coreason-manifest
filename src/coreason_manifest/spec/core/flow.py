@@ -247,7 +247,12 @@ class GraphFlow(CoreasonModel):
 
         variable_names = set(self.blackboard.variables.keys())
 
-        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
+        # Compatibility: graph.nodes might be a list if constructed via model_construct (bypassing validation)
+        nodes = self.graph.nodes
+        if isinstance(nodes, dict):
+            nodes_iter = nodes.values()
+        else:
+            nodes_iter = nodes
 
         for node in nodes_iter:
             if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
