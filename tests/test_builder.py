@@ -3,19 +3,22 @@ import pytest
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
-from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0.0", description="Desc")
-    # Use AgentNode instead of PlaceholderNode/InspectorNode to pass published validation
-    # LinearFlow lacks blackboard, so InspectorNode validation fails on missing variables.
-    builder.define_profile("p1", "role", "persona")
-    builder.add_agent_ref("step1", "p1")
-    builder.add_agent_ref("step2", "p1")
+    builder.add_step(PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.add_step(PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[]))
 
+    tp = ToolPack(
+        kind="ToolPack",
+        namespace="test",
+        tools=[ToolCapability(name="t1")],
+        dependencies=[],
+        env_vars=[],
+    )
     tp = ToolPack(
         kind="ToolPack",
         namespace="test",
@@ -41,9 +44,8 @@ def test_linear_builder() -> None:
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0.0", description="Desc")
-    # Use InspectorNode via add_inspector
-    builder.add_inspector("n1", "var1", "crit1", "out1")
-    builder.add_inspector("n2", "var2", "crit2", "out2")
+    builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[]))
     builder.connect("n1", "n2", condition="ok")
 
     tp = ToolPack(
@@ -63,15 +65,7 @@ def test_graph_builder() -> None:
         inputs={"type": "object", "properties": {"in": {"type": "string"}}},
         outputs={"type": "object", "properties": {"out": {"type": "integer"}}},
     )
-    builder.set_blackboard(
-        variables={
-            "var1": VariableDef(type="string", description="test var"),
-            "out1": VariableDef(type="string"),
-            "var2": VariableDef(type="string"),
-            "out2": VariableDef(type="string"),
-        },
-        persistence=True,
-    )
+    builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
 
     flow = builder.build()
 
@@ -109,9 +103,9 @@ def test_graph_builder_invalid() -> None:
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
 
-    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING"):
+    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING") as exc:
         builder.build()
-    assert "CRSN-VAL-LIFECYCLE-STRICTNESS" in str(exc.value)
+    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(exc.value)
 
 
 def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
@@ -261,26 +255,22 @@ def test_builder_validation_failure() -> None:
     )
     builder.add_step(node)
 
-    # Build should raise ManifestError due to strict validation logic in flow.py
-    with pytest.raises(ManifestError) as exc:
+    # Build should raise ValueError because of validate_flow finding missing fallback node
+    with pytest.raises(ValueError, match="Validation failed") as exc:
         builder.build()
 
-    errors = exc.value.fault.context["validation_errors"]
-    # We check if context contains the specific error about missing node
-    assert any("resilience fallback_node_id 'missing_node' does not exist" in e for e in errors)
+    assert "missing ID 'missing_node'" in str(exc.value)
 
 
 def test_builder_graph_entry_point_coverage() -> None:
     """Cover NewGraphFlow.set_entry_point (lines 297-298)."""
     from coreason_manifest.builder import NewGraphFlow
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     builder = NewGraphFlow("Graph Flow")
 
-    # Use InspectorNode instead of PlaceholderNode
-    builder.add_inspector("start", "var", "crit", "out")
-
-    # Add variables to blackboard
-    builder.set_blackboard({"var": VariableDef(type="string"), "out": VariableDef(type="string")})
+    node = PlaceholderNode(id="start", metadata={}, required_capabilities=[])
+    builder.add_node(node)
 
     # Use set_entry_point
     builder.set_entry_point("start")
@@ -292,15 +282,13 @@ def test_builder_graph_entry_point_coverage() -> None:
 def test_builder_graph_auto_entry_point() -> None:
     """Cover NewGraphFlow.build() auto entry point (line 368)."""
     from coreason_manifest.builder import NewGraphFlow
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
 
     builder = NewGraphFlow("Auto Entry")
 
     # Add one node
-    # Use InspectorNode instead of PlaceholderNode
-    builder.add_inspector("auto_start", "var", "crit", "out")
-
-    # Add variables to blackboard
-    builder.set_blackboard({"var": VariableDef(type="string"), "out": VariableDef(type="string")})
+    node = PlaceholderNode(id="auto_start", metadata={}, required_capabilities=[])
+    builder.add_node(node)
 
     # Do NOT call set_entry_point
 
@@ -316,10 +304,9 @@ def test_builder_graph_missing_entry_point() -> None:
     builder = NewGraphFlow("Empty Graph")
     # No nodes added
 
-    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING"):
+    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING") as exc:
         builder.build()
-
-    assert "CRSN-VAL-LIFECYCLE-STRICTNESS" in str(exc.value)
+    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(exc.value)
 
 
 def test_builder_graph_validation_failure() -> None:
@@ -344,8 +331,7 @@ def test_builder_graph_validation_failure() -> None:
     builder.add_node(node)
     builder.set_entry_point("a1")
 
-    with pytest.raises(ManifestError) as exc:
+    with pytest.raises(ValueError, match="Validation failed") as exc:
         builder.build()
 
-    errors = exc.value.fault.context["validation_errors"]
-    assert any("resilience fallback_node_id 'missing_node' does not exist" in e for e in errors)
+    assert "missing ID 'missing_node'" in str(exc.value)

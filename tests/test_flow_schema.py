@@ -18,12 +18,10 @@ def test_builder_interface_construction() -> None:
     output_s = {"type": "object", "properties": {"answer": {"type": "string"}}}
     builder.set_interface(inputs=input_s, outputs=output_s)
 
-    # Use InspectorNode to pass published flow validation
-    builder.add_inspector("start", "var", "crit", "out")
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
 
-    from coreason_manifest.spec.core.flow import VariableDef
-
-    builder.set_blackboard({"var": VariableDef(type="string"), "out": VariableDef(type="string")})
+    node = PlaceholderNode(id="start", metadata={}, type="placeholder", required_capabilities=[])
+    builder.add_node(node)
 
     flow = builder.build()
 

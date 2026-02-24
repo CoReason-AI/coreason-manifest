@@ -335,9 +335,7 @@ class GraphFlow(CoreasonModel):
 
         variable_names = set(self.blackboard.variables.keys())
 
-        # Compatibility: graph.nodes might be a list if constructed via model_construct (bypassing validation)
-        nodes = self.graph.nodes
-        nodes_iter = nodes.values() if isinstance(nodes, dict) else nodes
+        nodes_iter = self.graph.nodes.values() if isinstance(self.graph.nodes, dict) else self.graph.nodes
 
         for node in nodes_iter:
             if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
@@ -376,112 +374,6 @@ class GraphFlow(CoreasonModel):
             self.definitions,
             list(self.graph.nodes.values()),
         )
-        return self
-
-    @model_validator(mode="after")
-    def enforce_published_strictness(self) -> "GraphFlow":
-        if self.status != "published":
-            return self
-
-        fault_messages: list[str] = []
-        remediations: list[dict[str, Any]] = []
-
-        # 1. Placeholder Rejection & SwitchNode Topology Leak & Node Resilience
-        invalid_placeholder_ids = []
-        existing_ids = set(self.graph.nodes.keys())
-
-        # self.graph.nodes is guaranteed to be a dict by pydantic validation of Graph
-        for node_id, node in self.graph.nodes.items():
-            if isinstance(node, PlaceholderNode):
-                invalid_placeholder_ids.append(node_id)
-                remediations.append(
-                    RemediationAction(
-                        type="update_field",
-                        target_node_id=node_id,
-                        description=f"Replace PlaceholderNode '{node_id}' with a concrete execution node.",
-                        patch_data=[],
-                    ).model_dump()
-                )
-
-            # SwitchNode Hidden Topology Leak
-            if isinstance(node, SwitchNode):
-                fault_messages.extend(
-                    f"SwitchNode '{node.id}' case routes to missing node '{target_id}'."
-                    for target_id in node.cases.values()
-                    if target_id not in existing_ids
-                )
-
-                if node.default not in existing_ids:
-                    fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
-
-            # Check Node-Level Fallback Routing
-            resilience = getattr(node, "resilience", None)
-            if resilience and not isinstance(resilience, str):
-                fallback_id = getattr(resilience, "fallback_node_id", None)
-                if fallback_id and fallback_id not in existing_ids:
-                    fault_messages.append(
-                        f"Node '{node.id}' resilience fallback_node_id '{fallback_id}' does not exist."
-                    )
-
-        if invalid_placeholder_ids:
-            fault_messages.append(f"Flow contains PlaceholderNodes: {sorted(invalid_placeholder_ids)}")
-
-        # 2. Strict Edge Connectivity
-        missing_nodes = set()
-        for edge in self.graph.edges:
-            if edge.from_node not in existing_ids:
-                missing_nodes.add(edge.from_node)
-            if edge.to_node not in existing_ids:
-                missing_nodes.add(edge.to_node)
-
-        if missing_nodes:
-            fault_messages.append(f"Edges reference missing nodes: {sorted(missing_nodes)}")
-
-        # 3. Graph Topology Completeness (Entry Point)
-        if not self.graph.entry_point:
-            fault_messages.append("Missing or invalid entry_point.")
-            remediations.append(
-                RemediationAction(
-                    type="update_field",
-                    description="Set entry_point to a valid node ID.",
-                    patch_data=[
-                        {
-                            "op": "add",
-                            "path": "/graph/entry_point",
-                            "value": sorted(existing_ids)[0] if existing_ids else "",
-                        }
-                    ],
-                ).model_dump()
-            )
-
-        elif self.graph.entry_point not in existing_ids:
-            fault_messages.append(f"Entry point '{self.graph.entry_point}' does not exist in graph nodes.")
-            remediations.append(
-                RemediationAction(
-                    type="update_field",
-                    description=f"Update entry_point to one of {sorted(existing_ids)}.",
-                    patch_data=[],
-                ).model_dump()
-            )
-
-        # 4. Fallback Routing Validation
-        if self.governance and self.governance.circuit_breaker and self.governance.circuit_breaker.fallback_node_id:
-            fallback_id = self.governance.circuit_breaker.fallback_node_id
-            if fallback_id not in existing_ids:
-                fault_messages.append(f"Governance fallback_node_id '{fallback_id}' does not exist.")
-
-        # Final Error Accumulation
-        if fault_messages:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-LIFECYCLE-STRICTNESS",
-                    message="Published flow failed strictness validation. See context for details.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={"validation_errors": fault_messages, "remediations": remediations},
-                )
-            )
-
         return self
 
 
@@ -538,73 +430,6 @@ class LinearFlow(CoreasonModel):
             self.definitions,
             self.steps,
         )
-        return self
-
-    @model_validator(mode="after")
-    def enforce_published_strictness(self) -> "LinearFlow":
-        if self.status != "published":
-            return self
-
-        fault_messages: list[str] = []
-        remediations: list[dict[str, Any]] = []
-
-        # 1. Placeholder Rejection & SwitchNode Topology Leak & Node Resilience
-        invalid_placeholder_ids = []
-        existing_ids = {node.id for node in self.steps}
-
-        for node in self.steps:
-            if isinstance(node, PlaceholderNode):
-                invalid_placeholder_ids.append(node.id)
-                remediations.append(
-                    RemediationAction(
-                        type="update_field",
-                        target_node_id=node.id,
-                        description=f"Replace PlaceholderNode '{node.id}' with a concrete execution node.",
-                        patch_data=[],
-                    ).model_dump()
-                )
-
-            # SwitchNode Hidden Topology Leak
-            if isinstance(node, SwitchNode):
-                fault_messages.extend(
-                    f"SwitchNode '{node.id}' case routes to missing node '{target_id}'."
-                    for target_id in node.cases.values()
-                    if target_id not in existing_ids
-                )
-
-                if node.default not in existing_ids:
-                    fault_messages.append(f"SwitchNode '{node.id}' default routes to missing node '{node.default}'.")
-
-            # Check Node-Level Fallback Routing
-            resilience = getattr(node, "resilience", None)
-            if resilience and not isinstance(resilience, str):
-                fallback_id = getattr(resilience, "fallback_node_id", None)
-                if fallback_id and fallback_id not in existing_ids:
-                    fault_messages.append(
-                        f"Node '{node.id}' resilience fallback_node_id '{fallback_id}' does not exist."
-                    )
-
-        if invalid_placeholder_ids:
-            fault_messages.append(f"Flow contains PlaceholderNodes: {sorted(invalid_placeholder_ids)}")
-
-        # 2. Fallback Routing Validation
-        if self.governance and self.governance.circuit_breaker and self.governance.circuit_breaker.fallback_node_id:
-            fallback_id = self.governance.circuit_breaker.fallback_node_id
-            if fallback_id not in existing_ids:
-                fault_messages.append(f"Governance fallback_node_id '{fallback_id}' does not exist.")
-
-        # Final Error Accumulation
-        if fault_messages:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-LIFECYCLE-STRICTNESS",
-                    message="Published flow failed strictness validation. See context for details.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={"validation_errors": fault_messages, "remediations": remediations},
-                )
-            )
-
         return self
 
 
