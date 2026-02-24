@@ -42,6 +42,7 @@ def test_flow_backwards_compatibility() -> None:
     # Edge: source/target -> from_node/to_node
     # Removed backward compatibility: source/target now raise ValidationError
     from pydantic import ValidationError
+
     with pytest.raises(ValidationError):
         Edge(source="a", target="b")  # type: ignore[call-arg]
 

@@ -225,6 +225,7 @@ def test_validate_duplicate_node_ids() -> None:
 def test_validate_graph_flow_empty() -> None:
     """Test validation for empty graph."""
     import pytest
+
     from coreason_manifest.spec.interop.exceptions import ManifestError
 
     # Graph allows empty nodes if structurally sound (no cycles possible)
