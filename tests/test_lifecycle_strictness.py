@@ -179,29 +179,21 @@ def test_validator_dangling_edge_draft() -> None:
     assert any("Target 'missing'" in e for e in errors)
     assert any("Source 'missing_source'" in e for e in errors)
 
+
 def test_validator_governance_fallback() -> None:
     """
     Test validator.py governance fallback logic.
     Ensures validator.py line 240 is covered.
     """
     node = AgentNode(id="start", type="agent", profile="p1", tools=[])
-    graph = Graph(
-        nodes={"start": node},
-        edges=[],
-        entry_point="start"
-    )
+    graph = Graph(nodes={"start": node}, edges=[], entry_point="start")
     gov = Governance(
         circuit_breaker=CircuitBreaker(
-            fallback_node_id="missing_node",
-            error_threshold_count=3,
-            reset_timeout_seconds=10
+            fallback_node_id="missing_node", error_threshold_count=3, reset_timeout_seconds=10
         )
     )
     flow = GraphFlow(
-        metadata=FlowMetadata(name="t", version="1"),
-        interface=FlowInterface(),
-        graph=graph,
-        governance=gov
+        metadata=FlowMetadata(name="t", version="1"), interface=FlowInterface(), graph=graph, governance=gov
     )
     # validate_flow calls _validate_governance
     errors = validate_flow(flow)
@@ -219,15 +211,12 @@ def test_graph_flow_strictness_dangling_edge_source() -> None:
         nodes={"start": node},
         # "missing" is not in nodes
         edges=[Edge(from_node="missing", to_node="start")],
-        entry_point="start"
+        entry_point="start",
     )
 
     with pytest.raises(ManifestError) as excinfo:
         GraphFlow(
-            metadata=FlowMetadata(name="t", version="1"),
-            interface=FlowInterface(),
-            graph=graph,
-            status="published"
+            metadata=FlowMetadata(name="t", version="1"), interface=FlowInterface(), graph=graph, status="published"
         )
 
     assert "CRSN-VAL-LIFECYCLE-DANGLING-EDGE" in str(excinfo.value)
