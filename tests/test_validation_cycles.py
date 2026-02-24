@@ -8,13 +8,11 @@ from coreason_manifest.utils.validator import validate_flow
 def create_placeholder(node_id: str) -> PlaceholderNode:
     return PlaceholderNode(id=node_id, metadata={}, type="placeholder", required_capabilities=[])
 
+
 def test_valid_dag_passes() -> None:
     """A -> B -> C should pass validation."""
     builder = NewGraphFlow("test_dag", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}},
-        outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
@@ -28,13 +26,11 @@ def test_valid_dag_passes() -> None:
     errors = validate_flow(flow)
     assert not errors
 
+
 def test_simple_execution_cycle() -> None:
     """A -> B -> A should fail."""
     builder = NewGraphFlow("test_cycle", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}},
-        outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
@@ -50,13 +46,11 @@ def test_simple_execution_cycle() -> None:
     assert "A" in error_msg
     assert "B" in error_msg
 
+
 def test_self_referencing_node() -> None:
     """A -> A should fail."""
     builder = NewGraphFlow("test_self_loop", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}},
-        outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
 
@@ -69,13 +63,11 @@ def test_self_referencing_node() -> None:
     error_msg = str(excinfo.value)
     assert "A" in error_msg
 
+
 def test_isolated_cycle() -> None:
     """A -> B (valid), C -> D -> C (isolated cycle) should fail."""
     builder = NewGraphFlow("test_isolated_cycle", "1.0.0", "desc")
-    builder.set_interface(
-        inputs={"type": "object", "properties": {}},
-        outputs={"type": "object", "properties": {}}
-    )
+    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     builder.add_node(create_placeholder("A"))
     builder.add_node(create_placeholder("B"))
