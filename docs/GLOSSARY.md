@@ -16,7 +16,7 @@ The composition strategy of defining agent cognitive architectures inline (`cons
 The shared state dictionary (`StateDefinition`) accessible to all nodes in a Graph Recipe. It serves as the "working memory" where inputs are mapped and outputs are merged. See [Graph Recipes](graph_recipes.md).
 
 ### Blueprint Philosophy, The
-"If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run." The core philosophy of `coreason-manifest`, ensuring that the manifest is the immutable gatekeeper for the Agent Development Lifecycle. See [Vignette](VIGNETTE.md).
+"If it isn't in the manifest, it doesn't exist. If it violates the manifest, it doesn't run." The core philosophy of `coreason-manifest`, ensuring that the manifest is the immutable gatekeeper for the Agent Development Lifecycle. See [Home](index.md).
 
 ## C
 
@@ -71,7 +71,7 @@ The component responsible for interpreting the `Coreason Manifest` and executing
 A placeholder used in `DRAFT` recipes to describe *what* an agent should do without selecting a specific tool or model yet. It supports rich metadata for AI Architects.
 
 ### Shared Kernel
-A passive, pure data library that serves as the definitive source of truth for schemas and contracts within the Coreason ecosystem. It strictly separates `spec` (DTOs) from `utils` (logic) and contains no active execution logic, server capabilities, or side effects upon import. See [Shared Kernel Boundaries](architecture/ADR-001-shared-kernel-boundaries.md).
+A passive, pure data library that serves as the definitive source of truth for schemas and contracts within the Coreason ecosystem. It strictly separates `spec` (DTOs) from `utils` (logic) and contains no active execution logic, server capabilities, or side effects upon import. See [Core Philosophy](architecture/core_philosophy.md).
 
 ### Stream Reference
 A mechanism allowing agents to emit multiple named, concurrent streams (e.g., `stream_id="thinking"` vs `stream_id="default"`) during execution.

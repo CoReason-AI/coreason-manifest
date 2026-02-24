@@ -25,17 +25,21 @@ nav:
   - Architecture:
       - Core Philosophy: architecture/core_philosophy.md
       - Topology & State: architecture/topology_and_state.md
-  - Getting Started:
-      - Quick Start: usage.md
-      - CLI Reference: cli.md
-  - Core Concepts:
-      - Graph Orchestration: graph_recipes.md
-      - Reasoning Patterns: episteme_reasoning.md
-  - Developer Guides:
-      - Building Agents: builder_sdk.md
-      - Flow Governance: flow_governance.md
-  - API Reference:
-      - Agents & Tools: reference/agents.md
-      - Orchestration: reference/orchestration.md
-  - Internal Architecture:
-      - Compliance & Integrity: veritas_integrity.md
+  # PHASE 2-6 TARGET STRUCTURE (Commented out until written)
+  # - Core Primitives:
+  #     - Flows: core/flows.md
+  #     - Nodes: core/nodes.md
+  # - Cognitive Engines:
+  #     - Profiles & Fast Paths: core/cognitive_profiles.md
+  #     - Reasoning Engines: core/engines.md
+  #     - Tool Packs: core/tools.md
+  # - Resilience & Governance:
+  #     - Supervision & Error Handling: core/resilience.md
+  #     - Gatekeeper & Risk Policies: core/governance.md
+  # - Interoperability:
+  #     - Protocol & Multiplexing: interop/protocol.md
+  #     - Telemetry & Merkle Trees: interop/telemetry.md
+  #     - Gatekeeper Compliance: interop/compliance.md
+  # - DX Tooling:
+  #     - Builder SDK: tools/builder.md
+  #     - CLI: tools/cli.md

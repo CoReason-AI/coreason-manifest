@@ -10,9 +10,8 @@ Follow this path to master the architecture.
 
 Before writing code, understand the architectural constraints and the "Code is Source of Truth" doctrine.
 
-1.  **[Vignette](VIGNETTE.md)**: Start here for the high-level narrative. Why does this project exist? What problems does it solve in GxP-regulated environments?
-2.  **[Contributor Protocols](architecture/contributor_protocols.md)**: The "Supreme Law" of the repository. Understand the "Passive Library" and "No Execution" rules that govern this Shared Kernel.
-3.  **[Shared Kernel Strategy](architecture/ADR-001-shared-kernel-boundaries.md)**: A deeper dive into the architectural boundaries between Data (Spec) and Logic (Utils).
+1.  **[Home](index.md)**: Start here for the high-level narrative and "Blueprint Philosophy".
+2.  **[Core Philosophy](architecture/core_philosophy.md)**: The "Supreme Law" of the repository. Understand the "Passive Library", "Strong Typing", and "No Execution" rules that govern this Shared Kernel.
 
 ## Phase 2: Building Agents (The "What")
 
@@ -44,5 +43,4 @@ Agents don't work in a vacuum. Learn how to design for human-AI collaboration.
 
 ## Reference
 
-*   **[Package Structure](package_structure.md)**: Navigate the codebase layout.
 *   **[Full Index](index.md)**: The complete list of all documentation files.

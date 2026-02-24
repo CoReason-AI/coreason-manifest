@@ -40,4 +40,4 @@ Flows are designed to be treated as immutable data. Once a `GraphFlow` is publis
 Because flows are pure data, they can be hashed. This allows for:
 *   **Cryptographic Verification**: Ensuring a deployed agent is running the exact approved version of a flow.
 *   **Semantic Diffing**: Comparing two versions of a flow to understand exactly what changed (e.g., "The prompt for Agent A was modified").
-*   ** lineage Tracking**: Tracing the provenance of a decision back to the specific version of the manifest that produced it.
+*   **Lineage Tracking**: Tracing the provenance of a decision back to the specific version of the manifest that produced it.
