@@ -70,15 +70,16 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Also strip None values (Architectural requirement)
             excluded = self._EXCLUDED_KEYS
 
-            # 1. Cast keys to string to ensure canonical JSON compliance
-            stringified_items = ((str(orig_k), orig_v) for orig_k, orig_v in obj.items())
-
             return {
                 k: self._recursive_sort_and_sanitize(v)
-                # 2. Sort STRICTLY by the key (index 0) to prevent TypeError crashes on value fallback comparisons
-                for k, v in sorted(stringified_items, key=lambda item: item[0])
-                # 3. Filter using the optimized local variable and safe string methods
-                if v is not None and k not in excluded and not k.startswith("__")
+                # 1. Inline the generator to allow immediate Garbage Collection.
+                # 2. Pre-filter `None` values (O(N)) to prevent wasting CPU cycles sorting them (O(N log N)).
+                for k, v in sorted(
+                    ((str(orig_k), orig_v) for orig_k, orig_v in obj.items() if orig_v is not None),
+                    key=lambda item: item[0],
+                )
+                # 3. Apply final exclusion filters using the optimized local variable and safe string methods.
+                if k not in excluded and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
