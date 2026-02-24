@@ -1,18 +1,22 @@
+import contextlib
 import os
 import tempfile
-import yaml
-import pytest
 from pathlib import Path
 from typing import Any
+
+import pytest
+import yaml
 
 # Import the code to test
 # Assuming src is in python path or installed
 try:
-    from coreason_manifest.utils.io import export_manifest, ManifestDumper
+    from coreason_manifest.utils.io import export_manifest
 except ImportError:
     import sys
+
     sys.path.append(str(Path(__file__).parents[2] / "src"))
-    from coreason_manifest.utils.io import export_manifest, ManifestDumper
+    from coreason_manifest.utils.io import export_manifest
+
 
 class MockPydanticModel:
     def __init__(self, data: dict[str, Any]):
@@ -22,6 +26,7 @@ class MockPydanticModel:
         # Mimic Pydantic behavior:
         # exclude_none: remove keys with None values
         # by_alias: we'll just ignore it for this mock as we don't define aliases
+        _ = by_alias  # Silence unused argument warning
 
         result = {}
         for k, v in self.data.items():
@@ -30,20 +35,21 @@ class MockPydanticModel:
             result[k] = v
         return result
 
-def test_export_manifest_sorting():
+
+def test_export_manifest_sorting() -> None:
     # Define data with mixed priority, depriority, and normal keys
     # Intentionally unordered in the input dict
     data = {
-        "nodes": ["node1", "node2"],          # Depriority (index 4 in list)
-        "zebra": "stripe",                    # Normal (z)
-        "apiVersion": "v1",                   # Priority (index 0)
-        "apple": "fruit",                     # Normal (a)
-        "kind": "Agent",                      # Priority (index 2)
-        "definitions": {"foo": "bar"},        # Depriority (index 0)
-        "name": "MyAgent",                    # Priority (index 4)
-        "type": "standard",                   # Priority (index 1)
-        "ignored": None,                      # Should be excluded
-        "graph": "graph_data",                # Depriority (index 3)
+        "nodes": ["node1", "node2"],  # Depriority (index 4 in list)
+        "zebra": "stripe",  # Normal (z)
+        "apiVersion": "v1",  # Priority (index 0)
+        "apple": "fruit",  # Normal (a)
+        "kind": "Agent",  # Priority (index 2)
+        "definitions": {"foo": "bar"},  # Depriority (index 0)
+        "name": "MyAgent",  # Priority (index 4)
+        "type": "standard",  # Priority (index 1)
+        "ignored": None,  # Should be excluded
+        "graph": "graph_data",  # Depriority (index 3)
     }
 
     model = MockPydanticModel(data)
@@ -57,7 +63,7 @@ def test_export_manifest_sorting():
 
         export_manifest(model, tmp_path)
 
-        with open(tmp_path, "r", encoding="utf-8") as f:
+        with open(tmp_path, encoding="utf-8") as f:
             content = f.read()
             loaded = yaml.safe_load(content)
 
@@ -92,27 +98,22 @@ def test_export_manifest_sorting():
             "zebra",
             "definitions",
             "graph",
-            "nodes"
+            "nodes",
         ]
 
         assert keys_in_order == expected_order
 
     finally:
         if tmp_path.exists():
-            try:
+            with contextlib.suppress(OSError):
                 os.remove(tmp_path)
-            except OSError:
-                pass
 
-def test_export_manifest_nested_sorting():
+
+def test_export_manifest_nested_sorting() -> None:
     # Test recursive sorting
     data = {
-        "metadata": {
-            "version": "1.0",
-            "name": "meta",
-            "id": "123"
-        },
-        "apiVersion": "v1"
+        "metadata": {"version": "1.0", "name": "meta", "id": "123"},
+        "apiVersion": "v1",
     }
     # "metadata" is priority.
     # Inside "metadata":
@@ -127,7 +128,7 @@ def test_export_manifest_nested_sorting():
         tmp.close()
         export_manifest(model, tmp_path)
 
-        with open(tmp_path, "r", encoding="utf-8") as f:
+        with open(tmp_path, encoding="utf-8") as f:
             content = f.read()
             loaded = yaml.safe_load(content)
 
@@ -143,21 +144,16 @@ def test_export_manifest_nested_sorting():
 
     finally:
         if tmp_path.exists():
-            try:
+            with contextlib.suppress(OSError):
                 os.remove(tmp_path)
-            except OSError:
-                pass
 
-def test_export_manifest_mixed_types():
+
+def test_export_manifest_mixed_types() -> None:
     # Test with non-string keys if possible (though JSON/YAML usually have string keys for mappings)
     # But ManifestDumper logic casts to string.
     # Let's test just string keys but that resemble numbers?
 
-    data = {
-        "10": "ten",
-        "2": "two",
-        "kind": "test"
-    }
+    data = {"10": "ten", "2": "two", "kind": "test"}
     # "kind" is priority.
     # "10", "2" are normal.
     # Alphabetical: "10" < "2".
@@ -169,7 +165,7 @@ def test_export_manifest_mixed_types():
     try:
         tmp.close()
         export_manifest(model, tmp_path)
-        with open(tmp_path, "r", encoding="utf-8") as f:
+        with open(tmp_path, encoding="utf-8") as f:
             loaded = yaml.safe_load(f)
 
         keys = list(loaded.keys())
@@ -177,7 +173,5 @@ def test_export_manifest_mixed_types():
 
     finally:
         if tmp_path.exists():
-            try:
+            with contextlib.suppress(OSError):
                 os.remove(tmp_path)
-            except OSError:
-                pass

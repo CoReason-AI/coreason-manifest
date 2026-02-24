@@ -4,7 +4,7 @@ import os
 import stat
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import yaml
 
@@ -181,7 +181,7 @@ class ManifestIO:
 
 
 class ManifestDumper(yaml.SafeDumper):
-    PRIORITY_KEYS = [
+    PRIORITY_KEYS: ClassVar[list[str]] = [
         "apiVersion",
         "type",
         "kind",
@@ -192,19 +192,19 @@ class ManifestDumper(yaml.SafeDumper):
         "interface",
         "governance",
     ]
-    DEPRIORITY_KEYS = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
+    DEPRIORITY_KEYS: ClassVar[list[str]] = ["definitions", "sequence", "steps", "graph", "nodes", "edges"]
 
-    def represent_mapping(self, tag, mapping, flow_style=False):
-        value = []
+    def represent_mapping(self, tag: str, mapping: Any, flow_style: bool | None = False) -> yaml.MappingNode:
+        value: list[tuple[yaml.Node, yaml.Node]] = []
         node = yaml.MappingNode(tag, value, flow_style=flow_style)
         if self.alias_key is not None:
             self.represented_objects[self.alias_key] = node
         best_style = True
         if hasattr(mapping, "items"):
-            mapping = list(mapping.items())
+            mapping_list = list(mapping.items())
 
             # Custom sorting logic
-            def sort_key(item):
+            def sort_key(item: tuple[Any, Any]) -> tuple[int, int | str, str] | tuple[int, str]:
                 key = item[0]
                 # specific safe string conversion for sorting
                 key_str = str(key)
@@ -216,9 +216,11 @@ class ManifestDumper(yaml.SafeDumper):
                 else:
                     return (1, key_str)
 
-            mapping.sort(key=sort_key)
+            mapping_list.sort(key=sort_key)
+        else:
+            mapping_list = []
 
-        for item_key, item_value in mapping:
+        for item_key, item_value in mapping_list:
             node_key = self.represent_data(item_key)
             node_value = self.represent_data(item_value)
             if not (isinstance(node_key, yaml.ScalarNode) and not node_key.style):
