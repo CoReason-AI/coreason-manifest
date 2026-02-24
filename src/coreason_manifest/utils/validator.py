@@ -25,6 +25,7 @@ from coreason_manifest.spec.core.resilience import (
     ResilienceStrategy,
 )
 from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.utils.topology import get_strongly_connected_components
 
 
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
@@ -74,6 +75,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
             errors.append("GraphFlow Error: Graph must contain at least one node.")
 
         errors.extend(_validate_graph_integrity(flow.graph))
+        errors.extend(_validate_execution_cycles(flow.graph))
 
         # Helper for extracting nodes for generic logic checks
         nodes_list = list(flow.graph.nodes.values())
@@ -479,5 +481,44 @@ def _validate_fallback_cycles(nodes: list[AnyNode]) -> list[str]:
             errors.append(f"Resilience Error: Fallback cycle detected: {cycle_str}")
             # Clear stacks for next component (optional, but DFS handles components)
             path_stack.clear()
+
+    return errors
+
+
+def _validate_execution_cycles(graph: Graph) -> list[str]:
+    """
+    Enforces Strict DAG Topology on the execution graph.
+    Uses Tarjan's algorithm to detect Strongly Connected Components (SCCs).
+    """
+    errors: list[str] = []
+    # Build adjacency list from edges
+    # Initialize all nodes to empty list to handle disconnected nodes safely
+    adj: dict[str, list[str]] = {node_id: [] for node_id in graph.nodes}
+    for edge in graph.edges:
+        if edge.from_node in adj:
+            adj[edge.from_node].append(edge.to_node)
+        # Note: If edge.from_node is not in adj (integrity error), it's handled by _validate_graph_integrity
+
+    sccs = get_strongly_connected_components(adj)
+
+    for scc in sccs:
+        # A cycle exists if:
+        # 1. SCC has more than 1 node (A -> B -> A)
+        # 2. SCC has exactly 1 node AND it has a self-loop (A -> A)
+        is_cycle = False
+        if len(scc) > 1:
+            is_cycle = True
+        elif len(scc) == 1:
+            node = scc[0]
+            if node in adj and node in adj[node]:
+                is_cycle = True
+
+        if is_cycle:
+            # Sort for deterministic error message
+            cycle_nodes = ", ".join(sorted(scc))
+            errors.append(
+                f"Topology Integrity Error: Infinite execution cycle detected involving nodes: [{cycle_nodes}]. "
+                "Execution graphs must be strict Directed Acyclic Graphs (DAGs)."
+            )
 
     return errors
