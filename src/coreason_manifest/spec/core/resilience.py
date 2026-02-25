@@ -5,6 +5,7 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.core.engines import ModelCriteria, ModelRef
+from coreason_manifest.spec.core.types import UnboundedPositiveInt
 
 
 class ErrorDomain(StrEnum):
@@ -44,11 +45,9 @@ class RetryStrategy(ResilienceStrategy):
 
     type: Literal["retry"] = "retry"
 
-    max_attempts: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
-        ..., description="Hard limit on recovery loops."
-    )
+    max_attempts: UnboundedPositiveInt = Field(..., description="Hard limit on recovery loops.")
     backoff_factor: Annotated[float, Field(ge=1.0, description="Exponential backoff multiplier.")] = 2.0
-    initial_delay_seconds: Annotated[float, Field(ge=0.0, description="Initial wait time.")] = 1.0
+    initial_delay_seconds: Annotated[float, Field(gt=0.0, description="Initial wait time.")] = 1.0
     max_delay_seconds: Annotated[
         float,
         Field(gt=0.0, description="Ceiling for the backoff calculation (e.g., never sleep more than 60s)."),
@@ -81,9 +80,7 @@ class ReflexionStrategy(ResilienceStrategy):
 
     type: Literal["reflexion"] = "reflexion"
 
-    max_attempts: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
-        ..., description="Hard limit on recovery loops."
-    )
+    max_attempts: UnboundedPositiveInt = Field(..., description="Hard limit on recovery loops.")
     critic_model: ModelRef = Field(..., description="The model used to analyze the error.")
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: Annotated[bool, Field(description="Whether to feed the execution trace to the critic.")] = True
@@ -143,9 +140,7 @@ class EscalationStrategy(ResilienceStrategy):
 
     queue_name: str = Field(..., min_length=1, description="The task queue for suspended sessions.")
     notification_level: Literal["info", "warning", "critical"] = Field(..., description="Severity level.")
-    timeout_seconds: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
-        ..., description="Max wait for human intervention."
-    )
+    timeout_seconds: UnboundedPositiveInt = Field(..., description="Max wait for human intervention.")
     template: Annotated[
         str | None,
         Field(
@@ -270,7 +265,7 @@ class SupervisionPolicy(BaseModel):
     default_strategy: Annotated[
         RecoveryStrategy | None, Field(description="Catch-all strategy. If None, unhandled errors bubble up.")
     ] = None
-    max_cumulative_actions: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
+    max_cumulative_actions: UnboundedPositiveInt = Field(
         10, description="Total number of recovery actions (retries + reflexions + fallbacks) allowed."
     )
 
@@ -295,7 +290,12 @@ class SupervisionPolicy(BaseModel):
                         "To allow infinite retries, set the policy's max_cumulative_actions to 'infinite'."
                     )
                 # Both are finite integers
-                if s_limit > self.max_cumulative_actions:  # type: ignore # s_limit is int here
+                # Use strict type guards to satisfy pyright/mypy natively
+                if (
+                    isinstance(s_limit, int)
+                    and isinstance(self.max_cumulative_actions, int)
+                    and s_limit > self.max_cumulative_actions
+                ):
                     raise ValueError(
                         f"SupervisionPolicy global limit (max_cumulative_actions={self.max_cumulative_actions}) "
                         f"is lower than a strategy limit (max_attempts={s_limit}). "

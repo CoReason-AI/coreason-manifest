@@ -4,7 +4,13 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
+from coreason_manifest.spec.core.types import (
+    NodeID,
+    RiskLevel,
+    ToolID,
+    UnboundedNonNegativeInt,
+    UnboundedPositiveInt,
+)
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
 
@@ -80,12 +86,10 @@ class Governance(CoreasonModel):
             "entire manifest, regardless of individual tool policies."
         ),
     )
-    rate_limit_rpm: Annotated[int, Field(ge=0)] | Literal["infinite"] | None = Field(
+    rate_limit_rpm: UnboundedNonNegativeInt | None = Field(
         None, description="Rate limit in requests per minute.", examples=[60]
     )
-    timeout_seconds: Annotated[int, Field(gt=0)] | Literal["infinite"] | None = Field(
-        None, description="Global execution timeout.", examples=[300]
-    )
+    timeout_seconds: UnboundedPositiveInt | None = Field(None, description="Global execution timeout.", examples=[300])
     cost_limit_usd: Annotated[float, Field(ge=0.0)] | None = Field(
         None, description="Cost limit in USD.", examples=[10.0]
     )

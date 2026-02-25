@@ -9,9 +9,19 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import StrEnum
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, Field
+
+# =========================================================================
+#  COMMON TYPE ALIASES (Governance & Resilience)
+# =========================================================================
+
+# Integer > 0 OR "infinite"
+type UnboundedPositiveInt = Annotated[int, Field(gt=0)] | Literal["infinite"]
+
+# Integer >= 0 OR "infinite"
+type UnboundedNonNegativeInt = Annotated[int, Field(ge=0)] | Literal["infinite"]
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)

@@ -25,6 +25,12 @@ def test_infinite_retry() -> None:
         RetryStrategy(max_attempts=3, initial_delay_seconds=10.0, max_delay_seconds=5.0)
 
 
+def test_retry_strategy_zero_initial_delay() -> None:
+    # Should fail: initial_delay_seconds must be > 0.0
+    with pytest.raises(ValidationError):
+        RetryStrategy(max_attempts=3, initial_delay_seconds=0.0)
+
+
 def test_infinite_reflexion() -> None:
     # Should pass
     rs = ReflexionStrategy(max_attempts="infinite", critic_model="gpt-4", critic_prompt="fix it", include_trace=False)
