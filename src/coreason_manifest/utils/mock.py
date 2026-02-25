@@ -51,13 +51,22 @@ class MockFactory:
         if not isinstance(schema, dict):
             return schema
 
+        # Enforce exact values (Const and Enum) before any deeper evaluation
+        if "const" in schema:
+            return schema["const"]
+        if "enum" in schema and isinstance(schema["enum"], list) and schema["enum"]:
+            return self.rng.choice(schema["enum"])
+
+        # Best-effort combinator support
+        for combinator in ["allOf", "anyOf", "oneOf"]:
+            if combinator in schema and isinstance(schema[combinator], list) and schema[combinator]:
+                return self._generate_schema_data(
+                    schema[combinator][0], visited, visited_refs, depth, resolver
+                )
+
         # Resolve $ref if present
         if "$ref" in schema and resolver:
             ref_uri = schema["$ref"]
-
-            # Support for strict enum constraints
-            if "enum" in schema and isinstance(schema["enum"], list) and schema["enum"]:
-                return self.rng.choice(schema["enum"])
 
             # Check for cycle in refs
             if visited_refs is not None and ref_uri in visited_refs:
@@ -81,10 +90,6 @@ class MockFactory:
             return ""
 
         visited = visited | {schema_id}
-
-        # Support for strict enum constraints
-        if "enum" in schema and isinstance(schema["enum"], list) and schema["enum"]:
-            return self.rng.choice(schema["enum"])
 
         # Simple schema support
         type_ = schema.get("type")
@@ -116,14 +121,14 @@ class MockFactory:
                 k: self._generate_schema_data(v, visited, visited_refs, depth + 1, resolver) for k, v in props.items()
             }
         if type_ == "array":
-            items_schema = schema.get("items")
+            items_schema = schema.get("prefixItems", schema.get("items"))
             if isinstance(items_schema, list):
                 # Handle tuple validation (array of schemas)
                 return [
                     self._generate_schema_data(item, visited, visited_refs, depth + 1, resolver)
                     for item in items_schema
                 ]
-            if items_schema:
+            if items_schema is not None:
                 # Handle standard array validation (single schema)
                 return [self._generate_schema_data(items_schema, visited, visited_refs, depth + 1, resolver)]
             return []
