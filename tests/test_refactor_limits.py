@@ -20,6 +20,10 @@ def test_infinite_retry() -> None:
     with pytest.raises(ValidationError):
         RetryStrategy(max_attempts=-1)
 
+    # Cross-field validation: max_delay < initial_delay
+    with pytest.raises(ValueError, match="must be greater than or equal to"):
+        RetryStrategy(max_attempts=3, initial_delay_seconds=10.0, max_delay_seconds=5.0)
+
 
 def test_infinite_reflexion() -> None:
     # Should pass
