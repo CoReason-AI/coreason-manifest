@@ -11,8 +11,9 @@ def test_load_flow_yaml_error(tmp_path: Path) -> None:
     f = tmp_path / "bad.yaml"
     # Unbalanced brackets are a sure way to cause YAMLError
     f.write_text("invalid: [")
+    # strict_security=False because Windows does not support O_NOFOLLOW
     with pytest.raises(ValueError, match="Failed to parse manifest file"):
-        load_flow_from_file(str(f))
+        load_flow_from_file(str(f), strict_security=False)
 
 
 def test_load_flow_dynamic_exec_forbidden(tmp_path: Path) -> None:
@@ -31,8 +32,9 @@ steps:
 """
     f.write_text(content)
 
+    # strict_security=False because Windows does not support O_NOFOLLOW
     with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
-        load_flow_from_file(str(f), allow_dynamic_execution=False)
+        load_flow_from_file(str(f), allow_dynamic_execution=False, strict_security=False)
 
 
 def test_load_flow_relative_to_fail(tmp_path: Path) -> None:
@@ -51,7 +53,14 @@ def test_load_flow_relative_to_fail(tmp_path: Path) -> None:
         mock_io.return_value.read_text.return_value = f.read_text()
 
         # This forces file_path.relative_to(jail_root) to fail
-        load_flow_from_file(str(f), root_dir=jail)
+        # strict_security=False passed implicitly? No, load_flow defaults to True.
+        # But we mock ManifestIO so loader init args matter.
+        # We should pass False here too for consistency, or mock the init.
+        # But wait, we mock the CLASS.
+        # So when load_flow calls ManifestIO(...), it gets the mock.
+        # The mock doesn't run __init__ logic (OSError).
+        # So we don't strictly need it here, but let's be safe.
+        load_flow_from_file(str(f), root_dir=jail, strict_security=False)
 
         # Verify read_text called with name, confirming fallback
         mock_io.return_value.read_text.assert_called_with(f.name)
