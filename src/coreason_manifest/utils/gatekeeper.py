@@ -324,10 +324,11 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # Extract all nodes
     nodes: list[AnyNode] = []
-    if isinstance(flow, LinearFlow):
-        nodes = flow.steps
-    elif isinstance(flow, GraphFlow):
-        nodes = list(flow.graph.nodes.values())
+    match flow:
+        case LinearFlow():
+            nodes = flow.steps
+        case GraphFlow():
+            nodes = list(flow.graph.nodes.values())
 
     # Build tool map: name -> tool_object
     tool_map: dict[str, ToolCapability] = {}
@@ -354,92 +355,94 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     Checks if the target node is topologically guarded by a HumanNode.
     Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
     """
-    if isinstance(flow, LinearFlow):
-        # Scan sequence backwards from target
-        # Architectural Note: Match by ID to verify identity, not just value equality
-        target_idx = -1
-        for i, node in enumerate(flow.steps):
-            if node.id == target_node.id:
-                target_idx = i
-                break
+    match flow:
+        case LinearFlow():
+            # Scan sequence backwards from target
+            # Architectural Note: Match by ID to verify identity, not just value equality
+            target_idx = -1
+            for i, node in enumerate(flow.steps):
+                if node.id == target_node.id:
+                    target_idx = i
+                    break
 
-        if target_idx == -1:
+            if target_idx == -1:
+                return False
+
+            for i in range(target_idx - 1, -1, -1):
+                node = flow.steps[i]
+                if isinstance(node, HumanNode):
+                    return True
             return False
 
-        for i in range(target_idx - 1, -1, -1):
-            node = flow.steps[i]
-            if isinstance(node, HumanNode):
-                return True
-        return False
+        case GraphFlow():
+            # Reachability Analysis
 
-    if isinstance(flow, GraphFlow):
-        # Reachability Analysis
+            all_ids = set(flow.graph.nodes.keys())
+            entry_id = flow.graph.entry_point
 
-        all_ids = set(flow.graph.nodes.keys())
-        entry_id = flow.graph.entry_point
+            # Valid guards: HumanNode only.
+            valid_guards = (HumanNode,)
 
-        # Valid guards: HumanNode only.
-        valid_guards = (HumanNode,)
+            # Construct adjacency map
+            adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
+            for edge in flow.graph.edges:
+                adj[edge.from_node].append(edge.to_node)
 
-        # Construct adjacency map
-        adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
-        for edge in flow.graph.edges:
-            adj[edge.from_node].append(edge.to_node)
+            guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
 
-        guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
+            if entry_id:
+                queue = [entry_id]
+                visited = {entry_id}
+            else:
+                queue = []
+                visited = set()
 
-        if entry_id:
-            queue = [entry_id]
-            visited = {entry_id}
-        else:
-            queue = []
-            visited = set()
+            # Handle case where target is the entry node
+            if target_node.id == entry_id:
+                return False
 
-        # Handle case where target is the entry node
-        if target_node.id == entry_id:
-            return False
+            # 1. Check strict reachability (ignoring guards) to identify Islands
+            if entry_id:
+                full_queue = [entry_id]
+                full_visited = {entry_id}
+            else:
+                full_queue = []
+                full_visited = set()
 
-        # 1. Check strict reachability (ignoring guards) to identify Islands
-        if entry_id:
-            full_queue = [entry_id]
-            full_visited = {entry_id}
-        else:
-            full_queue = []
-            full_visited = set()
+            reachable = False
+            while full_queue:
+                curr = full_queue.pop(0)
+                if curr == target_node.id:
+                    reachable = True
+                    break
+                for n in adj.get(curr or "", []):
+                    if n not in full_visited:
+                        full_visited.add(n)
+                        full_queue.append(n)
 
-        reachable = False
-        while full_queue:
-            curr = full_queue.pop(0)
-            if curr == target_node.id:
-                reachable = True
-                break
-            for n in adj.get(curr or "", []):
-                if n not in full_visited:
-                    full_visited.add(n)
-                    full_queue.append(n)
+            if not reachable:
+                return False  # Island -> Fail Closed
 
-        if not reachable:
-            return False  # Island -> Fail Closed
+            # 2. Check guarded reachability
+            while queue:
+                curr_id = queue.pop(0)
 
-        # 2. Check guarded reachability
-        while queue:
-            curr_id = queue.pop(0)
+                if curr_id == target_node.id:
+                    return False  # Reached target without passing a guard
 
-            if curr_id == target_node.id:
-                return False  # Reached target without passing a guard
+                # If current node is a guard, we stop traversing this path
+                # (because downstream is guarded by this node).
+                if curr_id in guards:
+                    continue
 
-            # If current node is a guard, we stop traversing this path
-            # (because downstream is guarded by this node).
-            if curr_id in guards:
-                continue
+                # Expand neighbors
+                for neighbor in adj.get(curr_id or "", []):
+                    if neighbor not in visited:
+                        visited.add(neighbor)
+                        queue.append(neighbor)
 
-            # Expand neighbors
-            for neighbor in adj.get(curr_id or "", []):
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.append(neighbor)
+            # If reachable but not via unguarded path -> Guarded
+            return True
 
-        # If reachable but not via unguarded path -> Guarded
-        return True
-
-    return False
+        case _:
+            return False  # pragma: no cover

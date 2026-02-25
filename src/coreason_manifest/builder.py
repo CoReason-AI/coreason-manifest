@@ -59,10 +59,9 @@ def create_resilience(
             initial_delay_seconds=delay,
         )
     elif strategy == "fallback":
-        # if not fallback_id, Pydantic will raise ValidationError
-        res_strategy = FallbackStrategy(
-            fallback_node_id=fallback_id,  # type: ignore
-        )
+        if not fallback_id:
+            raise ValueError("fallback_id is required when strategy is 'fallback'")
+        res_strategy = FallbackStrategy(fallback_node_id=fallback_id)
     else:
         # Default to escalate
         res_strategy = EscalationStrategy(

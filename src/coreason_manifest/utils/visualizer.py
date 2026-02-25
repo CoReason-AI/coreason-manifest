@@ -87,16 +87,17 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     nodes: Sequence[AnyNode] = []
     edges: list[tuple[str, str, str | None]] = []
 
-    if isinstance(flow, LinearFlow):
-        lines.append("graph TD")
-        nodes = flow.steps
-        edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
-    elif isinstance(flow, GraphFlow):
-        lines.append("graph LR")
-        nodes = list(flow.graph.nodes.values())
-        edges = [(e.from_node, e.to_node, e.condition) for e in flow.graph.edges]
-    else:
-        return ""  # pragma: no cover
+    match flow:
+        case LinearFlow():
+            lines.append("graph TD")
+            nodes = flow.steps
+            edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
+        case GraphFlow():
+            lines.append("graph LR")
+            nodes = list(flow.graph.nodes.values())
+            edges = [(e.from_node, e.to_node, e.condition) for e in flow.graph.edges]
+        case _:  # pragma: no cover
+            return ""  # pragma: no cover
 
     # Grouping
     grouped_nodes: dict[str, list[AnyNode]] = {}
@@ -239,12 +240,17 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
     nodes: Sequence[AnyNode] = []
     edges: list[tuple[str, str, str | None]] = []
 
-    if isinstance(flow, LinearFlow):
-        nodes = flow.steps
-        edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
-    else:
-        nodes = list(flow.graph.nodes.values())
-        edges = [(e.from_node, e.to_node, e.condition) for e in flow.graph.edges]
+    match flow:
+        case LinearFlow():
+            nodes = flow.steps
+            edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
+        case GraphFlow():
+            nodes = list(flow.graph.nodes.values())
+            edges = []
+            for e in flow.graph.edges:
+                edges.append((e.from_node, e.to_node, e.condition))
+        case _:  # pragma: no cover
+            return {"nodes": [], "edges": []}  # pragma: no cover
 
     # Compute Layout
     positions = _compute_layout(nodes, edges)
