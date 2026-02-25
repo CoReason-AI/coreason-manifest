@@ -208,9 +208,7 @@ def _scan_for_dynamic_references(data: Any) -> bool:
     return False
 
 
-def _resolve_includes(
-    data: Any, root_dir: Path, loader: ManifestIO, seen: frozenset[Path] | None = None
-) -> Any:
+def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: frozenset[Path] | None = None) -> Any:
     """Recursively resolves JSON/YAML $include while guarding against circular dependencies and jail escapes."""
     seen = frozenset() if seen is None else seen
 

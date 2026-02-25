@@ -55,13 +55,7 @@ class MockFactory:
                 resolved = resolver.lookup(ref_uri)
                 contents = resolved.contents
                 new_visited_refs = (visited_refs or frozenset()) | {ref_uri}
-                return self._generate_schema_data(
-                    contents,
-                    visited,
-                    new_visited_refs,
-                    depth,
-                    resolver
-                )
+                return self._generate_schema_data(contents, visited, new_visited_refs, depth, resolver)
             except Unresolvable:
                 logger.warning(f"Unresolvable reference: {ref_uri}")
                 return "mock_ref_error"
@@ -93,15 +87,12 @@ class MockFactory:
         if type_ == "object":
             props = schema.get("properties", {})
             return {
-                k: self._generate_schema_data(v, visited, visited_refs, depth + 1, resolver)
-                for k, v in props.items()
+                k: self._generate_schema_data(v, visited, visited_refs, depth + 1, resolver) for k, v in props.items()
             }
         if type_ == "array":
             items_schema = schema.get("items")
             if items_schema:
-                return [
-                    self._generate_schema_data(items_schema, visited, visited_refs, depth + 1, resolver)
-                ]
+                return [self._generate_schema_data(items_schema, visited, visited_refs, depth + 1, resolver)]
             return []
         return "mock_data"
 
