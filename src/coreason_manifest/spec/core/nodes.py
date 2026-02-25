@@ -15,6 +15,7 @@ from coreason_manifest.spec.core.types import (
     CoercibleStringList,
     NodeID,
     ProfileID,
+    UnboundedPositiveInt,
     VariableID,
 )
 from coreason_manifest.spec.interop.compliance import RemediationAction
@@ -156,13 +157,11 @@ class HumanNode(Node):
 
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
-    timeout_seconds: Annotated[
-        int | Literal["infinite"] | None,
-        Field(
-            description="Max wait time for blocking/steering. Use 'infinite' for no timeout.",
-            examples=[300, "infinite"],
-        ),
-    ]
+    timeout_seconds: UnboundedPositiveInt | None = Field(
+        None,
+        description="Max wait time for blocking/steering. Use 'infinite' for no timeout.",
+        examples=[300, "infinite"],
+    )
     input_schema: dict[str, Any] | None = Field(
         None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
     )
@@ -175,10 +174,11 @@ class HumanNode(Node):
         Literal["blocking", "shadow", "steering"],
         Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
     ] = "blocking"
-    shadow_timeout_seconds: Annotated[
-        int | Literal["infinite"] | None,
-        Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout.", examples=[60]),
-    ] = None
+    shadow_timeout_seconds: UnboundedPositiveInt | None = Field(
+        None,
+        description="Time window for intervention in shadow mode. Use 'infinite' for no timeout.",
+        examples=[60],
+    )
 
     @model_validator(mode="after")
     def validate_interaction_config(self) -> "HumanNode":
@@ -276,10 +276,9 @@ class SwarmNode(Node):
     distribution_strategy: Literal["sharded", "replicated"] = Field(
         ..., description="Sharded=split data; Replicated=same data, many attempts.", examples=["sharded"]
     )
-    max_concurrency: Annotated[
-        int | Literal["infinite"] | None,
-        Field(description="Limit parallel workers. Use 'infinite' for no limit.", examples=[10]),
-    ]
+    max_concurrency: UnboundedPositiveInt | None = Field(
+        None, description="Limit parallel workers. Use 'infinite' for no limit.", examples=[10]
+    )
 
     # Architecture: Reliability (Partial Failure)
     failure_tolerance_percent: Annotated[

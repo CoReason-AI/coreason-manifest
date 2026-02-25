@@ -33,11 +33,11 @@ class Audit(CoreasonModel):
 
 
 class CircuitBreaker(CoreasonModel):
-    error_threshold_count: Annotated[int, Field(gt=0)] = Field(
-        ..., description="Number of errors before opening the circuit.", examples=[5]
+    error_threshold_count: int = Field(
+        ..., gt=0, description="Number of errors before opening the circuit.", examples=[5]
     )
-    reset_timeout_seconds: Annotated[int, Field(gt=0)] = Field(
-        ..., description="Seconds to wait before attempting half-open state.", examples=[60]
+    reset_timeout_seconds: int = Field(
+        ..., gt=0, description="Seconds to wait before attempting half-open state.", examples=[60]
     )
     fallback_node_id: NodeID | None = Field(
         None, description="Optional node to jump to when circuit opens.", examples=["fallback_agent"]
