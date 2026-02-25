@@ -7,7 +7,7 @@ from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
-def test_builder_no_nodes_entry_point_fallback():
+def test_builder_no_nodes_entry_point_fallback() -> None:
     """
     Test NewGraphFlow.build() when there are no nodes and no explicit entry point.
     This should hit the 'else' branch in builder.py where ep = "missing_entry_point".
@@ -22,7 +22,7 @@ def test_builder_no_nodes_entry_point_fallback():
     assert "Entry point 'missing_entry_point' not found" in str(excinfo.value)
 
 
-def test_builder_explicit_entry_point():
+def test_builder_explicit_entry_point() -> None:
     """
     Test NewGraphFlow.set_entry_point() to cover the explicit entry point setter.
     """
@@ -45,7 +45,7 @@ def test_builder_explicit_entry_point():
     assert flow.status == "published"
 
 
-def test_published_flow_missing_entry_point_suggestion():
+def test_published_flow_missing_entry_point_suggestion() -> None:
     """
     Test GraphFlow.enforce_lifecycle_constraints when status is 'published',
     entry_point is missing, BUT nodes exist.
@@ -78,7 +78,7 @@ def test_published_flow_missing_entry_point_suggestion():
     assert patch_data[0]["value"] == "agent1"
 
 
-def test_graph_flow_fallback_missing():
+def test_graph_flow_fallback_missing() -> None:
     """
     Test GraphFlow.validate_topology when circuit breaker fallback node is missing.
     This covers the validation logic for CRSN-VAL-FALLBACK-MISSING.
