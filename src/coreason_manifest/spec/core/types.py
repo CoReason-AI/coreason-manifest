@@ -128,5 +128,9 @@ class MiddlewareDef(CoreasonModel):
     Definition for a middleware component.
     """
 
-    ref: str = Field(..., description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').")
+    ref: str = Field(
+        ...,
+        pattern=r"^.+\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
+        description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
+    )
     config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")

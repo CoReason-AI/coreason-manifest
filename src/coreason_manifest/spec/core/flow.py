@@ -262,6 +262,9 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
 
     for mw_id in governance.active_middlewares:
         if mw_id not in defined_middlewares:
+            # SOTA RFC 6902 JSON Pointer Escaping
+            mw_id_escaped = mw_id.replace("~", "~0").replace("/", "~1")
+
             # Dynamically construct RFC 6902 compliant patch based on current state
             if not definitions:
                 patch = [
@@ -274,7 +277,9 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
             elif not definitions.middlewares:
                 patch = [{"op": "add", "path": "/definitions/middlewares", "value": {mw_id: {"ref": "file.py:Class"}}}]
             else:
-                patch = [{"op": "add", "path": f"/definitions/middlewares/{mw_id}", "value": {"ref": "file.py:Class"}}]
+                patch = [
+                    {"op": "add", "path": f"/definitions/middlewares/{mw_id_escaped}", "value": {"ref": "file.py:Class"}}
+                ]
 
             raise ManifestError(
                 fault=SemanticFault(
