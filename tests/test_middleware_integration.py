@@ -243,6 +243,49 @@ governance:
     assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
 
 
+def test_validation_missing_key_with_existing_middlewares() -> None:
+    # Test case where 'definitions.middlewares' exists and is not empty,
+    # but 'active_middlewares' references a key that is missing.
+    # This hits the `else` block in `_validate_middleware_references` for patch generation.
+    manifest_yaml = """
+kind: GraphFlow
+metadata:
+  name: test-flow
+  version: 1.0.0
+interface: {}
+graph:
+  nodes:
+    start:
+      type: placeholder
+      id: start
+  edges: []
+  entry_point: start
+definitions:
+  middlewares:
+    existing_mw:
+      ref: middlewares/valid.py:MyMiddleware
+governance:
+  active_middlewares:
+    - missing_mw
+"""
+    data = yaml.safe_load(manifest_yaml)
+    with pytest.raises(ManifestError) as exc:
+        GraphFlow.model_validate(data)
+
+    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+
+    # Verify the patch path is correct for non-empty middlewares
+    error_ctx = exc.value.fault.context
+    assert error_ctx
+    remediation = error_ctx.get("remediation")
+    assert remediation
+
+    # The patch path should be /definitions/middlewares/missing_mw because middlewares dict exists
+    # and we are adding a new key to it.
+    patch_data = remediation["patch_data"]
+    assert patch_data[0]["path"] == "/definitions/middlewares/missing_mw"
+
+
 def test_loader_valid_middleware(workspace: Path) -> None:
     cls = load_middleware_from_ref("middlewares/valid.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
