@@ -1,18 +1,17 @@
 # tests/test_integrity_canonical.py
 
-import json
 import hashlib
-import pytest
-import math
 import uuid
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+
+import pytest
 from pydantic import BaseModel
-from typing import Optional
-from coreason_manifest.utils.integrity import CanonicalHashingStrategy, compute_hash
+
+from coreason_manifest.utils.integrity import compute_hash
+
 
 class TestCanonicalHashingStrategy:
-
-    def test_primitive_hashing(self):
+    def test_primitive_hashing(self) -> None:
         """Test primitive hashing: dicts, lists, Pydantic models."""
         # Dict
         data_dict = {"a": 1, "b": "test"}
@@ -39,8 +38,9 @@ class TestCanonicalHashingStrategy:
         expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
         assert compute_hash(data_model) == expected_hash
 
-    def test_missing_leniency(self):
+    def test_missing_leniency(self) -> None:
         """Test missing leniency: custom class raises TypeError."""
+
         class OpaqueData:
             pass
 
@@ -48,18 +48,18 @@ class TestCanonicalHashingStrategy:
         with pytest.raises(TypeError, match="is not deterministically serializable"):
             compute_hash(obj)
 
-    def test_float_constraints(self):
+    def test_float_constraints(self) -> None:
         """Test float constraints: inf/nan raise ValueError."""
         with pytest.raises(ValueError, match="NaN and Infinity are not allowed"):
-            compute_hash(float('inf'))
+            compute_hash(float("inf"))
 
         with pytest.raises(ValueError, match="NaN and Infinity are not allowed"):
-            compute_hash(float('nan'))
+            compute_hash(float("nan"))
 
         # Finite float should work
         assert isinstance(compute_hash(1.5), str)
 
-    def test_none_exclusion(self):
+    def test_none_exclusion(self) -> None:
         """Test None exclusion: keys with None values are stripped."""
         data_with_none = {"a": 1, "b": None}
         data_without_none = {"a": 1}
@@ -69,7 +69,7 @@ class TestCanonicalHashingStrategy:
 
         assert hash_with_none == hash_without_none
 
-    def test_set_sorting(self):
+    def test_set_sorting(self) -> None:
         """Test that sets are sorted by string representation."""
         s = {"b", "a", "c"}
         # Expected: ["a","b","c"]
@@ -79,18 +79,18 @@ class TestCanonicalHashingStrategy:
 
         s2 = {1, 2, 3}
         # Expected: [1,2,3]
-        expected_json = '[1,2,3]'
+        expected_json = "[1,2,3]"
         expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
         assert compute_hash(s2) == expected_hash
 
-    def test_uuid_handling(self):
+    def test_uuid_handling(self) -> None:
         """Test UUID conversion to string."""
         u = uuid.uuid4()
-        expected_json = f'"{str(u)}"'
+        expected_json = f'"{u!s}"'
         expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
         assert compute_hash(u) == expected_hash
 
-    def test_datetime_handling(self):
+    def test_datetime_handling(self) -> None:
         """Test datetime conversion to UTC ISO-8601."""
         dt = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
         expected_str = "2023-01-01T12:00:00Z"
@@ -102,13 +102,13 @@ class TestCanonicalHashingStrategy:
         dt_naive = datetime(2023, 1, 1, 12, 0, 0)
         assert compute_hash(dt_naive) == expected_hash
 
-    def test_protected_keys(self):
+    def test_protected_keys(self) -> None:
         """Test stripping of protected keys."""
         data = {
             "a": 1,
             "execution_hash": "remove me",
             "signature": "remove me",
-            "__internal": "remove me"
+            "__internal": "remove me",
         }
         expected_data = {"a": 1}
         assert compute_hash(data) == compute_hash(expected_data)

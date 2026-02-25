@@ -111,11 +111,7 @@ class CanonicalHashingStrategy(HashingStrategy):
         # separators=(",", ":")
         # allow_nan=False
         json_bytes = json.dumps(
-            sanitized,
-            sort_keys=True,
-            ensure_ascii=False,
-            separators=(",", ":"),
-            allow_nan=False
+            sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
         ).encode("utf-8")
 
         # 3. Returns the hashlib.sha256(json_bytes).hexdigest().
