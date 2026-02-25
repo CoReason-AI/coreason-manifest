@@ -202,7 +202,6 @@ def test_loader_exception_handling_in_lock() -> None:
     # Cover exception handling inside _loader_lock (lines 233, 253, 281-282)
     # We need to trigger exception during exec_module
 
-    import sys
     import tempfile
 
     with tempfile.TemporaryDirectory() as d:

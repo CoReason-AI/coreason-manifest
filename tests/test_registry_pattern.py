@@ -1,7 +1,6 @@
 # tests/test_registry_pattern.py
 
 
-
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     FlowDefinitions,

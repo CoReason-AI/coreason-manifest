@@ -264,4 +264,7 @@ def test_graph_flow_swarm_variable_remediation() -> None:
     assert error is not None
     assert error.remediation is not None
     assert error.remediation.type == "update_field"
-    assert error.remediation.patch_data[0]["path"] == "/blackboard/variables/missing_var"
+    # Cast or assert type to satisfy mypy index error
+    patch_data = error.remediation.patch_data
+    assert isinstance(patch_data, list)
+    assert patch_data[0]["path"] == "/blackboard/variables/missing_var"

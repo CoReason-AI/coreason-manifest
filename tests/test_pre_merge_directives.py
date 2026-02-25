@@ -154,6 +154,7 @@ def test_module_namespace_clean(tmp_path: Path) -> None:
     # Dependencies loaded via imports WOULD be in sys.modules (cached).
 
     import sys
+
     assert cls.__module__ not in sys.modules
 
     # The class still holds the module name reference.
