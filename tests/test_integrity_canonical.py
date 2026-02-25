@@ -234,3 +234,23 @@ class TestCanonicalHashingStrategy:
         s2 = frozenset({frozenset({3, 4}), frozenset({1, 2})})
         # Despite different insertion/memory orders, the canonical JSON array representations must sort identically.
         assert compute_hash(s1) == compute_hash(s2)
+
+    def test_nested_compute_hash(self) -> None:
+        """Test that nested objects with compute_hash are handled correctly."""
+        class NestedHasher:
+            def compute_hash(self) -> str:
+                return "nested_hash"
+
+        data = {"key": NestedHasher()}
+        h = compute_hash(data)
+        # Expected: {"key":"nested_hash"}
+        expected_json = '{"key":"nested_hash"}'
+        assert h == hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
+
+    def test_nested_float_constraints(self) -> None:
+        """Test that NaN/Inf checks are hit for nested values."""
+        with pytest.raises(ValueError, match="NaN and Infinity"):
+            compute_hash({"key": float("inf")})
+
+        with pytest.raises(ValueError, match="NaN and Infinity"):
+            compute_hash([float("nan")])
