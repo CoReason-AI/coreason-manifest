@@ -441,16 +441,16 @@ def test_error_handler_invalid_codes() -> None:
 
 def test_escalation_template_syntax() -> None:
     """Test EscalationStrategy template validation."""
-    # Template with jinja syntax
+    # Template with jinja syntax (using authorized variables)
     s1 = EscalationStrategy(
         queue_name="q",
         notification_level="info",
         timeout_seconds=10,
-        template="Error: {{ error }}",
+        template="Error type {{ error_type }} at node {{ node_id }}: {{ message }}",
     )
-    assert s1.template == "Error: {{ error }}"
+    assert s1.template == "Error type {{ error_type }} at node {{ node_id }}: {{ message }}"
 
-    # Template without jinja syntax (should pass with warning/note internally)
+    # Template without jinja syntax (should pass)
     s2 = EscalationStrategy(
         queue_name="q",
         notification_level="info",
@@ -459,6 +459,15 @@ def test_escalation_template_syntax() -> None:
     )
     assert s2.template == "Static error message"
 
+    # Template with unauthorized variables should fail
+    with pytest.raises(ValidationError, match="unauthorized context variables"):
+        EscalationStrategy(
+            queue_name="q",
+            notification_level="info",
+            timeout_seconds=10,
+            template="Error: {{ secret_key }}",
+        )
+
 
 def test_escalation_template() -> None:
     """Test that EscalationStrategy accepts a template."""
@@ -466,9 +475,9 @@ def test_escalation_template() -> None:
         queue_name="human-review",
         notification_level="warning",
         timeout_seconds=600,
-        template="Agent failed at step {{step_id}}: {{error}}",
+        template="Agent failed at node {{node_id}}: {{message}}",
     )
-    assert strategy.template == "Agent failed at step {{step_id}}: {{error}}"
+    assert strategy.template == "Agent failed at node {{node_id}}: {{message}}"
 
 
 def test_reflexion_max_trace_turns() -> None:
