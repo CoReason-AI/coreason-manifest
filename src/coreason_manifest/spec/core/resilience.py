@@ -87,10 +87,15 @@ class ReflexionStrategy(ResilienceStrategy):
     critic_model: ModelRef = Field(..., description="The model used to analyze the error.")
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: Annotated[bool, Field(description="Whether to feed the execution trace to the critic.")] = True
-    max_trace_turns: Annotated[
-        int,
-        Field(gt=0, description="Limit the history feed to the Critic to the last N turns. Prevents context overflow."),
-    ] | None = 3
+    max_trace_turns: (
+        Annotated[
+            int,
+            Field(
+                gt=0, description="Limit the history feed to the Critic to the last N turns. Prevents context overflow."
+            ),
+        ]
+        | None
+    ) = 3
     critic_schema: Annotated[
         dict[str, Any] | None,
         Field(
