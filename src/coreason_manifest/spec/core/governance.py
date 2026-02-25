@@ -114,6 +114,18 @@ class Governance(CoreasonModel):
         default_factory=list, description="Allowed external domains.", examples=[["example.com"]]
     )
 
+    @field_validator("active_middlewares")
+    @classmethod
+    def deduplicate_middlewares(cls, v: list[str]) -> list[str]:
+        """Ensures middleware execution pipeline contains unique references while preserving order."""
+        seen = set()
+        deduped = []
+        for item in v:
+            if item not in seen:
+                seen.add(item)
+                deduped.append(item)
+        return deduped
+
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:

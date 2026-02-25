@@ -180,7 +180,7 @@ def test_loader_valid_middleware(workspace: Path) -> None:
 def test_loader_duck_typing_failure(workspace: Path) -> None:
     with pytest.raises(TypeError) as exc:
         load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
-    assert "must implement an `async def intercept_request` or `async def intercept_stream`" in str(exc.value)
+    assert "must implement at least one protocol method" in str(exc.value)
 
 
 def test_loader_security_violation(workspace: Path) -> None:

@@ -423,13 +423,20 @@ def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
     req_method = getattr(middleware_class, "intercept_request", None)
     stream_method = getattr(middleware_class, "intercept_stream", None)
 
-    has_async_req = inspect.iscoroutinefunction(req_method)
-    has_async_stream = inspect.iscoroutinefunction(stream_method)
-
-    if not (has_async_req or has_async_stream):
+    if not req_method and not stream_method:
         raise TypeError(
-            f"Middleware class in {reference} must implement an `async def intercept_request` "
-            "or `async def intercept_stream` method."
+            f"Middleware class in {reference} must implement at least one protocol method: "
+            "`async def intercept_request` or `async def intercept_stream`."
+        )
+
+    if req_method and not inspect.iscoroutinefunction(req_method):
+        raise TypeError(
+            f"Middleware method `intercept_request` in {reference} must be an asynchronous coroutine (`async def`)."
+        )
+
+    if stream_method and not inspect.iscoroutinefunction(stream_method):
+        raise TypeError(
+            f"Middleware method `intercept_stream` in {reference} must be an asynchronous coroutine (`async def`)."
         )
 
     return middleware_class

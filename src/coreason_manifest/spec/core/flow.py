@@ -262,6 +262,20 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
 
     for mw_id in governance.active_middlewares:
         if mw_id not in defined_middlewares:
+            # Dynamically construct RFC 6902 compliant patch based on current state
+            if not definitions:
+                patch = [
+                    {
+                        "op": "add",
+                        "path": "/definitions",
+                        "value": {"middlewares": {mw_id: {"ref": "file.py:Class"}}},
+                    }
+                ]
+            elif not definitions.middlewares:
+                patch = [{"op": "add", "path": "/definitions/middlewares", "value": {mw_id: {"ref": "file.py:Class"}}}]
+            else:
+                patch = [{"op": "add", "path": f"/definitions/middlewares/{mw_id}", "value": {"ref": "file.py:Class"}}]
+
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-VAL-MIDDLEWARE-MISSING",
@@ -273,13 +287,7 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
                         "remediation": RemediationAction(
                             type="update_field",
                             description=f"Add definition for middleware '{mw_id}'.",
-                            patch_data=[
-                                {
-                                    "op": "add",
-                                    "path": f"/definitions/middlewares/{mw_id}",
-                                    "value": {"ref": "file.py:Class"},
-                                }
-                            ],
+                            patch_data=patch,
                         ).model_dump(),
                     },
                 )
