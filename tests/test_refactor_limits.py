@@ -23,9 +23,7 @@ def test_infinite_retry() -> None:
 
 def test_infinite_reflexion() -> None:
     # Should pass
-    rs = ReflexionStrategy(
-        max_attempts="infinite", critic_model="gpt-4", critic_prompt="fix it", include_trace=False
-    )
+    rs = ReflexionStrategy(max_attempts="infinite", critic_model="gpt-4", critic_prompt="fix it", include_trace=False)
     assert rs.max_attempts == "infinite"
 
     # Should fail
