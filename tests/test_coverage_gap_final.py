@@ -5,7 +5,6 @@ import pytest
 from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import AgentNode
-from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.io import SecurityViolationError
 
@@ -62,7 +61,10 @@ def test_flow_fallback_orphan() -> None:
     from coreason_manifest.utils.validator import validate_flow
 
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_GOV_CIRCUIT_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_node" for e in errors)
+    assert any(
+        e.code == "ERR_GOV_CIRCUIT_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_node"
+        for e in errors
+    )
 
 
 def test_edge_condition_security_violation_store() -> None:

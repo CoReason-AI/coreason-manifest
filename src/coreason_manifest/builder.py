@@ -291,7 +291,7 @@ class NewLinearFlow(BaseFlowBuilder):
 
     def build(self) -> LinearFlow:
         # Override return type hint for better IDE support, but reuse base implementation
-        return cast(LinearFlow, super().build())
+        return cast("LinearFlow", super().build())
 
 
 class NewGraphFlow(BaseFlowBuilder):
@@ -366,4 +366,4 @@ class NewGraphFlow(BaseFlowBuilder):
 
     def build(self) -> GraphFlow:
         # Override return type hint
-        return cast(GraphFlow, super().build())
+        return cast("GraphFlow", super().build())

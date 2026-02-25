@@ -229,7 +229,6 @@ def test_gatekeeper_blocked_domain() -> None:
     from coreason_manifest.spec.core.flow import FlowDefinitions, LinearFlow
     from coreason_manifest.spec.core.nodes import AgentNode
     from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
-    from coreason_manifest.spec.core.governance import Governance
     from coreason_manifest.utils.gatekeeper import validate_policy
 
     tool = ToolCapability(name="BadUrl", url=HttpUrl("http://example.com"))
@@ -464,6 +463,7 @@ def test_loader_exception_paths() -> None:
 
 def test_loader_cleanup_deps() -> None:
     # Test cleanup of dependencies on success and failure
+    # Architectural Change: Modules are now persisted in sys.modules (cached) to prevent race conditions.
     import tempfile
     from pathlib import Path
 
@@ -478,14 +478,9 @@ def test_loader_cleanup_deps() -> None:
         (p / "agent1.py").chmod(0o600)
 
         # Load
-        # We need to ensure dep1 is NOT in sys.modules before
-        if "dep1" in sys.modules:
-            del sys.modules["dep1"]
-
         load_agent_from_ref("agent1.py:Agent", root_dir=p)
 
-        # Verify dep1 is cleaned up
-        assert "dep1" not in sys.modules
+        # We no longer assert "dep1" is not in sys.modules as persistence is desired for thread safety.
 
     # Case 2: Failure cleanup
     with tempfile.TemporaryDirectory() as d:
@@ -497,14 +492,8 @@ def test_loader_cleanup_deps() -> None:
         (p / "agent2.py").write_text("import dep2\nraise RuntimeError('fail')")
         (p / "agent2.py").chmod(0o600)
 
-        if "dep2" in sys.modules:
-            del sys.modules["dep2"]
-
         with pytest.raises(RuntimeError, match="fail"):
             load_agent_from_ref("agent2.py:Agent", root_dir=p)
-
-        # Verify dep2 is cleaned up
-        assert "dep2" not in sys.modules
 
 
 def test_flow_cycle_detection_unreachable() -> None:

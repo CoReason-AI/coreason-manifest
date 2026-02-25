@@ -258,7 +258,9 @@ def test_graph_flow_swarm_variable_remediation() -> None:
 
     errors = validate_flow(flow)
 
-    error = next((e for e in errors if e.code == "ERR_CAP_MISSING_VAR" and e.details.get("variable") == "missing_var"), None)
+    error = next(
+        (e for e in errors if e.code == "ERR_CAP_MISSING_VAR" and e.details.get("variable") == "missing_var"), None
+    )
     assert error is not None
     assert error.remediation is not None
     assert error.remediation.type == "update_field"

@@ -7,17 +7,16 @@ from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
     Edge,
-    VariableDef,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
+    VariableDef,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.interop.antibody import AntibodyBase
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
-from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.validator import validate_flow
 
@@ -141,7 +140,9 @@ def test_swarm_variable_valid() -> None:
         metadata=FlowMetadata(name="test", version="1.0"),
         interface=FlowInterface(),
         # Use VariableDef with explicit type
-        blackboard=Blackboard(variables={"existing_var": VariableDef(type="list"), "out_var": VariableDef(type="list")}),
+        blackboard=Blackboard(
+            variables={"existing_var": VariableDef(type="list"), "out_var": VariableDef(type="list")}
+        ),
         graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
         definitions=FlowDefinitions(profiles={}),
     )

@@ -27,7 +27,7 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     ResilienceStrategy,
 )
-from coreason_manifest.spec.core.tools import ToolPack, ToolCapability
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
@@ -509,7 +509,9 @@ def _validate_orphan_nodes(flow: GraphFlow) -> list[ComplianceReport]:
     ]
 
 
-def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefinitions | None) -> list[ComplianceReport]:
+def _validate_referential_integrity(
+    nodes: list[AnyNode], definitions: FlowDefinitions | None
+) -> list[ComplianceReport]:
     """
     Validates string references (e.g. resilience templates, profiles).
     """
@@ -573,7 +575,9 @@ def _validate_referential_integrity(nodes: list[AnyNode], definitions: FlowDefin
     return errors
 
 
-def _validate_supervision(node: AnyNode, valid_ids: set[str], definitions: FlowDefinitions | None) -> list[ComplianceReport]:
+def _validate_supervision(
+    node: AnyNode, valid_ids: set[str], definitions: FlowDefinitions | None
+) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
     # Check unified resilience field on any node type

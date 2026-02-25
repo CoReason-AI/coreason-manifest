@@ -1,23 +1,16 @@
-from typing import Any
 
-import pytest
 
-from coreason_manifest.builder import NewLinearFlow
 from coreason_manifest.spec.core.flow import (
     DataSchema,
-    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode, SwarmNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 from coreason_manifest.spec.core.resilience import (
-    EscalationStrategy,
     FallbackStrategy,
-    ReflexionStrategy,
-    ResilienceStrategy,
     SupervisionPolicy,
 )
 from coreason_manifest.utils.validator import validate_flow
@@ -33,7 +26,9 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]), steps=[node], definitions=None
     )
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing" for e in errors)
+    assert any(
+        e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing" for e in errors
+    )
 
     # 2. Supervision Policy (default strategy)
     p = SupervisionPolicy(handlers=[], default_strategy=s)
@@ -44,7 +39,9 @@ def test_validator_catch_invalid_fallback_ids() -> None:
         metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]), steps=[node2], definitions=None
     )
     errors2 = validate_flow(flow2)
-    assert any(e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing" for e in errors2)
+    assert any(
+        e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing" for e in errors2
+    )
 
 
 def test_fallback_cycle_detection() -> None:
@@ -63,7 +60,6 @@ def test_fallback_cycle_detection() -> None:
     )
 
     # Use unified validation
-    from coreason_manifest.spec.core.flow import Graph, GraphFlow
     from coreason_manifest.utils.validator import _validate_topology_cycles
 
     # Need to put them in a flow context

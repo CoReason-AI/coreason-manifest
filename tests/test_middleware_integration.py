@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow
-from coreason_manifest.spec.interop.exceptions import ManifestError, SecurityJailViolationError
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import load_middleware_from_ref
 from coreason_manifest.utils.validator import validate_flow
 
@@ -185,7 +185,9 @@ governance:
     data = yaml.safe_load(manifest_yaml)
     flow = GraphFlow.model_validate(data)
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors)
+    assert any(
+        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
+    )
 
 
 def test_validation_no_definitions() -> None:
@@ -211,7 +213,9 @@ governance:
     data = yaml.safe_load(manifest_yaml)
     flow = GraphFlow.model_validate(data)
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors)
+    assert any(
+        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
+    )
 
 
 def test_validation_no_middlewares() -> None:
@@ -241,7 +245,9 @@ governance:
     data = yaml.safe_load(manifest_yaml)
     flow = GraphFlow.model_validate(data)
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors)
+    assert any(
+        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
+    )
 
 
 def test_validation_missing_key_with_existing_middlewares() -> None:
@@ -273,7 +279,14 @@ governance:
     flow = GraphFlow.model_validate(data)
     errors = validate_flow(flow)
 
-    error = next((e for e in errors if e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw"), None)
+    error = next(
+        (
+            e
+            for e in errors
+            if e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw"
+        ),
+        None,
+    )
     assert error is not None
 
     # Verify remediation

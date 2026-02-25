@@ -346,12 +346,12 @@ def _execute_jailed_module(
                 raise
             raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
         finally:
-            # Cleanup dependencies loaded during execution
-            cleanup_modules = _jail_modules_var.get()
-            if cleanup_modules:
-                for mod in cleanup_modules:
-                    if mod in sys.modules:
-                        del sys.modules[mod]
+            # Architectural Decision: We DO NOT clean up dependencies (cleanup_modules) here.
+            # Rationale: Deleting from sys.modules causes race conditions in concurrent/async workloads
+            # if multiple tasks share the same jail root (and thus the same hash-namespaced modules).
+            # Python's import system is thread-safe; deleting from underneath it is not.
+            # Memory leak risk is acceptable for this manifest loader context (caching behavior).
+            pass
 
     loaded_class = exec_globals.get(class_name)
 

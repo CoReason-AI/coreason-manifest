@@ -128,8 +128,6 @@ def test_load_agent_class_missing(tmp_path: Path) -> None:
         load_agent_from_ref("good.py:Agent", root_dir=jail)
 
 
-
-
 def test_load_agent_exec_fail_cleanup_deps(tmp_path: Path) -> None:
     jail = tmp_path / "jail"
     jail.mkdir()

@@ -1,8 +1,5 @@
-from typing import Any
 
-import pytest
 
-from coreason_manifest.builder import NewLinearFlow
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     FlowDefinitions,
@@ -89,7 +86,7 @@ def test_coverage_validator_escalation_empty_queue() -> None:
 def test_supervision_policy_complex_validation() -> None:
     """Test validation of SupervisionPolicy (complex) in resilience field."""
     # Create a complex policy with a fallback strategy that points to a missing node
-    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, FallbackStrategy, SupervisionPolicy
+    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, SupervisionPolicy
 
     complex_policy = SupervisionPolicy(
         handlers=[
@@ -107,8 +104,14 @@ def test_supervision_policy_complex_validation() -> None:
     errors = _validate_supervision(node, {"a1"}, None)
 
     # Should catch both missing IDs
-    assert any(e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_handler" for e in errors)
-    assert any(e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_default" for e in errors)
+    assert any(
+        e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_handler"
+        for e in errors
+    )
+    assert any(
+        e.code == "ERR_RESILIENCE_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_default"
+        for e in errors
+    )
 
 
 def test_validator_string_reference_skip() -> None:
@@ -122,7 +125,7 @@ def test_validator_string_reference_skip() -> None:
 
 def test_fallback_cycle_complex_policy() -> None:
     """Test cycle detection with SupervisionPolicy (complex)."""
-    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, FallbackStrategy, SupervisionPolicy
+    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, SupervisionPolicy
 
     policy_a = SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="b"))
 
@@ -164,7 +167,6 @@ def test_validator_definitions_profile_scanning() -> None:
         Graph,
         GraphFlow,
     )
-    from coreason_manifest.utils.validator import validate_flow
 
     # Define a profile with a variable
     definitions = FlowDefinitions(
@@ -219,7 +221,6 @@ def test_jinja2_filter_validation() -> None:
         GraphFlow,
         VariableDef,
     )
-    from coreason_manifest.utils.validator import validate_flow
 
     agent = AgentNode(
         id="n1",
@@ -284,7 +285,6 @@ def test_swarm_type_safety() -> None:
         GraphFlow,
         VariableDef,
     )
-    from coreason_manifest.utils.validator import validate_flow
 
     blackboard = Blackboard(variables={"text_var": VariableDef(type="string")}, persistence=False)
 
@@ -325,7 +325,6 @@ def test_inspector_regex_warning() -> None:
         GraphFlow,
         VariableDef,
     )
-    from coreason_manifest.spec.core.nodes import InspectorNode
     from coreason_manifest.utils.validator import validate_flow
 
     blackboard = Blackboard(variables={"obj_var": VariableDef(type="object")}, persistence=False)
@@ -365,7 +364,6 @@ def test_validator_union_type_normalization() -> None:
         GraphFlow,
     )
     from coreason_manifest.spec.core.nodes import SwarmNode
-    from coreason_manifest.utils.validator import validate_flow
 
     inputs = DataSchema(
         json_schema={
@@ -445,7 +443,6 @@ def test_graph_flow_draft_mode() -> None:
         blackboard=None,
         graph=graph,
     )
-    from coreason_manifest.utils.validator import validate_flow
 
     errors = validate_flow(flow_pub)
     assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "missing-tool" for e in errors)

@@ -1,9 +1,9 @@
 import pytest
 
 from coreason_manifest.spec.core.flow import FlowDefinitions
-from coreason_manifest.utils.validator import validate_integrity
 from coreason_manifest.spec.core.nodes import CognitiveProfile, SwarmNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.utils.validator import validate_integrity
 
 
 def test_swarm_integrity_validation() -> None:

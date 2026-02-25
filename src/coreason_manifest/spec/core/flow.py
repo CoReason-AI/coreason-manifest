@@ -18,8 +18,8 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
-from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID, RiskLevel
+from coreason_manifest.spec.core.tools import AnyTool, ToolPack
+from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
@@ -174,8 +174,6 @@ class VariableDef(CoreasonModel):
     description: str | None = None
 
 
-
-
 class GraphFlow(CoreasonModel):
     """
     Standard graph-based execution flow.
@@ -190,7 +188,6 @@ class GraphFlow(CoreasonModel):
     blackboard: Blackboard | None = Field(default_factory=Blackboard)
     definitions: FlowDefinitions | None = None
     graph: Graph
-
 
 
 class LinearFlow(CoreasonModel):
@@ -211,7 +208,6 @@ class LinearFlow(CoreasonModel):
         return self.steps
 
 
-
 Manifest = GraphFlow
 
 
@@ -224,5 +220,3 @@ class AgentRequest(CoreasonModel):
 
     manifest: GraphFlow | LinearFlow
     metadata: dict[str, Any] = Field(default_factory=dict)
-
-

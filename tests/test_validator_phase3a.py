@@ -100,8 +100,16 @@ def test_validate_graph_flow_invalid_edges() -> None:
         status="draft",
     )
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and e.details["target"] == "missing" for e in errors if e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and "target" in e.details)
-    assert any(e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and e.details["source"] == "missing" for e in errors if e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and "source" in e.details)
+    assert any(
+        e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and e.details["target"] == "missing"
+        for e in errors
+        if e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and "target" in e.details
+    )
+    assert any(
+        e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and e.details["source"] == "missing"
+        for e in errors
+        if e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and "source" in e.details
+    )
 
 
 def test_validate_switch_node_invalid_targets() -> None:
@@ -225,7 +233,6 @@ def test_validate_duplicate_node_ids() -> None:
 
 def test_validate_graph_flow_empty() -> None:
     """Test validation for empty graph."""
-    import pytest
 
     # Entry point missing is checked in verify_integrity (strict) or validate_flow
     graph = Graph(nodes={}, edges=[], entry_point="missing")

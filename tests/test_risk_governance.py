@@ -49,7 +49,9 @@ def test_risk_governance_graph_flow() -> None:
         governance=Governance(max_risk_level=RiskLevel.STANDARD),
     )
     errors = validate_flow(flow_blocked)
-    assert any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("tool_name") == "nuke_database" for e in errors)
+    assert any(
+        e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("tool_name") == "nuke_database" for e in errors
+    )
 
     # Case 3: Kill switch set to 'critical' (should PASS)
     flow_allowed = GraphFlow(
@@ -152,7 +154,9 @@ def test_inline_tool_bypass_prevention() -> None:
     )
 
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("tool_name") == "inline_nuke" for e in errors)
+    assert any(
+        e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("tool_name") == "inline_nuke" for e in errors
+    )
 
 
 def test_scan_remote_uri_fail_closed() -> None:
@@ -174,7 +178,9 @@ def test_scan_remote_uri_fail_closed() -> None:
     )
 
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("assumed_risk") == "critical" for e in errors)
+    assert any(
+        e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("assumed_risk") == "critical" for e in errors
+    )
 
 
 def test_scan_remote_uri_allowed_if_critical() -> None:

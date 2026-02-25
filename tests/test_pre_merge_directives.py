@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitState, ToolAccessPolicy, check_circuit
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
@@ -149,11 +149,11 @@ def test_module_namespace_clean(tmp_path: Path) -> None:
     assert "v1.2-agent" not in cls.__module__
     assert cls.__module__.startswith("_jail_")
 
-    # We can check if it is importable (if context persists or if we are just checking the string)
-    # The test failed with KeyError because the module might be cleaned up if it was only temporary?
-    # SandboxedPathFinder keeps modules in _jail_modules_var.
-    # But load_agent_from_ref cleans up:
-    # "if module_name in sys.modules: del sys.modules[module_name]"
-    # So we CANNOT access sys.modules[cls.__module__] after return.
+    # We can check if it is importable.
+    # Main agent modules loaded via `exec` are NOT in sys.modules (which is correct for isolation).
+    # Dependencies loaded via imports WOULD be in sys.modules (cached).
+
+    import sys
+    assert cls.__module__ not in sys.modules
 
     # The class still holds the module name reference.

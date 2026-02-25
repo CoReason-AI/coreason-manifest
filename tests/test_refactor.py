@@ -126,9 +126,7 @@ def test_merkle_dag_parallel() -> None:
     assert verify_merkle_proof(trace_tampered) is False
 
 
-def test_extra_fields_forbidden(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_extra_fields_forbidden(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     """
     5. test_extra_fields_forbidden: Attempt to pass tenant_id="123" at the root of an
        AgentRequest instantiation. Prove it crashes with a validation error.

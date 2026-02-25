@@ -1,12 +1,9 @@
 # tests/test_registry_pattern.py
 
-from typing import Any
 
-import pytest
 
 from coreason_manifest.spec.core.flow import (
     DataSchema,
-    Edge,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
@@ -87,7 +84,10 @@ def test_referential_integrity_failure() -> None:
 
     # 3. Expect an error code from validate_flow
     errors = validate_flow(flow)
-    assert any(e.code == "ERR_CAP_UNDEFINED_PROFILE_002" and e.details.get("profile_id") == "missing_profile_id" for e in errors)
+    assert any(
+        e.code == "ERR_CAP_UNDEFINED_PROFILE_002" and e.details.get("profile_id") == "missing_profile_id"
+        for e in errors
+    )
 
 
 def test_tool_integrity_failure() -> None:

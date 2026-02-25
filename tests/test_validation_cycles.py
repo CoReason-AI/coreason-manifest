@@ -1,12 +1,8 @@
 # tests/test_validation_cycles.py
 
 from collections.abc import Callable
-from typing import Any
-
-import pytest
 
 from coreason_manifest.spec.core.flow import (
-    DataSchema,
     Edge,
     FlowDefinitions,
     FlowInterface,
@@ -18,7 +14,6 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    CognitiveProfile,
     SwitchNode,
 )
 from coreason_manifest.spec.core.resilience import (
@@ -30,9 +25,7 @@ from coreason_manifest.spec.core.resilience import (
 from coreason_manifest.utils.validator import validate_flow
 
 
-def test_simple_execution_cycle(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_simple_execution_cycle(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # A -> B -> A
     a = agent_node_factory("A")
     b = agent_node_factory("B")
@@ -49,9 +42,7 @@ def test_simple_execution_cycle(
     assert any("B" in e.details.get("cycle_nodes", []) for e in errors if e.code == "ERR_TOPOLOGY_CYCLE_002")
 
 
-def test_self_referencing_node(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_self_referencing_node(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # A -> A
     a = agent_node_factory("A")
     graph = Graph(nodes={"A": a}, edges=[Edge(from_node="A", to_node="A")], entry_point="A")
@@ -61,9 +52,7 @@ def test_self_referencing_node(
     assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
 
 
-def test_isolated_cycle(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_isolated_cycle(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # A (entry)
     # B <-> C (isolated cycle)
     a = agent_node_factory("A")
@@ -83,9 +72,7 @@ def test_isolated_cycle(
     # Reachability check (BFS from entry) would be needed to flag them as unreachable.
 
 
-def test_switch_node_cycle(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_switch_node_cycle(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # A -> Switch -> A
     a = agent_node_factory("A")
     switch = SwitchNode(
@@ -112,9 +99,7 @@ def test_switch_node_cycle(
     assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
 
 
-def test_linear_flow_cycle(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_linear_flow_cycle(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # LinearFlow implicit edges (A -> B).
     # Add fallback B -> A to create cycle.
     a = agent_node_factory("A")
@@ -126,9 +111,7 @@ def test_linear_flow_cycle(
     assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
 
 
-def test_hybrid_fallback_cycle(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_hybrid_fallback_cycle(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Graph: A -> B
     # Fallback: B -> A
     a = agent_node_factory("A")
@@ -166,9 +149,7 @@ def test_global_circuit_breaker_cycle(
     assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
 
 
-def test_referenced_template_cycle(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_referenced_template_cycle(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # A -> B
     # B uses template -> Fallback(A)
     # Cycle.
@@ -181,9 +162,7 @@ def test_referenced_template_cycle(
     b = agent_node_factory("B", resilience="ref:tpl")
 
     graph = Graph(nodes={"A": a, "B": b}, edges=[Edge(from_node="A", to_node="B")], entry_point="A")
-    flow = GraphFlow(
-        metadata=flow_metadata, interface=FlowInterface(), graph=graph, definitions=defs
-    )
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph, definitions=defs)
 
     errors = validate_flow(flow)
     assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)

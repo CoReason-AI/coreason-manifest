@@ -1,5 +1,6 @@
 from coreason_manifest.spec.core.flow import AnyNode, Edge, GraphFlow, LinearFlow
 
+
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
     """Tarjan's algorithm to find strongly connected components."""
     visited: set[str] = set()
@@ -56,6 +57,7 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
 
     return reachable
 
+
 def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], list[Edge]]:
     """
     Returns a unified view of the flow topology (nodes and edges).
@@ -63,14 +65,13 @@ def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], l
     """
     if isinstance(flow, GraphFlow):
         return list(flow.graph.nodes.values()), flow.graph.edges
-    elif isinstance(flow, LinearFlow):
+    if isinstance(flow, LinearFlow):
         nodes = flow.steps
         edges = []
         for i in range(len(nodes) - 1):
             # Use model_construct to bypass validation for generated edges
             # This is important for testing scenarios where node IDs might be invalid (e.g. escaping tests)
-            edges.append(Edge.model_construct(from_node=nodes[i].id, to_node=nodes[i+1].id))
+            edges.append(Edge.model_construct(from_node=nodes[i].id, to_node=nodes[i + 1].id))
         return nodes, edges
-    else:
-        # Raise error for unknown flow types to ensure strict typing/handling
-        raise ValueError(f"Unknown flow type: {type(flow)}. Expected LinearFlow or GraphFlow.")
+    # Raise error for unknown flow types to ensure strict typing/handling
+    raise ValueError(f"Unknown flow type: {type(flow)}. Expected LinearFlow or GraphFlow.")
