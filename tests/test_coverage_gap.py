@@ -562,8 +562,8 @@ def test_loader_resolve_refs_complex() -> None:
             "kind": "LinearFlow",
             "metadata": {"name": "main", "version": "1.0.0", "description": "d", "tags": []},
             # "interface" removed because LinearFlow doesn't support it in strict mode
-            "sequence": [{"$ref": "step1.yaml"}],
-            "definitions": {"schemas": {"shared": {"$ref": "shared.yaml"}}},
+            "sequence": [{"$include": "step1.yaml"}],
+            "definitions": {"schemas": {"shared": {"$include": "shared.yaml"}}},
         }
 
         step1 = {
@@ -588,11 +588,11 @@ def test_loader_resolve_refs_complex() -> None:
         assert flow.sequence[0].id == "s1"
 
         # Test circular dependency
-        (p / "cycle1.yaml").write_text(yaml.dump({"$ref": "cycle2.yaml"}))
-        (p / "cycle2.yaml").write_text(yaml.dump({"$ref": "cycle1.yaml"}))
+        (p / "cycle1.yaml").write_text(yaml.dump({"$include": "cycle2.yaml"}))
+        (p / "cycle2.yaml").write_text(yaml.dump({"$include": "cycle1.yaml"}))
 
         cycle_flow = main.copy()
-        cycle_flow["sequence"] = [{"$ref": "cycle1.yaml"}]
+        cycle_flow["sequence"] = [{"$include": "cycle1.yaml"}]
         (p / "cycle_main.yaml").write_text(yaml.dump(cycle_flow))
 
         with pytest.raises(RecursionError, match="Circular dependency detected"):
@@ -667,7 +667,7 @@ def test_loader_security_escapes() -> None:
         jail.mkdir()
 
         # 1. $ref escape
-        manifest = {"$ref": "../outside.yaml"}
+        manifest = {"$include": "../outside.yaml"}
         (jail / "bad_ref.yaml").write_text(yaml.dump(manifest))
         (p / "outside.yaml").write_text("content: 1")
 
@@ -692,7 +692,7 @@ def test_loader_ref_load_failure() -> None:
 
     with tempfile.TemporaryDirectory() as d:
         p = Path(d)
-        manifest = {"$ref": "missing.yaml"}
+        manifest = {"$include": "missing.yaml"}
         (p / "main.yaml").write_text(yaml.dump(manifest))
 
         with pytest.raises(ValueError, match="Failed to load reference"):

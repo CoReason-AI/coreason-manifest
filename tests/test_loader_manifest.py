@@ -8,10 +8,11 @@ import yaml
 from coreason_manifest.spec.core.flow import LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import (
+    RuntimeSecurityWarning,
     SandboxedPathFinder,
     UniqueKeyLoader,
     _jail_root_var,
-    _resolve_refs,
+    _resolve_includes,
     _scan_for_dynamic_references,
     load_flow_from_file,
     sandbox_context,
@@ -56,16 +57,16 @@ def test_resolve_refs_circular(tmp_path: Path) -> None:
     file1 = tmp_path / "file1.yaml"
     file2 = tmp_path / "file2.yaml"
 
-    file1.write_text('{"$ref": "file2.yaml"}')
-    file2.write_text('{"$ref": "file1.yaml"}')
+    file1.write_text('{"$include": "file2.yaml"}')
+    file2.write_text('{"$include": "file1.yaml"}')
 
     loader = MagicMock()
     loader.read_text.side_effect = lambda x: (tmp_path / x).read_text()
 
     # Use match="Circular dependency" to verify exact error
-    data = {"$ref": "file2.yaml"}
+    data = {"$include": "file2.yaml"}
     with pytest.raises(RecursionError, match="Circular dependency"):
-        _resolve_refs(data, tmp_path, loader)
+        _resolve_includes(data, tmp_path, loader)
 
 
 def test_resolve_refs_escape(tmp_path: Path) -> None:
@@ -76,10 +77,10 @@ def test_resolve_refs_escape(tmp_path: Path) -> None:
 
     loader = MagicMock()
 
-    data = {"$ref": "../outside.yaml"}
+    data = {"$include": "../outside.yaml"}
 
     with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
-        _resolve_refs(data, jail, loader)
+        _resolve_includes(data, jail, loader)
 
 
 def test_load_flow_from_file_valid(tmp_path: Path) -> None:
@@ -177,3 +178,53 @@ def test_loader_symlink_module_py(tmp_path: Path) -> None:
     finder = SandboxedPathFinder()
     with sandbox_context(jail), pytest.raises(SecurityJailViolationError, match="outside jail"):
         finder.find_spec("mod")
+
+
+def test_loader_ref_passthrough(tmp_path: Path) -> None:
+    # Test that $ref is passed through and not resolved as file
+    import yaml
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    manifest = {
+        "kind": "LinearFlow",
+        "metadata": {"name": "Test", "version": "1.0.0", "description": "d", "tags": []},
+        "sequence": [
+            {"type": "agent", "id": "step1", "profile": "p", "tools": [], "metadata": {"ref": {"$ref": "#/foo"}}}
+        ],
+        "definitions": {},
+    }
+
+    (tmp_path / "main.yaml").write_text(yaml.dump(manifest))
+
+    # Should not raise ValueError or FileNotFoundError (Anchor Crash check)
+    flow = load_flow_from_file(str(tmp_path / "main.yaml"), strict_security=False)
+
+    assert isinstance(flow, LinearFlow)
+    assert flow.sequence[0].metadata["ref"] == {"$ref": "#/foo"}
+
+
+def test_loader_include_sibling_warning(tmp_path: Path) -> None:
+    # Test that a warning is issued when sibling keys are present with $include
+    import yaml
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    manifest = {
+        "kind": "LinearFlow",
+        "metadata": {"name": "Test", "version": "1.0.0", "description": "d", "tags": []},
+        "sequence": [{"$include": "step1.yaml", "ignored_key": "value"}],
+        "definitions": {},
+    }
+
+    step1 = {"type": "agent", "id": "step1", "profile": "p", "tools": []}
+
+    (tmp_path / "main.yaml").write_text(yaml.dump(manifest))
+    (tmp_path / "step1.yaml").write_text(yaml.dump(step1))
+
+    with pytest.warns(RuntimeSecurityWarning, match="Sibling keys alongside \\$include are ignored"):
+        flow = load_flow_from_file(str(tmp_path / "main.yaml"), strict_security=False)
+
+    # Verify the included content is loaded
+    assert isinstance(flow, LinearFlow)
+    assert flow.sequence[0].id == "step1"
