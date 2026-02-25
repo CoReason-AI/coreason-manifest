@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import BaseModel
 
-from coreason_manifest.utils.integrity import compute_hash
+from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
 
 class TestCanonicalHashingStrategy:
@@ -112,3 +112,21 @@ class TestCanonicalHashingStrategy:
         }
         expected_data = {"a": 1}
         assert compute_hash(data) == compute_hash(expected_data)
+
+    def test_verify_merkle_with_nondeterministic_payload(self) -> None:
+        """Test verify_merkle_proof handles non-deterministic payloads gracefully."""
+
+        class OpaqueData:
+            pass
+
+        # Create a trace with a node containing an opaque object
+        # reconstruct_payload will accept the dict, but compute_hash will fail
+        node = {
+            "data": OpaqueData(),
+            "execution_hash": "some_hash",
+            "parent_hashes": [],
+        }
+        trace = [node]
+
+        # Should return False (invalid), catching the TypeError internally
+        assert verify_merkle_proof(trace) is False
