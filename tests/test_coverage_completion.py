@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, cast
 
 import pytest
 
@@ -160,9 +161,6 @@ def test_swarm_node_reducer_validation() -> None:
     """
     Cover nodes.py:317 logic: SwarmNode reducer='summarize' without aggregator_model.
     """
-    # This should raise error during SwarmNode validation itself (not GraphFlow validation)
-    # But since SwarmNode is a model, it runs after init.
-
     with pytest.raises(ManifestError) as excinfo:
         SwarmNode(
             id="swarm",
