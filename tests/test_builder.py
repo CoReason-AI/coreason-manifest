@@ -88,6 +88,7 @@ def test_graph_builder() -> None:
 
     # Assert new features
     from coreason_manifest.spec.core.flow import DataSchema
+
     assert isinstance(flow.interface.inputs, DataSchema)
     assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}
     assert isinstance(flow.interface.outputs, DataSchema)
