@@ -86,6 +86,13 @@ class CanonicalHashingStrategy(HashingStrategy):
 
         if isinstance(obj, BaseModel):
             # Use model_dump(exclude_none=True, mode="python") and recursively process.
+            excludes = getattr(obj, "_hash_exclude_", None)
+            return self._recursive_sort_and_sanitize(
+                obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
+            )
+
+        if hasattr(obj, "model_dump"):
+            # Pydantic v2 or compatible
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
 
         if isinstance(obj, float):
@@ -102,6 +109,10 @@ class CanonicalHashingStrategy(HashingStrategy):
         raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
 
     def compute_hash(self, obj: Any) -> str:
+        if hasattr(obj, "compute_hash"):
+            # Self-hashing objects (avoid infinite recursion if they call back here)
+            return str(obj.compute_hash())
+
         # 1. Pass the object through _recursive_sort_and_sanitize method.
         sanitized = self._recursive_sort_and_sanitize(obj)
 
