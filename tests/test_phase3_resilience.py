@@ -460,7 +460,7 @@ def test_escalation_template_syntax() -> None:
     assert s2.template == "Static error message"
 
     # Template with unauthorized variables should fail
-    with pytest.raises(ValidationError, match="unauthorized context variables"):
+    with pytest.raises(ValidationError, match="unauthorized root variable"):
         EscalationStrategy(
             queue_name="q",
             notification_level="info",
