@@ -76,6 +76,19 @@ ToolID = Annotated[
 ]
 
 
+# Middleware Identifiers (Alphanumeric, underscores, hyphens only)
+MiddlewareID = Annotated[
+    str,
+    Field(
+        pattern=r"^[a-zA-Z0-9_-]+$",
+        min_length=1,
+        max_length=64,
+        description="Identifier for a middleware component. Alphanumeric, underscores, and hyphens only.",
+        examples=["pii_redactor", "security-filter"],
+    ),
+]
+
+
 # Risk Level
 class RiskLevel(StrEnum):
     """
@@ -130,7 +143,7 @@ class MiddlewareDef(CoreasonModel):
 
     ref: str = Field(
         ...,
-        pattern=r"^.+\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
-        description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
+        pattern=r"^[^\s]+\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
+        description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor'). Cannot contain whitespace.",
     )
     config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")

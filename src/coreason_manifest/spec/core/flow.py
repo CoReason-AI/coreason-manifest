@@ -19,7 +19,7 @@ from coreason_manifest.spec.core.nodes import (
     SwitchNode,
 )
 from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
-from coreason_manifest.spec.core.types import MiddlewareDef, NodeID, RiskLevel
+from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 from coreason_manifest.utils.io import SecurityViolationError
@@ -168,7 +168,7 @@ class FlowDefinitions(CoreasonModel):
     tools: dict[str, AnyTool] = Field(default_factory=dict)
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
-    middlewares: dict[str, MiddlewareDef] = Field(default_factory=dict)
+    middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
 
