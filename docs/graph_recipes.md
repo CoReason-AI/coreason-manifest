@@ -1,0 +1,591 @@
+# Orchestration: Graph Recipes
+
+**Note:** This document defines the *schema* and *contract* for orchestration. As part of the Shared Kernel, it provides the blueprints (`RecipeDefinition`) that the Runtime Engine executes. It does not contain the execution logic itself.
+
+Coreason V2 introduces **Graph Recipes**, replacing linear workflows with a robust **Directed Cyclic Graph (DCG)** architecture. This allows for complex orchestration patterns including loops, conditional branching, and human-in-the-loop interactions.
+
+## Concept: Graphs, Not Lists
+
+In V1 (and `ManifestV2`), workflows were simple lists of steps. In V2 Graph Recipes, a `RecipeDefinition` contains a `GraphTopology`.
+A Topology is a collection of **Nodes** connected by **Edges**.
+
+*   **Nodes**: The "Workers" (Agents, Humans, Routers).
+*   **Edges**: The "Control Flow" (Next Step).
+*   **Entry Point**: Where execution begins.
+
+This structure allows for **Cycles** (loops), enabling agents to self-correct or retry tasks until a condition is met.
+
+## Syntactic Sugar: Task Sequences (New in 0.22.0)
+
+While Graphs are powerful, they can be verbose for simple linear workflows. To simplify this, `RecipeDefinition` supports **Task Sequences**.
+
+You can pass a simple list of nodes (or a dictionary with a `"steps"` key) to the `topology` field, and the library will automatically:
+1.  Set the first node as the `entry_point`.
+2.  Create linear edges connecting each node to the next (A -> B -> C).
+3.  Compile it into a full `GraphTopology` object.
+
+### Example: Linear Sequence
+
+```python
+from coreason_manifest.spec.v2.recipe import RecipeDefinition, AgentNode, HumanNode
+
+# Define nodes linearly
+step1 = AgentNode(id="research", agent_ref="researcher")
+step2 = HumanNode(id="approve", prompt="Approve?")
+step3 = AgentNode(id="publish", agent_ref="publisher")
+
+# Pass as a list
+recipe = RecipeDefinition(
+    ...
+    topology=[step1, step2, step3]  # Automatically converts to GraphTopology
+)
+
+# Resulting Topology:
+# Nodes: [research, approve, publish]
+# Edges: research -> approve, approve -> publish
+# Entry Point: research
+```
+
+## Recipe Components
+
+A `RecipeDefinition` is composed of four key layers:
+
+1.  **Interface (Contract)**: Defines inputs and outputs.
+2.  **State (Memory)**: Defines shared variables.
+3.  **Policy (Governance)**: Defines execution limits.
+4.  **Topology (Logic)**: Defines the graph structure.
+
+### 1. The Interface Layer (`RecipeInterface`)
+Defines the input/output contract for the Recipe using JSON Schema.
+
+```python
+interface=RecipeInterface(
+    inputs={"user_input": {"type": "string"}},
+    outputs={"final_report": {"type": "string"}}
+)
+```
+
+### 2. Feasibility Constraints (`Constraint`)
+
+The `RecipeDefinition` can enforce feasibility checks (logic gates) against the execution context before running. These are defined in the `requirements` list.
+
+```python
+from coreason_manifest.spec.v2.recipe import Constraint
+
+requirements=[
+    Constraint(variable="user.role", operator="eq", value="admin"),
+    Constraint(variable="data.row_count", operator="gt", value=500),
+    Constraint(
+        variable="system.mode",
+        operator="eq",
+        value="maintenance",
+        required=False, # If this fails, it logs a warning but proceeds
+        error_message="System is in maintenance mode; performance may be degraded."
+    )
+]
+```
+
+**Supported Operators:** `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `in`, `contains`.
+
+You can validate these constraints against a context dictionary using the `check_feasibility` method:
+
+```python
+is_feasible, errors = recipe.check_feasibility(context={"user": {"role": "guest"}})
+if not is_feasible:
+    print(f"Recipe cannot run: {errors}")
+```
+
+### 3. The State Layer (`StateDefinition`)
+Defines the shared memory structure (Blackboard) and persistence strategy.
+
+```python
+state=StateDefinition(
+    properties={"draft": {"type": "string"}},
+    persistence="ephemeral" # or "redis", "postgres"
+)
+```
+
+### 4. The Policy Layer (`PolicyConfig`)
+Sets execution limits and error handling strategies, including **MCP Governance** and **Traffic Prioritization**.
+
+```python
+from coreason_manifest.spec.v2.recipe import PolicyConfig, ExecutionPriority
+
+policy=PolicyConfig(
+    # --- Traffic Governance (QoS) ---
+    priority=ExecutionPriority.CRITICAL, # 10 (High), 5 (Normal), 2 (Low), 1 (Batch)
+    rate_limit_rpm=60,      # Max 60 requests per minute
+    rate_limit_tpm=10000,   # Max 10k tokens per minute
+    caching_enabled=True,   # Semantic Caching allowed
+
+    # --- Execution Limits ---
+    max_retries=3,
+    timeout_seconds=3600,
+    execution_mode="sequential", # or "parallel"
+
+    # --- Financial & Safety ---
+    budget_cap_usd=50.0,
+    sensitive_tools=["buy_stock", "delete_db"],
+    allowed_mcp_servers=["github", "brave-search"],
+    token_budget=5000, # Max tokens for the assembled prompt context
+    # Governance Text Injection (New)
+    safety_preamble="Do not offer medical advice.",
+    legal_disclaimer="Generated by AI."
+)
+```
+
+### 5. The Environment Layer (`RuntimeEnvironment`)
+
+New in 0.22.0, the `environment` field allows recipes to declare their **MCP Infrastructure Requirements**.
+
+The `RecipeDefinition` also supports a `default_model_policy` field to set global model selection rules for all agents in the recipe. See [Model Routing](model_routing.md).
+
+```python
+from coreason_manifest.spec.v2.resources import RuntimeEnvironment, McpServerRequirement
+
+environment=RuntimeEnvironment(
+    mcp_servers=[
+        McpServerRequirement(name="github", required_tools=["create_issue"])
+    ]
+)
+```
+
+See [MCP Runtime & Governance](mcp_runtime.md) for full details.
+
+### 6. The Test Layer (`SimulationScenario`)
+
+Recipes can now embed self-contained test scenarios (harvested from Simulacrum) for validation.
+
+```python
+from coreason_manifest.spec.simulation import SimulationScenario, ValidationLogic
+
+tests=[
+    SimulationScenario(
+        id="happy-path",
+        description="Verify basic functionality",
+        inputs={"q": "hello"},
+        validation_logic=ValidationLogic.EXACT_MATCH
+    )
+]
+```
+
+### 7. The Compliance Layer (`ComplianceConfig`)
+
+The `compliance` field dictates the rigor of the audit trail, instructing the `coreason-auditor` worker on what artifacts to generate (GxP, SOC2, etc.).
+
+```python
+from coreason_manifest.spec.v2.recipe import ComplianceConfig, AuditLevel, RetentionPolicy
+
+compliance=ComplianceConfig(
+    audit_level=AuditLevel.GXP_COMPLIANT, # "full" trace + signatures
+    retention=RetentionPolicy.SEVEN_YEARS, # Legal hold
+    generate_aibom=True,    # Create software supply chain manifest
+    generate_pdf_report=True,
+    require_signature=True, # Cryptographically sign output
+    mask_pii=False          # Do not scrub PII (e.g., if needed for clinical records)
+)
+```
+
+### 8. The Identity Layer (`IdentityRequirement`)
+
+New in 0.23.0, the `identity` field allows a Recipe to strictly declare its **Access Control** requirements (RBAC) and **Context Injection** needs. This enables the runtime to act as a security Gatekeeper.
+
+See [Identity & Access Management (IAM)](identity_access_management.md) for full details.
+
+```python
+from coreason_manifest.spec.v2.identity import IdentityRequirement, AccessScope
+
+identity=IdentityRequirement(
+    min_scope=AccessScope.INTERNAL,
+    required_roles=["finance_admin"],
+    inject_user_profile=True,
+    anonymize_pii=False
+)
+```
+
+### 9. The Guardrails Layer (`GuardrailsConfig`)
+
+New in 0.23.0, the `guardrails` field configures active defense mechanisms like Circuit Breakers and Drift Detection.
+
+```python
+from coreason_manifest.spec.v2.guardrails import GuardrailsConfig
+
+guardrails=GuardrailsConfig(
+    input_guardrails=["sql-injection-check"],
+    output_guardrails=["hallucination-check"],
+    circuit_breaker_threshold=5 # Stop if 5 failures in a row
+)
+```
+
+## The Graph Topology Schema (`GraphTopology`)
+
+The `GraphTopology` enforces structural integrity. It requires a list of `nodes`, a list of `edges`, and a valid `entry_point`.
+
+### JSON Example: Agent -> Human Handover
+
+Here is a raw JSON example of a topology where an AI Agent performs a task, and then a Human Manager must approve it.
+
+### Visualization
+
+```mermaid
+graph TD
+    start((Entry)) --> A[research-task]
+    A -->|on_success| B{{manager-approval}}
+    B -->|approve| C[publish-result]
+    B -->|reject| A
+    C --> stop((End))
+
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#fff9c4,stroke:#e65100,stroke-width:2px
+    style C fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+**How to Interpret this Diagram:**
+*   **Rectangles (`[Node]`)**: Represent **Agent Tasks** (e.g., `research-task`, `publish-result`).
+*   **Hexagons (`{{Node}}`)**: Represent **Human Decision Gateways** (e.g., `manager-approval`).
+*   **Arrows (`-->`)**: Represent the **Control Flow** (Edges). The label on the arrow (e.g., `on_success`, `reject`) is the condition required to traverse that edge.
+*   **Cycles**: Notice the arrow going from `manager-approval` back to `research-task` if rejected. This illustrates the **Cyclic** nature of the graph.
+
+```json
+{
+  "entry_point": "research-task",
+  "nodes": [
+    {
+      "type": "agent",
+      "id": "research-task",
+      "agent_ref": "researcher-v1",
+      "inputs_map": {
+        "topic": "user_query"
+      }
+    },
+    {
+      "type": "human",
+      "id": "manager-approval",
+      "prompt": "Review the research report. Approve to proceed?",
+      "routes": {
+        "approve": "publish-result",
+        "reject": "research-task"
+      },
+      "timeout_seconds": 86400,
+      "required_role": "manager"
+    }
+  ],
+  "edges": [
+    {
+      "source": "research-task",
+      "target": "manager-approval",
+      "condition": "on_success"
+    }
+  ]
+}
+```
+
+### Node Types
+
+All nodes inherit from `RecipeNode`, which includes `id`, `metadata`, and `presentation` (UI layout).
+
+1.  **`AgentNode`** (`type: agent`): Executes an AI Agent.
+    - `agent_ref`: The ID or URI of the Agent Definition to execute.
+    - `construct`: (Optional) Inline definition of the agent's cognitive architecture (Assembler Pattern). See [The Assembler Pattern](assembler_pattern.md).
+    - `model_policy`: (Optional) Semantic Model Selection policy (inline or string ID). See [Model Routing](model_routing.md).
+    - `system_prompt_override`: Context-specific instructions (optional).
+    - `inputs_map`: Mapping parent outputs to agent inputs (dict[str, str]).
+
+2.  **`HumanNode`** (`type: human`): **A conditional router for human decision-making.** It presents a choice to the user and routes execution based on the selected `SteeringCommand`.
+    - `prompt`: Instruction for the human user.
+    - `routes`: A dictionary mapping `SteeringCommand` keys to Target Node IDs (type: `dict[SteeringCommand, str]`).
+    - `timeout_seconds`: SLA for approval (optional).
+    - `required_role`: Role required to approve (e.g., manager) (optional).
+    - **Note:** `HumanNode` inherits `collaboration` from `RecipeNode`. It does *not* use a separate `config` field.
+
+3.  **`RouterNode`** (`type: router`): Evaluates a variable and branches execution to different target nodes.
+    - `input_key`: The variable to evaluate (e.g., 'classification').
+    - `routes`: Map of value -> target_node_id.
+    - `default_route`: Fallback target_node_id.
+
+4.  **`EvaluatorNode`** (`type: evaluator`): Executes an LLM-as-a-Judge evaluation loop, providing scores and critiques to optimize content.
+    - `target_variable`: The key in the shared state/blackboard containing the content to evaluate.
+    - `evaluator_agent_ref`: Reference to the Agent Definition ID that will act as the judge.
+    - `evaluation_profile`: Inline criteria definition or a reference to a preset profile.
+    - `pass_threshold`: The score (0.0-1.0) required to proceed.
+    - `max_refinements`: Maximum number of loops allowed before forcing a generic fail/fallback.
+    - `pass_route`: Node ID to go to if score >= threshold.
+    - `fail_route`: Node ID to go to if score < threshold.
+    - `feedback_variable`: The key in the state where the critique/reasoning will be written.
+
+5.  **`GenerativeNode`** (`type: generative`): Acts as an interface definition for dynamic solvers (like ROMA) to solve a high-level goal recursively.
+    - `goal`: The high-level objective to be solved (e.g., "Research competitor pricing").
+    - `output_schema`: JSON Schema defining the expected structure of the final answer.
+    - `solver`: Configuration for the autonomous planning capabilities (`SolverConfig`).
+        - `strategy`: The planning strategy (`standard`, `tree_search`, `ensemble`).
+        - `depth_limit`: Hard limit on recursion depth (default: 3).
+        - `n_samples`: For SPIO (Ensemble): How many distinct plans to generate in parallel (default: 1).
+        - `beam_width`: For LATS (Tree Search): How many children to expand per node (default: 1).
+        - `max_iterations`: For LATS: The "Search Budget" (total simulations) (default: 10).
+        - `aggregation_method`: For SPIO-E: How to combine results (`best_of_n`, `majority_vote`, `weighted_merge`).
+    - `allowed_tools`: Whitelist of Tool IDs the solver is permitted to use.
+
+See [Generative Solvers & Strategies](generative_solvers.md) for more details.
+
+## Evaluator-Optimizer Workflow
+
+Coreason V2 natively supports the **Evaluator-Optimizer** pattern (popularized by Anthropic's Claude Cookbook). This pattern uses a dedicated `EvaluatorNode` to critique the output of a Generator agent and loop back for refinements until a quality threshold is met.
+
+### Example: Writer + Editor Loop
+
+```yaml
+topology:
+  nodes:
+    # 1. The Generator
+    - type: agent
+      id: "writer"
+      agent_ref: "copywriter-v1"
+      inputs_map:
+        topic: "user_topic"
+        critique: "critique_history"  # Receives feedback from the Evaluator
+
+    # 2. The Evaluator-Optimizer
+    - type: evaluator
+      id: "editor-check"
+      target_variable: "writer_output" # The content to grade
+      evaluator_agent_ref: "editor-llm" # The judge
+      evaluation_profile: "standard-critique" # The criteria
+
+      # Logic
+      pass_threshold: 0.9
+      max_refinements: 3
+
+      # Feedback Output
+      feedback_variable: "critique_history"
+
+      # Control Flow
+      pass_route: "publish"
+      fail_route: "writer" # Loops back to Generator for refinement
+
+    # 3. Success State
+    - type: agent
+      id: "publish"
+      agent_ref: "publisher-v1"
+```
+
+## Lifecycle Governance (Draft vs. Published)
+
+The `RecipeDefinition` enforces a strict lifecycle to distinguish between "work-in-progress" (Intent-based) and "execution-ready" (Concrete) states. This is controlled by the `status` field.
+
+### 1. Status: `DRAFT` (Default)
+A recipe in `DRAFT` mode is permissive. It allows:
+*   **Semantic References**: Using `SemanticRef` (intent descriptions) instead of concrete Agent IDs.
+*   **Incomplete Topology**: Missing entry points or dangling edges (if `topology.status="draft"`).
+*   **Partial Configuration**: Useful for AI-generated plans or initial human sketches.
+
+#### Intent-Based Planning (`SemanticRef`)
+In Draft mode, you can use `SemanticRef` to describe *what* an agent should do without selecting a specific tool or model yet. The `SemanticRef` structure supports rich metadata for AI Architects, including constraints, candidate recommendations, and optimization directives.
+
+```python
+from coreason_manifest.spec.v2.recipe import (
+    AgentNode,
+    SemanticRef,
+    RecipeRecommendation,
+    OptimizationIntent,
+    RecipeStatus
+)
+
+# 1. Recommendations from the Catalog
+rec = RecipeRecommendation(
+    ref="travel-agent-v1",
+    score=0.95,
+    rationale="High success rate for flight bookings.",
+    warnings=["Requires API key"]
+)
+
+# 2. Directives for Improvement (Harvested from Foundry)
+opt = OptimizationIntent(
+    base_ref="generic-agent",
+    improvement_goal="Minimize latency",
+    strategy="parallel",
+    # Advanced Tuning
+    metric_name="faithfulness",
+    teacher_model="gpt-4-turbo",
+    max_demonstrations=5
+)
+
+# 3. An Abstract Step with Metadata
+node = AgentNode(
+    id="step-1",
+    agent_ref=SemanticRef(
+        intent="Find cheapest flights to Tokyo",
+        constraints=["max_price < 1000", "airline in [ANA, JAL]"],
+        candidates=[rec],
+        optimization=opt
+    )
+)
+
+# Valid in DRAFT mode
+recipe = RecipeDefinition(
+    ...,
+    status=RecipeStatus.DRAFT,
+    topology=GraphTopology(nodes=[node], ...)
+)
+```
+
+### 2. Status: `PUBLISHED`
+A recipe in `PUBLISHED` mode is strict. It enforces:
+*   **Concrete IDs Only**: All `SemanticRef` placeholders MUST be resolved to concrete Agent Definition IDs (`str`).
+*   **Structural Integrity**: The `topology` MUST be complete (valid entry point, no dangling edges).
+*   **Execution Ready**: Guarantees the runtime can execute the graph without ambiguity.
+
+Attempting to set `status="published"` on an invalid recipe will raise a `ValidationError`.
+
+```python
+# This will RAISE ValidationError because agent_ref is still semantic
+try:
+    recipe = RecipeDefinition(
+        ...,
+        status=RecipeStatus.PUBLISHED,
+        topology=GraphTopology(nodes=[node], ...)
+    )
+except ValidationError as e:
+    print("Lifecycle Error: Node 'step-1' is still abstract.")
+```
+
+### 3. Status: `ARCHIVED`
+Behaves similarly to `DRAFT` but indicates the recipe is deprecated or read-only.
+
+## Runtime Execution
+
+A compliant Runtime Engine (e.g., **CoReason Simulacrum**) is responsible for traversing the `RecipeDefinition` and executing nodes.
+
+### The Blackboard Architecture
+
+Execution state is maintained in a shared **Blackboard** (`context`).
+*   **Inputs Mapping**: When entering a node, data is mapped from the Blackboard to the Node's inputs using `inputs_map`.
+*   **Output Merging**: When a node completes, its output is merged back into the Blackboard.
+
+### Routing Logic
+
+*   **Standard Edges**: If a node has a single outgoing edge matching its ID, execution proceeds to the target.
+*   **Router Nodes**: `RouterNode` explicitly inspects a variable in the Blackboard (`input_key`) and selects the next node based on the `routes` map. If no match is found, it uses the `default_route`.
+
+### Execution Limits
+
+To prevent infinite loops in malformed graphs, the executor enforces a `max_steps` limit (default: 50). If the limit is reached, execution halts to protect resources.
+
+### Trace Generation
+
+The executor generates a `SimulationTrace` containing a list of `SimulationStep` objects, providing a full audit trail of the execution path, including inputs, outputs, and routing decisions.
+
+## Episteme: Meta-Cognition (New in 0.22.0)
+
+Coreason V2 introduces **Episteme**, a framework for meta-cognition that enables agents to critique their own work, detect knowledge gaps, and reason about their reasoning.
+
+This is configured via the `reasoning` field on any `RecipeNode`.
+
+See [Episteme: Meta-Cognition & Reasoning](episteme_reasoning.md) for detailed configuration patterns.
+
+## Flow Governance & Resilience (New in 0.23.0)
+
+Coreason V2 introduces **Flow Governance**, transforming the Recipe from a static DAG into a resilient State Machine.
+
+Nodes can now define `RecoveryConfig` to handle failures via **Retries** and **Fallbacks**. This is configured via the `recovery` field on any `RecipeNode`.
+
+### Configuration (`RecoveryConfig`)
+
+```python
+from coreason_manifest.spec.v2.recipe import RecoveryConfig, FailureBehavior
+
+recovery=RecoveryConfig(
+    max_retries=3,
+    retry_delay_seconds=1.0, # Exponential backoff start
+    behavior=FailureBehavior.ROUTE_TO_FALLBACK, # Strategy on final failure
+    fallback_node_id="human-intervention",
+    default_output={"status": "failed_gracefully"}
+)
+```
+
+### Failure Behaviors
+
+*   `FAIL_WORKFLOW`: (Default) Stop everything and raise an error.
+*   `CONTINUE_WITH_DEFAULT`: Use the `default_output` payload and proceed to the next step.
+*   `ROUTE_TO_FALLBACK`: Jump to the node specified in `fallback_node_id`.
+*   `IGNORE`: Return `None` and proceed (best effort).
+
+See [Flow Governance & Resilience](flow_governance.md) for detailed configuration patterns.
+
+## Interactive Control Plane (New in 0.22.0)
+
+Coreason V2 introduces an **Interactive Control Plane**, allowing any node (`AgentNode`, `GenerativeNode`, etc.) to declare *when* it should pause for human intervention and *what* parts of its state are mutable during execution.
+
+This is configured via the `interaction` field on any `RecipeNode`.
+
+### Configuration (`InteractionConfig`)
+
+```python
+from coreason_manifest.spec.v2.recipe import (
+    InteractionConfig,
+    TransparencyLevel,
+    InterventionTrigger
+)
+
+# Define interaction settings
+interaction = InteractionConfig(
+    transparency=TransparencyLevel.INTERACTIVE, # "Step-Through" mode
+    triggers=[
+        InterventionTrigger.ON_PLAN_GENERATION, # Pause after planning
+        InterventionTrigger.ON_FAILURE          # Pause on error
+    ],
+    editable_fields=["inputs", "system_prompt_override"], # Whitelist mutable fields
+    enforce_contract=True, # Validate steered output against schema
+    guidance_hint="Please review the plan carefully."
+)
+
+# Attach to a node
+node = AgentNode(
+    id="planner",
+    agent_ref="planner-v1",
+    interaction=interaction
+)
+```
+
+### Primitives
+
+1.  **`TransparencyLevel`**:
+    *   `OPAQUE`: (Default) Black box. Only inputs/outputs are visible.
+    *   `OBSERVABLE`: "Glass Box." Emits internal thought traces/events.
+    *   `INTERACTIVE`: "Step-Through." Implies `OBSERVABLE` + signals runtime to expect pauses.
+
+2.  **`InterventionTrigger`**:
+    *   `ON_START`: Pause before node execution (e.g., to tweak inputs).
+    *   `ON_PLAN_GENERATION`: Pause after a `GenerativeNode` creates a plan (Review & Refine).
+    *   `ON_FAILURE`: Pause on error (Manual Recovery).
+    *   `ON_COMPLETION`: Pause before output release (Quality Check).
+
+3.  **`InteractionConfig` Fields**:
+    *   `transparency`: `TransparencyLevel` (Default: `OPAQUE`).
+    *   `triggers`: `list[InterventionTrigger]` (Default: `[]`).
+    *   `editable_fields`: `list[str]` (Default: `[]`). Whitelist of fields the user can modify during a pause.
+    *   `enforce_contract`: `bool` (Default: `True`). If True, the runtime MUST validate the steered output against the original output_schema.
+    *   `guidance_hint`: `str | None`. Optional instruction for the operator.
+
+## Cognitive Visualization & Collaboration (New in 0.23.0)
+
+Coreason V2 now supports **Human-on-the-Loop (HOTL)** and **Magentic-UI** capabilities directly in the manifest.
+
+### 1. Visualization (`PresentationHints`)
+
+The `visualization` field allows you to hint at how the node's internal reasoning should be rendered (e.g., as a Tree of Thoughts or a Kanban board).
+
+*   `style`: `VisualizationStyle` (`CHAT`, `TREE`, `KANBAN`, `DOCUMENT`).
+*   `display_title`: Friendly label.
+*   `hidden_fields`: Whitelist of internal variables to hide.
+*   `progress_indicator`: Context variable to watch for % completion.
+
+### 2. Collaboration (`CollaborationConfig`)
+
+The `collaboration` field defines the protocol for human engagement (e.g., Co-Editing a document with an agent).
+
+*   `mode`: `CollaborationMode` (`COMPLETION`, `INTERACTIVE`, `CO_EDIT`).
+*   `feedback_schema`: JSON Schema for structured feedback.
+*   `supported_commands`: Typed list of `SteeringCommand` (e.g., `[SteeringCommand.MODIFY]`).
+*   `render_strategy`: UI protocol (`JSON_FORMS`, `ADAPTIVE_CARD`).
+
+See [UX & Collaboration: Human-on-the-Loop](ux_collaboration.md) for detailed configuration examples.

@@ -41,89 +41,7 @@ def test_builder_integration_circuit_breaker() -> None:
     # Graph Flow
     gf = NewGraphFlow(name="Test Graph")
     gf.set_circuit_breaker(error_threshold=10, reset_timeout=60, fallback_node="dummy")
-    # Add nodes. To avoid "self-loop via global fallback" cycle, we need "dummy" to be the fallback,
-    # but the active nodes should not be "dummy" unless we accept cycle detection.
-    # Wait, any node will have an edge to "dummy".
-    # If "dummy" is also in the graph, it has an edge to itself via global fallback.
-    # This IS a cycle.
-    # To test builder integration without triggering cycle validation failure, we must avoid a cycle.
-    # But global fallback to a node IN the graph ALWAYS creates a path from ANY node to fallback.
-    # If fallback is in the graph, it has a path to itself (fallback -> fallback).
-    # So global fallback node MUST BE acyclic with respect to itself?
-    # No, global fallback edge is `node -> fallback`.
-    # If node == fallback, then `fallback -> fallback`. Self loop.
-    # So we cannot use a node in the graph as global fallback if we enforce strict DAG?
-    # Correct. A global fallback essentially makes the fallback node reachable from everywhere.
-    # If the fallback node points to anything, that thing must not point back to any node in the graph.
-    # And the fallback node itself must not have an edge to itself (which `_build_unified_adjacency_map` adds).
-
-    # However, strict DAG means NO cycles. Self-loop is a cycle.
-    # So `fallback_node` CANNOT be one of the graph nodes?
-    # But `validate_topology` (Rule B) says: "Circuit breaker fallback ... not found in nodes" -> Error.
-    # So it MUST be in nodes.
-    # Contradiction?
-    # If it must be in nodes, and we add edge `node -> fallback` for ALL nodes.
-    # Then `fallback -> fallback` is added.
-    # This is a self-loop.
-    # So global circuit breaker ALWAYS creates a cycle if fallback is a valid node?
-    # This implies `_build_unified_adjacency_map` logic for global fallback is too aggressive
-    # or strict DAG is incompatible with global fallback to a graph node?
-
-    # The requirement: "All execution graphs MUST be strictly acyclic."
-    # "Denial of Wallet".
-    # If global circuit breaker trips, we go to fallback.
-    # If fallback fails and trips global CB again... we go to fallback. Infinite loop.
-    # So `fallback -> fallback` IS an infinite loop if fallback fails.
-    # But usually fallback node is "safe" (e.g. static response, human handoff).
-    # Does "safe" mean it won't trigger CB? Maybe.
-    # But topologically, it is a cycle.
-    # If we enforce topological DAG, we ban global fallback to any node that is subject to global fallback.
-    # Which is ALL nodes.
-    # So we effectively ban global fallback?
-
-    # Solution: The fallback node itself should probably NOT be subject to the global circuit breaker?
-    # Or we accept that risk?
-    # Agent instructions said:
-    # "Handle Global Governance Edges... add this global fallback ID to the adjacency list of EVERY node".
-    # This creates the cycle.
-    # If I must follow instructions, then `test_builder_integration_circuit_breaker` is testing a configuration
-    # that is now ILLEGAL.
-    # But the test just wants to verify builder sets the fields.
-    # I should construct the builder but NOT build? Or catch the error?
-    # The test asserts on `flow_g`. So it expects success.
-    # I will modify the test to expect `ValueError` due to cycle, OR modify validation logic?
-    # I cannot modify validation logic (it's specified).
-    # So I must accept that this configuration is invalid.
-    # But wait, is there ANY valid configuration for global fallback?
-    # If fallback must be in nodes, and all nodes get edge to fallback...
-    # Then fallback gets edge to fallback.
-    # ALWAYS a cycle.
-    # This means Global Circuit Breaker feature is effectively KILLED by this validator unless fallback is NOT in nodes
-    # (which fails Rule B).
-
-    # Maybe the instructions meant "every node EXCEPT the fallback node"?
-    # "If present, add this global fallback ID to the adjacency list of **every** node in the flow,
-    # because any node can potentially trip to the global fallback."
-    # It doesn't say "except fallback".
-    # But logically, if fallback trips, does it go to itself? Yes, if it's subject to the same policy.
-    # Infinite loop.
-    # So it is a vulnerability.
-    # So the test IS testing a vulnerable config.
-
-    # I will update the test to assert that `gf.build()` raises ValueError (Cycle detected).
-    # And I will verify the builder state by inspecting `gf.governance` directly if possible,
-    # or accept that we can't build valid flow with global CB.
-    # Actually, if I can't build, I can't verify the object properties.
-    # But `gf` (builder) has the state.
-
-    # Wait, if Global CB is impossible, that's a big deal.
-    # Maybe I should exclude fallback node from having the edge to itself in `_build_unified_adjacency_map`?
-    # "Refactor... ensure absolute mathematical safety".
-    # A self-loop on fallback node IS an infinite loop risk.
-    # So correct behavior is to flag it.
-
-    # So I will update the test to expect failure.
-
+    # Add a dummy node so build() passes validation "Graph must contain at least one node"
     node_g = AgentNode(
         id="dummy",
         metadata={},
@@ -363,8 +281,7 @@ def test_fallback_cycle_detection() -> None:
     # Architectural Update: The error message changed because builders might now invoke strict Gatekeeper policies
     # or the underlying graph validation behavior shifted.
     # The actual failure log showed: "Resilience Error: Fallback cycle detected..."
-    # Update: With unified cycle detection, the error message is now "Unified execution/fallback cycle detected"
-    with pytest.raises(ValueError, match="Unified execution/fallback cycle detected"):
+    with pytest.raises(ValueError, match="Resilience Error: Fallback cycle detected"):
         gf.build()
 
 

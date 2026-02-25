@@ -244,7 +244,7 @@ def test_coverage_validator_reflexion_mismatch() -> None:
     # Run validation logic manually
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, set(), None)
+    errors = _validate_supervision(node, set())
     # Note: _validate_supervision checks node.resilience, which we set.
     assert any("uses ReflexionStrategy but is of type 'invalid_type'" in e for e in errors)
 
@@ -262,7 +262,7 @@ def test_coverage_validator_escalation_empty_queue() -> None:
 
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, set(), None)
+    errors = _validate_supervision(node, set())
     assert any("empty queue_name" in e for e in errors)
 
 
@@ -282,7 +282,7 @@ def test_supervision_policy_complex_validation() -> None:
 
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, {"a1"}, None)
+    errors = _validate_supervision(node, {"a1"})
 
     # Should catch both missing IDs
     assert any("missing ID 'missing_handler'" in e for e in errors)
@@ -294,12 +294,14 @@ def test_validator_string_reference_skip() -> None:
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[], resilience="ref:template")
     from coreason_manifest.utils.validator import _validate_supervision
 
-    errors = _validate_supervision(node, set(), None)
+    errors = _validate_supervision(node, set())
     assert len(errors) == 0
 
 
 def test_fallback_cycle_complex_policy() -> None:
     """Test cycle detection with SupervisionPolicy (complex)."""
+    from coreason_manifest.utils.validator import _validate_fallback_cycles
+
     # A -> B (via default)
     # B -> A (via handler)
 
@@ -313,24 +315,8 @@ def test_fallback_cycle_complex_policy() -> None:
     node_a = AgentNode(id="a", metadata={}, type="agent", profile="p", tools=[], resilience=policy_a)
     node_b = AgentNode(id="b", metadata={}, type="agent", profile="p", tools=[], resilience=policy_b)
 
-    # Use unified cycle validation (mocking a GraphFlow with no explicit edges)
-    from coreason_manifest.spec.core.flow import DataSchema, FlowInterface, FlowMetadata, Graph, GraphFlow
-    from coreason_manifest.utils.validator import _validate_topology_cycles
-
-    # Need a GraphFlow for unified validation
-    dummy_graph = Graph(nodes={"a": node_a, "b": node_b}, edges=[], entry_point="a")
-    flow = GraphFlow(
-        kind="GraphFlow",
-        status="published",
-        metadata=FlowMetadata(name="test", version="1.0.0", description="", tags=[]),
-        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-        blackboard=None,
-        graph=dummy_graph,
-        definitions=None,
-    )
-    errors = _validate_topology_cycles(flow)
-
-    assert any("Unified execution/fallback cycle detected" in e for e in errors)
+    errors = _validate_fallback_cycles([node_a, node_b])
+    assert any("Fallback cycle detected" in e for e in errors)
 
 
 def test_recursive_schema_strict_validation() -> None:

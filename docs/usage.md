@@ -37,7 +37,7 @@ print(f"Loaded {manifest.kind}: {manifest.metadata.name}")
 print(f"Inputs: {manifest.interface.inputs.keys()}")
 ```
 
-For details on composition, security constraints, and referencing syntax, see [Shared Kernel Architecture](architecture/shared_kernel.md).
+For details on composition, security constraints, and referencing syntax, see [Secure Composition](composition.md).
 
 ### Creating a Manifest Programmatically
 
@@ -116,7 +116,7 @@ from coreason_manifest import generate_mermaid_graph
 print(generate_mermaid_graph(manifest))
 ```
 
-For more details, see [Visualization Tools](tools/visualizer.md).
+For more details, see [Visualization Tools](visualization.md).
 
 ### Using the CLI
 
@@ -130,12 +130,12 @@ coreason viz examples/my_agent.py:agent
 coreason run examples/my_agent.py:agent --inputs '{"query": "hello"}' --mock
 ```
 
-For full documentation, see [CLI Reference](tools/cli.md).
+For full documentation, see [CLI Reference](cli.md).
 
 ## Advanced Documentation
 
-*   [Shared Kernel Architecture](architecture/shared_kernel.md): Secure Recursive Loader and `$ref` syntax.
-*   [Interoperability & Integrity](interop/integrity.md): Cryptographic guarantees and lineage.
+*   [Secure Composition](composition.md): Secure Recursive Loader and `$ref` syntax.
+*   [Coreason Agent Manifest](cap/specification.md): The Canonical YAML Authoring Format.
 
 ## Shared Primitives
 
