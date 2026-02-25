@@ -6,7 +6,7 @@ import pytest
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import (
     SandboxedPathFinder,
-    _resolve_refs,
+    _resolve_includes,
     load_agent_from_ref,
     load_flow_from_file,
     sandbox_context,
@@ -37,9 +37,9 @@ def test_resolve_refs_error(tmp_path: Path) -> None:
     loader = MagicMock()
     loader.read_text.side_effect = Exception("Read failed")
 
-    data = {"$ref": "file.yaml"}
+    data = {"$include": "file.yaml"}
     with pytest.raises(ValueError, match="Failed to load reference"):
-        _resolve_refs(data, jail, loader)
+        _resolve_includes(data, jail, loader)
 
 
 # 4. load_flow_from_file custom root mismatch

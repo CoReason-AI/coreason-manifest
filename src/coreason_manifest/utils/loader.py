@@ -208,14 +208,14 @@ def _scan_for_dynamic_references(data: Any) -> bool:
     return False
 
 
-def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[Path] | None = None) -> Any:
-    """Recursively resolves JSON/YAML $refs while guarding against circular dependencies and jail escapes."""
+def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: set[Path] | None = None) -> Any:
+    """Recursively resolves JSON/YAML $include while guarding against circular dependencies and jail escapes."""
     if seen is None:
         seen = set()
 
     if isinstance(data, dict):
-        if "$ref" in data:
-            ref_path = data["$ref"]
+        if "$include" in data:
+            ref_path = data["$include"]
 
             target_path = (root_dir / ref_path).resolve()
             if target_path in seen:
@@ -232,12 +232,12 @@ def _resolve_refs(data: Any, root_dir: Path, loader: ManifestIO, seen: set[Path]
             except Exception as e:
                 raise ValueError(f"Failed to load reference {ref_path}: {e}") from e
 
-            return _resolve_refs(ref_data, root_dir, loader, seen)
+            return _resolve_includes(ref_data, root_dir, loader, seen)
 
-        return {k: _resolve_refs(v, root_dir, loader, seen.copy()) for k, v in data.items()}
+        return {k: _resolve_includes(v, root_dir, loader, seen.copy()) for k, v in data.items()}
 
     if isinstance(data, list):
-        return [_resolve_refs(item, root_dir, loader, seen.copy()) for item in data]
+        return [_resolve_includes(item, root_dir, loader, seen.copy()) for item in data]
 
     return data
 
@@ -268,7 +268,7 @@ def load_flow_from_file(
         raise ValueError(f"Failed to parse manifest file: {e}") from e
 
     # Resolve pointers before schema validation
-    data = _resolve_refs(data, jail_root, loader)
+    data = _resolve_includes(data, jail_root, loader)
 
     if not isinstance(data, dict):
         raise ValueError("Manifest content must be a dictionary.")

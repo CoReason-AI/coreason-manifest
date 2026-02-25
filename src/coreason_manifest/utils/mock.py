@@ -5,6 +5,7 @@ import secrets
 from datetime import UTC, datetime
 from typing import Any
 
+import jsonschema
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
@@ -25,6 +26,7 @@ class MockFactory:
         schema: dict[str, Any] | None,
         visited: frozenset[int] | None = None,
         depth: int = 0,
+        resolver: jsonschema.RefResolver | None = None,
     ) -> Any:
         max_depth = 10
 
@@ -33,6 +35,15 @@ class MockFactory:
 
         if not schema:
             return {"mock_key": "mock_value"}
+
+        # Resolve $ref if present
+        if "$ref" in schema and resolver:
+            try:
+                with resolver.resolving(schema["$ref"]) as resolved:
+                    return self._generate_schema_data(resolved, visited, depth, resolver)
+            except Exception:
+                # Fallback if resolution fails
+                return "mock_ref_error"
 
         # Cycle detection
         schema_id = id(schema)
@@ -56,11 +67,11 @@ class MockFactory:
             return self.rng.choice([True, False])
         if type_ == "object":
             props = schema.get("properties", {})
-            return {k: self._generate_schema_data(v, visited, depth + 1) for k, v in props.items()}
+            return {k: self._generate_schema_data(v, visited, depth + 1, resolver) for k, v in props.items()}
         if type_ == "array":
             items_schema = schema.get("items")
             if items_schema:
-                return [self._generate_schema_data(items_schema, visited, depth + 1)]
+                return [self._generate_schema_data(items_schema, visited, depth + 1, resolver)]
             return []
         return "mock_data"
 
@@ -68,11 +79,15 @@ class MockFactory:
         trace: list[NodeExecution] = []
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
+        # Create resolver from the full document
+        full_doc = flow.model_dump(by_alias=True)
+        resolver = jsonschema.RefResolver.from_schema(full_doc)
+
         if isinstance(flow, LinearFlow):
             nodes = flow.steps
             prev_hashes: list[str] = []
             for node in nodes:
-                exec_records = self._execute_node(node, execution_map, prev_hashes)
+                exec_records = self._execute_node(node, execution_map, prev_hashes, resolver)
                 trace.extend(exec_records)
                 last_record = exec_records[-1]
                 execution_map[node.id] = last_record
@@ -100,7 +115,7 @@ class MockFactory:
             prev_hashes = []
 
             while current_node and steps < max_steps:
-                exec_records = self._execute_node(current_node, execution_map, prev_hashes)
+                exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver)
                 trace.extend(exec_records)
                 last_record = exec_records[-1]
                 execution_map[current_node.id] = last_record
@@ -126,6 +141,7 @@ class MockFactory:
         node: Node,
         _execution_map: dict[str, NodeExecution],
         prev_hashes: list[str] | None = None,
+        resolver: jsonschema.RefResolver | None = None,
     ) -> list[NodeExecution]:
         timestamp = datetime.now(UTC)
 
@@ -193,10 +209,14 @@ class MockFactory:
         outputs: Any = {}
 
         if isinstance(node, PlannerNode):
-            raw_output = self._generate_schema_data(node.output_schema)
+            raw_output = self._generate_schema_data(node.output_schema, resolver=resolver)
             outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         elif isinstance(node, HumanNode):
-            raw_output = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
+            raw_output = (
+                self._generate_schema_data(node.input_schema, resolver=resolver)
+                if node.input_schema
+                else {"approved": True}
+            )
             outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         else:
             outputs = {"result": "mock_output"}
