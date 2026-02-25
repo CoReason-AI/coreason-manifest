@@ -1,5 +1,6 @@
 # src/coreason_manifest/utils/integrity.py
 
+import enum
 import hashlib
 import json
 import math
@@ -14,7 +15,7 @@ from pydantic import BaseModel
 
 def to_canonical_timestamp(dt: datetime) -> str:
     """
-    Converts a datetime to a strict UTC string format: YYYY-MM-DDTHH:MM:SSZ
+    Converts a datetime to a strict UTC string format: YYYY-MM-DDTHH:MM:SS.mmmmmmZ
     """
     if dt.tzinfo is None:
         # Assume UTC if naive
@@ -23,8 +24,8 @@ def to_canonical_timestamp(dt: datetime) -> str:
     # Convert to UTC
     dt_utc = dt.astimezone(UTC)
 
-    # Format as YYYY-MM-DDTHH:MM:SSZ (no microseconds)
-    return dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Format with microsecond precision to prevent sub-second trace collisions.
+    return dt_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 class MerkleNode(TypedDict):
@@ -57,24 +58,33 @@ class CanonicalHashingStrategy(HashingStrategy):
         """
         Prepares an object for RFC 8785 Canonical JSON serialization.
         """
-        if isinstance(obj, dict):
-            # Recursively process values.
-            # Strip any keys where the value is None.
-            # Strip protected keys (execution_hash, signature, or keys starting with __).
-            # Sort keys alphabetically to guarantee deterministic ordering.
-            return {
-                k: self._recursive_sort_and_sanitize(v)
-                for k, v in sorted(obj.items())
-                if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
-            }
+        # Nested Hashing:
+        if hasattr(obj, "compute_hash"):
+            return str(obj.compute_hash())
 
+        # Enums:
+        if isinstance(obj, enum.Enum):
+            return self._recursive_sort_and_sanitize(obj.value)
+
+        # Dictionaries (The Key Fix):
+        if isinstance(obj, dict):
+            sanitized_dict = {}
+            # Sort by stringified key to prevent mixed-type TypeError
+            for k, v in sorted(obj.items(), key=lambda item: str(item[0])):
+                if v is not None and k not in {"execution_hash", "signature"} and not str(k).startswith("__"):
+                    sanitized_dict[str(k)] = self._recursive_sort_and_sanitize(v)
+            return sanitized_dict
+
+        # Iterables (List/Tuple):
         if isinstance(obj, (list, tuple)):
             # Recursively process items.
             return [self._recursive_sort_and_sanitize(x) for x in obj]
 
+        # Sets (The Determinism Fix):
         if isinstance(obj, (set, frozenset)):
-            # Convert to sorted lists based on their string representation.
-            return sorted([self._recursive_sort_and_sanitize(x) for x in obj], key=str)
+            # Sort by deterministic typed string, then sanitize
+            sorted_items = sorted(list(obj), key=lambda x: f"{type(x).__name__}:{x}")
+            return [self._recursive_sort_and_sanitize(x) for x in sorted_items]
 
         if isinstance(obj, uuid.UUID):
             # Convert to string via str(obj).
@@ -87,16 +97,22 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, BaseModel):
             # Use model_dump(exclude_none=True, mode="python") and recursively process.
             excludes = getattr(obj, "_hash_exclude_", None)
-            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="python"))
+            return self._recursive_sort_and_sanitize(
+                obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
+            )
 
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
 
+        # Floats (The RFC 8785 Integer Fix):
         if isinstance(obj, float):
             # Allow finite floats. Explicitly raise a ValueError if math.isnan(obj) or math.isinf(obj).
             if math.isnan(obj) or math.isinf(obj):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
+            # RFC 8785: whole numbers must not have fractional parts
+            if obj.is_integer():
+                return int(obj)
             return obj
 
         # Primitives (int, str, bool) & None: Return as-is.
@@ -246,8 +262,8 @@ def verify_merkle_proof(
             expected_parents.add(parent_hash)
 
         if not expected_parents:
-            # Genesis Node
-            if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
+            # Genesis Node (can be multiple in disconnected DAGs)
+            if trusted_root_hash and stored_hash != trusted_root_hash:
                 return False
         else:
             # Child Node: Every declared parent must be present in the VERIFIED pool or be the trusted root.

@@ -1,5 +1,6 @@
 # tests/test_integrity_canonical.py
 
+import enum
 import hashlib
 import uuid
 from datetime import UTC, datetime
@@ -7,7 +8,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import BaseModel
 
-from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
+from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 
 
 class TestCanonicalHashingStrategy:
@@ -91,9 +92,9 @@ class TestCanonicalHashingStrategy:
         assert compute_hash(u) == expected_hash
 
     def test_datetime_handling(self) -> None:
-        """Test datetime conversion to UTC ISO-8601."""
+        """Test datetime conversion to UTC ISO-8601 with microseconds."""
         dt = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
-        expected_str = "2023-01-01T12:00:00Z"
+        expected_str = "2023-01-01T12:00:00.000000Z"
         expected_json = f'"{expected_str}"'
         expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
         assert compute_hash(dt) == expected_hash
@@ -130,3 +131,91 @@ class TestCanonicalHashingStrategy:
 
         # Should return False (invalid), catching the TypeError internally
         assert verify_merkle_proof(trace) is False
+
+    def test_enum_hashing(self) -> None:
+        """Test that an Enum member hashes successfully based on its value."""
+        class Color(enum.Enum):
+            RED = 1
+            BLUE = "blue"
+
+        # Enum value is int
+        assert compute_hash(Color.RED) == compute_hash(1)
+        # Enum value is string
+        assert compute_hash(Color.BLUE) == compute_hash("blue")
+
+    def test_mixed_type_dict_keys(self) -> None:
+        """Assert that {1: "a", "2": "b"} does not raise a TypeError and hashes consistently."""
+        data = {1: "a", "2": "b"}
+        # Keys sorted by str(key): "1", "2"
+        # 1 -> "1", "2" -> "2"
+        # Expected JSON: {"1":"a","2":"b"}
+        expected_json = '{"1":"a","2":"b"}'
+        expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
+
+        assert compute_hash(data) == expected_hash
+
+        # Order independence
+        data2 = {"2": "b", 1: "a"}
+        assert compute_hash(data2) == expected_hash
+
+    def test_set_mixed_types(self) -> None:
+        """Assert that set([1, "1"]) hashes deterministically without colliding or dropping data."""
+        s = {1, "1"}
+        # Sorted by f"{type(x).__name__}:{x}"
+        # 1 -> "int:1"
+        # "1" -> "str:1"
+        # "int:1" comes before "str:1" alphabetically
+        # Expected list: [1, "1"]
+        expected_json = '[1,"1"]'
+        expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
+
+        assert compute_hash(s) == expected_hash
+
+    def test_float_integer_truncation(self) -> None:
+        """Assert that 1.0 and 1 yield the exact same SHA-256 hash."""
+        assert compute_hash(1.0) == compute_hash(1)
+        assert compute_hash(1.5) != compute_hash(1)
+
+    def test_tuple_hashing(self) -> None:
+        """Test tuple hashing coverage."""
+        t = ("a", 1)
+        # Treated as list
+        assert compute_hash(t) == compute_hash(["a", 1])
+
+    def test_verify_merkle_cycle(self) -> None:
+        """Test cycle detection in verify_merkle_proof."""
+        # A -> B -> A
+        node_a = {"id": "a", "parent_hashes": ["hash_b"]}
+        node_b = {"id": "b", "parent_hashes": ["hash_a"]}
+
+        # We need to pre-calculate hashes to make the cycle valid in terms of keys,
+        # but since verify_merkle_proof sorts by dependency, a cycle will fail the sort check (len != len).
+        # We need valid hashes for lookups.
+
+        # Actually, verify_merkle_proof builds graph based on 'execution_hash'.
+        # We need to construct nodes such that they point to each other's execution_hash.
+
+        # This is tricky because hash depends on content.
+        # But we can just set execution_hash manually since verify_merkle_proof reads it.
+        # But verify_merkle_proof ALSO computes hash.
+        # However, the cycle detection happens *before* hash verification in step 4.
+        # Step 3 is Topological Sort.
+
+        node_a["execution_hash"] = "hash_a"
+        node_b["execution_hash"] = "hash_b"
+
+        trace = [node_a, node_b]
+        assert verify_merkle_proof(trace) is False
+
+    def test_verify_merkle_genesis_mismatch(self) -> None:
+        """Test genesis node hash mismatch."""
+        node = {"x": 1}
+        payload = reconstruct_payload(node)
+        h = compute_hash(payload)
+        node["execution_hash"] = h
+
+        # Pass a trusted root that doesn't match
+        assert verify_merkle_proof([node], trusted_root_hash="wrong_hash") is False
+
+        # Pass correct trusted root
+        assert verify_merkle_proof([node], trusted_root_hash=h) is True
