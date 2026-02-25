@@ -94,10 +94,7 @@ def test_mock_semantics_array_advanced() -> None:
     factory = MockFactory(seed=42)
 
     # 9. prefixItems (Draft 2020-12)
-    schema_prefix = {
-        "type": "array",
-        "prefixItems": [{"const": "A"}, {"const": "B"}]
-    }
+    schema_prefix = {"type": "array", "prefixItems": [{"const": "A"}, {"const": "B"}]}
     result = factory._generate_schema_data(schema_prefix)
     assert isinstance(result, list)
     assert result == ["A", "B"]
@@ -113,7 +110,7 @@ def test_mock_semantics_array_advanced() -> None:
     # items: True -> same as {}
     schema_true = {"type": "array", "items": True}
     result_true = factory._generate_schema_data(schema_true)
-    assert result_true[0] == "mock_data" # Because True schema returns "mock_data"
+    assert result_true[0] == "mock_data"  # Because True schema returns "mock_data"
 
     # items: False -> empty array (cannot contain anything valid)
     # Mock behavior should probably return empty list or None?

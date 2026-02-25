@@ -60,9 +60,7 @@ class MockFactory:
         # Best-effort combinator support
         for combinator in ["allOf", "anyOf", "oneOf"]:
             if combinator in schema and isinstance(schema[combinator], list) and schema[combinator]:
-                return self._generate_schema_data(
-                    schema[combinator][0], visited, visited_refs, depth, resolver
-                )
+                return self._generate_schema_data(schema[combinator][0], visited, visited_refs, depth, resolver)
 
         # Resolve $ref if present
         if "$ref" in schema and resolver:
