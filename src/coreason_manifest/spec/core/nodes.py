@@ -237,10 +237,28 @@ class PlaceholderNode(Node):
     )
 
 
+class HumanNode(Node):
+    """
+    A node representing a human-in-the-loop interaction.
+    """
+
+    type: Literal["human"] = "human"
+    prompt: str = Field(..., description="The prompt or question for the human.", examples=["Approve deployment?"])
+    options: list[str] | None = Field(
+        None, description="List of valid options for the human to choose from.", examples=[["Approve", "Reject"]]
+    )
+    timeout_seconds: int | None = Field(None, description="Time to wait before timing out.", examples=[3600])
+    input_schema: dict[str, Any] | None = Field(
+        None, description="JSON Schema for the human's input.", examples=[{"type": "object"}]
+    )
+    requires_approval: bool = Field(False, description="Whether this node requires explicit approval.", examples=[True])
+
+
 __all__ = [
     "AgentNode",
     "CognitiveProfile",
     "EmergenceInspectorNode",
+    "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
     "Node",

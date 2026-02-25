@@ -12,17 +12,17 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 from coreason_manifest.utils.langchain_adapter import flow_to_langchain_config
 from coreason_manifest.utils.mcp_adapter import pack_to_mcp_resources
 from coreason_manifest.utils.openai_adapter import node_to_openai_assistant
 
 
 def test_mcp_adapter() -> None:
-    pack = ToolPack(
-        kind="ToolPack",
+    pack = MCPServerConfig(
+        kind="MCPServerConfig",
         namespace="utils",
-        tools=[ToolCapability(name="calculator"), ToolCapability(name="weather")],
+        tools=[MCPTool(name="calculator", input_schema={}), MCPTool(name="weather", input_schema={})],
         dependencies=[],
         env_vars=[],
     )
@@ -35,10 +35,10 @@ def test_mcp_adapter() -> None:
 
 
 def test_openai_adapter() -> None:
-    pack = ToolPack(
-        kind="ToolPack",
+    pack = MCPServerConfig(
+        kind="MCPServerConfig",
         namespace="utils",
-        tools=[ToolCapability(name="calculator"), ToolCapability(name="weather")],
+        tools=[MCPTool(name="calculator", input_schema={}), MCPTool(name="weather", input_schema={})],
         dependencies=[],
         env_vars=[],
     )
@@ -54,7 +54,7 @@ def test_openai_adapter() -> None:
         "name": "agent1",
         "instructions": "assistant helpful",
         "model": "gpt-4o",
-        "tools": [{"type": "function", "function": {"name": "calculator"}}],
+        "tools": [{"type": "function", "function": {"name": "calculator", "description": None, "parameters": {}}}],
     }
     assert openai_res == expected_openai
 
@@ -71,10 +71,10 @@ def test_openai_adapter() -> None:
 
 def test_langchain_adapter() -> None:
     meta = FlowMetadata(name="test", version="1.0.0", description="desc", tags=[])
-    pack = ToolPack(
-        kind="ToolPack",
+    pack = MCPServerConfig(
+        kind="MCPServerConfig",
         namespace="utils",
-        tools=[ToolCapability(name="calculator"), ToolCapability(name="weather")],
+        tools=[MCPTool(name="calculator", input_schema={}), MCPTool(name="weather", input_schema={})],
         dependencies=[],
         env_vars=[],
     )
@@ -92,7 +92,7 @@ def test_langchain_adapter() -> None:
         kind="LinearFlow",
         metadata=meta,
         steps=[node1, node2],
-        definitions=FlowDefinitions(tool_packs={"pack": pack}),
+        definitions=FlowDefinitions(mcp_servers={"pack": pack}),
     )
     lc_linear = flow_to_langchain_config(linear_flow)
     expected_lc_linear = {"type": "chain", "steps": ["agent1", "agent2"]}
@@ -113,7 +113,7 @@ def test_langchain_adapter() -> None:
         ),
         memory=None,
         graph=graph,
-        definitions=FlowDefinitions(tool_packs={"pack": pack}),
+        definitions=FlowDefinitions(mcp_servers={"pack": pack}),
     )
     lc_graph = flow_to_langchain_config(graph_flow)
 

@@ -36,8 +36,11 @@ def test_flow_backwards_compatibility() -> None:
     # But here we are testing the compat validator!
     # So we MUST pass 'schema' to test the compatibility logic.
     # We can silence mypy for this line.
-    ds_compat = DataSchema(schema={"type": "string"})  # type: ignore[call-arg]
-    assert ds_compat.json_schema == {"type": "string"}
+    # SOTA Refactor: Removed legacy compatibility for "schema". Now raises ValidationError.
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError):
+        DataSchema(schema={"type": "string"})  # type: ignore[call-arg]
 
     # Edge: source/target -> from_node/to_node
     # Removed backward compatibility: source/target now raise ValidationError

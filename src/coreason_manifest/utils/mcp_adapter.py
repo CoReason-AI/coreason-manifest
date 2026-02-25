@@ -1,9 +1,9 @@
 from typing import Any
 
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig
 
 
-def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
+def pack_to_mcp_resources(pack: MCPServerConfig) -> list[dict[str, Any]]:
     """
     Convert a ToolPack into Model Context Protocol (MCP) resource definitions.
 

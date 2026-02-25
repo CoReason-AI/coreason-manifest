@@ -13,7 +13,6 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
-    VariableDef,
 )
 from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import (
@@ -26,7 +25,7 @@ from coreason_manifest.spec.core.nodes import (
 from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
 )
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 from coreason_manifest.spec.core.types import RiskLevel
 
 
@@ -80,15 +79,15 @@ def test_core_kernel_instantiation() -> None:
     )
     memory = MemorySubsystem(working=WorkingMemory(variables={"context": "User context"}))
 
-    # Define ToolPack for integrity
-    tool_pack = ToolPack(
-        kind="ToolPack",
+    # Define MCPServerConfig for integrity
+    tool_pack = MCPServerConfig(
+        kind="MCPServerConfig",
         namespace="core",
-        tools=[ToolCapability(name="search", risk_level=RiskLevel.STANDARD)],
+        tools=[MCPTool(name="search", risk_level=RiskLevel.STANDARD, input_schema={})],
         dependencies=[],
         env_vars=[],
     )
-    definitions = FlowDefinitions(tool_packs={"core": tool_pack})
+    definitions = FlowDefinitions(mcp_servers={"core": tool_pack})
 
     edge = Edge(from_node="agent-1", to_node="switch-1")
     graph = Graph(

@@ -1,22 +1,22 @@
 from typing import Any
 
 from coreason_manifest.spec.core.nodes import AgentNode
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig
 
 
-def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
+def node_to_openai_assistant(node: AgentNode, mcp_servers: list[MCPServerConfig] | None = None) -> dict[str, Any]:
     """
     Convert an AgentNode into an OpenAI Assistant definition.
 
     Args:
         node: The AgentNode to convert.
-        tool_packs: A list of available ToolPacks.
+        mcp_servers: A list of available MCPServerConfigs.
 
     Returns:
         A dictionary representing the OpenAI Assistant configuration.
     """
-    if tool_packs is None:
-        tool_packs = []
+    if mcp_servers is None:
+        mcp_servers = []
 
     # Model: use node.profile.reasoning.model or default
     model: Any = "gpt-4-turbo"
@@ -31,15 +31,23 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     # Instructions: Combine role and persona
     instructions = f"{node.profile.role} {node.profile.persona}"
 
-    # Tools: Generate function definitions for every tool listed in node.tools found in tool_packs
-    available_tools: set[str] = set()
-    for pack in tool_packs:
-        available_tools.update(t.name for t in pack.tools)
+    # Tools: Generate function definitions for every tool listed in node.tools found in mcp_servers
+    available_tools: dict[str, Any] = {}
+    for server in mcp_servers:
+        for tool in server.tools:
+            available_tools[tool.name] = tool
 
-    tools_definitions = [
-        {"type": "function", "function": {"name": tool_name}}
-        for tool_name in node.tools
-        if tool_name in available_tools
-    ]
+    tools_definitions = []
+    for tool_name in node.tools:
+        if tool_name in available_tools:
+            tool = available_tools[tool_name]
+            tool_def: dict[str, Any] = {
+                "type": "function",
+                "function": {"name": tool_name, "description": tool.description, "parameters": {}},
+            }
+            if tool.type == "mcp_tool" and tool.input_schema:
+                tool_def["function"]["parameters"] = tool.input_schema
+
+            tools_definitions.append(tool_def)
 
     return {"name": node.id, "instructions": instructions, "model": model, "tools": tools_definitions}

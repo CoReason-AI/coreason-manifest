@@ -11,12 +11,11 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
-    VariableDef,
 )
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwitchNode
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -53,11 +52,11 @@ def create_switch_node(node_id: str, variable: str, cases: dict[str, str], defau
     )
 
 
-def create_tool_pack(namespace: str, tools: list[str]) -> ToolPack:
-    return ToolPack(
-        kind="ToolPack",
+def create_tool_pack(namespace: str, tools: list[str]) -> MCPServerConfig:
+    return MCPServerConfig(
+        kind="MCPServerConfig",
         namespace=namespace,
-        tools=[ToolCapability(name=t) for t in tools],
+        tools=[MCPTool(name=t, input_schema={}) for t in tools],
         dependencies=[],
         env_vars=[],
     )
@@ -73,7 +72,7 @@ def test_validate_graph_flow_valid() -> None:
         interface=create_interface(),
         memory=None,
         graph=graph,
-        definitions=FlowDefinitions(tool_packs={"tp": tp}),
+        definitions=FlowDefinitions(mcp_servers={"tp": tp}),
     )
     errors = validate_flow(flow)
     assert errors == []
@@ -133,7 +132,7 @@ def test_validate_missing_tool() -> None:
         interface=create_interface(),
         memory=None,
         graph=graph,
-        definitions=FlowDefinitions(tool_packs={"tp": tp}),
+        definitions=FlowDefinitions(mcp_servers={"tp": tp}),
     )
     errors = validate_flow(flow)
     assert any("requires tool 'tool1'" in e for e in errors)
@@ -164,7 +163,7 @@ def test_validate_linear_flow_valid() -> None:
         kind="LinearFlow",
         metadata=create_metadata(),
         steps=[agent],
-        definitions=FlowDefinitions(tool_packs={"tp": tp}),
+        definitions=FlowDefinitions(mcp_servers={"tp": tp}),
     )
     errors = validate_flow(flow)
     assert errors == []

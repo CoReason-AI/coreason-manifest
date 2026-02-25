@@ -10,13 +10,15 @@ from pydantic import ValidationError
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     Edge,
+    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
 )
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import PlaceholderNode
+from coreason_manifest.spec.core.nodes import AgentNode, PlaceholderNode
+from coreason_manifest.spec.core.tools import MCPResource, MCPServerConfig
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.diff import _generate_diff
@@ -222,14 +224,12 @@ def test_loader_exception_handling_in_lock() -> None:
 
 def test_gatekeeper_blocked_domain() -> None:
     # Test that domains are blocked correctly using HttpUrl validation
-    from pydantic import HttpUrl
 
-    from coreason_manifest.spec.core.flow import FlowDefinitions, LinearFlow
-    from coreason_manifest.spec.core.nodes import AgentNode
-    from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+    from coreason_manifest.spec.core.flow import LinearFlow
     from coreason_manifest.utils.gatekeeper import validate_policy
 
-    tool = ToolCapability(name="BadUrl", url=HttpUrl("http://example.com"))
+    # Use MCPResource for URL checking
+    tool = MCPResource(name="BadUrl", uri="http://example.com/foo", description="desc")
     gov = Governance(allowed_domains=["good.com"])
 
     flow = LinearFlow(
@@ -238,7 +238,9 @@ def test_gatekeeper_blocked_domain() -> None:
         steps=[AgentNode(id="a", type="agent", metadata={}, profile="p", tools=["BadUrl"])],
         governance=gov,
         definitions=FlowDefinitions(
-            tool_packs={"tp": ToolPack(kind="ToolPack", namespace="n", tools=[tool], dependencies=[], env_vars=[])}
+            mcp_servers={
+                "tp": MCPServerConfig(kind="MCPServerConfig", namespace="n", tools=[tool], dependencies=[], env_vars=[])
+            }
         ),
     )
 
@@ -516,7 +518,7 @@ def test_loader_cleanup_deps() -> None:
 
 
 def test_flow_cycle_detection_unreachable() -> None:
-    # spec/core/flow.py (raise ValueError("Cycle detected..."))
+    # spec/core/flow.py (raise ValueError("Cycle detected..."), input_schema={})
     from coreason_manifest.spec.core.flow import (
         Edge,
     )
@@ -925,9 +927,8 @@ def test_topology_self_loop_island() -> None:
     from coreason_manifest.spec.core.engines import ComputerUseReasoning
     from coreason_manifest.spec.core.flow import (
         Edge,
-        FlowDefinitions,
     )
-    from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+    from coreason_manifest.spec.core.nodes import CognitiveProfile
     from coreason_manifest.utils.gatekeeper import validate_policy
 
     # Unsafe profile to trigger risk check

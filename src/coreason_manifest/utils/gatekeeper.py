@@ -15,7 +15,7 @@ from coreason_manifest.utils.net_utils import canonicalize_domain
 from coreason_manifest.utils.topology import get_reachable_nodes, get_strongly_connected_components
 
 if TYPE_CHECKING:
-    from coreason_manifest.spec.core.tools import ToolCapability
+    from coreason_manifest.spec.core.tools import AnyTool
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
@@ -59,10 +59,13 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         return []
 
     # Build tool map: name -> tool_object
-    tool_map: dict[str, ToolCapability] = {}
-    if flow.definitions and flow.definitions.tool_packs:
-        for pack in flow.definitions.tool_packs.values():
-            for tool in pack.tools:
+    tool_map: dict[str, AnyTool] = {}
+    if flow.definitions and flow.definitions.mcp_servers:
+        for server in flow.definitions.mcp_servers.values():
+            for tool in server.tools:
+                # Assuming tools are unique by name across all servers for flat mapping check
+                # In strict MCP, scope might be namespace + name.
+                # For this validator, we check flat name usage in AgentNode.tools
                 tool_map[tool.name] = tool
 
     # 0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)
@@ -74,36 +77,42 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     allowed_domains = {canonicalize_domain(d) for d in allowed_domains_raw}
 
     if allowed_domains:
+        # Check domain for MCP Resources (tools might not have URLs in same way)
+        # Assuming MCPResource has URI field.
         for tool_obj in tool_map.values():
-            # Architectural Note: Utilize strict Pydantic HttpUrl object instead of manual string parsing
-            if tool_obj.url and tool_obj.url.host:
-                domain_raw = str(tool_obj.url.host)
-                domain = canonicalize_domain(domain_raw)
+            if tool_obj.type == "mcp_resource" and hasattr(tool_obj, "uri") and tool_obj.uri:
+                # Parse domain from URI
+                # Simple extraction: split by / and take domain part if scheme exists
+                uri = tool_obj.uri
+                domain = ""
+                if "://" in uri:
+                    domain = uri.split("://")[1].split("/")[0]
 
-                allowed = False
-                for allowed_d in allowed_domains:
-                    # Exact match or subdomain
-                    if domain == allowed_d or (domain and domain.endswith("." + allowed_d)):
-                        allowed = True
-                        break
+                if domain:
+                    domain = canonicalize_domain(domain)
+                    allowed = False
+                    for allowed_d in allowed_domains:
+                        if domain == allowed_d or (domain and domain.endswith("." + allowed_d)):
+                            allowed = True
+                            break
 
-                if allowed:
-                    continue
-
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
-                        severity="violation",
-                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
-                        details={"domain": domain, "tool_name": tool_obj.name},
-                        remediation=RemediationAction(
-                            type="whitelist_domain",
-                            format="json_patch",
-                            patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
-                            description=f"Add '{domain}' to allowed_domains",
-                        ),
-                    )
-                )
+                    if not allowed:
+                        reports.append(
+                            ComplianceReport(
+                                code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
+                                severity="violation",
+                                message=f"Resource '{tool_obj.name}' uses blocked domain: {domain}",
+                                details={"domain": domain, "resource_name": tool_obj.name},
+                                remediation=RemediationAction(
+                                    type="whitelist_domain",
+                                    format="json_patch",
+                                    patch_data=[
+                                        {"op": "add", "path": "/governance/allowed_domains/-", "value": domain}
+                                    ],
+                                    description=f"Add '{domain}' to allowed_domains",
+                                ),
+                            )
+                        )
 
     # 1. Capability Analysis & Red Button Rule
     for node in nodes:
@@ -115,7 +124,11 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             for tool_name in node.tools:
                 resolved_tool = tool_map.get(tool_name)
                 # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown
-                risk = resolved_tool.risk_level if resolved_tool else "critical"
+                # MCPTool has risk_level
+                risk = "critical"
+                if resolved_tool and hasattr(resolved_tool, "risk_level"):
+                    risk = resolved_tool.risk_level
+
                 if risk == "critical":
                     critical_tools.append(tool_name)
 
@@ -286,5 +299,3 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 )
 
     return reports
-
-

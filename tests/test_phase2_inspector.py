@@ -1,5 +1,4 @@
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
-from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.nodes import InspectorNode
 from coreason_manifest.utils.visualizer import to_mermaid
 
@@ -9,12 +8,8 @@ def test_inspector_lifecycle_graph() -> None:
     flow_builder = NewGraphFlow(name="inspector-test-graph", version="0.25.0")
 
     # Domain 4: Add Blackboard variables for data flow validation
-    flow_builder.set_blackboard(
-        {
-            "result_score": VariableDef(id="unknown", type="float", description="Score"),
-            "verification_result": VariableDef(id="unknown", type="boolean", description="Result"),
-        }
-    )
+    # Use with_memory_tier for variables
+    flow_builder.with_memory_tier("working", {"variables": {"result_score": None, "verification_result": None}})
 
     # 2. Add an InspectorNode using .add_inspector()
     flow_builder.add_inspector(
@@ -39,7 +34,7 @@ def test_inspector_lifecycle_graph() -> None:
 
     # Verify pass_threshold is set correctly
     assert node.pass_threshold == 0.8
-    assert node.to_node_variable == "result_score"
+    assert node.target_variable == "result_score"
     assert node.criteria == "Score must be > 0.8"
 
     # Run to_mermaid(flow) and verify the classDef inspector is present
@@ -85,7 +80,7 @@ def test_inspector_lifecycle_linear() -> None:
 
     # Verify properties
     assert node.pass_threshold == 0.9
-    assert node.to_node_variable == "result_quality"
+    assert node.target_variable == "result_quality"
 
     # Run to_mermaid(flow) to verify visualization for linear flow
     mermaid_code = to_mermaid(flow)

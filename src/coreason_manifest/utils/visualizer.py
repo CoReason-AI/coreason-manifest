@@ -38,6 +38,7 @@ def _get_node_shape(node: Node) -> tuple[str, str]:
         "emergence_inspector": ("{{", "}}"),
         "placeholder": ("(", ")"),
         "swarm": ("[[", "]]"),
+        "human": (">", "]"),
     }
     return shape_map.get(node.type, ("[", "]"))
 
@@ -54,6 +55,11 @@ def _render_mermaid_node(node: Node, snapshot: ExecutionSnapshot | None = None) 
         # Legacy used "EmergenceInspectorNode", we stick to clean UI "Emergence Inspector"
 
         label += f"<br/>({type_label})"
+
+        # Display options for HumanNode
+        if node.type == "human" and hasattr(node, "options") and node.options:
+            options_str = ", ".join(node.options)
+            label += f"<br/>[{options_str}]"
 
     shape_start, shape_end = _get_node_shape(node)
 
@@ -147,6 +153,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
     lines.append("    classDef emergence_inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
     lines.append("    classDef swarm fill:#aed6f1,stroke:#2e86c1,stroke-width:2px;")
+    lines.append("    classDef human fill:#d2b4de,stroke:#8e44ad,stroke-width:2px;")
 
     # State styles
     lines.append("    classDef running fill:#fcf3cf,stroke:#f1c40f,stroke-width:3px,stroke-dasharray: 5 5;")

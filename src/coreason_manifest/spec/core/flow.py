@@ -12,13 +12,14 @@ from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
     EmergenceInspectorNode,
+    HumanNode,
     InspectorNode,
     PlaceholderNode,
     PlannerNode,
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import AnyTool, MCPServerConfig, MCPTool
 from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
@@ -35,9 +36,8 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
-    # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
-    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
+    json_schema: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -54,7 +54,7 @@ class DataSchema(CoreasonModel):
                         "remediation": RemediationAction(
                             type="update_field",
                             description="Correct the JSON Schema syntax.",
-                            patch_data=[{"op": "replace", "path": "/schema", "value": {}}],
+                            patch_data=[{"op": "replace", "path": "/json_schema", "value": {}}],
                         ).model_dump()
                     },
                 )
@@ -69,7 +69,8 @@ AnyNode = Annotated[
     | EmergenceInspectorNode
     | PlannerNode
     | SwarmNode
-    | PlaceholderNode,
+    | PlaceholderNode
+    | HumanNode,
     Field(discriminator="type"),
 ]
 
@@ -159,7 +160,7 @@ class FlowDefinitions(CoreasonModel):
     profiles: dict[str, Any] = Field(default_factory=dict)
     schemas: dict[str, Any] = Field(default_factory=dict)
     tools: dict[str, AnyTool] = Field(default_factory=dict)
-    tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
+    mcp_servers: dict[str, MCPServerConfig] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
@@ -180,8 +181,8 @@ def _scan_for_kill_switch_violations(
     from pydantic import BaseModel
 
     def _recursive_scan(obj: Any) -> None:
-        # 1. Check ToolCapability objects
-        if isinstance(obj, ToolCapability) and obj.risk_level.weight > max_risk.weight:
+        # 1. Check MCPTool objects
+        if isinstance(obj, MCPTool) and obj.risk_level.weight > max_risk.weight:
             raise ManifestError(
                 fault=SemanticFault(
                     error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
@@ -198,10 +199,6 @@ def _scan_for_kill_switch_violations(
                     },
                 )
             )
-            # ToolCapability might have nested fields, but typically leaf. Continue scan if needed?
-            # ToolCapability inherits CoreasonModel, so we'll scan its fields below if we don't return.
-            # But since we checked the tool itself, we might want to check children too if tools can contain tools.
-            # Assuming ToolCapability is a leaf for risk purposes, but safety first: proceed.
 
         # 2. Check Strings for Remote URIs
         if isinstance(obj, str):
@@ -427,6 +424,22 @@ class LinearFlow(CoreasonModel):
         return self
 
 
+class MaxTurnsCriteria(CoreasonModel):
+    type: Literal["max_turns"] = "max_turns"
+    max_turns: int = Field(..., ge=1, description="Maximum number of turns allowed.")
+
+
+class SchemaSatisfiedCriteria(CoreasonModel):
+    type: Literal["schema_satisfied"] = "schema_satisfied"
+    target_variable: str = Field(..., description="The variable to check against the schema.")
+    json_schema: dict[str, Any] = Field(..., description="JSON Schema the variable must satisfy.")
+
+
+class ConsensusCriteria(CoreasonModel):
+    type: Literal["consensus"] = "consensus"
+    min_agreement: float = Field(..., ge=0.0, le=1.0, description="Fraction of agents that must agree.")
+
+
 class IntentFlow(CoreasonModel):
     """
     Intent-driven swarm execution flow.
@@ -446,9 +459,12 @@ class IntentFlow(CoreasonModel):
     routing_strategy: Literal["semantic_bidding", "llm_router", "round_robin"] = Field(
         ..., description="Strategy for dispatching tasks to agents."
     )
-    termination_criteria: dict[str, Any] = Field(
-        ..., description="Conditions defining when the swarm has achieved its goal."
-    )
+    termination_criteria: (
+        MaxTurnsCriteria
+        | SchemaSatisfiedCriteria
+        | ConsensusCriteria
+        | list[MaxTurnsCriteria | SchemaSatisfiedCriteria | ConsensusCriteria]
+    ) = Field(..., description="Conditions defining when the swarm has achieved its goal.")
 
     @model_validator(mode="after")
     def enforce_global_kill_switch(self) -> "IntentFlow":

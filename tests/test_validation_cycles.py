@@ -4,7 +4,6 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
-    VariableDef,
 )
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
@@ -38,7 +37,7 @@ def build_flow_without_validation(builder: NewGraphFlow) -> GraphFlow:
         status="published",
         metadata=builder.metadata,
         interface=builder.interface,
-        blackboard=builder.blackboard,
+        memory=builder.memory,
         graph=graph,
         definitions=builder._build_definitions(),
         governance=builder.governance,
@@ -134,7 +133,8 @@ def test_switch_node_cycle() -> None:
     """
     builder = NewGraphFlow("test_switch_cycle", "1.0.0", "desc")
     # Need a variable for SwitchNode
-    builder.set_blackboard(variables={"v": VariableDef(type="string")})
+    # Use with_memory_tier instead of set_blackboard
+    builder.with_memory_tier("working", {"variables": {"v": None}})
     builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
 
     # A is SwitchNode: if v="x" -> B
@@ -301,7 +301,7 @@ def test_referenced_template_cycle() -> None:
         status="published",
         metadata=builder.metadata,
         interface=builder.interface,
-        blackboard=builder.blackboard,
+        memory=builder.memory,
         graph=graph,
         definitions=definitions,
         governance=builder.governance,

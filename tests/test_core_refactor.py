@@ -5,7 +5,6 @@ from coreason_manifest.spec.core.engines import StandardReasoning
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     DataSchema,
-    FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
@@ -30,7 +29,9 @@ def test_healing_ingestion_stub() -> None:
 
 def test_topology_tolerance_and_gatekeeper() -> None:
     """Directive 2: GraphFlow should allow islands, Gatekeeper should flag them."""
-    profile = CognitiveProfile(role="tester", persona="tester", reasoning=StandardReasoning(model="gpt-4"), fast_path=None)
+    profile = CognitiveProfile(
+        role="tester", persona="tester", reasoning=StandardReasoning(model="gpt-4"), fast_path=None
+    )
     nodes: dict[str, AnyNode] = {
         "n1": AgentNode(id="n1", metadata={}, type="agent", profile=profile, tools=[]),
         "n2": AgentNode(id="n2", metadata={}, type="agent", profile=profile, tools=[]),

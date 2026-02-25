@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import Field
 
@@ -21,18 +21,17 @@ class CoIntelligencePolicy(CoreasonModel):
     Replaces the static 'HumanNode' concept with dynamic governance.
     """
 
-    shadow_mode: bool = Field(
+    shadow_mode_enabled: bool = Field(
         False, description="If True, human observers receive live telemetry without blocking execution."
     )
-    mentor_mode: dict[str, Any] | None = Field(
+    mentor_intervention_timeout_sec: int | None = Field(
         None,
         description=(
-            "Timeout thresholds where the system waits for human reasoning adjustments "
-            "before executing critical tools."
+            "Timeout thresholds where the system waits for human reasoning adjustments before executing critical tools."
         ),
-        examples=[{"critical_tool_timeout": 300}],
+        examples=[300],
     )
-    peer_routing: dict[str, Any] | None = Field(
+    peer_routing_rules: dict[str, Any] | None = Field(
         None,
         description="Criteria for dynamically routing specific sub-tasks to human workers instead of agents.",
         examples=[{"criteria": "ambiguity > 0.8", "role": "expert_human"}],

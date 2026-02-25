@@ -35,7 +35,7 @@ def test_load_graph_flow() -> None:
             "inputs": {"json_schema": {}},
             "outputs": {"json_schema": {}},
         },
-        "blackboard": None,
+        "memory": None,
         "graph": {
             "nodes": {
                 "start": {

@@ -48,11 +48,13 @@ from coreason_manifest.spec.core.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
+    HumanNode,
     InspectorNode,
     InspectorNodeBase,
     Node,
     PlaceholderNode,
     PlannerNode,
+    SwarmNode,
     SwitchNode,
 )
 from coreason_manifest.spec.core.resilience import (
@@ -68,8 +70,8 @@ from coreason_manifest.spec.core.resilience import (
 from coreason_manifest.spec.core.tools import (
     MCPPrompt,
     MCPResource,
+    MCPServerConfig,
     MCPTool,
-    ToolPack,
 )
 
 __all__ = [
@@ -87,6 +89,7 @@ __all__ = [
     "CoIntelligencePolicy",
     "CognitiveProfile",
     "ComputerUseReasoning",
+    "ConsensusCriteria",
     "CouncilReasoning",
     "DecompositionReasoning",
     "Edge",
@@ -105,10 +108,17 @@ __all__ = [
     "Graph",
     "GraphFlow",
     "GraphReasoning",
+    "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
     "IntentFlow",
     "LinearFlow",
+    # Tools
+    "MCPPrompt",
+    "MCPResource",
+    "MCPServerConfig",
+    "MCPTool",
+    "MaxTurnsCriteria",
     "MemorySubsystem",
     "ModelCriteria",
     "ModelRef",
@@ -123,15 +133,12 @@ __all__ = [
     "ResilienceStrategy",
     "RetryStrategy",
     "Safety",
+    "SchemaSatisfiedCriteria",
     "SemanticMemory",
     "StandardReasoning",
     "SupervisionPolicy",
+    "SwarmNode",
     "SwitchNode",
-    # Tools
-    "MCPPrompt",
-    "MCPResource",
-    "MCPTool",
-    "ToolPack",
     "TreeSearchReasoning",
     "VariableDef",
     "WorkingMemory",

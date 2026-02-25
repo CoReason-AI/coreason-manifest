@@ -25,7 +25,7 @@ from coreason_manifest.spec.core.resilience import (
     ReflexionStrategy,
     ResilienceStrategy,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig
 from coreason_manifest.utils.topology import get_strongly_connected_components
 
 
@@ -51,8 +51,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[str]:
 
     if flow.definitions:
         # Convert dict to list for backward compatibility with _validate_tools
-        tool_packs = list(flow.definitions.tool_packs.values()) if flow.definitions.tool_packs else []
-        errors.extend(_validate_tools(nodes, tool_packs))
+        mcp_servers = list(flow.definitions.mcp_servers.values()) if flow.definitions.mcp_servers else []
+        errors.extend(_validate_tools(nodes, mcp_servers))
         errors.extend(_validate_referential_integrity(nodes, flow.definitions))
     else:
         # If no definitions, ensure no references exist
@@ -250,9 +250,9 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[str]:
     return errors
 
 
-def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[str]:
+def _validate_tools(nodes: list[AnyNode], servers: list[MCPServerConfig]) -> list[str]:
     errors: list[str] = []
-    available_tools = {t.name for pack in packs for t in pack.tools}
+    available_tools = {t.name for server in servers for t in server.tools}
 
     for node in nodes:
         if isinstance(node, AgentNode):

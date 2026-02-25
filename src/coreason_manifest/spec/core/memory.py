@@ -52,12 +52,6 @@ class SemanticMemory(CoreasonModel):
 class MemorySubsystem(CoreasonModel):
     """Hierarchical memory subsystem configuration."""
 
-    working: WorkingMemory = Field(
-        default_factory=WorkingMemory, description="Working memory configuration."
-    )
-    episodic: EpisodicMemory | None = Field(
-        None, description="Episodic memory configuration."
-    )
-    semantic: SemanticMemory | None = Field(
-        None, description="Semantic memory configuration."
-    )
+    working: WorkingMemory = Field(default_factory=WorkingMemory, description="Working memory configuration.")
+    episodic: EpisodicMemory | None = Field(None, description="Episodic memory configuration.")
+    semantic: SemanticMemory | None = Field(None, description="Semantic memory configuration.")

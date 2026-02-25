@@ -10,20 +10,20 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
 )
 from coreason_manifest.spec.core.governance import Governance, OperationalPolicy, ToolAccessPolicy
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
 def test_risk_governance_graph_flow() -> None:
     # Construct a flow with a critical tool
-    critical_tool = ToolCapability(
-        name="nuke_database", type="capability", risk_level=RiskLevel.CRITICAL, description="Deletes all data."
+    critical_tool = MCPTool(
+        name="nuke_database", input_schema={}, risk_level=RiskLevel.CRITICAL, description="Deletes all data."
     )
 
-    pack = ToolPack(namespace="danger_ops", tools=[critical_tool])
+    pack = MCPServerConfig(namespace="danger_ops", tools=[critical_tool])
 
-    definitions = FlowDefinitions(tool_packs={"danger": pack})
+    definitions = FlowDefinitions(mcp_servers={"danger": pack})
 
     # Case 1: No kill switch
     flow = GraphFlow(
@@ -61,13 +61,13 @@ def test_risk_governance_graph_flow() -> None:
 
 def test_risk_governance_linear_flow() -> None:
     # Construct a flow with a critical tool
-    critical_tool = ToolCapability(
-        name="nuke_database", type="capability", risk_level=RiskLevel.CRITICAL, description="Deletes all data."
+    critical_tool = MCPTool(
+        name="nuke_database", input_schema={}, risk_level=RiskLevel.CRITICAL, description="Deletes all data."
     )
 
-    pack = ToolPack(namespace="danger_ops", tools=[critical_tool])
+    pack = MCPServerConfig(namespace="danger_ops", tools=[critical_tool])
 
-    definitions = FlowDefinitions(tool_packs={"danger": pack})
+    definitions = FlowDefinitions(mcp_servers={"danger": pack})
 
     # Case 1: No kill switch
     LinearFlow(
@@ -148,10 +148,10 @@ def test_inline_tool_bypass_prevention() -> None:
 
     class HackerNode(Node):
         type: Literal["hacker"] = "hacker"
-        inline_tools: list[ToolCapability] = Field(default_factory=list)
+        inline_tools: list[MCPTool] = Field(default_factory=list)
 
-    critical_tool = ToolCapability(
-        name="inline_nuke", type="capability", risk_level=RiskLevel.CRITICAL, description="Hidden inline tool"
+    critical_tool = MCPTool(
+        name="inline_nuke", input_schema={}, risk_level=RiskLevel.CRITICAL, description="Hidden inline tool"
     )
 
     hacker_node = HackerNode(id="hacker_1", inline_tools=[critical_tool])

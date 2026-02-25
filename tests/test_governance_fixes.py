@@ -3,8 +3,8 @@
 import pytest
 from pydantic import BaseModel
 
-from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
+from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
 from coreason_manifest.spec.core.flow import (
     DataSchema,
     Edge,
@@ -17,7 +17,7 @@ from coreason_manifest.spec.core.flow import (
     validate_integrity,
 )
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode, SwitchNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
@@ -88,7 +88,7 @@ def test_linear_guarded_computer_use() -> None:
     defs = get_defs()
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
-    gov = Governance(co_intelligence=CoIntelligencePolicy(shadow_mode=True))
+    gov = Governance(co_intelligence=CoIntelligencePolicy(shadow_mode_enabled=True))
     flow = LinearFlow(kind="LinearFlow", metadata=get_meta(), definitions=defs, steps=[node], governance=gov)
 
     errors = validate_policy(flow)
@@ -279,8 +279,6 @@ def test_gatekeeper_inline_profile() -> None:
 
     errors = validate_policy(flow)
     assert len(errors) == 0
-
-
 
 
 def test_integrity_empty_chain() -> None:

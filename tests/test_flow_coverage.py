@@ -16,7 +16,7 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.memory import MemorySubsystem, WorkingMemory
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.validator import validate_flow
 
@@ -25,11 +25,11 @@ def test_flow_integrity_coverage() -> None:
     """Cover lines 300-331 in flow.py: validate_integrity logic."""
 
     # 1. Tool Packs (lines 300-301)
-    # Note: ToolPack takes list[ToolCapability]
-    tool = ToolCapability(name="my-tool", description="test")
-    # ToolPack signature: kind, namespace, tools, dependencies, env_vars
-    pack = ToolPack(kind="ToolPack", namespace="pack1", tools=[tool], dependencies=[], env_vars=[])
-    definitions = FlowDefinitions(tool_packs={"p1": pack})
+    # Note: MCPServerConfig takes list[MCPTool]
+    tool = MCPTool(name="my-tool", description="test", input_schema={})
+    # MCPServerConfig signature: kind, namespace, tools, dependencies, env_vars
+    pack = MCPServerConfig(kind="MCPServerConfig", namespace="pack1", tools=[tool], dependencies=[], env_vars=[])
+    definitions = FlowDefinitions(mcp_servers={"p1": pack})
 
     # Agent with valid tool
     agent = AgentNode(

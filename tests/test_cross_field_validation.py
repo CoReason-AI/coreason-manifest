@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.nodes import SwarmNode
-from coreason_manifest.spec.core.tools import ToolCapability
+from coreason_manifest.spec.core.tools import MCPTool
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
@@ -31,9 +31,9 @@ def test_tool_critical_description() -> None:
     If risk_level is 'critical', description is required.
     """
     with pytest.raises(ValidationError) as excinfo:
-        ToolCapability(
+        MCPTool(
             name="nuke_db",
-            type="capability",
+            input_schema={},
             risk_level=RiskLevel.CRITICAL,
             # Missing description
         )

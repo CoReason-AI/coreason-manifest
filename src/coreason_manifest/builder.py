@@ -18,6 +18,7 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.flow import (
     AnyNode,
+    ConsensusCriteria,
     DataSchema,
     Edge,
     FlowDefinitions,
@@ -27,7 +28,8 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     IntentFlow,
     LinearFlow,
-    VariableDef,
+    MaxTurnsCriteria,
+    SchemaSatisfiedCriteria,
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance, OperationalPolicy
 from coreason_manifest.spec.core.memory import (
@@ -45,7 +47,7 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -162,7 +164,7 @@ class BaseFlowBuilder:
     def __init__(self, name: str, version: str, description: str) -> None:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
-        self._tool_packs: dict[str, ToolPack] = {}
+        self._mcp_servers: dict[str, MCPServerConfig] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
         self.memory: MemorySubsystem = MemorySubsystem(working=WorkingMemory())
@@ -186,9 +188,9 @@ class BaseFlowBuilder:
         )
         return self
 
-    def add_tool_pack(self, pack: ToolPack) -> Self:
-        """Adds a tool pack to the flow."""
-        self._tool_packs[pack.namespace] = pack
+    def add_mcp_server(self, config: MCPServerConfig) -> Self:
+        """Adds an MCP Server configuration to the flow."""
+        self._mcp_servers[config.namespace] = config
         return self
 
     def set_governance(self, gov: Governance) -> Self:
@@ -239,7 +241,7 @@ class BaseFlowBuilder:
         """Helper to build FlowDefinitions from registered components."""
         return FlowDefinitions(
             profiles=self._profiles,
-            tool_packs=self._tool_packs,
+            mcp_servers=self._mcp_servers,
             supervision_templates=self._supervision_templates,
         )
 
@@ -389,28 +391,6 @@ class NewGraphFlow(BaseFlowBuilder):
         )
         return self
 
-    def set_blackboard(self, variables: dict[str, VariableDef], persistence: bool = False) -> "NewGraphFlow":
-        """Configures the shared memory blackboard."""
-        # Mapping old set_blackboard to new memory subsystem for compatibility
-        # We assume 'variables' dict[str, VariableDef] maps to working memory variables?
-        # VariableDef has 'type', 'description'. WorkingMemory is dict[str, Any] (value).
-        # It seems VariableDef was just definition, not value.
-        # But Blackboard had 'variables: dict[str, Any]'.
-        # Wait, the signature in old builder was `variables: dict[str, VariableDef]`.
-        # And Blackboard model had `variables: dict[str, Any]`.
-        # This seems like a mismatch in the old code or I misunderstood.
-        # Let's assume we want to initialize working memory variables.
-        # But VariableDef is metadata.
-        # Let's just update working memory with empty values or similar?
-        # Or better, just ignore for now and trust `with_memory_tier` is the new way.
-        # But for backward compat in tests, I might need to do something.
-        # The old test did: builder.set_blackboard(variables={"var1": VariableDef(...)})
-        # I'll populate working memory with None values for these keys to satisfy existence checks.
-
-        # Actually, let's keep it simple.
-        self.memory.working.variables.update({k: None for k in variables.keys()})
-        return self
-
     def build(self) -> GraphFlow:
         """Constructs and validates the GraphFlow object."""
         # Determine entry point
@@ -445,7 +425,7 @@ class NewSwarmFlow(BaseFlowBuilder):
         super().__init__(name, version, description)
         self.pool: dict[str, AgentNode] = {}
         self.routing_strategy: Literal["semantic_bidding", "llm_router", "round_robin"] = "semantic_bidding"
-        self.termination_criteria: dict[str, Any] = {}
+        self.termination_criteria: list[MaxTurnsCriteria | SchemaSatisfiedCriteria | ConsensusCriteria] = []
         self.interface = FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
@@ -461,9 +441,11 @@ class NewSwarmFlow(BaseFlowBuilder):
         self.routing_strategy = strategy
         return self
 
-    def set_termination(self, criteria: dict[str, Any]) -> "NewSwarmFlow":
-        """Sets the termination criteria."""
-        self.termination_criteria = criteria
+    def add_termination(
+        self, criterion: MaxTurnsCriteria | SchemaSatisfiedCriteria | ConsensusCriteria
+    ) -> "NewSwarmFlow":
+        """Adds a termination criterion."""
+        self.termination_criteria.append(criterion)
         return self
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewSwarmFlow":
@@ -476,7 +458,10 @@ class NewSwarmFlow(BaseFlowBuilder):
 
     def build(self) -> IntentFlow:
         """Constructs and validates the IntentFlow object."""
-        flow = IntentFlow(
+        # Convert list to single or keep list if IntentFlow supports list (it does)
+        criteria = self.termination_criteria[0] if len(self.termination_criteria) == 1 else self.termination_criteria
+
+        return IntentFlow(
             kind="IntentFlow",
             status="published",
             metadata=self.metadata,
@@ -484,13 +469,7 @@ class NewSwarmFlow(BaseFlowBuilder):
             memory=self.memory,
             pool=self.pool,
             routing_strategy=self.routing_strategy,
-            termination_criteria=self.termination_criteria,
+            termination_criteria=criteria,
             definitions=self._build_definitions(),
             governance=self.governance,
         )
-
-        # We can reuse validate_flow if it supports IntentFlow, or we assume pydantic validation is enough for now.
-        # Since validate_flow was designed for Graph/Linear, it might not work fully for IntentFlow.
-        # For now, let's rely on Pydantic.
-
-        return flow

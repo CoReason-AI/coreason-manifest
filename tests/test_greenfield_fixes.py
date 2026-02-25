@@ -575,15 +575,6 @@ def test_swarm_type_safety() -> None:
 
 def test_inspector_regex_warning() -> None:
     """Test warning when InspectorNode uses regex mode on complex types."""
-    from coreason_manifest.spec.core.flow import (
-        DataSchema,
-        FlowInterface,
-        FlowMetadata,
-        Graph,
-        GraphFlow,
-    )
-    from coreason_manifest.spec.core.nodes import InspectorNode
-    from coreason_manifest.utils.validator import validate_flow
 
     # type({"some": "object"}).__name__ is 'dict'.
     # Validator checks for "object" or "array".
@@ -609,7 +600,6 @@ def test_inspector_regex_warning() -> None:
     # For inspector: `and symbol_table[...] in ("object", "array")`.
     # This is problematic for `dict`.
     # I will skip this fix here and address it by updating `validator.py` in the next step.
-    pass
 
 
 def test_validator_union_type_normalization() -> None:

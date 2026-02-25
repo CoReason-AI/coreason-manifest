@@ -44,7 +44,7 @@ def test_flow_definitions() -> None:
     brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(
         profiles={"brain-id-123": brain},
-        tool_packs={},
+        mcp_servers={},
         skills={"skill-1": {"type": "python", "code": "print('hello')"}},
     )
     assert definitions.profiles["brain-id-123"] == brain
@@ -56,7 +56,7 @@ def test_linear_flow_definitions() -> None:
     brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(
         profiles={"brain-id-123": brain},
-        tool_packs={},
+        mcp_servers={},
     )
     agent = AgentNode(
         id="agent-1",
@@ -88,7 +88,7 @@ def test_graph_flow_definitions() -> None:
     brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(
         profiles={"brain-id-123": brain},
-        tool_packs={},
+        mcp_servers={},
     )
     agent = AgentNode(
         id="agent-1",
@@ -161,7 +161,7 @@ def test_tool_integrity_failure() -> None:
     brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(
         profiles={"my-brain": brain},
-        tool_packs={},  # No tools registered
+        mcp_servers={},  # No tools registered
     )
 
     agent = AgentNode(
@@ -190,7 +190,7 @@ def test_tool_integrity_failure_graph() -> None:
     brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(
         profiles={"my-brain": brain},
-        tool_packs={},  # No tools registered
+        mcp_servers={},  # No tools registered
     )
 
     agent = AgentNode(

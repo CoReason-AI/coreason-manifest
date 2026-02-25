@@ -2,25 +2,27 @@ from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
 
 
 def test_critical_tool_requires_guard() -> None:
     # Define a critical tool
-    critical_tool = ToolCapability(name="delete_db", risk_level=RiskLevel.CRITICAL, description="Deletes the database")
-    safe_tool = ToolCapability(name="read_db", risk_level=RiskLevel.SAFE)
+    critical_tool = MCPTool(
+        name="delete_db", risk_level=RiskLevel.CRITICAL, description="Deletes the database", input_schema={}
+    )
+    safe_tool = MCPTool(name="read_db", risk_level=RiskLevel.SAFE, input_schema={})
 
-    pack = ToolPack(
-        kind="ToolPack", namespace="db_tools", tools=[critical_tool, safe_tool], dependencies=[], env_vars=[]
+    pack = MCPServerConfig(
+        kind="MCPServerConfig", namespace="db_tools", tools=[critical_tool, safe_tool], dependencies=[], env_vars=[]
     )
 
     # Need a profile for integrity check
     profile = CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None)
 
     definitions = FlowDefinitions(
-        profiles={"default_profile": profile}, tool_packs={"db_tools": pack}, supervision_templates={}
+        profiles={"default_profile": profile}, mcp_servers={"db_tools": pack}, supervision_templates={}
     )
 
     # Define Agent using critical tool
@@ -57,14 +59,16 @@ def test_critical_tool_requires_guard() -> None:
 
 def test_safe_tool_allowed() -> None:
     # Define tools
-    safe_tool = ToolCapability(name="read_db", risk_level=RiskLevel.SAFE)
+    safe_tool = MCPTool(name="read_db", risk_level=RiskLevel.SAFE, input_schema={})
 
-    pack = ToolPack(kind="ToolPack", namespace="db_tools", tools=[safe_tool], dependencies=[], env_vars=[])
+    pack = MCPServerConfig(
+        kind="MCPServerConfig", namespace="db_tools", tools=[safe_tool], dependencies=[], env_vars=[]
+    )
 
     profile = CognitiveProfile(role="tester", persona="tester", reasoning=None, fast_path=None)
 
     definitions = FlowDefinitions(
-        profiles={"default_profile": profile}, tool_packs={"db_tools": pack}, supervision_templates={}
+        profiles={"default_profile": profile}, mcp_servers={"db_tools": pack}, supervision_templates={}
     )
 
     agent = AgentNode(id="agent-1", metadata={}, type="agent", profile="default_profile", tools=["read_db"])

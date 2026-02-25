@@ -1,32 +1,30 @@
 import pytest
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow, NewSwarmFlow
-from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.governance import Governance, OperationalPolicy
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.tools import MCPServerConfig, MCPTool
 
 
 def test_linear_builder() -> None:
     builder = NewLinearFlow("MyLinear", version="1.0.0", description="Desc")
-    builder.add_step(PlaceholderNode(id="step1", type="placeholder", metadata={}, required_capabilities=[]))
-    builder.add_step(PlaceholderNode(id="step2", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.define_profile("default", "role", "persona")
 
-    tp = ToolPack(
-        kind="ToolPack",
+    # Use AgentNode instead of PlaceholderNode to be safe
+    node1 = AgentNode(id="step1", type="agent", metadata={}, profile="default", tools=[])
+    node2 = AgentNode(id="step2", type="agent", metadata={}, profile="default", tools=[])
+
+    builder.add_step(node1)
+    builder.add_step(node2)
+
+    tp = MCPServerConfig(
+        kind="MCPServerConfig",
         namespace="test",
-        tools=[ToolCapability(name="t1")],
+        tools=[MCPTool(name="t1", input_schema={})],
         dependencies=[],
         env_vars=[],
     )
-    tp = ToolPack(
-        kind="ToolPack",
-        namespace="test",
-        tools=[ToolCapability(name="t1")],
-        dependencies=[],
-        env_vars=[],
-    )
-    builder.add_tool_pack(tp)
+    builder.add_mcp_server(tp)
 
     gov = Governance(rate_limit_rpm=10)
     builder.set_governance(gov)
@@ -37,25 +35,30 @@ def test_linear_builder() -> None:
     assert flow.metadata.name == "MyLinear"
     assert len(flow.steps) == 2
     assert flow.definitions is not None
-    assert len(flow.definitions.tool_packs) == 1
+    assert len(flow.definitions.mcp_servers) == 1
     assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
 
 
 def test_graph_builder() -> None:
     builder = NewGraphFlow("MyGraph", version="1.0.0", description="Desc")
-    builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
-    builder.add_node(PlaceholderNode(id="n2", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.define_profile("default", "role", "persona")
+
+    node1 = AgentNode(id="n1", type="agent", metadata={}, profile="default", tools=[])
+    node2 = AgentNode(id="n2", type="agent", metadata={}, profile="default", tools=[])
+
+    builder.add_node(node1)
+    builder.add_node(node2)
     builder.connect("n1", "n2", condition="ok")
 
-    tp = ToolPack(
-        kind="ToolPack",
+    tp = MCPServerConfig(
+        kind="MCPServerConfig",
         namespace="test",
-        tools=[ToolCapability(name="t1")],
+        tools=[MCPTool(name="t1", input_schema={})],
         dependencies=[],
         env_vars=[],
     )
-    builder.add_tool_pack(tp)
+    builder.add_mcp_server(tp)
 
     gov = Governance(rate_limit_rpm=10)
     builder.set_governance(gov)
@@ -66,8 +69,6 @@ def test_graph_builder() -> None:
         outputs={"type": "object", "properties": {"out": {"type": "integer"}}},
     )
 
-    # Use new memory config API
-    # Old: builder.set_blackboard(variables={"var1": VariableDef(type="string", description="test var")}, persistence=True)
     builder.with_memory_tier("working", {"variables": {"var1": None}})
     builder.with_memory_tier("episodic", {"retention_policy": "forever"})
 
@@ -81,13 +82,16 @@ def test_graph_builder() -> None:
     assert flow.graph.edges[0].to_node == "n2"
     assert flow.graph.edges[0].condition == "ok"
     assert flow.definitions is not None
-    assert len(flow.definitions.tool_packs) == 1
+    assert len(flow.definitions.mcp_servers) == 1
     assert flow.governance is not None
     assert flow.governance.rate_limit_rpm == 10
 
     # Assert new features
-    assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}  # type: ignore[union-attr]
-    assert flow.interface.outputs.json_schema == {"type": "object", "properties": {"out": {"type": "integer"}}}  # type: ignore[union-attr]
+    from coreason_manifest.spec.core.flow import DataSchema
+    assert isinstance(flow.interface.inputs, DataSchema)
+    assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}
+    assert isinstance(flow.interface.outputs, DataSchema)
+    assert flow.interface.outputs.json_schema == {"type": "object", "properties": {"out": {"type": "integer"}}}
     assert flow.memory is not None
     assert flow.memory.working is not None
     assert "var1" in flow.memory.working.variables
@@ -102,14 +106,20 @@ def test_swarm_builder() -> None:
     builder.add_agent(agent)
 
     builder.set_routing("round_robin")
-    builder.set_termination({"type": "schema_match"})
+    # Termination criteria is now a typed object, not a dict
+    from coreason_manifest.spec.core.flow import SchemaSatisfiedCriteria
+
+    builder.add_termination(SchemaSatisfiedCriteria(target_variable="result", json_schema={"type": "object"}))
 
     flow = builder.build()
 
     assert flow.kind == "IntentFlow"
     assert len(flow.pool) == 1
     assert flow.routing_strategy == "round_robin"
-    assert flow.termination_criteria["type"] == "schema_match"
+    # termination_criteria can be a list or single object depending on build() logic.
+    # NewSwarmFlow.build() takes the first element if length is 1.
+    assert isinstance(flow.termination_criteria, SchemaSatisfiedCriteria)
+    assert flow.termination_criteria.target_variable == "result"
 
 
 def test_linear_builder_invalid() -> None:
@@ -229,6 +239,7 @@ def test_builder_coverage_add_agent_ref_defaults() -> None:
 def test_builder_coverage_explicit_add_agent() -> None:
     """Explicitly test add_agent to ensure coverage."""
     brain = CognitiveProfile(role="role", persona="persona", reasoning=None, fast_path=None)
+    # AgentNode needs profile to be a valid ID or object.
     agent = AgentNode(id="agent1", type="agent", profile=brain, tools=[], metadata={}, resilience=None)
 
     # Linear
@@ -295,6 +306,8 @@ def test_builder_validation_failure() -> None:
 
     # Add agent with valid profile but invalid resilience fallback
     # Resilience fallback_node_id points to "missing_node"
+    # AgentNode needs profile to be a valid ID or object.
+
     node = AgentNode(
         id="a1",
         metadata={},
@@ -315,11 +328,12 @@ def test_builder_validation_failure() -> None:
 def test_builder_graph_entry_point_coverage() -> None:
     """Cover NewGraphFlow.set_entry_point (lines 297-298)."""
     from coreason_manifest.builder import NewGraphFlow
-    from coreason_manifest.spec.core.nodes import PlaceholderNode
+    from coreason_manifest.spec.core.nodes import AgentNode
 
     builder = NewGraphFlow("Graph Flow")
+    builder.define_profile("p1", "role", "persona")
 
-    node = PlaceholderNode(id="start", metadata={}, required_capabilities=[])
+    node = AgentNode(id="start", metadata={}, profile="p1", tools=[], type="agent")
     builder.add_node(node)
 
     # Use set_entry_point
@@ -332,12 +346,13 @@ def test_builder_graph_entry_point_coverage() -> None:
 def test_builder_graph_auto_entry_point() -> None:
     """Cover NewGraphFlow.build() auto entry point (line 368)."""
     from coreason_manifest.builder import NewGraphFlow
-    from coreason_manifest.spec.core.nodes import PlaceholderNode
+    from coreason_manifest.spec.core.nodes import AgentNode
 
     builder = NewGraphFlow("Auto Entry")
+    builder.define_profile("p1", "role", "persona")
 
     # Add one node
-    node = PlaceholderNode(id="auto_start", metadata={}, required_capabilities=[])
+    node = AgentNode(id="auto_start", metadata={}, profile="p1", tools=[], type="agent")
     builder.add_node(node)
 
     # Do NOT call set_entry_point
