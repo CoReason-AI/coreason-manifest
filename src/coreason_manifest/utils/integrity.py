@@ -66,13 +66,22 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, enum.Enum):
             return self._recursive_sort_and_sanitize(obj.value)
 
-        # Dictionaries (The Key Fix):
+        # Dictionaries:
         if isinstance(obj, dict):
             sanitized_dict = {}
+            seen_keys = set()
+
             # Sort by stringified key to prevent mixed-type TypeError
             for k, v in sorted(obj.items(), key=lambda item: str(item[0])):
-                if v is not None and k not in {"execution_hash", "signature"} and not str(k).startswith("__"):
-                    sanitized_dict[str(k)] = self._recursive_sort_and_sanitize(v)
+                if v is None or str(k).startswith("__"):
+                    continue
+
+                str_k = str(k)
+                if str_k in seen_keys:
+                    raise ValueError(f"Canonical JSON dictionary keys must be uniquely stringifiable. Collision detected for key: '{str_k}'")
+
+                seen_keys.add(str_k)
+                sanitized_dict[str_k] = self._recursive_sort_and_sanitize(v)
             return sanitized_dict
 
         # Iterables (List/Tuple):
@@ -80,11 +89,15 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Recursively process items.
             return [self._recursive_sort_and_sanitize(x) for x in obj]
 
-        # Sets (The Determinism Fix):
+        # Sets:
         if isinstance(obj, (set, frozenset)):
-            # Sort by deterministic typed string, then sanitize
-            sorted_items = sorted(obj, key=lambda x: f"{type(x).__name__}:{x}")
-            return [self._recursive_sort_and_sanitize(x) for x in sorted_items]
+            # 1. Sanitize all items first
+            sanitized_items = [self._recursive_sort_and_sanitize(x) for x in obj]
+            # 2. Sort by their deterministic JSON string representation
+            sanitized_items.sort(
+                key=lambda x: json.dumps(x, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+            )
+            return sanitized_items
 
         if isinstance(obj, uuid.UUID):
             # Convert to string via str(obj).
@@ -124,6 +137,25 @@ class CanonicalHashingStrategy(HashingStrategy):
         if hasattr(obj, "compute_hash"):
             # Self-hashing objects (avoid infinite recursion if they call back here)
             return str(obj.compute_hash())
+
+        # Strip root-level cryptographic keys to avoid hashing the hash
+        if isinstance(obj, dict):
+            obj = obj.copy()
+            obj.pop("execution_hash", None)
+            obj.pop("signature", None)
+        elif isinstance(obj, BaseModel):
+            # Pydantic models need to be dumped to be mutable dicts for popping keys,
+            # OR we rely on _recursive_sort_and_sanitize handling Pydantic.
+            # But we need to strip keys BEFORE recursion to avoid recursive stripping.
+            # So we dump it here.
+            excludes = getattr(obj, "_hash_exclude_", None)
+            obj = obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
+            obj.pop("execution_hash", None)
+            obj.pop("signature", None)
+        elif hasattr(obj, "model_dump"):
+             obj = obj.model_dump(mode="python")
+             obj.pop("execution_hash", None)
+             obj.pop("signature", None)
 
         # 1. Pass the object through _recursive_sort_and_sanitize method.
         sanitized = self._recursive_sort_and_sanitize(obj)

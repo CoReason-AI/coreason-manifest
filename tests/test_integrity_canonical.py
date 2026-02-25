@@ -2,6 +2,7 @@
 
 import enum
 import hashlib
+import json
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -167,7 +168,13 @@ class TestCanonicalHashingStrategy:
         # "1" -> "str:1"
         # "int:1" comes before "str:1" alphabetically
         # Expected list: [1, "1"]
-        expected_json = '[1,"1"]'
+
+        # SOTA Update: Sorted by JSON dump.
+        # json(1) -> "1"
+        # json("1") -> "\"1\""
+        # "\"1\"" < "1" because ascii '"' (34) < '1' (49). So "1" comes first.
+
+        expected_json = '["1",1]'
         expected_hash = hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
 
         assert compute_hash(s) == expected_hash
@@ -189,19 +196,6 @@ class TestCanonicalHashingStrategy:
         node_a = {"id": "a", "parent_hashes": ["hash_b"]}
         node_b = {"id": "b", "parent_hashes": ["hash_a"]}
 
-        # We need to pre-calculate hashes to make the cycle valid in terms of keys,
-        # but since verify_merkle_proof sorts by dependency, a cycle will fail the sort check (len != len).
-        # We need valid hashes for lookups.
-
-        # Actually, verify_merkle_proof builds graph based on 'execution_hash'.
-        # We need to construct nodes such that they point to each other's execution_hash.
-
-        # This is tricky because hash depends on content.
-        # But we can just set execution_hash manually since verify_merkle_proof reads it.
-        # But verify_merkle_proof ALSO computes hash.
-        # However, the cycle detection happens *before* hash verification in step 4.
-        # Step 3 is Topological Sort.
-
         node_a["execution_hash"] = "hash_a"
         node_b["execution_hash"] = "hash_b"
 
@@ -220,3 +214,29 @@ class TestCanonicalHashingStrategy:
 
         # Pass correct trusted root
         assert verify_merkle_proof([node], trusted_root_hash=h) is True
+
+    def test_nested_signature_retention(self) -> None:
+        """Assert that 'signature' is only stripped from the root, not nested dicts."""
+        data = {
+            "signature": "root_signature_to_strip",
+            "payload": {
+                "signature": "keep_me"
+            }
+        }
+        # Expected behavior: root signature goes away, payload signature stays.
+        hashed = compute_hash(data)
+        expected_json = '{"payload":{"signature":"keep_me"}}'
+        assert hashed == hashlib.sha256(expected_json.encode("utf-8")).hexdigest()
+
+    def test_key_stringification_collision(self) -> None:
+        """Assert that mixing types that stringify identically raises a ValueError to prevent silent data loss."""
+        data: dict[Any, Any] = {1: "a", "1": "b"}
+        with pytest.raises(ValueError, match="Collision detected"):
+            compute_hash(data)
+
+    def test_complex_set_determinism(self) -> None:
+        """Assert that sets containing nested unordered elements hash perfectly deterministically."""
+        s1 = frozenset({ frozenset({2, 1}), frozenset({4, 3}) })
+        s2 = frozenset({ frozenset({3, 4}), frozenset({1, 2}) })
+        # Despite different insertion/memory orders, the canonical JSON array representations must sort identically.
+        assert compute_hash(s1) == compute_hash(s2)
