@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from referencing import Registry, Resource
-from referencing.exceptions import Unresolvable
+from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
@@ -55,13 +55,11 @@ class MockFactory:
                 resolved = resolver.lookup(ref_uri)
                 contents = resolved.contents
                 new_visited_refs = (visited_refs or frozenset()) | {ref_uri}
-                return self._generate_schema_data(contents, visited, new_visited_refs, depth, resolver)
-            except Unresolvable:
+                return self._generate_schema_data(
+                    contents, visited, new_visited_refs, depth, resolved.resolver
+                )
+            except (Unresolvable, PointerToNowhere):
                 logger.warning(f"Unresolvable reference: {ref_uri}")
-                return "mock_ref_error"
-            except Exception as e:
-                # Fallback for other resolution errors
-                logger.warning(f"Failed to resolve reference {ref_uri}: {e}")
                 return "mock_ref_error"
 
         # Cycle detection for schema objects
@@ -101,7 +99,7 @@ class MockFactory:
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
         # Create resolver from the full document
-        full_doc = flow.model_dump(by_alias=True, exclude_none=True)
+        full_doc = flow.model_dump(mode="json", by_alias=True)
         # We use empty string as base URI for the root document
         resource = Resource.from_contents(full_doc, default_specification=DRAFT202012)
         registry = Registry().with_resource("", resource)

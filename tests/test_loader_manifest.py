@@ -8,6 +8,7 @@ import yaml
 from coreason_manifest.spec.core.flow import LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import (
+    RuntimeSecurityWarning,
     SandboxedPathFinder,
     UniqueKeyLoader,
     _jail_root_var,
@@ -201,3 +202,29 @@ def test_loader_ref_passthrough(tmp_path: Path) -> None:
 
     assert isinstance(flow, LinearFlow)
     assert flow.sequence[0].metadata["ref"] == {"$ref": "#/foo"}
+
+
+def test_loader_include_sibling_warning(tmp_path: Path) -> None:
+    # Test that a warning is issued when sibling keys are present with $include
+    import yaml
+
+    from coreason_manifest.utils.loader import load_flow_from_file
+
+    manifest = {
+        "kind": "LinearFlow",
+        "metadata": {"name": "Test", "version": "1.0.0", "description": "d", "tags": []},
+        "sequence": [{"$include": "step1.yaml", "ignored_key": "value"}],
+        "definitions": {},
+    }
+
+    step1 = {"type": "agent", "id": "step1", "profile": "p", "tools": []}
+
+    (tmp_path / "main.yaml").write_text(yaml.dump(manifest))
+    (tmp_path / "step1.yaml").write_text(yaml.dump(step1))
+
+    with pytest.warns(RuntimeSecurityWarning, match="Sibling keys alongside \\$include are ignored"):
+        flow = load_flow_from_file(str(tmp_path / "main.yaml"), strict_security=False)
+
+    # Verify the included content is loaded
+    assert isinstance(flow, LinearFlow)
+    assert flow.sequence[0].id == "step1"

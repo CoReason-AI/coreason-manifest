@@ -101,13 +101,27 @@ def test_mock_ref_cycle() -> None:
 
 
 def test_mock_ref_generic_exception() -> None:
-    # Trigger generic exception during resolution
+    # Trigger generic exception during resolution (now only catches Unresolvable/PointerToNowhere)
+    # So a generic exception should bubble up
+    from referencing.exceptions import Unresolvable
+
     factory = MockFactory(seed=42)
 
-    # We need to manually call _generate_schema_data with a broken resolver
-    resolver = MagicMock()
-    resolver.lookup.side_effect = Exception("Boom")
+    # Broken resolver raising generic exception
+    resolver_broken = MagicMock()
+    resolver_broken.lookup.side_effect = Exception("Boom")
 
     schema = {"$ref": "something"}
-    result = factory._generate_schema_data(schema, resolver=resolver)
+
+    # Expect it to RAISE Exception, not catch it
+    import pytest
+
+    with pytest.raises(Exception, match="Boom"):
+        factory._generate_schema_data(schema, resolver=resolver_broken)
+
+    # Now verify Unresolvable is caught
+    resolver_unresolvable = MagicMock()
+    resolver_unresolvable.lookup.side_effect = Unresolvable(ref="something")
+
+    result = factory._generate_schema_data(schema, resolver=resolver_unresolvable)
     assert result == "mock_ref_error"

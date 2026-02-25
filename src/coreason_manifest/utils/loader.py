@@ -214,6 +214,12 @@ def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: froze
 
     if isinstance(data, dict):
         if "$include" in data:
+            if len(data) > 1:
+                warnings.warn(
+                    "Sibling keys alongside $include are ignored. The included file strictly overrides the current node.",
+                    category=RuntimeSecurityWarning,
+                    stacklevel=2,
+                )
             ref_path = data["$include"]
 
             target_path = (root_dir / ref_path).resolve()
