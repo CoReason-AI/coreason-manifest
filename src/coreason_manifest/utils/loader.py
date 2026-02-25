@@ -300,6 +300,68 @@ def load_flow_from_file(
     raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
 
 
+def _execute_jailed_module(
+    file_path: Path, root_dir: Path, class_name: str, component_name: str, file_ref: str
+) -> type:
+    """
+    Execute a module in a sandboxed environment and retrieve the target class.
+    """
+    # Explicit warning for audit logs
+    warnings.warn(
+        f"Dynamic Code Execution: Loading {component_name} from {file_ref}. Ensure this code is trusted.",
+        category=RuntimeSecurityWarning,
+        stacklevel=3,
+    )
+
+    # Generate cryptographically unique module name to prevent collisions
+    path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
+    module_name = f"_jail_{path_hash}"
+
+    loaded_class = None
+
+    # Use context manager to enable jailed imports during spec finding and loading
+    with sandbox_context(root_dir):
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec is None or spec.loader is None:
+            raise ValueError(f"Could not load spec for {file_ref}")
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+
+        warnings.warn(
+            f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
+            "Ensure strict governance until Wasm sandboxing is implemented.",
+            category=RuntimeSecurityWarning,
+            stacklevel=3,
+        )
+
+        try:
+            spec.loader.exec_module(module)
+            loaded_class = getattr(module, class_name, None)
+        except Exception as e:
+            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
+                raise
+            raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
+        finally:
+            # SOTA Hygiene: Guaranteed cleanup even if BaseExceptions (SystemExit, etc.) occur.
+            if module_name in sys.modules:
+                del sys.modules[module_name]
+
+            cleanup_modules = _jail_modules_var.get()
+            if cleanup_modules:
+                for mod in cleanup_modules:
+                    if mod in sys.modules:
+                        del sys.modules[mod]
+
+    if loaded_class is None:
+        raise ValueError(f"{component_name.capitalize()} class '{class_name}' not found in {file_ref}")
+
+    if not isinstance(loaded_class, type):
+        raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+
+    return loaded_class
+
+
 def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -> type:
     """
     Helper to load a class from a reference string in a secure sandbox context.
@@ -339,58 +401,7 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
     except RuntimeError as e:
         raise SecurityJailViolationError(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
 
-    # Explicit warning for audit logs
-    warnings.warn(
-        f"Dynamic Code Execution: Loading {component_name} from {file_ref}. Ensure this code is trusted.",
-        category=RuntimeSecurityWarning,
-        stacklevel=2,
-    )
-
-    # Generate cryptographically unique module name to prevent collisions
-    path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
-    module_name = f"_jail_{path_hash}"
-
-    # Use context manager to enable jailed imports during spec finding and loading
-    with sandbox_context(root_dir):
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        if spec is None or spec.loader is None:
-            raise ValueError(f"Could not load spec for {file_ref}")
-
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-
-        warnings.warn(
-            f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
-            "Ensure strict governance until Wasm sandboxing is implemented.",
-            category=RuntimeSecurityWarning,
-            stacklevel=2,
-        )
-
-        try:
-            spec.loader.exec_module(module)
-            loaded_class = getattr(module, class_name, None)
-        except Exception as e:
-            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
-                raise
-            raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
-        finally:
-            # SOTA Hygiene: Guaranteed cleanup even if BaseExceptions (SystemExit, etc.) occur.
-            if module_name in sys.modules:
-                del sys.modules[module_name]
-
-            cleanup_modules = _jail_modules_var.get()
-            if cleanup_modules:
-                for mod in cleanup_modules:
-                    if mod in sys.modules:
-                        del sys.modules[mod]
-
-    if loaded_class is None:
-        raise ValueError(f"{component_name.capitalize()} class '{class_name}' not found in {file_ref}")
-
-    if not isinstance(loaded_class, type):
-        raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
-
-    return loaded_class
+    return _execute_jailed_module(file_path, root_dir, class_name, component_name, file_ref)
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:

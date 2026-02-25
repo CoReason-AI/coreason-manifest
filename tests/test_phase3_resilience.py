@@ -163,8 +163,15 @@ def test_supervision_logic() -> None:
 
 def test_create_resilience_fallback_missing_id() -> None:
     """Test create_resilience raises error when fallback_id is missing for fallback strategy."""
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError, match="fallback_id is required"):
         create_resilience(retries=3, strategy="fallback", fallback_id=None)
+
+
+def test_create_resilience_fallback_success() -> None:
+    """Test create_resilience successfully creates a FallbackStrategy."""
+    strategy = create_resilience(retries=3, strategy="fallback", fallback_id="fallback_node")
+    assert isinstance(strategy, FallbackStrategy)
+    assert strategy.fallback_node_id == "fallback_node"
 
 
 def test_validator_catch_reflexion_type_mismatch() -> None:
