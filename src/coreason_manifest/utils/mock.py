@@ -1,13 +1,21 @@
 import hashlib
 import json
+import logging
 import random
 import secrets
+import uuid
 from datetime import UTC, datetime
 from typing import Any
+
+from referencing import Registry, Resource
+from referencing.exceptions import PointerToNowhere, Unresolvable
+from referencing.jsonschema import DRAFT202012
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
+
+logger = logging.getLogger(__name__)
 
 
 class MockFactory:
@@ -22,31 +30,113 @@ class MockFactory:
 
     def _generate_schema_data(
         self,
-        schema: dict[str, Any] | None,
+        schema: dict[str, Any] | bool | None,
         visited: frozenset[int] | None = None,
+        visited_refs: frozenset[str] | None = None,
         depth: int = 0,
+        resolver: Any | None = None,
     ) -> Any:
         max_depth = 10
 
         if depth > max_depth:
             return ""
 
+        # Hoist cycle detection to top to catch all recursions early
+        if isinstance(schema, dict):
+            schema_id = id(schema)
+            if visited is None:
+                visited = frozenset()
+
+            if schema_id in visited:
+                return ""
+
+            visited = visited | {schema_id}
+
+        # Handle JSON Schema boolean specifications
+        if isinstance(schema, bool):
+            return "mock_data" if schema else None
+
         if not schema:
             return {"mock_key": "mock_value"}
 
-        # Cycle detection
-        schema_id = id(schema)
-        if visited is None:
-            visited = frozenset()
+        # Ensure we only process dictionaries moving forward
+        if not isinstance(schema, dict):
+            return schema
 
-        if schema_id in visited:
-            return ""
+        # Enforce exact values (Const and Enum) before any deeper evaluation
+        if "const" in schema:
+            return schema["const"]
+        if "enum" in schema and isinstance(schema["enum"], list) and schema["enum"]:
+            return self.rng.choice(schema["enum"])
 
-        visited = visited | {schema_id}
+        # Handle mutual exclusivity combinators (Pick first)
+        for combinator in ["anyOf", "oneOf"]:
+            if combinator in schema and isinstance(schema[combinator], list) and schema[combinator]:
+                return self._generate_schema_data(schema[combinator][0], visited, visited_refs, depth, resolver)
+
+        # Handle inheritance combinator (Merge all)
+        if "allOf" in schema and isinstance(schema["allOf"], list):
+            merged_mock = {}
+            # 1. Generate and merge all parent schemas
+            for sub_schema in schema["allOf"]:
+                sub_mock = self._generate_schema_data(sub_schema, visited, visited_refs, depth, resolver)
+                if isinstance(sub_mock, dict):
+                    merged_mock.update(sub_mock)
+
+            # 2. Generate and merge local properties safely
+            local_schema = {k: v for k, v in schema.items() if k != "allOf"}
+
+            # SOTA Guard: Only recurse if the local schema actually contains additional constraints
+            if local_schema:
+                local_mock = self._generate_schema_data(local_schema, visited, visited_refs, depth, resolver)
+                if isinstance(local_mock, dict):
+                    merged_mock.update(local_mock)
+                    return merged_mock
+                return local_mock or merged_mock
+
+            return merged_mock
+
+        # Resolve $ref if present
+        if "$ref" in schema and resolver:
+            ref_uri = schema["$ref"]
+
+            # Check for cycle in refs
+            if visited_refs is not None and ref_uri in visited_refs:
+                return ""
+
+            try:
+                resolved = resolver.lookup(ref_uri)
+                contents = resolved.contents
+                new_visited_refs = (visited_refs or frozenset()) | {ref_uri}
+                return self._generate_schema_data(contents, visited, new_visited_refs, depth, resolved.resolver)
+            except (Unresolvable, PointerToNowhere):
+                logger.warning(f"Unresolvable reference: {ref_uri}")
+                return "mock_ref_error"
 
         # Simple schema support
-        type_ = schema.get("type", "string")
+        type_ = schema.get("type")
+
+        if isinstance(type_, list):
+            # Pick the first non-null type, or default to string
+            types = [t for t in type_ if t != "null"]
+            type_ = types[0] if types else "string"
+        elif not type_:
+            # Implicit type inference based on structure
+            if "properties" in schema:
+                type_ = "object"
+            elif "items" in schema or "prefixItems" in schema:
+                type_ = "array"
+            else:
+                type_ = "string"
+
         if type_ == "string":
+            fmt = schema.get("format")
+            if fmt == "uuid":
+                return str(uuid.UUID(int=self.rng.getrandbits(128), version=4))
+            if fmt == "date-time":
+                return datetime.now(UTC).isoformat()
+            if fmt == "email":
+                return f"mock_{self.rng.randint(1000, 9999)}@example.com"
             return "lorem ipsum"
         if type_ == "integer":
             return self.rng.randint(1, 100)
@@ -56,11 +146,30 @@ class MockFactory:
             return self.rng.choice([True, False])
         if type_ == "object":
             props = schema.get("properties", {})
-            return {k: self._generate_schema_data(v, visited, depth + 1) for k, v in props.items()}
+            data = {
+                k: self._generate_schema_data(v, visited, visited_refs, depth + 1, resolver) for k, v in props.items()
+            }
+            # Prevent starvation if no properties defined but additionalProperties allowed
+            if not data:
+                additional = schema.get("additionalProperties", True)
+                if additional is not False:
+                    # If additional is a schema, use it; otherwise generic
+                    val_schema = additional if isinstance(additional, dict) else None
+                    data["mock_dynamic_key"] = self._generate_schema_data(
+                        val_schema, visited, visited_refs, depth + 1, resolver
+                    )
+            return data
         if type_ == "array":
-            items_schema = schema.get("items")
-            if items_schema:
-                return [self._generate_schema_data(items_schema, visited, depth + 1)]
+            items_schema = schema.get("prefixItems", schema.get("items"))
+            if isinstance(items_schema, list):
+                # Handle tuple validation (array of schemas)
+                return [
+                    self._generate_schema_data(item, visited, visited_refs, depth + 1, resolver)
+                    for item in items_schema
+                ]
+            if items_schema is not None:
+                # Handle standard array validation (single schema)
+                return [self._generate_schema_data(items_schema, visited, visited_refs, depth + 1, resolver)]
             return []
         return "mock_data"
 
@@ -68,11 +177,18 @@ class MockFactory:
         trace: list[NodeExecution] = []
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
+        # Create resolver from the full document
+        full_doc = flow.model_dump(mode="json", by_alias=True)
+        # We use empty string as base URI for the root document
+        resource = Resource.from_contents(full_doc, default_specification=DRAFT202012)
+        registry = Registry().with_resource("", resource)
+        resolver = registry.resolver()
+
         if isinstance(flow, LinearFlow):
             nodes = flow.steps
             prev_hashes: list[str] = []
             for node in nodes:
-                exec_records = self._execute_node(node, execution_map, prev_hashes)
+                exec_records = self._execute_node(node, execution_map, prev_hashes, resolver)
                 trace.extend(exec_records)
                 last_record = exec_records[-1]
                 execution_map[node.id] = last_record
@@ -100,7 +216,7 @@ class MockFactory:
             prev_hashes = []
 
             while current_node and steps < max_steps:
-                exec_records = self._execute_node(current_node, execution_map, prev_hashes)
+                exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver)
                 trace.extend(exec_records)
                 last_record = exec_records[-1]
                 execution_map[current_node.id] = last_record
@@ -126,6 +242,7 @@ class MockFactory:
         node: Node,
         _execution_map: dict[str, NodeExecution],
         prev_hashes: list[str] | None = None,
+        resolver: Any | None = None,
     ) -> list[NodeExecution]:
         timestamp = datetime.now(UTC)
 
@@ -193,10 +310,14 @@ class MockFactory:
         outputs: Any = {}
 
         if isinstance(node, PlannerNode):
-            raw_output = self._generate_schema_data(node.output_schema)
+            raw_output = self._generate_schema_data(node.output_schema, resolver=resolver)
             outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         elif isinstance(node, HumanNode):
-            raw_output = self._generate_schema_data(node.input_schema) if node.input_schema else {"approved": True}
+            raw_output = (
+                self._generate_schema_data(node.input_schema, resolver=resolver)
+                if node.input_schema
+                else {"approved": True}
+            )
             outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         else:
             outputs = {"result": "mock_output"}

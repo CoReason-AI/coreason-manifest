@@ -38,8 +38,8 @@ def test_loader_recursion_bypass(tmp_path: Path) -> None:
     from coreason_manifest.utils.loader import load_flow_from_file
 
     # Create recursive structure using different relative paths
-    (tmp_path / "a.yaml").write_text(yaml.dump({"$ref": "./b.yaml"}))
-    (tmp_path / "b.yaml").write_text(yaml.dump({"$ref": "../" + tmp_path.name + "/a.yaml"}))
+    (tmp_path / "a.yaml").write_text(yaml.dump({"$include": "./b.yaml"}))
+    (tmp_path / "b.yaml").write_text(yaml.dump({"$include": "../" + tmp_path.name + "/a.yaml"}))
 
     with pytest.raises(RecursionError, match="Circular dependency detected"):
         load_flow_from_file(str(tmp_path / "a.yaml"), strict_security=False)
