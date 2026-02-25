@@ -1,15 +1,20 @@
 import hashlib
 import json
+import logging
 import random
 import secrets
 from datetime import UTC, datetime
 from typing import Any
 
-import jsonschema
+from referencing import Registry, Resource
+from referencing.exceptions import Unresolvable
+from referencing.jsonschema import DRAFT202012
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
+
+logger = logging.getLogger(__name__)
 
 
 class MockFactory:
@@ -26,8 +31,9 @@ class MockFactory:
         self,
         schema: dict[str, Any] | None,
         visited: frozenset[int] | None = None,
+        visited_refs: frozenset[str] | None = None,
         depth: int = 0,
-        resolver: jsonschema.RefResolver | None = None,
+        resolver: Any | None = None,
     ) -> Any:
         max_depth = 10
 
@@ -39,14 +45,32 @@ class MockFactory:
 
         # Resolve $ref if present
         if "$ref" in schema and resolver:
+            ref_uri = schema["$ref"]
+
+            # Check for cycle in refs
+            if visited_refs is not None and ref_uri in visited_refs:
+                return ""
+
             try:
-                with resolver.resolving(schema["$ref"]) as resolved:
-                    return self._generate_schema_data(resolved, visited, depth, resolver)
-            except Exception:
-                # Fallback if resolution fails
+                resolved = resolver.lookup(ref_uri)
+                contents = resolved.contents
+                new_visited_refs = (visited_refs or frozenset()) | {ref_uri}
+                return self._generate_schema_data(
+                    contents,
+                    visited,
+                    new_visited_refs,
+                    depth,
+                    resolver
+                )
+            except Unresolvable:
+                logger.warning(f"Unresolvable reference: {ref_uri}")
+                return "mock_ref_error"
+            except Exception as e:
+                # Fallback for other resolution errors
+                logger.warning(f"Failed to resolve reference {ref_uri}: {e}")
                 return "mock_ref_error"
 
-        # Cycle detection
+        # Cycle detection for schema objects
         schema_id = id(schema)
         if visited is None:
             visited = frozenset()
@@ -68,11 +92,16 @@ class MockFactory:
             return self.rng.choice([True, False])
         if type_ == "object":
             props = schema.get("properties", {})
-            return {k: self._generate_schema_data(v, visited, depth + 1, resolver) for k, v in props.items()}
+            return {
+                k: self._generate_schema_data(v, visited, visited_refs, depth + 1, resolver)
+                for k, v in props.items()
+            }
         if type_ == "array":
             items_schema = schema.get("items")
             if items_schema:
-                return [self._generate_schema_data(items_schema, visited, depth + 1, resolver)]
+                return [
+                    self._generate_schema_data(items_schema, visited, visited_refs, depth + 1, resolver)
+                ]
             return []
         return "mock_data"
 
@@ -81,8 +110,11 @@ class MockFactory:
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
         # Create resolver from the full document
-        full_doc = flow.model_dump(by_alias=True)
-        resolver = jsonschema.RefResolver.from_schema(full_doc)
+        full_doc = flow.model_dump(by_alias=True, exclude_none=True)
+        # We use empty string as base URI for the root document
+        resource = Resource.from_contents(full_doc, default_specification=DRAFT202012)
+        registry = Registry().with_resource("", resource)
+        resolver = registry.resolver()
 
         if isinstance(flow, LinearFlow):
             nodes = flow.steps
@@ -142,7 +174,7 @@ class MockFactory:
         node: Node,
         _execution_map: dict[str, NodeExecution],
         prev_hashes: list[str] | None = None,
-        resolver: jsonschema.RefResolver | None = None,
+        resolver: Any | None = None,
     ) -> list[NodeExecution]:
         timestamp = datetime.now(UTC)
 
