@@ -51,10 +51,9 @@ def test_missing_supervision_template() -> None:
     )
     lf.add_step(node)
 
-    with pytest.raises(ManifestError) as excinfo:
+    with pytest.raises(ValueError, match="Validation failed") as excinfo:
         lf.build()
-    assert excinfo.value.fault.error_code == "CRSN-VAL-RESILIENCE-MISSING"
-    assert "missing resilience template" in excinfo.value.fault.message
+    assert "ERR_RESILIENCE_MISSING_TEMPLATE" in str(excinfo.value)
 
 
 def test_malformed_supervision_reference() -> None:
@@ -69,6 +68,6 @@ def test_malformed_supervision_reference() -> None:
     )
     lf.add_step(node)
 
-    with pytest.raises(ManifestError) as excinfo:
+    with pytest.raises(ValueError, match="Validation failed") as excinfo:
         lf.build()
-    assert excinfo.value.fault.error_code == "CRSN-VAL-RESILIENCE-MISSING"
+    assert "ERR_RESILIENCE_INVALID_REF" in str(excinfo.value)

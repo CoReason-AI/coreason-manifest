@@ -50,17 +50,19 @@ def test_flow_fallback_orphan() -> None:
 
     definitions = FlowDefinitions(profiles={"p1": "dummy"})  # Minimal
 
-    with pytest.raises(ManifestError) as excinfo:
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
-            interface=FlowInterface(),
-            graph=graph,
-            governance=gov,
-            definitions=definitions,
-        )
-    assert excinfo.value.fault.error_code == "CRSN-VAL-FALLBACK-MISSING"
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
+        interface=FlowInterface(),
+        graph=graph,
+        governance=gov,
+        definitions=definitions,
+    )
+    from coreason_manifest.utils.validator import validate_flow
+
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_GOV_CIRCUIT_FALLBACK_MISSING" and e.details.get("fallback_node_id") == "missing_node" for e in errors)
 
 
 def test_edge_condition_security_violation_store() -> None:

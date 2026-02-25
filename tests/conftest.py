@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Any
 
 import pytest
 
@@ -13,7 +14,27 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
 )
-from coreason_manifest.spec.core.nodes import CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+
+
+@pytest.fixture
+def flow_metadata() -> FlowMetadata:
+    return FlowMetadata(name="test", version="1.0.0", description="test", tags=[])
+
+
+@pytest.fixture
+def agent_node_factory() -> Callable[..., AgentNode]:
+    def _create(nid: str, resilience: Any = None) -> AgentNode:
+        return AgentNode(
+            id=nid,
+            type="agent",
+            metadata={},
+            profile=CognitiveProfile(role="r", persona="p"),
+            tools=[],
+            resilience=resilience,
+        )
+
+    return _create
 
 
 @pytest.fixture

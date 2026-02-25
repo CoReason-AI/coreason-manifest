@@ -12,7 +12,7 @@ from coreason_manifest.spec.interop.compliance import (
     RemediationAction,
 )
 from coreason_manifest.utils.net_utils import canonicalize_domain
-from coreason_manifest.utils.topology import get_reachable_nodes, get_strongly_connected_components
+from coreason_manifest.utils.topology import get_reachable_nodes, get_strongly_connected_components, get_unified_topology
 
 if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
@@ -187,8 +187,9 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     reports: list[ComplianceReport] = []
 
     # Build Adjacency List
+    nodes, edges = get_unified_topology(flow)
     adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
-    for edge in flow.graph.edges:
+    for edge in edges:
         # SOTA Fix 1: Defensive check for Draft Mode Fatality
         if edge.from_node in adj:
             adj[edge.from_node].append(edge.to_node)
@@ -323,12 +324,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     reports: list[ComplianceReport] = []
 
     # Extract all nodes
-    nodes: list[AnyNode] = []
-    match flow:
-        case LinearFlow():
-            nodes = flow.steps
-        case GraphFlow():
-            nodes = list(flow.graph.nodes.values())
+    nodes, _ = get_unified_topology(flow)
 
     # Build tool map: name -> tool_object
     tool_map: dict[str, ToolCapability] = {}
@@ -355,94 +351,78 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     Checks if the target node is topologically guarded by a HumanNode.
     Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
     """
-    match flow:
-        case LinearFlow():
-            # Scan sequence backwards from target
-            # Architectural Note: Match by ID to verify identity, not just value equality
-            target_idx = -1
-            for i, node in enumerate(flow.steps):
-                if node.id == target_node.id:
-                    target_idx = i
-                    break
+    nodes, edges = get_unified_topology(flow)
 
-            if target_idx == -1:
-                return False
+    all_ids = {n.id for n in nodes}
 
-            for i in range(target_idx - 1, -1, -1):
-                node = flow.steps[i]
-                if isinstance(node, HumanNode):
-                    return True
-            return False
+    # Determine entry point
+    entry_id = None
+    if isinstance(flow, GraphFlow):
+        entry_id = flow.graph.entry_point
+    elif isinstance(flow, LinearFlow) and flow.steps:
+        entry_id = flow.steps[0].id
 
-        case GraphFlow():
-            # Reachability Analysis
+    # Valid guards: HumanNode only.
+    valid_guards = (HumanNode,)
 
-            all_ids = set(flow.graph.nodes.keys())
-            entry_id = flow.graph.entry_point
+    # Construct adjacency map
+    adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
+    for edge in edges:
+        if edge.from_node in adj:
+            adj[edge.from_node].append(edge.to_node)
 
-            # Valid guards: HumanNode only.
-            valid_guards = (HumanNode,)
+    guards = {n.id for n in nodes if isinstance(n, valid_guards)}
 
-            # Construct adjacency map
-            adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
-            for edge in flow.graph.edges:
-                adj[edge.from_node].append(edge.to_node)
+    if entry_id:
+        queue = [entry_id]
+        visited = {entry_id}
+    else:
+        queue = []
+        visited = set()
 
-            guards = {nid for nid, node in flow.graph.nodes.items() if isinstance(node, valid_guards)}
+    # Handle case where target is the entry node
+    if entry_id and target_node.id == entry_id:
+        return False
 
-            if entry_id:
-                queue = [entry_id]
-                visited = {entry_id}
-            else:
-                queue = []
-                visited = set()
+    # 1. Check strict reachability (ignoring guards) to identify Islands
+    if entry_id:
+        full_queue = [entry_id]
+        full_visited = {entry_id}
+    else:
+        full_queue = []
+        full_visited = set()
 
-            # Handle case where target is the entry node
-            if target_node.id == entry_id:
-                return False
+    reachable = False
+    while full_queue:
+        curr = full_queue.pop(0)
+        if curr == target_node.id:
+            reachable = True
+            break
+        for n in adj.get(curr or "", []):
+            if n not in full_visited:
+                full_visited.add(n)
+                full_queue.append(n)
 
-            # 1. Check strict reachability (ignoring guards) to identify Islands
-            if entry_id:
-                full_queue = [entry_id]
-                full_visited = {entry_id}
-            else:
-                full_queue = []
-                full_visited = set()
+    if not reachable:
+        return False  # Island -> Fail Closed
 
-            reachable = False
-            while full_queue:
-                curr = full_queue.pop(0)
-                if curr == target_node.id:
-                    reachable = True
-                    break
-                for n in adj.get(curr or "", []):
-                    if n not in full_visited:
-                        full_visited.add(n)
-                        full_queue.append(n)
+    # 2. Check guarded reachability
+    while queue:
+        curr_id = queue.pop(0)
 
-            if not reachable:
-                return False  # Island -> Fail Closed
+        if curr_id == target_node.id:
+            return False  # Reached target without passing a guard
 
-            # 2. Check guarded reachability
-            while queue:
-                curr_id = queue.pop(0)
+        # If current node is a guard, we stop traversing this path
+        # (because downstream is guarded by this node).
+        if curr_id in guards:
+            continue
 
-                if curr_id == target_node.id:
-                    return False  # Reached target without passing a guard
+        # Expand neighbors
+        for neighbor in adj.get(curr_id or "", []):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
 
-                # If current node is a guard, we stop traversing this path
-                # (because downstream is guarded by this node).
-                if curr_id in guards:
-                    continue
-
-                # Expand neighbors
-                for neighbor in adj.get(curr_id or "", []):
-                    if neighbor not in visited:
-                        visited.add(neighbor)
-                        queue.append(neighbor)
-
-            # If reachable but not via unguarded path -> Guarded
-            return True
-
-        case _:
-            return False  # pragma: no cover
+    # If reachable but not via unguarded path -> Guarded
+    return True

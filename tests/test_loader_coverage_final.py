@@ -128,19 +128,6 @@ def test_load_agent_class_missing(tmp_path: Path) -> None:
         load_agent_from_ref("good.py:Agent", root_dir=jail)
 
 
-# 10. Test spec is None (harder, maybe mock importlib)
-def test_load_agent_spec_fail(tmp_path: Path) -> None:
-    jail = tmp_path / "jail"
-    jail.mkdir()
-    f = jail / "empty.py"
-    f.touch()
-    f.chmod(0o600)
-
-    with (
-        patch("importlib.util.spec_from_file_location", return_value=None),
-        pytest.raises(ValueError, match="Could not load spec"),
-    ):
-        load_agent_from_ref("empty.py:Agent", root_dir=jail)
 
 
 def test_load_agent_exec_fail_cleanup_deps(tmp_path: Path) -> None:

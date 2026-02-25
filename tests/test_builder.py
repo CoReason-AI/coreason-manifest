@@ -98,14 +98,12 @@ def test_linear_builder_invalid() -> None:
 
 
 def test_graph_builder_invalid() -> None:
-    from coreason_manifest.spec.interop.exceptions import ManifestError
-
     # Empty graph is invalid
     builder = NewGraphFlow("Invalid")
 
-    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING") as exc:
+    with pytest.raises(ValueError, match="Graph must contain at least one node") as exc:
         builder.build()
-    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(exc.value)
+    assert "Graph must contain at least one node" in str(exc.value)
 
 
 def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
@@ -299,14 +297,15 @@ def test_builder_graph_auto_entry_point() -> None:
 def test_builder_graph_missing_entry_point() -> None:
     """Cover NewGraphFlow.build() missing entry point logic."""
     from coreason_manifest.builder import NewGraphFlow
-    from coreason_manifest.spec.interop.exceptions import ManifestError
+    from coreason_manifest.spec.core.nodes import PlaceholderNode
 
-    builder = NewGraphFlow("Empty Graph")
-    # No nodes added
+    builder = NewGraphFlow("Bad Entry Graph")
+    builder.add_node(PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[]))
+    builder.set_entry_point("missing_node")
 
-    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING") as exc:
+    with pytest.raises(ValueError, match="Validation failed") as exc:
         builder.build()
-    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(exc.value)
+    assert "Entry point 'missing_node' not found" in str(exc.value)
 
 
 def test_builder_graph_validation_failure() -> None:

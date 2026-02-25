@@ -13,12 +13,12 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
-    validate_integrity,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, SwarmNode, SwitchNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
+from coreason_manifest.utils.validator import validate_integrity
 
 
 # Helper to create common metadata
@@ -382,7 +382,8 @@ def test_unknown_flow_type() -> None:
         pass
 
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
-    assert _is_guarded(node, UnknownFlow()) is False  # type: ignore
+    with pytest.raises(ValueError):
+        _is_guarded(node, UnknownFlow())  # type: ignore
 
 
 if __name__ == "__main__":

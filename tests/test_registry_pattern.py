@@ -1,221 +1,150 @@
+# tests/test_registry_pattern.py
+
+from typing import Any
+
+import pytest
+
 from coreason_manifest.spec.core.flow import (
     DataSchema,
+    Edge,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
-    LinearFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
 
-def test_agent_node_brain_string() -> None:
-    """Test that AgentNode can accept a string ID for profile."""
+def test_registry_tool_pack_lookup() -> None:
+    # 1. Define a tool pack
+    my_tool = ToolCapability(name="search_db", description="Search database")
+    pack = ToolPack(
+        kind="ToolPack",
+        namespace="db_tools",
+        tools=[my_tool],
+        dependencies=[],
+        env_vars=[],
+    )
+
+    # 2. Define definitions
+    defs = FlowDefinitions(tool_packs={"db": pack})
+
+    # 3. Create Agent referencing the tool
     agent = AgentNode(
-        id="agent-1",
-        metadata={},
-        resilience=None,
+        id="agent1",
         type="agent",
-        profile="brain-id-123",
-        tools=[],
-    )
-    assert agent.profile == "brain-id-123"
-
-
-def test_agent_node_brain_object() -> None:
-    """Test that AgentNode can still accept a CognitiveProfile object."""
-    brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
-    agent = AgentNode(
-        id="agent-1",
         metadata={},
+        profile=CognitiveProfile(role="r", persona="p"),
+        tools=["search_db"],  # valid because it's in the pack
         resilience=None,
-        type="agent",
-        profile=brain,
-        tools=[],
-    )
-    assert isinstance(agent.profile, CognitiveProfile)
-    assert agent.profile.role == "assistant"
-
-
-def test_flow_definitions() -> None:
-    """Test FlowDefinitions instantiation."""
-    brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
-    definitions = FlowDefinitions(
-        profiles={"brain-id-123": brain},
-        tool_packs={},
-        skills={"skill-1": {"type": "python", "code": "print('hello')"}},
-    )
-    assert definitions.profiles["brain-id-123"] == brain
-    assert definitions.skills["skill-1"]["type"] == "python"
-
-
-def test_linear_flow_definitions() -> None:
-    """Test LinearFlow with definitions."""
-    brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
-    definitions = FlowDefinitions(
-        profiles={"brain-id-123": brain},
-        tool_packs={},
-    )
-    agent = AgentNode(
-        id="agent-1",
-        metadata={},
-        resilience=None,
-        type="agent",
-        profile="brain-id-123",
-        tools=[],
     )
 
-    metadata = FlowMetadata(name="test-linear", version="1.0.0", description="test", tags=[])
-    flow = LinearFlow(
-        kind="LinearFlow",
-        metadata=metadata,
-        definitions=definitions,
-        steps=[agent],
-    )
-
-    assert flow.definitions is not None
-    assert flow.definitions.profiles["brain-id-123"] == brain
-
-    first_node = flow.sequence[0]
-    assert isinstance(first_node, AgentNode)
-    assert first_node.profile == "brain-id-123"
-
-
-def test_graph_flow_definitions() -> None:
-    """Test GraphFlow with definitions."""
-    brain = CognitiveProfile(role="assistant", persona="helpful", reasoning=None, fast_path=None)
-    definitions = FlowDefinitions(
-        profiles={"brain-id-123": brain},
-        tool_packs={},
-    )
-    agent = AgentNode(
-        id="agent-1",
-        metadata={},
-        resilience=None,
-        type="agent",
-        profile="brain-id-123",
-        tools=[],
-    )
-
-    metadata = FlowMetadata(name="test-graph", version="1.0.0", description="test", tags=[])
-    interface = FlowInterface(
-        inputs=DataSchema(json_schema={}),
-        outputs=DataSchema(json_schema={}),
-    )
-    graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
-
+    # 4. Create Flow
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=metadata,
-        definitions=definitions,
-        interface=interface,
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0"),
+        definitions=defs,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,
     )
 
-    assert flow.definitions is not None
-    assert flow.definitions.profiles["brain-id-123"] == brain
-
-    agent_node = flow.graph.nodes["agent-1"]
-    assert isinstance(agent_node, AgentNode)
-    assert agent_node.profile == "brain-id-123"
+    # 5. Validate
+    errors = validate_flow(flow)
+    assert not errors
 
 
 def test_referential_integrity_failure() -> None:
-    """
-    SOTA SAFETY CHECK:
-    Ensures that referencing a non-existent profile ID raises a validation error.
-    This prevents 'dangling pointer' runtime crashes.
-    """
-    # 1. Define a flow with an AgentNode pointing to "ghost-brain"
-    # 2. But DO NOT define "ghost-brain" in the registry
-
+    # 1. Agent references missing profile ID
     agent = AgentNode(
-        id="bad-agent",
+        id="agent1",
         type="agent",
-        profile="ghost-brain",  # <--- This ID does not exist
+        metadata={},
+        profile="missing_profile_id",
         tools=[],
-        metadata={},
         resilience=None,
     )
 
-    metadata = FlowMetadata(name="broken-flow", version="1.0.0", description="fail", tags=[])
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
 
-    # 3. Expect an error string from validate_flow
-    flow = LinearFlow(
-        kind="LinearFlow",
-        status="published",
-        metadata=metadata,
-        definitions=FlowDefinitions(),  # Empty registry
-        steps=[agent],
-    )
-    errors = validate_flow(flow)
-    assert any("references undefined profile ID 'ghost-brain'" in e for e in errors)
-
-
-def test_tool_integrity_failure() -> None:
-    """Ensures that referencing a missing tool raises a validation error."""
-    # Define a brain (so that part passes)
-    brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
-    definitions = FlowDefinitions(
-        profiles={"my-brain": brain},
-        tool_packs={},  # No tools registered
-    )
-
-    agent = AgentNode(
-        id="agent-1",
-        type="agent",
-        profile="my-brain",
-        tools=["missing-tool"],  # <--- Violation
-        metadata={},
-        resilience=None,
-    )
-
-    flow = LinearFlow(
-        kind="LinearFlow",
-        status="published",
-        metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
-        definitions=definitions,
-        steps=[agent],
-    )
-
-    errors = validate_flow(flow)
-    assert any("requires tool 'missing-tool'" in e for e in errors)
-
-
-def test_tool_integrity_failure_graph() -> None:
-    """Ensures that referencing a missing tool raises a validation error in GraphFlow."""
-    brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
-    definitions = FlowDefinitions(
-        profiles={"my-brain": brain},
-        tool_packs={},  # No tools registered
-    )
-
-    agent = AgentNode(
-        id="agent-1",
-        type="agent",
-        profile="my-brain",
-        tools=["missing-tool"],  # <--- Violation
-        metadata={},
-        resilience=None,
-    )
-
-    graph = Graph(nodes={"agent-1": agent}, edges=[], entry_point="agent-1")
+    # Empty definitions
+    defs = FlowDefinitions(profiles={})
 
     flow = GraphFlow(
         kind="GraphFlow",
         status="published",
-        metadata=FlowMetadata(name="fail", version="1.0.0", description="", tags=[]),
-        definitions=definitions,
-        interface=FlowInterface(
-            inputs=DataSchema(json_schema={}),
-            outputs=DataSchema(json_schema={}),
-        ),
+        metadata=FlowMetadata(name="T", version="1.0"),
+        definitions=defs,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+
+    # 3. Expect an error code from validate_flow
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_CAP_UNDEFINED_PROFILE_002" and e.details.get("profile_id") == "missing_profile_id" for e in errors)
+
+
+def test_tool_integrity_failure() -> None:
+    # 1. Agent references missing tool
+    agent = AgentNode(
+        id="agent1",
+        type="agent",
+        metadata={},
+        profile=CognitiveProfile(role="r", persona="p"),
+        tools=["missing_tool"],
+        resilience=None,
+    )
+
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
+
+    # Empty definitions
+    defs = FlowDefinitions(tool_packs={})
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0"),
+        definitions=defs,
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
+        blackboard=None,
+        graph=graph,
+    )
+
+    # 3. Expect an error code from validate_flow
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "missing_tool" for e in errors)
+
+
+def test_tool_integrity_failure_graph() -> None:
+    # Same as above but explicitly GraphFlow structure logic check if separate
+    # Covered by test_tool_integrity_failure actually.
+    # Let's ensure coverage for GraphFlow specifically if validator logic forks.
+
+    agent = AgentNode(
+        id="agent1",
+        type="agent",
+        metadata={},
+        profile=CognitiveProfile(role="r", persona="p"),
+        tools=["missing_tool"],
+        resilience=None,
+    )
+    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
+
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0"),
+        definitions=FlowDefinitions(),
+        interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
         blackboard=None,
         graph=graph,
     )
 
     errors = validate_flow(flow)
-    assert any("requires tool 'missing-tool'" in e for e in errors)
+    assert any(e.code == "ERR_CAP_MISSING_TOOL_001" for e in errors)

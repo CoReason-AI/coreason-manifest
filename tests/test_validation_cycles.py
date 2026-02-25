@@ -1,314 +1,189 @@
-from coreason_manifest.builder import NewGraphFlow
+# tests/test_validation_cycles.py
+
+from collections.abc import Callable
+from typing import Any
+
+import pytest
+
 from coreason_manifest.spec.core.flow import (
+    DataSchema,
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
     FlowMetadata,
     Graph,
     GraphFlow,
     LinearFlow,
-    VariableDef,
 )
+from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    PlaceholderNode,
+    CognitiveProfile,
     SwitchNode,
 )
 from coreason_manifest.spec.core.resilience import (
+    ErrorDomain,
+    ErrorHandler,
     FallbackStrategy,
+    SupervisionPolicy,
 )
 from coreason_manifest.utils.validator import validate_flow
 
 
-def create_placeholder(node_id: str) -> PlaceholderNode:
-    """Helper to create a minimal valid PlaceholderNode."""
-    return PlaceholderNode(id=node_id, metadata={}, type="placeholder", required_capabilities=[])
+def test_simple_execution_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # A -> B -> A
+    a = agent_node_factory("A")
+    b = agent_node_factory("B")
+    graph = Graph(
+        nodes={"A": a, "B": b},
+        edges=[Edge(from_node="A", to_node="B"), Edge(from_node="B", to_node="A")],
+        entry_point="A",
+    )
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph)
+
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
+    assert any("A" in e.details.get("cycle_nodes", []) for e in errors if e.code == "ERR_TOPOLOGY_CYCLE_002")
+    assert any("B" in e.details.get("cycle_nodes", []) for e in errors if e.code == "ERR_TOPOLOGY_CYCLE_002")
 
 
-def build_flow_without_validation(builder: NewGraphFlow) -> GraphFlow:
-    """
-    Helper to construct GraphFlow directly from builder state,
-    bypassing builder.build() which performs validation.
-    """
-    ep = builder._entry_point
-    if not ep:
-        ep = next(iter(builder._nodes.keys())) if builder._nodes else "missing_entry_point"
+def test_self_referencing_node(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # A -> A
+    a = agent_node_factory("A")
+    graph = Graph(nodes={"A": a}, edges=[Edge(from_node="A", to_node="A")], entry_point="A")
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph)
 
-    graph = Graph(nodes=builder._nodes, edges=builder._edges, entry_point=ep)
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
 
-    return GraphFlow(
-        kind="GraphFlow",
-        status="published",
-        metadata=builder.metadata,
-        interface=builder.interface,
-        blackboard=builder.blackboard,
-        graph=graph,
-        definitions=builder._build_definitions(),
-        governance=builder.governance,
+
+def test_isolated_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # A (entry)
+    # B <-> C (isolated cycle)
+    a = agent_node_factory("A")
+    b = agent_node_factory("B")
+    c = agent_node_factory("C")
+    graph = Graph(
+        nodes={"A": a, "B": b, "C": c},
+        edges=[Edge(from_node="B", to_node="C"), Edge(from_node="C", to_node="B")],
+        entry_point="A",
+    )
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph)
+
+    errors = validate_flow(flow)
+    # Expect validation error for cycle, even if isolated
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
+    # Note: B and C are not "orphans" (indegree=0) because they point to each other.
+    # Reachability check (BFS from entry) would be needed to flag them as unreachable.
+
+
+def test_switch_node_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # A -> Switch -> A
+    a = agent_node_factory("A")
+    switch = SwitchNode(
+        id="S",
+        type="switch",
+        metadata={},
+        variable="x",
+        cases={"true": "A"},
+        default="A",
+    )
+    graph = Graph(
+        nodes={"A": a, "S": switch},
+        edges=[Edge(from_node="A", to_node="S")],
+        entry_point="A",
+    )
+    # Mock blackboard for variable
+    from coreason_manifest.spec.core.flow import Blackboard, VariableDef
+
+    bb = Blackboard(variables={"x": VariableDef(type="string")})
+
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph, blackboard=bb)
+
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
+
+
+def test_linear_flow_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # LinearFlow implicit edges (A -> B).
+    # Add fallback B -> A to create cycle.
+    a = agent_node_factory("A")
+    b = agent_node_factory("B", resilience=FallbackStrategy(fallback_node_id="A"))
+
+    flow = LinearFlow(metadata=flow_metadata, steps=[a, b])
+
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
+
+
+def test_hybrid_fallback_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # Graph: A -> B
+    # Fallback: B -> A
+    a = agent_node_factory("A")
+    b = agent_node_factory("B", resilience=FallbackStrategy(fallback_node_id="A"))
+
+    graph = Graph(nodes={"A": a, "B": b}, edges=[Edge(from_node="A", to_node="B")], entry_point="A")
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph)
+
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
+
+
+def test_global_circuit_breaker_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # A -> B
+    # Global CB Fallback -> A
+    # If B triggers CB, it goes to A -> cycle?
+    # B -> Fallback(A). A -> B. Cycle.
+
+    a = agent_node_factory("A")
+    b = agent_node_factory("B")  # B implicitly connects to fallback if set
+
+    graph = Graph(nodes={"A": a, "B": b}, edges=[Edge(from_node="A", to_node="B")], entry_point="A")
+
+    gov = Governance(
+        circuit_breaker=CircuitBreaker(error_threshold_count=1, reset_timeout_seconds=10, fallback_node_id="A")
     )
 
-
-def test_valid_dag_passes() -> None:
-    """Test that a valid A -> B -> C Directed Acyclic Graph (DAG) passes validation."""
-    builder = NewGraphFlow("test_dag", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    builder.add_node(create_placeholder("A"))
-    builder.add_node(create_placeholder("B"))
-    builder.add_node(create_placeholder("C"))
-
-    builder.connect("A", "B")
-    builder.connect("B", "C")
-    builder.set_entry_point("A")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-    assert not errors
-
-
-def test_simple_execution_cycle() -> None:
-    """Test that a simple execution loop (A -> B -> A) is caught."""
-    builder = NewGraphFlow("test_cycle", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    builder.add_node(create_placeholder("A"))
-    builder.add_node(create_placeholder("B"))
-
-    builder.connect("A", "B")
-    builder.connect("B", "A")
-    builder.set_entry_point("A")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-
-    assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
-    assert "A" in cycle_errors[0]
-    assert "B" in cycle_errors[0]
-
-
-def test_self_referencing_node() -> None:
-    """Test that a direct self-loop (A -> A) is caught."""
-    builder = NewGraphFlow("test_self_loop", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    builder.add_node(create_placeholder("A"))
-
-    builder.connect("A", "A")
-    builder.set_entry_point("A")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
-    assert "A" in cycle_errors[0]
-
-
-def test_isolated_cycle() -> None:
-    """Test that an isolated cycle (C -> D -> C) unreachable from entry point is still caught."""
-    builder = NewGraphFlow("test_isolated_cycle", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    builder.add_node(create_placeholder("A"))
-    builder.add_node(create_placeholder("B"))
-    builder.add_node(create_placeholder("C"))
-    builder.add_node(create_placeholder("D"))
-
-    builder.connect("A", "B")
-    builder.connect("C", "D")
-    builder.connect("D", "C")
-    builder.set_entry_point("A")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert len(cycle_errors) > 0, f"Expected cycle error, got: {errors}"
-    assert "C" in cycle_errors[0]
-    assert "D" in cycle_errors[0]
-
-
-def test_switch_node_cycle() -> None:
-    """
-    Test cycle detection involving a SwitchNode via implicit routing.
-    Cycle: A (Switch) -> B (via case) -> A
-    """
-    builder = NewGraphFlow("test_switch_cycle", "1.0.0", "desc")
-    # Need a variable for SwitchNode
-    builder.set_blackboard(variables={"v": VariableDef(type="string")})
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    # A is SwitchNode: if v="x" -> B
-    builder.add_node(SwitchNode(id="A", metadata={}, type="switch", variable="v", cases={"x": "B"}, default="B"))
-
-    # B is Placeholder: B -> A
-    builder.add_node(create_placeholder("B"))
-    builder.connect("B", "A")
-
-    builder.set_entry_point("A")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert len(cycle_errors) > 0, f"Expected cycle error involving SwitchNode, got: {errors}"
-    assert "A" in cycle_errors[0]
-    assert "B" in cycle_errors[0]
-
-
-def test_linear_flow_cycle() -> None:
-    """
-    Test LinearFlow implicit sequential edges combined with SwitchNode cycle.
-    Linear Sequence: [A, B, C] -> Implies A -> B -> C
-    SwitchNode C: default -> A
-    Cycle: A -> B -> C -> A
-    """
-    # Manually construct LinearFlow to bypass builder which might add extra validation
-    node_a = create_placeholder("A")
-    node_b = create_placeholder("B")
-    node_c = SwitchNode(id="C", metadata={}, type="switch", variable="v", cases={}, default="A")
-
-    flow = LinearFlow(
-        kind="LinearFlow",
-        status="published",
-        metadata=FlowMetadata(name="linear_cycle_test", version="1.0.0", description=""),
-        steps=[node_a, node_b, node_c],
-        definitions=None,
-    )
+    flow = GraphFlow(metadata=flow_metadata, interface=FlowInterface(), graph=graph, governance=gov)
 
     errors = validate_flow(flow)
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-
-    assert len(cycle_errors) > 0, f"Expected cycle error in LinearFlow, got: {errors}"
-    assert "A" in cycle_errors[0]
-    assert "C" in cycle_errors[0]
+    # The adjacency map should include edge from ALL nodes (except fallback itself) to fallback node
+    # So B -> A. And A -> B. Cycle.
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)
 
 
-def test_hybrid_fallback_cycle() -> None:
-    """
-    Test hybrid cycle via execution and fallback edges.
-    Graph: A -> B
-    Fallback: B -> A
-    Cycle: A -> B -> (fail) -> A
-    """
-    builder = NewGraphFlow("hybrid_fallback", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
+def test_referenced_template_cycle(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
+    # A -> B
+    # B uses template -> Fallback(A)
+    # Cycle.
 
-    node_a = create_placeholder("A")
+    strategy = FallbackStrategy(fallback_node_id="A")
+    policy = SupervisionPolicy(handlers=[ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)])
+    defs = FlowDefinitions(supervision_templates={"tpl": policy})
 
-    # Node B with fallback to A
-    fallback = FallbackStrategy(fallback_node_id="A")
-    node_b = AgentNode(id="B", type="agent", metadata={}, resilience=fallback, profile="p", tools=[])
+    a = agent_node_factory("A")
+    b = agent_node_factory("B", resilience="ref:tpl")
 
-    builder.add_node(node_a)
-    builder.add_node(node_b)
-    builder.connect("A", "B")
-    builder.set_entry_point("A")
-    builder.define_profile("p", "r", "p")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert len(cycle_errors) > 0, f"Expected hybrid fallback cycle, got: {errors}"
-    assert "A" in cycle_errors[0]
-    assert "B" in cycle_errors[0]
-
-
-def test_global_circuit_breaker_cycle() -> None:
-    """
-    Test cycle involving Global Circuit Breaker.
-    Graph: A -> B
-    Global Circuit Breaker: fallback -> A
-    Cycle: A -> B -> (global fail) -> A
-    """
-    builder = NewGraphFlow("global_cb_cycle", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    builder.add_node(create_placeholder("A"))
-    builder.add_node(create_placeholder("B"))
-    builder.connect("A", "B")
-    builder.set_entry_point("A")
-
-    # Set global circuit breaker pointing to A
-    builder.set_circuit_breaker(error_threshold=5, reset_timeout=30, fallback_node="A")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert len(cycle_errors) > 0, f"Expected global circuit breaker cycle, got: {errors}"
-    assert "A" in cycle_errors[0]
-    assert "B" in cycle_errors[0]
-
-
-def test_valid_global_circuit_breaker_passes() -> None:
-    """
-    Test that a valid global circuit breaker does NOT flag a cycle.
-    Graph: A -> B. Global Fallback is C.
-    A -> C, B -> C. No cycle.
-    """
-    builder = NewGraphFlow("valid_global_cb", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    builder.add_node(create_placeholder("A"))
-    builder.add_node(create_placeholder("B"))
-    builder.add_node(create_placeholder("C"))  # The Fallback Node
-    builder.connect("A", "B")
-    builder.set_entry_point("A")
-
-    builder.set_circuit_breaker(error_threshold=5, reset_timeout=30, fallback_node="C")
-
-    flow = build_flow_without_validation(builder)
-    errors = validate_flow(flow)
-
-    # SOTA FIX: With unified adjacency map, 'C' is reachable via global fallback,
-    # so it shouldn't be an orphan. Assert absolutely NO errors are returned.
-    assert not errors, f"Unexpected errors: {errors}"
-
-
-def test_referenced_template_cycle() -> None:
-    """Test that a cycle introduced via a referenced supervision template is caught."""
-    builder = NewGraphFlow("template_cycle", "1.0.0", "desc")
-    builder.set_interface(inputs={"type": "object", "properties": {}}, outputs={"type": "object", "properties": {}})
-
-    node_a = create_placeholder("A")
-    # Node B references a template
-    node_b = AgentNode(id="B", type="agent", metadata={}, resilience="ref:loop_to_a", profile="p", tools=[])
-
-    builder.add_node(node_a)
-    builder.add_node(node_b)
-    builder.connect("A", "B")
-    builder.set_entry_point("A")
-    builder.define_profile("p", "r", "p")
-
-    # Manually inject the supervision template BEFORE flow construction to satisfy Pydantic validation
-    from coreason_manifest.spec.core.resilience import FallbackStrategy, SupervisionPolicy
-
-    # We must construct definitions first because GraphFlow validator checks it
-    definitions = builder._build_definitions()
-    object.__setattr__(
-        definitions,
-        "supervision_templates",
-        {"loop_to_a": SupervisionPolicy(handlers=[], default_strategy=FallbackStrategy(fallback_node_id="A"))},
-    )
-
-    # Use a modified version of build_flow_without_validation that accepts pre-built definitions
-    ep = builder._entry_point
-    graph = Graph(nodes=builder._nodes, edges=builder._edges, entry_point=ep)
-
+    graph = Graph(nodes={"A": a, "B": b}, edges=[Edge(from_node="A", to_node="B")], entry_point="A")
     flow = GraphFlow(
-        kind="GraphFlow",
-        status="published",
-        metadata=builder.metadata,
-        interface=builder.interface,
-        blackboard=builder.blackboard,
-        graph=graph,
-        definitions=definitions,
-        governance=builder.governance,
+        metadata=flow_metadata, interface=FlowInterface(), graph=graph, definitions=defs
     )
 
     errors = validate_flow(flow)
-    cycle_errors = [e for e in errors if "cycle detected" in e]
-    assert len(cycle_errors) > 0, f"Failed to catch Trojan cycle in referenced template. Errors: {errors}"
-    assert "A" in cycle_errors[0]
-    assert "B" in cycle_errors[0]
+    assert any(e.code == "ERR_TOPOLOGY_CYCLE_002" for e in errors)

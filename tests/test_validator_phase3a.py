@@ -100,7 +100,8 @@ def test_validate_graph_flow_invalid_edges() -> None:
         status="draft",
     )
     errors = validate_flow(flow)
-    assert any("Dangling Edge Error" in e and "missing" in e for e in errors)
+    assert any(e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and e.details["target"] == "missing" for e in errors if e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and "target" in e.details)
+    assert any(e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and e.details["source"] == "missing" for e in errors if e.code == "ERR_TOPOLOGY_DANGLING_EDGE" and "source" in e.details)
 
 
 def test_validate_switch_node_invalid_targets() -> None:
@@ -119,8 +120,8 @@ def test_validate_switch_node_invalid_targets() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 2
-    assert "Broken Switch Error: Node 'switch1' case 'case1' points to missing ID 'missing1'." in errors
-    assert "Broken Switch Error: Node 'switch1' default route points to missing ID 'missing2'." in errors
+    assert any(e.code == "ERR_TOPOLOGY_BROKEN_SWITCH" and e.details.get("target_id") == "missing1" for e in errors)
+    assert any(e.code == "ERR_TOPOLOGY_BROKEN_SWITCH" and e.details.get("target_id") == "missing2" for e in errors)
 
 
 def test_validate_missing_tool() -> None:
@@ -139,7 +140,7 @@ def test_validate_missing_tool() -> None:
         definitions=FlowDefinitions(tool_packs={"tp": tp}),
     )
     errors = validate_flow(flow)
-    assert any("requires tool 'tool1'" in e for e in errors)
+    assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "tool1" for e in errors)
 
 
 def test_validate_governance_sanity() -> None:
@@ -156,8 +157,7 @@ def test_validate_governance_sanity() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 2
-    assert "Governance Error: rate_limit_rpm cannot be negative." in errors
-    assert "Governance Error: cost_limit_usd cannot be negative." in errors
+    assert all(e.code == "ERR_GOV_INVALID_CONFIG" for e in errors)
 
 
 def test_validate_linear_flow_valid() -> None:
@@ -181,7 +181,7 @@ def test_validate_linear_flow_empty() -> None:
     )
     errors = validate_flow(flow)
     assert len(errors) == 1
-    assert "LinearFlow Error: Sequence cannot be empty." in errors
+    assert errors[0].code == "ERR_TOPOLOGY_LINEAR_EMPTY"
 
 
 def test_validate_linear_flow_switch_missing_targets() -> None:
@@ -195,8 +195,8 @@ def test_validate_linear_flow_switch_missing_targets() -> None:
     errors = validate_flow(flow)
     # Target IDs must be present in the sequence
     assert len(errors) == 2
-    assert "Broken Switch Error: Node 'switch1' case 'case1' points to missing ID 'missing1'." in errors
-    assert "Broken Switch Error: Node 'switch1' default route points to missing ID 'missing2'." in errors
+    assert any(e.code == "ERR_TOPOLOGY_BROKEN_SWITCH" and e.details.get("target_id") == "missing1" for e in errors)
+    assert any(e.code == "ERR_TOPOLOGY_BROKEN_SWITCH" and e.details.get("target_id") == "missing2" for e in errors)
 
 
 def test_validate_flow_invalid_type() -> None:
@@ -206,7 +206,7 @@ def test_validate_flow_invalid_type() -> None:
         governance = None
         definitions = None
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         validate_flow(cast("LinearFlow", DummyFlow()))
 
 
@@ -220,27 +220,29 @@ def test_validate_duplicate_node_ids() -> None:
         steps=[agent1, agent2],
     )
     errors = validate_flow(flow)
-    assert "ID Collision Error: Duplicate Node ID 'agent1' found." in errors
+    assert any(e.code == "ERR_TOPOLOGY_NODE_ID_COLLISION" for e in errors)
 
 
 def test_validate_graph_flow_empty() -> None:
     """Test validation for empty graph."""
     import pytest
 
-    from coreason_manifest.spec.interop.exceptions import ManifestError
-
-    # Graph allows empty nodes if structurally sound (no cycles possible)
     # Entry point missing is checked in verify_integrity (strict) or validate_flow
     graph = Graph(nodes={}, edges=[], entry_point="missing")
 
-    with pytest.raises(ManifestError, match="CRSN-VAL-ENTRY-POINT-MISSING"):
-        GraphFlow(
-            kind="GraphFlow",
-            metadata=create_metadata(),
-            interface=create_interface(),
-            blackboard=None,
-            graph=graph,
-        )
+    flow = GraphFlow(
+        kind="GraphFlow",
+        metadata=create_metadata(),
+        interface=create_interface(),
+        blackboard=None,
+        graph=graph,
+    )
+    errors = validate_flow(flow)
+
+    # We expect graph empty error
+    assert any(e.code == "ERR_TOPOLOGY_EMPTY_GRAPH" for e in errors)
+    # And potentially missing entry point
+    assert any(e.code == "ERR_TOPOLOGY_MISSING_ENTRY" for e in errors)
 
 
 def test_validate_graph_flow_key_id_mismatch() -> None:
@@ -257,7 +259,7 @@ def test_validate_graph_flow_key_id_mismatch() -> None:
         graph=graph,
     )
     errors = validate_flow(flow)
-    assert any("Graph Integrity Error" in e and "wrong_key" in e for e in errors)
+    assert any(e.code == "ERR_TOPOLOGY_ID_MISMATCH" for e in errors)
 
 
 def test_validate_orphan_nodes() -> None:
@@ -285,5 +287,5 @@ def test_validate_orphan_nodes() -> None:
 
     # node1 has no incoming edges but should be exempt as entry point
     # node3 has no incoming edges and should be flagged
-    assert not any("node1" in e for e in errors)
-    assert any("Orphan Node Warning: Node 'node3' has no incoming edges or implicit routes." in e for e in errors)
+    assert not any(e.node_id == "node1" for e in errors if e.code == "ERR_TOPOLOGY_ORPHAN_001")
+    assert any(e.node_id == "node3" for e in errors if e.code == "ERR_TOPOLOGY_ORPHAN_001")

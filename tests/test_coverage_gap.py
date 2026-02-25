@@ -1,3 +1,5 @@
+# tests/test_coverage_gap.py
+
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -227,6 +229,7 @@ def test_gatekeeper_blocked_domain() -> None:
     from coreason_manifest.spec.core.flow import FlowDefinitions, LinearFlow
     from coreason_manifest.spec.core.nodes import AgentNode
     from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
+    from coreason_manifest.spec.core.governance import Governance
     from coreason_manifest.utils.gatekeeper import validate_policy
 
     tool = ToolCapability(name="BadUrl", url=HttpUrl("http://example.com"))
@@ -317,7 +320,8 @@ def test_visualizer_failure_branch() -> None:
     # visualizer.py to_mermaid type check
     from typing import Any, cast
 
-    assert to_mermaid(cast("Any", "not_a_flow")) == ""
+    with pytest.raises(ValueError):
+        to_mermaid(cast("Any", "not_a_flow"))
 
 
 def test_net_utils_edge_cases() -> None:
@@ -394,7 +398,7 @@ def test_validator_edge_cases() -> None:
     )
 
     reports = validate_flow(flow_empty)
-    assert any("GraphFlow Error: Graph must contain at least one node" in r for r in reports)
+    assert any(r.code == "ERR_TOPOLOGY_EMPTY_GRAPH" for r in reports)
 
     # Dangling edges (validator.py 282, 284 check)
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
@@ -412,7 +416,7 @@ def test_validator_edge_cases() -> None:
         graph=graph_dangling,
     )
     reports = validate_flow(flow_dangling)
-    assert any("Dangling Edge Error" in r for r in reports)
+    assert any(r.code == "ERR_TOPOLOGY_DANGLING_EDGE" for r in reports)
 
     # Node key mismatch
     Graph.model_construct(nodes={"wrong_key": n1}, edges=[], entry_point="wrong_key")
@@ -430,8 +434,7 @@ def test_validator_edge_cases() -> None:
     )
 
     reports = validate_flow(flow_mismatch)
-    # Note capital "Node ID" in source code
-    assert any("Node key 'key' does not match Node ID 'n1'" in r for r in reports)
+    assert any(r.code == "ERR_TOPOLOGY_ID_MISMATCH" for r in reports)
 
 
 def test_loader_file_not_found() -> None:
@@ -453,20 +456,9 @@ def test_loader_exception_paths() -> None:
         (p / "dummy.py").touch()
         (p / "dummy.py").chmod(0o600)
 
-        # Mock spec_from_file_location to return None
-        with (
-            patch("importlib.util.spec_from_file_location", return_value=None),
-            pytest.raises(ValueError, match="Could not load spec"),
-        ):
-            load_agent_from_ref("dummy.py:Agent", root_dir=p)
-
-        # Mock spec.loader to be None
-        spec_mock = MagicMock()
-        spec_mock.loader = None
-        with (
-            patch("importlib.util.spec_from_file_location", return_value=spec_mock),
-            pytest.raises(ValueError, match="Could not load spec"),
-        ):
+        # Main file execution uses exec(), skipping importlib spec logic for main entry.
+        # But if we try to load an agent class that doesn't exist:
+        with pytest.raises(ValueError, match="Agent class 'Agent' not found"):
             load_agent_from_ref("dummy.py:Agent", root_dir=p)
 
 
