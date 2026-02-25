@@ -55,9 +55,7 @@ class MockFactory:
                 resolved = resolver.lookup(ref_uri)
                 contents = resolved.contents
                 new_visited_refs = (visited_refs or frozenset()) | {ref_uri}
-                return self._generate_schema_data(
-                    contents, visited, new_visited_refs, depth, resolved.resolver
-                )
+                return self._generate_schema_data(contents, visited, new_visited_refs, depth, resolved.resolver)
             except (Unresolvable, PointerToNowhere):
                 logger.warning(f"Unresolvable reference: {ref_uri}")
                 return "mock_ref_error"
