@@ -1,11 +1,13 @@
 from coreason_manifest.utils.mock import MockFactory
 
+
 def test_mock_semantics_enum() -> None:
     factory = MockFactory(seed=42)
     # 1. Simple enum
     schema = {"enum": ["A", "B", "C"]}
     result = factory._generate_schema_data(schema)
     assert result in ["A", "B", "C"]
+
 
 def test_mock_semantics_implicit_type() -> None:
     factory = MockFactory(seed=42)
@@ -29,8 +31,10 @@ def test_mock_semantics_implicit_type() -> None:
     result_str = factory._generate_schema_data(schema_str)
     assert result_str == "lorem ipsum"
 
+
 def test_mock_semantics_ref_enum() -> None:
-    # Test enum alongside $ref (enum takes precedence if present? Wait, logic says inside $ref block enum check is added)
+    # Test enum alongside $ref (enum takes precedence if present?
+    # Wait, logic says inside $ref block enum check is added)
     # But wait, standard JSON Schema says $ref replaces everything.
     # However, my implementation added enum check INSIDE $ref block?
     # No, I added it inside `if "$ref" in schema and resolver:` block.
@@ -47,6 +51,7 @@ def test_mock_semantics_ref_enum() -> None:
     # If the intention is that the node constraint overrides the ref, then this is correct.
 
     from unittest.mock import MagicMock
+
     factory = MockFactory(seed=42)
     resolver = MagicMock()
 
