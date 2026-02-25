@@ -300,10 +300,11 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
     if ":" not in reference:
         raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
 
-    if not reference.split(":")[0].endswith(".py"):
-        raise ValueError(f"Invalid reference format: {reference}. The file component must end with '.py'.")
-
+    # MUST rsplit first to safely support Windows drive letters (C:\path\file.py)
     file_ref, class_name = reference.rsplit(":", 1)
+
+    if not file_ref.endswith(".py"):
+        raise ValueError(f"Invalid reference format: {reference}. The file component must end with '.py'.")
 
     if not class_name.isidentifier():
         raise ValueError(f"Invalid reference format: {reference}. '{class_name}' is not a valid Python identifier.")
@@ -360,33 +361,21 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
 
         try:
             spec.loader.exec_module(module)
+            loaded_class = getattr(module, class_name, None)
         except Exception as e:
-            # Cleanup on failure
+            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
+                raise
+            raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
+        finally:
+            # SOTA Hygiene: Guaranteed cleanup even if BaseExceptions (SystemExit, etc.) occur.
             if module_name in sys.modules:
                 del sys.modules[module_name]
-            # Precise cleanup of dependencies
+
             cleanup_modules = _jail_modules_var.get()
             if cleanup_modules:
                 for mod in cleanup_modules:
                     if mod in sys.modules:
                         del sys.modules[mod]
-
-            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
-                raise
-
-            raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
-
-        loaded_class = getattr(module, class_name, None)
-
-        # Cleanup dependencies to prevent pollution
-        if module_name in sys.modules:
-            del sys.modules[module_name]
-
-        cleanup_modules = _jail_modules_var.get()
-        if cleanup_modules:
-            for mod in cleanup_modules:
-                if mod in sys.modules:
-                    del sys.modules[mod]
 
     if loaded_class is None:
         raise ValueError(f"{component_name.capitalize()} class '{class_name}' not found in {file_ref}")
