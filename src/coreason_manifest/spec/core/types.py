@@ -145,8 +145,7 @@ class MiddlewareDef(CoreasonModel):
         ...,
         pattern=r"^[^\s]+\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
         description=(
-            "Reference to the Python file and class (e.g., 'filters.py:PIIRedactor'). "
-            "Cannot contain whitespace."
+            "Reference to the Python file and class (e.g., 'filters.py:PIIRedactor'). Cannot contain whitespace."
         ),
     )
     config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")
