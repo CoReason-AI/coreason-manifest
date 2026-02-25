@@ -117,6 +117,24 @@ class Governance(CoreasonModel):
         default_factory=list, description="Allowed external domains.", examples=[["example.com"]]
     )
 
+    def resolve_timeout(self, default_env_timeout: int = 300) -> int | Literal["infinite"]:
+        """
+        Resolves the Tri-State timeout policy.
+        If None, uses the provided environment default.
+        """
+        if self.timeout_seconds is None:
+            return default_env_timeout
+        return self.timeout_seconds
+
+    def resolve_cost_limit(self, default_env_cost: float = 0.0) -> float | Literal["infinite"]:
+        """
+        Resolves the Tri-State cost limit policy.
+        If None, uses the provided environment default.
+        """
+        if self.cost_limit_usd is None:
+            return default_env_cost
+        return self.cost_limit_usd
+
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:

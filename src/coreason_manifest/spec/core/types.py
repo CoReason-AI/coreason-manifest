@@ -17,14 +17,27 @@ from pydantic import BeforeValidator, Field
 #  COMMON TYPE ALIASES (Governance & Resilience)
 # =========================================================================
 
+def _coerce_infinite(v: Any) -> Any:
+    """Normalizes 'Infinite', ' INFINITE ', etc. to 'infinite'."""
+    if isinstance(v, str) and v.strip().lower() == "infinite":
+        return "infinite"
+    return v
+
+
 # Integer > 0 OR "infinite"
-type UnboundedPositiveInt = Annotated[int, Field(gt=0)] | Literal["infinite"]
+type UnboundedPositiveInt = Annotated[
+    Annotated[int, Field(gt=0)] | Literal["infinite"], BeforeValidator(_coerce_infinite)
+]
 
 # Integer >= 0 OR "infinite"
-type UnboundedNonNegativeInt = Annotated[int, Field(ge=0)] | Literal["infinite"]
+type UnboundedNonNegativeInt = Annotated[
+    Annotated[int, Field(ge=0)] | Literal["infinite"], BeforeValidator(_coerce_infinite)
+]
 
 # Float >= 0.0 OR "infinite"
-type UnboundedNonNegativeFloat = Annotated[float, Field(ge=0.0)] | Literal["infinite"]
+type UnboundedNonNegativeFloat = Annotated[
+    Annotated[float, Field(ge=0.0)] | Literal["infinite"], BeforeValidator(_coerce_infinite)
+]
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
