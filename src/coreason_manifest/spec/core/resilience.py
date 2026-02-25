@@ -46,7 +46,7 @@ class RetryStrategy(ResilienceStrategy):
     type: Literal["retry"] = "retry"
 
     max_attempts: UnboundedPositiveInt = Field(..., description="Hard limit on recovery loops.")
-    backoff_factor: Annotated[float, Field(ge=1.0, description="Exponential backoff multiplier.")] = 2.0
+    backoff_factor: Annotated[float, Field(gt=1.0, description="Exponential backoff multiplier.")] = 2.0
     initial_delay_seconds: Annotated[float, Field(gt=0.0, description="Initial wait time.")] = 1.0
     max_delay_seconds: Annotated[
         float,
@@ -151,10 +151,21 @@ class EscalationStrategy(ResilienceStrategy):
     @field_validator("template")
     @classmethod
     def validate_template_syntax(cls, v: str | None) -> str | None:
-        if v and "{{" not in v:
-            # Warning or Note: This looks like a static string, not a Jinja2 template.
-            # We won't block it (valid use case), but it's good to note mentally.
-            pass
+        if v is None:
+            return v
+
+        # Strict Jinja2 security check
+        found_vars = re.findall(r"\{\{\s*(.*?)\s*\}\}", v)
+        allowed_vars = {"node_id", "error_type", "message"}
+
+        for var in found_vars:
+            # Simple check: variable name must be in allowed list.
+            # Does not support complex expressions like filters for strict security.
+            if var not in allowed_vars:
+                raise ValueError(
+                    "Template contains unauthorized context variables. "
+                    "Allowed variables are: node_id, error_type, message."
+                )
         return v
 
 

@@ -23,6 +23,9 @@ type UnboundedPositiveInt = Annotated[int, Field(gt=0)] | Literal["infinite"]
 # Integer >= 0 OR "infinite"
 type UnboundedNonNegativeInt = Annotated[int, Field(ge=0)] | Literal["infinite"]
 
+# Float >= 0.0 OR "infinite"
+type UnboundedNonNegativeFloat = Annotated[float, Field(ge=0.0)] | Literal["infinite"]
+
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
 # =========================================================================
