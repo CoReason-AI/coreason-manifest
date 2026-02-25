@@ -71,7 +71,14 @@ class ToolAccessPolicy(CoreasonModel):
 class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
-    active_middlewares: list[str] = Field(default_factory=list)
+    active_middlewares: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ordered list of middleware references (from definitions.middlewares) to apply sequentially "
+            "to execution requests and streams."
+        ),
+        examples=[["pii_redactor", "toxicity_filter"]],
+    )
     max_risk_level: RiskLevel | None = Field(
         None,
         description=(

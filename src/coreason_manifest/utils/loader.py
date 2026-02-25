@@ -3,6 +3,7 @@
 import hashlib
 import importlib.abc
 import importlib.util
+import inspect
 import os
 import re
 import stat
@@ -292,17 +293,9 @@ def load_flow_from_file(
     raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
 
 
-def load_agent_from_ref(reference: str, root_dir: Path) -> type:
+def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -> type:
     """
-    Load an Agent class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
-
-    Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Agent class.
+    Helper to load a class from a reference string in a secure sandbox context.
     """
     if ":" not in reference:
         raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
@@ -328,115 +321,13 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
                 )
 
     except FileNotFoundError:
-        raise ValueError(f"Agent file not found: {file_ref}") from None
+        raise ValueError(f"{component_name.capitalize()} file not found: {file_ref}") from None
     except RuntimeError as e:
         raise SecurityJailViolationError(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
 
     # Explicit warning for audit logs
     warnings.warn(
-        f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",
-        category=RuntimeSecurityWarning,
-        stacklevel=2,
-    )
-
-    # Generate cryptographically unique module name to prevent collisions
-    path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
-    module_name = f"_jail_{path_hash}"
-
-    # Use context manager to enable jailed imports during spec finding and loading
-    with sandbox_context(root_dir):
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        if spec is None or spec.loader is None:
-            raise ValueError(f"Could not load spec for {file_ref}")
-
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-
-        warnings.warn(
-            f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
-            "Ensure strict governance until Wasm sandboxing is implemented.",
-            category=RuntimeSecurityWarning,
-            stacklevel=2,
-        )
-
-        try:
-            spec.loader.exec_module(module)
-        except Exception as e:
-            # Cleanup on failure
-            if module_name in sys.modules:
-                del sys.modules[module_name]
-            # Precise cleanup of dependencies
-            cleanup_modules = _jail_modules_var.get()
-            if cleanup_modules:
-                for mod in cleanup_modules:
-                    if mod in sys.modules:
-                        del sys.modules[mod]
-            raise ValueError(f"Failed to execute agent code in {file_ref}: {e}") from e
-
-        agent_class = getattr(module, class_name, None)
-
-        # Cleanup dependencies to prevent pollution
-        if module_name in sys.modules:
-            del sys.modules[module_name]
-
-        cleanup_modules = _jail_modules_var.get()
-        if cleanup_modules:
-            for mod in cleanup_modules:
-                if mod in sys.modules:
-                    del sys.modules[mod]
-
-    if agent_class is None:
-        raise ValueError(f"Agent class '{class_name}' not found in {file_ref}")
-
-    if isinstance(agent_class, type):
-        return agent_class
-
-    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
-
-
-def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
-    """
-    Load a Middleware class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
-
-    Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Middleware class.
-    """
-    if ":" not in reference:
-        raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
-
-    file_ref, class_name = reference.rsplit(":", 1)
-
-    # Architectural Note: Strict Pathlib Resolution
-    try:
-        # Resolve path strictly (must exist) and canonicalize
-        file_path = (root_dir / file_ref).resolve(strict=True)
-
-        # Jail boundary check
-        if not file_path.is_relative_to(root_dir.resolve()):
-            raise SecurityJailViolationError(f"Security Error: Reference {file_ref} escapes the root directory.")
-
-        # Permission check: Reject world-writable files
-        # Only enforce strict POSIX permissions on POSIX systems
-        if os.name == "posix":
-            st = file_path.stat()
-            if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
-                raise SecurityJailViolationError(
-                    f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
-                )
-
-    except FileNotFoundError:
-        raise ValueError(f"Middleware file not found: {file_ref}") from None
-    except RuntimeError as e:
-        raise SecurityJailViolationError(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
-
-    # Explicit warning for audit logs
-    warnings.warn(
-        f"Dynamic Code Execution: Loading middleware from {file_ref}. Ensure this code is trusted.",
+        f"Dynamic Code Execution: Loading {component_name} from {file_ref}. Ensure this code is trusted.",
         category=RuntimeSecurityWarning,
         stacklevel=2,
     )
@@ -477,9 +368,9 @@ def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
             if isinstance(e, (SecurityJailViolationError, RuntimeError)):
                 raise
 
-            raise ValueError(f"Failed to execute middleware code in {file_ref}: {e}") from e
+            raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
 
-        middleware_class = getattr(module, class_name, None)
+        loaded_class = getattr(module, class_name, None)
 
         # Cleanup dependencies to prevent pollution
         if module_name in sys.modules:
@@ -491,19 +382,54 @@ def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
                 if mod in sys.modules:
                     del sys.modules[mod]
 
-    if middleware_class is None:
-        raise ValueError(f"Middleware class '{class_name}' not found in {file_ref}")
+    if loaded_class is None:
+        raise ValueError(f"{component_name.capitalize()} class '{class_name}' not found in {file_ref}")
 
-    if not isinstance(middleware_class, type):
+    if not isinstance(loaded_class, type):
         raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
 
-    # Duck-type check for protocol compliance
-    has_intercept_request = hasattr(middleware_class, "intercept_request") and callable(
-        middleware_class.intercept_request
-    )
-    has_intercept_stream = hasattr(middleware_class, "intercept_stream") and callable(middleware_class.intercept_stream)
+    return loaded_class
 
-    if not (has_intercept_request or has_intercept_stream):
-        raise TypeError(f"Middleware class '{class_name}' must implement 'intercept_request' or 'intercept_stream'.")
+
+def load_agent_from_ref(reference: str, root_dir: Path) -> type:
+    """
+    Load an Agent class from a Python file reference (file.py:ClassName).
+    WARNING: Executes arbitrary code. Ensure source is trusted.
+
+    Args:
+        reference: string in format "path/to/file.py:ClassName"
+        root_dir: The root directory for file access confinement.
+
+    Returns:
+        The loaded Agent class.
+    """
+    return _load_sandboxed_class(reference, root_dir, "agent")
+
+
+def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
+    """
+    Load a Middleware class from a Python file reference (file.py:ClassName).
+    WARNING: Executes arbitrary code. Ensure source is trusted.
+
+    Args:
+        reference: string in format "path/to/file.py:ClassName"
+        root_dir: The root directory for file access confinement.
+
+    Returns:
+        The loaded Middleware class.
+    """
+    middleware_class = _load_sandboxed_class(reference, root_dir, "middleware")
+
+    req_method = getattr(middleware_class, "intercept_request", None)
+    stream_method = getattr(middleware_class, "intercept_stream", None)
+
+    has_async_req = inspect.iscoroutinefunction(req_method)
+    has_async_stream = inspect.iscoroutinefunction(stream_method)
+
+    if not (has_async_req or has_async_stream):
+        raise TypeError(
+            f"Middleware class in {reference} must implement an `async def intercept_request` "
+            "or `async def intercept_stream` method."
+        )
 
     return middleware_class

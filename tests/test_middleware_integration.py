@@ -14,7 +14,7 @@ from coreason_manifest.utils.loader import load_middleware_from_ref
 # Mock content for middlewares
 VALID_MIDDLEWARE_CODE = """
 class MyMiddleware:
-    def intercept_request(self, context, request):
+    async def intercept_request(self, context, request):
         pass
 """
 
@@ -45,7 +45,7 @@ def helper():
 MIDDLEWARE_WITH_DEP_CODE = """
 import dependency
 class MyMiddleware:
-    def intercept_request(self, context, request):
+    async def intercept_request(self, context, request):
         dependency.helper()
 """
 
@@ -56,28 +56,28 @@ raise ValueError("Dependency failed")
 MIDDLEWARE_FAIL_DEP_CODE = """
 import fail_dep
 class MyMiddleware:
-    def intercept_request(self, context, request):
+    async def intercept_request(self, context, request):
         pass
 """
 
 IMPORT_BAD_LINK_CODE = """
 import bad_link
 class MyMiddleware:
-    def intercept_request(self, context, request):
+    async def intercept_request(self, context, request):
         pass
 """
 
 IMPORT_BAD_PKG_CODE = """
 import bad_pkg
 class MyMiddleware:
-    def intercept_request(self, context, request):
+    async def intercept_request(self, context, request):
         pass
 """
 
 IMPORT_LOOP_CODE = """
 import loop_link
 class MyMiddleware:
-    def intercept_request(self, context, request):
+    async def intercept_request(self, context, request):
         pass
 """
 
@@ -180,7 +180,7 @@ def test_loader_valid_middleware(workspace: Path) -> None:
 def test_loader_duck_typing_failure(workspace: Path) -> None:
     with pytest.raises(TypeError) as exc:
         load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
-    assert "must implement 'intercept_request' or 'intercept_stream'" in str(exc.value)
+    assert "must implement an `async def intercept_request` or `async def intercept_stream`" in str(exc.value)
 
 
 def test_loader_security_violation(workspace: Path) -> None:
