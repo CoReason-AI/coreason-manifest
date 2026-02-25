@@ -135,6 +135,7 @@ class TestCanonicalHashingStrategy:
 
     def test_enum_hashing(self) -> None:
         """Test that an Enum member hashes successfully based on its value."""
+
         class Color(enum.Enum):
             RED = "red"
             BLUE = "blue"
