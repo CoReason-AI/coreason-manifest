@@ -1,20 +1,21 @@
-
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from coreason_manifest.utils.loader import SecurityJailViolationError, load_flow_from_file
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.utils.loader import load_flow_from_file
 
 
-def test_load_flow_yaml_error(tmp_path: Path):
+def test_load_flow_yaml_error(tmp_path: Path) -> None:
     f = tmp_path / "bad.yaml"
     # Unbalanced brackets are a sure way to cause YAMLError
     f.write_text("invalid: [")
     with pytest.raises(ValueError, match="Failed to parse manifest file"):
         load_flow_from_file(str(f))
 
-def test_load_flow_dynamic_exec_forbidden(tmp_path: Path):
+
+def test_load_flow_dynamic_exec_forbidden(tmp_path: Path) -> None:
     f = tmp_path / "flow.yaml"
     # Create a flow with a dynamic ref string
     # Ensure it's reachable in the structure
@@ -33,7 +34,8 @@ steps:
     with pytest.raises(SecurityJailViolationError, match="Dynamic code execution references detected"):
         load_flow_from_file(str(f), allow_dynamic_execution=False)
 
-def test_load_flow_relative_to_fail(tmp_path: Path):
+
+def test_load_flow_relative_to_fail(tmp_path: Path) -> None:
     # Cover the ValueError in relative_to check
     # file at /tmp/file.yaml
     # root at /etc

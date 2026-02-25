@@ -1,3 +1,5 @@
+from typing import Any
+
 from coreason_manifest.utils.mock import MockFactory
 
 
@@ -128,8 +130,8 @@ def test_mock_direct_recursion() -> None:
     factory = MockFactory()
 
     # Create a recursive dict structure
-    recursive_schema = {"type": "object", "properties": {}}
-    recursive_schema["properties"]["self"] = recursive_schema  # type: ignore
+    recursive_schema: dict[str, Any] = {"type": "object", "properties": {}}
+    recursive_schema["properties"]["self"] = recursive_schema
 
     # This should return a structure that terminates at max depth or due to visited check
     # With hoisted check, it should detect the cycle immediately upon re-entry.
@@ -148,13 +150,14 @@ def test_mock_combinator_recursion() -> None:
     factory = MockFactory()
 
     # Recursive via combinator
-    recursive_schema = {"anyOf": []}
-    recursive_schema["anyOf"].append(recursive_schema)  # type: ignore
+    recursive_schema: dict[str, Any] = {"anyOf": []}
+    recursive_schema["anyOf"].append(recursive_schema)
 
     # Should not crash
     result = factory._generate_schema_data(recursive_schema)
     # result might be empty string if cycle detected immediately
     assert result == ""
+
 
 def test_mock_implicit_array_prefixitems() -> None:
     factory = MockFactory()
@@ -163,6 +166,7 @@ def test_mock_implicit_array_prefixitems() -> None:
     result = factory._generate_schema_data(schema)
     assert isinstance(result, list)
     assert result == ["A", "B"]
+
 
 def test_mock_object_starvation() -> None:
     factory = MockFactory()
