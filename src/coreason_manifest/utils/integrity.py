@@ -78,7 +78,9 @@ class CanonicalHashingStrategy(HashingStrategy):
 
                 str_k = str(k)
                 if str_k in seen_keys:
-                    raise ValueError(f"Canonical JSON dictionary keys must be uniquely stringifiable. Collision detected for key: '{str_k}'")
+                    raise ValueError(
+                        f"Canonical JSON dictionary keys must be uniquely stringifiable. Collision detected for key: '{str_k}'"
+                    )
 
                 seen_keys.add(str_k)
                 sanitized_dict[str_k] = self._recursive_sort_and_sanitize(v)
@@ -94,9 +96,7 @@ class CanonicalHashingStrategy(HashingStrategy):
             # 1. Sanitize all items first
             sanitized_items = [self._recursive_sort_and_sanitize(x) for x in obj]
             # 2. Sort by their deterministic JSON string representation
-            sanitized_items.sort(
-                key=lambda x: json.dumps(x, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-            )
+            sanitized_items.sort(key=lambda x: json.dumps(x, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
             return sanitized_items
 
         if isinstance(obj, uuid.UUID):
@@ -153,9 +153,9 @@ class CanonicalHashingStrategy(HashingStrategy):
             obj.pop("execution_hash", None)
             obj.pop("signature", None)
         elif hasattr(obj, "model_dump"):
-             obj = obj.model_dump(mode="python")
-             obj.pop("execution_hash", None)
-             obj.pop("signature", None)
+            obj = obj.model_dump(mode="python")
+            obj.pop("execution_hash", None)
+            obj.pop("signature", None)
 
         # 1. Pass the object through _recursive_sort_and_sanitize method.
         sanitized = self._recursive_sort_and_sanitize(obj)

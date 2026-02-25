@@ -2,7 +2,6 @@
 
 import enum
 import hashlib
-import json
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -217,12 +216,7 @@ class TestCanonicalHashingStrategy:
 
     def test_nested_signature_retention(self) -> None:
         """Assert that 'signature' is only stripped from the root, not nested dicts."""
-        data = {
-            "signature": "root_signature_to_strip",
-            "payload": {
-                "signature": "keep_me"
-            }
-        }
+        data = {"signature": "root_signature_to_strip", "payload": {"signature": "keep_me"}}
         # Expected behavior: root signature goes away, payload signature stays.
         hashed = compute_hash(data)
         expected_json = '{"payload":{"signature":"keep_me"}}'
@@ -236,7 +230,7 @@ class TestCanonicalHashingStrategy:
 
     def test_complex_set_determinism(self) -> None:
         """Assert that sets containing nested unordered elements hash perfectly deterministically."""
-        s1 = frozenset({ frozenset({2, 1}), frozenset({4, 3}) })
-        s2 = frozenset({ frozenset({3, 4}), frozenset({1, 2}) })
+        s1 = frozenset({frozenset({2, 1}), frozenset({4, 3})})
+        s2 = frozenset({frozenset({3, 4}), frozenset({1, 2})})
         # Despite different insertion/memory orders, the canonical JSON array representations must sort identically.
         assert compute_hash(s1) == compute_hash(s2)
