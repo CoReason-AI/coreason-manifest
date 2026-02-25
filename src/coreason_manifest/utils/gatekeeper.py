@@ -277,8 +277,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
                             severity="warning",
                             message=(
-                                f"Non-Published Topology Warning: Found {len(dangerous_node_ids)} dangerous unreachable nodes. "
-                                "They will be guarded by the security policy, but remain disconnected."
+                                f"Non-Published Topology Warning: Found {len(dangerous_node_ids)} dangerous "
+                                "unreachable nodes. They will be guarded by the security policy, but remain disconnected."
                             ),
                             details={
                                 "dangerous_nodes": list(dangerous_node_ids),
@@ -295,7 +295,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
                             severity="info",  # Use info as requested ("info or warning")
                             message=(
-                                f"Non-Published Topology Info: Found {len(safe_node_ids)} disconnected nodes (Safe Dead Code)."
+                                f"Non-Published Topology Info: Found {len(safe_node_ids)} disconnected nodes "
+                                "(Safe Dead Code)."
                             ),
                             details={"node_ids": list(safe_node_ids)},
                             remediation=None,

@@ -213,7 +213,7 @@ def test_loader_exception_handling_in_lock() -> None:
         # load_agent_from_ref inserts it. exec_module fails.
         # So it should be there.
 
-        with pytest.raises(RuntimeError, match="Boom"):
+        with pytest.raises(ValueError, match="Failed to execute agent code"):
             load_agent_from_ref("broken.py:Agent", root_dir=p)
 
         # Verify module is NOT in sys.modules (success path cleanup or error path cleanup)
@@ -508,7 +508,7 @@ def test_loader_cleanup_deps() -> None:
         if "dep2" in sys.modules:
             del sys.modules["dep2"]
 
-        with pytest.raises(RuntimeError, match="fail"):
+        with pytest.raises(ValueError, match="Failed to execute agent code"):
             load_agent_from_ref("agent2.py:Agent", root_dir=p)
 
         # Verify dep2 is cleaned up
@@ -602,7 +602,7 @@ def test_loader_resolve_refs_complex() -> None:
 
 
 def test_loader_execution_exception_propagation() -> None:
-    """Verify that RuntimeErrors during module execution are propagated directly."""
+    """Verify that exceptions during module execution are propagated correctly as ValueErrors."""
     import tempfile
 
     from coreason_manifest.utils.loader import load_agent_from_ref
@@ -612,7 +612,7 @@ def test_loader_execution_exception_propagation() -> None:
         (p / "fail.py").write_text("raise RuntimeError('Boom')")
         (p / "fail.py").chmod(0o600)
 
-        with pytest.raises(RuntimeError, match="Boom"):
+        with pytest.raises(ValueError, match="Failed to execute agent code"):
             load_agent_from_ref("fail.py:Agent", root_dir=p)
 
 

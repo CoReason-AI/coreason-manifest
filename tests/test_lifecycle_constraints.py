@@ -150,7 +150,7 @@ def test_linear_flow_published_constraints() -> None:
     with pytest.raises(ManifestError) as excinfo:
         LinearFlow(
             metadata=FlowMetadata(name="Linear Test", version="1.0"),
-            sequence=steps,
+            steps=steps,
             status="published"
         )
 

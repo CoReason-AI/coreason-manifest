@@ -19,7 +19,7 @@ from coreason_manifest.spec.core.nodes import (
     SwitchNode,
 )
 from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
-from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID, RiskLevel
+from coreason_manifest.spec.core.types import NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 from coreason_manifest.utils.io import SecurityViolationError
@@ -168,7 +168,6 @@ class FlowDefinitions(CoreasonModel):
     tools: dict[str, AnyTool] = Field(default_factory=dict)
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
-    middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
 
@@ -250,59 +249,6 @@ def _scan_for_kill_switch_violations(
         _recursive_scan(definitions)
 
     _recursive_scan(nodes)
-
-
-def _validate_middleware_references(governance: Governance | None, definitions: FlowDefinitions | None) -> None:
-    if not governance or not governance.active_middlewares:
-        return
-
-    defined_middlewares = set()
-    if definitions and definitions.middlewares:
-        defined_middlewares = set(definitions.middlewares.keys())
-
-    for mw_id in governance.active_middlewares:
-        if mw_id not in defined_middlewares:
-            # SOTA RFC 6902 JSON Pointer Escaping
-            # Architectural Note: MiddlewareID validation prevents ~ and /, but we escape
-            # defensively here to protect the remediation engine against model_construct() bypasses.
-            mw_id_escaped = mw_id.replace("~", "~0").replace("/", "~1")
-
-            # Dynamically construct RFC 6902 compliant patch based on current state
-            if not definitions:
-                patch = [
-                    {
-                        "op": "add",
-                        "path": "/definitions",
-                        "value": {"middlewares": {mw_id: {"ref": "file.py:Class"}}},
-                    }
-                ]
-            elif not definitions.middlewares:
-                patch = [{"op": "add", "path": "/definitions/middlewares", "value": {mw_id: {"ref": "file.py:Class"}}}]
-            else:
-                patch = [
-                    {
-                        "op": "add",
-                        "path": f"/definitions/middlewares/{mw_id_escaped}",
-                        "value": {"ref": "file.py:Class"},
-                    }
-                ]
-
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-MIDDLEWARE-MISSING",
-                    message=f"Active middleware '{mw_id}' is not defined in definitions.middlewares.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={
-                        "middleware_id": mw_id,
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            description=f"Add definition for middleware '{mw_id}'.",
-                            patch_data=patch,
-                        ).model_dump(),
-                    },
-                )
-            )
 
 
 class GraphFlow(CoreasonModel):
@@ -489,8 +435,6 @@ class GraphFlow(CoreasonModel):
                     },
                 )
             )
-    def validate_middleware_refs(self) -> "GraphFlow":
-        _validate_middleware_references(self.governance, self.definitions)
         return self
 
 
@@ -588,8 +532,6 @@ class LinearFlow(CoreasonModel):
                     },
                 )
             )
-    def validate_middleware_refs(self) -> "LinearFlow":
-        _validate_middleware_references(self.governance, self.definitions)
         return self
 
 
