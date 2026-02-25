@@ -4,7 +4,7 @@ from typing import Any, Literal
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
+from coreason_manifest.spec.core.types import MiddlewareID, NodeID, RiskLevel, ToolID
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
 
@@ -71,6 +71,14 @@ class ToolAccessPolicy(CoreasonModel):
 class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
+    active_middlewares: list[MiddlewareID] = Field(
+        default_factory=list,
+        description=(
+            "Ordered list of middleware references (from definitions.middlewares) to apply sequentially "
+            "to execution requests and streams."
+        ),
+        examples=[["pii_redactor", "toxicity_filter"]],
+    )
     max_risk_level: RiskLevel | None = Field(
         None,
         description=(
@@ -105,6 +113,12 @@ class Governance(CoreasonModel):
     allowed_domains: list[str] = Field(
         default_factory=list, description="Allowed external domains.", examples=[["example.com"]]
     )
+
+    @field_validator("active_middlewares")
+    @classmethod
+    def deduplicate_middlewares(cls, v: list[MiddlewareID]) -> list[MiddlewareID]:
+        """Ensures middleware execution pipeline contains unique references while preserving order."""
+        return list(dict.fromkeys(v))
 
     @field_validator("allowed_domains")
     @classmethod
