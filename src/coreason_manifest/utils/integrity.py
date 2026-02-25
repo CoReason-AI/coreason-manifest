@@ -83,7 +83,7 @@ class CanonicalHashingStrategy(HashingStrategy):
         # Sets (The Determinism Fix):
         if isinstance(obj, (set, frozenset)):
             # Sort by deterministic typed string, then sanitize
-            sorted_items = sorted(list(obj), key=lambda x: f"{type(x).__name__}:{x}")
+            sorted_items = sorted(obj, key=lambda x: f"{type(x).__name__}:{x}")
             return [self._recursive_sort_and_sanitize(x) for x in sorted_items]
 
         if isinstance(obj, uuid.UUID):
@@ -238,7 +238,7 @@ def verify_merkle_proof(
     # 4. Verification
     verified_hashes = set()
 
-    for i, payload in enumerate(sorted_trace):
+    for payload in sorted_trace:
         # Verify Content Integrity
         try:
             computed_hash = compute_hash(payload)

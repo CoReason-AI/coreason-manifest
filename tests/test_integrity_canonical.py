@@ -145,7 +145,7 @@ class TestCanonicalHashingStrategy:
 
     def test_mixed_type_dict_keys(self) -> None:
         """Assert that {1: "a", "2": "b"} does not raise a TypeError and hashes consistently."""
-        data = {1: "a", "2": "b"}
+        data: dict[int | str, str] = {1: "a", "2": "b"}
         # Keys sorted by str(key): "1", "2"
         # 1 -> "1", "2" -> "2"
         # Expected JSON: {"1":"a","2":"b"}
@@ -155,7 +155,7 @@ class TestCanonicalHashingStrategy:
         assert compute_hash(data) == expected_hash
 
         # Order independence
-        data2 = {"2": "b", 1: "a"}
+        data2: dict[int | str, str] = {"2": "b", 1: "a"}
         assert compute_hash(data2) == expected_hash
 
     def test_set_mixed_types(self) -> None:
