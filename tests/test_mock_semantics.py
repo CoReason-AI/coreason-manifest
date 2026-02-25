@@ -122,3 +122,65 @@ def test_mock_semantics_array_advanced() -> None:
     schema_false = {"type": "array", "items": False}
     result_false = factory._generate_schema_data(schema_false)
     assert result_false == [None]
+
+
+def test_mock_direct_recursion() -> None:
+    factory = MockFactory()
+
+    # Create a recursive dict structure
+    recursive_schema = {"type": "object", "properties": {}}
+    recursive_schema["properties"]["self"] = recursive_schema  # type: ignore
+
+    # This should return a structure that terminates at max depth or due to visited check
+    # With hoisted check, it should detect the cycle immediately upon re-entry.
+
+    result = factory._generate_schema_data(recursive_schema)
+
+    assert isinstance(result, dict)
+    # Depending on how recursion is handled (returns ""), check structure
+    assert "self" in result
+    # The value of self should be empty string or partial structure
+    # Because generate_schema_data returns "" on visited cycle
+    assert result["self"] == ""
+
+
+def test_mock_combinator_recursion() -> None:
+    factory = MockFactory()
+
+    # Recursive via combinator
+    recursive_schema = {"anyOf": []}
+    recursive_schema["anyOf"].append(recursive_schema)  # type: ignore
+
+    # Should not crash
+    result = factory._generate_schema_data(recursive_schema)
+    # result might be empty string if cycle detected immediately
+    assert result == ""
+
+def test_mock_implicit_array_prefixitems() -> None:
+    factory = MockFactory()
+    # Schema with no "type" but has "prefixItems"
+    schema = {"prefixItems": [{"const": "A"}, {"const": "B"}]}
+    result = factory._generate_schema_data(schema)
+    assert isinstance(result, list)
+    assert result == ["A", "B"]
+
+def test_mock_object_starvation() -> None:
+    factory = MockFactory()
+
+    # 1. additionalProperties: True (default) -> should have a key
+    schema_default = {"type": "object"}
+    res_default = factory._generate_schema_data(schema_default)
+    assert isinstance(res_default, dict)
+    assert len(res_default) > 0
+    assert "mock_dynamic_key" in res_default
+
+    # 2. additionalProperties: False -> empty dict
+    schema_false = {"type": "object", "additionalProperties": False}
+    res_false = factory._generate_schema_data(schema_false)
+    assert res_false == {}
+
+    # 3. additionalProperties: Schema -> generate using schema
+    schema_schema = {"type": "object", "additionalProperties": {"type": "integer"}}
+    res_schema = factory._generate_schema_data(schema_schema)
+    assert "mock_dynamic_key" in res_schema
+    assert isinstance(res_schema["mock_dynamic_key"], int)

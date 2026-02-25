@@ -40,6 +40,17 @@ class MockFactory:
         if depth > max_depth:
             return ""
 
+        # Hoist cycle detection to top to catch all recursions early
+        if isinstance(schema, dict):
+            schema_id = id(schema)
+            if visited is None:
+                visited = frozenset()
+
+            if schema_id in visited:
+                return ""
+
+            visited = visited | {schema_id}
+
         # Handle JSON Schema boolean specifications
         if isinstance(schema, bool):
             return "mock_data" if schema else None
@@ -79,16 +90,6 @@ class MockFactory:
                 logger.warning(f"Unresolvable reference: {ref_uri}")
                 return "mock_ref_error"
 
-        # Cycle detection for schema objects
-        schema_id = id(schema)
-        if visited is None:
-            visited = frozenset()
-
-        if schema_id in visited:
-            return ""
-
-        visited = visited | {schema_id}
-
         # Simple schema support
         type_ = schema.get("type")
 
@@ -100,7 +101,7 @@ class MockFactory:
             # Implicit type inference based on structure
             if "properties" in schema:
                 type_ = "object"
-            elif "items" in schema:
+            elif "items" in schema or "prefixItems" in schema:
                 type_ = "array"
             else:
                 type_ = "string"
@@ -115,9 +116,19 @@ class MockFactory:
             return self.rng.choice([True, False])
         if type_ == "object":
             props = schema.get("properties", {})
-            return {
+            data = {
                 k: self._generate_schema_data(v, visited, visited_refs, depth + 1, resolver) for k, v in props.items()
             }
+            # Prevent starvation if no properties defined but additionalProperties allowed
+            if not data:
+                additional = schema.get("additionalProperties", True)
+                if additional is not False:
+                    # If additional is a schema, use it; otherwise generic
+                    val_schema = additional if isinstance(additional, dict) else None
+                    data["mock_dynamic_key"] = self._generate_schema_data(
+                        val_schema, visited, visited_refs, depth + 1, resolver
+                    )
+            return data
         if type_ == "array":
             items_schema = schema.get("prefixItems", schema.get("items"))
             if isinstance(items_schema, list):
