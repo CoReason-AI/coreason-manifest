@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 
     from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import Node, SwitchNode
+from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.nodes import SwitchNode
 
 
 def _safe_id(node_id: str) -> str:
@@ -22,13 +22,13 @@ def _escape_label(text: str) -> str:
     return html.escape(text).replace('"', "&quot;")
 
 
-def _get_node_label(node: Node) -> str:
+def _get_node_label(node: AnyNode) -> str:
     if node.presentation and node.presentation.label:
         return _escape_label(node.presentation.label)
     return _escape_label(node.id)
 
 
-def _get_node_shape(node: Node) -> tuple[str, str]:
+def _get_node_shape(node: AnyNode) -> tuple[str, str]:
     # Default shapes
     shape_map = {
         "agent": ("[", "]"),
@@ -43,7 +43,7 @@ def _get_node_shape(node: Node) -> tuple[str, str]:
     return shape_map.get(node.type, ("[", "]"))
 
 
-def _render_mermaid_node(node: Node, snapshot: ExecutionSnapshot | None = None) -> str:
+def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = None) -> str:
     safe_id = _safe_id(node.id)
     label = _get_node_label(node)
 
@@ -84,7 +84,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     """Generates valid Mermaid.js diagram code."""
     lines = []
 
-    nodes: Sequence[Node] = []
+    nodes: Sequence[AnyNode] = []
     edges: list[tuple[str, str, str | None]] = []
 
     if isinstance(flow, LinearFlow):
@@ -99,8 +99,8 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
         return ""  # pragma: no cover
 
     # Grouping
-    grouped_nodes: dict[str, list[Node]] = {}
-    ungrouped_nodes: list[Node] = []
+    grouped_nodes: dict[str, list[AnyNode]] = {}
+    ungrouped_nodes: list[AnyNode] = []
 
     for node in nodes:
         if node.presentation and node.presentation.group:
@@ -165,7 +165,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     return "\n".join(lines)
 
 
-def _compute_layout(nodes: Sequence[Node], edges: list[tuple[str, str, str | None]]) -> dict[str, dict[str, int]]:
+def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | None]]) -> dict[str, dict[str, int]]:
     """Computes a basic DAG layout using Kahn's algorithm layers."""
     adj: dict[str, list[str]] = {n.id: [] for n in nodes}
     in_degree: dict[str, int] = {n.id: 0 for n in nodes}
@@ -236,7 +236,7 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
     rf_nodes: list[dict[str, Any]] = []
     rf_edges: list[dict[str, Any]] = []
 
-    nodes: Sequence[Node] = []
+    nodes: Sequence[AnyNode] = []
     edges: list[tuple[str, str, str | None]] = []
 
     if isinstance(flow, LinearFlow):

@@ -209,25 +209,11 @@ class BaseFlowBuilder:
             supervision_templates=self._supervision_templates,
         )
 
+    def _register_node(self, node: AnyNode) -> None:
+        """Registers a node to the flow. Must be implemented by subclasses."""
+        raise NotImplementedError
 
-class NewLinearFlow(BaseFlowBuilder):
-    """Fluent API to construct LinearFlows programmatically."""
-
-    def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
-        super().__init__(name, version, description)
-        self.steps: list[AnyNode] = []
-
-    def add_step(self, node: AnyNode) -> "NewLinearFlow":
-        """Appends a node to the sequence."""
-        self.steps.append(node)
-        return self
-
-    def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
-        """Appends an agent node to the sequence."""
-        self.steps.append(agent)
-        return self
-
-    def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> "NewLinearFlow":
+    def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> Self:
         """Adds a node that points to a registered profile."""
         if tools is None:
             tools = []
@@ -239,13 +225,13 @@ class NewLinearFlow(BaseFlowBuilder):
             profile=profile_id,
             tools=tools,
         )
-        self.steps.append(node)
+        self._register_node(node)
         return self
 
     def add_inspector(
         self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
-    ) -> "NewLinearFlow":
-        """Adds an inspector node to the sequence."""
+    ) -> Self:
+        """Adds an inspector node to the flow."""
         node = InspectorNode(
             id=node_id,
             metadata={},
@@ -256,7 +242,28 @@ class NewLinearFlow(BaseFlowBuilder):
             optimizer=None,
             type="inspector",
         )
+        self._register_node(node)
+        return self
+
+
+class NewLinearFlow(BaseFlowBuilder):
+    """Fluent API to construct LinearFlows programmatically."""
+
+    def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
+        super().__init__(name, version, description)
+        self.steps: list[AnyNode] = []
+
+    def _register_node(self, node: AnyNode) -> None:
         self.steps.append(node)
+
+    def add_step(self, node: AnyNode) -> "NewLinearFlow":
+        """Appends a node to the sequence."""
+        self.steps.append(node)
+        return self
+
+    def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
+        """Appends an agent node to the sequence."""
+        self.steps.append(agent)
         return self
 
     def build(self) -> LinearFlow:
@@ -292,6 +299,9 @@ class NewGraphFlow(BaseFlowBuilder):
         )
         self.blackboard: Blackboard | None = None
 
+    def _register_node(self, node: AnyNode) -> None:
+        self._nodes[node.id] = node
+
     def set_entry_point(self, node_id: str) -> "NewGraphFlow":
         """Sets the explicit entry point for the graph."""
         self._entry_point = node_id
@@ -305,38 +315,6 @@ class NewGraphFlow(BaseFlowBuilder):
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
         """Adds an agent node to the graph."""
         self._nodes[agent.id] = agent
-        return self
-
-    def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> "NewGraphFlow":
-        """Adds a node that points to a registered profile."""
-        if tools is None:
-            tools = []
-        node = AgentNode(
-            id=node_id,
-            metadata={},
-            resilience=None,
-            type="agent",
-            profile=profile_id,
-            tools=tools,
-        )
-        self._nodes[node.id] = node
-        return self
-
-    def add_inspector(
-        self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
-    ) -> "NewGraphFlow":
-        """Adds an inspector node to the graph."""
-        node = InspectorNode(
-            id=node_id,
-            metadata={},
-            target_variable=target,
-            criteria=criteria,
-            pass_threshold=pass_threshold,
-            output_variable=output,
-            optimizer=None,
-            type="inspector",
-        )
-        self._nodes[node.id] = node
         return self
 
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":

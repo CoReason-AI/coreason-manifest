@@ -21,7 +21,7 @@ from coreason_manifest.spec.core.nodes import (
 from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
-from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
+from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
 
 
@@ -44,20 +44,16 @@ class DataSchema(CoreasonModel):
         try:
             jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
         except SchemaError as e:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-SCHEMA-INVALID",
-                    message=f"Invalid JSON Schema definition: {e.message}",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            description="Correct the JSON Schema syntax.",
-                            patch_data=[{"op": "replace", "path": "/schema", "value": {}}],
-                        ).model_dump()
-                    },
-                )
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_SCHEMA_INVALID,
+                message=f"Invalid JSON Schema definition: {e.message}",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        description="Correct the JSON Schema syntax.",
+                        patch_data=[{"op": "replace", "path": "/schema", "value": {}}],
+                    ).model_dump()
+                },
             ) from e
         return self
 
@@ -190,21 +186,17 @@ def _scan_for_kill_switch_violations(
     def _recursive_scan(obj: Any) -> None:
         # 1. Check ToolCapability objects
         if isinstance(obj, ToolCapability) and obj.risk_level.weight > max_risk.weight:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
-                    message=(
-                        f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
-                        f"which exceeds the global max_risk_level '{max_risk.value}'."
-                    ),
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={
-                        "tool_name": obj.name,
-                        "tool_risk": obj.risk_level.value,
-                        "max_risk": max_risk.value,
-                    },
-                )
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
+                message=(
+                    f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
+                    f"which exceeds the global max_risk_level '{max_risk.value}'."
+                ),
+                context={
+                    "tool_name": obj.name,
+                    "tool_risk": obj.risk_level.value,
+                    "max_risk": max_risk.value,
+                },
             )
             # ToolCapability might have nested fields, but typically leaf. Continue scan if needed?
             # ToolCapability inherits CoreasonModel, so we'll scan its fields below if we don't return.
@@ -214,21 +206,17 @@ def _scan_for_kill_switch_violations(
         # 2. Check Strings for Remote URIs
         if isinstance(obj, str):
             if "://" in obj and RiskLevel.CRITICAL.weight > max_risk.weight:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-SEC-KILL-SWITCH-VIOLATION",
-                        message=(
-                            "Security Violation: Unresolved remote tool URIs default to CRITICAL risk "
-                            "and violate the global max_risk_level."
-                        ),
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={
-                            "tool_uri": obj,
-                            "assumed_risk": RiskLevel.CRITICAL.value,
-                            "max_risk": max_risk.value,
-                        },
-                    )
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
+                    message=(
+                        "Security Violation: Unresolved remote tool URIs default to CRITICAL risk "
+                        "and violate the global max_risk_level."
+                    ),
+                    context={
+                        "tool_uri": obj,
+                        "assumed_risk": RiskLevel.CRITICAL.value,
+                        "max_risk": max_risk.value,
+                    },
                 )
             return
 
@@ -287,21 +275,17 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
                     }
                 ]
 
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-MIDDLEWARE-MISSING",
-                    message=f"Active middleware '{mw_id}' is not defined in definitions.middlewares.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={
-                        "middleware_id": mw_id,
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            description=f"Add definition for middleware '{mw_id}'.",
-                            patch_data=patch,
-                        ).model_dump(),
-                    },
-                )
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_MIDDLEWARE_MISSING,
+                message=f"Active middleware '{mw_id}' is not defined in definitions.middlewares.",
+                context={
+                    "middleware_id": mw_id,
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        description=f"Add definition for middleware '{mw_id}'.",
+                        patch_data=patch,
+                    ).model_dump(),
+                },
             )
 
 
@@ -338,26 +322,18 @@ class GraphFlow(CoreasonModel):
                 ref_id = node.resilience.removeprefix("ref:")
 
                 if ref_id not in template_ids:
-                    raise ManifestError(
-                        fault=SemanticFault(
-                            error_code="CRSN-VAL-RESILIENCE-MISSING",
-                            message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
-                            severity=FaultSeverity.CRITICAL,
-                            recovery_action=RecoveryAction.HALT,
-                            context={"node_id": node.id, "template_id": node.resilience},
-                        )
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.CRSN_VAL_RESILIENCE_MISSING,
+                        message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                        context={"node_id": node.id, "template_id": node.resilience},
                     )
 
         # Rule A: Entry Point
         if self.graph.entry_point and self.graph.entry_point not in node_ids:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-ENTRY-POINT-MISSING",
-                    message=f"Entry point '{self.graph.entry_point}' not found in nodes.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={"entry_point": self.graph.entry_point},
-                )
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_ENTRY_POINT_MISSING,
+                message=f"Entry point '{self.graph.entry_point}' not found in nodes.",
+                context={"entry_point": self.graph.entry_point},
             )
 
         # Rule B: Fallback Orphans
@@ -367,17 +343,13 @@ class GraphFlow(CoreasonModel):
             and self.governance.circuit_breaker.fallback_node_id
             and self.governance.circuit_breaker.fallback_node_id not in node_ids
         ):
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-FALLBACK-MISSING",
-                    message=(
-                        f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' "
-                        "not found in nodes."
-                    ),
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={"fallback_id": self.governance.circuit_breaker.fallback_node_id},
-                )
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_FALLBACK_MISSING,
+                message=(
+                    f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' "
+                    "not found in nodes."
+                ),
+                context={"fallback_id": self.governance.circuit_breaker.fallback_node_id},
             )
 
         return self
@@ -393,28 +365,24 @@ class GraphFlow(CoreasonModel):
 
         for node in nodes_iter:
             if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-VAL-SWARM-VAR-MISSING",
-                        message=(
-                            f"SwarmNode '{node.id}' references missing workload variable '{node.workload_variable}'."
-                        ),
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={
-                            "remediation": RemediationAction(
-                                type="update_field",
-                                description=f"Add variable '{node.workload_variable}' to blackboard.",
-                                patch_data=[
-                                    {  # pragma: no cover
-                                        "op": "add",
-                                        "path": f"/blackboard/variables/{node.workload_variable}",
-                                        "value": [],
-                                    }
-                                ],
-                            ).model_dump()
-                        },
-                    )
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_VAL_SWARM_VAR_MISSING,
+                    message=(
+                        f"SwarmNode '{node.id}' references missing workload variable '{node.workload_variable}'."
+                    ),
+                    context={
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            description=f"Add variable '{node.workload_variable}' to blackboard.",
+                            patch_data=[
+                                {  # pragma: no cover
+                                    "op": "add",
+                                    "path": f"/blackboard/variables/{node.workload_variable}",
+                                    "value": [],
+                                }
+                            ],
+                        ).model_dump()
+                    },
                 )
         return self
 
@@ -468,14 +436,10 @@ class LinearFlow(CoreasonModel):
                 ref_id = node.resilience.removeprefix("ref:")
 
                 if ref_id not in template_ids:
-                    raise ManifestError(
-                        fault=SemanticFault(
-                            error_code="CRSN-VAL-RESILIENCE-MISSING",
-                            message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
-                            severity=FaultSeverity.CRITICAL,
-                            recovery_action=RecoveryAction.HALT,
-                            context={"node_id": node.id, "template_id": node.resilience},
-                        )
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.CRSN_VAL_RESILIENCE_MISSING,
+                        message=f"Node '{node.id}' references missing resilience template '{node.resilience}'.",
+                        context={"node_id": node.id, "template_id": node.resilience},
                     )
         return self
 
@@ -518,12 +482,8 @@ def validate_integrity(definitions: FlowDefinitions, nodes: list[AnyNode]) -> No
     profile_ids = set(definitions.profiles.keys())
     for node in nodes:
         if isinstance(node, SwarmNode) and node.worker_profile not in profile_ids:
-            raise ManifestError(
-                fault=SemanticFault(
-                    error_code="CRSN-VAL-INTEGRITY-PROFILE-MISSING",
-                    message=f"SwarmNode '{node.id}' references missing profile '{node.worker_profile}'.",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                    context={},
-                )
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_INTEGRITY_PROFILE_MISSING,
+                message=f"SwarmNode '{node.id}' references missing profile '{node.worker_profile}'.",
+                context={},
             )
