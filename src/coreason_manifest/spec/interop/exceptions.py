@@ -69,7 +69,9 @@ class ManifestError(Exception):
         return f"[{self.fault.error_code}] {self.fault.message} (Severity: {self.fault.severity})"
 
     @classmethod
-    def critical_halt(cls, code: ManifestErrorCode | str, message: str, context: dict[str, Any] | None = None) -> "ManifestError":
+    def critical_halt(
+        cls, code: ManifestErrorCode | str, message: str, context: dict[str, Any] | None = None
+    ) -> "ManifestError":
         """Factory for critical errors that halt execution."""
         return cls(
             SemanticFault(

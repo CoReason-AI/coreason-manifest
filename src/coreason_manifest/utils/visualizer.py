@@ -64,7 +64,7 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
     definition = f'{safe_id}{shape_start}"{label}"{shape_end}'
 
     # Classes
-    classes = []
+    classes: list[str] = []
 
     # Type class
     classes.append(node.type)

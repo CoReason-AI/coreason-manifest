@@ -6,9 +6,9 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 
-DomainType: TypeAlias = Literal["resource", "topology", "governance"]
-MutationOp: TypeAlias = Literal["add", "remove", "replace", "move", "copy", "test"]
-CategoryType: TypeAlias = Literal["BREAKING", "FEATURE", "GOVERNANCE", "RESOURCE"]
+type DomainType = Literal["resource", "topology", "governance"]
+type MutationOp = Literal["add", "remove", "replace", "move", "copy", "test"]
+type CategoryType = Literal["BREAKING", "FEATURE", "GOVERNANCE", "RESOURCE"]
 
 
 class BaseOperation(BaseModel):
@@ -58,7 +58,7 @@ class SemanticPatchReport(BaseModel):
 
     changes: list[ChangeOperation]
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def has_breaking(self) -> bool:
         """
