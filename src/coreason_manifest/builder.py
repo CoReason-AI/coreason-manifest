@@ -216,6 +216,12 @@ class NewLinearFlow(BaseFlowBuilder):
     def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
         super().__init__(name, version, description)
         self.steps: list[AnyNode] = []
+        self._status: str = "draft"
+
+    def set_status(self, status: str) -> "NewLinearFlow":
+        """Sets the lifecycle status of the flow."""
+        self._status = status
+        return self
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence."""
@@ -263,7 +269,7 @@ class NewLinearFlow(BaseFlowBuilder):
         """Constructs and validates the LinearFlow object."""
         flow = LinearFlow(
             kind="LinearFlow",
-            status="published",
+            status=cast("Literal['draft', 'published', 'archived']", self._status),
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),

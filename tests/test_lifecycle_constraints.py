@@ -3,8 +3,8 @@ from typing import Any, cast
 import pytest
 
 from coreason_manifest.spec.core.engines import ComputerUseReasoning
-from coreason_manifest.spec.core.flow import FlowInterface, FlowMetadata, Graph, GraphFlow
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.flow import FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, PlaceholderNode
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
@@ -114,3 +114,51 @@ def test_published_mode_missing_entry_point() -> None:
     # ManifestError str() usually contains the message.
     # The error code I used was CRSN-VAL-ENTRY-POINT-MISSING
     assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(excinfo.value)
+
+
+def test_published_mode_with_placeholder_node() -> None:
+    # Setup: Published mode with entry point and one PlaceholderNode
+    nodes = {
+        "node1": AgentNode(id="node1", profile=CognitiveProfile(role="assistant", persona="p")),
+        "placeholder1": PlaceholderNode(id="placeholder1", type="placeholder", required_capabilities=[]),
+    }
+
+    with pytest.raises(ManifestError) as excinfo:
+        create_flow(status="published", entry_point="node1", nodes=nodes)
+
+    err = excinfo.value
+    assert "CRSN-VAL-ABSTRACT-NODE" in str(err)
+
+    # Check that error context contains node_ids list
+    node_ids = err.fault.context.get("node_ids", [])
+    assert "placeholder1" in node_ids
+
+    # Check patch data
+    patch_data = err.fault.context["remediation"]["patch_data"]
+    assert len(patch_data) == 1
+    assert patch_data[0]["op"] == "replace"
+    assert patch_data[0]["path"] == "/graph/nodes/placeholder1"
+
+
+def test_linear_flow_published_constraints() -> None:
+    # Setup: LinearFlow with one PlaceholderNode
+    steps = [
+        AgentNode(id="node1", profile=CognitiveProfile(role="assistant", persona="p")),
+        PlaceholderNode(id="placeholder1", type="placeholder", required_capabilities=[]),
+    ]
+
+    with pytest.raises(ManifestError) as excinfo:
+        LinearFlow(
+            metadata=FlowMetadata(name="Linear Test", version="1.0"),
+            sequence=steps,
+            status="published"
+        )
+
+    err = excinfo.value
+    assert "CRSN-VAL-ABSTRACT-NODE" in str(err)
+
+    # Check patch data
+    patch_data = err.fault.context["remediation"]["patch_data"]
+    assert len(patch_data) == 1
+    assert patch_data[0]["op"] == "replace"
+    assert patch_data[0]["path"] == "/sequence/1"

@@ -1,6 +1,8 @@
+from typing import Any, cast
+
 import pytest
 
-from coreason_manifest.builder import NewGraphFlow
+from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
 from coreason_manifest.spec.core.flow import FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import AgentNode
@@ -103,3 +105,18 @@ def test_graph_flow_fallback_missing() -> None:
         )
 
     assert "Circuit breaker fallback 'missing_fallback' not found in nodes" in str(excinfo.value)
+
+
+def test_linear_builder_set_status() -> None:
+    """
+    Test NewLinearFlow.set_status() to cover the method.
+    """
+    builder = NewLinearFlow("LinearStatus", "0.0.1", "Testing status setter")
+    builder.set_status("published")
+
+    # Just to make it valid for build
+    builder.define_profile("default", role="tester", persona="helper")
+    builder.add_agent_ref("agent1", "default")
+
+    flow = builder.build()
+    assert flow.status == "published"

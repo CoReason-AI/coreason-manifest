@@ -406,30 +406,35 @@ class GraphFlow(CoreasonModel):
             )
 
         # 2. Concrete Resolution (No PlaceholderNode)
-        for node in self.graph.nodes.values():
-            if isinstance(node, PlaceholderNode):
-                raise ManifestError(
-                    fault=SemanticFault(
-                        error_code="CRSN-VAL-ABSTRACT-NODE",
-                        message=f"Published flow cannot contain abstract PlaceholderNode '{node.id}'.",
-                        severity=FaultSeverity.CRITICAL,
-                        recovery_action=RecoveryAction.HALT,
-                        context={
-                            "node_id": node.id,
-                            "remediation": RemediationAction(
-                                type="update_field",
-                                description=f"Replace PlaceholderNode '{node.id}' with a concrete implementation.",
-                                patch_data=[
-                                    {
-                                        "op": "replace",
-                                        "path": f"/graph/nodes/{node.id}",
-                                        "value": {"type": "agent", "id": node.id, "profile": "default"},
-                                    }
-                                ],  # Example patch
-                            ).model_dump(),
-                        },
-                    )
+        abstract_nodes = [node for node in self.graph.nodes.values() if isinstance(node, PlaceholderNode)]
+
+        if abstract_nodes:
+            # Dynamically generate patch_data for all abstract nodes
+            patch_data = [
+                {
+                    "op": "replace",
+                    "path": f"/graph/nodes/{node.id}",
+                    "value": {"type": "agent", "id": node.id, "profile": "default"},
+                }
+                for node in abstract_nodes
+            ]
+
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-ABSTRACT-NODE",
+                    message=f"Published flow contains {len(abstract_nodes)} abstract PlaceholderNode(s).",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "node_ids": [node.id for node in abstract_nodes],
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            description="Replace all PlaceholderNodes with concrete implementations.",
+                            patch_data=patch_data,
+                        ).model_dump(),
+                    },
                 )
+            )
         return self
 
 
@@ -486,6 +491,47 @@ class LinearFlow(CoreasonModel):
             self.definitions,
             self.steps,
         )
+        return self
+
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "LinearFlow":
+        # Only enforce for published flows
+        if self.status != "published":
+            return self
+
+        # 1. Concrete Resolution (No PlaceholderNode)
+        abstract_nodes = []
+        for idx, node in enumerate(self.steps):
+            if isinstance(node, PlaceholderNode):
+                abstract_nodes.append((idx, node))
+
+        if abstract_nodes:
+            # Dynamically generate patch_data for all abstract nodes
+            patch_data = [
+                {
+                    "op": "replace",
+                    "path": f"/sequence/{idx}",
+                    "value": {"type": "agent", "id": node.id, "profile": "default"},
+                }
+                for idx, node in abstract_nodes
+            ]
+
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-ABSTRACT-NODE",
+                    message=f"Published flow contains {len(abstract_nodes)} abstract PlaceholderNode(s).",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "node_ids": [node.id for _, node in abstract_nodes],
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            description="Replace all PlaceholderNodes with concrete implementations.",
+                            patch_data=patch_data,
+                        ).model_dump(),
+                    },
+                )
+            )
         return self
 
 

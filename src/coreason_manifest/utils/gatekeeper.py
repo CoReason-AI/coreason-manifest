@@ -267,8 +267,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
             patch_list = []
 
-            if flow.status == "draft":
-                # Draft Mode: Be Forgiving
+            if flow.status != "published":
+                # Draft/Archived Mode: Be Forgiving
                 if dangerous_node_ids:
                     # Dangerous Islands: Step 1 (Red Button Rule) already handles guard injection.
                     # Here we just warn about connectivity.
@@ -277,7 +277,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
                             severity="warning",
                             message=(
-                                f"Draft Topology Warning: Found {len(dangerous_node_ids)} dangerous unreachable nodes. "
+                                f"Non-Published Topology Warning: Found {len(dangerous_node_ids)} dangerous unreachable nodes. "
                                 "They will be guarded by the security policy, but remain disconnected."
                             ),
                             details={
@@ -295,7 +295,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                             code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
                             severity="info",  # Use info as requested ("info or warning")
                             message=(
-                                f"Draft Topology Info: Found {len(safe_node_ids)} disconnected nodes (Safe Dead Code)."
+                                f"Non-Published Topology Info: Found {len(safe_node_ids)} disconnected nodes (Safe Dead Code)."
                             ),
                             details={"node_ids": list(safe_node_ids)},
                             remediation=None,
