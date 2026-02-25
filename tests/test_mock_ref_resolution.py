@@ -138,6 +138,9 @@ def test_mock_edge_cases() -> None:
     # If passed None directly, it returns default
     assert factory._generate_schema_data(None) == {"mock_key": "mock_value"}
 
+    # Pass an integer (invalid schema type, but defensive check should return it)
+    assert factory._generate_schema_data(123) == 123  # type: ignore[arg-type]
+
     # 3. Union type
     schema_union = {"type": ["string", "null"]}
     assert factory._generate_schema_data(schema_union) == "lorem ipsum"
@@ -149,3 +152,19 @@ def test_mock_edge_cases() -> None:
     assert len(result) == 2
     assert result[0] == "lorem ipsum"
     assert isinstance(result[1], int)
+
+
+def test_mock_ref_cycle_explicit() -> None:
+    # Explicitly test the visited_refs cycle detection branch
+    # This covers the line: if visited_refs is not None and ref_uri in visited_refs:
+    factory = MockFactory(seed=42)
+    resolver = MagicMock()
+
+    # We don't need resolver to do anything if we pass visited_refs containing the ref
+    schema = {"$ref": "cycle"}
+    visited_refs = frozenset(["cycle"])
+
+    result = factory._generate_schema_data(schema, visited_refs=visited_refs, resolver=resolver)
+
+    # Should return "" immediately
+    assert result == ""
