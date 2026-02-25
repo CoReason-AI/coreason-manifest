@@ -182,6 +182,7 @@ def test_loader_symlink_module_py(tmp_path: Path) -> None:
 def test_loader_ref_passthrough(tmp_path: Path) -> None:
     # Test that $ref is passed through and not resolved as file
     import yaml
+
     from coreason_manifest.utils.loader import load_flow_from_file
 
     manifest = {
@@ -190,7 +191,7 @@ def test_loader_ref_passthrough(tmp_path: Path) -> None:
         "sequence": [
             {"type": "agent", "id": "step1", "profile": "p", "tools": [], "metadata": {"ref": {"$ref": "#/foo"}}}
         ],
-        "definitions": {}
+        "definitions": {},
     }
 
     (tmp_path / "main.yaml").write_text(yaml.dump(manifest))
@@ -198,4 +199,5 @@ def test_loader_ref_passthrough(tmp_path: Path) -> None:
     # Should not raise ValueError or FileNotFoundError (Anchor Crash check)
     flow = load_flow_from_file(str(tmp_path / "main.yaml"), strict_security=False)
 
+    assert isinstance(flow, LinearFlow)
     assert flow.sequence[0].metadata["ref"] == {"$ref": "#/foo"}
