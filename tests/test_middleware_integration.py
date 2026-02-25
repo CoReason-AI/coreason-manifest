@@ -1,9 +1,11 @@
 # tests/test_middleware_integration.py
 
-import pytest
-import yaml
 import os
 from pathlib import Path
+
+import pytest
+import yaml
+
 from coreason_manifest.spec.core.flow import GraphFlow
 from coreason_manifest.spec.interop.exceptions import ManifestError, SecurityJailViolationError
 from coreason_manifest.utils.loader import load_middleware_from_ref
@@ -78,6 +80,7 @@ class MyMiddleware:
         pass
 """
 
+
 @pytest.fixture
 def workspace(tmp_path: Path) -> Path:
     # Create a workspace with some files
@@ -107,6 +110,7 @@ def workspace(tmp_path: Path) -> Path:
     (tmp_path / "fail_dep.py").write_text(FAIL_DEP_CODE)
 
     return tmp_path
+
 
 def test_valid_manifest_loading() -> None:
     manifest_yaml = """
@@ -141,6 +145,7 @@ governance:
     assert flow.governance is not None
     assert "my_mw" in flow.governance.active_middlewares
 
+
 def test_missing_definition_validation() -> None:
     manifest_yaml = """
 kind: GraphFlow
@@ -164,15 +169,18 @@ governance:
         GraphFlow.model_validate(data)
     assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
 
+
 def test_loader_valid_middleware(workspace: Path) -> None:
     cls = load_middleware_from_ref("middlewares/valid.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
     assert hasattr(cls, "intercept_request")
 
+
 def test_loader_duck_typing_failure(workspace: Path) -> None:
     with pytest.raises(TypeError) as exc:
         load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
     assert "must implement 'intercept_request' or 'intercept_stream'" in str(exc.value)
+
 
 def test_loader_security_violation(workspace: Path) -> None:
     # Create a file outside the workspace
@@ -184,22 +192,27 @@ def test_loader_security_violation(workspace: Path) -> None:
     with pytest.raises(SecurityJailViolationError):
         load_middleware_from_ref(f"../{outside.name}:MyMiddleware", workspace)
 
+
 def test_loader_file_not_found(workspace: Path) -> None:
     # Add match parameter to make pytest.raises more specific
     with pytest.raises(ValueError, match="Middleware file not found"):
         load_middleware_from_ref("middlewares/nonexistent.py:MyMiddleware", workspace)
 
+
 def test_loader_not_a_class(workspace: Path) -> None:
     with pytest.raises(TypeError, match="is not a class"):
         load_middleware_from_ref("middlewares/not_class.py:MyMiddleware", workspace)
+
 
 def test_loader_class_not_found_in_module(workspace: Path) -> None:
     with pytest.raises(ValueError, match="Middleware class 'MyMiddleware' not found"):
         load_middleware_from_ref("middlewares/missing_class.py:MyMiddleware", workspace)
 
+
 def test_loader_execution_failure(workspace: Path) -> None:
     with pytest.raises(ValueError, match="Failed to execute middleware code"):
         load_middleware_from_ref("middlewares/failing.py:MyMiddleware", workspace)
+
 
 def test_loader_cleanup_coverage(workspace: Path) -> None:
     # Import dependency, succeeds. Covers success cleanup loop.
@@ -207,11 +220,13 @@ def test_loader_cleanup_coverage(workspace: Path) -> None:
     cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
 
+
 def test_loader_cleanup_exception_coverage(workspace: Path) -> None:
     # Import fail dependency. Covers exception cleanup loop.
     # fail_dep.py is in root.
     with pytest.raises(ValueError, match="Failed to execute middleware code"):
         load_middleware_from_ref("middlewares/with_fail_dep.py:MyMiddleware", workspace)
+
 
 def test_loader_symlink_file_escape(workspace: Path) -> None:
     if os.name == "nt":
@@ -230,6 +245,7 @@ def test_loader_symlink_file_escape(workspace: Path) -> None:
 
     with pytest.raises(SecurityJailViolationError, match="outside jail"):
         load_middleware_from_ref("middlewares/import_bad_link.py:MyMiddleware", workspace)
+
 
 def test_loader_symlink_pkg_escape(workspace: Path) -> None:
     if os.name == "nt":
@@ -251,6 +267,7 @@ def test_loader_symlink_pkg_escape(workspace: Path) -> None:
     with pytest.raises(SecurityJailViolationError, match="outside jail"):
         load_middleware_from_ref("middlewares/import_bad_pkg.py:MyMiddleware", workspace)
 
+
 def test_loader_symlink_loop(workspace: Path) -> None:
     if os.name == "nt":
         pytest.skip("Symlinks not reliable on Windows tests")
@@ -258,7 +275,7 @@ def test_loader_symlink_loop(workspace: Path) -> None:
     # Directory loop at ROOT to trigger recursion error in resolving path before file check
     link = workspace / "loop_link"
     try:
-        link.symlink_to(link) # Self loop directory
+        link.symlink_to(link)  # Self loop directory
     except OSError:
         pytest.skip("Symlinks not supported")
 
