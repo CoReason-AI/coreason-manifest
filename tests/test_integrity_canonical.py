@@ -4,6 +4,7 @@ import enum
 import hashlib
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 from pydantic import BaseModel
@@ -208,7 +209,7 @@ class TestCanonicalHashingStrategy:
 
     def test_verify_merkle_genesis_mismatch(self) -> None:
         """Test genesis node hash mismatch."""
-        node = {"x": 1}
+        node: dict[str, Any] = {"x": 1}
         payload = reconstruct_payload(node)
         h = compute_hash(payload)
         node["execution_hash"] = h
