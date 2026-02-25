@@ -473,6 +473,10 @@ def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
                 for mod in cleanup_modules:
                     if mod in sys.modules:
                         del sys.modules[mod]
+
+            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
+                raise
+
             raise ValueError(f"Failed to execute middleware code in {file_ref}: {e}") from e
 
         middleware_class = getattr(module, class_name, None)
