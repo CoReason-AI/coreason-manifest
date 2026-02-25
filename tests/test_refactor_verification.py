@@ -38,7 +38,7 @@ class Agent:
 
     # We expect a RuntimeSecurityWarning from the loader's AST check (which now only warns)
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
-        load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)
+        load_agent_from_ref(f"{agent_file.name}:Agent", root_dir=tmp_path)
 
 
 def test_malicious_gadget_chain(tmp_path: Path) -> None:
@@ -58,7 +58,7 @@ class Agent:
     agent_file.chmod(0o600)
 
     with pytest.warns(RuntimeSecurityWarning, match="Dynamic Code Execution"):
-        load_agent_from_ref(f"{agent_file}:Agent", root_dir=tmp_path)
+        load_agent_from_ref(f"{agent_file.name}:Agent", root_dir=tmp_path)
 
 
 # ------------------------------------------------------------------------
