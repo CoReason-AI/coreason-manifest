@@ -79,7 +79,8 @@ class CanonicalHashingStrategy(HashingStrategy):
                 str_k = str(k)
                 if str_k in seen_keys:
                     raise ValueError(
-                        f"Canonical JSON dictionary keys must be uniquely stringifiable. Collision detected for key: '{str_k}'"
+                        f"Canonical JSON dictionary keys must be uniquely stringifiable. "
+                        f"Collision detected for key: '{str_k}'"
                     )
 
                 seen_keys.add(str_k)
