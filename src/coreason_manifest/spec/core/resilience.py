@@ -44,7 +44,9 @@ class RetryStrategy(ResilienceStrategy):
 
     type: Literal["retry"] = "retry"
 
-    max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
+    max_attempts: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
+        ..., description="Hard limit on recovery loops."
+    )
     backoff_factor: Annotated[float, Field(ge=1.0, description="Exponential backoff multiplier.")] = 2.0
     initial_delay_seconds: Annotated[float, Field(description="Initial wait time.")] = 1.0
     max_delay_seconds: Annotated[
@@ -69,7 +71,9 @@ class ReflexionStrategy(ResilienceStrategy):
 
     type: Literal["reflexion"] = "reflexion"
 
-    max_attempts: int = Field(..., gt=0, description="Hard limit on recovery loops.")
+    max_attempts: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
+        ..., description="Hard limit on recovery loops."
+    )
     critic_model: ModelRef = Field(..., description="The model used to analyze the error.")
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: Annotated[bool, Field(description="Whether to feed the execution trace to the critic.")] = True
@@ -249,24 +253,36 @@ class SupervisionPolicy(BaseModel):
     default_strategy: Annotated[
         RecoveryStrategy | None, Field(description="Catch-all strategy. If None, unhandled errors bubble up.")
     ] = None
-    max_cumulative_actions: Annotated[
-        int,
-        Field(description=("Total number of recovery actions (retries + reflexions + fallbacks) allowed.")),
-    ] = 10
+    max_cumulative_actions: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
+        10, description="Total number of recovery actions (retries + reflexions + fallbacks) allowed."
+    )
 
     @model_validator(mode="after")
     def validate_limits(self) -> "SupervisionPolicy":
+        # If global limit is infinite, any strategy limit is valid.
+        if self.max_cumulative_actions == "infinite":
+            return self
+
         strategies = [h.strategy for h in self.handlers]
         if self.default_strategy:
             strategies.append(self.default_strategy)
 
         for strategy in strategies:
-            if hasattr(strategy, "max_attempts") and strategy.max_attempts > self.max_cumulative_actions:
-                raise ValueError(
-                    f"SupervisionPolicy global limit (max_cumulative_actions={self.max_cumulative_actions}) "
-                    f"is lower than a strategy limit (max_attempts={strategy.max_attempts}). "
-                    "The strategy will never complete."
-                )
+            if hasattr(strategy, "max_attempts"):
+                s_limit = strategy.max_attempts
+                # If strategy is infinite but global is finite -> Error
+                if s_limit == "infinite":
+                    raise ValueError(
+                        f"SupervisionPolicy has a finite global limit ({self.max_cumulative_actions}), "
+                        "but contains a strategy with 'infinite' retries. This is a logic error."
+                    )
+                # Both are finite integers
+                if s_limit > self.max_cumulative_actions:  # type: ignore # s_limit is int here
+                    raise ValueError(
+                        f"SupervisionPolicy global limit (max_cumulative_actions={self.max_cumulative_actions}) "
+                        f"is lower than a strategy limit (max_attempts={s_limit}). "
+                        "The strategy will never complete."
+                    )
         return self
 
 

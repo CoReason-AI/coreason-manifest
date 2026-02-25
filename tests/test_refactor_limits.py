@@ -1,0 +1,97 @@
+import pytest
+from pydantic import ValidationError
+from coreason_manifest.spec.core.resilience import RetryStrategy, SupervisionPolicy, ErrorHandler, ErrorDomain, ReflexionStrategy
+from coreason_manifest.spec.core.governance import Governance, CircuitBreaker
+
+def test_infinite_retry():
+    # Should pass
+    rs = RetryStrategy(max_attempts="infinite", backoff_factor=1.5)
+    assert rs.max_attempts == "infinite"
+
+    # Should fail
+    with pytest.raises(ValidationError):
+        RetryStrategy(max_attempts=-1)
+
+def test_infinite_reflexion():
+    # Should pass
+    rs = ReflexionStrategy(
+        max_attempts="infinite",
+        critic_model="gpt-4",
+        critic_prompt="fix it",
+        include_trace=False
+    )
+    assert rs.max_attempts == "infinite"
+
+    # Should fail
+    with pytest.raises(ValidationError):
+        ReflexionStrategy(
+            max_attempts=-1,
+            critic_model="gpt-4",
+            critic_prompt="fix it"
+        )
+
+def test_infinite_governance():
+    # Should pass
+    g = Governance(rate_limit_rpm="infinite", timeout_seconds="infinite")
+    assert g.rate_limit_rpm == "infinite"
+    assert g.timeout_seconds == "infinite"
+
+    # Should fail
+    with pytest.raises(ValidationError):
+        Governance(rate_limit_rpm=-1)
+
+    with pytest.raises(ValidationError):
+        Governance(timeout_seconds=-1)
+
+def test_circuit_breaker_limits():
+    # Should pass
+    cb = CircuitBreaker(error_threshold_count=5, reset_timeout_seconds=60)
+
+    # Should fail
+    with pytest.raises(ValidationError):
+        CircuitBreaker(error_threshold_count=-1, reset_timeout_seconds=60)
+
+    with pytest.raises(ValidationError):
+        CircuitBreaker(error_threshold_count=5, reset_timeout_seconds=-1)
+
+def test_supervision_infinite_global():
+    # Should pass: Infinite global limit allows infinite child
+    strategy = RetryStrategy(max_attempts="infinite")
+    handler = ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)
+    policy = SupervisionPolicy(handlers=[handler], max_cumulative_actions="infinite")
+    assert policy.max_cumulative_actions == "infinite"
+
+def test_supervision_finite_global_infinite_child():
+    # Should fail: Finite global limit cannot contain infinite child
+    strategy = RetryStrategy(max_attempts="infinite")
+    handler = ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)
+
+    with pytest.raises(ValueError, match="contains a strategy with 'infinite' retries"):
+        SupervisionPolicy(handlers=[handler], max_cumulative_actions=10)
+
+def test_supervision_finite_global_finite_child():
+    # Should pass: Finite child <= Finite global
+    strategy = RetryStrategy(max_attempts=5)
+    handler = ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)
+    policy = SupervisionPolicy(handlers=[handler], max_cumulative_actions=10)
+    assert policy.max_cumulative_actions == 10
+
+def test_supervision_finite_global_exceeding_child():
+    # Should fail: Finite child > Finite global
+    strategy = RetryStrategy(max_attempts=15)
+    handler = ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)
+
+    with pytest.raises(ValueError, match="is lower than a strategy limit"):
+        SupervisionPolicy(handlers=[handler], max_cumulative_actions=10)
+
+def test_supervision_default_strategy_check():
+    # Check that default_strategy is also validated
+    strategy = RetryStrategy(max_attempts="infinite")
+    # No handlers, but default strategy is infinite
+
+    # Infinite global -> OK
+    SupervisionPolicy(handlers=[], default_strategy=strategy, max_cumulative_actions="infinite")
+
+    # Finite global -> Fail
+    with pytest.raises(ValueError, match="contains a strategy with 'infinite' retries"):
+        SupervisionPolicy(handlers=[], default_strategy=strategy, max_cumulative_actions=10)

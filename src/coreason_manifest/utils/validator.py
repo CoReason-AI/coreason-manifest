@@ -231,8 +231,8 @@ def _validate_data_flow(
 
 def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[str]:
     errors: list[str] = []
-    if gov.rate_limit_rpm is not None and gov.rate_limit_rpm < 0:
-        errors.append("Governance Error: rate_limit_rpm cannot be negative.")
+    # rate_limit_rpm is validated by Pydantic (ge=0 or "infinite")
+
     if gov.cost_limit_usd is not None and gov.cost_limit_usd < 0:
         errors.append("Governance Error: cost_limit_usd cannot be negative.")
     if (

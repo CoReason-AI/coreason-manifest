@@ -143,9 +143,15 @@ def test_validate_missing_tool() -> None:
 
 
 def test_validate_governance_sanity() -> None:
+    from pydantic import ValidationError
+
+    # rate_limit_rpm=-1 should raise strict Pydantic ValidationError now
+    with pytest.raises(ValidationError):
+        Governance(rate_limit_rpm=-1)
+
     agent = create_agent_node("agent1", [])
     graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
-    gov = Governance(rate_limit_rpm=-1, cost_limit_usd=-5.0)
+    gov = Governance(cost_limit_usd=-5.0)
     flow = GraphFlow(
         kind="GraphFlow",
         metadata=create_metadata(),
@@ -155,8 +161,7 @@ def test_validate_governance_sanity() -> None:
         governance=gov,
     )
     errors = validate_flow(flow)
-    assert len(errors) == 2
-    assert "Governance Error: rate_limit_rpm cannot be negative." in errors
+    assert len(errors) == 1
     assert "Governance Error: cost_limit_usd cannot be negative." in errors
 
 

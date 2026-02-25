@@ -1,5 +1,5 @@
 import time
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -26,8 +26,10 @@ class Audit(CoreasonModel):
 
 
 class CircuitBreaker(CoreasonModel):
-    error_threshold_count: int = Field(..., description="Number of errors before opening the circuit.", examples=[5])
-    reset_timeout_seconds: int = Field(
+    error_threshold_count: Annotated[int, Field(gt=0)] = Field(
+        ..., description="Number of errors before opening the circuit.", examples=[5]
+    )
+    reset_timeout_seconds: Annotated[int, Field(gt=0)] = Field(
         ..., description="Seconds to wait before attempting half-open state.", examples=[60]
     )
     fallback_node_id: NodeID | None = Field(
@@ -78,8 +80,12 @@ class Governance(CoreasonModel):
             "entire manifest, regardless of individual tool policies."
         ),
     )
-    rate_limit_rpm: int | None = Field(None, description="Rate limit in requests per minute.", examples=[60])
-    timeout_seconds: int | None = Field(None, description="Global execution timeout.", examples=[300])
+    rate_limit_rpm: Annotated[int, Field(ge=0)] | Literal["infinite"] | None = Field(
+        None, description="Rate limit in requests per minute.", examples=[60]
+    )
+    timeout_seconds: Annotated[int, Field(ge=0)] | Literal["infinite"] | None = Field(
+        None, description="Global execution timeout.", examples=[300]
+    )
     cost_limit_usd: float | None = Field(None, description="Cost limit in USD.", examples=[10.0])
     safety: Safety | None = Field(
         None,
