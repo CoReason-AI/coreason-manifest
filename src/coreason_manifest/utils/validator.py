@@ -233,8 +233,6 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[str]:
     errors: list[str] = []
     # rate_limit_rpm is validated by Pydantic (ge=0 or "infinite")
 
-    if gov.cost_limit_usd is not None and gov.cost_limit_usd < 0:
-        errors.append("Governance Error: cost_limit_usd cannot be negative.")
     if (
         gov.circuit_breaker
         and gov.circuit_breaker.fallback_node_id
