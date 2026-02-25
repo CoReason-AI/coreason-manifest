@@ -21,7 +21,13 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
-__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file", "load_middleware_from_ref"]
+__all__ = [
+    "RuntimeSecurityWarning",
+    "SecurityViolationError",
+    "load_agent_from_ref",
+    "load_flow_from_file",
+    "load_middleware_from_ref",
+]
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
@@ -488,8 +494,12 @@ def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
         raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
 
     # Duck-type check for protocol compliance
-    has_intercept_request = hasattr(middleware_class, "intercept_request") and callable(middleware_class.intercept_request)
-    has_intercept_stream = hasattr(middleware_class, "intercept_stream") and callable(middleware_class.intercept_stream)
+    has_intercept_request = hasattr(middleware_class, "intercept_request") and callable(
+        middleware_class.intercept_request
+    )
+    has_intercept_stream = hasattr(middleware_class, "intercept_stream") and callable(
+        middleware_class.intercept_stream
+    )
 
     if not (has_intercept_request or has_intercept_stream):
         raise TypeError(

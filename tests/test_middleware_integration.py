@@ -2,7 +2,6 @@
 
 import pytest
 import yaml
-import os
 from pathlib import Path
 from coreason_manifest.spec.core.flow import GraphFlow
 from coreason_manifest.spec.interop.exceptions import ManifestError, SecurityJailViolationError
@@ -21,7 +20,7 @@ class MyInvalidMiddleware:
 """
 
 @pytest.fixture
-def workspace(tmp_path):
+def workspace(tmp_path: Path) -> Path:
     # Create a workspace with some files
     (tmp_path / "middlewares").mkdir()
     valid_file = tmp_path / "middlewares" / "valid.py"
@@ -35,7 +34,7 @@ def workspace(tmp_path):
 
     return tmp_path
 
-def test_valid_manifest_loading(workspace):
+def test_valid_manifest_loading() -> None:
     manifest_yaml = """
 kind: GraphFlow
 metadata:
@@ -59,10 +58,16 @@ governance:
 """
     data = yaml.safe_load(manifest_yaml)
     flow = GraphFlow.model_validate(data)
+
+    # Assertions with type narrowing for Mypy
+    assert flow.definitions is not None
+    assert "my_mw" in flow.definitions.middlewares
     assert flow.definitions.middlewares["my_mw"].ref == "middlewares/valid.py:MyMiddleware"
+
+    assert flow.governance is not None
     assert "my_mw" in flow.governance.active_middlewares
 
-def test_missing_definition_validation():
+def test_missing_definition_validation() -> None:
     manifest_yaml = """
 kind: GraphFlow
 metadata:
@@ -85,17 +90,17 @@ governance:
         GraphFlow.model_validate(data)
     assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
 
-def test_loader_valid_middleware(workspace):
+def test_loader_valid_middleware(workspace: Path) -> None:
     cls = load_middleware_from_ref("middlewares/valid.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
     assert hasattr(cls, "intercept_request")
 
-def test_loader_duck_typing_failure(workspace):
+def test_loader_duck_typing_failure(workspace: Path) -> None:
     with pytest.raises(TypeError) as exc:
         load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
     assert "must implement 'intercept_request' or 'intercept_stream'" in str(exc.value)
 
-def test_loader_security_violation(workspace):
+def test_loader_security_violation(workspace: Path) -> None:
     # Create a file outside the workspace
     # Since tmp_path is a temp directory, workspace.parent is the base temp dir.
     # We create a file there.
@@ -107,7 +112,7 @@ def test_loader_security_violation(workspace):
     with pytest.raises(SecurityJailViolationError):
         load_middleware_from_ref(f"../{outside.name}:MyMiddleware", workspace)
 
-def test_loader_file_not_found(workspace):
-    with pytest.raises(ValueError) as exc:
+def test_loader_file_not_found(workspace: Path) -> None:
+    # Add match parameter to make pytest.raises more specific
+    with pytest.raises(ValueError, match="Middleware file not found"):
         load_middleware_from_ref("middlewares/nonexistent.py:MyMiddleware", workspace)
-    assert "Middleware file not found" in str(exc.value)
