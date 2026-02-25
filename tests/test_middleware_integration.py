@@ -23,6 +23,18 @@ class MyInvalidMiddleware:
     pass
 """
 
+SYNC_REQUEST_MIDDLEWARE_CODE = """
+class MySyncMiddleware:
+    def intercept_request(self, context, request):
+        pass
+"""
+
+SYNC_STREAM_MIDDLEWARE_CODE = """
+class MySyncStreamMiddleware:
+    def intercept_stream(self, packet):
+        pass
+"""
+
 NOT_A_CLASS_CODE = """
 def MyMiddleware():
     pass
@@ -91,6 +103,8 @@ def workspace(tmp_path: Path) -> Path:
     files = {
         "valid.py": VALID_MIDDLEWARE_CODE,
         "invalid.py": INVALID_MIDDLEWARE_CODE,
+        "sync_request.py": SYNC_REQUEST_MIDDLEWARE_CODE,
+        "sync_stream.py": SYNC_STREAM_MIDDLEWARE_CODE,
         "not_class.py": NOT_A_CLASS_CODE,
         "missing_class.py": MISSING_CLASS_CODE,
         "failing.py": FAILING_MODULE_CODE,
@@ -161,6 +175,64 @@ graph:
       id: start
   edges: []
   entry_point: start
+definitions:
+  middlewares: {}
+governance:
+  active_middlewares:
+    - missing_mw
+"""
+    data = yaml.safe_load(manifest_yaml)
+    with pytest.raises(ManifestError) as exc:
+        GraphFlow.model_validate(data)
+    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+
+
+def test_validation_no_definitions() -> None:
+    # Test case where 'definitions' is completely missing
+    manifest_yaml = """
+kind: GraphFlow
+metadata:
+  name: test-flow
+  version: 1.0.0
+interface: {}
+graph:
+  nodes:
+    start:
+      type: placeholder
+      id: start
+  edges: []
+  entry_point: start
+# definitions block omitted
+governance:
+  active_middlewares:
+    - missing_mw
+"""
+    data = yaml.safe_load(manifest_yaml)
+    with pytest.raises(ManifestError) as exc:
+        GraphFlow.model_validate(data)
+    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+
+
+def test_validation_no_middlewares() -> None:
+    # Test case where 'definitions' exists but 'middlewares' is missing (default empty dict in model)
+    # Actually, if we omit it in YAML, Pydantic defaults it to empty dict.
+    # To hit `elif not definitions.middlewares:` we need definitions object but empty middlewares dict.
+    manifest_yaml = """
+kind: GraphFlow
+metadata:
+  name: test-flow
+  version: 1.0.0
+interface: {}
+graph:
+  nodes:
+    start:
+      type: placeholder
+      id: start
+  edges: []
+  entry_point: start
+definitions:
+    # middlewares omitted
+    tools: {}
 governance:
   active_middlewares:
     - missing_mw
@@ -181,6 +253,16 @@ def test_loader_duck_typing_failure(workspace: Path) -> None:
     with pytest.raises(TypeError) as exc:
         load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
     assert "must implement at least one protocol method" in str(exc.value)
+
+
+def test_loader_sync_request_method(workspace: Path) -> None:
+    with pytest.raises(TypeError, match="must be an asynchronous coroutine"):
+        load_middleware_from_ref("middlewares/sync_request.py:MySyncMiddleware", workspace)
+
+
+def test_loader_sync_stream_method(workspace: Path) -> None:
+    with pytest.raises(TypeError, match="must be an asynchronous coroutine"):
+        load_middleware_from_ref("middlewares/sync_stream.py:MySyncStreamMiddleware", workspace)
 
 
 def test_loader_security_violation(workspace: Path) -> None:
