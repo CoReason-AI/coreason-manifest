@@ -165,16 +165,18 @@ def test_integrity_sanitization() -> None:
 
     # Check stripped keys
     # integrity_hash is no longer stripped in V2 (legacy key)
-    assert "execution_hash" not in sanitized
-    assert "signature" not in sanitized
+    # SOTA: execution_hash and signature are ONLY stripped at root by compute_hash,
+    # but preserved in _recursive_sort_and_sanitize for nested usage.
+    assert "execution_hash" in sanitized
+    assert "signature" in sanitized
     assert "__private" not in sanitized
-    assert "execution_hash" not in sanitized["nested"]
+    assert "execution_hash" in sanitized["nested"]
 
     # Check sorting (implicitly by keys being ordered in output, but hard to assert on dict)
     # Compute hash of original vs manual sanitized should match
 
     # Check timestamp
-    assert sanitized["nested"]["timestamp"] == "2023-01-01T12:00:00Z"
+    assert sanitized["nested"]["timestamp"] == "2023-01-01T12:00:00.123456Z"
 
     # Check UUID fast-path
     uid = uuid4()
@@ -188,7 +190,7 @@ def test_integrity_sanitization() -> None:
     data_reordered = {
         "a": 1,
         "b": 2,
-        "nested": {"c": 3, "d": 4, "timestamp": dt},
+        "nested": {"c": 3, "d": 4, "timestamp": dt, "execution_hash": "nested_bad"},
     }
     h2 = compute_hash(data_reordered)
 
