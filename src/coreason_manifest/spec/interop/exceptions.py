@@ -22,6 +22,7 @@ class ManifestErrorCode(StrEnum):
     """
     Centralized catalog of all Coreason Manifest error codes.
     """
+
     # Validation
     CRSN_VAL_SCHEMA_INVALID = "CRSN-VAL-SCHEMA-INVALID"
     CRSN_VAL_MIDDLEWARE_MISSING = "CRSN-VAL-MIDDLEWARE-MISSING"
@@ -82,7 +83,6 @@ class ManifestError(Exception):
                 context=context or {},
             )
         )
-
 
 
 class SecurityJailViolationError(ManifestError):

@@ -1,6 +1,6 @@
 # src/coreason_manifest/utils/diff.py
 
-from typing import Annotated, Any, Literal, TypeAlias
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
@@ -67,9 +67,7 @@ class SemanticPatchReport(BaseModel):
         return any(op.category == "BREAKING" for op in self.changes)
 
 
-def _determine_category(
-    op: str, path: str, domain: DomainType
-) -> CategoryType:
+def _determine_category(op: str, path: str, domain: DomainType) -> CategoryType:
     """
     Determines the semantic category of an operation.
     """

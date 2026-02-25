@@ -346,8 +346,7 @@ class GraphFlow(CoreasonModel):
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_FALLBACK_MISSING,
                 message=(
-                    f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' "
-                    "not found in nodes."
+                    f"Circuit breaker fallback '{self.governance.circuit_breaker.fallback_node_id}' not found in nodes."
                 ),
                 context={"fallback_id": self.governance.circuit_breaker.fallback_node_id},
             )
@@ -367,9 +366,7 @@ class GraphFlow(CoreasonModel):
             if isinstance(node, SwarmNode) and node.workload_variable not in variable_names:
                 raise ManifestError.critical_halt(
                     code=ManifestErrorCode.CRSN_VAL_SWARM_VAR_MISSING,
-                    message=(
-                        f"SwarmNode '{node.id}' references missing workload variable '{node.workload_variable}'."
-                    ),
+                    message=(f"SwarmNode '{node.id}' references missing workload variable '{node.workload_variable}'."),
                     context={
                         "remediation": RemediationAction(
                             type="update_field",

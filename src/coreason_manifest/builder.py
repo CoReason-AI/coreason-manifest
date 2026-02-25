@@ -227,9 +227,7 @@ class BaseFlowBuilder:
         self._register_node(node)
         return self
 
-    def add_inspector(
-        self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5
-    ) -> Self:
+    def add_inspector(self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5) -> Self:
         """Adds an inspector node to the flow."""
         node = InspectorNode(
             id=node_id,
