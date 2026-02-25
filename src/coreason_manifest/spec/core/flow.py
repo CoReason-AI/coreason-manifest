@@ -278,7 +278,11 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
                 patch = [{"op": "add", "path": "/definitions/middlewares", "value": {mw_id: {"ref": "file.py:Class"}}}]
             else:
                 patch = [
-                    {"op": "add", "path": f"/definitions/middlewares/{mw_id_escaped}", "value": {"ref": "file.py:Class"}}
+                    {
+                        "op": "add",
+                        "path": f"/definitions/middlewares/{mw_id_escaped}",
+                        "value": {"ref": "file.py:Class"},
+                    }
                 ]
 
             raise ManifestError(
