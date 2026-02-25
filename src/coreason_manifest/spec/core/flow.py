@@ -19,7 +19,7 @@ from coreason_manifest.spec.core.nodes import (
     SwitchNode,
 )
 from coreason_manifest.spec.core.tools import AnyTool, ToolCapability, ToolPack
-from coreason_manifest.spec.core.types import NodeID, RiskLevel
+from coreason_manifest.spec.core.types import MiddlewareDef, NodeID, RiskLevel
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 from coreason_manifest.utils.io import SecurityViolationError
@@ -168,6 +168,7 @@ class FlowDefinitions(CoreasonModel):
     tools: dict[str, AnyTool] = Field(default_factory=dict)
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
+    middlewares: dict[str, MiddlewareDef] = Field(default_factory=dict)
     supervision_templates: Any | None = None
 
 
@@ -249,6 +250,40 @@ def _scan_for_kill_switch_violations(
         _recursive_scan(definitions)
 
     _recursive_scan(nodes)
+
+
+def _validate_middleware_references(governance: Governance | None, definitions: FlowDefinitions | None) -> None:
+    if not governance or not governance.active_middlewares:
+        return
+
+    defined_middlewares = set()
+    if definitions and definitions.middlewares:
+        defined_middlewares = set(definitions.middlewares.keys())
+
+    for mw_id in governance.active_middlewares:
+        if mw_id not in defined_middlewares:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-VAL-MIDDLEWARE-MISSING",
+                    message=f"Active middleware '{mw_id}' is not defined in definitions.middlewares.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                    context={
+                        "middleware_id": mw_id,
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            description=f"Add definition for middleware '{mw_id}'.",
+                            patch_data=[
+                                {
+                                    "op": "add",
+                                    "path": f"/definitions/middlewares/{mw_id}",
+                                    "value": {"ref": "file.py:Class"},
+                                }
+                            ],
+                        ).model_dump(),
+                    },
+                )
+            )
 
 
 class GraphFlow(CoreasonModel):
@@ -376,6 +411,11 @@ class GraphFlow(CoreasonModel):
         )
         return self
 
+    @model_validator(mode="after")
+    def validate_middleware_refs(self) -> "GraphFlow":
+        _validate_middleware_references(self.governance, self.definitions)
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -430,6 +470,11 @@ class LinearFlow(CoreasonModel):
             self.definitions,
             self.steps,
         )
+        return self
+
+    @model_validator(mode="after")
+    def validate_middleware_refs(self) -> "LinearFlow":
+        _validate_middleware_references(self.governance, self.definitions)
         return self
 
 

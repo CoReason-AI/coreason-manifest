@@ -71,6 +71,7 @@ class ToolAccessPolicy(CoreasonModel):
 class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
+    active_middlewares: list[str] = Field(default_factory=list)
     max_risk_level: RiskLevel | None = Field(
         None,
         description=(

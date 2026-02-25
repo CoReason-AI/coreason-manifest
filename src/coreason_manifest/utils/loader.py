@@ -21,7 +21,7 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
-__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
+__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file", "load_middleware_from_ref"]
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
@@ -386,3 +386,114 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
         return agent_class
 
     raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+
+
+def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
+    """
+    Load a Middleware class from a Python file reference (file.py:ClassName).
+    WARNING: Executes arbitrary code. Ensure source is trusted.
+
+    Args:
+        reference: string in format "path/to/file.py:ClassName"
+        root_dir: The root directory for file access confinement.
+
+    Returns:
+        The loaded Middleware class.
+    """
+    if ":" not in reference:
+        raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
+
+    file_ref, class_name = reference.rsplit(":", 1)
+
+    # Architectural Note: Strict Pathlib Resolution
+    try:
+        # Resolve path strictly (must exist) and canonicalize
+        file_path = (root_dir / file_ref).resolve(strict=True)
+
+        # Jail boundary check
+        if not file_path.is_relative_to(root_dir.resolve()):
+            raise SecurityJailViolationError(f"Security Error: Reference {file_ref} escapes the root directory.")
+
+        # Permission check: Reject world-writable files
+        # Only enforce strict POSIX permissions on POSIX systems
+        if os.name == "posix":
+            st = file_path.stat()
+            if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
+                raise SecurityJailViolationError(
+                    f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
+                )
+
+    except FileNotFoundError:
+        raise ValueError(f"Middleware file not found: {file_ref}") from None
+    except RuntimeError as e:
+        raise SecurityJailViolationError(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
+
+    # Explicit warning for audit logs
+    warnings.warn(
+        f"Dynamic Code Execution: Loading middleware from {file_ref}. Ensure this code is trusted.",
+        category=RuntimeSecurityWarning,
+        stacklevel=2,
+    )
+
+    # Generate cryptographically unique module name to prevent collisions
+    path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
+    module_name = f"_jail_{path_hash}"
+
+    # Use context manager to enable jailed imports during spec finding and loading
+    with sandbox_context(root_dir):
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec is None or spec.loader is None:
+            raise ValueError(f"Could not load spec for {file_ref}")
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+
+        warnings.warn(
+            f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
+            "Ensure strict governance until Wasm sandboxing is implemented.",
+            category=RuntimeSecurityWarning,
+            stacklevel=2,
+        )
+
+        try:
+            spec.loader.exec_module(module)
+        except Exception as e:
+            # Cleanup on failure
+            if module_name in sys.modules:
+                del sys.modules[module_name]
+            # Precise cleanup of dependencies
+            cleanup_modules = _jail_modules_var.get()
+            if cleanup_modules:
+                for mod in cleanup_modules:
+                    if mod in sys.modules:
+                        del sys.modules[mod]
+            raise ValueError(f"Failed to execute middleware code in {file_ref}: {e}") from e
+
+        middleware_class = getattr(module, class_name, None)
+
+        # Cleanup dependencies to prevent pollution
+        if module_name in sys.modules:
+            del sys.modules[module_name]
+
+        cleanup_modules = _jail_modules_var.get()
+        if cleanup_modules:
+            for mod in cleanup_modules:
+                if mod in sys.modules:
+                    del sys.modules[mod]
+
+    if middleware_class is None:
+        raise ValueError(f"Middleware class '{class_name}' not found in {file_ref}")
+
+    if not isinstance(middleware_class, type):
+        raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+
+    # Duck-type check for protocol compliance
+    has_intercept_request = hasattr(middleware_class, "intercept_request") and callable(middleware_class.intercept_request)
+    has_intercept_stream = hasattr(middleware_class, "intercept_stream") and callable(middleware_class.intercept_stream)
+
+    if not (has_intercept_request or has_intercept_stream):
+        raise TypeError(
+            f"Middleware class '{class_name}' must implement 'intercept_request' or 'intercept_stream'."
+        )
+
+    return middleware_class

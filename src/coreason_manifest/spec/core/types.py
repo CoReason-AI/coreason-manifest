@@ -13,6 +13,8 @@ from typing import Annotated, Any
 
 from pydantic import BeforeValidator, Field
 
+from coreason_manifest.spec.common_base import CoreasonModel
+
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
 # =========================================================================
@@ -119,3 +121,11 @@ CoercibleStringList = Annotated[
     BeforeValidator(_coerce_comma_strings),
     Field(default_factory=list),
 ]
+
+
+class MiddlewareDef(CoreasonModel):
+    """
+    Definition for a middleware component.
+    """
+    ref: str = Field(..., description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').")
+    config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")
