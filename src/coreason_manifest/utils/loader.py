@@ -233,9 +233,9 @@ def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: froze
             # Track fully resolved path (immutable propagation)
             new_seen = seen | {target_path}
             try:
-                ref_content_str = loader.read_text(str(target_path.relative_to(root_dir)))
+                ref_content_str = loader.read_text(str(target_path.relative_to(root_dir.resolve())))
                 ref_data = yaml.load(ref_content_str, Loader=UniqueKeyLoader)
-            except Exception as e:
+            except (OSError, yaml.YAMLError) as e:
                 raise ValueError(f"Failed to load reference {ref_path}: {e}") from e
 
             return _resolve_includes(ref_data, root_dir, loader, new_seen)

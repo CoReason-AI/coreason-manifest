@@ -125,3 +125,33 @@ def test_mock_ref_generic_exception() -> None:
 
     result = factory._generate_schema_data(schema, resolver=resolver_unresolvable)
     assert result == "mock_ref_error"
+
+
+def test_mock_edge_cases() -> None:
+    factory = MockFactory(seed=42)
+
+    # 1. Boolean schema
+    assert factory._generate_schema_data(True) == "mock_data"
+    assert factory._generate_schema_data(False) is None
+
+    # 2. Not a dict (and not bool, e.g. None or int - though typing says dict|None)
+    # If passed None directly, it returns default
+    assert factory._generate_schema_data(None) == {"mock_key": "mock_value"}
+
+    # 3. Union type
+    schema_union = {"type": ["string", "null"]}
+    assert factory._generate_schema_data(schema_union) == "lorem ipsum"
+
+    # 4. Tuple validation (array of schemas)
+    schema_tuple = {
+        "type": "array",
+        "items": [
+            {"type": "string"},
+            {"type": "integer"}
+        ]
+    }
+    result = factory._generate_schema_data(schema_tuple)
+    assert isinstance(result, list)
+    assert len(result) == 2
+    assert result[0] == "lorem ipsum"
+    assert isinstance(result[1], int)

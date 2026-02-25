@@ -35,7 +35,7 @@ def test_loader_exception_in_find_spec(tmp_path: Path) -> None:
 def test_resolve_refs_error(tmp_path: Path) -> None:
     jail = tmp_path
     loader = MagicMock()
-    loader.read_text.side_effect = Exception("Read failed")
+    loader.read_text.side_effect = OSError("Read failed")
 
     data = {"$include": "file.yaml"}
     with pytest.raises(ValueError, match="Failed to load reference"):

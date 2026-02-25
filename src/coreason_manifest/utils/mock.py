@@ -40,8 +40,16 @@ class MockFactory:
         if depth > max_depth:
             return ""
 
+        # Handle JSON Schema boolean specifications
+        if isinstance(schema, bool):
+            return "mock_data" if schema else None
+
         if not schema:
             return {"mock_key": "mock_value"}
+
+        # Ensure we only process dictionaries moving forward
+        if not isinstance(schema, dict):
+            return schema
 
         # Resolve $ref if present
         if "$ref" in schema and resolver:
@@ -72,6 +80,11 @@ class MockFactory:
 
         # Simple schema support
         type_ = schema.get("type", "string")
+        if isinstance(type_, list):
+            # Pick the first non-null type, or default to string
+            types = [t for t in type_ if t != "null"]
+            type_ = types[0] if types else "string"
+
         if type_ == "string":
             return "lorem ipsum"
         if type_ == "integer":
@@ -87,7 +100,14 @@ class MockFactory:
             }
         if type_ == "array":
             items_schema = schema.get("items")
+            if isinstance(items_schema, list):
+                # Handle tuple validation (array of schemas)
+                return [
+                    self._generate_schema_data(item, visited, visited_refs, depth + 1, resolver)
+                    for item in items_schema
+                ]
             if items_schema:
+                # Handle standard array validation (single schema)
                 return [self._generate_schema_data(items_schema, visited, visited_refs, depth + 1, resolver)]
             return []
         return "mock_data"
