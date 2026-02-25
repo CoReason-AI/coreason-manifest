@@ -13,8 +13,6 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, Field
 
-from coreason_manifest.spec.common_base import CoreasonModel
-
 # =========================================================================
 #  COMMON TYPE ALIASES (Governance & Resilience)
 # =========================================================================
@@ -103,19 +101,6 @@ ToolID = Annotated[
 ]
 
 
-# Middleware Identifiers (Alphanumeric, underscores, hyphens only)
-MiddlewareID = Annotated[
-    str,
-    Field(
-        pattern=r"^[a-zA-Z0-9_-]+$",
-        min_length=1,
-        max_length=64,
-        description="Identifier for a middleware component. Alphanumeric, underscores, and hyphens only.",
-        examples=["pii_redactor", "security-filter"],
-    ),
-]
-
-
 # Risk Level
 class RiskLevel(StrEnum):
     """
@@ -161,16 +146,3 @@ CoercibleStringList = Annotated[
     BeforeValidator(_coerce_comma_strings),
     Field(default_factory=list),
 ]
-
-
-class MiddlewareDef(CoreasonModel):
-    """
-    Definition for a middleware component.
-    """
-
-    ref: str = Field(
-        ...,
-        pattern=r"^.*\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
-        description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
-    )
-    config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")

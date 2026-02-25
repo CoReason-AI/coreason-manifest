@@ -112,7 +112,7 @@ def test_load_agent_exec_fail(tmp_path: Path) -> None:
     bad_agent.write_text("raise RuntimeError('Boom')")
     bad_agent.chmod(0o600)
 
-    with pytest.raises(RuntimeError, match="Boom"):
+    with pytest.raises(ValueError, match="Failed to execute agent code"):
         load_agent_from_ref("bad.py:Agent", root_dir=jail)
 
 
@@ -156,7 +156,7 @@ def test_load_agent_exec_fail_cleanup_deps(tmp_path: Path) -> None:
     agent.write_text("import dep\nraise RuntimeError('Fail')")
     agent.chmod(0o600)
 
-    with pytest.raises(RuntimeError, match="Fail"):
+    with pytest.raises(ValueError, match="Failed to execute agent code"):
         load_agent_from_ref("agent_fail.py:Agent", root_dir=jail)
 
     # Verify dep is cleaned up?
