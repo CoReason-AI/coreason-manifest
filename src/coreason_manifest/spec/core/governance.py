@@ -135,6 +135,15 @@ class Governance(CoreasonModel):
             return default_env_cost
         return self.cost_limit_usd
 
+    def resolve_rate_limit(self, default_env_rpm: int = 60) -> int | Literal["infinite"]:
+        """
+        Resolves the Tri-State rate limit policy.
+        If None, uses the provided environment default.
+        """
+        if self.rate_limit_rpm is None:
+            return default_env_rpm
+        return self.rate_limit_rpm
+
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:

@@ -155,15 +155,14 @@ class EscalationStrategy(ResilienceStrategy):
             return v
 
         # Strict Jinja2 security check
-        found_vars = re.findall(r"\{\{\s*(.*?)\s*\}\}", v)
+        # Matches the first valid identifier right after {{ and optional spaces
+        found_vars = re.findall(r"\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)", v)
         allowed_vars = {"node_id", "error_type", "message"}
 
         for var in found_vars:
-            # Simple check: variable name must be in allowed list.
-            # Does not support complex expressions like filters for strict security.
             if var not in allowed_vars:
                 raise ValueError(
-                    "Template contains unauthorized context variables. "
+                    f"Template contains unauthorized root variable '{var}'. "
                     "Allowed variables are: node_id, error_type, message."
                 )
         return v

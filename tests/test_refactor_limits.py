@@ -42,7 +42,7 @@ def test_escalation_template_validation() -> None:
     )
 
     # Invalid var
-    with pytest.raises(ValidationError, match="unauthorized context variables"):
+    with pytest.raises(ValidationError, match="unauthorized root variable"):
         EscalationStrategy(
             queue_name="q",
             notification_level="info",
@@ -162,3 +162,32 @@ def test_governance_resolvers() -> None:
 
     g6 = Governance(cost_limit_usd="infinite")
     assert g6.resolve_cost_limit() == "infinite"
+
+    # Test resolve_rate_limit
+    g7 = Governance(rate_limit_rpm=120)
+    assert g7.resolve_rate_limit() == 120
+
+    g8 = Governance(rate_limit_rpm=None)
+    assert g8.resolve_rate_limit(default_env_rpm=60) == 60
+
+    g9 = Governance(rate_limit_rpm="infinite")
+    assert g9.resolve_rate_limit() == "infinite"
+
+
+def test_escalation_template_filters() -> None:
+    # Should pass with filters
+    EscalationStrategy(
+        queue_name="q",
+        notification_level="info",
+        timeout_seconds=60,
+        template="Error: {{ message | upper }} in {{ node_id }}",
+    )
+
+    # Should fail with unauthorized root var
+    with pytest.raises(ValidationError, match="unauthorized root variable"):
+        EscalationStrategy(
+            queue_name="q",
+            notification_level="info",
+            timeout_seconds=60,
+            template="{{ bad_var | lower }}",
+        )
