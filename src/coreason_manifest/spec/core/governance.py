@@ -118,13 +118,7 @@ class Governance(CoreasonModel):
     @classmethod
     def deduplicate_middlewares(cls, v: list[str]) -> list[str]:
         """Ensures middleware execution pipeline contains unique references while preserving order."""
-        seen = set()
-        deduped = []
-        for item in v:
-            if item not in seen:
-                seen.add(item)
-                deduped.append(item)
-        return deduped
+        return list(dict.fromkeys(v))
 
     @field_validator("allowed_domains")
     @classmethod

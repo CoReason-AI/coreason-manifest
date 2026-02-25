@@ -300,7 +300,13 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
     if ":" not in reference:
         raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
 
+    if not reference.split(":")[0].endswith(".py"):
+        raise ValueError(f"Invalid reference format: {reference}. The file component must end with '.py'.")
+
     file_ref, class_name = reference.rsplit(":", 1)
+
+    if not class_name.isidentifier():
+        raise ValueError(f"Invalid reference format: {reference}. '{class_name}' is not a valid Python identifier.")
 
     # Architectural Note: Strict Pathlib Resolution
     try:
@@ -365,7 +371,7 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
                     if mod in sys.modules:
                         del sys.modules[mod]
 
-            if isinstance(e, SecurityJailViolationError):
+            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
                 raise
 
             raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e

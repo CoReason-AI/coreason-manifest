@@ -418,3 +418,11 @@ def test_loader_symlink_loop(workspace: Path) -> None:
 def test_loader_invalid_reference_format(workspace: Path) -> None:
     with pytest.raises(ValueError, match="Invalid reference format"):
         load_middleware_from_ref("invalid_format", workspace)
+
+def test_loader_invalid_file_extension(workspace: Path) -> None:
+    with pytest.raises(ValueError, match="must end with '.py'"):
+        load_middleware_from_ref("middlewares/valid.txt:MyMiddleware", workspace)
+
+def test_loader_invalid_class_identifier(workspace: Path) -> None:
+    with pytest.raises(ValueError, match="not a valid Python identifier"):
+        load_middleware_from_ref("middlewares/valid.py:My-Middleware", workspace)
