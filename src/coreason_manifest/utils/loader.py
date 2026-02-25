@@ -365,7 +365,7 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
                     if mod in sys.modules:
                         del sys.modules[mod]
 
-            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
+            if isinstance(e, SecurityJailViolationError):
                 raise
 
             raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
