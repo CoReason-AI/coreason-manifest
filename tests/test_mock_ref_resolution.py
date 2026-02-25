@@ -143,13 +143,7 @@ def test_mock_edge_cases() -> None:
     assert factory._generate_schema_data(schema_union) == "lorem ipsum"
 
     # 4. Tuple validation (array of schemas)
-    schema_tuple = {
-        "type": "array",
-        "items": [
-            {"type": "string"},
-            {"type": "integer"}
-        ]
-    }
+    schema_tuple = {"type": "array", "items": [{"type": "string"}, {"type": "integer"}]}
     result = factory._generate_schema_data(schema_tuple)
     assert isinstance(result, list)
     assert len(result) == 2

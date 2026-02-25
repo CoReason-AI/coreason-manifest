@@ -29,7 +29,7 @@ class MockFactory:
 
     def _generate_schema_data(
         self,
-        schema: dict[str, Any] | None,
+        schema: dict[str, Any] | bool | None,
         visited: frozenset[int] | None = None,
         visited_refs: frozenset[str] | None = None,
         depth: int = 0,
