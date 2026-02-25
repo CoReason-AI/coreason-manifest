@@ -237,6 +237,7 @@ class TestCanonicalHashingStrategy:
 
     def test_nested_compute_hash(self) -> None:
         """Test that nested objects with compute_hash are handled correctly."""
+
         class NestedHasher:
             def compute_hash(self) -> str:
                 return "nested_hash"
