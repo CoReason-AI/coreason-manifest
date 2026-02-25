@@ -17,6 +17,7 @@ from pydantic import BeforeValidator, Field
 #  COMMON TYPE ALIASES (Governance & Resilience)
 # =========================================================================
 
+
 def _coerce_infinite(v: Any) -> Any:
     """Normalizes 'Infinite', ' INFINITE ', etc. to 'infinite'."""
     if isinstance(v, str) and v.strip().lower() == "infinite":

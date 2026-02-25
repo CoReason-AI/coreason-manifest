@@ -140,3 +140,25 @@ def test_supervision_default_strategy_check() -> None:
     # Finite global -> Fail
     with pytest.raises(ValueError, match="contains a child strategy with 'infinite' retries"):
         SupervisionPolicy(handlers=[], default_strategy=strategy, max_cumulative_actions=10)
+
+
+def test_governance_resolvers() -> None:
+    # Test resolve_timeout
+    g1 = Governance(timeout_seconds=600)
+    assert g1.resolve_timeout() == 600
+
+    g2 = Governance(timeout_seconds=None)
+    assert g2.resolve_timeout(default_env_timeout=999) == 999
+
+    g3 = Governance(timeout_seconds="infinite")
+    assert g3.resolve_timeout() == "infinite"
+
+    # Test resolve_cost_limit
+    g4 = Governance(cost_limit_usd=50.0)
+    assert g4.resolve_cost_limit() == 50.0
+
+    g5 = Governance(cost_limit_usd=None)
+    assert g5.resolve_cost_limit(default_env_cost=100.0) == 100.0
+
+    g6 = Governance(cost_limit_usd="infinite")
+    assert g6.resolve_cost_limit() == "infinite"
