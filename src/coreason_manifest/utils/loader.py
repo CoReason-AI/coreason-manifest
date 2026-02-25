@@ -3,6 +3,7 @@
 import hashlib
 import importlib.abc
 import importlib.util
+import inspect
 import os
 import re
 import stat
@@ -21,7 +22,13 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
-__all__ = ["RuntimeSecurityWarning", "SecurityViolationError", "load_agent_from_ref", "load_flow_from_file"]
+__all__ = [
+    "RuntimeSecurityWarning",
+    "SecurityViolationError",
+    "load_agent_from_ref",
+    "load_flow_from_file",
+    "load_middleware_from_ref",
+]
 
 
 class RuntimeSecurityWarning(RuntimeWarning):
@@ -286,22 +293,21 @@ def load_flow_from_file(
     raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
 
 
-def load_agent_from_ref(reference: str, root_dir: Path) -> type:
+def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -> type:
     """
-    Load an Agent class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
-
-    Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Agent class.
+    Helper to load a class from a reference string in a secure sandbox context.
     """
     if ":" not in reference:
         raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
 
+    # MUST rsplit first to safely support Windows drive letters (C:\path\file.py)
     file_ref, class_name = reference.rsplit(":", 1)
+
+    if not file_ref.endswith(".py"):
+        raise ValueError(f"Invalid reference format: {reference}. The file component must end with '.py'.")
+
+    if not class_name.isidentifier():
+        raise ValueError(f"Invalid reference format: {reference}. '{class_name}' is not a valid Python identifier.")
 
     # Architectural Note: Strict Pathlib Resolution
     try:
@@ -322,13 +328,13 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
                 )
 
     except FileNotFoundError:
-        raise ValueError(f"Agent file not found: {file_ref}") from None
+        raise ValueError(f"{component_name.capitalize()} file not found: {file_ref}") from None
     except RuntimeError as e:
         raise SecurityJailViolationError(f"Security Error: Symlink resolution failed for {file_ref}: {e}") from e
 
     # Explicit warning for audit logs
     warnings.warn(
-        f"Dynamic Code Execution: Loading agent from {file_ref}. Ensure this code is trusted.",
+        f"Dynamic Code Execution: Loading {component_name} from {file_ref}. Ensure this code is trusted.",
         category=RuntimeSecurityWarning,
         stacklevel=2,
     )
@@ -355,34 +361,77 @@ def load_agent_from_ref(reference: str, root_dir: Path) -> type:
 
         try:
             spec.loader.exec_module(module)
+            loaded_class = getattr(module, class_name, None)
         except Exception as e:
-            # Cleanup on failure
+            if isinstance(e, (SecurityJailViolationError, RuntimeError)):
+                raise
+            raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
+        finally:
+            # SOTA Hygiene: Guaranteed cleanup even if BaseExceptions (SystemExit, etc.) occur.
             if module_name in sys.modules:
                 del sys.modules[module_name]
-            # Precise cleanup of dependencies
+
             cleanup_modules = _jail_modules_var.get()
             if cleanup_modules:
                 for mod in cleanup_modules:
                     if mod in sys.modules:
                         del sys.modules[mod]
-            raise ValueError(f"Failed to execute agent code in {file_ref}: {e}") from e
 
-        agent_class = getattr(module, class_name, None)
+    if loaded_class is None:
+        raise ValueError(f"{component_name.capitalize()} class '{class_name}' not found in {file_ref}")
 
-        # Cleanup dependencies to prevent pollution
-        if module_name in sys.modules:
-            del sys.modules[module_name]
+    if not isinstance(loaded_class, type):
+        raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
 
-        cleanup_modules = _jail_modules_var.get()
-        if cleanup_modules:
-            for mod in cleanup_modules:
-                if mod in sys.modules:
-                    del sys.modules[mod]
+    return loaded_class
 
-    if agent_class is None:
-        raise ValueError(f"Agent class '{class_name}' not found in {file_ref}")
 
-    if isinstance(agent_class, type):
-        return agent_class
+def load_agent_from_ref(reference: str, root_dir: Path) -> type:
+    """
+    Load an Agent class from a Python file reference (file.py:ClassName).
+    WARNING: Executes arbitrary code. Ensure source is trusted.
 
-    raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+    Args:
+        reference: string in format "path/to/file.py:ClassName"
+        root_dir: The root directory for file access confinement.
+
+    Returns:
+        The loaded Agent class.
+    """
+    return _load_sandboxed_class(reference, root_dir, "agent")
+
+
+def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
+    """
+    Load a Middleware class from a Python file reference (file.py:ClassName).
+    WARNING: Executes arbitrary code. Ensure source is trusted.
+
+    Args:
+        reference: string in format "path/to/file.py:ClassName"
+        root_dir: The root directory for file access confinement.
+
+    Returns:
+        The loaded Middleware class.
+    """
+    middleware_class = _load_sandboxed_class(reference, root_dir, "middleware")
+
+    req_method = getattr(middleware_class, "intercept_request", None)
+    stream_method = getattr(middleware_class, "intercept_stream", None)
+
+    if not req_method and not stream_method:
+        raise TypeError(
+            f"Middleware class in {reference} must implement at least one protocol method: "
+            "`async def intercept_request` or `async def intercept_stream`."
+        )
+
+    if req_method and not inspect.iscoroutinefunction(req_method):
+        raise TypeError(
+            f"Middleware method `intercept_request` in {reference} must be an asynchronous coroutine (`async def`)."
+        )
+
+    if stream_method and not inspect.iscoroutinefunction(stream_method):
+        raise TypeError(
+            f"Middleware method `intercept_stream` in {reference} must be an asynchronous coroutine (`async def`)."
+        )
+
+    return middleware_class
