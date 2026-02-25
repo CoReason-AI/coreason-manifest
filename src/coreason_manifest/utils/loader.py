@@ -497,13 +497,9 @@ def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
     has_intercept_request = hasattr(middleware_class, "intercept_request") and callable(
         middleware_class.intercept_request
     )
-    has_intercept_stream = hasattr(middleware_class, "intercept_stream") and callable(
-        middleware_class.intercept_stream
-    )
+    has_intercept_stream = hasattr(middleware_class, "intercept_stream") and callable(middleware_class.intercept_stream)
 
     if not (has_intercept_request or has_intercept_stream):
-        raise TypeError(
-            f"Middleware class '{class_name}' must implement 'intercept_request' or 'intercept_stream'."
-        )
+        raise TypeError(f"Middleware class '{class_name}' must implement 'intercept_request' or 'intercept_stream'.")
 
     return middleware_class
