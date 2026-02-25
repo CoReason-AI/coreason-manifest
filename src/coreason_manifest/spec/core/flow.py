@@ -263,6 +263,8 @@ def _validate_middleware_references(governance: Governance | None, definitions: 
     for mw_id in governance.active_middlewares:
         if mw_id not in defined_middlewares:
             # SOTA RFC 6902 JSON Pointer Escaping
+            # Architectural Note: MiddlewareID validation prevents ~ and /, but we escape
+            # defensively here to protect the remediation engine against model_construct() bypasses.
             mw_id_escaped = mw_id.replace("~", "~0").replace("/", "~1")
 
             # Dynamically construct RFC 6902 compliant patch based on current state
