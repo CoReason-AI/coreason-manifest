@@ -48,11 +48,21 @@ class RetryStrategy(ResilienceStrategy):
         ..., description="Hard limit on recovery loops."
     )
     backoff_factor: Annotated[float, Field(ge=1.0, description="Exponential backoff multiplier.")] = 2.0
-    initial_delay_seconds: Annotated[float, Field(description="Initial wait time.")] = 1.0
+    initial_delay_seconds: Annotated[float, Field(ge=0.0, description="Initial wait time.")] = 1.0
     max_delay_seconds: Annotated[
-        float, Field(description="Ceiling for the backoff calculation (e.g., never sleep more than 60s).")
+        float,
+        Field(gt=0.0, description="Ceiling for the backoff calculation (e.g., never sleep more than 60s)."),
     ] = 60.0
     jitter: Annotated[bool, Field(description="Add random jitter to delay.")] = True
+
+    @model_validator(mode="after")
+    def validate_backoff_bounds(self) -> "RetryStrategy":
+        if self.max_delay_seconds < self.initial_delay_seconds:
+            raise ValueError(
+                f"RetryStrategy logic error: max_delay_seconds ({self.max_delay_seconds}) "
+                f"must be greater than or equal to initial_delay_seconds ({self.initial_delay_seconds})."
+            )
+        return self
 
 
 class FallbackStrategy(ResilienceStrategy):
@@ -78,9 +88,9 @@ class ReflexionStrategy(ResilienceStrategy):
     critic_prompt: str = Field(..., description="Instructions for the critic (e.g., 'Identify logic errors').")
     include_trace: Annotated[bool, Field(description="Whether to feed the execution trace to the critic.")] = True
     max_trace_turns: Annotated[
-        int | None,
-        Field(description="Limit the history feed to the Critic to the last N turns. Prevents context overflow."),
-    ] = 3
+        int,
+        Field(gt=0, description="Limit the history feed to the Critic to the last N turns. Prevents context overflow."),
+    ] | None = 3
     critic_schema: Annotated[
         dict[str, Any] | None,
         Field(
@@ -128,7 +138,9 @@ class EscalationStrategy(ResilienceStrategy):
 
     queue_name: str = Field(..., min_length=1, description="The task queue for suspended sessions.")
     notification_level: Literal["info", "warning", "critical"] = Field(..., description="Severity level.")
-    timeout_seconds: int = Field(..., description="Max wait for human intervention.")
+    timeout_seconds: Annotated[int, Field(gt=0)] | Literal["infinite"] = Field(
+        ..., description="Max wait for human intervention."
+    )
     template: Annotated[
         str | None,
         Field(
@@ -274,7 +286,8 @@ class SupervisionPolicy(BaseModel):
                 if s_limit == "infinite":
                     raise ValueError(
                         f"SupervisionPolicy has a finite global limit ({self.max_cumulative_actions}), "
-                        "but contains a strategy with 'infinite' retries. This is a logic error."
+                        "but contains a child strategy with 'infinite' retries. "
+                        "To allow infinite retries, set the policy's max_cumulative_actions to 'infinite'."
                     )
                 # Both are finite integers
                 if s_limit > self.max_cumulative_actions:  # type: ignore # s_limit is int here

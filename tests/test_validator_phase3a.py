@@ -149,20 +149,9 @@ def test_validate_governance_sanity() -> None:
     with pytest.raises(ValidationError):
         Governance(rate_limit_rpm=-1)
 
-    agent = create_agent_node("agent1", [])
-    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
-    gov = Governance(cost_limit_usd=-5.0)
-    flow = GraphFlow(
-        kind="GraphFlow",
-        metadata=create_metadata(),
-        interface=create_interface(),
-        blackboard=None,
-        graph=graph,
-        governance=gov,
-    )
-    errors = validate_flow(flow)
-    assert len(errors) == 1
-    assert "Governance Error: cost_limit_usd cannot be negative." in errors
+    # cost_limit_usd=-5.0 should raise strict Pydantic ValidationError now
+    with pytest.raises(ValidationError):
+        Governance(cost_limit_usd=-5.0)
 
 
 def test_validate_linear_flow_valid() -> None:

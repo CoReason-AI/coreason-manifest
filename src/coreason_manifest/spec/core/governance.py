@@ -83,10 +83,12 @@ class Governance(CoreasonModel):
     rate_limit_rpm: Annotated[int, Field(ge=0)] | Literal["infinite"] | None = Field(
         None, description="Rate limit in requests per minute.", examples=[60]
     )
-    timeout_seconds: Annotated[int, Field(ge=0)] | Literal["infinite"] | None = Field(
+    timeout_seconds: Annotated[int, Field(gt=0)] | Literal["infinite"] | None = Field(
         None, description="Global execution timeout.", examples=[300]
     )
-    cost_limit_usd: float | None = Field(None, description="Cost limit in USD.", examples=[10.0])
+    cost_limit_usd: Annotated[float, Field(ge=0.0)] | None = Field(
+        None, description="Cost limit in USD.", examples=[10.0]
+    )
     safety: Safety | None = Field(
         None,
         description="Safety configuration.",

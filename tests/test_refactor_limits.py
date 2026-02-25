@@ -70,7 +70,7 @@ def test_supervision_finite_global_infinite_child() -> None:
     strategy = RetryStrategy(max_attempts="infinite")
     handler = ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=strategy)
 
-    with pytest.raises(ValueError, match="contains a strategy with 'infinite' retries"):
+    with pytest.raises(ValueError, match="contains a child strategy with 'infinite' retries"):
         SupervisionPolicy(handlers=[handler], max_cumulative_actions=10)
 
 
@@ -100,5 +100,5 @@ def test_supervision_default_strategy_check() -> None:
     SupervisionPolicy(handlers=[], default_strategy=strategy, max_cumulative_actions="infinite")
 
     # Finite global -> Fail
-    with pytest.raises(ValueError, match="contains a strategy with 'infinite' retries"):
+    with pytest.raises(ValueError, match="contains a child strategy with 'infinite' retries"):
         SupervisionPolicy(handlers=[], default_strategy=strategy, max_cumulative_actions=10)
