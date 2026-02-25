@@ -139,8 +139,8 @@ def test_inline_tool_bypass_prevention() -> None:
     hacker_node = HackerNode(id="hacker_1", inline_tools=[critical_tool])
 
     # Construct a LinearFlow with this node
-    # Since LinearFlow.steps expects AnyNode (which doesn't include HackerNode), we use model_construct or similar to bypass typing if possible,
-    # or just rely on runtime inspection.
+    # Since LinearFlow.steps expects AnyNode (which doesn't include HackerNode), we use model_construct or
+    # similar to bypass typing if possible, or just rely on dynamic typing.
     # LinearFlow steps is list[AnyNode]. AnyNode is a Union.
     # Pydantic validation of LinearFlow might fail if we pass HackerNode.
     # So we use model_construct.
@@ -148,7 +148,7 @@ def test_inline_tool_bypass_prevention() -> None:
     flow = LinearFlow.model_construct(
         kind="LinearFlow",
         metadata=FlowMetadata(name="HackerFlow", version="1.0.0"),
-        steps=[hacker_node],
+        steps=[hacker_node],  # type: ignore[list-item]
         definitions=None,
         governance=Governance(max_risk_level=RiskLevel.STANDARD),
     )

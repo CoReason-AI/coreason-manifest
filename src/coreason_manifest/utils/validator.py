@@ -204,7 +204,8 @@ def _validate_data_flow(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_CAP_MISSING_VAR,
                         severity="violation",
-                        message=f"Data Flow Error: SwarmNode '{node.id}' references missing variable '{node.workload_variable}'.",
+                        message=f"Data Flow Error: SwarmNode '{node.id}' references missing variable "
+                        f"'{node.workload_variable}'.",
                         node_id=node.id,
                         details={"variable": node.workload_variable},
                         remediation=RemediationAction(
@@ -229,7 +230,8 @@ def _validate_data_flow(
                         ComplianceReport(
                             code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
                             severity="violation",
-                            message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', but found type '{var_type}'.",
+                    message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', but "
+                    f"found type '{var_type}'.",
                             node_id=node.id,
                             details={"variable": node.workload_variable, "found_type": var_type},
                         )
@@ -240,7 +242,8 @@ def _validate_data_flow(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_CAP_MISSING_VAR,
                         severity="violation",
-                        message=f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable '{node.output_variable}'.",
+                        message=f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable "
+                        f"'{node.output_variable}'.",
                         node_id=node.id,
                         details={"variable": node.output_variable},
                     )
@@ -252,7 +255,8 @@ def _validate_data_flow(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_CAP_MISSING_VAR,
                         severity="violation",
-                        message=f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable '{node.variable}'.",
+                        message=f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable "
+                        f"'{node.variable}'.",
                         node_id=node.id,
                         details={"variable": node.variable},
                     )
@@ -264,7 +268,8 @@ def _validate_data_flow(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_CAP_MISSING_VAR,
                         severity="violation",
-                        message=f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable '{node.to_node_variable}'.",
+                        message=f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable "
+                        f"'{node.to_node_variable}'.",
                         node_id=node.id,
                         details={"variable": node.to_node_variable},
                     )
@@ -282,7 +287,8 @@ def _validate_data_flow(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
                         severity="warning",
-                        message=f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' variable '{node.to_node_variable}'. Matching may fail.",
+                        message=f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
+                        f"variable '{node.to_node_variable}'. Matching may fail.",
                         node_id=node.id,
                         details={"variable": node.to_node_variable, "found_type": var_type},
                     )
@@ -293,7 +299,8 @@ def _validate_data_flow(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_CAP_MISSING_VAR,
                         severity="violation",
-                        message=f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable '{node.output_variable}'.",
+                        message=f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable "
+                        f"'{node.output_variable}'.",
                         node_id=node.id,
                         details={"variable": node.output_variable},
                     )
@@ -302,17 +309,17 @@ def _validate_data_flow(
         elif isinstance(node, AgentNode):
             # Scan for prompt template variables
             refs = _scan_agent_templates(node, definitions)
-            for var in refs:
-                if var not in available_vars:
-                    errors.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                            severity="violation",
-                            message=f"Data Flow Error: AgentNode '{node.id}' references missing variable '{var}' in templates.",
-                            node_id=node.id,
-                            details={"variable": var},
-                        )
-                    )
+            errors.extend(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                    severity="violation",
+                    message=f"Data Flow Error: AgentNode '{node.id}' references missing variable '{var}' in templates.",
+                    node_id=node.id,
+                    details={"variable": var},
+                )
+                for var in refs
+                if var not in available_vars
+            )
 
     return errors
 
@@ -344,7 +351,8 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[Complianc
             ComplianceReport(
                 code=ErrorCatalog.ERR_GOV_CIRCUIT_FALLBACK_MISSING,
                 severity="violation",
-                message=f"Circuit Breaker Error: 'fallback_node_id' points to missing ID '{gov.circuit_breaker.fallback_node_id}'.",
+                message=f"Circuit Breaker Error: 'fallback_node_id' points to missing ID "
+                f"'{gov.circuit_breaker.fallback_node_id}'.",
                 details={"fallback_node_id": gov.circuit_breaker.fallback_node_id},
             )
         )
@@ -357,17 +365,18 @@ def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[Complia
 
     for node in nodes:
         if isinstance(node, AgentNode):
-            for tool in node.tools:
-                if tool not in available_tools:
-                    errors.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001,
-                            severity="warning",
-                            message=f"Missing Tool Warning: Agent '{node.id}' requires tool '{tool}' but it is not provided by any attached ToolPack.",
-                            node_id=node.id,
-                            details={"tool": tool},
-                        )
-                    )
+            errors.extend(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001,
+                    severity="warning",
+                    message=f"Missing Tool Warning: Agent '{node.id}' requires tool '{tool}' but it is not provided by "
+                    "any attached ToolPack.",
+                    node_id=node.id,
+                    details={"tool": tool},
+                )
+                for tool in node.tools
+                if tool not in available_tools
+            )
     return errors
 
 
@@ -452,7 +461,8 @@ def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[Co
                         ComplianceReport(
                             code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
                             severity="violation",
-                            message=f"Broken Switch Error: Node '{node.id}' case '{condition}' points to missing ID '{target_id}'.",
+                            message=f"Broken Switch Error: Node '{node.id}' case '{condition}' points to missing ID "
+                            f"'{target_id}'.",
                             node_id=node.id,
                             details={"condition": condition, "target_id": target_id},
                         )
@@ -463,7 +473,8 @@ def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[Co
                     ComplianceReport(
                         code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
                         severity="violation",
-                        message=f"Broken Switch Error: Node '{node.id}' default route points to missing ID '{node.default}'.",
+                        message=f"Broken Switch Error: Node '{node.id}' default route points to missing ID "
+                        f"'{node.default}'.",
                         node_id=node.id,
                         details={"target_id": node.default},
                     )
@@ -530,7 +541,8 @@ def _validate_referential_integrity(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_RESILIENCE_INVALID_REF,
                         severity="violation",
-                        message=f"Resilience Error: Node '{node.id}' has invalid resilience reference '{ref}'. Must start with 'ref:'.",
+                        message=f"Resilience Error: Node '{node.id}' has invalid resilience reference '{ref}'. "
+                        "Must start with 'ref:'.",
                         node_id=node.id,
                         details={"reference": ref},
                     )
@@ -542,7 +554,8 @@ def _validate_referential_integrity(
                         ComplianceReport(
                             code=ErrorCatalog.ERR_RESILIENCE_MISSING_TEMPLATE,
                             severity="violation",
-                            message=f"Resilience Error: Node '{node.id}' references undefined supervision template ID '{tmpl_id}'.",
+                            message=f"Resilience Error: Node '{node.id}' references undefined supervision template ID "
+                            f"'{tmpl_id}'.",
                             node_id=node.id,
                             details={"template_id": tmpl_id},
                         )
@@ -566,7 +579,8 @@ def _validate_referential_integrity(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_CAP_UNDEFINED_PROFILE_002,
                     severity="violation",
-                    message=f"Integrity Error: SwarmNode '{node.id}' references undefined worker profile ID '{node.worker_profile}'.",
+                    message=f"Integrity Error: SwarmNode '{node.id}' references undefined worker profile ID "
+                    f"'{node.worker_profile}'.",
                     node_id=node.id,
                     details={"profile_id": node.worker_profile},
                 )
@@ -604,7 +618,8 @@ def _validate_supervision(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_RESILIENCE_MISMATCH,
                     severity="violation",
-                    message=f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. Only Agent/Inspector/Swarm/Planner nodes support reflexion.",
+                    message=f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. "
+                    "Only Agent/Inspector/Swarm/Planner nodes support reflexion.",
                     node_id=node.id,
                 )
             )
@@ -614,7 +629,8 @@ def _validate_supervision(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_RESILIENCE_FALLBACK_MISSING,
                     severity="violation",
-                    message=f"Resilience Error: Node '{node.id}' fallback points to missing ID '{strategy.fallback_node_id}'.",
+                    message=f"Resilience Error: Node '{node.id}' fallback points to missing ID "
+                    f"'{strategy.fallback_node_id}'.",
                     node_id=node.id,
                     details={"fallback_node_id": strategy.fallback_node_id},
                 )
@@ -742,7 +758,8 @@ def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[ComplianceRe
                 ComplianceReport(
                     code=ErrorCatalog.ERR_TOPOLOGY_CYCLE_002,
                     severity="violation",
-                    message=f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: [{cycle_nodes}]. Execution graphs must be strict Directed Acyclic Graphs (DAGs).",
+                    message=f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: "
+                    f"[{cycle_nodes}]. Execution graphs must be strict Directed Acyclic Graphs (DAGs).",
                     details={"cycle_nodes": scc},
                 )
             )
@@ -752,31 +769,48 @@ def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[ComplianceRe
 
 def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
+    if not flow.governance:
+        return errors
+
     max_risk = flow.governance.max_risk_level
 
     nodes, _ = get_unified_topology(flow)
 
     def _check(obj: Any) -> None:
         # 1. Check ToolCapability objects
-        if isinstance(obj, ToolCapability) and obj.risk_level.weight > max_risk.weight:
+        if (
+            isinstance(obj, ToolCapability)
+            and max_risk is not None
+            and obj.risk_level.weight > max_risk.weight
+        ):
             errors.append(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_SEC_KILL_SWITCH_VIOLATION,
                     severity="violation",
-                    message=f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' which exceeds the global max_risk_level '{max_risk.value}'.",
+                    message=f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
+                    f"which exceeds the global max_risk_level '{max_risk.value}'.",
                     details={"tool_name": obj.name, "tool_risk": obj.risk_level.value, "max_risk": max_risk.value},
                 )
             )
 
         # 2. Check Strings for Remote URIs
         if isinstance(obj, str):
-            if "://" in obj and RiskLevel.CRITICAL.weight > max_risk.weight:
+            if (
+                "://" in obj
+                and max_risk is not None
+                and RiskLevel.CRITICAL.weight > max_risk.weight
+            ):
                 errors.append(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_SEC_KILL_SWITCH_VIOLATION,
                         severity="violation",
-                        message="Security Violation: Unresolved remote tool URIs default to CRITICAL risk and violate the global max_risk_level.",
-                        details={"tool_uri": obj, "assumed_risk": RiskLevel.CRITICAL.value, "max_risk": max_risk.value},
+                        message="Security Violation: Unresolved remote tool URIs default to CRITICAL risk and "
+                        "violate the global max_risk_level.",
+                        details={
+                            "tool_uri": obj,
+                            "assumed_risk": RiskLevel.CRITICAL.value,
+                            "max_risk": max_risk.value,
+                        },
                     )
                 )
             return

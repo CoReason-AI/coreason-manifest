@@ -191,7 +191,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     reports: list[ComplianceReport] = []
 
     # Build Adjacency List
-    nodes, edges = get_unified_topology(flow)
+    _, edges = get_unified_topology(flow)
     adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
     for edge in edges:
         # SOTA Fix 1: Defensive check for Draft Mode Fatality

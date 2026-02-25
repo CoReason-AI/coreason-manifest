@@ -318,7 +318,7 @@ def test_visualizer_failure_branch() -> None:
     # visualizer.py to_mermaid type check
     from typing import Any, cast
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Unknown flow type"):
         to_mermaid(cast("Any", "not_a_flow"))
 
 

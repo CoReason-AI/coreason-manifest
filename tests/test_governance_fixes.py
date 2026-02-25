@@ -382,7 +382,7 @@ def test_unknown_flow_type() -> None:
         pass
 
     node = AgentNode(id="a1", metadata={}, type="agent", profile="p", tools=[])
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Unknown flow type"):
         _is_guarded(node, UnknownFlow())  # type: ignore
 
 

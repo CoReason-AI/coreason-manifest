@@ -214,7 +214,7 @@ def test_validate_flow_invalid_type() -> None:
         governance = None
         definitions = None
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Unknown flow type"):
         validate_flow(cast("LinearFlow", DummyFlow()))
 
 
