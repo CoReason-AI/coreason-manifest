@@ -55,6 +55,10 @@ class MockFactory:
         if "$ref" in schema and resolver:
             ref_uri = schema["$ref"]
 
+            # Support for strict enum constraints
+            if "enum" in schema and isinstance(schema["enum"], list) and schema["enum"]:
+                return self.rng.choice(schema["enum"])
+
             # Check for cycle in refs
             if visited_refs is not None and ref_uri in visited_refs:
                 return ""
@@ -78,12 +82,25 @@ class MockFactory:
 
         visited = visited | {schema_id}
 
+        # Support for strict enum constraints
+        if "enum" in schema and isinstance(schema["enum"], list) and schema["enum"]:
+            return self.rng.choice(schema["enum"])
+
         # Simple schema support
-        type_ = schema.get("type", "string")
+        type_ = schema.get("type")
+
         if isinstance(type_, list):
             # Pick the first non-null type, or default to string
             types = [t for t in type_ if t != "null"]
             type_ = types[0] if types else "string"
+        elif not type_:
+            # Implicit type inference based on structure
+            if "properties" in schema:
+                type_ = "object"
+            elif "items" in schema:
+                type_ = "array"
+            else:
+                type_ = "string"
 
         if type_ == "string":
             return "lorem ipsum"
