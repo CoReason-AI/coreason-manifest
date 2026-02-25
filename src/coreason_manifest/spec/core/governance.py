@@ -91,9 +91,7 @@ class Governance(CoreasonModel):
         None, description="Rate limit in requests per minute.", examples=[60]
     )
     timeout_seconds: UnboundedPositiveInt | None = Field(None, description="Global execution timeout.", examples=[300])
-    cost_limit_usd: UnboundedNonNegativeFloat | None = Field(
-        None, description="Cost limit in USD.", examples=[10.0]
-    )
+    cost_limit_usd: UnboundedNonNegativeFloat | None = Field(None, description="Cost limit in USD.", examples=[10.0])
     safety: Safety | None = Field(
         None,
         description="Safety configuration.",

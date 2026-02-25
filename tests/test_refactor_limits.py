@@ -5,6 +5,7 @@ from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.resilience import (
     ErrorDomain,
     ErrorHandler,
+    EscalationStrategy,
     ReflexionStrategy,
     RetryStrategy,
     SupervisionPolicy,
@@ -29,6 +30,33 @@ def test_retry_strategy_zero_initial_delay() -> None:
     # Should fail: initial_delay_seconds must be > 0.0
     with pytest.raises(ValidationError):
         RetryStrategy(max_attempts=3, initial_delay_seconds=0.0)
+
+
+def test_escalation_template_validation() -> None:
+    # Valid
+    EscalationStrategy(
+        queue_name="q",
+        notification_level="info",
+        timeout_seconds=60,
+        template="Error in {{ node_id }}: {{ message }}",
+    )
+
+    # Invalid var
+    with pytest.raises(ValidationError, match="unauthorized context variables"):
+        EscalationStrategy(
+            queue_name="q",
+            notification_level="info",
+            timeout_seconds=60,
+            template="Error: {{ secret_env }}",
+        )
+
+    # None template (should pass)
+    EscalationStrategy(
+        queue_name="q",
+        notification_level="info",
+        timeout_seconds=60,
+        template=None,
+    )
 
 
 def test_infinite_reflexion() -> None:
