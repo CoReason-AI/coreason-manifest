@@ -50,13 +50,7 @@ class HashingStrategy(ABC):
 class CanonicalHashingStrategy(HashingStrategy):
     """
     Canonical hashing strategy enforcing RFC 8785 compliance.
-    Note: This implementation approximates true JCS (RFC 8785) compliance.
-    Specific ECMA-262 double-precision float formatting is approximated by Python's
-    standard library. Full compliance would require a custom dtoa implementation.
-    - Strict float formatting (no NaN/Inf).
-    - Strips None values.
-    - Deterministic key sorting.
-    - UTF-8 enforcement (no escapes).
+    Strictly prohibits non-deterministic types.
     """
 
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
@@ -64,60 +58,67 @@ class CanonicalHashingStrategy(HashingStrategy):
         Prepares an object for RFC 8785 Canonical JSON serialization.
         """
         if isinstance(obj, dict):
-            # Universal Hash Sanitization:
-            # Strip modern keys (execution_hash, signature, __*)
-            # Also strip None values (Architectural requirement)
+            # Recursively process values.
+            # Strip any keys where the value is None.
+            # Strip protected keys (execution_hash, signature, or keys starting with __).
+            # Sort keys alphabetically to guarantee deterministic ordering.
             return {
                 k: self._recursive_sort_and_sanitize(v)
                 for k, v in sorted(obj.items())
                 if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
             }
+
         if isinstance(obj, (list, tuple)):
+            # Recursively process items.
             return [self._recursive_sort_and_sanitize(x) for x in obj]
+
         if isinstance(obj, (set, frozenset)):
-            # Sets should be sorted lists
+            # Convert to sorted lists based on their string representation.
             return sorted([self._recursive_sort_and_sanitize(x) for x in obj], key=str)
+
         if isinstance(obj, uuid.UUID):
+            # Convert to string via str(obj).
             return str(obj)
+
         if isinstance(obj, datetime):
+            # Enforce conversion to UTC and format as a strict ISO-8601 string.
             return to_canonical_timestamp(obj)
+
         if isinstance(obj, BaseModel):
-            # Pydantic v2
-            excludes = getattr(obj, "_hash_exclude_", None)
-            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="python"))
-        if hasattr(obj, "model_dump"):
-            # Pydantic v2 or compatible
+            # Use model_dump(exclude_none=True, mode="python") and recursively process.
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
+
         if isinstance(obj, float):
-            # RFC 8785: If number is integer, represent as integer.
-            # Directive: Avoid mutating floats to integers natively to preserve type info.
-            # However, ensure NaN/Inf are rejected.
-            if not math.isfinite(obj):
+            # Allow finite floats. Explicitly raise a ValueError if math.isnan(obj) or math.isinf(obj).
+            if math.isnan(obj) or math.isinf(obj):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
             return obj
 
-        # Architectural Note: Enforce strict deterministic types.
+        # Primitives (int, str, bool) & None: Return as-is.
         if isinstance(obj, (int, str, bool)) or obj is None:
             return obj
 
+        # Strict Rejection (The Core Mandate)
         raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
 
     def compute_hash(self, obj: Any) -> str:
-        if hasattr(obj, "compute_hash"):
-            # Self-hashing objects (avoid infinite recursion if they call back here)
-            return str(obj.compute_hash())
-
+        # 1. Pass the object through _recursive_sort_and_sanitize method.
         sanitized = self._recursive_sort_and_sanitize(obj)
 
-        # RFC 8785 approximation:
-        # - separators=(',', ':') removes whitespace
-        # - sort_keys=True
-        # - ensure_ascii=False (UTF-8)
-        # - allow_nan=False
+        # 2. Serialize the sanitized output using json.dumps() with strict arguments.
+        # sort_keys=True
+        # ensure_ascii=False
+        # separators=(",", ":")
+        # allow_nan=False
         json_bytes = json.dumps(
-            sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
+            sanitized,
+            sort_keys=True,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            allow_nan=False
         ).encode("utf-8")
 
+        # 3. Returns the hashlib.sha256(json_bytes).hexdigest().
         return hashlib.sha256(json_bytes).hexdigest()
 
 
@@ -125,7 +126,6 @@ def compute_hash(obj: Any) -> str:
     """
     Computes a SHA-256 hash of a JSON-serializable object using the CanonicalHashingStrategy (RFC 8785).
     """
-    # Inherently use CanonicalHashingStrategy
     return CanonicalHashingStrategy().compute_hash(obj)
 
 
@@ -219,7 +219,12 @@ def verify_merkle_proof(
 
     for i, payload in enumerate(sorted_trace):
         # Verify Content Integrity
-        computed_hash = compute_hash(payload)
+        try:
+            computed_hash = compute_hash(payload)
+        except (TypeError, ValueError):
+            # If payload contains non-deterministic data, verification fails
+            return False
+
         stored_hash = payload.get("execution_hash")
 
         if not stored_hash or stored_hash != computed_hash:
