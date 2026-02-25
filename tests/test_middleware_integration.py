@@ -1,5 +1,6 @@
 # tests/test_middleware_integration.py
 
+import os
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,50 @@ FAILING_MODULE_CODE = """
 raise ValueError("Module load failed")
 """
 
+DEPENDENCY_CODE = """
+def helper():
+    return True
+"""
+
+MIDDLEWARE_WITH_DEP_CODE = """
+import dependency
+class MyMiddleware:
+    def intercept_request(self, context, request):
+        dependency.helper()
+"""
+
+FAIL_DEP_CODE = """
+raise ValueError("Dependency failed")
+"""
+
+MIDDLEWARE_FAIL_DEP_CODE = """
+import fail_dep
+class MyMiddleware:
+    def intercept_request(self, context, request):
+        pass
+"""
+
+IMPORT_BAD_LINK_CODE = """
+import bad_link
+class MyMiddleware:
+    def intercept_request(self, context, request):
+        pass
+"""
+
+IMPORT_BAD_PKG_CODE = """
+import bad_pkg
+class MyMiddleware:
+    def intercept_request(self, context, request):
+        pass
+"""
+
+IMPORT_LOOP_CODE = """
+import loop_link
+class MyMiddleware:
+    def intercept_request(self, context, request):
+        pass
+"""
+
 
 @pytest.fixture
 def workspace(tmp_path: Path) -> Path:
@@ -47,6 +92,13 @@ def workspace(tmp_path: Path) -> Path:
         "not_class.py": NOT_A_CLASS_CODE,
         "missing_class.py": MISSING_CLASS_CODE,
         "failing.py": FAILING_MODULE_CODE,
+        "dependency.py": DEPENDENCY_CODE,
+        "with_dep.py": MIDDLEWARE_WITH_DEP_CODE,
+        "fail_dep.py": FAIL_DEP_CODE,
+        "with_fail_dep.py": MIDDLEWARE_FAIL_DEP_CODE,
+        "import_bad_link.py": IMPORT_BAD_LINK_CODE,
+        "import_bad_pkg.py": IMPORT_BAD_PKG_CODE,
+        "import_loop.py": IMPORT_LOOP_CODE,
     }
 
     for name, content in files.items():
@@ -129,8 +181,6 @@ def test_loader_duck_typing_failure(workspace: Path) -> None:
 
 def test_loader_security_violation(workspace: Path) -> None:
     # Create a file outside the workspace
-    # Since tmp_path is a temp directory, workspace.parent is the base temp dir.
-    # We create a file there.
     outside = workspace.parent / "outside.py"
     outside.write_text(VALID_MIDDLEWARE_CODE)
     outside.chmod(0o600)
@@ -141,7 +191,6 @@ def test_loader_security_violation(workspace: Path) -> None:
 
 
 def test_loader_file_not_found(workspace: Path) -> None:
-    # Add match parameter to make pytest.raises more specific
     with pytest.raises(ValueError, match="Middleware file not found"):
         load_middleware_from_ref("middlewares/nonexistent.py:MyMiddleware", workspace)
 
@@ -159,3 +208,68 @@ def test_loader_class_not_found_in_module(workspace: Path) -> None:
 def test_loader_execution_failure(workspace: Path) -> None:
     with pytest.raises(ValueError, match="Failed to execute middleware code"):
         load_middleware_from_ref("middlewares/failing.py:MyMiddleware", workspace)
+
+
+def test_loader_cleanup_coverage(workspace: Path) -> None:
+    # Import dependency, succeeds. Covers success cleanup loop.
+    cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)
+    assert cls.__name__ == "MyMiddleware"
+
+
+def test_loader_cleanup_exception_coverage(workspace: Path) -> None:
+    # Import fail dependency. Covers exception cleanup loop.
+    with pytest.raises(ValueError, match="Failed to execute middleware code"):
+        load_middleware_from_ref("middlewares/with_fail_dep.py:MyMiddleware", workspace)
+
+
+def test_loader_symlink_file_escape(workspace: Path) -> None:
+    if os.name == "nt":
+        pytest.skip("Symlinks not reliable on Windows tests")
+
+    outside = workspace.parent / "target.py"
+    outside.write_text("x = 1")
+    outside.chmod(0o600)
+
+    link = workspace / "middlewares" / "bad_link.py"
+    try:
+        link.symlink_to(outside)
+    except OSError:
+        pytest.skip("Symlinks not supported")
+
+    with pytest.raises(SecurityJailViolationError, match="outside jail"):
+        load_middleware_from_ref("middlewares/import_bad_link.py:MyMiddleware", workspace)
+
+
+def test_loader_symlink_pkg_escape(workspace: Path) -> None:
+    if os.name == "nt":
+        pytest.skip("Symlinks not reliable on Windows tests")
+
+    outside_dir = workspace.parent / "outside_pkg"
+    outside_dir.mkdir()
+    (outside_dir / "__init__.py").write_text("y = 1")
+
+    pkg_dir = workspace / "middlewares" / "bad_pkg"
+    pkg_dir.mkdir()
+    link = pkg_dir / "__init__.py"
+    try:
+        link.symlink_to(outside_dir / "__init__.py")
+    except OSError:
+        pytest.skip("Symlinks not supported")
+
+    with pytest.raises(SecurityJailViolationError, match="outside jail"):
+        load_middleware_from_ref("middlewares/import_bad_pkg.py:MyMiddleware", workspace)
+
+
+def test_loader_symlink_loop(workspace: Path) -> None:
+    if os.name == "nt":
+        pytest.skip("Symlinks not reliable on Windows tests")
+
+    link = workspace / "middlewares" / "loop_link.py"
+    try:
+        link.symlink_to(link)  # Self loop
+    except OSError:
+        pytest.skip("Symlinks not supported")
+
+    # This might raise RuntimeError or SecurityJailViolationError depending on impl
+    with pytest.raises((RuntimeError, SecurityJailViolationError)):
+        load_middleware_from_ref("middlewares/import_loop.py:MyMiddleware", workspace)
