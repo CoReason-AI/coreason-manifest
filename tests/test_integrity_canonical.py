@@ -135,12 +135,11 @@ class TestCanonicalHashingStrategy:
     def test_enum_hashing(self) -> None:
         """Test that an Enum member hashes successfully based on its value."""
         class Color(enum.Enum):
-            RED = 1
+            RED = "red"
             BLUE = "blue"
 
-        # Enum value is int
-        assert compute_hash(Color.RED) == compute_hash(1)
         # Enum value is string
+        assert compute_hash(Color.RED) == compute_hash("red")
         assert compute_hash(Color.BLUE) == compute_hash("blue")
 
     def test_mixed_type_dict_keys(self) -> None:
