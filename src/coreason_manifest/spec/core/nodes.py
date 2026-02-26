@@ -5,7 +5,9 @@ from pydantic import Field, model_validator
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
+from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree
 from coreason_manifest.spec.core.engines import (
+    DecompositionReasoning,
     FastPath,
     ModelRef,
     Optimizer,
@@ -86,6 +88,9 @@ class AgentNode(Node):
         description="Local escalation rules for this agent.",
         examples=[{"condition": "confidence < 0.5", "role": "supervisor"}],
     )
+    immutable: bool = Field(
+        False, description="If True, this node represents a fixed recipe step that cannot be altered by planners."
+    )
 
 
 class SwitchNode(Node):
@@ -157,6 +162,89 @@ class PlannerNode(Node):
         description="JSON Schema for the plan output.",
         examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
     )
+
+    def process(
+        self,
+        input: Any,
+        context: dict[str, Any],
+        constraints: list[str | AtomicSkill] | None = None,
+    ) -> Any:
+        """
+        Executes the planning logic to produce a PlanTree, and then compiles it into a graph representation.
+        """
+        if constraints is None:
+            constraints = []
+
+        # 1. Select Engine (Mocking selection logic, using default configuration if available)
+        # In a real system, this might come from the node configuration or be injected via context
+        # We avoid hardcoding "gpt-4" by allowing the model to be specified in context or defaulting to a generic placeholder
+        model_id = context.get("model", "default_model")
+        engine = DecompositionReasoning(
+             model=model_id,
+             decomposition_breadth=3
+        )
+
+        # 1.5 Extract constraints from input if available
+        # This allows users to pass dynamic constraints at runtime via the input payload
+        if isinstance(input, dict) and "constraints" in input:
+            dynamic_constraints = input.get("constraints")
+            if isinstance(dynamic_constraints, list):
+                constraints.extend(dynamic_constraints)
+
+        # 2. Decompose Goal
+        plan: PlanTree = engine.decompose(
+            goal=self.goal,
+            context=context,
+            strategy="auto",
+            constraints=constraints
+        )
+
+        # 3. Compile Plan to Graph (FlowSpec)
+        return self._compile_to_graph(plan)
+
+    def _compile_to_graph(self, plan: PlanTree) -> dict[str, Any]:
+        """
+        Compiles the PlanTree into a flat list of nodes and edges (simple graph representation),
+        tagging immutable nodes as locked.
+        """
+        graph_nodes = []
+        graph_edges = []
+
+        def traverse(node: PlanTree):
+             if isinstance(node, AtomicSkill):
+                 graph_nodes.append({
+                     "id": node.id,
+                     "description": node.description,
+                     "locked": node.immutable,  # KEY: Transfer immutable flag to locked
+                     "tool_ref": node.tool_ref,
+                     "params": node.params
+                 })
+             elif isinstance(node, list):
+                 for child in node:
+                     if isinstance(child, dict): # Handle legacy Step dicts
+                          graph_nodes.append({
+                              "id": child.get("id"),
+                              "description": child.get("description"),
+                              "locked": False, # Legacy steps are mutable by default
+                              "tool_ref": child.get("tool_ref"),
+                              "params": {}
+                          })
+                     else:
+                          traverse(child)
+
+        traverse(plan)
+
+        # Generate sequential edges for linear execution
+        # A real planner might generate branching edges based on plan structure
+        for i in range(len(graph_nodes) - 1):
+            source = graph_nodes[i]["id"]
+            target = graph_nodes[i+1]["id"]
+            graph_edges.append({
+                "from": source,
+                "to": target
+            })
+
+        return {"nodes": graph_nodes, "edges": graph_edges}
 
 
 class SteeringConfig(CoreasonModel):

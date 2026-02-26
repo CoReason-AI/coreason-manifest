@@ -14,6 +14,7 @@ from typing import Annotated, Any
 from pydantic import BeforeValidator, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.contracts import PlanTree, Step, AtomicSkill
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
@@ -147,3 +148,19 @@ class MiddlewareDef(CoreasonModel):
         description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
     )
     config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")
+
+__all__ = [
+    "AtomicSkill",
+    "CoercibleStringList",
+    "GitSHA",
+    "MiddlewareDef",
+    "MiddlewareID",
+    "NodeID",
+    "PlanTree",
+    "ProfileID",
+    "RiskLevel",
+    "SemanticVersion",
+    "Step",
+    "ToolID",
+    "VariableID",
+]

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator, PrivateAttr
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
@@ -21,7 +21,7 @@ from coreason_manifest.spec.core.nodes import (
 from coreason_manifest.spec.core.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.spec.interop.compliance import RemediationAction
-from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode, SemanticFault, FaultSeverity, RecoveryAction
 from coreason_manifest.utils.io import SecurityViolationError
 
 
@@ -151,6 +151,33 @@ class Graph(CoreasonModel):
     nodes: dict[str, AnyNode]
     edges: list[Edge]
     entry_point: NodeID | None = None
+
+    # Store dynamic locks (runtime state, but modeled here for contract)
+    # In a real runtime, this might be separate from the static spec
+    _locked_nodes: set[str] = PrivateAttr(default_factory=set)
+
+    def inject_subgraph(self, node_id: str, subgraph_spec: dict[str, Any]) -> None:
+        """
+        Dynamically injects a subgraph.
+        STRICT GOVERNANCE: Cannot mutate locked nodes.
+        """
+        # 1. Governance Check
+        if node_id in self._locked_nodes:
+            raise ManifestError(
+                fault=SemanticFault(
+                    error_code="CRSN-GOV-IMMUTABLE-VIOLATION",
+                    message=f"Cannot mutate immutable step: {node_id}",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT
+                )
+            )
+
+        # 2. Mock Injection Logic (In a real system, this would splice the graph)
+        # We just iterate and add locked nodes to the lock set for future checks
+        new_nodes = subgraph_spec.get("nodes", [])
+        for n in new_nodes:
+            if n.get("locked", False):
+                self._locked_nodes.add(n["id"])
 
 
 class FlowInterface(CoreasonModel):

@@ -574,6 +574,12 @@ class NewGraphFlow(BaseFlowBuilder):
 
         graph = Graph(nodes=self._nodes, edges=self._edges, entry_point=ep)
 
+        # KEY: All nodes in a static GraphFlow built via this builder are considered
+        # "Fixed Recipes" and should be immutable by default in the runtime.
+        # We simulate this by pre-populating the lock set.
+        for node_id in self._nodes.keys():
+            graph._locked_nodes.add(node_id)
+
         return GraphFlow(
             kind="GraphFlow",
             status="published",

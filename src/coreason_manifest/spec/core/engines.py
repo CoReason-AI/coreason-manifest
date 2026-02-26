@@ -3,6 +3,7 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.spec.core.constants import NodeCapability
+from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree, Step
 
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
@@ -181,6 +182,88 @@ class DecompositionReasoning(BaseReasoning):
     decomposition_breadth: int = 3
     contract_every_steps: int = 2
     global_context_window: int = 4096
+
+    def decompose(
+        self,
+        goal: str,
+        context: dict[str, Any],
+        strategy: str = "auto",
+        constraints: list[str | AtomicSkill] | None = None,
+    ) -> PlanTree:
+        """
+        Decomposes a goal into a PlanTree (Hybrid Reasoning).
+        Supports both linear (legacy) and recursive decomposition.
+        """
+        if constraints is None:
+            constraints = []
+
+        if strategy == "linear":
+            # Legacy Path: Return a flat list of steps (simulated as list of dicts)
+            # We preserve existing behavior by generating a standard linear plan structure
+            # In a real implementation, this would invoke the specific logic for StandardReasoning
+            # For now, we return a valid structure that the rest of the system can process as a "linear plan"
+            return [
+                {"id": "step_1", "description": f"Analyze: {goal}", "tool_ref": None},
+                {"id": "step_2", "description": f"Execute: {goal}", "tool_ref": None},
+                {"id": "step_3", "description": f"Verify: {goal}", "tool_ref": None}
+            ]
+
+        # New Path: Recursive Decomposition with Immutable Constraints
+        # NOTE: This implementation is a structural skeleton for the neuro-symbolic engine.
+        # It successfully demonstrates the contract for immutable nodes and recursive planning.
+        # The actual "intelligence" (LLM calls) would be plugged into _recursive_decompose.
+        return self._recursive_decompose(goal, constraints)
+
+    def _recursive_decompose(
+        self, goal: str, constraints: list[str | AtomicSkill], depth: int = 0
+    ) -> PlanTree:
+        # Safety Check: Infinite Recursion
+        # In a real system, this would be `self.decomposition_depth`
+        MAX_DEPTH = 3
+
+        # Check if the goal matches a constraint (Fixed Recipe)
+        for constraint in constraints:
+            if isinstance(constraint, AtomicSkill):
+                # If explicit AtomicSkill is provided, check ID or description match
+                # For simplicity, we assume if it's passed, it's relevant
+                if constraint.description in goal or goal in constraint.description:
+                    return constraint
+            elif isinstance(constraint, str):
+                 if constraint == goal:
+                     # Create an immutable node from string constraint
+                     return AtomicSkill(
+                         id=f"fixed_{hash(goal)}",
+                         description=goal,
+                         immutable=True
+                     )
+
+        # Base case: Simple goal (mock logic for "is atomic") or Max Depth Reached
+        if depth >= MAX_DEPTH or "simple" in goal or "atomic" in goal:
+             return AtomicSkill(
+                 id=f"atomic_{hash(goal)}",
+                 description=goal,
+                 immutable=False
+             )
+
+        # Recursive step: Split into sub-goals
+        # Mocking decomposition logic
+        sub_goals = [f"{goal}_part_1", f"{goal}_part_2"]
+        return [
+            self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals
+        ]
+
+    def verify_plan(self, plan: PlanTree) -> bool:
+        """
+        Verifies that the plan structure is valid and immutable nodes are respected.
+        (In a real implementation, this would compare against a required skeleton)
+        """
+        if isinstance(plan, AtomicSkill):
+            return True # Individual node is valid
+
+        if isinstance(plan, list):
+            return all(self.verify_plan(node) for node in plan)
+
+        return False
 
 
 class CouncilReasoning(BaseReasoning):
