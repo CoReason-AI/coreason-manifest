@@ -186,7 +186,7 @@ class DecompositionReasoning(BaseReasoning):
     def decompose(
         self,
         goal: str,
-        context: dict[str, Any],
+        _context: dict[str, Any],
         strategy: str = "auto",
         constraints: list[str | AtomicSkill] | None = None,
     ) -> PlanTree:
@@ -219,7 +219,7 @@ class DecompositionReasoning(BaseReasoning):
     ) -> PlanTree:
         # Safety Check: Infinite Recursion
         # In a real system, this would be `self.decomposition_depth`
-        MAX_DEPTH = 3
+        max_depth = 3
 
         # Check if the goal matches a constraint (Fixed Recipe)
         for constraint in constraints:
@@ -228,17 +228,16 @@ class DecompositionReasoning(BaseReasoning):
                 # For simplicity, we assume if it's passed, it's relevant
                 if constraint.description in goal or goal in constraint.description:
                     return constraint
-            elif isinstance(constraint, str):
-                 if constraint == goal:
-                     # Create an immutable node from string constraint
-                     return AtomicSkill(
-                         id=f"fixed_{hash(goal)}",
-                         description=goal,
-                         immutable=True
-                     )
+            elif isinstance(constraint, str) and constraint == goal:
+                 # Create an immutable node from string constraint
+                 return AtomicSkill(
+                     id=f"fixed_{hash(goal)}",
+                     description=goal,
+                     immutable=True
+                 )
 
         # Base case: Simple goal (mock logic for "is atomic") or Max Depth Reached
-        if depth >= MAX_DEPTH or "simple" in goal or "atomic" in goal:
+        if depth >= max_depth or "simple" in goal or "atomic" in goal:
              return AtomicSkill(
                  id=f"atomic_{hash(goal)}",
                  description=goal,

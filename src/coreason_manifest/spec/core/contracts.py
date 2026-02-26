@@ -1,9 +1,9 @@
-from typing import Any, List, Union, TypeAlias
+from typing import Any, List, Union
 from pydantic import Field
 from coreason_manifest.spec.common_base import CoreasonModel
 
 # Backward compatibility for Step
-Step: TypeAlias = dict[str, Any]
+type Step = dict[str, Any]
 
 class AtomicSkill(CoreasonModel):
     """
@@ -17,4 +17,4 @@ class AtomicSkill(CoreasonModel):
 
 # Recursive definition for a PlanTree
 # A PlanTree can be a single AtomicSkill, a list of steps (linear plan), or a nested structure
-PlanTree: TypeAlias = Union[AtomicSkill, List[Union["PlanTree", Step]]]
+type PlanTree = Union[AtomicSkill, List[Union["PlanTree", Step]]]

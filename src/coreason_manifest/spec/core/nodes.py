@@ -165,7 +165,7 @@ class PlannerNode(Node):
 
     def process(
         self,
-        input: Any,
+        input_payload: Any,
         context: dict[str, Any],
         constraints: list[str | AtomicSkill] | None = None,
     ) -> Any:
@@ -186,15 +186,15 @@ class PlannerNode(Node):
 
         # 1.5 Extract constraints from input if available
         # This allows users to pass dynamic constraints at runtime via the input payload
-        if isinstance(input, dict) and "constraints" in input:
-            dynamic_constraints = input.get("constraints")
+        if isinstance(input_payload, dict) and "constraints" in input_payload:
+            dynamic_constraints = input_payload.get("constraints")
             if isinstance(dynamic_constraints, list):
                 constraints.extend(dynamic_constraints)
 
         # 2. Decompose Goal
         plan: PlanTree = engine.decompose(
             goal=self.goal,
-            context=context,
+            _context=context,
             strategy="auto",
             constraints=constraints
         )
