@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -30,6 +31,8 @@ def test_agent_builder_partial() -> None:
     ab.with_identity("role", "persona")
     # Missing reasoning/fast_path is allowed by constructor but let's check basic build
     node = ab.build()
+    from coreason_manifest.spec.core.nodes import CognitiveProfile
+    assert isinstance(node.profile, CognitiveProfile)
     assert node.profile.role == "role"
 
 
@@ -104,7 +107,10 @@ def test_validator_kill_switch_weight_check() -> None:
     # Critical tools require description
     tool = ToolCapability(name="nuke", risk_level=RiskLevel.CRITICAL, description="Nukes the DB")
     # Mocking just enough
-    GraphFlow.model_construct(governance=Governance(max_risk_level=RiskLevel.STANDARD), graph=None)
+    GraphFlow.model_construct(
+        governance=Governance(max_risk_level=RiskLevel.STANDARD),
+        graph=None,  # type: ignore # Mocking
+    )
 
     # We call the internal validator helper via public API if possible, or mock
     # Public API validate_flow -> _validate_kill_switch
@@ -123,7 +129,11 @@ def test_validator_kill_switch_weight_check() -> None:
     # Mock get_unified_topology to return nothing so we focus on definitions scan
     with patch("coreason_manifest.utils.validator.get_unified_topology", return_value=([], [])):
         errors = _validate_kill_switch(
-            GraphFlow.model_construct(governance=Governance(max_risk_level=RiskLevel.STANDARD), definitions=defs)
+            GraphFlow.model_construct(
+                governance=Governance(max_risk_level=RiskLevel.STANDARD),
+                definitions=defs,
+                graph=None,  # type: ignore # Mocking
+            )
         )
 
     assert any("exceeds the global max_risk_level" in e.message for e in errors)
@@ -244,7 +254,7 @@ def test_integrity_pydantic_exclude() -> None:
 
 
 class MockDuckModel:
-    def model_dump(self, **_kwargs):
+    def model_dump(self, **_kwargs: dict[str, Any]) -> dict[str, bool]:
         return {"duck": True}
 
 
@@ -322,7 +332,7 @@ def test_validator_kill_switch_no_governance() -> None:
     # utils/validator.py line 773
     # Call _validate_kill_switch with governance=None
 
-    flow = GraphFlow.model_construct(governance=None, graph=None)
+    flow = GraphFlow.model_construct(governance=None, graph=None)  # type: ignore # Mocking
 
     errors = _validate_kill_switch(flow)
     assert len(errors) == 0
@@ -396,6 +406,9 @@ def test_builder_additional_methods() -> None:
     # Coverage for builder.py: with_reasoning, with_fast_path etc.
     # Lines 55-73, 96-97, 101-102 etc.
     from coreason_manifest.builder import AgentBuilder
+    from coreason_manifest.spec.core.engines import FastPath, StandardReasoning
+    from coreason_manifest.spec.core.nodes import CognitiveProfile
+    from coreason_manifest.spec.core.resilience import FallbackStrategy, RetryStrategy
 
     ab = AgentBuilder("a1").with_identity("r", "p")
     ab.with_reasoning("gpt-4", 10, 0.9)
@@ -407,15 +420,20 @@ def test_builder_additional_methods() -> None:
 
     node = ab.build()
 
+    assert isinstance(node.profile, CognitiveProfile)
+    assert isinstance(node.profile.reasoning, StandardReasoning)
     assert node.profile.reasoning.thoughts_max == 10
+    assert isinstance(node.profile.fast_path, FastPath)
     assert node.profile.fast_path.caching is False
     assert "t1" in node.tools
+    assert isinstance(node.resilience, RetryStrategy)
     assert node.resilience.max_attempts == 3
 
     # Test fallback strategy
     ab2 = AgentBuilder("a2").with_identity("r", "p")
     ab2.with_resilience(retries=0, strategy="fallback", fallback_id="fb")
     node2 = ab2.build()
+    assert isinstance(node2.resilience, FallbackStrategy)
     assert node2.resilience.fallback_node_id == "fb"
 
 
@@ -460,11 +478,11 @@ def test_resilience_normalize_error_codes() -> None:
     s = RetryStrategy(max_attempts=1)
 
     # Int input -> string list
-    eh1 = ErrorHandler(match_error_code=404, strategy=s)
+    eh1 = ErrorHandler(match_error_code=404, strategy=s)  # type: ignore # Testing validation logic
     assert eh1.match_error_code == ["404"]
 
     # List input -> string list
-    eh2 = ErrorHandler(match_error_code=[404, "500"], strategy=s)
+    eh2 = ErrorHandler(match_error_code=[404, "500"], strategy=s)  # type: ignore # Testing validation logic
     assert eh2.match_error_code == ["404", "500"]
 
     # None input
@@ -473,7 +491,7 @@ def test_resilience_normalize_error_codes() -> None:
 
     # Invalid input type (coverage for 'return v' fallback)
     with pytest.raises(ValidationError):
-        ErrorHandler(match_error_code=3.14, strategy=s)
+        ErrorHandler(match_error_code=3.14, strategy=s)  # type: ignore # Testing validation logic
 
 
 def test_resilience_trace_config() -> None:
