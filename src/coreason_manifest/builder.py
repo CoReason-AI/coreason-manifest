@@ -27,7 +27,6 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
-    VariableDef,
 )
 from coreason_manifest.spec.core.governance import (
     CircuitBreaker,
@@ -561,7 +560,7 @@ class NewGraphFlow(BaseFlowBuilder):
         )
         return self
 
-    def set_blackboard(self, variables: dict[str, VariableDef], persistence: bool = False) -> "NewGraphFlow":
+    def set_blackboard(self, variables: dict[str, dict[str, Any]], persistence: bool = False) -> "NewGraphFlow":
         """Configures the shared memory blackboard."""
         self.blackboard = Blackboard(variables=variables, persistence=persistence)
         return self
