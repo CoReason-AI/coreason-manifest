@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree
+from coreason_manifest.spec.core.contracts import ActionNode, AtomicSkill, PlanTree, StrategyNode
 
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
@@ -240,7 +240,10 @@ class DecompositionReasoning(BaseReasoning):
         # Recursive step: Split into sub-goals
         # Mocking decomposition logic
         sub_goals = [f"{goal}_part_1", f"{goal}_part_2"]
-        return [self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals]
+        # CRITICAL FIX: Pass constraints down to children to maintain "Immutable Recipe" logic
+        return [
+            self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals
+        ]
 
     def verify_plan(self, plan: PlanTree) -> bool:
         """
@@ -249,6 +252,14 @@ class DecompositionReasoning(BaseReasoning):
         """
         if isinstance(plan, AtomicSkill):
             return True  # Individual node is valid
+
+        if isinstance(plan, ActionNode):
+            # Verify constraints on ActionNode if any
+            return True
+
+        if isinstance(plan, StrategyNode):
+            # Verify children
+            return self.verify_plan(plan.children)
 
         if isinstance(plan, list):
             return all(self.verify_plan(node) for node in plan)

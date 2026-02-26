@@ -15,12 +15,15 @@ from pydantic import BeforeValidator, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.contracts import (
+    ActionNode,
     AtomicSkill,
+    Constraint,
     EdgeSpec,
     FlowSpec,
     NodeSpec,
     PlanTree,
     Step,
+    StrategyNode,
 )
 
 # =========================================================================
@@ -158,8 +161,10 @@ class MiddlewareDef(CoreasonModel):
 
 
 __all__ = [
+    "ActionNode",
     "AtomicSkill",
     "CoercibleStringList",
+    "Constraint",
     "EdgeSpec",
     "FlowSpec",
     "GitSHA",
@@ -172,6 +177,7 @@ __all__ = [
     "RiskLevel",
     "SemanticVersion",
     "Step",
+    "StrategyNode",
     "ToolID",
     "VariableID",
 ]

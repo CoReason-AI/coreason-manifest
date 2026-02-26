@@ -6,11 +6,13 @@ from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
 from coreason_manifest.spec.core.contracts import (
+    ActionNode,
     AtomicSkill,
     EdgeSpec,
     FlowSpec,
     NodeSpec,
     PlanTree,
+    StrategyNode,
 )
 from coreason_manifest.spec.core.engines import (
     DecompositionReasoning,
@@ -215,11 +217,27 @@ class PlannerNode(Node):
                     NodeSpec(
                         id=node.id,
                         description=node.description,
-                        locked=node.immutable,  # KEY: Transfer immutable flag to locked
+                        locked=node.immutable,
                         tool_ref=node.tool_ref,
                         params=node.params,
                     )
                 )
+            elif isinstance(node, ActionNode):
+                graph_nodes.append(
+                    NodeSpec(
+                        id=node.id,
+                        description=node.description,
+                        locked=node.skill.immutable,
+                        tool_ref=node.skill.tool_ref,
+                        params=node.inputs,
+                    )
+                )
+            elif isinstance(node, StrategyNode):
+                # StrategyNode is a container, traverse its children
+                # We might want to represent StrategyNode itself in the graph in future
+                # but for execution, we need the leaves (Actions)
+                for child in node.children:
+                    traverse(child)
             elif isinstance(node, list):
                 for child in node:
                     if isinstance(child, dict):  # Handle legacy Step dicts
