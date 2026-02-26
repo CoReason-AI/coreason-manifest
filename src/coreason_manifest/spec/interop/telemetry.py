@@ -121,6 +121,45 @@ class HumanSteeringEvent(AntibodyBase):
     human_identity: str = Field(..., description="ID/Email of the human operator.")
 
 
+class MemoryMutationEvent(AntibodyBase):
+    """
+    Telemetry record for memory mutations (ADD, UPDATE, DELETE, EVICT, CONSOLIDATE)
+    within the 4-tier memory subsystem. Ensures the Merkle DAG lineage isn't broken
+    by implicit state changes.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    request_id: str | None = Field(
+        default_factory=lambda: str(uuid4()), description="Unique ID for this mutation event."
+    )
+    parent_request_id: str = Field(..., description="The execution ID that triggered this mutation.")
+    root_request_id: str = Field(..., description="The trace ID.")
+    tier: Literal["working", "episodic", "semantic", "procedural"] = Field(
+        ...,
+        description="The memory tier affected.",
+    )
+    operation: Literal[
+        "ADD",
+        "UPDATE",
+        "DELETE",
+        "EVICT",
+        "CONSOLIDATE",
+    ] = Field(
+        ...,
+        description="The type of mutation.",
+    )
+    mutation_payload: dict[str, Any] = Field(..., description="The state diff or payload of the mutation.")
+    timestamp: datetime = Field(..., description="When the mutation occurred.")
+
+    # --- VERITAS INTEGRITY RESTORATION ---
+    hash_version: Literal["v2"] = Field(default="v2", description="Cryptographic hashing protocol version.")
+    mutation_hash: Annotated[str | None, Field(description="SHA-256 hash of the mutation payload.")] = None
+    parent_hash: str | None = Field(default=None, description="Hash of the preceding execution state.")
+
+    _hash_exclude_: ClassVar[set[str]] = {"mutation_hash"}
+
+
 class ExecutionSnapshot(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
