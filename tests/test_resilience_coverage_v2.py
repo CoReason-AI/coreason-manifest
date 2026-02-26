@@ -13,6 +13,7 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
+from coreason_manifest.utils.validator import _extract_strategies
 
 
 def test_resilience_strategy_name_slug() -> None:
@@ -133,3 +134,18 @@ def test_supervision_policy_limits() -> None:
     # Strategy max > global max
     with pytest.raises(ValidationError, match="lower than a strategy limit"):
         SupervisionPolicy(handlers=[], default_strategy=RetryStrategy(max_attempts=20), max_cumulative_actions=10)
+
+
+def test_validator_supervision_default() -> None:
+    pol = SupervisionPolicy(handlers=[], default_strategy=RetryStrategy(max_attempts=3))
+    strategies = _extract_strategies(pol)
+    assert len(strategies) == 1
+    assert isinstance(strategies[0], RetryStrategy)
+
+
+def test_error_handler_regex_none() -> None:
+    # Explicitly test None for match_pattern coverage
+    h = ErrorHandler(match_error_code=["404"], strategy=RetryStrategy(max_attempts=1))
+    assert h.match_pattern is None
+    # Validate regex with None directly to ensure coverage of "if v:" check
+    assert ErrorHandler.validate_regex(None) is None

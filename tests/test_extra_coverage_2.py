@@ -1,7 +1,9 @@
 from datetime import datetime
 
+import pytest
+
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
-from coreason_manifest.utils.integrity import verify_merkle_proof
+from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 
 
 def test_telemetry_parent_hash_consistency() -> None:
@@ -37,3 +39,25 @@ def test_integrity_verify_merkle_proof_exception() -> None:
             raise RuntimeError("Boom")
 
     assert verify_merkle_proof([BadObj()]) is False
+
+
+def test_telemetry_orphan_trace() -> None:
+    # parent_request_id without root_request_id
+    with pytest.raises(ValueError, match="Orphaned trace detected"):
+        NodeExecution(
+            node_id="n",
+            state=NodeState.COMPLETED,
+            inputs={},
+            outputs={},
+            timestamp=datetime.now(),
+            duration_ms=1,
+            parent_request_id="p",
+            root_request_id=None,
+        )
+
+
+def test_integrity_nan_inf() -> None:
+    with pytest.raises(ValueError, match="NaN and Infinity are not allowed"):
+        compute_hash(float("nan"))
+    with pytest.raises(ValueError, match="NaN and Infinity are not allowed"):
+        compute_hash(float("inf"))

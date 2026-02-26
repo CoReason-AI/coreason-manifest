@@ -169,3 +169,55 @@ def test_visualizer_snapshot() -> None:
 
     rf = to_react_flow(flow, snapshot=snap)
     assert rf["nodes"][0]["data"]["state"] == "COMPLETED"
+
+
+def test_visualizer_react_flow_conditional() -> None:
+    n1 = PlaceholderNode(id="n1", type="placeholder", required_capabilities=[])
+    n2 = PlaceholderNode(id="n2", type="placeholder", required_capabilities=[])
+
+    graph = Graph(
+        nodes={"n1": n1, "n2": n2}, edges=[Edge(from_node="n1", to_node="n2", condition="x>1")], entry_point="n1"
+    )
+    flow = GraphFlow.model_construct(kind="GraphFlow", metadata=FlowMetadata(name="t", version="1"), graph=graph)
+
+    rf = to_react_flow(flow)
+    assert rf["edges"][0]["label"] == "x>1"
+
+
+def test_visualizer_layout_unreachable_cycle() -> None:
+    # Root R
+    r = PlaceholderNode(id="R", type="placeholder", required_capabilities=[])
+    # Cycle A <-> B (disconnected from R)
+    a = PlaceholderNode(id="A", type="placeholder", required_capabilities=[])
+    b = PlaceholderNode(id="B", type="placeholder", required_capabilities=[])
+
+    graph = Graph(
+        nodes={"R": r, "A": a, "B": b},
+        edges=[Edge(from_node="A", to_node="B"), Edge(from_node="B", to_node="A")],
+        entry_point="R",
+    )
+
+    flow = GraphFlow.model_construct(kind="GraphFlow", metadata=FlowMetadata(name="t", version="1"), graph=graph)
+
+    rf = to_react_flow(flow)
+
+    r_pos = next(n["position"]["x"] for n in rf["nodes"] if n["id"] == "R")
+    a_pos = next(n["position"]["x"] for n in rf["nodes"] if n["id"] == "A")
+    b_pos = next(n["position"]["x"] for n in rf["nodes"] if n["id"] == "B")
+
+    assert r_pos == 0
+    # They should be pushed to a higher rank
+    assert a_pos >= 300
+    assert b_pos >= 300
+
+
+def test_visualizer_unknown_flow_type(monkeypatch) -> None:
+    class DummyFlow:
+        pass
+
+    # Mock get_unified_topology to return empty list/tuple
+    monkeypatch.setattr("coreason_manifest.utils.visualizer.get_unified_topology", lambda x: ([], []))
+
+    # ignore type checker
+    res = to_mermaid(DummyFlow())  # type: ignore
+    assert res == ""
