@@ -136,3 +136,55 @@ def test_telemetry_human_steering_event() -> None:
     )
     assert event.checkpoint_id == "chk_1"
     assert event.human_identity == "user@example.com"
+
+
+def test_steering_config_validation() -> None:
+    # Test that allowed_targets is invalid if allow_variable_mutation is False
+    with pytest.raises(ManifestError) as excinfo:
+        SteeringConfig(allow_variable_mutation=False, allowed_targets=["var1"])
+    assert "SteeringConfig defines 'allowed_targets' but 'allow_variable_mutation' is False" in str(excinfo.value)
+
+    # Test valid case
+    cfg = SteeringConfig(allow_variable_mutation=True, allowed_targets=["var1"])
+    assert cfg.allow_variable_mutation is True
+    assert cfg.allowed_targets == ["var1"]
+
+    # Test valid case with no targets (implicitly allowed all)
+    cfg2 = SteeringConfig(allow_variable_mutation=True)
+    assert cfg2.allowed_targets is None
+
+
+def test_builder_supervision_limits() -> None:
+    # Test dynamic limit calculation in with_human_steering
+    builder = AgentBuilder("agent1").with_identity("role", "persona")
+
+    # Set a retry strategy with high attempts
+    builder.with_resilience(retries=15, strategy="retry")
+
+    # Upgrade to human steering
+    builder.with_human_steering(timeout=300)
+
+    node = builder.build()
+    assert isinstance(node.resilience, SupervisionPolicy)
+    # 15 retries + 1 escalation > 10, so limit should be 16
+    assert node.resilience.max_cumulative_actions == 16
+
+
+def test_builder_fallback_exposure() -> None:
+    builder = AgentBuilder("agent1").with_identity("role", "persona")
+    builder.with_human_steering(timeout=300, fallback_id="fallback_node")
+
+    node = builder.build()
+    # If it was upgraded to Supervision, we need to check the strategy inside handlers
+    # Or if it's direct EscalationStrategy (if no previous resilience)
+
+    if isinstance(node.resilience, EscalationStrategy):
+        assert node.resilience.fallback_node_id == "fallback_node"
+    elif isinstance(node.resilience, SupervisionPolicy):
+        # Find the escalation strategy
+        esc_handler = next(h for h in node.resilience.handlers if isinstance(h.strategy, EscalationStrategy))
+        assert isinstance(esc_handler.strategy, EscalationStrategy)
+        assert esc_handler.strategy.fallback_node_id == "fallback_node"
+
+        assert isinstance(node.resilience.default_strategy, EscalationStrategy)
+        assert node.resilience.default_strategy.fallback_node_id == "fallback_node"
