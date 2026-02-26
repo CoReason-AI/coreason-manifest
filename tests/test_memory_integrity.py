@@ -8,7 +8,7 @@ from coreason_manifest.spec.core.memory import (
 )
 from coreason_manifest.spec.interop.telemetry import MemoryMutationEvent
 
-def test_working_memory_boundaries():
+def test_working_memory_boundaries() -> None:
     """Test strict boundaries for WorkingMemoryConfig."""
     # Valid
     config = WorkingMemoryConfig(max_tokens=1024, enable_active_paging=True)
@@ -21,7 +21,7 @@ def test_working_memory_boundaries():
     with pytest.raises(ValidationError):
         WorkingMemoryConfig(max_tokens=-100, enable_active_paging=True)
 
-def test_episodic_memory_boundaries():
+def test_episodic_memory_boundaries() -> None:
     """Test strict boundaries for EpisodicMemoryConfig."""
     # Valid
     config = EpisodicMemoryConfig(salience_threshold=0.5, consolidation_interval_turns=10)
@@ -39,7 +39,7 @@ def test_episodic_memory_boundaries():
     with pytest.raises(ValidationError):
         EpisodicMemoryConfig(salience_threshold=0.5, consolidation_interval_turns=0)
 
-def test_memory_mutation_event_integrity():
+def test_memory_mutation_event_integrity() -> None:
     """Test MemoryMutationEvent with new integrity fields."""
     event = MemoryMutationEvent(
         parent_request_id=str(uuid4()),
