@@ -130,11 +130,17 @@ class MemoryMutationEvent(AntibodyBase):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    request_id: str | None = Field(default_factory=lambda: str(uuid4()), description="Unique ID for this mutation event.")
+    request_id: str | None = Field(
+        default_factory=lambda: str(uuid4()), description="Unique ID for this mutation event."
+    )
     parent_request_id: str = Field(..., description="The execution ID that triggered this mutation.")
     root_request_id: str = Field(..., description="The trace ID.")
-    tier: Literal["working", "episodic", "semantic", "procedural"] = Field(..., description="The memory tier affected.")
-    operation: Literal["ADD", "UPDATE", "DELETE", "EVICT", "CONSOLIDATE"] = Field(..., description="The type of mutation.")
+    tier: Literal["working", "episodic", "semantic", "procedural"] = Field(
+        ..., description="The memory tier affected."
+    )
+    operation: Literal["ADD", "UPDATE", "DELETE", "EVICT", "CONSOLIDATE"] = Field(
+        ..., description="The type of mutation."
+    )
     mutation_payload: dict[str, Any] = Field(..., description="The state diff or payload of the mutation.")
     timestamp: datetime = Field(..., description="When the mutation occurred.")
 
