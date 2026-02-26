@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -188,7 +189,7 @@ class DecompositionReasoning(BaseReasoning):
         goal: str,
         _context: dict[str, Any],
         strategy: str = "auto",
-        constraints: list[str | AtomicSkill] | None = None,
+        constraints: Sequence[str | AtomicSkill] | None = None,
     ) -> PlanTree:
         """
         Decomposes a goal into a PlanTree (Hybrid Reasoning).
@@ -214,7 +215,9 @@ class DecompositionReasoning(BaseReasoning):
         # The actual "intelligence" (LLM calls) would be plugged into _recursive_decompose.
         return self._recursive_decompose(goal, constraints)
 
-    def _recursive_decompose(self, goal: str, constraints: list[str | AtomicSkill], depth: int = 0) -> PlanTree:
+    def _recursive_decompose(
+        self, goal: str, constraints: Sequence[str | AtomicSkill], depth: int = 0
+    ) -> PlanTree:
         # Safety Check: Infinite Recursion
         # In a real system, this would be `self.decomposition_depth`
         max_depth = 3
