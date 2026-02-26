@@ -1,3 +1,5 @@
+import pytest
+
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.core.flow import (
     Edge,
@@ -178,7 +180,12 @@ def test_visualizer_react_flow_conditional() -> None:
     graph = Graph(
         nodes={"n1": n1, "n2": n2}, edges=[Edge(from_node="n1", to_node="n2", condition="x>1")], entry_point="n1"
     )
-    flow = GraphFlow.model_construct(kind="GraphFlow", metadata=FlowMetadata(name="t", version="1"), graph=graph)
+    flow = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="t", version="1"),
+        interface=FlowInterface(),
+        graph=graph,
+    )
 
     rf = to_react_flow(flow)
     assert rf["edges"][0]["label"] == "x>1"
@@ -197,7 +204,12 @@ def test_visualizer_layout_unreachable_cycle() -> None:
         entry_point="R",
     )
 
-    flow = GraphFlow.model_construct(kind="GraphFlow", metadata=FlowMetadata(name="t", version="1"), graph=graph)
+    flow = GraphFlow.model_construct(
+        kind="GraphFlow",
+        metadata=FlowMetadata(name="t", version="1"),
+        interface=FlowInterface(),
+        graph=graph,
+    )
 
     rf = to_react_flow(flow)
 
@@ -211,12 +223,12 @@ def test_visualizer_layout_unreachable_cycle() -> None:
     assert b_pos >= 300
 
 
-def test_visualizer_unknown_flow_type(monkeypatch) -> None:
+def test_visualizer_unknown_flow_type(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyFlow:
         pass
 
     # Mock get_unified_topology to return empty list/tuple
-    monkeypatch.setattr("coreason_manifest.utils.visualizer.get_unified_topology", lambda x: ([], []))
+    monkeypatch.setattr("coreason_manifest.utils.visualizer.get_unified_topology", lambda _x: ([], []))
 
     # ignore type checker
     res = to_mermaid(DummyFlow())  # type: ignore
