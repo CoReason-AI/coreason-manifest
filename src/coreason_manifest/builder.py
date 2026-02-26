@@ -154,14 +154,15 @@ class AgentBuilder:
             # Upgrade existing RecoveryStrategy to SupervisionPolicy
             # Preserving existing strategy for transient errors
             old_strategy = self.resilience
-            # cast to RecoveryStrategy for typing
-            old_strategy = cast("RecoveryStrategy", old_strategy)
 
-            # Defuse Time-Bomb: Dynamic limit calculation
+            # Dynamic limit calculation if max_attempts is available
             max_actions = 10
             if hasattr(old_strategy, "max_attempts"):
                 # Ensure global limit accommodates the retry strategy + 1 for escalation
-                max_actions = max(10, getattr(old_strategy, "max_attempts") + 1)
+                # Use getattr to avoid type checking issues with Union members that might not have max_attempts
+                attempts = getattr(old_strategy, "max_attempts", 0)
+                if isinstance(attempts, int):
+                    max_actions = max(10, attempts + 1)
 
             self.resilience = SupervisionPolicy(
                 handlers=[
