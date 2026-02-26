@@ -28,21 +28,21 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 
 ---
 
-## **1. Philosophy: Agents as Software, Not Magic**
+## **1. Philosophy: Agents as System Configurations**
 
-In `coreason-manifest`, an agent is not a simple "prompt." It is modeled as a **recursive system configuration** composed of three verifiable data layers. While external runtimes handle the execution, this library defines their strict blueprints:
+In `coreason-manifest`, an agent is modeled as a **recursive system configuration** composed of three verifiable data layers. While external runtimes handle the execution, this library defines their strict blueprints:
 
-1. **The Brain (Reasoning):** Schemas defining how an agent breaks down problems.
-2. **The Tools (Skills):** Schemas representing atomic units of capability.
-3. **The Law (Contracts):** Rigid rules and constraints that the runtime agent cannot violate.
+1. **Reasoning Strategy (Cognitive Architecture):** Schemas defining how an agent breaks down problems and plans execution.
+2. **Capabilities (Tools/Functions):** Schemas representing atomic units of functionality and API interfaces.
+3. **Governance Policy (Contracts):** Rigid rules, constraints, and validation logic that the runtime agent must enforce.
 
 ---
 
-## **2. The Reasoning Engine (The CPU Blueprints)**
+## **2. The Reasoning Configuration (Execution Engine Blueprints)**
 
 The external reasoning engine drives the agent's behavior. This repository defines the schemas to configure that engine. We support two primary modes, modeled strictly as data:
 
-### **A. Recursive Decomposition (SOTA)**
+### **A. Recursive Decomposition**
 
 * **Class:** `DecompositionReasoning` (A pure Pydantic model)
 * **Schema Behavior:** It outlines the configuration for an agent that plans before it acts. The schema strictly types the data required for the runtime to:
