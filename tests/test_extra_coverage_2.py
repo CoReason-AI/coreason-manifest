@@ -34,4 +34,4 @@ def test_integrity_verify_merkle_proof_exception() -> None:
         def get(self, _k: object) -> object:
             raise RuntimeError("Boom")
 
-    assert verify_merkle_proof([BadObj()]) is False  # type: ignore
+    assert verify_merkle_proof([BadObj()]) is False
