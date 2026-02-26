@@ -157,12 +157,11 @@ class AgentBuilder:
 
             # Dynamic limit calculation if max_attempts is available
             max_actions = 10
-            if hasattr(old_strategy, "max_attempts"):
+            # Use getattr with default to safely check for max_attempts on Union types
+            attempts = getattr(old_strategy, "max_attempts", 0)
+            if isinstance(attempts, int) and attempts > 0:
                 # Ensure global limit accommodates the retry strategy + 1 for escalation
-                # Use getattr to avoid type checking issues with Union members that might not have max_attempts
-                attempts = getattr(old_strategy, "max_attempts", 0)
-                if isinstance(attempts, int):
-                    max_actions = max(10, attempts + 1)
+                max_actions = max(10, attempts + 1)
 
             self.resilience = SupervisionPolicy(
                 handlers=[
