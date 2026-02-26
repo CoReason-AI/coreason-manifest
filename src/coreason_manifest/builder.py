@@ -16,13 +16,6 @@ from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
     StandardReasoning,
 )
-from coreason_manifest.spec.core.memory import (
-    EpisodicMemoryConfig,
-    MemorySubsystem,
-    ProceduralMemoryConfig,
-    SemanticMemoryConfig,
-    WorkingMemoryConfig,
-)
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -37,6 +30,13 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
+from coreason_manifest.spec.core.memory import (
+    EpisodicMemoryConfig,
+    MemorySubsystem,
+    ProceduralMemoryConfig,
+    SemanticMemoryConfig,
+    WorkingMemoryConfig,
+)
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.spec.core.resilience import (
     ErrorDomain,
