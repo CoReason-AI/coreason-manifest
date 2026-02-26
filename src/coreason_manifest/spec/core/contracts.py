@@ -53,14 +53,14 @@ class StrategyNode(CoreasonModel):
     id: str = Field(..., description="Unique identifier for this strategy node")
     goal: str = Field(..., description="High-level goal description")
     strategy_name: str = Field(..., description="Name of the strategy used (e.g., 'ReAct', 'TreeOfThoughts')")
-    children: list["PlanTree"] = Field(..., description="Child nodes (sub-goals)")
+    children: list[PlanTree] = Field(..., description="Child nodes (sub-goals)")
     constraints: list[Constraint] = Field(default_factory=list, description="Constraints propagated to children")
 
 
 # Recursive definition for a PlanTree
 # A PlanTree is a tree structure where nodes can be StrategyNode (abstract) or ActionNode (concrete).
 # It also supports the legacy 'Step' (dict) and 'AtomicSkill' for backward compatibility during migration.
-type PlanTree = StrategyNode | ActionNode | AtomicSkill | list[Union["PlanTree", Step]]
+type PlanTree = StrategyNode | ActionNode | AtomicSkill | list["PlanTree" | Step]
 
 
 class NodeSpec(CoreasonModel):

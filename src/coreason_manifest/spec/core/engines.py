@@ -215,9 +215,7 @@ class DecompositionReasoning(BaseReasoning):
         # The actual "intelligence" (LLM calls) would be plugged into _recursive_decompose.
         return self._recursive_decompose(goal, constraints)
 
-    def _recursive_decompose(
-        self, goal: str, constraints: Sequence[str | AtomicSkill], depth: int = 0
-    ) -> PlanTree:
+    def _recursive_decompose(self, goal: str, constraints: Sequence[str | AtomicSkill], depth: int = 0) -> PlanTree:
         # Safety Check: Infinite Recursion
         # In a real system, this would be `self.decomposition_depth`
         max_depth = 3
@@ -241,9 +239,7 @@ class DecompositionReasoning(BaseReasoning):
         # Mocking decomposition logic
         sub_goals = [f"{goal}_part_1", f"{goal}_part_2"]
         # CRITICAL FIX: Pass constraints down to children to maintain "Immutable Recipe" logic
-        return [
-            self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals
-        ]
+        return [self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals]
 
     def verify_plan(self, plan: PlanTree) -> bool:
         """
