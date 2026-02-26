@@ -11,6 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem
 from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
@@ -53,6 +54,7 @@ class CognitiveProfile(CoreasonModel):
     fast_path: FastPath | None = Field(
         None, description="Fast path configuration for low-latency responses.", examples=[{"model": "gpt-3.5-turbo"}]
     )
+    memory: MemorySubsystem | None = Field(None, description="The 4-tier hierarchical memory configuration.")
 
 
 class AgentNode(Node):

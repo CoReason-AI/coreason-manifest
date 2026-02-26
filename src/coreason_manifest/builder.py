@@ -16,6 +16,13 @@ from coreason_manifest.spec.core.engines import (
     ReasoningConfig,
     StandardReasoning,
 )
+from coreason_manifest.spec.core.memory import (
+    EpisodicMemoryConfig,
+    MemorySubsystem,
+    ProceduralMemoryConfig,
+    SemanticMemoryConfig,
+    WorkingMemoryConfig,
+)
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
@@ -89,6 +96,7 @@ class AgentBuilder:
         self.tools: list[str] = []
         self.resilience: ResilienceConfig | None = None
         self.escalation_rules: list[EscalationCriteria] = []
+        self.memory: MemorySubsystem | None = None
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures CognitiveProfile.role and CognitiveProfile.persona."""
@@ -187,6 +195,47 @@ class AgentBuilder:
         self.escalation_rules.append(EscalationCriteria(condition=condition, role=role, strategy=strategy))
         return self
 
+    def with_memory(
+        self,
+        working_limit: int = 4096,
+        enable_paging: bool = False,
+        salience_threshold: float | None = None,
+        consolidation_interval: int | None = None,
+        graph_namespace: str | None = None,
+        bitemporal_tracking: bool = False,
+        allowed_entity_types: list[str] | None = None,
+        skill_library_ref: str | None = None,
+    ) -> "AgentBuilder":
+        """Configures the memory subsystem."""
+        working = WorkingMemoryConfig(max_tokens=working_limit, enable_active_paging=enable_paging)
+
+        episodic = None
+        if salience_threshold is not None:
+            episodic = EpisodicMemoryConfig(
+                salience_threshold=salience_threshold,
+                consolidation_interval_turns=consolidation_interval,
+            )
+
+        semantic = None
+        if graph_namespace is not None:
+            semantic = SemanticMemoryConfig(
+                graph_namespace=graph_namespace,
+                bitemporal_tracking=bitemporal_tracking,
+                allowed_entity_types=allowed_entity_types,
+            )
+
+        procedural = None
+        if skill_library_ref is not None:
+            procedural = ProceduralMemoryConfig(skill_library_ref=skill_library_ref)
+
+        self.memory = MemorySubsystem(
+            working=working,
+            episodic=episodic,
+            semantic=semantic,
+            procedural=procedural,
+        )
+        return self
+
     def build(self) -> AgentNode:
         """Validates and returns the node."""
         if not self.role or not self.persona:
@@ -197,6 +246,7 @@ class AgentBuilder:
             persona=self.persona,
             reasoning=self.reasoning,
             fast_path=self.fast_path,
+            memory=self.memory,
         )
 
         return AgentNode(
