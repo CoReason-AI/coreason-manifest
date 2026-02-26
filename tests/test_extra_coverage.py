@@ -4,7 +4,7 @@ from coreason_manifest.spec.core.governance import ToolAccessPolicy
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.gatekeeper import validate_policy
-from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, FlowDefinitions
+from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode
 from coreason_manifest.spec.core.resilience import EscalationStrategy
 

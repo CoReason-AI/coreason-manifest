@@ -1,16 +1,17 @@
+import contextlib
 import pytest
 import pydantic_core
 from pydantic import ValidationError
-from coreason_manifest.spec.core.resilience import (
-    ResilienceStrategy,
-    ReflexionStrategy,
-    EscalationStrategy,
-    ErrorHandler,
-    SupervisionPolicy,
-    RetryStrategy,
-    ErrorDomain
-)
 from coreason_manifest.spec.core.engines import ModelCriteria
+from coreason_manifest.spec.core.resilience import (
+    ErrorDomain,
+    ErrorHandler,
+    EscalationStrategy,
+    ReflexionStrategy,
+    ResilienceStrategy,
+    RetryStrategy,
+    SupervisionPolicy,
+)
 
 def test_resilience_strategy_name_slug() -> None:
     # Valid
@@ -88,15 +89,15 @@ def test_escalation_strategy_template() -> None:
 def test_error_handler_normalize() -> None:
     # normalize_error_codes (int to str)
     h = ErrorHandler(
-        match_error_code=[404],
-        strategy=RetryStrategy(max_attempts=1)
+        match_error_code=[404],  # type: ignore[list-item]
+        strategy=RetryStrategy(max_attempts=1),
     )
     assert h.match_error_code == ["404"]
 
     # normalize_error_codes (single int)
     h2 = ErrorHandler(
-        match_error_code=500,
-        strategy=RetryStrategy(max_attempts=1)
+        match_error_code=500,  # type: ignore[arg-type]
+        strategy=RetryStrategy(max_attempts=1),
     )
     assert h2.match_error_code == ["500"]
 
@@ -104,7 +105,7 @@ def test_error_handler_normalize() -> None:
     h3 = ErrorHandler(
         match_error_code=None,
         match_domain=[ErrorDomain.SYSTEM],
-        strategy=RetryStrategy(max_attempts=1)
+        strategy=RetryStrategy(max_attempts=1),
     )
     assert h3.match_error_code is None
 
@@ -113,20 +114,16 @@ def test_error_handler_normalize() -> None:
     # BUT wait, does strict=True allows tuple for list?
     # Based on previous failure, it might NOT.
     # If this fails, we will call validator directly.
-    try:
+    with contextlib.suppress(ValidationError):
         ErrorHandler(
-            match_error_code=("400",), # type: ignore
-            strategy=RetryStrategy(max_attempts=1)
+            match_error_code=("400",),  # type: ignore
+            strategy=RetryStrategy(max_attempts=1),
         )
-    except ValidationError:
-         # If strict mode prevents tuple->list coercion, we can accept this outcome
-         # but we want to ensure return v IS HIT.
-         pass
 
     # To definitely cover "return v", let's call validator manually
     val = {"400"}
     res = ErrorHandler.normalize_error_codes(val)
-    assert res == val
+    assert res == val  # type: ignore[comparison-overlap]
 
 def test_error_handler_existence() -> None:
     # validate_criteria_existence

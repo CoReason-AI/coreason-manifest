@@ -1,7 +1,15 @@
 import pytest
 from coreason_manifest.utils.visualizer import to_mermaid, to_react_flow
-from coreason_manifest.spec.core.flow import LinearFlow, FlowMetadata, FlowDefinitions, GraphFlow, Graph, Edge
-from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode, HumanNode, PlaceholderNode
+from coreason_manifest.spec.core.flow import (
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
+from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, PlaceholderNode, SwitchNode
 from coreason_manifest.spec.core.resilience import EscalationStrategy
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
@@ -24,6 +32,7 @@ def test_visualizer_graph_mermaid() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description=""),
+        interface=FlowInterface(),
         definitions=None,
         graph=graph
     )
@@ -56,6 +65,7 @@ def test_visualizer_switch_node_labels() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description=""),
+        interface=FlowInterface(),
         definitions=None,
         graph=graph
     )
@@ -71,6 +81,7 @@ def test_visualizer_react_flow() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description=""),
+        interface=FlowInterface(),
         definitions=None,
         graph=graph
     )
@@ -87,7 +98,10 @@ def test_visualizer_human_options() -> None:
         options=["yes", "no"],
         escalation=EscalationStrategy(queue_name="q", notification_level="info", timeout_seconds=10)
     )
-    flow = LinearFlow.model_construct(steps=[human])
+    flow = LinearFlow.model_construct(
+        metadata=FlowMetadata(name="test", version="1.0.0", description=""),
+        steps=[human]
+    )
     diagram = to_mermaid(flow)
     assert "[yes, no]" in diagram
 
@@ -132,6 +146,7 @@ def test_visualizer_layout_fallback() -> None:
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
         metadata=FlowMetadata(name="test", version="1.0.0", description=""),
+        interface=FlowInterface(),
         graph=graph
     )
     rf = to_react_flow(flow)

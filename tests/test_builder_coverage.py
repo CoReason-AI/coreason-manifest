@@ -1,6 +1,6 @@
 import pytest
 from coreason_manifest.builder import AgentBuilder, create_resilience
-from coreason_manifest.spec.core.resilience import RetryStrategy, FallbackStrategy, EscalationStrategy
+from coreason_manifest.spec.core.resilience import EscalationStrategy, FallbackStrategy, RetryStrategy
 
 def test_create_resilience_retry() -> None:
     res = create_resilience(retries=3, strategy="retry", backoff=1.5, delay=2.0)
