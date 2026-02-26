@@ -165,7 +165,7 @@ class SteeringConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_mutation_permissions(self) -> "SteeringConfig":
-        if not self.allow_variable_mutation and self.allowed_targets:
+        if not self.allow_variable_mutation and self.allowed_targets is not None:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
                 message="SteeringConfig defines 'allowed_targets' but 'allow_variable_mutation' is False.",
@@ -174,6 +174,18 @@ class SteeringConfig(CoreasonModel):
                         type="update_field",
                         description="Enable mutation or remove targets.",
                         patch_data=[{"op": "remove", "path": "/allowed_targets"}],
+                    ).model_dump()
+                },
+            )
+        if self.allow_variable_mutation and self.allowed_targets is not None and len(self.allowed_targets) == 0:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                message="allowed_targets cannot be empty when mutation is allowed. Use None to allow all targets.",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        description="Set allowed_targets to None or populate it.",
+                        patch_data=[{"op": "replace", "path": "/allowed_targets", "value": None}],
                     ).model_dump()
                 },
             )

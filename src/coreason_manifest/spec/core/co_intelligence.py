@@ -1,6 +1,7 @@
+import ast
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.resilience import EscalationStrategy
@@ -24,6 +25,24 @@ class EscalationCriteria(CoreasonModel):
         examples=["supervisor", "legal_compliance"],
     )
     priority: Literal["low", "medium", "high", "critical"] = "medium"
+    strategy: EscalationStrategy | None = Field(
+        None, description="Local SLA/Queue routing. Overrides global default_sla if set."
+    )
+
+    @field_validator("condition")
+    @classmethod
+    def validate_python_expression(cls, v: str) -> str:
+        try:
+            tree = ast.parse(v, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Invalid Python expression syntax: {e}") from e
+
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Call, ast.Assign)):
+                raise ValueError(
+                    "Security Violation: Function calls and assignments are forbidden in escalation logic."
+                )
+        return v
 
 
 class CoIntelligencePolicy(CoreasonModel):
