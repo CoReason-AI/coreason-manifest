@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from coreason_manifest.spec.core.engines import AdaptiveReasoning
-from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
+from coreason_manifest.spec.core.nodes import SwarmNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
 

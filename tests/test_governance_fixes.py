@@ -90,11 +90,7 @@ def test_linear_guarded_computer_use() -> None:
         metadata={},
         type="human",
         prompt="ok?",
-        escalation=EscalationStrategy(
-            queue_name="q",
-            notification_level="info",
-            timeout_seconds=10
-        )
+        escalation=EscalationStrategy(queue_name="q", notification_level="info", timeout_seconds=10),
     )
     node = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 
@@ -221,11 +217,7 @@ def test_graph_guarded_path() -> None:
         metadata={},
         type="human",
         prompt="ok?",
-        escalation=EscalationStrategy(
-            queue_name="q",
-            notification_level="info",
-            timeout_seconds=10
-        )
+        escalation=EscalationStrategy(queue_name="q", notification_level="info", timeout_seconds=10),
     )
     agent = AgentNode(id="a1", metadata={}, type="agent", profile="comp", tools=[])
 

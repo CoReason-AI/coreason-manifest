@@ -1,9 +1,9 @@
 from coreason_manifest.builder import AgentBuilder, NewLinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode
 from coreason_manifest.spec.core.resilience import EscalationStrategy
-from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
 
-def test_agent_builder_co_intelligence():
+
+def test_agent_builder_co_intelligence() -> None:
     builder = AgentBuilder("agent_1")
     builder.with_identity(role="assistant", persona="you are helpful")
     builder.with_human_steering(timeout=500)
@@ -20,7 +20,8 @@ def test_agent_builder_co_intelligence():
     assert agent.escalation_rules[0].condition == "x > 5"
     assert agent.escalation_rules[0].role == "supervisor"
 
-def test_flow_builder_shadow_node():
+
+def test_flow_builder_shadow_node() -> None:
     flow = NewLinearFlow("test_flow", "0.0.1", "test")
     flow.add_shadow_node(node_id="shadow_human", prompt="Check this", shadow_timeout=120)
 

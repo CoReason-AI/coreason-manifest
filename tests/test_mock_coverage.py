@@ -237,9 +237,7 @@ def test_execute_node_human() -> None:
         type="human",
         input_schema={"type": "boolean"},
         prompt="approve?",
-        escalation=EscalationStrategy(
-            queue_name="q", notification_level="info", timeout_seconds=300
-        )
+        escalation=EscalationStrategy(queue_name="q", notification_level="info", timeout_seconds=300),
     )
     results = factory._execute_node(human, {})
     assert isinstance(results[0].outputs, dict)
@@ -251,9 +249,7 @@ def test_execute_node_human() -> None:
         type="human",
         input_schema=None,
         prompt="approve?",
-        escalation=EscalationStrategy(
-            queue_name="q", notification_level="info", timeout_seconds=300
-        )
+        escalation=EscalationStrategy(queue_name="q", notification_level="info", timeout_seconds=300),
     )
     results2 = factory._execute_node(human2, {})
     assert results2[0].outputs == {"approved": True}
