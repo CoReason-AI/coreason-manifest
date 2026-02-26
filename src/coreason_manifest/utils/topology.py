@@ -69,10 +69,7 @@ def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], l
         nodes = flow.steps
         # Use model_construct to bypass validation for generated edges
         # This is important for testing scenarios where node IDs might be invalid (e.g. escaping tests)
-        edges = [
-            Edge.model_construct(from_node=nodes[i].id, to_node=nodes[i + 1].id)
-            for i in range(len(nodes) - 1)
-        ]
+        edges = [Edge.model_construct(from_node=nodes[i].id, to_node=nodes[i + 1].id) for i in range(len(nodes) - 1)]
         return nodes, edges
     # Raise error for unknown flow types to ensure strict typing/handling
     raise ValueError(f"Unknown flow type: {type(flow)}. Expected LinearFlow or GraphFlow.")

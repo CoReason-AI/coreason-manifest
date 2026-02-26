@@ -230,8 +230,8 @@ def _validate_data_flow(
                         ComplianceReport(
                             code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
                             severity="violation",
-                    message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', but "
-                    f"found type '{var_type}'.",
+                    message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', "
+                    f"but found type '{var_type}'.",
                             node_id=node.id,
                             details={"variable": node.workload_variable, "found_type": var_type},
                         )
@@ -778,11 +778,7 @@ def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport
 
     def _check(obj: Any) -> None:
         # 1. Check ToolCapability objects
-        if (
-            isinstance(obj, ToolCapability)
-            and max_risk is not None
-            and obj.risk_level.weight > max_risk.weight
-        ):
+        if isinstance(obj, ToolCapability) and max_risk is not None and obj.risk_level.weight > max_risk.weight:
             errors.append(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_SEC_KILL_SWITCH_VIOLATION,
@@ -795,11 +791,7 @@ def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport
 
         # 2. Check Strings for Remote URIs
         if isinstance(obj, str):
-            if (
-                "://" in obj
-                and max_risk is not None
-                and RiskLevel.CRITICAL.weight > max_risk.weight
-            ):
+            if "://" in obj and max_risk is not None and RiskLevel.CRITICAL.weight > max_risk.weight:
                 errors.append(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_SEC_KILL_SWITCH_VIOLATION,

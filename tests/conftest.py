@@ -24,13 +24,13 @@ def flow_metadata() -> FlowMetadata:
 
 @pytest.fixture
 def agent_node_factory() -> Callable[..., AgentNode]:
-    def _create(nid: str, resilience: Any = None) -> AgentNode:
+    def _create(nid: str, resilience: Any = None, tools: list[str] | None = None) -> AgentNode:
         return AgentNode(
             id=nid,
             type="agent",
             metadata={},
             profile=CognitiveProfile(role="r", persona="p"),
-            tools=[],
+            tools=tools or [],
             resilience=resilience,
         )
 
