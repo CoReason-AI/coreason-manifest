@@ -69,6 +69,33 @@ class ToolAccessPolicy(CoreasonModel):
         return data
 
 
+class FinancialLimits(CoreasonModel):
+    max_cost_usd: float | None = Field(None, ge=0.0)
+    max_tokens_total: int | None = Field(None, gt=0)
+    budget_depletion_routing: str | None = Field(
+        None,
+        description="Model ID to fallback to when budget hits 90% depletion (e.g., swap o1-pro to gpt-4o-mini).",
+    )
+
+
+class DataLimits(CoreasonModel):
+    max_rows_per_query: int | None = Field(None, gt=0)
+    max_payload_bytes: int | None = Field(None, gt=0, description="Max bytes for active memory insertion/API responses.")
+    max_search_results: int | None = Field(None, gt=0)
+
+
+class ComputeLimits(CoreasonModel):
+    max_execution_time_seconds: int | None = Field(None, gt=0)
+    max_cognitive_steps: int | None = Field(None, gt=0, description="Max turn/DAG transitions.")
+    max_concurrent_agents: int | None = Field(None, gt=0)
+
+
+class OperationalPolicy(CoreasonModel):
+    financial: FinancialLimits | None = None
+    data: DataLimits | None = None
+    compute: ComputeLimits | None = None
+
+
 class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
@@ -87,9 +114,9 @@ class Governance(CoreasonModel):
             "entire manifest, regardless of individual tool policies."
         ),
     )
-    rate_limit_rpm: int | None = Field(None, description="Rate limit in requests per minute.", examples=[60])
-    timeout_seconds: int | None = Field(None, description="Global execution timeout.", examples=[300])
-    cost_limit_usd: float | None = Field(None, description="Cost limit in USD.", examples=[10.0])
+    operational_policy: OperationalPolicy | None = Field(
+        None, description="Global operational, financial, and compute constraints."
+    )
     safety: Safety | None = Field(
         None,
         description="Safety configuration.",

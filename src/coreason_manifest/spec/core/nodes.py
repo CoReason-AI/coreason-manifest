@@ -11,6 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
+from coreason_manifest.spec.core.governance import OperationalPolicy
 from coreason_manifest.spec.core.memory import MemorySubsystem
 from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
@@ -76,6 +77,9 @@ class AgentNode(Node):
         default_factory=list,
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
+    )
+    operational_policy: OperationalPolicy | None = Field(
+        None, description="Local operational limits. Overrides global Governance limits if set."
     )
     escalation_rules: list[EscalationCriteria] = Field(
         default_factory=list,
@@ -309,6 +313,9 @@ class SwarmNode(Node):
             examples=["gpt-4"],
         ),
     ] = None
+    operational_policy: OperationalPolicy | None = Field(
+        None, description="Local operational limits. Overrides global Governance limits if set."
+    )
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
     )

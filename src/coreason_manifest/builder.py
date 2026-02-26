@@ -29,7 +29,14 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
+from coreason_manifest.spec.core.governance import (
+    CircuitBreaker,
+    ComputeLimits,
+    DataLimits,
+    FinancialLimits,
+    Governance,
+    OperationalPolicy,
+)
 from coreason_manifest.spec.core.memory import (
     EpisodicMemoryConfig,
     MemorySubsystem,
@@ -95,6 +102,7 @@ class AgentBuilder:
         self.fast_path: FastPath | None = None
         self.tools: list[str] = []
         self.resilience: ResilienceConfig | None = None
+        self.operational_policy: OperationalPolicy | None = None
         self.escalation_rules: list[EscalationCriteria] = []
         self.memory: MemorySubsystem | None = None
 
@@ -188,6 +196,30 @@ class AgentBuilder:
             )
         return self
 
+    def with_operational_policy(
+        self,
+        max_cost_usd: float | None = None,
+        max_tokens: int | None = None,
+        max_steps: int | None = None,
+        fallback_model: str | None = None,
+    ) -> "AgentBuilder":
+        """Configures the operational limits (Financial, Compute)."""
+        financial = None
+        if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
+            financial = FinancialLimits(
+                max_cost_usd=max_cost_usd,
+                max_tokens_total=max_tokens,
+                budget_depletion_routing=fallback_model,
+            )
+
+        compute = None
+        if max_steps is not None:
+            compute = ComputeLimits(max_cognitive_steps=max_steps)
+
+        if financial or compute:
+            self.operational_policy = OperationalPolicy(financial=financial, compute=compute)
+        return self
+
     def with_escalation_rule(
         self, condition: str, role: str, strategy: EscalationStrategy | None = None
     ) -> "AgentBuilder":
@@ -256,6 +288,7 @@ class AgentBuilder:
             type="agent",
             profile=profile,
             tools=self.tools,
+            operational_policy=self.operational_policy,
             escalation_rules=self.escalation_rules,
         )
 
@@ -297,6 +330,43 @@ class BaseFlowBuilder:
     def set_governance(self, gov: Governance) -> Self:
         """Sets the governance policy."""
         self.governance = gov
+        return self
+
+    def set_operational_policy(
+        self,
+        max_cost_usd: float | None = None,
+        max_tokens: int | None = None,
+        max_steps: int | None = None,
+        fallback_model: str | None = None,
+        max_rows_per_query: int | None = None,
+        max_payload_bytes: int | None = None,
+    ) -> Self:
+        """Configures global operational limits (Financial, Data, Compute)."""
+        financial = None
+        if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
+            financial = FinancialLimits(
+                max_cost_usd=max_cost_usd,
+                max_tokens_total=max_tokens,
+                budget_depletion_routing=fallback_model,
+            )
+
+        data = None
+        if max_rows_per_query is not None or max_payload_bytes is not None:
+            data = DataLimits(
+                max_rows_per_query=max_rows_per_query,
+                max_payload_bytes=max_payload_bytes,
+            )
+
+        compute = None
+        if max_steps is not None:
+            compute = ComputeLimits(max_cognitive_steps=max_steps)
+
+        op_policy = OperationalPolicy(financial=financial, data=data, compute=compute)
+
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"operational_policy": op_policy})
+        else:
+            self.governance = Governance(operational_policy=op_policy)
         return self
 
     def set_circuit_breaker(self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None) -> Self:
