@@ -1,17 +1,15 @@
-
 import pytest
-from typing import Any, cast
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow, NewLinearFlow, create_resilience
-from coreason_manifest.spec.core.nodes import AgentNode
+from coreason_manifest.spec.core.flow import DataSchema
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.flow import DataSchema
 
 
 def test_flow_builder_operational_policy() -> None:
@@ -260,6 +258,7 @@ def test_create_resilience_coverage() -> None:
     assert isinstance(res, EscalationStrategy)
     assert res.queue_name == "custom"
 
+
 def test_agent_builder_operational_policy() -> None:
     builder = AgentBuilder("agent-op")
 
@@ -290,6 +289,7 @@ def test_agent_builder_operational_policy() -> None:
     assert builder.operational_policy.compute is None
     assert builder.operational_policy.data is not None
     assert builder.operational_policy.data.max_rows_per_query == 10
+
 
 def test_flow_builder_set_governance() -> None:
     flow = NewLinearFlow("test-gov")
