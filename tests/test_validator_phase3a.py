@@ -15,7 +15,6 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.validator import validate_flow
@@ -140,10 +139,10 @@ def test_validate_missing_tool(flow_metadata: FlowMetadata, agent_node_factory: 
     assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "tool1" for e in errors)
 
 
-def test_validate_governance_sanity(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
+def test_validate_governance_sanity() -> None:
     from pydantic import ValidationError
 
-    from coreason_manifest.spec.core.governance import FinancialLimits, OperationalPolicy
+    from coreason_manifest.spec.core.governance import FinancialLimits
 
     # Test that Pydantic enforces the schema constraint (ge=0.0)
     with pytest.raises(ValidationError) as exc:
