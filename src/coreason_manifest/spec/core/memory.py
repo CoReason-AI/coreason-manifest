@@ -8,10 +8,15 @@ class WorkingMemoryConfig(CoreasonModel):
     Configuration for the agent's short-term working memory (RAM).
     """
 
-    max_tokens: int = Field(..., description="Maximum token limit for the working memory context window.")
+    max_tokens: int = Field(
+        ..., gt=0, description="Maximum token limit for the working memory context window."
+    )
     enable_active_paging: bool = Field(
         ...,
-        description=("If true, the runtime engine equips the agent with tools to load/evict context pages explicitly."),
+        description=(
+            "If true, the runtime engine equips the agent with tools to load/evict "
+            "context pages explicitly."
+        ),
     )
 
 
@@ -22,10 +27,13 @@ class EpisodicMemoryConfig(CoreasonModel):
 
     salience_threshold: float = Field(
         ...,
+        ge=0.0,
+        le=1.0,
         description="Minimum importance score (0.0-1.0) for a memory to be retained in long-term storage.",
     )
     consolidation_interval_turns: int | None = Field(
         None,
+        gt=0,
         description=(
             "Number of conversation turns before the background loop compresses the journal. "
             "None means no auto-consolidation."
@@ -71,4 +79,6 @@ class MemorySubsystem(CoreasonModel):
     semantic: SemanticMemoryConfig | None = Field(
         None, description="Configuration for Semantic Memory (Knowledge Graph)."
     )
-    procedural: ProceduralMemoryConfig | None = Field(None, description="Configuration for Procedural Memory (Skills).")
+    procedural: ProceduralMemoryConfig | None = Field(
+        None, description="Configuration for Procedural Memory (Skills)."
+    )

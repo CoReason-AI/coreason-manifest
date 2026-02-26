@@ -152,6 +152,13 @@ class MemoryMutationEvent(AntibodyBase):
     mutation_payload: dict[str, Any] = Field(..., description="The state diff or payload of the mutation.")
     timestamp: datetime = Field(..., description="When the mutation occurred.")
 
+    # --- VERITAS INTEGRITY RESTORATION ---
+    hash_version: Literal["v2"] = Field(default="v2", description="Cryptographic hashing protocol version.")
+    mutation_hash: Annotated[str | None, Field(description="SHA-256 hash of the mutation payload.")] = None
+    parent_hash: str | None = Field(default=None, description="Hash of the preceding execution state.")
+
+    _hash_exclude_: ClassVar[set[str]] = {"mutation_hash"}
+
 
 class ExecutionSnapshot(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
