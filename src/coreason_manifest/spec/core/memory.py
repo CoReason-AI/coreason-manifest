@@ -74,4 +74,6 @@ class MemorySubsystem(CoreasonModel):
     semantic: SemanticMemoryConfig | None = Field(
         None, description="Configuration for Semantic Memory (Knowledge Graph)."
     )
-    procedural: ProceduralMemoryConfig | None = Field(None, description="Configuration for Procedural Memory (Skills).")
+    procedural: ProceduralMemoryConfig | None = Field(
+        None, description="Configuration for Procedural Memory (Skills)."
+    )

@@ -136,10 +136,12 @@ class MemoryMutationEvent(AntibodyBase):
     parent_request_id: str = Field(..., description="The execution ID that triggered this mutation.")
     root_request_id: str = Field(..., description="The trace ID.")
     tier: Literal["working", "episodic", "semantic", "procedural"] = Field(
-        ..., description="The memory tier affected."
+        ...,
+        description="The memory tier affected.",
     )
     operation: Literal["ADD", "UPDATE", "DELETE", "EVICT", "CONSOLIDATE"] = Field(
-        ..., description="The type of mutation."
+        ...,
+        description="The type of mutation.",
     )
     mutation_payload: dict[str, Any] = Field(..., description="The state diff or payload of the mutation.")
     timestamp: datetime = Field(..., description="When the mutation occurred.")
