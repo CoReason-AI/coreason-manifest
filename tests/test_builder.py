@@ -28,8 +28,8 @@ def test_linear_builder() -> None:
     )
     builder.add_tool_pack(tp)
 
-    gov = Governance(rate_limit_rpm=10)
-    builder.set_governance(gov)
+    # Use new OperationalPolicy via builder
+    builder.set_operational_policy(max_cost_usd=10.0)
 
     flow = builder.build()
 
@@ -39,7 +39,9 @@ def test_linear_builder() -> None:
     assert flow.definitions is not None
     assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
-    assert flow.governance.rate_limit_rpm == 10
+    assert flow.governance.operational_policy is not None
+    assert flow.governance.operational_policy.financial is not None
+    assert flow.governance.operational_policy.financial.max_cost_usd == 10.0
 
 
 def test_graph_builder() -> None:
@@ -57,8 +59,8 @@ def test_graph_builder() -> None:
     )
     builder.add_tool_pack(tp)
 
-    gov = Governance(rate_limit_rpm=10)
-    builder.set_governance(gov)
+    # Use new OperationalPolicy via builder
+    builder.set_operational_policy(max_cost_usd=10.0)
 
     # Test set_interface and set_blackboard
     builder.set_interface(
@@ -79,7 +81,9 @@ def test_graph_builder() -> None:
     assert flow.definitions is not None
     assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
-    assert flow.governance.rate_limit_rpm == 10
+    assert flow.governance.operational_policy is not None
+    assert flow.governance.operational_policy.financial is not None
+    assert flow.governance.operational_policy.financial.max_cost_usd == 10.0
 
     # Assert new features
     assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}  # type: ignore[union-attr]
@@ -109,14 +113,15 @@ def test_graph_builder_invalid() -> None:
 def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None:
     """Test setting circuit breaker when governance is already set."""
     builder = NewLinearFlow("Test", "1.0.0", "Desc")
-    gov = Governance(rate_limit_rpm=10)
-    builder.set_governance(gov)
+    builder.set_operational_policy(max_cost_usd=10.0)
 
     # This should trigger the `if self.governance:` branch in set_circuit_breaker
     builder.set_circuit_breaker(error_threshold=5, reset_timeout=30)
 
     assert builder.governance is not None
-    assert builder.governance.rate_limit_rpm == 10
+    assert builder.governance.operational_policy is not None
+    assert builder.governance.operational_policy.financial is not None
+    assert builder.governance.operational_policy.financial.max_cost_usd == 10.0
     assert builder.governance.circuit_breaker is not None
     assert builder.governance.circuit_breaker.error_threshold_count == 5
 

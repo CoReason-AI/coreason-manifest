@@ -327,19 +327,6 @@ def _validate_data_flow(
 def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
-    # Check Operational Policy
-    if gov.operational_policy:
-        if gov.operational_policy.financial:
-            fin = gov.operational_policy.financial
-            if fin.max_cost_usd is not None and fin.max_cost_usd < 0:
-                 errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_GOV_INVALID_CONFIG,
-                        severity="violation",
-                        message="Governance Error: max_cost_usd cannot be negative.",
-                    )
-                )
-
     if (
         gov.circuit_breaker
         and gov.circuit_breaker.fallback_node_id

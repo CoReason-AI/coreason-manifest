@@ -80,7 +80,9 @@ class FinancialLimits(CoreasonModel):
 
 class DataLimits(CoreasonModel):
     max_rows_per_query: int | None = Field(None, gt=0)
-    max_payload_bytes: int | None = Field(None, gt=0, description="Max bytes for active memory insertion/API responses.")
+    max_payload_bytes: int | None = Field(
+        None, gt=0, description="Max bytes for active memory insertion/API responses."
+    )
     max_search_results: int | None = Field(None, gt=0)
 
 

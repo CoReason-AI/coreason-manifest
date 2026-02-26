@@ -200,10 +200,14 @@ class AgentBuilder:
         self,
         max_cost_usd: float | None = None,
         max_tokens: int | None = None,
-        max_steps: int | None = None,
         fallback_model: str | None = None,
+        max_steps: int | None = None,
+        max_execution_time_seconds: int | None = None,
+        max_rows_per_query: int | None = None,
+        max_payload_bytes: int | None = None,
+        max_search_results: int | None = None,
     ) -> "AgentBuilder":
-        """Configures the operational limits (Financial, Compute)."""
+        """Configures the operational limits (Financial, Compute, Data)."""
         financial = None
         if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
             financial = FinancialLimits(
@@ -213,11 +217,21 @@ class AgentBuilder:
             )
 
         compute = None
-        if max_steps is not None:
-            compute = ComputeLimits(max_cognitive_steps=max_steps)
+        if max_steps is not None or max_execution_time_seconds is not None:
+            compute = ComputeLimits(
+                max_cognitive_steps=max_steps, max_execution_time_seconds=max_execution_time_seconds
+            )
 
-        if financial or compute:
-            self.operational_policy = OperationalPolicy(financial=financial, compute=compute)
+        data = None
+        if max_rows_per_query is not None or max_payload_bytes is not None or max_search_results is not None:
+            data = DataLimits(
+                max_rows_per_query=max_rows_per_query,
+                max_payload_bytes=max_payload_bytes,
+                max_search_results=max_search_results,
+            )
+
+        if financial or compute or data:
+            self.operational_policy = OperationalPolicy(financial=financial, compute=compute, data=data)
         return self
 
     def with_escalation_rule(
@@ -336,10 +350,13 @@ class BaseFlowBuilder:
         self,
         max_cost_usd: float | None = None,
         max_tokens: int | None = None,
-        max_steps: int | None = None,
         fallback_model: str | None = None,
+        max_steps: int | None = None,
+        max_execution_time_seconds: int | None = None,
+        max_concurrent_agents: int | None = None,
         max_rows_per_query: int | None = None,
         max_payload_bytes: int | None = None,
+        max_search_results: int | None = None,
     ) -> Self:
         """Configures global operational limits (Financial, Data, Compute)."""
         financial = None
@@ -351,15 +368,20 @@ class BaseFlowBuilder:
             )
 
         data = None
-        if max_rows_per_query is not None or max_payload_bytes is not None:
+        if max_rows_per_query is not None or max_payload_bytes is not None or max_search_results is not None:
             data = DataLimits(
                 max_rows_per_query=max_rows_per_query,
                 max_payload_bytes=max_payload_bytes,
+                max_search_results=max_search_results,
             )
 
         compute = None
-        if max_steps is not None:
-            compute = ComputeLimits(max_cognitive_steps=max_steps)
+        if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
+            compute = ComputeLimits(
+                max_cognitive_steps=max_steps,
+                max_execution_time_seconds=max_execution_time_seconds,
+                max_concurrent_agents=max_concurrent_agents,
+            )
 
         op_policy = OperationalPolicy(financial=financial, data=data, compute=compute)
 
