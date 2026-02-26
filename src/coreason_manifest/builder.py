@@ -152,9 +152,6 @@ class AgentBuilder:
             # Upgrade existing RecoveryStrategy to SupervisionPolicy
             # Preserving existing strategy for transient errors
             old_strategy = self.resilience
-            # cast to RecoveryStrategy for typing
-            old_strategy = cast(RecoveryStrategy, old_strategy)
-
             self.resilience = SupervisionPolicy(
                 handlers=[
                     ErrorHandler(
@@ -166,7 +163,7 @@ class AgentBuilder:
                         strategy=esc_strategy,
                     ),
                 ],
-                default_strategy=esc_strategy, # Fallback to escalation
+                default_strategy=esc_strategy,  # Fallback to escalation
             )
         return self
 

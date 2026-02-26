@@ -65,6 +65,7 @@ known-first-party = ["coreason_manifest"]
 
 [tool.mypy]
 python_version = "3.12"
+mypy_path = "src"
 strict = true
 warn_unused_ignores = true
 warn_redundant_casts = true

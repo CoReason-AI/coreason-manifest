@@ -1,12 +1,13 @@
+from datetime import datetime
+
 import pytest
-from pydantic import ValidationError
 
 from coreason_manifest.builder import AgentBuilder
 from coreason_manifest.spec.core.nodes import HumanNode, SteeringConfig
-from coreason_manifest.spec.core.resilience import EscalationStrategy, RetryStrategy, SupervisionPolicy, ErrorDomain
+from coreason_manifest.spec.core.resilience import ErrorDomain, EscalationStrategy, RetryStrategy, SupervisionPolicy
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.spec.interop.telemetry import HumanSteeringEvent
-from datetime import datetime
+
 
 def test_human_node_validation_shadow() -> None:
     # Shadow mode -> input_schema and options MUST be None
@@ -46,6 +47,7 @@ def test_human_node_validation_shadow() -> None:
         )
     assert "cannot have 'input_schema' or 'options'" in str(excinfo.value)
 
+
 def test_human_node_validation_hijack() -> None:
     # Hijack only -> steering_config MUST be present
 
@@ -70,6 +72,7 @@ def test_human_node_validation_hijack() -> None:
             steering_config=None,
         )
     assert "requires 'steering_config'" in str(excinfo.value)
+
 
 def test_builder_with_human_steering_upgrade() -> None:
     # Case 1: No previous resilience
@@ -107,20 +110,15 @@ def test_builder_with_human_steering_upgrade() -> None:
         handlers=[
             # Some handler
         ],
-        default_strategy=None
-    ) # type: ignore
+        default_strategy=None,
+    )
 
     # Need to properly construct SupervisionPolicy with handlers
     # Import ErrorHandler/ErrorDomain
     from coreason_manifest.spec.core.resilience import ErrorHandler
 
     builder3.resilience = SupervisionPolicy(
-        handlers=[
-            ErrorHandler(
-                match_domain=[ErrorDomain.SYSTEM],
-                strategy=RetryStrategy(max_attempts=1)
-            )
-        ]
+        handlers=[ErrorHandler(match_domain=[ErrorDomain.SYSTEM], strategy=RetryStrategy(max_attempts=1))]
     )
 
     builder3.with_human_steering(timeout=300)
@@ -131,12 +129,10 @@ def test_builder_with_human_steering_upgrade() -> None:
     assert len(node3.resilience.handlers) == 2
     assert isinstance(node3.resilience.handlers[1].strategy, EscalationStrategy)
 
+
 def test_telemetry_human_steering_event() -> None:
     event = HumanSteeringEvent(
-        checkpoint_id="chk_1",
-        timestamp=datetime.now(),
-        mutated_variables={"var": 1},
-        human_identity="user@example.com"
+        checkpoint_id="chk_1", timestamp=datetime.now(), mutated_variables={"var": 1}, human_identity="user@example.com"
     )
     assert event.checkpoint_id == "chk_1"
     assert event.human_identity == "user@example.com"

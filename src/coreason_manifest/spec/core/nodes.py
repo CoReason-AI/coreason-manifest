@@ -158,9 +158,7 @@ class SteeringConfig(CoreasonModel):
     Configuration for human steering permissions.
     """
 
-    allow_variable_mutation: bool = Field(
-        False, description="Whether the human can mutate blackboard variables."
-    )
+    allow_variable_mutation: bool = Field(False, description="Whether the human can mutate blackboard variables.")
     allowed_targets: list[VariableID] | None = Field(
         None, description="List of variable IDs that can be mutated. If None, all are allowed (if mutation is enabled)."
     )
@@ -188,49 +186,45 @@ class HumanNode(Node):
         Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
     ] = "blocking"
 
-    steering_config: SteeringConfig | None = Field(
-        None, description="Configuration for steering permissions."
-    )
+    steering_config: SteeringConfig | None = Field(None, description="Configuration for steering permissions.")
 
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
-        if self.interaction_mode == "shadow":
-            if self.input_schema is not None or self.options is not None:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
-                    message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
-                    context={
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            target_node_id=self.id,
-                            description="Remove 'input_schema' and 'options'.",
-                            patch_data=[
-                                {"op": "remove", "path": "/input_schema"},
-                                {"op": "remove", "path": "/options"},
-                            ],
-                        ).model_dump()
-                    },
-                )
-        if self.interaction_mode == "hijack_only":
-            if self.steering_config is None:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
-                    message="HumanNode in 'hijack_only' mode requires 'steering_config'.",
-                    context={
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            target_node_id=self.id,
-                            description="Add 'steering_config'.",
-                            patch_data=[
-                                {
-                                    "op": "add",
-                                    "path": "/steering_config",
-                                    "value": {"allow_variable_mutation": True},
-                                }
-                            ],
-                        ).model_dump()
-                    },
-                )
+        if self.interaction_mode == "shadow" and (self.input_schema is not None or self.options is not None):
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
+                message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Remove 'input_schema' and 'options'.",
+                        patch_data=[
+                            {"op": "remove", "path": "/input_schema"},
+                            {"op": "remove", "path": "/options"},
+                        ],
+                    ).model_dump()
+                },
+            )
+        if self.interaction_mode == "hijack_only" and self.steering_config is None:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                message="HumanNode in 'hijack_only' mode requires 'steering_config'.",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Add 'steering_config'.",
+                        patch_data=[
+                            {
+                                "op": "add",
+                                "path": "/steering_config",
+                                "value": {"allow_variable_mutation": True},
+                            }
+                        ],
+                    ).model_dump()
+                },
+            )
         return self
 
 
