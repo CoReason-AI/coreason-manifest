@@ -190,12 +190,7 @@ class PlannerNode(Node):
                 constraints.extend(dynamic_constraints)
 
         # 2. Decompose Goal
-        plan: PlanTree = engine.decompose(
-            goal=self.goal,
-            _context=context,
-            strategy="auto",
-            constraints=constraints
-        )
+        plan: PlanTree = engine.decompose(goal=self.goal, _context=context, strategy="auto", constraints=constraints)
 
         # 3. Compile Plan to Graph (FlowSpec)
         return self._compile_to_graph(plan)
@@ -209,26 +204,30 @@ class PlannerNode(Node):
         graph_edges = []
 
         def traverse(node: PlanTree):
-             if isinstance(node, AtomicSkill):
-                 graph_nodes.append({
-                     "id": node.id,
-                     "description": node.description,
-                     "locked": node.immutable,  # KEY: Transfer immutable flag to locked
-                     "tool_ref": node.tool_ref,
-                     "params": node.params
-                 })
-             elif isinstance(node, list):
-                 for child in node:
-                     if isinstance(child, dict): # Handle legacy Step dicts
-                          graph_nodes.append({
-                              "id": child.get("id"),
-                              "description": child.get("description"),
-                              "locked": False, # Legacy steps are mutable by default
-                              "tool_ref": child.get("tool_ref"),
-                              "params": {}
-                          })
-                     else:
-                          traverse(child)
+            if isinstance(node, AtomicSkill):
+                graph_nodes.append(
+                    {
+                        "id": node.id,
+                        "description": node.description,
+                        "locked": node.immutable,  # KEY: Transfer immutable flag to locked
+                        "tool_ref": node.tool_ref,
+                        "params": node.params,
+                    }
+                )
+            elif isinstance(node, list):
+                for child in node:
+                    if isinstance(child, dict):  # Handle legacy Step dicts
+                        graph_nodes.append(
+                            {
+                                "id": child.get("id"),
+                                "description": child.get("description"),
+                                "locked": False,  # Legacy steps are mutable by default
+                                "tool_ref": child.get("tool_ref"),
+                                "params": {},
+                            }
+                        )
+                    else:
+                        traverse(child)
 
         traverse(plan)
 
@@ -236,11 +235,8 @@ class PlannerNode(Node):
         # A real planner might generate branching edges based on plan structure
         for i in range(len(graph_nodes) - 1):
             source = graph_nodes[i]["id"]
-            target = graph_nodes[i+1]["id"]
-            graph_edges.append({
-                "from": source,
-                "to": target
-            })
+            target = graph_nodes[i + 1]["id"]
+            graph_edges.append({"from": source, "to": target})
 
         return {"nodes": graph_nodes, "edges": graph_edges}
 

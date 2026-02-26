@@ -3,7 +3,7 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree, Step
+from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree
 
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
@@ -205,7 +205,7 @@ class DecompositionReasoning(BaseReasoning):
             return [
                 {"id": "step_1", "description": f"Analyze: {goal}", "tool_ref": None},
                 {"id": "step_2", "description": f"Execute: {goal}", "tool_ref": None},
-                {"id": "step_3", "description": f"Verify: {goal}", "tool_ref": None}
+                {"id": "step_3", "description": f"Verify: {goal}", "tool_ref": None},
             ]
 
         # New Path: Recursive Decomposition with Immutable Constraints
@@ -214,9 +214,7 @@ class DecompositionReasoning(BaseReasoning):
         # The actual "intelligence" (LLM calls) would be plugged into _recursive_decompose.
         return self._recursive_decompose(goal, constraints)
 
-    def _recursive_decompose(
-        self, goal: str, constraints: list[str | AtomicSkill], depth: int = 0
-    ) -> PlanTree:
+    def _recursive_decompose(self, goal: str, constraints: list[str | AtomicSkill], depth: int = 0) -> PlanTree:
         # Safety Check: Infinite Recursion
         # In a real system, this would be `self.decomposition_depth`
         max_depth = 3
@@ -229,27 +227,17 @@ class DecompositionReasoning(BaseReasoning):
                 if constraint.description in goal or goal in constraint.description:
                     return constraint
             elif isinstance(constraint, str) and constraint == goal:
-                 # Create an immutable node from string constraint
-                 return AtomicSkill(
-                     id=f"fixed_{hash(goal)}",
-                     description=goal,
-                     immutable=True
-                 )
+                # Create an immutable node from string constraint
+                return AtomicSkill(id=f"fixed_{hash(goal)}", description=goal, immutable=True)
 
         # Base case: Simple goal (mock logic for "is atomic") or Max Depth Reached
         if depth >= max_depth or "simple" in goal or "atomic" in goal:
-             return AtomicSkill(
-                 id=f"atomic_{hash(goal)}",
-                 description=goal,
-                 immutable=False
-             )
+            return AtomicSkill(id=f"atomic_{hash(goal)}", description=goal, immutable=False)
 
         # Recursive step: Split into sub-goals
         # Mocking decomposition logic
         sub_goals = [f"{goal}_part_1", f"{goal}_part_2"]
-        return [
-            self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals
-        ]
+        return [self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals]
 
     def verify_plan(self, plan: PlanTree) -> bool:
         """
@@ -257,7 +245,7 @@ class DecompositionReasoning(BaseReasoning):
         (In a real implementation, this would compare against a required skeleton)
         """
         if isinstance(plan, AtomicSkill):
-            return True # Individual node is valid
+            return True  # Individual node is valid
 
         if isinstance(plan, list):
             return all(self.verify_plan(node) for node in plan)

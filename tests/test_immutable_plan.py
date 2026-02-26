@@ -1,14 +1,17 @@
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
 
 import pytest
 
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 from coreason_manifest.spec.core.contracts import AtomicSkill
 from coreason_manifest.spec.core.engines import DecompositionReasoning
 from coreason_manifest.spec.core.flow import Graph
 from coreason_manifest.spec.core.nodes import AgentNode, PlannerNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
+
 
 def test_decomposition_reasoning_creates_immutable_nodes() -> None:
     engine = DecompositionReasoning(model="gpt-4")
@@ -21,6 +24,7 @@ def test_decomposition_reasoning_creates_immutable_nodes() -> None:
     assert plan.id == "step_a"
     assert plan.immutable is True
 
+
 def test_decomposition_reasoning_linear_strategy() -> None:
     engine = DecompositionReasoning(model="gpt-4")
     goal = "Test Goal"
@@ -32,7 +36,8 @@ def test_decomposition_reasoning_linear_strategy() -> None:
     step1 = plan[0]
     assert isinstance(step1, dict)
     assert step1["id"] == "step_1"
-    assert "Analyze: Test Goal" in cast(str, step1["description"])
+    assert "Analyze: Test Goal" in cast("str", step1["description"])
+
 
 def test_decomposition_recursion_depth_limit() -> None:
     engine = DecompositionReasoning(model="gpt-4")
@@ -50,6 +55,7 @@ def test_decomposition_recursion_depth_limit() -> None:
     level3 = level2[0]
     assert isinstance(level3, AtomicSkill)
     assert "atomic" in level3.id
+
 
 def test_planner_process_respects_constraints() -> None:
     planner = PlannerNode(
@@ -76,6 +82,7 @@ def test_planner_process_respects_constraints() -> None:
     # One node means zero edges in a linear sequence
     assert len(edges) == 0
 
+
 def test_planner_process_generates_edges() -> None:
     planner = PlannerNode(id="planner_edges", goal="Two Step Task", output_schema={})
 
@@ -99,6 +106,7 @@ def test_planner_process_generates_edges() -> None:
     assert edges[1]["from"] == "step_2"
     assert edges[1]["to"] == "step_3"
 
+
 def test_planner_process_extracts_constraints_from_input() -> None:
     planner = PlannerNode(
         id="planner_2",
@@ -116,6 +124,7 @@ def test_planner_process_extracts_constraints_from_input() -> None:
     assert nodes[0]["id"] == "dynamic_fixed"
     assert nodes[0]["locked"] is True
 
+
 def test_graph_flow_governance_prevents_mutation() -> None:
     graph = Graph(nodes={}, edges=[])
 
@@ -127,6 +136,7 @@ def test_graph_flow_governance_prevents_mutation() -> None:
 
     assert "Cannot mutate immutable step: critical_step" in str(exc.value)
 
+
 def test_graph_isolation() -> None:
     graph1 = Graph(nodes={}, edges=[])
     graph2 = Graph(nodes={}, edges=[])
@@ -135,6 +145,7 @@ def test_graph_isolation() -> None:
 
     assert "node_1" in graph1._locked_nodes
     assert "node_1" not in graph2._locked_nodes
+
 
 def test_builder_locks_static_nodes() -> None:
     flow_builder = NewGraphFlow("static_flow", "1.0.0", "A flow with fixed recipes")
@@ -146,6 +157,7 @@ def test_builder_locks_static_nodes() -> None:
     built_flow = flow_builder.build()
 
     assert "fixed_agent" in built_flow.graph._locked_nodes
+
 
 def test_agent_node_has_immutable_flag() -> None:
     agent = AgentBuilder("test_agent").with_identity("bot", "helper").build()

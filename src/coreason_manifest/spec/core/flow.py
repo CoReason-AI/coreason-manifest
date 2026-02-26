@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import ConfigDict, Field, field_validator, model_validator, PrivateAttr
+from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
@@ -21,7 +21,13 @@ from coreason_manifest.spec.core.nodes import (
 from coreason_manifest.spec.core.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.spec.interop.compliance import RemediationAction
-from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode, SemanticFault, FaultSeverity, RecoveryAction
+from coreason_manifest.spec.interop.exceptions import (
+    FaultSeverity,
+    ManifestError,
+    ManifestErrorCode,
+    RecoveryAction,
+    SemanticFault,
+)
 from coreason_manifest.utils.io import SecurityViolationError
 
 
@@ -168,7 +174,7 @@ class Graph(CoreasonModel):
                     error_code="CRSN-GOV-IMMUTABLE-VIOLATION",
                     message=f"Cannot mutate immutable step: {node_id}",
                     severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT
+                    recovery_action=RecoveryAction.HALT,
                 )
             )
 
