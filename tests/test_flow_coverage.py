@@ -60,15 +60,15 @@ def test_flow_integrity_coverage() -> None:
         resilience="invalid_format",
     )
 
-    with pytest.raises(ManifestError) as excinfo:
-        LinearFlow(
-            kind="LinearFlow",
-            status="published",
-            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
-            definitions=definitions,
-            steps=[agent_bad_ref],
-        )
-    assert excinfo.value.fault.error_code == "CRSN-VAL-RESILIENCE-MISSING"
+    flow_bad_ref = LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
+        definitions=definitions,
+        steps=[agent_bad_ref],
+    )
+    errors = validate_flow(flow_bad_ref)
+    assert any(e.code == "ERR_RESILIENCE_INVALID_REF" for e in errors)
 
     # 3. Invalid Resilience Ref ID (lines 310-311)
     agent_missing_ref = AgentNode(
@@ -80,15 +80,15 @@ def test_flow_integrity_coverage() -> None:
         resilience="ref:missing",
     )
 
-    with pytest.raises(ManifestError) as excinfo:
-        LinearFlow(
-            kind="LinearFlow",
-            status="published",
-            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
-            definitions=definitions,
-            steps=[agent_missing_ref],
-        )
-    assert excinfo.value.fault.error_code == "CRSN-VAL-RESILIENCE-MISSING"
+    flow_missing_ref = LinearFlow(
+        kind="LinearFlow",
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
+        definitions=definitions,
+        steps=[agent_missing_ref],
+    )
+    errors = validate_flow(flow_missing_ref)
+    assert any(e.code == "ERR_RESILIENCE_MISSING_TEMPLATE" for e in errors)
 
     # 4. Invalid Profile Ref (lines 319-320)
     # Note: AgentNode profile is validated in its own validator if it's a string,
@@ -134,7 +134,7 @@ def test_flow_integrity_coverage() -> None:
     )
     # validate_integrity checks profile refs.
     # We call validate_integrity directly to ensure coverage of that function.
-    from coreason_manifest.spec.core.flow import validate_integrity
+    from coreason_manifest.utils.validator import validate_integrity
 
     with pytest.raises(ManifestError) as excinfo:
         validate_integrity(definitions, [swarm_missing])
@@ -217,10 +217,10 @@ def test_validator_resilience_ref_format_and_missing() -> None:
     errors = validate_flow(flow)
 
     # Check for invalid format error (validator.py:350)
-    assert any("invalid resilience reference" in e and "n1" in e for e in errors)
+    assert any(e.code == "ERR_RESILIENCE_INVALID_REF" and e.node_id == "n1" for e in errors)
 
     # Check for undefined template error (validator.py:357)
-    assert any("references undefined supervision template" in e and "n2" in e for e in errors)
+    assert any(e.code == "ERR_RESILIENCE_MISSING_TEMPLATE" and e.node_id == "n2" for e in errors)
 
 
 def test_graph_flow_swarm_variable_remediation() -> None:
@@ -245,23 +245,26 @@ def test_graph_flow_swarm_variable_remediation() -> None:
         profiles={"p1": CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None)}
     )
 
-    with pytest.raises(ManifestError) as excinfo:
-        GraphFlow(
-            kind="GraphFlow",
-            status="published",
-            metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
-            definitions=definitions,
-            interface=FlowInterface(),
-            blackboard=blackboard,
-            graph=graph,
-            governance=None,
-        )
+    flow = GraphFlow(
+        kind="GraphFlow",
+        status="published",
+        metadata=FlowMetadata(name="T", version="1.0.0", description="D", tags=[]),
+        definitions=definitions,
+        interface=FlowInterface(),
+        blackboard=blackboard,
+        graph=graph,
+        governance=None,
+    )
 
-    # Verify the remediation context structure
-    context = excinfo.value.fault.context
-    assert "remediation" in context
-    remediation = context["remediation"]
-    assert remediation["type"] == "update_field"
-    patch = remediation["patch_data"][0]
-    assert patch["op"] == "add"
-    assert patch["path"] == "/blackboard/variables/missing_var"
+    errors = validate_flow(flow)
+
+    error = next(
+        (e for e in errors if e.code == "ERR_CAP_MISSING_VAR" and e.details.get("variable") == "missing_var"), None
+    )
+    assert error is not None
+    assert error.remediation is not None
+    assert error.remediation.type == "update_field"
+    # Cast or assert type to satisfy mypy index error
+    patch_data = error.remediation.patch_data
+    assert isinstance(patch_data, list)
+    assert patch_data[0]["path"] == "/blackboard/variables/missing_var"

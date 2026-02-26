@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -6,16 +7,12 @@ from pydantic import ValidationError
 
 from coreason_manifest.spec.core.flow import Edge, FlowDefinitions, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.spec.core.governance import CircuitBreaker, CircuitState, ToolAccessPolicy, check_circuit
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.resilience import SupervisionPolicy
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.integrity import compute_hash, reconstruct_payload, verify_merkle_proof
 from coreason_manifest.utils.io import SecurityViolationError
 from coreason_manifest.utils.loader import load_agent_from_ref
-
-
-def get_meta() -> FlowMetadata:
-    return FlowMetadata(name="test", version="1.0.0", description="test")
 
 
 def test_ast_whitelist() -> None:
@@ -69,16 +66,20 @@ def test_partial_dag_verification() -> None:
     assert verify_merkle_proof(trace, trusted_parent_hashes={h_b}) is True
 
 
-def test_resilience_reference_validation() -> None:
+def test_resilience_reference_validation(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
     # Node refers to missing template
-    node = AgentNode(
-        id="a1", type="agent", profile=CognitiveProfile(role="r", persona="p"), tools=[], resilience="missing_template"
-    )
+    node = agent_node_factory("a1", resilience="ref:missing_template")
 
     graph = Graph(nodes={"a1": node}, edges=[], entry_point="a1")
 
-    with pytest.raises(ManifestError, match="references missing resilience template"):
-        GraphFlow(kind="GraphFlow", metadata=get_meta(), interface=FlowInterface(), graph=graph)
+    flow = GraphFlow(kind="GraphFlow", metadata=flow_metadata, interface=FlowInterface(), graph=graph)
+    from coreason_manifest.utils.validator import validate_flow
+
+    errors = validate_flow(flow)
+    # Matches message in validator.py
+    assert any("references undefined supervision template" in e.message for e in errors)
 
     # Valid reference
     # Must use full valid SupervisionPolicy
@@ -93,12 +94,10 @@ def test_resilience_reference_validation() -> None:
 
     # We must construct node WITH valid resilience ID since field is frozen/validated?
     # Or create a new node
-    valid_node = AgentNode(
-        id="a1", type="agent", profile=CognitiveProfile(role="r", persona="p"), tools=[], resilience="my_template"
-    )
+    valid_node = agent_node_factory("a1", resilience="my_template")
     valid_graph = Graph(nodes={"a1": valid_node}, edges=[], entry_point="a1")
 
-    GraphFlow(kind="GraphFlow", metadata=get_meta(), interface=FlowInterface(), graph=valid_graph, definitions=defs)
+    GraphFlow(kind="GraphFlow", metadata=flow_metadata, interface=FlowInterface(), graph=valid_graph, definitions=defs)
 
 
 def test_enum_case_insensitivity() -> None:
@@ -150,11 +149,12 @@ def test_module_namespace_clean(tmp_path: Path) -> None:
     assert "v1.2-agent" not in cls.__module__
     assert cls.__module__.startswith("_jail_")
 
-    # We can check if it is importable (if context persists or if we are just checking the string)
-    # The test failed with KeyError because the module might be cleaned up if it was only temporary?
-    # SandboxedPathFinder keeps modules in _jail_modules_var.
-    # But load_agent_from_ref cleans up:
-    # "if module_name in sys.modules: del sys.modules[module_name]"
-    # So we CANNOT access sys.modules[cls.__module__] after return.
+    # We can check if it is importable.
+    # Main agent modules loaded via `exec` are NOT in sys.modules (which is correct for isolation).
+    # Dependencies loaded via imports WOULD be in sys.modules (cached).
+
+    import sys
+
+    assert cls.__module__ not in sys.modules
 
     # The class still holds the module name reference.

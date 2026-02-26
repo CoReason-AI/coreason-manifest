@@ -17,25 +17,17 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, SwarmNode
 from coreason_manifest.spec.interop.antibody import AntibodyBase
 from coreason_manifest.spec.interop.compliance import ErrorCatalog
-from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import validate_policy
+from coreason_manifest.utils.validator import validate_flow
 
 # --- Flow Compatibility Tests ---
 
 
 def test_flow_backwards_compatibility() -> None:
     # DataSchema: schema -> json_schema
-    # Use canonical field names because mypy doesn't support aliases in init without a plugin or config
     ds = DataSchema(json_schema={"type": "string"})
     assert ds.json_schema == {"type": "string"}
-    # But wait, compat_json_schema is a mode='before' validator that handles "schema".
-    # Pydantic allows aliases in __init__.
-    # The mypy error "Unexpected keyword argument 'schema'" is because mypy sees the model definition.
-    # To fix this for mypy, we should use the field name 'json_schema' or 'alias' if populate_by_name is True.
-    # The compat validator handles it at runtime.
-    # But here we are testing the compat validator!
-    # So we MUST pass 'schema' to test the compatibility logic.
-    # We can silence mypy for this line.
+
     ds_compat = DataSchema(schema={"type": "string"})  # type: ignore[call-arg]
     assert ds_compat.json_schema == {"type": "string"}
 
@@ -65,19 +57,16 @@ def test_swarm_variable_validation() -> None:
         output_variable="out_var",
     )
 
-    # We need a valid GraphFlow structure
-    # Use model_construct to avoid validation during creation of sub-parts if possible,
-    # but here we want to trigger the GraphFlow validator.
+    flow = GraphFlow(
+        metadata=FlowMetadata(name="test", version="1.0"),
+        interface=FlowInterface(),
+        blackboard=Blackboard(variables={"existing_var": []}),
+        graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
+        definitions=FlowDefinitions(profiles={}),
+    )
 
-    with pytest.raises(ManifestError, match="references missing workload variable"):
-        # GraphFlow instantiation validation
-        GraphFlow(
-            metadata=FlowMetadata(name="test", version="1.0"),
-            interface=FlowInterface(),
-            blackboard=Blackboard(variables={"existing_var": []}),
-            graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
-            definitions=FlowDefinitions(profiles={}),
-        )
+    errors = validate_flow(flow)
+    assert any(e.code == "ERR_CAP_MISSING_VAR" and e.details.get("variable") == "missing_var" for e in errors)
 
 
 # --- Antibody Tests ---
@@ -146,22 +135,26 @@ def test_swarm_variable_valid() -> None:
         output_variable="out_var",
     )
 
+    # Use VariableDef for blackboard variables
     flow = GraphFlow.model_construct(
         metadata=FlowMetadata(name="test", version="1.0"),
         interface=FlowInterface(),
-        blackboard=Blackboard(variables={"existing_var": []}),
+        # Use VariableDef with explicit type
+        blackboard=Blackboard(
+            variables={"existing_var": VariableDef(type="list"), "out_var": VariableDef(type="list")}
+        ),
         graph=Graph(nodes={"swarm1": swarm_node}, edges=[]),
         definitions=FlowDefinitions(profiles={}),
     )
 
     # Should NOT raise
-    validated = flow.validate_swarm_variables()  # type: ignore[operator]
-    assert validated is flow
+    errors = validate_flow(flow)
+    swarm_errors = [e for e in errors if e.code in ["ERR_CAP_MISSING_VAR", "ERR_CAP_TYPE_MISMATCH"]]
+    assert not swarm_errors, f"Validation errors: {swarm_errors}"
 
 
 def test_validate_swarm_variables_no_blackboard() -> None:
     # Construct GraphFlow without blackboard (simulating None)
-    # Using model_construct allows bypassing defaults/validation
     flow = GraphFlow.model_construct(
         metadata=FlowMetadata(name="test", version="1.0"),
         interface=FlowInterface(),
@@ -170,10 +163,9 @@ def test_validate_swarm_variables_no_blackboard() -> None:
         definitions=FlowDefinitions(profiles={}),
     )
 
-    # Should return self immediately (line 162)
-    validated = flow.validate_swarm_variables()  # type: ignore[operator]
-    assert validated is flow
+    errors = validate_flow(flow)
     assert flow.blackboard is None
+    assert not any(e.code == "ERR_CAP_MISSING_VAR" for e in errors)
 
 
 # --- Gatekeeper Tests ---
@@ -204,7 +196,6 @@ def test_gatekeeper_no_entry_point() -> None:
     reports = validate_policy(flow)
 
     # Should report unsafe because it's not guarded (and not reachable)
-    # The error ERR_SEC_UNGUARDED_CRITICAL_003 should be present
     unguarded_errors = [r for r in reports if r.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003]
     assert len(unguarded_errors) > 0
 
@@ -235,47 +226,3 @@ def test_gatekeeper_bfs_traversal() -> None:
     # Should report unsafe because B is not guarded by HumanNode
     unguarded_errors = [r for r in reports if r.code == ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003]
     assert len(unguarded_errors) > 0
-
-
-def test_flow_nodes_iter_list_coverage() -> None:
-    # Cover flow.py line 162 else branch
-    # We need to construct GraphFlow such that graph.nodes is a list
-    # This requires model_construct because Pydantic expects dict
-
-    agent = AgentNode(
-        id="a1",
-        type="agent",
-        profile=CognitiveProfile(role="r", persona="p", reasoning=None, fast_path=None),
-        tools=[],
-        metadata={},
-        resilience=None,
-    )
-
-    # Manually call the validator
-    swarm = SwarmNode(
-        id="s1",
-        type="swarm",
-        worker_profile="p1",
-        workload_variable="v",
-        distribution_strategy="sharded",
-        max_concurrency=1,
-        reducer_function="concat",
-        output_variable="out",
-        metadata={},
-        resilience=None,
-    )
-
-    # Construct with list nodes in graph (bypassing validation type check)
-    # We use model_construct for Graph to inject list
-    graph_with_list = Graph.model_construct(nodes=[agent, swarm], edges=[], entry_point="a1")  # type: ignore[arg-type]
-
-    flow = GraphFlow.model_construct(
-        kind="GraphFlow",
-        blackboard=Blackboard(variables={"v": {"type": "list", "id": "v"}}),
-        graph=graph_with_list,
-        interface=FlowInterface(),  # Added missing required field
-        metadata=FlowMetadata(name="test", version="1.0"),  # Added missing required field
-    )
-
-    # Should pass (variable 'v' is in blackboard) and iterate over list
-    flow.validate_swarm_variables()  # type: ignore[operator]

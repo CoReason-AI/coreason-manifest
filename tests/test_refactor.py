@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -13,37 +14,29 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
 from coreason_manifest.utils.io import SecurityViolationError
 from coreason_manifest.utils.loader import _jail_root_var, sandbox_context
 
 
-# Helper to create minimal valid metadata
-def get_meta() -> FlowMetadata:
-    return FlowMetadata(name="test", version="0.1.0", description="test")
-
-
-def get_agent_node(nid: str) -> AgentNode:
-    return AgentNode(id=nid, type="agent", profile=CognitiveProfile(role="r", persona="p"), tools=[])
-
-
-def test_dangling_entry_point_rejected() -> None:
+def test_dangling_entry_point_rejected(
+    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
+) -> None:
     """
     1. test_dangling_entry_point_rejected: Attempting to instantiate a GraphFlow
        where the entry_point is "node_a" but nodes only contains "node_b" throws a Pydantic ValidationError.
     """
     # The framework raises a specific ManifestError inside the validator
-    with pytest.raises((ValidationError, ManifestError)) as excinfo:
-        GraphFlow(
-            metadata=get_meta(),
-            interface=FlowInterface(),
-            graph=Graph(nodes={"node_b": get_agent_node("node_b")}, edges=[], entry_point="node_a"),
-        )
-    assert "CRSN-VAL-ENTRY-POINT-MISSING" in str(excinfo.value) or "Entry point 'node_a' not found" in str(
-        excinfo.value
+    flow = GraphFlow(
+        metadata=flow_metadata,
+        interface=FlowInterface(),
+        graph=Graph(nodes={"node_b": agent_node_factory("node_b")}, edges=[], entry_point="node_a"),
     )
+    from coreason_manifest.utils.validator import validate_flow
+
+    errors = validate_flow(flow)
+    assert any("GraphFlow Error: Entry point 'node_a' not found in nodes." in e.message for e in errors)
 
 
 def test_ast_injection_blocked() -> None:
@@ -133,16 +126,16 @@ def test_merkle_dag_parallel() -> None:
     assert verify_merkle_proof(trace_tampered) is False
 
 
-def test_extra_fields_forbidden() -> None:
+def test_extra_fields_forbidden(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     """
     5. test_extra_fields_forbidden: Attempt to pass tenant_id="123" at the root of an
        AgentRequest instantiation. Prove it crashes with a validation error.
     """
     # Valid manifest
     manifest = GraphFlow(
-        metadata=get_meta(),
+        metadata=flow_metadata,
         interface=FlowInterface(),
-        graph=Graph(nodes={"start": get_agent_node("start")}, edges=[], entry_point="start"),
+        graph=Graph(nodes={"start": agent_node_factory("start")}, edges=[], entry_point="start"),
     )
 
     # Valid request

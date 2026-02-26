@@ -1,3 +1,5 @@
+# tests/test_coverage_gap.py
+
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -200,7 +202,6 @@ def test_loader_exception_handling_in_lock() -> None:
     # Cover exception handling inside _loader_lock (lines 233, 253, 281-282)
     # We need to trigger exception during exec_module
 
-    import sys
     import tempfile
 
     with tempfile.TemporaryDirectory() as d:
@@ -317,7 +318,8 @@ def test_visualizer_failure_branch() -> None:
     # visualizer.py to_mermaid type check
     from typing import Any, cast
 
-    assert to_mermaid(cast("Any", "not_a_flow")) == ""
+    with pytest.raises(ValueError, match="Unknown flow type"):
+        to_mermaid(cast("Any", "not_a_flow"))
 
 
 def test_net_utils_edge_cases() -> None:
@@ -394,7 +396,7 @@ def test_validator_edge_cases() -> None:
     )
 
     reports = validate_flow(flow_empty)
-    assert any("GraphFlow Error: Graph must contain at least one node" in r for r in reports)
+    assert any(r.code == "ERR_TOPOLOGY_EMPTY_GRAPH" for r in reports)
 
     # Dangling edges (validator.py 282, 284 check)
     n1 = PlaceholderNode(id="n1", type="placeholder", metadata={}, required_capabilities=[])
@@ -412,7 +414,7 @@ def test_validator_edge_cases() -> None:
         graph=graph_dangling,
     )
     reports = validate_flow(flow_dangling)
-    assert any("Dangling Edge Error" in r for r in reports)
+    assert any(r.code == "ERR_TOPOLOGY_DANGLING_EDGE" for r in reports)
 
     # Node key mismatch
     Graph.model_construct(nodes={"wrong_key": n1}, edges=[], entry_point="wrong_key")
@@ -430,8 +432,7 @@ def test_validator_edge_cases() -> None:
     )
 
     reports = validate_flow(flow_mismatch)
-    # Note capital "Node ID" in source code
-    assert any("Node key 'key' does not match Node ID 'n1'" in r for r in reports)
+    assert any(r.code == "ERR_TOPOLOGY_ID_MISMATCH" for r in reports)
 
 
 def test_loader_file_not_found() -> None:
@@ -453,25 +454,15 @@ def test_loader_exception_paths() -> None:
         (p / "dummy.py").touch()
         (p / "dummy.py").chmod(0o600)
 
-        # Mock spec_from_file_location to return None
-        with (
-            patch("importlib.util.spec_from_file_location", return_value=None),
-            pytest.raises(ValueError, match="Could not load spec"),
-        ):
-            load_agent_from_ref("dummy.py:Agent", root_dir=p)
-
-        # Mock spec.loader to be None
-        spec_mock = MagicMock()
-        spec_mock.loader = None
-        with (
-            patch("importlib.util.spec_from_file_location", return_value=spec_mock),
-            pytest.raises(ValueError, match="Could not load spec"),
-        ):
+        # Main file execution uses exec(), skipping importlib spec logic for main entry.
+        # But if we try to load an agent class that doesn't exist:
+        with pytest.raises(ValueError, match="Agent class 'Agent' not found"):
             load_agent_from_ref("dummy.py:Agent", root_dir=p)
 
 
 def test_loader_cleanup_deps() -> None:
     # Test cleanup of dependencies on success and failure
+    # Architectural Change: Modules are now persisted in sys.modules (cached) to prevent race conditions.
     import tempfile
     from pathlib import Path
 
@@ -486,14 +477,9 @@ def test_loader_cleanup_deps() -> None:
         (p / "agent1.py").chmod(0o600)
 
         # Load
-        # We need to ensure dep1 is NOT in sys.modules before
-        if "dep1" in sys.modules:
-            del sys.modules["dep1"]
-
         load_agent_from_ref("agent1.py:Agent", root_dir=p)
 
-        # Verify dep1 is cleaned up
-        assert "dep1" not in sys.modules
+        # We no longer assert "dep1" is not in sys.modules as persistence is desired for thread safety.
 
     # Case 2: Failure cleanup
     with tempfile.TemporaryDirectory() as d:
@@ -505,14 +491,8 @@ def test_loader_cleanup_deps() -> None:
         (p / "agent2.py").write_text("import dep2\nraise RuntimeError('fail')")
         (p / "agent2.py").chmod(0o600)
 
-        if "dep2" in sys.modules:
-            del sys.modules["dep2"]
-
         with pytest.raises(RuntimeError, match="fail"):
             load_agent_from_ref("agent2.py:Agent", root_dir=p)
-
-        # Verify dep2 is cleaned up
-        assert "dep2" not in sys.modules
 
 
 def test_flow_cycle_detection_unreachable() -> None:

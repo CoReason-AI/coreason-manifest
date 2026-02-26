@@ -203,7 +203,7 @@ def test_validator_coverage() -> None:
             graph=graph,
         )
         errors = validate_flow(flow)
-        assert any(expected_error in e for e in errors), f"Expected '{expected_error}' in {errors}"
+        assert any(expected_error in e.message for e in errors), f"Expected '{expected_error}' in {errors}"
 
     # SwarmNode missing vars
     swarm = SwarmNode(

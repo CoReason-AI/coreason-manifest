@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self
+from typing import Any, Self, cast
 
 from coreason_manifest.spec.core.engines import (
     FastPath,
@@ -242,6 +242,22 @@ class BaseFlowBuilder:
         self._register_node(node)
         return self
 
+    def _create_flow_instance(self) -> LinearFlow | GraphFlow:
+        """Abstract method to create the specific Flow instance."""
+        raise NotImplementedError
+
+    def build(self) -> LinearFlow | GraphFlow:
+        """Constructs and validates the Flow object."""
+        flow = self._create_flow_instance()
+
+        errors = validate_flow(flow)
+        if errors:
+            # Format structured errors into string for ValueError
+            error_msgs = [f"[{e.code}] {e.message}" for e in errors]
+            raise ValueError("Validation failed:\n- " + "\n- ".join(error_msgs))
+
+        return flow
+
 
 class NewLinearFlow(BaseFlowBuilder):
     """Fluent API to construct LinearFlows programmatically."""
@@ -263,9 +279,8 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps.append(agent)
         return self
 
-    def build(self) -> LinearFlow:
-        """Constructs and validates the LinearFlow object."""
-        flow = LinearFlow(
+    def _create_flow_instance(self) -> LinearFlow:
+        return LinearFlow(
             kind="LinearFlow",
             status="published",
             metadata=self.metadata,
@@ -274,11 +289,9 @@ class NewLinearFlow(BaseFlowBuilder):
             governance=self.governance,
         )
 
-        errors = validate_flow(flow)
-        if errors:
-            raise ValueError("Validation failed:\n- " + "\n- ".join(errors))
-
-        return flow
+    def build(self) -> LinearFlow:
+        # Override return type hint for better IDE support, but reuse base implementation
+        return cast("LinearFlow", super().build())
 
 
 class NewGraphFlow(BaseFlowBuilder):
@@ -321,9 +334,6 @@ class NewGraphFlow(BaseFlowBuilder):
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
         """Defines the Input/Output contract for the Flow."""
-        # Convert simple dict to JSON schema if needed, or assume raw schema passed?
-        # Mandate says: "Replace the naive dict with a full JSON Schema definition"
-        # The builder might accept the full schema dict.
         self.interface = FlowInterface(
             inputs=DataSchema(json_schema=inputs),
             outputs=DataSchema(json_schema=outputs),
@@ -335,8 +345,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self.blackboard = Blackboard(variables=variables, persistence=persistence)
         return self
 
-    def build(self) -> GraphFlow:
-        """Constructs and validates the GraphFlow object."""
+    def _create_flow_instance(self) -> GraphFlow:
         # Determine entry point
         ep = self._entry_point
         if not ep:
@@ -344,7 +353,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         graph = Graph(nodes=self._nodes, edges=self._edges, entry_point=ep)
 
-        flow = GraphFlow(
+        return GraphFlow(
             kind="GraphFlow",
             status="published",
             metadata=self.metadata,
@@ -355,8 +364,6 @@ class NewGraphFlow(BaseFlowBuilder):
             governance=self.governance,
         )
 
-        errors = validate_flow(flow)
-        if errors:
-            raise ValueError("Validation failed:\n- " + "\n- ".join(errors))
-
-        return flow
+    def build(self) -> GraphFlow:
+        # Override return type hint
+        return cast("GraphFlow", super().build())

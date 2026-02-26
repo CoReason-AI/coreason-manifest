@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import SwitchNode
+from coreason_manifest.utils.topology import get_unified_topology
 
 
 def _safe_id(node_id: str) -> str:
@@ -84,20 +85,15 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     """Generates valid Mermaid.js diagram code."""
     lines = []
 
-    nodes: Sequence[AnyNode] = []
-    edges: list[tuple[str, str, str | None]] = []
+    nodes, edge_objs = get_unified_topology(flow)
+    edges = [(e.from_node, e.to_node, e.condition) for e in edge_objs]
 
-    match flow:
-        case LinearFlow():
-            lines.append("graph TD")
-            nodes = flow.steps
-            edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
-        case GraphFlow():
-            lines.append("graph LR")
-            nodes = list(flow.graph.nodes.values())
-            edges = [(e.from_node, e.to_node, e.condition) for e in flow.graph.edges]
-        case _:  # pragma: no cover
-            return ""  # pragma: no cover
+    if isinstance(flow, LinearFlow):
+        lines.append("graph TD")
+    elif isinstance(flow, GraphFlow):
+        lines.append("graph LR")
+    else:  # pragma: no cover
+        return ""  # pragma: no cover
 
     # Grouping
     grouped_nodes: dict[str, list[AnyNode]] = {}
@@ -237,20 +233,8 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
     rf_nodes: list[dict[str, Any]] = []
     rf_edges: list[dict[str, Any]] = []
 
-    nodes: Sequence[AnyNode] = []
-    edges: list[tuple[str, str, str | None]] = []
-
-    match flow:
-        case LinearFlow():
-            nodes = flow.steps
-            edges.extend((nodes[i].id, nodes[i + 1].id, None) for i in range(len(nodes) - 1))
-        case GraphFlow():
-            nodes = list(flow.graph.nodes.values())
-            edges = []
-            for e in flow.graph.edges:
-                edges.append((e.from_node, e.to_node, e.condition))
-        case _:  # pragma: no cover
-            return {"nodes": [], "edges": []}  # pragma: no cover
+    nodes, edge_objs = get_unified_topology(flow)
+    edges = [(e.from_node, e.to_node, e.condition) for e in edge_objs]
 
     # Compute Layout
     positions = _compute_layout(nodes, edges)

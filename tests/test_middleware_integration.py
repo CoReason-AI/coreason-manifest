@@ -8,8 +8,9 @@ import pytest
 import yaml
 
 from coreason_manifest.spec.core.flow import GraphFlow
-from coreason_manifest.spec.interop.exceptions import ManifestError, SecurityJailViolationError
+from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import load_middleware_from_ref
+from coreason_manifest.utils.validator import validate_flow
 
 # Mock content for middlewares
 VALID_MIDDLEWARE_CODE = """
@@ -182,9 +183,11 @@ governance:
     - missing_mw
 """
     data = yaml.safe_load(manifest_yaml)
-    with pytest.raises(ManifestError) as exc:
-        GraphFlow.model_validate(data)
-    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+    flow = GraphFlow.model_validate(data)
+    errors = validate_flow(flow)
+    assert any(
+        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
+    )
 
 
 def test_validation_no_definitions() -> None:
@@ -208,9 +211,11 @@ governance:
     - missing_mw
 """
     data = yaml.safe_load(manifest_yaml)
-    with pytest.raises(ManifestError) as exc:
-        GraphFlow.model_validate(data)
-    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+    flow = GraphFlow.model_validate(data)
+    errors = validate_flow(flow)
+    assert any(
+        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
+    )
 
 
 def test_validation_no_middlewares() -> None:
@@ -238,9 +243,11 @@ governance:
     - missing_mw
 """
     data = yaml.safe_load(manifest_yaml)
-    with pytest.raises(ManifestError) as exc:
-        GraphFlow.model_validate(data)
-    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+    flow = GraphFlow.model_validate(data)
+    errors = validate_flow(flow)
+    assert any(
+        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
+    )
 
 
 def test_validation_missing_key_with_existing_middlewares() -> None:
@@ -269,21 +276,25 @@ governance:
     - missing_mw
 """
     data = yaml.safe_load(manifest_yaml)
-    with pytest.raises(ManifestError) as exc:
-        GraphFlow.model_validate(data)
+    flow = GraphFlow.model_validate(data)
+    errors = validate_flow(flow)
 
-    assert "Active middleware 'missing_mw' is not defined" in str(exc.value)
+    error = next(
+        (
+            e
+            for e in errors
+            if e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw"
+        ),
+        None,
+    )
+    assert error is not None
 
-    # Verify the patch path is correct for non-empty middlewares
-    error_ctx = exc.value.fault.context
-    assert error_ctx
-    remediation = error_ctx.get("remediation")
-    assert remediation
-
-    # The patch path should be /definitions/middlewares/missing_mw because middlewares dict exists
-    # and we are adding a new key to it.
-    patch_data = remediation["patch_data"]
-    assert patch_data[0]["path"] == "/definitions/middlewares/missing_mw"
+    # Verify remediation
+    assert error.remediation is not None
+    assert error.remediation.type == "update_field"
+    # patch_data is typically list of dicts for JSON Patch
+    assert isinstance(error.remediation.patch_data, list)
+    assert error.remediation.patch_data[0]["path"] == "/definitions/middlewares/missing_mw"
 
 
 def test_loader_valid_middleware(workspace: Path) -> None:

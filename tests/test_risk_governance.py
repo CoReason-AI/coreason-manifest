@@ -12,7 +12,7 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import Governance, ToolAccessPolicy
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
-from coreason_manifest.spec.interop.exceptions import ManifestError
+from coreason_manifest.utils.validator import validate_flow
 
 
 def test_risk_governance_graph_flow() -> None:
@@ -35,28 +35,34 @@ def test_risk_governance_graph_flow() -> None:
     )
     assert flow.governance is not None
     assert flow.governance.max_risk_level is None
+    errors = validate_flow(flow)
+    # Assuming no other errors (empty graph is error? Yes "Graph must contain at least one node")
+    # But we check specific error.
+    assert not any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)
 
     # Case 2: Kill switch set to 'standard'
-    with pytest.raises(ManifestError) as exc_info:
-        GraphFlow(
-            metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
-            interface=FlowInterface(),
-            graph=Graph(nodes={}, edges=[]),
-            definitions=definitions,
-            governance=Governance(max_risk_level=RiskLevel.STANDARD),
-        )
-
-    assert "Security Violation" in str(exc_info.value)
-    assert "nuke_database" in str(exc_info.value)
+    flow_blocked = GraphFlow(
+        metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
+        interface=FlowInterface(),
+        graph=Graph(nodes={}, edges=[]),
+        definitions=definitions,
+        governance=Governance(max_risk_level=RiskLevel.STANDARD),
+    )
+    errors = validate_flow(flow_blocked)
+    assert any(
+        e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("tool_name") == "nuke_database" for e in errors
+    )
 
     # Case 3: Kill switch set to 'critical' (should PASS)
-    GraphFlow(
+    flow_allowed = GraphFlow(
         metadata=FlowMetadata(name="DangerousFlowAllowed", version="1.0.0"),
         interface=FlowInterface(),
         graph=Graph(nodes={}, edges=[]),
         definitions=definitions,
         governance=Governance(max_risk_level=RiskLevel.CRITICAL),
     )
+    errors = validate_flow(flow_allowed)
+    assert not any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)
 
 
 def test_risk_governance_linear_flow() -> None:
@@ -70,30 +76,34 @@ def test_risk_governance_linear_flow() -> None:
     definitions = FlowDefinitions(tool_packs={"danger": pack})
 
     # Case 1: No kill switch
-    LinearFlow(
+    flow = LinearFlow(
         metadata=FlowMetadata(name="DangerousFlow", version="1.0.0"),
         steps=[],
         definitions=definitions,
         governance=Governance(),  # No max_risk_level
     )
+    errors = validate_flow(flow)
+    assert not any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)
 
     # Case 2: Kill switch set to 'standard'
-    with pytest.raises(ManifestError) as exc_info:
-        LinearFlow(
-            metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
-            steps=[],
-            definitions=definitions,
-            governance=Governance(max_risk_level=RiskLevel.STANDARD),
-        )
-    assert "Security Violation" in str(exc_info.value)
+    flow_blocked = LinearFlow(
+        metadata=FlowMetadata(name="DangerousFlowBlocked", version="1.0.0"),
+        steps=[],
+        definitions=definitions,
+        governance=Governance(max_risk_level=RiskLevel.STANDARD),
+    )
+    errors = validate_flow(flow_blocked)
+    assert any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)
 
     # Case 3: Kill switch set to 'critical' (should PASS)
-    LinearFlow(
+    flow_allowed = LinearFlow(
         metadata=FlowMetadata(name="DangerousFlowAllowed", version="1.0.0"),
         steps=[],
         definitions=definitions,
         governance=Governance(max_risk_level=RiskLevel.CRITICAL),
     )
+    errors = validate_flow(flow_allowed)
+    assert not any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)
 
 
 def test_risk_enum_update() -> None:
@@ -128,21 +138,25 @@ def test_inline_tool_bypass_prevention() -> None:
 
     hacker_node = HackerNode(id="hacker_1", inline_tools=[critical_tool])
 
-    # Bypass GraphFlow validation (which strictly checks AnyNode types)
-    # and test the scanner directly.
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
+    # Construct a LinearFlow with this node
+    # Since LinearFlow.steps expects AnyNode (which doesn't include HackerNode), we use model_construct or
+    # similar to bypass typing if possible, or just rely on dynamic typing.
+    # LinearFlow steps is list[AnyNode]. AnyNode is a Union.
+    # Pydantic validation of LinearFlow might fail if we pass HackerNode.
+    # So we use model_construct.
 
-    max_risk = RiskLevel.STANDARD
+    flow = LinearFlow.model_construct(
+        kind="LinearFlow",
+        metadata=FlowMetadata(name="HackerFlow", version="1.0.0"),
+        steps=[hacker_node],  # type: ignore[list-item]
+        definitions=None,
+        governance=Governance(max_risk_level=RiskLevel.STANDARD),
+    )
 
-    with pytest.raises(ManifestError) as exc_info:
-        _scan_for_kill_switch_violations(
-            max_risk=max_risk,
-            definitions=None,
-            nodes=[hacker_node],  # type: ignore[list-item]
-        )
-
-    assert "Security Violation" in str(exc_info.value)
-    assert "inline_nuke" in str(exc_info.value)
+    errors = validate_flow(flow)
+    assert any(
+        e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("tool_name") == "inline_nuke" for e in errors
+    )
 
 
 def test_scan_remote_uri_fail_closed() -> None:
@@ -150,53 +164,62 @@ def test_scan_remote_uri_fail_closed() -> None:
     Test that the scanner enforces fail-closed logic for remote URIs (://).
     These should be treated as CRITICAL risk.
     """
-
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
     from coreason_manifest.spec.core.nodes import AgentNode
 
     # AgentNode with a remote tool reference
     agent = AgentNode(id="agent_remote", type="agent", profile="default", tools=["mcp://remote-server/tools/dangerous"])
 
     # If max_risk is STANDARD, CRITICAL (remote) should raise
-    max_risk = RiskLevel.STANDARD
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=FlowMetadata(name="RemoteFlow", version="1.0.0"),
+        steps=[agent],
+        governance=Governance(max_risk_level=RiskLevel.STANDARD),
+    )
 
-    with pytest.raises(ManifestError) as exc_info:
-        _scan_for_kill_switch_violations(max_risk=max_risk, definitions=None, nodes=[agent])
-
-    assert "Security Violation" in str(exc_info.value)
-    assert "Unresolved remote tool URIs default to CRITICAL" in str(exc_info.value)
-    # Check the structured fault context for the specific URI
-    assert exc_info.value.fault.context["tool_uri"] == "mcp://remote-server/tools/dangerous"
-    assert exc_info.value.fault.context["assumed_risk"] == "critical"
+    errors = validate_flow(flow)
+    assert any(
+        e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" and e.details.get("assumed_risk") == "critical" for e in errors
+    )
 
 
 def test_scan_remote_uri_allowed_if_critical() -> None:
     """
     Test that remote URIs are allowed if the global policy allows CRITICAL risk.
     """
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
     from coreason_manifest.spec.core.nodes import AgentNode
 
     agent = AgentNode(
         id="agent_remote_allowed", type="agent", profile="default", tools=["https://trusted-but-remote.com/api"]
     )
 
-    max_risk = RiskLevel.CRITICAL
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=FlowMetadata(name="RemoteFlow", version="1.0.0"),
+        steps=[agent],
+        governance=Governance(max_risk_level=RiskLevel.CRITICAL),
+    )
 
-    # Should NOT raise because max_risk >= CRITICAL
-    _scan_for_kill_switch_violations(max_risk=max_risk, definitions=None, nodes=[agent])
+    errors = validate_flow(flow)
+    assert not any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)
 
 
 def test_scan_skips_local_string_references() -> None:
     """
     Test that the scanner ignores local string references (no ://) in node tools.
     """
-    from coreason_manifest.spec.core.flow import _scan_for_kill_switch_violations
     from coreason_manifest.spec.core.nodes import AgentNode
 
     # AgentNode has tools: list[str]
     agent = AgentNode(id="agent1", type="agent", profile="default", tools=["some_tool_ref", "another_tool_ref"])
 
     # Should run without error and without checking these strings
-    # (since they are references, not inline definitions, and not remote URIs)
-    _scan_for_kill_switch_violations(max_risk=RiskLevel.SAFE, definitions=None, nodes=[agent])
+    flow = LinearFlow(
+        kind="LinearFlow",
+        metadata=FlowMetadata(name="LocalFlow", version="1.0.0"),
+        steps=[agent],
+        governance=Governance(max_risk_level=RiskLevel.SAFE),
+    )
+
+    errors = validate_flow(flow)
+    assert not any(e.code == "ERR_SEC_KILL_SWITCH_VIOLATION" for e in errors)

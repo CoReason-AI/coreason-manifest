@@ -1,6 +1,7 @@
 from typing import Any
 
 from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.utils.topology import get_unified_topology
 
 
 def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
@@ -13,13 +14,15 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
     Returns:
         A dictionary representing the LangChain configuration.
     """
+    nodes, edges = get_unified_topology(flow)
+
     if isinstance(flow, LinearFlow):
-        return {"type": "chain", "steps": [node.id for node in flow.steps]}
+        return {"type": "chain", "steps": [node.id for node in nodes]}
     if isinstance(flow, GraphFlow):
         return {
             "type": "graph",
-            "nodes": list(flow.graph.nodes.keys()),
-            "edges": [(edge.from_node, edge.to_node, edge.condition) for edge in flow.graph.edges],
+            "nodes": [node.id for node in nodes],
+            "edges": [(edge.from_node, edge.to_node, edge.condition) for edge in edges],
         }
-    # This case should ideally not be reachable if type hints are respected
-    raise ValueError(f"Unknown flow type: {type(flow)}")
+
+    return {}  # pragma: no cover

@@ -313,21 +313,24 @@ def _execute_jailed_module(
         stacklevel=3,
     )
 
-    # Generate cryptographically unique module name to prevent collisions
+    # Generate cryptographically unique module name to prevent collisions/namespace pollution
     path_hash = hashlib.sha256(str(file_path).encode("utf-8")).hexdigest()[:16]
     module_name = f"_jail_{path_hash}"
 
-    loaded_class = None
+    # Prepare execution namespace
+    # We use a restricted globals dict (acting as both globals and locals) to avoid polluting sys.modules
+    # with the main agent code, while preserving module-level scope behavior (globals==locals).
+    # Dependencies will still use sys.modules via import mechanism, managed by SandboxedPathFinder
+    exec_globals: dict[str, Any] = {
+        "__name__": module_name,
+        "__file__": str(file_path),
+        "__builtins__": __builtins__,  # Allow standard builtins (imports, etc.)
+    }
 
-    # Use context manager to enable jailed imports during spec finding and loading
+    content = file_path.read_text(encoding="utf-8")
+
+    # Use context manager to enable jailed imports during execution
     with sandbox_context(root_dir):
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        if spec is None or spec.loader is None:
-            raise ValueError(f"Could not load spec for {file_ref}")
-
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-
         warnings.warn(
             f"Host Process Execution: Code in {file_ref} is executing within the host Python process. "
             "Ensure strict governance until Wasm sandboxing is implemented.",
@@ -336,28 +339,30 @@ def _execute_jailed_module(
         )
 
         try:
-            spec.loader.exec_module(module)
-            loaded_class = getattr(module, class_name, None)
+            # SOTA Concurrency Fix: exec() into isolated namespace instead of sys.modules injection
+            exec(content, exec_globals)
         except Exception as e:
             if isinstance(e, (SecurityJailViolationError, RuntimeError)):
                 raise
             raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
         finally:
-            # SOTA Hygiene: Guaranteed cleanup even if BaseExceptions (SystemExit, etc.) occur.
-            if module_name in sys.modules:
-                del sys.modules[module_name]
+            # Architectural Decision: We DO NOT clean up dependencies (cleanup_modules) here.
+            # Rationale: Deleting from sys.modules causes race conditions in concurrent/async workloads
+            # if multiple tasks share the same jail root (and thus the same hash-namespaced modules).
+            # Python's import system is thread-safe; deleting from underneath it is not.
+            # Memory leak risk is acceptable for this manifest loader context (caching behavior).
+            pass
 
-            cleanup_modules = _jail_modules_var.get()
-            if cleanup_modules:
-                for mod in cleanup_modules:
-                    if mod in sys.modules:
-                        del sys.modules[mod]
+    loaded_class = exec_globals.get(class_name)
 
     if loaded_class is None:
         raise ValueError(f"{component_name.capitalize()} class '{class_name}' not found in {file_ref}")
 
     if not isinstance(loaded_class, type):
         raise TypeError(f"'{class_name}' in {file_ref} is not a class.")
+
+    # Fixup __module__ to match the namespaced name for consistency (e.g. logging/pickling)
+    loaded_class.__module__ = module_name
 
     return loaded_class
 

@@ -15,16 +15,16 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 *   **Manifest Responsibility:** Defines *what* an agent is and *what* it can do.
 *   **Runtime Responsibility:**
     *   **Execution Loop:** Instantiates the LLM client, manages the context window, and executes tool calls.
-    *   **Policy Enforcement:** The runtime must respect `PolicyConfig` definitions found in `recipe.py`. This includes enforcing `max_retries` for failed steps, `timeout_seconds` for global execution, and adhering to `execution_mode` (sequential vs. parallel).
-    *   **Safety Interceptors:** Adhere to strict governance rules. If a tool is marked `risk_level: critical` or if the `PolicyConfig` forbids custom logic, the runtime must halt or reject execution accordingly.
+    *   **Policy Enforcement:** The runtime must respect `Governance` and `ResilienceConfig` definitions found in `spec/core/flow.py` and `spec/core/governance.py`. This includes enforcing `max_retries` for failed steps, `timeout_seconds` for global execution, and adhering to `execution_mode` (sequential vs. parallel).
+    *   **Safety Interceptors:** Adhere to strict governance rules. If a tool is marked `risk_level: critical` or if the `Governance` config forbids custom logic, the runtime must halt or reject execution accordingly.
 
 ### 2. The "Pre-Flight" Feasibility Check
 
 **The Rule:** The runtime must validate the environment state against defined `Constraints` *before* attempting execution.
 
-*   **The Component:** `Constraint` objects in `recipe.py` (e.g., `requirements` list in `RecipeDefinition`).
+*   **The Component:** `Constraint` objects in `spec/core/flow.py` (e.g., `requirements` list in `GraphFlow`).
 *   **Runtime Requirement:**
-    1.  Before starting the graph or a specific node, the runtime must evaluate the `requirements` list using `RecipeDefinition.check_feasibility`.
+    1.  Before starting the graph or a specific node, the runtime must evaluate the `requirements` list.
     2.  It must resolve variables from the Blackboard (e.g., `data.row_count`) and apply the defined operator (`eq`, `gt`, `contains`).
     3.  If a `required: True` constraint fails, the runtime must abort execution immediately with the provided `error_message`.
 
@@ -56,7 +56,7 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 *   **The Component:** `ManifestMetadata` fields in `definitions.py` (`generation_rationale`, `confidence_score`, `generated_by`, `original_user_intent`).
 *   **Runtime Requirement:**
     *   If executing a dynamic/ephemeral manifest, the runtime logs must include the `generated_by` model ID and the `confidence_score`.
-    *   This data must be persisted in the `SimulationTrace` to allow debugging why a specific workflow structure was hallucinated/generated.
+    *   This data must be persisted in the telemetry logs (`ExecutionSnapshot`) to allow debugging why a specific workflow structure was hallucinated/generated.
 
 ### 6. Lazy Loading
 
@@ -73,9 +73,9 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 
 **The Rule:** Execution is a Directed Cyclic Graph (DCG) where flow is determined by data, not just linear sequence.
 
-*   **Data Structure:** The `RecipeDefinition` defines a `StateDefinition` schema for shared memory.
+*   **Data Structure:** The `GraphFlow` defines a `Blackboard` schema for shared memory.
 *   **Runtime Requirement:**
-    *   **Router Execution:** When encountering a `RouterNode`, the runtime must evaluate the `input_key` against the Blackboard. It must strictly match the value to the `routes` map to determine the next node ID, falling back to `default_route` only if no match is found.
+    *   **Router Execution:** When encountering a `SwitchNode`, the runtime must evaluate the `variable` against the Blackboard. It must strictly match the value to the `cases` map to determine the next node ID, falling back to `default` only if no match is found.
     *   **I/O Mapping:** Map global state variables to `AgentNode` inputs using `inputs_map`.
     *   **Persistence:** If `state.persistence` is set to `redis` or `postgres`, the runtime must serialize the Blackboard to external storage to support long-running or resumed sessions.
 
@@ -83,7 +83,7 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 
 **The Rule:** The runtime must produce a standardized trace object, not just raw logs.
 
-*   **The Component:** `SimulationTrace` and `SimulationStep` in `spec/simulation.py`.
+*   **The Component:** `ExecutionSnapshot` and `NodeState` in `spec/interop/telemetry.py`.
 *   **Runtime Requirement:**
     *   Every state transition must be recorded as a `SimulationStep`.
     *   The step must explicitly capture `thought` (reasoning), `action` (tool/router decision), `observation` (result), and a `snapshot` of the Blackboard context at that moment.
@@ -91,9 +91,9 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 
 ### 9. The Evaluator-Optimizer Loop (LLM-as-a-Judge)
 
-**The Rule:** The runtime must natively support self-correction loops using the `EvaluatorNode`.
+**The Rule:** The runtime must natively support self-correction loops using the `InspectorNode`.
 
-*   **The Component:** `EvaluatorNode` in `recipe.py`.
+*   **The Component:** `InspectorNode` in `spec/core/nodes.py`.
 *   **Runtime Logic:**
     1.  **Execute Judge:** Call the `evaluator_agent_ref` with the content of `target_variable`.
     2.  **Parse Score:** Extract a normalized score (0.0 - 1.0) based on the `EvaluationProfile`.
@@ -111,9 +111,9 @@ This document defines how a Runtime Engine (the "Executor") must behave to corre
 | **Multiplexed Streams** | `stream_lifecycle.md` | Emit `STREAM_START/END` events; support `stream_id` in chunks. |
 | **Middleware** | `middleware_extension_interfaces.md` | Apply `IRequestInterceptor` and `IResponseInterceptor` chains. |
 | **Generative Provenance** | `definitions.py` | Log `generation_rationale` and `confidence_score` from metadata. |
-| **Pre-Flight Checks** | `recipe.py` -> `Constraint` | Evaluate `requirements` against context before execution using `check_feasibility`. |
-| **Operational Policy** | `recipe.py` -> `PolicyConfig` | Enforce `timeout_seconds` and `max_retries`. |
-| **Dynamic Routing** | `recipe.py` -> `RouterNode` | Switch execution path based on Blackboard variable values. |
+| **Pre-Flight Checks** | `spec/core/flow.py` -> `Constraint` | Evaluate `requirements` against context before execution. |
+| **Operational Policy** | `spec/core/governance.py` -> `Governance` | Enforce `timeout_seconds` and `max_retries` via resilience strategies. |
+| **Dynamic Routing** | `spec/core/nodes.py` -> `SwitchNode` | Switch execution path based on Blackboard variable values. |
 | **Lazy Loading** | `skills.py` -> `SkillDefinition` | Index `trigger_intent` for vector search; load only when needed. |
-| **Observability** | `spec/simulation.py` | Generate structured `SimulationStep` objects with state snapshots. |
-| **Self-Correction** | `recipe.py` -> `EvaluatorNode` | Implement logic to parse "Score" and route based on threshold. |
+| **Observability** | `spec/interop/telemetry.py` | Generate structured `ExecutionSnapshot` objects with state snapshots. |
+| **Self-Correction** | `spec/core/nodes.py` -> `InspectorNode` | Implement logic to evaluate criteria and route based on threshold. |

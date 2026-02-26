@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Any
 
 from coreason_manifest.spec.common.presentation import PresentationHints
@@ -12,7 +13,6 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
-    CognitiveProfile,
     HumanNode,
     Node,
     PlaceholderNode,
@@ -21,29 +21,6 @@ from coreason_manifest.spec.core.nodes import (
 )
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 from coreason_manifest.utils.visualizer import to_mermaid, to_react_flow
-
-
-def _get_metadata() -> FlowMetadata:
-    return FlowMetadata(
-        name="Test Flow",
-        version="1.0.0",
-        description="A test flow",
-        tags=["test"],
-    )
-
-
-def _get_agent_node(node_id: str) -> AgentNode:
-    return AgentNode(
-        id=node_id,
-        metadata={},
-        profile=CognitiveProfile(
-            role="assistant",
-            persona="helpful",
-            reasoning=None,
-            fast_path=None,
-        ),
-        tools=[],
-    )
 
 
 def _get_switch_node(node_id: str, cases: dict[str, str], default: str) -> SwitchNode:
@@ -83,9 +60,9 @@ def _get_placeholder_node(node_id: str) -> PlaceholderNode:
     )
 
 
-def test_linear_flow_to_mermaid() -> None:
+def test_linear_flow_to_mermaid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: list[Any] = [
-        _get_agent_node("start"),
+        agent_node_factory("start"),
         _get_human_node("review"),
         _get_planner_node("plan"),
         _get_placeholder_node("end"),
@@ -93,7 +70,7 @@ def test_linear_flow_to_mermaid() -> None:
 
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         steps=nodes,
     )
 
@@ -114,9 +91,9 @@ def test_linear_flow_to_mermaid() -> None:
     assert ":::human" in mermaid_code
 
 
-def test_graph_flow_to_mermaid() -> None:
+def test_graph_flow_to_mermaid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: dict[str, Any] = {
-        "start": _get_agent_node("start"),
+        "start": agent_node_factory("start"),
         "decision": _get_switch_node("decision", cases={"success": "end", "retry": "start"}, default="end"),
         "end": _get_placeholder_node("end"),
     }
@@ -133,7 +110,7 @@ def test_graph_flow_to_mermaid() -> None:
 
     flow = GraphFlow.model_construct(
         kind="GraphFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
@@ -158,7 +135,9 @@ def test_graph_flow_to_mermaid() -> None:
     assert ":::switch" in mermaid_code
 
 
-def test_switch_default_path() -> None:
+def test_switch_default_path(
+    flow_metadata: FlowMetadata,
+) -> None:
     nodes: dict[str, Any] = {
         "decision": _get_switch_node("decision", cases={"success": "end"}, default="fallback"),
         "end": _get_placeholder_node("end"),
@@ -173,7 +152,7 @@ def test_switch_default_path() -> None:
     graph = Graph(nodes=nodes, edges=edges, entry_point="decision")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
@@ -187,10 +166,10 @@ def test_switch_default_path() -> None:
     assert "decision -->|default| fallback" in mermaid_code
 
 
-def test_explicit_edge_labels() -> None:
+def test_explicit_edge_labels(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: dict[str, Any] = {
-        "A": _get_agent_node("A"),
-        "B": _get_agent_node("B"),
+        "A": agent_node_factory("A"),
+        "B": agent_node_factory("B"),
     }
     edges = [
         Edge(from_node="A", to_node="B", condition="explicit_cond"),
@@ -198,7 +177,7 @@ def test_explicit_edge_labels() -> None:
     graph = Graph(nodes=nodes, edges=edges, entry_point="A")
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
@@ -211,7 +190,9 @@ def test_explicit_edge_labels() -> None:
     assert "A -->|explicit_cond| B" in mermaid_code
 
 
-def test_special_characters_escaping() -> None:
+def test_special_characters_escaping(
+    flow_metadata: FlowMetadata,
+) -> None:
     # Use model_construct to bypass strict validation for testing visualizer escaping logic
     nodes: list[Any] = [
         AgentNode.model_construct(id="agent 1", type="agent", profile="p", tools=[]),
@@ -221,7 +202,7 @@ def test_special_characters_escaping() -> None:
 
     flow = LinearFlow.model_construct(
         kind="LinearFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         steps=nodes,
     )
 
@@ -240,10 +221,10 @@ def test_special_characters_escaping() -> None:
     assert 'agent"2" --> agent_3' in mermaid_code
 
 
-def test_react_flow_output() -> None:
+def test_react_flow_output(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Explicitly type as dict[str, AnyNode] or Node if compatible, but Node is safer for generic visualizer tests
     nodes: dict[str, Node] = {
-        "start": _get_agent_node("start"),
+        "start": agent_node_factory("start"),
         "end": _get_placeholder_node("end"),
     }
     edges: list[Edge] = [
@@ -255,7 +236,7 @@ def test_react_flow_output() -> None:
     graph = Graph(nodes=nodes, edges=edges, entry_point="start")  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
@@ -288,15 +269,15 @@ def test_react_flow_output() -> None:
     assert start_pos["x"] != end_pos["x"]
 
 
-def test_react_flow_linear() -> None:
+def test_react_flow_linear(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: list[Node] = [
-        _get_agent_node("start"),
+        agent_node_factory("start"),
         _get_placeholder_node("end"),
     ]
     # LinearFlow sequence expects AnyNode.
     flow = LinearFlow(
         kind="LinearFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         steps=nodes,  # type: ignore[arg-type]
     )
 
@@ -307,11 +288,11 @@ def test_react_flow_linear() -> None:
     assert rf["edges"][0]["target"] == "end"
 
 
-def test_visualizer_coverage_extras() -> None:
+def test_visualizer_coverage_extras(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Coverage for presentation, snapshot, edge labels in to_react_flow
 
     # 1. Setup Node with Presentation
-    agent = _get_agent_node("agent-cov")
+    agent = agent_node_factory("agent-cov")
     agent = agent.model_copy(update={"presentation": PresentationHints(label="Custom Label", icon="icon")})
 
     # 2. Setup Flow
@@ -321,7 +302,7 @@ def test_visualizer_coverage_extras() -> None:
     graph = Graph(nodes=nodes, edges=edges, entry_point="agent-cov")  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
@@ -349,13 +330,13 @@ def test_visualizer_coverage_extras() -> None:
     assert edge_rf["label"] == "go"
 
 
-def test_visualizer_grouping() -> None:
+def test_visualizer_grouping(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Coverage for subgraph grouping
 
-    agent = _get_agent_node("agent-group")
+    agent = agent_node_factory("agent-group")
     agent = agent.model_copy(update={"presentation": PresentationHints(group="My Group")})
 
-    other = _get_agent_node("other")  # No group
+    other = agent_node_factory("other")  # No group
 
     nodes = {"agent-group": agent, "other": other}
     edges: list[Edge] = []
@@ -363,7 +344,7 @@ def test_visualizer_grouping() -> None:
     graph = Graph(nodes=nodes, edges=edges, entry_point="agent-group")  # type: ignore[arg-type]
     flow = GraphFlow(
         kind="GraphFlow",
-        metadata=_get_metadata(),
+        metadata=flow_metadata,
         interface=FlowInterface(
             inputs=DataSchema(json_schema={}),
             outputs=DataSchema(json_schema={}),
