@@ -32,6 +32,7 @@ def test_agent_builder_partial() -> None:
     # Missing reasoning/fast_path is allowed by constructor but let's check basic build
     node = ab.build()
     from coreason_manifest.spec.core.nodes import CognitiveProfile
+
     assert isinstance(node.profile, CognitiveProfile)
     assert node.profile.role == "role"
 
