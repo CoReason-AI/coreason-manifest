@@ -60,9 +60,7 @@ def _get_placeholder_node(node_id: str) -> PlaceholderNode:
     )
 
 
-def test_linear_flow_to_mermaid(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_linear_flow_to_mermaid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: list[Any] = [
         agent_node_factory("start"),
         _get_human_node("review"),
@@ -93,9 +91,7 @@ def test_linear_flow_to_mermaid(
     assert ":::human" in mermaid_code
 
 
-def test_graph_flow_to_mermaid(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_graph_flow_to_mermaid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: dict[str, Any] = {
         "start": agent_node_factory("start"),
         "decision": _get_switch_node("decision", cases={"success": "end", "retry": "start"}, default="end"),
@@ -170,9 +166,7 @@ def test_switch_default_path(
     assert "decision -->|default| fallback" in mermaid_code
 
 
-def test_explicit_edge_labels(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_explicit_edge_labels(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: dict[str, Any] = {
         "A": agent_node_factory("A"),
         "B": agent_node_factory("B"),
@@ -227,9 +221,7 @@ def test_special_characters_escaping(
     assert 'agent"2" --> agent_3' in mermaid_code
 
 
-def test_react_flow_output(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_react_flow_output(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Explicitly type as dict[str, AnyNode] or Node if compatible, but Node is safer for generic visualizer tests
     nodes: dict[str, Node] = {
         "start": agent_node_factory("start"),
@@ -277,9 +269,7 @@ def test_react_flow_output(
     assert start_pos["x"] != end_pos["x"]
 
 
-def test_react_flow_linear(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_react_flow_linear(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     nodes: list[Node] = [
         agent_node_factory("start"),
         _get_placeholder_node("end"),
@@ -298,9 +288,7 @@ def test_react_flow_linear(
     assert rf["edges"][0]["target"] == "end"
 
 
-def test_visualizer_coverage_extras(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_visualizer_coverage_extras(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Coverage for presentation, snapshot, edge labels in to_react_flow
 
     # 1. Setup Node with Presentation
@@ -342,9 +330,7 @@ def test_visualizer_coverage_extras(
     assert edge_rf["label"] == "go"
 
 
-def test_visualizer_grouping(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_visualizer_grouping(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     # Coverage for subgraph grouping
 
     agent = agent_node_factory("agent-group")

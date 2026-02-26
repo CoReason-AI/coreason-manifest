@@ -48,9 +48,7 @@ def create_tool_pack(namespace: str, tools: list[str]) -> ToolPack:
     )
 
 
-def test_validate_graph_flow_valid(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_validate_graph_flow_valid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     agent = agent_node_factory("agent1", tools=["tool1"])
     tp = create_tool_pack("ns", ["tool1"])
     graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
@@ -123,9 +121,7 @@ def test_validate_switch_node_invalid_targets(
     assert any(e.code == "ERR_TOPOLOGY_BROKEN_SWITCH" and e.details.get("target_id") == "missing2" for e in errors)
 
 
-def test_validate_missing_tool(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_validate_missing_tool(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     agent = agent_node_factory("agent1", tools=["tool1"])
     # Tool pack has no tools
     tp = create_tool_pack("ns", [])
@@ -144,9 +140,7 @@ def test_validate_missing_tool(
     assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "tool1" for e in errors)
 
 
-def test_validate_governance_sanity(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_validate_governance_sanity(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     agent = agent_node_factory("agent1", tools=[])
     graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
     gov = Governance(rate_limit_rpm=-1, cost_limit_usd=-5.0)
@@ -163,9 +157,7 @@ def test_validate_governance_sanity(
     assert all(e.code == "ERR_GOV_INVALID_CONFIG" for e in errors)
 
 
-def test_validate_linear_flow_valid(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_validate_linear_flow_valid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     agent = agent_node_factory("agent1", tools=["tool1"])
     tp = create_tool_pack("ns", ["tool1"])
     flow = LinearFlow(
@@ -219,9 +211,7 @@ def test_validate_flow_invalid_type() -> None:
         validate_flow(cast("LinearFlow", DummyFlow()))
 
 
-def test_validate_duplicate_node_ids(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_validate_duplicate_node_ids(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     """Test validation for duplicate node IDs."""
     agent1 = agent_node_factory("agent1", tools=[])
     agent2 = agent_node_factory("agent1", tools=[])  # Duplicate ID
@@ -276,9 +266,7 @@ def test_validate_graph_flow_key_id_mismatch(
     assert any(e.code == "ERR_TOPOLOGY_ID_MISMATCH" for e in errors)
 
 
-def test_validate_orphan_nodes(
-    flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]
-) -> None:
+def test_validate_orphan_nodes(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
     """Test orphan node detection with entry point exemption."""
     # node1 is entry point (first in dict)
     # node2 is connected
