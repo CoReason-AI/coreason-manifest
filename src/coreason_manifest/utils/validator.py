@@ -230,8 +230,8 @@ def _validate_data_flow(
                         ComplianceReport(
                             code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
                             severity="violation",
-                    message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for '{node.workload_variable}', "
-                    f"but found type '{var_type}'.",
+                            message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for "
+                            f"'{node.workload_variable}', but found type '{var_type}'.",
                             node_id=node.id,
                             details={"variable": node.workload_variable, "found_type": var_type},
                         )
