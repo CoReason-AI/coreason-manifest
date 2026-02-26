@@ -25,6 +25,10 @@ CoordinateSystem = Literal["absolute_px", "normalized_0_1"]
 GraphRetrievalMode = Literal["local", "global", "hybrid"]
 GuidedDecodingMode = Literal["json_schema", "regex", "grammar", "none"]
 
+DeliberationMode = Literal["fast", "balanced", "deep_search"]
+VerificationProtocol = Literal["none", "step_by_step", "final_only"]
+IsolationLevel = Literal["shared", "isolated", "copy_on_write"]
+
 
 # =========================================================================
 #  1. SEMANTIC MODEL ROUTING ("The Hardware")
@@ -178,9 +182,24 @@ class DecompositionReasoning(BaseReasoning):
 
     type: Literal["decomposition"] = "decomposition"
 
+    # Legacy fields
     decomposition_breadth: int = 3
     contract_every_steps: int = 2
     global_context_window: int = 4096
+
+    # SOTA fields
+    deliberation_mode: Annotated[
+        DeliberationMode, Field(description="System 1 vs System 2 toggle.")
+    ] = "fast"
+    verification_protocol: Annotated[
+        VerificationProtocol, Field(description="When to run the critic.")
+    ] = "none"
+    critic_model: Annotated[
+        ModelRef | None, Field(description="Model used for intermediate verification.")
+    ] = None
+    isolation_level: Annotated[
+        IsolationLevel, Field(description="Context isolation strategy for sub-tasks.")
+    ] = "shared"
 
 
 class CouncilReasoning(BaseReasoning):

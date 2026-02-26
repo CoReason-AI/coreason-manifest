@@ -19,6 +19,8 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
     if isinstance(flow, LinearFlow):
         return {"type": "chain", "steps": [node.id for node in nodes]}
     if isinstance(flow, GraphFlow):
+        # TODO(Orchestration): Handle dynamic routing and HITL interrupts when LangChain supports them.
+        # Currently, these SOTA features (Memory, EscalationCriteria) are passed through but not executed by standard LC chains.
         return {
             "type": "graph",
             "nodes": [node.id for node in nodes],

@@ -11,6 +11,7 @@ from coreason_manifest.spec.core.engines import (
     Optimizer,
     ReasoningConfig,
 )
+from coreason_manifest.spec.core.memory import MemorySubsystem
 from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
@@ -146,11 +147,62 @@ class PlannerNode(Node):
     type: Literal["planner"] = "planner"
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
     optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
-    output_schema: dict[str, Any] = Field(
-        ...,
-        description="JSON Schema for the plan output.",
+
+    # SOTA Orchestration fields
+    output_schema: dict[str, Any] | None = Field(
+        None,
+        description="JSON Schema for the plan output. Required unless dynamic routing is enabled.",
         examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
     )
+    allow_dynamic_routing: bool = Field(
+        False, description="Allow the planner to spawn new nodes/edges at runtime."
+    )
+    recovery_strategy: Literal["fail_fast", "re_plan", "fallback_node"] = Field(
+        "fail_fast", description="Strategy when planning fails."
+    )
+    fallback_node_id: NodeID | None = Field(
+        None, description="Target node ID if recovery_strategy is 'fallback_node'."
+    )
+    hitl_interrupts: list[EscalationCriteria] = Field(
+        default_factory=list, description="Conditions to pause planning for human input."
+    )
+    memory: MemorySubsystem | None = Field(
+        None,
+        description="The 4-tier memory configuration for retrieving past successful plan topologies.",
+    )
+
+    @model_validator(mode="after")
+    def validate_planner_config(self) -> "PlannerNode":
+        # 1. Fallback Strategy Validation
+        if self.recovery_strategy == "fallback_node" and not self.fallback_node_id:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_PLANNER_FALLBACK,
+                message="PlannerNode with recovery_strategy='fallback_node' requires 'fallback_node_id'.",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Add a fallback_node_id or change strategy.",
+                        patch_data=[{"op": "add", "path": "/fallback_node_id", "value": "error_handler"}],
+                    ).model_dump()
+                },
+            )
+
+        # 2. Dynamic Routing vs Output Schema
+        if not self.allow_dynamic_routing and not self.output_schema:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_PLANNER_SCHEMA,
+                message="PlannerNode must have an 'output_schema' if 'allow_dynamic_routing' is False.",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        target_node_id=self.id,
+                        description="Add an output_schema or enable dynamic routing.",
+                        patch_data=[{"op": "replace", "path": "/allow_dynamic_routing", "value": True}],
+                    ).model_dump()
+                },
+            )
+        return self
 
 
 class SteeringConfig(CoreasonModel):
