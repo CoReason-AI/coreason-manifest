@@ -36,7 +36,7 @@ def test_decomposition_reasoning_linear_strategy() -> None:
     step1 = plan[0]
     assert isinstance(step1, dict)
     assert step1["id"] == "step_1"
-    assert "Analyze: Test Goal" in cast(str, step1["description"])
+    assert "Analyze: Test Goal" in cast("str", step1["description"])
 
 
 def test_decomposition_recursion_depth_limit() -> None:
