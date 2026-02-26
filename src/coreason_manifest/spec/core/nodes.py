@@ -4,13 +4,14 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
 from coreason_manifest.spec.core.engines import (
     FastPath,
     ModelRef,
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.resilience import ResilienceConfig
+from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
     NodeID,
@@ -73,6 +74,11 @@ class AgentNode(Node):
         default_factory=list,
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
+    )
+    escalation_rules: list[EscalationCriteria] = Field(
+        default_factory=list,
+        description="Local escalation rules for this agent.",
+        examples=[{"condition": "confidence < 0.5", "role": "supervisor"}],
     )
 
 
@@ -147,6 +153,17 @@ class PlannerNode(Node):
     )
 
 
+class StateCheckpoint(CoreasonModel):
+    """
+    Records a state mutation injected by a human (Time Travel/Steering).
+    """
+
+    checkpoint_id: str = Field(..., description="Unique ID for this checkpoint.")
+    parent_checkpoint_id: str | None = Field(None, description="The previous checkpoint ID.")
+    timestamp: float = Field(..., description="When the mutation occurred.")
+    mutated_variables: dict[str, Any] = Field(..., description="The variables that were changed.")
+
+
 class HumanNode(Node):
     """
     Human-in-the-Loop interaction node.
@@ -156,13 +173,7 @@ class HumanNode(Node):
 
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
-    timeout_seconds: Annotated[
-        int | Literal["infinite"] | None,
-        Field(
-            description="Max wait time for blocking/steering. Use 'infinite' for no timeout.",
-            examples=[300, "infinite"],
-        ),
-    ]
+    escalation: EscalationStrategy = Field(..., description="The escalation configuration.")
     input_schema: dict[str, Any] | None = Field(
         None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
     )
@@ -170,78 +181,14 @@ class HumanNode(Node):
         None, description="List of valid options for the human.", examples=[["approve", "reject"]]
     )
 
-    # *** UPGRADE: SHADOW MODE ***
     interaction_mode: Annotated[
-        Literal["blocking", "shadow", "steering"],
+        Literal["blocking", "shadow", "hijack_only"],
         Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
     ] = "blocking"
-    shadow_timeout_seconds: Annotated[
-        int | Literal["infinite"] | None,
-        Field(description="Time window for intervention in shadow mode. Use 'infinite' for no timeout.", examples=[60]),
-    ] = None
 
-    @model_validator(mode="after")
-    def validate_interaction_config(self) -> "HumanNode":
-        # Fix 4: Temporal Collision - Enforce mutual exclusion
-        if self.interaction_mode == "shadow":
-            if self.shadow_timeout_seconds is None:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
-                    message="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'.",
-                    context={
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            target_node_id=self.id,
-                            description="Set 'shadow_timeout_seconds' to a valid value.",
-                            patch_data=[
-                                {
-                                    "op": "add",
-                                    "path": "/shadow_timeout_seconds",
-                                    "value": 300,
-                                }
-                            ],
-                        ).model_dump()
-                    },
-                )
-            if self.timeout_seconds is not None:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_HUMAN_TIMEOUT,
-                    message="HumanNode in 'shadow' mode must not have 'timeout_seconds'.",
-                    context={
-                        "remediation": RemediationAction(
-                            type="update_field",
-                            target_node_id=self.id,
-                            description="Remove 'timeout_seconds'.",
-                            patch_data=[
-                                {
-                                    "op": "remove",
-                                    "path": "/timeout_seconds",
-                                }
-                            ],
-                        ).model_dump()
-                    },
-                )
-
-        # SIM102: Combine nested if statements
-        if self.interaction_mode == "blocking" and self.shadow_timeout_seconds is not None:
-            raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_HUMAN_BLOCKING,
-                message="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'.",
-                context={
-                    "remediation": RemediationAction(
-                        type="update_field",
-                        target_node_id=self.id,
-                        description="Remove 'shadow_timeout_seconds'.",
-                        patch_data=[
-                            {
-                                "op": "remove",
-                                "path": "/shadow_timeout_seconds",
-                            }
-                        ],
-                    ).model_dump()
-                },
-            )
-        return self
+    state_checkpoint: StateCheckpoint | None = Field(
+        None, description="Snapshot of state mutation if steering occurred."
+    )
 
 
 class SwarmNode(Node):

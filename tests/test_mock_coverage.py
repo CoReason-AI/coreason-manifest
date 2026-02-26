@@ -4,6 +4,7 @@ from typing import Any
 
 from coreason_manifest.spec.core.flow import DataSchema, Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import HumanNode, PlaceholderNode, PlannerNode, SwarmNode
+from coreason_manifest.spec.core.resilience import EscalationStrategy
 from coreason_manifest.utils.mock import MockFactory
 
 
@@ -232,14 +233,28 @@ def test_execute_node_human() -> None:
 
     # With input schema
     human = HumanNode(
-        id="human1", type="human", input_schema={"type": "boolean"}, prompt="approve?", timeout_seconds=300
+        id="human1",
+        type="human",
+        input_schema={"type": "boolean"},
+        prompt="approve?",
+        escalation=EscalationStrategy(
+            queue_name="q", notification_level="info", timeout_seconds=300
+        )
     )
     results = factory._execute_node(human, {})
     assert isinstance(results[0].outputs, dict)
     assert isinstance(results[0].outputs["result"], bool)
 
     # Without input schema
-    human2 = HumanNode(id="human2", type="human", input_schema=None, prompt="approve?", timeout_seconds=300)
+    human2 = HumanNode(
+        id="human2",
+        type="human",
+        input_schema=None,
+        prompt="approve?",
+        escalation=EscalationStrategy(
+            queue_name="q", notification_level="info", timeout_seconds=300
+        )
+    )
     results2 = factory._execute_node(human2, {})
     assert results2[0].outputs == {"approved": True}
 

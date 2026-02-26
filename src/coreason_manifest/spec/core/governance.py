@@ -4,6 +4,7 @@ from typing import Any, Literal
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
 from coreason_manifest.spec.core.types import MiddlewareID, NodeID, RiskLevel, ToolID
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
@@ -96,6 +97,9 @@ class Governance(CoreasonModel):
     )
     audit: Audit | None = Field(
         None, description="Audit configuration.", examples=[{"trace_retention_days": 7, "log_payloads": True}]
+    )
+    co_intelligence: CoIntelligencePolicy | None = Field(
+        None, description="Human-AI Co-Intelligence policy.", examples=[{"global_intervention_mode": "blocking"}]
     )
     circuit_breaker: CircuitBreaker | None = Field(
         None,

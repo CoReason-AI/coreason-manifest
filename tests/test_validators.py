@@ -6,34 +6,6 @@ from coreason_manifest.spec.core.nodes import HumanNode, SwarmNode
 from coreason_manifest.spec.interop.exceptions import ManifestError
 
 
-def test_human_node_validators_coverage() -> None:
-    """Test validation logic in HumanNode to ensure 100% coverage."""
-
-    # Test 1: Shadow mode without shadow_timeout_seconds (Should raise ManifestError)
-    with pytest.raises(ManifestError, match="HumanNode in 'shadow' mode requires 'shadow_timeout_seconds'"):
-        HumanNode(
-            id="h1",
-            metadata={},
-            type="human",
-            prompt="p",
-            timeout_seconds=10,
-            interaction_mode="shadow",
-            shadow_timeout_seconds=None,
-        )
-
-    # Test 2: Blocking mode with shadow_timeout_seconds (Should raise ManifestError)
-    with pytest.raises(ManifestError, match="HumanNode in 'blocking' mode must not have 'shadow_timeout_seconds'"):
-        HumanNode(
-            id="h2",
-            metadata={},
-            type="human",
-            prompt="p",
-            timeout_seconds=10,
-            interaction_mode="blocking",
-            shadow_timeout_seconds=5,
-        )
-
-
 def test_swarm_node_validators_coverage() -> None:
     """Test validation logic in SwarmNode to ensure 100% coverage."""
 

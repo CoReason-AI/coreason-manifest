@@ -10,6 +10,7 @@
 
 from typing import Any, Self, cast
 
+from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
 from coreason_manifest.spec.core.engines import (
     FastPath,
     ReasoningConfig,
@@ -29,7 +30,7 @@ from coreason_manifest.spec.core.flow import (
     VariableDef,
 )
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, InspectorNode
+from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
@@ -84,6 +85,7 @@ class AgentBuilder:
         self.fast_path: FastPath | None = None
         self.tools: list[str] = []
         self.resilience: ResilienceConfig | None = None
+        self.escalation_rules: list[EscalationCriteria] = []
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures CognitiveProfile.role and CognitiveProfile.persona."""
@@ -126,6 +128,20 @@ class AgentBuilder:
         )
         return self
 
+    def with_human_steering(self, timeout: int = 300) -> "AgentBuilder":
+        """Configures resilience with a human escalation strategy."""
+        self.resilience = EscalationStrategy(
+            queue_name="steering_queue",
+            notification_level="info",
+            timeout_seconds=timeout,
+        )
+        return self
+
+    def with_escalation_rule(self, condition: str, role: str) -> "AgentBuilder":
+        """Adds a local escalation rule to the agent."""
+        self.escalation_rules.append(EscalationCriteria(condition=condition, role=role))
+        return self
+
     def build(self) -> AgentNode:
         """Validates and returns the node."""
         if not self.role or not self.persona:
@@ -145,6 +161,7 @@ class AgentBuilder:
             type="agent",
             profile=profile,
             tools=self.tools,
+            escalation_rules=self.escalation_rules,
         )
 
 
@@ -223,6 +240,23 @@ class BaseFlowBuilder:
             type="agent",
             profile=profile_id,
             tools=tools,
+        )
+        self._register_node(node)
+        return self
+
+    def add_shadow_node(self, node_id: str, prompt: str, shadow_timeout: int = 60) -> Self:
+        """Adds a human shadow node to the flow."""
+        node = HumanNode(
+            id=node_id,
+            metadata={},
+            type="human",
+            prompt=prompt,
+            interaction_mode="shadow",
+            escalation=EscalationStrategy(
+                queue_name="shadow_queue",
+                notification_level="info",
+                timeout_seconds=shadow_timeout,
+            ),
         )
         self._register_node(node)
         return self
