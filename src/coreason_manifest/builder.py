@@ -71,6 +71,7 @@ def create_resilience(
             queue_name=queue_name or "default_human_queue",
             notification_level="warning",
             timeout_seconds=3600,
+            fallback_node_id=fallback_id,
         )
 
     return res_strategy
@@ -130,12 +131,13 @@ class AgentBuilder:
         )
         return self
 
-    def with_human_steering(self, timeout: int = 300) -> "AgentBuilder":
+    def with_human_steering(self, timeout: int = 300, fallback_id: str | None = None) -> "AgentBuilder":
         """Configures resilience with a human escalation strategy."""
         esc_strategy = EscalationStrategy(
             queue_name="steering_queue",
             notification_level="info",
             timeout_seconds=timeout,
+            fallback_node_id=fallback_id,
         )
 
         if self.resilience is None:
@@ -152,6 +154,15 @@ class AgentBuilder:
             # Upgrade existing RecoveryStrategy to SupervisionPolicy
             # Preserving existing strategy for transient errors
             old_strategy = self.resilience
+            # cast to RecoveryStrategy for typing
+            old_strategy = cast("RecoveryStrategy", old_strategy)
+
+            # Defuse Time-Bomb: Dynamic limit calculation
+            max_actions = 10
+            if hasattr(old_strategy, "max_attempts"):
+                # Ensure global limit accommodates the retry strategy + 1 for escalation
+                max_actions = max(10, getattr(old_strategy, "max_attempts") + 1)
+
             self.resilience = SupervisionPolicy(
                 handlers=[
                     ErrorHandler(
@@ -164,6 +175,7 @@ class AgentBuilder:
                     ),
                 ],
                 default_strategy=esc_strategy,  # Fallback to escalation
+                max_cumulative_actions=max_actions,
             )
         return self
 

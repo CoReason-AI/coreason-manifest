@@ -163,12 +163,28 @@ class SteeringConfig(CoreasonModel):
         None, description="List of variable IDs that can be mutated. If None, all are allowed (if mutation is enabled)."
     )
 
+    @model_validator(mode="after")
+    def validate_mutation_permissions(self) -> "SteeringConfig":
+        if not self.allow_variable_mutation and self.allowed_targets:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                message="SteeringConfig defines 'allowed_targets' but 'allow_variable_mutation' is False.",
+                context={
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        description="Enable mutation or remove targets.",
+                        patch_data=[{"op": "remove", "path": "/allowed_targets"}],
+                    ).model_dump()
+                },
+            )
+        return self
+
 
 class HumanNode(Node):
     """
     Human-in-the-Loop interaction node.
     Supports blocking approval, or 'shadow' mode where the agent streams intent
-    and proceeds if no signal is received, while 'steering' allows mid-flight plan alteration.
+    and proceeds if no signal is received, while 'hijack_only' allows mid-flight plan alteration.
     """
 
     type: Literal["human"] = "human"
