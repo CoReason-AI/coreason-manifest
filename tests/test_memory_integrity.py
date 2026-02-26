@@ -1,12 +1,15 @@
-import pytest
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
+
+import pytest
 from pydantic import ValidationError
+
 from coreason_manifest.spec.core.memory import (
-    WorkingMemoryConfig,
     EpisodicMemoryConfig,
+    WorkingMemoryConfig,
 )
 from coreason_manifest.spec.interop.telemetry import MemoryMutationEvent
+
 
 def test_working_memory_boundaries() -> None:
     """Test strict boundaries for WorkingMemoryConfig."""
@@ -20,6 +23,7 @@ def test_working_memory_boundaries() -> None:
 
     with pytest.raises(ValidationError):
         WorkingMemoryConfig(max_tokens=-100, enable_active_paging=True)
+
 
 def test_episodic_memory_boundaries() -> None:
     """Test strict boundaries for EpisodicMemoryConfig."""
@@ -39,6 +43,7 @@ def test_episodic_memory_boundaries() -> None:
     with pytest.raises(ValidationError):
         EpisodicMemoryConfig(salience_threshold=0.5, consolidation_interval_turns=0)
 
+
 def test_memory_mutation_event_integrity() -> None:
     """Test MemoryMutationEvent with new integrity fields."""
     event = MemoryMutationEvent(
@@ -50,7 +55,7 @@ def test_memory_mutation_event_integrity() -> None:
         timestamp=datetime.now(),
         # New fields
         parent_hash="abc123hash",
-        mutation_hash="def456hash"
+        mutation_hash="def456hash",
     )
 
     assert event.hash_version == "v2"

@@ -1,5 +1,5 @@
 from coreason_manifest.builder import AgentBuilder
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import CognitiveProfile
 
 
 def test_agent_builder_with_memory_full_config() -> None:
