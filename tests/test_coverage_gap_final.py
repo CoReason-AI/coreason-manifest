@@ -1,19 +1,19 @@
-from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+
 import pytest
-from pydantic import ValidationError, BaseModel
+from pydantic import BaseModel, ValidationError
 
 from coreason_manifest.builder import AgentBuilder, BaseFlowBuilder
-from coreason_manifest.spec.core.governance import ToolAccessPolicy
-from coreason_manifest.spec.core.resilience import ResilienceStrategy, EscalationStrategy, ReflexionStrategy
 from coreason_manifest.spec.core.engines import ModelCriteria
-from coreason_manifest.spec.core.flow import GraphFlow, FlowMetadata, FlowInterface, DataSchema
+from coreason_manifest.spec.core.flow import GraphFlow
+from coreason_manifest.spec.core.governance import Governance, ToolAccessPolicy
+from coreason_manifest.spec.core.resilience import EscalationStrategy, ReflexionStrategy, ResilienceStrategy
 from coreason_manifest.spec.core.tools import ToolCapability
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.utils.validator import _validate_kill_switch
-from coreason_manifest.spec.core.governance import Governance
 
 # --- Builder Coverage ---
+
 
 def test_base_builder_abstract_methods() -> None:
     # Test that calling abstract methods raises NotImplementedError
@@ -23,6 +23,7 @@ def test_base_builder_abstract_methods() -> None:
     with pytest.raises(NotImplementedError):
         builder._create_flow_instance()
 
+
 def test_agent_builder_partial() -> None:
     # Test AgentBuilder partially built state logic
     ab = AgentBuilder("a1")
@@ -31,7 +32,9 @@ def test_agent_builder_partial() -> None:
     node = ab.build()
     assert node.profile.role == "role"
 
+
 # --- Governance Coverage ---
+
 
 def test_tool_access_policy_require_auth_defaults() -> None:
     # Case 1: Critical -> require_auth must be True (defaulting)
@@ -46,7 +49,9 @@ def test_tool_access_policy_require_auth_defaults() -> None:
     t3 = ToolAccessPolicy.model_validate({"risk_level": RiskLevel.STANDARD})
     assert t3.require_auth is False
 
+
 # --- Resilience Coverage ---
+
 
 def test_resilience_strategy_name_slug_validation() -> None:
     # Valid
@@ -55,15 +60,12 @@ def test_resilience_strategy_name_slug_validation() -> None:
     with pytest.raises(ValueError, match="Strategy name must be lowercase"):
         ResilienceStrategy(name="Invalid Slug")
 
+
 def test_escalation_template_warning() -> None:
     # Warning logic coverage (no {{ }})
     # Since it's a pass in code, just ensuring it runs without error
-    EscalationStrategy(
-        queue_name="q",
-        notification_level="info",
-        timeout_seconds=10,
-        template="static string"
-    )
+    EscalationStrategy(queue_name="q", notification_level="info", timeout_seconds=10, template="static string")
+
 
 def test_reflexion_capabilities_validation() -> None:
     # ReflexionStrategy validates critic_model capabilities if schema present
@@ -78,17 +80,22 @@ def test_reflexion_capabilities_validation() -> None:
             max_attempts=1,
             critic_model=model_crit,
             critic_prompt="p",
-            critic_schema={"type": "object", "properties": {}}
+            critic_schema={"type": "object", "properties": {}},
         )
+
 
 # --- Integrity Coverage ---
 
+
 def test_integrity_float_success() -> None:
     from coreason_manifest.utils.integrity import compute_hash
+
     # compute_hash on float invokes is_finite check
     assert isinstance(compute_hash(1.5), str)
 
+
 # --- Validator Coverage ---
+
 
 def test_validator_kill_switch_weight_check() -> None:
     # Cover the specific line: obj.risk_level.weight > max_risk.weight
@@ -96,10 +103,8 @@ def test_validator_kill_switch_weight_check() -> None:
 
     # Critical tools require description
     tool = ToolCapability(name="nuke", risk_level=RiskLevel.CRITICAL, description="Nukes the DB")
-    flow = GraphFlow.model_construct(
-        governance=Governance(max_risk_level=RiskLevel.STANDARD),
-        graph=None # Mocking just enough
-    )
+    # Mocking just enough
+    GraphFlow.model_construct(governance=Governance(max_risk_level=RiskLevel.STANDARD), graph=None)
 
     # We call the internal validator helper via public API if possible, or mock
     # Public API validate_flow -> _validate_kill_switch
@@ -112,29 +117,20 @@ def test_validator_kill_switch_weight_check() -> None:
     from coreason_manifest.spec.core.tools import ToolPack
 
     defs = FlowDefinitions(
-        tool_packs={
-            "p": ToolPack(
-                kind="ToolPack",
-                namespace="ns",
-                tools=[tool],
-                dependencies=[],
-                env_vars=[]
-            )
-        }
+        tool_packs={"p": ToolPack(kind="ToolPack", namespace="ns", tools=[tool], dependencies=[], env_vars=[])}
     )
 
     # Mock get_unified_topology to return nothing so we focus on definitions scan
     with patch("coreason_manifest.utils.validator.get_unified_topology", return_value=([], [])):
         errors = _validate_kill_switch(
-            GraphFlow.model_construct(
-                governance=Governance(max_risk_level=RiskLevel.STANDARD),
-                definitions=defs
-            )
+            GraphFlow.model_construct(governance=Governance(max_risk_level=RiskLevel.STANDARD), definitions=defs)
         )
 
     assert any("exceeds the global max_risk_level" in e.message for e in errors)
 
+
 # --- Visualizer Coverage ---
+
 
 def test_to_mermaid_unknown_flow_type() -> None:
     from coreason_manifest.utils.visualizer import to_mermaid
@@ -151,7 +147,9 @@ def test_to_mermaid_unknown_flow_type() -> None:
         # We pass a mock that is NOT GraphFlow/LinearFlow
         assert to_mermaid(MagicMock()) == ""
 
+
 # --- Additional Coverage ---
+
 
 def test_error_handler_regex_validation() -> None:
     from coreason_manifest.spec.core.resilience import ErrorHandler, RetryStrategy
@@ -163,18 +161,17 @@ def test_error_handler_regex_validation() -> None:
     with pytest.raises(ValueError, match="Invalid regex pattern"):
         ErrorHandler(match_pattern="[", strategy=RetryStrategy(max_attempts=1))
 
+
 def test_error_handler_security_retry() -> None:
-    from coreason_manifest.spec.core.resilience import ErrorHandler, RetryStrategy, ErrorDomain
+    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, RetryStrategy
 
     # Security + Retry = Forbidden
     with pytest.raises(ValueError, match="Security Policy Violation"):
-        ErrorHandler(
-            match_domain=[ErrorDomain.SECURITY],
-            strategy=RetryStrategy(max_attempts=1)
-        )
+        ErrorHandler(match_domain=[ErrorDomain.SECURITY], strategy=RetryStrategy(max_attempts=1))
+
 
 def test_supervision_limits_validation() -> None:
-    from coreason_manifest.spec.core.resilience import SupervisionPolicy, RetryStrategy, ErrorHandler, ErrorDomain
+    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, RetryStrategy, SupervisionPolicy
 
     # Strategy max_attempts > Global max_cumulative_actions
     s = RetryStrategy(max_attempts=10)
@@ -182,6 +179,7 @@ def test_supervision_limits_validation() -> None:
 
     with pytest.raises(ValueError, match="SupervisionPolicy global limit"):
         SupervisionPolicy(handlers=[h], max_cumulative_actions=5)
+
 
 def test_builder_circuit_breaker_update() -> None:
     from coreason_manifest.builder import NewLinearFlow
@@ -203,24 +201,20 @@ def test_builder_circuit_breaker_update() -> None:
     assert b.governance.max_risk_level == RiskLevel.SAFE
     assert b.governance.circuit_breaker.error_threshold_count == 5
 
+
 def test_validator_governance_fallback_check() -> None:
     # utils/validator.py line 350
     # Condition: gov.circuit_breaker is set, but fallback_node_id is NOT in valid_ids
 
-    from coreason_manifest.utils.validator import validate_flow
     from coreason_manifest.spec.core.governance import CircuitBreaker
-    from coreason_manifest.spec.core.flow import FlowDefinitions
-    from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
-
-    # Valid node "a"
-    agent = AgentNode(id="a", type="agent", metadata={}, profile=CognitiveProfile(role="r", persona="p"), tools=[], resilience=None)
 
     # Governance with fallback "b" (missing)
     gov = Governance(
         circuit_breaker=CircuitBreaker(error_threshold_count=1, reset_timeout_seconds=1, fallback_node_id="b")
     )
 
-    # The issue might be that validate_flow does not call _validate_governance properly or valid_ids is not what we expect.
+    # The issue might be that validate_flow does not call _validate_governance properly
+    # or valid_ids is not what we expect.
     # GraphFlow logic constructs valid_ids from get_unified_topology.
     # We will invoke the helper directly to confirm it catches the error given the inputs.
     from coreason_manifest.utils.validator import _validate_governance
@@ -228,10 +222,12 @@ def test_validator_governance_fallback_check() -> None:
     errors = _validate_governance(gov, valid_ids={"a"})
     assert any(e.code == "ERR_GOV_CIRCUIT_FALLBACK_MISSING" for e in errors)
 
+
 class SecretModel(BaseModel):
     public: int
     secret: int
     _hash_exclude_ = {"secret"}
+
 
 def test_integrity_pydantic_exclude() -> None:
     # integrity.py line 90: excludes = getattr(obj, "_hash_exclude_", None)
@@ -241,14 +237,16 @@ def test_integrity_pydantic_exclude() -> None:
     # Hash should only include public
     h1 = compute_hash(m)
 
-    m2 = SecretModel(public=1, secret=888) # Different secret
+    m2 = SecretModel(public=1, secret=888)  # Different secret
     h2 = compute_hash(m2)
 
     assert h1 == h2
 
+
 class MockDuckModel:
-    def model_dump(self, **kwargs):
+    def model_dump(self, **_kwargs):
         return {"duck": True}
+
 
 def test_integrity_duck_typing() -> None:
     # integrity.py line 90: hasattr(obj, "model_dump") without inheriting BaseModel
@@ -259,10 +257,11 @@ def test_integrity_duck_typing() -> None:
     h2 = compute_hash({"duck": True})
     assert h == h2
 
+
 def test_builder_resilience_helper_strategies() -> None:
     # builder.py 63, 67, 73
     from coreason_manifest.builder import create_resilience
-    from coreason_manifest.spec.core.resilience import RetryStrategy, FallbackStrategy, EscalationStrategy
+    from coreason_manifest.spec.core.resilience import EscalationStrategy, FallbackStrategy, RetryStrategy
 
     # Test Retry
     r1 = create_resilience(3, strategy="retry", backoff=1.5, delay=0.1)
@@ -282,22 +281,20 @@ def test_builder_resilience_helper_strategies() -> None:
     r3 = create_resilience(1, strategy="unknown")
     assert isinstance(r3, EscalationStrategy)
 
+
 def test_telemetry_request_id_gen() -> None:
     # telemetry.py line 92
-    from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
     from datetime import datetime
+
+    from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
     # Missing request_id -> auto-generated
     ne = NodeExecution(
-        node_id="n1",
-        state=NodeState.COMPLETED,
-        inputs={},
-        outputs={},
-        timestamp=datetime.now(),
-        duration_ms=1
+        node_id="n1", state=NodeState.COMPLETED, inputs={}, outputs={}, timestamp=datetime.now(), duration_ms=1
     )
     assert ne.request_id is not None
     assert len(ne.request_id) > 0
+
 
 def test_integrity_hash_none_strip() -> None:
     # integrity.py line 90
@@ -309,6 +306,7 @@ def test_integrity_hash_none_strip() -> None:
     h2 = compute_hash({"a": 1})
     assert h1 == h2
 
+
 def test_error_handler_empty_criteria() -> None:
     # resilience.py 194-200
     # ErrorHandler must have at least one matching criterion
@@ -316,23 +314,19 @@ def test_error_handler_empty_criteria() -> None:
 
     with pytest.raises(ValueError, match="must specify at least one matching criterion"):
         ErrorHandler(
-            match_domain=None,
-            match_pattern=None,
-            match_error_code=None,
-            strategy=RetryStrategy(max_attempts=1)
+            match_domain=None, match_pattern=None, match_error_code=None, strategy=RetryStrategy(max_attempts=1)
         )
+
 
 def test_validator_kill_switch_no_governance() -> None:
     # utils/validator.py line 773
     # Call _validate_kill_switch with governance=None
 
-    flow = GraphFlow.model_construct(
-        governance=None,
-        graph=None
-    )
+    flow = GraphFlow.model_construct(governance=None, graph=None)
 
     errors = _validate_kill_switch(flow)
     assert len(errors) == 0
+
 
 def test_error_handler_criteria_missing() -> None:
     # resilience.py 194-200
@@ -341,6 +335,7 @@ def test_error_handler_criteria_missing() -> None:
 
     with pytest.raises(ValueError, match="must specify at least one matching criterion"):
         ErrorHandler(strategy=RetryStrategy(max_attempts=1))
+
 
 def test_resilience_json_schema_validation() -> None:
     # resilience.py 95, 97, 105
@@ -351,7 +346,7 @@ def test_resilience_json_schema_validation() -> None:
         max_attempts=1,
         critic_model=ModelCriteria(capabilities=["json_mode"]),
         critic_prompt="p",
-        critic_schema={"type": "object", "properties": {"a": {}}}
+        critic_schema={"type": "object", "properties": {"a": {}}},
     )
 
     # Invalid: missing type/properties/$ref
@@ -360,7 +355,7 @@ def test_resilience_json_schema_validation() -> None:
             max_attempts=1,
             critic_model=ModelCriteria(capabilities=["json_mode"]),
             critic_prompt="p",
-            critic_schema={"invalid": "schema"}
+            critic_schema={"invalid": "schema"},
         )
 
     # Invalid: object without properties
@@ -369,16 +364,17 @@ def test_resilience_json_schema_validation() -> None:
             max_attempts=1,
             critic_model=ModelCriteria(capabilities=["json_mode"]),
             critic_prompt="p",
-            critic_schema={"type": "object"}
+            critic_schema={"type": "object"},
         )
+
 
 def test_visualizer_label_fallback() -> None:
     # visualizer.py 60-61
     # Node without presentation label -> Fallback logic
 
-    from coreason_manifest.utils.visualizer import _render_mermaid_node
-    from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
     from coreason_manifest.spec.common.presentation import PresentationHints
+    from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+    from coreason_manifest.utils.visualizer import _render_mermaid_node
 
     # Node with presentation but NO label
     node = AgentNode(
@@ -387,13 +383,14 @@ def test_visualizer_label_fallback() -> None:
         metadata={},
         profile=CognitiveProfile(role="r", persona="p"),
         tools=[],
-        presentation=PresentationHints(icon="icon") # No label
+        presentation=PresentationHints(icon="icon"),  # No label
     )
 
     label = _render_mermaid_node(node)
     # Check that fallback ID is used and type is appended
     assert "a1" in label
     assert "(Agent)" in label
+
 
 def test_builder_additional_methods() -> None:
     # Coverage for builder.py: with_reasoning, with_fast_path etc.
@@ -421,28 +418,24 @@ def test_builder_additional_methods() -> None:
     node2 = ab2.build()
     assert node2.resilience.fallback_node_id == "fb"
 
+
 def test_visualizer_human_node_options_fallback() -> None:
     # visualizer.py 60-61
     # HumanNode with options but no explicit presentation label
-    from coreason_manifest.utils.visualizer import _render_mermaid_node
     from coreason_manifest.spec.core.nodes import HumanNode
+    from coreason_manifest.utils.visualizer import _render_mermaid_node
 
-    node = HumanNode(
-        id="h1",
-        type="human",
-        metadata={},
-        prompt="p",
-        timeout_seconds=10,
-        options=["yes", "no"]
-    )
+    node = HumanNode(id="h1", type="human", metadata={}, prompt="p", timeout_seconds=10, options=["yes", "no"])
 
     label = _render_mermaid_node(node)
     assert "[yes, no]" in label
 
+
 def test_telemetry_parent_hash_migration() -> None:
     # telemetry.py line 92: if prev_hashes is None: data["parent_hashes"] = [p_hash]
-    from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
     from datetime import datetime
+
+    from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
     # Input has parent_hash but NO parent_hashes
     data = {
@@ -452,16 +445,17 @@ def test_telemetry_parent_hash_migration() -> None:
         "outputs": {},
         "timestamp": datetime.now(),
         "duration_ms": 1,
-        "parent_hash": "h1"
+        "parent_hash": "h1",
         # parent_hashes missing
     }
 
     ne = NodeExecution.model_validate(data)
     assert ne.parent_hashes == ["h1"]
 
+
 def test_resilience_normalize_error_codes() -> None:
     # resilience.py 196-200
-    from coreason_manifest.spec.core.resilience import ErrorHandler, RetryStrategy, ErrorDomain
+    from coreason_manifest.spec.core.resilience import ErrorDomain, ErrorHandler, RetryStrategy
 
     s = RetryStrategy(max_attempts=1)
 
@@ -479,7 +473,8 @@ def test_resilience_normalize_error_codes() -> None:
 
     # Invalid input type (coverage for 'return v' fallback)
     with pytest.raises(ValidationError):
-         ErrorHandler(match_error_code=3.14, strategy=s)
+        ErrorHandler(match_error_code=3.14, strategy=s)
+
 
 def test_resilience_trace_config() -> None:
     # resilience.py line 105: include_trace=False -> max_trace_turns=None
@@ -490,9 +485,7 @@ def test_resilience_trace_config() -> None:
         critic_model="gpt-4",
         critic_prompt="p",
         include_trace=False,
-        max_trace_turns=10 # Should be ignored/reset
+        max_trace_turns=10,  # Should be ignored/reset
     )
 
     assert rs.max_trace_turns is None
-
-from unittest.mock import MagicMock
