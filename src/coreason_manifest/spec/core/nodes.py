@@ -177,7 +177,8 @@ class PlannerNode(Node):
 
         # 1. Select Engine (Mocking selection logic, using default configuration if available)
         # In a real system, this might come from the node configuration or be injected via context
-        # We avoid hardcoding "gpt-4" by allowing the model to be specified in context or defaulting to a generic placeholder
+        # We avoid hardcoding "gpt-4" by allowing the model to be specified in context or defaulting to
+        # a generic placeholder
         model_id = context.get("model", "default_model")
         engine = DecompositionReasoning(model=model_id, decomposition_breadth=3)
 

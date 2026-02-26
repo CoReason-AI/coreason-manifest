@@ -1,5 +1,8 @@
-from typing import Sequence, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, cast
+
 import pytest
+
 from coreason_manifest.builder import AgentBuilder, NewGraphFlow
 from coreason_manifest.spec.core.contracts import AtomicSkill
 from coreason_manifest.spec.core.engines import DecompositionReasoning
@@ -56,7 +59,11 @@ def test_planner_process_respects_constraints() -> None:
     )
 
     constraints: Sequence[str | AtomicSkill] = [
-        AtomicSkill(id="fixed_task", description="Execute Task", immutable=True)
+        AtomicSkill(
+            id="fixed_task",
+            description="Execute Task",
+            immutable=True,
+        )
     ]
 
     result = planner.process(input_payload={}, context={}, constraints=constraints)
