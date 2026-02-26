@@ -31,7 +31,7 @@ def test_integrity_duck_typed_model_dump() -> None:
     # Cover integrity.py line 91
     class DuckModel:
         # Prefix unused args with _ to satisfy ARG002
-        def model_dump(self, _exclude_none: bool = False, _mode: str = "python") -> dict[str, Any]:
+        def model_dump(self, **_kwargs: Any) -> dict[str, Any]:
             return {"a": 1}
 
     # Must use canonical strategy directly or via compute_hash which uses it
