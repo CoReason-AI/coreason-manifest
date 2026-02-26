@@ -15,7 +15,6 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import AgentNode, SwitchNode
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.utils.validator import validate_flow
@@ -140,21 +139,17 @@ def test_validate_missing_tool(flow_metadata: FlowMetadata, agent_node_factory: 
     assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "tool1" for e in errors)
 
 
-def test_validate_governance_sanity(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:
-    agent = agent_node_factory("agent1", tools=[])
-    graph = Graph(nodes={"agent1": agent}, edges=[], entry_point="agent1")
-    gov = Governance(rate_limit_rpm=-1, cost_limit_usd=-5.0)
-    flow = GraphFlow(
-        kind="GraphFlow",
-        metadata=flow_metadata,
-        interface=create_interface(),
-        blackboard=None,
-        graph=graph,
-        governance=gov,
-    )
-    errors = validate_flow(flow)
-    assert len(errors) == 2
-    assert all(e.code == "ERR_GOV_INVALID_CONFIG" for e in errors)
+def test_validate_governance_sanity() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.spec.core.governance import FinancialLimits
+
+    # Test that Pydantic enforces the schema constraint (ge=0.0)
+    with pytest.raises(ValidationError) as exc:
+        FinancialLimits(max_cost_usd=-5.0)
+
+    # Match the actual Pydantic error message
+    assert "Input should be greater than or equal to 0" in str(exc.value)
 
 
 def test_validate_linear_flow_valid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:

@@ -326,22 +326,7 @@ def _validate_data_flow(
 
 def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
-    if gov.rate_limit_rpm is not None and gov.rate_limit_rpm < 0:
-        errors.append(
-            ComplianceReport(
-                code=ErrorCatalog.ERR_GOV_INVALID_CONFIG,
-                severity="violation",
-                message="Governance Error: rate_limit_rpm cannot be negative.",
-            )
-        )
-    if gov.cost_limit_usd is not None and gov.cost_limit_usd < 0:
-        errors.append(
-            ComplianceReport(
-                code=ErrorCatalog.ERR_GOV_INVALID_CONFIG,
-                severity="violation",
-                message="Governance Error: cost_limit_usd cannot be negative.",
-            )
-        )
+
     if (
         gov.circuit_breaker
         and gov.circuit_breaker.fallback_node_id

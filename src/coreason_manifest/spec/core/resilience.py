@@ -14,9 +14,10 @@ class ErrorDomain(StrEnum):
     TOOL = "tool"
     SECURITY = "security"
     CONTEXT = "context"
-    DATA = "data"
-    RESOURCE = "resource"
+    DATA = "data"  # Maps to DataLimits
+    RESOURCE = "resource"  # Maps to ComputeLimits
     TIMEOUT = "timeout"
+    FINANCIAL = "financial"
 
 
 class ResilienceStrategy(BaseModel):
