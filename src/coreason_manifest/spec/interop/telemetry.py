@@ -139,7 +139,13 @@ class MemoryMutationEvent(AntibodyBase):
         ...,
         description="The memory tier affected.",
     )
-    operation: Literal["ADD", "UPDATE", "DELETE", "EVICT", "CONSOLIDATE"] = Field(
+    operation: Literal[
+        "ADD",
+        "UPDATE",
+        "DELETE",
+        "EVICT",
+        "CONSOLIDATE",
+    ] = Field(
         ...,
         description="The type of mutation.",
     )
