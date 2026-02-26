@@ -1,7 +1,8 @@
-import pytest
 from datetime import datetime
+
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 from coreason_manifest.utils.integrity import verify_merkle_proof
+
 
 def test_telemetry_parent_hash_consistency() -> None:
     # 1. parent_hash added to parent_hashes if not present
@@ -13,10 +14,11 @@ def test_telemetry_parent_hash_consistency() -> None:
         timestamp=datetime.now(),
         duration_ms=100,
         parent_hash="abc",
-        parent_hashes=["def"]
+        parent_hashes=["def"],
     )
     assert "abc" in ne.parent_hashes
     assert "def" in ne.parent_hashes
+
 
 def test_integrity_verify_merkle_proof_exception() -> None:
     # verify_merkle_proof(chain)
