@@ -22,6 +22,8 @@ dependencies = [
     "jsonschema>=4.23.0",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
 ]
 
 [project.urls]
@@ -68,6 +70,7 @@ known-first-party = ["coreason_manifest"]
 python_version = "3.12"
 mypy_path = "src"
 strict = true
+disallow_untyped_defs = true
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
