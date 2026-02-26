@@ -1,16 +1,16 @@
-
-import sys
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from unittest.mock import patch, MagicMock
+from typing import Any
+from unittest.mock import patch
 
-import pytest
 import yaml
 from typer.testing import CliRunner
+
 from coreason_manifest.cli import app
 
 runner = CliRunner()
+
 
 def create_valid_flow(path: str) -> None:
     data = {
@@ -42,9 +42,11 @@ def test_validate_success() -> None:
         # Mocking ManifestIO because of strict security checks in loader
         with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
-            def unsafe_manifest_io(*args, **kwargs):
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
                 kwargs["strict_security"] = False
                 return ManifestIO(*args, **kwargs)
+
             mock_io.side_effect = unsafe_manifest_io
 
             result = runner.invoke(app, ["validate", tmp_path])
@@ -63,9 +65,11 @@ def test_validate_failure() -> None:
     try:
         with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
-            def unsafe_manifest_io(*args, **kwargs):
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
                 kwargs["strict_security"] = False
                 return ManifestIO(*args, **kwargs)
+
             mock_io.side_effect = unsafe_manifest_io
 
             result = runner.invoke(app, ["validate", tmp_path])
@@ -84,9 +88,11 @@ def test_visualize_success() -> None:
     try:
         with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
-            def unsafe_manifest_io(*args, **kwargs):
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
                 kwargs["strict_security"] = False
                 return ManifestIO(*args, **kwargs)
+
             mock_io.side_effect = unsafe_manifest_io
 
             result = runner.invoke(app, ["visualize", tmp_path])
@@ -105,9 +111,11 @@ def test_visualize_with_errors() -> None:
     try:
         with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
-            def unsafe_manifest_io(*args, **kwargs):
+
+            def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
                 kwargs["strict_security"] = False
                 return ManifestIO(*args, **kwargs)
+
             mock_io.side_effect = unsafe_manifest_io
 
             result = runner.invoke(app, ["visualize", tmp_path])
