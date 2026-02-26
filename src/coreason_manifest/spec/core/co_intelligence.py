@@ -38,9 +38,9 @@ class EscalationCriteria(CoreasonModel):
             raise ValueError(f"Invalid Python expression syntax: {e}") from e
 
         for node in ast.walk(tree):
-            if isinstance(node, (ast.Call, ast.Assign)):
+            if isinstance(node, ast.Call):
                 raise ValueError(
-                    "Security Violation: Function calls and assignments are forbidden in escalation logic."
+                    "Security Violation: Function calls are forbidden in escalation logic."
                 )
         return v
 
