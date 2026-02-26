@@ -154,15 +154,11 @@ class PlannerNode(Node):
         description="JSON Schema for the plan output. Required unless dynamic routing is enabled.",
         examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
     )
-    allow_dynamic_routing: bool = Field(
-        False, description="Allow the planner to spawn new nodes/edges at runtime."
-    )
+    allow_dynamic_routing: bool = Field(False, description="Allow the planner to spawn new nodes/edges at runtime.")
     recovery_strategy: Literal["fail_fast", "re_plan", "fallback_node"] = Field(
         "fail_fast", description="Strategy when planning fails."
     )
-    fallback_node_id: NodeID | None = Field(
-        None, description="Target node ID if recovery_strategy is 'fallback_node'."
-    )
+    fallback_node_id: NodeID | None = Field(None, description="Target node ID if recovery_strategy is 'fallback_node'.")
     hitl_interrupts: list[EscalationCriteria] = Field(
         default_factory=list, description="Conditions to pause planning for human input."
     )

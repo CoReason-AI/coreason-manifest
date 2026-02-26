@@ -26,13 +26,9 @@ class MemoryConfig(CoreasonModel):
     """Configuration for a specific memory tier."""
 
     enabled: bool = Field(True, description="Whether this memory tier is active.")
-    retention: MemoryRetentionPolicy = Field(
-        "forever", description="How long to keep memories in this tier."
-    )
+    retention: MemoryRetentionPolicy = Field("forever", description="How long to keep memories in this tier.")
     max_items: Annotated[int | None, Field(description="Maximum number of items to store.")] = None
-    ttl_seconds: Annotated[
-        int | None, Field(description="Time-to-live in seconds for TTL retention policy.")
-    ] = None
+    ttl_seconds: Annotated[int | None, Field(description="Time-to-live in seconds for TTL retention policy.")] = None
 
 
 class WorkingMemory(MemoryConfig):
@@ -41,9 +37,7 @@ class WorkingMemory(MemoryConfig):
     Handles immediate task context and scratchpad.
     """
 
-    context_window_size: int = Field(
-        4096, description="Maximum tokens allocated for working memory."
-    )
+    context_window_size: int = Field(4096, description="Maximum tokens allocated for working memory.")
 
 
 class EpisodicMemory(MemoryConfig):
@@ -52,12 +46,8 @@ class EpisodicMemory(MemoryConfig):
     Used for retrieving successful plans and avoiding past failures.
     """
 
-    collection_name: str = Field(
-        ..., description="Vector database collection name for episodes."
-    )
-    similarity_threshold: float = Field(
-        0.75, description="Minimum similarity score for retrieval."
-    )
+    collection_name: str = Field(..., description="Vector database collection name for episodes.")
+    similarity_threshold: float = Field(0.75, description="Minimum similarity score for retrieval.")
 
 
 class SemanticMemory(MemoryConfig):
@@ -66,9 +56,7 @@ class SemanticMemory(MemoryConfig):
     Used for RAG (Retrieval Augmented Generation) over domain knowledge.
     """
 
-    knowledge_base_id: str = Field(
-        ..., description="Identifier for the knowledge base or graph."
-    )
+    knowledge_base_id: str = Field(..., description="Identifier for the knowledge base or graph.")
     retrieval_k: int = Field(5, description="Number of documents to retrieve.")
 
 
@@ -87,19 +75,9 @@ class MemorySubsystem(CoreasonModel):
     Integrates all memory types into a cohesive system for the agent.
     """
 
-    working: WorkingMemory | None = Field(
-        None, description="Short-term working memory configuration."
-    )
-    episodic: EpisodicMemory | None = Field(
-        None, description="Long-term episodic memory configuration."
-    )
-    semantic: SemanticMemory | None = Field(
-        None, description="Domain knowledge semantic memory configuration."
-    )
-    procedural: ProceduralMemory | None = Field(
-        None, description="Skill-based procedural memory configuration."
-    )
+    working: WorkingMemory | None = Field(None, description="Short-term working memory configuration.")
+    episodic: EpisodicMemory | None = Field(None, description="Long-term episodic memory configuration.")
+    semantic: SemanticMemory | None = Field(None, description="Domain knowledge semantic memory configuration.")
+    procedural: ProceduralMemory | None = Field(None, description="Skill-based procedural memory configuration.")
 
-    shared_namespace: str | None = Field(
-        None, description="Namespace for sharing memory across agents/sessions."
-    )
+    shared_namespace: str | None = Field(None, description="Namespace for sharing memory across agents/sessions.")

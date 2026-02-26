@@ -188,18 +188,12 @@ class DecompositionReasoning(BaseReasoning):
     global_context_window: int = 4096
 
     # SOTA fields
-    deliberation_mode: Annotated[
-        DeliberationMode, Field(description="System 1 vs System 2 toggle.")
-    ] = "fast"
-    verification_protocol: Annotated[
-        VerificationProtocol, Field(description="When to run the critic.")
-    ] = "none"
-    critic_model: Annotated[
-        ModelRef | None, Field(description="Model used for intermediate verification.")
-    ] = None
-    isolation_level: Annotated[
-        IsolationLevel, Field(description="Context isolation strategy for sub-tasks.")
-    ] = "shared"
+    deliberation_mode: Annotated[DeliberationMode, Field(description="System 1 vs System 2 toggle.")] = "fast"
+    verification_protocol: Annotated[VerificationProtocol, Field(description="When to run the critic.")] = "none"
+    critic_model: Annotated[ModelRef | None, Field(description="Model used for intermediate verification.")] = None
+    isolation_level: Annotated[IsolationLevel, Field(description="Context isolation strategy for sub-tasks.")] = (
+        "shared"
+    )
 
 
 class CouncilReasoning(BaseReasoning):
