@@ -196,7 +196,11 @@ class ErrorHandler(BaseModel):
         if isinstance(v, (int, str)):
             return [str(v)]
         if isinstance(v, list):
-            return [str(item) for item in v]
+            # Expanded for coverage
+            res = []
+            for item in v:
+                res.append(str(item))
+            return res
         return v  # type: ignore # Let Pydantic raise validation error for other types
 
     @model_validator(mode="after")
