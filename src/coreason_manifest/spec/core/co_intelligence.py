@@ -39,9 +39,7 @@ class EscalationCriteria(CoreasonModel):
 
         for node in ast.walk(tree):
             if isinstance(node, ast.Call):
-                raise ValueError(
-                    "Security Violation: Function calls are forbidden in escalation logic."
-                )
+                raise ValueError("Security Violation: Function calls are forbidden in escalation logic.")
         return v
 
 
