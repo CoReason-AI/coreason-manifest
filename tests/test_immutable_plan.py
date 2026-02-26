@@ -55,7 +55,9 @@ def test_planner_process_respects_constraints() -> None:
         output_schema={"type": "object", "properties": {"steps": {"type": "array"}}},
     )
 
-    constraints: Sequence[str | AtomicSkill] = [AtomicSkill(id="fixed_task", description="Execute Task", immutable=True)]
+    constraints: Sequence[str | AtomicSkill] = [
+        AtomicSkill(id="fixed_task", description="Execute Task", immutable=True)
+    ]
 
     result = planner.process(input_payload={}, context={}, constraints=constraints)
 
