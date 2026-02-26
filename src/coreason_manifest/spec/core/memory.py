@@ -11,10 +11,7 @@ class WorkingMemoryConfig(CoreasonModel):
     max_tokens: int = Field(..., description="Maximum token limit for the working memory context window.")
     enable_active_paging: bool = Field(
         ...,
-        description=(
-            "If true, the runtime engine equips the agent with tools to load/evict "
-            "context pages explicitly."
-        ),
+        description=("If true, the runtime engine equips the agent with tools to load/evict context pages explicitly."),
     )
 
 
@@ -74,6 +71,4 @@ class MemorySubsystem(CoreasonModel):
     semantic: SemanticMemoryConfig | None = Field(
         None, description="Configuration for Semantic Memory (Knowledge Graph)."
     )
-    procedural: ProceduralMemoryConfig | None = Field(
-        None, description="Configuration for Procedural Memory (Skills)."
-    )
+    procedural: ProceduralMemoryConfig | None = Field(None, description="Configuration for Procedural Memory (Skills).")
