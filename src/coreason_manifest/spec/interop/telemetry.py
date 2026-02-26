@@ -107,6 +107,20 @@ class NodeExecution(AntibodyBase):
         return self
 
 
+class HumanSteeringEvent(AntibodyBase):
+    """
+    Records a state mutation injected by a human (Time Travel/Steering).
+    Used to preserve the Merkle execution trace when state is altered mid-flight.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    checkpoint_id: str = Field(..., description="Unique ID for this checkpoint.")
+    timestamp: datetime = Field(..., description="When the mutation occurred.")
+    mutated_variables: dict[str, Any] = Field(..., description="The variables that were changed.")
+    human_identity: str = Field(..., description="ID/Email of the human operator.")
+
+
 class ExecutionSnapshot(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 

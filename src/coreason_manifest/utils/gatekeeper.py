@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.resilience import EscalationStrategy
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,
@@ -129,7 +130,11 @@ def _enforce_red_button_rule(
                 id=human_node_id,
                 type="human",
                 prompt=f"Approve unsafe action by {node.id}",
-                timeout_seconds=300,
+                escalation=EscalationStrategy(
+                    queue_name="default_guard_queue",
+                    notification_level="warning",
+                    timeout_seconds=300,
+                ),
                 interaction_mode="blocking",
                 metadata={},
             )
