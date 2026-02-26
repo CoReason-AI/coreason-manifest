@@ -125,6 +125,9 @@ class EscalationStrategy(ResilienceStrategy):
     queue_name: str = Field(..., min_length=1, description="The task queue for suspended sessions.")
     notification_level: Literal["info", "warning", "critical"] = Field(..., description="Severity level.")
     timeout_seconds: int = Field(..., description="Max wait for human intervention.")
+    fallback_node_id: str | None = Field(
+        None, description="Graceful degradation target if timeout is reached (overrides global SLA)."
+    )
     template: Annotated[
         str | None,
         Field(

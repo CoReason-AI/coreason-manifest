@@ -153,15 +153,17 @@ class PlannerNode(Node):
     )
 
 
-class StateCheckpoint(CoreasonModel):
+class SteeringConfig(CoreasonModel):
     """
-    Records a state mutation injected by a human (Time Travel/Steering).
+    Configuration for human steering permissions.
     """
 
-    checkpoint_id: str = Field(..., description="Unique ID for this checkpoint.")
-    parent_checkpoint_id: str | None = Field(None, description="The previous checkpoint ID.")
-    timestamp: float = Field(..., description="When the mutation occurred.")
-    mutated_variables: dict[str, Any] = Field(..., description="The variables that were changed.")
+    allow_variable_mutation: bool = Field(
+        False, description="Whether the human can mutate blackboard variables."
+    )
+    allowed_targets: list[VariableID] | None = Field(
+        None, description="List of variable IDs that can be mutated. If None, all are allowed (if mutation is enabled)."
+    )
 
 
 class HumanNode(Node):
@@ -186,9 +188,50 @@ class HumanNode(Node):
         Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
     ] = "blocking"
 
-    state_checkpoint: StateCheckpoint | None = Field(
-        None, description="Snapshot of state mutation if steering occurred."
+    steering_config: SteeringConfig | None = Field(
+        None, description="Configuration for steering permissions."
     )
+
+    @model_validator(mode="after")
+    def validate_interaction_mode(self) -> "HumanNode":
+        if self.interaction_mode == "shadow":
+            if self.input_schema is not None or self.options is not None:
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
+                    message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
+                    context={
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            target_node_id=self.id,
+                            description="Remove 'input_schema' and 'options'.",
+                            patch_data=[
+                                {"op": "remove", "path": "/input_schema"},
+                                {"op": "remove", "path": "/options"},
+                            ],
+                        ).model_dump()
+                    },
+                )
+        if self.interaction_mode == "hijack_only":
+            if self.steering_config is None:
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                    message="HumanNode in 'hijack_only' mode requires 'steering_config'.",
+                    context={
+                        "remediation": RemediationAction(
+                            type="update_field",
+                            target_node_id=self.id,
+                            description="Add 'steering_config'.",
+                            patch_data=[
+                                {
+                                    "op": "add",
+                                    "path": "/steering_config",
+                                    "value": {"allow_variable_mutation": True},
+                                }
+                            ],
+                        ).model_dump()
+                    },
+                )
+        return self
 
 
 class SwarmNode(Node):
@@ -287,6 +330,7 @@ __all__ = [
     "Node",
     "PlaceholderNode",
     "PlannerNode",
+    "SteeringConfig",
     "SwarmNode",
     "SwitchNode",
 ]

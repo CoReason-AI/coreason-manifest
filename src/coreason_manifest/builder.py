@@ -32,6 +32,8 @@ from coreason_manifest.spec.core.flow import (
 from coreason_manifest.spec.core.governance import CircuitBreaker, Governance
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.spec.core.resilience import (
+    ErrorDomain,
+    ErrorHandler,
     EscalationStrategy,
     FallbackStrategy,
     RecoveryStrategy,
@@ -130,11 +132,42 @@ class AgentBuilder:
 
     def with_human_steering(self, timeout: int = 300) -> "AgentBuilder":
         """Configures resilience with a human escalation strategy."""
-        self.resilience = EscalationStrategy(
+        esc_strategy = EscalationStrategy(
             queue_name="steering_queue",
             notification_level="info",
             timeout_seconds=timeout,
         )
+
+        if self.resilience is None:
+            self.resilience = esc_strategy
+        elif isinstance(self.resilience, SupervisionPolicy):
+            # Already a policy, append handler
+            self.resilience.handlers.append(
+                ErrorHandler(
+                    match_domain=[ErrorDomain.SECURITY, ErrorDomain.CONTEXT],
+                    strategy=esc_strategy,
+                )
+            )
+        else:
+            # Upgrade existing RecoveryStrategy to SupervisionPolicy
+            # Preserving existing strategy for transient errors
+            old_strategy = self.resilience
+            # cast to RecoveryStrategy for typing
+            old_strategy = cast(RecoveryStrategy, old_strategy)
+
+            self.resilience = SupervisionPolicy(
+                handlers=[
+                    ErrorHandler(
+                        match_domain=[ErrorDomain.LLM, ErrorDomain.SYSTEM, ErrorDomain.TIMEOUT, ErrorDomain.RESOURCE],
+                        strategy=old_strategy,
+                    ),
+                    ErrorHandler(
+                        match_domain=[ErrorDomain.SECURITY, ErrorDomain.CONTEXT, ErrorDomain.DATA, ErrorDomain.CLIENT],
+                        strategy=esc_strategy,
+                    ),
+                ],
+                default_strategy=esc_strategy, # Fallback to escalation
+            )
         return self
 
     def with_escalation_rule(self, condition: str, role: str) -> "AgentBuilder":
