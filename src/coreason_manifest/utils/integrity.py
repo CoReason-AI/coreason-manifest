@@ -84,7 +84,8 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, BaseModel):
             # Pydantic v2
             excludes = getattr(obj, "_hash_exclude_", None)
-            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, exclude=excludes, mode="python"))
+            data = obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
+            return self._recursive_sort_and_sanitize(data)
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
