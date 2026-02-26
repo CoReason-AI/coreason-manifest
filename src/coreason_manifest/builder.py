@@ -27,7 +27,6 @@ from coreason_manifest.spec.core.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
-    VariableDef,
 )
 from coreason_manifest.spec.core.governance import (
     CircuitBreaker,

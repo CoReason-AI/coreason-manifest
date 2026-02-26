@@ -1,5 +1,4 @@
 from coreason_manifest.builder import NewGraphFlow, NewLinearFlow
-from coreason_manifest.spec.core.flow import VariableDef
 from coreason_manifest.spec.core.nodes import InspectorNode
 from coreason_manifest.utils.visualizer import to_mermaid
 
@@ -11,8 +10,8 @@ def test_inspector_lifecycle_graph() -> None:
     # Domain 4: Add Blackboard variables for data flow validation
     flow_builder.set_blackboard(
         {
-            "result_score": VariableDef(id="unknown", type="float", description="Score"),
-            "verification_result": VariableDef(id="unknown", type="boolean", description="Result"),
+            "result_score": {"type": "float", "description": "Score"},
+            "verification_result": {"type": "boolean", "description": "Result"},
         }
     )
 
