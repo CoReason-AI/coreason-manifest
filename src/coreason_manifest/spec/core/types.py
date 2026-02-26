@@ -14,7 +14,14 @@ from typing import Annotated, Any
 from pydantic import BeforeValidator, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree, Step
+from coreason_manifest.spec.core.contracts import (
+    AtomicSkill,
+    EdgeSpec,
+    FlowSpec,
+    NodeSpec,
+    PlanTree,
+    Step,
+)
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
@@ -153,9 +160,12 @@ class MiddlewareDef(CoreasonModel):
 __all__ = [
     "AtomicSkill",
     "CoercibleStringList",
+    "EdgeSpec",
+    "FlowSpec",
     "GitSHA",
     "MiddlewareDef",
     "MiddlewareID",
+    "NodeSpec",
     "NodeID",
     "PlanTree",
     "ProfileID",

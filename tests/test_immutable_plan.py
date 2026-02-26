@@ -36,7 +36,7 @@ def test_decomposition_reasoning_linear_strategy() -> None:
     step1 = plan[0]
     assert isinstance(step1, dict)
     assert step1["id"] == "step_1"
-    assert "Analyze: Test Goal" in cast("str", step1["description"])
+    assert "Analyze: Test Goal" in cast(str, step1["description"])
 
 
 def test_decomposition_recursion_depth_limit() -> None:
@@ -74,11 +74,11 @@ def test_planner_process_respects_constraints() -> None:
 
     result = planner.process(input_payload={}, context={}, constraints=constraints)
 
-    nodes = result["nodes"]
-    edges = result["edges"]
+    nodes = result.nodes
+    edges = result.edges
     assert len(nodes) == 1
-    assert nodes[0]["id"] == "fixed_task"
-    assert nodes[0]["locked"] is True
+    assert nodes[0].id == "fixed_task"
+    assert nodes[0].locked is True
     # One node means zero edges in a linear sequence
     assert len(edges) == 0
 
@@ -96,15 +96,15 @@ def test_planner_process_generates_edges() -> None:
     ]
 
     result = planner._compile_to_graph(plan)
-    nodes = result["nodes"]
-    edges = result["edges"]
+    nodes = result.nodes
+    edges = result.edges
 
     assert len(nodes) == 3
     assert len(edges) == 2
-    assert edges[0]["from"] == "step_1"
-    assert edges[0]["to"] == "step_2"
-    assert edges[1]["from"] == "step_2"
-    assert edges[1]["to"] == "step_3"
+    assert edges[0].from_node == "step_1"
+    assert edges[0].to_node == "step_2"
+    assert edges[1].from_node == "step_2"
+    assert edges[1].to_node == "step_3"
 
 
 def test_planner_process_extracts_constraints_from_input() -> None:
@@ -119,10 +119,21 @@ def test_planner_process_extracts_constraints_from_input() -> None:
 
     result = planner.process(input_payload=input_payload, context={})
 
-    nodes = result["nodes"]
+    nodes = result.nodes
     assert len(nodes) == 1
-    assert nodes[0]["id"] == "dynamic_fixed"
-    assert nodes[0]["locked"] is True
+    assert nodes[0].id == "dynamic_fixed"
+    assert nodes[0].locked is True
+
+
+def test_graph_flow_resilience_missing_node() -> None:
+    graph = Graph(nodes={}, edges=[])
+
+    # Injecting into a non-existent node should raise a warning/recoverable error
+    with pytest.raises(ManifestError) as exc:
+        graph.inject_subgraph("phantom_node", {"nodes": []})
+
+    assert "Target node for injection does not exist" in str(exc.value)
+    assert exc.value.fault.error_code == "CRSN-RES-MISSING-NODE"
 
 
 def test_graph_flow_governance_prevents_mutation() -> None:

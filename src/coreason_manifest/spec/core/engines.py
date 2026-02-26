@@ -237,7 +237,9 @@ class DecompositionReasoning(BaseReasoning):
         # Recursive step: Split into sub-goals
         # Mocking decomposition logic
         sub_goals = [f"{goal}_part_1", f"{goal}_part_2"]
-        return [self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals]
+        return [
+            self._recursive_decompose(sg, constraints, depth + 1) for sg in sub_goals
+        ]
 
     def verify_plan(self, plan: PlanTree) -> bool:
         """
@@ -249,6 +251,9 @@ class DecompositionReasoning(BaseReasoning):
 
         if isinstance(plan, list):
             return all(self.verify_plan(node) for node in plan)
+
+        if isinstance(plan, dict):
+            return True  # Legacy steps are considered valid
 
         return False
 

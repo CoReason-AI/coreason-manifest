@@ -5,7 +5,13 @@ from pydantic import Field, model_validator
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
-from coreason_manifest.spec.core.contracts import AtomicSkill, PlanTree
+from coreason_manifest.spec.core.contracts import (
+    AtomicSkill,
+    EdgeSpec,
+    FlowSpec,
+    NodeSpec,
+    PlanTree,
+)
 from coreason_manifest.spec.core.engines import (
     DecompositionReasoning,
     FastPath,
@@ -195,36 +201,36 @@ class PlannerNode(Node):
         # 3. Compile Plan to Graph (FlowSpec)
         return self._compile_to_graph(plan)
 
-    def _compile_to_graph(self, plan: PlanTree) -> dict[str, Any]:
+    def _compile_to_graph(self, plan: PlanTree) -> FlowSpec:
         """
         Compiles the PlanTree into a flat list of nodes and edges (simple graph representation),
         tagging immutable nodes as locked.
         """
-        graph_nodes = []
-        graph_edges = []
+        graph_nodes: list[NodeSpec] = []
+        graph_edges: list[EdgeSpec] = []
 
-        def traverse(node: PlanTree):
+        def traverse(node: PlanTree) -> None:
             if isinstance(node, AtomicSkill):
                 graph_nodes.append(
-                    {
-                        "id": node.id,
-                        "description": node.description,
-                        "locked": node.immutable,  # KEY: Transfer immutable flag to locked
-                        "tool_ref": node.tool_ref,
-                        "params": node.params,
-                    }
+                    NodeSpec(
+                        id=node.id,
+                        description=node.description,
+                        locked=node.immutable,  # KEY: Transfer immutable flag to locked
+                        tool_ref=node.tool_ref,
+                        params=node.params,
+                    )
                 )
             elif isinstance(node, list):
                 for child in node:
                     if isinstance(child, dict):  # Handle legacy Step dicts
                         graph_nodes.append(
-                            {
-                                "id": child.get("id"),
-                                "description": child.get("description"),
-                                "locked": False,  # Legacy steps are mutable by default
-                                "tool_ref": child.get("tool_ref"),
-                                "params": {},
-                            }
+                            NodeSpec(
+                                id=child.get("id", ""),
+                                description=child.get("description", ""),
+                                locked=False,  # Legacy steps are mutable by default
+                                tool_ref=child.get("tool_ref"),
+                                params={},
+                            )
                         )
                     else:
                         traverse(child)
@@ -234,11 +240,11 @@ class PlannerNode(Node):
         # Generate sequential edges for linear execution
         # A real planner might generate branching edges based on plan structure
         for i in range(len(graph_nodes) - 1):
-            source = graph_nodes[i]["id"]
-            target = graph_nodes[i + 1]["id"]
-            graph_edges.append({"from": source, "to": target})
+            source = graph_nodes[i].id
+            target = graph_nodes[i + 1].id
+            graph_edges.append(EdgeSpec(from_node=source, to_node=target))
 
-        return {"nodes": graph_nodes, "edges": graph_edges}
+        return FlowSpec(nodes=graph_nodes, edges=graph_edges)
 
 
 class SteeringConfig(CoreasonModel):

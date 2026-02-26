@@ -167,7 +167,23 @@ class Graph(CoreasonModel):
         Dynamically injects a subgraph.
         STRICT GOVERNANCE: Cannot mutate locked nodes.
         """
-        # 1. Governance Check
+        # 1. Resilience Check: Node Existence
+        if node_id not in self.nodes and node_id not in self._locked_nodes:
+            # If the node is not in the graph and not tracked as locked (which implies existence in history or future),
+            # it might be a hallucination.
+            # Note: We check _locked_nodes just in case it was a known anchor that got pruned?
+            # Actually, standard logic is just check self.nodes.
+            if node_id not in self.nodes:
+                 raise ManifestError(
+                    fault=SemanticFault(
+                        error_code="CRSN-RES-MISSING-NODE",
+                        message=f"Target node for injection does not exist: {node_id}",
+                        severity=FaultSeverity.WARNING,
+                        recovery_action=RecoveryAction.IGNORE,
+                    )
+                )
+
+        # 2. Governance Check
         if node_id in self._locked_nodes:
             raise ManifestError(
                 fault=SemanticFault(
@@ -178,7 +194,7 @@ class Graph(CoreasonModel):
                 )
             )
 
-        # 2. Mock Injection Logic (In a real system, this would splice the graph)
+        # 3. Mock Injection Logic (In a real system, this would splice the graph)
         # We just iterate and add locked nodes to the lock set for future checks
         new_nodes = subgraph_spec.get("nodes", [])
         for n in new_nodes:
