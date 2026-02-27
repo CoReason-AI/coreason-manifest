@@ -159,6 +159,7 @@ class StrictPayload(CoreasonModel):
 
     @model_validator(mode="after")
     def _freeze_content(self) -> "StrictPayload":
+        # raise ValueError("Validator Called")
         def _freeze(obj: Any) -> Any:
             if isinstance(obj, dict):
                 return MappingProxyType({k: _freeze(v) for k, v in obj.items()})

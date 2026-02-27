@@ -6,7 +6,7 @@ from collections.abc import Mapping
 
 def test_atomic_skill_strict_types():
     # Valid
-    AtomicSkill(capabilities=["caps"], inputs_schema={"a": "b"})
+    AtomicSkill(name="skill", version="1.0.0", capabilities=["caps"], inputs_schema={"a": "b"})
 
     # Invalid: capabilities should be list, not int
     with pytest.raises(ValidationError):
@@ -26,6 +26,11 @@ def test_middleware_def_strict_types():
 
 def test_strict_payload_immutability():
     payload = StrictPayload(data={"a": [1, 2]})
+
+    # Check type
+    if isinstance(payload.data, dict):
+        pytest.fail(f"payload.data is mutable dict: {type(payload.data)}")
+
     assert isinstance(payload.data, Mapping)
 
     # Check top level immutability

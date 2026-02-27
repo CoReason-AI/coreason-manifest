@@ -108,8 +108,13 @@ def _enforce_red_button_rule(
             human_node = ActionNode(
                 id=human_node_id,
                 type="action",
+                locked=True,  # SOTA: Guards must be immutable
                 metadata=StrictPayload(data={"prompt": f"Approve unsafe action by {node.id}"}),
-                skill=AtomicSkill(capabilities=["human_approval"]),
+                skill=AtomicSkill(
+                    name="HumanApproval",
+                    version="1.0.0",
+                    capabilities=["human_approval"],
+                ),
             )
 
             # Construct Patch
@@ -257,7 +262,11 @@ def _is_guarded(target_node: NodeSpec, flow: FlowSpec) -> bool:
     # 1. Identify Guards
     guards = set()
     for n in flow.graph.nodes.values():
-        if isinstance(n, ActionNode) and "human_approval" in n.skill.capabilities:
+        if (
+            isinstance(n, ActionNode)
+            and "human_approval" in n.skill.capabilities
+            and n.locked is True
+        ):
             guards.add(n.id)
 
     if not guards:

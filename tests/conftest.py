@@ -30,7 +30,7 @@ def agent_node_factory() -> Callable[..., ActionNode]:
         return ActionNode(
             id=nid,
             type="action",
-            skill=AtomicSkill(capabilities=caps),
+            skill=AtomicSkill(name="test_skill", version="1.0.0", capabilities=caps),
         )
 
     return _create

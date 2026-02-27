@@ -3,7 +3,12 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.types import NodeID, StrictJson, StrictPayload
+from coreason_manifest.spec.core.types import (
+    NodeID,
+    SemanticVersion,
+    StrictJson,
+    StrictPayload,
+)
 
 
 class Constraint(CoreasonModel):
@@ -12,6 +17,8 @@ class Constraint(CoreasonModel):
 
 
 class AtomicSkill(CoreasonModel):
+    name: str = Field(..., description="Deterministic skill identifier.")
+    version: SemanticVersion = Field(..., description="SemVer of the skill definition.")
     capabilities: list[str] = Field(default_factory=list)
     immutable: Literal[True] = Field(True, description="Enforces absolute definition immutability.")
     inputs_schema: dict[str, StrictJson] = Field(default_factory=dict)

@@ -6,7 +6,7 @@ from coreason_manifest.spec.core.constants import NodeCapability
 
 def test_gatekeeper_entry_point_bypass_fix():
     # Node with computer_use (needs guard) is the entry point
-    skill = AtomicSkill(capabilities=[NodeCapability.COMPUTER_USE])
+    skill = AtomicSkill(name="s", version="1.0.0", capabilities=[NodeCapability.COMPUTER_USE])
     node = ActionNode(id="risky_entry", type="action", skill=skill)
 
     graph = Graph(nodes={"risky_entry": node}, edges=[], entry_point="risky_entry")
@@ -25,11 +25,11 @@ def test_gatekeeper_entry_point_bypass_fix():
     assert entry_point_patch["value"].startswith("guard_risky_entry")
 
 def test_gatekeeper_id_collision():
-    skill = AtomicSkill(capabilities=[NodeCapability.COMPUTER_USE])
+    skill = AtomicSkill(name="s", version="1.0.0", capabilities=[NodeCapability.COMPUTER_USE])
     node = ActionNode(id="n1", type="action", skill=skill)
 
     # Existing guard node
-    existing_guard = ActionNode(id="guard_n1", type="action", skill=AtomicSkill(capabilities=["human_approval"]))
+    existing_guard = ActionNode(id="guard_n1", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=["human_approval"]), locked=True)
 
     graph = Graph(nodes={"n1": node, "guard_n1": existing_guard}, edges=[], entry_point="n1")
     flow = FlowSpec(metadata=FlowMetadata(name="test", version="1.0.0"), graph=graph, interface=FlowInterface())
@@ -46,9 +46,9 @@ def test_gatekeeper_id_collision():
 
 def test_dominator_guarding():
     # Start -> Guard -> Risky. Guard dominates Risky.
-    start = ActionNode(id="start", type="action", skill=AtomicSkill(capabilities=[]))
-    guard = ActionNode(id="guard", type="action", skill=AtomicSkill(capabilities=["human_approval"]))
-    risky = ActionNode(id="risky", type="action", skill=AtomicSkill(capabilities=[NodeCapability.COMPUTER_USE]))
+    start = ActionNode(id="start", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=[]))
+    guard = ActionNode(id="guard", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=["human_approval"]), locked=True)
+    risky = ActionNode(id="risky", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=[NodeCapability.COMPUTER_USE]))
 
     edges = [
         EdgeSpec(from_node="start", to_node="guard"),
@@ -63,9 +63,9 @@ def test_dominator_guarding():
 def test_dominator_guarding_bypass():
     # Start -> Guard -> Risky
     # Start -> Risky (bypass)
-    start = ActionNode(id="start", type="action", skill=AtomicSkill(capabilities=[]))
-    guard = ActionNode(id="guard", type="action", skill=AtomicSkill(capabilities=["human_approval"]))
-    risky = ActionNode(id="risky", type="action", skill=AtomicSkill(capabilities=[NodeCapability.COMPUTER_USE]))
+    start = ActionNode(id="start", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=[]))
+    guard = ActionNode(id="guard", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=["human_approval"]), locked=True)
+    risky = ActionNode(id="risky", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=[NodeCapability.COMPUTER_USE]))
 
     edges = [
         EdgeSpec(from_node="start", to_node="guard"),
@@ -77,4 +77,18 @@ def test_dominator_guarding_bypass():
     flow = FlowSpec(metadata=FlowMetadata(name="test", version="1.0.0"), graph=graph, interface=FlowInterface())
 
     # Not dominated by guard
+    assert not _is_guarded(risky, flow)
+
+def test_unlocked_guard_fails():
+    start = ActionNode(id="start", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=[]))
+    guard = ActionNode(id="guard", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=["human_approval"]), locked=False) # Unlocked
+    risky = ActionNode(id="risky", type="action", skill=AtomicSkill(name="s", version="1.0.0", capabilities=[NodeCapability.COMPUTER_USE]))
+
+    edges = [
+        EdgeSpec(from_node="start", to_node="guard"),
+        EdgeSpec(from_node="guard", to_node="risky")
+    ]
+    graph = Graph(nodes={"start": start, "guard": guard, "risky": risky}, edges=edges, entry_point="start")
+    flow = FlowSpec(metadata=FlowMetadata(name="test", version="1.0.0"), graph=graph, interface=FlowInterface())
+
     assert not _is_guarded(risky, flow)

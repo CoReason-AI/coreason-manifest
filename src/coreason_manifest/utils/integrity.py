@@ -65,12 +65,12 @@ class CanonicalHashingStrategy(HashingStrategy):
         """
         if isinstance(obj, dict):
             # Universal Hash Sanitization:
-            # Strip modern keys (execution_hash, signature, __*)
-            # Also strip None values (Architectural requirement)
+            # Strip modern keys (execution_hash, signature)
+            # Architectural Requirement: Preserve None and dunders for mathematical completeness
             return {
                 k: self._recursive_sort_and_sanitize(v)
                 for k, v in sorted(obj.items())
-                if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
+                if k not in {"execution_hash", "signature"}
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
@@ -84,11 +84,11 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, BaseModel):
             # Pydantic v2
             excludes = getattr(obj, "_hash_exclude_", None)
-            data = obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
+            data = obj.model_dump(exclude=excludes, mode="json")
             return self._recursive_sort_and_sanitize(data)
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
-            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
+            return self._recursive_sort_and_sanitize(obj.model_dump(mode="json"))
         if isinstance(obj, float):
             # RFC 8785: If number is integer, represent as integer.
             # Directive: Avoid mutating floats to integers natively to preserve type info.

@@ -13,7 +13,7 @@ def create_flow(nodes_list, edges_list, entry_point=None):
     )
 
 def _create_node(id):
-    return ActionNode(id=id, skill=AtomicSkill(capabilities=[]))
+    return ActionNode(id=id, skill=AtomicSkill(name="test_skill", version="1.0.0", capabilities=[]))
 
 def test_valid_topology():
     n1 = _create_node("n1")
