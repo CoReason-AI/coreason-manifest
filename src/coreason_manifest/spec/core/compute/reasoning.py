@@ -390,13 +390,17 @@ class WasmExecutionReasoning(BaseReasoning):
 
     type: Literal["wasm_execution"] = "wasm_execution"
 
-    memory_limit_mb: Annotated[int, Field(description="Memory limit for the Wasm sandbox in megabytes.")]
+    memory_limit_mb: Annotated[int, Field(gt=0, description="Memory limit for the Wasm sandbox in megabytes.")]
     imported_host_functions: Annotated[
-        list[str], Field(description="List of allowed host functions the Wasm module can call.")
+        list[str], Field(default_factory=list, description="List of allowed host functions the Wasm module can call.")
     ]
     wasi_capabilities: Annotated[
-        list[WasiCapability], Field(description="List of enabled WASI capabilities (e.g., 'network', 'fs_read').")
+        list[WasiCapability],
+        Field(default_factory=list, description="List of enabled WASI capabilities (e.g., 'network', 'fs_read')."),
     ]
+
+    def required_capabilities(self) -> list[str]:
+        return [NodeCapability.WASM_EXECUTION.value]
 
 
 # -------------------------------------------------------------------------
