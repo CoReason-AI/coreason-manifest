@@ -869,16 +869,19 @@ class NewGraphFlow(BaseFlowBuilder):
         )
         return self
 
-    def set_blackboard(self, variables: dict[str, dict[str, Any]], persistence: bool = False) -> "NewGraphFlow":
+    def set_blackboard(self, variables: dict[str, dict[str, Any]], persistence: Any | None = None) -> "NewGraphFlow":
         """Configures the shared memory blackboard.
 
         Args:
             variables (dict[str, dict[str, Any]]): Blackboard variable definitions.
-            persistence (bool): Whether to persist blackboard state. Defaults to False.
+            persistence (Any | None): Optional persistence config mapping. Defaults to None.
 
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
+        # Note: If boolean passed historically, ignore or map to default. We set to None for simplicity if False
+        if persistence is False:
+            persistence = None
         self.blackboard = Blackboard(variables=variables, persistence=persistence)
         return self
 

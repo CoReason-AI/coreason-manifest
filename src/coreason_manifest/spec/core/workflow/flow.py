@@ -8,6 +8,7 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
+from coreason_manifest.spec.core.state.persistence import PersistenceConfig
 from coreason_manifest.spec.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.workflow.nodes import (
     AnyNode,
@@ -72,7 +73,7 @@ class DataSchema(CoreasonModel):
 class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: Any | None = None
+    persistence: PersistenceConfig | None = None
 
 
 class Edge(CoreasonModel):

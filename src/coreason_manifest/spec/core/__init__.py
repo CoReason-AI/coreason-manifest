@@ -36,6 +36,7 @@ from coreason_manifest.spec.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.spec.core.primitives.types import WasmMiddlewareDef
+from coreason_manifest.spec.core.state.persistence import Checkpoint, PersistenceConfig, StateDiff
 from coreason_manifest.spec.core.state.tools import ToolPack
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
@@ -74,6 +75,7 @@ __all__ = [
     "BaseReasoning",
     "Blackboard",
     "BufferReasoning",
+    "Checkpoint",
     "CircuitBreaker",
     "CognitiveProfile",
     "ComputerUseReasoning",
@@ -102,6 +104,7 @@ __all__ = [
     "ModelRef",
     "Node",
     "Optimizer",
+    "PersistenceConfig",
     "PlaceholderNode",
     "PlannerNode",
     "ReasoningConfig",
@@ -111,6 +114,7 @@ __all__ = [
     "RetryStrategy",
     "Safety",
     "StandardReasoning",
+    "StateDiff",
     "SupervisionPolicy",
     "SwitchNode",
     # Tools
