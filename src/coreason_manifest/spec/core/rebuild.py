@@ -9,6 +9,7 @@ def rebuild_manifest() -> None:
     """
     # Import modules lazily to avoid circular dependencies
     from coreason_manifest.spec.core.compute import reasoning
+    from coreason_manifest.spec.core.primitives import types
     from coreason_manifest.spec.core.workflow import flow, nodes
 
     # 1. Resolve fresh unions
@@ -53,3 +54,8 @@ def rebuild_manifest() -> None:
 
     # AgentRequest depends on GraphFlow | LinearFlow
     flow.AgentRequest.model_rebuild(force=True)
+
+    # 4. Rebuild newly added isolated models that don't depend on unions
+    # but still might need to resolve types
+    types.WasmMiddlewareDef.model_rebuild(force=True)
+    reasoning.WasmExecutionReasoning.model_rebuild(force=True)

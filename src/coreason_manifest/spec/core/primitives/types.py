@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import StrEnum
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, Field
 
@@ -147,3 +147,12 @@ class MiddlewareDef(CoreasonModel):
         description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
     )
     config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")
+
+
+WasiCapability = Literal["network", "fs_read", "fs_write", "clocks", "random"]
+
+
+class WasmMiddlewareDef(CoreasonModel):
+    """
+    Definition for a Wasm interceptor/middleware.
+    """

@@ -17,6 +17,7 @@ from coreason_manifest.spec.core.compute.reasoning import (
     RedTeamingReasoning,
     StandardReasoning,
     TreeSearchReasoning,
+    WasmExecutionReasoning,
 )
 from coreason_manifest.spec.core.oversight.governance import (
     Audit,
@@ -34,6 +35,7 @@ from coreason_manifest.spec.core.oversight.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
+from coreason_manifest.spec.core.primitives.types import WasmMiddlewareDef
 from coreason_manifest.spec.core.state.tools import ToolPack
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
@@ -115,4 +117,6 @@ __all__ = [
     "ToolPack",
     "TreeSearchReasoning",
     "VariableDef",
+    "WasmExecutionReasoning",
+    "WasmMiddlewareDef",
 ]
