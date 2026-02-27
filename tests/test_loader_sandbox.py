@@ -65,7 +65,13 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
 
     # Create a malicious symlink inside the jail that points outside
     malicious_link = jail / "malicious_module"
-    malicious_link.symlink_to(outside, target_is_directory=True)
+    try:
+        malicious_link.symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symlinks not supported")
+
+    # Ensure target exists and is a package if we expect it to be found
+    (outside / "__init__.py").touch()
 
     finder = SandboxedPathFinder()
 

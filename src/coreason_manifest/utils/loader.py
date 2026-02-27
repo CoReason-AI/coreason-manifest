@@ -235,6 +235,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
                 raise SecurityJailViolationError(
                     f"Security Error: Symlink loop or resolution failed in {fullname}"
                 ) from e
+            # If resolve fails for other reasons (e.g. not found during strict check), return None
             return None
 
         # Re-create the spec with the namespaced name to ensure the loader is correctly initialized

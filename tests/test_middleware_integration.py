@@ -125,6 +125,9 @@ def workspace(tmp_path: Path) -> Path:
     (tmp_path / "dependency.py").write_text(DEPENDENCY_CODE)
     (tmp_path / "fail_dep.py").write_text(FAIL_DEP_CODE)
 
+    # loop_link.py needed for symlink loop test
+    (tmp_path / "loop_link.py").touch()
+
     return tmp_path
 
 

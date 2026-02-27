@@ -21,9 +21,21 @@ def test_loader_symlink_loop_in_find_spec(tmp_path: Path) -> None:
 
     token = _jail_root_var.set(jail)
     try:
+        # We need to mock FileFinder.find_spec to return something, or it returns None
+        # But we want to trigger the exception block in SandboxedPathFinder.find_spec
+        # The exception block is inside the try...except wrapping finder.find_spec OR later during resolve
+
+        # If we want to hit lines 220-225 (RuntimeError during resolve of origin), we need found_spec to be valid first.
+        # So we mock finder.find_spec to return a spec.
+
+        from unittest.mock import MagicMock
+        mock_spec = MagicMock()
+        mock_spec.origin = str(jail / "foo.py")
+
         with (
+            patch("importlib.machinery.FileFinder.find_spec", return_value=mock_spec),
             patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop detected")),
-            pytest.raises(SecurityJailViolationError, match="Symlink loop in foo"),
+            pytest.raises(SecurityJailViolationError, match="Symlink loop or resolution failed in foo"),
         ):
             finder.find_spec("foo")
     finally:
@@ -99,13 +111,22 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     outside = tmp_path / "outside"
     outside.mkdir()
 
+    # Needs __init__.py to be findable as a package
+    (outside / "__init__.py").touch()
+
     # 2. Create a malicious symlink inside the jail that points outside
     malicious_link = jail / "malicious_module"
-    malicious_link.symlink_to(outside, target_is_directory=True)
+    try:
+        malicious_link.symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symlinks not supported")
 
     finder = SandboxedPathFinder()
 
     # 3. Execute the finder within the sandbox context
+    # If the symlink is valid, standard FileFinder might resolve it.
+    # Our SandboxedPathFinder logic checks origin escape.
+
     with (
         sandbox_context(jail),
         pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
