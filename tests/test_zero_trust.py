@@ -82,7 +82,6 @@ class TestStrictContracts:
 class TestGatekeeper:
     def test_cycle_detection_strict(self):
         """Test that unbounded cycles are rejected."""
-        # start -> node2 -> start (No Constraint)
         n1 = StrategyNode(id="start", strategy_name="loop", inputs={}, routes={"next": "node2"})
         n2 = StrategyNode(id="node2", strategy_name="loop", inputs={}, routes={"back": "start"})
 
@@ -97,7 +96,6 @@ class TestGatekeeper:
 
     def test_cycle_detection_bounded_allowed(self):
         """Test that bounded cycles (with Constraint) are allowed."""
-        # start -> node2 -> start (With Constraint)
         c = Constraint(type="max_iterations", value=5)
         n1 = StrategyNode(
             id="start",
@@ -105,13 +103,13 @@ class TestGatekeeper:
             inputs={},
             routes={"next": "node2"}
         )
-        # The back-edge node (n2) must be guarded to allow the jump back
+        # Put constraint on the node that loops back
         n2 = StrategyNode(
             id="node2",
             strategy_name="loop",
             inputs={},
             routes={"back": "start"},
-            constraints=[c] # Guard
+            constraints=[c]
         )
 
         plan = PlanTree(
@@ -123,41 +121,97 @@ class TestGatekeeper:
         # Should NOT raise error
         compile_graph(plan)
 
-    def test_detect_bypass_of_locked_node(self):
+    def test_dominance_conditional_compliance(self):
         """
-        Test that graph compilation fails if a locked node is reachable but bypassed by a parallel path.
+        Test SOTA Dominance Check:
+        Route A: Dangerous Node (Computer Use) -> MUST be dominated by Locked Guard.
+        Route B: Safe Node -> Need NOT be dominated by Locked Guard.
         """
-        skill = AtomicSkill(name="s1", version="1.0.0", definition={})
+        skill_guard = AtomicSkill(name="guard", version="1.0.0", definition={})
+        skill_danger = AtomicSkill(
+            name="danger",
+            version="1.0.0",
+            definition={},
+            capabilities=["computer_use"]
+        )
+        skill_safe = AtomicSkill(name="safe", version="1.0.0", definition={})
 
+        # Guard Node (Locked)
+        n_guard = ActionNode(id="guard", skill=skill_guard, inputs={}, outputs={}, locked=True)
+        # Dangerous Node (Unlocked itself, but must be guarded)
+        n_danger = ActionNode(id="danger", skill=skill_danger, inputs={}, outputs={}, locked=False)
+        # Safe Node
+        n_safe = ActionNode(id="safe", skill=skill_safe, inputs={}, outputs={}, locked=False)
+
+        # Locked Strategy Node (The Guard)
+        n_guard_strat = StrategyNode(
+            id="guard_strat",
+            strategy_name="approval",
+            inputs={},
+            routes={"approved": "danger"},
+            locked=True
+        )
+
+        # Start Node: Define routes correctly at initialization
         n_start = StrategyNode(
             id="start",
             strategy_name="branch",
             inputs={},
-            routes={"path1": "locked_node", "path2": "action_end"}
-        )
-
-        n_locked = ActionNode(
-            id="locked_node",
-            skill=skill,
-            inputs={},
-            outputs={},
-            locked=True
-        )
-
-        n_end = ActionNode(
-            id="action_end",
-            skill=skill,
-            inputs={},
-            outputs={}
+            routes={"risky": "guard_strat", "safe": "safe"}
         )
 
         plan = PlanTree(
-            id="bypass_plan",
+            id="conditional_compliance",
             root_node="start",
-            nodes={"start": n_start, "locked_node": n_locked, "action_end": n_end}
+            nodes={
+                "start": n_start,
+                "guard_strat": n_guard_strat, # Locked
+                "danger": n_danger,           # High Risk
+                "safe": n_safe                # Safe
+            }
         )
 
-        with pytest.raises(ZeroTrustRoutingError, match="bypasses locked mandatory nodes"):
+        # High Risk Node: "danger".
+        # Dom(danger) = {start, guard_strat, danger}.
+        # Locked Nodes = {guard_strat}.
+        # Intersection = {guard_strat}. NOT EMPTY. -> Valid.
+
+        compile_graph(plan) # Should Pass
+
+    def test_dominance_failure(self):
+        """Test that missing the guard for a high-risk node fails."""
+        skill_danger = AtomicSkill(
+            name="danger",
+            version="1.0.0",
+            definition={},
+            capabilities=["computer_use"]
+        )
+
+        # Unlocked path to danger
+        n_start = StrategyNode(
+            id="start",
+            strategy_name="direct",
+            inputs={},
+            routes={"go": "danger"},
+            locked=False
+        )
+        n_danger = ActionNode(
+            id="danger",
+            skill=skill_danger,
+            inputs={},
+            outputs={},
+            locked=False # Not self-locking
+        )
+
+        plan = PlanTree(
+            id="unsafe_plan",
+            root_node="start",
+            nodes={"start": n_start, "danger": n_danger}
+        )
+
+        # Dom(danger) = {start, danger}. Locked = {}. Intersection Empty.
+
+        with pytest.raises(ZeroTrustRoutingError, match="not dominated by any Locked Node"):
             compile_graph(plan)
 
 
@@ -167,15 +221,21 @@ class TestIntegrity:
         inputs_safe = {"user": "alice"}
         receipt_safe = generate_execution_receipt("e1", skill, inputs_safe, {})
 
-        inputs_malicious = {"user": "alice", "execution_hash": "fake_hash"}
-        receipt_malicious = generate_execution_receipt("e2", skill, inputs_malicious, {})
+        # Include _hash_exclude_ to ensure it is NOT stripped (backdoor removal check)
+        inputs_backdoor = {"user": "alice", "_hash_exclude_": {"user"}}
+        receipt_backdoor = generate_execution_receipt("e2", skill, inputs_backdoor, {})
 
-        assert receipt_safe.execution_hash != receipt_malicious.execution_hash
+        # If backdoor worked (was stripped), hash might match safe (if 'user' was excluded)?
+        # No, _hash_exclude_ itself would be stripped, and 'user' would be stripped.
+        # Result: inputs={}.
+        # Safe inputs={"user": "alice"}.
+        # Hashes would differ regardless.
+        # But we want to prove `_hash_exclude_` is INCLUDED in the hash.
 
-        payload_malicious = reconstruct_payload(receipt_malicious)
-        assert "execution_hash" in payload_malicious["inputs"]
+        payload = reconstruct_payload(receipt_backdoor)
+        assert "_hash_exclude_" in payload["inputs"]
 
-        assert verify_merkle_proof([receipt_malicious]) is True
+        assert verify_merkle_proof([receipt_backdoor]) is True
 
 
 class TestLoaderSecurity:

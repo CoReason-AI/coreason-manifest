@@ -82,22 +82,9 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, datetime):
             return to_canonical_timestamp(obj)
         if isinstance(obj, BaseModel):
-            # Pydantic v2
-            excludes = getattr(obj, "_hash_exclude_", None)
-            data = obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
-            # When dumping a model, we treat the resulting dict as root-level relative to *that* model?
-            # No, `is_root` should only be True for the TOP-LEVEL object passed to `compute_hash`.
-            # If a Pydantic model is nested inside another structure, `is_root` is False from the recursive call.
-            # If the user passed a Pydantic model directly to `compute_hash`, `is_root` is True.
-            # So we just pass `is_root` down?
-            # Wait, `model_dump` produces a dict. If we pass `is_root` blindly, and this model is nested,
-            # we might strip keys we shouldn't? No, because `is_root` comes from the caller.
-            # However, if the TOP level object is a Pydantic model, `is_root` is True, so we want to strip execution_hash from IT.
-            # If it's nested, `is_root` is False, so we keep execution_hash if present in nested models.
-            # Yes, simply passing `is_root` seems correct for the recursive call *into* the dict result of model_dump.
-
-            # BUT: We recursively call _recursive_sort_and_sanitize on the result of model_dump.
-            # If `is_root` was True, we pass it. If False, we pass False.
+            # SOTA Fix: Removed `_hash_exclude_` backdoor logic.
+            # We must hash strictly what is in the model.
+            data = obj.model_dump(exclude_none=True, mode="python")
             return self._recursive_sort_and_sanitize(data, is_root=is_root)
 
         if hasattr(obj, "model_dump"):
