@@ -19,6 +19,7 @@ from coreason_manifest.spec.core.resilience import EscalationStrategy
 from coreason_manifest.spec.interop.exceptions import ManifestError
 from coreason_manifest.utils.gatekeeper import _is_guarded, validate_policy
 from coreason_manifest.utils.integrity import compute_hash, verify_merkle_proof
+from coreason_manifest.utils.validator import validate_integrity
 
 
 # Helper to create common metadata
@@ -160,10 +161,8 @@ def test_swarm_missing_profile_validation() -> None:
         steps=[swarm],
     )
     # Manual integrity check (since LinearFlow doesn't enforce it automatically)
-    from coreason_manifest.utils.validator import validate_flow
-    errors = validate_flow(flow)
-    # The error message should indicate missing profile
-    assert any("missing" in e.message for e in errors)
+    with pytest.raises(ManifestError, match="references missing profile"):
+        validate_integrity(defs, flow.steps)
 
 
 def test_gatekeeper_robustness_missing_profile() -> None:

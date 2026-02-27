@@ -4,8 +4,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.flow import AnyNode, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, SwarmNode
 from coreason_manifest.spec.core.resilience import EscalationStrategy
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,

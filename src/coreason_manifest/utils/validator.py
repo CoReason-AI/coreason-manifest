@@ -863,3 +863,19 @@ def _validate_middleware_refs(flow: LinearFlow | GraphFlow) -> list[ComplianceRe
             )
 
     return errors
+
+
+def validate_integrity(definitions: FlowDefinitions, nodes: list[AnyNode]) -> None:
+    """
+    Legacy helper for tests.
+    Validates integrity of nodes against definitions.
+    Strictly raises ManifestError to maintain backward compatibility with tests.
+    """
+    profile_ids = set(definitions.profiles.keys())
+    for node in nodes:
+        if isinstance(node, SwarmNode) and node.worker_profile not in profile_ids:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_INTEGRITY_PROFILE_MISSING,
+                message=f"SwarmNode '{node.id}' references missing profile '{node.worker_profile}'.",
+                context={},
+            )

@@ -2,9 +2,6 @@ from typing import Any
 
 from coreason_manifest.spec.core.nodes import AgentNode
 from coreason_manifest.spec.core.tools import ToolPack
-from coreason_manifest.spec.interop.adapter_config import AdapterConfig
-from coreason_manifest.spec.interop.compliance import RemediationAction
-from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
 def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
@@ -21,39 +18,14 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     if tool_packs is None:
         tool_packs = []
 
-    # Architectural Change: Decouple hardcoded model assumption.
-    # Use AdapterConfig to resolve default model from environment or fallback.
-    config = AdapterConfig()
-    model: str = config.default_openai_model
-
+    # Model: use node.profile.reasoning.model or default
+    model: Any = "gpt-4-turbo"
     if isinstance(node.profile, str):
-        # Upgrade: Replace NotImplementedError with SemanticFault ManifestError
-        # This guides the user to define the profile inline or implement resolution.
-        raise ManifestError.critical_halt(
-            code=ManifestErrorCode.CRSN_VAL_INTEGRITY_PROFILE_MISSING,
-            message=f"Profile resolution from string ID '{node.profile}' is not yet supported in this adapter version.",
-            context={
-                "node_id": node.id,
-                "remediation": RemediationAction(
-                    type="update_field",
-                    target_node_id=node.id,
-                    description="Expand the profile definition inline instead of using a reference ID.",
-                    patch_data=[
-                        {
-                            "op": "replace",
-                            "path": "/profile",
-                            "value": {
-                                "role": "Assistant",
-                                "persona": "Please define persona here.",
-                                "reasoning": {"type": "standard", "model": config.default_openai_model},
-                            },
-                        }
-                    ],
-                ).model_dump(),
-            },
-        )
+        # TODO: Lookup Profile from registry in Phase 2
+        # For now, we raise an error as we can't resolve the string ID without the registry context
+        raise NotImplementedError("Profile resolution from string ID not yet implemented in adapter.")
 
-    if node.profile.reasoning and node.profile.reasoning.model:
+    if node.profile.reasoning:
         model = node.profile.reasoning.model
 
     # Instructions: Combine role and persona

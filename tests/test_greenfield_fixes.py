@@ -23,7 +23,7 @@ def test_coverage_flow_builder_template() -> None:
 
 
 def test_coverage_linear_flow_published() -> None:
-    """Test LinearFlow with status='published' to ensure validation passes."""
+    """Test LinearFlow with status='published' to hit validate_integrity."""
     brain = CognitiveProfile(role="assistant", persona="helper", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(profiles={"my-brain": brain})
     agent = AgentNode(

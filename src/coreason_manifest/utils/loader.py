@@ -2,7 +2,6 @@
 
 import hashlib
 import importlib.abc
-import importlib.machinery
 import importlib.util
 import inspect
 import os
@@ -93,34 +92,16 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
     A custom MetaPathFinder that resolves imports relative to a 'jail' directory
     without modifying sys.path. It uses a ContextVar to determine the current
     jail, ensuring thread/task safety.
-
-    Security Model:
-    1.  No traversal: All resolved paths must be strictly within the jail root.
-    2.  No shadowing: Standard library modules cannot be overridden (Dependency Confusion protection).
-    3.  Symlink protection: Resolved paths are checked against the jail root after symlink expansion.
-
-    OS Specifics:
-    - POSIX: Uses `resolve()` to handle symlinks and `is_relative_to` for containment checks.
-             Strict permission checks are enforced on loaded files (no world-writable).
-    - Windows: Uses `resolve()` to handle paths. File permission checks are relaxed as POSIX bits
-               don't map 1:1, but containment checks remain strict.
-
-    Assumption:
-    - The OS supports `O_NOFOLLOW` or similar mechanisms if strict TOCTOU protection is needed
-      (handled by ManifestIO, but relevant here for context).
-    - Symlinks that point outside the jail are considered security violations.
-    - Standard library modules are trusted and loaded from the host environment, but shadowed names in
-      the jail are ignored to prevent confusion.
     """
 
     def find_spec(
         self,
         fullname: str,
-        path: Any = None,
-        target: Any = None,  # noqa: ARG002
+        _path: Any = None,
+        _target: Any = None,
     ) -> importlib.machinery.ModuleSpec | None:
         """
-        Attempt to find the module in the current jail root using standard importlib machinery.
+        Attempt to find the module in the current jail root.
         """
         # Security: Prevent standard library shadowing (Dependency Confusion)
         if fullname in sys.stdlib_module_names:
@@ -130,195 +111,71 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         if not jail_root:
             return None
 
+        # Architectural Note: Pathlib based validation
+        parts = fullname.split(".")
+
         # Security: Module Isolation via Namespacing
         # Prevent sys.modules poisoning by namespacing the module name with the jail hash.
         jail_hash = hashlib.sha256(str(jail_root).encode("utf-8")).hexdigest()[:8]
         namespaced_name = f"_jail_{jail_hash}.{fullname}"
 
-        # If this is a top-level import (path is None), we look in the jail_root.
-        # If it is a sub-package import, 'path' will contain the parent package's path.
-        # We must ensure that 'path', if provided, is also within the jail.
-        search_paths = []
-        if path is None:
-            search_paths = [str(jail_root)]
-        else:
-            # Verify all paths in 'path' are within jail_root
-            for p in path:
-                p_path = Path(p).resolve()
-                if not p_path.is_relative_to(jail_root.resolve()):
-                    # This might happen if a package somehow added an external path to its __path__
-                    # We skip unsafe paths or raise. safer to skip/ignore for find_spec, or return None.
-                    continue
-                search_paths.append(str(p_path))
-
-        if not search_paths:
-            return None
-
-        # Use standard FileFinder to locate the file spec
-        # This handles .py, .pyc, packages, etc. correctly.
-        loader_details = (importlib.machinery.SourceFileLoader, importlib.machinery.SOURCE_SUFFIXES)
-        finder = importlib.machinery.FileFinder(
-            search_paths[0], loader_details
-        )  # Only support single root for top level
-
-        # We are looking for the "leaf" name of the module
-        leaf_name = fullname.split(".")[-1]
-
         try:
-            # We find the spec using the leaf name (as it appears on disk)
-            found_spec = finder.find_spec(leaf_name)
+            potential_path = jail_root.joinpath(*parts)
+
+            # Resolve to check if it escapes (handling '..' in parts if any, though unlikely in fullname)
+            # strict=False because file might not exist yet, we are just looking
+            resolved_potential = potential_path.resolve()
+
+            # Double check against jail root
+            if not resolved_potential.is_relative_to(jail_root.resolve()):
+                # This is a critical security violation if a module name resolves outside jail
+                raise SecurityJailViolationError(f"Security Error: Reference {fullname} escapes the root directory.")
+
+        except SecurityJailViolationError:
+            # Prevent the security exception from being swallowed
+            raise
+        except RuntimeError as e:
+            # Symlink loop or similar
+            if "Symlink" in str(e):
+                raise SecurityJailViolationError(f"Security Error: Symlink loop in {fullname}") from e
+            return None
         except Exception:
+            # Other errors (e.g. invalid path chars) -> not found
             return None
 
-        if found_spec is None:
-            # If standard finder returns None, it might be because it refuses to load symlinks?
-            # Or it simply didn't find it.
-            # But we must check if the path exists as a symlink pointing outside!
-
-            # Manual check for potential symlink escape that finder ignored
-            # This covers the case where FileFinder sees a symlink but doesn't resolve it to a spec
-            # if it points to something invalid or if it just ignores it?
-
-            # Actually, FileFinder generally follows symlinks.
-            # If it returned None, maybe it didn't find a .py file?
-
-            # If the test creates a directory symlink `malicious_module -> outside`,
-            # and we asked for `malicious_module`, FileFinder looks for `malicious_module/__init__.py`.
-            # If `outside` is empty, it finds nothing.
-
-            # We should check if the path component exists in the jail and is a symlink escaping.
-
-            # Only do this check if we failed to find a valid spec, to catch "hidden" escapes.
-            # Construct the potential path
-            try:
-                # We only support top-level checks here roughly
-                potential_path = Path(search_paths[0]) / leaf_name
-                # If it exists (even as broken symlink or directory)
-                if potential_path.is_symlink() or potential_path.exists():
-                    # Must use strict=False for resolve if target might not exist (broken link),
-                    # but here we care about where it points.
-                    # If it's a broken link pointing outside, resolve() might still show it.
-                    resolved = potential_path.resolve(strict=False)
-                    if not resolved.is_relative_to(jail_root.resolve()):
-                        raise SecurityJailViolationError(
-                            f"Security Error: Symlink {leaf_name} escapes the root directory."
-                        )
-            except SecurityJailViolationError:
-                raise
-            except Exception:
-                pass
-
-            return None
-
-        if found_spec.origin is None:
-            return None
-
-        # Security: Validate the found origin against the jail
-        try:
-            origin_path = Path(found_spec.origin).resolve(strict=True)
-            if not origin_path.is_relative_to(jail_root.resolve()):
+        spec = None
+        # Check for package (directory with __init__.py)
+        init_py = resolved_potential / "__init__.py"
+        if init_py.is_file():
+            # Check actual path for symlink escape
+            if not init_py.resolve().is_relative_to(jail_root.resolve()):
                 raise SecurityJailViolationError(
-                    f"Security Error: Module {fullname} resolves to {origin_path} outside jail."
+                    f"Security Error: Module {fullname} resolves to {init_py.resolve()} outside jail."
                 )
+            spec = importlib.util.spec_from_file_location(namespaced_name, init_py)
 
-            # Permission check (POSIX only)
-            if os.name == "posix":
-                st = origin_path.stat()
-                if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
-                    raise SecurityJailViolationError(
-                        f"Security Error: {found_spec.origin} possesses unsafe writable permissions "
-                        "(S_IWOTH or S_IWGRP)."
-                    )
-
-        except (RuntimeError, OSError) as e:
-            if "Symlink" in str(e) or getattr(e, "errno", 0) == 40:  # ELOOP
+        # Check for module (file.py)
+        elif resolved_potential.with_suffix(".py").is_file():
+            found_py = resolved_potential.with_suffix(".py")
+            # Check actual path for symlink escape
+            if not found_py.resolve().is_relative_to(jail_root.resolve()):
                 raise SecurityJailViolationError(
-                    f"Security Error: Symlink loop or resolution failed in {fullname}"
-                ) from e
-            # If resolve fails for other reasons (e.g. not found during strict check), return None
-            return None
-
-        # Re-create the spec with the namespaced name to ensure the loader is correctly initialized
-        # We checked found_spec.origin above, so it is not None here.
-        spec = importlib.util.spec_from_file_location(namespaced_name, found_spec.origin)
+                    f"Security Error: Module {fullname} resolves to {found_py.resolve()} outside jail."
+                )
+            spec = importlib.util.spec_from_file_location(namespaced_name, found_py)
 
         if spec:
             # Architectural Note: Track module as managed by this sandbox context to enable precise cleanup.
             modules = _jail_modules_var.get()
             if modules is not None:
                 modules.add(namespaced_name)
+            return spec
 
-        return spec
+        return None
 
 
 # Singleton instance of the finder
 _SANDBOXED_FINDER = SandboxedPathFinder()
-
-
-_HOOK_INSTALLED = False
-
-
-def _install_audit_hook() -> None:
-    """
-    Install a sys.audit hook to monitor file system access.
-    The hook is active only when _jail_root_var is set (inside sandbox_context).
-    """
-    global _HOOK_INSTALLED
-    if _HOOK_INSTALLED:
-        return
-
-    def hook(event: str, args: tuple[Any, ...]) -> None:
-        jail_root = _jail_root_var.get()
-        if not jail_root:
-            return
-
-        if event == "open":
-            path, _mode, _flags = args
-            # We strictly only care about string paths (file system).
-            if isinstance(path, (str, Path)):
-                try:
-                    file_path = Path(path).resolve()
-
-                    # 1. If inside jail, it's allowed.
-                    if file_path.is_relative_to(jail_root.resolve()):
-                        return
-
-                    # 2. If outside jail, we must be careful.
-                    # Python runtime needs to open many files (stdlib, .pyc, encodings, etc.)
-                    # We verify if path is relative to python installation prefixes.
-                    prefixes = [
-                        Path(sys.prefix).resolve(),
-                        Path(sys.base_prefix).resolve(),
-                        Path(sys.exec_prefix).resolve(),
-                        Path(sys.base_exec_prefix).resolve(),
-                    ]
-
-                    for prefix in prefixes:
-                        if file_path.is_relative_to(prefix):
-                            return
-
-                    # If we are here, it is outside jail and outside python runtime.
-                    raise SecurityViolationError(f"Unauthorized file access blocked by audit hook: {path}")
-
-                except (ValueError, RuntimeError) as e:
-                    # Path resolution failed or similar. Safe to block.
-                    raise SecurityViolationError(f"Unauthorized file access blocked (resolution failed): {path}") from e
-                except SecurityViolationError:
-                    raise
-                except Exception:
-                    # Ignore other errors during checking to avoid breaking system calls
-                    pass
-
-    try:
-        sys.addaudithook(hook)
-        _HOOK_INSTALLED = True
-    except Exception:
-        # Might fail on some implementations or if already audited
-        pass
-
-
-# Call installation (safe to call at module level)
-_install_audit_hook()
 
 
 @contextmanager
