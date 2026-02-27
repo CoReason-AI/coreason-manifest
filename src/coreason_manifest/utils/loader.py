@@ -29,6 +29,8 @@ __all__ = [
     "load_agent_from_ref",
     "load_flow_from_file",
     "load_middleware_from_ref",
+    "scoped_tool_context",
+    "verify_tool_authorization",
 ]
 
 
@@ -86,6 +88,9 @@ UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, 
 # Uses ContextVar to handle async concurrency safely without race conditions.
 _jail_root_var: ContextVar[Path | None] = ContextVar("jail_root", default=None)
 _jail_modules_var: ContextVar[set[str] | None] = ContextVar("jail_modules", default=None)
+
+# JIT Tool Authorization (Ephemeral Scoping)
+_scoped_tools_var: ContextVar[set[str] | None] = ContextVar("scoped_tools", default=None)
 
 
 class SandboxedPathFinder(importlib.abc.MetaPathFinder):
@@ -339,6 +344,35 @@ def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
     finally:
         _jail_root_var.reset(token_root)
         _jail_modules_var.reset(token_modules)
+
+
+@contextmanager
+def scoped_tool_context(allowed_tools: set[str]) -> Generator[None, None, None]:
+    """
+    JIT Tool Authorization context manager.
+    Injects a whitelist of allowed tools for the duration of a task execution block.
+    Destroys the reference upon exit, ensuring ephemeral scoping.
+    """
+    token = _scoped_tools_var.set(allowed_tools)
+    try:
+        yield
+    finally:
+        _scoped_tools_var.reset(token)
+
+
+def verify_tool_authorization(tool_name: str) -> None:
+    """
+    Verifies if a tool is authorized in the current execution scope.
+    Raises SecurityViolationError if not authorized.
+    """
+    allowed = _scoped_tools_var.get()
+    if allowed is None:
+        # If no scope is set, default to DENY ALL (Zero Trust)
+        # unless specifically relaxed by system policy (not handled here).
+        raise SecurityViolationError(f"Tool execution attempt outside of authorized scope: {tool_name}")
+
+    if tool_name not in allowed:
+        raise SecurityViolationError(f"Tool '{tool_name}' is not authorized in this ephemeral scope.")
 
 
 def _scan_for_dynamic_references(data: Any) -> bool:

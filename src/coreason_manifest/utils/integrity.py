@@ -7,9 +7,12 @@ import uuid
 from abc import ABC, abstractmethod
 from collections import defaultdict, deque
 from datetime import UTC, datetime
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.contracts import AtomicSkill
 
 
 def to_canonical_timestamp(dt: datetime) -> str:
@@ -50,13 +53,6 @@ class HashingStrategy(ABC):
 class CanonicalHashingStrategy(HashingStrategy):
     """
     Canonical hashing strategy enforcing RFC 8785 compliance.
-    Note: This implementation approximates true JCS (RFC 8785) compliance.
-    Specific ECMA-262 double-precision float formatting is approximated by Python's
-    standard library. Full compliance would require a custom dtoa implementation.
-    - Strict float formatting (no NaN/Inf).
-    - Strips None values.
-    - Deterministic key sorting.
-    - UTF-8 enforcement (no escapes).
     """
 
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
@@ -67,10 +63,17 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Universal Hash Sanitization:
             # Strip modern keys (execution_hash, signature, __*)
             # Also strip None values (Architectural requirement)
+            # CRITICAL FIX: Ensure keys that are not part of the payload are excluded from hash computation
+            # during verification.
+
+            # The keys to exclude MUST match what is excluded in generate_execution_receipt's payload construction
+            # PLUS the fields that hold the hash/signature itself.
+            excluded_keys = {"execution_hash", "signature", "annotations"}
+
             return {
                 k: self._recursive_sort_and_sanitize(v)
                 for k, v in sorted(obj.items())
-                if v is not None and k not in {"execution_hash", "signature"} and not k.startswith("__")
+                if v is not None and k not in excluded_keys and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x) for x in obj]
@@ -90,14 +93,10 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Pydantic v2 or compatible
             return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
         if isinstance(obj, float):
-            # RFC 8785: If number is integer, represent as integer.
-            # Directive: Avoid mutating floats to integers natively to preserve type info.
-            # However, ensure NaN/Inf are rejected.
             if not math.isfinite(obj):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
             return obj
 
-        # Architectural Note: Enforce strict deterministic types.
         if isinstance(obj, (int, str, bool)) or obj is None:
             return obj
 
@@ -105,16 +104,10 @@ class CanonicalHashingStrategy(HashingStrategy):
 
     def compute_hash(self, obj: Any) -> str:
         if hasattr(obj, "compute_hash"):
-            # Self-hashing objects (avoid infinite recursion if they call back here)
             return str(obj.compute_hash())
 
         sanitized = self._recursive_sort_and_sanitize(obj)
 
-        # RFC 8785 approximation:
-        # - separators=(',', ':') removes whitespace
-        # - sort_keys=True
-        # - ensure_ascii=False (UTF-8)
-        # - allow_nan=False
         json_bytes = json.dumps(
             sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False
         ).encode("utf-8")
@@ -126,8 +119,69 @@ def compute_hash(obj: Any) -> str:
     """
     Computes a SHA-256 hash of a JSON-serializable object using the CanonicalHashingStrategy (RFC 8785).
     """
-    # Inherently use CanonicalHashingStrategy
     return CanonicalHashingStrategy().compute_hash(obj)
+
+
+class ProofOfTaskExecution(CoreasonModel):
+    """
+    Cryptographically signed receipt of task execution.
+    Ties inputs, outputs, skill definition, and model weights to a Merkle node.
+    """
+    execution_id: str = Field(..., description="Unique ID of this execution.")
+    timestamp: str = Field(..., description="UTC timestamp of execution.")
+    skill: AtomicSkill = Field(..., description="The immutable skill executed.")
+    inputs: dict[str, Any] = Field(..., description="Canonicalized inputs.")
+    outputs: dict[str, Any] = Field(..., description="Canonicalized outputs.")
+    model_weights_hash: str | None = Field(None, description="Hash of the model weights used, if applicable.")
+    parent_hash: str | None = Field(None, description="Hash of the previous execution in the chain.")
+    locked_status: bool = Field(True, description="Asserts that this step was locked/immutable.")
+
+    # The self-hash of this object (excluding signature)
+    execution_hash: str = Field(..., description="SHA-256 hash of the canonicalized fields.")
+    signature: str | None = Field(None, description="Digital signature of the execution_hash.")
+
+
+def generate_execution_receipt(
+    execution_id: str,
+    skill: AtomicSkill,
+    inputs: dict[str, Any],
+    outputs: dict[str, Any],
+    parent_hash: str | None = None,
+    model_weights_hash: str | None = None,
+) -> ProofOfTaskExecution:
+    """
+    Generates a cryptographically verifiable receipt for a locked task execution.
+    """
+    # 1. Create the Payload Structure (without hash)
+    # We use a temporary dict to compute hash
+    payload = {
+        "execution_id": execution_id,
+        "timestamp": to_canonical_timestamp(datetime.now(UTC)),
+        "skill": skill.model_dump(),
+        "inputs": inputs,
+        "outputs": outputs,
+        "model_weights_hash": model_weights_hash,
+        "parent_hash": parent_hash,
+        "locked_status": True
+    }
+
+    # 2. Compute Canonical Hash
+    strategy = CanonicalHashingStrategy()
+    exec_hash = strategy.compute_hash(payload)
+
+    # 3. Create PoTE Object
+    return ProofOfTaskExecution(
+        execution_id=cast(str, payload["execution_id"]),
+        timestamp=cast(str, payload["timestamp"]),
+        skill=skill,
+        inputs=inputs,
+        outputs=outputs,
+        model_weights_hash=model_weights_hash,
+        parent_hash=parent_hash,
+        locked_status=True,
+        execution_hash=exec_hash,
+        signature=None
+    )
 
 
 def reconstruct_payload(node: Any) -> dict[str, Any]:

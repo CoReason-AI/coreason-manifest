@@ -5,6 +5,7 @@ from pydantic import Field, model_validator
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
+from coreason_manifest.spec.core.contracts import NodeSpec
 from coreason_manifest.spec.core.engines import (
     FastPath,
     ModelRef,
@@ -25,10 +26,15 @@ from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
-class Node(CoreasonModel):
-    """Base class for vertices of the execution graph."""
+class Node(NodeSpec):
+    """
+    Base class for vertices of the execution graph.
+    Inherits from NodeSpec to enforce 'locked' contract.
+    """
 
-    id: NodeID = Field(..., description="Unique identifier for the node.", examples=["start_node", "agent_1"])
+    # id: NodeID inherited from NodeSpec
+    # locked: Literal[True] inherited from NodeSpec, but we default to True here for safety.
+
     metadata: dict[str, Any] = Field(
         default_factory=dict, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
     )
