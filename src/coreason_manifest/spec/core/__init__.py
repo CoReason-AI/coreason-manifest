@@ -1,6 +1,6 @@
 # Core specification package
 
-from coreason_manifest.spec.core.engines import (
+from coreason_manifest.spec.core.cognitive.engines import (
     AttentionReasoning,
     BaseReasoning,
     BufferReasoning,
@@ -18,7 +18,7 @@ from coreason_manifest.spec.core.engines import (
     StandardReasoning,
     TreeSearchReasoning,
 )
-from coreason_manifest.spec.core.flow import (
+from coreason_manifest.spec.core.topology.flow import (
     AnyNode,
     Blackboard,
     Edge,
@@ -30,13 +30,13 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import (
+from coreason_manifest.spec.core.oversight.governance import (
     Audit,
     CircuitBreaker,
     Governance,
     Safety,
 )
-from coreason_manifest.spec.core.nodes import (
+from coreason_manifest.spec.core.cognitive.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
@@ -48,7 +48,7 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.resilience import (
+from coreason_manifest.spec.core.oversight.resilience import (
     ErrorDomain,
     ErrorHandler,
     EscalationStrategy,
@@ -58,7 +58,7 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.state.tools import ToolPack
 
 __all__ = [
     # Nodes

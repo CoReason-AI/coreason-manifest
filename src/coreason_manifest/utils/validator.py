@@ -5,15 +5,15 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from coreason_manifest.spec.core.flow import (
+from coreason_manifest.spec.core.topology.flow import (
     AnyNode,
     FlowDefinitions,
     Graph,
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import (
+from coreason_manifest.spec.core.oversight.governance import Governance
+from coreason_manifest.spec.core.cognitive.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
@@ -21,14 +21,14 @@ from coreason_manifest.spec.core.nodes import (
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.resilience import (
+from coreason_manifest.spec.core.oversight.resilience import (
     EscalationStrategy,
     FallbackStrategy,
     ReflexionStrategy,
     ResilienceStrategy,
 )
-from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
-from coreason_manifest.spec.core.types import RiskLevel
+from coreason_manifest.spec.core.state.tools import ToolCapability, ToolPack
+from coreason_manifest.spec.core.primitives.types import RiskLevel
 from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.topology import get_strongly_connected_components, get_unified_topology

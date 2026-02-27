@@ -3,10 +3,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from coreason_manifest.spec.core.constants import NodeCapability
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
-from coreason_manifest.spec.core.resilience import EscalationStrategy
+from coreason_manifest.spec.core.primitives.constants import NodeCapability
+from coreason_manifest.spec.core.topology.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.cognitive.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,
@@ -20,7 +20,7 @@ from coreason_manifest.utils.topology import (
 )
 
 if TYPE_CHECKING:
-    from coreason_manifest.spec.core.tools import ToolCapability
+    from coreason_manifest.spec.core.state.tools import ToolCapability
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:

@@ -19,7 +19,8 @@ from typing import Any, Protocol, cast
 import yaml
 from yaml.nodes import MappingNode
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.rebuild import rebuild_manifest
+from coreason_manifest.spec.core.topology.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
@@ -436,6 +437,10 @@ def load_flow_from_file(
         )
 
     kind = data.get("kind")
+
+    # Ensure all string forward references are resolved before validation
+    rebuild_manifest()
+
     if kind == "LinearFlow":
         return LinearFlow.model_validate(data)
     if kind == "GraphFlow":

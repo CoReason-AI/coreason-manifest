@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 
     from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
-from coreason_manifest.spec.core.nodes import AnyNode, SwitchNode
+from coreason_manifest.spec.core.topology.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.cognitive.nodes import AnyNode, SwitchNode
 from coreason_manifest.utils.topology import get_unified_topology
 
 

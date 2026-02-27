@@ -10,13 +10,13 @@
 
 from typing import Any, Self, cast
 
-from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
-from coreason_manifest.spec.core.engines import (
+from coreason_manifest.spec.core.oversight.co_intelligence import EscalationCriteria
+from coreason_manifest.spec.core.cognitive.engines import (
     FastPath,
     ReasoningConfig,
     StandardReasoning,
 )
-from coreason_manifest.spec.core.flow import (
+from coreason_manifest.spec.core.topology.flow import (
     AnyNode,
     Blackboard,
     DataSchema,
@@ -28,7 +28,7 @@ from coreason_manifest.spec.core.flow import (
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.spec.core.governance import (
+from coreason_manifest.spec.core.oversight.governance import (
     CircuitBreaker,
     ComputeLimits,
     DataLimits,
@@ -36,15 +36,15 @@ from coreason_manifest.spec.core.governance import (
     Governance,
     OperationalPolicy,
 )
-from coreason_manifest.spec.core.memory import (
+from coreason_manifest.spec.core.state.memory import (
     EpisodicMemoryConfig,
     MemorySubsystem,
     ProceduralMemoryConfig,
     SemanticMemoryConfig,
     WorkingMemoryConfig,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
-from coreason_manifest.spec.core.resilience import (
+from coreason_manifest.spec.core.cognitive.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
+from coreason_manifest.spec.core.oversight.resilience import (
     ErrorDomain,
     ErrorHandler,
     EscalationStrategy,
@@ -54,7 +54,8 @@ from coreason_manifest.spec.core.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.rebuild import rebuild_manifest
+from coreason_manifest.spec.core.state.tools import ToolPack
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -397,6 +398,9 @@ class AgentBuilder:
         Raises:
             ValueError: If agent identity (role, persona) is not set.
         """
+        # Ensure schema is built
+        rebuild_manifest()
+
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
@@ -691,6 +695,9 @@ class BaseFlowBuilder:
         Raises:
             ValueError: If validation fails.
         """
+        # Ensure schema is built
+        rebuild_manifest()
+
         flow = self._create_flow_instance()
 
         errors = validate_flow(flow)

@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.topology.flow import GraphFlow, LinearFlow
 
 type DomainType = Literal["resource", "topology", "governance"]
 type MutationOp = Literal["add", "remove", "replace", "move", "copy", "test"]

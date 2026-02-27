@@ -1,6 +1,6 @@
 from typing import Any
 
-from coreason_manifest.spec.core.tools import ToolPack
+from coreason_manifest.spec.core.state.tools import ToolPack
 
 
 def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
