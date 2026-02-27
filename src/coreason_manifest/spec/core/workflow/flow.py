@@ -32,7 +32,6 @@ __all__ = [
     "Graph",
     "GraphFlow",
     "LinearFlow",
-    "Manifest",
     "VariableDef",
 ]
 
@@ -49,7 +48,7 @@ class FlowMetadata(CoreasonModel):
 class DataSchema(CoreasonModel):
     # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
-    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
+    json_schema: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -63,7 +62,7 @@ class DataSchema(CoreasonModel):
                     "remediation": RemediationAction(
                         type="update_field",
                         description="Correct the JSON Schema syntax.",
-                        patch_data=[{"op": "replace", "path": "/schema", "value": {}}],
+                        patch_data=[{"op": "replace", "path": "/json_schema", "value": {}}],
                     ).model_dump()
                 },
             ) from e
@@ -77,8 +76,8 @@ class Blackboard(CoreasonModel):
 
 
 class Edge(CoreasonModel):
-    from_node: NodeID = Field(..., alias="from")
-    to_node: NodeID = Field(..., alias="to")
+    from_node: NodeID
+    to_node: NodeID
     condition: str | None = None
 
     @field_validator("condition", mode="before")
@@ -168,7 +167,7 @@ class FlowDefinitions(CoreasonModel):
 
 
 class VariableDef(CoreasonModel):
-    id: str = Field(default_factory=lambda: str(uuid4()), alias="name")
+    id: str = Field(default_factory=lambda: str(uuid4()))
     type: str
     description: str | None = None
 
@@ -198,16 +197,9 @@ class LinearFlow(CoreasonModel):
     kind: Literal["LinearFlow"] = "LinearFlow"
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
-    steps: list[AnyNode] = Field(default_factory=list, alias="sequence")
+    steps: list[AnyNode] = Field(default_factory=list)
     governance: "Governance | None" = None
     definitions: FlowDefinitions | None = None
-
-    @property
-    def sequence(self) -> list[AnyNode]:
-        return self.steps
-
-
-Manifest = GraphFlow
 
 
 class AgentRequest(CoreasonModel):
