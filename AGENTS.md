@@ -90,3 +90,22 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * You feel a feature requires adding a dependency that is not `pydantic` or `yaml`.
 * You are tempted to add a "helper script" that runs a server.
 * You encounter a requirement that seems to violate the "Shared Kernel" philosophy.
+
+## 🛡️ Mandatory Local Verification Workflow
+
+This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. To ensure the Shared Kernel remains completely stable and immutable, **the following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.** Failure to comply will result in an immediate rejection by the CI/CD pipeline.
+
+### 1. Formatting and Linting
+We use `ruff` with an aggressive, strict ruleset (including `SIM`, `C4`, `PERF`, and `FURB`). Run the auto-fixer to resolve import and syntax issues:
+`uv run ruff format .`
+`uv run ruff check . --fix`
+
+### 2. Strict Type Checking
+We run `mypy` in `strict = true` mode. There are no implicit optionals, and `Any` should be avoided wherever possible. Verify your types:
+`uv run mypy src/ tests/`
+
+### 3. Test Coverage
+Ensure your new logic maintains the strict coverage mandates:
+`uv run pytest`
+
+*Note: Do not bypass type hints or add `# type: ignore` unless interacting with deeply dynamic external modules, and only do so with an explicit explanatory comment.*
