@@ -50,7 +50,7 @@ def test_gatekeeper_schemeless_url() -> None:
             # This line causes type error because Mypy sees `str` passed to `HttpUrl | None`
             # But we WANT to test validation failure at runtime.
             # We cast to ignore typing.
-            url="evil.com/api",
+            url="evil.com/api",  # type: ignore[arg-type]
             risk_level=RiskLevel.STANDARD,
         )
 

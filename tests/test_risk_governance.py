@@ -114,7 +114,7 @@ def test_risk_enum_update() -> None:
 
     # Test invalid value 'minimal'
     with pytest.raises(ValidationError):
-        ToolAccessPolicy(risk_level="minimal")
+        ToolAccessPolicy(risk_level="minimal")  # type: ignore[arg-type]
 
 
 def test_inline_tool_bypass_prevention() -> None:
