@@ -17,6 +17,23 @@ from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
 
+# Export AnyNode so it can be imported from here as well
+__all__ = [
+    "AgentRequest",
+    "AnyNode",
+    "Blackboard",
+    "DataSchema",
+    "Edge",
+    "FlowDefinitions",
+    "FlowInterface",
+    "FlowMetadata",
+    "Graph",
+    "GraphFlow",
+    "LinearFlow",
+    "Manifest",
+    "VariableDef",
+]
+
 
 class FlowMetadata(CoreasonModel):
     name: str

@@ -5,7 +5,7 @@ from pathlib import Path
 from coreason_manifest.utils.loader import SecurityViolationError, sandbox_context
 
 
-def verify_audit_hook():
+def verify_audit_hook() -> None:
     base = Path("verify_audit")
     if base.exists():
         shutil.rmtree(base)

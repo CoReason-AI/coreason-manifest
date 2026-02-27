@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Literal, TypeAlias
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
@@ -361,7 +361,8 @@ class PlaceholderNode(Node):
 
 
 # AnyNode is now resolved dynamically
-AnyNode: TypeAlias = resolve_node_union()  # type: ignore
+# Use 'type' keyword for type aliases (Python 3.12+)
+type AnyNode = resolve_node_union()  # type: ignore
 
 
 __all__ = [

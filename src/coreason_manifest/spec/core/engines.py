@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Literal, TypeAlias
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -384,7 +384,8 @@ class GraphReasoning(BaseReasoning):
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
-ReasoningConfig: TypeAlias = resolve_engine_union()  # type: ignore
+# Use 'type' keyword for type aliases (Python 3.12+)
+type ReasoningConfig = resolve_engine_union()  # type: ignore
 
 
 # =========================================================================

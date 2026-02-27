@@ -6,7 +6,7 @@ from coreason_manifest.spec.core.nodes import Node
 from coreason_manifest.spec.core.registry import _NODE_REGISTRY, register_node, resolve_node_union
 
 
-def test_dynamic_node_registration():
+def test_dynamic_node_registration() -> None:
     # 1. Define a new custom node type
     @register_node
     class CustomNode(Node):
@@ -50,7 +50,7 @@ def test_dynamic_node_registration():
     assert obj.custom_field == "hello"
 
 
-def test_registry_persistence():
+def test_registry_persistence() -> None:
     # Verify standard nodes are present
     assert "AgentNode" in _NODE_REGISTRY
     assert "SwitchNode" in _NODE_REGISTRY

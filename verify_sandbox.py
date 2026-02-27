@@ -7,7 +7,7 @@ from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.loader import load_agent_from_ref
 
 
-def verify_sandboxed_path_finder():
+def verify_sandboxed_path_finder() -> None:
     base = Path("verify_sandbox")
     if base.exists():
         shutil.rmtree(base)
