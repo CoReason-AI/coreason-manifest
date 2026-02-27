@@ -10,10 +10,22 @@ on:
   schedule:
     - cron: '0 0 * * *' # Nightly build
 
+# Enforce concurrency to cancel outdated runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Security hardening
+permissions:
+  contents: read
+
 jobs:
   fast-quality-gate:
     name: Fast Quality Gate
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -22,10 +34,10 @@ jobs:
         with:
           version: "latest"
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: uv sync --all-extras
@@ -43,11 +55,16 @@ jobs:
         # Exclude heavy/long running tests if separated in future
         run: uv run pytest -k "not benchmark and not fuzz"
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   heavy-quality-gate:
     name: Heavy Quality Gate
     runs-on: ubuntu-latest
     needs: fast-quality-gate
-    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
