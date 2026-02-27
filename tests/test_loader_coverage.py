@@ -29,6 +29,7 @@ def test_loader_symlink_loop_in_find_spec(tmp_path: Path) -> None:
         # So we mock finder.find_spec to return a spec.
 
         from unittest.mock import MagicMock
+
         mock_spec = MagicMock()
         mock_spec.origin = str(jail / "foo.py")
 
