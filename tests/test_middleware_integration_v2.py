@@ -1,4 +1,4 @@
-# tests/test_middleware_integration.py
+# tests/test_middleware_integration_v2.py
 
 import os
 from pathlib import Path
@@ -301,25 +301,32 @@ governance:
 
 
 def test_loader_valid_middleware(workspace: Path) -> None:
-    cls = load_middleware_from_ref("middlewares/valid.py:MyMiddleware", workspace)
+    # Use context manager to capture warnings
+    with pytest.warns(RuntimeWarning) as record:
+        cls = load_middleware_from_ref("middlewares/valid.py:MyMiddleware", workspace)
+
+    assert len(record) > 0
     assert cls.__name__ == "MyMiddleware"
     assert hasattr(cls, "intercept_request")
 
 
 def test_loader_duck_typing_failure(workspace: Path) -> None:
-    with pytest.raises(TypeError) as exc:
-        load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
-    assert "must implement at least one protocol method" in str(exc.value)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(TypeError) as exc:
+            load_middleware_from_ref("middlewares/invalid.py:MyInvalidMiddleware", workspace)
+        assert "must implement at least one protocol method" in str(exc.value)
 
 
 def test_loader_sync_request_method(workspace: Path) -> None:
-    with pytest.raises(TypeError, match="must be an asynchronous coroutine"):
-        load_middleware_from_ref("middlewares/sync_request.py:MySyncMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(TypeError, match="must be an asynchronous coroutine"):
+            load_middleware_from_ref("middlewares/sync_request.py:MySyncMiddleware", workspace)
 
 
 def test_loader_sync_stream_method(workspace: Path) -> None:
-    with pytest.raises(TypeError, match="must be an asynchronous coroutine"):
-        load_middleware_from_ref("middlewares/sync_stream.py:MySyncStreamMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(TypeError, match="must be an asynchronous coroutine"):
+            load_middleware_from_ref("middlewares/sync_stream.py:MySyncStreamMiddleware", workspace)
 
 
 def test_loader_security_violation(workspace: Path) -> None:
@@ -329,6 +336,7 @@ def test_loader_security_violation(workspace: Path) -> None:
     outside.chmod(0o600)
 
     # Try to load it using ..
+    # No warning here because validation happens before execution
     with pytest.raises(SecurityJailViolationError):
         load_middleware_from_ref(f"../{outside.name}:MyMiddleware", workspace)
 
@@ -340,18 +348,21 @@ def test_loader_file_not_found(workspace: Path) -> None:
 
 
 def test_loader_not_a_class(workspace: Path) -> None:
-    with pytest.raises(TypeError, match="is not a class"):
-        load_middleware_from_ref("middlewares/not_class.py:MyMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(TypeError, match="is not a class"):
+            load_middleware_from_ref("middlewares/not_class.py:MyMiddleware", workspace)
 
 
 def test_loader_class_not_found_in_module(workspace: Path) -> None:
-    with pytest.raises(ValueError, match="Middleware class 'MyMiddleware' not found"):
-        load_middleware_from_ref("middlewares/missing_class.py:MyMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(ValueError, match="Middleware class 'MyMiddleware' not found"):
+            load_middleware_from_ref("middlewares/missing_class.py:MyMiddleware", workspace)
 
 
 def test_loader_execution_failure(workspace: Path) -> None:
-    with pytest.raises(ValueError, match="Failed to execute middleware code"):
-        load_middleware_from_ref("middlewares/failing.py:MyMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(ValueError, match="Failed to execute middleware code"):
+            load_middleware_from_ref("middlewares/failing.py:MyMiddleware", workspace)
 
 
 def test_loader_cleanup_coverage(workspace: Path) -> None:
@@ -362,7 +373,24 @@ def test_loader_cleanup_coverage(workspace: Path) -> None:
 
     # Ensure sys.path doesn't interfere? SandboxedPathFinder doesn't use sys.path.
 
-    cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)
+    # If the previous test failed with "did not warn", it means execution succeeded without warning?
+    # No, it likely failed because `dependency.helper()` couldn't be imported/executed if pathing is wrong.
+
+    # Let's ensure 'dependency' is importable.
+    # SandboxedPathFinder looks in `root_dir`.
+    # workspace path is `.../middlewares`.
+    # dependency.py is in `.../dependency.py` (ROOT of fixture).
+
+    # The fixture returns tmp_path (ROOT).
+    # load_middleware_from_ref is called with `workspace`.
+    # `load_middleware_from_ref` takes a file reference.
+    # If file ref is "middlewares/with_dep.py:...", it loads that file.
+    # And executing that file tries `import dependency`.
+    # `dependency` is in `root_dir`.
+
+    # Capture warnings to prevent failure from RuntimeSecurityWarning
+    with pytest.warns(RuntimeWarning):
+        cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
 
 
@@ -372,8 +400,13 @@ def test_loader_cleanup_exception_coverage(workspace: Path) -> None:
     # load_middleware_from_ref raises ValueError if execution fails, but
     # SandboxedPathFinder might raise SecurityJailViolationError if imports are wonky?
     # No, with_fail_dep.py just raises ValueError.
-    with pytest.raises(ValueError, match="Failed to execute middleware code"):
-        load_middleware_from_ref("middlewares/with_fail_dep.py:MyMiddleware", workspace)
+
+    # We expect `RuntimeWarning` from `_execute_jailed_module`.
+    # We ALSO expect the `ValueError` from the execution failure.
+
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(ValueError, match="Failed to execute middleware code"):
+            load_middleware_from_ref("middlewares/with_fail_dep.py:MyMiddleware", workspace)
 
 
 def test_loader_symlink_file_escape(workspace: Path) -> None:
@@ -391,8 +424,9 @@ def test_loader_symlink_file_escape(workspace: Path) -> None:
     except OSError:
         pytest.skip("Symlinks not supported")
 
-    with pytest.raises(SecurityJailViolationError, match="outside jail"):
-        load_middleware_from_ref("middlewares/import_bad_link.py:MyMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(SecurityJailViolationError, match="outside jail"):
+            load_middleware_from_ref("middlewares/import_bad_link.py:MyMiddleware", workspace)
 
 
 def test_loader_symlink_pkg_escape(workspace: Path) -> None:
@@ -412,8 +446,9 @@ def test_loader_symlink_pkg_escape(workspace: Path) -> None:
     except OSError:
         pytest.skip("Symlinks not supported")
 
-    with pytest.raises(SecurityJailViolationError, match="outside jail"):
-        load_middleware_from_ref("middlewares/import_bad_pkg.py:MyMiddleware", workspace)
+    with pytest.warns(RuntimeWarning):
+        with pytest.raises(SecurityJailViolationError, match="outside jail"):
+            load_middleware_from_ref("middlewares/import_bad_pkg.py:MyMiddleware", workspace)
 
 
 def test_loader_symlink_loop(workspace: Path) -> None:
@@ -442,6 +477,7 @@ def test_loader_symlink_loop(workspace: Path) -> None:
 
     with (
         patch("pathlib.Path.resolve", side_effect=mock_resolve, autospec=True),
+        pytest.warns(RuntimeWarning),
         pytest.raises(SecurityJailViolationError, match="Symlink loop"),
     ):
         # We expect SecurityJailViolationError because SandboxedPathFinder catches RuntimeError

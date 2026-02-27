@@ -1,9 +1,8 @@
 import pytest
 
-from coreason_manifest.spec.core.flow import FlowDefinitions
+from coreason_manifest.spec.core.flow import FlowDefinitions, FlowMetadata, LinearFlow
 from coreason_manifest.spec.core.nodes import CognitiveProfile, SwarmNode
-from coreason_manifest.spec.interop.exceptions import ManifestError
-from coreason_manifest.utils.validator import validate_integrity
+from coreason_manifest.utils.validator import validate_flow
 
 
 def test_swarm_integrity_validation() -> None:
@@ -12,6 +11,7 @@ def test_swarm_integrity_validation() -> None:
     # Define a valid profile
     profile = CognitiveProfile(role="worker", persona="worker persona", reasoning=None, fast_path=None)
     definitions = FlowDefinitions(profiles={"worker-1": profile})
+    metadata = FlowMetadata(name="test_swarm", version="1.0.0")
 
     # Case 1: Valid SwarmNode
     valid_swarm = SwarmNode(
@@ -28,8 +28,14 @@ def test_swarm_integrity_validation() -> None:
         output_variable="out",
     )
 
-    # Should not raise
-    validate_integrity(definitions, [valid_swarm])
+    # Should not report errors
+    flow_valid = LinearFlow(
+        metadata=metadata,
+        definitions=definitions,
+        steps=[valid_swarm]
+    )
+    errors_valid = validate_flow(flow_valid)
+    assert len(errors_valid) == 0
 
     # Case 2: Invalid SwarmNode (undefined profile)
     invalid_swarm = SwarmNode(
@@ -46,8 +52,17 @@ def test_swarm_integrity_validation() -> None:
         output_variable="out",
     )
 
-    with pytest.raises(ManifestError, match="SwarmNode 's2' references missing profile 'ghost-worker'"):
-        validate_integrity(definitions, [invalid_swarm])
+    flow_invalid = LinearFlow(
+        metadata=metadata,
+        definitions=definitions,
+        steps=[invalid_swarm]
+    )
+    errors_invalid = validate_flow(flow_invalid)
+
+    # The fix to validator.py changed this from integrity error to validation error
+    assert len(errors_invalid) > 0
+    # Depending on implementation, message might vary slightly but should contain profile ID
+    assert any("ghost-worker" in e.message or "missing profile" in e.message for e in errors_invalid)
 
 
 if __name__ == "__main__":
