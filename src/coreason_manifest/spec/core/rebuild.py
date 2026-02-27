@@ -1,10 +1,6 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from coreason_manifest.spec.core.primitives.registry import resolve_engine_union, resolve_node_union
-
-if TYPE_CHECKING:
-    from coreason_manifest.spec.core.cognitive import engines, nodes
-    from coreason_manifest.spec.core.topology import flow
 
 
 def rebuild_manifest() -> None:
@@ -14,9 +10,9 @@ def rebuild_manifest() -> None:
     additions to the registry require an explicit rebuild of the schema.
     """
     # Import modules lazily to avoid circular dependencies
-    from coreason_manifest.spec.core.cognitive import engines, nodes
-    from coreason_manifest.spec.core.oversight import co_intelligence, governance, resilience
-    from coreason_manifest.spec.core.topology import flow
+    from coreason_manifest.spec.core.compute import nodes, reasoning
+    from coreason_manifest.spec.core.oversight import governance, intervention, resilience
+    from coreason_manifest.spec.core.workflow import flow
 
     # 1. Resolve fresh unions
     new_node_union = resolve_node_union()
@@ -30,12 +26,12 @@ def rebuild_manifest() -> None:
     nodes.AnyNode = new_node_union
 
     # Namespace for type resolution
-    oversight_types = {
+    oversight_types: dict[str, Any] = {
         "Governance": governance.Governance,
         "OperationalPolicy": governance.OperationalPolicy,
         "ResilienceConfig": resilience.ResilienceConfig,
         "EscalationStrategy": resilience.EscalationStrategy,
-        "EscalationCriteria": co_intelligence.EscalationCriteria,
+        "EscalationCriteria": intervention.EscalationCriteria,
     }
 
     # Patch Graph
@@ -52,7 +48,7 @@ def rebuild_manifest() -> None:
     # CognitiveProfile uses ReasoningConfig
 
     # Update ReasoningConfig alias in engines module
-    engines.ReasoningConfig = new_engine_union
+    reasoning.ReasoningConfig = new_engine_union
 
     if "reasoning" in nodes.CognitiveProfile.model_fields:
         nodes.CognitiveProfile.model_fields["reasoning"].annotation = new_engine_union | None  # type: ignore

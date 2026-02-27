@@ -1,5 +1,5 @@
-from coreason_manifest.spec.core.topology.flow import Edge, GraphFlow, LinearFlow
-from coreason_manifest.spec.core.cognitive.nodes import AnyNode
+from coreason_manifest.spec.core.compute.nodes import AnyNode
+from coreason_manifest.spec.core.workflow.flow import Edge, GraphFlow, LinearFlow
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:

@@ -4,13 +4,12 @@ from pydantic import Field, model_validator
 
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.cognitive.engines import (
+from coreason_manifest.spec.core.compute.reasoning import (
     FastPath,
     ModelRef,
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.state.memory import MemorySubsystem
 from coreason_manifest.spec.core.primitives.registry import register_node, resolve_node_union
 from coreason_manifest.spec.core.primitives.types import (
     CoercibleStringList,
@@ -18,12 +17,13 @@ from coreason_manifest.spec.core.primitives.types import (
     ProfileID,
     VariableID,
 )
+from coreason_manifest.spec.core.state.memory import MemorySubsystem
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 if TYPE_CHECKING:
-    from coreason_manifest.spec.core.oversight.co_intelligence import EscalationCriteria
     from coreason_manifest.spec.core.oversight.governance import OperationalPolicy
+    from coreason_manifest.spec.core.oversight.intervention import EscalationCriteria
     from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy, ResilienceConfig
 
 
