@@ -361,8 +361,7 @@ class PlaceholderNode(Node):
 
 
 # AnyNode is now resolved dynamically
-# Use 'type' keyword for type aliases (Python 3.12+)
-type AnyNode = resolve_node_union()  # type: ignore
+AnyNode: Any = resolve_node_union()
 
 
 __all__ = [

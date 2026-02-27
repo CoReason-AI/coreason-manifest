@@ -1,6 +1,6 @@
 # src/coreason_manifest/spec/core/registry.py
 
-from typing import TYPE_CHECKING, Annotated, Any, TypeVar
+from typing import TYPE_CHECKING, Annotated, Any, TypeVar, Union
 
 from pydantic import Field
 
@@ -80,11 +80,9 @@ def resolve_node_union() -> Any:
     if not nodes:
         return Any
 
-    union_type = nodes[0]
-    for n in nodes[1:]:
-        union_type = union_type | n
+    union_type = Union[tuple(nodes)]  # type: ignore  # noqa: UP007
 
-    return Annotated[union_type, Field(discriminator="type")]
+    return Annotated[union_type, Field(discriminator="type")]  # type: ignore
 
 
 def resolve_engine_union() -> Any:
@@ -96,8 +94,6 @@ def resolve_engine_union() -> Any:
     if not engines:
         return Any
 
-    union_type = engines[0]
-    for e in engines[1:]:
-        union_type = union_type | e
+    union_type = Union[tuple(engines)]  # type: ignore  # noqa: UP007
 
-    return Annotated[union_type, Field(discriminator="type")]
+    return Annotated[union_type, Field(discriminator="type")]  # type: ignore

@@ -384,8 +384,7 @@ class GraphReasoning(BaseReasoning):
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
-# Use 'type' keyword for type aliases (Python 3.12+)
-type ReasoningConfig = resolve_engine_union()  # type: ignore
+ReasoningConfig: Any = resolve_engine_union()
 
 
 # =========================================================================

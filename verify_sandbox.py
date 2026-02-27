@@ -56,7 +56,8 @@ def verify_sandboxed_path_finder() -> None:
     except ImportError as e:
         # If SandboxedPathFinder returns None (because it detected escape and returned None or raised),
         # then import fails.
-        # But our Finder implementation raises SecurityJailViolationError inside find_spec if it finds it but it escapes.
+        # But our Finder implementation raises SecurityJailViolationError inside find_spec if it
+        # finds it but it escapes.
         # If it returns None, then ModuleNotFoundError is raised.
         # Let's check our implementation.
         # Our implementation raises SecurityJailViolationError.
@@ -75,7 +76,7 @@ def verify_sandboxed_path_finder() -> None:
     # If it loaded local os, it would have x=1 and no 'name' (or different behavior).
     # Since we filter stdlib in find_spec, it should return None, and python should fall back to standard importer.
     # So 'import os' should get the real os module.
-    assert agent_cls.val == os.name
+    assert getattr(agent_cls, "val") == os.name  # noqa: B009
     print("Stdlib shadowing passed.")
 
     print("All verification checks passed.")

@@ -541,7 +541,8 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
             st = file_path.stat()
             if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
                 raise SecurityJailViolationError(
-                    f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
+                    f"Security Error: {file_ref} possesses unsafe writable permissions "
+                    "(S_IWOTH or S_IWGRP)."
                 )
 
     except FileNotFoundError:

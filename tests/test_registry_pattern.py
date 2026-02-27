@@ -21,7 +21,8 @@ def test_dynamic_node_registration() -> None:
     # NOTE: AnyNode imported from spec.core.nodes is statically defined at import time.
     # To see the update, we must re-resolve or use resolve_node_union() directly.
     # However, existing models (like GraphFlow) that use AnyNode won't automatically update
-    # unless we rebuild them or if AnyNode uses a deferred resolution mechanism (which Pydantic V2 doesn't support natively for runtime updates easily).
+    # unless we rebuild them or if AnyNode uses a deferred resolution mechanism (which Pydantic
+    # V2 doesn't support natively for runtime updates easily).
 
     # In this specific implementation, `AnyNode = resolve_node_union()` happens at module level in `nodes.py`.
     # So `AnyNode` is frozen at import time of `nodes.py`.
