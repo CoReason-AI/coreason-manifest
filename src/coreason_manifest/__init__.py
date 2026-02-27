@@ -12,7 +12,7 @@ from coreason_manifest.builder import (
     NewGraphFlow,
     NewLinearFlow,
 )
-from coreason_manifest.spec.core.engines import (
+from coreason_manifest.spec.core.cognitive.engines import (
     BaseReasoning,
     CouncilReasoning,
     DecompositionReasoning,
@@ -22,7 +22,7 @@ from coreason_manifest.spec.core.engines import (
     StandardReasoning,
     TreeSearchReasoning,
 )
-from coreason_manifest.spec.core.flow import (
+from coreason_manifest.spec.core.topology.flow import (
     AnyNode,
     Blackboard,
     Edge,
@@ -33,12 +33,12 @@ from coreason_manifest.spec.core.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.governance import (
+from coreason_manifest.spec.core.oversight.governance import (
     Audit,
     Governance,
     Safety,
 )
-from coreason_manifest.spec.core.nodes import (
+from coreason_manifest.spec.core.cognitive.nodes import (
     AgentNode,
     CognitiveProfile,
     HumanNode,
@@ -47,8 +47,8 @@ from coreason_manifest.spec.core.nodes import (
     PlannerNode,
     SwitchNode,
 )
-from coreason_manifest.spec.core.resilience import SupervisionPolicy
-from coreason_manifest.spec.core.tools import (
+from coreason_manifest.spec.core.oversight.resilience import SupervisionPolicy
+from coreason_manifest.spec.core.state.tools import (
     Dependency,
     ToolPack,
 )
