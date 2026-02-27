@@ -97,4 +97,4 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
             spec = finder.find_spec("malicious_module")
             # If it returns None, explicitly fail
             if spec is None:
-                 pytest.fail("find_spec returned None! It ignored the symlink.")
+                pytest.fail("find_spec returned None! It ignored the symlink.")

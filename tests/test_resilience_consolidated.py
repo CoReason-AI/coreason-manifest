@@ -1,13 +1,15 @@
 # tests/test_resilience_consolidated.py
 
 import pytest
+
 from coreason_manifest.spec.core.resilience import (
+    EscalationStrategy,
+    FallbackStrategy,
     ResilienceConfig,
     RetryStrategy,
-    FallbackStrategy,
-    EscalationStrategy,
-    SwitchStrategy
+    SwitchStrategy,
 )
+
 
 def test_resilience_config_union() -> None:
     # Test valid retry configuration

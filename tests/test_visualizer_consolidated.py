@@ -1,25 +1,11 @@
 # tests/test_visualizer_consolidated.py
 
-from typing import cast
-from coreason_manifest.spec.core.flow import (
-    GraphFlow,
-    FlowMetadata,
-    FlowInterface,
-    Graph,
-    Edge,
-    LinearFlow
-)
-from coreason_manifest.spec.core.nodes import (
-    PlaceholderNode,
-    SwitchNode,
-    AgentNode,
-    CognitiveProfile,
-    HumanNode,
-    SteeringConfig
-)
 from coreason_manifest.spec.common.presentation import PresentationHints
+from coreason_manifest.spec.core.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.nodes import AgentNode, HumanNode, PlaceholderNode, SteeringConfig, SwitchNode
 from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot, NodeState
 from coreason_manifest.utils.visualizer import to_mermaid, to_react_flow
+
 
 def test_visualizer_complex_graph_with_grouping_and_snapshot() -> None:
     """
@@ -184,4 +170,5 @@ def test_visualizer_pure_cycle_fallback() -> None:
     # Just verify it didn't crash and produced positions
     assert len(rf["nodes"]) == 2
     pos_a = rf["nodes"][0]["position"]
-    assert "x" in pos_a and "y" in pos_a
+    assert "x" in pos_a
+    assert "y" in pos_a

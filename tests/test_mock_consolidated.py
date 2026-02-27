@@ -1,7 +1,7 @@
 # tests/test_mock_consolidated.py
 
-import pytest
 from coreason_manifest.utils.mock import MockAgent, MockGenerator
+
 
 def test_mock_agent_response() -> None:
     # Test simple mock response
