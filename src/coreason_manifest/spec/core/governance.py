@@ -1,5 +1,5 @@
 import time
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Mapping
 
 from pydantic import Field, field_validator, model_validator
 
@@ -75,28 +75,28 @@ class OperationalPolicy(CoreasonModel):
     Replaces static nested models with flat dictionaries for zero-downtime extensibility.
     """
 
-    retry_counts: dict[NodeID | str, Annotated[int, Field(ge=0)]] = Field(
-        default_factory=dict, description="Granular control over retries per operation/node."
+    retry_counts: Mapping[str, Annotated[int, Field(ge=0)]] = Field(
+        default_factory=dict, description="Granular control over retries per operation/node (NodeID keys)."
     )
-    row_limits: dict[str, Annotated[int, Field(gt=0)]] = Field(
+    row_limits: Mapping[str, Annotated[int, Field(gt=0)]] = Field(
         default_factory=dict, description="Granular data retrieval limits (e.g., 'default', 'query_users')."
     )
-    search_limits: dict[str, Annotated[int, Field(gt=0)]] = Field(
+    search_limits: Mapping[str, Annotated[int, Field(gt=0)]] = Field(
         default_factory=dict, description="Dynamic search result limits (e.g., 'web', 'vector')."
     )
-    timeout_durations: dict[NodeID | str, Annotated[int, Field(gt=0)]] = Field(
-        default_factory=dict, description="Operation-specific timeouts in seconds."
+    timeout_durations: Mapping[str, Annotated[int, Field(gt=0)]] = Field(
+        default_factory=dict, description="Operation-specific timeouts in seconds (NodeID keys)."
     )
-    cost_multipliers: dict[NodeID | ToolID | str, Annotated[float, Field(gt=0.0)]] = Field(
-        default_factory=dict, description="Dynamic adjustment of cost thresholds."
+    cost_multipliers: Mapping[str, Annotated[float, Field(gt=0.0)]] = Field(
+        default_factory=dict, description="Dynamic adjustment of cost thresholds (NodeID/ToolID keys)."
     )
-    model_switching: dict[str, Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
+    model_switching: Mapping[str, Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
         default_factory=dict, description="Thresholds for tiered model degradation/swapping."
     )
-    custom_thresholds: dict[str, float] = Field(
+    custom_thresholds: Mapping[str, float] = Field(
         default_factory=dict, description="Generic extension dictionary for float limits."
     )
-    custom_limits: dict[str, int] = Field(
+    custom_limits: Mapping[str, int] = Field(
         default_factory=dict, description="Generic extension dictionary for integer limits."
     )
 
@@ -115,14 +115,17 @@ class Governance(CoreasonModel):
     # New Global Guardrails (Hoisted from deleted nested models)
     rate_limit_rpm: int | None = Field(
         None,
+        ge=0,
         description="Global requests per minute limit across the entire flow. PRECEDENCE: Acts as an absolute global ceiling, overriding any local node policies."
     )
     timeout_seconds: int | None = Field(
         None,
+        gt=0,
         description="Global execution timeout in seconds. PRECEDENCE: Acts as an absolute hard ceiling, overriding any local timeout_durations."
     )
     cost_limit_usd: float | None = Field(
         None,
+        ge=0.0,
         description="Global financial blast-radius limit (USD). PRECEDENCE: Triggers absolute halting, overriding any dynamic cost multipliers."
     )
 
@@ -145,7 +148,7 @@ class Governance(CoreasonModel):
         description="Circuit breaker policy.",
         examples=[{"error_threshold_count": 3, "reset_timeout_seconds": 30}],
     )
-    tool_policy: dict[ToolID, ToolAccessPolicy] | None = Field(
+    tool_policy: Mapping[ToolID, ToolAccessPolicy] | None = Field(
         None,
         description="Per-tool access policies.",
         examples=[{"web_search": {"risk_level": "standard", "require_auth": False}}],
@@ -182,6 +185,18 @@ class Governance(CoreasonModel):
             cleaned.append(canonicalize_domain(candidate))
 
         return cleaned
+
+    @model_validator(mode="after")
+    def validate_global_precedence(self) -> "Governance":
+        """SOTA defensive validation: ensure local dynamic policies do not exceed global hard ceilings."""
+        if self.timeout_seconds is not None and self.operational_policy is not None:
+            for node, local_timeout in self.operational_policy.timeout_durations.items():
+                if local_timeout > self.timeout_seconds:
+                    raise ValueError(
+                        f"Contradiction: Local timeout for '{node}' ({local_timeout}s) "
+                        f"cannot exceed the global hard ceiling timeout ({self.timeout_seconds}s)."
+                    )
+        return self
 
 
 class CircuitState(CoreasonModel):
