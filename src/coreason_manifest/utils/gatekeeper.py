@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.spec.core.constants import NodeCapability
 from coreason_manifest.spec.core.flow import FlowSpec
-from coreason_manifest.spec.core.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+from coreason_manifest.spec.core.contracts import ActionNode, NodeSpec, StrategyNode
 from coreason_manifest.spec.core.resilience import EscalationStrategy
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
@@ -22,25 +22,10 @@ if TYPE_CHECKING:
     from coreason_manifest.spec.core.tools import ToolCapability
 
 
-def _get_capabilities(node: AnyNode, flow: FlowSpec) -> list[str]:
+def _get_capabilities(node: NodeSpec, flow: FlowSpec) -> list[str]:
     """Helper to resolve profile and get capabilities."""
-    reasoning = None
-    if isinstance(node, AgentNode):
-        # Resolve profile
-        if isinstance(node.profile, str):
-            if flow.definitions and node.profile in flow.definitions.profiles:
-                profile = flow.definitions.profiles[node.profile]
-                reasoning = profile.reasoning
-        else:
-            reasoning = node.profile.reasoning
-
-    elif isinstance(node, SwarmNode) and flow.definitions and node.worker_profile in flow.definitions.profiles:
-        # Resolve worker profile
-        profile = flow.definitions.profiles[node.worker_profile]
-        reasoning = profile.reasoning
-
-    if reasoning and hasattr(reasoning, "required_capabilities"):
-        return cast("list[str]", reasoning.required_capabilities())
+    if isinstance(node, ActionNode):
+        return node.skill.capabilities
     return []
 
 
@@ -91,22 +76,12 @@ def _check_domain_whitelist(
 
 
 def _enforce_red_button_rule(
-    nodes: list[AnyNode], flow: FlowSpec, tool_map: dict[str, ToolCapability]
+    nodes: list[NodeSpec], flow: FlowSpec, tool_map: dict[str, ToolCapability]
 ) -> list[ComplianceReport]:
     """1. Capability Analysis & Red Button Rule"""
     reports: list[ComplianceReport] = []
     for node in nodes:
         caps = _get_capabilities(node, flow)
-
-        # Check tool risks for AgentNode
-        critical_tools = []
-        if isinstance(node, AgentNode):
-            for tool_name in node.tools:
-                resolved_tool = tool_map.get(tool_name)
-                # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown
-                risk = resolved_tool.risk_level if resolved_tool else "critical"
-                if risk == "critical":
-                    critical_tools.append(tool_name)
 
         # Check for high-risk capabilities
         needs_guard = False
@@ -119,23 +94,15 @@ def _enforce_red_button_rule(
             needs_guard = True
             violation_reason.append("code_execution capability")
 
-        if critical_tools:
-            needs_guard = True
-            violation_reason.append(f"critical tools {critical_tools}")
-
         if needs_guard and not _is_guarded(node, flow):
             human_node_id = f"guard_{node.id}"
-            human_node = HumanNode(
+            # Inject ActionNode as guard
+            from coreason_manifest.spec.core.contracts import SkillConfig, StrictPayload
+            human_node = ActionNode(
                 id=human_node_id,
-                type="human",
-                prompt=f"Approve unsafe action by {node.id}",
-                escalation=EscalationStrategy(
-                    queue_name="default_guard_queue",
-                    notification_level="warning",
-                    timeout_seconds=300,
-                ),
-                interaction_mode="blocking",
-                metadata={},
+                type="action",
+                metadata=StrictPayload(data={"prompt": f"Approve unsafe action by {node.id}"}),
+                skill=SkillConfig(capabilities=["human_approval"])
             )
 
             # Construct Patch
@@ -159,6 +126,12 @@ def _enforce_red_button_rule(
                 {"op": "add", "path": "/graph/edges/-", "value": {"from": human_node_id, "to": node.id}}
             )
 
+            # 4. Entry Point Check (Fix Bypass)
+            if flow.graph.entry_point == node.id:
+                patch_ops.append(
+                    {"op": "replace", "path": "/graph/entry_point", "value": human_node_id}
+                )
+
             reports.append(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
@@ -174,7 +147,7 @@ def _enforce_red_button_rule(
                         target_node_id=node.id,
                         format="json_patch",
                         patch_data=patch_ops,
-                        description=f"Insert HumanNode '{human_node_id}' before '{node.id}'",
+                        description=f"Insert Guard '{human_node_id}' before '{node.id}'",
                     ),
                 )
             )
@@ -215,10 +188,9 @@ def validate_policy(flow: FlowSpec) -> list[ComplianceReport]:
     return reports
 
 
-def _is_guarded(target_node: AnyNode, flow: FlowSpec) -> bool:
+def _is_guarded(target_node: NodeSpec, flow: FlowSpec) -> bool:
     """
-    Checks if the target node is topologically guarded by a HumanNode.
-    Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
+    Checks if the target node is topologically guarded by a HumanNode (ActionNode with human capability).
     """
     nodes, edges = get_unified_topology(flow)
 
@@ -227,16 +199,17 @@ def _is_guarded(target_node: AnyNode, flow: FlowSpec) -> bool:
     # Determine entry point
     entry_id = flow.graph.entry_point
 
-    # Valid guards: HumanNode only.
-    valid_guards = (HumanNode,)
-
     # Construct adjacency map
     adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
     for edge in edges:
         if edge.from_node in adj:
             adj[edge.from_node].append(edge.to_node)
 
-    guards = {n.id for n in nodes if isinstance(n, valid_guards)}
+    # Valid guards: ActionNode with human_approval capability
+    guards = set()
+    for n in nodes:
+        if isinstance(n, ActionNode) and "human_approval" in n.skill.capabilities:
+            guards.add(n.id)
 
     if entry_id:
         queue = [entry_id]

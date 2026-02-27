@@ -17,10 +17,10 @@ from coreason_manifest.spec.core.registry import register_node, resolve_node_uni
 from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
-    JsonDict,
-    Metadata,
     NodeID,
     ProfileID,
+    StrictJson,
+    StrictPayload,
     VariableID,
 )
 from coreason_manifest.spec.interop.compliance import RemediationAction
@@ -31,8 +31,8 @@ class Node(CoreasonModel):
     """Base class for vertices of the execution graph."""
 
     id: NodeID = Field(..., description="Unique identifier for the node.", examples=["start_node", "agent_1"])
-    metadata: Metadata = Field(
-        default_factory=dict, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
+    metadata: StrictPayload = Field(
+        default_factory=StrictPayload, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
     )
     resilience: Annotated[
         ResilienceConfig | str | None,
@@ -160,7 +160,7 @@ class PlannerNode(Node):
     type: Literal["planner"] = "planner"
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
     optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
-    output_schema: JsonDict = Field(
+    output_schema: dict[str, StrictJson] = Field(
         ...,
         description="JSON Schema for the plan output.",
         examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
@@ -217,7 +217,7 @@ class HumanNode(Node):
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
     escalation: EscalationStrategy = Field(..., description="The escalation configuration.")
-    input_schema: JsonDict | None = Field(
+    input_schema: dict[str, StrictJson] | None = Field(
         None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
     )
     options: list[str] | None = Field(

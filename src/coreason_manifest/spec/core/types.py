@@ -11,7 +11,7 @@
 from enum import StrEnum
 from typing import Annotated, Any, TypeAlias
 
-from pydantic import BeforeValidator, Field, JsonValue
+from pydantic import BeforeValidator, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
 
@@ -137,14 +137,13 @@ CoercibleStringList = Annotated[
 
 
 # Strict JSON Types
-JsonDict: TypeAlias = dict[str, JsonValue]
-Metadata: TypeAlias = JsonDict
+type StrictJson = bool | int | float | str | list[StrictJson] | dict[str, StrictJson] | None
 
 
 class StrictPayload(CoreasonModel):
     """Strict container for arbitrary JSON payloads."""
 
-    data: JsonDict = Field(default_factory=dict)
+    data: dict[str, StrictJson] = Field(default_factory=dict)
 
 
 class MiddlewareDef(CoreasonModel):
@@ -157,4 +156,4 @@ class MiddlewareDef(CoreasonModel):
         pattern=r"^.*\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
         description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
     )
-    config: JsonDict = Field(default_factory=dict, description="Initialization configuration.")
+    config: dict[str, StrictJson] = Field(default_factory=dict, description="Initialization configuration.")

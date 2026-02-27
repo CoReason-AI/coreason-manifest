@@ -1,5 +1,5 @@
 from coreason_manifest.spec.core.flow import EdgeSpec, FlowSpec
-from coreason_manifest.spec.core.nodes import AnyNode
+from coreason_manifest.spec.core.contracts import NodeSpec
 from coreason_manifest.spec.interop.exceptions import (
     FaultSeverity,
     ManifestError,
@@ -29,7 +29,7 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
     return reachable
 
 
-def get_unified_topology(flow: FlowSpec) -> tuple[list[AnyNode], list[EdgeSpec]]:
+def get_unified_topology(flow: FlowSpec) -> tuple[list[NodeSpec], list[EdgeSpec]]:
     """
     Returns a unified view of the flow topology (nodes and edges).
     """

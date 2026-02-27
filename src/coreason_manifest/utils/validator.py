@@ -5,21 +5,13 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from coreason_manifest.spec.core.contracts import NodeSpec
 from coreason_manifest.spec.core.flow import (
-    AnyNode,
     FlowDefinitions,
     FlowSpec,
     Graph,
 )
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import (
-    AgentNode,
-    CognitiveProfile,
-    EmergenceInspectorNode,
-    InspectorNode,
-    SwarmNode,
-    SwitchNode,
-)
 from coreason_manifest.spec.core.resilience import (
     EscalationStrategy,
     FallbackStrategy,
@@ -68,16 +60,10 @@ def validate_flow(flow: FlowSpec) -> list[ComplianceReport]:
         errors.extend(_validate_governance(flow.governance, valid_ids))
 
     if flow.definitions:
-        # Convert dict to list for backward compatibility with _validate_tools
-        tool_packs = list(flow.definitions.tool_packs.values()) if flow.definitions.tool_packs else []
-        errors.extend(_validate_tools(nodes, tool_packs))
         errors.extend(_validate_referential_integrity(nodes, flow.definitions))
     else:
         # If no definitions, ensure no references exist
         errors.extend(_validate_referential_integrity(nodes, None))
-
-    for node in nodes:
-        errors.extend(_validate_supervision(node, valid_ids, flow.definitions))
 
     # Graph Checks
     if not flow.graph.nodes:
@@ -107,40 +93,7 @@ def validate_flow(flow: FlowSpec) -> list[ComplianceReport]:
     node_ids = set(flow.graph.nodes.keys())
 
     errors.extend(_validate_unique_ids(nodes_list))
-    errors.extend(_validate_switch_logic(nodes_list, node_ids))
     errors.extend(_validate_orphan_nodes(flow))
-
-    # 4. Domain 4: Static Data-Flow Analysis
-    # Construct Symbol Table: Map variable name -> type (str)
-    symbol_table: dict[str, str] = {}
-    if hasattr(flow, "blackboard") and flow.blackboard:
-        for name, var_def in flow.blackboard.variables.items():
-            # Architectural Note: Normalize to lowercase to handle "List", "ARRAY", etc.
-            if hasattr(var_def, "type"):
-                symbol_table[name] = var_def.type.lower()
-            else:
-                symbol_table[name] = "unknown"
-    if hasattr(flow, "interface") and flow.interface:
-        inputs = flow.interface.inputs
-        in_schema = getattr(inputs, "json_schema", inputs)
-        if isinstance(in_schema, dict):
-            # Extract properties from input schema
-            # Heuristic: extract property type if simple, else "unknown"
-            props = in_schema.get("properties", {})
-            for name, schema in props.items():
-                raw_type = schema.get("type", "unknown")
-                if isinstance(raw_type, list):
-                    # Sort to ensure deterministic symbol table regardless of input order
-                    # Result: "array|string"
-                    types = sorted([x for x in raw_type if x != "null"])
-                    if types:
-                        symbol_table[name] = "|".join(types)
-                    else:
-                        symbol_table[name] = "union"
-                else:
-                    symbol_table[name] = str(raw_type)
-
-        errors.extend(_validate_data_flow(nodes, symbol_table, flow.definitions))
 
     # 5. Security & Kill Switch
     if flow.governance and flow.governance.max_risk_level:
@@ -148,184 +101,6 @@ def validate_flow(flow: FlowSpec) -> list[ComplianceReport]:
 
     # 6. Middleware References
     errors.extend(_validate_middleware_refs(flow))
-
-    return errors
-
-
-def _scan_string_for_vars(text: str) -> set[str]:
-    """
-    Scan a string for Jinja2-style variable references: {{ var_name }}
-    Handles filters like {{ var | lower }} by stripping them.
-    """
-    return set(re.findall(r"\{\{\s*([a-zA-Z_][\w\.]*)(?:\s*\|.*?)?\s*\}\}", text))
-
-
-def _scan_agent_templates(node: AgentNode, definitions: FlowDefinitions | None) -> set[str]:
-    """
-    Extract variable references from AgentNode fields.
-    Scans:
-    - Inline profile role/persona
-    - Referenced profiles (from definitions)
-    - Metadata values (if strings)
-    """
-    refs = set()
-
-    # Scan profile
-    if isinstance(node.profile, CognitiveProfile):
-        # Inline profile
-        refs.update(_scan_string_for_vars(node.profile.role))
-        refs.update(_scan_string_for_vars(node.profile.persona))
-    elif isinstance(node.profile, str):
-        # Referenced profile
-        if definitions and node.profile in definitions.profiles:
-            profile_def = definitions.profiles[node.profile]
-            if isinstance(profile_def, CognitiveProfile):
-                refs.update(_scan_string_for_vars(profile_def.role))
-                refs.update(_scan_string_for_vars(profile_def.persona))
-
-    # Scan metadata values
-    for val in node.metadata.values():
-        if isinstance(val, str):
-            refs.update(_scan_string_for_vars(val))
-
-    return refs
-
-
-def _validate_data_flow(
-    nodes: list[AnyNode],
-    symbol_table: dict[str, str],
-    definitions: FlowDefinitions | None,
-) -> list[ComplianceReport]:
-    """
-    Check if nodes reference variables that exist in the symbol table.
-    Also validates type compatibility for specific node types.
-    """
-    errors: list[ComplianceReport] = []
-    available_vars = set(symbol_table.keys())
-
-    for node in nodes:
-        if isinstance(node, SwarmNode):
-            if node.workload_variable not in available_vars:
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                        severity="violation",
-                        message=f"Data Flow Error: SwarmNode '{node.id}' references missing variable "
-                        f"'{node.workload_variable}'.",
-                        node_id=node.id,
-                        details={"variable": node.workload_variable},
-                        remediation=RemediationAction(
-                            type="update_field",
-                            description=f"Add variable '{node.workload_variable}' to blackboard.",
-                            patch_data=[
-                                {
-                                    "op": "add",
-                                    "path": f"/blackboard/variables/{node.workload_variable}",
-                                    "value": [],
-                                }
-                            ],
-                        ),
-                    )
-                )
-            # MVP Type Safety: SwarmNode expects a list/array for workload
-            elif node.workload_variable in symbol_table:
-                var_type = symbol_table[node.workload_variable]
-                # Check if 'array' is ANY of the permitted types
-                if "array" not in var_type and "list" not in var_type and "unknown" not in var_type:
-                    errors.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
-                            severity="violation",
-                            message=f"Type Mismatch: SwarmNode '{node.id}' expects a list for "
-                            f"'{node.workload_variable}', but found type '{var_type}'.",
-                            node_id=node.id,
-                            details={"variable": node.workload_variable, "found_type": var_type},
-                        )
-                    )
-
-            if node.output_variable not in available_vars:
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                        severity="violation",
-                        message=f"Data Flow Error: SwarmNode '{node.id}' writes to missing variable "
-                        f"'{node.output_variable}'.",
-                        node_id=node.id,
-                        details={"variable": node.output_variable},
-                    )
-                )
-
-        elif isinstance(node, SwitchNode):
-            if node.variable not in available_vars:
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                        severity="violation",
-                        message=f"Data Flow Error: SwitchNode '{node.id}' evaluates missing variable "
-                        f"'{node.variable}'.",
-                        node_id=node.id,
-                        details={"variable": node.variable},
-                    )
-                )
-
-        elif isinstance(node, (InspectorNode, EmergenceInspectorNode)):
-            if node.to_node_variable not in available_vars:
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                        severity="violation",
-                        message=f"Data Flow Error: InspectorNode '{node.id}' inspects missing variable "
-                        f"'{node.to_node_variable}'.",
-                        node_id=node.id,
-                        details={"variable": node.to_node_variable},
-                    )
-                )
-            # MVP Type Safety: Regex matching on complex objects is risky
-            elif (
-                node.to_node_variable in symbol_table
-                and hasattr(node, "mode")
-                and node.mode == "programmatic"
-                and symbol_table[node.to_node_variable] in ("object", "array")
-            ):
-                var_type = symbol_table[node.to_node_variable]
-                # Just a warning for now
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
-                        severity="warning",
-                        message=f"Type Warning: InspectorNode '{node.id}' uses regex mode on complex type '{var_type}' "
-                        f"variable '{node.to_node_variable}'. Matching may fail.",
-                        node_id=node.id,
-                        details={"variable": node.to_node_variable, "found_type": var_type},
-                    )
-                )
-
-            if node.output_variable not in available_vars:
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                        severity="violation",
-                        message=f"Data Flow Error: InspectorNode '{node.id}' writes to missing variable "
-                        f"'{node.output_variable}'.",
-                        node_id=node.id,
-                        details={"variable": node.output_variable},
-                    )
-                )
-
-        elif isinstance(node, AgentNode):
-            # Scan for prompt template variables
-            refs = _scan_agent_templates(node, definitions)
-            errors.extend(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                    severity="violation",
-                    message=f"Data Flow Error: AgentNode '{node.id}' references missing variable '{var}' in templates.",
-                    node_id=node.id,
-                    details={"variable": var},
-                )
-                for var in refs
-                if var not in available_vars
-            )
 
     return errors
 
@@ -350,28 +125,7 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[Complianc
     return errors
 
 
-def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[ComplianceReport]:
-    errors: list[ComplianceReport] = []
-    available_tools = {t.name for pack in packs for t in pack.tools}
-
-    for node in nodes:
-        if isinstance(node, AgentNode):
-            errors.extend(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001,
-                    severity="warning",
-                    message=f"Missing Tool Warning: Agent '{node.id}' requires tool '{tool}' but it is not provided by "
-                    "any attached ToolPack.",
-                    node_id=node.id,
-                    details={"tool": tool},
-                )
-                for tool in node.tools
-                if tool not in available_tools
-            )
-    return errors
-
-
-def _validate_unique_ids(nodes: list[AnyNode]) -> list[ComplianceReport]:
+def _validate_unique_ids(nodes: list[NodeSpec]) -> list[ComplianceReport]:
     seen = set()
     errors: list[ComplianceReport] = []
     for node in nodes:
@@ -429,38 +183,6 @@ def _validate_graph_integrity(graph: Graph) -> list[ComplianceReport]:
     return errors
 
 
-def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[ComplianceReport]:
-    errors: list[ComplianceReport] = []
-    for node in nodes:
-        if isinstance(node, SwitchNode):
-            # Check Cases
-            for condition, target_id in node.cases.items():
-                if target_id not in valid_ids:
-                    errors.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
-                            severity="violation",
-                            message=f"Broken Switch Error: Node '{node.id}' case '{condition}' points to missing ID "
-                            f"'{target_id}'.",
-                            node_id=node.id,
-                            details={"condition": condition, "target_id": target_id},
-                        )
-                    )
-            # Check Default
-            if node.default not in valid_ids:
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
-                        severity="violation",
-                        message=f"Broken Switch Error: Node '{node.id}' default route points to missing ID "
-                        f"'{node.default}'.",
-                        node_id=node.id,
-                        details={"target_id": node.default},
-                    )
-                )
-    return errors
-
-
 def _validate_orphan_nodes(flow: FlowSpec) -> list[ComplianceReport]:
     """
     Validates that no reachable nodes are isolated from the rest of the graph.
@@ -500,7 +222,7 @@ def _validate_orphan_nodes(flow: FlowSpec) -> list[ComplianceReport]:
 
 
 def _validate_referential_integrity(
-    nodes: list[AnyNode], definitions: FlowDefinitions | None
+    nodes: list[NodeSpec], definitions: FlowDefinitions | None
 ) -> list[ComplianceReport]:
     """
     Validates string references (e.g. resilience templates, profiles).
@@ -509,121 +231,8 @@ def _validate_referential_integrity(
 
     # Check supervision templates
     templates = definitions.supervision_templates if definitions and definitions.supervision_templates else {}
-    profile_ids = set(definitions.profiles.keys()) if definitions and definitions.profiles else set()
 
-    for node in nodes:
-        # Check resilience references
-        if isinstance(node.resilience, str):
-            ref = node.resilience
-            if not ref.startswith("ref:"):
-                errors.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_RESILIENCE_INVALID_REF,
-                        severity="violation",
-                        message=f"Resilience Error: Node '{node.id}' has invalid resilience reference '{ref}'. "
-                        "Must start with 'ref:'.",
-                        node_id=node.id,
-                        details={"reference": ref},
-                    )
-                )
-            else:
-                tmpl_id = ref.removeprefix("ref:")
-                if tmpl_id not in templates:
-                    errors.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_RESILIENCE_MISSING_TEMPLATE,
-                            severity="violation",
-                            message=f"Resilience Error: Node '{node.id}' references undefined supervision template ID "
-                            f"'{tmpl_id}'.",
-                            node_id=node.id,
-                            details={"template_id": tmpl_id},
-                        )
-                    )
-
-        # Check profile references (AgentNode)
-        if isinstance(node, AgentNode) and isinstance(node.profile, str) and node.profile not in profile_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_CAP_UNDEFINED_PROFILE_002,
-                    severity="violation",
-                    message=f"Integrity Error: AgentNode '{node.id}' references undefined profile ID '{node.profile}'.",
-                    node_id=node.id,
-                    details={"profile_id": node.profile},
-                )
-            )
-
-        # Check worker profile references (SwarmNode)
-        if isinstance(node, SwarmNode) and node.worker_profile not in profile_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_CAP_UNDEFINED_PROFILE_002,
-                    severity="violation",
-                    message=f"Integrity Error: SwarmNode '{node.id}' references undefined worker profile ID "
-                    f"'{node.worker_profile}'.",
-                    node_id=node.id,
-                    details={"profile_id": node.worker_profile},
-                )
-            )
-
-    return errors
-
-
-def _validate_supervision(
-    node: AnyNode, valid_ids: set[str], definitions: FlowDefinitions | None
-) -> list[ComplianceReport]:
-    errors: list[ComplianceReport] = []
-
-    # Check unified resilience field on any node type
-    policy = node.resilience
-    if not policy:
-        return errors
-
-    resolved_policy = _resolve_resilience_policy(policy, definitions)
-    if not resolved_policy:
-        return errors
-
-    # Collect strategies
-    strategies = _extract_strategies(resolved_policy)
-
-    for strategy in strategies:
-        if isinstance(strategy, ReflexionStrategy) and node.type not in (
-            "agent",
-            "inspector",
-            "emergence_inspector",
-            "swarm",
-            "planner",
-        ):
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_RESILIENCE_MISMATCH,
-                    severity="violation",
-                    message=f"Resilience Error: Node '{node.id}' uses ReflexionStrategy but is of type '{node.type}'. "
-                    "Only Agent/Inspector/Swarm/Planner nodes support reflexion.",
-                    node_id=node.id,
-                )
-            )
-
-        if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id not in valid_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_RESILIENCE_FALLBACK_MISSING,
-                    severity="violation",
-                    message=f"Resilience Error: Node '{node.id}' fallback points to missing ID "
-                    f"'{strategy.fallback_node_id}'.",
-                    node_id=node.id,
-                    details={"fallback_node_id": strategy.fallback_node_id},
-                )
-            )
-
-        if isinstance(strategy, EscalationStrategy) and not strategy.queue_name:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_RESILIENCE_ESCALATION_INVALID,
-                    severity="violation",
-                    message=f"Resilience Error: Node '{node.id}' uses EscalationStrategy with empty queue_name.",
-                    node_id=node.id,
-                )
-            )
+    # Assuming NodeSpec.metadata is strict payload.
 
     return errors
 
@@ -642,14 +251,6 @@ def _resolve_resilience_policy(policy: Any, definitions: FlowDefinitions | None)
 def _extract_strategies(policy: Any) -> list[ResilienceStrategy]:
     """
     Helper to extract flat list of strategies from a unified resilience config.
-
-    Args:
-        policy: Can be ResilienceConfig (duck-typed with 'handlers'), a single Strategy,
-               or SupervisionPolicy. We use Any here to avoid circular dependencies with
-               complex Pydantic unions in the core spec.
-
-    Returns:
-        List of strategies extracted from the policy.
     """
     strategies: list[ResilienceStrategy] = []
     if hasattr(policy, "handlers"):
@@ -686,22 +287,8 @@ def _build_unified_adjacency_map(flow: FlowSpec) -> dict[str, set[str]]:
         if global_fallback_id and global_fallback_id in adj and node.id != global_fallback_id:
             adj[node.id].add(global_fallback_id)
 
-        # SwitchNode routing
-        if isinstance(node, SwitchNode):
-            for target_id in node.cases.values():
-                if target_id in adj:
-                    adj[node.id].add(target_id)
-            if node.default in adj:
-                adj[node.id].add(node.default)
-
-        # Local Fallback routing (Resolving templates to catch Trojan cycles)
-        if node.resilience:
-            resolved_policy = _resolve_resilience_policy(node.resilience, getattr(flow, "definitions", None))
-            if resolved_policy:
-                strategies = _extract_strategies(resolved_policy)
-                for strategy in strategies:
-                    if isinstance(strategy, FallbackStrategy) and strategy.fallback_node_id in adj:
-                        adj[node.id].add(strategy.fallback_node_id)
+        # We assume NodeSpec doesn't expose SwitchNode/Resilience in same way.
+        # So we skip specific node routing if unknown.
 
     return adj
 

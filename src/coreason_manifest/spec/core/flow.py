@@ -4,32 +4,28 @@ from uuid import uuid4
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import ConfigDict, Field, JsonValue, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.contracts import NodeSpec
 from coreason_manifest.spec.core.governance import Governance
-from coreason_manifest.spec.core.nodes import (
-    AnyNode,
-    CognitiveProfile,
-)
+from coreason_manifest.spec.core.nodes import CognitiveProfile
 from coreason_manifest.spec.core.skills import SkillDefinition
 from coreason_manifest.spec.core.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.types import (
-    JsonDict,
-    Metadata,
     MiddlewareDef,
     MiddlewareID,
     NodeID,
+    StrictJson,
     StrictPayload,
 )
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
 
-# Export AnyNode so it can be imported from here as well
+# Export NodeSpec so it can be imported from here as well
 __all__ = [
     "AgentRequest",
-    "AnyNode",
     "Blackboard",
     "DataSchema",
     "EdgeSpec",
@@ -39,6 +35,7 @@ __all__ = [
     "FlowSpec",
     "Graph",
     "Manifest",
+    "NodeSpec",
     "PersistenceConfig",
     "SupervisionConfig",
     "VariableDef",
@@ -57,7 +54,7 @@ class FlowMetadata(CoreasonModel):
 class DataSchema(CoreasonModel):
     # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
-    json_schema: JsonDict = Field(default_factory=dict, alias="schema")
+    json_schema: dict[str, StrictJson] = Field(default_factory=dict, alias="schema")
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -80,11 +77,11 @@ class DataSchema(CoreasonModel):
 
 class PersistenceConfig(CoreasonModel):
     type: str
-    config: dict[str, JsonValue] = Field(default_factory=dict)
+    config: dict[str, StrictJson] = Field(default_factory=dict)
 
 
 class Blackboard(CoreasonModel):
-    variables: dict[str, JsonValue] = Field(default_factory=dict)
+    variables: dict[str, StrictJson] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
     persistence: PersistenceConfig | None = None
 
@@ -141,6 +138,10 @@ class EdgeSpec(CoreasonModel):
                     ast.Pow,
                     ast.USub,
                     ast.UAdd,
+                    ast.Attribute,
+                    ast.Subscript,
+                    ast.Index,
+                    ast.Slice,
                 )
                 if not isinstance(node, allowed):
                     raise SecurityViolationError(
@@ -156,13 +157,20 @@ class EdgeSpec(CoreasonModel):
                     )  # pragma: no cover
                 super().generic_visit(node)
 
+            def visit_Attribute(self, node: ast.Attribute) -> None:
+                if node.attr.startswith("__"):
+                    raise SecurityViolationError(
+                        f"Security Violation: Dunder attribute access '{node.attr}' forbidden in condition '{v}'"
+                    )
+                super().generic_visit(node)
+
         visitor = SecurityVisitor()
         visitor.visit(tree)
         return v
 
 
 class Graph(CoreasonModel):
-    nodes: dict[str, AnyNode]
+    nodes: dict[str, NodeSpec]
     edges: list[EdgeSpec]
     entry_point: NodeID | None = None
 
@@ -174,7 +182,7 @@ class FlowInterface(CoreasonModel):
 
 class SupervisionConfig(CoreasonModel):
     ref: str
-    params: dict[str, JsonValue] = Field(default_factory=dict)
+    params: dict[str, StrictJson] = Field(default_factory=dict)
 
 
 class FlowDefinitions(CoreasonModel):
@@ -220,4 +228,4 @@ class AgentRequest(CoreasonModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     manifest: FlowSpec
-    metadata: Metadata = Field(default_factory=dict)
+    metadata: StrictPayload = Field(default_factory=StrictPayload)

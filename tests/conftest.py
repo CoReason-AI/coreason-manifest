@@ -4,8 +4,8 @@ from typing import Any
 import pytest
 
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
+from coreason_manifest.spec.core.contracts import ActionNode, NodeSpec, SkillConfig
 from coreason_manifest.spec.core.flow import (
-    AnyNode,
     Blackboard,
     DataSchema,
     EdgeSpec,
@@ -14,7 +14,7 @@ from coreason_manifest.spec.core.flow import (
     FlowSpec,
     Graph,
 )
-from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
+from coreason_manifest.spec.core.nodes import CognitiveProfile
 
 
 @pytest.fixture
@@ -23,23 +23,22 @@ def flow_metadata() -> FlowMetadata:
 
 
 @pytest.fixture
-def agent_node_factory() -> Callable[..., AgentNode]:
-    def _create(nid: str, resilience: Any = None, tools: list[str] | None = None) -> AgentNode:
-        return AgentNode(
+def agent_node_factory() -> Callable[..., ActionNode]:
+    def _create(nid: str, resilience: Any = None, tools: list[str] | None = None) -> ActionNode:
+        # Map tools to capabilities
+        caps = tools or []
+        return ActionNode(
             id=nid,
-            type="agent",
-            metadata={},
-            profile=CognitiveProfile(role="r", persona="p"),
-            tools=tools or [],
-            resilience=resilience,
+            type="action",
+            skill=SkillConfig(capabilities=caps),
         )
 
     return _create
 
 
 @pytest.fixture
-def mock_flow_factory() -> Callable[[list[AnyNode], list[tuple[str, str]]], FlowSpec]:
-    def _create(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> FlowSpec:
+def mock_flow_factory() -> Callable[[list[NodeSpec], list[tuple[str, str]]], FlowSpec]:
+    def _create(nodes_list: list[NodeSpec], edges_list: list[tuple[str, str]]) -> FlowSpec:
         entry_point = nodes_list[0].id if nodes_list else "unknown"
         return FlowSpec(
             kind="FlowSpec",

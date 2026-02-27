@@ -23,7 +23,6 @@ from coreason_manifest.spec.core.engines import (
     TreeSearchReasoning,
 )
 from coreason_manifest.spec.core.flow import (
-    AnyNode,
     Blackboard,
     EdgeSpec,
     FlowInterface,
@@ -54,7 +53,6 @@ from coreason_manifest.spec.core.tools import (
 
 __all__ = [
     "AgentNode",
-    "AnyNode",
     "Audit",
     "BaseReasoning",
     "Blackboard",
@@ -67,6 +65,7 @@ __all__ = [
     "FlowInterface",
     "FlowMetadata",
     "FlowSpec",
+    "NodeSpec",
     "Governance",
     "Graph",
     "HumanNode",
