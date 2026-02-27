@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
     from coreason_manifest.spec.interop.telemetry import ExecutionSnapshot
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import FlowSpec
 from coreason_manifest.spec.core.nodes import AnyNode, SwitchNode
 from coreason_manifest.utils.topology import get_unified_topology
 
@@ -81,19 +81,14 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
     return definition
 
 
-def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None = None) -> str:
+def to_mermaid(flow: FlowSpec, snapshot: ExecutionSnapshot | None = None) -> str:
     """Generates valid Mermaid.js diagram code."""
     lines = []
 
     nodes, edge_objs = get_unified_topology(flow)
     edges = [(e.from_node, e.to_node, e.condition) for e in edge_objs]
 
-    if isinstance(flow, LinearFlow):
-        lines.append("graph TD")
-    elif isinstance(flow, GraphFlow):
-        lines.append("graph LR")
-    else:  # pragma: no cover
-        return ""  # pragma: no cover
+    lines.append("graph LR")
 
     # Grouping
     grouped_nodes: dict[str, list[AnyNode]] = {}
@@ -228,7 +223,7 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     return positions
 
 
-def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None = None) -> dict[str, Any]:
+def to_react_flow(flow: FlowSpec, snapshot: ExecutionSnapshot | None = None) -> dict[str, Any]:
     """Generates React Flow compatible JSON."""
     rf_nodes: list[dict[str, Any]] = []
     rf_edges: list[dict[str, Any]] = []

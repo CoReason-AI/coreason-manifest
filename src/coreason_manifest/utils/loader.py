@@ -19,7 +19,7 @@ from typing import Any, Protocol, cast
 import yaml
 from yaml.nodes import MappingNode
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import FlowSpec
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
@@ -401,7 +401,7 @@ def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: froze
 
 def load_flow_from_file(
     path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False, strict_security: bool = True
-) -> LinearFlow | GraphFlow:
+) -> FlowSpec:
     """
     Load a flow manifest from a YAML or JSON file.
     """
@@ -435,12 +435,7 @@ def load_flow_from_file(
             "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
         )
 
-    kind = data.get("kind")
-    if kind == "LinearFlow":
-        return LinearFlow.model_validate(data)
-    if kind == "GraphFlow":
-        return GraphFlow.model_validate(data)
-    raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
+    return FlowSpec.model_validate(data)
 
 
 def _execute_jailed_module(

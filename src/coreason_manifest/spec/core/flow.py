@@ -20,6 +20,7 @@ from coreason_manifest.spec.core.types import (
     MiddlewareDef,
     MiddlewareID,
     NodeID,
+    StrictPayload,
 )
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
@@ -31,14 +32,15 @@ __all__ = [
     "AnyNode",
     "Blackboard",
     "DataSchema",
-    "Edge",
+    "EdgeSpec",
     "FlowDefinitions",
     "FlowInterface",
     "FlowMetadata",
+    "FlowSpec",
     "Graph",
-    "GraphFlow",
-    "LinearFlow",
     "Manifest",
+    "PersistenceConfig",
+    "SupervisionConfig",
     "VariableDef",
 ]
 
@@ -76,16 +78,23 @@ class DataSchema(CoreasonModel):
         return self
 
 
+class PersistenceConfig(CoreasonModel):
+    type: str
+    config: dict[str, JsonValue] = Field(default_factory=dict)
+
+
 class Blackboard(CoreasonModel):
     variables: dict[str, JsonValue] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: JsonDict | None = None
+    persistence: PersistenceConfig | None = None
 
 
-class Edge(CoreasonModel):
+class EdgeSpec(CoreasonModel):
     from_node: NodeID = Field(..., alias="from")
     to_node: NodeID = Field(..., alias="to")
     condition: str | None = None
+    max_iterations: int | None = Field(None, description="Max loop iterations.")
+    timeout: int | None = Field(None, description="Timeout in seconds.")
 
     @field_validator("condition", mode="before")
     @classmethod
@@ -154,13 +163,18 @@ class Edge(CoreasonModel):
 
 class Graph(CoreasonModel):
     nodes: dict[str, AnyNode]
-    edges: list[Edge]
+    edges: list[EdgeSpec]
     entry_point: NodeID | None = None
 
 
 class FlowInterface(CoreasonModel):
-    inputs: JsonDict | DataSchema = Field(default_factory=dict)
-    outputs: JsonDict | DataSchema = Field(default_factory=dict)
+    inputs: StrictPayload | DataSchema = Field(default_factory=StrictPayload)
+    outputs: StrictPayload | DataSchema = Field(default_factory=StrictPayload)
+
+
+class SupervisionConfig(CoreasonModel):
+    ref: str
+    params: dict[str, JsonValue] = Field(default_factory=dict)
 
 
 class FlowDefinitions(CoreasonModel):
@@ -170,7 +184,7 @@ class FlowDefinitions(CoreasonModel):
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, SkillDefinition] = Field(default_factory=dict)
     middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
-    supervision_templates: JsonDict | None = None
+    supervision_templates: dict[str, SupervisionConfig] | None = None
 
 
 class VariableDef(CoreasonModel):
@@ -179,13 +193,13 @@ class VariableDef(CoreasonModel):
     description: str | None = None
 
 
-class GraphFlow(CoreasonModel):
+class FlowSpec(CoreasonModel):
     """
-    Standard graph-based execution flow.
+    Unified execution flow specification.
     """
 
-    type: Literal["graph"] = "graph"
-    kind: Literal["GraphFlow"] = "GraphFlow"
+    type: Literal["flow"] = "flow"
+    kind: Literal["FlowSpec"] = "FlowSpec"
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     interface: FlowInterface
@@ -195,25 +209,7 @@ class GraphFlow(CoreasonModel):
     graph: Graph
 
 
-class LinearFlow(CoreasonModel):
-    """
-    Simplified linear execution flow (sequence of steps).
-    """
-
-    type: Literal["linear"] = "linear"
-    kind: Literal["LinearFlow"] = "LinearFlow"
-    status: Literal["draft", "published", "archived"] = "draft"
-    metadata: FlowMetadata
-    steps: list[AnyNode] = Field(default_factory=list, alias="sequence")
-    governance: Governance | None = None
-    definitions: FlowDefinitions | None = None
-
-    @property
-    def sequence(self) -> list[AnyNode]:
-        return self.steps
-
-
-Manifest = GraphFlow
+Manifest = FlowSpec
 
 
 class AgentRequest(CoreasonModel):
@@ -223,5 +219,5 @@ class AgentRequest(CoreasonModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    manifest: GraphFlow | LinearFlow
+    manifest: FlowSpec
     metadata: Metadata = Field(default_factory=dict)

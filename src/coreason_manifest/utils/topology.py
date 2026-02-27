@@ -1,4 +1,4 @@
-from coreason_manifest.spec.core.flow import Edge, GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import EdgeSpec, FlowSpec
 from coreason_manifest.spec.core.nodes import AnyNode
 from coreason_manifest.spec.interop.exceptions import (
     FaultSeverity,
@@ -12,48 +12,6 @@ class TopologyValidationError(ManifestError):
     """Raised when the flow topology violates structural constraints."""
 
     pass
-
-
-def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
-    """Tarjan's algorithm to find strongly connected components."""
-    visited: set[str] = set()
-    stack: list[str] = []
-    on_stack: set[str] = set()
-    ids: dict[str, int] = {}
-    low: dict[str, int] = {}
-    sccs: list[list[str]] = []
-    id_counter = 0
-
-    def dfs(at: str) -> None:
-        nonlocal id_counter
-        stack.append(at)
-        on_stack.add(at)
-        visited.add(at)
-        ids[at] = low[at] = id_counter
-        id_counter += 1
-
-        for to in adj.get(at, []):
-            if to not in visited:
-                dfs(to)
-                low[at] = min(low[at], low[to])
-            elif to in on_stack:
-                low[at] = min(low[at], ids[to])
-
-        if ids[at] == low[at]:
-            component = []
-            while stack:
-                node = stack.pop()
-                on_stack.remove(node)
-                component.append(node)
-                if node == at:
-                    break
-            sccs.append(component)
-
-    for node_id in adj:
-        if node_id not in visited:
-            dfs(node_id)
-
-    return sccs
 
 
 def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> set[str]:
@@ -71,24 +29,14 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
     return reachable
 
 
-def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], list[Edge]]:
+def get_unified_topology(flow: FlowSpec) -> tuple[list[AnyNode], list[EdgeSpec]]:
     """
     Returns a unified view of the flow topology (nodes and edges).
-    For LinearFlow, it generates implicit edges between sequential steps.
     """
-    if isinstance(flow, GraphFlow):
-        return list(flow.graph.nodes.values()), flow.graph.edges
-    if isinstance(flow, LinearFlow):
-        nodes = flow.steps
-        # Use model_construct to bypass validation for generated edges
-        # This is important for testing scenarios where node IDs might be invalid (e.g. escaping tests)
-        edges = [Edge.model_construct(from_node=nodes[i].id, to_node=nodes[i + 1].id) for i in range(len(nodes) - 1)]
-        return nodes, edges
-    # Raise error for unknown flow types to ensure strict typing/handling
-    raise ValueError(f"Unknown flow type: {type(flow)}. Expected LinearFlow or GraphFlow.")
+    return list(flow.graph.nodes.values()), flow.graph.edges
 
 
-def validate_topology(flow: GraphFlow | LinearFlow) -> None:
+def validate_topology(flow: FlowSpec) -> None:
     """
     Statically compiles and validates the flow topology.
     Enforces:
@@ -125,8 +73,8 @@ def validate_topology(flow: GraphFlow | LinearFlow) -> None:
     for edge in edges:
         adj[edge.from_node].append(edge.to_node)
 
-    # 2. Reachability (GraphFlow only)
-    if isinstance(flow, GraphFlow) and flow.graph.entry_point:
+    # 2. Reachability
+    if flow.graph.entry_point:
         entry_point = flow.graph.entry_point
         if entry_point not in node_ids:
             raise TopologyValidationError(
@@ -152,24 +100,54 @@ def validate_topology(flow: GraphFlow | LinearFlow) -> None:
                 )
             )
 
-    # 3. Cycle Detection
-    sccs = get_strongly_connected_components(adj)
-    for scc in sccs:
-        # A component has a cycle if it has > 1 node, or 1 node with a self-loop
-        has_cycle = False
-        if len(scc) > 1:
-            has_cycle = True
-        elif len(scc) == 1:
-            node = scc[0]
-            if node in adj[node]:
-                has_cycle = True
+    # 3. Cycle Detection (Bounded Loop Contract)
+    # We use DFS to find back-edges.
 
-        if has_cycle:
-            raise TopologyValidationError(
-                SemanticFault(
-                    error_code="CRSN_VAL_TOPOLOGY_CYCLE",
-                    message=f"Infinite loop detected involving nodes: {sorted(scc)}",
-                    severity=FaultSeverity.CRITICAL,
-                    recovery_action=RecoveryAction.HALT,
-                )
-            )
+    # Map (from, to) -> EdgeSpec to check constraints easily
+    edge_map = {}
+    for edge in edges:
+        key = (edge.from_node, edge.to_node)
+        if key not in edge_map:
+            edge_map[key] = []
+        edge_map[key].append(edge)
+
+    visited = set()
+    path_stack = set()
+
+    def dfs_cycle_check(current_node: str) -> None:
+        visited.add(current_node)
+        path_stack.add(current_node)
+
+        for neighbor in adj.get(current_node, []):
+            if neighbor in path_stack:
+                # Cycle detected. Back-edge is current_node -> neighbor.
+                # Check constraints on edges (current_node, neighbor)
+                edges_between = edge_map.get((current_node, neighbor), [])
+                is_bounded = False
+                for e in edges_between:
+                    if e.max_iterations is not None or e.timeout is not None:
+                        is_bounded = True
+                        break
+
+                if not is_bounded:
+                    raise TopologyValidationError(
+                        SemanticFault(
+                            error_code="CRSN_VAL_TOPOLOGY_CYCLE",
+                            message=f"Unbounded infinite loop detected: {current_node} -> {neighbor}. Back-edge requires 'max_iterations' or 'timeout'.",
+                            severity=FaultSeverity.CRITICAL,
+                            recovery_action=RecoveryAction.HALT,
+                        )
+                    )
+            elif neighbor not in visited:
+                dfs_cycle_check(neighbor)
+
+        path_stack.remove(current_node)
+
+    # Run DFS from entry point first to establish canonical direction
+    if flow.graph.entry_point and flow.graph.entry_point in node_ids:
+        dfs_cycle_check(flow.graph.entry_point)
+
+    # Then visit any remaining nodes (disjoint components)
+    for node_id in sorted(node_ids):
+        if node_id not in visited:
+            dfs_cycle_check(node_id)

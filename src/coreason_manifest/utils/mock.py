@@ -10,7 +10,7 @@ from referencing import Registry, Resource
 from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import FlowSpec
 from coreason_manifest.spec.core.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
@@ -143,7 +143,7 @@ class MockFactory:
             return []
         return "mock_data"
 
-    def simulate_trace(self, flow: GraphFlow | LinearFlow, max_steps: int = 20) -> list[NodeExecution]:
+    def simulate_trace(self, flow: FlowSpec, max_steps: int = 20) -> list[NodeExecution]:
         trace: list[NodeExecution] = []
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
@@ -154,56 +154,44 @@ class MockFactory:
         registry = Registry().with_resource("", resource)
         resolver = registry.resolver()
 
-        if isinstance(flow, LinearFlow):
-            nodes = flow.steps
-            prev_hashes: list[str] = []
-            for node in nodes:
-                exec_records = self._execute_node(node, execution_map, prev_hashes, resolver)
-                trace.extend(exec_records)
-                last_record = exec_records[-1]
-                execution_map[node.id] = last_record
-                # Next node depends on this one
-                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
+        # Find start nodes (indegree 0)
+        graph = flow.graph
+        all_targets = {e.to_node for e in graph.edges}
+        start_nodes = [n for n_id, n in graph.nodes.items() if n_id not in all_targets]
 
-        elif isinstance(flow, GraphFlow):
-            # Find start nodes (indegree 0)
-            graph = flow.graph
-            all_targets = {e.to_node for e in graph.edges}
-            start_nodes = [n for n_id, n in graph.nodes.items() if n_id not in all_targets]
+        if not start_nodes:
+            # Cycle or no nodes? Pick first
+            if graph.nodes:
+                start_nodes = [next(iter(graph.nodes.values()))]
+            else:
+                return []
 
-            if not start_nodes:
-                # Cycle or no nodes? Pick first
-                if graph.nodes:
-                    start_nodes = [next(iter(graph.nodes.values()))]
-                else:
-                    return []
+        # Simple random walk
+        current_node: Node | None = self.rng.choice(start_nodes)
+        steps = 0
 
-            # Simple random walk
-            current_node: Node | None = self.rng.choice(start_nodes)
-            steps = 0
+        # For the very first node, no previous hash
+        prev_hashes = []
 
-            # For the very first node, no previous hash
-            prev_hashes = []
+        while current_node and steps < max_steps:
+            exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver)
+            trace.extend(exec_records)
+            last_record = exec_records[-1]
+            execution_map[current_node.id] = last_record
+            steps += 1
 
-            while current_node and steps < max_steps:
-                exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver)
-                trace.extend(exec_records)
-                last_record = exec_records[-1]
-                execution_map[current_node.id] = last_record
-                steps += 1
+            # Update prev_hashes for next iteration
+            # We know execution_hash is generated
+            prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
 
-                # Update prev_hashes for next iteration
-                # We know execution_hash is generated
-                prev_hashes = [last_record.execution_hash] if last_record.execution_hash else []
+            # Find next node
+            outgoing_edges = [e for e in graph.edges if e.from_node == current_node.id]
+            if not outgoing_edges:
+                break
 
-                # Find next node
-                outgoing_edges = [e for e in graph.edges if e.from_node == current_node.id]
-                if not outgoing_edges:
-                    break
-
-                # Pick one edge randomly
-                chosen_edge = self.rng.choice(outgoing_edges)
-                current_node = graph.nodes.get(chosen_edge.to_node)
+            # Pick one edge randomly
+            chosen_edge = self.rng.choice(outgoing_edges)
+            current_node = graph.nodes.get(chosen_edge.to_node)
 
         return trace
 

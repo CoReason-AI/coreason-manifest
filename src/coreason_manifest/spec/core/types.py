@@ -141,6 +141,12 @@ JsonDict: TypeAlias = dict[str, JsonValue]
 Metadata: TypeAlias = JsonDict
 
 
+class StrictPayload(CoreasonModel):
+    """Strict container for arbitrary JSON payloads."""
+
+    data: JsonDict = Field(default_factory=dict)
+
+
 class MiddlewareDef(CoreasonModel):
     """
     Definition for a middleware component.

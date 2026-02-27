@@ -8,9 +8,8 @@ from pydantic import BaseModel
 from coreason_manifest.spec.core.flow import (
     AnyNode,
     FlowDefinitions,
+    FlowSpec,
     Graph,
-    GraphFlow,
-    LinearFlow,
 )
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
@@ -31,15 +30,33 @@ from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
-from coreason_manifest.utils.topology import get_strongly_connected_components, get_unified_topology
+from coreason_manifest.utils.topology import (
+    TopologyValidationError,
+    get_unified_topology,
+    validate_topology,
+)
 
 
-def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def validate_flow(flow: FlowSpec) -> list[ComplianceReport]:
     """
-    Semantically validate a Flow (Linear or Graph).
+    Semantically validate a FlowSpec.
     Returns a list of structured ComplianceReport objects. Empty list implies validity.
     """
     errors: list[ComplianceReport] = []
+
+    # 0. AOT Topology Validation
+    try:
+        validate_topology(flow)
+    except TopologyValidationError as e:
+        # Convert to ComplianceReport
+        errors.append(
+            ComplianceReport(
+                code=e.fault.error_code,
+                severity="violation",
+                message=e.fault.message,
+                details=e.fault.context,
+            )
+        )
 
     # Flatten nodes based on flow type
     nodes, _ = get_unified_topology(flow)
@@ -62,47 +79,36 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids, flow.definitions))
 
-    # 2. LinearFlow Specific Checks
-    if isinstance(flow, LinearFlow):
-        errors.extend(_validate_linear_integrity(flow))
-        node_ids = {n.id for n in flow.steps}
-        errors.extend(_validate_unique_ids(flow.steps))
-        errors.extend(_validate_switch_logic(flow.steps, node_ids))
-
-    # 3. GraphFlow Specific Checks
-    if isinstance(flow, GraphFlow):
-        if not flow.graph.nodes:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_EMPTY_GRAPH,
-                    severity="violation",
-                    message="GraphFlow Error: Graph must contain at least one node.",
-                )
+    # Graph Checks
+    if not flow.graph.nodes:
+        errors.append(
+            ComplianceReport(
+                code=ErrorCatalog.ERR_TOPOLOGY_EMPTY_GRAPH,
+                severity="violation",
+                message="FlowSpec Error: Graph must contain at least one node.",
             )
+        )
 
-        # Entry Point Existence
-        if flow.graph.entry_point and flow.graph.entry_point not in valid_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_MISSING_ENTRY,
-                    severity="violation",
-                    message=f"GraphFlow Error: Entry point '{flow.graph.entry_point}' not found in nodes.",
-                    details={"entry_point": flow.graph.entry_point},
-                )
+    # Entry Point Existence
+    if flow.graph.entry_point and flow.graph.entry_point not in valid_ids:
+        errors.append(
+            ComplianceReport(
+                code=ErrorCatalog.ERR_TOPOLOGY_MISSING_ENTRY,
+                severity="violation",
+                message=f"FlowSpec Error: Entry point '{flow.graph.entry_point}' not found in nodes.",
+                details={"entry_point": flow.graph.entry_point},
             )
+        )
 
-        errors.extend(_validate_graph_integrity(flow.graph))
+    errors.extend(_validate_graph_integrity(flow.graph))
 
-        # Helper for extracting nodes for generic logic checks
-        nodes_list = list(flow.graph.nodes.values())
-        node_ids = set(flow.graph.nodes.keys())
+    # Helper for extracting nodes for generic logic checks
+    nodes_list = list(flow.graph.nodes.values())
+    node_ids = set(flow.graph.nodes.keys())
 
-        errors.extend(_validate_unique_ids(nodes_list))
-        errors.extend(_validate_switch_logic(nodes_list, node_ids))
-        errors.extend(_validate_orphan_nodes(flow))
-
-    # Global Unified Cycle Detection
-    errors.extend(_validate_topology_cycles(flow))
+    errors.extend(_validate_unique_ids(nodes_list))
+    errors.extend(_validate_switch_logic(nodes_list, node_ids))
+    errors.extend(_validate_orphan_nodes(flow))
 
     # 4. Domain 4: Static Data-Flow Analysis
     # Construct Symbol Table: Map variable name -> type (str)
@@ -365,18 +371,6 @@ def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[Complia
     return errors
 
 
-def _validate_linear_integrity(flow: LinearFlow) -> list[ComplianceReport]:
-    if not flow.steps:
-        return [
-            ComplianceReport(
-                code=ErrorCatalog.ERR_TOPOLOGY_LINEAR_EMPTY,
-                severity="violation",
-                message="LinearFlow Error: Sequence cannot be empty.",
-            )
-        ]
-    return []
-
-
 def _validate_unique_ids(nodes: list[AnyNode]) -> list[ComplianceReport]:
     seen = set()
     errors: list[ComplianceReport] = []
@@ -467,7 +461,7 @@ def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[Co
     return errors
 
 
-def _validate_orphan_nodes(flow: GraphFlow) -> list[ComplianceReport]:
+def _validate_orphan_nodes(flow: FlowSpec) -> list[ComplianceReport]:
     """
     Validates that no reachable nodes are isolated from the rest of the graph.
     Uses unified adjacency map to check connectivity via edges, switches, or fallbacks.
@@ -667,9 +661,9 @@ def _extract_strategies(policy: Any) -> list[ResilienceStrategy]:
     return strategies
 
 
-def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[str]]:
+def _build_unified_adjacency_map(flow: FlowSpec) -> dict[str, set[str]]:
     """
-    Constructs a unified adjacency map for cycle detection.
+    Constructs a unified adjacency map for analysis.
     Includes sequential/graph edges, implicit SwitchNode routing, fallback routing, and global circuit breaker.
     """
     # 1. Initialize Map with strict type inference for node iteration
@@ -712,47 +706,7 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
     return adj
 
 
-def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """
-    Enforces Strict DAG Topology on the unified execution graph.
-    Uses Tarjan's algorithm to detect unified cycles.
-    """
-    errors: list[ComplianceReport] = []
-
-    adj_set = _build_unified_adjacency_map(flow)
-    # SOTA FIX: Sort the sets into lists to guarantee 100% deterministic DFS traversal
-    adj_list = {k: sorted(adj_set[k]) for k in sorted(adj_set.keys())}
-
-    sccs = get_strongly_connected_components(adj_list)
-
-    for scc in sccs:
-        # A cycle exists if:
-        # 1. SCC has more than 1 node (A -> B -> A)
-        # 2. SCC has exactly 1 node AND it has a self-loop (A -> A)
-        is_cycle = False
-        if len(scc) > 1:
-            is_cycle = True
-        elif len(scc) == 1:
-            node_id = scc[0]
-            if node_id in adj_set and node_id in adj_set[node_id]:
-                is_cycle = True
-
-        if is_cycle:
-            cycle_nodes = ", ".join(sorted(scc))
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_CYCLE_002,
-                    severity="violation",
-                    message=f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: "
-                    f"[{cycle_nodes}]. Execution graphs must be strict Directed Acyclic Graphs (DAGs).",
-                    details={"cycle_nodes": scc},
-                )
-            )
-
-    return errors
-
-
-def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _validate_kill_switch(flow: FlowSpec) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
     if not flow.governance:
         return errors
@@ -813,7 +767,7 @@ def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport
     return errors
 
 
-def _validate_middleware_refs(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _validate_middleware_refs(flow: FlowSpec) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
     if not flow.governance or not flow.governance.active_middlewares:
         return errors

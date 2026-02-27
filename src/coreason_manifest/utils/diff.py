@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.flow import FlowSpec
 
 type DomainType = Literal["resource", "topology", "governance"]
 type MutationOp = Literal["add", "remove", "replace", "move", "copy", "test"]
@@ -238,7 +238,7 @@ def _generate_diff(
     return changes
 
 
-def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> SemanticPatchReport:
+def compare_flows(old: FlowSpec, new: FlowSpec) -> SemanticPatchReport:
     """
     Compares two flows and returns a list of semantic JSON Patch operations.
     """

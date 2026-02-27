@@ -8,11 +8,11 @@ from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
     DataSchema,
-    Edge,
+    EdgeSpec,
     FlowInterface,
     FlowMetadata,
+    FlowSpec,
     Graph,
-    GraphFlow,
 )
 from coreason_manifest.spec.core.nodes import AgentNode, CognitiveProfile
 
@@ -38,18 +38,18 @@ def agent_node_factory() -> Callable[..., AgentNode]:
 
 
 @pytest.fixture
-def mock_flow_factory() -> Callable[[list[AnyNode], list[tuple[str, str]]], GraphFlow]:
-    def _create(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> GraphFlow:
+def mock_flow_factory() -> Callable[[list[AnyNode], list[tuple[str, str]]], FlowSpec]:
+    def _create(nodes_list: list[AnyNode], edges_list: list[tuple[str, str]]) -> FlowSpec:
         entry_point = nodes_list[0].id if nodes_list else "unknown"
-        return GraphFlow.model_construct(
-            kind="GraphFlow",
+        return FlowSpec(
+            kind="FlowSpec",
             status="draft",
             metadata=FlowMetadata(name="test", version="1.0.0", description="test", tags=[]),
             interface=FlowInterface(inputs=DataSchema(), outputs=DataSchema()),
-            blackboard=Blackboard(variables={}, persistence=False),
-            graph=Graph.model_construct(
+            blackboard=Blackboard(variables={}, persistence=None),
+            graph=Graph(
                 nodes={n.id: n for n in nodes_list},
-                edges=[Edge(from_node=s, to_node=t) for s, t in edges_list],
+                edges=[EdgeSpec(from_node=s, to_node=t) for s, t in edges_list],
                 entry_point=entry_point,
             ),
         )

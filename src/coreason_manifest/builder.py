@@ -20,14 +20,15 @@ from coreason_manifest.spec.core.flow import (
     AnyNode,
     Blackboard,
     DataSchema,
-    Edge,
+    EdgeSpec,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
+    FlowSpec,
     Graph,
-    GraphFlow,
-    LinearFlow,
+    PersistenceConfig,
 )
+from coreason_manifest.spec.core.types import StrictPayload
 from coreason_manifest.spec.core.governance import (
     CircuitBreaker,
     ComputeLimits,
@@ -678,15 +679,15 @@ class BaseFlowBuilder:
         self._register_node(node)
         return self
 
-    def _create_flow_instance(self) -> LinearFlow | GraphFlow:
+    def _create_flow_instance(self) -> FlowSpec:
         """Abstract method to create the specific Flow instance."""
         raise NotImplementedError
 
-    def build(self) -> LinearFlow | GraphFlow:
+    def build(self) -> FlowSpec:
         """Constructs and validates the Flow object.
 
         Returns:
-            LinearFlow | GraphFlow: The constructed flow object.
+            FlowSpec: The constructed flow object.
 
         Raises:
             ValueError: If validation fails.
@@ -703,9 +704,7 @@ class BaseFlowBuilder:
 
 
 class NewLinearFlow(BaseFlowBuilder):
-    """Fluent API to construct LinearFlows programmatically.
-
-    LinearFlows represent a sequence of steps executed in order.
+    """Fluent API to construct Flows programmatically using linear sequence logic.
     """
 
     def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
@@ -746,30 +745,39 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps.append(agent)
         return self
 
-    def _create_flow_instance(self) -> LinearFlow:
-        return LinearFlow(
-            kind="LinearFlow",
+    def _create_flow_instance(self) -> FlowSpec:
+        # Convert steps to graph
+        nodes = {n.id: n for n in self.steps}
+        edges: list[EdgeSpec] = []
+        for i in range(len(self.steps) - 1):
+            edges.append(EdgeSpec(from_node=self.steps[i].id, to_node=self.steps[i + 1].id))
+
+        entry_point = self.steps[0].id if self.steps else None
+
+        graph = Graph(nodes=nodes, edges=edges, entry_point=entry_point)
+
+        return FlowSpec(
+            kind="FlowSpec",
             status="published",
             metadata=self.metadata,
-            steps=self.steps,
+            graph=graph,
             definitions=self._build_definitions(),
             governance=self.governance,
         )
 
-    def build(self) -> LinearFlow:
-        """Constructs and validates the LinearFlow object.
+    def build(self) -> FlowSpec:
+        """Constructs and validates the FlowSpec object.
 
         Returns:
-            LinearFlow: The constructed linear flow.
+            FlowSpec: The constructed flow.
         """
-        # Override return type hint for better IDE support, but reuse base implementation
-        return cast("LinearFlow", super().build())
+        return cast("FlowSpec", super().build())
 
 
 class NewGraphFlow(BaseFlowBuilder):
-    """Fluent API to construct GraphFlows programmatically.
+    """Fluent API to construct Flows programmatically.
 
-    GraphFlows represent a graph of nodes connected by edges, allowing for
+    Flows represent a graph of nodes connected by edges, allowing for
     complex branching and looping logic.
     """
 
@@ -783,7 +791,7 @@ class NewGraphFlow(BaseFlowBuilder):
         """
         super().__init__(name, version, description)
         self._nodes: dict[str, AnyNode] = {}
-        self._edges: list[Edge] = []
+        self._edges: list[EdgeSpec] = []
         self._entry_point: str | None = None
         # Defaults
         self.interface = FlowInterface(
@@ -842,7 +850,7 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
-        self._edges.append(Edge(from_node=source, to_node=target, condition=condition))
+        self._edges.append(EdgeSpec(from_node=source, to_node=target, condition=condition))
         return self
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
@@ -871,10 +879,11 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
-        self.blackboard = Blackboard(variables=variables, persistence=persistence)
+        persistence_config = PersistenceConfig(type="default") if persistence else None
+        self.blackboard = Blackboard(variables=variables, persistence=persistence_config)
         return self
 
-    def _create_flow_instance(self) -> GraphFlow:
+    def _create_flow_instance(self) -> FlowSpec:
         # Determine entry point
         ep = self._entry_point
         if not ep:
@@ -882,8 +891,8 @@ class NewGraphFlow(BaseFlowBuilder):
 
         graph = Graph(nodes=self._nodes, edges=self._edges, entry_point=ep)
 
-        return GraphFlow(
-            kind="GraphFlow",
+        return FlowSpec(
+            kind="FlowSpec",
             status="published",
             metadata=self.metadata,
             interface=self.interface,
@@ -893,11 +902,11 @@ class NewGraphFlow(BaseFlowBuilder):
             governance=self.governance,
         )
 
-    def build(self) -> GraphFlow:
-        """Constructs and validates the GraphFlow object.
+    def build(self) -> FlowSpec:
+        """Constructs and validates the FlowSpec object.
 
         Returns:
-            GraphFlow: The constructed graph flow.
+            FlowSpec: The constructed graph flow.
         """
         # Override return type hint
-        return cast("GraphFlow", super().build())
+        return cast("FlowSpec", super().build())
