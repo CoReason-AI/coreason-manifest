@@ -1,5 +1,5 @@
 import time
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -75,22 +75,22 @@ class OperationalPolicy(CoreasonModel):
     Replaces static nested models with flat dictionaries for zero-downtime extensibility.
     """
 
-    retry_counts: dict[str, int] = Field(
+    retry_counts: dict[NodeID | str, Annotated[int, Field(ge=0)]] = Field(
         default_factory=dict, description="Granular control over retries per operation/node."
     )
-    row_limits: dict[str, int] = Field(
+    row_limits: dict[str, Annotated[int, Field(gt=0)]] = Field(
         default_factory=dict, description="Granular data retrieval limits (e.g., 'default', 'query_users')."
     )
-    search_limits: dict[str, int] = Field(
+    search_limits: dict[str, Annotated[int, Field(gt=0)]] = Field(
         default_factory=dict, description="Dynamic search result limits (e.g., 'web', 'vector')."
     )
-    timeout_durations: dict[str, int] = Field(
+    timeout_durations: dict[NodeID | str, Annotated[int, Field(gt=0)]] = Field(
         default_factory=dict, description="Operation-specific timeouts in seconds."
     )
-    cost_multipliers: dict[str, float] = Field(
+    cost_multipliers: dict[NodeID | ToolID | str, Annotated[float, Field(gt=0.0)]] = Field(
         default_factory=dict, description="Dynamic adjustment of cost thresholds."
     )
-    model_switching: dict[str, float] = Field(
+    model_switching: dict[str, Annotated[float, Field(ge=0.0, le=1.0)]] = Field(
         default_factory=dict, description="Thresholds for tiered model degradation/swapping."
     )
     custom_thresholds: dict[str, float] = Field(
@@ -102,7 +102,7 @@ class OperationalPolicy(CoreasonModel):
 
 
 class Governance(CoreasonModel):
-    """Governance constraints and policies."""
+    """Governance constraints and SOTA Edge-First API routing policies."""
 
     max_risk_level: RiskLevel | None = Field(
         None,
@@ -114,13 +114,16 @@ class Governance(CoreasonModel):
 
     # New Global Guardrails (Hoisted from deleted nested models)
     rate_limit_rpm: int | None = Field(
-        None, description="Global requests per minute limit across the entire flow."
+        None,
+        description="Global requests per minute limit across the entire flow. PRECEDENCE: Acts as an absolute global ceiling, overriding any local node policies."
     )
     timeout_seconds: int | None = Field(
-        None, description="Global execution timeout in seconds."
+        None,
+        description="Global execution timeout in seconds. PRECEDENCE: Acts as an absolute hard ceiling, overriding any local timeout_durations."
     )
     cost_limit_usd: float | None = Field(
-        None, description="Global financial blast-radius limit (USD)."
+        None,
+        description="Global financial blast-radius limit (USD). PRECEDENCE: Triggers absolute halting, overriding any dynamic cost multipliers."
     )
 
     operational_policy: OperationalPolicy | None = Field(
