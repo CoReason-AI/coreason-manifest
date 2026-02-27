@@ -1,16 +1,18 @@
-from typing import TYPE_CHECKING, Annotated, Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.spec.common.presentation import PresentationHints
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.cognitive.engines import (
+from coreason_manifest.spec.core.compute.reasoning import (
     FastPath,
     ModelRef,
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.state.memory import MemorySubsystem
+from coreason_manifest.spec.core.oversight.governance import OperationalPolicy
+from coreason_manifest.spec.core.oversight.intervention import EscalationCriteria
+from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.primitives.registry import register_node, resolve_node_union
 from coreason_manifest.spec.core.primitives.types import (
     CoercibleStringList,
@@ -18,13 +20,9 @@ from coreason_manifest.spec.core.primitives.types import (
     ProfileID,
     VariableID,
 )
+from coreason_manifest.spec.core.state.memory import MemorySubsystem
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
-
-if TYPE_CHECKING:
-    from coreason_manifest.spec.core.oversight.co_intelligence import EscalationCriteria
-    from coreason_manifest.spec.core.oversight.governance import OperationalPolicy
-    from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy, ResilienceConfig
 
 
 class Node(CoreasonModel):
@@ -35,7 +33,7 @@ class Node(CoreasonModel):
         default_factory=dict, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
     )
     resilience: Annotated[
-        "ResilienceConfig | str | None",
+        ResilienceConfig | str | None,
         Field(description="Error handling policy or reference ID.", examples=["retry_policy_1"]),
     ] = None
     presentation: Annotated[
@@ -82,10 +80,10 @@ class AgentNode(Node):
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
     )
-    operational_policy: Annotated["OperationalPolicy | None", Field(
+    operational_policy: Annotated[OperationalPolicy | None, Field(
         None, description="Local operational limits. Overrides global Governance limits if set."
     )]
-    escalation_rules: list["EscalationCriteria"] = Field(
+    escalation_rules: list[EscalationCriteria] = Field(
         default_factory=list,
         description="Local escalation rules for this agent.",
         examples=[{"condition": "confidence < 0.5", "role": "supervisor"}],
@@ -216,7 +214,7 @@ class HumanNode(Node):
 
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
-    escalation: "EscalationStrategy" = Field(..., description="The escalation configuration.")
+    escalation: EscalationStrategy = Field(..., description="The escalation configuration.")
     input_schema: dict[str, Any] | None = Field(
         None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
     )
@@ -323,7 +321,7 @@ class SwarmNode(Node):
             examples=["gpt-4"],
         ),
     ] = None
-    operational_policy: Annotated["OperationalPolicy | None", Field(
+    operational_policy: Annotated[OperationalPolicy | None, Field(
         None, description="Local operational limits. Overrides global Governance limits if set."
     )]
     output_variable: VariableID = Field(

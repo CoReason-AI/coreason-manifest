@@ -1,6 +1,6 @@
 # Core specification package
 
-from coreason_manifest.spec.core.cognitive.engines import (
+from coreason_manifest.spec.core.compute.reasoning import (
     AttentionReasoning,
     BaseReasoning,
     BufferReasoning,
@@ -18,35 +18,11 @@ from coreason_manifest.spec.core.cognitive.engines import (
     StandardReasoning,
     TreeSearchReasoning,
 )
-from coreason_manifest.spec.core.topology.flow import (
-    AnyNode,
-    Blackboard,
-    Edge,
-    FlowDefinitions,
-    FlowInterface,
-    FlowMetadata,
-    Graph,
-    GraphFlow,
-    LinearFlow,
-    VariableDef,
-)
 from coreason_manifest.spec.core.oversight.governance import (
     Audit,
     CircuitBreaker,
     Governance,
     Safety,
-)
-from coreason_manifest.spec.core.cognitive.nodes import (
-    AgentNode,
-    CognitiveProfile,
-    EmergenceInspectorNode,
-    HumanNode,
-    InspectorNode,
-    InspectorNodeBase,
-    Node,
-    PlaceholderNode,
-    PlannerNode,
-    SwitchNode,
 )
 from coreason_manifest.spec.core.oversight.resilience import (
     ErrorDomain,
@@ -59,6 +35,30 @@ from coreason_manifest.spec.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.spec.core.state.tools import ToolPack
+from coreason_manifest.spec.core.workflow.flow import (
+    AnyNode,
+    Blackboard,
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+    VariableDef,
+)
+from coreason_manifest.spec.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    EmergenceInspectorNode,
+    HumanNode,
+    InspectorNode,
+    InspectorNodeBase,
+    Node,
+    PlaceholderNode,
+    PlannerNode,
+    SwitchNode,
+)
 
 __all__ = [
     # Nodes

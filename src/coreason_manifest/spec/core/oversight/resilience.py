@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from coreason_manifest.spec.core.cognitive.engines import ModelCriteria, ModelRef
+from coreason_manifest.spec.core.compute.reasoning import ModelCriteria, ModelRef
 
 
 class ErrorDomain(StrEnum):

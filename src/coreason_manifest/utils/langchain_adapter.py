@@ -1,6 +1,6 @@
 from typing import Any
 
-from coreason_manifest.spec.core.topology.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.utils.topology import get_unified_topology
 
 

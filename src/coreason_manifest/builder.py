@@ -10,23 +10,10 @@
 
 from typing import Any, Self, cast
 
-from coreason_manifest.spec.core.oversight.co_intelligence import EscalationCriteria
-from coreason_manifest.spec.core.cognitive.engines import (
+from coreason_manifest.spec.core.compute.reasoning import (
     FastPath,
     ReasoningConfig,
     StandardReasoning,
-)
-from coreason_manifest.spec.core.topology.flow import (
-    AnyNode,
-    Blackboard,
-    DataSchema,
-    Edge,
-    FlowDefinitions,
-    FlowInterface,
-    FlowMetadata,
-    Graph,
-    GraphFlow,
-    LinearFlow,
 )
 from coreason_manifest.spec.core.oversight.governance import (
     CircuitBreaker,
@@ -36,14 +23,7 @@ from coreason_manifest.spec.core.oversight.governance import (
     Governance,
     OperationalPolicy,
 )
-from coreason_manifest.spec.core.state.memory import (
-    EpisodicMemoryConfig,
-    MemorySubsystem,
-    ProceduralMemoryConfig,
-    SemanticMemoryConfig,
-    WorkingMemoryConfig,
-)
-from coreason_manifest.spec.core.cognitive.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
+from coreason_manifest.spec.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.spec.core.oversight.resilience import (
     ErrorDomain,
     ErrorHandler,
@@ -55,7 +35,27 @@ from coreason_manifest.spec.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.spec.core.rebuild import rebuild_manifest
+from coreason_manifest.spec.core.state.memory import (
+    EpisodicMemoryConfig,
+    MemorySubsystem,
+    ProceduralMemoryConfig,
+    SemanticMemoryConfig,
+    WorkingMemoryConfig,
+)
 from coreason_manifest.spec.core.state.tools import ToolPack
+from coreason_manifest.spec.core.workflow.flow import (
+    AnyNode,
+    Blackboard,
+    DataSchema,
+    Edge,
+    FlowDefinitions,
+    FlowInterface,
+    FlowMetadata,
+    Graph,
+    GraphFlow,
+    LinearFlow,
+)
+from coreason_manifest.spec.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.utils.validator import validate_flow
 
 

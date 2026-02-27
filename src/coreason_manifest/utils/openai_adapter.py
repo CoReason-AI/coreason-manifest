@@ -1,7 +1,7 @@
 from typing import Any
 
-from coreason_manifest.spec.core.cognitive.nodes import AgentNode
 from coreason_manifest.spec.core.state.tools import ToolPack
+from coreason_manifest.spec.core.workflow.nodes import AgentNode
 from coreason_manifest.spec.interop.adapter_config import AdapterConfig
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode

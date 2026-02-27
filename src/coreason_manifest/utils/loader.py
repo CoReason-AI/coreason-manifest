@@ -20,7 +20,7 @@ import yaml
 from yaml.nodes import MappingNode
 
 from coreason_manifest.spec.core.rebuild import rebuild_manifest
-from coreason_manifest.spec.core.topology.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
 from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
