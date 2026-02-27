@@ -39,13 +39,13 @@ def massive_flow() -> GraphFlow:
         )
     )
 
-def test_benchmark_validation(benchmark, massive_flow):
+def test_benchmark_validation(benchmark, massive_flow) -> None:  # type: ignore[no-untyped-def]
     """Benchmarks the full semantic validation of a 100-node flow."""
     # We benchmark the validate_flow function
     result = benchmark(validate_flow, massive_flow)
     assert isinstance(result, list)
 
-def test_benchmark_hashing(benchmark, massive_flow):
+def test_benchmark_hashing(benchmark, massive_flow) -> None:  # type: ignore[no-untyped-def]
     """Benchmarks the Merkle hash computation of a 100-node flow."""
     # We benchmark compute_hash
     result = benchmark(compute_hash, massive_flow)

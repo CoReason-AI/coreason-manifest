@@ -36,7 +36,7 @@ def compile_agent_prompt(node: AgentNode, governance: Governance | None = None) 
 
     return "\n".join(prompt_parts)
 
-def test_eval_agent_prompt_compilation():
+def test_eval_agent_prompt_compilation() -> None:
     """
     Verifies that the cognitive profile and governance settings are correctly
     reflected in the compiled system prompt string.
@@ -85,7 +85,7 @@ def test_eval_agent_prompt_compilation():
     tools_idx = system_prompt.find("AVAILABLE TOOLS:")
     assert role_idx < tools_idx
 
-def test_eval_agent_prompt_empty_tools():
+def test_eval_agent_prompt_empty_tools() -> None:
     profile = CognitiveProfile(role="Chatbot", persona="Friendly", reasoning=None)
     agent = AgentNode(id="chat-1", type="agent", profile=profile, tools=[], metadata={})
 

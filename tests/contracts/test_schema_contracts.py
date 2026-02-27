@@ -11,10 +11,13 @@ from coreason_manifest.spec.core.flow import GraphFlow, LinearFlow, AgentRequest
 SNAPSHOT_DIR = Path(__file__).parent / "fixtures"
 
 @pytest.fixture(scope="session", autouse=True)
-def ensure_snapshot_dir():
+def ensure_snapshot_dir() -> None:
     SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
 
-def check_schema_contract(model_class, schema_name):
+from typing import Any, Type
+from pydantic import BaseModel
+
+def check_schema_contract(model_class: Type[BaseModel], schema_name: str) -> None:
     """
     Validates that the current JSON schema of the model matches the stored snapshot.
     If snapshot does not exist, it creates it (first run).
@@ -37,11 +40,11 @@ def check_schema_contract(model_class, schema_name):
     if diff:
         pytest.fail(f"Schema Contract Broken for {schema_name}!\nDiff: {diff.to_json(indent=2)}")
 
-def test_contract_graph_flow():
+def test_contract_graph_flow() -> None:
     check_schema_contract(GraphFlow, "v1_graphflow_schema")
 
-def test_contract_linear_flow():
+def test_contract_linear_flow() -> None:
     check_schema_contract(LinearFlow, "v1_linearflow_schema")
 
-def test_contract_agent_request():
+def test_contract_agent_request() -> None:
     check_schema_contract(AgentRequest, "v1_agent_request_schema")

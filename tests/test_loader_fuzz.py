@@ -11,7 +11,7 @@ import os
 from coreason_manifest.utils.loader import load_flow_from_file, SandboxedPathFinder, sandbox_context
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError, ManifestError
 
-def test_fuzz_loader():
+def test_fuzz_loader() -> None:
     """
     Fuzz test target for the manifest loader and sandbox path finder.
     """
@@ -20,7 +20,7 @@ def test_fuzz_loader():
     if not os.getenv("FUZZING_MODE"):
         pytest.skip("Skipping fuzzing test in normal test run. Set FUZZING_MODE=1 to run.")
 
-    def fuzz_target(data):
+    def fuzz_target(data: bytes) -> None:
         fdp = atheris.FuzzedDataProvider(data)
 
         # 1. Fuzz Manifest Content (as string)

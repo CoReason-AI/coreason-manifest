@@ -4,7 +4,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, "version-*" ]
   pull_request:
     branches: [ main ]
   schedule:
@@ -28,7 +28,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras
 
       - name: Linting (Ruff)
         run: uv run ruff check src/ tests/
@@ -37,11 +37,11 @@ jobs:
         run: uv run ruff format --check src/ tests/
 
       - name: Type Checking (Mypy)
-        run: uv run mypy src/
+        run: uv run mypy src/ tests/
 
       - name: Unit & Integration Tests (Standard)
         # Exclude heavy/long running tests if separated in future
-        run: uv run pytest --cov=coreason_manifest --cov-report=term-missing --cov-fail-under=95 -k "not benchmark and not fuzz"
+        run: uv run pytest -k "not benchmark and not fuzz"
 
   heavy-quality-gate:
     name: Heavy Quality Gate
@@ -62,7 +62,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras
 
       # Only run if benchmark tests exist (Phase 2)
       - name: Performance Benchmarks

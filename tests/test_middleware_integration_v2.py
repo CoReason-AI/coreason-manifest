@@ -125,6 +125,10 @@ def workspace(tmp_path: Path) -> Path:
     (tmp_path / "dependency.py").write_text(DEPENDENCY_CODE)
     (tmp_path / "fail_dep.py").write_text(FAIL_DEP_CODE)
 
+    # Ensure files are not world-writable to pass security checks
+    for p in tmp_path.glob("*.py"):
+        p.chmod(0o600)
+
     # loop_link.py needed for symlink loop test - mock creates symlink logic but file needs to exist for importlib
     (tmp_path / "loop_link.py").touch()
 
@@ -366,28 +370,6 @@ def test_loader_execution_failure(workspace: Path) -> None:
 
 
 def test_loader_cleanup_coverage(workspace: Path) -> None:
-    # dependency.py needs to be importable.
-    # The workspace fixture puts dependency.py in workspace root.
-    # workspace root is passed as root_dir to load_middleware_from_ref.
-    # SandboxedPathFinder should find it.
-
-    # Ensure sys.path doesn't interfere? SandboxedPathFinder doesn't use sys.path.
-
-    # If the previous test failed with "did not warn", it means execution succeeded without warning?
-    # No, it likely failed because `dependency.helper()` couldn't be imported/executed if pathing is wrong.
-
-    # Let's ensure 'dependency' is importable.
-    # SandboxedPathFinder looks in `root_dir`.
-    # workspace path is `.../middlewares`.
-    # dependency.py is in `.../dependency.py` (ROOT of fixture).
-
-    # The fixture returns tmp_path (ROOT).
-    # load_middleware_from_ref is called with `workspace`.
-    # `load_middleware_from_ref` takes a file reference.
-    # If file ref is "middlewares/with_dep.py:...", it loads that file.
-    # And executing that file tries `import dependency`.
-    # `dependency` is in `root_dir`.
-
     # Capture warnings to prevent failure from RuntimeSecurityWarning
     with pytest.warns(RuntimeWarning):
         cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)

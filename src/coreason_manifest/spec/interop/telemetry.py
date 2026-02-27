@@ -165,3 +165,7 @@ class ExecutionSnapshot(BaseModel):
 
     node_states: dict[str, NodeState]
     active_path: list[str]
+    flow_id: str | None = None
+    execution_id: str | None = None
+    status: str | None = None
+    artifacts: dict[str, Any] | None = None
