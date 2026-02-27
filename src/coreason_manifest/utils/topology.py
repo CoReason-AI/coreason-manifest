@@ -1,5 +1,17 @@
 from coreason_manifest.spec.core.flow import Edge, GraphFlow, LinearFlow
 from coreason_manifest.spec.core.nodes import AnyNode
+from coreason_manifest.spec.interop.exceptions import (
+    FaultSeverity,
+    ManifestError,
+    RecoveryAction,
+    SemanticFault,
+)
+
+
+class TopologyValidationError(ManifestError):
+    """Raised when the flow topology violates structural constraints."""
+
+    pass
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
@@ -74,3 +86,90 @@ def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], l
         return nodes, edges
     # Raise error for unknown flow types to ensure strict typing/handling
     raise ValueError(f"Unknown flow type: {type(flow)}. Expected LinearFlow or GraphFlow.")
+
+
+def validate_topology(flow: GraphFlow | LinearFlow) -> None:
+    """
+    Statically compiles and validates the flow topology.
+    Enforces:
+    1. Referential integrity (all edges point to valid nodes).
+    2. Reachability (all nodes reachable from entry point in GraphFlow).
+    3. Acyclicity (no infinite loops, unless explicitly handled - currently strict DAG).
+    """
+    nodes, edges = get_unified_topology(flow)
+    node_ids = {node.id for node in nodes}
+
+    # 1. Referential Integrity
+    for edge in edges:
+        if edge.from_node not in node_ids:
+            raise TopologyValidationError(
+                SemanticFault(
+                    error_code="CRSN_VAL_TOPOLOGY_INVALID",
+                    message=f"Edge source '{edge.from_node}' does not exist in the graph.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                )
+            )
+        if edge.to_node not in node_ids:
+            raise TopologyValidationError(
+                SemanticFault(
+                    error_code="CRSN_VAL_TOPOLOGY_INVALID",
+                    message=f"Edge target '{edge.to_node}' does not exist in the graph.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                )
+            )
+
+    # Build Adjacency List
+    adj = {node_id: [] for node_id in node_ids}
+    for edge in edges:
+        adj[edge.from_node].append(edge.to_node)
+
+    # 2. Reachability (GraphFlow only)
+    if isinstance(flow, GraphFlow) and flow.graph.entry_point:
+        entry_point = flow.graph.entry_point
+        if entry_point not in node_ids:
+            raise TopologyValidationError(
+                SemanticFault(
+                    error_code="CRSN_VAL_ENTRY_POINT_MISSING",
+                    message=f"Entry point '{entry_point}' not found in nodes.",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                )
+            )
+
+        reachable = get_reachable_nodes(adj, [entry_point])
+        unreachable = node_ids - reachable
+        if unreachable:
+            # Sort for deterministic error message
+            sorted_unreachable = sorted(list(unreachable))
+            raise TopologyValidationError(
+                SemanticFault(
+                    error_code="CRSN_VAL_TOPOLOGY_UNREACHABLE",
+                    message=f"Unreachable nodes detected: {sorted_unreachable}",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                )
+            )
+
+    # 3. Cycle Detection
+    sccs = get_strongly_connected_components(adj)
+    for scc in sccs:
+        # A component has a cycle if it has > 1 node, or 1 node with a self-loop
+        has_cycle = False
+        if len(scc) > 1:
+            has_cycle = True
+        elif len(scc) == 1:
+            node = scc[0]
+            if node in adj[node]:
+                has_cycle = True
+
+        if has_cycle:
+            raise TopologyValidationError(
+                SemanticFault(
+                    error_code="CRSN_VAL_TOPOLOGY_CYCLE",
+                    message=f"Infinite loop detected involving nodes: {sorted(scc)}",
+                    severity=FaultSeverity.CRITICAL,
+                    recovery_action=RecoveryAction.HALT,
+                )
+            )

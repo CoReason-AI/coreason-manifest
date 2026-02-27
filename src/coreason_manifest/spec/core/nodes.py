@@ -17,6 +17,8 @@ from coreason_manifest.spec.core.registry import register_node, resolve_node_uni
 from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
+    JsonDict,
+    Metadata,
     NodeID,
     ProfileID,
     VariableID,
@@ -29,7 +31,7 @@ class Node(CoreasonModel):
     """Base class for vertices of the execution graph."""
 
     id: NodeID = Field(..., description="Unique identifier for the node.", examples=["start_node", "agent_1"])
-    metadata: dict[str, Any] = Field(
+    metadata: Metadata = Field(
         default_factory=dict, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
     )
     resilience: Annotated[
@@ -158,7 +160,7 @@ class PlannerNode(Node):
     type: Literal["planner"] = "planner"
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
     optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
-    output_schema: dict[str, Any] = Field(
+    output_schema: JsonDict = Field(
         ...,
         description="JSON Schema for the plan output.",
         examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
@@ -215,7 +217,7 @@ class HumanNode(Node):
     type: Literal["human"] = "human"
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
     escalation: EscalationStrategy = Field(..., description="The escalation configuration.")
-    input_schema: dict[str, Any] | None = Field(
+    input_schema: JsonDict | None = Field(
         None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
     )
     options: list[str] | None = Field(

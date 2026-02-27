@@ -145,6 +145,35 @@ def reconstruct_payload(node: Any) -> dict[str, Any]:
     raise TypeError(f"Could not reconstruct payload from {type(node)}. Must be dict or Pydantic model.")
 
 
+def verify_deterministic_serialization(model: BaseModel) -> bool:
+    """
+    Verifies that a model serializes deterministically.
+    Checks that:
+    1. model_dump_canonical produces the same output on multiple calls.
+    2. The hash computed from the model matches the hash computed from its dict representation.
+    """
+    if not hasattr(model, "model_dump_canonical"):
+        # If it doesn't have our mixin, we can't guarantee canonical serialization
+        return False
+
+    # Check stability
+    dump1 = model.model_dump_canonical()
+    dump2 = model.model_dump_canonical()
+    if dump1 != dump2:
+        return False
+
+    # Verify consistency with CanonicalHashingStrategy
+    strategy = CanonicalHashingStrategy()
+    hash1 = strategy.compute_hash(model)
+
+    # Construct payload manually and hash
+    # This ensures that the model's direct hashing matches the strategy used for general objects
+    payload = reconstruct_payload(model)
+    hash2 = strategy.compute_hash(payload)
+
+    return hash1 == hash2
+
+
 def verify_merkle_proof(
     trace: list[Any],
     trusted_root_hash: str | None = None,

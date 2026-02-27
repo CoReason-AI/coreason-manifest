@@ -4,15 +4,23 @@ from uuid import uuid4
 
 import jsonschema
 from jsonschema.exceptions import SchemaError
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, JsonValue, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AnyNode,
+    CognitiveProfile,
 )
+from coreason_manifest.spec.core.skills import SkillDefinition
 from coreason_manifest.spec.core.tools import AnyTool, ToolPack
-from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID
+from coreason_manifest.spec.core.types import (
+    JsonDict,
+    Metadata,
+    MiddlewareDef,
+    MiddlewareID,
+    NodeID,
+)
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
@@ -47,7 +55,7 @@ class FlowMetadata(CoreasonModel):
 class DataSchema(CoreasonModel):
     # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
-    json_schema: dict[str, Any] = Field(default_factory=dict, alias="schema")
+    json_schema: JsonDict = Field(default_factory=dict, alias="schema")
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -69,9 +77,9 @@ class DataSchema(CoreasonModel):
 
 
 class Blackboard(CoreasonModel):
-    variables: dict[str, Any] = Field(default_factory=dict)
+    variables: dict[str, JsonValue] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: Any | None = None
+    persistence: JsonDict | None = None
 
 
 class Edge(CoreasonModel):
@@ -151,18 +159,18 @@ class Graph(CoreasonModel):
 
 
 class FlowInterface(CoreasonModel):
-    inputs: dict[str, Any] | DataSchema = Field(default_factory=dict)
-    outputs: dict[str, Any] | DataSchema = Field(default_factory=dict)
+    inputs: JsonDict | DataSchema = Field(default_factory=dict)
+    outputs: JsonDict | DataSchema = Field(default_factory=dict)
 
 
 class FlowDefinitions(CoreasonModel):
-    profiles: dict[str, Any] = Field(default_factory=dict)
-    schemas: dict[str, Any] = Field(default_factory=dict)
+    profiles: dict[str, CognitiveProfile] = Field(default_factory=dict)
+    schemas: dict[str, DataSchema] = Field(default_factory=dict)
     tools: dict[str, AnyTool] = Field(default_factory=dict)
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
-    skills: dict[str, Any] = Field(default_factory=dict)
+    skills: dict[str, SkillDefinition] = Field(default_factory=dict)
     middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
-    supervision_templates: Any | None = None
+    supervision_templates: JsonDict | None = None
 
 
 class VariableDef(CoreasonModel):
@@ -216,4 +224,4 @@ class AgentRequest(CoreasonModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     manifest: GraphFlow | LinearFlow
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    metadata: Metadata = Field(default_factory=dict)

@@ -9,9 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import StrEnum
-from typing import Annotated, Any
+from typing import Annotated, Any, TypeAlias
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, JsonValue
 
 from coreason_manifest.spec.common_base import CoreasonModel
 
@@ -136,6 +136,11 @@ CoercibleStringList = Annotated[
 ]
 
 
+# Strict JSON Types
+JsonDict: TypeAlias = dict[str, JsonValue]
+Metadata: TypeAlias = JsonDict
+
+
 class MiddlewareDef(CoreasonModel):
     """
     Definition for a middleware component.
@@ -146,4 +151,4 @@ class MiddlewareDef(CoreasonModel):
         pattern=r"^.*\.py:[a-zA-Z_][a-zA-Z0-9_]*$",
         description="Reference to the Python file and class (e.g., 'filters.py:PIIRedactor').",
     )
-    config: dict[str, Any] = Field(default_factory=dict, description="Initialization configuration.")
+    config: JsonDict = Field(default_factory=dict, description="Initialization configuration.")
