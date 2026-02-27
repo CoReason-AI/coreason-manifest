@@ -5,14 +5,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from coreason_manifest.spec.core.compute.nodes import (
-    AgentNode,
-    CognitiveProfile,
-    EmergenceInspectorNode,
-    InspectorNode,
-    SwarmNode,
-    SwitchNode,
-)
 from coreason_manifest.spec.core.oversight.governance import Governance
 from coreason_manifest.spec.core.oversight.resilience import (
     EscalationStrategy,
@@ -28,6 +20,14 @@ from coreason_manifest.spec.core.workflow.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+)
+from coreason_manifest.spec.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    EmergenceInspectorNode,
+    InspectorNode,
+    SwarmNode,
+    SwitchNode,
 )
 from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
 from coreason_manifest.utils.topology import get_strongly_connected_components, get_unified_topology

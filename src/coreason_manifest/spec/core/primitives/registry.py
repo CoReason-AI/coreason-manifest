@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Annotated, Any, TypeVar, Union
 from pydantic import Field
 
 if TYPE_CHECKING:
-    from coreason_manifest.spec.core.compute.nodes import Node
     from coreason_manifest.spec.core.compute.reasoning import BaseReasoning
+    from coreason_manifest.spec.core.workflow.nodes import Node
 
 
 TNode = TypeVar("TNode", bound="Node")

@@ -12,15 +12,6 @@ from coreason_manifest.builder import (
     NewGraphFlow,
     NewLinearFlow,
 )
-from coreason_manifest.spec.core.compute.nodes import (
-    AgentNode,
-    CognitiveProfile,
-    HumanNode,
-    Node,
-    PlaceholderNode,
-    PlannerNode,
-    SwitchNode,
-)
 from coreason_manifest.spec.core.compute.reasoning import (
     BaseReasoning,
     CouncilReasoning,
@@ -51,6 +42,15 @@ from coreason_manifest.spec.core.workflow.flow import (
     GraphFlow,
     LinearFlow,
     VariableDef,
+)
+from coreason_manifest.spec.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    HumanNode,
+    Node,
+    PlaceholderNode,
+    PlannerNode,
+    SwitchNode,
 )
 
 __all__ = [

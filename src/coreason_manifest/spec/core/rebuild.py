@@ -10,9 +10,9 @@ def rebuild_manifest() -> None:
     additions to the registry require an explicit rebuild of the schema.
     """
     # Import modules lazily to avoid circular dependencies
-    from coreason_manifest.spec.core.compute import nodes, reasoning
+    from coreason_manifest.spec.core.compute import reasoning
     from coreason_manifest.spec.core.oversight import governance, intervention, resilience
-    from coreason_manifest.spec.core.workflow import flow
+    from coreason_manifest.spec.core.workflow import flow, nodes
 
     # 1. Resolve fresh unions
     new_node_union = resolve_node_union()

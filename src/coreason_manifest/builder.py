@@ -10,7 +10,6 @@
 
 from typing import Any, Self, cast
 
-from coreason_manifest.spec.core.compute.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.spec.core.compute.reasoning import (
     FastPath,
     ReasoningConfig,
@@ -56,6 +55,7 @@ from coreason_manifest.spec.core.workflow.flow import (
     GraphFlow,
     LinearFlow,
 )
+from coreason_manifest.spec.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.utils.validator import validate_flow
 
 
@@ -626,7 +626,6 @@ class BaseFlowBuilder:
             type="agent",
             profile=profile_id,
             tools=tools,
-            operational_policy=None,
         )
         self._register_node(node)
         return self

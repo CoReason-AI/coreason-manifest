@@ -3,10 +3,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from coreason_manifest.spec.core.compute.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
 from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.spec.core.primitives.constants import NodeCapability
 from coreason_manifest.spec.core.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
 from coreason_manifest.spec.interop.compliance import (
     ComplianceReport,
     ErrorCatalog,

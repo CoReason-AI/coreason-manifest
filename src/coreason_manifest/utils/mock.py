@@ -10,8 +10,8 @@ from referencing import Registry, Resource
 from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
-from coreason_manifest.spec.core.compute.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.core.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.spec.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode
 from coreason_manifest.spec.interop.telemetry import NodeExecution, NodeState
 
 logger = logging.getLogger(__name__)

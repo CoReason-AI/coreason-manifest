@@ -7,11 +7,11 @@ from jsonschema.exceptions import SchemaError
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.compute.nodes import (
-    AnyNode,
-)
 from coreason_manifest.spec.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.spec.core.state.tools import AnyTool, ToolPack
+from coreason_manifest.spec.core.workflow.nodes import (
+    AnyNode,
+)
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError

@@ -1,17 +1,5 @@
 # Core specification package
 
-from coreason_manifest.spec.core.compute.nodes import (
-    AgentNode,
-    CognitiveProfile,
-    EmergenceInspectorNode,
-    HumanNode,
-    InspectorNode,
-    InspectorNodeBase,
-    Node,
-    PlaceholderNode,
-    PlannerNode,
-    SwitchNode,
-)
 from coreason_manifest.spec.core.compute.reasoning import (
     AttentionReasoning,
     BaseReasoning,
@@ -58,6 +46,18 @@ from coreason_manifest.spec.core.workflow.flow import (
     GraphFlow,
     LinearFlow,
     VariableDef,
+)
+from coreason_manifest.spec.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    EmergenceInspectorNode,
+    HumanNode,
+    InspectorNode,
+    InspectorNodeBase,
+    Node,
+    PlaceholderNode,
+    PlannerNode,
+    SwitchNode,
 )
 
 __all__ = [
