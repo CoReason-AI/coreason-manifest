@@ -55,31 +55,28 @@ class CanonicalHashingStrategy(HashingStrategy):
     Canonical hashing strategy enforcing RFC 8785 compliance.
     """
 
-    def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
+    def _recursive_sort_and_sanitize(self, obj: Any, is_root: bool = False) -> Any:
         """
         Prepares an object for RFC 8785 Canonical JSON serialization.
+
+        SOTA Fix: Only exclude hash/signature keys at the root level to prevent
+        'hash smuggling' vulnerabilities where nested payloads might hide malicious
+        keys that get stripped silently.
         """
         if isinstance(obj, dict):
-            # Universal Hash Sanitization:
-            # Strip modern keys (execution_hash, signature, __*)
-            # Also strip None values (Architectural requirement)
-            # CRITICAL FIX: Ensure keys that are not part of the payload are excluded from hash computation
-            # during verification.
-
-            # The keys to exclude MUST match what is excluded in generate_execution_receipt's payload construction
-            # PLUS the fields that hold the hash/signature itself.
-            excluded_keys = {"execution_hash", "signature", "annotations"}
+            # Define excluded keys only if we are at the root level
+            excluded_keys = {"execution_hash", "signature", "annotations"} if is_root else set()
 
             return {
-                k: self._recursive_sort_and_sanitize(v)
+                k: self._recursive_sort_and_sanitize(v, is_root=False)
                 for k, v in sorted(obj.items())
                 if v is not None and k not in excluded_keys and not k.startswith("__")
             }
         if isinstance(obj, (list, tuple)):
-            return [self._recursive_sort_and_sanitize(x) for x in obj]
+            return [self._recursive_sort_and_sanitize(x, is_root=False) for x in obj]
         if isinstance(obj, (set, frozenset)):
             # Sets should be sorted lists
-            return sorted([self._recursive_sort_and_sanitize(x) for x in obj], key=str)
+            return sorted([self._recursive_sort_and_sanitize(x, is_root=False) for x in obj], key=str)
         if isinstance(obj, uuid.UUID):
             return str(obj)
         if isinstance(obj, datetime):
@@ -88,10 +85,25 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Pydantic v2
             excludes = getattr(obj, "_hash_exclude_", None)
             data = obj.model_dump(exclude_none=True, exclude=excludes, mode="python")
-            return self._recursive_sort_and_sanitize(data)
+            # When dumping a model, we treat the resulting dict as root-level relative to *that* model?
+            # No, `is_root` should only be True for the TOP-LEVEL object passed to `compute_hash`.
+            # If a Pydantic model is nested inside another structure, `is_root` is False from the recursive call.
+            # If the user passed a Pydantic model directly to `compute_hash`, `is_root` is True.
+            # So we just pass `is_root` down?
+            # Wait, `model_dump` produces a dict. If we pass `is_root` blindly, and this model is nested,
+            # we might strip keys we shouldn't? No, because `is_root` comes from the caller.
+            # However, if the TOP level object is a Pydantic model, `is_root` is True, so we want to strip execution_hash from IT.
+            # If it's nested, `is_root` is False, so we keep execution_hash if present in nested models.
+            # Yes, simply passing `is_root` seems correct for the recursive call *into* the dict result of model_dump.
+
+            # BUT: We recursively call _recursive_sort_and_sanitize on the result of model_dump.
+            # If `is_root` was True, we pass it. If False, we pass False.
+            return self._recursive_sort_and_sanitize(data, is_root=is_root)
+
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
-            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"))
+            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"), is_root=is_root)
+
         if isinstance(obj, float):
             if not math.isfinite(obj):
                 raise ValueError("NaN and Infinity are not allowed in Canonical JSON")
@@ -106,7 +118,8 @@ class CanonicalHashingStrategy(HashingStrategy):
         if hasattr(obj, "compute_hash"):
             return str(obj.compute_hash())
 
-        sanitized = self._recursive_sort_and_sanitize(obj)
+        # Start recursion with is_root=True
+        sanitized = self._recursive_sort_and_sanitize(obj, is_root=True)
 
         json_bytes = json.dumps(
             sanitized, sort_keys=True, ensure_ascii=False, separators=(",", ":"), allow_nan=False

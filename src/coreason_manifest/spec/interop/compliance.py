@@ -60,6 +60,7 @@ class RemediationAction(BaseModel):
         "update_field",
         "semantic_repair",
         "prune_topology",
+        "lock_node",
     ]
     target_node_id: str | None = None
     format: Literal["json_patch", "merge_patch"] = "json_patch"

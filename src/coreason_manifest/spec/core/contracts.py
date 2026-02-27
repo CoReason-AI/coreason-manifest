@@ -20,6 +20,10 @@ class AtomicSkill(CoreasonModel):
         description="Strict definition of the skill. No 'Any' allowed.",
         examples=[{"input": "str", "output": "str"}]
     )
+    capabilities: list[str] = Field(
+        default_factory=list,
+        description="List of capabilities this skill grants (e.g., 'computer_use', 'network_access')."
+    )
     immutable: Literal[True] = Field(
         True,
         description="Enforces immutability of the skill definition."
@@ -29,12 +33,11 @@ class AtomicSkill(CoreasonModel):
 class NodeSpec(CoreasonModel):
     """
     Base contract for all execution nodes in the zero-trust kernel.
-    Enforces locking mechanisms.
     """
     id: NodeID = Field(..., description="Unique identifier for the node.")
-    locked: Literal[True] = Field(
-        True,
-        description="Enforces that this node cannot be bypassed or mutated at runtime."
+    locked: bool = Field(
+        False,
+        description="If True, enforces that this node must be executed on all valid paths (cannot be bypassed)."
     )
 
 
