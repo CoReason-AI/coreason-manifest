@@ -1,8 +1,9 @@
-import sys
 import shutil
-import os
+import sys
 from pathlib import Path
-from coreason_manifest.utils.loader import sandbox_context, SecurityViolationError
+
+from coreason_manifest.utils.loader import SecurityViolationError, sandbox_context
+
 
 def verify_audit_hook():
     base = Path("verify_audit")
@@ -21,7 +22,7 @@ def verify_audit_hook():
 
     print("Testing allowed file access...")
     with sandbox_context(jail):
-        with open(jail / "inside.txt", "r") as f:
+        with open(jail / "inside.txt") as f:
             content = f.read()
         assert content == "ok"
     print("Allowed access passed.")
@@ -29,9 +30,8 @@ def verify_audit_hook():
     # 2. Test disallowed access (outside jail)
     print("Testing disallowed file access...")
     try:
-        with sandbox_context(jail):
-            with open(outside, "r") as f:
-                content = f.read()
+        with sandbox_context(jail), open(outside) as f:
+            content = f.read()
         print("ERROR: Disallowed access check FAILED. Should have raised SecurityViolationError.")
         sys.exit(1)
     except SecurityViolationError as e:
@@ -47,8 +47,9 @@ def verify_audit_hook():
     try:
         with sandbox_context(jail):
             import os
+
             # accessing __file__ of os module
-            with open(os.__file__, "r") as f:
+            with open(os.__file__) as f:
                 pass
         print("Python runtime access passed.")
     except Exception as e:
@@ -57,6 +58,7 @@ def verify_audit_hook():
 
     print("All audit verification checks passed.")
     shutil.rmtree(base)
+
 
 if __name__ == "__main__":
     verify_audit_hook()

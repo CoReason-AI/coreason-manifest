@@ -82,9 +82,9 @@ def resolve_node_union() -> Any:
 
     union_type = nodes[0]
     for n in nodes[1:]:
-        union_type = union_type | n # type: ignore
+        union_type = union_type | n  # type: ignore
 
-    return Annotated[union_type, Field(discriminator="type")] # type: ignore
+    return Annotated[union_type, Field(discriminator="type")]  # type: ignore
 
 
 def resolve_engine_union() -> Any:
@@ -98,6 +98,6 @@ def resolve_engine_union() -> Any:
 
     union_type = engines[0]
     for e in engines[1:]:
-        union_type = union_type | e # type: ignore
+        union_type = union_type | e  # type: ignore
 
-    return Annotated[union_type, Field(discriminator="type")] # type: ignore
+    return Annotated[union_type, Field(discriminator="type")]  # type: ignore

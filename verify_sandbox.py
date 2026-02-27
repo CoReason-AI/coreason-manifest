@@ -1,9 +1,11 @@
-import sys
-import shutil
 import os
+import shutil
+import sys
 from pathlib import Path
-from coreason_manifest.utils.loader import sandbox_context, load_agent_from_ref
+
 from coreason_manifest.spec.interop.exceptions import SecurityJailViolationError
+from coreason_manifest.utils.loader import load_agent_from_ref
+
 
 def verify_sandboxed_path_finder():
     base = Path("verify_sandbox")
@@ -78,6 +80,7 @@ def verify_sandboxed_path_finder():
 
     print("All verification checks passed.")
     shutil.rmtree(base)
+
 
 if __name__ == "__main__":
     verify_sandboxed_path_finder()

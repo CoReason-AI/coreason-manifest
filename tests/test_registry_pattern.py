@@ -1,9 +1,10 @@
-import pytest
 from typing import Literal
-from pydantic import Field, ValidationError
 
-from coreason_manifest.spec.core.nodes import Node, AnyNode
-from coreason_manifest.spec.core.registry import register_node, resolve_node_union, _NODE_REGISTRY
+from pydantic import Field
+
+from coreason_manifest.spec.core.nodes import Node
+from coreason_manifest.spec.core.registry import _NODE_REGISTRY, register_node, resolve_node_union
+
 
 def test_dynamic_node_registration():
     # 1. Define a new custom node type
@@ -27,28 +28,27 @@ def test_dynamic_node_registration():
     # To support dynamic plugins, we would need to reload `nodes.py` or `flow.py`, or
     # use a mechanism where AnyNode is a TypeAdapter that we update.
 
-    # But for this task, "Introduce a dynamic registry pattern... allowing downstream packages to inject new Node types without altering the coreason-manifest core files".
-    # If the downstream package imports `register_node` and registers their node BEFORE importing `AnyNode` (or `GraphFlow`),
-    # then `AnyNode` will include it.
+    # But for this task, "Introduce a dynamic registry pattern... allowing downstream packages to inject
+    # new Node types without altering the coreason-manifest core files".
+    # If the downstream package imports `register_node` and registers their node BEFORE importing
+    # `AnyNode` (or `GraphFlow`), then `AnyNode` will include it.
 
     # But if `AnyNode` is already imported, it won't.
     # Let's verify that `resolve_node_union()` returns a union containing CustomNode.
 
-    NewAnyNode = resolve_node_union()
+    new_any_node = resolve_node_union()
 
     # 4. Instantiate the new node via the new union
     from pydantic import TypeAdapter
-    ta = TypeAdapter(NewAnyNode)
 
-    data = {
-        "id": "c1",
-        "type": "custom_plugin",
-        "custom_field": "hello"
-    }
+    ta = TypeAdapter(new_any_node)
+
+    data = {"id": "c1", "type": "custom_plugin", "custom_field": "hello"}
 
     obj = ta.validate_python(data)
     assert isinstance(obj, CustomNode)
     assert obj.custom_field == "hello"
+
 
 def test_registry_persistence():
     # Verify standard nodes are present
