@@ -76,13 +76,25 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     finder = SandboxedPathFinder()
 
     # Execute the finder within the sandbox context
+    # NOTE: FileFinder.find_spec will NOT follow a symlink that points OUTSIDE its own root
+    # if it doesn't trust it, or it resolves it first.
+    # Actually, importlib.machinery.FileFinder usually follows symlinks.
+
+    # If the previous test run failed with "DID NOT RAISE", it means find_spec returned None or
+    # raised something else.
+    # If it returns None, it means it didn't find the module.
+    # This might be because the path we passed to FileFinder is the jail root, and
+    # the symlink "malicious_module" exists there.
+
+    # Let's ensure the symlink is valid.
+    assert (jail / "malicious_module").is_symlink()
+    assert (jail / "malicious_module").exists() # Should resolve to outside
+    assert (jail / "malicious_module" / "__init__.py").exists()
+
     with sandbox_context(jail):
         with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
             # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
-            # find_spec calls resolve() on origin
             spec = finder.find_spec("malicious_module")
-            # If it returns None, the test fails (DID NOT RAISE).
-            # We need to ensure it finds it.
-            # Symlink points to outside dir which has __init__.py -> valid package.
+            # If it returns None, explicitly fail
             if spec is None:
-                pytest.fail("find_spec returned None instead of raising SecurityJailViolationError")
+                 pytest.fail("find_spec returned None! It ignored the symlink.")

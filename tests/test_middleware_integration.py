@@ -355,10 +355,13 @@ def test_loader_execution_failure(workspace: Path) -> None:
 
 
 def test_loader_cleanup_coverage(workspace: Path) -> None:
-    # Import dependency, succeeds. Covers success cleanup loop.
-    # dependency.py is in root, so it should be found.
-    # We must ensure dependency.py is a valid module
-    # workspace (jail) has dependency.py
+    # dependency.py needs to be importable.
+    # The workspace fixture puts dependency.py in workspace root.
+    # workspace root is passed as root_dir to load_middleware_from_ref.
+    # SandboxedPathFinder should find it.
+
+    # Ensure sys.path doesn't interfere? SandboxedPathFinder doesn't use sys.path.
+
     cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
 

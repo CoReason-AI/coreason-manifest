@@ -239,6 +239,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
             return None
 
         # Re-create the spec with the namespaced name to ensure the loader is correctly initialized
+        # We checked found_spec.origin above, so it is not None here.
         spec = importlib.util.spec_from_file_location(namespaced_name, found_spec.origin)
 
         if spec:
