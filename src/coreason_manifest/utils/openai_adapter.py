@@ -24,7 +24,7 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     # Architectural Change: Decouple hardcoded model assumption.
     # Use AdapterConfig to resolve default model from environment or fallback.
     config = AdapterConfig()
-    model: str | Any = config.default_openai_model
+    model: str = config.default_openai_model
 
     if isinstance(node.profile, str):
         # Upgrade: Replace NotImplementedError with SemanticFault ManifestError
