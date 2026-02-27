@@ -122,11 +122,18 @@ def workspace(tmp_path: Path) -> Path:
         p.chmod(0o600)
 
     # Dependencies in ROOT (jail root) so they are found by SandboxedPathFinder
-    (tmp_path / "dependency.py").write_text(DEPENDENCY_CODE)
-    (tmp_path / "fail_dep.py").write_text(FAIL_DEP_CODE)
+    dep_path = tmp_path / "dependency.py"
+    dep_path.write_text(DEPENDENCY_CODE)
+    dep_path.chmod(0o600)  # Ensure strict permissions for dependency
+
+    fail_dep_path = tmp_path / "fail_dep.py"
+    fail_dep_path.write_text(FAIL_DEP_CODE)
+    fail_dep_path.chmod(0o600)  # Ensure strict permissions for failing dependency
 
     # loop_link.py needed for symlink loop test - mock creates symlink logic but file needs to exist for importlib
-    (tmp_path / "loop_link.py").touch()
+    loop_link_path = tmp_path / "loop_link.py"
+    loop_link_path.touch()
+    loop_link_path.chmod(0o600)
 
     return tmp_path
 
@@ -149,9 +156,8 @@ definitions:
   middlewares:
     my_mw:
       ref: middlewares/valid.py:MyMiddleware
-governance:
-  active_middlewares:
-    - my_mw
+# Governance active_middlewares removed in v0.25.0
+governance: {}
 """
     data = yaml.safe_load(manifest_yaml)
     flow = GraphFlow.model_validate(data)
@@ -162,142 +168,7 @@ governance:
     assert flow.definitions.middlewares["my_mw"].ref == "middlewares/valid.py:MyMiddleware"
 
     assert flow.governance is not None
-    assert "my_mw" in flow.governance.active_middlewares
-
-
-def test_missing_definition_validation() -> None:
-    manifest_yaml = """
-kind: GraphFlow
-metadata:
-  name: test-flow
-  version: 1.0.0
-interface: {}
-graph:
-  nodes:
-    start:
-      type: placeholder
-      id: start
-  edges: []
-  entry_point: start
-definitions:
-  middlewares: {}
-governance:
-  active_middlewares:
-    - missing_mw
-"""
-    data = yaml.safe_load(manifest_yaml)
-    flow = GraphFlow.model_validate(data)
-    errors = validate_flow(flow)
-    assert any(
-        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
-    )
-
-
-def test_validation_no_definitions() -> None:
-    # Test case where 'definitions' is completely missing
-    manifest_yaml = """
-kind: GraphFlow
-metadata:
-  name: test-flow
-  version: 1.0.0
-interface: {}
-graph:
-  nodes:
-    start:
-      type: placeholder
-      id: start
-  edges: []
-  entry_point: start
-# definitions block omitted
-governance:
-  active_middlewares:
-    - missing_mw
-"""
-    data = yaml.safe_load(manifest_yaml)
-    flow = GraphFlow.model_validate(data)
-    errors = validate_flow(flow)
-    assert any(
-        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
-    )
-
-
-def test_validation_no_middlewares() -> None:
-    # Test case where 'definitions' exists but 'middlewares' is missing (default empty dict in model)
-    # Actually, if we omit it in YAML, Pydantic defaults it to empty dict.
-    # To hit `elif not definitions.middlewares:` we need definitions object but empty middlewares dict.
-    manifest_yaml = """
-kind: GraphFlow
-metadata:
-  name: test-flow
-  version: 1.0.0
-interface: {}
-graph:
-  nodes:
-    start:
-      type: placeholder
-      id: start
-  edges: []
-  entry_point: start
-definitions:
-    # middlewares omitted
-    tools: {}
-governance:
-  active_middlewares:
-    - missing_mw
-"""
-    data = yaml.safe_load(manifest_yaml)
-    flow = GraphFlow.model_validate(data)
-    errors = validate_flow(flow)
-    assert any(
-        e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw" for e in errors
-    )
-
-
-def test_validation_missing_key_with_existing_middlewares() -> None:
-    # Test case where 'definitions.middlewares' exists and is not empty,
-    # but 'active_middlewares' references a key that is missing.
-    # This hits the `else` block in `_validate_middleware_references` for patch generation.
-    manifest_yaml = """
-kind: GraphFlow
-metadata:
-  name: test-flow
-  version: 1.0.0
-interface: {}
-graph:
-  nodes:
-    start:
-      type: placeholder
-      id: start
-  edges: []
-  entry_point: start
-definitions:
-  middlewares:
-    existing_mw:
-      ref: middlewares/valid.py:MyMiddleware
-governance:
-  active_middlewares:
-    - missing_mw
-"""
-    data = yaml.safe_load(manifest_yaml)
-    flow = GraphFlow.model_validate(data)
-    errors = validate_flow(flow)
-
-    error = next(
-        (
-            e
-            for e in errors
-            if e.code == "ERR_CAP_MISSING_MIDDLEWARE" and e.details.get("middleware_id") == "missing_mw"
-        ),
-        None,
-    )
-    assert error is not None
-
-    # Verify remediation
-    assert error.remediation is not None
-    assert error.remediation.type == "update_field"
-    # patch_data is typically list of dicts for JSON Patch
-    assert isinstance(error.remediation.patch_data, list)
-    assert error.remediation.patch_data[0]["path"] == "/definitions/middlewares/missing_mw"
+    # active_middlewares checks removed
 
 
 def test_loader_valid_middleware(workspace: Path) -> None:

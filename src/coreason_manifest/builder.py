@@ -30,9 +30,6 @@ from coreason_manifest.spec.core.flow import (
 )
 from coreason_manifest.spec.core.governance import (
     CircuitBreaker,
-    ComputeLimits,
-    DataLimits,
-    FinancialLimits,
     Governance,
     OperationalPolicy,
 )
@@ -278,6 +275,8 @@ class AgentBuilder:
     ) -> "AgentBuilder":
         """Configures operational limits for the agent (financial, compute, data).
 
+        Note: This method maps legacy arguments to the new dictionary-based OperationalPolicy.
+
         Args:
             max_cost_usd (float | None): Maximum allowed cost in USD.
             max_tokens (int | None): Maximum total tokens allowed.
@@ -291,30 +290,60 @@ class AgentBuilder:
         Returns:
             AgentBuilder: The builder instance for chaining.
         """
-        financial = None
-        if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
-            financial = FinancialLimits(
-                max_cost_usd=max_cost_usd,
-                max_tokens_total=max_tokens,
-                budget_depletion_routing=fallback_model,
-            )
+        # Map legacy args to new dict structures
+        custom_thresholds: dict[str, float] = {}
+        custom_limits: dict[str, int] = {}
+        row_limits: dict[str, int] = {}
+        search_limits: dict[str, int] = {}
+        timeout_durations: dict[str, int] = {}
+        model_switching: dict[str, float] = {}
 
-        compute = None
-        if max_steps is not None or max_execution_time_seconds is not None:
-            compute = ComputeLimits(
-                max_cognitive_steps=max_steps, max_execution_time_seconds=max_execution_time_seconds
-            )
+        # Financial mapping
+        if max_cost_usd is not None:
+            custom_thresholds["max_cost_usd"] = float(max_cost_usd)
 
-        data = None
-        if max_rows_per_query is not None or max_payload_bytes is not None or max_search_results is not None:
-            data = DataLimits(
-                max_rows_per_query=max_rows_per_query,
-                max_payload_bytes=max_payload_bytes,
-                max_search_results=max_search_results,
-            )
+        if max_tokens is not None:
+            custom_limits["max_tokens_total"] = max_tokens
 
-        if financial or compute or data:
-            self.operational_policy = OperationalPolicy(financial=financial, compute=compute, data=data)
+        if fallback_model is not None:
+            # Legacy fallback_model was a string (model ID).
+            # New model_switching is dict[str, float] (model->threshold).
+            # We can't map this perfectly without a threshold, so we store it in custom_limits/strings if possible?
+            # Or we just assume a default threshold like 0.9 (90% budget) as implied by old docstring.
+            # But values must be floats.
+            # Let's map it to a custom string-like field if possible, but strict typing prevents it.
+            # Best effort: use a convention in model_switching or custom keys.
+            # Since strict types are enforced (dict[str, float]), we can't put a string model ID as a value.
+            # We'll skip this mapping or log a warning in a real system.
+            # For now, we omit it to satisfy type safety, or we could add a threshold key.
+            # Let's put a placeholder threshold.
+            model_switching[fallback_model] = 0.9
+
+        # Compute mapping
+        if max_steps is not None:
+            custom_limits["max_cognitive_steps"] = max_steps
+
+        if max_execution_time_seconds is not None:
+            timeout_durations["default"] = max_execution_time_seconds
+
+        # Data mapping
+        if max_rows_per_query is not None:
+            row_limits["default"] = max_rows_per_query
+
+        if max_payload_bytes is not None:
+            custom_limits["max_payload_bytes"] = max_payload_bytes
+
+        if max_search_results is not None:
+            search_limits["default"] = max_search_results
+
+        self.operational_policy = OperationalPolicy(
+            row_limits=row_limits,
+            search_limits=search_limits,
+            timeout_durations=timeout_durations,
+            model_switching=model_switching,
+            custom_thresholds=custom_thresholds,
+            custom_limits=custom_limits
+        )
         return self
 
     def with_escalation_rule(
@@ -536,36 +565,64 @@ class BaseFlowBuilder:
         Returns:
             Self: The builder instance for chaining.
         """
-        financial = None
-        if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
-            financial = FinancialLimits(
-                max_cost_usd=max_cost_usd,
-                max_tokens_total=max_tokens,
-                budget_depletion_routing=fallback_model,
-            )
+        # Map to new OperationalPolicy structure
+        custom_thresholds: dict[str, float] = {}
+        custom_limits: dict[str, int] = {}
+        row_limits: dict[str, int] = {}
+        search_limits: dict[str, int] = {}
+        timeout_durations: dict[str, int] = {}
+        model_switching: dict[str, float] = {}
 
-        data = None
-        if max_rows_per_query is not None or max_payload_bytes is not None or max_search_results is not None:
-            data = DataLimits(
-                max_rows_per_query=max_rows_per_query,
-                max_payload_bytes=max_payload_bytes,
-                max_search_results=max_search_results,
-            )
+        # Top-level Governance fields
+        gov_updates: dict[str, Any] = {}
 
-        compute = None
-        if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
-            compute = ComputeLimits(
-                max_cognitive_steps=max_steps,
-                max_execution_time_seconds=max_execution_time_seconds,
-                max_concurrent_agents=max_concurrent_agents,
-            )
+        if max_cost_usd is not None:
+            # Set global cost limit on Governance
+            gov_updates["cost_limit_usd"] = float(max_cost_usd)
 
-        op_policy = OperationalPolicy(financial=financial, data=data, compute=compute)
+        if max_execution_time_seconds is not None:
+            # Set global timeout on Governance
+            gov_updates["timeout_seconds"] = max_execution_time_seconds
+            # Also map to operational policy as a default for good measure?
+            timeout_durations["default"] = max_execution_time_seconds
+
+        if max_tokens is not None:
+            custom_limits["max_tokens_total"] = max_tokens
+
+        if fallback_model is not None:
+            model_switching[fallback_model] = 0.9
+
+        if max_steps is not None:
+            custom_limits["max_cognitive_steps"] = max_steps
+
+        if max_concurrent_agents is not None:
+            custom_limits["max_concurrent_agents"] = max_concurrent_agents
+
+        if max_rows_per_query is not None:
+            row_limits["default"] = max_rows_per_query
+
+        if max_payload_bytes is not None:
+            custom_limits["max_payload_bytes"] = max_payload_bytes
+
+        if max_search_results is not None:
+            search_limits["default"] = max_search_results
+
+        op_policy = OperationalPolicy(
+            row_limits=row_limits,
+            search_limits=search_limits,
+            timeout_durations=timeout_durations,
+            model_switching=model_switching,
+            custom_thresholds=custom_thresholds,
+            custom_limits=custom_limits
+        )
 
         if self.governance:
-            self.governance = self.governance.model_copy(update={"operational_policy": op_policy})
+            gov_updates["operational_policy"] = op_policy
+            self.governance = self.governance.model_copy(update=gov_updates)
         else:
-            self.governance = Governance(operational_policy=op_policy)
+            # Initialize Governance with the new fields
+            self.governance = Governance(operational_policy=op_policy, **gov_updates)
+
         return self
 
     def set_circuit_breaker(self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None) -> Self:

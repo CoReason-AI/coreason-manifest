@@ -139,17 +139,7 @@ def test_validate_missing_tool(flow_metadata: FlowMetadata, agent_node_factory: 
     assert any(e.code == "ERR_CAP_MISSING_TOOL_001" and e.details.get("tool") == "tool1" for e in errors)
 
 
-def test_validate_governance_sanity() -> None:
-    from pydantic import ValidationError
-
-    from coreason_manifest.spec.core.governance import FinancialLimits
-
-    # Test that Pydantic enforces the schema constraint (ge=0.0)
-    with pytest.raises(ValidationError) as exc:
-        FinancialLimits(max_cost_usd=-5.0)
-
-    # Match the actual Pydantic error message
-    assert "Input should be greater than or equal to 0" in str(exc.value)
+# Removed FinancialLimits test as the class was deleted.
 
 
 def test_validate_linear_flow_valid(flow_metadata: FlowMetadata, agent_node_factory: Callable[..., AgentNode]) -> None:

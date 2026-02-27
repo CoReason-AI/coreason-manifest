@@ -14,8 +14,8 @@ class ErrorDomain(StrEnum):
     TOOL = "tool"
     SECURITY = "security"
     CONTEXT = "context"
-    DATA = "data"  # Maps to DataLimits
-    RESOURCE = "resource"  # Maps to ComputeLimits
+    DATA = "data"  # Maps to data limits in OperationalPolicy
+    RESOURCE = "resource"  # Maps to compute limits in OperationalPolicy
     TIMEOUT = "timeout"
     FINANCIAL = "financial"
 

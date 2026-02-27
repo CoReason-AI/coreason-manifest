@@ -37,9 +37,11 @@ def test_linear_builder() -> None:
     assert flow.definitions is not None
     assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
+    # Verify new Governance structure
+    assert flow.governance.cost_limit_usd == 10.0
     assert flow.governance.operational_policy is not None
-    assert flow.governance.operational_policy.financial is not None
-    assert flow.governance.operational_policy.financial.max_cost_usd == 10.0
+    # Verify new OperationalPolicy structure (financial limits are gone/mapped)
+    assert not hasattr(flow.governance.operational_policy, "financial")
 
 
 def test_graph_builder() -> None:
@@ -79,9 +81,11 @@ def test_graph_builder() -> None:
     assert flow.definitions is not None
     assert len(flow.definitions.tool_packs) == 1
     assert flow.governance is not None
+
+    # Verify new Governance structure
+    assert flow.governance.cost_limit_usd == 10.0
     assert flow.governance.operational_policy is not None
-    assert flow.governance.operational_policy.financial is not None
-    assert flow.governance.operational_policy.financial.max_cost_usd == 10.0
+    assert not hasattr(flow.governance.operational_policy, "financial")
 
     # Assert new features
     assert flow.interface.inputs.json_schema == {"type": "object", "properties": {"in": {"type": "string"}}}  # type: ignore[union-attr]
@@ -117,9 +121,7 @@ def test_builder_coverage_set_circuit_breaker_with_existing_governance() -> None
     builder.set_circuit_breaker(error_threshold=5, reset_timeout=30)
 
     assert builder.governance is not None
-    assert builder.governance.operational_policy is not None
-    assert builder.governance.operational_policy.financial is not None
-    assert builder.governance.operational_policy.financial.max_cost_usd == 10.0
+    assert builder.governance.cost_limit_usd == 10.0
     assert builder.governance.circuit_breaker is not None
     assert builder.governance.circuit_breaker.error_threshold_count == 5
 
@@ -213,11 +215,19 @@ def test_agent_builder() -> None:
     # with_supervision deprecated/removed, assume replaced or removed from builder tests for now
     # builder.with_supervision(retries=3)
 
+    # New Operational Policy mapping
+    builder.with_operational_policy(max_cost_usd=5.0)
+
     agent = builder.build()
     assert isinstance(agent.profile, CognitiveProfile)
     assert agent.profile.reasoning is not None
     assert agent.profile.fast_path is not None
     assert agent.tools == ["tool1"]
+
+    # Assert custom threshold mapping
+    assert agent.operational_policy is not None
+    assert agent.operational_policy.custom_thresholds.get("max_cost_usd") == 5.0
+
     # assert isinstance(agent.supervision, SupervisionPolicy)
     # assert isinstance(agent.supervision.default_strategy, EscalationStrategy)
 

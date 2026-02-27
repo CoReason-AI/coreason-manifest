@@ -30,7 +30,6 @@ from coreason_manifest.spec.core.resilience import (
 from coreason_manifest.spec.core.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.types import RiskLevel
 from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
-from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.topology import get_strongly_connected_components, get_unified_topology
 
 
@@ -140,8 +139,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     if flow.governance and flow.governance.max_risk_level:
         errors.extend(_validate_kill_switch(flow))
 
-    # 6. Middleware References
-    errors.extend(_validate_middleware_refs(flow))
+    # 6. Middleware References - REMOVED
 
     return errors
 
@@ -809,57 +807,5 @@ def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport
         _check(flow.definitions)
 
     _check(nodes)
-
-    return errors
-
-
-def _validate_middleware_refs(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    errors: list[ComplianceReport] = []
-    if not flow.governance or not flow.governance.active_middlewares:
-        return errors
-
-    defined = set()
-    if flow.definitions and flow.definitions.middlewares:
-        defined = set(flow.definitions.middlewares.keys())
-
-    for mw_id in flow.governance.active_middlewares:
-        if mw_id not in defined:
-            # SOTA RFC 6902 JSON Pointer Escaping
-            mw_id_escaped = mw_id.replace("~", "~0").replace("/", "~1")
-
-            # Construct patch
-            patch: list[dict[str, Any]]
-            if not flow.definitions:
-                patch = [
-                    {
-                        "op": "add",
-                        "path": "/definitions",
-                        "value": {"middlewares": {mw_id: {"ref": "file.py:Class"}}},
-                    }
-                ]
-            elif not flow.definitions.middlewares:
-                patch = [{"op": "add", "path": "/definitions/middlewares", "value": {mw_id: {"ref": "file.py:Class"}}}]
-            else:
-                patch = [
-                    {
-                        "op": "add",
-                        "path": f"/definitions/middlewares/{mw_id_escaped}",
-                        "value": {"ref": "file.py:Class"},
-                    }
-                ]
-
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_CAP_MISSING_MIDDLEWARE,
-                    severity="violation",
-                    message=f"Middleware Error: Active middleware '{mw_id}' is not defined.",
-                    details={"middleware_id": mw_id},
-                    remediation=RemediationAction(
-                        type="update_field",
-                        description=f"Add definition for middleware '{mw_id}'.",
-                        patch_data=patch,
-                    ),
-                )
-            )
 
     return errors

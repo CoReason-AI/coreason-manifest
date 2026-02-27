@@ -5,7 +5,7 @@ from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.co_intelligence import CoIntelligencePolicy
-from coreason_manifest.spec.core.types import MiddlewareID, NodeID, RiskLevel, ToolID
+from coreason_manifest.spec.core.types import NodeID, RiskLevel, ToolID
 from coreason_manifest.spec.interop.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 
 
@@ -69,46 +69,41 @@ class ToolAccessPolicy(CoreasonModel):
         return data
 
 
-class FinancialLimits(CoreasonModel):
-    max_cost_usd: float | None = Field(None, ge=0.0)
-    max_tokens_total: int | None = Field(None, gt=0)
-    budget_depletion_routing: str | None = Field(
-        None,
-        description="Model ID to fallback to when budget hits 90% depletion (e.g., swap o1-pro to gpt-4o-mini).",
-    )
-
-
-class DataLimits(CoreasonModel):
-    max_rows_per_query: int | None = Field(None, gt=0)
-    max_payload_bytes: int | None = Field(
-        None, gt=0, description="Max bytes for active memory insertion/API responses."
-    )
-    max_search_results: int | None = Field(None, gt=0)
-
-
-class ComputeLimits(CoreasonModel):
-    max_execution_time_seconds: int | None = Field(None, gt=0)
-    max_cognitive_steps: int | None = Field(None, gt=0, description="Max turn/DAG transitions.")
-    max_concurrent_agents: int | None = Field(None, gt=0)
-
-
 class OperationalPolicy(CoreasonModel):
-    financial: FinancialLimits | None = None
-    data: DataLimits | None = None
-    compute: ComputeLimits | None = None
+    """
+    Dynamic configuration for operational limits, routing, and economic model-switching.
+    Replaces static nested models with flat dictionaries for zero-downtime extensibility.
+    """
+
+    retry_counts: dict[str, int] = Field(
+        default_factory=dict, description="Granular control over retries per operation/node."
+    )
+    row_limits: dict[str, int] = Field(
+        default_factory=dict, description="Granular data retrieval limits (e.g., 'default', 'query_users')."
+    )
+    search_limits: dict[str, int] = Field(
+        default_factory=dict, description="Dynamic search result limits (e.g., 'web', 'vector')."
+    )
+    timeout_durations: dict[str, int] = Field(
+        default_factory=dict, description="Operation-specific timeouts in seconds."
+    )
+    cost_multipliers: dict[str, float] = Field(
+        default_factory=dict, description="Dynamic adjustment of cost thresholds."
+    )
+    model_switching: dict[str, float] = Field(
+        default_factory=dict, description="Thresholds for tiered model degradation/swapping."
+    )
+    custom_thresholds: dict[str, float] = Field(
+        default_factory=dict, description="Generic extension dictionary for float limits."
+    )
+    custom_limits: dict[str, int] = Field(
+        default_factory=dict, description="Generic extension dictionary for integer limits."
+    )
 
 
 class Governance(CoreasonModel):
     """Governance constraints and policies."""
 
-    active_middlewares: list[MiddlewareID] = Field(
-        default_factory=list,
-        description=(
-            "Ordered list of middleware references (from definitions.middlewares) to apply sequentially "
-            "to execution requests and streams."
-        ),
-        examples=[["pii_redactor", "toxicity_filter"]],
-    )
     max_risk_level: RiskLevel | None = Field(
         None,
         description=(
@@ -116,6 +111,18 @@ class Governance(CoreasonModel):
             "entire manifest, regardless of individual tool policies."
         ),
     )
+
+    # New Global Guardrails (Hoisted from deleted nested models)
+    rate_limit_rpm: int | None = Field(
+        None, description="Global requests per minute limit across the entire flow."
+    )
+    timeout_seconds: int | None = Field(
+        None, description="Global execution timeout in seconds."
+    )
+    cost_limit_usd: float | None = Field(
+        None, description="Global financial blast-radius limit (USD)."
+    )
+
     operational_policy: OperationalPolicy | None = Field(
         None, description="Global operational, financial, and compute constraints."
     )
@@ -146,12 +153,6 @@ class Governance(CoreasonModel):
     allowed_domains: list[str] = Field(
         default_factory=list, description="Allowed external domains.", examples=[["example.com"]]
     )
-
-    @field_validator("active_middlewares")
-    @classmethod
-    def deduplicate_middlewares(cls, v: list[MiddlewareID]) -> list[MiddlewareID]:
-        """Ensures middleware execution pipeline contains unique references while preserving order."""
-        return list(dict.fromkeys(v))
 
     @field_validator("allowed_domains")
     @classmethod
