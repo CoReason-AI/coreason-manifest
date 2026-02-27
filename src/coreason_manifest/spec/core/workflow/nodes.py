@@ -80,9 +80,10 @@ class AgentNode(Node):
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
     )
-    operational_policy: Annotated[OperationalPolicy | None, Field(
-        None, description="Local operational limits. Overrides global Governance limits if set."
-    )]
+    operational_policy: Annotated[
+        OperationalPolicy | None,
+        Field(None, description="Local operational limits. Overrides global Governance limits if set."),
+    ]
     escalation_rules: list[EscalationCriteria] = Field(
         default_factory=list,
         description="Local escalation rules for this agent.",
@@ -321,9 +322,10 @@ class SwarmNode(Node):
             examples=["gpt-4"],
         ),
     ] = None
-    operational_policy: Annotated[OperationalPolicy | None, Field(
-        None, description="Local operational limits. Overrides global Governance limits if set."
-    )]
+    operational_policy: Annotated[
+        OperationalPolicy | None,
+        Field(None, description="Local operational limits. Overrides global Governance limits if set."),
+    ]
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
     )

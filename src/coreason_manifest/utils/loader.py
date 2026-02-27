@@ -26,10 +26,15 @@ from coreason_manifest.utils.io import ManifestIO, SecurityViolationError
 
 __all__ = [
     "RuntimeSecurityWarning",
+    "SandboxedPathFinder",
     "SecurityViolationError",
+    "UniqueKeyLoader",
+    "YamlLoaderProtocol",
+    "construct_mapping_unique",
     "load_agent_from_ref",
     "load_flow_from_file",
     "load_middleware_from_ref",
+    "sandbox_context",
 ]
 
 

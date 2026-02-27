@@ -1,5 +1,3 @@
-from typing import Any
-
 from coreason_manifest.spec.core.primitives.registry import resolve_engine_union, resolve_node_union
 
 
@@ -26,12 +24,12 @@ def rebuild_manifest() -> None:
 
     # Patch Graph
     if "nodes" in flow.Graph.model_fields:
-        flow.Graph.model_fields["nodes"].annotation = dict[str, new_node_union]  # type: ignore
+        flow.Graph.model_fields["nodes"].annotation = dict[str, new_node_union]  # type: ignore[valid-type]
         flow.Graph.model_rebuild(force=True)
 
     # Patch LinearFlow
     if "steps" in flow.LinearFlow.model_fields:
-        flow.LinearFlow.model_fields["steps"].annotation = list[new_node_union]  # type: ignore
+        flow.LinearFlow.model_fields["steps"].annotation = list[new_node_union]  # type: ignore[valid-type]
         flow.LinearFlow.model_rebuild(force=True)
 
     # Patch Engine-dependent models
@@ -41,7 +39,7 @@ def rebuild_manifest() -> None:
     reasoning.ReasoningConfig = new_engine_union
 
     if "reasoning" in nodes.CognitiveProfile.model_fields:
-        nodes.CognitiveProfile.model_fields["reasoning"].annotation = new_engine_union | None  # type: ignore
+        nodes.CognitiveProfile.model_fields["reasoning"].annotation = new_engine_union | None
         nodes.CognitiveProfile.model_rebuild(force=True)
 
     # 3. Rebuild downstream dependencies

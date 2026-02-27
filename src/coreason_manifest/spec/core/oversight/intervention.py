@@ -61,4 +61,5 @@ class CoIntelligencePolicy(CoreasonModel):
         description="Default escalation strategy for global interventions.",
     )
 
+
 __all__ = ["CoIntelligencePolicy", "EscalationCriteria", "InterventionMode"]
