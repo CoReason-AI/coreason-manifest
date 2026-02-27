@@ -82,7 +82,7 @@ def resolve_node_union() -> Any:
 
     union_type = Union[tuple(nodes)]  # type: ignore  # noqa: UP007
 
-    return Annotated[union_type, Field(discriminator="type")]  # type: ignore
+    return Annotated[union_type, Field(discriminator="type")]
 
 
 def resolve_engine_union() -> Any:
@@ -96,4 +96,4 @@ def resolve_engine_union() -> Any:
 
     union_type = Union[tuple(engines)]  # type: ignore  # noqa: UP007
 
-    return Annotated[union_type, Field(discriminator="type")]  # type: ignore
+    return Annotated[union_type, Field(discriminator="type")]

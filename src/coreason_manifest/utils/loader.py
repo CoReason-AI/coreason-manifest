@@ -146,9 +146,9 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
             for p in path:
                 p_path = Path(p).resolve()
                 if not p_path.is_relative_to(jail_root.resolve()):
-                     # This might happen if a package somehow added an external path to its __path__
-                     # We skip unsafe paths or raise. safer to skip/ignore for find_spec, or return None.
-                     continue
+                    # This might happen if a package somehow added an external path to its __path__
+                    # We skip unsafe paths or raise. safer to skip/ignore for find_spec, or return None.
+                    continue
                 search_paths.append(str(p_path))
 
         if not search_paths:
@@ -168,7 +168,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
             # We find the spec using the leaf name (as it appears on disk)
             found_spec = finder.find_spec(leaf_name)
         except Exception:
-             return None
+            return None
 
         if found_spec is None:
             # If standard finder returns None, it might be because it refuses to load symlinks?
@@ -217,7 +217,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         try:
             origin_path = Path(found_spec.origin).resolve(strict=True)
             if not origin_path.is_relative_to(jail_root.resolve()):
-                 raise SecurityJailViolationError(
+                raise SecurityJailViolationError(
                     f"Security Error: Module {fullname} resolves to {origin_path} outside jail."
                 )
 
@@ -226,8 +226,8 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
                 st = origin_path.stat()
                 if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
                     raise SecurityJailViolationError(
-                    f"Security Error: {found_spec.origin} possesses unsafe writable permissions "
-                    "(S_IWOTH or S_IWGRP)."
+                        f"Security Error: {found_spec.origin} possesses unsafe writable permissions "
+                        "(S_IWOTH or S_IWGRP)."
                     )
 
         except (RuntimeError, OSError) as e:
@@ -300,9 +300,7 @@ def _install_audit_hook() -> None:
 
                 except (ValueError, RuntimeError) as e:
                     # Path resolution failed or similar. Safe to block.
-                    raise SecurityViolationError(
-                        f"Unauthorized file access blocked (resolution failed): {path}"
-                    ) from e
+                    raise SecurityViolationError(f"Unauthorized file access blocked (resolution failed): {path}") from e
                 except SecurityViolationError:
                     raise
                 except Exception:
@@ -541,8 +539,7 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
             st = file_path.stat()
             if st.st_mode & (stat.S_IWOTH | stat.S_IWGRP):
                 raise SecurityJailViolationError(
-                    f"Security Error: {file_ref} possesses unsafe writable permissions "
-                    "(S_IWOTH or S_IWGRP)."
+                    f"Security Error: {file_ref} possesses unsafe writable permissions (S_IWOTH or S_IWGRP)."
                 )
 
     except FileNotFoundError:
