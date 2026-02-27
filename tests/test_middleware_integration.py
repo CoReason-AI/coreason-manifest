@@ -125,7 +125,7 @@ def workspace(tmp_path: Path) -> Path:
     (tmp_path / "dependency.py").write_text(DEPENDENCY_CODE)
     (tmp_path / "fail_dep.py").write_text(FAIL_DEP_CODE)
 
-    # loop_link.py needed for symlink loop test
+    # loop_link.py needed for symlink loop test - mock creates symlink logic but file needs to exist for importlib
     (tmp_path / "loop_link.py").touch()
 
     return tmp_path
@@ -357,6 +357,8 @@ def test_loader_execution_failure(workspace: Path) -> None:
 def test_loader_cleanup_coverage(workspace: Path) -> None:
     # Import dependency, succeeds. Covers success cleanup loop.
     # dependency.py is in root, so it should be found.
+    # We must ensure dependency.py is a valid module
+    # workspace (jail) has dependency.py
     cls = load_middleware_from_ref("middlewares/with_dep.py:MyMiddleware", workspace)
     assert cls.__name__ == "MyMiddleware"
 
@@ -364,6 +366,9 @@ def test_loader_cleanup_coverage(workspace: Path) -> None:
 def test_loader_cleanup_exception_coverage(workspace: Path) -> None:
     # Import fail dependency. Covers exception cleanup loop.
     # fail_dep.py is in root.
+    # load_middleware_from_ref raises ValueError if execution fails, but
+    # SandboxedPathFinder might raise SecurityJailViolationError if imports are wonky?
+    # No, with_fail_dep.py just raises ValueError.
     with pytest.raises(ValueError, match="Failed to execute middleware code"):
         load_middleware_from_ref("middlewares/with_fail_dep.py:MyMiddleware", workspace)
 
@@ -419,6 +424,18 @@ def test_loader_symlink_loop(workspace: Path) -> None:
         if "loop_link" in self.name:
             raise RuntimeError("Symlink loop detected")
         return original_resolve(self, strict=strict)
+
+    # We need to ensure find_spec returns something so resolve is called on it
+    # Import machinery will try to find 'loop_link'
+
+    # But SandboxedPathFinder logic calls resolve on potential path BEFORE calling standard finder?
+    # No, it calls find_spec (standard finder) -> if None -> manual check.
+    # If standard finder finds it (because it is a file), then it calls resolve on origin.
+
+    # So 'loop_link.py' must exist (it does in fixture).
+
+    # But we patch Path.resolve.
+    # When SandboxedPathFinder calls origin_path.resolve(), it should hit our mock.
 
     with (
         patch("pathlib.Path.resolve", side_effect=mock_resolve, autospec=True),

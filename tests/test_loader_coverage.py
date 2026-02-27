@@ -33,6 +33,9 @@ def test_loader_symlink_loop_in_find_spec(tmp_path: Path) -> None:
         mock_spec = MagicMock()
         mock_spec.origin = str(jail / "foo.py")
 
+        # Mocking resolve is enough, but we must ensure it's called.
+        # find_spec calls resolve() on origin.
+
         with (
             patch("importlib.machinery.FileFinder.find_spec", return_value=mock_spec),
             patch("pathlib.Path.resolve", side_effect=RuntimeError("Symlink loop detected")),
@@ -91,6 +94,8 @@ def test_loader_agent_unsafe_permissions(tmp_path: Path) -> None:
     # Force os.name="posix" so logic runs even on Windows
     with patch("os.name", "posix"):
         with patch("pathlib.Path.stat") as mock_stat:
+            # Must include S_IFREG or similar to avoid other checks failing if logic changes
+            # But the bitwise AND check is strict.
             mock_stat.return_value.st_mode = stat.S_IWOTH
             with pytest.raises(SecurityJailViolationError, match="unsafe writable permissions"):
                 load_agent_from_ref("agent.py:Agent", root_dir=jail)
@@ -133,7 +138,9 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
         pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
     ):
         # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
-        finder.find_spec("malicious_module")
+        spec = finder.find_spec("malicious_module")
+        if spec is None:
+             pytest.fail("find_spec returned None instead of raising SecurityJailViolationError")
 
 
 def test_loader_execution_success(tmp_path: Path) -> None:
