@@ -73,6 +73,12 @@ class ActionNode(NodeSpec):
     inputs: dict[str, str] = Field(..., description="Mapping of input arguments to variable names.")
     outputs: dict[str, str] = Field(..., description="Mapping of output keys to variable names.")
 
+    # SOTA Fix: Add next_node for chaining without StrategyNode
+    next_node: NodeID | None = Field(
+        None,
+        description="The node to transition to after successful action execution."
+    )
+
 
 class StrategyNode(NodeSpec):
     """

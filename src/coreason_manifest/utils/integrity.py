@@ -12,7 +12,7 @@ from typing import Any, TypedDict, cast
 from pydantic import BaseModel, Field
 
 from coreason_manifest.spec.common_base import CoreasonModel
-from coreason_manifest.spec.core.contracts import AtomicSkill
+from coreason_manifest.spec.core.contracts import AtomicSkill, StrictJsonDict
 
 
 def to_canonical_timestamp(dt: datetime) -> str:
@@ -67,10 +67,11 @@ class CanonicalHashingStrategy(HashingStrategy):
             # Define excluded keys only if we are at the root level
             excluded_keys = {"execution_hash", "signature", "annotations"} if is_root else set()
 
+            # SOTA Fix: Removed `startswith("__")` exclusion backdoor.
             return {
                 k: self._recursive_sort_and_sanitize(v, is_root=False)
                 for k, v in sorted(obj.items())
-                if v is not None and k not in excluded_keys and not k.startswith("__")
+                if v is not None and k not in excluded_keys
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x, is_root=False) for x in obj]
@@ -130,8 +131,9 @@ class ProofOfTaskExecution(CoreasonModel):
     execution_id: str = Field(..., description="Unique ID of this execution.")
     timestamp: str = Field(..., description="UTC timestamp of execution.")
     skill: AtomicSkill = Field(..., description="The immutable skill executed.")
-    inputs: dict[str, Any] = Field(..., description="Canonicalized inputs.")
-    outputs: dict[str, Any] = Field(..., description="Canonicalized outputs.")
+    # SOTA Fix: Use StrictJsonDict instead of dict[str, Any]
+    inputs: StrictJsonDict = Field(..., description="Canonicalized inputs.")
+    outputs: StrictJsonDict = Field(..., description="Canonicalized outputs.")
     model_weights_hash: str | None = Field(None, description="Hash of the model weights used, if applicable.")
     parent_hash: str | None = Field(None, description="Hash of the previous execution in the chain.")
     locked_status: bool = Field(True, description="Asserts that this step was locked/immutable.")
@@ -144,8 +146,8 @@ class ProofOfTaskExecution(CoreasonModel):
 def generate_execution_receipt(
     execution_id: str,
     skill: AtomicSkill,
-    inputs: dict[str, Any],
-    outputs: dict[str, Any],
+    inputs: StrictJsonDict,
+    outputs: StrictJsonDict,
     parent_hash: str | None = None,
     model_weights_hash: str | None = None,
 ) -> ProofOfTaskExecution:

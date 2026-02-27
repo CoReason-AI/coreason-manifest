@@ -47,13 +47,12 @@ def compile_graph(plan: PlanTree) -> None:
     Compiles and strictly validates a PlanTree for execution.
 
     SOTA Enforcement:
-    1. Cycle Detection: Checks for cycles. If found, checks for Bounded Loop Constraints.
+    1. Reachability (Ghost Cluster) Check: Ensures entire graph is connected from root.
+    2. Cycle Detection: Checks for cycles. If found, checks for Bounded Loop Constraints.
        If unbounded, raises fatal error.
-    2. Dominator Tree Analysis: Calculates dominators for every node.
+    3. Dominator Tree Analysis: Calculates dominators for every node.
        Enforces that for every 'High-Risk' node (ActionNode with dangerous capabilities),
        its dominator set MUST contain at least one `locked=True` node.
-       This mathematically proves that the high-risk action cannot be reached without passing
-       through a locked compliance/guard node (or the action itself is locked).
 
     Args:
         plan: The strict execution plan.
@@ -69,7 +68,7 @@ def compile_graph(plan: PlanTree) -> None:
 
     # 1. Build Adjacency List & Identifiers
     adj: dict[str, list[str]] = {nid: [] for nid in plan.nodes}
-    # Reverse adjacency for dominator calculation if needed, but iterative can use preds.
+    # Reverse adjacency for dominator calculation
     preds: dict[str, list[str]] = {nid: [] for nid in plan.nodes}
 
     locked_nodes: set[str] = set()
@@ -86,6 +85,16 @@ def compile_graph(plan: PlanTree) -> None:
             if NodeCapability.COMPUTER_USE in caps or NodeCapability.CODE_EXECUTION in caps:
                 high_risk_nodes.add(nid)
 
+            # SOTA Fix: Add next_node logic for chaining ActionNodes
+            if node.next_node:
+                if node.next_node not in plan.nodes:
+                    raise ZeroTrustRoutingError(
+                        f"Action node {nid} routes to unknown next_node {node.next_node}.",
+                        node_id=nid,
+                    )
+                adj[nid].append(node.next_node)
+                preds[node.next_node].append(nid)
+
         if isinstance(node, StrategyNode):
             for route_target in node.routes.values():
                 if route_target not in plan.nodes:
@@ -96,7 +105,22 @@ def compile_graph(plan: PlanTree) -> None:
                 adj[nid].append(route_target)
                 preds[route_target].append(nid)
 
-    # 2. Cycle Detection (Bounded)
+    # 2. Strict Reachability Check (Ghost Cluster Protection)
+    # Before initializing Dominators, we MUST verify reachability.
+    reachable = get_reachable_nodes(adj, [plan.root_node])
+    all_nodes_set = set(plan.nodes.keys())
+
+    # If any defined node is unreachable, it's a Ghost Cluster (or dead code),
+    # which invalidates the dominator assumption that "All nodes are potential dominators".
+    if reachable != all_nodes_set:
+        unreachable = all_nodes_set - reachable
+        raise ZeroTrustRoutingError(
+            f"Graph contains unreachable nodes/ghost clusters: {unreachable}. "
+            "All nodes must be reachable from the root in a Zero-Trust Kernel.",
+            node_id=list(unreachable)[0]
+        )
+
+    # 3. Cycle Detection (Bounded)
     visited = set()
     recursion_stack = set()
 
@@ -110,7 +134,6 @@ def compile_graph(plan: PlanTree) -> None:
                     return True
             elif neighbor in recursion_stack:
                 # Cycle detected! SOTA Check: Is this cycle bounded?
-                # Check constraints on the StrategyNode creating the cycle (source of back-edge).
                 node_obj = plan.nodes[current_node]
 
                 is_bounded = False
@@ -140,67 +163,47 @@ def compile_graph(plan: PlanTree) -> None:
     except RecursionError:
         raise ZeroTrustRoutingError("Graph depth exceeded recursion limit (possible cycle).")
 
-    # 3. Dominator Analysis (Iterative O(V+E))
-    # Algorithm: Cooper, Harvey, Kennedy (2001) - Simple Fast Dominance
-    # Or simpler set intersection for modest graphs:
-    # Dom(n) = {n} U (Intersection of Dom(p) for all preds p)
-    # Base: Dom(root) = {root}
-    # Init: Dom(n) = All Nodes
-
-    all_node_ids = set(plan.nodes.keys())
-    dom: dict[str, set[str]] = {nid: all_node_ids.copy() for nid in all_node_ids}
+    # 4. Dominator Analysis (Iterative O(V+E))
+    # Init: Dom(root) = {root}, Dom(others) = All Nodes
+    dom: dict[str, set[str]] = {nid: all_nodes_set.copy() for nid in all_nodes_set}
     dom[plan.root_node] = {plan.root_node}
 
     changed = True
     while changed:
         changed = False
-        # Iterate in some order (Reverse Post Order is best, but arbitrary converges eventually)
-        # For simplicity, just iterate keys.
+        # Simple iterative order (can be optimized but sufficient for kernel validation)
         for nid in plan.nodes:
             if nid == plan.root_node:
                 continue
 
-            # Intersection of preds dominators
-            # If a node has no preds (and isn't root), it's unreachable.
-            # Unreachable nodes should have been caught or we ignore them.
             node_preds = preds[nid]
             if not node_preds:
-                # Unreachable (or separate component). Dom is effectively just itself (local root) or empty context?
-                # Gatekeeper usually prunes unreachable nodes separately.
-                # Let's skip updating if unreachable from known roots to avoid noise,
-                # or set Dom(n) = {n}.
-                new_dom = {nid}
-            else:
-                # Intersect doms of all preds
-                # Start with the first pred's dom
-                intersection = dom[node_preds[0]].copy()
-                for p in node_preds[1:]:
-                    intersection &= dom[p]
+                # Should not happen due to Reachability Check above, but as a safeguard:
+                # Unreachable node's dom stays as All Nodes? No, unreachable nodes maintain {all}
+                # which causes the ghost cluster exploit if we didn't check reachability.
+                # Since we checked reachability, node_preds IS NOT EMPTY.
+                continue
 
-                new_dom = {nid} | intersection
+            # Intersection of preds dominators
+            # Start with the first pred's dom
+            intersection = dom[node_preds[0]].copy()
+            for p in node_preds[1:]:
+                intersection &= dom[p]
+
+            new_dom = {nid} | intersection
 
             if new_dom != dom[nid]:
                 dom[nid] = new_dom
                 changed = True
 
-    # 4. Enforce High-Risk Dominance
-    # "High-risk nodes must be dominated by locked nodes"
-    # For each high risk node H, check if Dom(H) contains any node L in `locked_nodes`.
-    # (Note: H can be L, and H dominates itself, so a Locked High-Risk node satisfies the check).
-
+    # 5. Enforce High-Risk Dominance
     for hr_node in high_risk_nodes:
         dominators = dom[hr_node]
-        # Check intersection
         guards = dominators.intersection(locked_nodes)
 
         if not guards:
-            # Violation: The high risk node is reachable without passing through ANY locked node.
-            # (Note: Unreachable high-risk nodes won't have the root in their dominator set if properly initialized,
-            # but here we initialized to All. The iteration converges. Unreachable nodes usually end up dominating themselves.
-            # If an unreachable node is high-risk, is it a violation? Maybe not executable, but bad practice.
-            # Assuming reachable for now. If unreachable, `detect_utility_islands` handles it.)
-
-            # Ensure it is actually reachable from root to be a threat.
+            # Violation
+            # Double check reachability just in case logic drifts (though enforced above)
             if plan.root_node in dominators:
                 raise ZeroTrustRoutingError(
                     f"High-Risk Node '{hr_node}' is not dominated by any Locked Node. "
@@ -226,57 +229,21 @@ def validate_policy(plan: PlanTree) -> list[ComplianceReport]:
     reports: list[ComplianceReport] = []
 
     # 1. Capability Analysis & Red Button Rule
-    # This is now PARTIALLY covered by compile_graph's dominance check (High-Risk -> Locked Guard).
-    # But validate_policy generates Reports (soft checks or detailed remediations) whereas compile_graph is a hard gate.
-    # We keep this for detailed remediation suggestions.
-
-    for nid, node in plan.nodes.items():
-        if isinstance(node, ActionNode):
-            caps = node.skill.capabilities
-
-            risk_reasons = []
-            if NodeCapability.COMPUTER_USE in caps:
-                risk_reasons.append(NodeCapability.COMPUTER_USE)
-            if NodeCapability.CODE_EXECUTION in caps:
-                risk_reasons.append(NodeCapability.CODE_EXECUTION)
-
-            if risk_reasons:
-                if not node.locked:
-                    # Note: compile_graph might have already failed if this node wasn't dominated by *another* locked node.
-                    # But if it passed compile_graph (e.g. dominated by a previous Locked Node), this check ensures
-                    # the node *itself* should ideally be locked or we just warn?
-                    # The prompt said: "If a node is dangerous... it MUST be locked" (my previous logic).
-                    # The new logic says: "High-risk nodes must be dominated by locked nodes".
-                    # This allows the dangerous node to be unlocked IF it is preceded by a Locked Approval Node.
-                    # So strict requirement that dangerous node ITSELF is locked is relaxed?
-                    # "Refactor: ... Revert the check ... The gatekeeper should ensure that if a node has high-risk capabilities ... the dominator set ... must contain a locked=True compliance/guard node."
-                    # This implies we DON'T strictly require the dangerous node itself to be locked,
-                    # as long as it is guarded.
-
-                    # So this `validate_policy` check below (requiring node.locked) might be too strict now?
-                    # However, "Immutable and Locked Steps" usually implies the dangerous ACTION is the one you lock.
-                    # But if we support "Guard -> Action", the Action can be unlocked (modifiable params?)
-                    # That sounds risky. A Locked Approval followed by an unlocked "Delete Everything" (where params can be changed) is bad.
-                    # Usually, the "Guard" approves specific parameters.
-                    # If the Action is unlocked, its parameters can change after approval?
-                    # In a "Zero Trust Execution Kernel", if the graph is static/compiled, "unlocked" only means "defined as not-locked in spec".
-                    # At runtime, the graph is frozen `PlanTree`.
-                    # So "locked" here refers to "Cannot be skipped" (Topological lock).
-                    # If the Action is unlocked, maybe it means it's not a *Compliance* node.
-                    # I will relax this check or remove it since `compile_graph` handles the SOTA dominance check now.
-                    # But `validate_policy` is useful for providing the *Remediation* (Add Guard Node).
-                    # `compile_graph` just raises Error.
-                    # I will keep a check but align it: Check if dominated by locked node.
-                    # Calculating dominators again here?
-                    pass
+    # Enforced by compile_graph, but we can add warnings or specific remediation hints here if needed.
+    # Leaving largely empty as compile_graph is the primary enforcement mechanism now.
 
     # 2. Utility Islands (Unreachable nodes)
+    # Check is also performed by compile_graph as a hard error.
+    # validate_policy serves as a linter before compilation if used separately.
     adj: dict[str, list[str]] = {nid: [] for nid in plan.nodes}
     for nid, node in plan.nodes.items():
         if isinstance(node, StrategyNode):
             for target in node.routes.values():
                  if target in plan.nodes:
                      adj[nid].append(target)
+        if isinstance(node, ActionNode) and node.next_node:
+             if node.next_node in plan.nodes:
+                 adj[nid].append(node.next_node)
 
     reachable = get_reachable_nodes(adj, [plan.root_node])
     all_nodes = set(plan.nodes.keys())
