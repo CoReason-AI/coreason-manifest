@@ -91,9 +91,22 @@ def create_resilience(
 
 
 class AgentBuilder:
-    """Fluent API to construct AgentNodes."""
+    """Fluent API to construct AgentNodes.
+
+    This builder simplifies the creation of `AgentNode` objects by providing
+    methods to configure identity, reasoning, tools, resilience, and operational
+    policies in a chained manner.
+
+    Attributes:
+        agent_id (str): The unique identifier for the agent being built.
+    """
 
     def __init__(self, agent_id: str) -> None:
+        """Initializes the AgentBuilder.
+
+        Args:
+            agent_id (str): The unique identifier for the agent.
+        """
         self.agent_id = agent_id
         self.role: str | None = None
         self.persona: str | None = None
@@ -106,23 +119,56 @@ class AgentBuilder:
         self.memory: MemorySubsystem | None = None
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
-        """Configures CognitiveProfile.role and CognitiveProfile.persona."""
+        """Configures the agent's identity.
+
+        Args:
+            role (str): The role of the agent (e.g., "Analyst").
+            persona (str): The persona description (e.g., "You are a helpful assistant...").
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         self.role = role
         self.persona = persona
         return self
 
     def with_reasoning(self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7) -> "AgentBuilder":
-        """Configures CognitiveProfile.reasoning (Standard CoT)."""
+        """Configures standard Chain of Thought (CoT) reasoning.
+
+        Args:
+            model (str): The model to use for reasoning.
+            thoughts_max (int): Maximum number of thought steps. Defaults to 5.
+            min_confidence (float): Minimum confidence threshold. Defaults to 0.7.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         self.reasoning = StandardReasoning(model=model, thoughts_max=thoughts_max, min_confidence=min_confidence)
         return self
 
     def with_fast_path(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> "AgentBuilder":
-        """Configures CognitiveProfile.fast_path."""
+        """Configures the fast path (System 1) reasoning.
+
+        Args:
+            model (str): The model to use for fast path execution.
+            timeout_ms (int): Timeout in milliseconds. Defaults to 1000.
+            caching (bool): Whether to enable caching. Defaults to True.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         self.fast_path = FastPath(model=model, timeout_ms=timeout_ms, caching=caching)
         return self
 
     def with_tools(self, tools: list[str]) -> "AgentBuilder":
-        """Appends to AgentNode.tools."""
+        """Adds a list of tools to the agent.
+
+        Args:
+            tools (list[str]): A list of tool names/identifiers.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         self.tools.extend(tools)
         return self
 
@@ -135,7 +181,23 @@ class AgentBuilder:
         fallback_id: str | None = None,
         queue_name: str | None = None,
     ) -> "AgentBuilder":
-        """Helper to configure AgentNode.resilience."""
+        """Configures the resilience strategy for the agent.
+
+        Args:
+            retries (int): Maximum number of retries.
+            strategy (str): The resilience strategy ("retry", "fallback", or "escalate").
+                Defaults to "escalate".
+            backoff (float): Backoff factor for retries. Defaults to 2.0.
+            delay (float): Initial delay in seconds. Defaults to 1.0.
+            fallback_id (str | None): The ID of the fallback node. Required if strategy is "fallback".
+            queue_name (str | None): The queue name for escalation. Defaults to "default_human_queue".
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+
+        Raises:
+            ValueError: If strategy is "fallback" and fallback_id is not provided.
+        """
         self.resilience = create_resilience(
             retries=retries,
             strategy=strategy,
@@ -147,7 +209,15 @@ class AgentBuilder:
         return self
 
     def with_human_steering(self, timeout: int = 300, fallback_id: str | None = None) -> "AgentBuilder":
-        """Configures resilience with a human escalation strategy."""
+        """Configures human steering (escalation) as a supervision policy.
+
+        Args:
+            timeout (int): Timeout in seconds for human intervention. Defaults to 300.
+            fallback_id (str | None): The ID of the fallback node if escalation times out.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         esc_strategy = EscalationStrategy(
             queue_name="steering_queue",
             notification_level="info",
@@ -206,7 +276,21 @@ class AgentBuilder:
         max_payload_bytes: int | None = None,
         max_search_results: int | None = None,
     ) -> "AgentBuilder":
-        """Configures the operational limits (Financial, Compute, Data)."""
+        """Configures operational limits for the agent (financial, compute, data).
+
+        Args:
+            max_cost_usd (float | None): Maximum allowed cost in USD.
+            max_tokens (int | None): Maximum total tokens allowed.
+            fallback_model (str | None): Model to use if budget is depleted.
+            max_steps (int | None): Maximum cognitive steps allowed.
+            max_execution_time_seconds (int | None): Maximum execution time in seconds.
+            max_rows_per_query (int | None): Maximum rows per data query.
+            max_payload_bytes (int | None): Maximum payload size in bytes.
+            max_search_results (int | None): Maximum number of search results.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         financial = None
         if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
             financial = FinancialLimits(
@@ -236,7 +320,16 @@ class AgentBuilder:
     def with_escalation_rule(
         self, condition: str, role: str, strategy: EscalationStrategy | None = None
     ) -> "AgentBuilder":
-        """Adds a local escalation rule to the agent."""
+        """Adds a local escalation rule to the agent.
+
+        Args:
+            condition (str): The condition triggering the escalation.
+            role (str): The role responsible for handling the escalation.
+            strategy (EscalationStrategy | None): The strategy to execute.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         self.escalation_rules.append(EscalationCriteria(condition=condition, role=role, strategy=strategy))
         return self
 
@@ -251,7 +344,21 @@ class AgentBuilder:
         allowed_entity_types: list[str] | None = None,
         skill_library_ref: str | None = None,
     ) -> "AgentBuilder":
-        """Configures the memory subsystem."""
+        """Configures the memory subsystem for the agent.
+
+        Args:
+            working_limit (int): Maximum tokens for working memory. Defaults to 4096.
+            enable_paging (bool): Whether to enable active paging. Defaults to False.
+            salience_threshold (float | None): Threshold for episodic memory salience.
+            consolidation_interval (int | None): Interval for memory consolidation (in turns).
+            graph_namespace (str | None): Namespace for semantic memory graph.
+            bitemporal_tracking (bool): Whether to enable bitemporal tracking. Defaults to False.
+            allowed_entity_types (list[str] | None): Allowed entity types for semantic memory.
+            skill_library_ref (str | None): Reference to a skill library for procedural memory.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
         working = WorkingMemoryConfig(max_tokens=working_limit, enable_active_paging=enable_paging)
 
         episodic = None
@@ -282,7 +389,14 @@ class AgentBuilder:
         return self
 
     def build(self) -> AgentNode:
-        """Validates and returns the node."""
+        """Validates configuration and builds the AgentNode.
+
+        Returns:
+            AgentNode: The constructed agent node.
+
+        Raises:
+            ValueError: If agent identity (role, persona) is not set.
+        """
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
@@ -307,9 +421,25 @@ class AgentBuilder:
 
 
 class BaseFlowBuilder:
-    """Shared logic for all flow builders to enforce DRY principles."""
+    """Shared logic for all flow builders to enforce DRY principles.
+
+    This class serves as the foundation for creating different types of flows
+    (e.g., LinearFlow, GraphFlow). It manages shared components like metadata,
+    profiles, tool packs, supervision templates, and governance policies.
+
+    Attributes:
+        metadata (FlowMetadata): Metadata associated with the flow.
+        governance (Governance | None): Governance policy for the flow.
+    """
 
     def __init__(self, name: str, version: str, description: str) -> None:
+        """Initializes the BaseFlowBuilder.
+
+        Args:
+            name (str): The name of the flow.
+            version (str): The version of the flow.
+            description (str): A description of the flow.
+        """
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
         self._tool_packs: dict[str, ToolPack] = {}
@@ -317,7 +447,15 @@ class BaseFlowBuilder:
         self.governance: Governance | None = None
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
-        """Registers a reusable supervision policy."""
+        """Registers a reusable supervision policy.
+
+        Args:
+            template_id (str): The unique ID for the template.
+            policy (SupervisionPolicy): The policy definition.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         self._supervision_templates[template_id] = policy
         return self
 
@@ -329,19 +467,44 @@ class BaseFlowBuilder:
         reasoning: ReasoningConfig | None = None,
         fast_path: FastPath | None = None,
     ) -> Self:
-        """Registers a reusable profile definition."""
+        """Registers a reusable profile definition.
+
+        Args:
+            profile_id (str): The unique ID for the profile.
+            role (str): The role associated with the profile.
+            persona (str): The persona description.
+            reasoning (ReasoningConfig | None): Optional reasoning configuration.
+            fast_path (FastPath | None): Optional fast path configuration.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         self._profiles[profile_id] = CognitiveProfile(
             role=role, persona=persona, reasoning=reasoning, fast_path=fast_path
         )
         return self
 
     def add_tool_pack(self, pack: ToolPack) -> Self:
-        """Adds a tool pack to the flow."""
+        """Adds a tool pack to the flow.
+
+        Args:
+            pack (ToolPack): The tool pack to add.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         self._tool_packs[pack.namespace] = pack
         return self
 
     def set_governance(self, gov: Governance) -> Self:
-        """Sets the governance policy."""
+        """Sets the governance policy.
+
+        Args:
+            gov (Governance): The governance policy object.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         self.governance = gov
         return self
 
@@ -357,7 +520,22 @@ class BaseFlowBuilder:
         max_payload_bytes: int | None = None,
         max_search_results: int | None = None,
     ) -> Self:
-        """Configures global operational limits (Financial, Data, Compute)."""
+        """Configures global operational limits (Financial, Data, Compute).
+
+        Args:
+            max_cost_usd (float | None): Maximum allowed cost in USD.
+            max_tokens (int | None): Maximum total tokens allowed.
+            fallback_model (str | None): Model to use if budget is depleted.
+            max_steps (int | None): Maximum cognitive steps allowed.
+            max_execution_time_seconds (int | None): Maximum execution time in seconds.
+            max_concurrent_agents (int | None): Maximum number of concurrent agents.
+            max_rows_per_query (int | None): Maximum rows per data query.
+            max_payload_bytes (int | None): Maximum payload size in bytes.
+            max_search_results (int | None): Maximum number of search results.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         financial = None
         if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
             financial = FinancialLimits(
@@ -391,7 +569,16 @@ class BaseFlowBuilder:
         return self
 
     def set_circuit_breaker(self, error_threshold: int, reset_timeout: int, fallback_node: str | None = None) -> Self:
-        """Sets the circuit breaker policy."""
+        """Sets the circuit breaker policy.
+
+        Args:
+            error_threshold (int): The number of errors to trigger the circuit breaker.
+            reset_timeout (int): The timeout in seconds before resetting.
+            fallback_node (str | None): The ID of the fallback node.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         cb = CircuitBreaker(
             error_threshold_count=error_threshold,
             reset_timeout_seconds=reset_timeout,
@@ -416,7 +603,16 @@ class BaseFlowBuilder:
         raise NotImplementedError
 
     def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> Self:
-        """Adds a node that points to a registered profile."""
+        """Adds a node that points to a registered profile.
+
+        Args:
+            node_id (str): The unique identifier for the new node.
+            profile_id (str): The ID of the registered profile to use.
+            tools (list[str] | None): Optional list of tools for the agent.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         if tools is None:
             tools = []
         node = AgentNode(
@@ -431,7 +627,16 @@ class BaseFlowBuilder:
         return self
 
     def add_shadow_node(self, node_id: str, prompt: str, shadow_timeout: int = 60) -> Self:
-        """Adds a human shadow node to the flow."""
+        """Adds a human shadow node to the flow.
+
+        Args:
+            node_id (str): The unique identifier for the shadow node.
+            prompt (str): The prompt for the human shadow.
+            shadow_timeout (int): Timeout in seconds for shadow interaction. Defaults to 60.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         node = HumanNode(
             id=node_id,
             metadata={},
@@ -448,7 +653,18 @@ class BaseFlowBuilder:
         return self
 
     def add_inspector(self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5) -> Self:
-        """Adds an inspector node to the flow."""
+        """Adds an inspector node to the flow.
+
+        Args:
+            node_id (str): The unique identifier for the inspector node.
+            target (str): The variable to inspect.
+            criteria (str): The criteria for inspection.
+            output (str): The variable to store the output.
+            pass_threshold (float): The threshold for passing. Defaults to 0.5.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
         node = InspectorNode(
             id=node_id,
             metadata={},
@@ -467,7 +683,14 @@ class BaseFlowBuilder:
         raise NotImplementedError
 
     def build(self) -> LinearFlow | GraphFlow:
-        """Constructs and validates the Flow object."""
+        """Constructs and validates the Flow object.
+
+        Returns:
+            LinearFlow | GraphFlow: The constructed flow object.
+
+        Raises:
+            ValueError: If validation fails.
+        """
         flow = self._create_flow_instance()
 
         errors = validate_flow(flow)
@@ -480,9 +703,19 @@ class BaseFlowBuilder:
 
 
 class NewLinearFlow(BaseFlowBuilder):
-    """Fluent API to construct LinearFlows programmatically."""
+    """Fluent API to construct LinearFlows programmatically.
+
+    LinearFlows represent a sequence of steps executed in order.
+    """
 
     def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
+        """Initializes the NewLinearFlow builder.
+
+        Args:
+            name (str): The name of the flow.
+            version (str): The version of the flow. Defaults to "0.1.0".
+            description (str): A description of the flow. Defaults to "".
+        """
         super().__init__(name, version, description)
         self.steps: list[AnyNode] = []
 
@@ -490,12 +723,26 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps.append(node)
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
-        """Appends a node to the sequence."""
+        """Appends a node to the sequence.
+
+        Args:
+            node (AnyNode): The node to add.
+
+        Returns:
+            NewLinearFlow: The builder instance for chaining.
+        """
         self.steps.append(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
-        """Appends an agent node to the sequence."""
+        """Appends an agent node to the sequence.
+
+        Args:
+            agent (AgentNode): The agent node to add.
+
+        Returns:
+            NewLinearFlow: The builder instance for chaining.
+        """
         self.steps.append(agent)
         return self
 
@@ -510,14 +757,30 @@ class NewLinearFlow(BaseFlowBuilder):
         )
 
     def build(self) -> LinearFlow:
+        """Constructs and validates the LinearFlow object.
+
+        Returns:
+            LinearFlow: The constructed linear flow.
+        """
         # Override return type hint for better IDE support, but reuse base implementation
         return cast("LinearFlow", super().build())
 
 
 class NewGraphFlow(BaseFlowBuilder):
-    """Fluent API to construct GraphFlows programmatically."""
+    """Fluent API to construct GraphFlows programmatically.
+
+    GraphFlows represent a graph of nodes connected by edges, allowing for
+    complex branching and looping logic.
+    """
 
     def __init__(self, name: str, version: str = "0.1.0", description: str = "") -> None:
+        """Initializes the NewGraphFlow builder.
+
+        Args:
+            name (str): The name of the flow.
+            version (str): The version of the flow. Defaults to "0.1.0".
+            description (str): A description of the flow. Defaults to "".
+        """
         super().__init__(name, version, description)
         self._nodes: dict[str, AnyNode] = {}
         self._edges: list[Edge] = []
@@ -533,27 +796,65 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes[node.id] = node
 
     def set_entry_point(self, node_id: str) -> "NewGraphFlow":
-        """Sets the explicit entry point for the graph."""
+        """Sets the explicit entry point for the graph.
+
+        Args:
+            node_id (str): The ID of the entry point node.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
         self._entry_point = node_id
         return self
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
-        """Adds a node to the graph."""
+        """Adds a node to the graph.
+
+        Args:
+            node (AnyNode): The node to add.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
         self._nodes[node.id] = node
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
-        """Adds an agent node to the graph."""
+        """Adds an agent node to the graph.
+
+        Args:
+            agent (AgentNode): The agent node to add.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
         self._nodes[agent.id] = agent
         return self
 
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
-        """Adds an edge to the graph."""
+        """Adds an edge to the graph.
+
+        Args:
+            source (str): The ID of the source node.
+            target (str): The ID of the target node.
+            condition (str | None): Optional condition for traversing the edge.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
         self._edges.append(Edge(from_node=source, to_node=target, condition=condition))
         return self
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
-        """Defines the Input/Output contract for the Flow."""
+        """Defines the Input/Output contract for the Flow.
+
+        Args:
+            inputs (dict[str, Any]): JSON schema for inputs.
+            outputs (dict[str, Any]): JSON schema for outputs.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
         self.interface = FlowInterface(
             inputs=DataSchema(json_schema=inputs),
             outputs=DataSchema(json_schema=outputs),
@@ -561,7 +862,15 @@ class NewGraphFlow(BaseFlowBuilder):
         return self
 
     def set_blackboard(self, variables: dict[str, dict[str, Any]], persistence: bool = False) -> "NewGraphFlow":
-        """Configures the shared memory blackboard."""
+        """Configures the shared memory blackboard.
+
+        Args:
+            variables (dict[str, dict[str, Any]]): Blackboard variable definitions.
+            persistence (bool): Whether to persist blackboard state. Defaults to False.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
         self.blackboard = Blackboard(variables=variables, persistence=persistence)
         return self
 
@@ -585,5 +894,10 @@ class NewGraphFlow(BaseFlowBuilder):
         )
 
     def build(self) -> GraphFlow:
+        """Constructs and validates the GraphFlow object.
+
+        Returns:
+            GraphFlow: The constructed graph flow.
+        """
         # Override return type hint
         return cast("GraphFlow", super().build())

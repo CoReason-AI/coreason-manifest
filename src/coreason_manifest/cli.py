@@ -8,85 +8,103 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-import argparse
 import sys
 from importlib.metadata import PackageNotFoundError, version
+
+import typer
+from rich import print as rprint
 
 from coreason_manifest.utils.loader import load_flow_from_file
 from coreason_manifest.utils.validator import validate_flow
 from coreason_manifest.utils.visualizer import to_mermaid
 
+app = typer.Typer(help="CoReason Manifest CLI")
 
-def main() -> int:
-    """Entry point for the coreason CLI."""
-    try:
-        pkg_version = version("coreason_manifest")
-    except PackageNotFoundError:
-        pkg_version = "unknown"
 
-    parser = argparse.ArgumentParser(prog="coreason", description="CoReason Manifest CLI")
-    parser.add_argument("--version", action="version", version=f"%(prog)s {pkg_version}")
+def version_callback(value: bool) -> None:
+    if value:
+        try:
+            pkg_version = version("coreason_manifest")
+        except PackageNotFoundError:
+            pkg_version = "unknown"
+        typer.echo(f"coreason {pkg_version}")
+        raise typer.Exit()
 
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate a manifest file")
-    validate_parser.add_argument("file", help="Path to the manifest file")
+@app.callback()  # type: ignore[untyped-decorator]
+def main(
+    version: bool | None = typer.Option(
+        None, "--version", callback=version_callback, is_eager=True, help="Show the version and exit."
+    ),
+) -> None:
+    """
+    CoReason Manifest CLI
+    """
 
-    # Visualize command
-    visualize_parser = subparsers.add_parser("visualize", help="Generate Mermaid diagram from manifest")
-    visualize_parser.add_argument("file", help="Path to the manifest file")
 
-    args = parser.parse_args()
+@app.command(name="validate")  # type: ignore[untyped-decorator]
+def validate(file: str = typer.Argument(..., help="Path to the manifest file")) -> int:
+    """
+    Validate a manifest file
+    """
+    return _handle_validate(file)
 
-    if args.command == "validate":
-        return _handle_validate(args.file)
 
-    if args.command == "visualize":
-        return _handle_visualize(args.file)
+@app.command(name="visualize")  # type: ignore[untyped-decorator]
+def visualize(file: str = typer.Argument(..., help="Path to the manifest file")) -> int:
+    """
+    Generate Mermaid diagram from manifest
+    """
+    return _handle_visualize(file)
 
-    parser.print_help()
-    return 0
+
+@app.command(name="create")  # type: ignore[untyped-decorator]
+def create() -> None:
+    """
+    Create a new manifest (Placeholder)
+    """
+    rprint("[yellow]Create command is not yet implemented.[/yellow]")
+    raise typer.Exit(code=1)
 
 
 def _handle_validate(file_path: str) -> int:
     try:
         flow = load_flow_from_file(file_path)
     except (FileNotFoundError, ValueError) as e:
-        print(f"❌ Error loading file: {e}", file=sys.stderr)
-        return 1
+        rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
+        raise typer.Exit(code=1) from e
     except Exception as e:
-        print(f"❌ Unexpected Error: {e}", file=sys.stderr)
-        return 1
+        rprint(f"[red]❌ Unexpected Error: {e}[/red]", file=sys.stderr)
+        raise typer.Exit(code=1) from e
 
     errors = validate_flow(flow)
 
     if not errors:
-        print("✅ Flow is valid.")
+        rprint("[green]✅ Flow is valid.[/green]")
         return 0
 
-    print("❌ Validation failed:", file=sys.stderr)
+    rprint("[red]❌ Validation failed:[/red]", file=sys.stderr)
     for error in errors:
-        print(f"- {error}", file=sys.stderr)
-    return 1
+        rprint(f"[red]- {error}[/red]", file=sys.stderr)
+    raise typer.Exit(code=1)
 
 
 def _handle_visualize(file_path: str) -> int:
     try:
         flow = load_flow_from_file(file_path)
     except (FileNotFoundError, ValueError) as e:
-        print(f"❌ Error loading file: {e}", file=sys.stderr)
-        return 1
+        rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
+        raise typer.Exit(code=1) from e
     except Exception as e:
-        print(f"❌ Unexpected Error: {e}", file=sys.stderr)
-        return 1
+        rprint(f"[red]❌ Unexpected Error: {e}[/red]", file=sys.stderr)
+        raise typer.Exit(code=1) from e
 
     # Optional: Warn if invalid, but proceed
     errors = validate_flow(flow)
     if errors:
-        print("⚠️ Warning: Flow has validation errors:", file=sys.stderr)
+        rprint("[yellow]⚠️ Warning: Flow has validation errors:[/yellow]", file=sys.stderr)
         for error in errors:
-            print(f"- {error}", file=sys.stderr)
+            rprint(f"[yellow]- {error}[/yellow]", file=sys.stderr)
 
     diagram = to_mermaid(flow)
     print(diagram)
@@ -94,4 +112,4 @@ def _handle_visualize(file_path: str) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    app()

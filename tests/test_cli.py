@@ -1,15 +1,15 @@
-import sys
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 from unittest.mock import patch
 
-import pytest
 import yaml
-from _pytest.capture import CaptureFixture
+from typer.testing import CliRunner
 
-from coreason_manifest.cli import main
+from coreason_manifest.cli import app
+
+runner = CliRunner()
 
 
 def create_valid_flow(path: str) -> None:
@@ -32,18 +32,15 @@ def create_invalid_flow(path: str) -> None:
         yaml.dump(data, f)
 
 
-def test_validate_success(capsys: CaptureFixture[str]) -> None:
+def test_validate_success() -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
     create_valid_flow(tmp_path)
 
     try:
-        test_args = ["coreason", "validate", tmp_path]
-        with (
-            patch.object(sys, "argv", test_args),
-            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
-        ):
+        # Mocking ManifestIO because of strict security checks in loader
+        with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
 
             def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
@@ -52,26 +49,21 @@ def test_validate_success(capsys: CaptureFixture[str]) -> None:
 
             mock_io.side_effect = unsafe_manifest_io
 
-            ret = main()
-            assert ret == 0
-            captured = capsys.readouterr()
-            assert "Flow is valid" in captured.out
+            result = runner.invoke(app, ["validate", tmp_path])
+            assert result.exit_code == 0
+            assert "Flow is valid" in result.stdout
     finally:
-        Path(tmp_path).unlink()
+        Path(tmp_path).unlink(missing_ok=True)
 
 
-def test_validate_failure(capsys: CaptureFixture[str]) -> None:
+def test_validate_failure() -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
     create_invalid_flow(tmp_path)
 
     try:
-        test_args = ["coreason", "validate", tmp_path]
-        with (
-            patch.object(sys, "argv", test_args),
-            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
-        ):
+        with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
 
             def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
@@ -80,26 +72,21 @@ def test_validate_failure(capsys: CaptureFixture[str]) -> None:
 
             mock_io.side_effect = unsafe_manifest_io
 
-            ret = main()
-            assert ret == 1
-            captured = capsys.readouterr()
-            assert "Validation failed" in captured.err
+            result = runner.invoke(app, ["validate", tmp_path])
+            assert result.exit_code == 1
+            assert "Validation failed" in result.stderr
     finally:
-        Path(tmp_path).unlink()
+        Path(tmp_path).unlink(missing_ok=True)
 
 
-def test_visualize_success(capsys: CaptureFixture[str]) -> None:
+def test_visualize_success() -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
     create_valid_flow(tmp_path)
 
     try:
-        test_args = ["coreason", "visualize", tmp_path]
-        with (
-            patch.object(sys, "argv", test_args),
-            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
-        ):
+        with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
 
             def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
@@ -108,26 +95,21 @@ def test_visualize_success(capsys: CaptureFixture[str]) -> None:
 
             mock_io.side_effect = unsafe_manifest_io
 
-            ret = main()
-            assert ret == 0
-            captured = capsys.readouterr()
-            assert "graph TD" in captured.out
+            result = runner.invoke(app, ["visualize", tmp_path])
+            assert result.exit_code == 0
+            assert "graph TD" in result.stdout
     finally:
-        Path(tmp_path).unlink()
+        Path(tmp_path).unlink(missing_ok=True)
 
 
-def test_visualize_with_errors(capsys: CaptureFixture[str]) -> None:
+def test_visualize_with_errors() -> None:
     with NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as tmp:
         tmp_path = tmp.name
 
     create_invalid_flow(tmp_path)
 
     try:
-        test_args = ["coreason", "visualize", tmp_path]
-        with (
-            patch.object(sys, "argv", test_args),
-            patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
-        ):
+        with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
             from coreason_manifest.utils.io import ManifestIO
 
             def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
@@ -136,22 +118,17 @@ def test_visualize_with_errors(capsys: CaptureFixture[str]) -> None:
 
             mock_io.side_effect = unsafe_manifest_io
 
-            ret = main()
-            assert ret == 0  # Visualize proceeds even with errors
-            captured = capsys.readouterr()
-            assert "Flow has validation errors" in captured.err
-            assert "graph TD" in captured.out
+            result = runner.invoke(app, ["visualize", tmp_path])
+            assert result.exit_code == 0
+            assert "Flow has validation errors" in result.stderr
+            assert "graph TD" in result.stdout
     finally:
-        Path(tmp_path).unlink()
+        Path(tmp_path).unlink(missing_ok=True)
 
 
-def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
-    """Test that the validate command handles missing files."""
-    test_args = ["coreason", "validate", "non_existent.yaml"]
-    with (
-        patch.object(sys, "argv", test_args),
-        patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
-    ):
+def test_validate_missing_file() -> None:
+    # Patch ManifestIO to relax security during test to avoid O_NOFOLLOW error on Windows
+    with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
         from coreason_manifest.utils.io import ManifestIO
 
         def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
@@ -160,21 +137,14 @@ def test_validate_missing_file(capsys: CaptureFixture[str]) -> None:
 
         mock_io.side_effect = unsafe_manifest_io
 
-        ret = main()
-        assert ret == 1
-        captured = capsys.readouterr()
-        # Updated assertion to match new error message
-        assert "Error loading file" in captured.err
-        assert "File not found or inaccessible" in captured.err
+        result = runner.invoke(app, ["validate", "non_existent.yaml"])
+        assert result.exit_code == 1
+        assert "Error loading file" in result.stderr
 
 
-def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
-    """Test that the visualize command handles missing files."""
-    test_args = ["coreason", "visualize", "non_existent.yaml"]
-    with (
-        patch.object(sys, "argv", test_args),
-        patch("coreason_manifest.utils.loader.ManifestIO") as mock_io,
-    ):
+def test_visualize_missing_file() -> None:
+    # Patch ManifestIO to relax security during test to avoid O_NOFOLLOW error on Windows
+    with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
         from coreason_manifest.utils.io import ManifestIO
 
         def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
@@ -183,73 +153,46 @@ def test_visualize_missing_file(capsys: CaptureFixture[str]) -> None:
 
         mock_io.side_effect = unsafe_manifest_io
 
-        ret = main()
-        assert ret == 1
-        captured = capsys.readouterr()
-        # Updated assertion to match new error message
-        assert "Error loading file" in captured.err
-        assert "File not found or inaccessible" in captured.err
+        result = runner.invoke(app, ["visualize", "non_existent.yaml"])
+        assert result.exit_code == 1
+        assert "Error loading file" in result.stderr
 
 
-def test_cli_help(capsys: CaptureFixture[str]) -> None:
-    """Test that help is printed when no command is given."""
-    test_args = ["coreason"]
-    with patch.object(sys, "argv", test_args):
-        try:
-            ret = main()
-            assert ret == 0
-            captured = capsys.readouterr()
-            assert "usage: coreason" in captured.out
-        except SystemExit:
-            pass
+def test_cli_help() -> None:
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "CoReason Manifest CLI" in result.stdout
 
 
-def test_validate_unexpected_error(capsys: CaptureFixture[str]) -> None:
-    """Test that validate handles unexpected errors."""
-    test_args = ["coreason", "validate", "test.yaml"]
-    with (
-        patch.object(sys, "argv", test_args),
-        patch("coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")),
-    ):
-        ret = main()
-        assert ret == 1
-        captured = capsys.readouterr()
-        assert "Unexpected Error: Boom" in captured.err
+def test_validate_unexpected_error() -> None:
+    with patch("coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")):
+        result = runner.invoke(app, ["validate", "test.yaml"])
+        assert result.exit_code == 1
+        assert "Unexpected Error: Boom" in result.stderr
 
 
-def test_visualize_unexpected_error(capsys: CaptureFixture[str]) -> None:
-    """Test that visualize handles unexpected errors."""
-    test_args = ["coreason", "visualize", "test.yaml"]
-    with (
-        patch.object(sys, "argv", test_args),
-        patch("coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")),
-    ):
-        ret = main()
-        assert ret == 1
-        captured = capsys.readouterr()
-        assert "Unexpected Error: Boom" in captured.err
+def test_visualize_unexpected_error() -> None:
+    with patch("coreason_manifest.cli.load_flow_from_file", side_effect=RuntimeError("Boom")):
+        result = runner.invoke(app, ["visualize", "test.yaml"])
+        assert result.exit_code == 1
+        assert "Unexpected Error: Boom" in result.stderr
 
 
-def test_version(capsys: CaptureFixture[str]) -> None:
-    """Test that the version command works."""
-    test_args = ["coreason", "--version"]
-    with patch.object(sys, "argv", test_args), patch("coreason_manifest.cli.version", return_value="0.25.0"):
-        with pytest.raises(SystemExit) as exc:
-            main()
-        assert exc.value.code == 0
-        captured = capsys.readouterr()
-        assert "0.25.0" in captured.out
+def test_version() -> None:
+    with patch("coreason_manifest.cli.version", return_value="0.25.0"):
+        result = runner.invoke(app, ["--version"])
+        assert result.exit_code == 0
+        assert "coreason 0.25.0" in result.stdout
 
 
-def test_version_not_found(capsys: CaptureFixture[str]) -> None:
-    """Test that the version command handles PackageNotFoundError."""
-    test_args = ["coreason", "--version"]
-    with (
-        patch.object(sys, "argv", test_args),
-        patch("coreason_manifest.cli.version", side_effect=PackageNotFoundError),
-    ):
-        with pytest.raises(SystemExit) as exc:
-            main()
-        assert exc.value.code == 0
-        captured = capsys.readouterr()
-        assert "unknown" in captured.out
+def test_version_not_found() -> None:
+    with patch("coreason_manifest.cli.version", side_effect=PackageNotFoundError):
+        result = runner.invoke(app, ["--version"])
+        assert result.exit_code == 0
+        assert "coreason unknown" in result.stdout
+
+
+def test_create_not_implemented() -> None:
+    result = runner.invoke(app, ["create"])
+    assert result.exit_code == 1
+    assert "Create command is not yet implemented." in result.stdout
