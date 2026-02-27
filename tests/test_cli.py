@@ -170,3 +170,9 @@ def test_version_not_found() -> None:
         result = runner.invoke(app, ["--version"])
         assert result.exit_code == 0
         assert "coreason unknown" in result.stdout
+
+
+def test_create_not_implemented() -> None:
+    result = runner.invoke(app, ["create"])
+    assert result.exit_code == 1
+    assert "Create command is not yet implemented." in result.stdout
