@@ -195,79 +195,81 @@ def validate_policy(flow: FlowSpec) -> list[ComplianceReport]:
     return reports
 
 
+def compile_graph(flow: FlowSpec) -> dict[str, set[str]]:
+    """
+    Computes the Dominator Tree using the SOTA iterative algorithm.
+    Returns: dict[node_id, set[dominator_ids]]
+    """
+    nodes = set(flow.graph.nodes.keys())
+    entry = flow.graph.entry_point
+
+    if not entry or entry not in nodes:
+        return {n: set() for n in nodes}
+
+    # Build predecessors
+    preds: dict[str, set[str]] = {n: set() for n in nodes}
+    for e in flow.graph.edges:
+        if e.to_node in preds and e.from_node in nodes:
+            preds[e.to_node].add(e.from_node)
+
+    # Initialize Dominators
+    # Dom(n0) = {n0}
+    # Dom(n) = AllNodes for n != n0
+    dom = {n: nodes.copy() for n in nodes}
+    dom[entry] = {entry}
+
+    changed = True
+    while changed:
+        changed = False
+        for n in nodes:
+            if n == entry:
+                continue
+
+            if not preds[n]:
+                # Unreachable nodes maintain full set (conceptually dominated by everything or undefined)
+                # But practically they shouldn't affect reachability.
+                # Standard algorithm assumes reachability.
+                continue
+
+            # Intersection of dominators of predecessors
+            # NewDom = {n} U Intersection(Dom(p) for p in preds(n))
+            p_iter = iter(preds[n])
+            # Initialize with first predecessor's dominators
+            first_p = next(p_iter)
+            new_dom = dom[first_p].copy()
+
+            for p in p_iter:
+                new_dom &= dom[p]
+
+            new_dom.add(n)
+
+            if new_dom != dom[n]:
+                dom[n] = new_dom
+                changed = True
+
+    return dom
+
+
 def _is_guarded(target_node: NodeSpec, flow: FlowSpec) -> bool:
     """
-    Checks if the target node is topologically guarded by a HumanNode (ActionNode with human capability).
+    Checks if the target node is mathematically dominated by a Guard Node.
     """
-    nodes, edges = get_unified_topology(flow)
-
-    all_ids = {n.id for n in nodes}
-
-    # Determine entry point
-    entry_id = flow.graph.entry_point
-
-    # Construct adjacency map
-    adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
-    for edge in edges:
-        if edge.from_node in adj:
-            adj[edge.from_node].append(edge.to_node)
-
-    # Valid guards: ActionNode with human_approval capability
+    # 1. Identify Guards
     guards = set()
-    for n in nodes:
+    for n in flow.graph.nodes.values():
         if isinstance(n, ActionNode) and "human_approval" in n.skill.capabilities:
             guards.add(n.id)
 
-    if entry_id:
-        queue = [entry_id]
-        visited = {entry_id}
-    else:
-        queue = []
-        visited = set()
-
-    # Handle case where target is the entry node
-    if entry_id and target_node.id == entry_id:
+    if not guards:
         return False
 
-    # 1. Check strict reachability (ignoring guards) to identify Islands
-    if entry_id:
-        full_queue = [entry_id]
-        full_visited = {entry_id}
-    else:
-        full_queue = []
-        full_visited = set()
+    # 2. Compute Dominators
+    doms = compile_graph(flow)
 
-    reachable = False
-    while full_queue:
-        curr = full_queue.pop(0)
-        if curr == target_node.id:
-            reachable = True
-            break
-        for n in adj.get(curr or "", []):
-            if n not in full_visited:
-                full_visited.add(n)
-                full_queue.append(n)
+    # 3. Check if any guard dominates the target
+    target_doms = doms.get(target_node.id, set())
 
-    if not reachable:
-        return False  # Island -> Fail Closed
-
-    # 2. Check guarded reachability
-    while queue:
-        curr_id = queue.pop(0)
-
-        if curr_id == target_node.id:
-            return False  # Reached target without passing a guard
-
-        # If current node is a guard, we stop traversing this path
-        # (because downstream is guarded by this node).
-        if curr_id in guards:
-            continue
-
-        # Expand neighbors
-        for neighbor in adj.get(curr_id or "", []):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append(neighbor)
-
-    # If reachable but not via unguarded path -> Guarded
-    return True
+    # Intersection of target_doms and guards.
+    # If intersection is non-empty, then there exists a guard g such that g dominates target.
+    # This means ALL paths to target go through g.
+    return not target_doms.isdisjoint(guards)

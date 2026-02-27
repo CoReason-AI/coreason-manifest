@@ -13,7 +13,7 @@ class Constraint(CoreasonModel):
 
 class AtomicSkill(CoreasonModel):
     capabilities: list[str] = Field(default_factory=list)
-    immutable: bool = True
+    immutable: Literal[True] = Field(True, description="Enforces absolute definition immutability.")
     inputs_schema: dict[str, StrictJson] = Field(default_factory=dict)
     outputs_schema: dict[str, StrictJson] = Field(default_factory=dict)
 

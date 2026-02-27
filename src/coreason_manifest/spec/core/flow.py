@@ -165,6 +165,25 @@ class EdgeSpec(CoreasonModel):
                 super().generic_visit(node)
 
             def visit_Subscript(self, node: ast.Subscript) -> None:
+                # Block dynamic slice construction (e.g. payload["__" + "class__"])
+                class SliceVisitor(ast.NodeVisitor):
+                    def visit_BinOp(self, n: ast.BinOp) -> None:
+                        raise SecurityViolationError(
+                            f"Security Violation: Dynamic slice construction (BinOp) forbidden in condition '{v}'"
+                        )
+
+                    def visit_Call(self, n: ast.Call) -> None:
+                        raise SecurityViolationError(
+                            f"Security Violation: Dynamic slice construction (Call) forbidden in condition '{v}'"
+                        )
+
+                    def visit_JoinedStr(self, n: ast.JoinedStr) -> None:
+                        raise SecurityViolationError(
+                            f"Security Violation: Dynamic slice construction (f-string) forbidden in condition '{v}'"
+                        )
+
+                SliceVisitor().visit(node.slice)
+
                 # Check if the slice is a constant string starting with "__"
                 if isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
                     if node.slice.value.startswith("__"):

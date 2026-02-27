@@ -8,10 +8,12 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from collections.abc import Mapping
 from enum import StrEnum
+from types import MappingProxyType
 from typing import Annotated, Any, TypeAlias
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, Field, field_serializer, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
 
@@ -137,13 +139,41 @@ CoercibleStringList = Annotated[
 
 
 # Strict JSON Types
-type StrictJson = bool | int | float | str | list[StrictJson] | dict[str, StrictJson] | None
+type StrictJson = (
+    bool
+    | int
+    | float
+    | str
+    | list[StrictJson]
+    | tuple[StrictJson, ...]
+    | dict[str, StrictJson]
+    | Mapping[str, StrictJson]
+    | None
+)
 
 
 class StrictPayload(CoreasonModel):
     """Strict container for arbitrary JSON payloads."""
 
-    data: dict[str, StrictJson] = Field(default_factory=dict)
+    data: Mapping[str, StrictJson] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _freeze_content(self) -> "StrictPayload":
+        def _freeze(obj: Any) -> Any:
+            if isinstance(obj, dict):
+                return MappingProxyType({k: _freeze(v) for k, v in obj.items()})
+            if isinstance(obj, list):
+                return tuple(_freeze(v) for v in obj)
+            return obj
+
+        if isinstance(self.data, dict):
+            # Enforce immutability on the dict itself
+            object.__setattr__(self, "data", _freeze(self.data))
+        return self
+
+    @field_serializer("data")
+    def serialize_data(self, v: Mapping[str, StrictJson], _info: Any) -> dict[str, Any]:
+        return dict(v)
 
 
 class MiddlewareDef(CoreasonModel):

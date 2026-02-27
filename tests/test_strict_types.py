@@ -1,7 +1,8 @@
 import pytest
 from pydantic import ValidationError
 from coreason_manifest.spec.core.contracts import AtomicSkill
-from coreason_manifest.spec.core.types import MiddlewareDef
+from coreason_manifest.spec.core.types import MiddlewareDef, StrictPayload
+from collections.abc import Mapping
 
 def test_atomic_skill_strict_types():
     # Valid
@@ -22,3 +23,15 @@ def test_middleware_def_strict_types():
     # Invalid: config should be dict
     with pytest.raises(ValidationError):
         MiddlewareDef(ref="module.py:Class", config="invalid")
+
+def test_strict_payload_immutability():
+    payload = StrictPayload(data={"a": [1, 2]})
+    assert isinstance(payload.data, Mapping)
+
+    # Check top level immutability
+    with pytest.raises(TypeError):
+        payload.data["a"] = [3]
+
+    # Check nested list immutability (converted to tuple)
+    val = payload.data["a"]
+    assert isinstance(val, tuple)

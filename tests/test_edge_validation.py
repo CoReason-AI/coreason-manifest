@@ -28,3 +28,17 @@ def test_ast_attributes():
     # Invalid dunder subscript
     with pytest.raises(SecurityViolationError):
         EdgeSpec(from_node="a", to_node="b", condition="obj['__class__']")
+
+def test_ast_dynamic_bypass():
+    with pytest.raises(SecurityViolationError):
+        # BinOp in slice: "data['__' + 'class__']"
+        # We need to simulate python code that produces this AST
+        # AST for "data['__' + 'class__']":
+        # Subscript(value=Name(id='data'), slice=BinOp(left=Constant('__'), op=Add(), right=Constant('class__')))
+        EdgeSpec(from_node="a", to_node="b", condition="data['__' + 'class__']")
+
+    with pytest.raises(SecurityViolationError):
+        EdgeSpec(from_node="a", to_node="b", condition="data[f'__class__']")
+
+    with pytest.raises(SecurityViolationError):
+        EdgeSpec(from_node="a", to_node="b", condition="data[chr(95)]") # Call
