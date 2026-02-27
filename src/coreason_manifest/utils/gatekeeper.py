@@ -48,8 +48,8 @@ def compile_graph(plan: PlanTree) -> None:
 
     SOTA Enforcement:
     1. Reachability (Ghost Cluster) Check: Ensures entire graph is connected from root.
-    2. Cycle Detection: Checks for cycles. If found, checks for Bounded Loop Constraints.
-       If unbounded, raises fatal error.
+    2. Cycle Detection: Checks for cycles. If found, checks for Bounded Loop Constraints
+       on ANY node in the cycle path.
     3. Dominator Tree Analysis: Calculates dominators for every node.
        Enforces that for every 'High-Risk' node (ActionNode with dangerous capabilities),
        its dominator set MUST contain at least one `locked=True` node.
@@ -68,7 +68,6 @@ def compile_graph(plan: PlanTree) -> None:
 
     # 1. Build Adjacency List & Identifiers
     adj: dict[str, list[str]] = {nid: [] for nid in plan.nodes}
-    # Reverse adjacency for dominator calculation
     preds: dict[str, list[str]] = {nid: [] for nid in plan.nodes}
 
     locked_nodes: set[str] = set()
@@ -95,7 +94,6 @@ def compile_graph(plan: PlanTree) -> None:
                 preds[node.next_node].append(nid)
 
         if isinstance(node, StrategyNode):
-            # SOTA Fix: Add default_route handling
             if node.default_route not in plan.nodes:
                 raise ZeroTrustRoutingError(
                     f"Strategy node {nid} routes to unknown default_route {node.default_route}.",
@@ -127,43 +125,30 @@ def compile_graph(plan: PlanTree) -> None:
 
     # 3. Cycle Detection (Bounded) & Back-Edge Identification
     visited = set()
-    recursion_stack = set()
-    # Track back-edges to filter them out for DAG-only dominance calculation
+    # SOTA Fix: Use ordered list to slice exact cycle path
+    path_stack: list[str] = []
     back_edges: list[tuple[str, str]] = []
 
     def detect_cycle(current_node: str) -> None:
         visited.add(current_node)
-        recursion_stack.add(current_node)
+        path_stack.append(current_node)
 
         for neighbor in adj[current_node]:
             if neighbor not in visited:
                 detect_cycle(neighbor)
-            elif neighbor in recursion_stack:
-                # Cycle detected! This is a back-edge (current -> neighbor).
+            elif neighbor in path_stack:
+                # Cycle detected! (current -> neighbor)
                 back_edges.append((current_node, neighbor))
 
                 # SOTA Check: Is this cycle bounded?
-                # Check ALL nodes in the identified loop for a constraint.
-                # The loop is from neighbor -> ... -> current_node -> neighbor.
-                # Since we don't have the path explicitly here without traversing stack,
-                # we can check if *any* node in the recursion stack (which forms the current path)
-                # has a constraint? No, that includes nodes *above* the loop start.
-                # Heuristic: Check `current_node` (Source) and `neighbor` (Target).
-                # AND ideally search up the stack until `neighbor`.
-                # Given strict instruction: "verify that the node *initiating* the back-edge possesses the bounding constraint."
-                # That is `current_node`.
-                # BUT also: "or recursively check all nodes participating in the identified cycle".
-                # Let's check `current_node` first. If failing, check `neighbor`.
+                # Extract the exact cycle path from stack: [neighbor, ..., current_node]
+                cycle_start_index = path_stack.index(neighbor)
+                cycle_path = path_stack[cycle_start_index:]
 
-                # We need to find at least ONE constraint in the loop.
-                # Let's perform a simplified check on `current_node` (Back-edge source)
-                # AND `neighbor` (Back-edge target/Header).
-
-                loop_nodes = {current_node, neighbor} # Simplified set
-
+                # Check ALL nodes in the cycle path for a constraint
                 is_bounded = False
-                for ln in loop_nodes:
-                    node_obj = plan.nodes[ln]
+                for node_id_in_loop in cycle_path:
+                    node_obj = plan.nodes[node_id_in_loop]
                     if hasattr(node_obj, "constraints"):
                         for c in node_obj.constraints:
                             if c.type in ("max_iterations", "timeout", "loop_limit"):
@@ -173,12 +158,12 @@ def compile_graph(plan: PlanTree) -> None:
 
                 if not is_bounded:
                     raise ZeroTrustRoutingError(
-                        f"Unbounded cycle detected at node '{current_node}' -> '{neighbor}'. "
-                        "Loops must be guarded by a Constraint (e.g. max_iterations) on the loop header or back-edge.",
+                        f"Unbounded cycle detected: {' -> '.join(cycle_path)} -> {neighbor}. "
+                        "Loops must be guarded by a Constraint (e.g. max_iterations) on at least one node in the loop.",
                         node_id=current_node
                     )
 
-        recursion_stack.remove(current_node)
+        path_stack.pop()
 
     try:
         detect_cycle(plan.root_node)
@@ -188,12 +173,9 @@ def compile_graph(plan: PlanTree) -> None:
         raise ZeroTrustRoutingError("Graph depth exceeded recursion limit (possible cycle).")
 
     # 4. Dominator Analysis (Iterative O(V+E)) on DAG (Back-edges removed)
-
-    # Filter back-edges from preds
     dag_preds = defaultdict(list)
     for target, sources in preds.items():
         for source in sources:
-            # If (source, target) is a back-edge, skip it
             if (source, target) in back_edges:
                 continue
             dag_preds[target].append(source)
@@ -205,23 +187,14 @@ def compile_graph(plan: PlanTree) -> None:
     changed = True
     while changed:
         changed = False
-        # Iterate in arbitrary order (since we filtered back-edges, it's a DAG, so valid)
         for nid in plan.nodes:
             if nid == plan.root_node:
                 continue
 
             node_preds = dag_preds[nid]
             if not node_preds:
-                # If node has no preds in DAG view (but reachable in full graph),
-                # it means it's ONLY reachable via back-edges?
-                # Impossible if reachable from root via tree edges.
-                # Unless it IS the root (handled) or we missed something.
-                # If a node is reachable, it has a parent in the DFS tree.
-                # DFS tree edges are never back-edges.
-                # So `node_preds` cannot be empty.
                 continue
 
-            # Intersection of preds dominators
             intersection = dom[node_preds[0]].copy()
             for p in node_preds[1:]:
                 intersection &= dom[p]
@@ -238,7 +211,6 @@ def compile_graph(plan: PlanTree) -> None:
         guards = dominators.intersection(locked_nodes)
 
         if not guards:
-            # Violation
             if plan.root_node in dominators:
                 raise ZeroTrustRoutingError(
                     f"High-Risk Node '{hr_node}' is not dominated by any Locked Node. "
@@ -264,41 +236,13 @@ def validate_policy(plan: PlanTree) -> list[ComplianceReport]:
     reports: list[ComplianceReport] = []
 
     # 1. Capability Analysis & Red Button Rule
-    for nid, node in plan.nodes.items():
-        if isinstance(node, ActionNode):
-            caps = node.skill.capabilities
-
-            risk_reasons = []
-            if NodeCapability.COMPUTER_USE in caps:
-                risk_reasons.append(NodeCapability.COMPUTER_USE)
-            if NodeCapability.CODE_EXECUTION in caps:
-                risk_reasons.append(NodeCapability.CODE_EXECUTION)
-
-            if risk_reasons:
-                if not node.locked:
-                    reports.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
-                            severity="violation",
-                            message=(
-                                f"Policy Violation: Node '{nid}' has high-risk capabilities "
-                                f"{risk_reasons} but is NOT locked. Critical nodes must be locked."
-                            ),
-                            node_id=nid,
-                            details={"reason": str(risk_reasons)},
-                            remediation=RemediationAction(
-                                type="lock_node",
-                                description=f"Set locked=True for node {nid}",
-                                patch_data=[], # Patch data generation omitted for brevity in strict kernel
-                            )
-                        )
-                    )
+    # SOTA Fix: Removed the primitive `if not node.locked` check.
+    # Compile-time dominance checking (in `compile_graph`) is the authoritative source of truth for high-risk guarding.
 
     # 2. Utility Islands (Unreachable nodes)
     adj: dict[str, list[str]] = {nid: [] for nid in plan.nodes}
     for nid, node in plan.nodes.items():
         if isinstance(node, StrategyNode):
-            # Check default route
             if node.default_route in plan.nodes:
                 adj[nid].append(node.default_route)
 

@@ -61,16 +61,11 @@ class CanonicalHashingStrategy(HashingStrategy):
 
         SOTA Fix: Only exclude hash/signature keys at the root level to prevent
         'hash smuggling' vulnerabilities.
-
-        SOTA Fix 2: Eradicate None stripping. Canonical JSON requires strict preservation
-        of nulls to prevent collision attacks.
         """
         if isinstance(obj, dict):
             # Define excluded keys only if we are at the root level
             excluded_keys = {"execution_hash", "signature", "annotations"} if is_root else set()
 
-            # SOTA Fix: Removed `if v is not None` to strictly comply with RFC 8785 structure
-            # and prevent forgery via null stripping.
             return {
                 k: self._recursive_sort_and_sanitize(v, is_root=False)
                 for k, v in sorted(obj.items())
@@ -86,15 +81,14 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, datetime):
             return to_canonical_timestamp(obj)
         if isinstance(obj, BaseModel):
-            # SOTA Fix: `exclude_none=False` (default for mode='python' is usually False,
-            # but we explicitly rely on default or set it if needed. `model_dump` defaults to `exclude_none=False`).
-            # We explicitly want `None` to be present.
-            data = obj.model_dump(mode="python")
+            # SOTA Fix: Use mode='json' to flatten Enums and complex types to primitives
+            # BEFORE sorting, preventing "Object of type Enum is not JSON serializable" crashes.
+            data = obj.model_dump(mode="json")
             return self._recursive_sort_and_sanitize(data, is_root=is_root)
 
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
-            return self._recursive_sort_and_sanitize(obj.model_dump(mode="python"), is_root=is_root)
+            return self._recursive_sort_and_sanitize(obj.model_dump(mode="json"), is_root=is_root)
 
         if isinstance(obj, float):
             if not math.isfinite(obj):
@@ -297,7 +291,13 @@ def verify_merkle_proof(
 
         if not expected_parents:
             # Genesis Node
-            if i == 0 and trusted_root_hash and stored_hash != trusted_root_hash:
+            # SOTA Fix: Strict Genesis Validation.
+            # If not expected parents (no parents declared), it MUST be the first node (i=0).
+            # If i > 0, it's a floating/unlinked node injection attempt.
+            if i > 0:
+                return False
+
+            if trusted_root_hash and stored_hash != trusted_root_hash:
                 return False
         else:
             # Child Node: Every declared parent must be present in the VERIFIED pool or be the trusted root.
