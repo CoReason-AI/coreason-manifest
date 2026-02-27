@@ -17,7 +17,7 @@ def test_gatekeeper_capability_error_handling() -> None:
     profile = Profile.model_construct(
         role="broken",
         persona="broken",
-        reasoning=object(),  # type: ignore[arg-type]
+        reasoning=object(),
         fast_path=None,
     )
 
@@ -50,7 +50,7 @@ def test_gatekeeper_schemeless_url() -> None:
             # This line causes type error because Mypy sees `str` passed to `HttpUrl | None`
             # But we WANT to test validation failure at runtime.
             # We cast to ignore typing.
-            url="evil.com/api",  # type: ignore[arg-type]
+            url="evil.com/api",
             risk_level=RiskLevel.STANDARD,
         )
 
