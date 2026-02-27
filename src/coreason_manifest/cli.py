@@ -31,7 +31,7 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-@app.callback()
+@app.callback()  # type: ignore[untyped-decorator]
 def main(
     version: bool | None = typer.Option(
         None, "--version", callback=version_callback, is_eager=True, help="Show the version and exit."
@@ -42,7 +42,7 @@ def main(
     """
 
 
-@app.command(name="validate")
+@app.command(name="validate")  # type: ignore[untyped-decorator]
 def validate(file: str = typer.Argument(..., help="Path to the manifest file")) -> int:
     """
     Validate a manifest file
@@ -50,7 +50,7 @@ def validate(file: str = typer.Argument(..., help="Path to the manifest file")) 
     return _handle_validate(file)
 
 
-@app.command(name="visualize")
+@app.command(name="visualize")  # type: ignore[untyped-decorator]
 def visualize(file: str = typer.Argument(..., help="Path to the manifest file")) -> int:
     """
     Generate Mermaid diagram from manifest
@@ -58,7 +58,7 @@ def visualize(file: str = typer.Argument(..., help="Path to the manifest file"))
     return _handle_visualize(file)
 
 
-@app.command(name="create")
+@app.command(name="create")  # type: ignore[untyped-decorator]
 def create() -> None:
     """
     Create a new manifest (Placeholder)
