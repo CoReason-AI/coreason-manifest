@@ -211,7 +211,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
                         )
             except SecurityJailViolationError:
                 raise
-            except Exception:
+            except Exception:  # noqa: S110
                 pass
 
             return None
@@ -311,14 +311,14 @@ def _install_audit_hook() -> None:
                     raise SecurityViolationError(f"Unauthorized file access blocked (resolution failed): {path}") from e
                 except SecurityViolationError:
                     raise
-                except Exception:
+                except Exception:  # noqa: S110
                     # Ignore other errors during checking to avoid breaking system calls
                     pass
 
     try:
         sys.addaudithook(hook)
         _HOOK_INSTALLED = True
-    except Exception:
+    except Exception:  # noqa: S110
         # Might fail on some implementations or if already audited
         pass
 
@@ -390,7 +390,7 @@ def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: froze
             new_seen = seen | {target_path}
             try:
                 ref_content_str = loader.read_text(str(target_path.relative_to(root_dir.resolve())))
-                ref_data = yaml.load(ref_content_str, Loader=UniqueKeyLoader)
+                ref_data = yaml.load(ref_content_str, Loader=UniqueKeyLoader)  # noqa: S506
             except (OSError, yaml.YAMLError) as e:
                 raise ValueError(f"Failed to load reference {ref_path}: {e}") from e
 
@@ -426,7 +426,7 @@ def load_flow_from_file(
     content_str = loader.read_text(load_path)
 
     try:
-        data = yaml.load(content_str, Loader=UniqueKeyLoader)
+        data = yaml.load(content_str, Loader=UniqueKeyLoader)  # noqa: S506
     except yaml.YAMLError as e:
         raise ValueError(f"Failed to parse manifest file: {e}") from e
 
@@ -493,7 +493,7 @@ def _execute_jailed_module(
 
         try:
             # SOTA Concurrency Fix: exec() into isolated namespace instead of sys.modules injection
-            exec(content, exec_globals)
+            exec(content, exec_globals)  # noqa: S102
         except Exception as e:
             if isinstance(e, (SecurityJailViolationError, RuntimeError)):
                 raise

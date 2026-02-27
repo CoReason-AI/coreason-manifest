@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":dependencyDashboard"
+  ],
+  "enabledManagers": ["pep621", "github-actions"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "branch",
+      "ignoreTests": false
+    }
+  ],
+  "pep621": {
+    "fileMatch": ["(^|/)pyproject\\.toml$"]
+  }
+}

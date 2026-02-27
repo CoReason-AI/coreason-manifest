@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class MockFactory:
     def __init__(self, seed: int | None = None):
         if seed is not None:
-            self.rng = random.Random(seed)
+            self.rng = random.Random(seed)  # noqa: S311
         else:
             self.rng = secrets.SystemRandom()
 
