@@ -39,8 +39,7 @@ class PresentationHints(CoreasonModel):
         str | None,
         Field(
             description=(
-                "A human-readable name for the node (e.g., 'Review Analyst'). "
-                "Used by the UI and the Graph Visualizer."
+                "A human-readable name for the node (e.g., 'Review Analyst'). Used by the UI and the Graph Visualizer."
             )
         ),
     ] = None

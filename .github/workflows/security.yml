@@ -21,7 +21,7 @@ jobs:
           enable-cache: true
 
       - name: Export dependencies
-        run: uv export --format requirements-txt > reqs.txt
+        run: uv export --format requirements-txt --no-emit-workspace > reqs.txt
 
       - name: Run pip-audit
         run: uv run --with pip-audit pip-audit -r reqs.txt
