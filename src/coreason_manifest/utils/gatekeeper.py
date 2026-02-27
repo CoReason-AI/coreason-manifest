@@ -96,13 +96,20 @@ def _enforce_red_button_rule(
 
         if needs_guard and not _is_guarded(node, flow):
             human_node_id = f"guard_{node.id}"
+            # Fix: Check for collision
+            if human_node_id in flow.graph.nodes:
+                from uuid import uuid4
+
+                human_node_id = f"guard_{node.id}_{uuid4().hex[:6]}"
+
             # Inject ActionNode as guard
-            from coreason_manifest.spec.core.contracts import SkillConfig, StrictPayload
+            from coreason_manifest.spec.core.contracts import AtomicSkill, StrictPayload
+
             human_node = ActionNode(
                 id=human_node_id,
                 type="action",
                 metadata=StrictPayload(data={"prompt": f"Approve unsafe action by {node.id}"}),
-                skill=SkillConfig(capabilities=["human_approval"])
+                skill=AtomicSkill(capabilities=["human_approval"]),
             )
 
             # Construct Patch

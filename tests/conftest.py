@@ -4,7 +4,7 @@ from typing import Any
 import pytest
 
 from coreason_manifest.spec.core.engines import CodeExecutionReasoning, ComputerUseReasoning, StandardReasoning
-from coreason_manifest.spec.core.contracts import ActionNode, NodeSpec, SkillConfig
+from coreason_manifest.spec.core.contracts import ActionNode, AtomicSkill, NodeSpec
 from coreason_manifest.spec.core.flow import (
     Blackboard,
     DataSchema,
@@ -30,7 +30,7 @@ def agent_node_factory() -> Callable[..., ActionNode]:
         return ActionNode(
             id=nid,
             type="action",
-            skill=SkillConfig(capabilities=caps),
+            skill=AtomicSkill(capabilities=caps),
         )
 
     return _create

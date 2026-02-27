@@ -1,6 +1,6 @@
 import pytest
 from coreason_manifest.spec.core.flow import FlowSpec, Graph, EdgeSpec, FlowMetadata, FlowInterface
-from coreason_manifest.spec.core.contracts import ActionNode, SkillConfig
+from coreason_manifest.spec.core.contracts import ActionNode, AtomicSkill
 from coreason_manifest.utils.topology import validate_topology, TopologyValidationError
 
 def create_flow(nodes_list, edges_list, entry_point=None):
@@ -13,7 +13,7 @@ def create_flow(nodes_list, edges_list, entry_point=None):
     )
 
 def _create_node(id):
-    return ActionNode(id=id, skill=SkillConfig(capabilities=[]))
+    return ActionNode(id=id, skill=AtomicSkill(capabilities=[]))
 
 def test_valid_topology():
     n1 = _create_node("n1")

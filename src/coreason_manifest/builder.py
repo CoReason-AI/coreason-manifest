@@ -13,8 +13,8 @@ from typing import Any, Self, cast
 from coreason_manifest.spec.core.co_intelligence import EscalationCriteria
 from coreason_manifest.spec.core.contracts import (
     ActionNode,
+    AtomicSkill,
     NodeSpec,
-    SkillConfig,
     StrategyNode,
 )
 from coreason_manifest.spec.core.engines import (
@@ -291,7 +291,7 @@ class AgentBuilder:
             id=self.agent_id,
             type="action",
             metadata=StrictPayload(data={"profile": profile_data, "resilience": self.resilience.model_dump(mode="json") if self.resilience else None}),
-            skill=SkillConfig(capabilities=self.tools),
+            skill=AtomicSkill(capabilities=self.tools),
         )
 
 
@@ -405,7 +405,7 @@ class BaseFlowBuilder:
             id=node_id,
             type="action",
             metadata=StrictPayload(data={"profile": profile_id}),
-            skill=SkillConfig(capabilities=tools),
+            skill=AtomicSkill(capabilities=tools),
         )
         self._register_node(node)
         return self
@@ -419,7 +419,7 @@ class BaseFlowBuilder:
                 "interaction_mode": "shadow",
                 "timeout": shadow_timeout
             }),
-            skill=SkillConfig(capabilities=["human_shadow"]),
+            skill=AtomicSkill(capabilities=["human_shadow"]),
         )
         self._register_node(node)
         return self

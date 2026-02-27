@@ -9,8 +9,8 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.contracts import NodeSpec
 from coreason_manifest.spec.core.governance import Governance
+from coreason_manifest.spec.core.contracts import AtomicSkill
 from coreason_manifest.spec.core.nodes import CognitiveProfile
-from coreason_manifest.spec.core.skills import SkillDefinition
 from coreason_manifest.spec.core.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.types import (
     MiddlewareDef,
@@ -90,8 +90,8 @@ class EdgeSpec(CoreasonModel):
     from_node: NodeID = Field(..., alias="from")
     to_node: NodeID = Field(..., alias="to")
     condition: str | None = None
-    max_iterations: int | None = Field(None, description="Max loop iterations.")
-    timeout: int | None = Field(None, description="Timeout in seconds.")
+    max_iterations: int | None = Field(None, ge=1, description="Max loop iterations (must be >= 1).")
+    timeout: int | None = Field(None, ge=1, description="Timeout in seconds (must be >= 1).")
 
     @field_validator("condition", mode="before")
     @classmethod
@@ -164,6 +164,15 @@ class EdgeSpec(CoreasonModel):
                     )
                 super().generic_visit(node)
 
+            def visit_Subscript(self, node: ast.Subscript) -> None:
+                # Check if the slice is a constant string starting with "__"
+                if isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
+                    if node.slice.value.startswith("__"):
+                        raise SecurityViolationError(
+                            f"Security Violation: Dunder subscript access '{node.slice.value}' forbidden in condition '{v}'"
+                        )
+                super().generic_visit(node)
+
         visitor = SecurityVisitor()
         visitor.visit(tree)
         return v
@@ -190,7 +199,7 @@ class FlowDefinitions(CoreasonModel):
     schemas: dict[str, DataSchema] = Field(default_factory=dict)
     tools: dict[str, AnyTool] = Field(default_factory=dict)
     tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
-    skills: dict[str, SkillDefinition] = Field(default_factory=dict)
+    skills: dict[str, AtomicSkill] = Field(default_factory=dict)
     middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
     supervision_templates: dict[str, SupervisionConfig] | None = None
 

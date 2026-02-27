@@ -1,19 +1,19 @@
 import pytest
 from pydantic import ValidationError
-from coreason_manifest.spec.core.skills import SkillDefinition
+from coreason_manifest.spec.core.contracts import AtomicSkill
 from coreason_manifest.spec.core.types import MiddlewareDef
 
-def test_skill_definition_strict_types():
+def test_atomic_skill_strict_types():
     # Valid
-    SkillDefinition(description="desc", parameters={"key": "value"})
+    AtomicSkill(capabilities=["caps"], inputs_schema={"a": "b"})
 
-    # Invalid: description should be str, not int
+    # Invalid: capabilities should be list, not int
     with pytest.raises(ValidationError):
-        SkillDefinition(description=123, parameters={})
+        AtomicSkill(capabilities=123)
 
-    # Invalid: parameters should be dict, not list
+    # Invalid: inputs_schema should be dict, not list
     with pytest.raises(ValidationError):
-        SkillDefinition(parameters=["invalid"])
+        AtomicSkill(inputs_schema=["invalid"])
 
 def test_middleware_def_strict_types():
     # Valid
