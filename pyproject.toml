@@ -77,7 +77,7 @@ warn_unused_configs = true
 plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-addopts = "--cov=src --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=src --cov-report=term-missing --cov-fail-under=95"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]

@@ -10,6 +10,7 @@ from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
     AgentNode,
+    AnyNode,
     EmergenceInspectorNode,
     HumanNode,
     InspectorNode,
@@ -62,19 +63,6 @@ class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
     persistence: Any | None = None
-
-
-AnyNode = Annotated[
-    AgentNode
-    | SwitchNode
-    | InspectorNode
-    | EmergenceInspectorNode
-    | PlannerNode
-    | HumanNode
-    | SwarmNode
-    | PlaceholderNode,
-    Field(discriminator="type"),
-]
 
 
 class Edge(CoreasonModel):

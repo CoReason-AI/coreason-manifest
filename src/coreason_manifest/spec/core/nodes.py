@@ -13,6 +13,7 @@ from coreason_manifest.spec.core.engines import (
 )
 from coreason_manifest.spec.core.governance import OperationalPolicy
 from coreason_manifest.spec.core.memory import MemorySubsystem
+from coreason_manifest.spec.core.registry import register_node, resolve_node_union
 from coreason_manifest.spec.core.resilience import EscalationStrategy, ResilienceConfig
 from coreason_manifest.spec.core.types import (
     CoercibleStringList,
@@ -58,6 +59,7 @@ class CognitiveProfile(CoreasonModel):
     memory: MemorySubsystem | None = Field(None, description="The 4-tier hierarchical memory configuration.")
 
 
+@register_node
 class AgentNode(Node):
     """
     Executes a cognitive task using a CognitiveProfile configuration.
@@ -88,6 +90,7 @@ class AgentNode(Node):
     )
 
 
+@register_node
 class SwitchNode(Node):
     type: Literal["switch"] = "switch"
     variable: VariableID = Field(..., description="The blackboard variable to evaluate.", examples=["user_sentiment"])
@@ -116,6 +119,7 @@ class InspectorNodeBase(Node):
         return self.target_variable
 
 
+@register_node
 class InspectorNode(InspectorNodeBase):
     """
     A node that evaluates a variable against criteria.
@@ -131,6 +135,7 @@ class InspectorNode(InspectorNodeBase):
     pass_threshold: float | None = Field(None, description="Threshold for passing the check (0.0-1.0).", examples=[0.8])
 
 
+@register_node
 class EmergenceInspectorNode(InspectorNodeBase):
     """
     Specialized inspector for detecting novel/emergent behaviors.
@@ -148,6 +153,7 @@ class EmergenceInspectorNode(InspectorNodeBase):
     judge_model: ModelRef = Field(..., description="Model required for emergence detection")
 
 
+@register_node
 class PlannerNode(Node):
     type: Literal["planner"] = "planner"
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
@@ -198,6 +204,7 @@ class SteeringConfig(CoreasonModel):
         return self
 
 
+@register_node
 class HumanNode(Node):
     """
     Human-in-the-Loop interaction node.
@@ -262,6 +269,7 @@ class HumanNode(Node):
         return self
 
 
+@register_node
 class SwarmNode(Node):
     """
     Dynamic Swarm Spawning (The "Hive").
@@ -344,6 +352,7 @@ class SwarmNode(Node):
         return self
 
 
+@register_node
 class PlaceholderNode(Node):
     type: Literal["placeholder"] = "placeholder"
     required_capabilities: CoercibleStringList = Field(
@@ -351,8 +360,13 @@ class PlaceholderNode(Node):
     )
 
 
+# AnyNode is now resolved dynamically
+AnyNode = resolve_node_union()
+
+
 __all__ = [
     "AgentNode",
+    "AnyNode",
     "CognitiveProfile",
     "EmergenceInspectorNode",
     "HumanNode",
