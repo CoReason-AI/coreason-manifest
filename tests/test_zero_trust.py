@@ -69,7 +69,8 @@ class TestStrictContracts:
                     "id": "n2",
                     "strategy_name": "foo",
                     "inputs": {},
-                    "routes": {}
+                    "routes": {},
+                    "default_route": "n1" # Required
                 }
             }
         }
@@ -82,8 +83,8 @@ class TestStrictContracts:
 class TestGatekeeper:
     def test_cycle_detection_strict(self):
         """Test that unbounded cycles are rejected."""
-        n1 = StrategyNode(id="start", strategy_name="loop", inputs={}, routes={"next": "node2"})
-        n2 = StrategyNode(id="node2", strategy_name="loop", inputs={}, routes={"back": "start"})
+        n1 = StrategyNode(id="start", strategy_name="loop", inputs={}, routes={"next": "node2"}, default_route="node2")
+        n2 = StrategyNode(id="node2", strategy_name="loop", inputs={}, routes={"back": "start"}, default_route="start")
 
         plan = PlanTree(
             id="cyclic",
@@ -94,26 +95,28 @@ class TestGatekeeper:
         with pytest.raises(ZeroTrustRoutingError, match="Unbounded cycle detected"):
             compile_graph(plan)
 
-    def test_cycle_detection_bounded_allowed(self):
-        """Test that bounded cycles (with Constraint) are allowed."""
+    def test_cycle_detection_bounded_allowed_header(self):
+        """Test that bounded cycles (with Constraint on Header/Target) are allowed."""
+        # start (Constraint Here) -> node2 -> start
         c = Constraint(type="max_iterations", value=5)
         n1 = StrategyNode(
             id="start",
             strategy_name="loop",
             inputs={},
-            routes={"next": "node2"}
+            routes={"next": "node2"},
+            default_route="node2",
+            constraints=[c] # Guard on Header
         )
-        # Put constraint on the node that loops back
         n2 = StrategyNode(
             id="node2",
             strategy_name="loop",
             inputs={},
             routes={"back": "start"},
-            constraints=[c]
+            default_route="start"
         )
 
         plan = PlanTree(
-            id="bounded_cyclic",
+            id="bounded_cyclic_header",
             root_node="start",
             nodes={"start": n1, "node2": n2}
         )
@@ -122,11 +125,6 @@ class TestGatekeeper:
         compile_graph(plan)
 
     def test_dominance_conditional_compliance(self):
-        """
-        Test SOTA Dominance Check:
-        Route A: Dangerous Node (Computer Use) -> MUST be dominated by Locked Guard.
-        Route B: Safe Node -> Need NOT be dominated by Locked Guard.
-        """
         skill_guard = AtomicSkill(name="guard", version="1.0.0", definition={})
         skill_danger = AtomicSkill(
             name="danger",
@@ -136,23 +134,16 @@ class TestGatekeeper:
         )
         skill_safe = AtomicSkill(name="safe", version="1.0.0", definition={})
 
-        # Guard Node (Locked)
         n_guard = ActionNode(id="guard", skill=skill_guard, inputs={}, outputs={}, locked=True, next_node="danger")
-        # Dangerous Node (Unlocked itself, but must be guarded)
         n_danger = ActionNode(id="danger", skill=skill_danger, inputs={}, outputs={}, locked=False)
-        # Safe Node
         n_safe = ActionNode(id="safe", skill=skill_safe, inputs={}, outputs={}, locked=False)
-
-        # Locked Strategy Node (The Guard) - Actually we use ActionNode as guard now via next_node for variety,
-        # but prompt test used StrategyNode. Let's use StrategyNode as Guard.
-        # But wait, `ActionNode.next_node` allows direct chaining now!
-        # Let's test Guard(Action) -> Danger(Action) chaining.
 
         n_start = StrategyNode(
             id="start",
             strategy_name="branch",
             inputs={},
-            routes={"risky": "guard", "safe": "safe"}
+            routes={"risky": "guard", "safe": "safe"},
+            default_route="safe"
         )
 
         plan = PlanTree(
@@ -166,18 +157,9 @@ class TestGatekeeper:
             }
         )
 
-        # Routes:
-        # start -> guard (Action) -> danger (Action)
-        # start -> safe
-
-        # Dom(danger) = {start, guard, danger}
-        # Locked = {guard}
-        # Intersection = {guard}. Valid.
-
-        compile_graph(plan) # Should Pass
+        compile_graph(plan)
 
     def test_dominance_failure(self):
-        """Test that missing the guard for a high-risk node fails."""
         skill_danger = AtomicSkill(
             name="danger",
             version="1.0.0",
@@ -190,6 +172,7 @@ class TestGatekeeper:
             strategy_name="direct",
             inputs={},
             routes={"go": "danger"},
+            default_route="danger",
             locked=False
         )
         n_danger = ActionNode(
@@ -197,7 +180,7 @@ class TestGatekeeper:
             skill=skill_danger,
             inputs={},
             outputs={},
-            locked=False # Not self-locking
+            locked=False
         )
 
         plan = PlanTree(
@@ -210,13 +193,8 @@ class TestGatekeeper:
             compile_graph(plan)
 
     def test_ghost_cluster_rejection(self):
-        """Test that unreachable 'ghost clusters' are detected and rejected."""
         skill = AtomicSkill(name="s1", version="1.0.0", definition={})
-
-        # Reachable component
         n_start = ActionNode(id="start", skill=skill, inputs={}, outputs={})
-
-        # Unreachable Ghost Cluster
         n_ghost = ActionNode(id="ghost", skill=skill, inputs={}, outputs={})
 
         plan = PlanTree(
@@ -228,6 +206,19 @@ class TestGatekeeper:
         with pytest.raises(ZeroTrustRoutingError, match="Graph contains unreachable nodes"):
             compile_graph(plan)
 
+    def test_default_route_validation(self):
+        """Test that default_route is validated."""
+        n1 = StrategyNode(
+            id="start",
+            strategy_name="broken",
+            inputs={},
+            routes={},
+            default_route="missing"
+        )
+        plan = PlanTree(id="p", root_node="start", nodes={"start": n1})
+        with pytest.raises(ZeroTrustRoutingError, match="routes to unknown default_route"):
+            compile_graph(plan)
+
 
 class TestIntegrity:
     def test_hash_smuggling_prevention(self):
@@ -235,18 +226,12 @@ class TestIntegrity:
         inputs_safe = {"user": "alice"}
         receipt_safe = generate_execution_receipt("e1", skill, inputs_safe, {})
 
-        # Include _hash_exclude_ to ensure it is NOT stripped (backdoor removal check)
-        # SOTA Check: Validation Error expected due to StrictJsonDict typing!
-        # StrictJsonDict prevents sets! inputs_backdoor has a set `{"user"}`.
-        # We must use list to be valid JSON.
         inputs_backdoor = {"user": "alice", "_hash_exclude_": ["user"]}
         receipt_backdoor = generate_execution_receipt("e2", skill, inputs_backdoor, {})
 
-        # Include dunder to ensure NOT stripped
         inputs_dunder = {"user": "alice", "__hidden__": "payload"}
         receipt_dunder = generate_execution_receipt("e3", skill, inputs_dunder, {})
 
-        # Hashes must differ
         assert receipt_safe.execution_hash != receipt_backdoor.execution_hash
         assert receipt_safe.execution_hash != receipt_dunder.execution_hash
 
@@ -254,6 +239,24 @@ class TestIntegrity:
         assert "__hidden__" in payload_dunder["inputs"]
 
         assert verify_merkle_proof([receipt_dunder]) is True
+
+    def test_null_preservation(self):
+        """Test that None values are PRESERVED in hash (RFC 8785 collision check)."""
+        skill = AtomicSkill(name="s1", version="1.0.0", definition={})
+
+        # {a: 1} vs {a: 1, b: None} must be different
+        inputs_none = {"a": 1, "b": None}
+        inputs_missing = {"a": 1}
+
+        r1 = generate_execution_receipt("e1", skill, inputs_none, {})
+        r2 = generate_execution_receipt("e2", skill, inputs_missing, {})
+
+        assert r1.execution_hash != r2.execution_hash
+
+        # Verify reconstruction includes None
+        p1 = reconstruct_payload(r1)
+        assert "b" in p1["inputs"]
+        assert p1["inputs"]["b"] is None
 
 
 class TestLoaderSecurity:

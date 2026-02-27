@@ -60,18 +60,21 @@ class CanonicalHashingStrategy(HashingStrategy):
         Prepares an object for RFC 8785 Canonical JSON serialization.
 
         SOTA Fix: Only exclude hash/signature keys at the root level to prevent
-        'hash smuggling' vulnerabilities where nested payloads might hide malicious
-        keys that get stripped silently.
+        'hash smuggling' vulnerabilities.
+
+        SOTA Fix 2: Eradicate None stripping. Canonical JSON requires strict preservation
+        of nulls to prevent collision attacks.
         """
         if isinstance(obj, dict):
             # Define excluded keys only if we are at the root level
             excluded_keys = {"execution_hash", "signature", "annotations"} if is_root else set()
 
-            # SOTA Fix: Removed `startswith("__")` exclusion backdoor.
+            # SOTA Fix: Removed `if v is not None` to strictly comply with RFC 8785 structure
+            # and prevent forgery via null stripping.
             return {
                 k: self._recursive_sort_and_sanitize(v, is_root=False)
                 for k, v in sorted(obj.items())
-                if v is not None and k not in excluded_keys
+                if k not in excluded_keys
             }
         if isinstance(obj, (list, tuple)):
             return [self._recursive_sort_and_sanitize(x, is_root=False) for x in obj]
@@ -83,14 +86,15 @@ class CanonicalHashingStrategy(HashingStrategy):
         if isinstance(obj, datetime):
             return to_canonical_timestamp(obj)
         if isinstance(obj, BaseModel):
-            # SOTA Fix: Removed `_hash_exclude_` backdoor logic.
-            # We must hash strictly what is in the model.
-            data = obj.model_dump(exclude_none=True, mode="python")
+            # SOTA Fix: `exclude_none=False` (default for mode='python' is usually False,
+            # but we explicitly rely on default or set it if needed. `model_dump` defaults to `exclude_none=False`).
+            # We explicitly want `None` to be present.
+            data = obj.model_dump(mode="python")
             return self._recursive_sort_and_sanitize(data, is_root=is_root)
 
         if hasattr(obj, "model_dump"):
             # Pydantic v2 or compatible
-            return self._recursive_sort_and_sanitize(obj.model_dump(exclude_none=True, mode="python"), is_root=is_root)
+            return self._recursive_sort_and_sanitize(obj.model_dump(mode="python"), is_root=is_root)
 
         if isinstance(obj, float):
             if not math.isfinite(obj):
@@ -131,7 +135,6 @@ class ProofOfTaskExecution(CoreasonModel):
     execution_id: str = Field(..., description="Unique ID of this execution.")
     timestamp: str = Field(..., description="UTC timestamp of execution.")
     skill: AtomicSkill = Field(..., description="The immutable skill executed.")
-    # SOTA Fix: Use StrictJsonDict instead of dict[str, Any]
     inputs: StrictJsonDict = Field(..., description="Canonicalized inputs.")
     outputs: StrictJsonDict = Field(..., description="Canonicalized outputs.")
     model_weights_hash: str | None = Field(None, description="Hash of the model weights used, if applicable.")

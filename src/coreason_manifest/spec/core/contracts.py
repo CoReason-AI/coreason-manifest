@@ -91,6 +91,11 @@ class StrategyNode(NodeSpec):
         ...,
         description="Mapping of strategy outcomes to next node IDs."
     )
+    # SOTA Fix: Enforce deterministic fallback routing.
+    default_route: NodeID = Field(
+        ...,
+        description="Fallback node if strategy outcome does not match any key in routes."
+    )
 
 
 class PlanTree(CoreasonModel):
