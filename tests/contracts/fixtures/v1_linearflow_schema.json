@@ -2692,6 +2692,31 @@
       "title": "GraphReasoning",
       "type": "object"
     },
+    "GuiCoords": {
+      "additionalProperties": false,
+      "description": "X/Y coordinates to persist the layout of the graph in the visual editor.",
+      "properties": {
+        "annotations": {
+          "additionalProperties": true,
+          "title": "Annotations",
+          "type": "object"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "GuiCoords",
+      "type": "object"
+    },
     "HumanHandoffStrategy": {
       "additionalProperties": false,
       "description": "Human-in-the-Loop focus: Urgent handoff.",
@@ -3366,6 +3391,20 @@
       "title": "ModelCriteria",
       "type": "object"
     },
+    "NodeColor": {
+      "description": "Semantic coloring for the graph.",
+      "enum": [
+        "red",
+        "orange",
+        "yellow",
+        "green",
+        "blue",
+        "purple",
+        "grey"
+      ],
+      "title": "NodeColor",
+      "type": "string"
+    },
     "OperationalPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -3721,6 +3760,36 @@
       "additionalProperties": false,
       "description": "Presentation Layer metadata for UI rendering.\nAllows backend logic to drive frontend visualization.",
       "properties": {
+        "annotations": {
+          "additionalProperties": true,
+          "title": "Annotations",
+          "type": "object"
+        },
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NodeColor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Semantic coloring for the graph (e.g., 'Red' for Critical Gates, 'Blue' for Actions)."
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A documentation string. Crucially, this is dual-purpose: 1. Human: Tooltips in the Builder UI. 2. Machine: Injected into the System Prompt so the LLM understands the 'Intent' of the node it is executing.",
+          "title": "Description"
+        },
         "group": {
           "anyOf": [
             {
@@ -3733,6 +3802,18 @@
           "default": null,
           "description": "For visual clustering/subgraphs.",
           "title": "Group"
+        },
+        "gui_coords": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GuiCoords"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "X/Y coordinates to persist the layout of the graph in the visual editor."
         },
         "hidden": {
           "default": false,
@@ -3750,7 +3831,7 @@
             }
           ],
           "default": null,
-          "description": "Icon identifier (e.g., 'lucide:shield-check').",
+          "description": "Likely an SVG path or a library identifier (e.g., lucide-react name) for the visualizer.",
           "title": "Icon"
         },
         "label": {
@@ -3763,7 +3844,7 @@
             }
           ],
           "default": null,
-          "description": "Human-readable name for the node.",
+          "description": "A human-readable name for the node (e.g., 'Review Analyst'). Used by the UI and the Graph Visualizer.",
           "title": "Label"
         },
         "metadata_view": {
