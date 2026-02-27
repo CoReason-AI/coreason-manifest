@@ -2,8 +2,8 @@ import ast
 from typing import TYPE_CHECKING, Any, Literal
 from uuid import uuid4
 
-import jsonschema
-from jsonschema.exceptions import SchemaError
+import jsonschema  # type: ignore[import-untyped]
+from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel

@@ -626,6 +626,7 @@ class BaseFlowBuilder:
             type="agent",
             profile=profile_id,
             tools=tools,
+            operational_policy=None,
         )
         self._register_node(node)
         return self
