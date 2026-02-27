@@ -127,15 +127,35 @@ def test_visualize_with_errors() -> None:
 
 
 def test_validate_missing_file() -> None:
-    result = runner.invoke(app, ["validate", "non_existent.yaml"])
-    assert result.exit_code == 1
-    assert "Error loading file" in result.stderr
+    # Patch ManifestIO to relax security during test to avoid O_NOFOLLOW error on Windows
+    with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
+        from coreason_manifest.utils.io import ManifestIO
+
+        def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+            kwargs["strict_security"] = False
+            return ManifestIO(*args, **kwargs)
+
+        mock_io.side_effect = unsafe_manifest_io
+
+        result = runner.invoke(app, ["validate", "non_existent.yaml"])
+        assert result.exit_code == 1
+        assert "Error loading file" in result.stderr
 
 
 def test_visualize_missing_file() -> None:
-    result = runner.invoke(app, ["visualize", "non_existent.yaml"])
-    assert result.exit_code == 1
-    assert "Error loading file" in result.stderr
+    # Patch ManifestIO to relax security during test to avoid O_NOFOLLOW error on Windows
+    with patch("coreason_manifest.utils.loader.ManifestIO") as mock_io:
+        from coreason_manifest.utils.io import ManifestIO
+
+        def unsafe_manifest_io(*args: Any, **kwargs: Any) -> ManifestIO:
+            kwargs["strict_security"] = False
+            return ManifestIO(*args, **kwargs)
+
+        mock_io.side_effect = unsafe_manifest_io
+
+        result = runner.invoke(app, ["visualize", "non_existent.yaml"])
+        assert result.exit_code == 1
+        assert "Error loading file" in result.stderr
 
 
 def test_cli_help() -> None:
