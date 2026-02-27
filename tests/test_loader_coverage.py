@@ -133,14 +133,12 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     # If the symlink is valid, standard FileFinder might resolve it.
     # Our SandboxedPathFinder logic checks origin escape.
 
-    with (
-        sandbox_context(jail),
-        pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
-    ):
-        # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
-        spec = finder.find_spec("malicious_module")
-        if spec is None:
-             pytest.fail("find_spec returned None instead of raising SecurityJailViolationError")
+    with sandbox_context(jail):
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
+            # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
+            spec = finder.find_spec("malicious_module")
+            if spec is None:
+                pytest.fail("find_spec returned None instead of raising SecurityJailViolationError")
 
 
 def test_loader_execution_success(tmp_path: Path) -> None:

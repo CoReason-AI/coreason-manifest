@@ -76,15 +76,13 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
     finder = SandboxedPathFinder()
 
     # Execute the finder within the sandbox context
-    with (
-        sandbox_context(jail),
-        pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
-    ):
-        # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
-        # find_spec calls resolve() on origin
-        spec = finder.find_spec("malicious_module")
-        # If it returns None, the test fails (DID NOT RAISE).
-        # We need to ensure it finds it.
-        # Symlink points to outside dir which has __init__.py -> valid package.
-        if spec is None:
-             pytest.fail("find_spec returned None instead of raising SecurityJailViolationError")
+    with sandbox_context(jail):
+        with pytest.raises(SecurityJailViolationError, match="escapes the root directory"):
+            # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
+            # find_spec calls resolve() on origin
+            spec = finder.find_spec("malicious_module")
+            # If it returns None, the test fails (DID NOT RAISE).
+            # We need to ensure it finds it.
+            # Symlink points to outside dir which has __init__.py -> valid package.
+            if spec is None:
+                pytest.fail("find_spec returned None instead of raising SecurityJailViolationError")
