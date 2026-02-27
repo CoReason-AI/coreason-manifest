@@ -1,5 +1,5 @@
 import ast
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 from uuid import uuid4
 
 import jsonschema
@@ -9,20 +9,30 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.governance import Governance
 from coreason_manifest.spec.core.nodes import (
-    AgentNode,
-    EmergenceInspectorNode,
-    HumanNode,
-    InspectorNode,
-    PlaceholderNode,
-    PlannerNode,
-    SwarmNode,
-    SwitchNode,
+    AnyNode,
 )
 from coreason_manifest.spec.core.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
+
+# Export AnyNode so it can be imported from here as well
+__all__ = [
+    "AgentRequest",
+    "AnyNode",
+    "Blackboard",
+    "DataSchema",
+    "Edge",
+    "FlowDefinitions",
+    "FlowInterface",
+    "FlowMetadata",
+    "Graph",
+    "GraphFlow",
+    "LinearFlow",
+    "Manifest",
+    "VariableDef",
+]
 
 
 class FlowMetadata(CoreasonModel):
@@ -62,19 +72,6 @@ class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
     persistence: Any | None = None
-
-
-AnyNode = Annotated[
-    AgentNode
-    | SwitchNode
-    | InspectorNode
-    | EmergenceInspectorNode
-    | PlannerNode
-    | HumanNode
-    | SwarmNode
-    | PlaceholderNode,
-    Field(discriminator="type"),
-]
 
 
 class Edge(CoreasonModel):

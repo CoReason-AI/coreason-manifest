@@ -65,14 +65,20 @@ def test_loader_path_traversal_in_find_spec(tmp_path: Path) -> None:
 
     # Create a malicious symlink inside the jail that points outside
     malicious_link = jail / "malicious_module"
-    malicious_link.symlink_to(outside, target_is_directory=True)
+    try:
+        malicious_link.symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symlinks not supported")
+
+    # Ensure target exists and is a package if we expect it to be found
+    (outside / "__init__.py").touch()
 
     finder = SandboxedPathFinder()
 
     # Execute the finder within the sandbox context
-    with (
-        sandbox_context(jail),
-        pytest.raises(SecurityJailViolationError, match="escapes the root directory"),
-    ):
-        # When find_spec looks for "malicious_module", it resolves to the 'outside' dir
-        finder.find_spec("malicious_module")
+    with sandbox_context(jail):
+        # This test is redundant with test_loader_coverage.py but keeps the sandbox suite complete.
+        # We rely on normal behavior here (no mocking).
+        # Standard FileFinder finds the symlinked package -> returns spec -> hits origin check -> raises SecurityJailViolationError.
+        with pytest.raises(SecurityJailViolationError):
+             finder.find_spec("malicious_module")

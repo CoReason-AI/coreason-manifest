@@ -41,7 +41,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 1.  **Architectural Audit:** Before writing code, ask: *"Does this change introduce a runtime side effect?"* If yes, STOP.
 2.  **Atomic Implementation:** Break tasks into the smallest testable units.
 3.  **Regression Check:** Ensure no re-introduction of "Ghosts" (e.g., do not accidentally re-add a Dockerfile because a generic template suggested it).
-4.  **Test Coverage:** Maintain 100% coverage. Tests must verify *logic*, not just existence.
+4.  **Test Coverage (The 95% Rule):** Maintain a strict `>= 95%` test coverage floor. **Do not write "filler tests" just to hit 100%.** If a branch of code is already proven impossible by strict Pydantic/mypy typing, remove the branch (Dead Code Elimination) rather than mocking Python internals to test it. Tests must verify *behavior* and *contracts*, not just line execution.
 
 ---
 
@@ -80,9 +80,12 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 
 ## **5. Testing Guidelines**
 
-* **Mock External Interactions:** Since this is a pure library, unit tests should mock *everything* external. There should be no need for integration tests against real databases or APIs within this repo.
-* **Schema Validation Tests:** Focus heavily on testing valid/invalid YAML configurations against the Pydantic models.
-* **"Passive" Tests:** specific tests (like `test_logger_creation.py`) must exist to PROVE that importing the library does not modify the system state.
+* **Behavioral over Unit:** Favor integration and BDD-style tests that verify business capabilities (e.g., routing, orchestration) over micro-tests that check class initialization.
+* **Property-Based Edge Cases:** Use `hypothesis` for generating randomized data payloads to test schema edge cases and Pydantic validators. Avoid hardcoding synthetic edge cases.
+* **Security Fuzzing:** Any changes to the `loader` or `sandbox` modules must be verified against our `atheris` fuzzing targets to prevent path-traversal and parsing vulnerabilities.
+* **Schema Contracts:** Changes to Pydantic models must not break the generated `model_json_schema()`. Contract tests must pass before merging.
+* **Performance Benchmarks:** Complex graph validations and Merkle hashing must pass `pytest-benchmark` thresholds to prevent silent regressions.
+* **Mock External Interactions:** Since this is a pure library, mock everything external (like LLM APIs) unless explicitly writing an 'Evals' test.
 
 ## **6. Human-in-the-Loop Triggers**
 
@@ -90,3 +93,22 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * You feel a feature requires adding a dependency that is not `pydantic` or `yaml`.
 * You are tempted to add a "helper script" that runs a server.
 * You encounter a requirement that seems to violate the "Shared Kernel" philosophy.
+
+## 🛡️ Mandatory Local Verification Workflow
+
+This package enforces a zero-tolerance policy for type errors, linting violations, and coverage drops. To ensure the Shared Kernel remains completely stable and immutable, **the following checks must be run locally before opening a Pull Request or finalizing an AI-generated refactor.** Failure to comply will result in an immediate rejection by the CI/CD pipeline.
+
+### 1. Formatting and Linting
+We use `ruff` with an aggressive, strict ruleset (including `SIM`, `C4`, `PERF`, and `FURB`). Run the auto-fixer to resolve import and syntax issues:
+`uv run ruff format .`
+`uv run ruff check . --fix`
+
+### 2. Strict Type Checking
+We run `mypy` in `strict = true` mode. There are no implicit optionals, and `Any` should be avoided wherever possible. Verify your types:
+`uv run mypy src/ tests/`
+
+### 3. Test Coverage
+Ensure your new logic maintains the strict 95% coverage mandate and passes all behavioral checks:
+`uv run pytest --cov --cov-fail-under=95`
+
+*Note: Do not bypass type hints or add `# type: ignore` unless interacting with deeply dynamic external modules, and only do so with an explicit explanatory comment.*

@@ -148,7 +148,7 @@ def test_inline_tool_bypass_prevention() -> None:
     flow = LinearFlow.model_construct(
         kind="LinearFlow",
         metadata=FlowMetadata(name="HackerFlow", version="1.0.0"),
-        steps=[hacker_node],  # type: ignore[list-item]
+        steps=[hacker_node],
         definitions=None,
         governance=Governance(max_risk_level=RiskLevel.STANDARD),
     )
