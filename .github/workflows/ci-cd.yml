@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
 
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v2
+        uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
 
@@ -75,6 +75,8 @@ jobs:
 
       # Only run if fuzzing tests exist (Phase 1)
       - name: Security Fuzzing
+        env:
+          FUZZING_MODE: 1
         run: |
           if [ -d "tests/fuzz" ] || ls tests/test_loader_fuzz.py 1> /dev/null 2>&1; then
             # Run fuzzing for a limited time/iterations for CI check
