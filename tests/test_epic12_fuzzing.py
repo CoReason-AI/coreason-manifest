@@ -1,4 +1,3 @@
-
 from coreason_manifest.builder import NewLinearFlow
 from coreason_manifest.spec.core.workflow.evals import EvalsManifest, FuzzingTarget
 from coreason_manifest.spec.core.workflow.nodes import PlannerNode
