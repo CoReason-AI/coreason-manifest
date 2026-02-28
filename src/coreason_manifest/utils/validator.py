@@ -450,6 +450,23 @@ def _validate_data_flow(
     return errors
 
 
+def _validate_opa_policies(gov: Governance) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+    if gov.opa_policies and gov.max_risk_level is None:
+        errors.append(
+            ComplianceReport(
+                # Use literal string to avoid dependency issues if it's not in ErrorCatalog
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=(
+                    "Declarative OPA policies must be mathematically backed by "
+                    "a hard risk ceiling in a zero-trust architecture."
+                ),
+            )
+        )
+    return errors
+
+
 def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
@@ -467,6 +484,9 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[Complianc
                 details={"fallback_node_id": gov.circuit_breaker.fallback_node_id},
             )
         )
+
+    errors.extend(_validate_opa_policies(gov))
+
     return errors
 
 
