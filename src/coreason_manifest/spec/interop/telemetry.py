@@ -5,7 +5,21 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.interop.antibody import AntibodyBase
+
+
+class CryptographicSignature(CoreasonModel):
+    """
+    Standard definition for a cryptographic signature proving origin and integrity.
+    """
+
+    signature_scheme: Literal["ed25519", "rsa", "ecdsa"] = Field(
+        ..., description="The algorithm used for the signature."
+    )
+    public_key: str = Field(..., description="The public key in base64 encoding.")
+    signature_value: str = Field(..., description="The computed signature in base64 encoding.")
+    signed_at: datetime = Field(..., description="Timestamp of the signature creation.")
 
 
 class NodeState(StrEnum):
@@ -56,7 +70,9 @@ class NodeExecution(AntibodyBase):
     parent_hash: str | None = Field(default=None, description="Hash of the single parent execution (Linear).")
     parent_hashes: list[str] = Field(default_factory=list, description="Hashes of preceding executions (DAG parents).")
 
-    signature: Annotated[str | None, Field(description="Optional cryptographic signature of the event.")] = None
+    signature: CryptographicSignature | None = Field(
+        default=None, description="Optional cryptographic signature of the event."
+    )
 
     _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
 

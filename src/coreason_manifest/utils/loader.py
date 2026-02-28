@@ -9,7 +9,9 @@ import os
 import re
 import stat
 import sys
+import threading
 import warnings
+from collections import OrderedDict
 from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -257,6 +259,29 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         return spec
 
 
+class JailModuleCache:
+    """Thread-safe LRU cache for evicting jailed modules to prevent memory leaks."""
+
+    def __init__(self, max_size: int = 100):
+        self.max_size = max_size
+        self.cache: OrderedDict[str, None] = OrderedDict()
+        self.lock = threading.Lock()
+
+    def add(self, module_name: str) -> None:
+        with self.lock:
+            if module_name in self.cache:
+                self.cache.move_to_end(module_name)
+            else:
+                self.cache[module_name] = None
+                if len(self.cache) > self.max_size:
+                    oldest, _ = self.cache.popitem(last=False)
+                    if oldest in sys.modules:
+                        del sys.modules[oldest]
+
+
+_JAIL_CACHE = JailModuleCache(max_size=100)
+
+
 # Singleton instance of the finder
 _SANDBOXED_FINDER = SandboxedPathFinder()
 
@@ -499,12 +524,8 @@ def _execute_jailed_module(
                 raise
             raise ValueError(f"Failed to execute {component_name} code in {file_ref}: {e}") from e
         finally:
-            # Architectural Decision: We DO NOT clean up dependencies (cleanup_modules) here.
-            # Rationale: Deleting from sys.modules causes race conditions in concurrent/async workloads
-            # if multiple tasks share the same jail root (and thus the same hash-namespaced modules).
-            # Python's import system is thread-safe; deleting from underneath it is not.
-            # Memory leak risk is acceptable for this manifest loader context (caching behavior).
-            pass
+            # Add to LRU Cache to safely manage memory
+            _JAIL_CACHE.add(module_name)
 
     loaded_class = exec_globals.get(class_name)
 

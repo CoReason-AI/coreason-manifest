@@ -1,5 +1,5 @@
 import ast
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal
 from uuid import uuid4
 
 import jsonschema  # type: ignore[import-untyped]
@@ -7,7 +7,9 @@ from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.spec.common_base import CoreasonModel
+from coreason_manifest.spec.core.oversight.governance import Governance
 from coreason_manifest.spec.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
+from coreason_manifest.spec.core.state.persistence import PersistenceConfig
 from coreason_manifest.spec.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.workflow.nodes import (
     AnyNode,
@@ -15,9 +17,6 @@ from coreason_manifest.spec.core.workflow.nodes import (
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.io import SecurityViolationError
-
-if TYPE_CHECKING:
-    from coreason_manifest.spec.core.oversight.governance import Governance
 
 # Export AnyNode so it can be imported from here as well
 __all__ = [
@@ -72,13 +71,15 @@ class DataSchema(CoreasonModel):
 class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
     schemas: list[DataSchema] = Field(default_factory=list)
-    persistence: Any | None = None
+    persistence: PersistenceConfig | None = None
 
 
 class Edge(CoreasonModel):
     from_node: NodeID
     to_node: NodeID
     condition: str | None = None
+    cost_weight: float = Field(0.0, ge=0.0, description="Estimated financial cost (USD) to traverse this edge.")
+    latency_weight_ms: float = Field(0.0, ge=0.0, description="Estimated latency in milliseconds.")
 
     @field_validator("condition", mode="before")
     @classmethod
@@ -182,7 +183,7 @@ class GraphFlow(CoreasonModel):
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     interface: FlowInterface
-    governance: "Governance | None" = None
+    governance: Governance | None = None
     blackboard: Blackboard | None = Field(default_factory=Blackboard)
     definitions: FlowDefinitions | None = None
     graph: Graph
@@ -198,7 +199,7 @@ class LinearFlow(CoreasonModel):
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     steps: list[AnyNode] = Field(default_factory=list)
-    governance: "Governance | None" = None
+    governance: Governance | None = None
     definitions: FlowDefinitions | None = None
 
 

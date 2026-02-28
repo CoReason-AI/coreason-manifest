@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.spec.core.primitives.constants import NodeCapability
 from coreason_manifest.spec.core.primitives.registry import register_engine, resolve_engine_union
+from coreason_manifest.spec.core.primitives.types import WasiCapability
 
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
@@ -381,6 +382,27 @@ class GraphReasoning(BaseReasoning):
     ] = 1
 
 
+@register_engine
+class WasmExecutionReasoning(BaseReasoning):
+    """
+    Executes tasks in an isolated WebAssembly (Wasm) sandbox.
+    """
+
+    type: Literal["wasm_execution"] = "wasm_execution"
+
+    memory_limit_mb: Annotated[int, Field(gt=0, description="Memory limit for the Wasm sandbox in megabytes.")]
+    imported_host_functions: Annotated[
+        list[str], Field(default_factory=list, description="List of allowed host functions the Wasm module can call.")
+    ]
+    wasi_capabilities: Annotated[
+        list[WasiCapability],
+        Field(default_factory=list, description="List of enabled WASI capabilities (e.g., 'network', 'fs_read')."),
+    ]
+
+    def required_capabilities(self) -> list[str]:
+        return [NodeCapability.WASM_EXECUTION.value]
+
+
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
@@ -432,4 +454,5 @@ __all__ = [
     "RedTeamingReasoning",
     "StandardReasoning",
     "TreeSearchReasoning",
+    "WasmExecutionReasoning",
 ]

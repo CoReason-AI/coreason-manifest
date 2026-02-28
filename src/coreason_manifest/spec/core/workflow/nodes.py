@@ -25,6 +25,17 @@ from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
+class LockConfig(CoreasonModel):
+    """
+    Configuration for atomic locks to prevent race conditions during concurrent execution.
+    """
+
+    write_locks: list[VariableID] = Field(
+        default_factory=list, description="Variables requiring mutually exclusive write access."
+    )
+    read_locks: list[VariableID] = Field(default_factory=list, description="Variables requiring shared read access.")
+
+
 class Node(CoreasonModel):
     """Base class for vertices of the execution graph."""
 
@@ -312,7 +323,7 @@ class SwarmNode(Node):
     ] = 0.0
 
     # Aggregation
-    reducer_function: Literal["concat", "vote", "summarize"] = Field(
+    reducer_function: Literal["concat", "vote", "summarize"] | None = Field(
         ..., description="How to combine results.", examples=["concat"]
     )
     aggregator_model: Annotated[
@@ -328,6 +339,10 @@ class SwarmNode(Node):
     ]
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
+    )
+
+    lock_config: LockConfig | None = Field(
+        None, description="Atomic lock configuration for preventing race conditions."
     )
 
     @model_validator(mode="after")
@@ -374,6 +389,7 @@ __all__ = [
     "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
+    "LockConfig",
     "Node",
     "PlaceholderNode",
     "PlannerNode",

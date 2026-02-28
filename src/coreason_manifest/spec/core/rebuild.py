@@ -1,4 +1,20 @@
-from coreason_manifest.spec.core.primitives.registry import resolve_engine_union, resolve_node_union
+import contextlib
+import hashlib
+import json
+
+from coreason_manifest.spec.core.primitives.registry import (
+    _ENGINE_REGISTRY,
+    _NODE_REGISTRY,
+    resolve_engine_union,
+    resolve_node_union,
+)
+
+_LAST_BUILD_HASH: str | None = None
+
+
+def _compute_registry_hash() -> str:
+    state = {"nodes": sorted(_NODE_REGISTRY.keys()), "engines": sorted(_ENGINE_REGISTRY.keys())}
+    return hashlib.sha256(json.dumps(state).encode("utf-8")).hexdigest()
 
 
 def rebuild_manifest() -> None:
@@ -7,9 +23,23 @@ def rebuild_manifest() -> None:
     This is necessary because Pydantic V2 resolves unions at import time, so dynamic
     additions to the registry require an explicit rebuild of the schema.
     """
+    global _LAST_BUILD_HASH
+    current_hash = _compute_registry_hash()
+
+    if _LAST_BUILD_HASH is not None and current_hash == _LAST_BUILD_HASH:
+        return
+
+    _LAST_BUILD_HASH = current_hash
+
     # Import modules lazily to avoid circular dependencies
     from coreason_manifest.spec.core.compute import reasoning
+    from coreason_manifest.spec.core.oversight import governance
+    from coreason_manifest.spec.core.primitives import types
     from coreason_manifest.spec.core.workflow import flow, nodes
+
+    # Force rebuild of Governance immediately before any models that depend on it
+    with contextlib.suppress(Exception):
+        governance.Governance.model_rebuild(force=True)
 
     # 1. Resolve fresh unions
     new_node_union = resolve_node_union()
@@ -51,5 +81,13 @@ def rebuild_manifest() -> None:
     # GraphFlow depends on Graph
     flow.GraphFlow.model_rebuild(force=True)
 
+    # Wait, Governance model_rebuild is failing because it imports other things or hasn't fully imported.
+    # Actually, Governance doesn't depend on new unions, we might not need to rebuild it explicitly.
+
     # AgentRequest depends on GraphFlow | LinearFlow
     flow.AgentRequest.model_rebuild(force=True)
+
+    # 4. Rebuild newly added isolated models that don't depend on unions
+    # but still might need to resolve types
+    types.WasmMiddlewareDef.model_rebuild(force=True)
+    reasoning.WasmExecutionReasoning.model_rebuild(force=True)

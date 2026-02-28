@@ -17,6 +17,7 @@ from coreason_manifest.spec.core.compute.reasoning import (
     RedTeamingReasoning,
     StandardReasoning,
     TreeSearchReasoning,
+    WasmExecutionReasoning,
 )
 from coreason_manifest.spec.core.oversight.governance import (
     Audit,
@@ -34,7 +35,10 @@ from coreason_manifest.spec.core.oversight.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.spec.core.state.tools import ToolPack
+from coreason_manifest.spec.core.primitives.types import WasmMiddlewareDef
+from coreason_manifest.spec.core.state.persistence import Checkpoint, PersistenceConfig, StateDiff
+from coreason_manifest.spec.core.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
+from coreason_manifest.spec.core.workflow.evals import EvalsManifest, FuzzingTarget, TestCase
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
     Blackboard,
@@ -72,6 +76,7 @@ __all__ = [
     "BaseReasoning",
     "Blackboard",
     "BufferReasoning",
+    "Checkpoint",
     "CircuitBreaker",
     "CognitiveProfile",
     "ComputerUseReasoning",
@@ -83,11 +88,13 @@ __all__ = [
     "ErrorDomain",
     "ErrorHandler",
     "EscalationStrategy",
+    "EvalsManifest",
     "FallbackStrategy",
     "FastPath",
     "FlowDefinitions",
     "FlowInterface",
     "FlowMetadata",
+    "FuzzingTarget",
     "Governance",
     "Graph",
     "GraphFlow",
@@ -96,10 +103,14 @@ __all__ = [
     "InspectorNode",
     "InspectorNodeBase",
     "LinearFlow",
+    "MCPPrompt",
+    "MCPResourceTemplate",
+    "MCPTool",
     "ModelCriteria",
     "ModelRef",
     "Node",
     "Optimizer",
+    "PersistenceConfig",
     "PlaceholderNode",
     "PlannerNode",
     "ReasoningConfig",
@@ -109,10 +120,14 @@ __all__ = [
     "RetryStrategy",
     "Safety",
     "StandardReasoning",
+    "StateDiff",
     "SupervisionPolicy",
     "SwitchNode",
+    "TestCase",
     # Tools
     "ToolPack",
     "TreeSearchReasoning",
     "VariableDef",
+    "WasmExecutionReasoning",
+    "WasmMiddlewareDef",
 ]
