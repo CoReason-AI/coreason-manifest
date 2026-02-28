@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, Literal, Self, cast
 
 if TYPE_CHECKING:
     from coreason_manifest.core.workflow.nodes import Constraint
@@ -126,6 +126,26 @@ class AgentBuilder:
         self.escalation_rules: list[EscalationCriteria] = []
         self.memory: MemorySubsystem | None = None
         self.constraints: list[Constraint] = []
+        self.review_strategy = "none"
+        self.adversarial_persona: str | None = None
+        self.gap_scan_enabled = False
+        self.gap_scan_threshold = 0.8
+        self.max_revisions = 1
+
+    def with_meta_cognition(
+        self,
+        review_strategy: str = "none",
+        adversarial_persona: str | None = None,
+        gap_scan_enabled: bool = False,
+        gap_scan_threshold: float = 0.8,
+        max_revisions: int = 1,
+    ) -> "AgentBuilder":
+        self.review_strategy = review_strategy
+        self.adversarial_persona = adversarial_persona
+        self.gap_scan_enabled = gap_scan_enabled
+        self.gap_scan_threshold = gap_scan_threshold
+        self.max_revisions = max_revisions
+        return self
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures the agent's identity.
@@ -384,6 +404,7 @@ class AgentBuilder:
         bitemporal_tracking: bool = False,
         allowed_entity_types: list[str] | None = None,
         skill_library_ref: str | None = None,
+        consolidation_strategy: str = "session_close",
     ) -> "AgentBuilder":
         """Configures the memory subsystem for the agent.
 
@@ -404,9 +425,12 @@ class AgentBuilder:
 
         episodic = None
         if salience_threshold is not None:
+            from coreason_manifest.core.state.memory import ConsolidationStrategy
+
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
                 consolidation_interval_turns=consolidation_interval,
+                consolidation_strategy=ConsolidationStrategy(consolidation_strategy),
             )
 
         semantic = None
@@ -474,6 +498,26 @@ class AgentBuilder:
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
+        if self.reasoning:
+            from coreason_manifest.core.compute.reasoning import AdversarialConfig, GapScanConfig, ReviewStrategy
+
+            adversarial_config = None
+            if self.review_strategy == "adversarial" or self.adversarial_persona is not None:
+                adversarial_config = AdversarialConfig(persona=self.adversarial_persona or "skeptic")
+
+            gap_scan = None
+            if self.gap_scan_enabled:
+                gap_scan = GapScanConfig(enabled=True, confidence_threshold=self.gap_scan_threshold)
+
+            self.reasoning = self.reasoning.model_copy(
+                update={
+                    "review_strategy": ReviewStrategy(self.review_strategy),
+                    "adversarial_config": adversarial_config,
+                    "gap_scan": gap_scan,
+                    "max_revisions": self.max_revisions,
+                }
+            )
+
         from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile
 
         profile = CognitiveProfile(
@@ -520,8 +564,15 @@ class BaseFlowBuilder:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
         self._tool_packs: dict[str, ToolPack] = {}
+        from typing import Literal
+
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
+        self.status: Literal["draft", "published", "archived"] = "draft"
+
+    def set_status(self, status: Literal["draft", "published", "archived"]) -> Self:
+        self.status = status
+        return self
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
         """Registers a reusable supervision policy.
@@ -583,6 +634,15 @@ class BaseFlowBuilder:
             Self: The builder instance for chaining.
         """
         self.governance = gov
+        return self
+
+    def set_mixed_initiative(self, policy: Any) -> Self:
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"mixed_initiative": policy})
+        else:
+            from coreason_manifest.core.oversight.governance import Governance
+
+            self.governance = Governance(mixed_initiative=policy)
         return self
 
     def set_operational_policy(
@@ -874,7 +934,7 @@ class NewLinearFlow(BaseFlowBuilder):
     def _create_flow_instance(self) -> LinearFlow:
         return LinearFlow(
             kind="LinearFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),
@@ -1013,7 +1073,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         return GraphFlow(
             kind="GraphFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,

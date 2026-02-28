@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, HttpUrl, model_validator
@@ -17,6 +18,11 @@ class Dependency(CoreasonModel):
         Field(pattern=r"^sha(?:256|384|512):[a-f0-9]+$", description="Cryptographic hash of the upstream package."),
     ] = None
     sbom_ref: str | None = Field(None, description="URI or path to a CycloneDX/SPDX JSON Document.")
+
+
+class LoadStrategy(StrEnum):
+    EAGER = "eager"
+    LAZY = "lazy"
 
 
 class ToolCapability(CoreasonModel):
@@ -39,12 +45,17 @@ class ToolCapability(CoreasonModel):
         None, description="Documentation or endpoint URL.", examples=["https://example.com/docs"]
     )
 
+    trigger_intent: str | None = None
+    load_strategy: LoadStrategy = Field(default=LoadStrategy.EAGER)
+
     @model_validator(mode="after")
     def validate_critical_description(self) -> "ToolCapability":
         if self.risk_level == "critical" and not self.description:
             raise ValueError(
                 f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
             )
+        if self.load_strategy == LoadStrategy.LAZY and self.trigger_intent is None:
+            raise ValueError("trigger_intent is required when load_strategy is LAZY")
         return self
 
 
