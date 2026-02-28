@@ -41,9 +41,7 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
     return []
 
 
-def _enforce_red_button_rule(
-    nodes: list[AnyNode], flow: LinearFlow | GraphFlow
-) -> list[ComplianceReport]:
+def _enforce_red_button_rule(nodes: list[AnyNode], flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """1. Capability Analysis & Red Button Rule"""
     reports: list[ComplianceReport] = []
     for node in nodes:
