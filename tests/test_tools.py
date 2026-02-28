@@ -12,7 +12,7 @@ def test_tool_capability_lazy_loading_without_intent() -> None:
             description="A lazy tool",
             load_strategy=LoadStrategy.LAZY,
         )
-    assert "Lazy loading requires a trigger_intent" in str(exc_info.value)  # noqa: S101
+    assert "Lazy loading requires a trigger_intent" in str(exc_info.value)
 
 
 def test_tool_capability_lazy_loading_with_intent() -> None:
@@ -23,9 +23,9 @@ def test_tool_capability_lazy_loading_with_intent() -> None:
         load_strategy=LoadStrategy.LAZY,
         trigger_intent="A semantic description of what this tool does",
     )
-    assert tool.name == "lazy_tool"  # noqa: S101
-    assert tool.load_strategy == LoadStrategy.LAZY  # noqa: S101
-    assert tool.trigger_intent == "A semantic description of what this tool does"  # noqa: S101
+    assert tool.name == "lazy_tool"
+    assert tool.load_strategy == LoadStrategy.LAZY
+    assert tool.trigger_intent == "A semantic description of what this tool does"
 
 
 def test_tool_capability_eager_loading_without_intent() -> None:
@@ -35,6 +35,6 @@ def test_tool_capability_eager_loading_without_intent() -> None:
         description="An eager tool",
         load_strategy=LoadStrategy.EAGER,
     )
-    assert tool.name == "eager_tool"  # noqa: S101
-    assert tool.load_strategy == LoadStrategy.EAGER  # noqa: S101
-    assert tool.trigger_intent is None  # noqa: S101
+    assert tool.name == "eager_tool"
+    assert tool.load_strategy == LoadStrategy.EAGER
+    assert tool.trigger_intent is None
