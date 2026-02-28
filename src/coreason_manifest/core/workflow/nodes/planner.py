@@ -11,9 +11,13 @@ from .base import Node
 
 @register_node
 class PlannerNode(Node):
-    type: Literal["planner"] = "planner"
+    """A node that generates a structured plan to achieve a goal."""
+
+    type: Literal["planner"] = Field("planner", description="The type of the node.", examples=["planner"])
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
-    optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
+    optimizer: Optimizer | None = Field(
+        None, description="Optimization configuration.", examples=[{"strategy": "greedy"}]
+    )
     output_schema: dict[str, Any] = Field(
         ...,
         description="JSON Schema for the plan output.",

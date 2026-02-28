@@ -14,13 +14,15 @@ from .base import Node
 
 
 class SteeringConfig(CoreasonModel):
-    """
-    Configuration for human steering permissions.
-    """
+    """Configuration for human steering permissions."""
 
-    allow_variable_mutation: bool = Field(False, description="Whether the human can mutate blackboard variables.")
+    allow_variable_mutation: bool = Field(
+        False, description="Whether the human can mutate blackboard variables.", examples=[True]
+    )
     allowed_targets: list[VariableID] | None = Field(
-        None, description="List of variable IDs that can be mutated. If None, all are allowed (if mutation is enabled)."
+        None,
+        description="List of variable IDs that can be mutated. If None, all are allowed (if mutation is enabled).",
+        examples=[["user_preference"]],
     )
 
     @model_validator(mode="after")
@@ -54,17 +56,17 @@ class SteeringConfig(CoreasonModel):
 
 @register_node
 class HumanNode(Node):
-    """
-    Human-in-the-Loop interaction node.
-    Supports blocking approval, or 'shadow' mode where the agent streams intent
-    and proceeds if no signal is received, while 'hijack_only' allows mid-flight plan alteration.
-    """
+    """Human-in-the-Loop interaction node for approval, shadow, or hijack modes."""
 
-    type: Literal["human"] = "human"
+    type: Literal["human"] = Field("human", description="The type of the node.", examples=["human"])
     prompt: str = Field(..., description="Prompt to display to the human.", examples=["Approve this plan?"])
-    escalation: EscalationStrategy = Field(..., description="The escalation configuration.")
+    escalation: EscalationStrategy = Field(
+        ..., description="The escalation configuration.", examples=[{"strategy": "escalate"}]
+    )
     input_schema: dict[str, Any] | None = Field(
-        None, description="JSON Schema for expected human input.", examples=[{"type": "object"}]
+        None,
+        description="JSON Schema for expected human input.",
+        examples=[{"type": "object", "properties": {"reason": {"type": "string"}}}],
     )
     options: list[str] | None = Field(
         None, description="List of valid options for the human.", examples=[["approve", "reject"]]
@@ -72,10 +74,12 @@ class HumanNode(Node):
 
     interaction_mode: Annotated[
         Literal["blocking", "shadow", "hijack_only"],
-        Field(description="Wait for input vs shadow execution.", examples=["blocking"]),
-    ] = "blocking"
+        Field("blocking", description="Wait for input vs shadow execution.", examples=["blocking"]),
+    ]
 
-    steering_config: SteeringConfig | None = Field(None, description="Configuration for steering permissions.")
+    steering_config: SteeringConfig | None = Field(
+        None, description="Configuration for steering permissions.", examples=[{"allow_variable_mutation": True}]
+    )
 
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
