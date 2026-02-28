@@ -26,18 +26,10 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, StrictJs
                 if isinstance(desc_val, str):
                     desc = desc_val
 
-            tools.append({
-                "name": skill.name,
-                "description": desc,
-                "parameters": skill.definition
-            })
+            tools.append({"name": skill.name, "description": desc, "parameters": skill.definition})
 
     if isinstance(flow, LinearFlow):
-        return {
-            "type": "chain",
-            "steps": [node.id for node in nodes],
-            "tools": tools
-        }
+        return {"type": "chain", "steps": [node.id for node in nodes], "tools": tools}
 
     if isinstance(flow, GraphFlow):
         edges: list[StrictJsonValue] = []
@@ -51,11 +43,6 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, StrictJs
                     edges.append([node.id, route_target, route_key])
                 edges.append([node.id, node.default_route, "default"])
 
-        return {
-            "type": "graph",
-            "nodes": [node.id for node in nodes],
-            "edges": edges,
-            "tools": tools
-        }
+        return {"type": "graph", "nodes": [node.id for node in nodes], "edges": edges, "tools": tools}
 
     return {}  # pragma: no cover

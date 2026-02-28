@@ -63,17 +63,10 @@ def node_to_openai_assistant(node: AgentNode, skills: dict[str, AtomicSkill] | N
     for tool_name in node.tools:
         if tool_name in skills:
             skill = skills[tool_name]
-            tools_definitions.append({
-                "type": "function",
-                "function": {
-                    "name": skill.name,
-                    "parameters": skill.definition
-                }
-            })
+            tools_definitions.append(
+                {"type": "function", "function": {"name": skill.name, "parameters": skill.definition}}
+            )
         else:
-            tools_definitions.append({
-                "type": "function",
-                "function": {"name": tool_name}
-            })
+            tools_definitions.append({"type": "function", "function": {"name": tool_name}})
 
     return {"name": node.id, "instructions": instructions, "model": model, "tools": tools_definitions}

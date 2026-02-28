@@ -478,8 +478,6 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[Complianc
     return errors
 
 
-
-
 def _validate_action_nodes(nodes: list[AnyNode], flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
