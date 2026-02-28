@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from coreason_manifest.spec.core.compute.reasoning import (
     FastPath,
@@ -56,6 +56,9 @@ from coreason_manifest.spec.core.workflow.flow import (
 )
 from coreason_manifest.spec.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.utils.validator import validate_flow
+
+if TYPE_CHECKING:
+    from coreason_manifest.spec.core.contracts import AtomicSkill
 
 
 def create_resilience(
@@ -445,6 +448,7 @@ class BaseFlowBuilder:
         """
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
+        self._tool_packs: dict[str, AtomicSkill] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
 
@@ -585,6 +589,7 @@ class BaseFlowBuilder:
         return FlowDefinitions(
             profiles=self._profiles,
             supervision_templates=self._supervision_templates,
+            skills=self._tool_packs,
         )
 
     def _register_node(self, node: AnyNode) -> None:
