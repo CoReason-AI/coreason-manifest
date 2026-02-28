@@ -6,6 +6,7 @@ from pydantic import Field, field_validator, model_validator
 from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 from coreason_manifest.core.oversight.intervention import CoIntelligencePolicy
+from coreason_manifest.core.oversight.mixed_initiative import MixedInitiativePolicy
 from coreason_manifest.core.primitives.types import MiddlewareID, NodeID, RiskLevel, ToolID
 
 
@@ -149,6 +150,9 @@ class Governance(CoreasonModel):
     opa_policies: list[str] = Field(
         default_factory=list,
         description="References to .rego files or inline Open Policy Agent definitions for custom enterprise rules.",
+    )
+    mixed_initiative: MixedInitiativePolicy | None = Field(
+        None, description="Global governance for Human-AI Supervisory Control."
     )
 
     @field_validator("active_middlewares")

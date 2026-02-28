@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from coreason_manifest.core.compute.reasoning import (
     AdversarialConfig,
@@ -62,6 +62,9 @@ from coreason_manifest.core.workflow.flow import (
 )
 from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.toolkit.validator import validate_flow
+
+if TYPE_CHECKING:
+    from coreason_manifest.core.oversight.mixed_initiative import MixedInitiativePolicy
 
 
 def create_resilience(
@@ -787,6 +790,16 @@ class BaseFlowBuilder:
             raise ValueError("Validation failed:\n- " + "\n- ".join(error_msgs))
 
         return flow
+
+    def set_mixed_initiative(self, policy: "MixedInitiativePolicy") -> Self:
+        """Sets the global Mixed-Initiative Control policy."""
+        if self.governance:
+            self.governance = self.governance.model_copy(update={"mixed_initiative": policy})
+        else:
+            from coreason_manifest.core.oversight.governance import Governance
+
+            self.governance = Governance(mixed_initiative=policy)
+        return self
 
 
 class NewLinearFlow(BaseFlowBuilder):
