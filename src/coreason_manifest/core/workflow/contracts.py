@@ -30,4 +30,4 @@ class StrategyNode(CoreasonModel):
     children: list["PlanTree"] = Field(..., description="Child nodes (sub-goals)")
 
 
-type PlanTree = StrategyNode | ActionNode | AtomicSkill | list["PlanTree"] | dict[str, Any]
+type PlanTree = StrategyNode | ActionNode | AtomicSkill | list["PlanTree"]
