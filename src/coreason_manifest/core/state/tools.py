@@ -1,4 +1,3 @@
-from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, HttpUrl, model_validator
@@ -20,13 +19,6 @@ class Dependency(CoreasonModel):
     sbom_ref: str | None = Field(None, description="URI or path to a CycloneDX/SPDX JSON Document.")
 
 
-class LoadStrategy(StrEnum):
-    """Strategy for loading a tool into the agent's context."""
-
-    EAGER = "eager"
-    LAZY = "lazy"
-
-
 class ToolCapability(CoreasonModel):
     """
     Definition of a tool's capabilities and risk profile.
@@ -46,23 +38,12 @@ class ToolCapability(CoreasonModel):
     url: HttpUrl | None = Field(
         None, description="Documentation or endpoint URL.", examples=["https://example.com/docs"]
     )
-    trigger_intent: str | None = Field(
-        default=None, description="Dense semantic description used for vector routing. Critical for lazy loading."
-    )
-    load_strategy: LoadStrategy = Field(
-        default=LoadStrategy.EAGER, description="Strategy for loading the tool into the agent's context."
-    )
 
     @model_validator(mode="after")
     def validate_critical_description(self) -> "ToolCapability":
         if self.risk_level == "critical" and not self.description:
             raise ValueError(
                 f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
-            )
-        if self.load_strategy == LoadStrategy.LAZY and self.trigger_intent is None:
-            raise ValueError(
-                f"Tool '{self.name}' is configured for lazy loading but lacks a trigger_intent. "
-                "Lazy loading requires a trigger_intent to be defined for semantic discovery."
             )
         return self
 

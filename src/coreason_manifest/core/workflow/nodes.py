@@ -371,11 +371,9 @@ class SwarmNode(Node):
 
 @register_node
 class PlaceholderNode(Node):
-    """An abstract node used during draft design. Must be resolved before publishing."""
-
     type: Literal["placeholder"] = "placeholder"
     required_capabilities: CoercibleStringList = Field(
-        default_factory=list, description="List of required capabilities.", examples=[["image_generation"]]
+        ..., description="List of required capabilities.", examples=[["image_generation"]]
     )
 
 

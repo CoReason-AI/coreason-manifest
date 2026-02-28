@@ -10,22 +10,22 @@ def test_agent_builder_traffic_policy() -> None:
     builder.with_operational_policy(rate_limit_rpm=100)
     agent = builder.build()
 
-    assert agent.operational_policy is not None
-    assert agent.operational_policy.traffic is not None
-    assert agent.operational_policy.traffic.rate_limit_rpm == 100
-    assert agent.operational_policy.traffic.semantic_cache is not None
-    assert agent.operational_policy.traffic.semantic_cache.enabled is True
+    assert agent.operational_policy is not None  # noqa: S101
+    assert agent.operational_policy.traffic is not None  # noqa: S101
+    assert agent.operational_policy.traffic.rate_limit_rpm == 100  # noqa: S101
+    assert agent.operational_policy.traffic.semantic_cache is not None  # noqa: S101
+    assert agent.operational_policy.traffic.semantic_cache.enabled is True  # noqa: S101
 
     # Test setting cache values explicitly
     builder.with_operational_policy(rate_limit_tpm=5000, semantic_cache_similarity=0.9, semantic_cache_ttl=1800)
     agent2 = builder.build()
 
-    assert agent2.operational_policy is not None
-    assert agent2.operational_policy.traffic is not None
-    assert agent2.operational_policy.traffic.rate_limit_tpm == 5000
-    assert agent2.operational_policy.traffic.semantic_cache is not None
-    assert agent2.operational_policy.traffic.semantic_cache.similarity_threshold == 0.9
-    assert agent2.operational_policy.traffic.semantic_cache.ttl_seconds == 1800
+    assert agent2.operational_policy is not None  # noqa: S101
+    assert agent2.operational_policy.traffic is not None  # noqa: S101
+    assert agent2.operational_policy.traffic.rate_limit_tpm == 5000  # noqa: S101
+    assert agent2.operational_policy.traffic.semantic_cache is not None  # noqa: S101
+    assert agent2.operational_policy.traffic.semantic_cache.similarity_threshold == 0.9  # noqa: S101
+    assert agent2.operational_policy.traffic.semantic_cache.ttl_seconds == 1800  # noqa: S101
 
 
 def test_flow_builder_traffic_policy() -> None:
@@ -40,10 +40,10 @@ def test_flow_builder_traffic_policy() -> None:
     builder.add_agent(agent)
     flow = builder.build()
 
-    assert flow.governance is not None
-    assert flow.governance.operational_policy is not None
-    assert flow.governance.operational_policy.traffic is not None
-    assert flow.governance.operational_policy.traffic.criticality == RequestCriticality.CRITICAL
-    assert flow.governance.operational_policy.traffic.rate_limit_tpm == 20000
-    assert flow.governance.operational_policy.traffic.semantic_cache is not None
-    assert flow.governance.operational_policy.traffic.semantic_cache.ttl_seconds == 7200
+    assert flow.governance is not None  # noqa: S101
+    assert flow.governance.operational_policy is not None  # noqa: S101
+    assert flow.governance.operational_policy.traffic is not None  # noqa: S101
+    assert flow.governance.operational_policy.traffic.criticality == RequestCriticality.CRITICAL  # noqa: S101
+    assert flow.governance.operational_policy.traffic.rate_limit_tpm == 20000  # noqa: S101
+    assert flow.governance.operational_policy.traffic.semantic_cache is not None  # noqa: S101
+    assert flow.governance.operational_policy.traffic.semantic_cache.ttl_seconds == 7200  # noqa: S101
