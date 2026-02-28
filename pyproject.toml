@@ -71,6 +71,9 @@ select = [
 ]
 ignore = []
 
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["coreason_manifest"]
 

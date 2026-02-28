@@ -8,11 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self, cast
+from typing import Any, Literal, Self, cast
 
 from coreason_manifest.core.compute.reasoning import (
+    AdversarialConfig,
     FastPath,
+    GapScanConfig,
     ReasoningConfig,
+    ReviewStrategy,
     StandardReasoning,
 )
 from coreason_manifest.core.oversight.governance import (
@@ -40,6 +43,7 @@ from coreason_manifest.core.oversight.resilience import (
 from coreason_manifest.core.primitives.types import RiskLevel
 from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
+    ConsolidationStrategy,
     EpisodicMemoryConfig,
     MemorySubsystem,
     ProceduralMemoryConfig,
@@ -122,6 +126,39 @@ class AgentBuilder:
         self.operational_policy: OperationalPolicy | None = None
         self.escalation_rules: list[EscalationCriteria] = []
         self.memory: MemorySubsystem | None = None
+        # Meta-Cognition state
+        self.review_strategy: str = "none"
+        self.adversarial_persona: str | None = None
+        self.gap_scan_enabled: bool = False
+        self.gap_scan_threshold: float = 0.8
+        self.max_revisions: int = 1
+
+    def with_meta_cognition(
+        self,
+        review_strategy: str = "none",
+        adversarial_persona: str | None = None,
+        gap_scan_enabled: bool = False,
+        gap_scan_threshold: float = 0.8,
+        max_revisions: int = 1,
+    ) -> "AgentBuilder":
+        """Configures meta-cognitive features for the agent.
+
+        Args:
+            review_strategy (str): The review strategy to use. Defaults to "none".
+            adversarial_persona (str | None): The persona for adversarial review.
+            gap_scan_enabled (bool): Whether gap scanning is enabled. Defaults to False.
+            gap_scan_threshold (float): The threshold for gap scanning. Defaults to 0.8.
+            max_revisions (int): Maximum self-correction loops. Defaults to 1.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
+        self.review_strategy = review_strategy
+        self.adversarial_persona = adversarial_persona
+        self.gap_scan_enabled = gap_scan_enabled
+        self.gap_scan_threshold = gap_scan_threshold
+        self.max_revisions = max_revisions
+        return self
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures the agent's identity.
@@ -376,6 +413,7 @@ class AgentBuilder:
         enable_paging: bool = False,
         salience_threshold: float | None = None,
         consolidation_interval: int | None = None,
+        consolidation_strategy: str = "session_close",
         graph_namespace: str | None = None,
         bitemporal_tracking: bool = False,
         allowed_entity_types: list[str] | None = None,
@@ -403,6 +441,7 @@ class AgentBuilder:
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
                 consolidation_interval_turns=consolidation_interval,
+                consolidation_strategy=ConsolidationStrategy(consolidation_strategy),
             )
 
         semantic = None
@@ -440,10 +479,38 @@ class AgentBuilder:
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
+        reasoning = self.reasoning
+        if reasoning is not None:
+            gap_scan_config = None
+            if self.gap_scan_enabled:
+                gap_scan_config = GapScanConfig(
+                    enabled=self.gap_scan_enabled, confidence_threshold=self.gap_scan_threshold
+                )
+
+            adversarial_config = None
+            if self.review_strategy == "adversarial":
+                adversarial_config = AdversarialConfig(persona=self.adversarial_persona or "skeptic")
+
+            # Map string to ReviewStrategy Enum
+            try:
+                review_strategy_enum = ReviewStrategy(self.review_strategy)
+            except ValueError:
+                review_strategy_enum = ReviewStrategy.NONE
+
+            # Since BaseModel models are immutable (frozen=True), we must use model_copy
+            reasoning = reasoning.model_copy(
+                update={
+                    "review_strategy": review_strategy_enum,
+                    "adversarial_config": adversarial_config,
+                    "gap_scan": gap_scan_config,
+                    "max_revisions": self.max_revisions,
+                }
+            )
+
         profile = CognitiveProfile(
             role=self.role,
             persona=self.persona,
-            reasoning=self.reasoning,
+            reasoning=reasoning,
             fast_path=self.fast_path,
             memory=self.memory,
         )
@@ -485,6 +552,19 @@ class BaseFlowBuilder:
         self._tool_packs: dict[str, ToolPack] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
+        self.status: Literal["draft", "published", "archived"] = "draft"
+
+    def set_status(self, status: Literal["draft", "published", "archived"]) -> Self:
+        """Sets the status of the flow.
+
+        Args:
+            status (Literal["draft", "published", "archived"]): The status to set.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
+        self.status = status
+        return self
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
         """Registers a reusable supervision policy.
@@ -837,7 +917,7 @@ class NewLinearFlow(BaseFlowBuilder):
     def _create_flow_instance(self) -> LinearFlow:
         return LinearFlow(
             kind="LinearFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),
@@ -976,7 +1056,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         return GraphFlow(
             kind="GraphFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,
