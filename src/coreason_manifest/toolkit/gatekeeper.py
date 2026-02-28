@@ -20,7 +20,7 @@ from coreason_manifest.core.workflow.topology import (
 )
 
 if TYPE_CHECKING:
-    from coreason_manifest.core.state.tools import ToolCapability, AnyTool
+    from coreason_manifest.core.state.tools import AnyTool
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
@@ -45,9 +45,7 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
     return []
 
 
-def _check_domain_whitelist(
-    flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]
-) -> list[ComplianceReport]:
+def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]) -> list[ComplianceReport]:
     """0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)"""
     reports: list[ComplianceReport] = []
     allowed_domains_raw = []
@@ -336,7 +334,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     nodes, _ = get_unified_topology(flow)
 
     # Build tool map: name -> tool_object
-    tool_map: dict[str, "AnyTool"] = {}
+    tool_map: dict[str, AnyTool] = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:
