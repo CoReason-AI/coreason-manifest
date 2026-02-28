@@ -11,7 +11,9 @@ from .base import Node
 
 @register_node
 class SwitchNode(Node):
-    type: Literal["switch"] = "switch"
+    """A node that routes execution based on the value of a blackboard variable."""
+
+    type: Literal["switch"] = Field("switch", description="The type of the node.", examples=["switch"])
     variable: VariableID = Field(..., description="The blackboard variable to evaluate.", examples=["user_sentiment"])
     cases: dict[str, NodeID] = Field(
         ...,

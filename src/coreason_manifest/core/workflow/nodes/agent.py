@@ -27,24 +27,20 @@ class CognitiveProfile(CoreasonModel):
     fast_path: FastPath | None = Field(
         None, description="Fast path configuration for low-latency responses.", examples=[{"model": "gpt-3.5-turbo"}]
     )
-    memory: MemorySubsystem | None = Field(None, description="The 4-tier hierarchical memory configuration.")
+    memory: MemorySubsystem | None = Field(
+        None, description="The 4-tier hierarchical memory configuration.", examples=[{"working_memory": {}}]
+    )
 
 
 @register_node
 class AgentNode(Node):
-    """
-    Executes a cognitive task using a CognitiveProfile configuration.
+    """Executes a cognitive task using a CognitiveProfile configuration."""
 
-    The 'profile' field is polymorphic:
-    - Pass a CognitiveProfile object for inline definition (Scripting mode).
-    - Pass a string ID to reference 'definitions.profiles' (Production mode).
-    """
-
-    type: Literal["agent"] = "agent"
+    type: Literal["agent"] = Field("agent", description="The type of the node.", examples=["agent"])
     profile: CognitiveProfile | ProfileID = Field(
         ...,
         description="The cognitive profile configuration or a reference ID.",
-        examples=["profile_1", {"role": "Assistant", "persona": "..."}],
+        examples=["profile_1", {"role": "Assistant", "persona": "You are a helpful assistant."}],
     )
     tools: CoercibleStringList = Field(
         default_factory=list,
@@ -53,10 +49,14 @@ class AgentNode(Node):
     )
     operational_policy: Annotated[
         OperationalPolicy | None,
-        Field(None, description="Local operational limits. Overrides global Governance limits if set."),
+        Field(
+            None,
+            description="Local operational limits. Overrides global Governance limits if set.",
+            examples=[{"financial": {"max_cost_usd": 10.0}}],
+        ),
     ]
     escalation_rules: list[EscalationCriteria] = Field(
         default_factory=list,
         description="Local escalation rules for this agent.",
-        examples=[{"condition": "confidence < 0.5", "role": "supervisor"}],
+        examples=[[{"condition": "confidence < 0.5", "role": "supervisor"}]],
     )

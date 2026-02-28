@@ -18,17 +18,23 @@ class RequestCriticality(IntEnum):
 
 
 class SemanticCacheConfig(CoreasonModel):
-    enabled: bool = Field(True, description="Enable semantic caching.")
-    similarity_threshold: float = Field(0.85, ge=0.0, le=1.0, description="Similarity threshold for cache hits.")
-    ttl_seconds: int | None = Field(3600, description="Time to live for cache entries in seconds.")
+    enabled: bool = Field(True, description="Enable semantic caching.", examples=[True])
+    similarity_threshold: float = Field(
+        0.85, ge=0.0, le=1.0, description="Similarity threshold for cache hits.", examples=[0.85]
+    )
+    ttl_seconds: int | None = Field(3600, description="Time to live for cache entries in seconds.", examples=[3600])
 
 
 class TrafficPolicy(CoreasonModel):
-    criticality: RequestCriticality = Field(RequestCriticality.STANDARD, description="Request criticality level.")
-    rate_limit_rpm: int | None = Field(None, gt=0, description="Rate limit in requests per minute.")
-    rate_limit_tpm: int | None = Field(None, gt=0, description="Rate limit in tokens per minute.")
+    criticality: RequestCriticality = Field(
+        RequestCriticality.STANDARD, description="Request criticality level.", examples=[RequestCriticality.STANDARD]
+    )
+    rate_limit_rpm: int | None = Field(None, gt=0, description="Rate limit in requests per minute.", examples=[60])
+    rate_limit_tpm: int | None = Field(None, gt=0, description="Rate limit in tokens per minute.", examples=[10000])
     semantic_cache: SemanticCacheConfig | None = Field(
-        default_factory=SemanticCacheConfig, description="Semantic cache configuration."
+        default_factory=SemanticCacheConfig,
+        description="Semantic cache configuration.",
+        examples=[{"enabled": True, "similarity_threshold": 0.85, "ttl_seconds": 3600}],
     )
 
 
@@ -93,33 +99,38 @@ class ToolAccessPolicy(CoreasonModel):
 
 
 class FinancialLimits(CoreasonModel):
-    max_cost_usd: float | None = Field(None, ge=0.0)
-    max_tokens_total: int | None = Field(None, gt=0)
+    max_cost_usd: float | None = Field(None, ge=0.0, description="Maximum cost in USD.", examples=[100.0])
+    max_tokens_total: int | None = Field(None, gt=0, description="Maximum total tokens allowed.", examples=[50000])
     budget_depletion_routing: str | None = Field(
         None,
         description="Model ID to fallback to when budget hits 90% depletion (e.g., swap o1-pro to gpt-4o-mini).",
+        examples=["gpt-4o-mini"],
     )
 
 
 class DataLimits(CoreasonModel):
-    max_rows_per_query: int | None = Field(None, gt=0)
+    max_rows_per_query: int | None = Field(None, gt=0, description="Maximum rows returned per query.", examples=[100])
     max_payload_bytes: int | None = Field(
-        None, gt=0, description="Max bytes for active memory insertion/API responses."
+        None, gt=0, description="Max bytes for active memory insertion/API responses.", examples=[1048576]
     )
-    max_search_results: int | None = Field(None, gt=0)
+    max_search_results: int | None = Field(None, gt=0, description="Maximum search results to return.", examples=[10])
 
 
 class ComputeLimits(CoreasonModel):
-    max_execution_time_seconds: int | None = Field(None, gt=0)
-    max_cognitive_steps: int | None = Field(None, gt=0, description="Max turn/DAG transitions.")
-    max_concurrent_agents: int | None = Field(None, gt=0)
+    max_execution_time_seconds: int | None = Field(
+        None, gt=0, description="Maximum execution time in seconds.", examples=[300]
+    )
+    max_cognitive_steps: int | None = Field(None, gt=0, description="Max turn/DAG transitions.", examples=[50])
+    max_concurrent_agents: int | None = Field(
+        None, gt=0, description="Maximum number of concurrent agents.", examples=[10]
+    )
 
 
 class OperationalPolicy(CoreasonModel):
-    financial: FinancialLimits | None = None
-    data: DataLimits | None = None
-    compute: ComputeLimits | None = None
-    traffic: TrafficPolicy | None = None
+    financial: FinancialLimits | None = Field(None, description="Financial limits configuration.")
+    data: DataLimits | None = Field(None, description="Data usage limits configuration.")
+    compute: ComputeLimits | None = Field(None, description="Compute resources limits configuration.")
+    traffic: TrafficPolicy | None = Field(None, description="Traffic and rate limit configuration.")
 
 
 class Governance(CoreasonModel):
@@ -212,9 +223,9 @@ class Governance(CoreasonModel):
 class CircuitState(CoreasonModel):
     """Runtime state of a circuit breaker for a specific node."""
 
-    state: Literal["open", "closed", "half-open"] = Field("closed", description="Current state.")
-    failure_count: int = Field(0, description="Consecutive failure count.")
-    last_failure_time: float | None = Field(None, description="Timestamp of last failure.")
+    state: Literal["open", "closed", "half-open"] = Field("closed", description="Current state.", examples=["closed"])
+    failure_count: int = Field(0, description="Consecutive failure count.", examples=[0])
+    last_failure_time: float | None = Field(None, description="Timestamp of last failure.", examples=[1633024800.0])
 
 
 class CircuitOpenError(Exception):
@@ -222,16 +233,10 @@ class CircuitOpenError(Exception):
 
 
 def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:
-    """
-    Middleware hook to enforce circuit breaker policy.
-
-    Args:
-        node_id: The ID of the node being executed.
-        policy: The circuit breaker policy configuration.
-        state_store: A mutable dictionary mapping node IDs to CircuitState objects.
+    """Enforce circuit breaker policy prior to execution.
 
     Raises:
-        ManifestError: If the circuit is open and timeout has not expired (ExecutionFault).
+        ManifestError: If the circuit is open and timeout has not expired.
     """
     # Get or create state
     state = state_store.get(node_id)
@@ -264,9 +269,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
 
 
 def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:
-    """
-    Record a failure for the given node and open the circuit if threshold is reached.
-    """
+    """Record an execution failure and conditionally open the circuit."""
     state = state_store.get(node_id)
     if not state:
         state = CircuitState()
@@ -289,9 +292,7 @@ def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, 
 
 
 def record_success(node_id: str, state_store: dict[str, CircuitState]) -> None:
-    """
-    Record a success, resetting the circuit state to closed.
-    """
+    """Record an execution success and reset the circuit to a closed state."""
     state = state_store.get(node_id)
     if state:
         new_state = state.model_copy(update={"state": "closed", "failure_count": 0, "last_failure_time": None})

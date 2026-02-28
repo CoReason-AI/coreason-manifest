@@ -15,14 +15,10 @@ from .base import LockConfig, Node
 
 @register_node
 class SwarmNode(Node):
-    """
-    Dynamic Swarm Spawning (The "Hive").
-    Spins up N ephemeral worker agents to process a dataset/workload in parallel.
-    """
+    """Dynamic Swarm Spawning. Spins up N ephemeral worker agents to process a dataset/workload in parallel."""
 
-    type: Literal["swarm"] = "swarm"
+    type: Literal["swarm"] = Field("swarm", description="The type of the node.", examples=["swarm"])
 
-    # Worker Config
     worker_profile: ProfileID = Field(
         ..., description="Reference to a CognitiveProfile ID.", examples=["researcher_profile"]
     )
@@ -30,7 +26,6 @@ class SwarmNode(Node):
         ..., description="The Blackboard list/dataset to process.", examples=["urls_to_scrape"]
     )
 
-    # Topology
     distribution_strategy: Literal["sharded", "replicated"] = Field(
         ..., description="Sharded=split data; Replicated=same data, many attempts.", examples=["sharded"]
     )
@@ -39,7 +34,6 @@ class SwarmNode(Node):
         Field(description="Limit parallel workers. Use 'infinite' for no limit.", examples=[10]),
     ]
 
-    # Architecture: Reliability (Partial Failure)
     failure_tolerance_percent: Annotated[
         float,
         Field(
@@ -54,7 +48,6 @@ class SwarmNode(Node):
         ),
     ] = 0.0
 
-    # Aggregation
     reducer_function: Literal["concat", "vote", "summarize"] | None = Field(
         ..., description="How to combine results.", examples=["concat"]
     )
@@ -67,14 +60,20 @@ class SwarmNode(Node):
     ] = None
     operational_policy: Annotated[
         OperationalPolicy | None,
-        Field(None, description="Local operational limits. Overrides global Governance limits if set."),
+        Field(
+            None,
+            description="Local operational limits. Overrides global Governance limits if set.",
+            examples=[{"financial": {"max_cost_usd": 50.0}}],
+        ),
     ]
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
     )
 
     lock_config: LockConfig | None = Field(
-        None, description="Atomic lock configuration for preventing race conditions."
+        None,
+        description="Atomic lock configuration for preventing race conditions.",
+        examples=[{"write_locks": ["shared_resource"]}],
     )
 
     @model_validator(mode="after")

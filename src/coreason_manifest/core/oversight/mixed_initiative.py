@@ -8,8 +8,10 @@ from coreason_manifest.core.compliance import SecurityVisitor
 
 
 class AllocationRule(CoreasonModel):
-    condition: str
-    target_queue: str
+    """Rule defining condition for dynamic allocation to a target queue."""
+
+    condition: str = Field(..., description="Python expression (AST-whitelisted) to evaluate.", examples=["risk > 5"])
+    target_queue: str = Field(..., description="Queue to route to if the condition is met.", examples=["review_queue"])
 
     @field_validator("condition", mode="before")
     @classmethod
@@ -25,11 +27,29 @@ class AllocationRule(CoreasonModel):
 
 
 class BoundedAutonomyConfig(CoreasonModel):
-    intervention_window_seconds: int
-    timeout_behavior: Literal["proceed", "escalate", "fail"]
+    """Configuration for bounding agent autonomy during human intervention."""
+
+    intervention_window_seconds: int = Field(
+        ..., description="Seconds to wait for a human intervention.", examples=[30]
+    )
+    timeout_behavior: Literal["proceed", "escalate", "fail"] = Field(
+        ..., description="Behavior when the intervention window times out.", examples=["escalate"]
+    )
 
 
 class MixedInitiativePolicy(CoreasonModel):
-    enable_shadow_telemetry: bool = False
-    bounded_autonomy: BoundedAutonomyConfig | None = None
-    dynamic_allocation_rules: list[AllocationRule] = Field(default_factory=list)
+    """Policy configuring mixed initiative human-AI interaction."""
+
+    enable_shadow_telemetry: bool = Field(
+        False, description="Enable shadow telemetry for observability.", examples=[True]
+    )
+    bounded_autonomy: BoundedAutonomyConfig | None = Field(
+        None,
+        description="Configuration for bounded autonomy.",
+        examples=[{"intervention_window_seconds": 60, "timeout_behavior": "proceed"}],
+    )
+    dynamic_allocation_rules: list[AllocationRule] = Field(
+        default_factory=list,
+        description="Rules for dynamic task allocation.",
+        examples=[[{"condition": "confidence < 0.5", "target_queue": "human_review"}]],
+    )

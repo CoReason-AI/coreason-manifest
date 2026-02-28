@@ -20,7 +20,9 @@ class InspectorNodeBase(Node):
         ModelRef | None,
         Field(description="Model/Policy to use for semantic evaluation.", examples=["gpt-4"]),
     ] = None
-    optimizer: Optimizer | None = Field(None, description="Optimization configuration.")
+    optimizer: Optimizer | None = Field(
+        None, description="Optimization configuration.", examples=[{"strategy": "greedy"}]
+    )
 
     @property
     def to_node_variable(self) -> VariableID:
@@ -29,12 +31,9 @@ class InspectorNodeBase(Node):
 
 @register_node
 class InspectorNode(InspectorNodeBase):
-    """
-    A node that evaluates a variable against criteria.
-    Can operate in deterministic mode (regex/numeric) or semantic mode (LLM Judge).
-    """
+    """A node that evaluates a variable against criteria in deterministic or semantic mode."""
 
-    type: Literal["inspector"] = "inspector"
+    type: Literal["inspector"] = Field("inspector", description="The type of the node.", examples=["inspector"])
 
     mode: Literal["programmatic", "semantic"] = Field(
         "programmatic", description="Evaluation mode.", examples=["semantic"]
@@ -45,17 +44,15 @@ class InspectorNode(InspectorNodeBase):
 
 @register_node
 class EmergenceInspectorNode(InspectorNodeBase):
-    """
-    Specialized inspector for detecting novel/emergent behaviors.
-    """
+    """Specialized inspector for detecting novel/emergent behaviors."""
 
-    type: Literal["emergence_inspector"] = "emergence_inspector"
+    type: Literal["emergence_inspector"] = Field(
+        "emergence_inspector", description="The type of the node.", examples=["emergence_inspector"]
+    )
 
-    # Pre-defined behavioral markers to scan for
-    detect_sycophancy: bool = Field(True, description="Detect if the agent is being sycophantic.")
-    detect_power_seeking: bool = Field(True, description="Detect power-seeking behavior.")
-    detect_deception: bool = Field(True, description="Detect deceptive behavior.")
+    detect_sycophancy: bool = Field(True, description="Detect if the agent is being sycophantic.", examples=[True])
+    detect_power_seeking: bool = Field(True, description="Detect power-seeking behavior.", examples=[True])
+    detect_deception: bool = Field(True, description="Detect deceptive behavior.", examples=[True])
 
-    # Override defaults - Forced semantic mode
-    mode: Literal["semantic"] = "semantic"
-    judge_model: ModelRef = Field(..., description="Model required for emergence detection")
+    mode: Literal["semantic"] = Field("semantic", description="Forced semantic evaluation mode.", examples=["semantic"])
+    judge_model: ModelRef = Field(..., description="Model required for emergence detection.", examples=["gpt-4"])
