@@ -15,7 +15,6 @@ from coreason_manifest.spec.core.compute.reasoning import (
     ReasoningConfig,
     StandardReasoning,
 )
-from coreason_manifest.spec.core.contracts import ActionNode, AtomicSkill, StrategyNode
 from coreason_manifest.spec.core.oversight.governance import (
     CircuitBreaker,
     ComputeLimits,
@@ -446,21 +445,8 @@ class BaseFlowBuilder:
         """
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
-        self._skills: dict[str, AtomicSkill] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
-
-    def register_skill(self, skill: AtomicSkill) -> Self:
-        """Registers an AtomicSkill into the flow definitions.
-
-        Args:
-            skill (AtomicSkill): The skill to register.
-
-        Returns:
-            Self: The builder instance for chaining.
-        """
-        self._skills[skill.name] = skill
-        return self
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
         """Registers a reusable supervision policy.
@@ -598,7 +584,6 @@ class BaseFlowBuilder:
         """Helper to build FlowDefinitions from registered components."""
         return FlowDefinitions(
             profiles=self._profiles,
-            skills=self._skills,
             supervision_templates=self._supervision_templates,
         )
 
@@ -680,39 +665,6 @@ class BaseFlowBuilder:
             optimizer=None,
             type="inspector",
         )
-        self._register_node(node)
-        return self
-
-    def add_action_node(
-        self, node_id: str, skill: AtomicSkill, inputs: dict[str, str], outputs: dict[str, str]
-    ) -> Self:
-        """Adds an ActionNode to the flow.
-
-        Args:
-            node_id (str): The unique identifier for the action node.
-            skill (AtomicSkill): The skill attached to this action node.
-            inputs (dict[str, str]): The mapping from internal inputs to Blackboard variables.
-            outputs (dict[str, str]): The mapping from internal outputs to Blackboard variables.
-
-        Returns:
-            Self: The builder instance for chaining.
-        """
-        node = ActionNode(id=node_id, skill=skill, inputs=inputs, outputs=outputs)
-        self._register_node(node)
-        return self
-
-    def add_strategy_node(self, node_id: str, default_route: str, routes: dict[str, str] | None = None) -> Self:
-        """Adds a StrategyNode to the flow.
-
-        Args:
-            node_id (str): The unique identifier for the strategy node.
-            default_route (str): The default node ID to route to.
-            routes (dict[str, str] | None): Optional explicit routing table.
-
-        Returns:
-            Self: The builder instance for chaining.
-        """
-        node = StrategyNode(id=node_id, default_route=default_route, routes=routes or {})
         self._register_node(node)
         return self
 
@@ -870,6 +822,20 @@ class NewGraphFlow(BaseFlowBuilder):
             NewGraphFlow: The builder instance for chaining.
         """
         self._nodes[agent.id] = agent
+        return self
+
+    def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
+        """Adds an edge to the graph.
+
+        Args:
+            source (str): The ID of the source node.
+            target (str): The ID of the target node.
+            condition (str | None): Optional condition for traversing the edge.
+
+        Returns:
+            NewGraphFlow: The builder instance for chaining.
+        """
+        self._edges.append(Edge(from_node=source, to_node=target, condition=condition))
         return self
 
     def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
