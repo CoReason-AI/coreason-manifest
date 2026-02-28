@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from pydantic import ValidationError
 
@@ -6,9 +8,9 @@ from coreason_manifest.core.workflow.nodes import PlaceholderNode
 from coreason_manifest.toolkit.validator import _validate_orphan_nodes
 
 
-def create_minimal_flow(status: str, include_placeholder: bool = False, include_orphan: bool = False) -> dict:
-    nodes = {}
-    edges = []
+def create_minimal_flow(status: str, include_placeholder: bool = False, include_orphan: bool = False) -> dict[str, Any]:
+    nodes: dict[str, Any] = {}
+    edges: list[dict[str, Any]] = []
 
     # Valid entry point
     nodes["start_node"] = {
@@ -48,7 +50,7 @@ def create_minimal_flow(status: str, include_placeholder: bool = False, include_
     }
 
 
-def test_draft_flow_with_placeholder():
+def test_draft_flow_with_placeholder() -> None:
     """Verify that a GraphFlow with a PlaceholderNode parses successfully when status="draft"."""
     data = create_minimal_flow(status="draft", include_placeholder=True)
     flow = GraphFlow.model_validate(data)
@@ -57,14 +59,14 @@ def test_draft_flow_with_placeholder():
     assert isinstance(flow.graph.nodes["draft_node"], PlaceholderNode)
 
 
-def test_published_flow_with_placeholder_raises_error():
+def test_published_flow_with_placeholder_raises_error() -> None:
     """Verify that setting status="published" on a flow with PlaceholderNode raises ValidationError."""
     data = create_minimal_flow(status="published", include_placeholder=True)
     with pytest.raises(ValidationError, match="Published flow contains abstract PlaceholderNode"):
         GraphFlow.model_validate(data)
 
 
-def test_published_flow_without_entry_point_raises_error():
+def test_published_flow_without_entry_point_raises_error() -> None:
     """Verify that setting status="published" on a flow without an entry point raises ValidationError."""
     data = create_minimal_flow(status="published")
     del data["graph"]["entry_point"]
@@ -73,7 +75,7 @@ def test_published_flow_without_entry_point_raises_error():
         GraphFlow.model_validate(data)
 
 
-def test_validate_orphan_nodes_lifecycle():
+def test_validate_orphan_nodes_lifecycle() -> None:
     """
     Verify _validate_orphan_nodes returns an info report in draft mode,
     but a warning with a remediation patch in published mode.
@@ -101,4 +103,10 @@ def test_validate_orphan_nodes_lifecycle():
 
     # Verify the patch removes the node
     patch = published_reports[0].remediation.patch_data
-    assert any(op["op"] == "remove" and "orphan_node" in op["path"] for op in patch)
+    assert any(
+        isinstance(op, dict)
+        and op.get("op") == "remove"
+        and isinstance(op.get("path"), str)
+        and "orphan_node" in str(op.get("path"))
+        for op in patch
+    )
