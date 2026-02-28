@@ -26,7 +26,7 @@ def test_persistence_config_failure() -> None:
 
 
 def test_state_diff_success() -> None:
-    diff = StateDiff(op="add", path="/foo", value="bar")
+    diff = StateDiff(op="add", path="/foo", value="bar")  # type: ignore
     assert diff.op == "add"  # noqa: S101
     assert diff.path == "/foo"  # noqa: S101
     assert diff.value == "bar"  # noqa: S101
@@ -43,11 +43,25 @@ def test_state_diff_failure() -> None:
         StateDiff(op="invalid_op", path="/foo")  # type: ignore
 
 
+def test_state_diff_rfc6902_validation() -> None:
+    # move without 'from' should fail
+    with pytest.raises(ValidationError, match="requires a 'from' path"):
+        StateDiff(op="move", path="/foo")  # type: ignore
+
+    # add without 'value' should fail
+    with pytest.raises(ValidationError, match="requires a 'value' field"):
+        StateDiff(op="add", path="/foo")  # type: ignore
+
+    # explicit None value should pass for add/replace
+    diff = StateDiff(op="replace", path="/foo", value=None)  # type: ignore
+    assert diff.value is None  # noqa: S101
+
+
 def test_checkpoint_success() -> None:
     cp = Checkpoint(
         thread_id="thread-123",
         node_id="node-abc",
-        state_diff=[StateDiff(op="add", path="/state/val1", value=42), StateDiff(op="remove", path="/state/val2")],
+        state_diff=[StateDiff(op="add", path="/state/val1", value=42), StateDiff(op="remove", path="/state/val2")],  # type: ignore
     )
     assert cp.thread_id == "thread-123"  # noqa: S101
     assert cp.node_id == "node-abc"  # noqa: S101
