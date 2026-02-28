@@ -5,7 +5,7 @@ from pydantic import ConfigDict, Field
 from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.primitives.types import NodeID
 
-type StrictJsonValue = str | int | float | bool | None | list["StrictJsonValue"] | dict[str, "StrictJsonValue"]
+type StrictJsonValue = str | int | float | bool | None | list[StrictJsonValue] | dict[str, StrictJsonValue]
 type StrictJsonDict = dict[str, StrictJsonValue]
 
 SemanticVersion = Annotated[

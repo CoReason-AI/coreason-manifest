@@ -10,6 +10,7 @@ from coreason_manifest.spec.core.compute.reasoning import (
     Optimizer,
     ReasoningConfig,
 )
+from coreason_manifest.spec.core.contracts import NodeSpec
 from coreason_manifest.spec.core.oversight.governance import OperationalPolicy
 from coreason_manifest.spec.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy, ResilienceConfig
@@ -36,11 +37,10 @@ class LockConfig(CoreasonModel):
     read_locks: list[VariableID] = Field(default_factory=list, description="Variables requiring shared read access.")
 
 
-class Node(CoreasonModel):
+class Node(NodeSpec):
     """Base class for vertices of the execution graph."""
 
-    id: NodeID = Field(..., description="Unique identifier for the node.", examples=["start_node", "agent_1"])
-    metadata: dict[str, Any] = Field(
+    metadata: dict[str, str] = Field(
         default_factory=dict, description="Arbitrary metadata for the node.", examples=[{"created_by": "user123"}]
     )
     resilience: Annotated[
