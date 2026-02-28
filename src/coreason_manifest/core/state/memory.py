@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from pydantic import Field
 
 from coreason_manifest.core.common_base import CoreasonModel
@@ -13,6 +15,13 @@ class WorkingMemoryConfig(CoreasonModel):
         ...,
         description=("If true, the runtime engine equips the agent with tools to load/evict context pages explicitly."),
     )
+
+
+class ConsolidationStrategy(StrEnum):
+    NONE = "none"
+    SUMMARY_WINDOW = "summary_window"
+    SEMANTIC_CLUSTER = "semantic_cluster"
+    SESSION_CLOSE = "session_close"
 
 
 class EpisodicMemoryConfig(CoreasonModel):
@@ -34,6 +43,7 @@ class EpisodicMemoryConfig(CoreasonModel):
             "None means no auto-consolidation."
         ),
     )
+    consolidation_strategy: ConsolidationStrategy = Field(default=ConsolidationStrategy.SESSION_CLOSE)
 
 
 class SemanticMemoryConfig(CoreasonModel):

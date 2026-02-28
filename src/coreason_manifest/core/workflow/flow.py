@@ -257,6 +257,17 @@ class GraphFlow(CoreasonModel):
     definitions: FlowDefinitions | None = None
     graph: Graph
 
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "GraphFlow":
+        if self.status != "published":
+            return self
+        for node in self.graph.nodes.values():
+            if node.type == "placeholder":
+                raise ValueError("Cannot publish a flow with placeholder nodes")
+        if self.graph.entry_point is None:
+            raise ValueError("Cannot publish a GraphFlow without an entry point")
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -288,6 +299,15 @@ class LinearFlow(CoreasonModel):
                 )
             seen.add(step.id)
 
+        return self
+
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "LinearFlow":
+        if self.status != "published":
+            return self
+        for node in self.steps:
+            if node.type == "placeholder":
+                raise ValueError("Cannot publish a flow with placeholder nodes")
         return self
 
 

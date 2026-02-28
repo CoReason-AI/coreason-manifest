@@ -633,12 +633,28 @@ def _validate_orphan_nodes(flow: GraphFlow) -> list[ComplianceReport]:
     if entry_point in orphans:
         orphans.remove(entry_point)
 
+    if flow.status != "published":
+        return [
+            ComplianceReport(
+                code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+                severity="info",
+                message=f"Orphan Node Warning: Node '{oid}' has no incoming edges or implicit routes.",
+                node_id=oid,
+            )
+            for oid in orphans
+        ]
+
     return [
         ComplianceReport(
             code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
             severity="warning",
             message=f"Orphan Node Warning: Node '{oid}' has no incoming edges or implicit routes.",
             node_id=oid,
+            remediation=RemediationAction(
+                type="update_field",
+                description=f"Remove orphan node '{oid}'.",
+                patch_data=[{"op": "remove", "path": f"/graph/nodes/{oid}"}],
+            ),
         )
         for oid in orphans
     ]

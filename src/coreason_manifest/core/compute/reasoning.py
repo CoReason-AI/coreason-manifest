@@ -1,6 +1,7 @@
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.primitives.registry import register_engine, resolve_engine_union
@@ -65,6 +66,28 @@ ModelRef = str | ModelCriteria
 # =========================================================================
 
 
+class ReviewStrategy(StrEnum):
+    NONE = "none"
+    BASIC = "basic"
+    ADVERSARIAL = "adversarial"
+    CAUSAL = "causal"
+    CONSENSUS = "consensus"
+
+
+class AdversarialConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    persona: str = "skeptic"
+    attack_vectors: list[str] = Field(default_factory=list)
+
+
+class GapScanConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    enabled: bool = False
+    confidence_threshold: float = 0.8
+
+
 class ConstitutionalScope(BaseModel):
     """
     Defines the ethical and safety boundaries for the cognitive process.
@@ -94,6 +117,17 @@ class BaseReasoning(BaseModel):
 
     # *** UPGRADE: CONSTITUTIONAL AI ***
     constitution: Annotated[ConstitutionalScope | None, Field(description="Intrinsic safety constraints.")] = None
+
+    review_strategy: ReviewStrategy = Field(default=ReviewStrategy.NONE)
+    adversarial_config: AdversarialConfig | None = None
+    gap_scan: GapScanConfig | None = None
+    max_revisions: int = 1
+
+    @model_validator(mode="after")
+    def _validate_adversarial(self) -> "BaseReasoning":
+        if self.review_strategy == ReviewStrategy.ADVERSARIAL and self.adversarial_config is None:
+            raise ValueError("adversarial_config is required when review_strategy is ADVERSARIAL")
+        return self
 
     def required_capabilities(self) -> list[str]:
         """Returns a list of high-risk capabilities required by this engine."""
@@ -436,6 +470,7 @@ class Optimizer(BaseModel):
 
 __all__ = [
     "AdaptiveReasoning",
+    "AdversarialConfig",
     "AttentionReasoning",
     "BaseReasoning",
     "BufferReasoning",
@@ -446,12 +481,14 @@ __all__ = [
     "DecompositionReasoning",
     "EnsembleReasoning",
     "FastPath",
+    "GapScanConfig",
     "GraphReasoning",
     "ModelCriteria",
     "ModelRef",
     "Optimizer",
     "ReasoningConfig",
     "RedTeamingReasoning",
+    "ReviewStrategy",
     "StandardReasoning",
     "TreeSearchReasoning",
     "WasmExecutionReasoning",
