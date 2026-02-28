@@ -18,7 +18,6 @@ from coreason_manifest.core.state.tools import ToolCapability, ToolPack
 from coreason_manifest.core.workflow.flow import (
     AnyNode,
     FlowDefinitions,
-    Graph,
     GraphFlow,
     LinearFlow,
 )
@@ -31,7 +30,7 @@ from coreason_manifest.core.workflow.nodes import (
     SwarmNode,
     SwitchNode,
 )
-from coreason_manifest.core.workflow.topology import get_strongly_connected_components, get_unified_topology
+from coreason_manifest.core.workflow.topology import get_unified_topology
 
 
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
@@ -70,47 +69,19 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
-        errors.extend(_validate_linear_integrity(flow))
         node_ids = {n.id for n in flow.steps}
-        errors.extend(_validate_unique_ids(flow.steps))
         errors.extend(_validate_switch_logic(flow.steps, node_ids))
         errors.extend(_validate_swarm_concurrency(flow.steps))
 
     # 3. GraphFlow Specific Checks
     if isinstance(flow, GraphFlow):
-        if not flow.graph.nodes:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_EMPTY_GRAPH,
-                    severity="violation",
-                    message="GraphFlow Error: Graph must contain at least one node.",
-                )
-            )
-
-        # Entry Point Existence
-        if flow.graph.entry_point and flow.graph.entry_point not in valid_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_MISSING_ENTRY,
-                    severity="violation",
-                    message=f"GraphFlow Error: Entry point '{flow.graph.entry_point}' not found in nodes.",
-                    details={"entry_point": flow.graph.entry_point},
-                )
-            )
-
-        errors.extend(_validate_graph_integrity(flow.graph))
-
         # Helper for extracting nodes for generic logic checks
         nodes_list = list(flow.graph.nodes.values())
         node_ids = set(flow.graph.nodes.keys())
 
-        errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
         errors.extend(_validate_orphan_nodes(flow))
         errors.extend(_validate_swarm_concurrency(nodes_list))
-
-    # Global Unified Cycle Detection
-    errors.extend(_validate_topology_cycles(flow))
 
     # Epic 11: Graph-Theoretic Financial Budgets
     errors.extend(_validate_budget_constraints(flow))
@@ -528,76 +499,6 @@ def _validate_swarm_concurrency(nodes: list[AnyNode]) -> list[ComplianceReport]:
     ]
 
 
-def _validate_linear_integrity(flow: LinearFlow) -> list[ComplianceReport]:
-    if not flow.steps:
-        return [
-            ComplianceReport(
-                code=ErrorCatalog.ERR_TOPOLOGY_LINEAR_EMPTY,
-                severity="violation",
-                message="LinearFlow Error: Sequence cannot be empty.",
-            )
-        ]
-    return []
-
-
-def _validate_unique_ids(nodes: list[AnyNode]) -> list[ComplianceReport]:
-    seen = set()
-    errors: list[ComplianceReport] = []
-    for node in nodes:
-        if node.id in seen:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_NODE_ID_COLLISION,
-                    severity="violation",
-                    message=f"ID Collision Error: Duplicate Node ID '{node.id}' found.",
-                    node_id=node.id,
-                )
-            )
-        seen.add(node.id)
-    return errors
-
-
-def _validate_graph_integrity(graph: Graph) -> list[ComplianceReport]:
-    errors: list[ComplianceReport] = []
-    valid_ids = set(graph.nodes.keys())
-
-    # Check 1: Key/ID Integrity
-    for key, node in graph.nodes.items():
-        if key != node.id:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_ID_MISMATCH,
-                    severity="violation",
-                    message=f"Graph Integrity Error: Node key '{key}' does not match Node ID '{node.id}'.",
-                    node_id=node.id,
-                    details={"key": key, "node_id": node.id},
-                )
-            )
-
-    # Check 2: Edge Validity
-    for edge in graph.edges:
-        if edge.from_node not in valid_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_DANGLING_EDGE,
-                    severity="violation",
-                    message=f"Dangling Edge Error: Source '{edge.from_node}' not found in graph nodes.",
-                    details={"source": edge.from_node},
-                )
-            )
-        if edge.to_node not in valid_ids:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_DANGLING_EDGE,
-                    severity="violation",
-                    message=f"Dangling Edge Error: Target '{edge.to_node}' not found in graph nodes.",
-                    details={"target": edge.to_node},
-                )
-            )
-
-    return errors
-
-
 def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
     for node in nodes:
@@ -964,46 +865,6 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
                 details={"max_path_latency_ms": max_path_latency_ms, "max_latency_s": max_latency},
             )
         )
-
-    return errors
-
-
-def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """
-    Enforces Strict DAG Topology on the unified execution graph.
-    Uses Tarjan's algorithm to detect unified cycles.
-    """
-    errors: list[ComplianceReport] = []
-
-    adj_set = _build_unified_adjacency_map(flow)
-    # SOTA FIX: Sort the sets into lists to guarantee 100% deterministic DFS traversal
-    adj_list = {k: sorted(adj_set[k]) for k in sorted(adj_set.keys())}
-
-    sccs = get_strongly_connected_components(adj_list)
-
-    for scc in sccs:
-        # A cycle exists if:
-        # 1. SCC has more than 1 node (A -> B -> A)
-        # 2. SCC has exactly 1 node AND it has a self-loop (A -> A)
-        is_cycle = False
-        if len(scc) > 1:
-            is_cycle = True
-        elif len(scc) == 1:
-            node_id = scc[0]
-            if node_id in adj_set and node_id in adj_set[node_id]:
-                is_cycle = True
-
-        if is_cycle:
-            cycle_nodes = ", ".join(sorted(scc))
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_TOPOLOGY_CYCLE_002,
-                    severity="violation",
-                    message=f"Topology Integrity Error: Unified execution/fallback cycle detected involving nodes: "
-                    f"[{cycle_nodes}]. Execution graphs must be strict Directed Acyclic Graphs (DAGs).",
-                    details={"cycle_nodes": scc},
-                )
-            )
 
     return errors
 

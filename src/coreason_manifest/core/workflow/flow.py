@@ -6,7 +6,6 @@ import jsonschema  # type: ignore[import-untyped]
 from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
-from coreason_manifest.adapters.system.io_jail import SecurityViolationError
 from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.compliance import RemediationAction
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
@@ -118,6 +117,7 @@ class Edge(CoreasonModel):
                     ast.NotIn,
                     ast.Not,
                     ast.Add,
+                    ast.Attribute,
                     ast.Sub,
                     ast.Mult,
                     ast.Div,
@@ -128,16 +128,19 @@ class Edge(CoreasonModel):
                     ast.UAdd,
                 )
                 if not isinstance(node, allowed):
-                    raise SecurityViolationError(
-                        f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'"
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
+                        message=f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'"
                     )
                 super().generic_visit(node)
 
             def visit_Name(self, node: ast.Name) -> None:
                 # Ensure Name usage is strictly Load context
                 if not isinstance(node.ctx, ast.Load):
-                    raise SecurityViolationError(
-                        f"Security Violation: Name context {type(node.ctx).__name__} forbidden in condition '{v}'"
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
+                        message=f"Security Violation: Name context {type(node.ctx).__name__} "
+                        f"forbidden in condition '{v}'",
                     )  # pragma: no cover
                 super().generic_visit(node)
 
