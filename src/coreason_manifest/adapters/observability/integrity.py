@@ -23,8 +23,8 @@ def to_canonical_timestamp(dt: datetime) -> str:
     # Convert to UTC
     dt_utc = dt.astimezone(UTC)
 
-    # Format as YYYY-MM-DDTHH:MM:SSZ (no microseconds)
-    return dt_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Format with microseconds to prevent parallel Swarm collisions
+    return dt_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 class MerkleNode(TypedDict):

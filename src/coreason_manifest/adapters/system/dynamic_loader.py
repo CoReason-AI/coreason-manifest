@@ -303,6 +303,9 @@ def _install_audit_hook() -> None:
         if not jail_root:
             return
 
+        if event in ("os.system", "os.exec", "os.posix_spawn", "subprocess.Popen"):
+            raise SecurityViolationError(f"Process execution blocked in sandbox: {event}")
+
         if event in ("socket.connect", "urllib.Request", "http.client.send"):
             raise SecurityViolationError(f"Network access blocked in sandbox: {event}")
 
@@ -339,9 +342,9 @@ def _install_audit_hook() -> None:
                     raise SecurityViolationError(f"Unauthorized file access blocked (resolution failed): {path}") from e
                 except SecurityViolationError:
                     raise
-                except Exception:  # noqa: S110
-                    # Ignore other errors during checking to avoid breaking system calls
-                    pass
+                except Exception as e:
+                    # ZERO-TRUST: If we cannot verify safety, we must fail closed.
+                    raise SecurityViolationError(f"Unable to verify path safety: {e}") from e
 
     try:
         sys.addaudithook(hook)

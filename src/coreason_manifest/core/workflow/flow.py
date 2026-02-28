@@ -7,7 +7,7 @@ from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.core.common_base import CoreasonModel
-from coreason_manifest.core.compliance import RemediationAction
+from coreason_manifest.core.compliance import RemediationAction, SecurityVisitor
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.governance import Governance
 from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
@@ -90,60 +90,6 @@ class Edge(CoreasonModel):
             tree = ast.parse(v, mode="eval")
         except SyntaxError as e:
             raise ValueError(f"Invalid Python syntax in condition: {e}") from e  # pragma: no cover
-
-        class SecurityVisitor(ast.NodeVisitor):
-            def generic_visit(self, node: ast.AST) -> None:
-                # Whitelist of allowed AST nodes
-                allowed = (
-                    ast.Expression,
-                    ast.BoolOp,
-                    ast.BinOp,
-                    ast.UnaryOp,
-                    ast.Compare,
-                    ast.Constant,
-                    ast.Name,
-                    ast.Load,
-                    ast.And,
-                    ast.Or,
-                    ast.Eq,
-                    ast.NotEq,
-                    ast.Lt,
-                    ast.LtE,
-                    ast.Gt,
-                    ast.GtE,
-                    ast.Is,
-                    ast.IsNot,
-                    ast.In,
-                    ast.NotIn,
-                    ast.Not,
-                    ast.Add,
-                    ast.Attribute,
-                    ast.Sub,
-                    ast.Mult,
-                    ast.Div,
-                    ast.FloorDiv,
-                    ast.Mod,
-                    ast.Pow,
-                    ast.USub,
-                    ast.UAdd,
-                )
-                if not isinstance(node, allowed):
-                    raise ManifestError.critical_halt(
-                        code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
-                        message=f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'",
-                    )
-                super().generic_visit(node)
-
-            def visit_Name(self, node: ast.Name) -> None:
-                # Ensure Name usage is strictly Load context
-                if not isinstance(node.ctx, ast.Load):
-                    raise ManifestError.critical_halt(
-                        code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
-                        message=f"Security Violation: Name context {type(node.ctx).__name__} "
-                        f"forbidden in condition '{v}'",
-                    )  # pragma: no cover
-                super().generic_visit(node)
-
         visitor = SecurityVisitor()
         visitor.visit(tree)
         return v

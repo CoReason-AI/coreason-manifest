@@ -25,13 +25,7 @@ class LoadStrategy(StrEnum):
     LAZY = "lazy"
 
 
-class ToolCapability(CoreasonModel):
-    """
-    Definition of a tool's capabilities and risk profile.
-    Mandate 3: Semantic Tool Governance.
-    """
-
-    type: Literal["capability"] = Field("capability", description="Discriminator for polymorphic tools.")
+class BaseTool(CoreasonModel):
     name: ToolID = Field(..., description="Unique identifier for the tool.", examples=["calculator"])
     risk_level: RiskLevel = Field(
         RiskLevel.STANDARD, description="Risk classification for governance.", examples=["safe"]
@@ -49,7 +43,7 @@ class ToolCapability(CoreasonModel):
     load_strategy: LoadStrategy = Field(default=LoadStrategy.EAGER)
 
     @model_validator(mode="after")
-    def validate_critical_description(self) -> "ToolCapability":
+    def validate_critical_description(self) -> "BaseTool":
         if self.risk_level == "critical" and not self.description:
             raise ValueError(
                 f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
@@ -57,6 +51,15 @@ class ToolCapability(CoreasonModel):
         if self.load_strategy == LoadStrategy.LAZY and self.trigger_intent is None:
             raise ValueError("trigger_intent is required when load_strategy is LAZY")
         return self
+
+
+class ToolCapability(BaseTool):
+    """
+    Definition of a tool's capabilities and risk profile.
+    Mandate 3: Semantic Tool Governance.
+    """
+
+    type: Literal["capability"] = Field("capability", description="Discriminator for polymorphic tools.")
 
 
 class MCPResourceTemplate(CoreasonModel):
@@ -76,12 +79,12 @@ class MCPPrompt(CoreasonModel):
     arguments: list[dict[str, Any]] | None = Field(default_factory=list, description="Arguments for the prompt.")
 
 
-class MCPTool(ToolCapability):
+class MCPTool(BaseTool):
     """
     Definition of a remote Model Context Protocol (MCP) tool server.
     """
 
-    type: Literal["mcp_tool"] = Field("mcp_tool", description="Discriminator for MCP tools.")  # type: ignore[assignment]
+    type: Literal["mcp_tool"] = Field("mcp_tool", description="Discriminator for MCP tools.")
     server_uri: HttpUrl = Field(..., description="The connection URI for the MCP server.")
     mcp_version: str = Field(..., description="The MCP version supported by the server.")
     supported_capabilities: list[str] = Field(

@@ -20,7 +20,7 @@ from coreason_manifest.core.workflow.topology import (
 )
 
 if TYPE_CHECKING:
-    from coreason_manifest.core.state.tools import ToolCapability
+    from coreason_manifest.core.state.tools import AnyTool
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
@@ -45,9 +45,7 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
     return []
 
 
-def _check_domain_whitelist(
-    flow: LinearFlow | GraphFlow, tool_map: dict[str, ToolCapability]
-) -> list[ComplianceReport]:
+def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]) -> list[ComplianceReport]:
     """0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)"""
     reports: list[ComplianceReport] = []
     allowed_domains_raw = []
@@ -92,7 +90,7 @@ def _check_domain_whitelist(
 
 
 def _enforce_red_button_rule(
-    nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, ToolCapability]
+    nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]
 ) -> list[ComplianceReport]:
     """1. Capability Analysis & Red Button Rule"""
     reports: list[ComplianceReport] = []
@@ -161,12 +159,12 @@ def _enforce_red_button_rule(
                 for edge_idx, edge in enumerate(flow.graph.edges):
                     if edge.to_node == node.id:
                         patch_ops.append(
-                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
+                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/to_node", "value": human_node_id}
                         )
 
                 # 3. Add edge (Guard -> Target)
                 patch_ops.append(
-                    {"op": "add", "path": "/graph/edges/-", "value": {"source": human_node_id, "target": node.id}}
+                    {"op": "add", "path": "/graph/edges/-", "value": {"from_node": human_node_id, "to_node": node.id}}
                 )
 
             reports.append(
@@ -336,7 +334,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     nodes, _ = get_unified_topology(flow)
 
     # Build tool map: name -> tool_object
-    tool_map: dict[str, ToolCapability] = {}
+    tool_map: dict[str, AnyTool] = {}
     if flow.definitions and flow.definitions.tool_packs:
         for pack in flow.definitions.tool_packs.values():
             for tool in pack.tools:

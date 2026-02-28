@@ -285,6 +285,14 @@ class EnsembleReasoning(BaseReasoning):
         None
     )
 
+    @model_validator(mode="after")
+    def validate_verification_model(self) -> "EnsembleReasoning":
+        if self.verification_mode in ("always", "ambiguous_only") and self.similarity_model is None:
+            raise ValueError(
+                f"A 'similarity_model' is strictly required when verification_mode is '{self.verification_mode}'."
+            )
+        return self
+
 
 @register_engine
 class RedTeamingReasoning(BaseReasoning):
