@@ -25,6 +25,9 @@ from coreason_manifest.core.oversight.governance import (
     FinancialLimits,
     Governance,
     OperationalPolicy,
+    RequestCriticality,
+    SemanticCacheConfig,
+    TrafficPolicy,
 )
 from coreason_manifest.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.core.oversight.resilience import (
@@ -281,6 +284,11 @@ class AgentBuilder:
         max_rows_per_query: int | None = None,
         max_payload_bytes: int | None = None,
         max_search_results: int | None = None,
+        criticality: int | None = None,
+        rate_limit_rpm: int | None = None,
+        rate_limit_tpm: int | None = None,
+        semantic_cache_similarity: float | None = None,
+        semantic_cache_ttl: int | None = None,
     ) -> "AgentBuilder":
         """Configures operational limits for the agent (financial, compute, data).
 
@@ -319,8 +327,35 @@ class AgentBuilder:
                 max_search_results=max_search_results,
             )
 
-        if financial or compute or data:
-            self.operational_policy = OperationalPolicy(financial=financial, compute=compute, data=data)
+        traffic = None
+        if (
+            criticality is not None
+            or rate_limit_rpm is not None
+            or rate_limit_tpm is not None
+            or semantic_cache_similarity is not None
+            or semantic_cache_ttl is not None
+        ):
+            from typing import Any
+
+            kwargs: dict[str, Any] = {
+                "criticality": RequestCriticality(criticality)
+                if criticality is not None
+                else RequestCriticality.STANDARD,
+                "rate_limit_rpm": rate_limit_rpm,
+                "rate_limit_tpm": rate_limit_tpm,
+            }
+            if semantic_cache_similarity is not None or semantic_cache_ttl is not None:
+                kwargs["semantic_cache"] = SemanticCacheConfig(
+                    similarity_threshold=semantic_cache_similarity if semantic_cache_similarity is not None else 0.85,
+                    ttl_seconds=semantic_cache_ttl if semantic_cache_ttl is not None else 3600,
+                )
+
+            traffic = TrafficPolicy(**kwargs)
+
+        if financial or compute or data or traffic:
+            self.operational_policy = OperationalPolicy(
+                financial=financial, compute=compute, data=data, traffic=traffic
+            )
         return self
 
     def with_escalation_rule(
@@ -561,6 +596,11 @@ class BaseFlowBuilder:
         max_rows_per_query: int | None = None,
         max_payload_bytes: int | None = None,
         max_search_results: int | None = None,
+        criticality: int | None = None,
+        rate_limit_rpm: int | None = None,
+        rate_limit_tpm: int | None = None,
+        semantic_cache_similarity: float | None = None,
+        semantic_cache_ttl: int | None = None,
     ) -> Self:
         """Configures global operational limits (Financial, Data, Compute).
 
@@ -596,13 +636,40 @@ class BaseFlowBuilder:
 
         compute = None
         if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
+            compute = None
+        if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
             compute = ComputeLimits(
                 max_cognitive_steps=max_steps,
                 max_execution_time_seconds=max_execution_time_seconds,
                 max_concurrent_agents=max_concurrent_agents,
             )
 
-        op_policy = OperationalPolicy(financial=financial, data=data, compute=compute)
+        traffic = None
+        if (
+            criticality is not None
+            or rate_limit_rpm is not None
+            or rate_limit_tpm is not None
+            or semantic_cache_similarity is not None
+            or semantic_cache_ttl is not None
+        ):
+            from typing import Any
+
+            kwargs: dict[str, Any] = {
+                "criticality": RequestCriticality(criticality)
+                if criticality is not None
+                else RequestCriticality.STANDARD,
+                "rate_limit_rpm": rate_limit_rpm,
+                "rate_limit_tpm": rate_limit_tpm,
+            }
+            if semantic_cache_similarity is not None or semantic_cache_ttl is not None:
+                kwargs["semantic_cache"] = SemanticCacheConfig(
+                    similarity_threshold=semantic_cache_similarity if semantic_cache_similarity is not None else 0.85,
+                    ttl_seconds=semantic_cache_ttl if semantic_cache_ttl is not None else 3600,
+                )
+
+            traffic = TrafficPolicy(**kwargs)
+
+        op_policy = OperationalPolicy(financial=financial, data=data, compute=compute, traffic=traffic)
 
         if self.governance:
             self.governance = self.governance.model_copy(update={"operational_policy": op_policy})

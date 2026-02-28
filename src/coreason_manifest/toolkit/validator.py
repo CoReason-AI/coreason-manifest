@@ -33,12 +33,70 @@ from coreason_manifest.core.workflow.nodes import (
 from coreason_manifest.core.workflow.topology import get_unified_topology
 
 
+def _validate_traffic_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if not flow.governance or not flow.governance.operational_policy or not flow.governance.operational_policy.traffic:
+        return errors
+
+    traffic = flow.governance.operational_policy.traffic
+
+    if traffic.rate_limit_rpm is not None and traffic.rate_limit_rpm <= 0:
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=(
+                    "Traffic Policy Error: rate_limit_rpm must be strictly greater than 0, "
+                    f"got {traffic.rate_limit_rpm}."
+                ),
+                details={"rate_limit_rpm": traffic.rate_limit_rpm},
+            )
+        )
+
+    if traffic.rate_limit_tpm is not None and traffic.rate_limit_tpm <= 0:
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=(
+                    "Traffic Policy Error: rate_limit_tpm must be strictly greater than 0, "
+                    f"got {traffic.rate_limit_tpm}."
+                ),
+                details={"rate_limit_tpm": traffic.rate_limit_tpm},
+            )
+        )
+
+    from coreason_manifest.core.oversight.governance import RequestCriticality
+
+    if (
+        traffic.criticality == RequestCriticality.CRITICAL
+        and traffic.rate_limit_tpm is not None
+        and traffic.rate_limit_tpm < 100
+    ):
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="warning",
+                message=(
+                    "Traffic Policy Warning: CRITICAL priority combined with "
+                    f"extremely low TPM limits ({traffic.rate_limit_tpm})."
+                ),
+                details={"criticality": "CRITICAL", "rate_limit_tpm": traffic.rate_limit_tpm},
+            )
+        )
+
+    return errors
+
+
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Semantically validate a Flow (Linear or Graph).
     Returns a list of structured ComplianceReport objects. Empty list implies validity.
     """
     errors: list[ComplianceReport] = []
+
+    errors.extend(_validate_traffic_policy(flow))
 
     # Flatten nodes based on flow type
     nodes, edges_objs = get_unified_topology(flow)
