@@ -257,6 +257,25 @@ class GraphFlow(CoreasonModel):
     definitions: FlowDefinitions | None = None
     graph: Graph
 
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "GraphFlow":
+        if self.status != "published":
+            return self
+
+        from coreason_manifest.core.workflow.nodes import PlaceholderNode
+
+        for node in self.graph.nodes.values():
+            if isinstance(node, PlaceholderNode):
+                raise ValueError(
+                    "Published flow contains abstract PlaceholderNode(s). "
+                    "Replace them with concrete implementations before publishing."
+                )
+
+        if not self.graph.entry_point:
+            raise ValueError("Published GraphFlow MUST have a defined entry_point.")
+
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -270,6 +289,22 @@ class LinearFlow(CoreasonModel):
     steps: list[AnyNode] = Field(default_factory=list)
     governance: Governance | None = None
     definitions: FlowDefinitions | None = None
+
+    @model_validator(mode="after")
+    def enforce_lifecycle_constraints(self) -> "LinearFlow":
+        if self.status != "published":
+            return self
+
+        from coreason_manifest.core.workflow.nodes import PlaceholderNode
+
+        for node in self.steps:
+            if isinstance(node, PlaceholderNode):
+                raise ValueError(
+                    "Published flow contains abstract PlaceholderNode(s). "
+                    "Replace them with concrete implementations before publishing."
+                )
+
+        return self
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":

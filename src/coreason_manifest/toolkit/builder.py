@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, Literal, Self, cast
 
 from coreason_manifest.core.compute.reasoning import (
     AdversarialConfig,
@@ -520,6 +520,19 @@ class BaseFlowBuilder:
         self._tool_packs: dict[str, ToolPack] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
+        self.status: Literal["draft", "published", "archived"] = "draft"
+
+    def set_status(self, status: Literal["draft", "published", "archived"]) -> Self:
+        """Sets the status of the flow.
+
+        Args:
+            status (Literal["draft", "published", "archived"]): The status to set.
+
+        Returns:
+            Self: The builder instance for chaining.
+        """
+        self.status = status
+        return self
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
         """Registers a reusable supervision policy.
@@ -850,7 +863,7 @@ class NewLinearFlow(BaseFlowBuilder):
     def _create_flow_instance(self) -> LinearFlow:
         return LinearFlow(
             kind="LinearFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),
@@ -989,7 +1002,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         return GraphFlow(
             kind="GraphFlow",
-            status="published",
+            status=self.status,
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,
