@@ -63,11 +63,8 @@ class CoreasonModel(BaseModel):
             if isinstance(obj, dict):
                 return {k: _sort_collections(v) for k, v in obj.items()}
             if isinstance(obj, list):
-                # Try to sort, fallback to original if elements are unorderable dicts
-                try:
-                    return sorted(_sort_collections(v) for v in obj)
-                except TypeError:
-                    return [_sort_collections(v) for v in obj]
+                # Arrays in JSON are strictly ordered (RFC 8785). We must not sort them.
+                return [_sort_collections(v) for v in obj]
             return obj
 
         canonical_dict = _sort_collections(raw_dict)

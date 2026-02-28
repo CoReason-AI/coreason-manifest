@@ -240,7 +240,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
         state_store[node_id] = state
 
     if state.state == "open":
-        if state.last_failure_time and (time.time() - state.last_failure_time > policy.reset_timeout_seconds):
+        if state.last_failure_time and (time.monotonic() - state.last_failure_time > policy.reset_timeout_seconds):
             # Timeout expired, try half-open
             # Immutability: Create new state and update store
             new_state = state.model_copy(update={"state": "half-open"})
@@ -276,7 +276,7 @@ def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, 
         return
 
     new_failure_count = state.failure_count + 1
-    new_last_failure_time = time.time()
+    new_last_failure_time = time.monotonic()
     new_status: Literal["open", "closed", "half-open"] = state.state
 
     if new_failure_count >= policy.error_threshold_count:

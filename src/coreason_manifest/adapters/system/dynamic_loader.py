@@ -303,6 +303,9 @@ def _install_audit_hook() -> None:
         if not jail_root:
             return
 
+        if event in ("os.system", "os.exec", "os.posix_spawn", "subprocess.Popen"):
+            raise SecurityViolationError(f"Process execution blocked in sandbox: {event}")
+
         if event in ("socket.connect", "urllib.Request", "http.client.send"):
             raise SecurityViolationError(f"Network access blocked in sandbox: {event}")
 

@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import Field, field_validator
 
 from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.compliance import SecurityVisitor
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 
 InterventionMode = Literal["blocking", "shadow", "hijack_only"]
@@ -37,9 +38,8 @@ class EscalationCriteria(CoreasonModel):
         except SyntaxError as e:
             raise ValueError(f"Invalid Python expression syntax: {e}") from e
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Call):
-                raise ValueError("Security Violation: Function calls are forbidden in escalation logic.")
+        visitor = SecurityVisitor()
+        visitor.visit(tree)
         return v
 
 
