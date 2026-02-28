@@ -40,6 +40,7 @@ from coreason_manifest.core.oversight.resilience import (
 from coreason_manifest.core.primitives.types import RiskLevel
 from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
+    ConsolidationStrategy,
     EpisodicMemoryConfig,
     MemorySubsystem,
     ProceduralMemoryConfig,
@@ -377,6 +378,7 @@ class AgentBuilder:
         enable_paging: bool = False,
         salience_threshold: float | None = None,
         consolidation_interval: int | None = None,
+        consolidation_strategy: str = "session_close",
         graph_namespace: str | None = None,
         bitemporal_tracking: bool = False,
         allowed_entity_types: list[str] | None = None,
@@ -404,6 +406,7 @@ class AgentBuilder:
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
                 consolidation_interval_turns=consolidation_interval,
+                consolidation_strategy=ConsolidationStrategy(consolidation_strategy),
             )
 
         semantic = None
