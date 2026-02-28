@@ -28,10 +28,6 @@ from coreason_manifest.spec.core.oversight.governance import (
     Safety,
 )
 from coreason_manifest.spec.core.oversight.resilience import SupervisionPolicy
-from coreason_manifest.spec.core.state.tools import (
-    Dependency,
-    ToolPack,
-)
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
     Blackboard,
@@ -62,7 +58,6 @@ __all__ = [
     "CognitiveProfile",
     "CouncilReasoning",
     "DecompositionReasoning",
-    "Dependency",
     "Edge",
     "FastPath",
     "FlowInterface",
@@ -83,7 +78,6 @@ __all__ = [
     "StandardReasoning",
     "SupervisionPolicy",
     "SwitchNode",
-    "ToolPack",
     "TreeSearchReasoning",
     "VariableDef",
 ]

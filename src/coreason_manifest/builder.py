@@ -42,7 +42,6 @@ from coreason_manifest.spec.core.state.memory import (
     SemanticMemoryConfig,
     WorkingMemoryConfig,
 )
-from coreason_manifest.spec.core.state.tools import ToolPack
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
     Blackboard,
@@ -446,7 +445,6 @@ class BaseFlowBuilder:
         """
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
-        self._tool_packs: dict[str, ToolPack] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
 
@@ -486,18 +484,6 @@ class BaseFlowBuilder:
         self._profiles[profile_id] = CognitiveProfile(
             role=role, persona=persona, reasoning=reasoning, fast_path=fast_path
         )
-        return self
-
-    def add_tool_pack(self, pack: ToolPack) -> Self:
-        """Adds a tool pack to the flow.
-
-        Args:
-            pack (ToolPack): The tool pack to add.
-
-        Returns:
-            Self: The builder instance for chaining.
-        """
-        self._tool_packs[pack.namespace] = pack
         return self
 
     def set_governance(self, gov: Governance) -> Self:
@@ -598,7 +584,6 @@ class BaseFlowBuilder:
         """Helper to build FlowDefinitions from registered components."""
         return FlowDefinitions(
             profiles=self._profiles,
-            tool_packs=self._tool_packs,
             supervision_templates=self._supervision_templates,
         )
 

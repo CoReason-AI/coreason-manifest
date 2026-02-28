@@ -10,7 +10,6 @@ from coreason_manifest.spec.common_base import CoreasonModel
 from coreason_manifest.spec.core.oversight.governance import Governance
 from coreason_manifest.spec.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.spec.core.state.persistence import PersistenceConfig
-from coreason_manifest.spec.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.spec.core.workflow.nodes import (
     AnyNode,
 )
@@ -160,8 +159,6 @@ class FlowInterface(CoreasonModel):
 class FlowDefinitions(CoreasonModel):
     profiles: dict[str, Any] = Field(default_factory=dict)
     schemas: dict[str, Any] = Field(default_factory=dict)
-    tools: dict[str, AnyTool] = Field(default_factory=dict)
-    tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
     skills: dict[str, Any] = Field(default_factory=dict)
     middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
     supervision_templates: Any | None = None

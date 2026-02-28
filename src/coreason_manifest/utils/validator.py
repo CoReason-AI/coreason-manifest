@@ -13,7 +13,6 @@ from coreason_manifest.spec.core.oversight.resilience import (
     ResilienceStrategy,
 )
 from coreason_manifest.spec.core.primitives.types import RiskLevel
-from coreason_manifest.spec.core.state.tools import ToolCapability, ToolPack
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
     FlowDefinitions,
@@ -57,9 +56,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         errors.extend(_validate_governance(flow.governance, valid_ids))
 
     if flow.definitions:
-        # Convert dict to list for backward compatibility with _validate_tools
-        tool_packs = list(flow.definitions.tool_packs.values()) if flow.definitions.tool_packs else []
-        errors.extend(_validate_tools(nodes, tool_packs))
+        skills = flow.definitions.skills or {}
+        errors.extend(_validate_tools(nodes, skills))
         errors.extend(_validate_referential_integrity(nodes, flow.definitions))
     else:
         # If no definitions, ensure no references exist
@@ -470,9 +468,9 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[Complianc
     return errors
 
 
-def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[ComplianceReport]:
+def _validate_tools(nodes: list[AnyNode], skills: dict[str, Any]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
-    available_tools = {t.name for pack in packs for t in pack.tools}
+    available_tools = set(skills.keys())
 
     for node in nodes:
         if isinstance(node, AgentNode):
@@ -481,7 +479,7 @@ def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[Complia
                     code=ErrorCatalog.ERR_CAP_MISSING_TOOL_001,
                     severity="warning",
                     message=f"Missing Tool Warning: Agent '{node.id}' requires tool '{tool}' but it is not provided by "
-                    "any attached ToolPack.",
+                    "any attached AtomicSkill.",
                     node_id=node.id,
                     details={"tool": tool},
                 )
@@ -998,19 +996,7 @@ def _validate_kill_switch(flow: LinearFlow | GraphFlow) -> list[ComplianceReport
     nodes, _ = get_unified_topology(flow)
 
     def _check(obj: Any) -> None:
-        # 1. Check ToolCapability objects
-        if isinstance(obj, ToolCapability) and max_risk is not None and obj.risk_level.weight > max_risk.weight:
-            errors.append(
-                ComplianceReport(
-                    code=ErrorCatalog.ERR_SEC_KILL_SWITCH_VIOLATION,
-                    severity="violation",
-                    message=f"Security Violation: Tool '{obj.name}' has risk level '{obj.risk_level.value}' "
-                    f"which exceeds the global max_risk_level '{max_risk.value}'.",
-                    details={"tool_name": obj.name, "tool_risk": obj.risk_level.value, "max_risk": max_risk.value},
-                )
-            )
-
-        # 2. Check Strings for Remote URIs
+        # 1. Check Strings for Remote URIs
         if isinstance(obj, str):
             if "://" in obj and max_risk is not None and RiskLevel.CRITICAL.weight > max_risk.weight:
                 errors.append(

@@ -1,26 +1,21 @@
 from typing import Any
 
-from coreason_manifest.spec.core.state.tools import ToolPack
 from coreason_manifest.spec.core.workflow.nodes import AgentNode
 from coreason_manifest.spec.interop.adapter_config import AdapterConfig
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
-def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
+def node_to_openai_assistant(node: AgentNode) -> dict[str, Any]:
     """
     Convert an AgentNode into an OpenAI Assistant definition.
 
     Args:
         node: The AgentNode to convert.
-        tool_packs: A list of available ToolPacks.
 
     Returns:
         A dictionary representing the OpenAI Assistant configuration.
     """
-    if tool_packs is None:
-        tool_packs = []
-
     # Architectural Change: Decouple hardcoded model assumption.
     # Use AdapterConfig to resolve default model from environment or fallback.
     config = AdapterConfig()
@@ -59,15 +54,7 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     # Instructions: Combine role and persona
     instructions = f"{node.profile.role} {node.profile.persona}"
 
-    # Tools: Generate function definitions for every tool listed in node.tools found in tool_packs
-    available_tools: set[str] = set()
-    for pack in tool_packs:
-        available_tools.update(t.name for t in pack.tools)
-
-    tools_definitions = [
-        {"type": "function", "function": {"name": tool_name}}
-        for tool_name in node.tools
-        if tool_name in available_tools
-    ]
+    # Tools: Generate function definitions for every tool listed in node.tools
+    tools_definitions = [{"type": "function", "function": {"name": tool_name}} for tool_name in node.tools]
 
     return {"name": node.id, "instructions": instructions, "model": model, "tools": tools_definitions}

@@ -1,7 +1,7 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.spec.core.primitives.constants import NodeCapability
@@ -12,15 +12,11 @@ from coreason_manifest.spec.interop.compliance import (
     ErrorCatalog,
     RemediationAction,
 )
-from coreason_manifest.utils.net_utils import canonicalize_domain
 from coreason_manifest.utils.topology import (
     get_reachable_nodes,
     get_strongly_connected_components,
     get_unified_topology,
 )
-
-if TYPE_CHECKING:
-    from coreason_manifest.spec.core.state.tools import ToolCapability
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
@@ -45,69 +41,13 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
     return []
 
 
-def _check_domain_whitelist(
-    flow: LinearFlow | GraphFlow, tool_map: dict[str, ToolCapability]
-) -> list[ComplianceReport]:
-    """0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)"""
-    reports: list[ComplianceReport] = []
-    allowed_domains_raw = []
-    if flow.governance and flow.governance.allowed_domains:
-        allowed_domains_raw = flow.governance.allowed_domains
-
-    # Canonicalize allowed domains
-    allowed_domains = {canonicalize_domain(d) for d in allowed_domains_raw}
-
-    if allowed_domains:
-        for tool_obj in tool_map.values():
-            # Architectural Note: Utilize strict Pydantic HttpUrl object instead of manual string parsing
-            if tool_obj.url and tool_obj.url.host:
-                domain_raw = str(tool_obj.url.host)
-                domain = canonicalize_domain(domain_raw)
-
-                allowed = False
-                for allowed_d in allowed_domains:
-                    # Exact match or subdomain
-                    if domain == allowed_d or (domain and domain.endswith("." + allowed_d)):
-                        allowed = True
-                        break
-
-                if allowed:
-                    continue
-
-                reports.append(
-                    ComplianceReport(
-                        code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
-                        severity="violation",
-                        message=f"Tool '{tool_obj.name}' uses blocked domain: {domain}",
-                        details={"domain": domain, "tool_name": tool_obj.name},
-                        remediation=RemediationAction(
-                            type="whitelist_domain",
-                            format="json_patch",
-                            patch_data=[{"op": "add", "path": "/governance/allowed_domains/-", "value": domain}],
-                            description=f"Add '{domain}' to allowed_domains",
-                        ),
-                    )
-                )
-    return reports
-
-
 def _enforce_red_button_rule(
-    nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, ToolCapability]
+    nodes: list[AnyNode], flow: LinearFlow | GraphFlow
 ) -> list[ComplianceReport]:
     """1. Capability Analysis & Red Button Rule"""
     reports: list[ComplianceReport] = []
     for node in nodes:
         caps = _get_capabilities(node, flow)
-
-        # Check tool risks for AgentNode
-        critical_tools = []
-        if isinstance(node, AgentNode):
-            for tool_name in node.tools:
-                resolved_tool = tool_map.get(tool_name)
-                # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown
-                risk = resolved_tool.risk_level if resolved_tool else "critical"
-                if risk == "critical":
-                    critical_tools.append(tool_name)
 
         # Check for high-risk capabilities
         needs_guard = False
@@ -119,10 +59,6 @@ def _enforce_red_button_rule(
         if NodeCapability.CODE_EXECUTION in caps:
             needs_guard = True
             violation_reason.append("code_execution capability")
-
-        if critical_tools:
-            needs_guard = True
-            violation_reason.append(f"critical tools {critical_tools}")
 
         if needs_guard and not _is_guarded(node, flow):
             human_node_id = f"guard_{node.id}"
@@ -335,18 +271,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # Extract all nodes
     nodes, _ = get_unified_topology(flow)
 
-    # Build tool map: name -> tool_object
-    tool_map: dict[str, ToolCapability] = {}
-    if flow.definitions and flow.definitions.tool_packs:
-        for pack in flow.definitions.tool_packs.values():
-            for tool in pack.tools:
-                tool_map[tool.name] = tool
-
-    # 0. Domain Policy Check
-    reports.extend(_check_domain_whitelist(flow, tool_map))
-
     # 1. Capability Analysis & Red Button Rule
-    reports.extend(_enforce_red_button_rule(nodes, flow, tool_map))
+    reports.extend(_enforce_red_button_rule(nodes, flow))
 
     # 5. Topology Analysis (GraphFlow Only)
     if isinstance(flow, GraphFlow):
