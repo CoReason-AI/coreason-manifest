@@ -276,8 +276,8 @@ def _validate_data_flow(
 
         elif isinstance(node, PlannerNode):
             try:
-                import jsonschema  # type: ignore
-                from jsonschema.exceptions import SchemaError  # type: ignore
+                import jsonschema
+                from jsonschema.exceptions import SchemaError
 
                 jsonschema.validators.validator_for(node.output_schema).check_schema(node.output_schema)
 
