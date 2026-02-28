@@ -146,6 +146,10 @@ class Governance(CoreasonModel):
     allowed_domains: list[str] = Field(
         default_factory=list, description="Allowed external domains.", examples=[["example.com"]]
     )
+    opa_policies: list[str] = Field(
+        default_factory=list,
+        description="References to .rego files or inline Open Policy Agent definitions for custom enterprise rules.",
+    )
 
     @field_validator("active_middlewares")
     @classmethod
