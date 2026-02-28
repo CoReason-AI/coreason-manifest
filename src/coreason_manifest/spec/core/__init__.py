@@ -38,6 +38,7 @@ from coreason_manifest.spec.core.oversight.resilience import (
 from coreason_manifest.spec.core.primitives.types import WasmMiddlewareDef
 from coreason_manifest.spec.core.state.persistence import Checkpoint, PersistenceConfig, StateDiff
 from coreason_manifest.spec.core.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
+from coreason_manifest.spec.core.workflow.evals import EvalsManifest, TestCase
 from coreason_manifest.spec.core.workflow.flow import (
     AnyNode,
     Blackboard,
@@ -87,6 +88,7 @@ __all__ = [
     "ErrorDomain",
     "ErrorHandler",
     "EscalationStrategy",
+    "EvalsManifest",
     "FallbackStrategy",
     "FastPath",
     "FlowDefinitions",
@@ -120,6 +122,7 @@ __all__ = [
     "StateDiff",
     "SupervisionPolicy",
     "SwitchNode",
+    "TestCase",
     # Tools
     "ToolPack",
     "TreeSearchReasoning",

@@ -26,6 +26,7 @@ from coreason_manifest.spec.core.workflow.nodes import (
     CognitiveProfile,
     EmergenceInspectorNode,
     InspectorNode,
+    PlannerNode,
     SwarmNode,
     SwitchNode,
 )
@@ -41,7 +42,13 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
     # Flatten nodes based on flow type
-    nodes, _ = get_unified_topology(flow)
+    nodes, edges_objs = get_unified_topology(flow)
+
+    # Build simple adjacency map from explicit edges
+    adj_map: dict[str, set[str]] = {n.id: set() for n in nodes}
+    for edge in edges_objs:
+        if edge.from_node in adj_map and edge.to_node in adj_map:
+            adj_map[edge.from_node].add(edge.to_node)
 
     valid_ids = {n.id for n in nodes}
 
@@ -67,6 +74,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         node_ids = {n.id for n in flow.steps}
         errors.extend(_validate_unique_ids(flow.steps))
         errors.extend(_validate_switch_logic(flow.steps, node_ids))
+        errors.extend(_validate_swarm_concurrency(flow.steps))
 
     # 3. GraphFlow Specific Checks
     if isinstance(flow, GraphFlow):
@@ -99,6 +107,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         errors.extend(_validate_unique_ids(nodes_list))
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
         errors.extend(_validate_orphan_nodes(flow))
+        errors.extend(_validate_swarm_concurrency(nodes_list))
 
     # Global Unified Cycle Detection
     errors.extend(_validate_topology_cycles(flow))
@@ -117,23 +126,27 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         inputs = flow.interface.inputs
         in_schema = getattr(inputs, "json_schema", inputs)
         if isinstance(in_schema, dict):
-            # Extract properties from input schema
-            # Heuristic: extract property type if simple, else "unknown"
-            props = in_schema.get("properties", {})
-            for name, schema in props.items():
-                raw_type = schema.get("type", "unknown")
-                if isinstance(raw_type, list):
-                    # Sort to ensure deterministic symbol table regardless of input order
-                    # Result: "array|string"
-                    types = sorted([x for x in raw_type if x != "null"])
-                    if types:
-                        symbol_table[name] = "|".join(types)
-                    else:
-                        symbol_table[name] = "union"
-                else:
-                    symbol_table[name] = str(raw_type)
+            def _extract_schema_types(schema_dict: dict[str, Any], prefix: str = "") -> None:
+                props = schema_dict.get("properties", {})
+                for name, schema in props.items():
+                    key = f"{prefix}{name}"
+                    if not isinstance(schema, dict):
+                        symbol_table[key] = "unknown"
+                        continue
 
-        errors.extend(_validate_data_flow(nodes, symbol_table, flow.definitions))
+                    raw_type = schema.get("type", "unknown")
+                    if isinstance(raw_type, list):
+                        types = sorted([x for x in raw_type if x != "null"])
+                        symbol_table[key] = "|".join(types) if types else "union"
+                    else:
+                        symbol_table[key] = str(raw_type)
+
+                    if raw_type == "object" or "object" in str(raw_type):
+                        _extract_schema_types(schema, prefix=f"{key}.")
+
+            _extract_schema_types(in_schema)
+
+        errors.extend(_validate_data_flow(nodes, symbol_table, flow.definitions, adj_map))
 
     # 5. Security & Kill Switch
     if flow.governance and flow.governance.max_risk_level:
@@ -188,6 +201,7 @@ def _validate_data_flow(
     nodes: list[AnyNode],
     symbol_table: dict[str, str],
     definitions: FlowDefinitions | None,
+    adj_map: dict[str, set[str]] | None = None,
 ) -> list[ComplianceReport]:
     """
     Check if nodes reference variables that exist in the symbol table.
@@ -245,6 +259,113 @@ def _validate_data_flow(
                         f"'{node.output_variable}'.",
                         node_id=node.id,
                         details={"variable": node.output_variable},
+                    )
+                )
+
+        elif isinstance(node, PlannerNode):
+            try:
+                import jsonschema  # type: ignore
+                from jsonschema.exceptions import SchemaError  # type: ignore
+
+                jsonschema.validators.validator_for(node.output_schema).check_schema(node.output_schema)
+
+                # SOTA 2026: Shift-Left Reliability
+                # Find structurally expected schemas from true *downstream connected* neighbors.
+                downstream_ids = adj_map.get(node.id, set()) if adj_map else set()
+                downstream_expectations: list[tuple[str, dict[str, Any]]] = []
+
+                # Map node ID to its instance for easy lookup
+                node_map = {n.id: n for n in nodes}
+
+                for d_id in downstream_ids:
+                    d_node = node_map.get(d_id)
+                    if not d_node:
+                        continue
+                    # Hardcoded structural constraints based on node type
+                    if isinstance(d_node, SwarmNode):
+                        downstream_expectations.append(
+                            (
+                                d_id,
+                                {
+                                    "type": "object",
+                                    "required": [d_node.workload_variable],
+                                    "properties": {d_node.workload_variable: {"type": "array"}},
+                                },
+                            )
+                        )
+                    # If other nodes have explicit input schemas in the future, we would add them here.
+                    from coreason_manifest.spec.core.workflow.nodes import HumanNode
+
+                    if isinstance(d_node, HumanNode) and getattr(d_node, "input_schema", None):
+                        downstream_expectations.append((d_id, d_node.input_schema))  # type: ignore
+
+                # Mathematical Verification: does Planner's output_schema satisfy downstream's expected input schema?
+                # We achieve this by validating a "dummy" full JSON object matching the Planner's exact shape
+                # against the downstream jsonschema if possible, or by structural overlap checking.
+                def _check_schema_satisfaction(
+                    provided: dict[str, Any], expected: dict[str, Any], path: str = ""
+                ) -> list[str]:
+                    errs = []
+                    # Check types
+                    prov_type = provided.get("type", "object")
+                    exp_type = expected.get("type", "object")
+                    if prov_type != exp_type:
+                        errs.append(f"Type mismatch at '{path}': expected {exp_type}, got {prov_type}")
+                        return errs
+
+                    if exp_type == "object":
+                        prov_props = provided.get("properties", {})
+                        exp_props = expected.get("properties", {})
+                        exp_req = expected.get("required", [])
+
+                        # All required downstream fields MUST be present in the planner's output
+                        errs.extend(
+                            [
+                                f"Missing required property '{req}' at '{path}'"
+                                for req in exp_req
+                                if req not in prov_props
+                            ]
+                        )
+
+                        # Recurse for nested properties
+                        for p_name, p_schema in exp_props.items():
+                            if p_name in prov_props:
+                                errs.extend(
+                                    _check_schema_satisfaction(
+                                        prov_props[p_name], p_schema, path=f"{path}.{p_name}" if path else p_name
+                                    )
+                                )
+                    elif exp_type == "array":
+                        # Recurse into array items
+                        prov_items = provided.get("items", {})
+                        exp_items = expected.get("items", {})
+                        if exp_items and prov_items:
+                            errs.extend(_check_schema_satisfaction(prov_items, exp_items, path=f"{path}[]"))
+
+                    return errs
+
+                for target_id, exp_schema in downstream_expectations:
+                    schema_errs = _check_schema_satisfaction(node.output_schema, exp_schema)
+                    errors.extend(
+                        [
+                            ComplianceReport(
+                                code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
+                                severity="violation",
+                                message=f"Structural Misalignment: PlannerNode '{node.id}' output does not satisfy "
+                                f"downstream node '{target_id}': {err_msg}.",
+                                node_id=node.id,
+                            )
+                            for err_msg in schema_errs
+                        ]
+                    )
+
+            except SchemaError as e:
+                errors.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_CAP_TYPE_MISMATCH,
+                        severity="violation",
+                        message=f"PlannerNode schema validation failed: {e!s}",
+                        node_id=node.id,
                     )
                 )
 
@@ -362,6 +483,23 @@ def _validate_tools(nodes: list[AnyNode], packs: list[ToolPack]) -> list[Complia
                 if tool not in available_tools
             )
     return errors
+
+
+def _validate_swarm_concurrency(nodes: list[AnyNode]) -> list[ComplianceReport]:
+    return [
+        ComplianceReport(
+            code=ErrorCatalog.ERR_TOPOLOGY_RACE_CONDITION,
+            severity="violation",
+            message=f"Concurrency Error: SwarmNode '{node.id}' uses replicated distribution but lacks a "
+            "reducer_function or lock_config, risking race conditions on the output variable.",
+            node_id=node.id,
+        )
+        for node in nodes
+        if isinstance(node, SwarmNode)
+        and node.distribution_strategy == "replicated"
+        and not node.reducer_function
+        and not node.lock_config
+    ]
 
 
 def _validate_linear_integrity(flow: LinearFlow) -> list[ComplianceReport]:
