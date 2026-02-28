@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
@@ -23,6 +24,27 @@ from coreason_manifest.core.primitives.types import (
     VariableID,
 )
 from coreason_manifest.core.state.memory import MemorySubsystem
+
+
+class ConstraintOperator(StrEnum):
+    EQ = "eq"
+    NEQ = "neq"
+    GT = "gt"
+    GTE = "gte"
+    LT = "lt"
+    LTE = "lte"
+    IN = "in"
+    CONTAINS = "contains"
+
+
+class Constraint(CoreasonModel):
+    """Declarative constraint evaluated before node execution."""
+
+    variable: str = Field(..., description="The Blackboard variable path to check.")
+    operator: ConstraintOperator
+    value: Any = Field(..., description="The threshold or reference value.")
+    required: bool = Field(True, description="If True, failure halts execution. If False, emits a warning.")
+    error_message: str | None = Field(None, description="Optional custom error message.")
 
 
 class LockConfig(CoreasonModel):
@@ -52,6 +74,9 @@ class Node(CoreasonModel):
         Field(description="UI rendering hints.", examples=[{"x": 100, "y": 200}]),
     ] = None
     type: str = Field(..., description="The type of the node.")
+    constraints: list[Constraint] = Field(
+        default_factory=list, description="Pre-flight checks evaluated before node execution."
+    )
 
 
 class CognitiveProfile(CoreasonModel):
@@ -385,6 +410,8 @@ __all__ = [
     "AgentNode",
     "AnyNode",
     "CognitiveProfile",
+    "Constraint",
+    "ConstraintOperator",
     "EmergenceInspectorNode",
     "HumanNode",
     "InspectorNode",

@@ -244,6 +244,23 @@ def _validate_data_flow(
     available_vars = set(symbol_table.keys())
 
     for node in nodes:
+        if hasattr(node, "constraints"):
+            for constraint in node.constraints:
+                base_var = constraint.variable.split(".")[0]
+                if base_var not in available_vars:
+                    errors.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                            severity="violation",
+                            message=(
+                                f"Constraint Error: Node '{node.id}' references "
+                                f"missing variable '{constraint.variable}'."
+                            ),
+                            node_id=node.id,
+                            details={"variable": constraint.variable},
+                        )
+                    )
+
         if isinstance(node, SwarmNode):
             if node.workload_variable not in available_vars:
                 errors.append(

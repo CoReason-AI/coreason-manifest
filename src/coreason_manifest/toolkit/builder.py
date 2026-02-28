@@ -8,7 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
+
+if TYPE_CHECKING:
+    from coreason_manifest.core.workflow.nodes import Constraint
 
 from coreason_manifest.core.compute.reasoning import (
     FastPath,
@@ -122,6 +125,7 @@ class AgentBuilder:
         self.operational_policy: OperationalPolicy | None = None
         self.escalation_rules: list[EscalationCriteria] = []
         self.memory: MemorySubsystem | None = None
+        self.constraints: list[Constraint] = []
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures the agent's identity.
@@ -425,6 +429,34 @@ class AgentBuilder:
         )
         return self
 
+    def with_constraint(
+        self, variable: str, operator: str, value: Any, required: bool = True, error_message: str | None = None
+    ) -> "AgentBuilder":
+        """Adds a constraint to the agent node.
+
+        Args:
+            variable (str): The Blackboard variable path to check.
+            operator (str): The operator to use (e.g., 'eq', 'gt').
+            value (Any): The threshold or reference value.
+            required (bool): Whether the constraint is required. Defaults to True.
+            error_message (str | None): Custom error message.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
+        from coreason_manifest.core.workflow.nodes import Constraint, ConstraintOperator
+
+        self.constraints.append(
+            Constraint(
+                variable=variable,
+                operator=ConstraintOperator(operator),
+                value=value,
+                required=required,
+                error_message=error_message,
+            )
+        )
+        return self
+
     def build(self) -> AgentNode:
         """Validates configuration and builds the AgentNode.
 
@@ -435,10 +467,14 @@ class AgentBuilder:
             ValueError: If agent identity (role, persona) is not set.
         """
         # Ensure schema is built
+        from coreason_manifest.core.rebuild import rebuild_manifest
+
         rebuild_manifest()
 
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
+
+        from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile
 
         profile = CognitiveProfile(
             role=self.role,
@@ -457,6 +493,7 @@ class AgentBuilder:
             tools=self.tools,
             operational_policy=self.operational_policy,
             escalation_rules=self.escalation_rules,
+            constraints=self.constraints,
         )
 
 
