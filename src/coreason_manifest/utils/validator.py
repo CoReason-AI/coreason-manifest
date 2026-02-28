@@ -112,6 +112,9 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # Global Unified Cycle Detection
     errors.extend(_validate_topology_cycles(flow))
 
+    # Epic 11: Graph-Theoretic Financial Budgets
+    errors.extend(_validate_budget_constraints(flow))
+
     # 4. Domain 4: Static Data-Flow Analysis
     # Construct Symbol Table: Map variable name -> type (str)
     symbol_table: dict[str, str] = {}
@@ -850,6 +853,99 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
                         adj[node.id].add(strategy.fallback_node_id)
 
     return adj
+
+
+def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """
+    Dynamically calculates the Maximum Cost Path using edge cost_weights to ensure
+    the financial and latency limits are respected mathematically at compile-time.
+    Uses Kahn's topological sort based dynamic programming algorithm.
+    """
+    errors: list[ComplianceReport] = []
+
+    if not flow.governance or not flow.governance.operational_policy:
+        return errors
+
+    fin_limits = flow.governance.operational_policy.financial
+    comp_limits = flow.governance.operational_policy.compute
+
+    max_cost = fin_limits.max_cost_usd if fin_limits else None
+    max_latency = comp_limits.max_execution_time_seconds if comp_limits else None
+
+    if max_cost is None and max_latency is None:
+        return errors
+
+    # Only graph flows have explicitly weighted edges
+    if not hasattr(flow, "graph"):
+        return errors
+
+    adj_map = _build_unified_adjacency_map(flow)
+
+    # Need to handle explicitly weighted edges
+    edge_weights: dict[tuple[str, str], tuple[float, float]] = {}
+    if hasattr(flow, "graph"):
+        for edge in flow.graph.edges:
+            edge_weights[(edge.from_node, edge.to_node)] = (edge.cost_weight, edge.latency_weight_ms)
+
+    from collections import defaultdict
+
+    in_degree: dict[str, int] = defaultdict(int)
+    for u in adj_map:
+        for v in adj_map[u]:
+            in_degree[v] += 1
+
+    # Topological sort (Kahn's algorithm)
+    dp_cost: dict[str, float] = defaultdict(float)
+    dp_latency: dict[str, float] = defaultdict(float)
+
+    topo_order = []
+    zero_in = [u for u in adj_map if in_degree[u] == 0]
+
+    while zero_in:
+        u = zero_in.pop(0)
+        topo_order.append(u)
+        for v in adj_map[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                zero_in.append(v)
+
+    # In case of cycles, length will not match. Fallback gracefully, as cycle detection handles cycles independently.
+    if len(topo_order) != len(adj_map):
+        return errors
+
+    for u in topo_order:
+        for v in adj_map[u]:
+            w_cost, w_latency = edge_weights.get((u, v), (0.0, 0.0))
+            if dp_cost[u] + w_cost > dp_cost[v]:
+                dp_cost[v] = dp_cost[u] + w_cost
+            if dp_latency[u] + w_latency > dp_latency[v]:
+                dp_latency[v] = dp_latency[u] + w_latency
+
+    max_path_cost = max(dp_cost.values()) if dp_cost else 0.0
+    max_path_latency_ms = max(dp_latency.values()) if dp_latency else 0.0
+
+    if max_cost is not None and max_path_cost > max_cost:
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=f"Budget Violation: Maximum possible path cost ({max_path_cost}) exceeds budget ({max_cost}).",
+                details={"max_path_cost": max_path_cost, "max_cost_usd": max_cost},
+            )
+        )
+
+    if max_latency is not None and (max_path_latency_ms / 1000.0) > max_latency:
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=f"Budget Violation: Maximum possible path latency ({max_path_latency_ms / 1000.0}s) "
+                f"exceeds budget ({max_latency}s).",
+                details={"max_path_latency_ms": max_path_latency_ms, "max_latency_s": max_latency},
+            )
+        )
+
+    return errors
 
 
 def _validate_topology_cycles(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:

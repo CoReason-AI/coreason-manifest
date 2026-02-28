@@ -12,6 +12,11 @@ class Dependency(CoreasonModel):
     name: str = Field(..., description="Name of the package.", examples=["requests", "pandas"])
     version: str | None = Field(None, description="Version constraint string.", examples=["^2.0.0", ">=1.0"])
     manager: Literal["pip", "npm", "apt", "mcp"] = Field(..., description="Package manager to use.", examples=["pip"])
+    integrity_hash: Annotated[
+        str | None,
+        Field(pattern=r"^sha(?:256|384|512):[a-f0-9]+$", description="Cryptographic hash of the upstream package."),
+    ] = None
+    sbom_ref: str | None = Field(None, description="URI or path to a CycloneDX/SPDX JSON Document.")
 
 
 class ToolCapability(CoreasonModel):
