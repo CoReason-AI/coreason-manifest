@@ -84,7 +84,7 @@ class BlackBoxRecorder:
             root_request_id=resolved_root_request_id,
             traceparent=traceparent,
             tracestate=tracestate,
-            execution_hash=None  # Explicitly None before hashing
+            execution_hash=None,  # Explicitly None before hashing
         )
 
         # Compute hash directly from the model (compute_hash handles BaseModel)
