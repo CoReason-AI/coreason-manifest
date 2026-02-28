@@ -1,4 +1,5 @@
 import time
+from enum import IntEnum
 from typing import Any, Literal
 
 from pydantic import Field, field_validator, model_validator
@@ -7,6 +8,27 @@ from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 from coreason_manifest.core.oversight.intervention import CoIntelligencePolicy
 from coreason_manifest.core.primitives.types import MiddlewareID, NodeID, RiskLevel, ToolID
+
+
+class RequestCriticality(IntEnum):
+    CRITICAL = 10
+    STANDARD = 5
+    SHEDDABLE = 1
+
+
+class SemanticCacheConfig(CoreasonModel):
+    enabled: bool = Field(True, description="Enable semantic caching.")
+    similarity_threshold: float = Field(0.85, ge=0.0, le=1.0, description="Similarity threshold for cache hits.")
+    ttl_seconds: int | None = Field(3600, description="Time to live for cache entries in seconds.")
+
+
+class TrafficPolicy(CoreasonModel):
+    criticality: RequestCriticality = Field(RequestCriticality.STANDARD, description="Request criticality level.")
+    rate_limit_rpm: int | None = Field(None, gt=0, description="Rate limit in requests per minute.")
+    rate_limit_tpm: int | None = Field(None, gt=0, description="Rate limit in tokens per minute.")
+    semantic_cache: SemanticCacheConfig | None = Field(
+        default_factory=SemanticCacheConfig, description="Semantic cache configuration."
+    )
 
 
 class Safety(CoreasonModel):
@@ -96,6 +118,7 @@ class OperationalPolicy(CoreasonModel):
     financial: FinancialLimits | None = None
     data: DataLimits | None = None
     compute: ComputeLimits | None = None
+    traffic: TrafficPolicy | None = None
 
 
 class Governance(CoreasonModel):
