@@ -11,8 +11,11 @@
 from typing import Any, Self, cast
 
 from coreason_manifest.core.compute.reasoning import (
+    AdversarialConfig,
     FastPath,
+    GapScanConfig,
     ReasoningConfig,
+    ReviewStrategy,
     StandardReasoning,
 )
 from coreason_manifest.core.oversight.governance import (
@@ -119,6 +122,39 @@ class AgentBuilder:
         self.operational_policy: OperationalPolicy | None = None
         self.escalation_rules: list[EscalationCriteria] = []
         self.memory: MemorySubsystem | None = None
+        # Meta-Cognition state
+        self.review_strategy: str = "none"
+        self.adversarial_persona: str | None = None
+        self.gap_scan_enabled: bool = False
+        self.gap_scan_threshold: float = 0.8
+        self.max_revisions: int = 1
+
+    def with_meta_cognition(
+        self,
+        review_strategy: str = "none",
+        adversarial_persona: str | None = None,
+        gap_scan_enabled: bool = False,
+        gap_scan_threshold: float = 0.8,
+        max_revisions: int = 1,
+    ) -> "AgentBuilder":
+        """Configures meta-cognitive features for the agent.
+
+        Args:
+            review_strategy (str): The review strategy to use. Defaults to "none".
+            adversarial_persona (str | None): The persona for adversarial review.
+            gap_scan_enabled (bool): Whether gap scanning is enabled. Defaults to False.
+            gap_scan_threshold (float): The threshold for gap scanning. Defaults to 0.8.
+            max_revisions (int): Maximum self-correction loops. Defaults to 1.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
+        self.review_strategy = review_strategy
+        self.adversarial_persona = adversarial_persona
+        self.gap_scan_enabled = gap_scan_enabled
+        self.gap_scan_threshold = gap_scan_threshold
+        self.max_revisions = max_revisions
+        return self
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures the agent's identity.
@@ -405,10 +441,38 @@ class AgentBuilder:
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
+        reasoning = self.reasoning
+        if reasoning is not None:
+            gap_scan_config = None
+            if self.gap_scan_enabled:
+                gap_scan_config = GapScanConfig(
+                    enabled=self.gap_scan_enabled, confidence_threshold=self.gap_scan_threshold
+                )
+
+            adversarial_config = None
+            if self.review_strategy == "adversarial":
+                adversarial_config = AdversarialConfig(persona=self.adversarial_persona or "skeptic")
+
+            # Map string to ReviewStrategy Enum
+            try:
+                review_strategy_enum = ReviewStrategy(self.review_strategy)
+            except ValueError:
+                review_strategy_enum = ReviewStrategy.NONE
+
+            # Since BaseModel models are immutable (frozen=True), we must use model_copy
+            reasoning = reasoning.model_copy(
+                update={
+                    "review_strategy": review_strategy_enum,
+                    "adversarial_config": adversarial_config,
+                    "gap_scan": gap_scan_config,
+                    "max_revisions": self.max_revisions,
+                }
+            )
+
         profile = CognitiveProfile(
             role=self.role,
             persona=self.persona,
-            reasoning=self.reasoning,
+            reasoning=reasoning,
             fast_path=self.fast_path,
             memory=self.memory,
         )
