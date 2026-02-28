@@ -6,9 +6,9 @@ def test_episodic_memory_config_default_strategy() -> None:
     config = EpisodicMemoryConfig(
         salience_threshold=0.5,
     )
-    assert config.consolidation_strategy == ConsolidationStrategy.SESSION_CLOSE
-    assert config.salience_threshold == 0.5
-    assert config.consolidation_interval_turns is None
+    assert config.consolidation_strategy == ConsolidationStrategy.SESSION_CLOSE  # noqa: S101
+    assert config.salience_threshold == 0.5  # noqa: S101
+    assert config.consolidation_interval_turns is None  # noqa: S101
 
 
 def test_episodic_memory_config_custom_strategy() -> None:
@@ -18,5 +18,5 @@ def test_episodic_memory_config_custom_strategy() -> None:
         consolidation_strategy=ConsolidationStrategy.SUMMARY_WINDOW,
         consolidation_interval_turns=10,
     )
-    assert config.consolidation_strategy == ConsolidationStrategy.SUMMARY_WINDOW
-    assert config.consolidation_interval_turns == 10
+    assert config.consolidation_strategy == ConsolidationStrategy.SUMMARY_WINDOW  # noqa: S101
+    assert config.consolidation_interval_turns == 10  # noqa: S101
