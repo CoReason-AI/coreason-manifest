@@ -8,15 +8,15 @@ from coreason_manifest.core.compute.reasoning import (
 )
 
 
-def test_review_strategy_enum():
-    assert ReviewStrategy.NONE == "none"
-    assert ReviewStrategy.BASIC == "basic"
-    assert ReviewStrategy.ADVERSARIAL == "adversarial"
-    assert ReviewStrategy.CAUSAL == "causal"
-    assert ReviewStrategy.CONSENSUS == "consensus"
+def test_review_strategy_enum() -> None:
+    assert ReviewStrategy.NONE.value == "none"
+    assert ReviewStrategy.BASIC.value == "basic"
+    assert ReviewStrategy.ADVERSARIAL.value == "adversarial"
+    assert ReviewStrategy.CAUSAL.value == "causal"
+    assert ReviewStrategy.CONSENSUS.value == "consensus"
 
 
-def test_adversarial_config():
+def test_adversarial_config() -> None:
     # Test valid
     config = AdversarialConfig(persona="hacker", attack_vectors=["payload_splitting"])
     assert config.persona == "hacker"
@@ -24,14 +24,14 @@ def test_adversarial_config():
 
     # Test frozen
     with pytest.raises(ValidationError):
-        config.persona = "new"
+        config.persona = "new"  # type: ignore[misc]
 
     # Test extra forbid
     with pytest.raises(ValidationError):
-        AdversarialConfig(extra_field="invalid")
+        AdversarialConfig(extra_field="invalid")  # type: ignore[call-arg]
 
 
-def test_gap_scan_config():
+def test_gap_scan_config() -> None:
     # Test valid
     config = GapScanConfig(enabled=True, confidence_threshold=0.9)
     assert config.enabled is True
@@ -39,10 +39,10 @@ def test_gap_scan_config():
 
     # Test frozen
     with pytest.raises(ValidationError):
-        config.enabled = False
+        config.enabled = False  # type: ignore
 
 
-def test_base_reasoning_validation():
+def test_base_reasoning_validation() -> None:
     # Test valid base case
     from coreason_manifest.core.compute.reasoning import StandardReasoning
 

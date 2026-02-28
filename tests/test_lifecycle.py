@@ -4,21 +4,21 @@ from coreason_manifest.core.workflow.flow import DataSchema, FlowInterface, Flow
 from coreason_manifest.core.workflow.nodes import AgentNode, PlaceholderNode
 
 
-def test_placeholder_node():
+def test_placeholder_node() -> None:
     node = PlaceholderNode(id="placeholder_1", required_capabilities=["search"])
     assert node.type == "placeholder"
     assert node.required_capabilities == ["search"]
 
 
-def create_mock_flow_metadata():
+def create_mock_flow_metadata() -> FlowMetadata:
     return FlowMetadata(name="test", version="1", description="test")
 
 
-def create_mock_flow_interface():
+def create_mock_flow_interface() -> FlowInterface:
     return FlowInterface(inputs=DataSchema(), outputs=DataSchema())
 
 
-def test_linear_flow_validation():
+def test_linear_flow_validation() -> None:
     # Test draft flow with placeholder
     placeholder = PlaceholderNode(id="placeholder_1", required_capabilities=["search"])
     flow = LinearFlow(status="draft", metadata=create_mock_flow_metadata(), steps=[placeholder])
@@ -29,9 +29,9 @@ def test_linear_flow_validation():
         LinearFlow(status="published", metadata=create_mock_flow_metadata(), steps=[placeholder])
 
 
-def test_graph_flow_validation():
+def test_graph_flow_validation() -> None:
     # Test published flow without entry point
-    agent = AgentNode(id="agent_1", profile="test_profile")
+    agent = AgentNode(id="agent_1", operational_policy=None, profile="test_profile")
     with pytest.raises(ValueError, match="Cannot publish a GraphFlow without an entry point"):
         GraphFlow(
             status="published",

@@ -6,19 +6,19 @@ from coreason_manifest.core.oversight.mixed_initiative import (
 )
 
 
-def test_allocation_rule():
+def test_allocation_rule() -> None:
     rule = AllocationRule(condition="x > 5", target_queue="human_review")
     assert rule.condition == "x > 5"
     assert rule.target_queue == "human_review"
 
 
-def test_bounded_autonomy_config():
+def test_bounded_autonomy_config() -> None:
     config = BoundedAutonomyConfig(intervention_window_seconds=300, timeout_behavior="escalate")
     assert config.intervention_window_seconds == 300
     assert config.timeout_behavior == "escalate"
 
 
-def test_mixed_initiative_policy():
+def test_mixed_initiative_policy() -> None:
     policy = MixedInitiativePolicy(
         enable_shadow_telemetry=True,
         dynamic_allocation_rules=[AllocationRule(condition="x > 5", target_queue="human_review")],
@@ -27,7 +27,7 @@ def test_mixed_initiative_policy():
     assert len(policy.dynamic_allocation_rules) == 1
 
 
-def test_governance_integration():
+def test_governance_integration() -> None:
     policy = MixedInitiativePolicy()
     gov = Governance(mixed_initiative=policy)
     assert gov.mixed_initiative is not None
