@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from coreason_manifest.core.exceptions import LineageIntegrityError
+from coreason_manifest.core.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
 
 
 class AgentRequest(BaseModel):
@@ -108,6 +108,10 @@ class AgentRequest(BaseModel):
             errors.append(err)
 
         if errors:
-            raise ExceptionGroup("Trace Integrity Violations", errors)
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_SEC_LINEAGE_001,
+                message="Multiple Trace Integrity Violations detected.",
+                context={"violations": [str(e) for e in errors]},
+            )
 
         return self

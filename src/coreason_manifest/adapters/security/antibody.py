@@ -45,29 +45,31 @@ def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
     return None
 
 
-def _scan_and_quarantine(data: Any, path: str) -> None:
+def _scan_and_quarantine(data: Any, path: str) -> Any:
     """
-    Recursively scans the raw input structure and MUTATES it in-place
-    to replace anomalies (NaN, Inf) or un-serializable types with
-    DataAnomaly dictionaries.
+    Recursively scans and functionally rebuilds the input structure,
+    replacing anomalies (NaN, Inf, Un-serializable) with DataAnomaly dicts.
     """
     if isinstance(data, dict):
-        for k, v in list(data.items()):
-            current_path = f"{path}.{k}" if path else k
-            anomaly = _get_anomaly(v, current_path)
-            if anomaly:
-                data[k] = anomaly
-            elif isinstance(v, (dict, list, tuple)):
-                _scan_and_quarantine(v, current_path)
-
-    elif isinstance(data, list):
-        for i, v in enumerate(data):
-            current_path = f"{path}[{i}]"
-            anomaly = _get_anomaly(v, current_path)
-            if anomaly:
-                data[i] = anomaly
-            elif isinstance(v, (dict, list, tuple)):
-                _scan_and_quarantine(v, current_path)
+        return {
+            k: _get_anomaly(v, f"{path}.{k}" if path else k)
+            or (_scan_and_quarantine(v, f"{path}.{k}" if path else k) if isinstance(v, (dict, list, tuple)) else v)
+            for k, v in data.items()
+        }
+    if isinstance(data, list):
+        return [
+            _get_anomaly(v, f"{path}[{i}]")
+            or (_scan_and_quarantine(v, f"{path}[{i}]") if isinstance(v, (dict, list, tuple)) else v)
+            for i, v in enumerate(data)
+        ]
+    if isinstance(data, tuple):
+        # Tuples are immutable; reconstruct them functionally
+        return tuple(
+            _get_anomaly(v, f"{path}[{i}]")
+            or (_scan_and_quarantine(v, f"{path}[{i}]") if isinstance(v, (dict, list, tuple)) else v)
+            for i, v in enumerate(data)
+        )
+    return data
 
 
 class AntibodyBase(BaseModel):
@@ -81,14 +83,7 @@ class AntibodyBase(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def run_quarantine(cls, data: Any) -> Any:
-        """
-        Stage 1: Quarantine.
-        Scans for anomalies and MUTATES them into DataAnomaly objects
-        before Pydantic attempts strict validation.
-        """
-        if isinstance(data, (dict, list)):
-            # We must mutate the data in-place.
-            # If data is a dict (likely for a Model), we scan it.
-            _scan_and_quarantine(data, "$")
-
+        if isinstance(data, (dict, list, tuple)):
+            # Assign the functionally rebuilt structure
+            data = _scan_and_quarantine(data, "$")
         return data

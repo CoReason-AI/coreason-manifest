@@ -130,7 +130,13 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         """
         Attempt to find the module in the current jail root using standard importlib machinery.
         """
-        # Security: Prevent standard library shadowing (Dependency Confusion)
+        # 1. CRITICAL: Block sandbox escapes via Wasm/threading or direct OS execution
+        if fullname in ("threading", "multiprocessing", "concurrent", "_thread", "os", "subprocess"):
+            from coreason_manifest.core.exceptions import SecurityJailViolationError
+
+            raise SecurityJailViolationError(f"Module '{fullname}' is strictly forbidden in the sandbox.")
+
+        # 2. Prevent standard library shadowing (Dependency Confusion)
         if fullname in sys.stdlib_module_names:
             return None
 
