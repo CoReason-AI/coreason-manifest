@@ -62,6 +62,7 @@ def test_base_flow_builder_set_mixed_initiative() -> None:
             type="agent",
             profile=CognitiveProfile(role="test", persona="test"),
             tools=[],
+            operational_policy=None,
         )
     )
 
