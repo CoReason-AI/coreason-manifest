@@ -10,7 +10,7 @@ from coreason_manifest.spec.core.compute.reasoning import (
     Optimizer,
     ReasoningConfig,
 )
-from coreason_manifest.spec.core.contracts import NodeSpec
+from coreason_manifest.spec.core.contracts import ActionNode, NodeSpec, StrategyNode
 from coreason_manifest.spec.core.oversight.governance import OperationalPolicy
 from coreason_manifest.spec.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.spec.core.oversight.resilience import EscalationStrategy, ResilienceConfig
@@ -382,6 +382,7 @@ AnyNode: Any = resolve_node_union()
 
 
 __all__ = [
+    "ActionNode",
     "AgentNode",
     "AnyNode",
     "CognitiveProfile",
@@ -394,6 +395,7 @@ __all__ = [
     "PlaceholderNode",
     "PlannerNode",
     "SteeringConfig",
+    "StrategyNode",
     "SwarmNode",
     "SwitchNode",
 ]

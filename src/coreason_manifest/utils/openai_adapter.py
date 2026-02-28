@@ -1,21 +1,25 @@
 from typing import Any
 
+from coreason_manifest.spec.core.contracts import AtomicSkill
 from coreason_manifest.spec.core.workflow.nodes import AgentNode
 from coreason_manifest.spec.interop.adapter_config import AdapterConfig
 from coreason_manifest.spec.interop.compliance import RemediationAction
 from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
-def node_to_openai_assistant(node: AgentNode) -> dict[str, Any]:
+def node_to_openai_assistant(node: AgentNode, skills: dict[str, AtomicSkill] | None = None) -> dict[str, Any]:
     """
     Convert an AgentNode into an OpenAI Assistant definition.
 
     Args:
         node: The AgentNode to convert.
+        skills: A dictionary mapping skill names to AtomicSkill contracts.
 
     Returns:
         A dictionary representing the OpenAI Assistant configuration.
     """
+    if skills is None:
+        skills = {}
     # Architectural Change: Decouple hardcoded model assumption.
     # Use AdapterConfig to resolve default model from environment or fallback.
     config = AdapterConfig()
@@ -55,6 +59,21 @@ def node_to_openai_assistant(node: AgentNode) -> dict[str, Any]:
     instructions = f"{node.profile.role} {node.profile.persona}"
 
     # Tools: Generate function definitions for every tool listed in node.tools
-    tools_definitions = [{"type": "function", "function": {"name": tool_name}} for tool_name in node.tools]
+    tools_definitions = []
+    for tool_name in node.tools:
+        if tool_name in skills:
+            skill = skills[tool_name]
+            tools_definitions.append({
+                "type": "function",
+                "function": {
+                    "name": skill.name,
+                    "parameters": skill.definition
+                }
+            })
+        else:
+            tools_definitions.append({
+                "type": "function",
+                "function": {"name": tool_name}
+            })
 
     return {"name": node.id, "instructions": instructions, "model": model, "tools": tools_definitions}

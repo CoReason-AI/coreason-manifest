@@ -3,8 +3,11 @@
 import re
 from typing import Any
 
+import jsonschema  # type: ignore[import-untyped]
+from jsonschema.exceptions import ValidationError  # type: ignore[import-untyped]
 from pydantic import BaseModel
 
+from coreason_manifest.spec.core.contracts import ActionNode, StrategyNode
 from coreason_manifest.spec.core.oversight.governance import Governance
 from coreason_manifest.spec.core.oversight.resilience import (
     EscalationStrategy,
@@ -30,6 +33,7 @@ from coreason_manifest.spec.core.workflow.nodes import (
     SwitchNode,
 )
 from coreason_manifest.spec.interop.compliance import ComplianceReport, ErrorCatalog, RemediationAction
+from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.utils.topology import get_strongly_connected_components, get_unified_topology
 
 
@@ -65,6 +69,12 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     for node in nodes:
         errors.extend(_validate_supervision(node, valid_ids, flow.definitions))
+
+    # 1.1 ActionNode Variable Binding and Schema Check
+    errors.extend(_validate_action_nodes(nodes, flow))
+
+    # 1.2 StrategyNode Validation
+    errors.extend(_validate_strategy_nodes(nodes, valid_ids))
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
@@ -465,6 +475,107 @@ def _validate_governance(gov: Governance, valid_ids: set[str]) -> list[Complianc
                 details={"fallback_node_id": gov.circuit_breaker.fallback_node_id},
             )
         )
+    return errors
+
+
+
+
+def _validate_action_nodes(nodes: list[AnyNode], flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    # Extract blackboard variables context
+    bb_vars = set()
+    if hasattr(flow, "blackboard") and flow.blackboard and flow.blackboard.variables:
+        bb_vars = set(flow.blackboard.variables.keys())
+
+    for node in nodes:
+        if isinstance(node, ActionNode):
+            # 1. Variable Binding Check
+            for input_key, blackboard_var in node.inputs.items():
+                if blackboard_var not in bb_vars:
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.CRSN_VAL_SCHEMA_INVALID,
+                        message=(
+                            f"ActionNode '{node.id}' input '{input_key}' binds to "
+                            f"missing Blackboard variable '{blackboard_var}'."
+                        ),
+                    )
+
+            # 2. Schema Alignment Check
+            if node.skill and node.skill.definition:
+                # We assume definitions are JSON Schema
+                required_props = node.skill.definition.get("required", [])
+
+                if isinstance(required_props, list):
+                    for req in required_props:
+                        if isinstance(req, str) and req not in node.inputs:
+                            raise ManifestError.critical_halt(
+                                code=ManifestErrorCode.CRSN_VAL_SCHEMA_INVALID,
+                                message=(
+                                    f"ActionNode '{node.id}' is missing required input '{req}' "
+                                    f"for skill '{node.skill.name}'."
+                                ),
+                            )
+
+                # Type Checking (Schema matching)
+                properties = node.skill.definition.get("properties", {})
+                if isinstance(properties, dict):
+                    for input_key, blackboard_var in node.inputs.items():
+                        if input_key in properties:
+                            expected_schema = properties[input_key]
+                            # If we have a schema for the blackboard, check type matching
+                            # For simplicity since blackboard vars are dynamically typed in the definition,
+                            # we ensure strict validation of matching types if they are provided in FlowDefinitions
+                            bb_val = None
+                            if hasattr(flow, "blackboard") and flow.blackboard and flow.blackboard.variables:
+                                bb_val = flow.blackboard.variables.get(blackboard_var)
+
+                            if bb_val is not None and isinstance(expected_schema, dict):
+                                try:
+                                    jsonschema.validate(instance=bb_val, schema=expected_schema)
+                                except ValidationError as e:
+                                    raise ManifestError.critical_halt(
+                                        code=ManifestErrorCode.CRSN_VAL_SCHEMA_INVALID,
+                                        message=(
+                                            f"ActionNode '{node.id}' input '{input_key}' schema mismatch: {e.message}"
+                                        ),
+                                    ) from e
+
+    return errors
+
+
+def _validate_strategy_nodes(nodes: list[AnyNode], valid_ids: set[str]) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    for node in nodes:
+        if isinstance(node, StrategyNode):
+            if node.default_route not in valid_ids:
+                errors.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_DANGLING_EDGE,
+                        severity="violation",
+                        message=(
+                            f"StrategyNode '{node.id}' default_route '{node.default_route}' "
+                            "points to a non-existent node."
+                        ),
+                        node_id=node.id,
+                        details={"missing_node": node.default_route},
+                    )
+                )
+            for route_key, route_target in node.routes.items():
+                if route_target not in valid_ids:
+                    errors.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_TOPOLOGY_DANGLING_EDGE,
+                            severity="violation",
+                            message=(
+                                f"StrategyNode '{node.id}' route '{route_key}' points to a "
+                                f"non-existent node '{route_target}'."
+                            ),
+                            node_id=node.id,
+                            details={"missing_node": route_target},
+                        )
+                    )
     return errors
 
 
