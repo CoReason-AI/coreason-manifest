@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from pydantic import Field
 
 from coreason_manifest.core.common_base import CoreasonModel
@@ -15,11 +17,24 @@ class WorkingMemoryConfig(CoreasonModel):
     )
 
 
+class ConsolidationStrategy(StrEnum):
+    """Algorithm used to compress working memory into episodic storage."""
+
+    NONE = "none"
+    SUMMARY_WINDOW = "summary_window"
+    SEMANTIC_CLUSTER = "semantic_cluster"
+    SESSION_CLOSE = "session_close"
+
+
 class EpisodicMemoryConfig(CoreasonModel):
     """
     Configuration for the agent's long-term episodic memory (Journal).
     """
 
+    consolidation_strategy: ConsolidationStrategy = Field(
+        default=ConsolidationStrategy.SESSION_CLOSE,
+        description="Algorithm used to compress working memory into episodic storage.",
+    )
     salience_threshold: float = Field(
         ...,
         ge=0.0,
@@ -31,6 +46,7 @@ class EpisodicMemoryConfig(CoreasonModel):
         gt=0,
         description=(
             "Number of conversation turns before the background loop compresses the journal. "
+            "Primarily utilized when the strategy is SUMMARY_WINDOW. "
             "None means no auto-consolidation."
         ),
     )
