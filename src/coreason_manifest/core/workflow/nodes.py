@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.core.common.presentation import PresentationHints
 from coreason_manifest.core.common_base import CoreasonModel
@@ -175,6 +175,13 @@ class PlannerNode(Node):
         description="JSON Schema for the plan output.",
         examples=[{"type": "object", "properties": {"steps": {"type": "array"}}}],
     )
+
+    @field_validator("output_schema")
+    @classmethod
+    def validate_planner_output_schema(cls, v: dict[str, Any]) -> dict[str, Any]:
+        if v.get("type") not in ["object", "array"]:
+            raise ValueError("PlannerNode output_schema must define an object or array representing the PlanTree.")
+        return v
 
 
 class SteeringConfig(CoreasonModel):
