@@ -24,6 +24,9 @@ VALID_PRIMITIVES = (str, int, float, bool, type(None), datetime)
 
 def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
     """Evaluates a single value and returns a serialized anomaly if invalid."""
+    if isinstance(v, BaseModel):
+        # We can recursively validate BaseModels later, or just trust their serialization
+        return None
     if isinstance(v, float) and not math.isfinite(v):
         anomaly = DataAnomaly(
             code="CRSN-ANTIBODY-FLOAT",

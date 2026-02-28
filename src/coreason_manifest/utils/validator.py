@@ -126,6 +126,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         inputs = flow.interface.inputs
         in_schema = getattr(inputs, "json_schema", inputs)
         if isinstance(in_schema, dict):
+
             def _extract_schema_types(schema_dict: dict[str, Any], prefix: str = "") -> None:
                 props = schema_dict.get("properties", {})
                 for name, schema in props.items():
@@ -317,13 +318,15 @@ def _validate_data_flow(
                         prov_props = provided.get("properties", {})
                         exp_props = expected.get("properties", {})
                         exp_req = expected.get("required", [])
+                        prov_req = provided.get("required", [])
 
-                        # All required downstream fields MUST be present in the planner's output
+                        # To satisfy the downstream node, the upstream node MUST also strictly require the field
                         errs.extend(
                             [
-                                f"Missing required property '{req}' at '{path}'"
+                                f"Property '{req}' is required by downstream but not guaranteed "
+                                f"(missing from 'required' array) at '{path}'"
                                 for req in exp_req
-                                if req not in prov_props
+                                if req not in prov_req
                             ]
                         )
 

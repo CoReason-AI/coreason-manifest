@@ -9,13 +9,13 @@ import os
 import re
 import stat
 import sys
+import threading
 import warnings
+from collections import OrderedDict
 from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-import threading
-from collections import OrderedDict
 from typing import Any, Protocol, cast
 
 import yaml
@@ -277,6 +277,7 @@ class JailModuleCache:
                     oldest, _ = self.cache.popitem(last=False)
                     if oldest in sys.modules:
                         del sys.modules[oldest]
+
 
 _JAIL_CACHE = JailModuleCache(max_size=100)
 

@@ -21,6 +21,8 @@ from coreason_manifest.spec.core.primitives.types import (
     VariableID,
 )
 from coreason_manifest.spec.core.state.memory import MemorySubsystem
+from coreason_manifest.spec.interop.compliance import RemediationAction
+from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
 class LockConfig(CoreasonModel):
@@ -32,10 +34,6 @@ class LockConfig(CoreasonModel):
         default_factory=list, description="Variables requiring mutually exclusive write access."
     )
     read_locks: list[VariableID] = Field(default_factory=list, description="Variables requiring shared read access.")
-
-
-from coreason_manifest.spec.interop.compliance import RemediationAction
-from coreason_manifest.spec.interop.exceptions import ManifestError, ManifestErrorCode
 
 
 class Node(CoreasonModel):

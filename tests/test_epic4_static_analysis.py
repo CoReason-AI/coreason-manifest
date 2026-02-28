@@ -7,7 +7,7 @@ def test_planner_node_static_analysis_success() -> None:
     planner = PlannerNode(
         id="planner_1",
         goal="Generate ideas",
-        output_schema={"type": "object", "properties": {"ideas_list": {"type": "array"}}},
+        output_schema={"type": "object", "required": ["ideas_list"], "properties": {"ideas_list": {"type": "array"}}},
     )
 
     swarm = SwarmNode(
@@ -46,6 +46,7 @@ def test_planner_node_static_analysis_type_failure() -> None:
         goal="Generate ideas",
         output_schema={
             "type": "object",
+            "required": ["ideas_list"],
             "properties": {
                 "ideas_list": {"type": "string"}  # Incorrect! Swarm expects array
             },
@@ -123,4 +124,4 @@ def test_planner_node_static_analysis_missing_field_failure() -> None:
 
     assert len(type_errors) >= 1  # noqa: S101
     assert "ideas_list" in type_errors[0].message  # noqa: S101
-    assert "missing required property" in type_errors[0].message.lower()  # noqa: S101
+    assert "not guaranteed" in type_errors[0].message.lower()  # noqa: S101

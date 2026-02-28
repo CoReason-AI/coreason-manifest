@@ -37,6 +37,7 @@ def test_evals_mock_integration() -> None:
     builder.define_profile("p1", role="r", persona="p", reasoning=StandardReasoning(model="m"))
 
     from coreason_manifest.spec.core.oversight.governance import Governance
+
     Governance.model_rebuild(force=True)
     GraphFlow.model_rebuild(force=True)
 
