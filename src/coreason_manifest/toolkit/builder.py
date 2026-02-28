@@ -8,14 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import TYPE_CHECKING, Any, Literal, Self, cast
+from typing import Any, Self, cast
 
 from coreason_manifest.core.compute.reasoning import (
-    AdversarialConfig,
     FastPath,
-    GapScanConfig,
     ReasoningConfig,
-    ReviewStrategy,
     StandardReasoning,
 )
 from coreason_manifest.core.oversight.governance import (
@@ -25,6 +22,9 @@ from coreason_manifest.core.oversight.governance import (
     FinancialLimits,
     Governance,
     OperationalPolicy,
+    RequestCriticality,
+    SemanticCacheConfig,
+    TrafficPolicy,
 )
 from coreason_manifest.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.core.oversight.resilience import (
@@ -40,7 +40,6 @@ from coreason_manifest.core.oversight.resilience import (
 from coreason_manifest.core.primitives.types import RiskLevel
 from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
-    ConsolidationStrategy,
     EpisodicMemoryConfig,
     MemorySubsystem,
     ProceduralMemoryConfig,
@@ -62,9 +61,6 @@ from coreason_manifest.core.workflow.flow import (
 )
 from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
 from coreason_manifest.toolkit.validator import validate_flow
-
-if TYPE_CHECKING:
-    from coreason_manifest.core.oversight.mixed_initiative import MixedInitiativePolicy
 
 
 def create_resilience(
@@ -126,39 +122,6 @@ class AgentBuilder:
         self.operational_policy: OperationalPolicy | None = None
         self.escalation_rules: list[EscalationCriteria] = []
         self.memory: MemorySubsystem | None = None
-        # Meta-Cognition state
-        self.review_strategy: str = "none"
-        self.adversarial_persona: str | None = None
-        self.gap_scan_enabled: bool = False
-        self.gap_scan_threshold: float = 0.8
-        self.max_revisions: int = 1
-
-    def with_meta_cognition(
-        self,
-        review_strategy: str = "none",
-        adversarial_persona: str | None = None,
-        gap_scan_enabled: bool = False,
-        gap_scan_threshold: float = 0.8,
-        max_revisions: int = 1,
-    ) -> "AgentBuilder":
-        """Configures meta-cognitive features for the agent.
-
-        Args:
-            review_strategy (str): The review strategy to use. Defaults to "none".
-            adversarial_persona (str | None): The persona for adversarial review.
-            gap_scan_enabled (bool): Whether gap scanning is enabled. Defaults to False.
-            gap_scan_threshold (float): The threshold for gap scanning. Defaults to 0.8.
-            max_revisions (int): Maximum self-correction loops. Defaults to 1.
-
-        Returns:
-            AgentBuilder: The builder instance for chaining.
-        """
-        self.review_strategy = review_strategy
-        self.adversarial_persona = adversarial_persona
-        self.gap_scan_enabled = gap_scan_enabled
-        self.gap_scan_threshold = gap_scan_threshold
-        self.max_revisions = max_revisions
-        return self
 
     def with_identity(self, role: str, persona: str) -> "AgentBuilder":
         """Configures the agent's identity.
@@ -317,6 +280,11 @@ class AgentBuilder:
         max_rows_per_query: int | None = None,
         max_payload_bytes: int | None = None,
         max_search_results: int | None = None,
+        criticality: int | None = None,
+        rate_limit_rpm: int | None = None,
+        rate_limit_tpm: int | None = None,
+        semantic_cache_similarity: float | None = None,
+        semantic_cache_ttl: int | None = None,
     ) -> "AgentBuilder":
         """Configures operational limits for the agent (financial, compute, data).
 
@@ -355,8 +323,35 @@ class AgentBuilder:
                 max_search_results=max_search_results,
             )
 
-        if financial or compute or data:
-            self.operational_policy = OperationalPolicy(financial=financial, compute=compute, data=data)
+        traffic = None
+        if (
+            criticality is not None
+            or rate_limit_rpm is not None
+            or rate_limit_tpm is not None
+            or semantic_cache_similarity is not None
+            or semantic_cache_ttl is not None
+        ):
+            from typing import Any
+
+            kwargs: dict[str, Any] = {
+                "criticality": RequestCriticality(criticality)
+                if criticality is not None
+                else RequestCriticality.STANDARD,
+                "rate_limit_rpm": rate_limit_rpm,
+                "rate_limit_tpm": rate_limit_tpm,
+            }
+            if semantic_cache_similarity is not None or semantic_cache_ttl is not None:
+                kwargs["semantic_cache"] = SemanticCacheConfig(
+                    similarity_threshold=semantic_cache_similarity if semantic_cache_similarity is not None else 0.85,
+                    ttl_seconds=semantic_cache_ttl if semantic_cache_ttl is not None else 3600,
+                )
+
+            traffic = TrafficPolicy(**kwargs)
+
+        if financial or compute or data or traffic:
+            self.operational_policy = OperationalPolicy(
+                financial=financial, compute=compute, data=data, traffic=traffic
+            )
         return self
 
     def with_escalation_rule(
@@ -381,7 +376,6 @@ class AgentBuilder:
         enable_paging: bool = False,
         salience_threshold: float | None = None,
         consolidation_interval: int | None = None,
-        consolidation_strategy: str = "session_close",
         graph_namespace: str | None = None,
         bitemporal_tracking: bool = False,
         allowed_entity_types: list[str] | None = None,
@@ -409,7 +403,6 @@ class AgentBuilder:
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
                 consolidation_interval_turns=consolidation_interval,
-                consolidation_strategy=ConsolidationStrategy(consolidation_strategy),
             )
 
         semantic = None
@@ -447,38 +440,10 @@ class AgentBuilder:
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
-        reasoning = self.reasoning
-        if reasoning is not None:
-            gap_scan_config = None
-            if self.gap_scan_enabled:
-                gap_scan_config = GapScanConfig(
-                    enabled=self.gap_scan_enabled, confidence_threshold=self.gap_scan_threshold
-                )
-
-            adversarial_config = None
-            if self.review_strategy == "adversarial":
-                adversarial_config = AdversarialConfig(persona=self.adversarial_persona or "skeptic")
-
-            # Map string to ReviewStrategy Enum
-            try:
-                review_strategy_enum = ReviewStrategy(self.review_strategy)
-            except ValueError:
-                review_strategy_enum = ReviewStrategy.NONE
-
-            # Since BaseModel models are immutable (frozen=True), we must use model_copy
-            reasoning = reasoning.model_copy(
-                update={
-                    "review_strategy": review_strategy_enum,
-                    "adversarial_config": adversarial_config,
-                    "gap_scan": gap_scan_config,
-                    "max_revisions": self.max_revisions,
-                }
-            )
-
         profile = CognitiveProfile(
             role=self.role,
             persona=self.persona,
-            reasoning=reasoning,
+            reasoning=self.reasoning,
             fast_path=self.fast_path,
             memory=self.memory,
         )
@@ -520,19 +485,6 @@ class BaseFlowBuilder:
         self._tool_packs: dict[str, ToolPack] = {}
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
-        self.status: Literal["draft", "published", "archived"] = "draft"
-
-    def set_status(self, status: Literal["draft", "published", "archived"]) -> Self:
-        """Sets the status of the flow.
-
-        Args:
-            status (Literal["draft", "published", "archived"]): The status to set.
-
-        Returns:
-            Self: The builder instance for chaining.
-        """
-        self.status = status
-        return self
 
     def define_supervision_template(self, template_id: str, policy: SupervisionPolicy) -> Self:
         """Registers a reusable supervision policy.
@@ -607,6 +559,11 @@ class BaseFlowBuilder:
         max_rows_per_query: int | None = None,
         max_payload_bytes: int | None = None,
         max_search_results: int | None = None,
+        criticality: int | None = None,
+        rate_limit_rpm: int | None = None,
+        rate_limit_tpm: int | None = None,
+        semantic_cache_similarity: float | None = None,
+        semantic_cache_ttl: int | None = None,
     ) -> Self:
         """Configures global operational limits (Financial, Data, Compute).
 
@@ -642,13 +599,40 @@ class BaseFlowBuilder:
 
         compute = None
         if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
+            compute = None
+        if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
             compute = ComputeLimits(
                 max_cognitive_steps=max_steps,
                 max_execution_time_seconds=max_execution_time_seconds,
                 max_concurrent_agents=max_concurrent_agents,
             )
 
-        op_policy = OperationalPolicy(financial=financial, data=data, compute=compute)
+        traffic = None
+        if (
+            criticality is not None
+            or rate_limit_rpm is not None
+            or rate_limit_tpm is not None
+            or semantic_cache_similarity is not None
+            or semantic_cache_ttl is not None
+        ):
+            from typing import Any
+
+            kwargs: dict[str, Any] = {
+                "criticality": RequestCriticality(criticality)
+                if criticality is not None
+                else RequestCriticality.STANDARD,
+                "rate_limit_rpm": rate_limit_rpm,
+                "rate_limit_tpm": rate_limit_tpm,
+            }
+            if semantic_cache_similarity is not None or semantic_cache_ttl is not None:
+                kwargs["semantic_cache"] = SemanticCacheConfig(
+                    similarity_threshold=semantic_cache_similarity if semantic_cache_similarity is not None else 0.85,
+                    ttl_seconds=semantic_cache_ttl if semantic_cache_ttl is not None else 3600,
+                )
+
+            traffic = TrafficPolicy(**kwargs)
+
+        op_policy = OperationalPolicy(financial=financial, data=data, compute=compute, traffic=traffic)
 
         if self.governance:
             self.governance = self.governance.model_copy(update={"operational_policy": op_policy})
@@ -804,16 +788,6 @@ class BaseFlowBuilder:
 
         return flow
 
-    def set_mixed_initiative(self, policy: "MixedInitiativePolicy") -> Self:
-        """Sets the global Mixed-Initiative Control policy."""
-        if self.governance:
-            self.governance = self.governance.model_copy(update={"mixed_initiative": policy})
-        else:
-            from coreason_manifest.core.oversight.governance import Governance
-
-            self.governance = Governance(mixed_initiative=policy)
-        return self
-
 
 class NewLinearFlow(BaseFlowBuilder):
     """Fluent API to construct LinearFlows programmatically.
@@ -863,7 +837,7 @@ class NewLinearFlow(BaseFlowBuilder):
     def _create_flow_instance(self) -> LinearFlow:
         return LinearFlow(
             kind="LinearFlow",
-            status=self.status,
+            status="published",
             metadata=self.metadata,
             steps=self.steps,
             definitions=self._build_definitions(),
@@ -1002,7 +976,7 @@ class NewGraphFlow(BaseFlowBuilder):
 
         return GraphFlow(
             kind="GraphFlow",
-            status=self.status,
+            status="published",
             metadata=self.metadata,
             interface=self.interface,
             blackboard=self.blackboard,

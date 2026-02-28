@@ -1,7 +1,6 @@
-from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.primitives.registry import register_engine, resolve_engine_union
@@ -66,40 +65,6 @@ ModelRef = str | ModelCriteria
 # =========================================================================
 
 
-class ReviewStrategy(StrEnum):
-    """Review strategy for cognitive reasoning."""
-
-    NONE = "none"
-    BASIC = "basic"
-    ADVERSARIAL = "adversarial"
-    CAUSAL = "causal"
-    CONSENSUS = "consensus"
-
-
-class AdversarialConfig(BaseModel):
-    """Configuration for adversarial review."""
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    persona: str = Field(
-        default="skeptic", description="The persona adopted by the reviewer (e.g., 'security_auditor')."
-    )
-    attack_vectors: list[str] = Field(
-        default_factory=list, description="Specific angles of critique (e.g., 'pii_leakage')."
-    )
-
-
-class GapScanConfig(BaseModel):
-    """Configuration for gap scanning (pre-execution meta-cognition)."""
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    enabled: bool = Field(default=False, description="Scan context for missing prerequisites before execution.")
-    confidence_threshold: float = Field(
-        default=0.8, description="Minimum confidence to proceed without asking clarifying questions."
-    )
-
-
 class ConstitutionalScope(BaseModel):
     """
     Defines the ethical and safety boundaries for the cognitive process.
@@ -129,17 +94,6 @@ class BaseReasoning(BaseModel):
 
     # *** UPGRADE: CONSTITUTIONAL AI ***
     constitution: Annotated[ConstitutionalScope | None, Field(description="Intrinsic safety constraints.")] = None
-
-    review_strategy: ReviewStrategy = Field(default=ReviewStrategy.NONE)
-    adversarial_config: AdversarialConfig | None = Field(default=None)
-    gap_scan: GapScanConfig | None = Field(default=None)
-    max_revisions: int = Field(default=1, description="Maximum self-correction loops allowed.")
-
-    @model_validator(mode="after")
-    def _validate_adversarial_config(self) -> "BaseReasoning":
-        if self.review_strategy == ReviewStrategy.ADVERSARIAL and self.adversarial_config is None:
-            raise ValueError("adversarial_config must be provided when review_strategy is 'adversarial'")
-        return self
 
     def required_capabilities(self) -> list[str]:
         """Returns a list of high-risk capabilities required by this engine."""
@@ -498,7 +452,6 @@ __all__ = [
     "Optimizer",
     "ReasoningConfig",
     "RedTeamingReasoning",
-    "ReviewStrategy",
     "StandardReasoning",
     "TreeSearchReasoning",
     "WasmExecutionReasoning",

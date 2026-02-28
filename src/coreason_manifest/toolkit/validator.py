@@ -33,12 +33,70 @@ from coreason_manifest.core.workflow.nodes import (
 from coreason_manifest.core.workflow.topology import get_unified_topology
 
 
+def _validate_traffic_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if not flow.governance or not flow.governance.operational_policy or not flow.governance.operational_policy.traffic:
+        return errors
+
+    traffic = flow.governance.operational_policy.traffic
+
+    if traffic.rate_limit_rpm is not None and traffic.rate_limit_rpm <= 0:
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=(
+                    "Traffic Policy Error: rate_limit_rpm must be strictly greater than 0, "
+                    f"got {traffic.rate_limit_rpm}."
+                ),
+                details={"rate_limit_rpm": traffic.rate_limit_rpm},
+            )
+        )
+
+    if traffic.rate_limit_tpm is not None and traffic.rate_limit_tpm <= 0:
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="violation",
+                message=(
+                    "Traffic Policy Error: rate_limit_tpm must be strictly greater than 0, "
+                    f"got {traffic.rate_limit_tpm}."
+                ),
+                details={"rate_limit_tpm": traffic.rate_limit_tpm},
+            )
+        )
+
+    from coreason_manifest.core.oversight.governance import RequestCriticality
+
+    if (
+        traffic.criticality == RequestCriticality.CRITICAL
+        and traffic.rate_limit_tpm is not None
+        and traffic.rate_limit_tpm < 100
+    ):
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_INVALID_CONFIG",
+                severity="warning",
+                message=(
+                    "Traffic Policy Warning: CRITICAL priority combined with "
+                    f"extremely low TPM limits ({traffic.rate_limit_tpm})."
+                ),
+                details={"criticality": "CRITICAL", "rate_limit_tpm": traffic.rate_limit_tpm},
+            )
+        )
+
+    return errors
+
+
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Semantically validate a Flow (Linear or Graph).
     Returns a list of structured ComplianceReport objects. Empty list implies validity.
     """
     errors: list[ComplianceReport] = []
+
+    errors.extend(_validate_traffic_policy(flow))
 
     # Flatten nodes based on flow type
     nodes, edges_objs = get_unified_topology(flow)
@@ -558,47 +616,15 @@ def _validate_orphan_nodes(flow: GraphFlow) -> list[ComplianceReport]:
     if entry_point in orphans:
         orphans.remove(entry_point)
 
-    if not orphans:
-        return []
-
-    if flow.status != "published":
-        return [
-            ComplianceReport(
-                code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
-                severity="info",
-                message="Non-Published Topology Info: Found disconnected node (Safe Dead Code).",
-                node_id=oid,
-            )
-            for oid in orphans
-        ]
-
-    # For published status, create a warning/violation with remediation
-    reports = []
-    for oid in orphans:
-        patch_data = [{"op": "remove", "path": f"/graph/nodes/{oid}"}]
-        # Remove any edges that start from this orphan node to other nodes,
-        # as pruning the node implies pruning its outbound edges.
-        edges_to_remove = []
-        for i, edge in enumerate(flow.graph.edges):
-            if edge.from_node == oid or edge.to_node == oid:
-                edges_to_remove.append(i)
-        # Reverse order removal to keep indices valid during sequential removal via patch
-        patch_data.extend({"op": "remove", "path": f"/graph/edges/{i}"} for i in reversed(edges_to_remove))
-
-        reports.append(
-            ComplianceReport(
-                code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
-                severity="warning",
-                message=f"Orphan Node Warning: Node '{oid}' has no incoming edges or implicit routes.",
-                node_id=oid,
-                remediation=RemediationAction(
-                    type="prune_node",
-                    description=f"Prune orphaned node '{oid}' and its connected edges.",
-                    patch_data=patch_data,
-                ),
-            )
+    return [
+        ComplianceReport(
+            code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
+            severity="warning",
+            message=f"Orphan Node Warning: Node '{oid}' has no incoming edges or implicit routes.",
+            node_id=oid,
         )
-    return reports
+        for oid in orphans
+    ]
 
 
 def _validate_referential_integrity(
