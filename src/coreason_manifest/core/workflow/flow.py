@@ -130,7 +130,7 @@ class Edge(CoreasonModel):
                 if not isinstance(node, allowed):
                     raise ManifestError.critical_halt(
                         code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
-                        message=f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'"
+                        message=f"Security Violation: forbidden AST node {type(node).__name__} in condition '{v}'",
                     )
                 super().generic_visit(node)
 
