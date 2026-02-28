@@ -923,6 +923,13 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
 
     # In case of cycles, length will not match. Fallback gracefully, as cycle detection handles cycles independently.
     if len(topo_order) != len(adj_map):
+        errors.append(
+            ComplianceReport(
+                code="ERR_GOV_BUDGET_BYPASS",
+                severity="warning",
+                message="Budget Constraints Verification bypassed due to detected cycles in the DAG.",
+            )
+        )
         return errors
 
     for u in topo_order:

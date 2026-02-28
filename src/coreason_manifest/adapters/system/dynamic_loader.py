@@ -339,9 +339,9 @@ def _install_audit_hook() -> None:
                     raise SecurityViolationError(f"Unauthorized file access blocked (resolution failed): {path}") from e
                 except SecurityViolationError:
                     raise
-                except Exception:  # noqa: S110
-                    # Ignore other errors during checking to avoid breaking system calls
-                    pass
+                except Exception as e:
+                    # ZERO-TRUST: If we cannot verify safety, we must fail closed.
+                    raise SecurityViolationError(f"Unable to verify path safety: {e}") from e
 
     try:
         sys.addaudithook(hook)

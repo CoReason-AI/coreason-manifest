@@ -159,12 +159,12 @@ def _enforce_red_button_rule(
                 for edge_idx, edge in enumerate(flow.graph.edges):
                     if edge.to_node == node.id:
                         patch_ops.append(
-                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/target", "value": human_node_id}
+                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/to_node", "value": human_node_id}
                         )
 
                 # 3. Add edge (Guard -> Target)
                 patch_ops.append(
-                    {"op": "add", "path": "/graph/edges/-", "value": {"source": human_node_id, "target": node.id}}
+                    {"op": "add", "path": "/graph/edges/-", "value": {"from_node": human_node_id, "to_node": node.id}}
                 )
 
             reports.append(
