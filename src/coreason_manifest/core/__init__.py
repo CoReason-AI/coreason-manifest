@@ -5,7 +5,6 @@
 # Execute dynamic Pydantic resolution strictly at the bottom of the module
 # to guarantee no forward references block the graph structure.
 # -----------------------------------------------------------------------------
-import pydantic
 
 from coreason_manifest.core.compute.reasoning import (
     AttentionReasoning,
