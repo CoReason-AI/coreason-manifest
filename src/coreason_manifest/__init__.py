@@ -8,11 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from coreason_manifest.builder import (
-    NewGraphFlow,
-    NewLinearFlow,
-)
-from coreason_manifest.spec.core.compute.reasoning import (
+from coreason_manifest.core.compute.reasoning import (
     BaseReasoning,
     CouncilReasoning,
     DecompositionReasoning,
@@ -22,17 +18,17 @@ from coreason_manifest.spec.core.compute.reasoning import (
     StandardReasoning,
     TreeSearchReasoning,
 )
-from coreason_manifest.spec.core.oversight.governance import (
+from coreason_manifest.core.oversight.governance import (
     Audit,
     Governance,
     Safety,
 )
-from coreason_manifest.spec.core.oversight.resilience import SupervisionPolicy
-from coreason_manifest.spec.core.state.tools import (
+from coreason_manifest.core.oversight.resilience import SupervisionPolicy
+from coreason_manifest.core.state.tools import (
     Dependency,
     ToolPack,
 )
-from coreason_manifest.spec.core.workflow.flow import (
+from coreason_manifest.core.workflow.flow import (
     AnyNode,
     Blackboard,
     Edge,
@@ -43,7 +39,7 @@ from coreason_manifest.spec.core.workflow.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.spec.core.workflow.nodes import (
+from coreason_manifest.core.workflow.nodes import (
     AgentNode,
     CognitiveProfile,
     HumanNode,
@@ -51,6 +47,10 @@ from coreason_manifest.spec.core.workflow.nodes import (
     PlaceholderNode,
     PlannerNode,
     SwitchNode,
+)
+from coreason_manifest.toolkit.builder import (
+    NewGraphFlow,
+    NewLinearFlow,
 )
 
 __all__ = [
