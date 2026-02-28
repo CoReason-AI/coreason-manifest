@@ -303,6 +303,9 @@ def _install_audit_hook() -> None:
         if not jail_root:
             return
 
+        if event in ("socket.connect", "urllib.Request", "http.client.send"):
+            raise SecurityViolationError(f"Network access blocked in sandbox: {event}")
+
         if event == "open":
             path, _mode, _flags = args
             # We strictly only care about string paths (file system).

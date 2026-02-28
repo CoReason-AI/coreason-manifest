@@ -34,6 +34,7 @@ from coreason_manifest.spec.core.oversight.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
+from coreason_manifest.spec.core.primitives.types import RiskLevel
 from coreason_manifest.spec.core.rebuild import rebuild_manifest
 from coreason_manifest.spec.core.state.memory import (
     EpisodicMemoryConfig,
@@ -603,8 +604,19 @@ class BaseFlowBuilder:
         )
 
     def _register_node(self, node: AnyNode) -> None:
-        """Registers a node to the flow. Must be implemented by subclasses."""
-        raise NotImplementedError
+        """Registers a node to the flow. Shared validation logic."""
+        if self.governance and self.governance.max_risk_level and isinstance(node, AgentNode):
+            max_risk = self.governance.max_risk_level.weight
+            available_tools = {}
+            for pack in self._tool_packs.values():
+                for tool in pack.tools:
+                    available_tools[tool.name] = tool.risk_level.weight
+
+            for tool_name in node.tools:
+                # Assume a tool is CRITICAL if its definition isn't currently loaded
+                tool_risk = available_tools.get(tool_name, RiskLevel.CRITICAL.weight)
+                if tool_risk > max_risk:
+                    raise ValueError(f"Tool '{tool_name}' exceeds the maximum allowed risk level for this flow.")
 
     def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> Self:
         """Adds a node that points to a registered profile.
@@ -728,6 +740,7 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps: list[AnyNode] = []
 
     def _register_node(self, node: AnyNode) -> None:
+        super()._register_node(node)
         self.steps.append(node)
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
@@ -801,6 +814,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self.blackboard: Blackboard | None = None
 
     def _register_node(self, node: AnyNode) -> None:
+        super()._register_node(node)
         self._nodes[node.id] = node
 
     def set_entry_point(self, node_id: str) -> "NewGraphFlow":

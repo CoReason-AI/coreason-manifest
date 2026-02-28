@@ -150,6 +150,11 @@ class MockFactory:
         trace: list[NodeExecution] = []
         execution_map: dict[str, NodeExecution] = {}  # node_id -> last execution
 
+        fuzzing_vars: set[str] = set()
+        if evals and evals.fuzzing_targets:
+            for ft in evals.fuzzing_targets:
+                fuzzing_vars.update(ft.variables)
+
         # Create resolver from the full document
         full_doc = flow.model_dump(mode="json", by_alias=True)
         # We use empty string as base URI for the root document
@@ -161,7 +166,7 @@ class MockFactory:
             nodes = flow.steps
             prev_hashes: list[str] = []
             for node in nodes:
-                exec_records = self._execute_node(node, execution_map, prev_hashes, resolver)
+                exec_records = self._execute_node(node, execution_map, prev_hashes, resolver, fuzzing_vars)
                 trace.extend(exec_records)
                 last_record = exec_records[-1]
                 execution_map[node.id] = last_record
@@ -185,7 +190,7 @@ class MockFactory:
                         logger.warning(f"Eval requested node {n_id} not in graph.")
                         break
 
-                    exec_records = self._execute_node(node, execution_map, prev_hashes, resolver)
+                    exec_records = self._execute_node(node, execution_map, prev_hashes, resolver, fuzzing_vars)
 
                     # Override outputs with mock inputs if it's the start node
                     if tc.mock_inputs and len(trace) == 0 and exec_records:
@@ -217,7 +222,7 @@ class MockFactory:
                 prev_hashes = []
 
                 while current_node and steps < max_steps:
-                    exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver)
+                    exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver, fuzzing_vars)
                     trace.extend(exec_records)
                     last_record = exec_records[-1]
                     execution_map[current_node.id] = last_record
@@ -244,6 +249,7 @@ class MockFactory:
         _execution_map: dict[str, NodeExecution],
         prev_hashes: list[str] | None = None,
         resolver: Any | None = None,
+        fuzzing_vars: set[str] | None = None,
     ) -> list[NodeExecution]:
         timestamp = datetime.now(UTC)
 
@@ -322,6 +328,19 @@ class MockFactory:
             outputs = raw_output if isinstance(raw_output, dict) else {"result": raw_output}
         else:
             outputs = {"result": "mock_output"}
+
+        if fuzzing_vars:
+            for key in outputs:
+                if key in fuzzing_vars:
+                    # Inject adversarial edge-case data
+                    payloads = [
+                        "A" * 100000,
+                        -999999999,
+                        "'; DROP TABLE users; --",
+                        "<script>alert(1)</script>",
+                        "\x00" * 100,
+                    ]
+                    outputs[key] = self.rng.choice(payloads)
 
         duration = self.rng.uniform(10, 500)
 
