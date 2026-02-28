@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-from coreason_manifest.adapters.observability.integrity import compute_hash, to_canonical_timestamp
+from coreason_manifest.adapters.observability.integrity import compute_hash
 from coreason_manifest.adapters.observability.privacy import PrivacySentinel
 from coreason_manifest.core.telemetry_schemas import NodeExecution, NodeState
 
@@ -68,29 +68,8 @@ class BlackBoxRecorder:
         # Default behavior: If we don't know parent, we are root.
         resolved_root_request_id = root_request_id or resolved_request_id
 
-        payload = {
-            "node_id": node_id,
-            "state": state,
-            "inputs": safe_inputs,
-            "outputs": safe_outputs,
-            "error": error,
-            "timestamp": to_canonical_timestamp(timestamp),
-            "duration_ms": duration_ms,
-            "attributes": attributes,
-            "parent_hashes": sorted(parent_hashes),
-            "hash_version": "v2",
-            "request_id": resolved_request_id,
-            "root_request_id": resolved_root_request_id,
-            "parent_request_id": parent_request_id,
-            "traceparent": traceparent,
-            "tracestate": tracestate,
-        }
-
-        # 3. Compute Hash
-        execution_hash = compute_hash(payload)
-
-        # 4. Construct Immutable Record
-        return NodeExecution(
+        # 2 & 3. Prepare payload and compute hash using single source of truth
+        record = NodeExecution(
             node_id=node_id,
             state=state,
             inputs=safe_inputs,
@@ -100,10 +79,16 @@ class BlackBoxRecorder:
             duration_ms=duration_ms,
             attributes=attributes,
             parent_hashes=sorted(parent_hashes),
-            execution_hash=execution_hash,
             request_id=resolved_request_id,
             parent_request_id=parent_request_id,
             root_request_id=resolved_root_request_id,
             traceparent=traceparent,
             tracestate=tracestate,
+            execution_hash=None  # Explicitly None before hashing
         )
+
+        # Compute hash directly from the model (compute_hash handles BaseModel)
+        execution_hash = compute_hash(record)
+
+        # 4. Return immutable copy with the final hash
+        return record.model_copy(update={"execution_hash": execution_hash})

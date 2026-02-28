@@ -35,7 +35,7 @@ def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
             description="Floating point value is not finite (NaN/Inf).",
         )
         return anomaly.model_dump()
-    if not isinstance(v, (dict, list)) and not isinstance(v, VALID_PRIMITIVES):
+    if not isinstance(v, (dict, list, tuple)) and not isinstance(v, VALID_PRIMITIVES):
         return DataAnomaly(
             code="CRSN-ANTIBODY-UNSERIALIZABLE",
             path=path,
@@ -57,7 +57,7 @@ def _scan_and_quarantine(data: Any, path: str) -> None:
             anomaly = _get_anomaly(v, current_path)
             if anomaly:
                 data[k] = anomaly
-            elif isinstance(v, (dict, list)):
+            elif isinstance(v, (dict, list, tuple)):
                 _scan_and_quarantine(v, current_path)
 
     elif isinstance(data, list):
@@ -66,7 +66,7 @@ def _scan_and_quarantine(data: Any, path: str) -> None:
             anomaly = _get_anomaly(v, current_path)
             if anomaly:
                 data[i] = anomaly
-            elif isinstance(v, (dict, list)):
+            elif isinstance(v, (dict, list, tuple)):
                 _scan_and_quarantine(v, current_path)
 
 

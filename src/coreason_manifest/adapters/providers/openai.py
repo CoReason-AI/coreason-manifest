@@ -4,10 +4,13 @@ from coreason_manifest.adapters.config import AdapterConfig
 from coreason_manifest.core.compliance import RemediationAction
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.state.tools import ToolPack
+from coreason_manifest.core.workflow.flow import FlowDefinitions
 from coreason_manifest.core.workflow.nodes import AgentNode
 
 
-def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
+def node_to_openai_assistant(
+    node: AgentNode, tool_packs: list[ToolPack] | None = None, definitions: FlowDefinitions | None = None
+) -> dict[str, Any]:
     """
     Convert an AgentNode into an OpenAI Assistant definition.
 
@@ -27,37 +30,40 @@ def node_to_openai_assistant(node: AgentNode, tool_packs: list[ToolPack] | None 
     model: str = config.default_openai_model
 
     if isinstance(node.profile, str):
-        # Upgrade: Replace NotImplementedError with SemanticFault ManifestError
-        # This guides the user to define the profile inline or implement resolution.
-        raise ManifestError.critical_halt(
-            code=ManifestErrorCode.CRSN_VAL_INTEGRITY_PROFILE_MISSING,
-            message=f"Profile resolution from string ID '{node.profile}' is not yet supported in this adapter version.",
-            context={
-                "node_id": node.id,
-                "remediation": RemediationAction(
-                    type="update_field",
-                    target_node_id=node.id,
-                    description="Expand the profile definition inline instead of using a reference ID.",
-                    patch_data=[
-                        {
-                            "op": "replace",
-                            "path": "/profile",
-                            "value": {
-                                "role": "Assistant",
-                                "persona": "Please define persona here.",
-                                "reasoning": {"type": "standard", "model": config.default_openai_model},
-                            },
-                        }
-                    ],
-                ).model_dump(),
-            },
-        )
+        if definitions and definitions.profiles and node.profile in definitions.profiles:
+            profile = definitions.profiles[node.profile]
+        else:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_INTEGRITY_PROFILE_MISSING,
+                message=f"Profile resolution from string ID '{node.profile}' failed. No matching definition found.",
+                context={
+                    "node_id": node.id,
+                    "remediation": RemediationAction(
+                        type="update_field",
+                        target_node_id=node.id,
+                        description="Expand the profile definition inline instead of using a reference ID.",
+                        patch_data=[
+                            {
+                                "op": "replace",
+                                "path": "/profile",
+                                "value": {
+                                    "role": "Assistant",
+                                    "persona": "Please define persona here.",
+                                    "reasoning": {"type": "standard", "model": config.default_openai_model},
+                                },
+                            }
+                        ],
+                    ).model_dump(),
+                },
+            )
+    else:
+        profile = node.profile
 
-    if node.profile.reasoning and node.profile.reasoning.model:
-        model = node.profile.reasoning.model
+    if profile.reasoning and profile.reasoning.model:
+        model = profile.reasoning.model
 
     # Instructions: Combine role and persona
-    instructions = f"{node.profile.role} {node.profile.persona}"
+    instructions = f"{profile.role} {profile.persona}"
 
     # Tools: Generate function definitions for every tool listed in node.tools found in tool_packs
     available_tools: set[str] = set()
