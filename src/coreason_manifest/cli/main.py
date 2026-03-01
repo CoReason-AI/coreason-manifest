@@ -15,6 +15,7 @@ import typer
 from rich import print as rprint
 
 from coreason_manifest.adapters.system.dynamic_loader import load_flow_from_file
+from coreason_manifest.toolkit.exporter import render_agent_card
 from coreason_manifest.toolkit.validator import validate_flow
 from coreason_manifest.toolkit.visualizer import to_mermaid
 
@@ -108,6 +109,32 @@ def _handle_visualize(file_path: str) -> int:
 
     diagram = to_mermaid(flow)
     print(diagram)
+    return 0
+
+
+@app.command(name="docs")
+def generate_docs(file: str = typer.Argument(..., help="Path to the manifest file")) -> int:
+    """
+    Generate an Agent Card (Markdown) from the manifest
+    """
+    try:
+        flow = load_flow_from_file(file)
+    except (FileNotFoundError, ValueError) as e:
+        rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
+        raise typer.Exit(code=1) from e
+    except Exception as e:
+        rprint(f"[red]❌ Unexpected Error: {e}[/red]", file=sys.stderr)
+        raise typer.Exit(code=1) from e
+
+    # Optional: Warn if invalid, but proceed
+    errors = validate_flow(flow)
+    if errors:
+        rprint("[yellow]⚠️ Warning: Flow has validation errors:[/yellow]", file=sys.stderr)
+        for error in errors:
+            rprint(f"[yellow]- {error}[/yellow]", file=sys.stderr)
+
+    markdown = render_agent_card(flow)
+    print(markdown)
     return 0
 
 
