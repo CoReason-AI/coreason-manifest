@@ -59,3 +59,16 @@ def test_epistemic_tracking_config() -> None:
     )
     assert config_epistemic.epistemic_tracking is True
     assert config_epistemic.retrieval_strategy == RetrievalStrategy.EPISTEMIC
+
+    from pydantic import ValidationError
+
+    # 3. Invalid behavior: testing EPISTEMIC strategy without tracking enabled
+    with pytest.raises(ValidationError) as exc_info:
+        SemanticMemoryConfig(
+            graph_namespace="test_invalid",
+            bitemporal_tracking=True,
+            scope=KnowledgeScope.SESSION,
+            epistemic_tracking=False,  # This should trigger the failure
+            retrieval_strategy=RetrievalStrategy.EPISTEMIC,
+        )
+    assert "epistemic_tracking must be True" in str(exc_info.value)
