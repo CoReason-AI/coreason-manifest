@@ -1,7 +1,7 @@
 import json
 import os
 import tempfile
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from typer.testing import CliRunner
 
@@ -37,8 +37,6 @@ def test_export_schema_unsupported() -> None:
     # Check stderr or stdout, typer prints red error to stderr
     # if runner doesn't capture stderr properly, we can just check exit_code
 
-
-from unittest.mock import MagicMock
 
 @patch("coreason_manifest.cli.main.export_html_diagram")
 @patch("coreason_manifest.cli.main.get_sota_scivis_topology")
