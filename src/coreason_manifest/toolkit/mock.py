@@ -25,6 +25,39 @@ class MockFactory:
         else:
             self.rng = secrets.SystemRandom()
 
+    def generate_mock_passport(self) -> dict[str, Any]:
+        """
+        Generates a perfectly valid SOTA IdentityPassport payload for local UI and Graph testing.
+        Returned as a dict to prevent import conflicts during parallel epic execution.
+        """
+        import time
+
+        current_time = time.time()
+
+        return {
+            "passport_id": f"mock_jti_{self.rng.randint(1000, 9999)}",
+            "user": {
+                "raw_user_id": "auth0|mock_admin",
+                "anonymized_user_id": "mock_hmac_hash_12345",
+                "tenant_id": "tenant_abc",
+                "roles": ["system_admin", "operator"],
+            },
+            "system": {
+                "agent_id": "mock_agent",
+                "version": "1.0.0",
+                "software_hash": self._generate_hash("mock_agent_v1"),
+            },
+            "delegation": {
+                "allowed_tools": ["*"],
+                "caveats": [],
+                "max_budget_usd": 100.0,
+                "issued_at": current_time - 100,
+                "expires_at": current_time + 3600,
+            },
+            "issuer_uri": "https://mock.auth.coreason.ai",
+            "signature_hash": "mock_sig_hash",
+        }
+
     def _generate_hash(self, data: str) -> str:
         return hashlib.sha256(data.encode()).hexdigest()
 
