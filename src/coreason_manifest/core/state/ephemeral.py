@@ -24,9 +24,10 @@ class LocalVariable(CoreasonModel):
         if self.default is not None:
             if self.type == LocalVariableType.STRING and not isinstance(self.default, str):
                 raise ValueError("Default value must be a string for STRING type.")
-            if self.type == LocalVariableType.NUMBER:
-                if not isinstance(self.default, (int, float)) or isinstance(self.default, bool):
-                    raise ValueError("Default value must be an int or float for NUMBER type.")
+            if self.type == LocalVariableType.NUMBER and (
+                not isinstance(self.default, (int, float)) or isinstance(self.default, bool)
+            ):
+                raise ValueError("Default value must be an int or float for NUMBER type.")
             if self.type == LocalVariableType.BOOLEAN and not isinstance(self.default, bool):
                 raise ValueError("Default value must be a bool for BOOLEAN type.")
             if self.type == LocalVariableType.LIST and not isinstance(self.default, list):
