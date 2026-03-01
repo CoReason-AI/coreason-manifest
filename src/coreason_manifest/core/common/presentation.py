@@ -4,6 +4,11 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.state.ephemeral import LocalStateManifest
+
+from .client_actions import ClientActionMap
+from .suspense import SuspenseConfig
+from .validation import UIValidationSchema
 
 
 class RenderStrategy(StrEnum):
@@ -47,6 +52,18 @@ class UIComponentNode(CoreasonModel):
     )
     children: list["UIComponentNode"] = Field(
         default_factory=list, description="Child component nodes for recursive nesting."
+    )
+    client_actions: list[ClientActionMap] = Field(
+        default_factory=list, description="Native OS-level actions triggered by client gestures."
+    )
+    validation: UIValidationSchema | None = Field(
+        default=None, description="Client-side validation rules for edge-fencing."
+    )
+    suspense: SuspenseConfig | None = Field(
+        default=None, description="Skeleton layout configuration while waiting for data."
+    )
+    local_state: LocalStateManifest | None = Field(
+        default=None, description="Ephemeral Scratchpad memory for this component."
     )
 
 

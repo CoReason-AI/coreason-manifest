@@ -415,6 +415,131 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
     return reports
 
 
+def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 5 Cohesion: Meta-Analysis swarms MUST define interoperability exports."""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, SwarmNode) and node.reducer_function == "meta_analysis_matrix":
+            if not node.export_interoperability or len(node.export_interoperability) == 0:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_SWARM_META_ANALYSIS_MISSING_EXPORT_006",
+                        severity="violation",
+                        message=(
+                            f"SwarmNode '{node.id}' uses a 'meta_analysis_matrix' reducer but "
+                            "fails to define 'export_interoperability'. Downstream biostatistics will fail."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="update_field",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Add formats like 'csv' or 'revman' to the export_interoperability list.",
+                        ),
+                    )
+                )
+    return reports
+
+
+def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Cohesion Rule: Meta-Analysis swarms MUST enforce visual bounding box provenance."""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, SwarmNode) and node.reducer_function == "meta_analysis_matrix":
+            has_visual_provenance = False
+
+            if flow.definitions and node.worker_profile in flow.definitions.profiles:
+                profile = flow.definitions.profiles[node.worker_profile]
+                # Safely traverse the profile -> memory -> semantic -> provenance tree
+                if getattr(profile, "memory", None):
+                    semantic = getattr(profile.memory, "semantic", None)
+                    if semantic and getattr(semantic, "provenance", None):
+                        if getattr(semantic.provenance, "required_level", "") == "visual_bounding_box":
+                            has_visual_provenance = True
+
+            if not has_visual_provenance:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_SWARM_META_ANALYSIS_UNGROUNDED_007",
+                        severity="violation",
+                        message=(
+                            f"SwarmNode '{node.id}' performs meta-analysis but its worker profile "
+                            "lacks strict 'visual_bounding_box' provenance. FDA auditability is compromised."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="update_profile",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Update worker_profile's SemanticMemoryConfig to enforce visual_bounding_box provenance.",
+                        ),
+                    )
+                )
+    return reports
+
+
+def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Cohesion Rule: PRISMA-S Search generation MUST be guarded by an Ontological Validator."""
+    reports: list[ComplianceReport] = []
+
+    if not isinstance(flow, GraphFlow):
+        return reports
+
+    nodes, edges = get_unified_topology(flow)
+    node_map = {n.id: n for n in nodes}
+
+    outgoing_edges: dict[str, list[str]] = {n.id: [] for n in nodes}
+    for edge in edges:
+        outgoing_edges[edge.from_node].append(edge.to_node)
+
+    for node in nodes:
+        is_prisma_s = False
+
+        if isinstance(node, (AgentNode, SwarmNode)):
+            profile_ref = getattr(node, "profile", None) or getattr(node, "worker_profile", None)
+            if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
+                reasoning = flow.definitions.profiles[profile_ref].reasoning
+                # Check if it's a CouncilReasoning with methodology.standard == "prisma_s"
+                if getattr(reasoning, "type", "") == "council" and getattr(reasoning, "methodology", None):
+                    if getattr(reasoning.methodology, "standard", "") == "prisma_s":
+                        is_prisma_s = True
+
+        if is_prisma_s:
+            is_guarded = False
+            for next_node_id in outgoing_edges[node.id]:
+                target = node_map.get(next_node_id)
+                from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+
+                if isinstance(target, InspectorNode) and target.mode == "symbolic_execution":
+                    if target.target_solver in ["mesh_ontology_validator", "emtree_validator", "meddra_validator"]:
+                        is_guarded = True
+                        break
+
+            if not is_guarded:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_COUNCIL_PRISMA_S_UNGUARDED_008",
+                        severity="violation",
+                        message=(
+                            f"Node '{node.id}' uses PRISMA-S methodology but its output is not "
+                            "topologically guarded by an Ontological InspectorNode (e.g., mesh_ontology_validator)."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="add_symbolic_guard",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Route this node's output to an InspectorNode with an ontological target_solver.",
+                        ),
+                    )
+                )
+    return reports
+
+
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
@@ -453,6 +578,15 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 7. Swarm-Evolution Cohesion (Epic 1 & 3 Binding)
     reports.extend(_check_island_evolution_binding(flow))
+
+    # 8. Regulatory-Grade Meta-Analysis Cohesion (Epic 5)
+    reports.extend(_check_meta_analysis_export_contract(flow))
+
+    # 9. Meta-Analysis Provenance Binding
+    reports.extend(_check_meta_analysis_provenance_contract(flow))
+
+    # 10. PRISMA-S Ontological Guarding
+    reports.extend(_check_prisma_s_ontological_guard(flow))
 
     return reports
 
