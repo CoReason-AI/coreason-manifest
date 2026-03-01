@@ -52,7 +52,9 @@ def _render_governance_block(governance: Any) -> str:
     lines = []
 
     if getattr(governance, "max_risk_level", None):
-        lines.append(f"- **Global Max Risk Level:** {governance.max_risk_level}")
+        max_risk = governance.max_risk_level
+        max_risk_str = getattr(max_risk, "value", str(max_risk))
+        lines.append(f"- **Global Max Risk Level:** {max_risk_str}")
 
     policy = getattr(governance, "operational_policy", None)
     if policy:
@@ -120,8 +122,9 @@ def _render_tools(tool_packs: dict[str, Any] | None) -> str:
         for tool in tools:
             tool_name = getattr(tool, "name", "Unknown Tool")
             risk_level = getattr(tool, "risk_level", "Unknown Risk")
+            risk_level_str = getattr(risk_level, "value", str(risk_level))
             description = getattr(tool, "description", "No description provided.")
-            lines.append(f"- **{tool_name}** (Risk: {risk_level}) - {description}")
+            lines.append(f"- **{tool_name}** (Risk: {risk_level_str}) - {description}")
 
     if not lines:
         return "No permitted tools defined.\n"
