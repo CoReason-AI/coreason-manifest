@@ -74,11 +74,17 @@ class ProvenanceConfig(CoreasonModel):
 
     required_level: ProvenanceLevel = Field(
         default=ProvenanceLevel.VISUAL_BOUNDING_BOX,
-        description="The minimum level of provenance required. 'visual_bounding_box' forces precise PDF pixel coordinate tracking.",
+        description=(
+            "The minimum level of provenance required. "
+            "'visual_bounding_box' forces precise PDF pixel coordinate tracking."
+        ),
     )
     enforce_cryptographic_trace: bool = Field(
         default=True,
-        description="If true, requires an immutable hash chain linking extracted data to its original source binary (e.g., 21 CFR Part 11 compliance).",
+        description=(
+            "If true, requires an immutable hash chain linking extracted data "
+            "to its original source binary (e.g., 21 CFR Part 11 compliance)."
+        ),
     )
 
 
@@ -123,7 +129,10 @@ class SemanticMemoryConfig(CoreasonModel):
         0.75, ge=0.0, le=1.0, description="Minimum confidence score for the runtime to inject the context."
     )
     provenance: ProvenanceConfig | None = Field(
-        None, description="Strict provenance requirements for ensuring extracted evidence is mathematically and visually grounded."
+        None,
+        description=(
+            "Strict provenance requirements for ensuring extracted evidence is mathematically and visually grounded."
+        ),
     )
 
     @model_validator(mode="after")
