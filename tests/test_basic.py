@@ -56,7 +56,7 @@ def test_genui_multiplexer_emission() -> None:
             p=AdaptiveUIContract(
                 layout=[{"type": "weather_widget", "props": {"location": "San Francisco", "user_id": "123-45-678"}}]
             ),
-            timestamp=2.0
+            timestamp=2.0,
         )
 
     # Simulate multiplexer reading the stream
