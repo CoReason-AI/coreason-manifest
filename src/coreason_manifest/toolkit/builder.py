@@ -931,6 +931,25 @@ class BaseFlowBuilder:
         self._register_node(node)
         return self
 
+    def add_human_gate(self, node_id: str, prompt: str, routes: dict[str, str], shadow_timeout: int = 300) -> Self:
+        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
+        node = HumanNode(
+            id=node_id,
+            metadata={},
+            type="human",
+            prompt=prompt,
+            collaboration_mode=CollaborationMode.APPROVAL_ONLY,
+            routes=routes,
+            escalation=EscalationStrategy(
+                queue_name="steering_queue",
+                notification_level="info",
+                timeout_seconds=shadow_timeout,
+            ),
+        )
+        self._register_node(node)
+        return self
+
     def add_inspector(self, node_id: str, target: str, criteria: str, output: str, pass_threshold: float = 0.5) -> Self:
         """Adds an inspector node to the flow.
 

@@ -22,6 +22,15 @@ class CollaborationMode(StrEnum):
     HIJACK = "hijack"
 
 
+class SteeringCommand(StrEnum):
+    APPROVE = "approve"
+    REJECT = "reject"
+    MODIFY = "modify"
+    ESCALATE = "escalate"
+    REWIND = "rewind"
+    REPLY = "reply"
+
+
 class SteeringConfig(CoreasonModel):
     """Configuration for human steering permissions."""
 
@@ -77,8 +86,12 @@ class HumanNode(Node):
         description="JSON Schema for expected human input.",
         examples=[{"type": "object", "properties": {"reason": {"type": "string"}}}],
     )
-    options: list[str] | None = Field(
-        None, description="List of valid options for the human.", examples=[["approve", "reject"]]
+    options: list[str | SteeringCommand] | None = Field(
+        None, description="List of valid options or semantic commands for the human."
+    )
+    routes: dict[str, str] | None = Field(
+        None,
+        description="Map of SteeringCommands or string options to target Node IDs. If None, flow defaults to linear.",
     )
 
     collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
