@@ -5,7 +5,7 @@ from typing import Any, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.common.presentation import RenderStrategy
+from coreason_manifest.core.common.presentation import AdaptiveUIContract, RenderStrategy
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.registry import register_node
@@ -96,6 +96,9 @@ class HumanNode(Node):
 
     collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
     render_strategy: RenderStrategy = Field(default=RenderStrategy.JSON_FORMS)
+    ui_contract: AdaptiveUIContract | None = Field(
+        None, description="The Generative UI contract. Required if render_strategy is GEN_UI."
+    )
 
     steering_config: SteeringConfig | None = Field(
         None, description="Configuration for steering permissions.", examples=[{"allow_variable_mutation": True}]
@@ -142,5 +145,10 @@ class HumanNode(Node):
                         ],
                     ).model_dump()
                 },
+            )
+        if self.render_strategy == RenderStrategy.GEN_UI and self.ui_contract is None:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                message="HumanNode requires 'ui_contract' when render_strategy is 'GEN_UI'.",
             )
         return self

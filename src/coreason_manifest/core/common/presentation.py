@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field
 
@@ -15,6 +15,29 @@ class RenderStrategy(StrEnum):
     JSON_FORMS = "json_forms"
     ADAPTIVE_CARD = "adaptive_card"
     CUSTOM_IFRAME = "custom_iframe"
+    GEN_UI = "gen_ui"
+
+
+class UIEventMap(CoreasonModel):
+    trigger: str = Field(..., description="The name of the event emitted by the widget (e.g., 'on_approve').")
+    action: str = Field(..., description="The semantic SteeringCommand or target route ID this translates to.")
+    mutates_variables: list[str] | None = Field(None, description="Blackboard variables updated by this event.")
+
+
+class AdaptiveUIContract(CoreasonModel):
+    widget_id: str = Field(..., description="The abstract identifier for the frontend component registry.")
+    props_schema: dict[str, Any] = Field(
+        ..., description="JSON Schema defining the data required to render the widget."
+    )
+    props_mapping: dict[str, str] = Field(
+        default_factory=dict, description="Maps Blackboard variables (values) to widget props (keys)."
+    )
+    events: list[UIEventMap] = Field(
+        default_factory=list, description="Maps widget interactions to orchestrator commands."
+    )
+    fallback_to_text: bool = Field(
+        True, description="Gracefully degrade to JSON Form or Text input if widget is unavailable."
+    )
 
 
 class NotificationRouting(CoreasonModel):

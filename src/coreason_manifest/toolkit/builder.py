@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self, cast
 if TYPE_CHECKING:
     from coreason_manifest.core.workflow.nodes import Constraint
 
-from coreason_manifest.core.common.presentation import NotificationRouting, RenderStrategy
+from coreason_manifest.core.common.presentation import AdaptiveUIContract, NotificationRouting, RenderStrategy
 from coreason_manifest.core.compute.reasoning import (
     FastPath,
     ReasoningConfig,
@@ -962,6 +962,34 @@ class BaseFlowBuilder:
             type="human",
             prompt=prompt,
             collaboration_mode=CollaborationMode.APPROVAL_ONLY,
+            routes=routes,
+            escalation=EscalationStrategy(
+                queue_name="steering_queue",
+                notification_level="info",
+                timeout_seconds=shadow_timeout,
+            ),
+        )
+        self._register_node(node)
+        return self
+
+    def add_gen_ui_gate(
+        self,
+        node_id: str,
+        prompt: str,
+        contract: AdaptiveUIContract,
+        routes: dict[str, str] | None = None,
+        shadow_timeout: int = 300,
+    ) -> Self:
+        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
+        node = HumanNode(
+            id=node_id,
+            metadata={},
+            type="human",
+            prompt=prompt,
+            collaboration_mode=CollaborationMode.APPROVAL_ONLY,
+            render_strategy=RenderStrategy.GEN_UI,
+            ui_contract=contract,
             routes=routes,
             escalation=EscalationStrategy(
                 queue_name="steering_queue",
