@@ -1,6 +1,6 @@
 # Prosperity-3.0
 from enum import StrEnum
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
@@ -90,7 +90,9 @@ class HumanNode(Node):
 
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
-        if self.collaboration_mode == CollaborationMode.SHADOW and (self.input_schema is not None or self.options is not None):
+        if self.collaboration_mode == CollaborationMode.SHADOW and (
+            self.input_schema is not None or self.options is not None
+        ):
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
                 message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
@@ -106,7 +108,10 @@ class HumanNode(Node):
                     ).model_dump()
                 },
             )
-        if self.collaboration_mode in (CollaborationMode.HIJACK, CollaborationMode.CO_EDIT) and self.steering_config is None:
+        if (
+            self.collaboration_mode in (CollaborationMode.HIJACK, CollaborationMode.CO_EDIT)
+            and self.steering_config is None
+        ):
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
                 message=f"HumanNode in '{self.collaboration_mode}' mode requires 'steering_config'.",

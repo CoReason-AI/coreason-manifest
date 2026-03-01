@@ -835,12 +835,14 @@ class BaseFlowBuilder:
         Returns:
             Self: The builder instance for chaining.
         """
+        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
         node = HumanNode(
             id=node_id,
             metadata={},
             type="human",
             prompt=prompt,
-            interaction_mode="shadow",
+            collaboration_mode=CollaborationMode.SHADOW,
             escalation=EscalationStrategy(
                 queue_name="shadow_queue",
                 notification_level="info",
