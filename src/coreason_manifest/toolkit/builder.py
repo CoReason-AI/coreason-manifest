@@ -132,6 +132,23 @@ class AgentBuilder:
         self.gap_scan_enabled = False
         self.gap_scan_threshold = 0.8
         self.max_revisions = 1
+        self._rate_card_config: dict[str, Any] | None = None
+
+    def with_rate_card(
+        self,
+        input_cost: float,
+        output_cost: float,
+        reasoning_cost: float | None = None,
+        unit: str = "TOKEN_1M",
+    ) -> "AgentBuilder":
+        """Attaches a FinOps rate card to the primary model profile."""
+        self._rate_card_config = {
+            "input_cost": input_cost,
+            "output_cost": output_cost,
+            "reasoning_cost": reasoning_cost,
+            "unit": unit,
+        }
+        return self
 
     def with_meta_cognition(
         self,
@@ -511,14 +528,44 @@ class AgentBuilder:
             if self.gap_scan_enabled:
                 gap_scan = GapScanConfig(enabled=True, confidence_threshold=self.gap_scan_threshold)
 
-            self.reasoning = self.reasoning.model_copy(
-                update={
-                    "review_strategy": ReviewStrategy(self.review_strategy),
-                    "adversarial_config": adversarial_config,
-                    "gap_scan": gap_scan,
-                    "max_revisions": self.max_revisions,
-                }
-            )
+            updates: dict[str, Any] = {
+                "review_strategy": ReviewStrategy(self.review_strategy),
+                "adversarial_config": adversarial_config,
+                "gap_scan": gap_scan,
+                "max_revisions": self.max_revisions,
+            }
+
+            if self._rate_card_config:
+                from coreason_manifest.core.compute.resources import RateCard, ModelProfile, PricingUnit
+
+                rc = RateCard(
+                    input_cost=self._rate_card_config["input_cost"],
+                    output_cost=self._rate_card_config["output_cost"],
+                    reasoning_cost=self._rate_card_config["reasoning_cost"],
+                    unit=PricingUnit(self._rate_card_config["unit"]),
+                )
+
+                # Retrieve existing primary_profile if models is already ModelCriteria
+                existing_models = self.reasoning.models
+                from coreason_manifest.core.compute.reasoning import ModelCriteria
+
+                if isinstance(existing_models, ModelCriteria):
+                    models_copy = existing_models.model_copy()
+                    if models_copy.primary_profile:
+                        # Append the pricing to the existing profile
+                        new_profile = models_copy.primary_profile.model_copy(update={"pricing": rc})
+                        models_copy = models_copy.model_copy(update={"primary_profile": new_profile})
+                    else:
+                        # Fallback to create a default model profile assuming a primary one is omitted
+                        new_profile = ModelProfile(provider="unknown", model_id="unknown", pricing=rc)
+                        models_copy = models_copy.model_copy(update={"primary_profile": new_profile})
+                    updates["models"] = models_copy
+                elif isinstance(existing_models, str):
+                    # Convert string to ModelCriteria with primary_profile
+                    new_profile = ModelProfile(provider="unknown", model_id=existing_models, pricing=rc)
+                    updates["models"] = ModelCriteria(specific_models=[existing_models], primary_profile=new_profile)
+
+            self.reasoning = self.reasoning.model_copy(update=updates)
 
         from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile
 
