@@ -348,16 +348,16 @@ def _validate_ui_contracts(
     errors: list[ComplianceReport] = []
     for node in nodes:
         if isinstance(node, HumanNode) and node.render_strategy == "gen_ui" and node.ui_contract:
-            for mapped_var in node.ui_contract.props_mapping.values():
-                if mapped_var not in symbol_table:
-                    errors.append(
-                        ComplianceReport(
-                            code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                            severity="violation",
-                            message=f"GenUI Error: Widget maps to missing variable '{mapped_var}'.",
-                            node_id=node.id,
-                        )
-                    )
+            errors.extend(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                    severity="violation",
+                    message=f"GenUI Error: Widget maps to missing variable '{mapped_var}'.",
+                    node_id=node.id,
+                )
+                for mapped_var in node.ui_contract.props_mapping.values()
+                if mapped_var not in symbol_table
+            )
 
             for event in node.ui_contract.events:
                 valid_action = False
@@ -369,22 +369,25 @@ def _validate_ui_contracts(
                         ComplianceReport(
                             code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
                             severity="violation",
-                            message=f"GenUI Error: Event action '{event.action}' does not map to a known route or node ID.",
+                            message=(
+                                f"GenUI Error: Event action '{event.action}' "
+                                "does not map to a known route or node ID."
+                            ),
                             node_id=node.id,
                         )
                     )
 
                 if event.mutates_variables:
-                    for var in event.mutates_variables:
-                        if var not in symbol_table:
-                            errors.append(
-                                ComplianceReport(
-                                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
-                                    severity="violation",
-                                    message=f"GenUI Error: Event mutates missing variable '{var}'.",
-                                    node_id=node.id,
-                                )
-                            )
+                    errors.extend(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                            severity="violation",
+                            message=f"GenUI Error: Event mutates missing variable '{var}'.",
+                            node_id=node.id,
+                        )
+                        for var in event.mutates_variables
+                        if var not in symbol_table
+                    )
     return errors
 
 
