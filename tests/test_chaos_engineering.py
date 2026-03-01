@@ -3,7 +3,7 @@ from pydantic import ValidationError
 
 from coreason_manifest.core.telemetry_schemas import NodeState
 from coreason_manifest.core.workflow.evals import AdversaryProfile, ChaosConfig, EvalsManifest, TestCase
-from coreason_manifest.core.workflow.flow import LinearFlow
+from coreason_manifest.core.workflow.flow import FlowMetadata, LinearFlow
 from coreason_manifest.core.workflow.nodes import AgentNode
 from coreason_manifest.toolkit.mock import MockFactory
 
@@ -41,7 +41,8 @@ def test_mock_factory_inflates_duration() -> None:
     # Base configuration without chaos
     evals_no_chaos = EvalsManifest(test_cases=[TestCase(expected_traversal_path=["node_1"])])
     flow = LinearFlow(
-        metadata={"name": "test_flow", "version": "1.0"}, steps=[AgentNode(id="node_1", profile="test_agent")]
+        metadata=FlowMetadata(name="test_flow", version="1.0"),
+        steps=[AgentNode(id="node_1", profile="test_agent", operational_policy=None)],
     )
     trace_no_chaos = factory.simulate_trace(flow, evals=evals_no_chaos)
 
@@ -79,7 +80,8 @@ def test_mock_factory_forces_failure() -> None:
         ]
     )
     flow = LinearFlow(
-        metadata={"name": "test_flow", "version": "1.0"}, steps=[AgentNode(id="node_1", profile="test_agent")]
+        metadata=FlowMetadata(name="test_flow", version="1.0"),
+        steps=[AgentNode(id="node_1", profile="test_agent", operational_policy=None)],
     )
     trace_fail = factory.simulate_trace(flow, evals=evals_fail)
 

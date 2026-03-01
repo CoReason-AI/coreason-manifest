@@ -31,8 +31,12 @@ class TestCase(CoreasonModel):
         default_factory=list, description="List of Node IDs that MUST be hit in sequence."
     )
     assertions: dict[str, Any] = Field(default_factory=dict, description="JSON Schema validations on the final output.")
-    chaos_config: ChaosConfig | None = Field(default=None, description="Infrastructure faults to apply during this test.")
-    adversary: AdversaryProfile | None = Field(default=None, description="Red-team configuration for semantic fuzzing.")
+    chaos_config: ChaosConfig | None = Field(
+        default=None, description="Infrastructure faults to apply during this test."
+    )
+    adversary: AdversaryProfile | None = Field(
+        default=None, description="Red-team configuration for semantic fuzzing."
+    )
 
 
 class FuzzingTarget(CoreasonModel):
