@@ -51,7 +51,6 @@ from coreason_manifest.core.state.memory import (
     WorkingMemoryConfig,
 )
 from coreason_manifest.core.state.tools import ToolPack
-from coreason_manifest.core.system.rebuild import rebuild_manifest
 from coreason_manifest.core.workflow.evals import EvalsManifest
 from coreason_manifest.core.workflow.flow import (
     AnyNode,
@@ -556,9 +555,9 @@ class AgentBuilder:
             ValueError: If agent identity (role, persona) is not set.
         """
         # Ensure schema is built
-        from coreason_manifest.core.system.rebuild import rebuild_manifest
 
-        rebuild_manifest()
+
+
 
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
@@ -1099,7 +1098,7 @@ class BaseFlowBuilder:
             ValueError: If validation fails.
         """
         # Ensure schema is built
-        rebuild_manifest()
+
 
         flow = self._create_flow_instance()
 

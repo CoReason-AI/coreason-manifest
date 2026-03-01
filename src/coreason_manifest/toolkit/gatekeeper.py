@@ -422,7 +422,8 @@ def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[C
 
     for node in nodes:
         if isinstance(node, SwarmNode) and node.reducer_function == "meta_analysis_matrix":
-            if not node.export_interoperability or len(node.export_interoperability) == 0:
+                has_exports = node.export_interoperability and len(node.export_interoperability) > 0
+                if not has_exports:
                 reports.append(
                     ComplianceReport(
                         code="ERR_SWARM_META_ANALYSIS_MISSING_EXPORT_006",
@@ -458,7 +459,8 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
                 if getattr(profile, "memory", None):
                     semantic = getattr(profile.memory, "semantic", None)
                     if semantic and getattr(semantic, "provenance", None):
-                        if getattr(semantic.provenance, "required_level", "") == "visual_bounding_box":
+                        provenance_req = getattr(semantic.provenance, "required_level", "")
+                        if provenance_req == "visual_bounding_box":
                             has_visual_provenance = True
 
             if not has_visual_provenance:
@@ -475,7 +477,10 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
                             type="update_profile",
                             target_node_id=node.id,
                             patch_data=[],
-                            description="Update worker_profile's SemanticMemoryConfig to enforce visual_bounding_box provenance.",
+                            description=(
+                                "Update worker_profile's SemanticMemoryConfig "
+                                "to enforce visual_bounding_box provenance."
+                            ),
                         ),
                     )
                 )
@@ -515,7 +520,8 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
                 from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 
                 if isinstance(target, InspectorNode) and target.mode == "symbolic_execution":
-                    if target.target_solver in ["mesh_ontology_validator", "emtree_validator", "meddra_validator"]:
+                    valid_solvers = ["mesh_ontology_validator", "emtree_validator", "meddra_validator"]
+                    if target.target_solver in valid_solvers:
                         is_guarded = True
                         break
 
@@ -533,7 +539,10 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
                             type="add_symbolic_guard",
                             target_node_id=node.id,
                             patch_data=[],
-                            description="Route this node's output to an InspectorNode with an ontological target_solver.",
+                            description=(
+                                "Route this node's output to an InspectorNode "
+                                "with an ontological target_solver."
+                            ),
                         ),
                     )
                 )
