@@ -99,3 +99,30 @@ def test_evolutionary_reasoning_schema() -> None:
         }
     )
     assert isinstance(parsed, EvolutionaryReasoning)
+
+
+def test_symbolic_execution_inspector_node() -> None:
+    from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+    from pydantic import ValidationError
+
+    # Valid symbolic execution
+    node = InspectorNode(
+        id="test-node",
+        target_variable="code",
+        criteria="must compile",
+        output_variable="result",
+        mode="symbolic_execution",
+        target_solver="lean4"
+    )
+    assert node.mode == "symbolic_execution"
+    assert node.target_solver == "lean4"
+
+    # Invalid symbolic execution (missing solver)
+    with pytest.raises(ValidationError):
+        InspectorNode(
+            id="test-node-invalid",
+            target_variable="code",
+            criteria="must compile",
+            output_variable="result",
+            mode="symbolic_execution"
+        )
