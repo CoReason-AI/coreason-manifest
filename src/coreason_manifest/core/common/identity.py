@@ -98,6 +98,26 @@ class DelegationContract(CoreasonModel):
     caveats: list[ResourceCaveat] = Field(default_factory=list, description="Cryptographic attenuations on authority.")
     max_budget_usd: float | None = Field(None, description="Financial circuit breaker for this specific trace.")
 
+    # --- BEGIN EPIC 6.2 INSERTION ---
+    max_tokens: int | None = Field(
+        None,
+        description=(
+            "Physical circuit breaker: Maximum LLM tokens (in+out) authorized to prevent local compute exhaustion."
+        ),
+    )
+    max_compute_time_ms: int | None = Field(
+        None,
+        description="Temporal circuit breaker: Maximum asynchronous wall-time before forced execution termination.",
+    )
+    caep_stream_uri: str | None = Field(
+        None,
+        description=(
+            "Shared Signals Framework (SSF) URI. The orchestrator subscribes "
+            "to this for real-time instantaneous passport revocation."
+        ),
+    )
+    # --- END EPIC 6.2 INSERTION ---
+
     # SOTA Temporal Bounding
     issued_at: float = Field(..., description="Unix epoch timestamp of delegation issuance.")
     expires_at: float = Field(..., description="Unix epoch timestamp of delegation expiry.")
