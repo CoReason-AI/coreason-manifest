@@ -106,6 +106,9 @@ class FinancialLimits(CoreasonModel):
         description="Model ID to fallback to when budget hits 90% depletion (e.g., swap o1-pro to gpt-4o-mini).",
         examples=["gpt-4o-mini"],
     )
+    max_transaction_cost_usd: float | None = Field(
+        None, ge=0.0, description="Maximum allowed cost for a single transaction or branch.", examples=[5.0]
+    )
 
 
 class DataLimits(CoreasonModel):
@@ -123,6 +126,12 @@ class ComputeLimits(CoreasonModel):
     max_cognitive_steps: int | None = Field(None, gt=0, description="Max turn/DAG transitions.", examples=[50])
     max_concurrent_agents: int | None = Field(
         None, gt=0, description="Maximum number of concurrent agents.", examples=[10]
+    )
+    max_tokens_per_turn: int | None = Field(
+        None, gt=0, description="Maximum allowed tokens per execution turn.", examples=[4000]
+    )
+    context_compression_strategy: Literal["none", "summarize", "truncate_oldest"] = Field(
+        "none", description="Strategy to compress context when it exceeds bounds.", examples=["summarize"]
     )
 
 

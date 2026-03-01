@@ -964,6 +964,36 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
             )
         )
 
+    nodes, _ = get_unified_topology(flow)
+    for node in nodes:
+        if node.type == "agent" and node.resilience:
+            resolved_policy = _resolve_resilience_policy(node.resilience, getattr(flow, "definitions", None))
+            if resolved_policy:
+                strategies = _extract_strategies(resolved_policy)
+                for strategy in strategies:
+                    if getattr(strategy, "type", None) == "retry":
+                        attempts = getattr(strategy, "max_attempts", 0)
+                        if attempts > 5:
+                            # Check for high cost model or RateCard
+                            is_high_cost = False
+                            if getattr(node, "profile", None) and getattr(node.profile, "reasoning", None):
+                                primary_prof = getattr(node.profile.reasoning.models, "primary_profile", None)
+                                if primary_prof and getattr(primary_prof, "pricing", None):
+                                    is_high_cost = True
+
+                            if is_high_cost:
+                                errors.append(
+                                    ComplianceReport(
+                                        code="ERR_GOV_FINANCIAL_RISK",
+                                        severity="warning",
+                                        message=(
+                                            f"Financial Risk: Agent node '{node.id}' has aggressive retry "
+                                            "loop (max_attempts > 5) while using a cost-bearing model."
+                                        ),
+                                        details={"node_id": node.id, "max_attempts": attempts},
+                                    )
+                                )
+
     return errors
 
 
