@@ -157,9 +157,18 @@ def render_agent_card(flow: GraphFlow | LinearFlow) -> str:
     # 3. API Interface
     doc_parts.append("## 🔌 API Interface")
     doc_parts.append("### Inputs")
-    doc_parts.append(_render_schema_tables(flow.interface.inputs))
+    inputs_schema = getattr(flow, "interface", None)
+    if inputs_schema:
+        doc_parts.append(_render_schema_tables(inputs_schema.inputs))
+    else:
+        doc_parts.append("No schema defined.\n")
+
     doc_parts.append("### Outputs")
-    doc_parts.append(_render_schema_tables(flow.interface.outputs))
+    outputs_schema = getattr(flow, "interface", None)
+    if outputs_schema:
+        doc_parts.append(_render_schema_tables(outputs_schema.outputs))
+    else:
+        doc_parts.append("No schema defined.\n")
     doc_parts.append("")
 
     # 4. Governance & Blast Radius
