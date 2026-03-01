@@ -3,7 +3,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.domains.scientific_vis import (
+from coreason_manifest.core.domains.scientific_vis import (
     FunctionalModule,
     GraphicElement,
     HierarchicalBlueprint,
@@ -149,7 +149,7 @@ def test_multimodal_reference_instantiation() -> None:
     with pytest.raises(ValidationError):
         MultimodalReference(
             artifact_uri="https://example.com/target.webp",
-            role="INVALID_ROLE",  # type: ignore
+            role="INVALID_ROLE",
             mime_type="image/webp",
         )
 

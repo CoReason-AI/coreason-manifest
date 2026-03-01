@@ -42,7 +42,6 @@ from coreason_manifest.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.core.primitives.types import RiskLevel
-from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
     EpisodicMemoryConfig,
     KnowledgeScope,
@@ -52,6 +51,7 @@ from coreason_manifest.core.state.memory import (
     WorkingMemoryConfig,
 )
 from coreason_manifest.core.state.tools import ToolPack
+from coreason_manifest.core.system.rebuild import rebuild_manifest
 from coreason_manifest.core.workflow.evals import EvalsManifest
 from coreason_manifest.core.workflow.flow import (
     AnyNode,
@@ -556,7 +556,7 @@ class AgentBuilder:
             ValueError: If agent identity (role, persona) is not set.
         """
         # Ensure schema is built
-        from coreason_manifest.core.rebuild import rebuild_manifest
+        from coreason_manifest.core.system.rebuild import rebuild_manifest
 
         rebuild_manifest()
 

@@ -3,7 +3,7 @@ from typing import Any
 from hypothesis import given
 from hypothesis import strategies as st
 
-from coreason_manifest.spec.domains.mcp_contracts import MCPOperation, MCPOperationSequence, MCPToolName
+from coreason_manifest.core.domains.mcp_contracts import MCPOperation, MCPOperationSequence, MCPToolName
 
 
 def test_mcp_tool_name_serialization() -> None:

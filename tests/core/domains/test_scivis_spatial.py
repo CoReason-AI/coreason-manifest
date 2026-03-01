@@ -5,7 +5,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from coreason_manifest.spec.domains.scivis_spatial import (
+from coreason_manifest.core.domains.scivis_spatial import (
     BoundingBox,
     LayoutDirection,
     PaddingConfig,

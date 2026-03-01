@@ -8,7 +8,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from coreason_manifest.spec.domains.scivis_style import (
+from coreason_manifest.core.domains.scivis_style import (
     AcademicJournal,
     CanvasGeometry,
     ColorPalette,

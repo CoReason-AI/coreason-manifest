@@ -22,8 +22,8 @@ import yaml
 from yaml.nodes import MappingNode
 
 from coreason_manifest.adapters.system.io_jail import ManifestIO, SecurityViolationError
-from coreason_manifest.core.exceptions import SecurityJailViolationError
-from coreason_manifest.core.rebuild import rebuild_manifest
+from coreason_manifest.core.common.exceptions import SecurityJailViolationError
+from coreason_manifest.core.system.rebuild import rebuild_manifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
 __all__ = [
@@ -132,7 +132,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         """
         # 1. CRITICAL: Block sandbox escapes via Wasm/threading or direct OS execution
         if fullname in ("threading", "multiprocessing", "concurrent", "_thread", "os", "subprocess"):
-            from coreason_manifest.core.exceptions import SecurityJailViolationError
+            from coreason_manifest.core.common.exceptions import SecurityJailViolationError
 
             raise SecurityJailViolationError(f"Module '{fullname}' is strictly forbidden in the sandbox.")
 

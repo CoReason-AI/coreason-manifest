@@ -4,7 +4,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 
 
 class ErrorCatalog(StrEnum):
@@ -58,6 +58,8 @@ class RemediationAction(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     type: Literal[
+        "update_profile",
+        "add_symbolic_guard",
         "add_guard_node",
         "whitelist_domain",
         "prune_node",
