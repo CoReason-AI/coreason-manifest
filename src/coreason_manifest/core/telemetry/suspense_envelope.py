@@ -1,7 +1,7 @@
 from typing import Literal
 
 from coreason_manifest.core.common.suspense import SuspenseConfig
-from coreason_manifest.core.telemetry.stream import BaseEnvelope
+from coreason_manifest.core.telemetry.stream_base import BaseEnvelope
 
 
 class StreamSuspenseEnvelope(BaseEnvelope):

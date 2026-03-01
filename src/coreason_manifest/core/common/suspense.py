@@ -1,7 +1,7 @@
 import re
 from enum import StrEnum
 
-from pydantic import model_validator
+from pydantic import model_validator, Field
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -16,8 +16,12 @@ class SkeletonType(StrEnum):
 
 class SuspenseConfig(CoreasonModel):
     fallback_type: SkeletonType = SkeletonType.SPINNER
-    estimated_duration_ms: int | None = None
-    reserved_height: str | None = None
+    estimated_duration_ms: int | None = Field(
+        default=None, description="The estimated duration in milliseconds before the content is expected to load."
+    )
+    reserved_height: str | None = Field(
+        default=None, description="CSS dimension to reserve space while the component is suspended, preventing layout shift."
+    )
 
     @model_validator(mode="after")
     def validate_reserved_height(self) -> "SuspenseConfig":
