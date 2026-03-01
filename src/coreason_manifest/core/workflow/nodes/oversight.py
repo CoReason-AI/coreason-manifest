@@ -1,7 +1,7 @@
 # Prosperity-3.0
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.compute.reasoning import ModelRef, Optimizer
 from coreason_manifest.core.primitives.registry import register_node
@@ -35,11 +35,21 @@ class InspectorNode(InspectorNodeBase):
 
     type: Literal["inspector"] = Field("inspector", description="The type of the node.", examples=["inspector"])
 
-    mode: Literal["programmatic", "semantic"] = Field(
+    mode: Literal["programmatic", "semantic", "symbolic_execution"] = Field(
         "programmatic", description="Evaluation mode.", examples=["semantic"]
     )
 
+    target_solver: Literal["lean4", "z3", "dafny", "r_sandbox"] | None = Field(
+        None, description="The deterministic symbolic engine used to compile/verify the output."
+    )
+
     pass_threshold: float | None = Field(None, description="Threshold for passing the check (0.0-1.0).", examples=[0.8])
+
+    @model_validator(mode="after")
+    def validate_symbolic_requirements(self) -> "InspectorNode":
+        if self.mode == "symbolic_execution" and self.target_solver is None:
+            raise ValueError("target_solver must be provided when mode is 'symbolic_execution'")
+        return self
 
 
 @register_node

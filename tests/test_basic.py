@@ -170,3 +170,41 @@ def test_evolutionary_reasoning_schema() -> None:
         }
     )
     assert isinstance(parsed, EvolutionaryReasoning)
+
+
+def test_symbolic_execution_inspector_node() -> None:
+    from pydantic import ValidationError
+
+    from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+
+    # Valid symbolic execution
+    node = InspectorNode(
+        id="test-node",
+        target_variable="code",
+        criteria="must compile",
+        output_variable="result",
+        mode="symbolic_execution",
+        target_solver="lean4",
+    )
+    assert node.mode == "symbolic_execution"
+    assert node.target_solver == "lean4"
+
+    # Invalid symbolic execution (missing solver)
+    with pytest.raises(ValidationError):
+        InspectorNode(
+            id="test-node-invalid",
+            target_variable="code",
+            criteria="must compile",
+            output_variable="result",
+            mode="symbolic_execution",
+        )
+
+    from coreason_manifest.core.oversight.resilience import RetryStrategy
+
+    # Valid resilience config
+    valid_retry = RetryStrategy(max_attempts=3, symbolic_repair_budget=5)
+    assert valid_retry.symbolic_repair_budget == 5
+
+    # Invalid resilience config (negative budget)
+    with pytest.raises(ValidationError):
+        RetryStrategy(max_attempts=3, symbolic_repair_budget=-1)

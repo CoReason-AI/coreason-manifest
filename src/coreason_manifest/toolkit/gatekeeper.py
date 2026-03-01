@@ -320,6 +320,64 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     return reports
 
 
+def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 4: Ensure Evolutionary pipelines are guarded by Symbolic Execution."""
+    reports: list[ComplianceReport] = []
+
+    if not isinstance(flow, GraphFlow):
+        return reports
+
+    nodes, edges = get_unified_topology(flow)
+    node_map = {n.id: n for n in nodes}
+
+    # Map outgoing edges
+    outgoing_edges = {n.id: [] for n in nodes}
+    for edge in edges:
+        outgoing_edges[edge.from_node].append(edge.to_node)
+
+    for node in nodes:
+        is_evolutionary = False
+
+        # Safely check for evolutionary reasoning without importing the class
+        if isinstance(node, (AgentNode, SwarmNode)):
+            profile_ref = getattr(node, "profile", None) or getattr(node, "worker_profile", None)
+
+            if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
+                reasoning = flow.definitions.profiles[profile_ref].reasoning
+                if getattr(reasoning, "type", "") == "evolutionary":
+                    is_evolutionary = True
+
+        if is_evolutionary:
+            # Check if it points to a symbolic_execution inspector
+            is_guarded = False
+            for next_node_id in outgoing_edges[node.id]:
+                target = node_map.get(next_node_id)
+                from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+
+                if isinstance(target, InspectorNode) and target.mode == "symbolic_execution":
+                    is_guarded = True
+                    break
+
+            if not is_guarded:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_SEC_MISSING_SYMBOLIC_GUARD_004",
+                        severity="violation",
+                        message=(
+                            f"Node '{node.id}' uses EvolutionaryReasoning but is not "
+                            "guarded by a symbolic_execution InspectorNode."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="add_symbolic_guard",
+                            target_node_id=node.id,
+                            description="Route this node's output to an InspectorNode with mode='symbolic_execution'.",
+                        ),
+                    )
+                )
+    return reports
+
+
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
@@ -329,6 +387,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     3. Swarm Safety: Recursively checks worker profiles in Swarms.
     4. Domain Policy: Checks tool URLs against allowed domains (Strict Canonicalization).
     5. Topology Analysis: Checks for hazardous utility islands using Tarjan's algorithm.
+    6. Neuro-Symbolic Gatekeeping: Ensure Evolutionary pipelines are guarded by Symbolic Execution.
     """
     reports: list[ComplianceReport] = []
 
@@ -351,6 +410,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # 5. Topology Analysis (GraphFlow Only)
     if isinstance(flow, GraphFlow):
         reports.extend(_detect_utility_islands(flow))
+
+    # 6. Neuro-Symbolic Gatekeeping
+    reports.extend(_check_neuro_symbolic_guard(flow))
 
     return reports
 
