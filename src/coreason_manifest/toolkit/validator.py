@@ -370,8 +370,7 @@ def _validate_ui_contracts(
                             code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
                             severity="violation",
                             message=(
-                                f"GenUI Error: Event action '{event.action}' "
-                                "does not map to a known route or node ID."
+                                f"GenUI Error: Event action '{event.action}' does not map to a known route or node ID."
                             ),
                             node_id=node.id,
                         )
