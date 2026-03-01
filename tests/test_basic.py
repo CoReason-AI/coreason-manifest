@@ -51,7 +51,6 @@ def test_genui_multiplexer_emission() -> None:
     successfully strips PII from the UI props.
     """
 
-    from coreason_manifest.core.common.presentation import UIComponentNode
 
     def mock_stream() -> Any:
         yield StreamThoughtEnvelope(op="thought", p="Generating dashboard...", timestamp=1.0)
