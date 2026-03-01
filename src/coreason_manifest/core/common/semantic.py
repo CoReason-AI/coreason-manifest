@@ -44,4 +44,5 @@ class SemanticRef(CoreasonModel):
     optimization: OptimizationIntent | None = Field(
         None,
         description="Directives for Weaver synthesis optimization.",
+        examples=[{"improvement_goal": "Maximize throughput", "metric_name": "accuracy", "teacher_model": "gpt-4"}],
     )

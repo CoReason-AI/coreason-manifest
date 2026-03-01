@@ -2,7 +2,7 @@ import math
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class DataAnomaly(BaseModel):
@@ -13,17 +13,21 @@ class DataAnomaly(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    code: str
-    path: str
-    value_repr: str
-    description: str
+    code: str = Field(..., description="The error code associated with the anomaly.", examples=["CRSN-ANTIBODY-FLOAT"])
+    path: str = Field(..., description="The JSON Pointer path to the anomalous data.", examples=["$.metrics.accuracy"])
+    value_repr: str = Field(..., description="The string representation of the anomalous value.", examples=["NaN"])
+    description: str = Field(
+        ...,
+        description="A human-readable description of the anomaly.",
+        examples=["Floating point value is not finite (NaN/Inf)."],
+    )
 
 
 VALID_PRIMITIVES = (str, int, float, bool, type(None), datetime)
 
 
 def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
-    """Evaluates a single value and returns a serialized anomaly if invalid."""
+    """Evaluate a single value and return a serialized anomaly if invalid."""
     if isinstance(v, BaseModel):
         # We can recursively validate BaseModels later, or just trust their serialization
         return None
@@ -46,9 +50,9 @@ def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
 
 
 def _scan_and_quarantine(data: Any, path: str) -> Any:
-    """
-    Recursively scans and functionally rebuilds the input structure,
-    replacing anomalies (NaN, Inf, Un-serializable) with DataAnomaly dicts.
+    """Recursively scan and functionally rebuild the input structure.
+
+    Replaces anomalies (NaN, Inf, Un-serializable) with DataAnomaly dicts.
     """
     if isinstance(data, dict):
         return {

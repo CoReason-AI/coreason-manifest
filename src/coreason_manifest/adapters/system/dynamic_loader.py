@@ -596,31 +596,23 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
-    """
-    Load an Agent class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
+    """Load an Agent class from a Python file reference.
+
+    WARNING: Executes arbitrary code within the host process. Ensure the source is strictly trusted.
 
     Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Agent class.
+        reference: Must be in the exact format 'path/to/file.py:ClassName'.
     """
     return _load_sandboxed_class(reference, root_dir, "agent")
 
 
 def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
-    """
-    Load a Middleware class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
+    """Load a Middleware class from a Python file reference.
+
+    WARNING: Executes arbitrary code within the host process. Ensure the source is strictly trusted.
 
     Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Middleware class.
+        reference: Must be in the exact format 'path/to/file.py:ClassName'.
     """
     middleware_class = _load_sandboxed_class(reference, root_dir, "middleware")
 
