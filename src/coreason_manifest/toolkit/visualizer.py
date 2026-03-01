@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from coreason_manifest.core.telemetry.telemetry_schemas import ExecutionSnapshot
 
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
-from coreason_manifest.core.workflow.nodes import AnyNode, SwitchNode
+from coreason_manifest.core.workflow.nodes import AnyNode, HumanNode, SwitchNode
 from coreason_manifest.core.workflow.topology import get_unified_topology
 
 
@@ -137,6 +137,11 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
                         break
                 if not label and source_node.default == target_id:
                     label = "|default|"
+            elif source_node and isinstance(source_node, HumanNode) and getattr(source_node, "routes", None):
+                for cmd, cmd_target in source_node.routes.items():
+                    if cmd_target == target_id:
+                        label = f"|{_escape_label(str(cmd))} ⚙️|"
+                        break
 
         lines.append(f"    {s_safe} -->{label} {t_safe}")
 

@@ -25,6 +25,7 @@ from coreason_manifest.core.workflow.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,
+    HumanNode,
     InspectorNode,
     PlannerNode,
     SwarmNode,
@@ -215,6 +216,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
         node_ids = set(flow.graph.nodes.keys())
 
         errors.extend(_validate_switch_logic(nodes_list, node_ids))
+        errors.extend(_validate_human_routes(nodes_list, node_ids))
         errors.extend(_validate_orphan_nodes(flow))
         errors.extend(_validate_swarm_concurrency(nodes_list))
 
@@ -653,6 +655,24 @@ def _validate_swarm_concurrency(nodes: list[AnyNode]) -> list[ComplianceReport]:
     ]
 
 
+def _validate_human_routes(nodes: list[AnyNode], valid_ids: set[str]) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+    for node in nodes:
+        if isinstance(node, HumanNode) and getattr(node, "routes", None) and node.routes is not None:
+            errors.extend(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
+                    severity="violation",
+                    message=f"HumanNode '{node.id}' route points to missing ID '{target_id}'.",
+                    node_id=node.id,
+                    details={"target_id": target_id},
+                )
+                for target_id in node.routes.values()
+                if target_id not in valid_ids
+            )
+    return errors
+
+
 def _validate_switch_logic(nodes: list[AnyNode], valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
     for node in nodes:
@@ -938,6 +958,12 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
                     adj[node.id].add(target_id)
             if node.default in adj:
                 adj[node.id].add(node.default)
+
+        # HumanNode routing
+        if isinstance(node, HumanNode) and getattr(node, "routes", None) and node.routes is not None:
+            for target_id in node.routes.values():
+                if target_id in adj:
+                    adj[node.id].add(target_id)
 
         # Local Fallback routing (Resolving templates to catch Trojan cycles)
         if node.resilience:
