@@ -1,0 +1,88 @@
+from coreason_manifest.core.workflow.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, InspectorNode, PlannerNode, SwitchNode
+
+
+def get_sota_scivis_topology() -> GraphFlow:
+    """Creates the SOTA 2026 scientific illustration topology."""
+
+    # Node 1: semantic_parser
+    semantic_parser = PlannerNode(
+        id="semantic_parser",
+        goal="Parses text to hierarchical blueprint",
+        output_schema={"type": "object"},
+    )
+
+    # Node 2: layout_agent
+    layout_agent = AgentNode(
+        id="layout_agent",
+        profile=CognitiveProfile(
+            role="Layout Designer",
+            persona="Drafts spatial coordinates and edges",
+        ),
+        operational_policy=None,
+    )
+
+    # Node 3: visual_critic
+    visual_critic = InspectorNode(
+        id="visual_critic",
+        target_variable="layout",
+        criteria="Applies VisBench rubrics to layout",
+        output_variable="critique_result",
+    )
+
+    # Node 4: critique_router
+    critique_router = SwitchNode(
+        id="critique_router",
+        variable="critique_result",
+        cases={"rejected": "layout_agent"},
+        default="final_renderer",
+    )
+
+    # Node 5: final_renderer
+    final_renderer = AgentNode(
+        id="final_renderer",
+        profile=CognitiveProfile(
+            role="Renderer",
+            persona="Compiles vector code and renders final artifact",
+        ),
+        operational_policy=None,
+    )
+
+    # Wire edges for Directed Cyclic Graph (DCG)
+    edges = [
+        Edge(from_node="semantic_parser", to_node="layout_agent"),
+        Edge(from_node="layout_agent", to_node="visual_critic"),
+        Edge(from_node="visual_critic", to_node="critique_router"),
+        Edge(from_node="critique_router", to_node="layout_agent", condition="rejected"),
+        Edge(from_node="critique_router", to_node="final_renderer", condition="approved"),
+    ]
+
+    nodes_dict = {
+        semantic_parser.id: semantic_parser,
+        layout_agent.id: layout_agent,
+        visual_critic.id: visual_critic,
+        critique_router.id: critique_router,
+        final_renderer.id: final_renderer,
+    }
+
+    # Bypass Graph model_validator to allow Directed Cyclic Graph (DCG)
+    graph = Graph.model_construct(
+        nodes=nodes_dict,
+        edges=edges,
+        entry_point="semantic_parser",
+    )
+
+    return GraphFlow.model_construct(
+        annotations={"id": "sota_scientific_illustration_v1"},
+        metadata=FlowMetadata(
+            name="SOTA Sci-Vis Flow",
+            version="1.0.0",
+            description="2026 SOTA Topology for Scientific Visualization",
+        ),
+        interface=FlowInterface(),
+        graph=graph,
+        type="graph",
+        kind="GraphFlow",
+        status="draft",
+        pre_flight_constraints=[],
+    )
