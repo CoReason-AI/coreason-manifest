@@ -1,4 +1,3 @@
-
 from coreason_manifest.core.workflow.nodes import SwitchNode
 from coreason_manifest.core.workflow.topologies.sci_vis_flow import get_sota_scivis_topology
 
