@@ -896,6 +896,12 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
             if node.default in adj:
                 adj[node.id].add(node.default)
 
+        # HumanNode routing
+        if isinstance(node, HumanNode) and getattr(node, "routes", None) and node.routes is not None:
+            for target_id in node.routes.values():
+                if target_id in adj:
+                    adj[node.id].add(target_id)
+
         # Local Fallback routing (Resolving templates to catch Trojan cycles)
         if node.resilience:
             resolved_policy = _resolve_resilience_policy(node.resilience, getattr(flow, "definitions", None))
