@@ -39,8 +39,17 @@ class InspectorNode(InspectorNodeBase):
         "programmatic", description="Evaluation mode.", examples=["semantic"]
     )
 
-    target_solver: Literal["lean4", "z3", "dafny", "r_sandbox"] | None = Field(
-        None, description="The deterministic symbolic engine used to compile/verify the output."
+    target_solver: Literal[
+        "lean4",
+        "z3",
+        "dafny",
+        "r_sandbox",
+        "mesh_ontology_validator",
+        "emtree_validator",
+        "meddra_validator"
+    ] | None = Field(
+        None,
+        description="The deterministic symbolic engine or ontological dictionary used to compile/verify the output."
     )
 
     tutor_prompt: str | None = Field(
