@@ -1102,8 +1102,7 @@ class NewGraphFlow(BaseFlowBuilder):
         """
         if node.id in self._nodes:
             raise ValueError(
-                f"Builder Error: Node ID '{node.id}' already exists in the topology. "
-                "Overwrites are strictly forbidden."
+                f"Builder Error: Node ID '{node.id}' already exists in the topology. Overwrites are strictly forbidden."
             )
         self._nodes[node.id] = node
         return self

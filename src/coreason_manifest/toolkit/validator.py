@@ -109,7 +109,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                     code=ErrorCatalog.ERR_TOPOLOGY_NODE_ID_COLLISION,
                     severity="violation",
                     message=f"Topology Error: Duplicate Node ID '{node.id}' detected in unified topology.",
-                    node_id=node.id
+                    node_id=node.id,
                 )
             )
         valid_ids.add(node.id)
