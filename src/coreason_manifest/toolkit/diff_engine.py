@@ -74,6 +74,9 @@ def _determine_category(op: str, path: str, domain: DomainType) -> CategoryType:
     if domain == "governance" or "/policy" in path or "/governance" in path:
         return "GOVERNANCE"
 
+    if "/presentation" in path or "/routing" in path or "/render_strategy" in path:
+        return "FEATURE"
+
     if domain == "resource":
         return "RESOURCE"
 

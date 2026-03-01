@@ -1,9 +1,11 @@
 # Prosperity-3.0
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.common.presentation import RenderStrategy
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.registry import register_node
@@ -11,6 +13,13 @@ from coreason_manifest.core.primitives.types import VariableID
 from coreason_manifest.core.security.compliance import RemediationAction
 
 from .base import Node
+
+
+class CollaborationMode(StrEnum):
+    APPROVAL_ONLY = "approval_only"
+    CO_EDIT = "co_edit"
+    SHADOW = "shadow"
+    HIJACK = "hijack"
 
 
 class SteeringConfig(CoreasonModel):
@@ -79,6 +88,12 @@ class HumanNode(Node):
 
     steering_config: SteeringConfig | None = Field(
         None, description="Configuration for steering permissions.", examples=[{"allow_variable_mutation": True}]
+    )
+
+    collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
+    render_strategy: RenderStrategy = Field(default=RenderStrategy.JSON_FORMS)
+    editable_variables: list[str] = Field(
+        default_factory=list, description="Blackboard variables the UI should render as editable if mode is CO_EDIT."
     )
 
     @model_validator(mode="after")
