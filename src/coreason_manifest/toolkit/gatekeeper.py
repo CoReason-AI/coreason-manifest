@@ -378,6 +378,38 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
     return reports
 
 
+def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Phase 2 Cohesion: Ensure Island Model swarms are utilizing Evolutionary Reasoning."""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, SwarmNode) and node.distribution_strategy == "island_model":
+            profile_ref = node.worker_profile
+            is_evolutionary = False
+
+            if flow.definitions and profile_ref in flow.definitions.profiles:
+                reasoning = flow.definitions.profiles[profile_ref].reasoning
+                if getattr(reasoning, "type", "") == "evolutionary":
+                    is_evolutionary = True
+
+            if not is_evolutionary:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_SWARM_ISLAND_NON_EVOLUTIONARY_005",
+                        severity="violation",
+                        message=f"SwarmNode '{node.id}' uses 'island_model' but its worker_profile '{profile_ref}' does not use EvolutionaryReasoning.",
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="update_profile",
+                            target_node_id=node.id,
+                            description="Change the worker_profile to an AgentProfile utilizing EvolutionaryReasoning.",
+                        ),
+                    )
+                )
+    return reports
+
+
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
@@ -413,6 +445,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 6. Neuro-Symbolic Gatekeeping
     reports.extend(_check_neuro_symbolic_guard(flow))
+
+    # 7. Swarm-Evolution Cohesion (Epic 1 & 3 Binding)
+    reports.extend(_check_island_evolution_binding(flow))
 
     return reports
 

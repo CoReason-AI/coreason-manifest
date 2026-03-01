@@ -43,12 +43,19 @@ class InspectorNode(InspectorNodeBase):
         None, description="The deterministic symbolic engine used to compile/verify the output."
     )
 
+    tutor_prompt: str | None = Field(
+        None, description="System instructions injected into the LLM context if symbolic compilation fails."
+    )
+
     pass_threshold: float | None = Field(None, description="Threshold for passing the check (0.0-1.0).", examples=[0.8])
 
     @model_validator(mode="after")
     def validate_symbolic_requirements(self) -> "InspectorNode":
-        if self.mode == "symbolic_execution" and self.target_solver is None:
-            raise ValueError("target_solver must be provided when mode is 'symbolic_execution'")
+        if self.mode == "symbolic_execution":
+            if self.target_solver is None:
+                raise ValueError("target_solver must be provided when mode is 'symbolic_execution'")
+            if self.tutor_prompt is None:
+                raise ValueError("tutor_prompt must be provided when mode is 'symbolic_execution' to guide the repair loop")
         return self
 
 

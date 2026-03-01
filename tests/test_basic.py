@@ -174,10 +174,10 @@ def test_evolutionary_reasoning_schema() -> None:
 
 def test_symbolic_execution_inspector_node() -> None:
     from pydantic import ValidationError
-
     from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+    from coreason_manifest.core.oversight.resilience import RetryStrategy
 
-    # Valid symbolic execution
+    # 1. Valid symbolic execution
     node = InspectorNode(
         id="test-node",
         target_variable="code",
@@ -185,26 +185,27 @@ def test_symbolic_execution_inspector_node() -> None:
         output_variable="result",
         mode="symbolic_execution",
         target_solver="lean4",
+        tutor_prompt="Analyze the following lean4 compiler error and rewrite the proof."
     )
     assert node.mode == "symbolic_execution"
     assert node.target_solver == "lean4"
+    assert node.tutor_prompt is not None
 
-    # Invalid symbolic execution (missing solver)
-    with pytest.raises(ValidationError):
+    # 2. Invalid symbolic execution (missing solver and prompt)
+    with pytest.raises(ValidationError) as exc:
         InspectorNode(
             id="test-node-invalid",
             target_variable="code",
             criteria="must compile",
             output_variable="result",
             mode="symbolic_execution",
+            target_solver="lean4", # Provide solver, but omit tutor_prompt
         )
+    assert "tutor_prompt must be provided" in str(exc.value)
 
-    from coreason_manifest.core.oversight.resilience import RetryStrategy
-
-    # Valid resilience config
+    # 3. Test Resilience Tutor-Apprentice bounds
     valid_retry = RetryStrategy(max_attempts=3, symbolic_repair_budget=5)
     assert valid_retry.symbolic_repair_budget == 5
 
-    # Invalid resilience config (negative budget)
     with pytest.raises(ValidationError):
         RetryStrategy(max_attempts=3, symbolic_repair_budget=-1)
