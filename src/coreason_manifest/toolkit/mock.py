@@ -4,13 +4,16 @@ import logging
 import random
 import secrets
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from referencing import Registry, Resource
 from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
 from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, NodeState
+
+if TYPE_CHECKING:
+    from coreason_manifest.core.common.identity import IdentityPassport
 from coreason_manifest.core.workflow.evals import ChaosConfig, EvalsManifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode
@@ -25,38 +28,53 @@ class MockFactory:
         else:
             self.rng = secrets.SystemRandom()
 
-    def generate_mock_passport(self) -> dict[str, Any]:
+    def generate_mock_passport(
+        self, classification: str = "internal", is_swarm_child: bool = False
+    ) -> "IdentityPassport":
         """
-        Generates a perfectly valid SOTA IdentityPassport payload for local UI and Graph testing.
-        Returned as a dict to prevent import conflicts during parallel epic execution.
+        Synthesizes a mathematically valid Zero-Trust envelope.
+        SOTA 2026 fields (Lineage, Edge Compute, CAEP) are scaffolded for parallel Epic execution.
         """
         import time
 
+        from coreason_manifest.core.common.identity import (
+            DelegationContract,
+            IdentityPassport,
+            SystemContext,
+            UserContext,
+        )
+
         current_time = time.time()
 
-        return {
-            "passport_id": f"mock_jti_{self.rng.randint(1000, 9999)}",
-            "user": {
-                "raw_user_id": "auth0|mock_admin",
-                "anonymized_user_id": "mock_hmac_hash_12345",
-                "tenant_id": "tenant_abc",
-                "roles": ["system_admin", "operator"],
-            },
-            "system": {
-                "agent_id": "mock_agent",
-                "version": "1.0.0",
-                "software_hash": self._generate_hash("mock_agent_v1"),
-            },
-            "delegation": {
-                "allowed_tools": ["*"],
-                "caveats": [],
-                "max_budget_usd": 100.0,
-                "issued_at": current_time - 100,
-                "expires_at": current_time + 3600,
-            },
-            "issuer_uri": "https://mock.auth.coreason.ai",
-            "signature_hash": "mock_sig_hash",
-        }
+        # SOTA 2026 Variables (Computed but dormant until Final Reconciliation)
+        sota_parent_id = f"mock_parent_jti_{self.rng.randint(1000, 9999)}" if is_swarm_child else None
+        sota_caep_uri = "https://mock-ssf.local.coreason.ai/stream"
+        _ = sota_parent_id
+        _ = sota_caep_uri
+        _ = classification
+
+        return IdentityPassport(
+            passport_id=f"mock_jti_{self.rng.randint(1000, 9999)}",
+            # TODO: FINAL RECONCILIATION - Uncomment SOTA Lineage & PQC fields
+            # parent_passport_id=sota_parent_id,
+            # signature_algorithm="ML-DSA-65",
+            user=UserContext(anonymized_user_id="mock_hmac_hash_12345", roles=["operator"]),
+            system=SystemContext(agent_id="mock_agent", version="1.0.0"),
+            delegation=DelegationContract(
+                allowed_tools=["*"],
+                caveats=[],
+                max_budget_usd=10.0,
+                issued_at=current_time - 100,
+                expires_at=current_time + 3600,
+                # TODO: FINAL RECONCILIATION - Uncomment SOTA Compute & Memory fields
+                # max_tokens=50_000,
+                # max_compute_time_ms=120_000,
+                # max_data_classification=classification,
+                # caep_stream_uri=sota_caep_uri
+            ),
+            issuer_uri="https://mock.auth.coreason.ai",
+            signature_hash="mock_sig_hash",
+        )
 
     def _generate_hash(self, data: str) -> str:
         return hashlib.sha256(data.encode()).hexdigest()
