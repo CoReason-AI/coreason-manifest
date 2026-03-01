@@ -53,10 +53,11 @@ def test_genui_multiplexer_emission() -> None:
 
     def mock_stream() -> Any:
         yield StreamThoughtEnvelope(op="thought", p="Generating dashboard...", timestamp=1.0)
+        from coreason_manifest.core.common.presentation import UIComponentNode
         yield StreamUIEnvelope(
             op="ui_mount",
             p=AdaptiveUIContract(
-                layout=[{"type": "weather_widget", "props": {"location": "San Francisco", "user_id": "123-45-678"}}]
+                layout=[UIComponentNode(type="weather_widget", props={"location": "San Francisco", "user_id": "123-45-678"})]
             ),
             timestamp=2.0,
         )
