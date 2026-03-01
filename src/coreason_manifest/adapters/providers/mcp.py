@@ -1,13 +1,21 @@
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from coreason_manifest.core.common.presentation import UIEventMap
 from coreason_manifest.core.state.tools import MCPTool, ToolPack
+
+
+class MCPRequestMethod(StrEnum):
+    EMIT_INTENT = "mcp.ui.emit_intent"
+    READY = "mcp.ui.ready"
+    ERROR = "mcp.ui.error"
 
 
 class MCPClientMessage(BaseModel):
     jsonrpc: Literal["2.0"] = Field(default="2.0", description="JSON-RPC version")
-    method: Literal["mcp.ui.emit_intent"] = Field(..., description="The intent bubbling method emitted from the UI")
+    method: MCPRequestMethod = Field(..., description="The lifecycle or intent bubbling method emitted from the UI")
     params: dict[str, Any] = Field(default_factory=dict, description="Intent parameters payload")
     id: str | int = Field(..., description="Message ID")
 
@@ -20,11 +28,15 @@ class MCPUIBroker:
         """
         return MCPClientMessage.model_validate(payload)
 
-    def translate_intent_to_action(self, message: MCPClientMessage) -> dict[str, Any]:
+    def translate_intent_to_action(
+        self, message: MCPClientMessage, event_map: UIEventMap | None = None
+    ) -> dict[str, Any]:
         """
         Safely unpacks the `params` (the user's intent) so the execution
         engine can route it to the Blackboard or the Agent's context.
         """
+        # Event map is currently unused until Epic 3 integration
+        _ = event_map
         return message.params
 
 

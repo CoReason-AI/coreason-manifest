@@ -148,7 +148,7 @@ class HumanNode(Node):
             )
         if self.render_strategy == RenderStrategy.GEN_UI and self.ui_contract is None:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.VAL_HUMAN_STEERING,
+                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
                 message="HumanNode requires 'ui_contract' when render_strategy is 'GEN_UI'.",
             )
         return self
