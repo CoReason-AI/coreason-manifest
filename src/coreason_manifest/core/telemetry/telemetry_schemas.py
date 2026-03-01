@@ -6,7 +6,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.adapters.security.antibody import AntibodyBase
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 
 class CryptographicSignature(CoreasonModel):

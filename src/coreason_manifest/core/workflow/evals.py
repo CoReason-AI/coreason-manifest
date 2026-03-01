@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic import Field
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.primitives.types import NodeID
 
 

@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from pydantic import Field
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 
 class WorkingMemoryConfig(CoreasonModel):

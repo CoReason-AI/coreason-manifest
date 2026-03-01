@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from coreason_manifest.core.telemetry_schemas import NodeExecution
+from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution
 
 
 def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:

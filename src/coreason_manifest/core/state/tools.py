@@ -3,7 +3,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import Field, HttpUrl, model_validator
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.primitives.types import CoercibleStringList, RiskLevel, ToolID
 
 

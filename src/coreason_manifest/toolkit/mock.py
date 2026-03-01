@@ -10,7 +10,7 @@ from referencing import Registry, Resource
 from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
-from coreason_manifest.core.telemetry_schemas import NodeExecution, NodeState
+from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, NodeState
 from coreason_manifest.core.workflow.evals import ChaosConfig, EvalsManifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode

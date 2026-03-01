@@ -4,7 +4,7 @@ import os
 
 from pydantic import Field
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 
 class AdapterConfig(CoreasonModel):

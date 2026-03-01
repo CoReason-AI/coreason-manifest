@@ -13,7 +13,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BeforeValidator, Field
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 # =========================================================================
 #  DOMAIN VOCABULARY (Living Standard)
