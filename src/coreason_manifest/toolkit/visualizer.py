@@ -299,3 +299,19 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
         rf_edges.append(edge_data)
 
     return {"nodes": rf_nodes, "edges": rf_edges}
+
+
+def export_html_diagram(flow: GraphFlow | LinearFlow, output_path: str = "graph.html") -> None:
+    """Exports a flow to an HTML file containing a Mermaid.js diagram."""
+    mermaid_str = to_mermaid(flow)
+    html_content = f"""<!DOCTYPE html>
+<html><body>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({{ startOnLoad: true }});
+    </script>
+    <div class="mermaid">{mermaid_str}</div>
+</body></html>
+"""
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
