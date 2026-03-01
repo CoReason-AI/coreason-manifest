@@ -97,9 +97,18 @@ class MethodologyConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    standard: Annotated[MethodologyStandard, Field(description="The scientific standard the council must mathematically follow.")]
-    require_flow_diagram_metadata: Annotated[bool, Field(description="If True, the council must output metadata to generate a flow diagram (e.g., PRISMA flow).")] = True
-    step_validation: Annotated[Literal["strict", "advisory"], Field(description="If 'strict', the runtime hard-fails if intermediate methodology artifacts are missed.")] = "strict"
+    standard: Annotated[
+        MethodologyStandard,
+        Field(description="The scientific standard the council must mathematically follow.")
+    ]
+    require_flow_diagram_metadata: Annotated[
+        bool,
+        Field(description="If True, the council must output metadata to generate a flow diagram (e.g., PRISMA flow).")
+    ] = True
+    step_validation: Annotated[
+        Literal["strict", "advisory"],
+        Field(description="If 'strict', the runtime hard-fails if intermediate methodology artifacts are missed.")
+    ] = "strict"
 
 
 class ReviewStrategy(StrEnum):
@@ -296,7 +305,10 @@ class CouncilReasoning(BaseReasoning):
     type: Literal["council"] = "council"
 
     personas: list[str] = Field(..., description="List of system prompts.")
-    methodology: Annotated[MethodologyConfig | None, Field(description="Strict methodological protocol the council is bound to.")] = None
+    methodology: Annotated[
+        MethodologyConfig | None,
+        Field(description="Strict methodological protocol the council is bound to.")
+    ] = None
     proposal_count: int = 1
     voting_mode: Literal["unanimous", "majority", "weighted"] = "majority"
     rounds: int = 1
