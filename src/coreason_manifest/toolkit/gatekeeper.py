@@ -331,7 +331,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
     node_map = {n.id: n for n in nodes}
 
     # Map outgoing edges
-    outgoing_edges = {n.id: [] for n in nodes}
+    outgoing_edges: dict[str, list[str]] = {n.id: [] for n in nodes}
     for edge in edges:
         outgoing_edges[edge.from_node].append(edge.to_node)
 
@@ -369,8 +369,9 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
                         ),
                         node_id=node.id,
                         remediation=RemediationAction(
-                            type="add_symbolic_guard",
+                            type="update_field",
                             target_node_id=node.id,
+                            patch_data=[],
                             description="Route this node's output to an InspectorNode with mode='symbolic_execution'.",
                         ),
                     )
@@ -404,8 +405,9 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
                         ),
                         node_id=node.id,
                         remediation=RemediationAction(
-                            type="update_profile",
+                            type="update_field",
                             target_node_id=node.id,
+                            patch_data=[],
                             description="Change the worker_profile to an AgentProfile utilizing EvolutionaryReasoning.",
                         ),
                     )
