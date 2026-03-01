@@ -288,6 +288,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
             _extract_schema_types(in_schema)
 
         errors.extend(_validate_data_flow(nodes, symbol_table, flow.definitions, adj_map))
+        errors.extend(_validate_ui_contracts(nodes, symbol_table, valid_ids))
 
     # 5. Security & Kill Switch
     if flow.governance and flow.governance.max_risk_level:
@@ -339,6 +340,52 @@ def _scan_agent_templates(node: AgentNode, definitions: FlowDefinitions | None) 
             refs.update(_scan_string_for_vars(val))
 
     return refs
+
+
+def _validate_ui_contracts(
+    nodes: list[AnyNode], symbol_table: dict[str, str], valid_ids: set[str]
+) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+    for node in nodes:
+        if isinstance(node, HumanNode) and node.render_strategy == "gen_ui" and node.ui_contract:
+            for mapped_var in node.ui_contract.props_mapping.values():
+                if mapped_var not in symbol_table:
+                    errors.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                            severity="violation",
+                            message=f"GenUI Error: Widget maps to missing variable '{mapped_var}'.",
+                            node_id=node.id,
+                        )
+                    )
+
+            for event in node.ui_contract.events:
+                valid_action = False
+                if (node.routes and event.action in node.routes) or event.action in valid_ids:
+                    valid_action = True
+
+                if not valid_action:
+                    errors.append(
+                        ComplianceReport(
+                            code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
+                            severity="violation",
+                            message=f"GenUI Error: Event action '{event.action}' does not map to a known route or node ID.",
+                            node_id=node.id,
+                        )
+                    )
+
+                if event.mutates_variables:
+                    for var in event.mutates_variables:
+                        if var not in symbol_table:
+                            errors.append(
+                                ComplianceReport(
+                                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                                    severity="violation",
+                                    message=f"GenUI Error: Event mutates missing variable '{var}'.",
+                                    node_id=node.id,
+                                )
+                            )
+    return errors
 
 
 def _validate_data_flow(
