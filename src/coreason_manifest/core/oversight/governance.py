@@ -46,6 +46,13 @@ class Safety(CoreasonModel):
     content_safety: Literal["high", "medium", "low"] = Field(
         ..., description="Content safety level.", examples=["high"]
     )
+    safety_preamble: str | None = Field(
+        None,
+        description="Mandatory safety instruction injected into the system prompt deterministically by the runtime.",
+    )
+    legal_disclaimer: str | None = Field(
+        None, description="Text that must be appended to the final output deterministically by the runtime."
+    )
 
 
 class Audit(CoreasonModel):

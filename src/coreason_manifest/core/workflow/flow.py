@@ -19,6 +19,7 @@ from coreason_manifest.core.workflow.evals import EvalsManifest
 from coreason_manifest.core.workflow.nodes import (
     AnyNode,
 )
+from coreason_manifest.core.workflow.nodes.base import Constraint
 
 
 class ProvenanceType(StrEnum):
@@ -231,6 +232,9 @@ class GraphFlow(CoreasonModel):
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     interface: FlowInterface
+    pre_flight_constraints: list[Constraint] = Field(
+        default_factory=list, description="Feasibility gates evaluated before the workflow is allocated compute."
+    )
     governance: Governance | None = None
     blackboard: Blackboard | None = Field(default_factory=Blackboard)
     definitions: FlowDefinitions | None = None
@@ -284,6 +288,9 @@ class LinearFlow(CoreasonModel):
     kind: Literal["LinearFlow"] = "LinearFlow"
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
+    pre_flight_constraints: list[Constraint] = Field(
+        default_factory=list, description="Feasibility gates evaluated before the workflow is allocated compute."
+    )
     steps: list[AnyNode] = Field(default_factory=list)
     governance: Governance | None = None
     definitions: FlowDefinitions | None = None
