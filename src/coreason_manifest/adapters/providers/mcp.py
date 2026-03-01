@@ -1,6 +1,52 @@
-from typing import Any
+from enum import StrEnum
+from typing import Any, Literal
 
+from pydantic import BaseModel, Field
+
+from coreason_manifest.core.common.presentation import UIEventMap
 from coreason_manifest.core.state.tools import MCPTool, ToolPack
+
+
+class MCPRequestMethod(StrEnum):
+    EMIT_INTENT = "mcp.ui.emit_intent"
+    READY = "mcp.ui.ready"
+    ERROR = "mcp.ui.error"
+
+
+class MCPClientMessage(BaseModel):
+    jsonrpc: Literal["2.0"] = Field(default="2.0", description="JSON-RPC version")
+    method: MCPRequestMethod = Field(..., description="The lifecycle or intent bubbling method emitted from the UI")
+    params: dict[str, Any] = Field(default_factory=dict, description="Intent parameters payload")
+    id: str | int = Field(..., description="Message ID")
+
+
+class MCPUIBroker:
+    def validate_iframe_payload(self, payload: dict[str, Any]) -> MCPClientMessage:
+        """
+        Validates the raw dictionary payload from the WebView iframe
+        into a strict MCPClientMessage schema.
+        """
+        return MCPClientMessage.model_validate(payload)
+
+    def translate_intent_to_action(
+        self, message: MCPClientMessage, event_map: UIEventMap | None = None
+    ) -> dict[str, Any]:
+        """
+        Safely unpacks the `params` (the user's intent) so the execution
+        engine can route it to the Blackboard or the Agent's context.
+        """
+        if event_map is None:
+            raise ValueError("Untethered state mutation from an MCP iframe is forbidden.")
+
+        payload_mapping = event_map.payload_mapping or {}
+        action_payload: dict[str, Any] = {}
+
+        for param_key, param_value in message.params.items():
+            if param_key in payload_mapping:
+                target_var = payload_mapping[param_key]
+                action_payload[target_var] = param_value
+
+        return action_payload
 
 
 def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:

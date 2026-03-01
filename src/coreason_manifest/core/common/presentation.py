@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -16,21 +16,50 @@ class RenderStrategy(StrEnum):
     ADAPTIVE_CARD = "adaptive_card"
     CUSTOM_IFRAME = "custom_iframe"
     GEN_UI = "gen_ui"
+    MCP_APPS = "mcp_apps"
 
 
 class UIEventMap(CoreasonModel):
     trigger: str = Field(..., description="The name of the event emitted by the widget (e.g., 'on_approve').")
     action: str = Field(..., description="The semantic SteeringCommand or target route ID this translates to.")
     mutates_variables: list[str] | None = Field(None, description="Blackboard variables updated by this event.")
+    payload_mapping: dict[str, str] | None = Field(
+        default=None, description="Maps frontend widget event payload keys to specific Blackboard variable paths."
+    )
+
+    @model_validator(mode="after")
+    def validate_zero_trust_mapping(self) -> "UIEventMap":
+        if self.payload_mapping:
+            if not self.mutates_variables:
+                raise ValueError("payload_mapping requires mutates_variables to be defined.")
+            for target_var in self.payload_mapping.values():
+                if target_var not in self.mutates_variables:
+                    raise ValueError(
+                        f"Target variable '{target_var}' in payload_mapping is not allowed by mutates_variables."
+                    )
+        return self
+
+
+class UIComponentNode(CoreasonModel):
+    type: str = Field(..., description="The component registry ID, e.g., 'LineChart', 'DataTable'.")
+    props: dict[str, Any] = Field(
+        default_factory=dict, description="The evaluated property data to bind to the widget."
+    )
+    children: list["UIComponentNode"] = Field(
+        default_factory=list, description="Child component nodes for recursive nesting."
+    )
 
 
 class AdaptiveUIContract(CoreasonModel):
-    widget_id: str = Field(..., description="The abstract identifier for the frontend component registry.")
-    props_schema: dict[str, Any] = Field(
-        ..., description="JSON Schema defining the data required to render the widget."
+    layout: list[UIComponentNode] = Field(default_factory=list, description="The root elements of the generated UI.")
+    widget_id: str | None = Field(
+        None, description="[DEPRECATED] The abstract identifier for the frontend component registry."
+    )
+    props_schema: dict[str, Any] | None = Field(
+        None, description="[DEPRECATED] JSON Schema defining the data required to render the widget."
     )
     props_mapping: dict[str, str] = Field(
-        default_factory=dict, description="Maps Blackboard variables (values) to widget props (keys)."
+        default_factory=dict, description="[DEPRECATED] Maps Blackboard variables (values) to widget props (keys)."
     )
     events: list[UIEventMap] = Field(
         default_factory=list, description="Maps widget interactions to orchestrator commands."
@@ -38,6 +67,24 @@ class AdaptiveUIContract(CoreasonModel):
     fallback_to_text: bool = Field(
         True, description="Gracefully degrade to JSON Form or Text input if widget is unavailable."
     )
+    mcp_ui_resource_uri: str | None = Field(
+        default=None,
+        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_widget(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            layout = data.get("layout")
+            widget_id = data.get("widget_id")
+
+            # If layout is empty/missing but widget_id is provided, auto-migrate to the new structure
+            if not layout and widget_id:
+                props = data.get("props_mapping", {})
+                node = {"type": widget_id, "props": props, "children": []}
+                data["layout"] = [node]
+        return data
 
 
 class NotificationRouting(CoreasonModel):
@@ -127,3 +174,6 @@ class PresentationHints(CoreasonModel):
         Literal["basic", "detailed", "debug"],
         Field(description="Preferred metadata detail level."),
     ] = "basic"
+
+
+UIComponentNode.model_rebuild()

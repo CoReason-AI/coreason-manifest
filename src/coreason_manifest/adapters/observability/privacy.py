@@ -110,3 +110,44 @@ class PrivacySentinel:
         # Use first 8 chars of hash as prefix
         hash_prefix = full_hash[:8]
         return f"<REDACTED:SECRET:{hash_prefix}>"
+
+
+def scrub_genui_payload(payload: dict[Any, Any]) -> dict[Any, Any]:
+    """
+    Scrub GenUI contracts (i.e., a dictionary with a `layout` of UI components),
+    recursively stripping all values inside the `props` fields and replacing them
+    with `"[REDACTED_PII]"`. The schema/structure remains intact.
+
+    Note: This explicitly operates on GenUI payloads only. Do not blindly pass
+    unrelated dictionaries that might happen to have a "layout" key.
+    """
+
+    def _scrub_recursive(data: Any, in_props: bool = False) -> Any:
+        if isinstance(data, dict):
+            new_dict = {}
+            for k, v in data.items():
+                # If we are inside props, or if the current key is props, we scrub
+                is_props_now = in_props or k == "props"
+
+                if is_props_now:
+                    # Replace everything inside props with "[REDACTED_PII]"
+                    # but keep dictionaries and lists to maintain structure
+                    if isinstance(v, dict):
+                        new_dict[k] = _scrub_recursive(v, in_props=True)
+                    elif isinstance(v, list):
+                        new_dict[k] = [_scrub_recursive(item, in_props=True) for item in v]
+                    else:
+                        new_dict[k] = "[REDACTED_PII]"
+                else:
+                    new_dict[k] = _scrub_recursive(v, in_props=False)
+            return new_dict
+        if isinstance(data, list):
+            return [_scrub_recursive(item, in_props=in_props) for item in data]
+        if in_props:
+            return "[REDACTED_PII]"
+        return data
+
+    result = _scrub_recursive(payload)
+    if isinstance(result, dict):
+        return result
+    return payload

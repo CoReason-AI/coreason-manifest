@@ -51,3 +51,22 @@ jobs:
         with:
           files: ./coverage.xml
           fail_ci_if_error: true
+
+  agentic-evals:
+    name: Agentic UX Trajectory Evals
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run Evals
+        run: uv run pytest tests/test_basic.py -m "evals"
