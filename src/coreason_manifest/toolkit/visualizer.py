@@ -37,6 +37,7 @@ def _get_node_shape(node: AnyNode) -> tuple[str, str]:
         "planner": ("{{", "}}"),
         "inspector": ("{{", "}}"),
         "emergence_inspector": ("{{", "}}"),
+        "visual_inspector": ("{{", "}}"),
         "human": ("[/", "/]"),
         "placeholder": ("(", ")"),
         "swarm": ("[[", "]]"),
@@ -182,6 +183,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
     lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
     lines.append("    classDef emergence_inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
+    lines.append("    classDef visual_inspector fill:#fdebd0,stroke:#d35400,stroke-width:2px;")
     lines.append("    classDef swarm fill:#aed6f1,stroke:#2e86c1,stroke-width:2px;")
 
     # State styles
@@ -316,3 +318,19 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
         rf_edges.append(edge_data)
 
     return {"nodes": rf_nodes, "edges": rf_edges}
+
+
+def export_html_diagram(flow: GraphFlow | LinearFlow, output_path: str = "graph.html") -> None:
+    """Exports a flow to an HTML file containing a Mermaid.js diagram."""
+    mermaid_str = to_mermaid(flow)
+    html_content = f"""<!DOCTYPE html>
+<html><body>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({{ startOnLoad: true }});
+    </script>
+    <div class="mermaid">{mermaid_str}</div>
+</body></html>
+"""
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)

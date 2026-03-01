@@ -11,6 +11,7 @@ from .planner import PlannerNode
 from .routing import SwitchNode
 from .swarm import SwarmNode
 from .system import PlaceholderNode
+from .visual_oversight import MultimodalConstraint, VisualInspectorNode
 
 # AnyNode is now resolved dynamically
 AnyNode: Any = resolve_node_union()
@@ -26,10 +27,12 @@ __all__ = [
     "InspectorNode",
     "InspectorNodeBase",
     "LockConfig",
+    "MultimodalConstraint",
     "Node",
     "PlaceholderNode",
     "PlannerNode",
     "SteeringConfig",
     "SwarmNode",
     "SwitchNode",
+    "VisualInspectorNode",
 ]

@@ -8,6 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import json
 import sys
 from importlib.metadata import PackageNotFoundError, version
 
@@ -15,9 +16,11 @@ import typer
 from rich import print as rprint
 
 from coreason_manifest.adapters.system.dynamic_loader import load_flow_from_file
+from coreason_manifest.core.workflow.topologies.sci_vis_flow import get_sota_scivis_topology
+from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint
 from coreason_manifest.toolkit.exporter import render_agent_card
 from coreason_manifest.toolkit.validator import validate_flow
-from coreason_manifest.toolkit.visualizer import to_mermaid
+from coreason_manifest.toolkit.visualizer import export_html_diagram, to_mermaid
 
 app = typer.Typer(help="CoReason Manifest CLI")
 
@@ -66,6 +69,39 @@ def create() -> None:
     """
     rprint("[yellow]Create command is not yet implemented.[/yellow]")
     raise typer.Exit(code=1)
+
+
+@app.command(name="export-schema")
+def export_schema(
+    model_name: str = typer.Argument(..., help="Model name (e.g. HierarchicalBlueprint)"),
+    out_file: str = typer.Argument(..., help="Output JSON file path"),
+) -> int:
+    """
+    Export Pydantic model JSON schema to a file
+    """
+    if model_name != "HierarchicalBlueprint":
+        rprint(f"[red]❌ Error: Model '{model_name}' not supported.[/red]", file=sys.stderr)
+        raise typer.Exit(code=1)
+
+    schema = HierarchicalBlueprint.model_json_schema()
+    with open(out_file, "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2)
+
+    rprint(f"[green]✅ Schema exported to {out_file}[/green]")
+    return 0
+
+
+@app.command(name="export-diagram")
+def export_diagram(
+    out_file: str = typer.Argument(..., help="Output HTML file path"),
+) -> int:
+    """
+    Export SciVis Flow as HTML preview
+    """
+    flow = get_sota_scivis_topology()
+    export_html_diagram(flow, out_file)
+    rprint(f"[green]✅ Diagram exported to {out_file}[/green]")
+    return 0
 
 
 def _handle_validate(file_path: str) -> int:
