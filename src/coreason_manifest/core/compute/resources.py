@@ -27,9 +27,7 @@ class RateCard(CoreasonModel):
         examples=[0.05],
     )
     unit: PricingUnit = Field(
-        default=PricingUnit.TOKEN_1M,
-        description="The unit of measurement for the cost.",
-        examples=["TOKEN_1M"]
+        default=PricingUnit.TOKEN_1M, description="The unit of measurement for the cost.", examples=["TOKEN_1M"]
     )
 
 
