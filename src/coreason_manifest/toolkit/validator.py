@@ -101,6 +101,52 @@ def _validate_planner_reasoning(nodes: list[AnyNode]) -> list[ComplianceReport]:
         for node in nodes
         if isinstance(node, PlannerNode) and getattr(node, "reasoning", None) is None
     ]
+def _validate_pre_flight_constraints(flow: GraphFlow | LinearFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if not hasattr(flow, "pre_flight_constraints") or not flow.pre_flight_constraints:
+        return errors
+
+    interface_keys = set()
+
+    if hasattr(flow, "interface") and flow.interface:
+        inputs = flow.interface.inputs
+        in_schema = getattr(inputs, "json_schema", inputs)
+        if isinstance(in_schema, dict):
+            props = in_schema.get("properties", {})
+            interface_keys.update(props.keys())
+
+    if hasattr(flow, "blackboard") and flow.blackboard:
+        interface_keys.update(flow.blackboard.variables.keys())
+
+    for constraint in flow.pre_flight_constraints:
+        base_var = constraint.variable.split(".")[0]
+        if base_var not in interface_keys:
+            errors.append(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                    severity="violation",
+                    message=f"Pre-flight constraint references missing variable '{constraint.variable}'.",
+                    details={"variable": constraint.variable},
+                )
+            )
+
+def _validate_evals_topology(flow: GraphFlow | LinearFlow, valid_ids: set[str]) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if hasattr(flow, "evals") and flow.evals and flow.evals.test_cases:
+        for test_case in flow.evals.test_cases:
+            if test_case.expected_traversal_path:
+                errors.extend(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_ID_MISMATCH,
+                        severity="violation",
+                        message=f"Eval Test Case expects traversal of missing Node ID '{node_id}'.",
+                    )
+                    for node_id in test_case.expected_traversal_path
+                    if node_id not in valid_ids
+                )
+    return errors
 
 
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
@@ -111,6 +157,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
     errors.extend(_validate_traffic_policy(flow))
+    errors.extend(_validate_pre_flight_constraints(flow))
 
     # Flatten nodes based on flow type
     nodes, edges_objs = get_unified_topology(flow)
@@ -217,8 +264,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 6. Middleware References
     errors.extend(_validate_middleware_refs(flow))
-
     errors.extend(_validate_planner_reasoning(nodes))
+    errors.extend(_validate_evals_topology(flow, valid_ids))
 
     return errors
 

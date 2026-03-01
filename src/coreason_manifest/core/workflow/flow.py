@@ -15,9 +15,11 @@ from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID,
 from coreason_manifest.core.security.compliance import RemediationAction, SecurityVisitor
 from coreason_manifest.core.state.persistence import PersistenceConfig
 from coreason_manifest.core.state.tools import AnyTool, ToolPack
+from coreason_manifest.core.workflow.evals import EvalsManifest
 from coreason_manifest.core.workflow.nodes import (
     AnyNode,
 )
+from coreason_manifest.core.workflow.nodes.base import Constraint
 
 
 class ProvenanceType(StrEnum):
@@ -230,10 +232,14 @@ class GraphFlow(CoreasonModel):
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
     interface: FlowInterface
+    pre_flight_constraints: list[Constraint] = Field(
+        default_factory=list, description="Feasibility gates evaluated before the workflow is allocated compute."
+    )
     governance: Governance | None = None
     blackboard: Blackboard | None = Field(default_factory=Blackboard)
     definitions: FlowDefinitions | None = None
     graph: Graph
+    evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
@@ -282,9 +288,13 @@ class LinearFlow(CoreasonModel):
     kind: Literal["LinearFlow"] = "LinearFlow"
     status: Literal["draft", "published", "archived"] = "draft"
     metadata: FlowMetadata
+    pre_flight_constraints: list[Constraint] = Field(
+        default_factory=list, description="Feasibility gates evaluated before the workflow is allocated compute."
+    )
     steps: list[AnyNode] = Field(default_factory=list)
     governance: Governance | None = None
     definitions: FlowDefinitions | None = None
+    evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":
