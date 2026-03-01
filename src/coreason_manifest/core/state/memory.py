@@ -29,6 +29,7 @@ class RetrievalStrategy(StrEnum):
     HYBRID = "hybrid"
     GRAPH = "graph"
     GRAPH_RAG = "graph_rag"
+    EPISTEMIC = "epistemic"
 
 
 class KnowledgeScope(StrEnum):
@@ -65,6 +66,13 @@ class SemanticMemoryConfig(CoreasonModel):
     """
 
     graph_namespace: str = Field(..., description="Namespace identifier for the knowledge graph partition.")
+    epistemic_tracking: bool = Field(
+        False,
+        description=(
+            "If true, requires the runtime to track Bayesian confidence scores "
+            "and falsification counts for every node in the graph, enabling scientific peer-validation."
+        ),
+    )
     bitemporal_tracking: bool = Field(
         ...,
         description=(

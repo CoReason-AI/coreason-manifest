@@ -36,3 +36,26 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
     child_passport = mock_factory.generate_mock_passport(is_swarm_child=True)
     assert child_passport.parent_passport_id is not None
     assert "mock_parent_jti_" in child_passport.parent_passport_id
+
+
+def test_epistemic_tracking_config() -> None:
+    from coreason_manifest.core.state.memory import KnowledgeScope, RetrievalStrategy, SemanticMemoryConfig
+
+    # Default behavior: epistemic_tracking should be False
+    config_default = SemanticMemoryConfig(
+        graph_namespace="test_default",
+        bitemporal_tracking=False,
+        scope=KnowledgeScope.SESSION,
+    )
+    assert config_default.epistemic_tracking is False
+
+    # Explicit behavior: testing EPISTEMIC retrieval strategy and epistemic_tracking=True
+    config_epistemic = SemanticMemoryConfig(
+        graph_namespace="test_epistemic",
+        bitemporal_tracking=True,
+        scope=KnowledgeScope.USER,
+        epistemic_tracking=True,
+        retrieval_strategy=RetrievalStrategy.EPISTEMIC,
+    )
+    assert config_epistemic.epistemic_tracking is True
+    assert config_epistemic.retrieval_strategy == RetrievalStrategy.EPISTEMIC
