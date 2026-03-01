@@ -51,6 +51,8 @@ def test_genui_multiplexer_emission() -> None:
     successfully strips PII from the UI props.
     """
 
+    from coreason_manifest.core.common.presentation import UIComponentNode
+
     def mock_stream() -> Any:
         yield StreamThoughtEnvelope(op="thought", p="Generating dashboard...", timestamp=1.0)
         yield StreamUIEnvelope(
@@ -61,6 +63,7 @@ def test_genui_multiplexer_emission() -> None:
                         type="weather_widget",
                         props={"location": "San Francisco", "user_id": "123-45-678"},
                     )
+                    UIComponentNode(type="weather_widget", props={"location": "San Francisco", "user_id": "123-45-678"})
                 ]
             ),
             timestamp=2.0,
@@ -89,6 +92,12 @@ def test_genui_multiplexer_emission() -> None:
             if isinstance(props, dict):
                 assert props.get("location") == "[REDACTED_PII]"
                 assert props.get("user_id") == "[REDACTED_PII]"
+
+
+    # The PII inside props should be redacted
+    props = scrubbed_payload["layout"][0]["props"]
+    assert props["location"] == "[REDACTED_PII]"
+    assert props["user_id"] == "[REDACTED_PII]"
 
 
 def test_swarm_orchestration_schema() -> None:
