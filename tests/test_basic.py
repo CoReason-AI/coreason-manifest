@@ -4,6 +4,8 @@ import pytest
 
 from coreason_manifest.adapters.observability.privacy import scrub_genui_payload
 from coreason_manifest.core.primitives.types import DataClassification
+from coreason_manifest.core.common.presentation import AdaptiveUIContract
+from coreason_manifest.core.telemetry.stream import StreamThoughtEnvelope, StreamUIEnvelope
 
 
 def test_import() -> None:
@@ -47,23 +49,14 @@ def test_genui_multiplexer_emission() -> None:
     successfully strips PII from the UI props.
     """
 
-    # Mocking the forward-looking imports from Epic 1 and Epic 2
-    class StreamThoughtEnvelope:
-        def __init__(self, content: str):
-            self.content = content
-            self.type = "thought"
-
-    class StreamUIEnvelope:
-        def __init__(self, ui_data: dict[str, Any]):
-            self.ui_data = ui_data
-            self.type = "genui"
-
     def mock_stream() -> Any:
-        yield StreamThoughtEnvelope(content="Generating dashboard...")
+        yield StreamThoughtEnvelope(op="thought", p="Generating dashboard...", timestamp=1.0)
         yield StreamUIEnvelope(
-            ui_data={
-                "layout": [{"type": "weather_widget", "props": {"location": "San Francisco", "user_id": "123-45-678"}}]
-            }
+            op="ui_mount",
+            p=AdaptiveUIContract(
+                layout=[{"type": "weather_widget", "props": {"location": "San Francisco", "user_id": "123-45-678"}}]
+            ),
+            timestamp=2.0
         )
 
     # Simulate multiplexer reading the stream
@@ -71,11 +64,11 @@ def test_genui_multiplexer_emission() -> None:
 
     # Assert non-blocking generation (all items yielded)
     assert len(stream_results) == 2
-    assert stream_results[0].type == "thought"
-    assert stream_results[1].type == "genui"
+    assert stream_results[0].op == "thought"
+    assert stream_results[1].op == "ui_mount"
 
     # Simulate processing the UI envelope and passing to logger/scrubber
-    raw_payload = stream_results[1].ui_data
+    raw_payload = stream_results[1].p.model_dump()
     scrubbed_payload = scrub_genui_payload(raw_payload)
 
     # The layout structure should be intact

@@ -3,6 +3,7 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.core.common.presentation import AdaptiveUIContract
+from coreason_manifest.core.state.persistence import JSONPatchOperation
 
 
 class StreamError(BaseModel):
@@ -55,7 +56,7 @@ class StreamUIEnvelope(BaseEnvelope):
 
 class StreamStateDeltaEnvelope(BaseEnvelope):
     op: Literal["state_delta"]
-    p: list[dict[str, Any]]
+    p: list[JSONPatchOperation]
 
 
 # SOTA Python 3.12 Union syntax mapped to a Pydantic Discriminator
