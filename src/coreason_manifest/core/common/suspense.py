@@ -1,7 +1,7 @@
 import re
 from enum import StrEnum
 
-from pydantic import model_validator, Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -20,7 +20,8 @@ class SuspenseConfig(CoreasonModel):
         default=None, description="The estimated duration in milliseconds before the content is expected to load."
     )
     reserved_height: str | None = Field(
-        default=None, description="CSS dimension to reserve space while the component is suspended, preventing layout shift."
+        default=None,
+        description="CSS dimension to reserve space while the component is suspended, preventing layout shift.",
     )
 
     @model_validator(mode="after")

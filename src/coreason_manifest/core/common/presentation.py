@@ -4,10 +4,11 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from .client_actions import ClientActionMap
-from .validation import UIValidationSchema
-from .suspense import SuspenseConfig
 from coreason_manifest.core.state.ephemeral import LocalStateManifest
+
+from .client_actions import ClientActionMap
+from .suspense import SuspenseConfig
+from .validation import UIValidationSchema
 
 
 class RenderStrategy(StrEnum):
