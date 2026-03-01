@@ -32,7 +32,7 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
             if flow.definitions and node.profile in flow.definitions.profiles:
                 profile = flow.definitions.profiles[node.profile]
                 reasoning = profile.reasoning
-        else:
+        elif hasattr(node.profile, "reasoning"):
             reasoning = node.profile.reasoning
 
     elif isinstance(node, SwarmNode) and flow.definitions and node.worker_profile in flow.definitions.profiles:
@@ -99,7 +99,7 @@ def _enforce_red_button_rule(
 
         # Check tool risks for AgentNode
         critical_tools = []
-        if isinstance(node, AgentNode):
+        if isinstance(node, AgentNode) and isinstance(node.tools, list):
             for tool_name in node.tools:
                 resolved_tool = tool_map.get(tool_name)
                 # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown

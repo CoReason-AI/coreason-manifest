@@ -6,6 +6,7 @@ import jsonschema  # type: ignore[import-untyped]
 from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
+from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.compliance import RemediationAction, SecurityVisitor
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
@@ -214,6 +215,27 @@ class GraphFlow(CoreasonModel):
             raise ValueError("Cannot publish a GraphFlow without an entry point")
         return self
 
+    @model_validator(mode="after")
+    def enforce_aot_compilation(self) -> "GraphFlow":
+        if self.status == "published":
+            unresolved = [
+                str(getattr(node, "id", ""))
+                for node in self.graph.nodes.values()
+                if getattr(node, "type", None) == "agent"
+                and (
+                    isinstance(getattr(node, "profile", None), SemanticRef)
+                    or isinstance(getattr(node, "tools", None), SemanticRef)
+                )
+            ]
+            if unresolved:
+                msg = (
+                    f"Lifecycle Violation: Cannot publish graph. Nodes [{','.join(unresolved)}] "
+                    "contain unresolved SemanticRefs. A Weaver must compile this graph into "
+                    "concrete profiles before publication."
+                )
+                raise ValueError(msg)
+        return self
+
 
 class LinearFlow(CoreasonModel):
     """
@@ -254,6 +276,27 @@ class LinearFlow(CoreasonModel):
         for node in self.steps:
             if node.type == "placeholder":
                 raise ValueError("Cannot publish a flow with placeholder nodes")
+        return self
+
+    @model_validator(mode="after")
+    def enforce_aot_compilation(self) -> "LinearFlow":
+        if self.status == "published":
+            unresolved = [
+                str(getattr(node, "id", ""))
+                for node in self.steps
+                if getattr(node, "type", None) == "agent"
+                and (
+                    isinstance(getattr(node, "profile", None), SemanticRef)
+                    or isinstance(getattr(node, "tools", None), SemanticRef)
+                )
+            ]
+            if unresolved:
+                msg = (
+                    f"Lifecycle Violation: Cannot publish graph. Nodes [{','.join(unresolved)}] "
+                    "contain unresolved SemanticRefs. A Weaver must compile this graph into "
+                    "concrete profiles before publication."
+                )
+                raise ValueError(msg)
         return self
 
 
