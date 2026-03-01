@@ -31,6 +31,9 @@ class CognitiveProfile(CoreasonModel):
     memory: MemorySubsystem | None = Field(
         None, description="The 4-tier hierarchical memory configuration.", examples=[{"working_memory": {}}]
     )
+    ui_capabilities: list[str] | None = Field(
+        default=None, description="List of frontend component registry IDs this agent is permitted to render."
+    )
 
 
 @register_node
