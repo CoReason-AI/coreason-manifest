@@ -1,7 +1,18 @@
+from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.workflow.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
-from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, PlannerNode, SwitchNode
+from coreason_manifest.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    HumanNode,
+    PlannerNode,
+    SteeringConfig,
+    SwitchNode,
+)
 from coreason_manifest.core.workflow.nodes.visual_oversight import VisBenchRubricConfig, VisualInspectorNode
-from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint
+from coreason_manifest.spec.domains.mcp_contracts import MCPOperationSequence
+from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint, SciVisIntent
+from coreason_manifest.spec.domains.scivis_spatial import SpatialLayoutBlueprint
+from coreason_manifest.spec.domains.scivis_style import DesignSystemConfig
 
 
 def get_sota_scivis_topology() -> GraphFlow:
@@ -19,8 +30,9 @@ def get_sota_scivis_topology() -> GraphFlow:
         id="layout_agent",
         profile=CognitiveProfile(
             role="Layout Designer",
-            persona="Drafts spatial coordinates and edges",
+            persona="Drafts relative spatial constraints and layouts (AST) based on the academic design system.",
         ),
+        output_schema=SpatialLayoutBlueprint.model_json_schema(),
         operational_policy=None,
     )
 
@@ -44,7 +56,23 @@ def get_sota_scivis_topology() -> GraphFlow:
         id="critique_router",
         variable="critique_result",
         cases={"rejected": "layout_agent"},
-        default="final_renderer",
+        default="human_expert_review",
+    )
+
+    # Node 4.5: human_expert_review
+    human_expert_review = HumanNode(
+        id="human_expert_review",
+        prompt="Review the logical HierarchicalBlueprint and spatial SpatialLayoutBlueprint before rendering.",
+        options=["approve_to_render", "reject_to_layout", "reject_to_planner"],
+        escalation=EscalationStrategy(
+            type="escalate",
+            queue_name="human_review",
+            notification_level="info",
+            timeout_seconds=3600,
+        ),
+        steering_config=SteeringConfig(
+            allow_variable_mutation=False,
+        ),
     )
 
     # Node 5: final_renderer
@@ -52,8 +80,9 @@ def get_sota_scivis_topology() -> GraphFlow:
         id="final_renderer",
         profile=CognitiveProfile(
             role="Renderer",
-            persona="Compiles vector code and renders final artifact",
+            persona="Executes atomic MCP tool transactions on a headless canvas to render the final artifact.",
         ),
+        output_schema=MCPOperationSequence.model_json_schema(),
         operational_policy=None,
     )
 
@@ -63,7 +92,10 @@ def get_sota_scivis_topology() -> GraphFlow:
         Edge(from_node="layout_agent", to_node="visual_critic"),
         Edge(from_node="visual_critic", to_node="critique_router"),
         Edge(from_node="critique_router", to_node="layout_agent", condition="rejected"),
-        Edge(from_node="critique_router", to_node="final_renderer", condition="approved"),
+        Edge(from_node="critique_router", to_node="human_expert_review", condition="approved"),
+        Edge(from_node="human_expert_review", to_node="final_renderer", condition="approve_to_render"),
+        Edge(from_node="human_expert_review", to_node="layout_agent", condition="reject_to_layout"),
+        Edge(from_node="human_expert_review", to_node="semantic_parser", condition="reject_to_planner"),
     ]
 
     nodes_dict = {
@@ -71,6 +103,7 @@ def get_sota_scivis_topology() -> GraphFlow:
         layout_agent.id: layout_agent,
         visual_critic.id: visual_critic,
         critique_router.id: critique_router,
+        human_expert_review.id: human_expert_review,
         final_renderer.id: final_renderer,
     }
 
@@ -88,7 +121,12 @@ def get_sota_scivis_topology() -> GraphFlow:
             version="1.0.0",
             description="2026 SOTA Topology for Scientific Visualization",
         ),
-        interface=FlowInterface(),
+        interface=FlowInterface(
+            inputs={
+                "intent": SciVisIntent.model_json_schema(),
+                "style_profile": DesignSystemConfig.model_json_schema(),
+            }
+        ),
         graph=graph,
         type="graph",
         kind="GraphFlow",
