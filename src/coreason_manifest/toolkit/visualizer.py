@@ -148,6 +148,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
                 and source_node
                 and isinstance(source_node, HumanNode)
                 and getattr(source_node, "ui_contract", None)
+                and source_node.ui_contract is not None
             ):
                 for event in source_node.ui_contract.events:
                     if event.action == target_id:

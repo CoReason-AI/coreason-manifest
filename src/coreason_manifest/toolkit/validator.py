@@ -1083,7 +1083,12 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
                     adj[node.id].add(target_id)
 
         # GenUI Contract routing
-        if isinstance(node, HumanNode) and getattr(node, "ui_contract", None) and node.ui_contract.events:
+        if (
+            isinstance(node, HumanNode)
+            and getattr(node, "ui_contract", None)
+            and node.ui_contract is not None
+            and node.ui_contract.events
+        ):
             for event in node.ui_contract.events:
                 # event.action could be a SteeringCommand OR a target NodeID
                 if event.action in adj:
