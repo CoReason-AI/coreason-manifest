@@ -3,8 +3,8 @@ from typing import Any
 import pytest
 
 from coreason_manifest.adapters.observability.privacy import scrub_genui_payload
-from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.common.presentation import AdaptiveUIContract
+from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.telemetry.stream import StreamThoughtEnvelope, StreamUIEnvelope
 
 

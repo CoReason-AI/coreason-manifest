@@ -66,7 +66,9 @@ class Checkpoint(CoreasonModel):
 
     thread_id: Annotated[str, Field(description="The unique identifier for the execution thread.")]
     node_id: Annotated[str, Field(description="The ID of the Node where this checkpoint was taken.")]
-    state_diff: Annotated[list[JSONPatchOperation], Field(description="The RFC 6902 JSON Patch representing the state delta.")]
+    state_diff: Annotated[
+        list[JSONPatchOperation], Field(description="The RFC 6902 JSON Patch representing the state delta.")
+    ]
 
 
 # =========================================================================
