@@ -1,4 +1,5 @@
 # Prosperity-3.0
+from enum import StrEnum
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -11,6 +12,20 @@ from coreason_manifest.core.primitives.types import ProfileID, VariableID
 from coreason_manifest.core.security.compliance import RemediationAction
 
 from .base import LockConfig, Node
+
+
+class StatisticalStoppingRule(StrEnum):
+    CMH_CORMACK_GROSSMAN = "cmh_cormack_grossman"
+    ELKAN_KNEE = "elkan_knee"
+
+
+class CALConfig(BaseModel):
+    """Conformal Active Learning (CAL) Configuration for High-Volume Swarms."""
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    active_learning_batch_size: Annotated[int, Field(gt=0, description="Number of items to process before reprioritizing the queue.")] = 50
+    target_recall_percent: Annotated[float, Field(ge=0.0, le=1.0, description="Statistical recall threshold to hit before halting execution.")] = 0.95
+    stopping_rule: Annotated[StatisticalStoppingRule, Field(description="The mathematical method used to calculate recall estimates.")] = StatisticalStoppingRule.CMH_CORMACK_GROSSMAN
 
 
 class TournamentConfig(BaseModel):
@@ -58,11 +73,15 @@ class SwarmNode(Node):
         ),
     ] = 0.0
 
-    reducer_function: Literal["concat", "vote", "summarize", "tournament"] | None = Field(
+    reducer_function: Literal["concat", "vote", "summarize", "tournament", "tabular_join", "meta_analysis_matrix"] | None = Field(
         ..., description="How to combine results.", examples=["concat"]
     )
 
     tournament_config: TournamentConfig | None = None
+
+    cal_config: CALConfig | None = Field(
+        None, description="Active learning bounds for high-volume screening. If set, overrides standard exhaustion."
+    )
 
     sub_swarm_count: Annotated[
         int | None, Field(description="Required if using island_model. Number of isolated sub-swarms.")
@@ -93,6 +112,10 @@ class SwarmNode(Node):
     ]
     output_variable: VariableID = Field(
         ..., description="Variable to store the aggregated result.", examples=["final_report"]
+    )
+
+    export_interoperability: list[Literal["csv", "revman", "r_metafor"]] | None = Field(
+        None, description="Required target formats for the aggregated data matrix. Used for downstream biostatistics."
     )
 
     lock_config: LockConfig | None = Field(
