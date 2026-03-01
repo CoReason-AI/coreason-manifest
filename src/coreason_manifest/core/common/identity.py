@@ -158,3 +158,17 @@ class IdentityPassport(CoreasonModel):
     signature_hash: str = Field(
         ..., description="Hash of the originating JWT/Token signature. Anchors the passport to reality."
     )
+    parent_passport_id: str | None = Field(
+        None,
+        description=(
+            "ID of the parent's passport if this agent was spawned by a "
+            "Swarm delegation. Enables recursive lineage tracking."
+        ),
+    )
+    signature_algorithm: str = Field(
+        default="ES256",
+        description=(
+            "Algorithm used for the root signature (e.g., 'ES256', 'EdDSA', "
+            "or NIST FIPS 204 PQC 'ML-DSA-65'). Protects against downgrade attacks."
+        ),
+    )
