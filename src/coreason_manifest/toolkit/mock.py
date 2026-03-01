@@ -292,7 +292,6 @@ class MockFactory:
                 if chaos_config and self.rng.random() < chaos_config.error_rate:
                     w_state = NodeState.FAILED
                     w_error = "HTTP 500 Internal Server Error"
-                    w_outputs["error"] = w_error
 
                 w_hash = self._generate_hash(
                     f"{w_id}{json.dumps(w_inputs, sort_keys=True)}{json.dumps(w_outputs, sort_keys=True)}"
@@ -327,7 +326,6 @@ class MockFactory:
             if chaos_config and self.rng.random() < chaos_config.error_rate:
                 agg_state = NodeState.FAILED
                 agg_error = "HTTP 500 Internal Server Error"
-                agg_outputs["error"] = agg_error
 
             agg_hash = self._generate_hash(
                 f"{node.id}{json.dumps(agg_inputs, sort_keys=True)}{json.dumps(agg_outputs, sort_keys=True)}"
@@ -388,7 +386,6 @@ class MockFactory:
         if chaos_config and self.rng.random() < chaos_config.error_rate:
             state = NodeState.FAILED
             error = "HTTP 500 Internal Server Error"
-            outputs["error"] = error
 
         # Calculate hash
         data_to_hash = f"{node.id}{json.dumps(inputs, sort_keys=True)}{json.dumps(outputs, sort_keys=True)}"

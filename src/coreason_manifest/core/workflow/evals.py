@@ -7,7 +7,7 @@ from coreason_manifest.core.primitives.types import NodeID
 
 
 class ChaosConfig(CoreasonModel, frozen=True):
-    latency_ms: int = Field(default=0, description="Artificial latency to inject into node execution.")
+    latency_ms: int = Field(default=0, ge=0, description="Artificial latency to inject into node execution.")
     error_rate: float = Field(
         default=0.0, ge=0.0, le=1.0, description="Probability of forcing a node failure (0.0 to 1.0)."
     )
@@ -47,6 +47,9 @@ class FuzzingTarget(CoreasonModel):
         default_factory=list, description="Mutator strategies to employ (e.g. 'edge_cases', 'adversarial')."
     )
     invariants: dict[str, Any] = Field(default_factory=dict, description="JSON Schema invariants that must hold true.")
+    adversary: AdversaryProfile | None = Field(
+        default=None, description="Red-team configuration for stochastic semantic fuzzing."
+    )
 
 
 class EvalsManifest(CoreasonModel):
