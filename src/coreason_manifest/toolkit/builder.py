@@ -1100,6 +1100,8 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
+        if node.id in self._nodes:
+            raise ValueError(f"Builder Error: Node ID '{node.id}' already exists in the topology. Overwrites are strictly forbidden.")
         self._nodes[node.id] = node
         return self
 
@@ -1112,6 +1114,8 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
+        if agent.id in self._nodes:
+            raise ValueError(f"Builder Error: Node ID '{agent.id}' already exists in the topology. Overwrites are strictly forbidden.")
         self._nodes[agent.id] = agent
         return self
 

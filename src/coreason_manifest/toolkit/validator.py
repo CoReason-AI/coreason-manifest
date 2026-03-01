@@ -101,13 +101,24 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # Flatten nodes based on flow type
     nodes, edges_objs = get_unified_topology(flow)
 
+    valid_ids = set()
+    for node in nodes:
+        if node.id in valid_ids:
+            errors.append(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_TOPOLOGY_NODE_ID_COLLISION,
+                    severity="violation",
+                    message=f"Topology Error: Duplicate Node ID '{node.id}' detected in unified topology.",
+                    node_id=node.id
+                )
+            )
+        valid_ids.add(node.id)
+
     # Build simple adjacency map from explicit edges
-    adj_map: dict[str, set[str]] = {n.id: set() for n in nodes}
+    adj_map: dict[str, set[str]] = {n_id: set() for n_id in valid_ids}
     for edge in edges_objs:
         if edge.from_node in adj_map and edge.to_node in adj_map:
             adj_map[edge.from_node].add(edge.to_node)
-
-    valid_ids = {n.id for n in nodes}
 
     # 1. Common Checks
     if flow.governance:

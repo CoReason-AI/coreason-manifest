@@ -129,13 +129,14 @@ class Graph(CoreasonModel):
                 message="Graph must contain at least one node.",
             )
 
-        # ID Mismatch
+        # ID Mismatch and Collision Defense
+        seen_ids = set()
         for key, node in self.nodes.items():
             if key != node.id:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_ID_MISMATCH,
-                    message=f"Node key '{key}' does not match Node ID '{node.id}'.",
-                )
+                raise ValueError(f"Routing contradiction: Node key '{key}' does not match Node ID '{node.id}'.")
+            if node.id in seen_ids:
+                raise ValueError(f"Internal collision defense: Node ID '{node.id}' appears multiple times.")
+            seen_ids.add(node.id)
 
         # Entry Point
         if self.entry_point and self.entry_point not in valid_ids:
@@ -284,10 +285,7 @@ class LinearFlow(CoreasonModel):
         seen = set()
         for step in self.steps:
             if step.id in seen:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
-                    message=f"Duplicate Node ID '{step.id}' found.",
-                )
+                raise ValueError(f"Duplicate Node ID '{step.id}' found in LinearFlow steps.")
             seen.add(step.id)
 
         return self
