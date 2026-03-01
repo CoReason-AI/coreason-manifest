@@ -62,11 +62,7 @@ class AdaptiveUIContract(CoreasonModel):
             # If layout is empty/missing but widget_id is provided, auto-migrate to the new structure
             if not layout and widget_id:
                 props = data.get("props_mapping", {})
-                node = {
-                    "type": widget_id,
-                    "props": props,
-                    "children": []
-                }
+                node = {"type": widget_id, "props": props, "children": []}
                 data["layout"] = [node]
         return data
 
