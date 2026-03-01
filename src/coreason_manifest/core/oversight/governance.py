@@ -38,6 +38,18 @@ class TrafficPolicy(CoreasonModel):
     )
 
 
+class UnicodeSanitization(CoreasonModel):
+    """Declarative instructions for the runtime middleware to neutralize invisible payload attacks."""
+
+    strip_invisible_tags: bool = Field(
+        True, description="Strips Unicode Tag Plane characters (U+E0000-U+E007F) used for ASCII Smuggling."
+    )
+    strip_bidi_overrides: bool = Field(
+        True, description="Strips Bidirectional formatting characters used to mask malicious payloads."
+    )
+    normalization_form: Literal["NFC", "NFKC", "none"] = Field("NFC", description="Required canonical normalization.")
+
+
 class Safety(CoreasonModel):
     """Safety and filtering configuration."""
 
@@ -52,6 +64,9 @@ class Safety(CoreasonModel):
     )
     legal_disclaimer: str | None = Field(
         None, description="Text that must be appended to the final output deterministically by the runtime."
+    )
+    unicode_sanitization: UnicodeSanitization = Field(
+        default_factory=UnicodeSanitization, description="Hardened protections against invisible character injection."
     )
 
 

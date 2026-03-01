@@ -654,6 +654,47 @@ class BaseFlowBuilder:
         self.pre_flight_constraints: list[Constraint] = []
         self.evals: EvalsManifest | None = None
 
+    def with_attestation(self, attestation: Any) -> Self:
+        from coreason_manifest.core.workflow.flow import ProvenanceData, ProvenanceType
+
+        if self.metadata.provenance:
+            self.metadata = self.metadata.model_copy(
+                update={"provenance": self.metadata.provenance.model_copy(update={"attestation": attestation})}
+            )
+        else:
+            self.metadata = self.metadata.model_copy(
+                update={"provenance": ProvenanceData(type=ProvenanceType.AI, attestation=attestation)}
+            )
+        return self
+
+    def with_unicode_sanitization(
+        self, strip_tags: bool = True, strip_bidi: bool = True, norm: Literal["NFC", "NFKC", "none"] = "NFC"
+    ) -> Self:
+        from coreason_manifest.core.oversight.governance import Governance, Safety, UnicodeSanitization
+
+        sanitization = UnicodeSanitization(
+            strip_invisible_tags=strip_tags, strip_bidi_overrides=strip_bidi, normalization_form=norm
+        )
+
+        if not self.governance:
+            safety = Safety(
+                input_filtering=True, pii_redaction=False, content_safety="medium", unicode_sanitization=sanitization
+            )
+            self.governance = Governance(safety=safety)
+        else:
+            if not self.governance.safety:
+                safety = Safety(
+                    input_filtering=True,
+                    pii_redaction=False,
+                    content_safety="medium",
+                    unicode_sanitization=sanitization,
+                )
+            else:
+                safety = self.governance.safety.model_copy(update={"unicode_sanitization": sanitization})
+            self.governance = self.governance.model_copy(update={"safety": safety})
+
+        return self
+
     def with_pre_flight_constraint(
         self, variable: str, operator: str, value: Any, required: bool = True, error_message: str | None = None
     ) -> Self:

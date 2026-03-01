@@ -28,12 +28,28 @@ class ProvenanceType(StrEnum):
     HYBRID = "hybrid"
 
 
+class SignatureAlgorithm(StrEnum):
+    ECDSA = "ecdsa"
+    ED25519 = "ed25519"
+    RSA = "rsa"
+
+
+class CryptographicAttestation(CoreasonModel):
+    signature: str = Field(..., description="Base64 encoded cryptographic signature of the manifest's canonical hash.")
+    public_key_ref: str = Field(..., description="URI or ID of the public key used to verify the signature.")
+    algorithm: SignatureAlgorithm = Field(default=SignatureAlgorithm.ECDSA, description="The signing algorithm used.")
+    signed_at: str = Field(..., description="ISO-8601 timestamp of when the manifest was cryptographically sealed.")
+
+
 class ProvenanceData(CoreasonModel):
     type: ProvenanceType = Field(..., description="Origin type of the workflow.")
     generated_by: str | None = Field(None, description="The system or model ID that generated this manifest.")
     derived_from: str | None = Field(None, description="The ID/URI of the parent flow this was forked from.")
     rationale: str | None = Field(None, description="Reasoning for why this specific topology was generated.")
     modifications: list[str] = Field(default_factory=list, description="Human-readable log of changes.")
+    attestation: CryptographicAttestation | None = Field(
+        None, description="Cryptographic proof that this workflow was authorized."
+    )
 
 
 # Export AnyNode so it can be imported from here as well

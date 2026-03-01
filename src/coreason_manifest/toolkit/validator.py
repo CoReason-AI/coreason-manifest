@@ -179,6 +179,43 @@ def _validate_evals_topology(flow: GraphFlow | LinearFlow, valid_ids: set[str]) 
     return errors
 
 
+def _validate_hardened_appsec(flow: GraphFlow | LinearFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    # Check 1: Shadow Agents
+    if flow.status == "published":
+        provenance = getattr(flow.metadata, "provenance", None)
+        if not provenance or getattr(provenance, "attestation", None) is None:
+            errors.append(
+                ComplianceReport(
+                    severity="violation",
+                    code="ERR_SEC_MISSING_ATTESTATION",
+                    message="Published flows must contain a valid CryptographicAttestation "
+                    "to prevent Shadow Agent deployments.",
+                )
+            )
+
+    # Check 2: ASCII Smuggling
+    if flow.governance and flow.governance.safety:
+        sanitation = getattr(flow.governance.safety, "unicode_sanitization", None)
+        max_risk = flow.governance.max_risk_level
+        if (
+            sanitation
+            and sanitation.strip_invisible_tags is False
+            and (max_risk is None or max_risk.weight > RiskLevel.SAFE.weight)
+        ):
+            errors.append(
+                ComplianceReport(
+                    severity="warning",
+                    code="ERR_SEC_ASCII_SMUGGLING_EXPOSED",
+                    message="Unicode tag stripping is disabled on a flow with elevated risk privileges, "
+                    "exposing the agent to ASCII Smuggling attacks.",
+                )
+            )
+
+    return errors
+
+
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Semantically validate a Flow (Linear or Graph).
@@ -292,6 +329,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # 5. Security & Kill Switch
     if flow.governance and flow.governance.max_risk_level:
         errors.extend(_validate_kill_switch(flow))
+    errors.extend(_validate_hardened_appsec(flow))
 
     # 6. Middleware References
     errors.extend(_validate_middleware_refs(flow))
