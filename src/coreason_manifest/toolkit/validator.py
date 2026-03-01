@@ -595,7 +595,7 @@ def _validate_swarm_concurrency(nodes: list[AnyNode]) -> list[ComplianceReport]:
 def _validate_human_routes(nodes: list[AnyNode], valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
     for node in nodes:
-        if isinstance(node, HumanNode) and getattr(node, "routes", None):
+        if isinstance(node, HumanNode) and getattr(node, "routes", None) and node.routes is not None:
             errors.extend(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_TOPOLOGY_BROKEN_SWITCH,
