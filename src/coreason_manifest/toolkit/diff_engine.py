@@ -326,7 +326,11 @@ def _apply_patch_in_place(state: Any, patch: JSONPatchOperation) -> None:
             if patch.from_ is None:
                 raise ValueError("move requires from")
             source_parent, source_key = _resolve_json_pointer(state, patch.from_)
-            val = source_parent.pop(source_key) if isinstance(source_parent, dict) else source_parent.pop(int(source_key))
+            val = (
+                source_parent.pop(source_key)
+                if isinstance(source_parent, dict)
+                else source_parent.pop(int(source_key))
+            )
             target_parent, target_key = _resolve_json_pointer(state, patch.path)
             if isinstance(target_parent, dict):
                 target_parent[target_key] = val
@@ -398,7 +402,9 @@ def generate_inverse_patches(
                 # Reversing a move is a move back
                 if patch.from_ is None:
                     raise ValueError("move requires from")
-                inverse_patches.append(JSONPatchOperation(op=PatchOp.MOVE, path=patch.from_, value=None, from_=patch.path))
+                inverse_patches.append(
+                    JSONPatchOperation(op=PatchOp.MOVE, path=patch.from_, value=None, from_=patch.path)
+                )
                 _apply_patch_in_place(current_state, patch)
 
             case PatchOp.COPY:
