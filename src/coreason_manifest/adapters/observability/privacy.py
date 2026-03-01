@@ -110,3 +110,52 @@ class PrivacySentinel:
         # Use first 8 chars of hash as prefix
         hash_prefix = full_hash[:8]
         return f"<REDACTED:SECRET:{hash_prefix}>"
+
+
+def scrub_genui_payload(payload: dict[Any, Any]) -> dict[Any, Any]:
+    """
+    If a payload contains a GenUI contract (e.g., a dictionary with a `layout`
+    of UI components), recursively strip all values inside the `props` fields,
+    replacing them with `"[REDACTED_PII]"`. The schema/structure remains intact.
+    """
+
+    # Check if this payload represents a GenUI contract
+    # We do a basic check for presence of "layout" key
+    def _scrub_recursive(data: Any, in_props: bool = False) -> Any:
+        if isinstance(data, dict):
+            new_dict = {}
+            for k, v in data.items():
+                # If we are inside props, or if the current key is props, we scrub
+                is_props_now = in_props or k == "props"
+
+                if is_props_now:
+                    # Replace everything inside props with "[REDACTED_PII]"
+                    # but keep dictionaries and lists to maintain structure
+                    if isinstance(v, dict):
+                        new_dict[k] = _scrub_recursive(v, in_props=True)
+                    elif isinstance(v, list):
+                        new_dict[k] = [_scrub_recursive(item, in_props=True) for item in v]
+                    else:
+                        new_dict[k] = "[REDACTED_PII]"
+                else:
+                    new_dict[k] = _scrub_recursive(v, in_props=False)
+            return new_dict
+        if isinstance(data, list):
+            return [_scrub_recursive(item, in_props=in_props) for item in data]
+        if in_props:
+            return "[REDACTED_PII]"
+        return data
+
+    def _find_and_scrub(data: Any) -> Any:
+        if isinstance(data, dict):
+            if "layout" in data:
+                return _scrub_recursive(data)
+            return {k: _find_and_scrub(v) for k, v in data.items()}
+        if isinstance(data, list):
+            return [_find_and_scrub(item) for item in data]
+        return data
+
+    result = _find_and_scrub(payload)
+    if isinstance(result, dict):
+        return result
+    return payload

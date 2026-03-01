@@ -48,6 +48,15 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
     safe_id = _safe_id(node.id)
     label = _get_node_label(node)
 
+    # Check for Agentic UX / GenUI emission
+    is_gen_ui = False
+    tooltip = ""
+    if node.presentation and hasattr(node.presentation, "render_strategy"):
+        strategy = node.presentation.render_strategy
+        if strategy in ("gen_ui", "mcp_apps"):
+            is_gen_ui = True
+            tooltip = "Emits GenUI"
+
     # Fallback/Enhancement if no explicit presentation label
     if not (node.presentation and node.presentation.label):
         # Convert snake_case to Title Case (e.g. emergence_inspector -> Emergence Inspector)
@@ -75,8 +84,15 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
         state = snapshot.node_states[node.id]
         classes.append(state.lower())
 
+    if is_gen_ui:
+        classes.append("genui")
+
     if classes:
         definition += ":::" + ":::".join(classes)
+
+    # Tooltip syntax for mermaid (using click id "tooltip" style)
+    if tooltip:
+        definition += f'\n    click {safe_id} href "#" "{tooltip}"'
 
     return definition
 
@@ -176,6 +192,9 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    classDef skipped fill:#e5e7e9,stroke:#bdc3c7,stroke-dasharray: 2 2;")
     lines.append("    classDef cancelled fill:#e5e7e9,stroke:#bdc3c7,stroke-dasharray: 2 2;")
     lines.append("    classDef pending fill:#ffffff,stroke:#333,stroke-width:1px,stroke-dasharray: 2 2;")
+
+    # GenUI style
+    lines.append("    classDef genui fill:#f5eef8,stroke:#9b59b6,stroke-width:3px,color:#6c3483;")
 
     return "\n".join(lines)
 

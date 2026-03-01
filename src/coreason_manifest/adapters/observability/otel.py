@@ -28,3 +28,16 @@ def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:
         attributes.update(execution.attributes)
 
     return attributes
+
+
+def record_genui_milestone(span: Any, event_type: str, timestamp: float) -> None:
+    """
+    Records the exact GenUI emission timing (e.g. "Time to First Component" / TTFC)
+    by adding a specific event to an active span.
+    """
+    if hasattr(span, "add_event"):
+        span.add_event(
+            name=event_type,
+            attributes={"gen_ai.system.genui": True},
+            timestamp=int(timestamp * 1e9),  # OTel timestamps are typically in nanoseconds
+        )
