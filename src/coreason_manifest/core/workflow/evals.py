@@ -34,9 +34,7 @@ class TestCase(CoreasonModel):
     chaos_config: ChaosConfig | None = Field(
         default=None, description="Infrastructure faults to apply during this test."
     )
-    adversary: AdversaryProfile | None = Field(
-        default=None, description="Red-team configuration for semantic fuzzing."
-    )
+    adversary: AdversaryProfile | None = Field(default=None, description="Red-team configuration for semantic fuzzing.")
 
 
 class FuzzingTarget(CoreasonModel):
