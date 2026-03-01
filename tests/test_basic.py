@@ -14,7 +14,9 @@ def test_import() -> None:
 @pytest.fixture
 def mock_factory() -> Any:
     from coreason_manifest.toolkit.mock import MockFactory
+
     return MockFactory(seed=42)
+
 
 def test_sota_passport_instantiation(mock_factory: Any) -> None:
     """
