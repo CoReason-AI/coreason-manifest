@@ -102,6 +102,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     nodes, edges_objs = get_unified_topology(flow)
 
     valid_ids = set()
+    collision_detected = False
     for node in nodes:
         if node.id in valid_ids:
             errors.append(
@@ -112,7 +113,12 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                     node_id=node.id,
                 )
             )
+            collision_detected = True
         valid_ids.add(node.id)
+
+    # SOTA Short-Circuit: Halt static analysis on mathematically unstable graphs
+    if collision_detected:
+        return errors
 
     # Build simple adjacency map from explicit edges
     adj_map: dict[str, set[str]] = {n_id: set() for n_id in valid_ids}
@@ -138,8 +144,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 2. LinearFlow Specific Checks
     if isinstance(flow, LinearFlow):
-        node_ids = {n.id for n in flow.steps}
-        errors.extend(_validate_switch_logic(flow.steps, node_ids))
+        errors.extend(_validate_switch_logic(flow.steps, valid_ids))
         errors.extend(_validate_swarm_concurrency(flow.steps))
 
     # 3. GraphFlow Specific Checks
@@ -840,7 +845,12 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
     """
     # 1. Initialize Map with strict type inference for node iteration
     nodes, edges_objs = get_unified_topology(flow)
-    adj: dict[str, set[str]] = {node.id: set() for node in nodes}
+
+    # SOTA Fix: Safe initialization without silent overwrites
+    adj: dict[str, set[str]] = {}
+    for node in nodes:
+        if node.id not in adj:
+            adj[node.id] = set()
 
     # 2. Add Flow Structure Edges
     for edge in edges_objs:
