@@ -1031,11 +1031,15 @@ class BaseFlowBuilder:
         self,
         node_id: str,
         prompt: str,
-        contract: AdaptiveUIContract,
+        contract: AdaptiveUIContract | dict[str, Any],
         routes: dict[str, str] | None = None,
         shadow_timeout: int = 300,
     ) -> Self:
         from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
+        # Validate and coerce if dictionary provided
+        if isinstance(contract, dict):
+            contract = AdaptiveUIContract.model_validate(contract)
 
         node = HumanNode(
             id=node_id,

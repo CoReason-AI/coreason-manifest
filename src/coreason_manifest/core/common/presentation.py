@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -35,7 +35,7 @@ class UIComponentNode(CoreasonModel):
 
 
 class AdaptiveUIContract(CoreasonModel):
-    layout: list[UIComponentNode] = Field(..., description="The root elements of the generated UI.")
+    layout: list[UIComponentNode] = Field(default_factory=list, description="The root elements of the generated UI.")
     widget_id: str | None = Field(
         None, description="[DEPRECATED] The abstract identifier for the frontend component registry."
     )
@@ -51,6 +51,24 @@ class AdaptiveUIContract(CoreasonModel):
     fallback_to_text: bool = Field(
         True, description="Gracefully degrade to JSON Form or Text input if widget is unavailable."
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_legacy_widget(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            layout = data.get("layout")
+            widget_id = data.get("widget_id")
+
+            # If layout is empty/missing but widget_id is provided, auto-migrate to the new structure
+            if not layout and widget_id:
+                props = data.get("props_mapping", {})
+                node = {
+                    "type": widget_id,
+                    "props": props,
+                    "children": []
+                }
+                data["layout"] = [node]
+        return data
 
 
 class NotificationRouting(CoreasonModel):
@@ -140,3 +158,6 @@ class PresentationHints(CoreasonModel):
         Literal["basic", "detailed", "debug"],
         Field(description="Preferred metadata detail level."),
     ] = "basic"
+
+
+UIComponentNode.model_rebuild()
