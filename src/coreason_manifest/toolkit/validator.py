@@ -102,6 +102,8 @@ def _validate_planner_reasoning(nodes: list[AnyNode]) -> list[ComplianceReport]:
         for node in nodes
         if isinstance(node, PlannerNode) and getattr(node, "reasoning", None) is None
     ]
+
+
 def _validate_pre_flight_constraints(flow: GraphFlow | LinearFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
@@ -131,6 +133,33 @@ def _validate_pre_flight_constraints(flow: GraphFlow | LinearFlow) -> list[Compl
                     details={"variable": constraint.variable},
                 )
             )
+
+    return errors
+
+
+def _validate_evals_feasibility(flow: GraphFlow | LinearFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if not hasattr(flow, "evals") or not flow.evals or not flow.evals.test_cases:
+        return errors
+    if not hasattr(flow, "pre_flight_constraints") or not flow.pre_flight_constraints:
+        return errors
+
+    for constraint in flow.pre_flight_constraints:
+        base_var = constraint.variable.split(".")[0]
+
+        errors.extend(
+            ComplianceReport(
+                code="ERR_TEST_CONSTRAINT_MISMATCH",
+                severity="warning",
+                message=f"Test case '{getattr(test_case, 'id', 'unknown')}' lacks mocked input for "
+                f"pre-flight constraint variable '{base_var}'.",
+            )
+            for test_case in flow.evals.test_cases
+            if hasattr(test_case, "inputs") and test_case.inputs is not None and base_var not in test_case.inputs
+        )
+    return errors
+
 
 def _validate_evals_topology(flow: GraphFlow | LinearFlow, valid_ids: set[str]) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
@@ -268,6 +297,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     errors.extend(_validate_middleware_refs(flow))
     errors.extend(_validate_planner_reasoning(nodes))
     errors.extend(_validate_evals_topology(flow, valid_ids))
+    errors.extend(_validate_evals_feasibility(flow))
 
     return errors
 
@@ -1012,6 +1042,11 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
 
             # SOTA FinOps: If multiple conditional edges exist between two nodes,
             # enforce the mathematically safest worst-case upper bound.
+            # SOTA FinOps Architecture Decision:
+            # Explicit Graph.edges have native cost_weight and latency_weight_ms.
+            # Implicit topological routes (SwitchNode branches, HumanNode SteeringCommands)
+            # do not carry inherent edge traversal costs; their cost is entirely assumed
+            # by the execution of the target node. They correctly default to 0.0 in the DP map.
             edge_weights[key] = (max(existing_cost, edge.cost_weight), max(existing_lat, edge.latency_weight_ms))
 
     from collections import defaultdict
