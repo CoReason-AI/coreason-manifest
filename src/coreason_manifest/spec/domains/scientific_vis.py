@@ -58,7 +58,7 @@ class SciVisIntent(BaseModel):
     )
     grounding_preference: Literal["text_dominant", "sketch_dominant", "balanced"] = Field(
         default="text_dominant",
-        description="Dictates how the VLM should resolve conflicts between text descriptions and sketch layouts."
+        description="Dictates how the VLM should resolve conflicts between text descriptions and sketch layouts.",
     )
 
 
