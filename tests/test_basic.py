@@ -127,3 +127,13 @@ def test_symbolic_execution_inspector_node() -> None:
             output_variable="result",
             mode="symbolic_execution",
         )
+
+    from coreason_manifest.core.oversight.resilience import RetryStrategy
+
+    # Valid resilience config
+    valid_retry = RetryStrategy(max_attempts=3, symbolic_repair_budget=5)
+    assert valid_retry.symbolic_repair_budget == 5
+
+    # Invalid resilience config (negative budget)
+    with pytest.raises(ValidationError):
+        RetryStrategy(max_attempts=3, symbolic_repair_budget=-1)
