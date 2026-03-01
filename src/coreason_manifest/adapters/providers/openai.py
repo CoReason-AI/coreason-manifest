@@ -11,16 +11,7 @@ from coreason_manifest.core.workflow.nodes import AgentNode
 def node_to_openai_assistant(
     node: AgentNode, tool_packs: list[ToolPack] | None = None, definitions: FlowDefinitions | None = None
 ) -> dict[str, Any]:
-    """
-    Convert an AgentNode into an OpenAI Assistant definition.
-
-    Args:
-        node: The AgentNode to convert.
-        tool_packs: A list of available ToolPacks.
-
-    Returns:
-        A dictionary representing the OpenAI Assistant configuration.
-    """
+    """Convert an AgentNode into an OpenAI Assistant definition."""
     if tool_packs is None:
         tool_packs = []
 

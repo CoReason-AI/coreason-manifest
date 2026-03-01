@@ -4,15 +4,7 @@ from coreason_manifest.core.state.tools import MCPTool, ToolPack
 
 
 def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
-    """
-    Convert a ToolPack into Model Context Protocol (MCP) resource definitions.
-
-    Args:
-        pack: The ToolPack to convert.
-
-    Returns:
-        A list of dictionaries representing MCP resources.
-    """
+    """Convert a ToolPack into Model Context Protocol (MCP) resource definitions."""
     resources = []
     for tool in pack.tools:
         if isinstance(tool, MCPTool):
@@ -35,9 +27,7 @@ def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
 
 
 def pack_to_mcp_prompts(pack: ToolPack) -> list[dict[str, Any]]:
-    """
-    Convert a ToolPack's MCP tools into MCP prompt definitions.
-    """
+    """Convert a ToolPack's MCP tools into MCP prompt definitions."""
     prompts = []
     for tool in pack.tools:
         if isinstance(tool, MCPTool):
@@ -51,10 +41,7 @@ def pack_to_mcp_prompts(pack: ToolPack) -> list[dict[str, Any]]:
 
 
 def parse_mcp_tool_payload(tool: MCPTool) -> dict[str, Any]:
-    """
-    Safely parse an MCPTool into a standard dictionary payload suitable
-    for a remote Model Context Protocol server handshake.
-    """
+    """Parse an MCPTool into a standard payload for a remote Model Context Protocol server handshake."""
     return {
         "mcp_version": tool.mcp_version,
         "capabilities": tool.supported_capabilities,

@@ -35,12 +35,7 @@ class BlackBoxRecorder:
         traceparent: str | None = None,
         tracestate: str | None = None,
     ) -> NodeExecution:
-        """
-        Records a single execution step.
-        1. Sanitizes data.
-        2. Computes integrity hash (linking to previous step).
-        3. Returns immutable record.
-        """
+        """Record a single execution step and return an immutable record."""
         if timestamp is None:
             timestamp = datetime.now(UTC)
 

@@ -5,9 +5,7 @@ from coreason_manifest.core.telemetry_schemas import NodeExecution
 
 
 def to_otel_attributes(execution: NodeExecution) -> dict[str, Any]:
-    """
-    Maps a NodeExecution event to OpenTelemetry Semantic Conventions.
-    """
+    """Map a NodeExecution event to OpenTelemetry Semantic Conventions."""
     attributes: dict[str, Any] = {
         "gen_ai.system": execution.node_id,
         # OTel attributes must be primitives or arrays of primitives.

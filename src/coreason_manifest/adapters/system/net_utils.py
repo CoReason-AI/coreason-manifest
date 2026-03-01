@@ -2,12 +2,7 @@ import idna
 
 
 def canonicalize_domain(domain: str) -> str:
-    """
-    Canonicalizes a domain name for strict comparison.
-    1. Strips trailing dot.
-    2. Lowercases.
-    3. IDNA encodes to ASCII (Punycode) using strict IDNA 2008 rules.
-    """
+    """Canonicalize a domain name for strict comparison via IDNA encoding."""
     if not domain:
         return ""
 

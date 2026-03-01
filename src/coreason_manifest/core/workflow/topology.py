@@ -3,7 +3,7 @@ from coreason_manifest.core.workflow.nodes import AnyNode
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
-    """Tarjan's algorithm to find strongly connected components."""
+    """Find strongly connected components using Tarjan's algorithm."""
     visited: set[str] = set()
     stack: list[str] = []
     on_stack: set[str] = set()
@@ -45,7 +45,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
 
 
 def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> set[str]:
-    """BFS to find all nodes reachable from the entry points."""
+    """Find all nodes reachable from the entry points via BFS."""
     reachable = set(entry_nodes)
     queue = list(entry_nodes)
 
@@ -61,8 +61,8 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
 
 def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], list[Edge]]:
     """
-    Returns a unified view of the flow topology (nodes and edges).
-    For LinearFlow, it generates implicit edges between sequential steps.
+    Return a unified view of the flow topology (nodes and edges).
+    Generates implicit edges between sequential steps for LinearFlow.
     """
     if isinstance(flow, GraphFlow):
         return list(flow.graph.nodes.values()), flow.graph.edges

@@ -57,9 +57,7 @@ class UniqueKeyLoader(yaml.SafeLoader):
 
 
 def construct_mapping_unique(loader: yaml.SafeLoader, node: yaml.Node, deep: bool = False) -> dict[Any, Any]:
-    """
-    Construct a mapping while checking for duplicate keys.
-    """
+    """Construct a mapping while checking for duplicate keys."""
     if not isinstance(node, MappingNode):
         # Cast node to Any to access attributes not in base Node but expected by ConstructorError format
         node_any = cast(Any, node)  # noqa: TC006
@@ -127,9 +125,7 @@ class SandboxedPathFinder(importlib.abc.MetaPathFinder):
         path: Any = None,
         target: Any = None,  # noqa: ARG002
     ) -> importlib.machinery.ModuleSpec | None:
-        """
-        Attempt to find the module in the current jail root using standard importlib machinery.
-        """
+        """Attempt to find the module in the current jail root using standard importlib machinery."""
         # 1. CRITICAL: Block sandbox escapes via Wasm/threading or direct OS execution
         if fullname in ("threading", "multiprocessing", "concurrent", "_thread", "os", "subprocess"):
             from coreason_manifest.core.exceptions import SecurityJailViolationError
@@ -296,10 +292,7 @@ _HOOK_INSTALLED = False
 
 
 def _install_audit_hook() -> None:
-    """
-    Install a sys.audit hook to monitor file system access.
-    The hook is active only when _jail_root_var is set (inside sandbox_context).
-    """
+    """Install a sys.audit hook to monitor file system access."""
     global _HOOK_INSTALLED
     if _HOOK_INSTALLED:
         return
@@ -366,10 +359,7 @@ _install_audit_hook()
 
 @contextmanager
 def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
-    """
-    Context manager to activate the sandboxed finder for the given jail root.
-    Ensures the finder is registered in sys.meta_path.
-    """
+    """Activate the sandboxed finder for the given jail root."""
     # Register finder if not present (idempotent)
     if _SANDBOXED_FINDER not in sys.meta_path:
         sys.meta_path.insert(0, _SANDBOXED_FINDER)
@@ -385,9 +375,7 @@ def sandbox_context(jail_root: Path) -> Generator[None, None, None]:
 
 
 def _scan_for_dynamic_references(data: Any) -> bool:
-    """
-    Recursively scan the data structure for potential dynamic code execution references.
-    """
+    """Recursively scan the data structure for potential dynamic code execution references."""
     if isinstance(data, dict):
         for value in data.values():
             if _scan_for_dynamic_references(value):
@@ -402,7 +390,7 @@ def _scan_for_dynamic_references(data: Any) -> bool:
 
 
 def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: frozenset[Path] | None = None) -> Any:
-    """Recursively resolves JSON/YAML $include while guarding against circular dependencies and jail escapes."""
+    """Recursively resolve JSON/YAML $include while guarding against circular dependencies and jail escapes."""
     seen = frozenset() if seen is None else seen
 
     if isinstance(data, dict):
@@ -445,9 +433,7 @@ def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: froze
 def load_flow_from_file(
     path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False, strict_security: bool = True
 ) -> LinearFlow | GraphFlow:
-    """
-    Load a flow manifest from a YAML or JSON file.
-    """
+    """Load a flow manifest from a YAML or JSON file."""
     file_path = Path(path).resolve()
     jail_root = root_dir or file_path.parent
 
@@ -493,9 +479,7 @@ def load_flow_from_file(
 def _execute_jailed_module(
     file_path: Path, root_dir: Path, class_name: str, component_name: str, file_ref: str
 ) -> type:
-    """
-    Execute a module in a sandboxed environment and retrieve the target class.
-    """
+    """Execute a module in a sandboxed environment and retrieve the target class."""
     # Explicit warning for audit logs
     warnings.warn(
         f"Dynamic Code Execution: Loading {component_name} from {file_ref}. Ensure this code is trusted.",
@@ -554,9 +538,7 @@ def _execute_jailed_module(
 
 
 def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -> type:
-    """
-    Helper to load a class from a reference string in a secure sandbox context.
-    """
+    """Load a class from a reference string in a secure sandbox context."""
     if ":" not in reference:
         raise ValueError(f"Invalid reference format: {reference}. Expected 'file.py:ClassName'.")
 
@@ -596,32 +578,12 @@ def _load_sandboxed_class(reference: str, root_dir: Path, component_name: str) -
 
 
 def load_agent_from_ref(reference: str, root_dir: Path) -> type:
-    """
-    Load an Agent class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
-
-    Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Agent class.
-    """
+    """Load an Agent class from a Python file reference (file.py:ClassName)."""
     return _load_sandboxed_class(reference, root_dir, "agent")
 
 
 def load_middleware_from_ref(reference: str, root_dir: Path) -> type:
-    """
-    Load a Middleware class from a Python file reference (file.py:ClassName).
-    WARNING: Executes arbitrary code. Ensure source is trusted.
-
-    Args:
-        reference: string in format "path/to/file.py:ClassName"
-        root_dir: The root directory for file access confinement.
-
-    Returns:
-        The loaded Middleware class.
-    """
+    """Load a Middleware class from a Python file reference (file.py:ClassName)."""
     middleware_class = _load_sandboxed_class(reference, root_dir, "middleware")
 
     req_method = getattr(middleware_class, "intercept_request", None)

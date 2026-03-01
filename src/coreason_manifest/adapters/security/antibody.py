@@ -2,28 +2,23 @@ import math
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class DataAnomaly(BaseModel):
-    """
-    Represents a quarantined data segment that failed strict validation
-    due to non-computable values (NaN, Inf) or un-serializable types.
-    """
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    code: str
-    path: str
-    value_repr: str
-    description: str
+    code: str = Field(..., description="The error code associated with the anomaly.")
+    path: str = Field(..., description="The JSON path to the anomalous field.")
+    value_repr: str = Field(..., description="A string representation of the anomalous value.")
+    description: str = Field(..., description="A detailed description of the anomaly.")
 
 
 VALID_PRIMITIVES = (str, int, float, bool, type(None), datetime)
 
 
 def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
-    """Evaluates a single value and returns a serialized anomaly if invalid."""
+    """Evaluate a single value and return a serialized anomaly if invalid."""
     if isinstance(v, BaseModel):
         # We can recursively validate BaseModels later, or just trust their serialization
         return None
@@ -46,10 +41,7 @@ def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
 
 
 def _scan_and_quarantine(data: Any, path: str) -> Any:
-    """
-    Recursively scans and functionally rebuilds the input structure,
-    replacing anomalies (NaN, Inf, Un-serializable) with DataAnomaly dicts.
-    """
+    """Recursively scan and rebuild the input structure, replacing anomalies with DataAnomaly objects."""
     if isinstance(data, dict):
         return {
             k: _get_anomaly(v, f"{path}.{k}" if path else k)
@@ -73,11 +65,6 @@ def _scan_and_quarantine(data: Any, path: str) -> Any:
 
 
 class AntibodyBase(BaseModel):
-    """
-    Base class for Zero-Trust Boundary objects.
-    Enforces a 'Quarantine' stage (Stage 1) before standard Pydantic Validation (Stage 2).
-    """
-
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     @model_validator(mode="before")

@@ -47,9 +47,7 @@ class PrivacySentinel:
             self.sensitive_words.update(custom_sensitive_keys)
 
     def sanitize(self, data: Any) -> Any:
-        """
-        Recursively sanitizes the input data.
-        """
+        """Recursively sanitize the input data."""
         if isinstance(data, dict):
             return {k: self._sanitize_kv(k, v) for k, v in data.items()}
         if isinstance(data, list):
@@ -59,10 +57,7 @@ class PrivacySentinel:
         return data
 
     def _sanitize_kv(self, key: str, value: Any) -> Any:
-        """
-        Sanitizes a key-value pair.
-        Checks the key for secret terms first.
-        """
+        """Sanitize a key-value pair."""
         # 1. Secret Detection based on Key Name
         if self.redact_secrets and isinstance(key, str):
             lower_key = key.lower()
@@ -85,9 +80,7 @@ class PrivacySentinel:
         return self.sanitize(value)
 
     def _sanitize_string(self, text: str) -> str:
-        """
-        Checks a string value for PII.
-        """
+        """Check a string value for PII."""
         if not self.redact_pii:
             return text
 
@@ -101,9 +94,7 @@ class PrivacySentinel:
         return text
 
     def _redact(self, value: str) -> str:
-        """
-        Returns a structured redaction string: <REDACTED:SECRET:{hash_prefix}>
-        """
+        """Return a structured redaction string: <REDACTED:SECRET:{hash_prefix}>."""
         # compute SHA256(value + salt)
         combined = value + self.hashing_salt
         full_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()

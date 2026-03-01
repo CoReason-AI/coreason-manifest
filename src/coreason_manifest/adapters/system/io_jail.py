@@ -29,14 +29,7 @@ class ManifestIO:
     """
 
     def __init__(self, root_dir: Path, allow_external_refs: bool = False, strict_security: bool = True):
-        """
-        Initialize the secure loader.
-
-        Args:
-            root_dir: The root directory to confine file access to.
-            allow_external_refs: Whether to allow loading files outside the root directory.
-            strict_security: If True, enforce strict TOCTOU protections (requires O_NOFOLLOW).
-        """
+        """Initialize the secure loader."""
         self.jail = root_dir.resolve()
         self.allow_external = allow_external_refs
 
@@ -58,10 +51,7 @@ class ManifestIO:
         return os.name == "posix"
 
     def _read_from_fd(self, fd: int) -> str:
-        """
-        Read content from a file descriptor.
-        This method takes ownership of the file descriptor via os.fdopen.
-        """
+        """Read content from a file descriptor taking ownership via os.fdopen."""
         # Wrap the descriptor in a Python file object
         # Note: os.fdopen takes ownership of the fd, so closing 'f' closes 'fd'
         with os.fdopen(fd, "r", encoding="utf-8") as f:
@@ -70,13 +60,6 @@ class ManifestIO:
     def read_text(self, path: str) -> str:
         """
         Read a file securely using low-level OS calls to prevent TOCTOU.
-        Returns the raw string content.
-
-        Args:
-            path: Relative path to the file within the jail.
-
-        Returns:
-            The file content as a string.
 
         Raises:
             SecurityViolationError: If path traversal or unsafe permissions are detected.
@@ -155,12 +138,6 @@ class ManifestIO:
     def load(self, path: str) -> dict[str, Any]:
         """
         Load a YAML/JSON file securely using low-level OS calls to prevent TOCTOU.
-
-        Args:
-            path: Relative path to the file within the jail.
-
-        Returns:
-            The parsed dictionary content.
 
         Raises:
             SecurityViolationError: If path traversal or unsafe permissions are detected.

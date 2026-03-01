@@ -7,10 +7,6 @@ from coreason_manifest.core.primitives.types import NodeID
 
 
 class TestCase(CoreasonModel):
-    """
-    A deterministic test case for an agent graph.
-    """
-
     mock_inputs: dict[str, Any] = Field(
         default_factory=dict, description="Variables to inject into the blackboard at start."
     )
@@ -21,21 +17,15 @@ class TestCase(CoreasonModel):
 
 
 class FuzzingTarget(CoreasonModel):
-    """
-    Definition of a fuzzing target for automated adversarial probing.
-    """
-
     variables: list[str] = Field(default_factory=list, description="Input variables to fuzz.")
     mutators: list[str] = Field(
-        default_factory=list, description="Mutator strategies to employ (e.g. 'edge_cases', 'adversarial')."
+        default_factory=list,
+        description="Mutator strategies to employ.",
+        examples=["edge_cases", "adversarial"],
     )
     invariants: dict[str, Any] = Field(default_factory=dict, description="JSON Schema invariants that must hold true.")
 
 
 class EvalsManifest(CoreasonModel):
-    """
-    Manifest defining how an agent graph is deterministically tested.
-    """
-
     test_cases: list[TestCase] = Field(default_factory=list, description="List of test cases to execute.")
     fuzzing_targets: list[FuzzingTarget] = Field(default_factory=list, description="List of fuzzing targets.")

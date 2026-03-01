@@ -13,9 +13,7 @@ from pydantic import BaseModel
 
 
 def to_canonical_timestamp(dt: datetime) -> str:
-    """
-    Converts a datetime to a strict UTC string format: YYYY-MM-DDTHH:MM:SSZ
-    """
+    """Convert a datetime to a strict UTC string format."""
     if dt.tzinfo is None:
         # Assume UTC if naive
         dt = dt.replace(tzinfo=UTC)
@@ -28,9 +26,7 @@ def to_canonical_timestamp(dt: datetime) -> str:
 
 
 class MerkleNode(TypedDict):
-    """
-    Standard structure for verifiable execution blocks.
-    """
+    """Standard structure for verifiable execution blocks."""
 
     execution_hash: str
     parent_hashes: list[str]
@@ -41,10 +37,9 @@ class HashingStrategy(ABC):
     Abstract base class for hashing strategies.
     Ensures verification capability across different protocol versions.
     """
-
     @abstractmethod
     def compute_hash(self, obj: Any) -> str:
-        """Computes the deterministic hash of the object."""
+        """Compute the deterministic hash of the object."""
 
 
 class CanonicalHashingStrategy(HashingStrategy):
@@ -60,9 +55,7 @@ class CanonicalHashingStrategy(HashingStrategy):
     """
 
     def _recursive_sort_and_sanitize(self, obj: Any) -> Any:
-        """
-        Prepares an object for RFC 8785 Canonical JSON serialization.
-        """
+        """Prepare an object for RFC 8785 Canonical JSON serialization."""
         if isinstance(obj, dict):
             # Universal Hash Sanitization:
             # Strip modern keys (execution_hash, signature, __*)
@@ -121,6 +114,7 @@ class CanonicalHashingStrategy(HashingStrategy):
         raise TypeError(f"Object of type {type(obj)} is not deterministically serializable.")
 
     def compute_hash(self, obj: Any) -> str:
+        """Compute the deterministic hash of the object via Canonical JSON."""
         if hasattr(obj, "compute_hash"):
             # Self-hashing objects (avoid infinite recursion if they call back here)
             return str(obj.compute_hash())
@@ -140,18 +134,12 @@ class CanonicalHashingStrategy(HashingStrategy):
 
 
 def compute_hash(obj: Any) -> str:
-    """
-    Computes a SHA-256 hash of a JSON-serializable object using the CanonicalHashingStrategy (RFC 8785).
-    """
-    # Inherently use CanonicalHashingStrategy
+    """Compute a SHA-256 hash of a JSON-serializable object using CanonicalHashingStrategy."""
     return CanonicalHashingStrategy().compute_hash(obj)
 
 
 def reconstruct_payload(node: Any) -> dict[str, Any]:
-    """
-    Reconstructs the payload dictionary used for hashing from a NodeExecution object.
-    Automatically handles SOTA fields by using model_dump if available.
-    """
+    """Reconstruct the payload dictionary used for hashing from a NodeExecution object."""
     if isinstance(node, BaseModel):
         return node.model_dump()
 
@@ -167,10 +155,7 @@ def verify_merkle_proof(
     trusted_root_hash: str | None = None,
     trusted_parent_hashes: set[str] | None = None,
 ) -> bool:
-    """
-    Verifies the cryptographic integrity of a DAG trace.
-    Mathematically reconstructs the DAG topology to prove absence of parallel hallucinations.
-    """
+    """Verify the cryptographic integrity of a DAG trace."""
     if not trace:
         return False
 
