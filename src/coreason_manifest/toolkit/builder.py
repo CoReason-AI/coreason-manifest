@@ -1000,12 +1000,14 @@ class NewLinearFlow(BaseFlowBuilder):
         """
         super().__init__(name, version, description)
         self.steps: list[AnyNode] = []
+        self._seen_ids: set[str] = set()
 
     def _register_node(self, node: AnyNode) -> None:
-        if any(step.id == node.id for step in self.steps):
+        if node.id in self._seen_ids:
             raise ValueError(f"Builder Error: Node ID '{node.id}' already exists in LinearFlow.")
         super()._register_node(node)
         self.steps.append(node)
+        self._seen_ids.add(node.id)
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence.

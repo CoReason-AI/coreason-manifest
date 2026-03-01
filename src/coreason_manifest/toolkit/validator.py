@@ -918,7 +918,12 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
     edge_weights: dict[tuple[str, str], tuple[float, float]] = {}
     if hasattr(flow, "graph"):
         for edge in flow.graph.edges:
-            edge_weights[(edge.from_node, edge.to_node)] = (edge.cost_weight, edge.latency_weight_ms)
+            key = (edge.from_node, edge.to_node)
+            existing_cost, existing_lat = edge_weights.get(key, (0.0, 0.0))
+
+            # SOTA FinOps: If multiple conditional edges exist between two nodes,
+            # enforce the mathematically safest worst-case upper bound.
+            edge_weights[key] = (max(existing_cost, edge.cost_weight), max(existing_lat, edge.latency_weight_ms))
 
     from collections import defaultdict
 
