@@ -1,5 +1,13 @@
+from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.workflow.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
-from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, PlannerNode, SwitchNode
+from coreason_manifest.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    HumanNode,
+    PlannerNode,
+    SteeringConfig,
+    SwitchNode,
+)
 from coreason_manifest.core.workflow.nodes.visual_oversight import VisBenchRubricConfig, VisualInspectorNode
 from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint
 
@@ -44,7 +52,23 @@ def get_sota_scivis_topology() -> GraphFlow:
         id="critique_router",
         variable="critique_result",
         cases={"rejected": "layout_agent"},
-        default="final_renderer",
+        default="human_expert_review",
+    )
+
+    # Node 4.5: human_expert_review
+    human_expert_review = HumanNode(
+        id="human_expert_review",
+        prompt="Review Blueprint & Layout",
+        options=["approve_to_render", "reject_to_layout", "reject_to_planner"],
+        escalation=EscalationStrategy(
+            type="escalate",
+            queue_name="human_review",
+            notification_level="info",
+            timeout_seconds=3600,
+        ),
+        steering_config=SteeringConfig(
+            allow_variable_mutation=False,
+        ),
     )
 
     # Node 5: final_renderer
@@ -63,7 +87,10 @@ def get_sota_scivis_topology() -> GraphFlow:
         Edge(from_node="layout_agent", to_node="visual_critic"),
         Edge(from_node="visual_critic", to_node="critique_router"),
         Edge(from_node="critique_router", to_node="layout_agent", condition="rejected"),
-        Edge(from_node="critique_router", to_node="final_renderer", condition="approved"),
+        Edge(from_node="critique_router", to_node="human_expert_review", condition="approved"),
+        Edge(from_node="human_expert_review", to_node="final_renderer", condition="approve_to_render"),
+        Edge(from_node="human_expert_review", to_node="layout_agent", condition="reject_to_layout"),
+        Edge(from_node="human_expert_review", to_node="semantic_parser", condition="reject_to_planner"),
     ]
 
     nodes_dict = {
@@ -71,6 +98,7 @@ def get_sota_scivis_topology() -> GraphFlow:
         layout_agent.id: layout_agent,
         visual_critic.id: visual_critic,
         critique_router.id: critique_router,
+        human_expert_review.id: human_expert_review,
         final_renderer.id: final_renderer,
     }
 
