@@ -37,6 +37,7 @@ class HashingStrategy(ABC):
     Abstract base class for hashing strategies.
     Ensures verification capability across different protocol versions.
     """
+
     @abstractmethod
     def compute_hash(self, obj: Any) -> str:
         """Compute the deterministic hash of the object."""
