@@ -1,9 +1,11 @@
 # Prosperity-3.0
-from typing import Annotated, Any, Literal
+from enum import StrEnum
+from typing import Any, Literal
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.common.presentation import RenderStrategy
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.registry import register_node
@@ -11,6 +13,13 @@ from coreason_manifest.core.primitives.types import VariableID
 from coreason_manifest.core.security.compliance import RemediationAction
 
 from .base import Node
+
+
+class CollaborationMode(StrEnum):
+    APPROVAL_ONLY = "approval_only"
+    CO_EDIT = "co_edit"
+    SHADOW = "shadow"
+    HIJACK = "hijack"
 
 
 class SteeringConfig(CoreasonModel):
@@ -72,10 +81,8 @@ class HumanNode(Node):
         None, description="List of valid options for the human.", examples=[["approve", "reject"]]
     )
 
-    interaction_mode: Annotated[
-        Literal["blocking", "shadow", "hijack_only"],
-        Field("blocking", description="Wait for input vs shadow execution.", examples=["blocking"]),
-    ]
+    collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
+    render_strategy: RenderStrategy = Field(default=RenderStrategy.JSON_FORMS)
 
     steering_config: SteeringConfig | None = Field(
         None, description="Configuration for steering permissions.", examples=[{"allow_variable_mutation": True}]
@@ -83,7 +90,9 @@ class HumanNode(Node):
 
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
-        if self.interaction_mode == "shadow" and (self.input_schema is not None or self.options is not None):
+        if self.collaboration_mode == CollaborationMode.SHADOW and (
+            self.input_schema is not None or self.options is not None
+        ):
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
                 message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
@@ -99,10 +108,13 @@ class HumanNode(Node):
                     ).model_dump()
                 },
             )
-        if self.interaction_mode == "hijack_only" and self.steering_config is None:
+        if (
+            self.collaboration_mode in (CollaborationMode.HIJACK, CollaborationMode.CO_EDIT)
+            and self.steering_config is None
+        ):
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
-                message="HumanNode in 'hijack_only' mode requires 'steering_config'.",
+                message=f"HumanNode in '{self.collaboration_mode}' mode requires 'steering_config'.",
                 context={
                     "remediation": RemediationAction(
                         type="update_field",

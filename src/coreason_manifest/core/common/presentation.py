@@ -6,6 +6,26 @@ from pydantic import Field
 from coreason_manifest.core.common.base import CoreasonModel
 
 
+class RenderStrategy(StrEnum):
+    """
+    Rendering strategies for Human-in-the-Loop interaction.
+    """
+
+    PLAIN_TEXT = "plain_text"
+    JSON_FORMS = "json_forms"
+    ADAPTIVE_CARD = "adaptive_card"
+    CUSTOM_IFRAME = "custom_iframe"
+
+
+class NotificationRouting(CoreasonModel):
+    """
+    Routing configuration for human interventions.
+    """
+
+    channels: list[str] = Field(default_factory=list, description="e.g., ['slack', 'email', 'push']")
+    urgency: Literal["low", "medium", "high", "critical"] = Field(default="medium")
+
+
 class NodeColor(StrEnum):
     """
     Semantic coloring for the graph.

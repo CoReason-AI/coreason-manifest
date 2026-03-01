@@ -4,6 +4,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from coreason_manifest.core.common.presentation import NotificationRouting, RenderStrategy
 from coreason_manifest.core.compute.reasoning import ModelCriteria, ModelRef
 
 
@@ -150,6 +151,8 @@ class EscalationStrategy(ResilienceStrategy):
             examples=["Alert: {{ error_type }} in {{ node_id }}"],
         ),
     ] = None
+    routing: NotificationRouting | None = None
+    render_strategy: RenderStrategy = Field(default=RenderStrategy.PLAIN_TEXT)
 
     @field_validator("template")
     @classmethod

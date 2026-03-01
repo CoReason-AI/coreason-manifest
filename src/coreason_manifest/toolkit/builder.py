@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self, cast
 if TYPE_CHECKING:
     from coreason_manifest.core.workflow.nodes import Constraint
 
+from coreason_manifest.core.common.presentation import NotificationRouting, RenderStrategy
 from coreason_manifest.core.compute.reasoning import (
     FastPath,
     ReasoningConfig,
@@ -238,21 +239,34 @@ class AgentBuilder:
         )
         return self
 
-    def with_human_steering(self, timeout: int = 300, fallback_id: str | None = None) -> "AgentBuilder":
+    def with_human_steering(
+        self,
+        timeout: int = 300,
+        fallback_id: str | None = None,
+        channels: list[str] | None = None,
+        urgency: Literal["low", "medium", "high", "critical"] = "medium",
+        render_strategy: str = "plain_text",
+    ) -> "AgentBuilder":
         """Configures human steering (escalation) as a supervision policy.
 
         Args:
             timeout (int): Timeout in seconds for human intervention. Defaults to 300.
             fallback_id (str | None): The ID of the fallback node if escalation times out.
+            channels (list[str] | None): A list of channels (e.g., slack, email).
+            urgency (Literal["low", "medium", "high", "critical"]): Urgency level. Defaults to 'medium'.
+            render_strategy (str): Strategy for rendering. Defaults to 'plain_text'.
 
         Returns:
             AgentBuilder: The builder instance for chaining.
         """
+        routing = NotificationRouting(channels=channels, urgency=urgency) if channels else None
         esc_strategy = EscalationStrategy(
             queue_name="steering_queue",
             notification_level="info",
             timeout_seconds=timeout,
             fallback_node_id=fallback_id,
+            routing=routing,
+            render_strategy=RenderStrategy(render_strategy),
         )
 
         if self.resilience is None:
@@ -821,12 +835,14 @@ class BaseFlowBuilder:
         Returns:
             Self: The builder instance for chaining.
         """
+        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
         node = HumanNode(
             id=node_id,
             metadata={},
             type="human",
             prompt=prompt,
-            interaction_mode="shadow",
+            collaboration_mode=CollaborationMode.SHADOW,
             escalation=EscalationStrategy(
                 queue_name="shadow_queue",
                 notification_level="info",

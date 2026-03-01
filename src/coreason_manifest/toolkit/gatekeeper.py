@@ -123,6 +123,8 @@ def _enforce_red_button_rule(
             violation_reason.append(f"critical tools {critical_tools}")
 
         if needs_guard and not _is_guarded(node, flow):
+            from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
             human_node_id = f"guard_{node.id}"
             human_node = HumanNode(
                 id=human_node_id,
@@ -133,7 +135,7 @@ def _enforce_red_button_rule(
                     notification_level="warning",
                     timeout_seconds=300,
                 ),
-                interaction_mode="blocking",
+                collaboration_mode=CollaborationMode.APPROVAL_ONLY,
                 metadata={},
             )
 
