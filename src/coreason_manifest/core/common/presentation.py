@@ -26,8 +26,12 @@ class UIEventMap(CoreasonModel):
 
 class UIComponentNode(CoreasonModel):
     type: str = Field(..., description="The component registry ID, e.g., 'LineChart', 'DataTable'.")
-    props: dict[str, Any] = Field(default_factory=dict, description="The evaluated property data to bind to the widget.")
-    children: list["UIComponentNode"] = Field(default_factory=list, description="Child component nodes for recursive nesting.")
+    props: dict[str, Any] = Field(
+        default_factory=dict, description="The evaluated property data to bind to the widget."
+    )
+    children: list["UIComponentNode"] = Field(
+        default_factory=list, description="Child component nodes for recursive nesting."
+    )
 
 
 class AdaptiveUIContract(CoreasonModel):
