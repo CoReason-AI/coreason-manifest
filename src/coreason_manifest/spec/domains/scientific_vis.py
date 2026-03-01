@@ -12,9 +12,14 @@ from enum import Enum
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+from pydantic_core import PydanticCustomError
 
 
 class VisInformationType(str, Enum):  # noqa: UP042
+    """
+    Taxonomy for scientific visualization types.
+    """
+
     QUALITATIVE_SCHEMATIC = "QUALITATIVE_SCHEMATIC"
     QUANTITATIVE_STATISTICAL = "QUANTITATIVE_STATISTICAL"
     SPATIAL_GEOMETRIC = "SPATIAL_GEOMETRIC"
@@ -22,7 +27,11 @@ class VisInformationType(str, Enum):  # noqa: UP042
 
 
 class SciVisIntent(BaseModel):
-    vis_type: VisInformationType
+    vis_type: VisInformationType = Field(
+        ...,
+        description="Classify the scientific visualization type based on the MECE taxonomy.",
+        examples=[VisInformationType.QUALITATIVE_SCHEMATIC, VisInformationType.QUANTITATIVE_STATISTICAL],
+    )
     requires_code_execution: bool = Field(
         description="Indicates if code execution is required for exact numerics (e.g., Matplotlib)."
     )
@@ -60,9 +69,17 @@ class HierarchicalBlueprint(BaseModel):
         module_ids = {module.module_id for module in self.modules}
         for connection in self.connections:
             if connection.source_module_id not in module_ids:
-                raise ValueError(f"source_module_id '{connection.source_module_id}' not found in modules.")
+                raise PydanticCustomError(
+                    "hallucinated_module_reference",
+                    'Module ID "{invalid_id}" does not exist in the declared modules list.',
+                    {"invalid_id": connection.source_module_id},
+                )
             if connection.target_module_id not in module_ids:
-                raise ValueError(f"target_module_id '{connection.target_module_id}' not found in modules.")
+                raise PydanticCustomError(
+                    "hallucinated_module_reference",
+                    'Module ID "{invalid_id}" does not exist in the declared modules list.',
+                    {"invalid_id": connection.target_module_id},
+                )
         return self
 
 

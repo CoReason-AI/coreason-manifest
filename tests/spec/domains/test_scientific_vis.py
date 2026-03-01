@@ -82,7 +82,7 @@ def test_invalid_hierarchical_blueprint_source() -> None:
     with pytest.raises(ValidationError) as exc_info:
         HierarchicalBlueprint(modules=modules, connections=connections, aspect_ratio_preference="16:9")
 
-    assert "source_module_id 'invalid_mod' not found in modules" in str(exc_info.value)
+    assert 'Module ID "invalid_mod" does not exist in the declared modules list.' in str(exc_info.value)
 
 
 def test_invalid_hierarchical_blueprint_target() -> None:
@@ -101,7 +101,7 @@ def test_invalid_hierarchical_blueprint_target() -> None:
     with pytest.raises(ValidationError) as exc_info:
         HierarchicalBlueprint(modules=modules, connections=connections, aspect_ratio_preference="16:9")
 
-    assert "target_module_id 'invalid_target' not found in modules" in str(exc_info.value)
+    assert 'Module ID "invalid_target" does not exist in the declared modules list.' in str(exc_info.value)
 
 
 def test_scivis_intent() -> None:
