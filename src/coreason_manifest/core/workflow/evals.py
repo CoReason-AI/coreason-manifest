@@ -50,6 +50,9 @@ class FuzzingTarget(CoreasonModel):
     adversary: AdversaryProfile | None = Field(
         default=None, description="Red-team configuration for stochastic semantic fuzzing."
     )
+    chaos_config: ChaosConfig | None = Field(
+        default=None, description="Allow the fuzzer to mutate infrastructure conditions (latency/errors) dynamically."
+    )
 
 
 class EvalsManifest(CoreasonModel):

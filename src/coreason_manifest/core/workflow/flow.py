@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import jsonschema  # type: ignore[import-untyped]
 from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.common_base import CoreasonModel
@@ -20,7 +20,6 @@ from coreason_manifest.core.workflow.nodes import (
 
 # Export AnyNode so it can be imported from here as well
 __all__ = [
-    "AgentRequest",
     "AnyNode",
     "Blackboard",
     "DataSchema",
@@ -298,14 +297,3 @@ class LinearFlow(CoreasonModel):
                 )
                 raise ManifestError.critical_halt(code=ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self
-
-
-class AgentRequest(CoreasonModel):
-    """
-    Strict envelope for agent execution requests.
-    """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-
-    manifest: GraphFlow | LinearFlow
-    metadata: dict[str, Any] = Field(default_factory=dict)

@@ -8,6 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from coreason_manifest.core.common.identity import (
+    AgentIdentity,
+    SessionContext,
+    UserIdentity,
+)
+from coreason_manifest.core.common.semantic import (
+    SemanticRef,
+)
 from coreason_manifest.core.compute.reasoning import (
     BaseReasoning,
     CouncilReasoning,
@@ -27,6 +35,10 @@ from coreason_manifest.core.oversight.resilience import SupervisionPolicy
 from coreason_manifest.core.state.tools import (
     Dependency,
     ToolPack,
+)
+from coreason_manifest.core.workflow.evals import (
+    AdversaryProfile,
+    ChaosConfig,
 )
 from coreason_manifest.core.workflow.flow import (
     AnyNode,
@@ -54,11 +66,14 @@ from coreason_manifest.toolkit.builder import (
 )
 
 __all__ = [
+    "AdversaryProfile",
+    "AgentIdentity",
     "AgentNode",
     "AnyNode",
     "Audit",
     "BaseReasoning",
     "Blackboard",
+    "ChaosConfig",
     "CognitiveProfile",
     "CouncilReasoning",
     "DecompositionReasoning",
@@ -80,10 +95,13 @@ __all__ = [
     "PlannerNode",
     "ReasoningConfig",
     "Safety",
+    "SemanticRef",
+    "SessionContext",
     "StandardReasoning",
     "SupervisionPolicy",
     "SwitchNode",
     "ToolPack",
     "TreeSearchReasoning",
+    "UserIdentity",
     "VariableDef",
 ]
