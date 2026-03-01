@@ -341,6 +341,9 @@ class AgentBuilder:
         rate_limit_tpm: int | None = None,
         semantic_cache_similarity: float | None = None,
         semantic_cache_ttl: int | None = None,
+        max_transaction_cost_usd: float | None = None,
+        max_tokens_per_turn: int | None = None,
+        context_compression_strategy: Literal["none", "summarize", "truncate_oldest"] = "none",
     ) -> "AgentBuilder":
         """Configures operational limits for the agent (financial, compute, data).
 
@@ -358,17 +361,31 @@ class AgentBuilder:
             AgentBuilder: The builder instance for chaining.
         """
         financial = None
-        if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
+        if (
+            max_cost_usd is not None
+            or max_tokens is not None
+            or fallback_model is not None
+            or max_transaction_cost_usd is not None
+        ):
             financial = FinancialLimits(
                 max_cost_usd=max_cost_usd,
                 max_tokens_total=max_tokens,
                 budget_depletion_routing=fallback_model,
+                max_transaction_cost_usd=max_transaction_cost_usd,
             )
 
         compute = None
-        if max_steps is not None or max_execution_time_seconds is not None:
+        if (
+            max_steps is not None
+            or max_execution_time_seconds is not None
+            or max_tokens_per_turn is not None
+            or context_compression_strategy != "none"
+        ):
             compute = ComputeLimits(
-                max_cognitive_steps=max_steps, max_execution_time_seconds=max_execution_time_seconds
+                max_cognitive_steps=max_steps,
+                max_execution_time_seconds=max_execution_time_seconds,
+                max_tokens_per_turn=max_tokens_per_turn,
+                context_compression_strategy=context_compression_strategy,
             )
 
         data = None
@@ -708,7 +725,7 @@ class BaseFlowBuilder:
             self.governance = Governance(mixed_initiative=policy)
         return self
 
-    def set_operational_policy(
+    def with_operational_policy(
         self,
         max_cost_usd: float | None = None,
         max_tokens: int | None = None,
@@ -724,6 +741,9 @@ class BaseFlowBuilder:
         rate_limit_tpm: int | None = None,
         semantic_cache_similarity: float | None = None,
         semantic_cache_ttl: int | None = None,
+        max_transaction_cost_usd: float | None = None,
+        max_tokens_per_turn: int | None = None,
+        context_compression_strategy: Literal["none", "summarize", "truncate_oldest"] = "none",
     ) -> Self:
         """Configures global operational limits (Financial, Data, Compute).
 
@@ -742,11 +762,17 @@ class BaseFlowBuilder:
             Self: The builder instance for chaining.
         """
         financial = None
-        if max_cost_usd is not None or max_tokens is not None or fallback_model is not None:
+        if (
+            max_cost_usd is not None
+            or max_tokens is not None
+            or fallback_model is not None
+            or max_transaction_cost_usd is not None
+        ):
             financial = FinancialLimits(
                 max_cost_usd=max_cost_usd,
                 max_tokens_total=max_tokens,
                 budget_depletion_routing=fallback_model,
+                max_transaction_cost_usd=max_transaction_cost_usd,
             )
 
         data = None
@@ -758,13 +784,19 @@ class BaseFlowBuilder:
             )
 
         compute = None
-        if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
-            compute = None
-        if max_steps is not None or max_execution_time_seconds is not None or max_concurrent_agents is not None:
+        if (
+            max_steps is not None
+            or max_execution_time_seconds is not None
+            or max_concurrent_agents is not None
+            or max_tokens_per_turn is not None
+            or context_compression_strategy != "none"
+        ):
             compute = ComputeLimits(
                 max_cognitive_steps=max_steps,
                 max_execution_time_seconds=max_execution_time_seconds,
                 max_concurrent_agents=max_concurrent_agents,
+                max_tokens_per_turn=max_tokens_per_turn,
+                context_compression_strategy=context_compression_strategy,
             )
 
         traffic = None
