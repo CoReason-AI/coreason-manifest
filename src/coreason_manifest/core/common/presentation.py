@@ -16,6 +16,7 @@ class RenderStrategy(StrEnum):
     ADAPTIVE_CARD = "adaptive_card"
     CUSTOM_IFRAME = "custom_iframe"
     GEN_UI = "gen_ui"
+    MCP_APPS = "mcp_apps"
 
 
 class UIEventMap(CoreasonModel):
@@ -157,3 +158,7 @@ class PresentationHints(CoreasonModel):
 
 
 UIComponentNode.model_rebuild()
+    mcp_ui_resource_uri: str | None = Field(
+        default=None,
+        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
+    )
