@@ -5,16 +5,16 @@ from coreason_manifest.core.common.suspense import SkeletonType, SuspenseConfig
 from coreason_manifest.core.telemetry.suspense_envelope import StreamSuspenseEnvelope
 
 
-def test_skeleton_type_enum():
+def test_skeleton_type_enum() -> None:
     """Test that all required fallback types are correctly defined."""
-    assert SkeletonType.TEXT_SHIMMER == "text_shimmer"
-    assert SkeletonType.MEDIA_BLOCK == "media_block"
-    assert SkeletonType.CHART_PULSE == "chart_pulse"
-    assert SkeletonType.TABLE_ROWS == "table_rows"
-    assert SkeletonType.SPINNER == "spinner"
+    assert SkeletonType.TEXT_SHIMMER.value == "text_shimmer"
+    assert SkeletonType.MEDIA_BLOCK.value == "media_block"
+    assert SkeletonType.CHART_PULSE.value == "chart_pulse"
+    assert SkeletonType.TABLE_ROWS.value == "table_rows"
+    assert SkeletonType.SPINNER.value == "spinner"
 
 
-def test_suspense_config_defaults():
+def test_suspense_config_defaults() -> None:
     """Test default initialization of SuspenseConfig."""
     config = SuspenseConfig()
     assert config.fallback_type == SkeletonType.SPINNER
@@ -23,20 +23,20 @@ def test_suspense_config_defaults():
 
 
 @pytest.mark.parametrize("valid_height", ["100px", "2.5rem", "1em", "50vh", "100vw", "10%"])
-def test_suspense_config_valid_reserved_height(valid_height):
+def test_suspense_config_valid_reserved_height(valid_height: str) -> None:
     """Test SuspenseConfig accepts valid CSS dimensions for reserved_height."""
     config = SuspenseConfig(reserved_height=valid_height)
     assert config.reserved_height == valid_height
 
 
 @pytest.mark.parametrize("invalid_height", ["tall", "100", "px", "100abc", "10.0.0px"])
-def test_suspense_config_invalid_reserved_height(invalid_height):
+def test_suspense_config_invalid_reserved_height(invalid_height: str) -> None:
     """Test SuspenseConfig rejects invalid CSS dimensions."""
     with pytest.raises(ValidationError):
         SuspenseConfig(reserved_height=invalid_height)
 
 
-def test_stream_suspense_envelope_valid():
+def test_stream_suspense_envelope_valid() -> None:
     """Test successful initialization of StreamSuspenseEnvelope."""
     config = SuspenseConfig(fallback_type=SkeletonType.TEXT_SHIMMER, estimated_duration_ms=500, reserved_height="200px")
 
@@ -48,7 +48,7 @@ def test_stream_suspense_envelope_valid():
     assert envelope.timestamp == 123456789.0
 
 
-def test_stream_suspense_envelope_invalid_op():
+def test_stream_suspense_envelope_invalid_op() -> None:
     """Test that StreamSuspenseEnvelope rejects invalid operations."""
     config = SuspenseConfig()
 

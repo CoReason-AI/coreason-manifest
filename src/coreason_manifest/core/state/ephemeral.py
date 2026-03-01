@@ -16,8 +16,10 @@ class LocalVariableType(StrEnum):
 
 class LocalVariable(CoreasonModel):
     type: LocalVariableType
-    default: Any | None = None
-    description: str | None = None
+    default: Any | None = Field(default=None, description="The initial default value of the ephemeral variable.")
+    description: str | None = Field(
+        default=None, description="A documentation string describing the purpose of this ephemeral variable."
+    )
 
     @model_validator(mode="after")
     def validate_default_type(self) -> "LocalVariable":

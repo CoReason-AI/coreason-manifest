@@ -69,14 +69,14 @@ class RuleRegex(CoreasonModel):
 class RuleMatchField(CoreasonModel):
     rule_type: Literal[ValidationRuleType.MATCH_FIELD] = ValidationRuleType.MATCH_FIELD
     message: str
-    target_field_id: str
+    target_field_id: str = Field(..., description="The ID of the field to match against (e.g., 'password_confirm').")
 
 
 class RuleWebhook(CoreasonModel):
     rule_type: Literal[ValidationRuleType.CUSTOM_WEBHOOK] = ValidationRuleType.CUSTOM_WEBHOOK
     message: str
     url: str
-    debounce_ms: int
+    debounce_ms: int = Field(..., description="Debounce time in milliseconds before sending the validation request.")
 
 
 ValidationRule = Annotated[

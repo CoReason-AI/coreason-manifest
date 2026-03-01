@@ -65,7 +65,7 @@ def test_action_trigger_haptic_creation() -> None:
     assert action.style == "success"
 
     with pytest.raises(ValidationError):
-        ActionTriggerHaptic(style="invalid_style") # type: ignore
+        ActionTriggerHaptic(style="invalid_style")  # type: ignore
 
 
 def test_action_show_toast_creation() -> None:
@@ -78,7 +78,7 @@ def test_action_show_toast_creation() -> None:
     assert action_success.style == "success"
 
     with pytest.raises(ValidationError):
-        ActionShowToast(message="Bad", style="invalid_style") # type: ignore
+        ActionShowToast(message="Bad", style="invalid_style")  # type: ignore
 
 
 def test_action_request_biometrics_creation() -> None:
