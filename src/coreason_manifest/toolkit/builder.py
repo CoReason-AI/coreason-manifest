@@ -1009,6 +1009,18 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps.append(node)
         self._seen_ids.add(node.id)
 
+    def replace_step(self, node: AnyNode) -> "NewLinearFlow":
+        """Explicitly replaces an existing step in the sequence."""
+        if node.id not in self._seen_ids:
+            raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the sequence.")
+
+        # Find and replace the specific node while preserving order
+        for i, existing_node in enumerate(self.steps):
+            if existing_node.id == node.id:
+                self.steps[i] = node
+                break
+        return self
+
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence.
 
@@ -1097,6 +1109,13 @@ class NewGraphFlow(BaseFlowBuilder):
             NewGraphFlow: The builder instance for chaining.
         """
         self._entry_point = node_id
+        return self
+
+    def replace_node(self, node: AnyNode) -> "NewGraphFlow":
+        """Explicitly replaces an existing node in the topology."""
+        if node.id not in self._nodes:
+            raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the graph.")
+        self._nodes[node.id] = node
         return self
 
     def add_node(self, node: AnyNode) -> "NewGraphFlow":

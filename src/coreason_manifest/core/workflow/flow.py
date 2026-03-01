@@ -140,11 +140,13 @@ class Graph(CoreasonModel):
                     code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_ID_MISMATCH,
                     message=f"Routing contradiction: Node dictionary key '{key}' "
                     f"does not match inner Node ID '{node.id}'.",
+                    context={"dict_key": key, "node_id": node.id},
                 )
             if node.id in seen_ids:
                 raise ManifestError.critical_halt(
                     code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
                     message=f"Internal collision defense: Node ID '{node.id}' appears multiple times.",
+                    context={"node_id": node.id},
                 )
             seen_ids.add(node.id)
 
@@ -298,6 +300,7 @@ class LinearFlow(CoreasonModel):
                 raise ManifestError.critical_halt(
                     code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
                     message=f"Duplicate Node ID '{step.id}' found in LinearFlow steps.",
+                    context={"node_id": step.id},
                 )
             seen.add(step.id)
 
