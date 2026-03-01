@@ -398,12 +398,16 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
                     ComplianceReport(
                         code="ERR_SWARM_ISLAND_NON_EVOLUTIONARY_005",
                         severity="violation",
-                        message=f"SwarmNode '{node.id}' uses 'island_model' but its worker_profile '{profile_ref}' does not use EvolutionaryReasoning.",
+                        message=(
+                            f"SwarmNode '{node.id}' uses 'island_model' but its "
+                            f"worker_profile '{profile_ref}' does not use EvolutionaryReasoning."
+                        ),
                         node_id=node.id,
                         remediation=RemediationAction(
                             type="update_profile",
                             target_node_id=node.id,
-                            description="Change the worker_profile to an AgentProfile utilizing EvolutionaryReasoning.",
+                            description="Change the worker_profile to an AgentProfile utilizing "
+                                        "EvolutionaryReasoning.",
                         ),
                     )
                 )

@@ -41,8 +41,9 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
 
 
 def test_swarm_orchestration_schema() -> None:
-    from coreason_manifest.core.workflow.nodes.swarm import SwarmNode, TournamentConfig
     from pydantic import ValidationError
+
+    from coreason_manifest.core.workflow.nodes.swarm import SwarmNode, TournamentConfig
 
     # Valid Instantiation
     valid_swarm = SwarmNode(
@@ -174,8 +175,9 @@ def test_evolutionary_reasoning_schema() -> None:
 
 def test_symbolic_execution_inspector_node() -> None:
     from pydantic import ValidationError
-    from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+
     from coreason_manifest.core.oversight.resilience import RetryStrategy
+    from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 
     # 1. Valid symbolic execution
     node = InspectorNode(

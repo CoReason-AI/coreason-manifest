@@ -55,7 +55,9 @@ class InspectorNode(InspectorNodeBase):
             if self.target_solver is None:
                 raise ValueError("target_solver must be provided when mode is 'symbolic_execution'")
             if self.tutor_prompt is None:
-                raise ValueError("tutor_prompt must be provided when mode is 'symbolic_execution' to guide the repair loop")
+                raise ValueError(
+                    "tutor_prompt must be provided when mode is 'symbolic_execution' to guide the repair loop"
+                )
         return self
 
 
