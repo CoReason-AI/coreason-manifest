@@ -52,7 +52,7 @@ def test_is_authorized_fail_closed_missing_context() -> None:
     """Ensure is_authorized fails-closed when no context is provided but roles are required."""
     from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
 
-    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1", required_capabilities=[])])
     request = AgentRequest(
         agent_id="agent-123",
         session_id="session-123",
@@ -67,7 +67,7 @@ def test_is_authorized_empty_required_roles() -> None:
     """Ensure is_authorized returns True when no roles are required."""
     from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
 
-    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1", required_capabilities=[])])
     request = AgentRequest(
         agent_id="agent-123",
         session_id="session-123",
@@ -92,7 +92,7 @@ def test_is_authorized_with_roles() -> None:
 
     from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
 
-    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1", required_capabilities=[])])
     request = AgentRequest(
         agent_id="agent-123",
         session_id="session-123",
@@ -128,7 +128,7 @@ def test_can_execute_tool() -> None:
     agent = AgentIdentity(agent_id="agent-123", version="1.0.0")
     from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
 
-    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1", required_capabilities=[])])
 
     # Test strict allowlist
     scope_strict = DelegationScope(allowed_tools=["safe_tool", "read_db"])
