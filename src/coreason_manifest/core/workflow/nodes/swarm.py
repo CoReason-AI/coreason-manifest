@@ -34,8 +34,8 @@ class SwarmNode(Node):
         ..., description="The Blackboard list/dataset to process.", examples=["urls_to_scrape"]
     )
 
-    distribution_strategy: Literal["sharded", "replicated"] = Field(
-        ..., description="Sharded=split data; Replicated=same data, many attempts.", examples=["sharded"]
+    distribution_strategy: Literal["sharded", "replicated", "island_model"] = Field(
+        ..., description="Sharded=split data; Replicated=same data, many attempts; island_model=isolated sub-swarms.", examples=["sharded"]
     )
     max_concurrency: Annotated[
         int | Literal["infinite"] | None,
@@ -56,8 +56,24 @@ class SwarmNode(Node):
         ),
     ] = 0.0
 
-    reducer_function: Literal["concat", "vote", "summarize"] | None = Field(
+    reducer_function: Literal["concat", "vote", "summarize", "tournament"] | None = Field(
         ..., description="How to combine results.", examples=["concat"]
+    )
+
+    tournament_config: TournamentConfig | None = None
+
+    sub_swarm_count: Annotated[
+        int | None,
+        Field(description="Required if using island_model. Number of isolated sub-swarms.")
+    ] = None
+
+    isolation_turns: Annotated[
+        int | None,
+        Field(description="Required if using island_model. Number of generations before islands migrate data.")
+    ] = None
+
+    pruning_strategy: Literal["none", "early_stopping", "compute_bound"] = Field(
+        "none", description="Strategy for dynamically killing failing worker agents."
     )
     aggregator_model: Annotated[
         ModelRef | None,
@@ -86,6 +102,16 @@ class SwarmNode(Node):
 
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":
+        if self.reducer_function == "tournament" and self.tournament_config is None:
+            raise ValueError("SwarmNode with reducer_function='tournament' requires a 'tournament_config'.")
+
+        if self.distribution_strategy == "island_model":
+            if self.sub_swarm_count is None or self.isolation_turns is None:
+                raise ValueError("SwarmNode with distribution_strategy='island_model' requires both 'sub_swarm_count' and 'isolation_turns'.")
+
+        if self.pruning_strategy == "compute_bound" and self.operational_policy is None:
+            raise ValueError("SwarmNode with pruning_strategy='compute_bound' requires an 'operational_policy' to bind to.")
+
         if self.reducer_function == "summarize" and not self.aggregator_model:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_SWARM_REDUCER,
