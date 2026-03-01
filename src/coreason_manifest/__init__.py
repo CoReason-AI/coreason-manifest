@@ -9,14 +9,11 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from coreason_manifest.core.common.identity import (
-    AgentIdentity,
     DelegationContract,
     IdentityPassport,
     ResourceCaveat,
-    SessionContext,
     SystemContext,
     UserContext,
-    UserIdentity,
 )
 from coreason_manifest.core.common.semantic import (
     SemanticRef,
@@ -72,7 +69,6 @@ from coreason_manifest.toolkit.builder import (
 
 __all__ = [
     "AdversaryProfile",
-    "AgentIdentity",
     "AgentNode",
     "AnyNode",
     "Audit",
@@ -104,7 +100,6 @@ __all__ = [
     "ResourceCaveat",
     "Safety",
     "SemanticRef",
-    "SessionContext",
     "StandardReasoning",
     "SupervisionPolicy",
     "SwitchNode",
@@ -112,6 +107,5 @@ __all__ = [
     "ToolPack",
     "TreeSearchReasoning",
     "UserContext",
-    "UserIdentity",
     "VariableDef",
 ]

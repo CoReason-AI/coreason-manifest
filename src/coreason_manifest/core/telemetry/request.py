@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from coreason_manifest.core.common.identity import SessionContext
+from coreason_manifest.core.common.identity import IdentityPassport
 from coreason_manifest.core.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
@@ -40,16 +40,12 @@ class AgentRequest(BaseModel):
     # Execution Manifest
     manifest: GraphFlow | LinearFlow = Field(..., description="The AOT-compiled execution graph.")
 
-    # Context Envelope
-    context: SessionContext | None = Field(
-        None, description="The Zero-Trust Identity Context Envelope for this request."
+    # SOTA 2026: The Zero-Trust Identity Envelope.
+    passport: IdentityPassport | None = Field(
+        None, description="The cryptographic Zero-Trust Identity Passport for this request."
     )
 
-    # SOTA 2026: The Zero-Trust Identity Envelope.
-    # Typed as Any during parallel development; will be strictly bound to IdentityPassport post-merge.
-    passport: Any | None = Field(None, description="The cryptographic Zero-Trust Identity Passport for this request.")
-
-    def verify_passport_authorization(self, required_roles: list[str]) -> bool:
+    def is_authorized(self, required_roles: list[str]) -> bool:
         """
         Safely checks if the passport's PBAC roles intersect with the required roles.
         Fails closed (returns False) if the passport or roles are missing.
@@ -59,17 +55,10 @@ class AgentRequest(BaseModel):
         if not self.passport:
             return False
 
-        # Duck-typing access for parallel development phase
-        user_context = (
-            getattr(self.passport, "user", {}) if not isinstance(self.passport, dict) else self.passport.get("user", {})
-        )
-        user_roles = set(
-            getattr(user_context, "roles", []) if not isinstance(user_context, dict) else user_context.get("roles", [])
-        )
-
+        user_roles = set(self.passport.user.roles)
         return any(role in user_roles for role in required_roles)
 
-    def verify_tool_delegation(self, tool_name: str, current_timestamp: float) -> bool:
+    def can_execute_tool(self, tool_name: str, current_timestamp: float) -> bool:
         """
         SOTA 2026: Time-bound, Caveat-aware capability verification.
         Evaluates the tool request against the passport's temporal bounds and whitelists.
@@ -78,59 +67,17 @@ class AgentRequest(BaseModel):
         if not self.passport:
             return False
 
-        delegation = (
-            getattr(self.passport, "delegation", {})
-            if not isinstance(self.passport, dict)
-            else self.passport.get("delegation", {})
-        )
+        delegation = self.passport.delegation
         if not delegation:
             return False
 
         # 1. Temporal Bounding (Fail Closed if Expired)
-        expires_at = (
-            getattr(delegation, "expires_at", 0.0)
-            if not isinstance(delegation, dict)
-            else delegation.get("expires_at", 0.0)
-        )
-        if current_timestamp > expires_at:
+        if current_timestamp > delegation.expires_at:
             return False
 
         # 2. Strict Tool Whitelist Check
-        allowed_tools = (
-            getattr(delegation, "allowed_tools", [])
-            if not isinstance(delegation, dict)
-            else delegation.get("allowed_tools", [])
-        )
+        allowed_tools = delegation.allowed_tools
         return not ("*" not in allowed_tools and tool_name not in allowed_tools)
-
-    def is_authorized(self, required_roles: list[str]) -> bool:
-        """
-        Safely checks if the user's PBAC roles intersect with the required roles.
-        If context is missing and roles are required, this fails closed (returns False).
-        """
-        if not required_roles:
-            return True
-        if self.context is None:
-            return False
-
-        # Check for intersection of required roles with user's roles
-        user_roles = set(self.context.user.roles)
-        return any(role in user_roles for role in required_roles)
-
-    def can_execute_tool(self, tool_name: str) -> bool:
-        """
-        Safely checks if the requested tool is within the agent's strictly delegated scope.
-        Fails closed if the context or delegation scope is missing.
-        """
-        if self.context is None or self.context.delegation is None:
-            return False
-
-        # SOTA Pattern: Support explicit wildcard delegation or exact match
-        allowed = self.context.delegation.allowed_tools
-        if "*" in allowed:
-            return True
-
-        return tool_name in allowed
 
     def create_child(self, metadata: dict[str, Any]) -> Self:
         return self.model_copy(
@@ -206,7 +153,7 @@ class AgentRequest(BaseModel):
 
         if errors:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_SEC_LINEAGE_001,
+                code=ManifestErrorCode.LINEAGE_001,
                 message="Multiple Trace Integrity Violations detected.",
                 context={"violations": [str(e) for e in errors]},
             )

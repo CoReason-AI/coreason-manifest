@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, Any, ClassVar, Literal
 from uuid import uuid4
@@ -183,16 +183,11 @@ class ExecutionSnapshot(BaseModel):
     active_path: list[str]
 
 
-from datetime import UTC  # noqa: E402
-
-
 class SecurityViolationEvent(AntibodyBase):
     """
     SIEM-Native Security Alerting Contract.
     Emitted when the identity middleware detects malicious activity or strict policy breaches.
     """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     # Event Classification
     event_type: Literal[
@@ -226,8 +221,6 @@ class AuthLifecycleEvent(AntibodyBase):
     Zero-Knowledge Identity Telemetry.
     Tracks authentication state changes strictly without leaking PII.
     """
-
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     event_type: Literal[
         "login_success", "token_refresh", "logout", "device_flow_initiated", "device_flow_completed"
