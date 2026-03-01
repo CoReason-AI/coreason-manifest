@@ -1082,6 +1082,13 @@ def _build_unified_adjacency_map(flow: LinearFlow | GraphFlow) -> dict[str, set[
                 if target_id in adj:
                     adj[node.id].add(target_id)
 
+        # GenUI Contract routing
+        if isinstance(node, HumanNode) and getattr(node, "ui_contract", None) and node.ui_contract.events:
+            for event in node.ui_contract.events:
+                # event.action could be a SteeringCommand OR a target NodeID
+                if event.action in adj:
+                    adj[node.id].add(event.action)
+
         # Local Fallback routing (Resolving templates to catch Trojan cycles)
         if node.resilience:
             resolved_policy = _resolve_resilience_policy(node.resilience, getattr(flow, "definitions", None))
