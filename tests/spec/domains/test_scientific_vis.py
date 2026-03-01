@@ -8,6 +8,8 @@ from coreason_manifest.spec.domains.scientific_vis import (
     GraphicElement,
     HierarchicalBlueprint,
     InterModuleConnection,
+    MultimodalReference,
+    ReferenceRole,
     SciVisIntent,
     SpatialCorrection,
     VectorRenderPayload,
@@ -111,6 +113,45 @@ def test_scivis_intent() -> None:
         requires_vector_layout=True,
     )
     assert intent.vis_type == VisInformationType.QUALITATIVE_SCHEMATIC
+    assert intent.references == []
+    assert intent.grounding_preference == "text_dominant"
+
+    intent_with_refs = SciVisIntent(
+        vis_type=VisInformationType.QUANTITATIVE_STATISTICAL,
+        requires_code_execution=True,
+        requires_vector_layout=False,
+        references=[
+            MultimodalReference(
+                artifact_uri="s3://bucket/sketch.png",
+                role=ReferenceRole.SPATIAL_SKETCH,
+                mime_type="image/png",
+            )
+        ],
+        grounding_preference="balanced",
+    )
+    assert len(intent_with_refs.references) == 1
+    assert intent_with_refs.references[0].role == ReferenceRole.SPATIAL_SKETCH
+    assert intent_with_refs.grounding_preference == "balanced"
+
+
+def test_multimodal_reference_instantiation() -> None:
+    # Valid instantiation
+    ref = MultimodalReference(
+        artifact_uri="https://example.com/target.webp",
+        role=ReferenceRole.STYLE_TARGET,
+        mime_type="image/webp",
+    )
+    assert ref.artifact_uri == "https://example.com/target.webp"
+    assert ref.role == ReferenceRole.STYLE_TARGET
+    assert ref.mime_type == "image/webp"
+
+    # Invalid role
+    with pytest.raises(ValidationError):
+        MultimodalReference(
+            artifact_uri="https://example.com/target.webp",
+            role="INVALID_ROLE",  # type: ignore
+            mime_type="image/webp",
+        )
 
 
 def test_spatial_correction() -> None:

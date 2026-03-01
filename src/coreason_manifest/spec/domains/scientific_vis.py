@@ -26,6 +26,21 @@ class VisInformationType(str, Enum):  # noqa: UP042
     HYBRID_META = "HYBRID_META"
 
 
+class ReferenceRole(str, Enum):  # noqa: UP042
+    SPATIAL_SKETCH = "SPATIAL_SKETCH"
+    STYLE_TARGET = "STYLE_TARGET"
+    DATA_CONTEXT = "DATA_CONTEXT"
+
+
+class MultimodalReference(BaseModel):
+    artifact_uri: str = Field(
+        ...,
+        description="A state-safe pointer/URI to the blob store. NEVER embed raw base64 data here.",
+    )
+    role: ReferenceRole
+    mime_type: str
+
+
 class SciVisIntent(BaseModel):
     vis_type: VisInformationType = Field(
         ...,
@@ -37,6 +52,13 @@ class SciVisIntent(BaseModel):
     )
     requires_vector_layout: bool = Field(
         description="Indicates if vector layout is required for SVG/mxGraph hierarchy."
+    )
+    references: list[MultimodalReference] = Field(
+        default_factory=list, description="Optional multimodal artifact pointers."
+    )
+    grounding_preference: Literal["text_dominant", "sketch_dominant", "balanced"] = Field(
+        default="text_dominant",
+        description="Dictates how the VLM should resolve conflicts between text descriptions and sketch layouts.",
     )
 
 
