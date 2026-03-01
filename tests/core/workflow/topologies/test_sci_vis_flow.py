@@ -38,6 +38,16 @@ def test_sci_vis_flow_serialization_and_structure() -> None:
     assert router.default is not None
     assert router.default == "human_expert_review"
 
+    # Validate layout_agent node
+    layout_agent = flow.graph.nodes["layout_agent"]
+    assert layout_agent.output_schema is not None
+    assert layout_agent.output_schema.get("title") == "SpatialLayoutBlueprint"
+
+    # Validate final_renderer node
+    final_renderer = flow.graph.nodes["final_renderer"]
+    assert final_renderer.output_schema is not None
+    assert final_renderer.output_schema.get("title") == "MCPOperationSequence"
+
     # Validate Pydantic dump doesn't throw errors
     dumped = flow.model_dump()
     assert isinstance(dumped, dict)

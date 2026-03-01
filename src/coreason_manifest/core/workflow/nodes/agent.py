@@ -1,5 +1,5 @@
 # Prosperity-3.0
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field
 
@@ -61,6 +61,9 @@ class AgentNode(Node):
             examples=[{"financial": {"max_cost_usd": 10.0}}],
         ),
     ]
+    output_schema: dict[str, Any] | None = Field(
+        None, description="The expected JSON schema for the agent's output payload.", examples=[{"type": "object"}]
+    )
     escalation_rules: list[EscalationCriteria] = Field(
         default_factory=list,
         description="Local escalation rules for this agent.",
