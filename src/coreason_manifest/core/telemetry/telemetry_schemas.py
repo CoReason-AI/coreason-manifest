@@ -181,3 +181,66 @@ class ExecutionSnapshot(BaseModel):
 
     node_states: dict[str, NodeState]
     active_path: list[str]
+
+
+from datetime import UTC  # noqa: E402
+
+
+class SecurityViolationEvent(AntibodyBase):
+    """
+    SIEM-Native Security Alerting Contract.
+    Emitted when the identity middleware detects malicious activity or strict policy breaches.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    # Event Classification
+    event_type: Literal[
+        "invalid_signature",
+        "expired_token",
+        "ssrf_attempt",  # Blocked attempt to query internal/malicious IdP URIs
+        "jwks_rate_limit_exceeded",  # Potential DoS attack via forced key refreshes
+        "issuer_mismatch",  # Token issuer does not match trusted authorities
+        "insufficient_scope",  # Token lacks the required capability bounds
+    ] = Field(..., description="Machine-readable taxonomy of the security violation.")
+
+    severity: Literal["low", "medium", "high", "critical"] = Field(
+        ..., description="Used by SOAR to determine automated response (e.g., page SOC vs. passive log)."
+    )
+    message: str = Field(..., description="Human-readable context.")
+
+    # Attacker Profiling
+    ip_address: str | None = Field(None, description="IP address initiating the request.")
+    attempted_uri: str | None = Field(None, description="The URL the attacker attempted to force the system to reach.")
+    raw_headers: dict[str, str] = Field(default_factory=dict, description="Sanitized HTTP headers for SIEM profiling.")
+
+    # W3C Lineage
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    trace_id: str | None = Field(
+        None, description="W3C traceparent ID linking this attack to a broader execution trace."
+    )
+
+
+class AuthLifecycleEvent(AntibodyBase):
+    """
+    Zero-Knowledge Identity Telemetry.
+    Tracks authentication state changes strictly without leaking PII.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    event_type: Literal[
+        "login_success", "token_refresh", "logout", "device_flow_initiated", "device_flow_completed"
+    ] = Field(..., description="The lifecycle state transition.")
+
+    # Privacy-First Identifiers
+    anonymized_user_id: str = Field(..., description="The HMAC-SHA256 hashed identity. NEVER log the raw subject ID.")
+    tenant_id: str | None = Field(None, description="The organizational boundary.")
+
+    # Ephemeral Context
+    session_id: str | None = Field(None, description="The JTI or session identifier.")
+    granted_scopes: list[str] = Field(default_factory=list, description="The bounded capabilities granted.")
+
+    # W3C Lineage
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    trace_id: str | None = Field(None, description="W3C traceparent ID linking to the agent execution.")
