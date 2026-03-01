@@ -233,7 +233,7 @@ class GraphFlow(CoreasonModel):
                     "contain unresolved SemanticRefs. A Weaver must compile this graph into "
                     "concrete profiles before publication."
                 )
-                raise ValueError(msg)
+                raise ManifestError.critical_halt(code=ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self
 
 
@@ -292,11 +292,11 @@ class LinearFlow(CoreasonModel):
             ]
             if unresolved:
                 msg = (
-                    f"Lifecycle Violation: Cannot publish graph. Nodes [{','.join(unresolved)}] "
-                    "contain unresolved SemanticRefs. A Weaver must compile this graph into "
+                    f"Lifecycle Violation: Cannot publish linear flow. Nodes [{','.join(unresolved)}] "
+                    "contain unresolved SemanticRefs. A Weaver must compile this linear flow into "
                     "concrete profiles before publication."
                 )
-                raise ValueError(msg)
+                raise ManifestError.critical_halt(code=ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self
 
 

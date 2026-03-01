@@ -40,11 +40,13 @@ class AgentNode(Node):
     type: Literal["agent"] = Field("agent", description="The type of the node.", examples=["agent"])
     profile: CognitiveProfile | ProfileID | SemanticRef = Field(
         ...,
+        union_mode="left_to_right",
         description="The cognitive profile configuration or a reference ID.",
         examples=["profile_1", {"role": "Assistant", "persona": "You are a helpful assistant."}],
     )
     tools: CoercibleStringList | SemanticRef = Field(
         default_factory=list,
+        union_mode="left_to_right",
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
     )

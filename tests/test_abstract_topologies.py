@@ -1,7 +1,8 @@
 import pytest
 
 from coreason_manifest.core.common.semantic import OptimizationIntent, SemanticRef
-from coreason_manifest.core.workflow.flow import FlowInterface, FlowMetadata, Graph, GraphFlow
+from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.workflow.flow import FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes.agent import AgentNode
 
 
@@ -49,8 +50,28 @@ def test_graph_flow_published_with_semantic_ref_raises() -> None:
         "concrete profiles before publication."
     )
 
-    with pytest.raises(ValueError, match=expected_msg.replace("[", r"\[").replace("]", r"\]")):
+    with pytest.raises(ManifestError) as exc_info:
         GraphFlow(status="published", metadata=create_metadata(), interface=FlowInterface(), graph=graph)
+
+    assert exc_info.value.fault.error_code == ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED
+    assert expected_msg in str(exc_info.value)
+
+
+def test_linear_flow_published_with_semantic_ref_raises() -> None:
+    ref = SemanticRef(intent="Research", constraints=[])
+    node = AgentNode(id="agent_1", profile=ref, tools=ref, operational_policy=None)
+
+    expected_msg = (
+        "Lifecycle Violation: Cannot publish linear flow. Nodes [agent_1] "
+        "contain unresolved SemanticRefs. A Weaver must compile this linear flow into "
+        "concrete profiles before publication."
+    )
+
+    with pytest.raises(ManifestError) as exc_info:
+        LinearFlow(status="published", metadata=create_metadata(), steps=[node])
+
+    assert exc_info.value.fault.error_code == ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED
+    assert expected_msg in str(exc_info.value)
 
 
 def test_graph_flow_published_concrete() -> None:
