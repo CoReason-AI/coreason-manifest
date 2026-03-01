@@ -58,6 +58,7 @@ def test_genui_multiplexer_emission() -> None:
         yield StreamUIEnvelope(
             op="ui_mount",
             p=AdaptiveUIContract(
+                layout=[UIComponentNode(type="weather_widget", props={"location": "San Francisco", "user_id": "123-45-678"})]
                 layout=[
                     UIComponentNode(
                         type="weather_widget",

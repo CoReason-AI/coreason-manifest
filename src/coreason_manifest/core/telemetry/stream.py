@@ -4,6 +4,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.core.common.presentation import AdaptiveUIContract
 from coreason_manifest.core.state.persistence import JSONPatchOperation
+from coreason_manifest.core.telemetry.stream_base import BaseEnvelope
+from coreason_manifest.core.telemetry.suspense_envelope import StreamSuspenseEnvelope
 
 
 class StreamError(BaseModel):
@@ -16,12 +18,6 @@ class StreamError(BaseModel):
     code: int
     message: str
     severity: Literal["low", "medium", "high", "critical"]
-
-
-class BaseEnvelope(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    trace_id: str | None = None
-    timestamp: float
 
 
 class StreamErrorEnvelope(BaseEnvelope):
@@ -67,7 +63,8 @@ StreamPacket = Annotated[
     | StreamThoughtEnvelope
     | StreamToolCallEnvelope
     | StreamUIEnvelope
-    | StreamStateDeltaEnvelope,
+    | StreamStateDeltaEnvelope
+    | StreamSuspenseEnvelope,
     Field(discriminator="op"),
 ]
 
