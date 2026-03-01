@@ -127,3 +127,16 @@ class PresentationHints(CoreasonModel):
         Literal["basic", "detailed", "debug"],
         Field(description="Preferred metadata detail level."),
     ] = "basic"
+
+
+class UIComponentNode(CoreasonModel):
+    """
+    A specific GenUI node that points to an MCP UI resource.
+    """
+
+    type: Literal["ui_component"] = "ui_component"
+    id: str
+    mcp_ui_resource_uri: str | None = Field(
+        default=None,
+        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
+    )
