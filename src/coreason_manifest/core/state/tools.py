@@ -42,7 +42,13 @@ class BaseTool(CoreasonModel):
     load_strategy: LoadStrategy = Field(LoadStrategy.EAGER, description="How the tool is mounted.")
     trigger_intent: str | None = Field(
         None,
-        description="Dense semantic string embedded by the runtime for Tool-RAG discovery. (e.g., 'Extract patient phenotypes from unstructured clinical notes')",
+        description=(
+            "Dense semantic string embedded by the runtime for Tool-RAG discovery. "
+            "(e.g., 'Extract patient phenotypes from unstructured clinical notes')"
+        ),
+    )
+    lazy_routing_threshold: float = Field(
+        0.75, ge=0.0, le=1.0, description="Minimum vector similarity score required to mount this tool dynamically."
     )
 
     @model_validator(mode="after")
@@ -55,8 +61,10 @@ class BaseTool(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_lazy_loading(self) -> "BaseTool":
-        if self.load_strategy == LoadStrategy.LAZY and not self.trigger_intent:
-            raise ValueError("trigger_intent is required when load_strategy is LAZY")
+        if self.load_strategy == LoadStrategy.LAZY and (not self.trigger_intent or not self.trigger_intent.strip()):
+            raise ValueError(
+                "A valid, non-empty 'trigger_intent' is required for vector discovery when load_strategy is LAZY."
+            )
         return self
 
 

@@ -77,9 +77,18 @@ class SemanticMemoryConfig(CoreasonModel):
     )
     retrieval_strategy: RetrievalStrategy = Field(
         RetrievalStrategy.HYBRID,
-        description="The algorithmic approach required by this agent. (e.g., GRAPH_RAG for multi-hop clinical ontology traversal)",
+        description=(
+            "The algorithmic approach required by this agent. "
+            "(e.g., GRAPH_RAG for multi-hop clinical ontology traversal)"
+        ),
     )
-    scope: KnowledgeScope = Field(KnowledgeScope.SHARED, description="The epistemic boundary of the knowledge access.")
+    scope: KnowledgeScope = Field(
+        ...,
+        description=(
+            "The epistemic boundary of the knowledge access. "
+            "Must be explicitly declared to prevent cross-tenant data leaks."
+        ),
+    )
     min_score_threshold: float = Field(
         0.75, ge=0.0, le=1.0, description="Minimum confidence score for the runtime to inject the context."
     )
