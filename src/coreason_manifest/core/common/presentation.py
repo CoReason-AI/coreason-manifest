@@ -24,14 +24,14 @@ class UIEventMap(CoreasonModel):
     mutates_variables: list[str] | None = Field(None, description="Blackboard variables updated by this event.")
 
 
+class UIComponentNode(CoreasonModel):
+    type: str = Field(..., description="The component registry ID, e.g., 'LineChart', 'DataTable'.")
+    props: dict[str, Any] = Field(default_factory=dict, description="The evaluated property data to bind to the widget.")
+    children: list["UIComponentNode"] = Field(default_factory=list, description="Child component nodes for recursive nesting.")
+
+
 class AdaptiveUIContract(CoreasonModel):
-    widget_id: str = Field(..., description="The abstract identifier for the frontend component registry.")
-    props_schema: dict[str, Any] = Field(
-        ..., description="JSON Schema defining the data required to render the widget."
-    )
-    props_mapping: dict[str, str] = Field(
-        default_factory=dict, description="Maps Blackboard variables (values) to widget props (keys)."
-    )
+    layout: list[UIComponentNode] = Field(..., description="The root elements of the generated UI.")
     events: list[UIEventMap] = Field(
         default_factory=list, description="Maps widget interactions to orchestrator commands."
     )

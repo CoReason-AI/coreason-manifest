@@ -136,6 +136,19 @@ class AgentBuilder:
         self.gap_scan_threshold = 0.8
         self.max_revisions = 1
         self._rate_card_config: dict[str, Any] | None = None
+        self.ui_capabilities: list[str] | None = None
+
+    def with_ui_capabilities(self, registry_ids: list[str]) -> "AgentBuilder":
+        """Assigns UI capabilities to the agent.
+
+        Args:
+            registry_ids (list[str]): List of frontend component registry IDs this agent is permitted to render.
+
+        Returns:
+            AgentBuilder: The builder instance for chaining.
+        """
+        self.ui_capabilities = registry_ids
+        return self
 
     def with_rate_card(
         self,
@@ -608,6 +621,7 @@ class AgentBuilder:
             reasoning=self.reasoning,
             fast_path=self.fast_path,
             memory=self.memory,
+            ui_capabilities=self.ui_capabilities,
         )
 
         return AgentNode(
