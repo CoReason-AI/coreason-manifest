@@ -129,13 +129,22 @@ class Graph(CoreasonModel):
                 message="Graph must contain at least one node.",
             )
 
-        # ID Mismatch and Collision Defense
+        # Note: While dict keys are unique natively, we enforce key == node.id.
+        # The seen_ids check acts as a strict Defense-in-Depth against advanced
+        # Pydantic aliasing attacks where multiple distinct keys might resolve
+        # to pointers sharing the same inner ID.
         seen_ids = set()
         for key, node in self.nodes.items():
             if key != node.id:
-                raise ValueError(f"Routing contradiction: Node key '{key}' does not match Node ID '{node.id}'.")
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_ID_MISMATCH,
+                    message=f"Routing contradiction: Node dictionary key '{key}' does not match inner Node ID '{node.id}'.",
+                )
             if node.id in seen_ids:
-                raise ValueError(f"Internal collision defense: Node ID '{node.id}' appears multiple times.")
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
+                    message=f"Internal collision defense: Node ID '{node.id}' appears multiple times.",
+                )
             seen_ids.add(node.id)
 
         # Entry Point
@@ -285,7 +294,10 @@ class LinearFlow(CoreasonModel):
         seen = set()
         for step in self.steps:
             if step.id in seen:
-                raise ValueError(f"Duplicate Node ID '{step.id}' found in LinearFlow steps.")
+                raise ManifestError.critical_halt(
+                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
+                    message=f"Duplicate Node ID '{step.id}' found in LinearFlow steps.",
+                )
             seen.add(step.id)
 
         return self

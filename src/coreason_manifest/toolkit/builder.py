@@ -1002,6 +1002,8 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps: list[AnyNode] = []
 
     def _register_node(self, node: AnyNode) -> None:
+        if any(step.id == node.id for step in self.steps):
+            raise ValueError(f"Builder Error: Node ID '{node.id}' already exists in LinearFlow.")
         super()._register_node(node)
         self.steps.append(node)
 
@@ -1014,7 +1016,7 @@ class NewLinearFlow(BaseFlowBuilder):
         Returns:
             NewLinearFlow: The builder instance for chaining.
         """
-        self.steps.append(node)
+        self._register_node(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
@@ -1026,7 +1028,7 @@ class NewLinearFlow(BaseFlowBuilder):
         Returns:
             NewLinearFlow: The builder instance for chaining.
         """
-        self.steps.append(agent)
+        self._register_node(agent)
         return self
 
     def _create_flow_instance(self) -> LinearFlow:
@@ -1076,6 +1078,10 @@ class NewGraphFlow(BaseFlowBuilder):
         self.blackboard: Blackboard | None = None
 
     def _register_node(self, node: AnyNode) -> None:
+        if node.id in self._nodes:
+            raise ValueError(
+                f"Builder Error: Node ID '{node.id}' already exists in the topology. Overwrites are strictly forbidden."
+            )
         super()._register_node(node)
         self._nodes[node.id] = node
 
@@ -1100,11 +1106,7 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
-        if node.id in self._nodes:
-            raise ValueError(
-                f"Builder Error: Node ID '{node.id}' already exists in the topology. Overwrites are strictly forbidden."
-            )
-        self._nodes[node.id] = node
+        self._register_node(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
@@ -1116,12 +1118,7 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
-        if agent.id in self._nodes:
-            raise ValueError(
-                f"Builder Error: Node ID '{agent.id}' already exists in the topology. "
-                "Overwrites are strictly forbidden."
-            )
-        self._nodes[agent.id] = agent
+        self._register_node(agent)
         return self
 
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
