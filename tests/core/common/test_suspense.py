@@ -22,18 +22,14 @@ def test_suspense_config_defaults():
     assert config.reserved_height is None
 
 
-@pytest.mark.parametrize("valid_height", [
-    "100px", "2.5rem", "1em", "50vh", "100vw", "10%"
-])
+@pytest.mark.parametrize("valid_height", ["100px", "2.5rem", "1em", "50vh", "100vw", "10%"])
 def test_suspense_config_valid_reserved_height(valid_height):
     """Test SuspenseConfig accepts valid CSS dimensions for reserved_height."""
     config = SuspenseConfig(reserved_height=valid_height)
     assert config.reserved_height == valid_height
 
 
-@pytest.mark.parametrize("invalid_height", [
-    "tall", "100", "px", "100abc", "10.0.0px"
-])
+@pytest.mark.parametrize("invalid_height", ["tall", "100", "px", "100abc", "10.0.0px"])
 def test_suspense_config_invalid_reserved_height(invalid_height):
     """Test SuspenseConfig rejects invalid CSS dimensions."""
     with pytest.raises(ValidationError):
@@ -42,18 +38,9 @@ def test_suspense_config_invalid_reserved_height(invalid_height):
 
 def test_stream_suspense_envelope_valid():
     """Test successful initialization of StreamSuspenseEnvelope."""
-    config = SuspenseConfig(
-        fallback_type=SkeletonType.TEXT_SHIMMER,
-        estimated_duration_ms=500,
-        reserved_height="200px"
-    )
+    config = SuspenseConfig(fallback_type=SkeletonType.TEXT_SHIMMER, estimated_duration_ms=500, reserved_height="200px")
 
-    envelope = StreamSuspenseEnvelope(
-        op="suspense_mount",
-        p=config,
-        target_node_id="node_123",
-        timestamp=123456789.0
-    )
+    envelope = StreamSuspenseEnvelope(op="suspense_mount", p=config, target_node_id="node_123", timestamp=123456789.0)
 
     assert envelope.op == "suspense_mount"
     assert envelope.p == config
@@ -69,5 +56,5 @@ def test_stream_suspense_envelope_invalid_op():
         StreamSuspenseEnvelope(
             op="invalid_mount",  # type: ignore
             p=config,
-            timestamp=123456789.0
+            timestamp=123456789.0,
         )

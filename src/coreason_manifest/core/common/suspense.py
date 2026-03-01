@@ -1,5 +1,6 @@
-from enum import StrEnum
 import re
+from enum import StrEnum
+
 from pydantic import model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
