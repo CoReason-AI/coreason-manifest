@@ -5,7 +5,6 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from coreason_manifest.core.compliance import ComplianceReport, ErrorCatalog, RemediationAction
 from coreason_manifest.core.oversight.governance import Governance
 from coreason_manifest.core.oversight.resilience import (
     EscalationStrategy,
@@ -14,6 +13,7 @@ from coreason_manifest.core.oversight.resilience import (
     ResilienceStrategy,
 )
 from coreason_manifest.core.primitives.types import RiskLevel
+from coreason_manifest.core.security.compliance import ComplianceReport, ErrorCatalog, RemediationAction
 from coreason_manifest.core.state.tools import ToolCapability, ToolPack
 from coreason_manifest.core.workflow.flow import (
     AnyNode,

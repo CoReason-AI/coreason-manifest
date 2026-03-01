@@ -3,9 +3,9 @@ from typing import Literal
 
 from pydantic import Field, field_validator
 
-from coreason_manifest.core.common_base import CoreasonModel
-from coreason_manifest.core.compliance import SecurityVisitor
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
+from coreason_manifest.core.security.compliance import SecurityVisitor
 
 InterventionMode = Literal["blocking", "shadow", "hijack_only"]
 

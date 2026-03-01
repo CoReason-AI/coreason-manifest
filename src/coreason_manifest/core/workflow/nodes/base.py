@@ -4,8 +4,8 @@ from typing import Annotated, Any
 
 from pydantic import Field
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.presentation import PresentationHints
-from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.oversight.resilience import ResilienceConfig
 from coreason_manifest.core.primitives.types import NodeID, VariableID
 

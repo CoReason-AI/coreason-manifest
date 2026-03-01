@@ -3,8 +3,8 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.semantic import SemanticRef
-from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.compute.reasoning import FastPath, ReasoningConfig
 from coreason_manifest.core.oversight.governance import OperationalPolicy
 from coreason_manifest.core.oversight.intervention import EscalationCriteria

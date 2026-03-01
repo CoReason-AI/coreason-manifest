@@ -11,7 +11,7 @@
 
 from pydantic import AwareDatetime, ConfigDict, Field
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 
 class AgentIdentity(CoreasonModel):

@@ -2,7 +2,7 @@ from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 # =========================================================================
 #  STATE DIFF (RFC 6902 JSON Patch)

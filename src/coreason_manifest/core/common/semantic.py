@@ -1,7 +1,7 @@
 # Prosperity-3.0
 from pydantic import ConfigDict, Field
 
-from coreason_manifest.core.common_base import CoreasonModel
+from coreason_manifest.core.common.base import CoreasonModel
 
 
 class OptimizationIntent(CoreasonModel):

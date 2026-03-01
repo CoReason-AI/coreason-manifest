@@ -1,8 +1,8 @@
 from typing import Any
 
-from coreason_manifest.adapters.config import AdapterConfig
-from coreason_manifest.core.compliance import RemediationAction
+from coreason_manifest.adapters.system.config import AdapterConfig
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.security.compliance import RemediationAction
 from coreason_manifest.core.state.tools import ToolPack
 from coreason_manifest.core.workflow.flow import FlowDefinitions
 from coreason_manifest.core.workflow.nodes import AgentNode

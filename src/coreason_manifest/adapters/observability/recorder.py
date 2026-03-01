@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from coreason_manifest.adapters.observability.integrity import compute_hash
 from coreason_manifest.adapters.observability.privacy import PrivacySentinel
-from coreason_manifest.core.telemetry_schemas import NodeExecution, NodeState
+from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, NodeState
 
 
 class BlackBoxRecorder:

@@ -4,13 +4,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.adapters.system.net_utils import canonicalize_domain
-from coreason_manifest.core.compliance import (
+from coreason_manifest.core.oversight.resilience import EscalationStrategy
+from coreason_manifest.core.primitives.constants import NodeCapability
+from coreason_manifest.core.security.compliance import (
     ComplianceReport,
     ErrorCatalog,
     RemediationAction,
 )
-from coreason_manifest.core.oversight.resilience import EscalationStrategy
-from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
 from coreason_manifest.core.workflow.topology import (

@@ -3,12 +3,12 @@ from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
-from coreason_manifest.core.common_base import CoreasonModel
-from coreason_manifest.core.compliance import RemediationAction
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import VariableID
+from coreason_manifest.core.security.compliance import RemediationAction
 
 from .base import Node
 

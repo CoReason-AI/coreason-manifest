@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from coreason_manifest.core.telemetry_schemas import ExecutionSnapshot
+    from coreason_manifest.core.telemetry.telemetry_schemas import ExecutionSnapshot
 
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import AnyNode, SwitchNode

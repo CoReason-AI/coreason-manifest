@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Protocol
 
-from coreason_manifest.core.telemetry_schemas import NodeExecution, NodeState
+from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, NodeState
 
 
 class TelemetryRecorder(Protocol):
