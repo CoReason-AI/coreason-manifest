@@ -131,5 +131,5 @@ class PresentationHints(CoreasonModel):
 
     mcp_ui_resource_uri: str | None = Field(
         default=None,
-        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865)."
+        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
     )

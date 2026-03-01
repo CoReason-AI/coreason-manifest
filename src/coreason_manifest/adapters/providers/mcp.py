@@ -7,9 +7,7 @@ from coreason_manifest.core.state.tools import MCPTool, ToolPack
 
 class MCPClientMessage(BaseModel):
     jsonrpc: Literal["2.0"] = Field(default="2.0", description="JSON-RPC version")
-    method: Literal["mcp.ui.emit_intent"] = Field(
-        ..., description="The intent bubbling method emitted from the UI"
-    )
+    method: Literal["mcp.ui.emit_intent"] = Field(..., description="The intent bubbling method emitted from the UI")
     params: dict[str, Any] = Field(default_factory=dict, description="Intent parameters payload")
     id: str | int = Field(..., description="Message ID")
 
