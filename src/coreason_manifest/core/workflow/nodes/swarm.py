@@ -80,9 +80,9 @@ class SwarmNode(Node):
         ),
     ] = 0.0
 
-    reducer_function: Literal[
-        "concat", "vote", "summarize", "tournament", "tabular_join", "meta_analysis_matrix"
-    ] | None = Field(..., description="How to combine results.", examples=["concat"])
+    reducer_function: (
+        Literal["concat", "vote", "summarize", "tournament", "tabular_join", "meta_analysis_matrix"] | None
+    ) = Field(..., description="How to combine results.", examples=["concat"])
 
     tournament_config: TournamentConfig | None = None
 
