@@ -1,6 +1,33 @@
-from typing import Any
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
 
 from coreason_manifest.core.state.tools import MCPTool, ToolPack
+
+
+class MCPClientMessage(BaseModel):
+    jsonrpc: Literal["2.0"] = Field(default="2.0", description="JSON-RPC version")
+    method: Literal["mcp.ui.emit_intent"] = Field(
+        ..., description="The intent bubbling method emitted from the UI"
+    )
+    params: dict[str, Any] = Field(default_factory=dict, description="Intent parameters payload")
+    id: str | int = Field(..., description="Message ID")
+
+
+class MCPUIBroker:
+    def validate_iframe_payload(self, payload: dict[str, Any]) -> MCPClientMessage:
+        """
+        Validates the raw dictionary payload from the WebView iframe
+        into a strict MCPClientMessage schema.
+        """
+        return MCPClientMessage.model_validate(payload)
+
+    def translate_intent_to_action(self, message: MCPClientMessage) -> dict[str, Any]:
+        """
+        Safely unpacks the `params` (the user's intent) so the execution
+        engine can route it to the Blackboard or the Agent's context.
+        """
+        return message.params
 
 
 def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
