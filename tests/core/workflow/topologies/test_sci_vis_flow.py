@@ -1,4 +1,5 @@
 from coreason_manifest.core.workflow.nodes import SwitchNode
+from coreason_manifest.core.workflow.nodes.visual_oversight import VisualInspectorNode
 from coreason_manifest.core.workflow.topologies.sci_vis_flow import get_sota_scivis_topology
 
 
@@ -16,6 +17,11 @@ def test_sci_vis_flow_serialization_and_structure() -> None:
     assert "visual_critic" in flow.graph.nodes
     assert "critique_router" in flow.graph.nodes
     assert "final_renderer" in flow.graph.nodes
+
+    # Validate visual_critic node
+    visual_critic = flow.graph.nodes["visual_critic"]
+    assert isinstance(visual_critic, VisualInspectorNode)
+    assert visual_critic.target_artifact_key == "rendered_layout_svg"
 
     # Validate the default non-null constraint on router
     router = flow.graph.nodes["critique_router"]

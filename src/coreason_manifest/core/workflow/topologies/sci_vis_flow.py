@@ -1,5 +1,7 @@
 from coreason_manifest.core.workflow.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
-from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, InspectorNode, PlannerNode, SwitchNode
+from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, PlannerNode, SwitchNode
+from coreason_manifest.core.workflow.nodes.visual_oversight import VisBenchRubricConfig, VisualInspectorNode
+from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint
 
 
 def get_sota_scivis_topology() -> GraphFlow:
@@ -9,7 +11,7 @@ def get_sota_scivis_topology() -> GraphFlow:
     semantic_parser = PlannerNode(
         id="semantic_parser",
         goal="Parses text to hierarchical blueprint",
-        output_schema={"type": "object"},
+        output_schema=HierarchicalBlueprint.model_json_schema(),
     )
 
     # Node 2: layout_agent
@@ -23,11 +25,18 @@ def get_sota_scivis_topology() -> GraphFlow:
     )
 
     # Node 3: visual_critic
-    visual_critic = InspectorNode(
+    visual_critic = VisualInspectorNode(
         id="visual_critic",
         target_variable="layout",
         criteria="Applies VisBench rubrics to layout",
         output_variable="critique_result",
+        target_artifact_key="rendered_layout_svg",
+        rubrics=VisBenchRubricConfig(
+            check_alignment=True,
+            check_text_readability=True,
+            check_spatial_overlap=True,
+            check_hallucinations=True,
+        ),
     )
 
     # Node 4: critique_router
