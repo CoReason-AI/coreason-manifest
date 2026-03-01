@@ -16,6 +16,7 @@ class RenderStrategy(StrEnum):
     ADAPTIVE_CARD = "adaptive_card"
     CUSTOM_IFRAME = "custom_iframe"
     GEN_UI = "gen_ui"
+    MCP_APPS = "mcp_apps"
 
 
 class UIEventMap(CoreasonModel):
@@ -127,3 +128,8 @@ class PresentationHints(CoreasonModel):
         Literal["basic", "detailed", "debug"],
         Field(description="Preferred metadata detail level."),
     ] = "basic"
+
+    mcp_ui_resource_uri: str | None = Field(
+        default=None,
+        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
+    )
