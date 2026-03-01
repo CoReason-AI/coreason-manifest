@@ -89,6 +89,24 @@ def _validate_traffic_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceRep
     return errors
 
 
+def _validate_evals_topology(flow: GraphFlow | LinearFlow, valid_ids: set[str]) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if hasattr(flow, "evals") and flow.evals and flow.evals.test_cases:
+        for test_case in flow.evals.test_cases:
+            if test_case.expected_traversal_path:
+                errors.extend(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_TOPOLOGY_ID_MISMATCH,
+                        severity="violation",
+                        message=f"Eval Test Case expects traversal of missing Node ID '{node_id}'.",
+                    )
+                    for node_id in test_case.expected_traversal_path
+                    if node_id not in valid_ids
+                )
+    return errors
+
+
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Semantically validate a Flow (Linear or Graph).
@@ -203,6 +221,8 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 6. Middleware References
     errors.extend(_validate_middleware_refs(flow))
+
+    errors.extend(_validate_evals_topology(flow, valid_ids))
 
     return errors
 
