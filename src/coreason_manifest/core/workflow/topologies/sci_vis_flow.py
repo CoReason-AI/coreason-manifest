@@ -9,7 +9,10 @@ from coreason_manifest.core.workflow.nodes import (
     SwitchNode,
 )
 from coreason_manifest.core.workflow.nodes.visual_oversight import VisBenchRubricConfig, VisualInspectorNode
-from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint
+from coreason_manifest.spec.domains.mcp_contracts import MCPOperationSequence
+from coreason_manifest.spec.domains.scientific_vis import HierarchicalBlueprint, SciVisIntent
+from coreason_manifest.spec.domains.scivis_spatial import SpatialLayoutBlueprint
+from coreason_manifest.spec.domains.scivis_style import DesignSystemConfig
 
 
 def get_sota_scivis_topology() -> GraphFlow:
@@ -27,8 +30,9 @@ def get_sota_scivis_topology() -> GraphFlow:
         id="layout_agent",
         profile=CognitiveProfile(
             role="Layout Designer",
-            persona="Drafts spatial coordinates and edges",
+            persona="Drafts relative spatial constraints and layouts (AST) based on the academic design system.",
         ),
+        output_schema=SpatialLayoutBlueprint.model_json_schema(),
         operational_policy=None,
     )
 
@@ -58,7 +62,7 @@ def get_sota_scivis_topology() -> GraphFlow:
     # Node 4.5: human_expert_review
     human_expert_review = HumanNode(
         id="human_expert_review",
-        prompt="Review Blueprint & Layout",
+        prompt="Review the logical HierarchicalBlueprint and spatial SpatialLayoutBlueprint before rendering.",
         options=["approve_to_render", "reject_to_layout", "reject_to_planner"],
         escalation=EscalationStrategy(
             type="escalate",
@@ -76,8 +80,9 @@ def get_sota_scivis_topology() -> GraphFlow:
         id="final_renderer",
         profile=CognitiveProfile(
             role="Renderer",
-            persona="Compiles vector code and renders final artifact",
+            persona="Executes atomic MCP tool transactions on a headless canvas to render the final artifact.",
         ),
+        output_schema=MCPOperationSequence.model_json_schema(),
         operational_policy=None,
     )
 
@@ -116,7 +121,12 @@ def get_sota_scivis_topology() -> GraphFlow:
             version="1.0.0",
             description="2026 SOTA Topology for Scientific Visualization",
         ),
-        interface=FlowInterface(),
+        interface=FlowInterface(
+            inputs={
+                "intent": SciVisIntent.model_json_schema(),
+                "style_profile": DesignSystemConfig.model_json_schema(),
+            }
+        ),
         graph=graph,
         type="graph",
         kind="GraphFlow",
