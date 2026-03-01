@@ -367,14 +367,18 @@ def generate_inverse_patches(
             # Reversing a remove is an add, needing the original value
             parent, key = _resolve_json_pointer(current_state, patch.path)
             original_value = parent[key] if isinstance(parent, dict) else parent[int(key)]
-            inverse_patches.append(JSONPatchOperation(op=PatchOp.ADD, path=patch.path, value=deepcopy(original_value), from_=None))
+            inverse_patches.append(
+                JSONPatchOperation(op=PatchOp.ADD, path=patch.path, value=deepcopy(original_value), from_=None)
+            )
             _apply_patch_in_place(current_state, patch)
 
         elif patch.op == PatchOp.REPLACE:
             # Reversing a replace is a replace with the old value
             parent, key = _resolve_json_pointer(current_state, patch.path)
             old_value = parent.get(key) if isinstance(parent, dict) else parent[int(key)]
-            inverse_patches.append(JSONPatchOperation(op=PatchOp.REPLACE, path=patch.path, value=deepcopy(old_value), from_=None))
+            inverse_patches.append(
+                JSONPatchOperation(op=PatchOp.REPLACE, path=patch.path, value=deepcopy(old_value), from_=None)
+            )
             _apply_patch_in_place(current_state, patch)
 
         elif patch.op == PatchOp.MOVE:
@@ -391,7 +395,9 @@ def generate_inverse_patches(
 
         elif patch.op == PatchOp.TEST:
             # Test has no state effect, its inverse is the same test
-            inverse_patches.append(JSONPatchOperation(op=PatchOp.TEST, path=patch.path, value=deepcopy(patch.value), from_=None))
+            inverse_patches.append(
+                JSONPatchOperation(op=PatchOp.TEST, path=patch.path, value=deepcopy(patch.value), from_=None)
+            )
             _apply_patch_in_place(current_state, patch)
 
     inverse_patches.reverse()
