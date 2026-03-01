@@ -44,4 +44,5 @@ class LocalStateManifest(CoreasonModel):
     These variables are accessed on the client using pointer syntax (e.g., $local.variable_name)
     and do NOT trigger RFC 6902 state patches on the backend.
     """
+
     keys: dict[str, LocalVariable] = Field(default_factory=dict)
