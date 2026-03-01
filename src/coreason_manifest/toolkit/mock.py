@@ -11,7 +11,7 @@ from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
 from coreason_manifest.core.telemetry_schemas import NodeExecution, NodeState
-from coreason_manifest.core.workflow.evals import EvalsManifest
+from coreason_manifest.core.workflow.evals import ChaosConfig, EvalsManifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode
 
@@ -163,10 +163,16 @@ class MockFactory:
         resolver = registry.resolver()
 
         if isinstance(flow, LinearFlow):
+            chaos_config = None
+            if evals and evals.test_cases and evals.test_cases[0].chaos_config:
+                chaos_config = evals.test_cases[0].chaos_config
+
             nodes = flow.steps
             prev_hashes: list[str] = []
             for node in nodes:
-                exec_records = self._execute_node(node, execution_map, prev_hashes, resolver, fuzzing_vars)
+                exec_records = self._execute_node(
+                    node, execution_map, prev_hashes, resolver, fuzzing_vars, chaos_config
+                )
                 trace.extend(exec_records)
                 last_record = exec_records[-1]
                 execution_map[node.id] = last_record
@@ -180,6 +186,7 @@ class MockFactory:
             if evals and evals.test_cases:
                 # Execute based on the first test case for simplicity in the mock
                 tc = evals.test_cases[0]
+                chaos_config = tc.chaos_config if tc else None
                 expected_path = tc.expected_traversal_path
                 prev_hashes = []
 
@@ -190,7 +197,9 @@ class MockFactory:
                         logger.warning(f"Eval requested node {n_id} not in graph.")
                         break
 
-                    exec_records = self._execute_node(node, execution_map, prev_hashes, resolver, fuzzing_vars)
+                    exec_records = self._execute_node(
+                        node, execution_map, prev_hashes, resolver, fuzzing_vars, chaos_config
+                    )
 
                     # Override outputs with mock inputs if it's the start node
                     if tc.mock_inputs and len(trace) == 0 and exec_records:
@@ -203,6 +212,7 @@ class MockFactory:
 
                 # We do not evaluate assertions here (done by evaluator), just trace creation.
             else:
+                chaos_config = None
                 # Find start nodes (indegree 0)
                 all_targets = {e.to_node for e in graph.edges}
                 start_nodes = [n for n_id, n in graph.nodes.items() if n_id not in all_targets]
@@ -222,7 +232,9 @@ class MockFactory:
                 prev_hashes = []
 
                 while current_node and steps < max_steps:
-                    exec_records = self._execute_node(current_node, execution_map, prev_hashes, resolver, fuzzing_vars)
+                    exec_records = self._execute_node(
+                        current_node, execution_map, prev_hashes, resolver, fuzzing_vars, chaos_config
+                    )
                     trace.extend(exec_records)
                     last_record = exec_records[-1]
                     execution_map[current_node.id] = last_record
@@ -250,6 +262,7 @@ class MockFactory:
         prev_hashes: list[str] | None = None,
         resolver: Any | None = None,
         fuzzing_vars: set[str] | None = None,
+        chaos_config: ChaosConfig | None = None,
     ) -> list[NodeExecution]:
         timestamp = datetime.now(UTC)
 
@@ -270,6 +283,15 @@ class MockFactory:
                 w_inputs = {"worker_id": i, "workload": "mock_item"}
                 w_outputs = {"result": "processed"}
                 w_duration = self.rng.uniform(10, 100)
+                if chaos_config:
+                    w_duration += chaos_config.latency_ms
+
+                w_state = NodeState.COMPLETED
+                w_error = None
+
+                if chaos_config and self.rng.random() < chaos_config.error_rate:
+                    w_state = NodeState.FAILED
+                    w_error = "HTTP 500 Internal Server Error"
 
                 w_hash = self._generate_hash(
                     f"{w_id}{json.dumps(w_inputs, sort_keys=True)}{json.dumps(w_outputs, sort_keys=True)}"
@@ -278,9 +300,10 @@ class MockFactory:
                 workers.append(
                     NodeExecution(
                         node_id=w_id,
-                        state=NodeState.COMPLETED,
+                        state=w_state,
                         inputs=w_inputs,
                         outputs=w_outputs,
+                        error=w_error,
                         timestamp=timestamp,
                         duration_ms=w_duration,
                         execution_hash=w_hash,
@@ -294,15 +317,26 @@ class MockFactory:
             agg_inputs = {"results": [w.outputs for w in workers]}
             agg_outputs = {"final": "aggregated_result"}
             agg_duration = self.rng.uniform(10, 50)
+            if chaos_config:
+                agg_duration += chaos_config.latency_ms
+
+            agg_state = NodeState.COMPLETED
+            agg_error = None
+
+            if chaos_config and self.rng.random() < chaos_config.error_rate:
+                agg_state = NodeState.FAILED
+                agg_error = "HTTP 500 Internal Server Error"
+
             agg_hash = self._generate_hash(
                 f"{node.id}{json.dumps(agg_inputs, sort_keys=True)}{json.dumps(agg_outputs, sort_keys=True)}"
             )
 
             aggregator = NodeExecution(
                 node_id=node.id,
-                state=NodeState.COMPLETED,
+                state=agg_state,
                 inputs=agg_inputs,
                 outputs=agg_outputs,
+                error=agg_error,
                 timestamp=timestamp,
                 duration_ms=agg_duration,
                 execution_hash=agg_hash,
@@ -343,6 +377,15 @@ class MockFactory:
                     outputs[key] = self.rng.choice(payloads)
 
         duration = self.rng.uniform(10, 500)
+        if chaos_config:
+            duration += chaos_config.latency_ms
+
+        state = NodeState.COMPLETED
+        error = None
+
+        if chaos_config and self.rng.random() < chaos_config.error_rate:
+            state = NodeState.FAILED
+            error = "HTTP 500 Internal Server Error"
 
         # Calculate hash
         data_to_hash = f"{node.id}{json.dumps(inputs, sort_keys=True)}{json.dumps(outputs, sort_keys=True)}"
@@ -351,9 +394,10 @@ class MockFactory:
         return [
             NodeExecution(
                 node_id=node.id,
-                state=NodeState.COMPLETED,
+                state=state,
                 inputs=inputs,
                 outputs=outputs,
+                error=error,
                 timestamp=timestamp,
                 duration_ms=duration,
                 execution_hash=exec_hash,
