@@ -115,7 +115,7 @@ def _render_tools(tool_packs: dict[str, Any] | None) -> str:
         return "No permitted tools defined.\n"
 
     lines = []
-    for pack_name, pack_def in tool_packs.items():
+    for pack_def in tool_packs.values():
         tools = getattr(pack_def, "tools", [])
         for tool in tools:
             tool_name = getattr(tool, "name", "Unknown Tool")
