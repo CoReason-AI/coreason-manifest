@@ -67,6 +67,10 @@ class AdaptiveUIContract(CoreasonModel):
     fallback_to_text: bool = Field(
         True, description="Gracefully degrade to JSON Form or Text input if widget is unavailable."
     )
+    mcp_ui_resource_uri: str | None = Field(
+        default=None,
+        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -173,7 +177,3 @@ class PresentationHints(CoreasonModel):
 
 
 UIComponentNode.model_rebuild()
-    mcp_ui_resource_uri: str | None = Field(
-        default=None,
-        description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
-    )

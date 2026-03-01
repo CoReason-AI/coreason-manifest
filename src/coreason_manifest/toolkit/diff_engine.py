@@ -305,7 +305,10 @@ def _apply_patch_in_place(state: Any, patch: JSONPatchOperation) -> None:
         if isinstance(parent, dict):
             parent[key] = deepcopy(patch.value)
         elif isinstance(parent, list):
-            parent.insert(int(key), deepcopy(patch.value))
+            if key == "-":
+                parent.append(deepcopy(patch.value))
+            else:
+                parent.insert(int(key), deepcopy(patch.value))
     elif patch.op == PatchOp.REMOVE:
         parent, key = _resolve_json_pointer(state, patch.path)
         if isinstance(parent, dict):
@@ -327,7 +330,10 @@ def _apply_patch_in_place(state: Any, patch: JSONPatchOperation) -> None:
         if isinstance(target_parent, dict):
             target_parent[target_key] = val
         else:
-            target_parent.insert(int(target_key), val)
+            if target_key == "-":
+                target_parent.append(val)
+            else:
+                target_parent.insert(int(target_key), val)
     elif patch.op == PatchOp.COPY:
         if patch.from_ is None:
             raise ValueError("copy requires from")
@@ -340,7 +346,10 @@ def _apply_patch_in_place(state: Any, patch: JSONPatchOperation) -> None:
         if isinstance(target_parent, dict):
             target_parent[target_key] = val
         else:
-            target_parent.insert(int(target_key), val)
+            if target_key == "-":
+                target_parent.append(val)
+            else:
+                target_parent.insert(int(target_key), val)
     elif patch.op == PatchOp.TEST:
         parent, key = _resolve_json_pointer(state, patch.path)
         current_val = parent.get(key) if isinstance(parent, dict) else parent[int(key)]

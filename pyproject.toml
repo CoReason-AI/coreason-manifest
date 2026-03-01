@@ -93,7 +93,7 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 filterwarnings = ["ignore:Pydantic serializer warnings:UserWarning"]
 markers = [
-    "evals: mark test as part of the trajectory evals suite",
+    "evals: Agentic UX Trajectory Evals",
 ]
 
 [tool.coverage.run]

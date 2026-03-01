@@ -35,9 +35,18 @@ class MCPUIBroker:
         Safely unpacks the `params` (the user's intent) so the execution
         engine can route it to the Blackboard or the Agent's context.
         """
-        # Event map is currently unused until Epic 3 integration
-        _ = event_map
-        return message.params
+        if event_map is None:
+            raise ValueError("Untethered state mutation from an MCP iframe is forbidden.")
+
+        payload_mapping = event_map.payload_mapping or {}
+        action_payload: dict[str, Any] = {}
+
+        for param_key, param_value in message.params.items():
+            if param_key in payload_mapping:
+                target_var = payload_mapping[param_key]
+                action_payload[target_var] = param_value
+
+        return action_payload
 
 
 def pack_to_mcp_resources(pack: ToolPack) -> list[dict[str, Any]]:
