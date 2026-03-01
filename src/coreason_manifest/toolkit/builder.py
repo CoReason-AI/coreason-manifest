@@ -778,11 +778,12 @@ class BaseFlowBuilder:
                 for tool in pack.tools:
                     available_tools[tool.name] = tool.risk_level.weight
 
-            for tool_name in node.tools:
-                # Assume a tool is CRITICAL if its definition isn't currently loaded
-                tool_risk = available_tools.get(tool_name, RiskLevel.CRITICAL.weight)
-                if tool_risk > max_risk:
-                    raise ValueError(f"Tool '{tool_name}' exceeds the maximum allowed risk level for this flow.")
+            if isinstance(node.tools, list):
+                for tool_name in node.tools:
+                    # Assume a tool is CRITICAL if its definition isn't currently loaded
+                    tool_risk = available_tools.get(tool_name, RiskLevel.CRITICAL.weight)
+                    if tool_risk > max_risk:
+                        raise ValueError(f"Tool '{tool_name}' exceeds the maximum allowed risk level for this flow.")
 
     def add_agent_ref(self, node_id: str, profile_id: str, tools: list[str] | None = None) -> Self:
         """Adds a node that points to a registered profile.

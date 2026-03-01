@@ -3,6 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.common_base import CoreasonModel
 from coreason_manifest.core.compute.reasoning import FastPath, ReasoningConfig
 from coreason_manifest.core.oversight.governance import OperationalPolicy
@@ -37,13 +38,15 @@ class AgentNode(Node):
     """Executes a cognitive task using a CognitiveProfile configuration."""
 
     type: Literal["agent"] = Field("agent", description="The type of the node.", examples=["agent"])
-    profile: CognitiveProfile | ProfileID = Field(
+    profile: CognitiveProfile | ProfileID | SemanticRef = Field(
         ...,
+        union_mode="left_to_right",
         description="The cognitive profile configuration or a reference ID.",
         examples=["profile_1", {"role": "Assistant", "persona": "You are a helpful assistant."}],
     )
-    tools: CoercibleStringList = Field(
+    tools: CoercibleStringList | SemanticRef = Field(
         default_factory=list,
+        union_mode="left_to_right",
         description="List of tool names available to this agent.",
         examples=[["calculator", "web_search"]],
     )
