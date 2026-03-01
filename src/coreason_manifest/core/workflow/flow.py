@@ -35,17 +35,33 @@ __all__ = [
 
 
 class FlowMetadata(CoreasonModel):
-    name: str = Field(..., description="The name of the flow.")
-    version: str = Field(..., description="The semantic version of the flow.")
-    description: str | None = Field(default=None, description="A description of the flow's purpose.")
-    tags: list[str] = Field(default_factory=list, description="A list of tags for categorization.")
-    created_at: str | None = Field(default=None, description="The creation timestamp of the flow.")
-    updated_at: str | None = Field(default=None, description="The last update timestamp of the flow.")
+    name: str = Field(..., description="The name of the flow.", examples=["customer_onboarding_flow"])
+    version: str = Field(..., description="The semantic version of the flow.", examples=["1.0.0"])
+    description: str | None = Field(
+        default=None, description="A description of the flow's purpose.", examples=["Flow to onboard new customers."]
+    )
+    tags: list[str] = Field(
+        default_factory=list, description="A list of tags for categorization.", examples=[["onboarding", "customer"]]
+    )
+    created_at: str | None = Field(
+        default=None, description="The creation timestamp of the flow.", examples=["2023-10-27T10:00:00Z"]
+    )
+    updated_at: str | None = Field(
+        default=None, description="The last update timestamp of the flow.", examples=["2023-10-27T11:00:00Z"]
+    )
 
 
 class DataSchema(CoreasonModel):
-    id: str = Field(default_factory=lambda: str(uuid4()), description="The unique identifier for the schema.")
-    json_schema: dict[str, Any] = Field(default_factory=dict, description="The JSON Schema definition to be validated.")
+    id: str = Field(
+        default_factory=lambda: str(uuid4()),
+        description="The unique identifier for the schema.",
+        examples=["schema-1234"],
+    )
+    json_schema: dict[str, Any] = Field(
+        default_factory=dict,
+        description="The JSON Schema definition to be validated.",
+        examples=[{"type": "object", "properties": {"name": {"type": "string"}}}],
+    )
 
     @model_validator(mode="after")
     def validate_schema_validity(self) -> "DataSchema":
@@ -67,21 +83,33 @@ class DataSchema(CoreasonModel):
 
 
 class Blackboard(CoreasonModel):
-    variables: dict[str, Any] = Field(default_factory=dict, description="A collection of variables.")
-    schemas: list[DataSchema] = Field(default_factory=list, description="A list of schemas for validation.")
+    variables: dict[str, Any] = Field(
+        default_factory=dict, description="A collection of variables.", examples=[{"user_id": "u123", "score": 85.5}]
+    )
+    schemas: list[DataSchema] = Field(
+        default_factory=list,
+        description="A list of schemas for validation.",
+        examples=[[{"id": "schema1", "json_schema": {"type": "string"}}]],
+    )
     persistence: PersistenceConfig | None = Field(
-        default=None, description="Configuration for state persistence backend."
+        default=None,
+        description="Configuration for state persistence backend.",
+        examples=[{"backend_type": "redis", "ttl_seconds": 3600}],
     )
 
 
 class Edge(CoreasonModel):
-    from_node: NodeID = Field(..., description="The ID of the source node.")
-    to_node: NodeID = Field(..., description="The ID of the target node.")
+    from_node: NodeID = Field(..., description="The ID of the source node.", examples=["node_a"])
+    to_node: NodeID = Field(..., description="The ID of the target node.", examples=["node_b"])
     condition: str | None = Field(
-        default=None, description="An optional Python expression string evaluated to determine edge traversal."
+        default=None,
+        description="An optional Python expression string evaluated to determine edge traversal.",
+        examples=["user.age > 18"],
     )
-    cost_weight: float = Field(0.0, ge=0.0, description="Estimated financial cost (USD) to traverse this edge.")
-    latency_weight_ms: float = Field(0.0, ge=0.0, description="Estimated latency in milliseconds.")
+    cost_weight: float = Field(
+        0.0, ge=0.0, description="Estimated financial cost (USD) to traverse this edge.", examples=[0.05]
+    )
+    latency_weight_ms: float = Field(0.0, ge=0.0, description="Estimated latency in milliseconds.", examples=[150.0])
 
     @field_validator("condition", mode="before")
     @classmethod
@@ -99,9 +127,19 @@ class Edge(CoreasonModel):
 
 
 class Graph(CoreasonModel):
-    nodes: dict[str, AnyNode] = Field(..., description="A dictionary mapping Node IDs to Node objects.")
-    edges: list[Edge] = Field(..., description="A list of edges connecting the nodes.")
-    entry_point: NodeID | None = Field(default=None, description="The ID of the node where execution starts.")
+    nodes: dict[str, AnyNode] = Field(
+        ...,
+        description="A dictionary mapping Node IDs to Node objects.",
+        examples=[{"node_1": {"id": "node_1", "type": "agent", "profile": "assistant"}}],
+    )
+    edges: list[Edge] = Field(
+        ...,
+        description="A list of edges connecting the nodes.",
+        examples=[[{"from_node": "node_1", "to_node": "node_2"}]],
+    )
+    entry_point: NodeID | None = Field(
+        default=None, description="The ID of the node where execution starts.", examples=["node_1"]
+    )
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
@@ -171,44 +209,102 @@ class Graph(CoreasonModel):
 
 
 class FlowInterface(CoreasonModel):
-    inputs: dict[str, Any] | DataSchema = Field(default_factory=dict, description="The required inputs for the flow.")
+    inputs: dict[str, Any] | DataSchema = Field(
+        default_factory=dict,
+        description="The required inputs for the flow.",
+        examples=[{"user_name": "string", "age": "integer"}],
+    )
     outputs: dict[str, Any] | DataSchema = Field(
-        default_factory=dict, description="The expected outputs from the flow."
+        default_factory=dict,
+        description="The expected outputs from the flow.",
+        examples=[{"status": "string", "result_data": "object"}],
     )
 
 
 class FlowDefinitions(CoreasonModel):
-    profiles: dict[str, Any] = Field(default_factory=dict, description="Shared profile definitions.")
-    schemas: dict[str, Any] = Field(default_factory=dict, description="Shared data schemas.")
-    tools: dict[str, AnyTool] = Field(default_factory=dict, description="Shared tool definitions.")
-    tool_packs: dict[str, ToolPack] = Field(default_factory=dict, description="Shared tool pack definitions.")
-    skills: dict[str, Any] = Field(default_factory=dict, description="Shared skill definitions.")
+    profiles: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Shared profile definitions.",
+        examples=[{"assistant": {"role": "helper", "reasoning": {"model": "gpt-4"}}}],
+    )
+    schemas: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Shared data schemas.",
+        examples=[{"user_schema": {"type": "object", "properties": {"name": {"type": "string"}}}}],
+    )
+    tools: dict[str, AnyTool] = Field(
+        default_factory=dict,
+        description="Shared tool definitions.",
+        examples=[{"calculator": {"name": "calculator", "type": "capability"}}],
+    )
+    tool_packs: dict[str, ToolPack] = Field(
+        default_factory=dict,
+        description="Shared tool pack definitions.",
+        examples=[{"math_pack": {"namespace": "math", "tools": [{"name": "add", "type": "capability"}]}}],
+    )
+    skills: dict[str, Any] = Field(
+        default_factory=dict, description="Shared skill definitions.", examples=[{"greeting": "Say hello"}]
+    )
     middlewares: dict[MiddlewareID, MiddlewareDef] = Field(
-        default_factory=dict, description="Shared middleware definitions."
+        default_factory=dict,
+        description="Shared middleware definitions.",
+        examples=[{"logger": {"type": "logging"}}],
     )
     supervision_templates: Any | None = Field(
-        default=None, description="Templates used for supervision configurations."
+        default=None,
+        description="Templates used for supervision configurations.",
+        examples=[{"strict_approval": {"requires_approval": True}}],
     )
 
 
 class VariableDef(CoreasonModel):
-    id: str = Field(default_factory=lambda: str(uuid4()), description="The unique identifier for the variable.")
-    type: str = Field(..., description="The type of the variable.")
-    description: str | None = Field(default=None, description="A description of the variable's purpose.")
+    id: str = Field(
+        default_factory=lambda: str(uuid4()),
+        description="The unique identifier for the variable.",
+        examples=["var_123"],
+    )
+    type: str = Field(..., description="The type of the variable.", examples=["string"])
+    description: str | None = Field(
+        default=None, description="A description of the variable's purpose.", examples=["The user's email address."]
+    )
 
 
 class GraphFlow(CoreasonModel):
-    type: Literal["graph"] = Field("graph", description="Discriminator for graph flows.")
-    kind: Literal["GraphFlow"] = Field("GraphFlow", description="The kind of manifest.")
-    status: Literal["draft", "published", "archived"] = Field("draft", description="The lifecycle status of the flow.")
-    metadata: FlowMetadata = Field(..., description="Metadata describing the flow.")
-    interface: FlowInterface = Field(..., description="The interface definition for inputs and outputs.")
-    governance: Governance | None = Field(default=None, description="Governance policies applied to the flow.")
-    blackboard: Blackboard | None = Field(
-        default_factory=Blackboard, description="The blackboard definition for state tracking."
+    type: Literal["graph"] = Field("graph", description="Discriminator for graph flows.", examples=["graph"])
+    kind: Literal["GraphFlow"] = Field("GraphFlow", description="The kind of manifest.", examples=["GraphFlow"])
+    status: Literal["draft", "published", "archived"] = Field(
+        "draft", description="The lifecycle status of the flow.", examples=["draft", "published"]
     )
-    definitions: FlowDefinitions | None = Field(default=None, description="Shared definitions used across the flow.")
-    graph: Graph = Field(..., description="The execution graph topology.")
+    metadata: FlowMetadata = Field(
+        ...,
+        description="Metadata describing the flow.",
+        examples=[{"name": "test_flow", "version": "1.0.0", "description": "Test flow"}],
+    )
+    interface: FlowInterface = Field(
+        ...,
+        description="The interface definition for inputs and outputs.",
+        examples=[{"inputs": {}, "outputs": {}}],
+    )
+    governance: Governance | None = Field(
+        default=None,
+        description="Governance policies applied to the flow.",
+        examples=[{"operational_policy": {"max_cost": 10.0}}],
+    )
+    blackboard: Blackboard | None = Field(
+        default_factory=Blackboard,
+        description="The blackboard definition for state tracking.",
+        examples=[{"variables": {"count": 0}}],
+    )
+    definitions: FlowDefinitions | None = Field(
+        default=None,
+        description="Shared definitions used across the flow.",
+        examples=[{"profiles": {"assistant": {"role": "helper"}}}],
+    )
+    graph: Graph = Field(
+        ...,
+        description="The execution graph topology.",
+        examples=[{"nodes": {"n1": {"id": "n1", "type": "agent"}}, "edges": [], "entry_point": "n1"}],
+    )
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
@@ -223,13 +319,31 @@ class GraphFlow(CoreasonModel):
 
 
 class LinearFlow(CoreasonModel):
-    type: Literal["linear"] = Field("linear", description="Discriminator for linear flows.")
-    kind: Literal["LinearFlow"] = Field("LinearFlow", description="The kind of manifest.")
-    status: Literal["draft", "published", "archived"] = Field("draft", description="The lifecycle status of the flow.")
-    metadata: FlowMetadata = Field(..., description="Metadata describing the flow.")
-    steps: list[AnyNode] = Field(default_factory=list, description="An ordered sequence of execution nodes.")
-    governance: Governance | None = Field(default=None, description="Governance policies applied to the flow.")
-    definitions: FlowDefinitions | None = Field(default=None, description="Shared definitions used across the flow.")
+    type: Literal["linear"] = Field("linear", description="Discriminator for linear flows.", examples=["linear"])
+    kind: Literal["LinearFlow"] = Field("LinearFlow", description="The kind of manifest.", examples=["LinearFlow"])
+    status: Literal["draft", "published", "archived"] = Field(
+        "draft", description="The lifecycle status of the flow.", examples=["draft", "published"]
+    )
+    metadata: FlowMetadata = Field(
+        ...,
+        description="Metadata describing the flow.",
+        examples=[{"name": "linear_test", "version": "1.0.0"}],
+    )
+    steps: list[AnyNode] = Field(
+        default_factory=list,
+        description="An ordered sequence of execution nodes.",
+        examples=[[{"id": "step1", "type": "agent", "profile": "assistant"}]],
+    )
+    governance: Governance | None = Field(
+        default=None,
+        description="Governance policies applied to the flow.",
+        examples=[{"operational_policy": {"max_retries": 3}}],
+    )
+    definitions: FlowDefinitions | None = Field(
+        default=None,
+        description="Shared definitions used across the flow.",
+        examples=[{"schemas": {"input": {"type": "object"}}}],
+    )
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":
@@ -263,5 +377,13 @@ class LinearFlow(CoreasonModel):
 class AgentRequest(CoreasonModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    manifest: GraphFlow | LinearFlow = Field(..., description="The execution flow to run.")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Metadata associated with the request.")
+    manifest: GraphFlow | LinearFlow = Field(
+        ...,
+        description="The execution flow to run.",
+        examples=[{"kind": "LinearFlow", "type": "linear", "metadata": {"name": "test", "version": "1"}, "steps": []}],
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Metadata associated with the request.",
+        examples=[{"request_id": "req-1234", "client": "web"}],
+    )
