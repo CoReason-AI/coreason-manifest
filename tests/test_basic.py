@@ -40,6 +40,40 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
     assert "mock_parent_jti_" in child_passport.parent_passport_id
 
 
+def test_epistemic_tracking_config() -> None:
+    from coreason_manifest.core.state.memory import KnowledgeScope, RetrievalStrategy, SemanticMemoryConfig
+
+    # Default behavior: epistemic_tracking should be False
+    config_default = SemanticMemoryConfig(
+        graph_namespace="test_default",
+        bitemporal_tracking=False,
+        scope=KnowledgeScope.SESSION,
+    )
+    assert config_default.epistemic_tracking is False
+
+    # Explicit behavior: testing EPISTEMIC retrieval strategy and epistemic_tracking=True
+    config_epistemic = SemanticMemoryConfig(
+        graph_namespace="test_epistemic",
+        bitemporal_tracking=True,
+        scope=KnowledgeScope.USER,
+        epistemic_tracking=True,
+        retrieval_strategy=RetrievalStrategy.EPISTEMIC,
+    )
+    assert config_epistemic.epistemic_tracking is True
+    assert config_epistemic.retrieval_strategy == RetrievalStrategy.EPISTEMIC
+
+    from pydantic import ValidationError
+
+    # 3. Invalid behavior: testing EPISTEMIC strategy without tracking enabled
+    with pytest.raises(ValidationError) as exc_info:
+        SemanticMemoryConfig(
+            graph_namespace="test_invalid",
+            bitemporal_tracking=True,
+            scope=KnowledgeScope.SESSION,
+            epistemic_tracking=False,  # This should trigger the failure
+            retrieval_strategy=RetrievalStrategy.EPISTEMIC,
+        )
+    assert "epistemic_tracking must be True" in str(exc_info.value)
 def test_evolutionary_reasoning_schema() -> None:
     # 1. Valid instantiation
     valid_evo = EvolutionaryReasoning(
