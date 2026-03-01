@@ -1,9 +1,9 @@
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
-from coreason_manifest.core.compute.reasoning import CrossoverStrategy, EvolutionaryReasoning
+from coreason_manifest.core.compute.reasoning import CrossoverStrategy, EvolutionaryReasoning, ReasoningConfig
 from coreason_manifest.core.primitives.types import DataClassification
 
 
@@ -88,3 +88,14 @@ def test_evolutionary_reasoning_schema() -> None:
         EvolutionaryReasoning(model="gpt-4")  # type: ignore[call-arg]
     assert "fitness_evaluator_model" in str(exc_info.value)
     assert "Field required" in str(exc_info.value)
+
+    # 3. Polymorphic Union Test
+    adapter = TypeAdapter(ReasoningConfig)
+    parsed = adapter.validate_python(
+        {
+            "type": "evolutionary",
+            "model": "gpt-4",
+            "fitness_evaluator_model": "gpt-4o",
+        }
+    )
+    assert isinstance(parsed, EvolutionaryReasoning)

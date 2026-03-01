@@ -24,6 +24,14 @@ VerificationMode = Literal["ambiguous_only", "always", "never"]
 AggregationStrategy = Literal["majority_vote", "strongest_judge", "union"]
 AttackStrategy = Literal["crescendo", "refusal_suppression", "payload_splitting", "goat", "emergence_boosting"]
 InteractionMode = Literal["native_os", "browser_dom", "hybrid"]
+
+
+class CrossoverStrategy(StrEnum):
+    NONE = "none"
+    SINGLE_POINT = "single_point"
+    SEMANTIC_BLENDING = "semantic_blending"
+
+
 AllowedAction = Literal["click", "type", "scroll", "screenshot", "drag", "hover", "hotkey"]
 CoordinateSystem = Literal["absolute_px", "normalized_0_1"]
 GraphRetrievalMode = Literal["local", "global", "hybrid"]
@@ -234,6 +242,34 @@ class DecompositionReasoning(BaseReasoning):
     decomposition_breadth: int = 3
     contract_every_steps: int = 2
     global_context_window: int = 4096
+
+
+@register_engine
+class EvolutionaryReasoning(BaseReasoning):
+    """
+    Evolutionary Search & Hypothesis Generation Engine.
+    """
+
+    type: Literal["evolutionary"] = "evolutionary"
+
+    population_size: Annotated[int, Field(description="Number of parallel hypotheses to maintain per generation.")] = 5
+    generations: Annotated[int, Field(description="Number of evolutionary refinement cycles.")] = 3
+    mutation_rate: Annotated[
+        float,
+        Field(
+            ge=0.0,
+            le=1.0,
+            description=(
+                "Probability of introducing random variance. "
+                "Controls how radically the agent alters the scientific premise."
+            ),
+        ),
+    ] = 0.15
+    crossover_strategy: CrossoverStrategy = Field(default=CrossoverStrategy.SEMANTIC_BLENDING)
+    fitness_evaluator_model: Annotated[
+        ModelRef,
+        Field(description="The Judge model used to score the viability of each variant. Simulates peer-review."),
+    ]
 
 
 @register_engine
@@ -494,40 +530,6 @@ class Optimizer(BaseModel):
     teacher_model: str
     metric: str
     max_demonstrations: int
-
-
-class CrossoverStrategy(StrEnum):
-    NONE = "none"
-    SINGLE_POINT = "single_point"
-    SEMANTIC_BLENDING = "semantic_blending"
-
-
-@register_engine
-class EvolutionaryReasoning(BaseReasoning):
-    """
-    Evolutionary Search & Hypothesis Generation Engine.
-    """
-
-    type: Literal["evolutionary"] = "evolutionary"
-
-    population_size: Annotated[int, Field(description="Number of parallel hypotheses to maintain per generation.")] = 5
-    generations: Annotated[int, Field(description="Number of evolutionary refinement cycles.")] = 3
-    mutation_rate: Annotated[
-        float,
-        Field(
-            ge=0.0,
-            le=1.0,
-            description=(
-                "Probability of introducing random variance. "
-                "Controls how radically the agent alters the scientific premise."
-            ),
-        ),
-    ] = 0.15
-    crossover_strategy: CrossoverStrategy = Field(default=CrossoverStrategy.SEMANTIC_BLENDING)
-    fitness_evaluator_model: Annotated[
-        ModelRef,
-        Field(description="The Judge model used to score the viability of each variant. Simulates peer-review."),
-    ]
 
 
 __all__ = [
