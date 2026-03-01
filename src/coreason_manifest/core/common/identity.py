@@ -99,7 +99,6 @@ class DelegationContract(CoreasonModel):
     caveats: list[ResourceCaveat] = Field(default_factory=list, description="Cryptographic attenuations on authority.")
     max_budget_usd: float | None = Field(None, description="Financial circuit breaker for this specific trace.")
 
-    # --- BEGIN EPIC 6.2 INSERTION ---
     max_tokens: int | None = Field(
         None,
         description=(
@@ -117,13 +116,11 @@ class DelegationContract(CoreasonModel):
             "to this for real-time instantaneous passport revocation."
         ),
     )
-    # --- END EPIC 6.2 INSERTION ---
 
     # SOTA Temporal Bounding
     issued_at: float = Field(..., description="Unix epoch timestamp of delegation issuance.")
     expires_at: float = Field(..., description="Unix epoch timestamp of delegation expiry.")
 
-    # --- BEGIN EPIC 6.3 INSERTION ---
     max_data_classification: DataClassification = Field(
         default=DataClassification.INTERNAL,
         description=(
@@ -131,7 +128,6 @@ class DelegationContract(CoreasonModel):
             "Dictates the highest sensitivity of data this trace can ingest."
         ),
     )
-    # --- END EPIC 6.3 INSERTION ---
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> "DelegationContract":

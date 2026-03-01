@@ -129,7 +129,7 @@ class SecurityVisitor(ast.NodeVisitor):
         )
         if not isinstance(node, allowed):
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
+                code=ManifestErrorCode.SEC_KILL_SWITCH_VIOLATION,
                 message=f"Security Violation: forbidden AST node {type(node).__name__} in evaluated condition",
             )
         super().generic_visit(node)
@@ -138,7 +138,7 @@ class SecurityVisitor(ast.NodeVisitor):
         # Ensure Name usage is strictly Load context (prevents variable reassignment)
         if not isinstance(node.ctx, ast.Load):
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_SEC_KILL_SWITCH_VIOLATION,
+                code=ManifestErrorCode.SEC_KILL_SWITCH_VIOLATION,
                 message=f"Security Violation: Name ctx {type(node.ctx).__name__} forbidden in evaluated condition",
             )
         super().generic_visit(node)

@@ -80,7 +80,7 @@ class SwarmNode(Node):
     def validate_reducer_requirements(self) -> "SwarmNode":
         if self.reducer_function == "summarize" and not self.aggregator_model:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_SWARM_REDUCER,
+                code=ManifestErrorCode.VAL_SWARM_REDUCER,
                 message="SwarmNode with reducer='summarize' requires an 'aggregator_model'.",
                 context={
                     "remediation": RemediationAction(

@@ -206,7 +206,7 @@ class AgentRequest(BaseModel):
 
         if errors:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_SEC_LINEAGE_001,
+                code=ManifestErrorCode.SEC_LINEAGE_001,
                 message="Multiple Trace Integrity Violations detected.",
                 context={"violations": [str(e) for e in errors]},
             )

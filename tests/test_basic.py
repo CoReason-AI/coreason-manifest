@@ -21,10 +21,10 @@ def mock_factory() -> Any:
 def test_sota_passport_instantiation(mock_factory: Any) -> None:
     """
     Ensures the 2026+ Architectural Hardening fields are properly validated.
-    This test remains skipped until Epics 6.1, 6.2, and 6.3 are merged and hard-wired.
+    Epic 6 is fully merged and models accept these kwargs.
     """
     # Test 1: Standard Multi-Dimensional Bounds
-    passport = mock_factory.generate_mock_passport(classification="restricted")
+    passport = mock_factory.generate_mock_passport(classification=DataClassification.RESTRICTED)
     assert passport.delegation.max_tokens == 50_000
     assert passport.delegation.max_compute_time_ms == 120_000
     assert passport.delegation.max_data_classification == DataClassification.RESTRICTED

@@ -264,7 +264,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
             # Raise strict structured error instead of raw exception
             raise ManifestError(
                 fault=SemanticFault(
-                    error_code="CRSN-EXEC-CIRCUIT-OPEN",
+                    error_code="EXEC-CIRCUIT-OPEN",
                     message=f"Circuit is OPEN for node {node_id}. Execution halted.",
                     severity=FaultSeverity.CRITICAL,
                     recovery_action=RecoveryAction.RETRY,
