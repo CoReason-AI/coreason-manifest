@@ -24,6 +24,19 @@ class ConsolidationStrategy(StrEnum):
     SESSION_CLOSE = "session_close"
 
 
+class RetrievalStrategy(StrEnum):
+    DENSE = "dense"
+    HYBRID = "hybrid"
+    GRAPH = "graph"
+    GRAPH_RAG = "graph_rag"
+
+
+class KnowledgeScope(StrEnum):
+    SHARED = "shared"
+    USER = "user"
+    SESSION = "session"
+
+
 class EpisodicMemoryConfig(CoreasonModel):
     """
     Configuration for the agent's long-term episodic memory (Journal).
@@ -61,6 +74,14 @@ class SemanticMemoryConfig(CoreasonModel):
     )
     allowed_entity_types: list[str] | None = Field(
         None, description="List of allowed entity types for the graph. If None, all types are allowed."
+    )
+    retrieval_strategy: RetrievalStrategy = Field(
+        RetrievalStrategy.HYBRID,
+        description="The algorithmic approach required by this agent. (e.g., GRAPH_RAG for multi-hop clinical ontology traversal)",
+    )
+    scope: KnowledgeScope = Field(KnowledgeScope.SHARED, description="The epistemic boundary of the knowledge access.")
+    min_score_threshold: float = Field(
+        0.75, ge=0.0, le=1.0, description="Minimum confidence score for the runtime to inject the context."
     )
 
 

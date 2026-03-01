@@ -39,8 +39,11 @@ class BaseTool(CoreasonModel):
         None, description="Documentation or endpoint URL.", examples=["https://example.com/docs"]
     )
 
-    trigger_intent: str | None = None
-    load_strategy: LoadStrategy = Field(default=LoadStrategy.EAGER)
+    load_strategy: LoadStrategy = Field(LoadStrategy.EAGER, description="How the tool is mounted.")
+    trigger_intent: str | None = Field(
+        None,
+        description="Dense semantic string embedded by the runtime for Tool-RAG discovery. (e.g., 'Extract patient phenotypes from unstructured clinical notes')",
+    )
 
     @model_validator(mode="after")
     def validate_critical_description(self) -> "BaseTool":
@@ -48,7 +51,11 @@ class BaseTool(CoreasonModel):
             raise ValueError(
                 f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
             )
-        if self.load_strategy == LoadStrategy.LAZY and self.trigger_intent is None:
+        return self
+
+    @model_validator(mode="after")
+    def validate_lazy_loading(self) -> "BaseTool":
+        if self.load_strategy == LoadStrategy.LAZY and not self.trigger_intent:
             raise ValueError("trigger_intent is required when load_strategy is LAZY")
         return self
 
