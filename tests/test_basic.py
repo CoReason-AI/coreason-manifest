@@ -81,6 +81,8 @@ def test_genui_multiplexer_emission() -> None:
     props = scrubbed_payload["layout"][0]["props"]
     assert props["location"] == "[REDACTED_PII]"
     assert props["user_id"] == "[REDACTED_PII]"
+
+
 def test_swarm_orchestration_schema() -> None:
     from pydantic import ValidationError
 
