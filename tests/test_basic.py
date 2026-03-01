@@ -4,7 +4,7 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from coreason_manifest.adapters.observability.privacy import scrub_genui_payload
-from coreason_manifest.core.common.presentation import AdaptiveUIContract, UIComponentNode
+from coreason_manifest.core.common.presentation import AdaptiveUIContract
 from coreason_manifest.core.compute.reasoning import CrossoverStrategy, EvolutionaryReasoning, ReasoningConfig
 from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.telemetry.stream import StreamThoughtEnvelope, StreamUIEnvelope
@@ -50,7 +50,6 @@ def test_genui_multiplexer_emission() -> None:
     Ensures that the stream does not block and the privacy scrubber
     successfully strips PII from the UI props.
     """
-
     from coreason_manifest.core.common.presentation import UIComponentNode
 
     def mock_stream() -> Any:
@@ -62,7 +61,7 @@ def test_genui_multiplexer_emission() -> None:
                     UIComponentNode(
                         type="weather_widget",
                         props={"location": "San Francisco", "user_id": "123-45-678"},
-                    )
+                    ),
                     UIComponentNode(type="weather_widget", props={"location": "San Francisco", "user_id": "123-45-678"})
                 ]
             ),
