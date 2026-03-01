@@ -52,6 +52,7 @@ from coreason_manifest.core.state.memory import (
     WorkingMemoryConfig,
 )
 from coreason_manifest.core.state.tools import ToolPack
+from coreason_manifest.core.workflow.evals import EvalsManifest
 from coreason_manifest.core.workflow.flow import (
     AnyNode,
     Blackboard,
@@ -65,6 +66,7 @@ from coreason_manifest.core.workflow.flow import (
     LinearFlow,
 )
 from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode, PlannerNode
+from coreason_manifest.core.workflow.nodes.base import Constraint, ConstraintOperator
 from coreason_manifest.toolkit.validator import validate_flow
 
 
@@ -649,6 +651,26 @@ class BaseFlowBuilder:
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
         self.status: Literal["draft", "published", "archived"] = "draft"
+        self.pre_flight_constraints: list[Constraint] = []
+        self.evals: EvalsManifest | None = None
+
+    def with_pre_flight_constraint(
+        self, variable: str, operator: str, value: Any, required: bool = True, error_message: str | None = None
+    ) -> Self:
+        self.pre_flight_constraints.append(
+            Constraint(
+                variable=variable,
+                operator=ConstraintOperator(operator),
+                value=value,
+                required=required,
+                error_message=error_message,
+            )
+        )
+        return self
+
+    def with_evals(self, evals: EvalsManifest) -> Self:
+        self.evals = evals
+        return self
 
     def set_status(self, status: Literal["draft", "published", "archived"]) -> Self:
         self.status = status
@@ -1075,6 +1097,8 @@ class NewLinearFlow(BaseFlowBuilder):
             steps=self.steps,
             definitions=self._build_definitions(),
             governance=self.governance,
+            pre_flight_constraints=self.pre_flight_constraints,
+            evals=self.evals,
         )
 
     def build(self) -> LinearFlow:
@@ -1231,6 +1255,8 @@ class NewGraphFlow(BaseFlowBuilder):
             graph=graph,
             definitions=self._build_definitions(),
             governance=self.governance,
+            pre_flight_constraints=self.pre_flight_constraints,
+            evals=self.evals,
         )
 
     def build(self) -> GraphFlow:
