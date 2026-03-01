@@ -16,9 +16,7 @@ class LocalVariableType(StrEnum):
 
 class LocalVariable(CoreasonModel):
     type: LocalVariableType
-    default: Any | None = Field(
-        default=None, description="The initial default value of the ephemeral variable."
-    )
+    default: Any | None = Field(default=None, description="The initial default value of the ephemeral variable.")
     description: str | None = Field(
         default=None, description="A documentation string describing the purpose of this ephemeral variable."
     )
