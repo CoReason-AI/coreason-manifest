@@ -36,3 +36,11 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
     child_passport = mock_factory.generate_mock_passport(is_swarm_child=True)
     assert child_passport.parent_passport_id is not None
     assert "mock_parent_jti_" in child_passport.parent_passport_id
+
+
+def test_tournament_config() -> None:
+    from coreason_manifest.core.workflow.nodes.swarm import TournamentConfig
+
+    config = TournamentConfig()
+    assert config.bracket_style == "single_elimination"
+    assert config.retain_falsified_data is True

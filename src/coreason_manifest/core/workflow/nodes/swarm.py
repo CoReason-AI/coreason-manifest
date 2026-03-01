@@ -1,7 +1,7 @@
 # Prosperity-3.0
 from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.compute.reasoning import ModelRef
 from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
@@ -11,6 +11,14 @@ from coreason_manifest.core.primitives.types import ProfileID, VariableID
 from coreason_manifest.core.security.compliance import RemediationAction
 
 from .base import LockConfig, Node
+
+
+class TournamentConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+    bracket_style: Literal["single_elimination", "round_robin"] = "single_elimination"
+    retain_falsified_data: bool = Field(
+        True, description="If True, the loser's methodology is logged as an anti-pattern."
+    )
 
 
 @register_node
