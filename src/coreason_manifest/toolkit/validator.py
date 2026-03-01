@@ -89,6 +89,39 @@ def _validate_traffic_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceRep
     return errors
 
 
+def _validate_pre_flight_constraints(flow: GraphFlow | LinearFlow) -> list[ComplianceReport]:
+    errors: list[ComplianceReport] = []
+
+    if not hasattr(flow, "pre_flight_constraints") or not flow.pre_flight_constraints:
+        return errors
+
+    interface_keys = set()
+
+    if hasattr(flow, "interface") and flow.interface:
+        inputs = flow.interface.inputs
+        in_schema = getattr(inputs, "json_schema", inputs)
+        if isinstance(in_schema, dict):
+            props = in_schema.get("properties", {})
+            interface_keys.update(props.keys())
+
+    if hasattr(flow, "blackboard") and flow.blackboard:
+        interface_keys.update(flow.blackboard.variables.keys())
+
+    for constraint in flow.pre_flight_constraints:
+        base_var = constraint.variable.split(".")[0]
+        if base_var not in interface_keys:
+            errors.append(
+                ComplianceReport(
+                    code=ErrorCatalog.ERR_CAP_MISSING_VAR,
+                    severity="violation",
+                    message=f"Pre-flight constraint references missing variable '{constraint.variable}'.",
+                    details={"variable": constraint.variable},
+                )
+            )
+
+    return errors
+
+
 def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Semantically validate a Flow (Linear or Graph).
@@ -97,6 +130,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
     errors.extend(_validate_traffic_policy(flow))
+    errors.extend(_validate_pre_flight_constraints(flow))
 
     # Flatten nodes based on flow type
     nodes, edges_objs = get_unified_topology(flow)
