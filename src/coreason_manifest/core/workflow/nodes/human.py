@@ -81,24 +81,16 @@ class HumanNode(Node):
         None, description="List of valid options for the human.", examples=[["approve", "reject"]]
     )
 
-    interaction_mode: Annotated[
-        Literal["blocking", "shadow", "hijack_only"],
-        Field("blocking", description="Wait for input vs shadow execution.", examples=["blocking"]),
-    ]
+    collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
+    render_strategy: RenderStrategy = Field(default=RenderStrategy.JSON_FORMS)
 
     steering_config: SteeringConfig | None = Field(
         None, description="Configuration for steering permissions.", examples=[{"allow_variable_mutation": True}]
     )
 
-    collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
-    render_strategy: RenderStrategy = Field(default=RenderStrategy.JSON_FORMS)
-    editable_variables: list[str] = Field(
-        default_factory=list, description="Blackboard variables the UI should render as editable if mode is CO_EDIT."
-    )
-
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
-        if self.interaction_mode == "shadow" and (self.input_schema is not None or self.options is not None):
+        if self.collaboration_mode == CollaborationMode.SHADOW and (self.input_schema is not None or self.options is not None):
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
                 message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
@@ -114,10 +106,10 @@ class HumanNode(Node):
                     ).model_dump()
                 },
             )
-        if self.interaction_mode == "hijack_only" and self.steering_config is None:
+        if self.collaboration_mode in (CollaborationMode.HIJACK, CollaborationMode.CO_EDIT) and self.steering_config is None:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
-                message="HumanNode in 'hijack_only' mode requires 'steering_config'.",
+                message=f"HumanNode in '{self.collaboration_mode}' mode requires 'steering_config'.",
                 context={
                     "remediation": RemediationAction(
                         type="update_field",
