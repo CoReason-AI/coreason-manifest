@@ -60,6 +60,28 @@ class EpisodicMemoryConfig(CoreasonModel):
     consolidation_strategy: ConsolidationStrategy = Field(default=ConsolidationStrategy.SESSION_CLOSE)
 
 
+class ProvenanceLevel(StrEnum):
+    DOCUMENT_HASH = "document_hash"
+    TEXT_SNIPPET = "text_snippet"
+    VISUAL_BOUNDING_BOX = "visual_bounding_box"
+
+
+class ProvenanceConfig(CoreasonModel):
+    """
+    Configuration for cryptographic and visual traceability of extracted data.
+    Ensures 100% 'Glass Box' auditability for regulatory submissions.
+    """
+
+    required_level: ProvenanceLevel = Field(
+        default=ProvenanceLevel.VISUAL_BOUNDING_BOX,
+        description="The minimum level of provenance required. 'visual_bounding_box' forces precise PDF pixel coordinate tracking.",
+    )
+    enforce_cryptographic_trace: bool = Field(
+        default=True,
+        description="If true, requires an immutable hash chain linking extracted data to its original source binary (e.g., 21 CFR Part 11 compliance).",
+    )
+
+
 class SemanticMemoryConfig(CoreasonModel):
     """
     Configuration for the agent's semantic knowledge graph (Knowledge Graph).
@@ -99,6 +121,9 @@ class SemanticMemoryConfig(CoreasonModel):
     )
     min_score_threshold: float = Field(
         0.75, ge=0.0, le=1.0, description="Minimum confidence score for the runtime to inject the context."
+    )
+    provenance: ProvenanceConfig | None = Field(
+        None, description="Strict provenance requirements for ensuring extracted evidence is mathematically and visually grounded."
     )
 
     @model_validator(mode="after")
