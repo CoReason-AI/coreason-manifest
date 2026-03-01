@@ -14,6 +14,7 @@ from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, No
 
 if TYPE_CHECKING:
     from coreason_manifest.core.common.identity import IdentityPassport
+    from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.workflow.evals import ChaosConfig, EvalsManifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode
@@ -29,7 +30,7 @@ class MockFactory:
             self.rng = secrets.SystemRandom()
 
     def generate_mock_passport(
-        self, classification: str = "internal", is_swarm_child: bool = False
+        self, classification: "DataClassification | None" = None, is_swarm_child: bool = False
     ) -> "IdentityPassport":
         """
         Synthesizes a mathematically valid Zero-Trust envelope.
@@ -45,14 +46,14 @@ class MockFactory:
         )
         from coreason_manifest.core.primitives.types import DataClassification
 
+        if classification is None:
+            classification = DataClassification.INTERNAL
+
         current_time = time.time()
 
-        # SOTA 2026 Variables (Computed but dormant until Final Reconciliation)
+        # SOTA 2026 Variables
         sota_parent_id = f"mock_parent_jti_{self.rng.randint(1000, 9999)}" if is_swarm_child else None
         sota_caep_uri = "https://mock-ssf.local.coreason.ai/stream"
-        _ = sota_parent_id
-        _ = sota_caep_uri
-        _ = classification
 
         return IdentityPassport(
             passport_id=f"mock_jti_{self.rng.randint(1000, 9999)}",
@@ -68,7 +69,7 @@ class MockFactory:
                 expires_at=current_time + 3600,
                 max_tokens=50_000,
                 max_compute_time_ms=120_000,
-                max_data_classification=DataClassification(classification),
+                max_data_classification=classification,
                 caep_stream_uri=sota_caep_uri,
             ),
             issuer_uri="https://mock.auth.coreason.ai",

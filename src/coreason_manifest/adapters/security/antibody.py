@@ -29,7 +29,7 @@ def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
         return None
     if isinstance(v, float) and not math.isfinite(v):
         anomaly = DataAnomaly(
-            code="CRSN-ANTIBODY-FLOAT",
+            code="ANTIBODY-FLOAT",
             path=path,
             value_repr=str(v),
             description="Floating point value is not finite (NaN/Inf).",
@@ -37,7 +37,7 @@ def _get_anomaly(v: Any, path: str) -> dict[str, Any] | None:
         return anomaly.model_dump()
     if not isinstance(v, (dict, list, tuple)) and not isinstance(v, VALID_PRIMITIVES):
         return DataAnomaly(
-            code="CRSN-ANTIBODY-UNSERIALIZABLE",
+            code="ANTIBODY-UNSERIALIZABLE",
             path=path,
             value_repr=str(type(v)),
             description="Object is not deterministically serializable.",
