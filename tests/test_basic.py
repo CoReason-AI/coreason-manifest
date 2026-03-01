@@ -102,8 +102,9 @@ def test_evolutionary_reasoning_schema() -> None:
 
 
 def test_symbolic_execution_inspector_node() -> None:
-    from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
     from pydantic import ValidationError
+
+    from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 
     # Valid symbolic execution
     node = InspectorNode(

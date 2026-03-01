@@ -37,7 +37,9 @@ class ResilienceStrategy(BaseModel):
     symbolic_repair_budget: int = Field(
         0,
         ge=0,
-        description="Max iterations for the Tutor-Apprentice repair loop. If a symbolic solver fails, the strict compilation error is fed back to the generator LLM up to this many times before halting."
+        description="Max iterations for the Tutor-Apprentice repair loop. "
+        "If a symbolic solver fails, the strict compilation error is fed "
+        "back to the generator LLM up to this many times before halting."
     )
 
     @field_validator("name")
