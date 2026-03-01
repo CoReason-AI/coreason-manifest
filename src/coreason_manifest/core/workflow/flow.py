@@ -138,7 +138,10 @@ class Graph(CoreasonModel):
             if key != node.id:
                 raise ManifestError.critical_halt(
                     code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_ID_MISMATCH,
-                    message=f"Routing contradiction: Node dictionary key '{key}' does not match inner Node ID '{node.id}'.",
+                    message=(
+                        f"Routing contradiction: Node dictionary key '{key}' "
+                        f"does not match inner Node ID '{node.id}'."
+                    ),
                 )
             if node.id in seen_ids:
                 raise ManifestError.critical_halt(
