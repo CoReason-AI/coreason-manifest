@@ -197,3 +197,14 @@ class SystemRole(StrEnum):
     AUDITOR = "auditor"
     VIEWER = "viewer"
     MACHINE_SERVICE = "machine_service"
+
+
+class DataClassification(StrEnum):
+    """
+    SOTA 2026: Standardized Information Flow Control (IFC) clearance levels.
+    """
+
+    PUBLIC = "public"
+    INTERNAL = "internal"
+    CONFIDENTIAL = "confidential"
+    RESTRICTED = "restricted"

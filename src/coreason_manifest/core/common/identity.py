@@ -122,6 +122,16 @@ class DelegationContract(CoreasonModel):
     issued_at: float = Field(..., description="Unix epoch timestamp of delegation issuance.")
     expires_at: float = Field(..., description="Unix epoch timestamp of delegation expiry.")
 
+    # --- BEGIN EPIC 6.3 INSERTION ---
+    max_data_classification: str = Field(
+        default="internal",
+        description=(
+            "Information Flow Control bound (e.g., 'public', 'internal', 'confidential', 'restricted'). "
+            "Dictates the highest sensitivity of data this trace can ingest."
+        ),
+    )
+    # --- END EPIC 6.3 INSERTION ---
+
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> "DelegationContract":
         if self.expires_at <= self.issued_at:
