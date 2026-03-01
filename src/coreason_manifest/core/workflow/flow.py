@@ -19,6 +19,7 @@ from coreason_manifest.core.workflow.nodes import (
     AnyNode,
 )
 
+
 class ProvenanceType(StrEnum):
     AI = "ai"
     HUMAN = "human"
@@ -56,7 +57,9 @@ class FlowMetadata(CoreasonModel):
     tags: list[str] = Field(default_factory=list)
     created_at: str | None = None
     updated_at: str | None = None
-    provenance: ProvenanceData | None = Field(None, description="Cryptographic/Lineage tracking for AI supply chain security.")
+    provenance: ProvenanceData | None = Field(
+        None, description="Cryptographic/Lineage tracking for AI supply chain security."
+    )
 
 
 class DataSchema(CoreasonModel):
@@ -225,7 +228,8 @@ class GraphFlow(CoreasonModel):
             return self
         if getattr(self.metadata, "provenance", None) is None:
             raise ValueError(
-                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. The Weaver must declare its lineage."
+                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. "
+                "The Weaver must declare its lineage."
             )
         for node in self.graph.nodes.values():
             if node.type == "placeholder":
@@ -294,7 +298,8 @@ class LinearFlow(CoreasonModel):
             return self
         if getattr(self.metadata, "provenance", None) is None:
             raise ValueError(
-                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. The Weaver must declare its lineage."
+                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. "
+                "The Weaver must declare its lineage."
             )
         for node in self.steps:
             if node.type == "placeholder":
