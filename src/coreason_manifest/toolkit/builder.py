@@ -44,6 +44,7 @@ from coreason_manifest.core.primitives.types import RiskLevel
 from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
     EpisodicMemoryConfig,
+    KnowledgeScope,
     MemorySubsystem,
     ProceduralMemoryConfig,
     SemanticMemoryConfig,
@@ -439,6 +440,7 @@ class AgentBuilder:
                 graph_namespace=graph_namespace,
                 bitemporal_tracking=bitemporal_tracking,
                 allowed_entity_types=allowed_entity_types,
+                scope=KnowledgeScope.SHARED,
             )
 
         procedural = None

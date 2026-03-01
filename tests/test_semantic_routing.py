@@ -67,11 +67,13 @@ def test_tool_lazy_load_strategy_missing_intent_fails() -> None:
 def test_semantic_memory_config_missing_scope_fails() -> None:
     """Test that SemanticMemoryConfig raises ValidationError if scope is not explicitly provided."""
     with pytest.raises(ValidationError, match="Field required"):
-        SemanticMemoryConfig(
-            graph_namespace="test_namespace",
-            bitemporal_tracking=True,
-            retrieval_strategy=RetrievalStrategy.GRAPH_RAG,
-            min_score_threshold=0.8,
+        SemanticMemoryConfig.model_validate(
+            {
+                "graph_namespace": "test_namespace",
+                "bitemporal_tracking": True,
+                "retrieval_strategy": "graph_rag",
+                "min_score_threshold": 0.8,
+            }
         )
 
 
