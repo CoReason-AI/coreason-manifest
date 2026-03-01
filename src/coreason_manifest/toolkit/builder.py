@@ -1000,10 +1000,29 @@ class NewLinearFlow(BaseFlowBuilder):
         """
         super().__init__(name, version, description)
         self.steps: list[AnyNode] = []
+        self._seen_ids: set[str] = set()
 
     def _register_node(self, node: AnyNode) -> None:
+        if node.id in self._seen_ids:
+            raise ValueError(f"Builder Error: Node ID '{node.id}' already exists in LinearFlow.")
         super()._register_node(node)
         self.steps.append(node)
+        self._seen_ids.add(node.id)
+
+    def replace_step(self, node: AnyNode) -> "NewLinearFlow":
+        """Explicitly replaces an existing step in the sequence."""
+        if node.id not in self._seen_ids:
+            raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the sequence.")
+
+        # SOTA Security: Audit the replacement node against the global Kill Switch
+        super()._register_node(node)
+
+        # Find and replace the specific node while preserving order
+        for i, existing_node in enumerate(self.steps):
+            if existing_node.id == node.id:
+                self.steps[i] = node
+                break
+        return self
 
     def add_step(self, node: AnyNode) -> "NewLinearFlow":
         """Appends a node to the sequence.
@@ -1014,7 +1033,7 @@ class NewLinearFlow(BaseFlowBuilder):
         Returns:
             NewLinearFlow: The builder instance for chaining.
         """
-        self.steps.append(node)
+        self._register_node(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
@@ -1026,7 +1045,7 @@ class NewLinearFlow(BaseFlowBuilder):
         Returns:
             NewLinearFlow: The builder instance for chaining.
         """
-        self.steps.append(agent)
+        self._register_node(agent)
         return self
 
     def _create_flow_instance(self) -> LinearFlow:
@@ -1076,6 +1095,10 @@ class NewGraphFlow(BaseFlowBuilder):
         self.blackboard: Blackboard | None = None
 
     def _register_node(self, node: AnyNode) -> None:
+        if node.id in self._nodes:
+            raise ValueError(
+                f"Builder Error: Node ID '{node.id}' already exists in the topology. Overwrites are strictly forbidden."
+            )
         super()._register_node(node)
         self._nodes[node.id] = node
 
@@ -1091,6 +1114,17 @@ class NewGraphFlow(BaseFlowBuilder):
         self._entry_point = node_id
         return self
 
+    def replace_node(self, node: AnyNode) -> "NewGraphFlow":
+        """Explicitly replaces an existing node in the topology."""
+        if node.id not in self._nodes:
+            raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the graph.")
+
+        # SOTA Security: Audit the replacement node against the global Kill Switch
+        super()._register_node(node)
+
+        self._nodes[node.id] = node
+        return self
+
     def add_node(self, node: AnyNode) -> "NewGraphFlow":
         """Adds a node to the graph.
 
@@ -1100,7 +1134,7 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
-        self._nodes[node.id] = node
+        self._register_node(node)
         return self
 
     def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
@@ -1112,7 +1146,7 @@ class NewGraphFlow(BaseFlowBuilder):
         Returns:
             NewGraphFlow: The builder instance for chaining.
         """
-        self._nodes[agent.id] = agent
+        self._register_node(agent)
         return self
 
     def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
