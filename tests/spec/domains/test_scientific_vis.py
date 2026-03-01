@@ -21,7 +21,7 @@ def graphic_element_strategy(draw: st.DrawFn) -> GraphicElement:
     return GraphicElement(
         id=draw(st.text(min_size=1)),
         semantic_role=draw(st.text()),
-        proposed_shape=draw(st.text()),
+        proposed_shape=draw(st.sampled_from(["rectangle", "cylinder", "document", "none"])),
     )
 
 
@@ -45,8 +45,8 @@ def valid_hierarchical_blueprint_strategy(draw: st.DrawFn) -> HierarchicalBluepr
                 InterModuleConnection,
                 source_module_id=st.sampled_from(module_ids),
                 target_module_id=st.sampled_from(module_ids),
-                label=st.text(),
-                flow_type=st.text(),
+                label=st.one_of(st.none(), st.text()),
+                flow_type=st.sampled_from(["sequential", "feedback", "bidirectional"]),
             ),
             max_size=5,
         )
@@ -55,7 +55,7 @@ def valid_hierarchical_blueprint_strategy(draw: st.DrawFn) -> HierarchicalBluepr
     return HierarchicalBlueprint(
         modules=modules,
         connections=connections,
-        aspect_ratio_preference=draw(st.text()),
+        aspect_ratio_preference=draw(st.sampled_from(["16:9", "4:3", "1:1"])),
     )
 
 
@@ -75,7 +75,7 @@ def test_invalid_hierarchical_blueprint_source() -> None:
             source_module_id="invalid_mod",
             target_module_id="mod2",
             label="conn",
-            flow_type="flow",
+            flow_type="sequential",
         )
     ]
 
@@ -94,7 +94,7 @@ def test_invalid_hierarchical_blueprint_target() -> None:
             source_module_id="mod1",
             target_module_id="invalid_target",
             label="conn",
-            flow_type="flow",
+            flow_type="sequential",
         )
     ]
 

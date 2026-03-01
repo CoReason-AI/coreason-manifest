@@ -34,7 +34,7 @@ class SciVisIntent(BaseModel):
 class GraphicElement(BaseModel):
     id: str
     semantic_role: str
-    proposed_shape: str
+    proposed_shape: Literal["rectangle", "cylinder", "document", "none"]
 
 
 class FunctionalModule(BaseModel):
@@ -46,14 +46,14 @@ class FunctionalModule(BaseModel):
 class InterModuleConnection(BaseModel):
     source_module_id: str
     target_module_id: str
-    label: str
-    flow_type: str
+    label: str | None = None
+    flow_type: Literal["sequential", "feedback", "bidirectional"]
 
 
 class HierarchicalBlueprint(BaseModel):
     modules: list[FunctionalModule]
     connections: list[InterModuleConnection]
-    aspect_ratio_preference: str
+    aspect_ratio_preference: Literal["16:9", "4:3", "1:1"]
 
     @model_validator(mode="after")
     def validate_connections(self) -> "HierarchicalBlueprint":
