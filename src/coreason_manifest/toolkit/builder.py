@@ -64,7 +64,7 @@ from coreason_manifest.core.workflow.flow import (
     GraphFlow,
     LinearFlow,
 )
-from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode
+from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode, PlannerNode
 from coreason_manifest.toolkit.validator import validate_flow
 
 
@@ -1222,3 +1222,39 @@ class NewGraphFlow(BaseFlowBuilder):
         """
         # Override return type hint
         return cast("GraphFlow", super().build())
+
+
+class PlannerBuilder:
+    """Fluent API to construct PlannerNodes."""
+
+    def __init__(self, node_id: str) -> None:
+        self.node_id = node_id
+        self.goal: str | None = None
+        self.reasoning: ReasoningConfig | None = None
+        self.output_schema: dict[str, Any] | None = None
+
+    def with_goal(self, goal: str) -> Self:
+        self.goal = goal
+        return self
+
+    def with_reasoning(self, reasoning: ReasoningConfig) -> Self:
+        self.reasoning = reasoning
+        return self
+
+    def with_output_schema(self, schema: dict[str, Any]) -> Self:
+        self.output_schema = schema
+        return self
+
+    def build(self) -> PlannerNode:
+        if not self.goal:
+            raise ValueError("Goal must be set.")
+        if not self.output_schema:
+            raise ValueError("Output schema must be set.")
+
+        return PlannerNode(
+            id=self.node_id,
+            goal=self.goal,
+            reasoning=self.reasoning,
+            output_schema=self.output_schema,
+            metadata={},
+        )

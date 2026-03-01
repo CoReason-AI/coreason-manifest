@@ -3,7 +3,7 @@ from typing import Any, Literal
 
 from pydantic import Field, field_validator
 
-from coreason_manifest.core.compute.reasoning import Optimizer
+from coreason_manifest.core.compute.reasoning import Optimizer, ReasoningConfig
 from coreason_manifest.core.primitives.registry import register_node
 
 from .base import Node
@@ -17,6 +17,11 @@ class PlannerNode(Node):
     goal: str = Field(..., description="The high-level goal to plan for.", examples=["Build a website"])
     optimizer: Optimizer | None = Field(
         None, description="Optimization configuration.", examples=[{"strategy": "greedy"}]
+    )
+    reasoning: ReasoningConfig | None = Field(
+        None,
+        description="The SOTA reasoning engine (e.g., TreeSearchReasoning, AdaptiveReasoning) "
+        "assigned to generate the plan.",
     )
     output_schema: dict[str, Any] = Field(
         ...,

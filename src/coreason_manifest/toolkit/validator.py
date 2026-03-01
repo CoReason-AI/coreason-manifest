@@ -89,6 +89,18 @@ def _validate_traffic_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceRep
     return errors
 
 
+def _validate_planner_reasoning(nodes: list[AnyNode]) -> list[ComplianceReport]:
+    return [
+        ComplianceReport(
+            code="ERR_GOV_INVALID_CONFIG",
+            severity="warning",
+            message=f"PlannerNode '{node.id}' is missing a reasoning engine. "
+            "It will rely on global default model policies.",
+            node_id=node.id,
+        )
+        for node in nodes
+        if isinstance(node, PlannerNode) and getattr(node, "reasoning", None) is None
+    ]
 def _validate_pre_flight_constraints(flow: GraphFlow | LinearFlow) -> list[ComplianceReport]:
     errors: list[ComplianceReport] = []
 
@@ -252,7 +264,7 @@ def validate_flow(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 6. Middleware References
     errors.extend(_validate_middleware_refs(flow))
-
+    errors.extend(_validate_planner_reasoning(nodes))
     errors.extend(_validate_evals_topology(flow, valid_ids))
 
     return errors
