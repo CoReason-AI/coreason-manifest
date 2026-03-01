@@ -64,20 +64,33 @@ def test_swarm_orchestration_schema() -> None:
     # Invalid: Tournament without config
     with pytest.raises(ValidationError) as exc:
         SwarmNode(
-            id="test_swarm", worker_profile="researcher", workload_variable="urls", output_variable="report",
-            distribution_strategy="sharded", reducer_function="tournament",
-            max_concurrency=10, operational_policy=None,
+            id="test_swarm",
+            worker_profile="researcher",
+            workload_variable="urls",
+            output_variable="report",
+            distribution_strategy="sharded",
+            reducer_function="tournament",
+            max_concurrency=10,
+            operational_policy=None,
         )
     assert "requires a 'tournament_config'" in str(exc.value)
 
     # Invalid: Compute bound without operational policy
     with pytest.raises(ValidationError) as exc:
         SwarmNode(
-            id="test_swarm", worker_profile="researcher", workload_variable="urls", output_variable="report",
-            distribution_strategy="sharded", pruning_strategy="compute_bound",
-            max_concurrency=10, reducer_function="concat", operational_policy=None,
+            id="test_swarm",
+            worker_profile="researcher",
+            workload_variable="urls",
+            output_variable="report",
+            distribution_strategy="sharded",
+            pruning_strategy="compute_bound",
+            max_concurrency=10,
+            reducer_function="concat",
+            operational_policy=None,
         )
     assert "requires an 'operational_policy'" in str(exc.value)
+
+
 def test_epistemic_tracking_config() -> None:
     from coreason_manifest.core.state.memory import KnowledgeScope, RetrievalStrategy, SemanticMemoryConfig
 
@@ -112,6 +125,8 @@ def test_epistemic_tracking_config() -> None:
             retrieval_strategy=RetrievalStrategy.EPISTEMIC,
         )
     assert "epistemic_tracking must be True" in str(exc_info.value)
+
+
 def test_evolutionary_reasoning_schema() -> None:
     # 1. Valid instantiation
     valid_evo = EvolutionaryReasoning(
@@ -187,7 +202,7 @@ def test_symbolic_execution_inspector_node() -> None:
         output_variable="result",
         mode="symbolic_execution",
         target_solver="lean4",
-        tutor_prompt="Analyze the following lean4 compiler error and rewrite the proof."
+        tutor_prompt="Analyze the following lean4 compiler error and rewrite the proof.",
     )
     assert node.mode == "symbolic_execution"
     assert node.target_solver == "lean4"
@@ -201,7 +216,7 @@ def test_symbolic_execution_inspector_node() -> None:
             criteria="must compile",
             output_variable="result",
             mode="symbolic_execution",
-            target_solver="lean4", # Provide solver, but omit tutor_prompt
+            target_solver="lean4",  # Provide solver, but omit tutor_prompt
         )
     assert "tutor_prompt must be provided" in str(exc.value)
 

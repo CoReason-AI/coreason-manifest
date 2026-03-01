@@ -406,8 +406,7 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
                         remediation=RemediationAction(
                             type="update_profile",
                             target_node_id=node.id,
-                            description="Change the worker_profile to an AgentProfile utilizing "
-                                        "EvolutionaryReasoning.",
+                            description="Change the worker_profile to an AgentProfile utilizing EvolutionaryReasoning.",
                         ),
                     )
                 )

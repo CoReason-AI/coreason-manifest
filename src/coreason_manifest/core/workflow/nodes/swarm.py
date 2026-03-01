@@ -36,11 +36,8 @@ class SwarmNode(Node):
 
     distribution_strategy: Literal["sharded", "replicated", "island_model"] = Field(
         ...,
-        description=(
-            "Sharded=split data; Replicated=same data, many attempts; "
-            "island_model=isolated sub-swarms."
-        ),
-        examples=["sharded"]
+        description=("Sharded=split data; Replicated=same data, many attempts; island_model=isolated sub-swarms."),
+        examples=["sharded"],
     )
     max_concurrency: Annotated[
         int | Literal["infinite"] | None,
@@ -68,13 +65,12 @@ class SwarmNode(Node):
     tournament_config: TournamentConfig | None = None
 
     sub_swarm_count: Annotated[
-        int | None,
-        Field(description="Required if using island_model. Number of isolated sub-swarms.")
+        int | None, Field(description="Required if using island_model. Number of isolated sub-swarms.")
     ] = None
 
     isolation_turns: Annotated[
         int | None,
-        Field(description="Required if using island_model. Number of generations before islands migrate data.")
+        Field(description="Required if using island_model. Number of generations before islands migrate data."),
     ] = None
 
     pruning_strategy: Literal["none", "early_stopping", "compute_bound"] = Field(
@@ -120,8 +116,7 @@ class SwarmNode(Node):
 
         if self.pruning_strategy == "compute_bound" and self.operational_policy is None:
             raise ValueError(
-                "SwarmNode with pruning_strategy='compute_bound' requires "
-                "an 'operational_policy' to bind to."
+                "SwarmNode with pruning_strategy='compute_bound' requires an 'operational_policy' to bind to."
             )
 
         if self.reducer_function == "summarize" and not self.aggregator_model:
