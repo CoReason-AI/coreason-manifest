@@ -11,7 +11,7 @@ class AsyncSSEMultiplexer:
     """
 
     def __init__(self) -> None:
-        self._queue: asyncio.Queue[StreamPacket] = asyncio.Queue()
+        self._queue: asyncio.Queue[StreamPacket] = asyncio.Queue(maxsize=250)
 
     async def push(self, packet: StreamPacket) -> None:
         """
