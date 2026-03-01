@@ -1,4 +1,5 @@
 import ast
+from enum import StrEnum
 from typing import Any, Literal
 from uuid import uuid4
 
@@ -17,6 +18,21 @@ from coreason_manifest.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.core.workflow.nodes import (
     AnyNode,
 )
+
+
+class ProvenanceType(StrEnum):
+    AI = "ai"
+    HUMAN = "human"
+    HYBRID = "hybrid"
+
+
+class ProvenanceData(CoreasonModel):
+    type: ProvenanceType = Field(..., description="Origin type of the workflow.")
+    generated_by: str | None = Field(None, description="The system or model ID that generated this manifest.")
+    derived_from: str | None = Field(None, description="The ID/URI of the parent flow this was forked from.")
+    rationale: str | None = Field(None, description="Reasoning for why this specific topology was generated.")
+    modifications: list[str] = Field(default_factory=list, description="Human-readable log of changes.")
+
 
 # Export AnyNode so it can be imported from here as well
 __all__ = [
@@ -41,6 +57,9 @@ class FlowMetadata(CoreasonModel):
     tags: list[str] = Field(default_factory=list)
     created_at: str | None = None
     updated_at: str | None = None
+    provenance: ProvenanceData | None = Field(
+        None, description="Cryptographic/Lineage tracking for AI supply chain security."
+    )
 
 
 class DataSchema(CoreasonModel):
@@ -207,6 +226,11 @@ class GraphFlow(CoreasonModel):
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
         if self.status != "published":
             return self
+        if getattr(self.metadata, "provenance", None) is None:
+            raise ValueError(
+                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. "
+                "The Weaver must declare its lineage."
+            )
         for node in self.graph.nodes.values():
             if node.type == "placeholder":
                 raise ValueError("Cannot publish a flow with placeholder nodes")
@@ -272,6 +296,11 @@ class LinearFlow(CoreasonModel):
     def enforce_lifecycle_constraints(self) -> "LinearFlow":
         if self.status != "published":
             return self
+        if getattr(self.metadata, "provenance", None) is None:
+            raise ValueError(
+                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. "
+                "The Weaver must declare its lineage."
+            )
         for node in self.steps:
             if node.type == "placeholder":
                 raise ValueError("Cannot publish a flow with placeholder nodes")

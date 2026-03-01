@@ -1,4 +1,6 @@
 # Prosperity-3.0
+from typing import Any
+
 from pydantic import ConfigDict, Field
 
 from coreason_manifest.core.common.base import CoreasonModel
@@ -24,6 +26,11 @@ class OptimizationIntent(CoreasonModel):
         description="Model to use for synthetic bootstrapping.",
         examples=["gpt-4"],
     )
+    max_demonstrations: int = Field(
+        default=5,
+        ge=0,
+        description="Maximum number of few-shot examples to learn and inject.",
+    )
 
 
 class SemanticRef(CoreasonModel):
@@ -44,4 +51,8 @@ class SemanticRef(CoreasonModel):
     optimization: OptimizationIntent | None = Field(
         None,
         description="Directives for Weaver synthesis optimization.",
+    )
+    candidates: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Stores AI-driven catalog search results (candidates) before final resolution.",
     )
