@@ -1,9 +1,11 @@
 # src/coreason_manifest/utils/diff.py
 
+from copy import deepcopy
 from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
+from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
 type DomainType = Literal["resource", "topology", "governance", "evals"]
@@ -270,3 +272,143 @@ def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> S
 
     changes = _generate_diff("", d1, d2)
     return SemanticPatchReport(changes=changes)
+
+
+def _resolve_json_pointer(obj: Any, pointer: str) -> tuple[Any, str]:
+    """
+    Resolves a JSON Pointer to return the parent object and the specific key/index.
+    """
+    if pointer == "" or pointer == "/":
+        return obj, ""
+
+    parts = pointer.strip("/").split("/")
+    current = obj
+    for _, part in enumerate(parts[:-1]):
+        key = part.replace("~1", "/").replace("~0", "~")
+        if isinstance(current, dict):
+            current = current[key]
+        elif isinstance(current, list):
+            current = current[int(key)]
+        else:
+            raise KeyError(f"Cannot resolve path segment '{part}' in '{pointer}'")
+
+    final_key = parts[-1].replace("~1", "/").replace("~0", "~")
+    return current, final_key
+
+
+def _apply_patch_in_place(state: Any, patch: JSONPatchOperation) -> None:
+    """
+    Applies a single RFC 6902 operation in-place to the state.
+    """
+    if patch.op == PatchOp.ADD:
+        parent, key = _resolve_json_pointer(state, patch.path)
+        if isinstance(parent, dict):
+            parent[key] = deepcopy(patch.value)
+        elif isinstance(parent, list):
+            parent.insert(int(key), deepcopy(patch.value))
+    elif patch.op == PatchOp.REMOVE:
+        parent, key = _resolve_json_pointer(state, patch.path)
+        if isinstance(parent, dict):
+            del parent[key]
+        elif isinstance(parent, list):
+            del parent[int(key)]
+    elif patch.op == PatchOp.REPLACE:
+        parent, key = _resolve_json_pointer(state, patch.path)
+        if isinstance(parent, dict):
+            parent[key] = deepcopy(patch.value)
+        elif isinstance(parent, list):
+            parent[int(key)] = deepcopy(patch.value)
+    elif patch.op == PatchOp.MOVE:
+        if patch.from_ is None:
+            raise ValueError("move requires from")
+        source_parent, source_key = _resolve_json_pointer(state, patch.from_)
+        val = source_parent.pop(source_key) if isinstance(source_parent, dict) else source_parent.pop(int(source_key))
+        target_parent, target_key = _resolve_json_pointer(state, patch.path)
+        if isinstance(target_parent, dict):
+            target_parent[target_key] = val
+        else:
+            target_parent.insert(int(target_key), val)
+    elif patch.op == PatchOp.COPY:
+        if patch.from_ is None:
+            raise ValueError("copy requires from")
+        source_parent, source_key = _resolve_json_pointer(state, patch.from_)
+        if isinstance(source_parent, dict):
+            val = deepcopy(source_parent[source_key])
+        else:
+            val = deepcopy(source_parent[int(source_key)])
+        target_parent, target_key = _resolve_json_pointer(state, patch.path)
+        if isinstance(target_parent, dict):
+            target_parent[target_key] = val
+        else:
+            target_parent.insert(int(target_key), val)
+    elif patch.op == PatchOp.TEST:
+        parent, key = _resolve_json_pointer(state, patch.path)
+        current_val = parent.get(key) if isinstance(parent, dict) else parent[int(key)]
+        if current_val != patch.value:
+            raise ValueError(f"Test failed at {patch.path}: expected {patch.value}, got {current_val}")
+
+
+def generate_inverse_patches(
+    original_state: dict[str, Any], patches: list[JSONPatchOperation]
+) -> list[JSONPatchOperation]:
+    """
+    Calculates the exact inverse of an applied patch list.
+    """
+    inverse_patches: list[JSONPatchOperation] = []
+    current_state = deepcopy(original_state)
+
+    for patch in patches:
+        if patch.op == PatchOp.ADD:
+            # Reversing an add is a remove
+            inverse_patches.append(JSONPatchOperation(op=PatchOp.REMOVE, path=patch.path, value=None, from_=None))
+            _apply_patch_in_place(current_state, patch)
+
+        elif patch.op == PatchOp.REMOVE:
+            # Reversing a remove is an add, needing the original value
+            parent, key = _resolve_json_pointer(current_state, patch.path)
+            original_value = parent[key] if isinstance(parent, dict) else parent[int(key)]
+            inverse_patches.append(
+                JSONPatchOperation(op=PatchOp.ADD, path=patch.path, value=deepcopy(original_value), from_=None)
+            )
+            _apply_patch_in_place(current_state, patch)
+
+        elif patch.op == PatchOp.REPLACE:
+            # Reversing a replace is a replace with the old value
+            parent, key = _resolve_json_pointer(current_state, patch.path)
+            old_value = parent.get(key) if isinstance(parent, dict) else parent[int(key)]
+            inverse_patches.append(
+                JSONPatchOperation(op=PatchOp.REPLACE, path=patch.path, value=deepcopy(old_value), from_=None)
+            )
+            _apply_patch_in_place(current_state, patch)
+
+        elif patch.op == PatchOp.MOVE:
+            # Reversing a move is a move back
+            if patch.from_ is None:
+                raise ValueError("move requires from")
+            inverse_patches.append(JSONPatchOperation(op=PatchOp.MOVE, path=patch.from_, value=None, from_=patch.path))
+            _apply_patch_in_place(current_state, patch)
+
+        elif patch.op == PatchOp.COPY:
+            # Reversing a copy is a remove at the target
+            inverse_patches.append(JSONPatchOperation(op=PatchOp.REMOVE, path=patch.path, value=None, from_=None))
+            _apply_patch_in_place(current_state, patch)
+
+        elif patch.op == PatchOp.TEST:
+            # Test has no state effect, its inverse is the same test
+            inverse_patches.append(
+                JSONPatchOperation(op=PatchOp.TEST, path=patch.path, value=deepcopy(patch.value), from_=None)
+            )
+            _apply_patch_in_place(current_state, patch)
+
+    inverse_patches.reverse()
+    return inverse_patches
+
+
+def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchOperation]) -> dict[str, Any]:
+    """
+    Applies inverse patches to a state dictionary.
+    """
+    rewound_state = deepcopy(current_state)
+    for patch in reverse_patches:
+        _apply_patch_in_place(rewound_state, patch)
+    return rewound_state

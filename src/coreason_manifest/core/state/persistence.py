@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
@@ -8,7 +9,41 @@ from coreason_manifest.core.common.base import CoreasonModel
 #  STATE DIFF (RFC 6902 JSON Patch)
 # =========================================================================
 
-PatchOp = Literal["add", "remove", "replace", "move", "copy", "test"]
+
+class PatchOp(StrEnum):
+    ADD = "add"
+    REMOVE = "remove"
+    REPLACE = "replace"
+    MOVE = "move"
+    COPY = "copy"
+    TEST = "test"
+
+
+class JSONPatchOperation(CoreasonModel):
+    op: Annotated[PatchOp, Field(description="The operation to perform.")]
+    path: Annotated[str, Field(description="A JSON Pointer path pointing to the target location.")]
+    value: Annotated[Any | None, Field(default=None, description="The value to add, replace, or test.")]
+    from_: Annotated[
+        str | None,
+        Field(
+            default=None,
+            alias="from",
+            description="A JSON Pointer path pointing to the source location (for move and copy).",
+        ),
+    ]
+
+    @model_validator(mode="after")
+    def validate_rfc6902_semantics(self) -> "JSONPatchOperation":
+        # Rule A: Move/Copy require 'from'
+        if self.op in (PatchOp.MOVE, PatchOp.COPY) and self.from_ is None:
+            raise ValueError(f"RFC 6902 Violation: operation '{self.op}' requires a 'from' path.")
+
+        # Rule B: Add/Replace/Test require 'value'
+        # We check model_fields_set to allow explicit `value=None` (JSON null) while rejecting omission
+        if self.op in (PatchOp.ADD, PatchOp.REPLACE, PatchOp.TEST) and "value" not in self.model_fields_set:
+            raise ValueError(f"RFC 6902 Violation: operation '{self.op}' requires a 'value' field.")
+
+        return self
 
 
 class StateDiff(CoreasonModel):
@@ -45,6 +80,14 @@ class StateDiff(CoreasonModel):
 # =========================================================================
 #  CHECKPOINTING ("Time Travel")
 # =========================================================================
+
+
+class StateCheckpoint(CoreasonModel):
+    checkpoint_id: str
+    parent_id: str | None
+    forward_patches: list[JSONPatchOperation]
+    reverse_patches: list[JSONPatchOperation]
+    trigger_source: str
 
 
 class Checkpoint(CoreasonModel):

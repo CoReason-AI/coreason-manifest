@@ -23,6 +23,21 @@ class UIEventMap(CoreasonModel):
     trigger: str = Field(..., description="The name of the event emitted by the widget (e.g., 'on_approve').")
     action: str = Field(..., description="The semantic SteeringCommand or target route ID this translates to.")
     mutates_variables: list[str] | None = Field(None, description="Blackboard variables updated by this event.")
+    payload_mapping: dict[str, str] | None = Field(
+        default=None, description="Maps frontend widget event payload keys to specific Blackboard variable paths."
+    )
+
+    @model_validator(mode="after")
+    def validate_zero_trust_mapping(self) -> "UIEventMap":
+        if self.payload_mapping:
+            if not self.mutates_variables:
+                raise ValueError("payload_mapping requires mutates_variables to be defined.")
+            for target_var in self.payload_mapping.values():
+                if target_var not in self.mutates_variables:
+                    raise ValueError(
+                        f"Target variable '{target_var}' in payload_mapping is not allowed by mutates_variables."
+                    )
+        return self
 
 
 class UIComponentNode(CoreasonModel):
