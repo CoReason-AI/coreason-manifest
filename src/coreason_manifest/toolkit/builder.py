@@ -554,9 +554,6 @@ class AgentBuilder:
         Raises:
             ValueError: If agent identity (role, persona) is not set.
         """
-        # Ensure schema is built
-
-
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
@@ -1095,8 +1092,6 @@ class BaseFlowBuilder:
         Raises:
             ValueError: If validation fails.
         """
-        # Ensure schema is built
-
         flow = self._create_flow_instance()
 
         errors = validate_flow(flow)
