@@ -1,4 +1,5 @@
 from enum import StrEnum
+
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
@@ -11,8 +12,8 @@ class Currency(StrEnum):
 
 
 class PricingUnit(StrEnum):
-    TOKEN_1K = "TOKEN_1K"
-    TOKEN_1M = "TOKEN_1M"
+    TOKEN_1K = "TOKEN_1K"  # noqa: S105
+    TOKEN_1M = "TOKEN_1M"  # noqa: S105
     REQUEST = "REQUEST"
 
 
@@ -25,7 +26,11 @@ class RateCard(CoreasonModel):
         description="Cost specifically for internal reasoning or thinking tokens per unit.",
         examples=[0.05],
     )
-    unit: PricingUnit = Field(default=PricingUnit.TOKEN_1M, description="The unit of measurement for the cost.", examples=["TOKEN_1M"])
+    unit: PricingUnit = Field(
+        default=PricingUnit.TOKEN_1M,
+        description="The unit of measurement for the cost.",
+        examples=["TOKEN_1M"]
+    )
 
 
 class ModelProfile(CoreasonModel):

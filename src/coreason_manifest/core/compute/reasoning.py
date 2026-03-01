@@ -3,10 +3,10 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.core.compute.resources import ModelProfile
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.primitives.registry import register_engine, resolve_engine_union
 from coreason_manifest.core.primitives.types import WasiCapability
-from coreason_manifest.core.compute.resources import ModelProfile
 
 # =========================================================================
 #  TYPE DEFINITIONS & ALIASES
@@ -56,11 +56,15 @@ class ModelCriteria(BaseModel):
     specific_models: Annotated[list[str] | None, Field(description="Explicit list of model IDs to route between.")] = (
         None
     )
-    primary_profile: "ModelProfile | None" = Field(
-        None, description="Explicit profile of the main model to use.", examples=[{"provider": "openai", "model_id": "gpt-4o"}]
+    primary_profile: ModelProfile | None = Field(
+        None,
+        description="Explicit profile of the main model to use.",
+        examples=[{"provider": "openai", "model_id": "gpt-4o"}],
     )
-    escalation_profile: "ModelProfile | None" = Field(
-        None, description="Explicit profile of the fallback model to use.", examples=[{"provider": "openai", "model_id": "o1-preview"}]
+    escalation_profile: ModelProfile | None = Field(
+        None,
+        description="Explicit profile of the fallback model to use.",
+        examples=[{"provider": "openai", "model_id": "o1-preview"}],
     )
 
 

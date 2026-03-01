@@ -986,8 +986,11 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
                                     ComplianceReport(
                                         code="ERR_GOV_FINANCIAL_RISK",
                                         severity="warning",
-                                        message=f"Financial Risk: Agent node '{node.id}' has aggressive retry loop (max_attempts > 5) while using a cost-bearing model.",
-                                        details={"node_id": node.id, "max_attempts": attempts}
+                                        message=(
+                                            f"Financial Risk: Agent node '{node.id}' has aggressive retry "
+                                            "loop (max_attempts > 5) while using a cost-bearing model."
+                                        ),
+                                        details={"node_id": node.id, "max_attempts": attempts},
                                     )
                                 )
 

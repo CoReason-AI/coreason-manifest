@@ -536,7 +536,7 @@ class AgentBuilder:
             }
 
             if self._rate_card_config:
-                from coreason_manifest.core.compute.resources import RateCard, ModelProfile, PricingUnit
+                from coreason_manifest.core.compute.resources import ModelProfile, PricingUnit, RateCard
 
                 rc = RateCard(
                     input_cost=self._rate_card_config["input_cost"],
