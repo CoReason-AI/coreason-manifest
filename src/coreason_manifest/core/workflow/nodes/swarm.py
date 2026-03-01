@@ -21,11 +21,18 @@ class StatisticalStoppingRule(StrEnum):
 
 class CALConfig(BaseModel):
     """Conformal Active Learning (CAL) Configuration for High-Volume Swarms."""
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    active_learning_batch_size: Annotated[int, Field(gt=0, description="Number of items to process before reprioritizing the queue.")] = 50
-    target_recall_percent: Annotated[float, Field(ge=0.0, le=1.0, description="Statistical recall threshold to hit before halting execution.")] = 0.95
-    stopping_rule: Annotated[StatisticalStoppingRule, Field(description="The mathematical method used to calculate recall estimates.")] = StatisticalStoppingRule.CMH_CORMACK_GROSSMAN
+    active_learning_batch_size: Annotated[
+        int, Field(gt=0, description="Number of items to process before reprioritizing the queue.")
+    ] = 50
+    target_recall_percent: Annotated[
+        float, Field(ge=0.0, le=1.0, description="Statistical recall threshold to hit before halting execution.")
+    ] = 0.95
+    stopping_rule: Annotated[
+        StatisticalStoppingRule, Field(description="The mathematical method used to calculate recall estimates.")
+    ] = StatisticalStoppingRule.CMH_CORMACK_GROSSMAN
 
 
 class TournamentConfig(BaseModel):
@@ -73,9 +80,9 @@ class SwarmNode(Node):
         ),
     ] = 0.0
 
-    reducer_function: Literal["concat", "vote", "summarize", "tournament", "tabular_join", "meta_analysis_matrix"] | None = Field(
-        ..., description="How to combine results.", examples=["concat"]
-    )
+    reducer_function: Literal[
+        "concat", "vote", "summarize", "tournament", "tabular_join", "meta_analysis_matrix"
+    ] | None = Field(..., description="How to combine results.", examples=["concat"])
 
     tournament_config: TournamentConfig | None = None
 
