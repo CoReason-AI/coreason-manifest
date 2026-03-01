@@ -1,7 +1,9 @@
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
+from coreason_manifest.core.compute.reasoning import CrossoverStrategy, EvolutionaryReasoning
 from coreason_manifest.core.primitives.types import DataClassification
 
 
@@ -36,3 +38,53 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
     child_passport = mock_factory.generate_mock_passport(is_swarm_child=True)
     assert child_passport.parent_passport_id is not None
     assert "mock_parent_jti_" in child_passport.parent_passport_id
+
+
+def test_evolutionary_reasoning_schema() -> None:
+    # 1. Valid instantiation
+    valid_evo = EvolutionaryReasoning(
+        model="gpt-4",
+        fitness_evaluator_model="gpt-4o",
+        population_size=10,
+        generations=5,
+        mutation_rate=0.2,
+        crossover_strategy=CrossoverStrategy.SINGLE_POINT,
+    )
+    assert valid_evo.type == "evolutionary"
+    assert valid_evo.population_size == 10
+    assert valid_evo.generations == 5
+    assert valid_evo.mutation_rate == 0.2
+    assert valid_evo.crossover_strategy == CrossoverStrategy.SINGLE_POINT
+    assert valid_evo.fitness_evaluator_model == "gpt-4o"
+
+    # Default values check
+    default_evo = EvolutionaryReasoning(model="gpt-4", fitness_evaluator_model="claude-3")
+    assert default_evo.population_size == 5
+    assert default_evo.generations == 3
+    assert default_evo.mutation_rate == 0.15
+    assert default_evo.crossover_strategy == CrossoverStrategy.SEMANTIC_BLENDING
+
+    # 2. Invalid instantiation (mutation_rate out of bounds)
+    with pytest.raises(ValidationError) as exc_info:
+        EvolutionaryReasoning(
+            model="gpt-4",
+            fitness_evaluator_model="gpt-4o",
+            mutation_rate=1.5,
+        )
+    assert "mutation_rate" in str(exc_info.value)
+    assert "Input should be less than or equal to 1" in str(exc_info.value)
+
+    with pytest.raises(ValidationError) as exc_info:
+        EvolutionaryReasoning(
+            model="gpt-4",
+            fitness_evaluator_model="gpt-4o",
+            mutation_rate=-0.1,
+        )
+    assert "mutation_rate" in str(exc_info.value)
+    assert "Input should be greater than or equal to 0" in str(exc_info.value)
+
+    # 2. Invalid instantiation (missing fitness_evaluator_model)
+    with pytest.raises(ValidationError) as exc_info:
+        EvolutionaryReasoning(model="gpt-4")  # type: ignore[call-arg]
+    assert "fitness_evaluator_model" in str(exc_info.value)
+    assert "Field required" in str(exc_info.value)

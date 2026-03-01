@@ -496,6 +496,40 @@ class Optimizer(BaseModel):
     max_demonstrations: int
 
 
+class CrossoverStrategy(StrEnum):
+    NONE = "none"
+    SINGLE_POINT = "single_point"
+    SEMANTIC_BLENDING = "semantic_blending"
+
+
+@register_engine
+class EvolutionaryReasoning(BaseReasoning):
+    """
+    Evolutionary Search & Hypothesis Generation Engine.
+    """
+
+    type: Literal["evolutionary"] = "evolutionary"
+
+    population_size: Annotated[int, Field(description="Number of parallel hypotheses to maintain per generation.")] = 5
+    generations: Annotated[int, Field(description="Number of evolutionary refinement cycles.")] = 3
+    mutation_rate: Annotated[
+        float,
+        Field(
+            ge=0.0,
+            le=1.0,
+            description=(
+                "Probability of introducing random variance. "
+                "Controls how radically the agent alters the scientific premise."
+            ),
+        ),
+    ] = 0.15
+    crossover_strategy: CrossoverStrategy = Field(default=CrossoverStrategy.SEMANTIC_BLENDING)
+    fitness_evaluator_model: Annotated[
+        ModelRef,
+        Field(description="The Judge model used to score the viability of each variant. Simulates peer-review."),
+    ]
+
+
 __all__ = [
     "AdaptiveReasoning",
     "AdversarialConfig",
@@ -506,8 +540,10 @@ __all__ = [
     "ComputerUseReasoning",
     "ConstitutionalScope",
     "CouncilReasoning",
+    "CrossoverStrategy",
     "DecompositionReasoning",
     "EnsembleReasoning",
+    "EvolutionaryReasoning",
     "FastPath",
     "GapScanConfig",
     "GraphReasoning",
