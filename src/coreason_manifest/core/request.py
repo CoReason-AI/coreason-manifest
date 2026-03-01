@@ -55,6 +55,21 @@ class AgentRequest(BaseModel):
         user_roles = set(self.context.user.roles)
         return any(role in user_roles for role in required_roles)
 
+    def can_execute_tool(self, tool_name: str) -> bool:
+        """
+        Safely checks if the requested tool is within the agent's strictly delegated scope.
+        Fails closed if the context or delegation scope is missing.
+        """
+        if self.context is None or self.context.delegation is None:
+            return False
+
+        # SOTA Pattern: Support explicit wildcard delegation or exact match
+        allowed = self.context.delegation.allowed_tools
+        if "*" in allowed:
+            return True
+
+        return tool_name in allowed
+
     def create_child(self, metadata: dict[str, Any]) -> Self:
         return self.model_copy(
             update={

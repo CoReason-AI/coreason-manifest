@@ -8,9 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from datetime import datetime
 
-from pydantic import ConfigDict, Field
+from pydantic import AwareDatetime, ConfigDict, Field
 
 from coreason_manifest.core.common_base import CoreasonModel
 
@@ -51,7 +50,9 @@ class DelegationScope(CoreasonModel):
         default_factory=list, description="Strictly scoped tool whitelist for this specific request."
     )
     max_budget_usd: float | None = Field(None, description="Financial cap for this trace.")
-    session_expiry: datetime | None = Field(None, description="When this context envelope expires.")
+    session_expiry: AwareDatetime | None = Field(
+        None, description="When this context envelope expires. Must be TZ-aware."
+    )
 
 
 class SessionContext(CoreasonModel):
@@ -65,4 +66,8 @@ class SessionContext(CoreasonModel):
     user: UserIdentity = Field(..., description="The delegating principal.")
     agent: AgentIdentity = Field(..., description="The acting agent.")
     delegation: DelegationScope = Field(..., description="The authority granted.")
-    trace_id: str | None = Field(None, description="W3C Trace Context ID for distributed secure tracking.")
+    trace_id: str | None = Field(
+        None,
+        pattern=r"^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$",
+        description="W3C Trace Context ID for distributed secure tracking.",
+    )

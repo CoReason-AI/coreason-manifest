@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import json
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
@@ -106,6 +107,44 @@ def test_delegation_scope_budget_serialization() -> None:
     # Check JSON serialization
     json_data = json.loads(scope.model_dump_json())
     assert json_data["max_budget_usd"] == 150.50
+
+
+def test_can_execute_tool() -> None:
+    """Ensure can_execute_tool properly checks delegated tool scope."""
+    user = UserIdentity(user_id="user-123")
+    agent = AgentIdentity(agent_id="agent-123", version="1.0.0")
+
+    # Test strict allowlist
+    scope_strict = DelegationScope(allowed_tools=["safe_tool", "read_db"])
+    context_strict = SessionContext(session_id="session-123", user=user, agent=agent, delegation=scope_strict)
+    request_strict = AgentRequest(agent_id="agent-123", session_id="session-123", inputs={}, context=context_strict)
+
+    assert request_strict.can_execute_tool("safe_tool") is True
+    assert request_strict.can_execute_tool("delete_db") is False
+
+    # Test wildcard
+    scope_wildcard = DelegationScope(allowed_tools=["*"])
+    context_wildcard = SessionContext(session_id="session-123", user=user, agent=agent, delegation=scope_wildcard)
+    request_wildcard = AgentRequest(agent_id="agent-123", session_id="session-123", inputs={}, context=context_wildcard)
+
+    assert request_wildcard.can_execute_tool("any_tool") is True
+
+    # Test fail-closed (no context)
+    request_no_context = AgentRequest(agent_id="agent-123", session_id="session-123", inputs={})
+    assert request_no_context.can_execute_tool("any_tool") is False
+
+
+def test_session_expiry_aware_datetime() -> None:
+    """Ensure session_expiry strictly enforces timezone-aware datetimes."""
+    # Aware datetime should succeed
+    aware_dt = datetime.now(UTC)
+    scope = DelegationScope(allowed_tools=[], session_expiry=aware_dt)
+    assert scope.session_expiry == aware_dt
+
+    # Naive datetime should fail validation
+    naive_dt = datetime.now()
+    with pytest.raises(ValidationError):
+        DelegationScope(allowed_tools=[], session_expiry=naive_dt)
 
 
 def test_w3c_trace_id_serialization() -> None:
