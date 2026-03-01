@@ -6,9 +6,9 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
-type DomainType = Literal["resource", "topology", "governance"]
+type DomainType = Literal["resource", "topology", "governance", "evals"]
 type MutationOp = Literal["add", "remove", "replace", "move", "copy", "test"]
-type CategoryType = Literal["BREAKING", "FEATURE", "GOVERNANCE", "RESOURCE"]
+type CategoryType = Literal["BREAKING", "FEATURE", "GOVERNANCE", "RESOURCE", "TEST"]
 
 
 class BaseOperation(BaseModel):
@@ -43,8 +43,14 @@ class GovernanceMutation(BaseOperation):
     mutation_type: Literal["governance"] = "governance"
 
 
+class EvalsMutation(BaseOperation):
+    """Mutation affecting embedded tests and executable specifications."""
+
+    mutation_type: Literal["evals"] = "evals"
+
+
 ChangeOperation = Annotated[
-    ResourceMutation | TopologyMutation | GovernanceMutation, Field(discriminator="mutation_type")
+    ResourceMutation | TopologyMutation | GovernanceMutation | EvalsMutation, Field(discriminator="mutation_type")
 ]
 
 
@@ -71,6 +77,9 @@ def _determine_category(op: str, path: str, domain: DomainType) -> CategoryType:
     """
     Determines the semantic category of an operation.
     """
+    if domain == "evals" or "/evals" in path:
+        return "TEST"
+
     if domain == "governance" or "/policy" in path or "/governance" in path:
         return "GOVERNANCE"
 
@@ -105,6 +114,8 @@ def _create_mutation(
         return TopologyMutation(op=op, path=path, value=value, category=category)
     if domain == "governance":
         return GovernanceMutation(op=op, path=path, value=value, category=category)
+    if domain == "evals":
+        return EvalsMutation(op=op, path=path, value=value, category=category)
 
     # Should be unreachable with strict types
     return ResourceMutation(op=op, path=path, value=value, category=category)  # pragma: no cover
@@ -147,6 +158,8 @@ def _diff_dicts(
             next_override = "resource"
         elif key == "governance":
             next_domain = "governance"
+        elif key == "evals":
+            next_domain = "evals"
 
         if key not in obj1:
             changes.append(_create_mutation(op="add", path=new_path, value=obj2[key], domain=next_domain))
