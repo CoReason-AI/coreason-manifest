@@ -76,6 +76,9 @@ def resolve_node_union() -> Any:
     # Create a union of all registered types
     # Note: We need to handle the case where registry is empty? (Shouldn't happen if core nodes are registered)
 
+    # Ensure VisualInspectorNode is evaluated and registered before resolving
+    from coreason_manifest.core.workflow.nodes.visual_oversight import VisualInspectorNode  # noqa: F401
+
     nodes = list(_NODE_REGISTRY.values())
     if not nodes:
         return Any
