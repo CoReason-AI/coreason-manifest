@@ -21,6 +21,7 @@ from coreason_manifest.core.common.identity import (
     UserIdentity,
 )
 from coreason_manifest.core.request import AgentRequest
+from coreason_manifest.core.workflow.flow import FlowMetadata, LinearFlow
 
 
 def test_models_are_frozen() -> None:
@@ -49,10 +50,14 @@ def test_models_are_frozen() -> None:
 
 def test_is_authorized_fail_closed_missing_context() -> None:
     """Ensure is_authorized fails-closed when no context is provided but roles are required."""
+    from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
+
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
     request = AgentRequest(
         agent_id="agent-123",
         session_id="session-123",
         inputs={},
+        manifest=dummy_manifest,
     )
 
     assert request.is_authorized(["admin"]) is False
@@ -60,10 +65,14 @@ def test_is_authorized_fail_closed_missing_context() -> None:
 
 def test_is_authorized_empty_required_roles() -> None:
     """Ensure is_authorized returns True when no roles are required."""
+    from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
+
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
     request = AgentRequest(
         agent_id="agent-123",
         session_id="session-123",
         inputs={},
+        manifest=dummy_manifest,
     )
 
     assert request.is_authorized([]) is True
@@ -81,10 +90,14 @@ def test_is_authorized_with_roles() -> None:
         delegation=scope,
     )
 
+    from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
+
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
     request = AgentRequest(
         agent_id="agent-123",
         session_id="session-123",
         inputs={},
+        manifest=dummy_manifest,
         context=context,
     )
 
@@ -113,11 +126,16 @@ def test_can_execute_tool() -> None:
     """Ensure can_execute_tool properly checks delegated tool scope."""
     user = UserIdentity(user_id="user-123")
     agent = AgentIdentity(agent_id="agent-123", version="1.0.0")
+    from coreason_manifest.core.workflow.nodes.system import PlaceholderNode
+
+    dummy_manifest = LinearFlow(metadata=FlowMetadata(name="test", version="1.0"), steps=[PlaceholderNode(id="step1")])
 
     # Test strict allowlist
     scope_strict = DelegationScope(allowed_tools=["safe_tool", "read_db"])
     context_strict = SessionContext(session_id="session-123", user=user, agent=agent, delegation=scope_strict)
-    request_strict = AgentRequest(agent_id="agent-123", session_id="session-123", inputs={}, context=context_strict)
+    request_strict = AgentRequest(
+        agent_id="agent-123", session_id="session-123", inputs={}, manifest=dummy_manifest, context=context_strict
+    )
 
     assert request_strict.can_execute_tool("safe_tool") is True
     assert request_strict.can_execute_tool("delete_db") is False
@@ -125,12 +143,16 @@ def test_can_execute_tool() -> None:
     # Test wildcard
     scope_wildcard = DelegationScope(allowed_tools=["*"])
     context_wildcard = SessionContext(session_id="session-123", user=user, agent=agent, delegation=scope_wildcard)
-    request_wildcard = AgentRequest(agent_id="agent-123", session_id="session-123", inputs={}, context=context_wildcard)
+    request_wildcard = AgentRequest(
+        agent_id="agent-123", session_id="session-123", inputs={}, manifest=dummy_manifest, context=context_wildcard
+    )
 
     assert request_wildcard.can_execute_tool("any_tool") is True
 
     # Test fail-closed (no context)
-    request_no_context = AgentRequest(agent_id="agent-123", session_id="session-123", inputs={})
+    request_no_context = AgentRequest(
+        agent_id="agent-123", session_id="session-123", inputs={}, manifest=dummy_manifest
+    )
     assert request_no_context.can_execute_tool("any_tool") is False
 
 

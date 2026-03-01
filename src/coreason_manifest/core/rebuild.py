@@ -85,7 +85,9 @@ def rebuild_manifest() -> None:
     # Actually, Governance doesn't depend on new unions, we might not need to rebuild it explicitly.
 
     # AgentRequest depends on GraphFlow | LinearFlow
-    flow.AgentRequest.model_rebuild(force=True)
+    from coreason_manifest.core.request import AgentRequest
+
+    AgentRequest.model_rebuild(force=True)
 
     # 4. Rebuild newly added isolated models that don't depend on unions
     # but still might need to resolve types

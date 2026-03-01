@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.identity import SessionContext
 from coreason_manifest.core.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
+from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
 
 class AgentRequest(BaseModel):
@@ -35,6 +36,9 @@ class AgentRequest(BaseModel):
 
     # Versioning
     hash_version: Literal["v2"] = Field(default="v2", description="Versioning for integrity strategies.")
+
+    # Execution Manifest
+    manifest: GraphFlow | LinearFlow = Field(..., description="The AOT-compiled execution graph.")
 
     # Context Envelope
     context: SessionContext | None = Field(
