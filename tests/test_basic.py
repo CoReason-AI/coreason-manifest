@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 
@@ -7,9 +9,6 @@ def test_import() -> None:
     assert coreason_manifest is not None
 
 
-from coreason_manifest.toolkit.mock import MockFactory
-
-from typing import Any
 @pytest.mark.skip(reason="Parallel Epic 6.4: SOTA schemas will merge in final reconciliation")
 def test_sota_passport_instantiation(mock_factory: Any) -> None:
     """
