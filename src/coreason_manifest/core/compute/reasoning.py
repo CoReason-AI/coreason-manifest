@@ -247,6 +247,15 @@ class CouncilReasoning(BaseReasoning):
     voting_mode: Literal["unanimous", "majority", "weighted"] = "majority"
     rounds: int = 1
     tie_breaker_model: ModelRef | None = None
+    diversity_threshold: float | None = Field(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Minimum Jaccard distance required between generated plans to ensure Council diversity.",
+    )
+    enable_dissenter: bool = Field(
+        False, description="If True, an adversarial meta-prompt is injected to critique plans before the voting phase."
+    )
 
 
 @register_engine
