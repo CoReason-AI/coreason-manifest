@@ -114,13 +114,14 @@ class PrivacySentinel:
 
 def scrub_genui_payload(payload: dict[Any, Any]) -> dict[Any, Any]:
     """
-    If a payload contains a GenUI contract (e.g., a dictionary with a `layout`
-    of UI components), recursively strip all values inside the `props` fields,
-    replacing them with `"[REDACTED_PII]"`. The schema/structure remains intact.
+    Scrub GenUI contracts (i.e., a dictionary with a `layout` of UI components),
+    recursively stripping all values inside the `props` fields and replacing them
+    with `"[REDACTED_PII]"`. The schema/structure remains intact.
+
+    Note: This explicitly operates on GenUI payloads only. Do not blindly pass
+    unrelated dictionaries that might happen to have a "layout" key.
     """
 
-    # Check if this payload represents a GenUI contract
-    # We do a basic check for presence of "layout" key
     def _scrub_recursive(data: Any, in_props: bool = False) -> Any:
         if isinstance(data, dict):
             new_dict = {}
@@ -146,16 +147,7 @@ def scrub_genui_payload(payload: dict[Any, Any]) -> dict[Any, Any]:
             return "[REDACTED_PII]"
         return data
 
-    def _find_and_scrub(data: Any) -> Any:
-        if isinstance(data, dict):
-            if "layout" in data:
-                return _scrub_recursive(data)
-            return {k: _find_and_scrub(v) for k, v in data.items()}
-        if isinstance(data, list):
-            return [_find_and_scrub(item) for item in data]
-        return data
-
-    result = _find_and_scrub(payload)
+    result = _scrub_recursive(payload)
     if isinstance(result, dict):
         return result
     return payload
