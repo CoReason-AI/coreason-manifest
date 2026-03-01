@@ -43,6 +43,7 @@ class MockFactory:
             SystemContext,
             UserContext,
         )
+        from coreason_manifest.core.primitives.types import DataClassification
 
         current_time = time.time()
 
@@ -55,9 +56,8 @@ class MockFactory:
 
         return IdentityPassport(
             passport_id=f"mock_jti_{self.rng.randint(1000, 9999)}",
-            # TODO: FINAL RECONCILIATION - Uncomment SOTA Lineage & PQC fields
-            # parent_passport_id=sota_parent_id,
-            # signature_algorithm="ML-DSA-65",
+            parent_passport_id=sota_parent_id,
+            signature_algorithm="ML-DSA-65",
             user=UserContext(anonymized_user_id="mock_hmac_hash_12345", roles=["operator"]),
             system=SystemContext(agent_id="mock_agent", version="1.0.0"),
             delegation=DelegationContract(
@@ -66,11 +66,10 @@ class MockFactory:
                 max_budget_usd=10.0,
                 issued_at=current_time - 100,
                 expires_at=current_time + 3600,
-                # TODO: FINAL RECONCILIATION - Uncomment SOTA Compute & Memory fields
-                # max_tokens=50_000,
-                # max_compute_time_ms=120_000,
-                # max_data_classification=classification,
-                # caep_stream_uri=sota_caep_uri
+                max_tokens=50_000,
+                max_compute_time_ms=120_000,
+                max_data_classification=DataClassification(classification),
+                caep_stream_uri=sota_caep_uri,
             ),
             issuer_uri="https://mock.auth.coreason.ai",
             signature_hash="mock_sig_hash",

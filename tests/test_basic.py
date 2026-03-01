@@ -2,6 +2,8 @@ from typing import Any
 
 import pytest
 
+from coreason_manifest.core.primitives.types import DataClassification
+
 
 def test_import() -> None:
     import coreason_manifest
@@ -9,7 +11,13 @@ def test_import() -> None:
     assert coreason_manifest is not None
 
 
-@pytest.mark.skip(reason="Parallel Epic 6.4: SOTA schemas will merge in final reconciliation")
+@pytest.fixture
+def mock_factory() -> Any:
+    from coreason_manifest.toolkit.mock import MockFactory
+
+    return MockFactory(seed=42)
+
+
 def test_sota_passport_instantiation(mock_factory: Any) -> None:
     """
     Ensures the 2026+ Architectural Hardening fields are properly validated.
@@ -19,7 +27,7 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
     passport = mock_factory.generate_mock_passport(classification="restricted")
     assert passport.delegation.max_tokens == 50_000
     assert passport.delegation.max_compute_time_ms == 120_000
-    assert passport.delegation.max_data_classification == "restricted"
+    assert passport.delegation.max_data_classification == DataClassification.RESTRICTED
     assert passport.delegation.caep_stream_uri == "https://mock-ssf.local.coreason.ai/stream"
     assert passport.signature_algorithm == "ML-DSA-65"
     assert passport.parent_passport_id is None

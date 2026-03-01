@@ -12,6 +12,7 @@
 from pydantic import AwareDatetime, ConfigDict, Field, SecretStr, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.primitives.types import DataClassification
 
 
 class AgentIdentity(CoreasonModel):
@@ -123,8 +124,8 @@ class DelegationContract(CoreasonModel):
     expires_at: float = Field(..., description="Unix epoch timestamp of delegation expiry.")
 
     # --- BEGIN EPIC 6.3 INSERTION ---
-    max_data_classification: str = Field(
-        default="internal",
+    max_data_classification: DataClassification = Field(
+        default=DataClassification.INTERNAL,
         description=(
             "Information Flow Control bound (e.g., 'public', 'internal', 'confidential', 'restricted'). "
             "Dictates the highest sensitivity of data this trace can ingest."
