@@ -40,6 +40,43 @@ def test_sota_passport_instantiation(mock_factory: Any) -> None:
     assert "mock_parent_jti_" in child_passport.parent_passport_id
 
 
+def test_swarm_orchestration_schema() -> None:
+    from coreason_manifest.core.workflow.nodes.swarm import SwarmNode, TournamentConfig
+    from pydantic import ValidationError
+
+    # Valid Instantiation
+    valid_swarm = SwarmNode(
+        id="test_swarm",
+        worker_profile="researcher",
+        workload_variable="urls",
+        output_variable="report",
+        distribution_strategy="island_model",
+        sub_swarm_count=3,
+        isolation_turns=5,
+        reducer_function="tournament",
+        tournament_config=TournamentConfig(),
+        max_concurrency=10,
+        operational_policy=None,
+    )
+    assert valid_swarm.distribution_strategy == "island_model"
+
+    # Invalid: Tournament without config
+    with pytest.raises(ValidationError) as exc:
+        SwarmNode(
+            id="test_swarm", worker_profile="researcher", workload_variable="urls", output_variable="report",
+            distribution_strategy="sharded", reducer_function="tournament",
+            max_concurrency=10, operational_policy=None,
+        )
+    assert "requires a 'tournament_config'" in str(exc.value)
+
+    # Invalid: Compute bound without operational policy
+    with pytest.raises(ValidationError) as exc:
+        SwarmNode(
+            id="test_swarm", worker_profile="researcher", workload_variable="urls", output_variable="report",
+            distribution_strategy="sharded", pruning_strategy="compute_bound",
+            max_concurrency=10, reducer_function="concat", operational_policy=None,
+        )
+    assert "requires an 'operational_policy'" in str(exc.value)
 def test_epistemic_tracking_config() -> None:
     from coreason_manifest.core.state.memory import KnowledgeScope, RetrievalStrategy, SemanticMemoryConfig
 
