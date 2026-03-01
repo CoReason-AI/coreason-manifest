@@ -19,6 +19,7 @@ class ErrorDomain(StrEnum):
     RESOURCE = "resource"  # Maps to ComputeLimits
     TIMEOUT = "timeout"
     FINANCIAL = "financial"
+    IDENTITY = "identity"
 
 
 class ResilienceStrategy(BaseModel):
