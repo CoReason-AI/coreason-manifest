@@ -62,7 +62,7 @@ def test_genui_multiplexer_emission() -> None:
                     UIComponentNode(
                         type="weather_widget",
                         props={"location": "San Francisco", "user_id": "123-45-678"},
-                    )
+                    ),
                     UIComponentNode(type="weather_widget", props={"location": "San Francisco", "user_id": "123-45-678"})
                 ]
             ),

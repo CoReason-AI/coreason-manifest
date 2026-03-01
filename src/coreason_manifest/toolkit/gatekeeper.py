@@ -415,6 +415,34 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
     return reports
 
 
+def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 5 Cohesion: Meta-Analysis swarms MUST define interoperability exports."""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, SwarmNode) and node.reducer_function == "meta_analysis_matrix":
+            if not node.export_interoperability or len(node.export_interoperability) == 0:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_SWARM_META_ANALYSIS_MISSING_EXPORT_006",
+                        severity="violation",
+                        message=(
+                            f"SwarmNode '{node.id}' uses a 'meta_analysis_matrix' reducer but "
+                            "fails to define 'export_interoperability'. Downstream biostatistics will fail."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="update_field",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Add formats like 'csv' or 'revman' to the export_interoperability list.",
+                        ),
+                    )
+                )
+    return reports
+
+
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
@@ -453,6 +481,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 7. Swarm-Evolution Cohesion (Epic 1 & 3 Binding)
     reports.extend(_check_island_evolution_binding(flow))
+
+    # 8. Regulatory-Grade Meta-Analysis Cohesion (Epic 5)
+    reports.extend(_check_meta_analysis_export_contract(flow))
 
     return reports
 
