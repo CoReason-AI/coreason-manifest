@@ -422,8 +422,8 @@ def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[C
 
     for node in nodes:
         if isinstance(node, SwarmNode) and node.reducer_function == "meta_analysis_matrix":
-                has_exports = node.export_interoperability and len(node.export_interoperability) > 0
-                if not has_exports:
+            has_exports = node.export_interoperability and len(node.export_interoperability) > 0
+            if not has_exports:
                 reports.append(
                     ComplianceReport(
                         code="ERR_SWARM_META_ANALYSIS_MISSING_EXPORT_006",
@@ -509,9 +509,10 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
             if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
                 reasoning = flow.definitions.profiles[profile_ref].reasoning
                 # Check if it's a CouncilReasoning with methodology.standard == "prisma_s"
-                if getattr(reasoning, "type", "") == "council" and getattr(reasoning, "methodology", None):
-                    if getattr(reasoning.methodology, "standard", "") == "prisma_s":
-                        is_prisma_s = True
+                is_council = getattr(reasoning, "type", "") == "council"
+                has_meth = getattr(reasoning, "methodology", None)
+                if is_council and has_meth and getattr(reasoning.methodology, "standard", "") == "prisma_s":
+                    is_prisma_s = True
 
         if is_prisma_s:
             is_guarded = False

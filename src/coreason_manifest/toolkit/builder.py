@@ -556,8 +556,7 @@ class AgentBuilder:
         """
         # Ensure schema is built
 
-
-
+        rebuild_manifest()
 
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
@@ -1098,7 +1097,7 @@ class BaseFlowBuilder:
             ValueError: If validation fails.
         """
         # Ensure schema is built
-
+        rebuild_manifest()
 
         flow = self._create_flow_instance()
 

@@ -11,26 +11,33 @@ class AsyncSSEMultiplexer:
     """
 
     def __init__(self) -> None:
-        self._queue: asyncio.Queue[StreamPacket] = asyncio.Queue(maxsize=250)
+        self._queue: asyncio.Queue[StreamPacket] | None = None
+
+    def _get_queue(self) -> asyncio.Queue[StreamPacket]:
+        if self._queue is None:
+            self._queue = asyncio.Queue(maxsize=250)
+        return self._queue
 
     async def push(self, packet: StreamPacket) -> None:
         """
         Push a stream packet into the buffer.
         """
-        await self._queue.put(packet)
+        await self._get_queue().put(packet)
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
         """
         Consume the queue and yield strings formatted as SSE.
         Terminates upon encountering a StreamCloseEnvelope.
         """
+        queue = self._get_queue()
         while True:
-            packet = await self._queue.get()
+            packet = await queue.get()
 
-            # Use model_dump_json directly, formatting as SSE
-            yield f"data: {packet.model_dump_json()}\n\n"
-
-            self._queue.task_done()
+            try:
+                # Use model_dump_json directly, formatting as SSE
+                yield f"data: {packet.model_dump_json()}\n\n"
+            finally:
+                queue.task_done()
 
             if isinstance(packet, StreamCloseEnvelope):
                 break
