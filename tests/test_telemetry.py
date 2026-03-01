@@ -1,4 +1,3 @@
-
 import pytest
 
 from coreason_manifest.core.telemetry.multiplexer import AsyncSSEMultiplexer
