@@ -113,7 +113,7 @@ def test_symbolic_execution_inspector_node() -> None:
         criteria="must compile",
         output_variable="result",
         mode="symbolic_execution",
-        target_solver="lean4"
+        target_solver="lean4",
     )
     assert node.mode == "symbolic_execution"
     assert node.target_solver == "lean4"
@@ -125,5 +125,5 @@ def test_symbolic_execution_inspector_node() -> None:
             target_variable="code",
             criteria="must compile",
             output_variable="result",
-            mode="symbolic_execution"
+            mode="symbolic_execution",
         )
