@@ -1014,6 +1014,9 @@ class NewLinearFlow(BaseFlowBuilder):
         if node.id not in self._seen_ids:
             raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the sequence.")
 
+        # SOTA Security: Audit the replacement node against the global Kill Switch
+        super()._register_node(node)
+
         # Find and replace the specific node while preserving order
         for i, existing_node in enumerate(self.steps):
             if existing_node.id == node.id:
@@ -1115,6 +1118,10 @@ class NewGraphFlow(BaseFlowBuilder):
         """Explicitly replaces an existing node in the topology."""
         if node.id not in self._nodes:
             raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the graph.")
+
+        # SOTA Security: Audit the replacement node against the global Kill Switch
+        super()._register_node(node)
+
         self._nodes[node.id] = node
         return self
 
