@@ -36,6 +36,15 @@ class UIComponentNode(CoreasonModel):
 
 class AdaptiveUIContract(CoreasonModel):
     layout: list[UIComponentNode] = Field(..., description="The root elements of the generated UI.")
+    widget_id: str | None = Field(
+        None, description="[DEPRECATED] The abstract identifier for the frontend component registry."
+    )
+    props_schema: dict[str, Any] | None = Field(
+        None, description="[DEPRECATED] JSON Schema defining the data required to render the widget."
+    )
+    props_mapping: dict[str, str] = Field(
+        default_factory=dict, description="[DEPRECATED] Maps Blackboard variables (values) to widget props (keys)."
+    )
     events: list[UIEventMap] = Field(
         default_factory=list, description="Maps widget interactions to orchestrator commands."
     )
