@@ -8,10 +8,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class DataAnomaly(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    code: str = Field(..., description="The error code associated with the anomaly.")
-    path: str = Field(..., description="The JSON path to the anomalous field.")
-    value_repr: str = Field(..., description="A string representation of the anomalous value.")
-    description: str = Field(..., description="A detailed description of the anomaly.")
+    code: str = Field(..., description="The error code associated with the anomaly.", examples=["CRSN-ANTIBODY-FLOAT"])
+    path: str = Field(..., description="The JSON path to the anomalous field.", examples=["$.inputs.temperature"])
+    value_repr: str = Field(..., description="A string representation of the anomalous value.", examples=["NaN"])
+    description: str = Field(
+        ...,
+        description="A detailed description of the anomaly.",
+        examples=["Floating point value is not finite (NaN/Inf)."],
+    )
 
 
 VALID_PRIMITIVES = (str, int, float, bool, type(None), datetime)
