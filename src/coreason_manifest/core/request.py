@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.core.common.identity import SessionContext
 from coreason_manifest.core.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
 
 
@@ -34,6 +35,25 @@ class AgentRequest(BaseModel):
 
     # Versioning
     hash_version: Literal["v2"] = Field(default="v2", description="Versioning for integrity strategies.")
+
+    # Context Envelope
+    context: SessionContext | None = Field(
+        None, description="The Zero-Trust Identity Context Envelope for this request."
+    )
+
+    def is_authorized(self, required_roles: list[str]) -> bool:
+        """
+        Safely checks if the user's PBAC roles intersect with the required roles.
+        If context is missing and roles are required, this fails closed (returns False).
+        """
+        if not required_roles:
+            return True
+        if self.context is None:
+            return False
+
+        # Check for intersection of required roles with user's roles
+        user_roles = set(self.context.user.roles)
+        return any(role in user_roles for role in required_roles)
 
     def create_child(self, metadata: dict[str, Any]) -> Self:
         return self.model_copy(
