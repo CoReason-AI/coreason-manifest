@@ -91,7 +91,7 @@ class DataSchema(CoreasonModel):
             jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
         except SchemaError as e:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_SCHEMA_INVALID,
+                code=ManifestErrorCode.VAL_SCHEMA_INVALID,
                 message=f"Invalid JSON Schema definition: {e.message}",
                 context={
                     "remediation": RemediationAction(
@@ -143,7 +143,7 @@ class Graph(CoreasonModel):
 
         if not self.nodes:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_EMPTY,
+                code=ManifestErrorCode.VAL_TOPOLOGY_EMPTY,
                 message="Graph must contain at least one node.",
             )
 
@@ -155,14 +155,14 @@ class Graph(CoreasonModel):
         for key, node in self.nodes.items():
             if key != node.id:
                 raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_ID_MISMATCH,
+                    code=ManifestErrorCode.VAL_TOPOLOGY_ID_MISMATCH,
                     message=f"Routing contradiction: Node dictionary key '{key}' "
                     f"does not match inner Node ID '{node.id}'.",
                     context={"dict_key": key, "node_id": node.id},
                 )
             if node.id in seen_ids:
                 raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
+                    code=ManifestErrorCode.VAL_TOPOLOGY_NODE_ID_COLLISION,
                     message=f"Internal collision defense: Node ID '{node.id}' appears multiple times.",
                     context={"node_id": node.id},
                 )
@@ -171,7 +171,7 @@ class Graph(CoreasonModel):
         # Entry Point
         if self.entry_point and self.entry_point not in valid_ids:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_MISSING_ENTRY,
+                code=ManifestErrorCode.VAL_TOPOLOGY_MISSING_ENTRY,
                 message=f"Entry point '{self.entry_point}' not found in nodes.",
             )
 
@@ -179,12 +179,12 @@ class Graph(CoreasonModel):
         for edge in self.edges:
             if edge.from_node not in valid_ids:
                 raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_DANGLING_EDGE,
+                    code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
                     message=f"Source '{edge.from_node}' not found in graph nodes.",
                 )
             if edge.to_node not in valid_ids:
                 raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_DANGLING_EDGE,
+                    code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
                     message=f"Target '{edge.to_node}' not found in graph nodes.",
                 )
 
@@ -210,7 +210,7 @@ class Graph(CoreasonModel):
         for node in valid_ids:
             if node not in visited and has_cycle(node, visited, rec_stack):
                 raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_CYCLE,
+                    code=ManifestErrorCode.VAL_TOPOLOGY_CYCLE,
                     message="Execution graphs must be strict Directed Acyclic Graphs (DAGs). Cycle detected.",
                 )
 
@@ -291,7 +291,7 @@ class GraphFlow(CoreasonModel):
                     "contain unresolved SemanticRefs. A Weaver must compile this graph into "
                     "concrete profiles before publication."
                 )
-                raise ManifestError.critical_halt(code=ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED, message=msg)
+                raise ManifestError.critical_halt(code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self
 
 
@@ -316,7 +316,7 @@ class LinearFlow(CoreasonModel):
     def validate_linear_structure(self) -> "LinearFlow":
         if not self.steps:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_LINEAR_EMPTY,
+                code=ManifestErrorCode.VAL_TOPOLOGY_LINEAR_EMPTY,
                 message="Sequence cannot be empty.",
             )
 
@@ -324,7 +324,7 @@ class LinearFlow(CoreasonModel):
         for step in self.steps:
             if step.id in seen:
                 raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.CRSN_VAL_TOPOLOGY_NODE_ID_COLLISION,
+                    code=ManifestErrorCode.VAL_TOPOLOGY_NODE_ID_COLLISION,
                     message=f"Duplicate Node ID '{step.id}' found in LinearFlow steps.",
                     context={"node_id": step.id},
                 )
@@ -364,5 +364,5 @@ class LinearFlow(CoreasonModel):
                     "contain unresolved SemanticRefs. A Weaver must compile this linear flow into "
                     "concrete profiles before publication."
                 )
-                raise ManifestError.critical_halt(code=ManifestErrorCode.CRSN_VAL_LIFECYCLE_UNRESOLVED, message=msg)
+                raise ManifestError.critical_halt(code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self

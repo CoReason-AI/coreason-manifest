@@ -156,3 +156,55 @@ class WasmMiddlewareDef(CoreasonModel):
     """
     Definition for a Wasm interceptor/middleware.
     """
+
+
+class SystemScope(StrEnum):
+    """
+    Standardized OAuth2/OIDC Scopes and Capability URIs for the ecosystem.
+    """
+
+    # Standard OIDC Identity
+    OPENID = "openid"
+    PROFILE = "profile"
+    EMAIL = "email"
+
+    # Agent Orchestration Boundaries
+    AGENT_INVOKE = "agent:invoke"
+    AGENT_RESUME = "agent:resume"
+
+    # Memory & State Confinement
+    MEMORY_READ_SHARED = "memory:read:shared"
+    MEMORY_WRITE_TENANT = "memory:write:tenant"
+
+    # Tool & Capability Bounding
+    TOOL_EXECUTE_SAFE = "tool:execute:safe"
+    TOOL_EXECUTE_CRITICAL = "tool:execute:critical"
+
+    # System & Telemetry
+    SYSTEM_ADMIN = "system:admin"
+    TELEMETRY_WRITE = "telemetry:write"
+
+
+class SystemRole(StrEnum):
+    """
+    Standardized Persona-Based Access Control (PBAC) Roles.
+    """
+
+    SYSTEM_ADMIN = "system_admin"
+    TENANT_ADMIN = "tenant_admin"
+    AGENT_BUILDER = "agent_builder"
+    OPERATOR = "operator"
+    AUDITOR = "auditor"
+    VIEWER = "viewer"
+    MACHINE_SERVICE = "machine_service"
+
+
+class DataClassification(StrEnum):
+    """
+    SOTA 2026: Standardized Information Flow Control (IFC) clearance levels.
+    """
+
+    PUBLIC = "public"
+    INTERNAL = "internal"
+    CONFIDENTIAL = "confidential"
+    RESTRICTED = "restricted"

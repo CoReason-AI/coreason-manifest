@@ -45,6 +45,64 @@ class AgentRequest(BaseModel):
         None, description="The Zero-Trust Identity Context Envelope for this request."
     )
 
+    # SOTA 2026: The Zero-Trust Identity Envelope.
+    # Typed as Any during parallel development; will be strictly bound to IdentityPassport post-merge.
+    passport: Any | None = Field(None, description="The cryptographic Zero-Trust Identity Passport for this request.")
+
+    def verify_passport_authorization(self, required_roles: list[str]) -> bool:
+        """
+        Safely checks if the passport's PBAC roles intersect with the required roles.
+        Fails closed (returns False) if the passport or roles are missing.
+        """
+        if not required_roles:
+            return True
+        if not self.passport:
+            return False
+
+        # Duck-typing access for parallel development phase
+        user_context = (
+            getattr(self.passport, "user", {}) if not isinstance(self.passport, dict) else self.passport.get("user", {})
+        )
+        user_roles = set(
+            getattr(user_context, "roles", []) if not isinstance(user_context, dict) else user_context.get("roles", [])
+        )
+
+        return any(role in user_roles for role in required_roles)
+
+    def verify_tool_delegation(self, tool_name: str, current_timestamp: float) -> bool:
+        """
+        SOTA 2026: Time-bound, Caveat-aware capability verification.
+        Evaluates the tool request against the passport's temporal bounds and whitelists.
+        Requires current_timestamp to be passed in to maintain functional purity.
+        """
+        if not self.passport:
+            return False
+
+        delegation = (
+            getattr(self.passport, "delegation", {})
+            if not isinstance(self.passport, dict)
+            else self.passport.get("delegation", {})
+        )
+        if not delegation:
+            return False
+
+        # 1. Temporal Bounding (Fail Closed if Expired)
+        expires_at = (
+            getattr(delegation, "expires_at", 0.0)
+            if not isinstance(delegation, dict)
+            else delegation.get("expires_at", 0.0)
+        )
+        if current_timestamp > expires_at:
+            return False
+
+        # 2. Strict Tool Whitelist Check
+        allowed_tools = (
+            getattr(delegation, "allowed_tools", [])
+            if not isinstance(delegation, dict)
+            else delegation.get("allowed_tools", [])
+        )
+        return not ("*" not in allowed_tools and tool_name not in allowed_tools)
+
     def is_authorized(self, required_roles: list[str]) -> bool:
         """
         Safely checks if the user's PBAC roles intersect with the required roles.
@@ -148,7 +206,7 @@ class AgentRequest(BaseModel):
 
         if errors:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_SEC_LINEAGE_001,
+                code=ManifestErrorCode.SEC_LINEAGE_001,
                 message="Multiple Trace Integrity Violations detected.",
                 context={"violations": [str(e) for e in errors]},
             )

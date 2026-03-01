@@ -10,7 +10,12 @@
 
 from coreason_manifest.core.common.identity import (
     AgentIdentity,
+    DelegationContract,
+    IdentityPassport,
+    ResourceCaveat,
     SessionContext,
+    SystemContext,
+    UserContext,
     UserIdentity,
 )
 from coreason_manifest.core.common.semantic import (
@@ -77,6 +82,7 @@ __all__ = [
     "CognitiveProfile",
     "CouncilReasoning",
     "DecompositionReasoning",
+    "DelegationContract",
     "Dependency",
     "Edge",
     "FastPath",
@@ -86,6 +92,7 @@ __all__ = [
     "Graph",
     "GraphFlow",
     "HumanNode",
+    "IdentityPassport",
     "LinearFlow",
     "NewGraphFlow",
     "NewLinearFlow",
@@ -94,14 +101,17 @@ __all__ = [
     "PlaceholderNode",
     "PlannerNode",
     "ReasoningConfig",
+    "ResourceCaveat",
     "Safety",
     "SemanticRef",
     "SessionContext",
     "StandardReasoning",
     "SupervisionPolicy",
     "SwitchNode",
+    "SystemContext",
     "ToolPack",
     "TreeSearchReasoning",
+    "UserContext",
     "UserIdentity",
     "VariableDef",
 ]

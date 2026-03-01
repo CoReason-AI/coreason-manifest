@@ -4,13 +4,17 @@ import logging
 import random
 import secrets
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from referencing import Registry, Resource
 from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
 from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, NodeState
+
+if TYPE_CHECKING:
+    from coreason_manifest.core.common.identity import IdentityPassport
+    from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.workflow.evals import ChaosConfig, EvalsManifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode
@@ -24,6 +28,53 @@ class MockFactory:
             self.rng = random.Random(seed)  # noqa: S311
         else:
             self.rng = secrets.SystemRandom()
+
+    def generate_mock_passport(
+        self, classification: "DataClassification | None" = None, is_swarm_child: bool = False
+    ) -> "IdentityPassport":
+        """
+        Synthesizes a mathematically valid Zero-Trust envelope.
+        SOTA 2026 fields (Lineage, Edge Compute, CAEP) are scaffolded for parallel Epic execution.
+        """
+        import time
+
+        from coreason_manifest.core.common.identity import (
+            DelegationContract,
+            IdentityPassport,
+            SystemContext,
+            UserContext,
+        )
+        from coreason_manifest.core.primitives.types import DataClassification
+
+        if classification is None:
+            classification = DataClassification.INTERNAL
+
+        current_time = time.time()
+
+        # SOTA 2026 Variables
+        sota_parent_id = f"mock_parent_jti_{self.rng.randint(1000, 9999)}" if is_swarm_child else None
+        sota_caep_uri = "https://mock-ssf.local.coreason.ai/stream"
+
+        return IdentityPassport(
+            passport_id=f"mock_jti_{self.rng.randint(1000, 9999)}",
+            parent_passport_id=sota_parent_id,
+            signature_algorithm="ML-DSA-65",
+            user=UserContext(anonymized_user_id="mock_hmac_hash_12345", roles=["operator"]),
+            system=SystemContext(agent_id="mock_agent", version="1.0.0"),
+            delegation=DelegationContract(
+                allowed_tools=["*"],
+                caveats=[],
+                max_budget_usd=10.0,
+                issued_at=current_time - 100,
+                expires_at=current_time + 3600,
+                max_tokens=50_000,
+                max_compute_time_ms=120_000,
+                max_data_classification=classification,
+                caep_stream_uri=sota_caep_uri,
+            ),
+            issuer_uri="https://mock.auth.coreason.ai",
+            signature_hash="mock_sig_hash",
+        )
 
     def _generate_hash(self, data: str) -> str:
         return hashlib.sha256(data.encode()).hexdigest()

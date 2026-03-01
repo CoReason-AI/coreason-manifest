@@ -34,7 +34,7 @@ def node_to_openai_assistant(
             profile = definitions.profiles[node.profile]
         else:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_INTEGRITY_PROFILE_MISSING,
+                code=ManifestErrorCode.VAL_INTEGRITY_PROFILE_MISSING,
                 message=f"Profile resolution from string ID '{node.profile}' failed. No matching definition found.",
                 context={
                     "node_id": node.id,

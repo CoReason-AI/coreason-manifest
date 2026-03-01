@@ -47,7 +47,7 @@ class SteeringConfig(CoreasonModel):
     def validate_mutation_permissions(self) -> "SteeringConfig":
         if not self.allow_variable_mutation and self.allowed_targets is not None:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                code=ManifestErrorCode.VAL_HUMAN_STEERING,
                 message="SteeringConfig defines 'allowed_targets' but 'allow_variable_mutation' is False.",
                 context={
                     "remediation": RemediationAction(
@@ -59,7 +59,7 @@ class SteeringConfig(CoreasonModel):
             )
         if self.allow_variable_mutation and self.allowed_targets is not None and len(self.allowed_targets) == 0:
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                code=ManifestErrorCode.VAL_HUMAN_STEERING,
                 message="allowed_targets cannot be empty when mutation is allowed. Use None to allow all targets.",
                 context={
                     "remediation": RemediationAction(
@@ -110,7 +110,7 @@ class HumanNode(Node):
             self.input_schema is not None or self.options is not None
         ):
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_HUMAN_SHADOW,
+                code=ManifestErrorCode.VAL_HUMAN_SHADOW,
                 message="HumanNode in 'shadow' mode cannot have 'input_schema' or 'options'.",
                 context={
                     "remediation": RemediationAction(
@@ -129,7 +129,7 @@ class HumanNode(Node):
             and self.steering_config is None
         ):
             raise ManifestError.critical_halt(
-                code=ManifestErrorCode.CRSN_VAL_HUMAN_STEERING,
+                code=ManifestErrorCode.VAL_HUMAN_STEERING,
                 message=f"HumanNode in '{self.collaboration_mode}' mode requires 'steering_config'.",
                 context={
                     "remediation": RemediationAction(

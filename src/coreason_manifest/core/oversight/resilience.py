@@ -19,6 +19,7 @@ class ErrorDomain(StrEnum):
     RESOURCE = "resource"  # Maps to ComputeLimits
     TIMEOUT = "timeout"
     FINANCIAL = "financial"
+    IDENTITY = "identity"
 
 
 class ResilienceStrategy(BaseModel):
@@ -210,7 +211,7 @@ class ErrorHandler(BaseModel):
         str | None, Field(description="Regex for fine-grained error message matching.", examples=[".*Timeout.*"])
     ] = None
     match_error_code: Annotated[
-        list[str] | None, Field(description="List of specific error codes to match.", examples=[["CRSN-VAL-001"]])
+        list[str] | None, Field(description="List of specific error codes to match.", examples=[["VAL-001"]])
     ] = None
     strategy: RecoveryStrategy = Field(
         ..., description="The polymorphic strategy to execute.", examples=[{"type": "retry", "max_attempts": 3}]
