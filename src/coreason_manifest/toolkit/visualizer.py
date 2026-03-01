@@ -37,6 +37,7 @@ def _get_node_shape(node: AnyNode) -> tuple[str, str]:
         "planner": ("{{", "}}"),
         "inspector": ("{{", "}}"),
         "emergence_inspector": ("{{", "}}"),
+        "visual_inspector": ("{{", "}}"),
         "human": ("[/", "/]"),
         "placeholder": ("(", ")"),
         "swarm": ("[[", "]]"),
@@ -166,6 +167,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    classDef human fill:#ff9999,stroke:#333,stroke-width:2px;")
     lines.append("    classDef inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
     lines.append("    classDef emergence_inspector fill:#e8daef,stroke:#8e44ad,stroke-width:2px;")
+    lines.append("    classDef visual_inspector fill:#fdebd0,stroke:#d35400,stroke-width:2px;")
     lines.append("    classDef swarm fill:#aed6f1,stroke:#2e86c1,stroke-width:2px;")
 
     # State styles
