@@ -63,7 +63,7 @@ class OpenAIGenerativeAdapter(GenerativeAdapter):
         if profile.reasoning and getattr(profile.reasoning, "model", None):
             # If it's a ModelRef or string we assume string logic works downstream
             # or handle type properly
-            model_val = getattr(profile.reasoning, "model")
+            model_val = profile.reasoning.model
             if isinstance(model_val, str):
                 model = model_val
 
