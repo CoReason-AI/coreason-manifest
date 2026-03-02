@@ -33,7 +33,14 @@ class CrossoverStrategy(StrEnum):
 
 AllowedAction = Literal["click", "type", "scroll", "screenshot", "drag", "hover", "hotkey"]
 CoordinateSystem = Literal["absolute_px", "normalized_0_1"]
-GraphRetrievalMode = Literal["local", "global", "hybrid"]
+GraphRetrievalMode = Literal[
+    "local",
+    "global",
+    "hybrid",
+    "forward_snowball",
+    "backward_snowball",
+    "bidirectional_snowball",
+]
 GuidedDecodingMode = Literal["json_schema", "regex", "grammar", "none"]
 
 
@@ -89,6 +96,7 @@ class MethodologyStandard(StrEnum):
     PRISMA_S = "prisma_s"
     COCHRANE_MECIR = "cochrane_mecir"
     GRADE = "grade"
+    PRESS_2015 = "press_2015"
 
 
 class MethodologyConfig(BaseModel):
@@ -487,7 +495,16 @@ class GraphReasoning(BaseReasoning):
     # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
     # global: "Corpus-Centric". Good for "What are the themes?" (uses pre-computed community summaries).
     # hybrid: The best of both worlds.
-    retrieval_mode: Annotated[GraphRetrievalMode, Field(description="Strategy for traversing the graph.")] = "local"
+    retrieval_mode: Annotated[
+        GraphRetrievalMode,
+        Field(
+            description=(
+                "Strategy for traversing the graph. "
+                "local/global/hybrid are for semantic community detection. "
+                "snowball modes execute temporal citation network traversals."
+            )
+        ),
+    ] = "local"
 
     # Local Mode Constraints
     max_hops: Annotated[int, Field(description="Traversal depth for local neighbor search.")] = 2
