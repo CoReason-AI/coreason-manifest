@@ -1,9 +1,0 @@
---- src/coreason_manifest/toolkit/gatekeeper.py
-+++ src/coreason_manifest/toolkit/gatekeeper.py
-@@ -19,2 +19,6 @@
-
-+def canonicalize_domain(d: str) -> str:
-+    return d.lower().strip()
-+
-+
- if TYPE_CHECKING:
