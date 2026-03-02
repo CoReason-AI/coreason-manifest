@@ -504,8 +504,6 @@ class AgentBuilder:
 
         episodic = None
         if salience_threshold is not None:
-
-
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
                 consolidation_interval_turns=consolidation_interval,
@@ -549,7 +547,6 @@ class AgentBuilder:
             AgentBuilder: The builder instance for chaining.
         """
 
-
         self.constraints.append(
             Constraint(
                 variable=variable,
@@ -572,15 +569,12 @@ class AgentBuilder:
         """
         # Ensure schema is built
 
-
         rebuild_manifest()
 
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
         if self.reasoning:
-
-
             adversarial_config = None
             if self.review_strategy == "adversarial" or self.adversarial_persona is not None:
                 adversarial_config = AdversarialConfig(persona=self.adversarial_persona or "skeptic")
@@ -597,8 +591,6 @@ class AgentBuilder:
             }
 
             if self._rate_card_config:
-
-
                 rc = RateCard(
                     input_cost=self._rate_card_config["input_cost"],
                     output_cost=self._rate_card_config["output_cost"],
@@ -608,7 +600,6 @@ class AgentBuilder:
 
                 # Retrieve existing primary_profile if models is already ModelCriteria
                 existing_models = self.reasoning.models
-
 
                 if isinstance(existing_models, ModelCriteria):
                     models_copy = existing_models.model_copy()
@@ -627,8 +618,6 @@ class AgentBuilder:
                     updates["models"] = ModelCriteria(specific_models=[existing_models], primary_profile=new_profile)
 
             self.reasoning = self.reasoning.model_copy(update=updates)
-
-
 
         profile = CognitiveProfile(
             role=self.role,
@@ -685,7 +674,6 @@ class BaseFlowBuilder:
 
     def with_attestation(self, attestation: Any) -> Self:
 
-
         if self.metadata.provenance:
             self.metadata = self.metadata.model_copy(
                 update={"provenance": self.metadata.provenance.model_copy(update={"attestation": attestation})}
@@ -699,7 +687,6 @@ class BaseFlowBuilder:
     def with_unicode_sanitization(
         self, strip_tags: bool = True, strip_bidi: bool = True, norm: Literal["NFC", "NFKC", "none"] = "NFC"
     ) -> Self:
-
 
         sanitization = UnicodeSanitization(
             strip_invisible_tags=strip_tags, strip_bidi_overrides=strip_bidi, normalization_form=norm
@@ -812,8 +799,6 @@ class BaseFlowBuilder:
         if self.governance:
             self.governance = self.governance.model_copy(update={"mixed_initiative": policy})
         else:
-
-
             self.governance = Governance(mixed_initiative=policy)
         return self
 
@@ -1007,7 +992,6 @@ class BaseFlowBuilder:
             Self: The builder instance for chaining.
         """
 
-
         node = HumanNode(
             id=node_id,
             metadata={},
@@ -1024,7 +1008,6 @@ class BaseFlowBuilder:
         return self
 
     def add_human_gate(self, node_id: str, prompt: str, routes: dict[str, str], shadow_timeout: int = 300) -> Self:
-
 
         node = HumanNode(
             id=node_id,
@@ -1050,7 +1033,6 @@ class BaseFlowBuilder:
         routes: dict[str, str] | None = None,
         shadow_timeout: int = 300,
     ) -> Self:
-
 
         # Validate and coerce if dictionary provided
         if isinstance(contract, dict):
