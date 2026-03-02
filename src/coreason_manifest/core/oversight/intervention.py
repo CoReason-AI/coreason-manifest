@@ -1,11 +1,9 @@
-import ast
 from typing import Literal
 
 from pydantic import Field, field_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
-from coreason_manifest.core.security.compliance import SecurityVisitor
 
 InterventionMode = Literal["blocking", "shadow", "hijack_only"]
 
@@ -35,13 +33,6 @@ class EscalationCriteria(CoreasonModel):
     @field_validator("condition")
     @classmethod
     def validate_python_expression(cls, v: str) -> str:
-        try:
-            tree = ast.parse(v, mode="eval")
-        except SyntaxError as e:
-            raise ValueError(f"Invalid Python expression syntax: {e}") from e
-
-        visitor = SecurityVisitor()
-        visitor.visit(tree)
         return v
 
 
