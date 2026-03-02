@@ -1,5 +1,5 @@
-import pytest
-from coreason_manifest.core.domains.mcp_contracts import MCPToolName, MCPOperation
+from coreason_manifest.core.domains.mcp_contracts import MCPOperation, MCPToolName
+
 
 def test_mcp_tool_name_serialization() -> None:
     # Existing tool test

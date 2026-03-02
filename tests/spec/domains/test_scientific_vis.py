@@ -2,6 +2,7 @@ import pytest
 
 from coreason_manifest.spec.domains.scientific_vis import DataArtifactElement
 
+
 def test_data_artifact_element_instantiation() -> None:
     # Test valid instantiation
     element = DataArtifactElement(
