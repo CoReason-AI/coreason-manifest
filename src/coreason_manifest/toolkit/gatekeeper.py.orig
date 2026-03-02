@@ -3,6 +3,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+
+def canonicalize_domain(d: str) -> str:
+    return d.lower().strip()
+
+
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.security.compliance import (
@@ -12,16 +17,17 @@ from coreason_manifest.core.security.compliance import (
 )
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+
+
+def canonicalize_domain(d: str) -> str:
+    return d.lower().strip()
+
+
 from coreason_manifest.core.workflow.topology import (
     get_reachable_nodes,
     get_strongly_connected_components,
     get_unified_topology,
 )
-
-
-def canonicalize_domain(domain: str) -> str:
-    return domain.lower().strip()
-
 
 if TYPE_CHECKING:
     from coreason_manifest.core.state.tools import AnyTool
@@ -794,3 +800,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
     # If reachable but not via unguarded path -> Guarded
     return True
+
+
+def canonicalize_domain(d: str) -> str:
+    return d.lower().strip()
