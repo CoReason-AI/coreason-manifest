@@ -1,8 +1,8 @@
 import time
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 from typing import Any, Literal
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
@@ -158,6 +158,26 @@ class ComputeLimits(CoreasonModel):
     )
 
 
+class DriftMeasurementMethod(StrEnum):
+    COSINE_DISTANCE = "cosine_distance"
+    JACCARD_INDEX = "jaccard_index"
+    EPISTEMIC_FALSIFICATION = "epistemic_falsification"
+
+
+class DriftPolicy(CoreasonModel):
+    """Declarative bounds for semantic stability."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    input_drift_threshold: float = Field(..., ge=0.0, le=1.0, description="Threshold for input drift.")
+    output_drift_threshold: float = Field(..., ge=0.0, le=1.0, description="Threshold for output drift.")
+    trajectory_divergence_limit: float = Field(
+        ..., ge=0.0, le=1.0, description="Max allowed cosine distance between Step 1 and Step N."
+    )
+    baseline_dataset_id: str | None = Field(None, description="Dataset ID for epistemic falsification checks.")
+    measurement_method: DriftMeasurementMethod = Field(..., description="Method for drift measurement.")
+
+
 class OperationalPolicy(CoreasonModel):
     financial: FinancialLimits | None = Field(None, description="Financial limits configuration.")
     data: DataLimits | None = Field(None, description="Data usage limits configuration.")
@@ -218,6 +238,7 @@ class Governance(CoreasonModel):
         description="References to .rego files or inline Open Policy Agent definitions for custom enterprise rules.",
     )
     mixed_initiative: MixedInitiativePolicy | None = Field(None)
+    drift: DriftPolicy | None = Field(None, description="Semantic drift and stability policy.")
 
     @field_validator("active_middlewares")
     @classmethod

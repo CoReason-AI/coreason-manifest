@@ -20,6 +20,8 @@ class ErrorDomain(StrEnum):
     TIMEOUT = "timeout"
     FINANCIAL = "financial"
     IDENTITY = "identity"
+    DRIFT = "drift"
+    ALIGNMENT = "alignment"
 
 
 class ResilienceStrategy(BaseModel):
@@ -198,6 +200,32 @@ class HumanHandoffStrategy(ResilienceStrategy):
     )
 
 
+class ContextPruningStrategy(ResilienceStrategy):
+    """Strategy to shrink the agent's context window when drift occurs."""
+
+    type: Literal["context_pruning"] = Field(
+        "context_pruning", description="The strategy type.", examples=["context_pruning"]
+    )
+
+    eviction_target: Literal["oldest_messages", "lowest_salience"] = Field(
+        ..., description="What part of the context to evict.", examples=["oldest_messages"]
+    )
+    prune_percentage: float = Field(..., gt=0.0, le=1.0, description="Percentage of context to prune.", examples=[0.2])
+
+
+class TutorAlignmentStrategy(ResilienceStrategy):
+    """Strategy to issue a harsh correction to an agent."""
+
+    type: Literal["tutor_alignment"] = Field(
+        "tutor_alignment", description="The strategy type.", examples=["tutor_alignment"]
+    )
+
+    system_prompt_override: str = Field(
+        ..., description="The overriding correction instruction.", examples=["You must follow the baseline dataset."]
+    )
+    reset_trajectory: bool = Field(..., description="Whether to reset the trajectory to step 1.", examples=[True])
+
+
 # Polymorphic Union
 RecoveryStrategy = Annotated[
     RetryStrategy
@@ -205,7 +233,9 @@ RecoveryStrategy = Annotated[
     | ReflexionStrategy
     | EscalationStrategy
     | DiagnosisReasoning
-    | HumanHandoffStrategy,
+    | HumanHandoffStrategy
+    | ContextPruningStrategy
+    | TutorAlignmentStrategy,
     Field(discriminator="type"),
 ]
 
