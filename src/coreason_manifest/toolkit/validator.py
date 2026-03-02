@@ -1,11 +1,13 @@
 # src/coreason_manifest/utils/validator.py
-
 import re
+from collections import defaultdict
 from typing import Any
 
+import jsonschema  # type: ignore
+from jsonschema.exceptions import SchemaError  # type: ignore
 from pydantic import BaseModel
 
-from coreason_manifest.core.oversight.governance import Governance
+from coreason_manifest.core.oversight.governance import Governance, RequestCriticality
 from coreason_manifest.core.oversight.resilience import (
     EscalationStrategy,
     FallbackStrategy,
@@ -67,8 +69,6 @@ def _validate_traffic_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceRep
                 details={"rate_limit_tpm": traffic.rate_limit_tpm},
             )
         )
-
-    from coreason_manifest.core.oversight.governance import RequestCriticality
 
     if (
         traffic.criticality == RequestCriticality.CRITICAL
@@ -512,9 +512,6 @@ def _validate_data_flow(
 
         elif isinstance(node, PlannerNode):
             try:
-                import jsonschema  # type: ignore
-                from jsonschema.exceptions import SchemaError  # type: ignore
-
                 jsonschema.validators.validator_for(node.output_schema).check_schema(node.output_schema)
 
                 # SOTA 2026: Shift-Left Reliability
@@ -542,7 +539,6 @@ def _validate_data_flow(
                             )
                         )
                     # If other nodes have explicit input schemas in the future, we would add them here.
-                    from coreason_manifest.core.workflow.nodes import HumanNode
 
                     if isinstance(d_node, HumanNode) and getattr(d_node, "input_schema", None):
                         downstream_expectations.append((d_id, d_node.input_schema))  # type: ignore
@@ -1147,8 +1143,6 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
             # do not carry inherent edge traversal costs; their cost is entirely assumed
             # by the execution of the target node. They correctly default to 0.0 in the DP map.
             edge_weights[key] = (max(existing_cost, edge.cost_weight), max(existing_lat, edge.latency_weight_ms))
-
-    from collections import defaultdict
 
     in_degree: dict[str, int] = defaultdict(int)
     for u in adj_map:

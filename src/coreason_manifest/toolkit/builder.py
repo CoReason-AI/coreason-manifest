@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Copyright (c) 2025 CoReason, Inc.
 #
 # This software is proprietary and dual-licensed.
@@ -7,18 +9,19 @@
 # Commercial use beyond a 30-day trial requires a separate license.
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
-
 from typing import TYPE_CHECKING, Any, Literal, Self, cast
-
-if TYPE_CHECKING:
-    from coreason_manifest.core.workflow.nodes import Constraint
 
 from coreason_manifest.core.common.presentation import AdaptiveUIContract, NotificationRouting, RenderStrategy
 from coreason_manifest.core.compute.reasoning import (
+    AdversarialConfig,
     FastPath,
+    GapScanConfig,
+    ModelCriteria,
     ReasoningConfig,
+    ReviewStrategy,
     StandardReasoning,
 )
+from coreason_manifest.core.compute.resources import ModelProfile, PricingUnit, RateCard
 from coreason_manifest.core.oversight.governance import (
     CircuitBreaker,
     ComputeLimits,
@@ -27,8 +30,10 @@ from coreason_manifest.core.oversight.governance import (
     Governance,
     OperationalPolicy,
     RequestCriticality,
+    Safety,
     SemanticCacheConfig,
     TrafficPolicy,
+    UnicodeSanitization,
 )
 from coreason_manifest.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.core.oversight.resilience import (
@@ -42,8 +47,8 @@ from coreason_manifest.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.core.primitives.types import RiskLevel
-from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
+    ConsolidationStrategy,
     EpisodicMemoryConfig,
     KnowledgeScope,
     MemorySubsystem,
@@ -51,10 +56,14 @@ from coreason_manifest.core.state.memory import (
     SemanticMemoryConfig,
     WorkingMemoryConfig,
 )
-from coreason_manifest.core.state.tools import ToolPack
-from coreason_manifest.core.workflow.evals import EvalsManifest
+from coreason_manifest.core.system.rebuild import rebuild_manifest
+
+if TYPE_CHECKING:
+    from coreason_manifest.core.state.tools import ToolPack
+    from coreason_manifest.core.workflow.evals import EvalsManifest
+    from coreason_manifest.core.workflow.flow import AnyNode
+
 from coreason_manifest.core.workflow.flow import (
-    AnyNode,
     Blackboard,
     DataSchema,
     Edge,
@@ -64,9 +73,14 @@ from coreason_manifest.core.workflow.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+    ProvenanceData,
+    ProvenanceType,
 )
-from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode, PlannerNode
+from coreason_manifest.core.workflow.nodes.agent import AgentNode, CognitiveProfile
 from coreason_manifest.core.workflow.nodes.base import Constraint, ConstraintOperator
+from coreason_manifest.core.workflow.nodes.human import CollaborationMode, HumanNode
+from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+from coreason_manifest.core.workflow.nodes.planner import PlannerNode
 from coreason_manifest.toolkit.validator import validate_flow
 
 
@@ -138,7 +152,7 @@ class AgentBuilder:
         self._rate_card_config: dict[str, Any] | None = None
         self.ui_capabilities: list[str] | None = None
 
-    def with_ui_capabilities(self, registry_ids: list[str]) -> "AgentBuilder":
+    def with_ui_capabilities(self, registry_ids: list[str]) -> AgentBuilder:
         """Assigns UI capabilities to the agent.
 
         Args:
@@ -156,7 +170,7 @@ class AgentBuilder:
         output_cost: float,
         reasoning_cost: float | None = None,
         unit: str = "TOKEN_1M",
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Attaches a FinOps rate card to the primary model profile."""
         self._rate_card_config = {
             "input_cost": input_cost,
@@ -173,7 +187,7 @@ class AgentBuilder:
         gap_scan_enabled: bool = False,
         gap_scan_threshold: float = 0.8,
         max_revisions: int = 1,
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         self.review_strategy = review_strategy
         self.adversarial_persona = adversarial_persona
         self.gap_scan_enabled = gap_scan_enabled
@@ -181,7 +195,7 @@ class AgentBuilder:
         self.max_revisions = max_revisions
         return self
 
-    def with_identity(self, role: str, persona: str) -> "AgentBuilder":
+    def with_identity(self, role: str, persona: str) -> AgentBuilder:
         """Configures the agent's identity.
 
         Args:
@@ -195,7 +209,7 @@ class AgentBuilder:
         self.persona = persona
         return self
 
-    def with_reasoning(self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7) -> "AgentBuilder":
+    def with_reasoning(self, model: str, thoughts_max: int = 5, min_confidence: float = 0.7) -> AgentBuilder:
         """Configures standard Chain of Thought (CoT) reasoning.
 
         Args:
@@ -209,7 +223,7 @@ class AgentBuilder:
         self.reasoning = StandardReasoning(model=model, thoughts_max=thoughts_max, min_confidence=min_confidence)
         return self
 
-    def with_fast_path(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> "AgentBuilder":
+    def with_fast_path(self, model: str, timeout_ms: int = 1000, caching: bool = True) -> AgentBuilder:
         """Configures the fast path (System 1) reasoning.
 
         Args:
@@ -223,7 +237,7 @@ class AgentBuilder:
         self.fast_path = FastPath(model=model, timeout_ms=timeout_ms, caching=caching)
         return self
 
-    def with_tools(self, tools: list[str]) -> "AgentBuilder":
+    def with_tools(self, tools: list[str]) -> AgentBuilder:
         """Adds a list of tools to the agent.
 
         Args:
@@ -243,7 +257,7 @@ class AgentBuilder:
         delay: float = 1.0,
         fallback_id: str | None = None,
         queue_name: str | None = None,
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Configures the resilience strategy for the agent.
 
         Args:
@@ -278,7 +292,7 @@ class AgentBuilder:
         channels: list[str] | None = None,
         urgency: Literal["low", "medium", "high", "critical"] = "medium",
         render_strategy: str = "plain_text",
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Configures human steering (escalation) as a supervision policy.
 
         Args:
@@ -359,7 +373,7 @@ class AgentBuilder:
         max_transaction_cost_usd: float | None = None,
         max_tokens_per_turn: int | None = None,
         context_compression_strategy: Literal["none", "summarize", "truncate_oldest"] = "none",
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Configures operational limits for the agent (financial, compute, data).
 
         Args:
@@ -419,8 +433,6 @@ class AgentBuilder:
             or semantic_cache_similarity is not None
             or semantic_cache_ttl is not None
         ):
-            from typing import Any
-
             kwargs: dict[str, Any] = {
                 "criticality": RequestCriticality(criticality)
                 if criticality is not None
@@ -444,7 +456,7 @@ class AgentBuilder:
 
     def with_escalation_rule(
         self, condition: str, role: str, strategy: EscalationStrategy | None = None
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Adds a local escalation rule to the agent.
 
         Args:
@@ -469,7 +481,7 @@ class AgentBuilder:
         allowed_entity_types: list[str] | None = None,
         skill_library_ref: str | None = None,
         consolidation_strategy: str = "session_close",
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Configures the memory subsystem for the agent.
 
         Args:
@@ -489,8 +501,6 @@ class AgentBuilder:
 
         episodic = None
         if salience_threshold is not None:
-            from coreason_manifest.core.state.memory import ConsolidationStrategy
-
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
                 consolidation_interval_turns=consolidation_interval,
@@ -520,7 +530,7 @@ class AgentBuilder:
 
     def with_constraint(
         self, variable: str, operator: str, value: Any, required: bool = True, error_message: str | None = None
-    ) -> "AgentBuilder":
+    ) -> AgentBuilder:
         """Adds a constraint to the agent node.
 
         Args:
@@ -533,7 +543,6 @@ class AgentBuilder:
         Returns:
             AgentBuilder: The builder instance for chaining.
         """
-        from coreason_manifest.core.workflow.nodes import Constraint, ConstraintOperator
 
         self.constraints.append(
             Constraint(
@@ -556,7 +565,6 @@ class AgentBuilder:
             ValueError: If agent identity (role, persona) is not set.
         """
         # Ensure schema is built
-        from coreason_manifest.core.rebuild import rebuild_manifest
 
         rebuild_manifest()
 
@@ -564,8 +572,6 @@ class AgentBuilder:
             raise ValueError("Agent identity (role, persona) must be set.")
 
         if self.reasoning:
-            from coreason_manifest.core.compute.reasoning import AdversarialConfig, GapScanConfig, ReviewStrategy
-
             adversarial_config = None
             if self.review_strategy == "adversarial" or self.adversarial_persona is not None:
                 adversarial_config = AdversarialConfig(persona=self.adversarial_persona or "skeptic")
@@ -582,8 +588,6 @@ class AgentBuilder:
             }
 
             if self._rate_card_config:
-                from coreason_manifest.core.compute.resources import ModelProfile, PricingUnit, RateCard
-
                 rc = RateCard(
                     input_cost=self._rate_card_config["input_cost"],
                     output_cost=self._rate_card_config["output_cost"],
@@ -593,7 +597,6 @@ class AgentBuilder:
 
                 # Retrieve existing primary_profile if models is already ModelCriteria
                 existing_models = self.reasoning.models
-                from coreason_manifest.core.compute.reasoning import ModelCriteria
 
                 if isinstance(existing_models, ModelCriteria):
                     models_copy = existing_models.model_copy()
@@ -612,8 +615,6 @@ class AgentBuilder:
                     updates["models"] = ModelCriteria(specific_models=[existing_models], primary_profile=new_profile)
 
             self.reasoning = self.reasoning.model_copy(update=updates)
-
-        from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile
 
         profile = CognitiveProfile(
             role=self.role,
@@ -660,7 +661,6 @@ class BaseFlowBuilder:
         self.metadata = FlowMetadata(name=name, version=version, description=description, tags=[])
         self._profiles: dict[str, CognitiveProfile] = {}
         self._tool_packs: dict[str, ToolPack] = {}
-        from typing import Literal
 
         self._supervision_templates: dict[str, SupervisionPolicy] = {}
         self.governance: Governance | None = None
@@ -669,7 +669,6 @@ class BaseFlowBuilder:
         self.evals: EvalsManifest | None = None
 
     def with_attestation(self, attestation: Any) -> Self:
-        from coreason_manifest.core.workflow.flow import ProvenanceData, ProvenanceType
 
         if self.metadata.provenance:
             self.metadata = self.metadata.model_copy(
@@ -684,7 +683,6 @@ class BaseFlowBuilder:
     def with_unicode_sanitization(
         self, strip_tags: bool = True, strip_bidi: bool = True, norm: Literal["NFC", "NFKC", "none"] = "NFC"
     ) -> Self:
-        from coreason_manifest.core.oversight.governance import Governance, Safety, UnicodeSanitization
 
         sanitization = UnicodeSanitization(
             strip_invisible_tags=strip_tags, strip_bidi_overrides=strip_bidi, normalization_form=norm
@@ -797,8 +795,6 @@ class BaseFlowBuilder:
         if self.governance:
             self.governance = self.governance.model_copy(update={"mixed_initiative": policy})
         else:
-            from coreason_manifest.core.oversight.governance import Governance
-
             self.governance = Governance(mixed_initiative=policy)
         return self
 
@@ -884,8 +880,6 @@ class BaseFlowBuilder:
             or semantic_cache_similarity is not None
             or semantic_cache_ttl is not None
         ):
-            from typing import Any
-
             kwargs: dict[str, Any] = {
                 "criticality": RequestCriticality(criticality)
                 if criticality is not None
@@ -991,7 +985,6 @@ class BaseFlowBuilder:
         Returns:
             Self: The builder instance for chaining.
         """
-        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
 
         node = HumanNode(
             id=node_id,
@@ -1009,7 +1002,6 @@ class BaseFlowBuilder:
         return self
 
     def add_human_gate(self, node_id: str, prompt: str, routes: dict[str, str], shadow_timeout: int = 300) -> Self:
-        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
 
         node = HumanNode(
             id=node_id,
@@ -1035,7 +1027,6 @@ class BaseFlowBuilder:
         routes: dict[str, str] | None = None,
         shadow_timeout: int = 300,
     ) -> Self:
-        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
 
         # Validate and coerce if dictionary provided
         if isinstance(contract, dict):
@@ -1137,7 +1128,7 @@ class NewLinearFlow(BaseFlowBuilder):
         self.steps.append(node)
         self._seen_ids.add(node.id)
 
-    def replace_step(self, node: AnyNode) -> "NewLinearFlow":
+    def replace_step(self, node: AnyNode) -> NewLinearFlow:
         """Explicitly replaces an existing step in the sequence."""
         if node.id not in self._seen_ids:
             raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the sequence.")
@@ -1152,7 +1143,7 @@ class NewLinearFlow(BaseFlowBuilder):
                 break
         return self
 
-    def add_step(self, node: AnyNode) -> "NewLinearFlow":
+    def add_step(self, node: AnyNode) -> NewLinearFlow:
         """Appends a node to the sequence.
 
         Args:
@@ -1164,7 +1155,7 @@ class NewLinearFlow(BaseFlowBuilder):
         self._register_node(node)
         return self
 
-    def add_agent(self, agent: AgentNode) -> "NewLinearFlow":
+    def add_agent(self, agent: AgentNode) -> NewLinearFlow:
         """Appends an agent node to the sequence.
 
         Args:
@@ -1232,7 +1223,7 @@ class NewGraphFlow(BaseFlowBuilder):
         super()._register_node(node)
         self._nodes[node.id] = node
 
-    def set_entry_point(self, node_id: str) -> "NewGraphFlow":
+    def set_entry_point(self, node_id: str) -> NewGraphFlow:
         """Sets the explicit entry point for the graph.
 
         Args:
@@ -1244,7 +1235,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self._entry_point = node_id
         return self
 
-    def replace_node(self, node: AnyNode) -> "NewGraphFlow":
+    def replace_node(self, node: AnyNode) -> NewGraphFlow:
         """Explicitly replaces an existing node in the topology."""
         if node.id not in self._nodes:
             raise ValueError(f"Builder Error: Cannot replace node '{node.id}' as it does not exist in the graph.")
@@ -1255,7 +1246,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self._nodes[node.id] = node
         return self
 
-    def add_node(self, node: AnyNode) -> "NewGraphFlow":
+    def add_node(self, node: AnyNode) -> NewGraphFlow:
         """Adds a node to the graph.
 
         Args:
@@ -1267,7 +1258,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self._register_node(node)
         return self
 
-    def add_agent(self, agent: AgentNode) -> "NewGraphFlow":
+    def add_agent(self, agent: AgentNode) -> NewGraphFlow:
         """Adds an agent node to the graph.
 
         Args:
@@ -1279,7 +1270,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self._register_node(agent)
         return self
 
-    def connect(self, source: str, target: str, condition: str | None = None) -> "NewGraphFlow":
+    def connect(self, source: str, target: str, condition: str | None = None) -> NewGraphFlow:
         """Adds an edge to the graph.
 
         Args:
@@ -1293,7 +1284,7 @@ class NewGraphFlow(BaseFlowBuilder):
         self._edges.append(Edge(from_node=source, to_node=target, condition=condition))
         return self
 
-    def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> "NewGraphFlow":
+    def set_interface(self, inputs: dict[str, Any], outputs: dict[str, Any]) -> NewGraphFlow:
         """Defines the Input/Output contract for the Flow.
 
         Args:
@@ -1309,7 +1300,7 @@ class NewGraphFlow(BaseFlowBuilder):
         )
         return self
 
-    def set_blackboard(self, variables: dict[str, dict[str, Any]], persistence: Any | None = None) -> "NewGraphFlow":
+    def set_blackboard(self, variables: dict[str, dict[str, Any]], persistence: Any | None = None) -> NewGraphFlow:
         """Configures the shared memory blackboard.
 
         Args:

@@ -5,7 +5,7 @@ from typing import Any, Literal
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
+from coreason_manifest.core.common.exceptions import FaultSeverity, ManifestError, RecoveryAction, SemanticFault
 from coreason_manifest.core.oversight.intervention import CoIntelligencePolicy
 from coreason_manifest.core.oversight.mixed_initiative import MixedInitiativePolicy
 from coreason_manifest.core.primitives.types import MiddlewareID, NodeID, RiskLevel, ToolID

@@ -3,18 +3,17 @@ import json
 import logging
 import random
 import secrets
+import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from referencing import Registry, Resource
 from referencing.exceptions import PointerToNowhere, Unresolvable
 from referencing.jsonschema import DRAFT202012
 
+from coreason_manifest.core.common.identity import DelegationContract, IdentityPassport, SystemContext, UserContext
+from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.telemetry.telemetry_schemas import NodeExecution, NodeState
-
-if TYPE_CHECKING:
-    from coreason_manifest.core.common.identity import IdentityPassport
-    from coreason_manifest.core.primitives.types import DataClassification
 from coreason_manifest.core.workflow.evals import ChaosConfig, EvalsManifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import HumanNode, Node, PlannerNode, SwarmNode
@@ -36,15 +35,6 @@ class MockFactory:
         Synthesizes a mathematically valid Zero-Trust envelope.
         SOTA 2026 fields (Lineage, Edge Compute, CAEP) are scaffolded for parallel Epic execution.
         """
-        import time
-
-        from coreason_manifest.core.common.identity import (
-            DelegationContract,
-            IdentityPassport,
-            SystemContext,
-            UserContext,
-        )
-        from coreason_manifest.core.primitives.types import DataClassification
 
         if classification is None:
             classification = DataClassification.INTERNAL
