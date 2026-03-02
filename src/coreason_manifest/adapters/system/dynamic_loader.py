@@ -16,7 +16,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any, Protocol, cast
+from typing import Any, Protocol, cast, override
 
 import yaml
 from yaml.nodes import MappingNode
@@ -25,8 +25,10 @@ from coreason_manifest.adapters.system.io_jail import ManifestIO, SecurityViolat
 from coreason_manifest.core.common.exceptions import SecurityJailViolationError
 from coreason_manifest.core.system.rebuild import rebuild_manifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.ports.system import ManifestLoader
 
 __all__ = [
+    "LocalFileLoader",
     "RuntimeSecurityWarning",
     "SandboxedPathFinder",
     "SecurityViolationError",
@@ -34,7 +36,6 @@ __all__ = [
     "YamlLoaderProtocol",
     "construct_mapping_unique",
     "load_agent_from_ref",
-    "load_flow_from_file",
     "load_middleware_from_ref",
     "sandbox_context",
 ]
@@ -440,52 +441,66 @@ def _resolve_includes(data: Any, root_dir: Path, loader: ManifestIO, seen: froze
     return data
 
 
-def load_flow_from_file(
-    path: str, root_dir: Path | None = None, allow_dynamic_execution: bool = False, strict_security: bool = True
-) -> LinearFlow | GraphFlow:
+class LocalFileLoader(ManifestLoader):
     """
-    Load a flow manifest from a YAML or JSON file.
+    Local file loader that implements the ManifestLoader protocol.
     """
-    file_path = Path(path).resolve()
-    jail_root = root_dir or file_path.parent
 
-    # Initialize secure loader confined to the file's directory
-    loader = ManifestIO(root_dir=jail_root, strict_security=strict_security)
+    def __init__(
+        self,
+        root_dir: Path | None = None,
+        allow_dynamic_execution: bool = False,
+        strict_security: bool = True,
+    ) -> None:
+        self.root_dir = root_dir
+        self.allow_dynamic_execution = allow_dynamic_execution
+        self.strict_security = strict_security
 
-    try:
-        rel_path = file_path.relative_to(jail_root)
-        load_path = str(rel_path)
-    except ValueError:
-        load_path = file_path.name
+    @override
+    def load_flow(self, file_path: str) -> LinearFlow | GraphFlow:
+        """
+        Load a flow manifest from a YAML or JSON file.
+        """
+        resolved_file_path = Path(file_path).resolve()
+        jail_root = self.root_dir or resolved_file_path.parent
 
-    content_str = loader.read_text(load_path)
+        # Initialize secure loader confined to the file's directory
+        loader = ManifestIO(root_dir=jail_root, strict_security=self.strict_security)
 
-    try:
-        data = yaml.load(content_str, Loader=UniqueKeyLoader)  # noqa: S506
-    except yaml.YAMLError as e:
-        raise ValueError(f"Failed to parse manifest file: {e}") from e
+        try:
+            rel_path = resolved_file_path.relative_to(jail_root)
+            load_path = str(rel_path)
+        except ValueError:
+            load_path = resolved_file_path.name
 
-    # Resolve pointers before schema validation
-    data = _resolve_includes(data, jail_root, loader)
+        content_str = loader.read_text(load_path)
 
-    if not isinstance(data, dict):
-        raise ValueError("Manifest content must be a dictionary.")
+        try:
+            data = yaml.load(content_str, Loader=UniqueKeyLoader)  # noqa: S506
+        except yaml.YAMLError as e:
+            raise ValueError(f"Failed to parse manifest file: {e}") from e
 
-    if _scan_for_dynamic_references(data) and not allow_dynamic_execution:
-        raise SecurityJailViolationError(
-            "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
-        )
+        # Resolve pointers before schema validation
+        data = _resolve_includes(data, jail_root, loader)
 
-    kind = data.get("kind")
+        if not isinstance(data, dict):
+            raise ValueError("Manifest content must be a dictionary.")
 
-    # Ensure all string forward references are resolved before validation
-    rebuild_manifest()
+        if _scan_for_dynamic_references(data) and not self.allow_dynamic_execution:
+            raise SecurityJailViolationError(
+                "Dynamic code execution references detected in manifest. Set 'allow_dynamic_execution=True' to proceed."
+            )
 
-    if kind == "LinearFlow":
-        return LinearFlow.model_validate(data)
-    if kind == "GraphFlow":
-        return GraphFlow.model_validate(data)
-    raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
+        kind = data.get("kind")
+
+        # Ensure all string forward references are resolved before validation
+        rebuild_manifest()
+
+        if kind == "LinearFlow":
+            return LinearFlow.model_validate(data)
+        if kind == "GraphFlow":
+            return GraphFlow.model_validate(data)
+        raise ValueError(f"Unknown or missing manifest kind: {kind}. Expected 'LinearFlow' or 'GraphFlow'.")
 
 
 def _execute_jailed_module(
