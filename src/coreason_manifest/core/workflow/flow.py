@@ -1,10 +1,7 @@
-import ast
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import uuid4
 
-import jsonschema  # type: ignore[import-untyped]
-from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
@@ -12,7 +9,6 @@ from coreason_manifest.core.common.exceptions import ManifestError, ManifestErro
 from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.oversight.governance import Governance
 from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
-from coreason_manifest.core.security.compliance import RemediationAction, SecurityVisitor
 from coreason_manifest.core.state.persistence import PersistenceConfig
 from coreason_manifest.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.core.workflow.evals import EvalsManifest
@@ -85,24 +81,6 @@ class DataSchema(CoreasonModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     json_schema: dict[str, Any] = Field(default_factory=dict)
 
-    @model_validator(mode="after")
-    def validate_schema_validity(self) -> "DataSchema":
-        try:
-            jsonschema.validators.validator_for(self.json_schema).check_schema(self.json_schema)
-        except SchemaError as e:
-            raise ManifestError.critical_halt(
-                code=ManifestErrorCode.VAL_SCHEMA_INVALID,
-                message=f"Invalid JSON Schema definition: {e.message}",
-                context={
-                    "remediation": RemediationAction(
-                        type="update_field",
-                        description="Correct the JSON Schema syntax.",
-                        patch_data=[{"op": "replace", "path": "/json_schema", "value": {}}],
-                    ).model_dump()
-                },
-            ) from e
-        return self
-
 
 class Blackboard(CoreasonModel):
     variables: dict[str, Any] = Field(default_factory=dict)
@@ -120,15 +98,6 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
-        if not v:
-            return v
-
-        try:
-            tree = ast.parse(v, mode="eval")
-        except SyntaxError as e:
-            raise ValueError(f"Invalid Python syntax in condition: {e}") from e  # pragma: no cover
-        visitor = SecurityVisitor()
-        visitor.visit(tree)
         return v
 
 

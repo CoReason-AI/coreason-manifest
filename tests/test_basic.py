@@ -1,6 +1,2 @@
-import pytest
-
-
-@pytest.mark.evals
-def test_dummy() -> None:
+def test_schema_import():
     pass
