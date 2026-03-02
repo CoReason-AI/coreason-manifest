@@ -15,6 +15,7 @@ from importlib.metadata import PackageNotFoundError, version
 import typer
 from rich import print as rprint
 
+from coreason_manifest.adapters.system.dynamic_loader import LocalFileLoader
 from coreason_manifest.templates.sci_vis_flow import get_sota_scivis_topology
 from coreason_manifest.templates.scientific_vis import HierarchicalBlueprint
 from coreason_manifest.toolkit import (
@@ -109,7 +110,8 @@ def export_diagram(
 
 def _handle_validate(file_path: str) -> int:
     try:
-        workspace = WorkspaceManager()
+        loader = LocalFileLoader()
+        workspace = WorkspaceManager(loader=loader)
         flow = workspace.load_flow(file_path)
     except (FileNotFoundError, ValueError) as e:
         rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
@@ -132,7 +134,8 @@ def _handle_validate(file_path: str) -> int:
 
 def _handle_visualize(file_path: str) -> int:
     try:
-        workspace = WorkspaceManager()
+        loader = LocalFileLoader()
+        workspace = WorkspaceManager(loader=loader)
         flow = workspace.load_flow(file_path)
     except (FileNotFoundError, ValueError) as e:
         rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
@@ -159,7 +162,8 @@ def generate_docs(file: str = typer.Argument(..., help="Path to the manifest fil
     Generate an Agent Card (Markdown) from the manifest
     """
     try:
-        workspace = WorkspaceManager()
+        loader = LocalFileLoader()
+        workspace = WorkspaceManager(loader=loader)
         flow = workspace.load_flow(file)
     except (FileNotFoundError, ValueError) as e:
         rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)

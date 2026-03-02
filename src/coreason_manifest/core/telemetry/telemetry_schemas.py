@@ -7,7 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.adapters.security.antibody import AntibodyBase
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.common.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.workflow import LineageIntegrityError
 
 
 class CryptographicSignature(CoreasonModel):
