@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
@@ -42,10 +42,36 @@ class SciVisIntent(BaseModel):
     )
 
 
-class GraphicElement(BaseModel):
+class GraphicElementType(str, Enum):  # noqa: UP042
+    SHAPE = "SHAPE"
+    TEXT = "TEXT"
+    EQUATION = "EQUATION"
+
+
+class ShapeElement(BaseModel):
+    element_type: Literal[GraphicElementType.SHAPE] = GraphicElementType.SHAPE
     id: str
     semantic_role: str
     proposed_shape: Literal["rectangle", "cylinder", "document", "none"]
+
+
+class TextElement(BaseModel):
+    element_type: Literal[GraphicElementType.TEXT] = GraphicElementType.TEXT
+    id: str
+    semantic_role: str
+    raw_text: str
+    markdown_enabled: bool = Field(default=True)
+
+
+class EquationElement(BaseModel):
+    element_type: Literal[GraphicElementType.EQUATION] = GraphicElementType.EQUATION
+    id: str
+    semantic_role: str
+    latex_source: str = Field(..., description="The pure LaTeX string, e.g., '\\\\sum_{i=1}^{n} x_i'")
+    render_mode: Literal["inline", "display"] = Field(..., description="Dictates MathJax rendering context.")
+
+
+GraphicElement = Annotated[ShapeElement | TextElement | EquationElement, Field(discriminator="element_type")]
 
 
 class FunctionalModule(BaseModel):
@@ -105,6 +131,10 @@ class VisualCriticFeedback(BaseModel):
     missing_required_elements: list[str]
     readability_issues: list[str]
     spatial_corrections: list[SpatialCorrection]
+    math_compilation_errors: list[str] = Field(
+        default_factory=list,
+        description="Captures invalid LaTeX syntax errors flagged by the downstream compiler.",
+    )
     global_aesthetic_score: float = Field(ge=0, le=10)
 
 
