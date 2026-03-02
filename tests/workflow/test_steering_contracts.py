@@ -1,6 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
+from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.workflow.nodes.agent import (
     AgentNode,
     CognitiveProfile,
@@ -13,7 +14,6 @@ from coreason_manifest.core.workflow.nodes.human import (
     SteeringConfig,
     TimeoutBehavior,
 )
-from coreason_manifest.core.oversight.resilience import EscalationStrategy
 
 
 def test_inspection_config_valid():
@@ -86,7 +86,6 @@ def test_human_node_with_steering():
         prompt="Please verify.",
         escalation=escalation,
         steering_config=config,
-
 
     )
     assert human.steering_config is not None
