@@ -35,25 +35,6 @@ class CoreasonModel(BaseModel):
     # Storage for unknown fields caught by the funnel
     annotations: dict[str, Any] = Field(default_factory=dict)
 
-    def model_dump_json(self, **kwargs: Any) -> str:
-        """
-        Overrides the default JSON dump to enforce deterministic output.
-        We serialize to a dict first, then use json.dumps with sort_keys=True.
-        """
-        # Extract json.dumps specific arguments
-        indent = kwargs.pop("indent", None)
-
-        # Ensure round_trip is True unless explicitly overridden (which we discourage)
-        if "round_trip" not in kwargs:
-            kwargs["round_trip"] = True
-
-        # Dump to python dict first
-        # We pass remaining kwargs (like include, exclude, by_alias) to model_dump
-        data = self.model_dump(mode="json", **kwargs)
-
-        # Use json.dumps to ensure key sorting
-        return json.dumps(data, sort_keys=True, ensure_ascii=False, indent=indent)
-
     def model_dump_canonical(self) -> bytes:
         """RFC-8785 strict canonical serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
