@@ -108,9 +108,9 @@ class PICOOperatorNode(CoreasonModel):
 
     type: Literal["operator"] = "operator"
     operator: Annotated[PICOOperator, Field(description="The logic operator applied to the children.")]
-    proximity_distance: Annotated[
-        int | None, Field(description="Distance 'n' required if operator is PROXIMITY.")
-    ] = None
+    proximity_distance: Annotated[int | None, Field(description="Distance 'n' required if operator is PROXIMITY.")] = (
+        None
+    )
     children: Annotated[list[PICONode], Field(description="Child nodes connected by this operator.")]
 
 

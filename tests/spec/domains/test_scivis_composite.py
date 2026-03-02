@@ -93,8 +93,10 @@ def test_json_serialization_resolves_enums() -> None:
 
 # Hypothesis Fuzzing Strategy
 # Let's generate a valid subset of letters to use for grid and panels
+from typing import Any
+
 @st.composite
-def blueprint_data(draw: st.DrawFn) -> dict:
+def blueprint_data(draw: st.DrawFn) -> dict[str, Any]:
     # Pick a random non-empty subset of valid panel letters
     all_letters = ["A", "B", "C", "D", "E", "F"]
     used_letters = draw(st.lists(st.sampled_from(all_letters), min_size=1, max_size=6, unique=True))
@@ -129,7 +131,7 @@ def blueprint_data(draw: st.DrawFn) -> dict:
 
 
 @given(blueprint_data())
-def test_fuzz_composite_figure_blueprint(data: dict) -> None:
+def test_fuzz_composite_figure_blueprint(data: dict[str, Any]) -> None:
     # This should always successfully validate since we generated matching grids and panels
     blueprint = CompositeFigureBlueprint.model_validate(data)
     assert blueprint.figure_id == data["figure_id"]
