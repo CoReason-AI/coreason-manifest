@@ -1,6 +1,7 @@
-from typing import Any, Protocol, runtime_checkable
 import hashlib
 import json
+from typing import Any, Protocol, runtime_checkable
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint

@@ -1,12 +1,12 @@
 from typing import Literal
 
+from pydantic import ConfigDict
+
 from coreason_manifest.core.common.suspense import SuspenseConfig
-from coreason_manifest.core.telemetry.stream_base import BaseEnvelope
 from coreason_manifest.core.telemetry.custody import EpistemicEnvelope, EpistemicLedger
+from coreason_manifest.core.telemetry.stream_base import BaseEnvelope
 from coreason_manifest.core.telemetry.telemetry_schemas import HardwareFingerprint
 
-
-from pydantic import ConfigDict
 
 class StreamSuspenseEnvelope(BaseEnvelope):
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="forbid", strict=True, frozen=True)

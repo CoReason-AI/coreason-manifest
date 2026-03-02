@@ -1,8 +1,8 @@
 import asyncio
 from collections.abc import AsyncGenerator
 
-from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket
 from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
+from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket
 
 
 class AsyncSSEMultiplexer:
@@ -14,6 +14,7 @@ class AsyncSSEMultiplexer:
     def __init__(self) -> None:
         """Initialize the multiplexer with a queue."""
         self._queue: asyncio.Queue[StreamPacket] | None = None
+        self._background_tasks: set[asyncio.Task] = set()
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
         if self._queue is None:
@@ -27,7 +28,7 @@ class AsyncSSEMultiplexer:
         queue = await self._get_queue()
         await queue.put(packet)
 
-    async def _simulate_external_sink(self, envelope: EpistemicEnvelope) -> None:
+    async def _simulate_external_sink(self, _envelope: EpistemicEnvelope) -> None:
         """
         Mock utility to simulate external Data Lake broadcast.
         """
@@ -38,7 +39,9 @@ class AsyncSSEMultiplexer:
         Simulate streaming cryptographic wrappers to an external Data Lake
         without blocking the main GPU execution thread.
         """
-        asyncio.create_task(self._simulate_external_sink(envelope))
+        task = asyncio.create_task(self._simulate_external_sink(envelope))
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
         """

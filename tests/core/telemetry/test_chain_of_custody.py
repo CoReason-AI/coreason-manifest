@@ -1,9 +1,9 @@
 import pytest
 
-from coreason_manifest.core.telemetry.custody import MerkleHasher, EpistemicEnvelope
-from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
+from coreason_manifest.core.common.suspense import SkeletonType, SuspenseConfig
+from coreason_manifest.core.telemetry.custody import EpistemicEnvelope, MerkleHasher
 from coreason_manifest.core.telemetry.suspense_envelope import StreamSuspenseEnvelope
-from coreason_manifest.core.common.suspense import SuspenseConfig, SkeletonType
+from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
 
 
 @pytest.fixture
@@ -26,7 +26,9 @@ def base_agent_signature() -> AgentSignature:
     )
 
 
-def test_chain_of_custody_tamper_proof(base_hardware_fingerprint: HardwareFingerprint, base_agent_signature: AgentSignature):
+def test_chain_of_custody_tamper_proof(
+    base_hardware_fingerprint: HardwareFingerprint, base_agent_signature: AgentSignature
+):
     """
     Chains three EpistemicEnvelopes together and proves that altering the payload
     of Envelope 1 invalidates the Merkle hash of Envelope 3.
@@ -78,7 +80,9 @@ def test_chain_of_custody_tamper_proof(base_hardware_fingerprint: HardwareFinger
     assert tampered_hash_3 != env_3.merkle_hash
 
 
-def test_suspense_envelope_captures_hardware(base_hardware_fingerprint: HardwareFingerprint, base_agent_signature: AgentSignature):
+def test_suspense_envelope_captures_hardware(
+    base_hardware_fingerprint: HardwareFingerprint, base_agent_signature: AgentSignature
+):
     """
     Proves the SuspenseEnvelope correctly captures the HardwareFingerprint and related custody data.
     """
