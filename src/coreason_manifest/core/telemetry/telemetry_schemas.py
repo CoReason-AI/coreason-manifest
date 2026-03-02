@@ -10,6 +10,30 @@ from coreason_manifest.core.common.exceptions import ManifestError, ManifestErro
 from coreason_manifest.core.workflow import LineageIntegrityError
 
 
+class HardwareFingerprint(CoreasonModel):
+    """
+    Tracks compute environment and precision details to establish Epistemic trace.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    architecture: str = Field(..., description="The hardware architecture, e.g., Ampere, Ada.")
+    compute_precision: str = Field(..., description="Precision level used, e.g., fp8, int4_awq.")
+    vram_allocated: float = Field(..., description="Amount of VRAM allocated.")
+
+
+class AgentSignature(CoreasonModel):
+    """
+    Tracks agent model and parameters to verify origin of generation.
+    """
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    model_weights_hash: str = Field(..., description="Hash of the model weights.")
+    prompt_commit_hash: str = Field(..., description="Hash of the exact prompt commit used.")
+    temperature: float = Field(..., description="Sampling temperature.")
+    seed: int = Field(..., description="Random seed used for generation.")
+    inference_engine: str = Field(..., description="Engine used for inference, e.g., vLLM, TensorRT.")
+
+
 class CryptographicSignature(CoreasonModel):
     """
     Standard definition for a cryptographic signature proving origin and integrity.
