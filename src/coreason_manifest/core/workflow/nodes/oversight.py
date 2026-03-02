@@ -25,6 +25,7 @@ class InspectorNodeBase(Node):
 
     @property
     def to_node_variable(self) -> VariableID:
+        """Map legacy parameter definitions to canonical state variable representations."""
         return self.target_variable
 
 
@@ -53,6 +54,7 @@ class InspectorNode(InspectorNodeBase):
 
     @model_validator(mode="after")
     def validate_symbolic_requirements(self) -> "InspectorNode":
+        """Assert that symbolic validators specify rigorous criteria for autonomous validation."""
         if self.mode == "symbolic_execution":
             if self.target_solver is None:
                 raise ValueError("target_solver must be provided when mode is 'symbolic_execution'")

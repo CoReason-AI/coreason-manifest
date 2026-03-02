@@ -50,10 +50,7 @@ class AgentRequest(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def enforce_lineage_rooting(cls, data: Any) -> Any:
-        """
-        Auto-Rooting: If no root is provided and no parent exists,
-        promote current request_id to root_request_id.
-        """
+        """Assert that any parent_request_id implies the existence of a root_request_id."""
         if isinstance(data, dict):
             # COPY data to avoid side effects on the input dict
             data = data.copy()
@@ -83,9 +80,7 @@ class AgentRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "AgentRequest":
-        """
-        Enforces strict lineage integrity.
-        """
+        """Enforce strict W3C trace lineage constraints on request tracking propagation."""
         errors = []
 
         # Rule 1: Orphaned trace check (Parent exists, but Root missing)

@@ -131,6 +131,7 @@ class SwarmNode(Node):
 
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":
+        """Enforce that MapReduce swarm aggregators provide a mathematically valid merge strategy."""
         if self.reducer_function == "tournament" and self.tournament_config is None:
             raise ValueError("SwarmNode with reducer_function='tournament' requires a 'tournament_config'.")
 

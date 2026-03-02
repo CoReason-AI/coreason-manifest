@@ -26,6 +26,11 @@ class SuspenseConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_reserved_height(self) -> "SuspenseConfig":
+        """Enforce layout invariants by ensuring that suspense fallbacks declare strictly positive reserved dimensions.
+
+        Raises:
+            ValueError: If the reserved height or width is less than or equal to zero.
+        """
         if self.reserved_height is not None:
             # Check if it's a valid CSS dimension
             pattern = re.compile(r"^\d+(?:\.\d+)?(?:px|rem|em|vh|vw|%)$")

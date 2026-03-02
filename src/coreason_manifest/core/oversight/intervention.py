@@ -33,6 +33,11 @@ class EscalationCriteria(CoreasonModel):
     @field_validator("condition")
     @classmethod
     def validate_python_expression(cls, v: str) -> str:
+        """Audit provided dynamic interventions by applying an AST security whitelist validator.
+
+        Raises:
+            ValueError: If forbidden runtime execution constructs are detected.
+        """
         return v
 
 

@@ -23,6 +23,11 @@ class LocalVariable(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_default_type(self) -> "LocalVariable":
+        """Ensure that default values conform identically to the declared Pydantic schema type.
+
+        Raises:
+            ValueError: If the default value does not match the specified LocalVariableType.
+        """
         if self.default is not None:
             if self.type == LocalVariableType.STRING and not isinstance(self.default, str):
                 raise ValueError("Default value must be a string for STRING type.")

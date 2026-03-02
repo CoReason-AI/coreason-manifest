@@ -38,6 +38,11 @@ class RuleLength(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_bounds(self) -> "RuleLength":
+        """Enforce that numeric rule bounds are mathematically sound and properly ordered.
+
+        Raises:
+            ValueError: If neither bound is provided, or if min strictly exceeds max.
+        """
         if self.min is None and self.max is None:
             raise ValueError("At least one bound (min or max) must be provided.")
         if self.min is not None and self.max is not None and self.min > self.max:
@@ -53,6 +58,11 @@ class RuleRange(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_bounds(self) -> "RuleRange":
+        """Enforce that numeric rule bounds are mathematically sound and properly ordered.
+
+        Raises:
+            ValueError: If neither bound is provided, or if min strictly exceeds max.
+        """
         if self.min is None and self.max is None:
             raise ValueError("At least one bound (min or max) must be provided.")
         if self.min is not None and self.max is not None and self.min > self.max:
@@ -91,6 +101,11 @@ class UIValidationSchema(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_rules(self) -> "UIValidationSchema":
+        """Enforce the invariant that mutually exclusive UI validation rules cannot be duplicated.
+
+        Raises:
+            ValueError: If duplicate foundational rule types are detected in the rules array.
+        """
         rule_types_seen = set()
         for rule in self.rules:
             if rule.rule_type in (

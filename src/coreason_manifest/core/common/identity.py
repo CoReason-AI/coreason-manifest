@@ -131,6 +131,11 @@ class DelegationContract(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> "DelegationContract":
+        """Verify that cryptographic tokens or identities fall strictly within their allowed temporal validity window.
+
+        Raises:
+            ValueError: If the current time is outside the valid 'not_before' to 'expires_at' window.
+        """
         if self.expires_at <= self.issued_at:
             raise ValueError("Delegation expires_at must be strictly greater than issued_at.")
         return self

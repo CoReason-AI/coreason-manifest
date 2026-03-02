@@ -98,6 +98,7 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
+        """Ensure conditional mixed-initiative branching only accesses allowed immutable local variables."""
         return v
 
 
@@ -108,6 +109,11 @@ class Graph(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
+        """Validate directed acyclic graph properties, enforcing cycle detection (via DFS).
+
+        Raises:
+            ManifestError: If graph topology contains cycles, ID collisions, or dangling edges.
+        """
         valid_ids = set(self.nodes.keys())
 
         if not self.nodes:
@@ -228,6 +234,7 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
+        """Verify that published workflows contain signed provenance data and no placeholder nodes."""
         if self.status != "published":
             return self
         if getattr(self.metadata, "provenance", None) is None:
@@ -244,6 +251,7 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_aot_compilation(self) -> "GraphFlow":
+        """Assert that AOT compilation successfully resolved all semantic references before publication."""
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))
@@ -283,6 +291,11 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":
+        """Ensure sequential workflow steps contain unique node identifiers without collisions.
+
+        Raises:
+            ManifestError: If duplicate node IDs are detected or if the sequence is empty.
+        """
         if not self.steps:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_TOPOLOGY_LINEAR_EMPTY,
@@ -303,6 +316,7 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "LinearFlow":
+        """Verify that published workflows contain signed provenance data and no placeholder nodes."""
         if self.status != "published":
             return self
         if getattr(self.metadata, "provenance", None) is None:
@@ -317,6 +331,7 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_aot_compilation(self) -> "LinearFlow":
+        """Assert that AOT compilation successfully resolved all semantic references before publication."""
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))

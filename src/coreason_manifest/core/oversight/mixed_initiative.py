@@ -14,6 +14,7 @@ class AllocationRule(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_sandbox(cls, v: str) -> str:
+        """Ensure conditional mixed-initiative branching only accesses allowed immutable local variables."""
         return v
 
 

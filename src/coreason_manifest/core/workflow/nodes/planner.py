@@ -30,6 +30,7 @@ class PlannerNode(Node):
     @field_validator("output_schema")
     @classmethod
     def validate_planner_output_schema(cls, v: dict[str, Any]) -> dict[str, Any]:
+        """Ensure semantic planners output structurally valid Pydantic or JSON schemas."""
         if v.get("type") not in ["object", "array"]:
             raise ValueError("PlannerNode output_schema must define an object or array representing the PlanTree.")
         return v

@@ -34,6 +34,11 @@ class UIEventMap(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_zero_trust_mapping(self) -> "UIEventMap":
+        """Enforce that UI bindings map exactly to declared and schema-validated fields to prevent injection.
+
+        Raises:
+            ValueError: If a presentation widget maps to an undeclared schema property.
+        """
         if self.payload_mapping:
             if not self.mutates_variables:
                 raise ValueError("payload_mapping requires mutates_variables to be defined.")
@@ -92,6 +97,7 @@ class AdaptiveUIContract(CoreasonModel):
     @model_validator(mode="before")
     @classmethod
     def migrate_legacy_widget(cls, data: Any) -> Any:
+        """Convert legacy presentation widget definitions into their strict v2 canonical equivalents."""
         if isinstance(data, dict):
             layout = data.get("layout")
             widget_id = data.get("widget_id")

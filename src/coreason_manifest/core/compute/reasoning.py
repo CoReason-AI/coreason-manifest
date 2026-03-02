@@ -168,12 +168,13 @@ class BaseReasoning(BaseModel):
 
     @model_validator(mode="after")
     def _validate_adversarial(self) -> "BaseReasoning":
+        """Verify that zero-trust constraints against jailbreaks and prompt injection are enforced."""
         if self.review_strategy == ReviewStrategy.ADVERSARIAL and self.adversarial_config is None:
             raise ValueError("adversarial_config is required when review_strategy is ADVERSARIAL")
         return self
 
     def required_capabilities(self) -> list[str]:
-        """Returns a list of high-risk capabilities required by this engine."""
+        """Calculate the composite compute requirements and memory bounds for allocation."""
         return []
 
 
@@ -361,6 +362,11 @@ class EnsembleReasoning(BaseReasoning):
 
     @model_validator(mode="after")
     def validate_verification_model(self) -> "EnsembleReasoning":
+        """Enforce that verification nodes strictly define a designated verifier model.
+
+        Raises:
+            ValueError: If a validation step lacks the specific verifier model ID.
+        """
         if self.verification_mode in ("always", "ambiguous_only") and self.similarity_model is None:
             raise ValueError(
                 f"A 'similarity_model' is strictly required when verification_mode is '{self.verification_mode}'."
@@ -399,6 +405,7 @@ class RedTeamingReasoning(BaseReasoning):
 
     @property
     def to_node_model(self) -> Any:
+        """Translate the reasoning profile strictly to its schema-enforced graph execution structure."""
         return None
 
 
@@ -442,6 +449,7 @@ class ComputerUseReasoning(BaseReasoning):
     ] = 1000
 
     def required_capabilities(self) -> list[str]:
+        """Calculate the composite compute requirements and memory bounds for allocation."""
         return [NodeCapability.COMPUTER_USE.value]
 
 
@@ -457,6 +465,7 @@ class CodeExecutionReasoning(BaseReasoning):
     timeout_seconds: Annotated[float, Field(description="Max execution time.")] = 30.0
 
     def required_capabilities(self) -> list[str]:
+        """Calculate the composite compute requirements and memory bounds for allocation."""
         return [NodeCapability.CODE_EXECUTION.value]
 
 
@@ -511,6 +520,7 @@ class WasmExecutionReasoning(BaseReasoning):
     ]
 
     def required_capabilities(self) -> list[str]:
+        """Calculate the composite compute requirements and memory bounds for allocation."""
         return [NodeCapability.WASM_EXECUTION.value]
 
 

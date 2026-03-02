@@ -36,11 +36,20 @@ class CoreasonModel(BaseModel):
     annotations: dict[str, Any] = Field(default_factory=dict)
 
     def model_dump_canonical(self) -> bytes:
-        """RFC-8785 strict canonical serialization for cryptographic hashing."""
+        """Produce an RFC-8785 strict canonical serialization of the schema for cryptographic hashing.
+
+        Returns:
+            bytes: A deterministically serialized JSON representation of the model.
+        """
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
 
         # Architectural Note: Recursively sort lists to prevent non-deterministic set-to-list casting
         def _sort_collections(obj: Any) -> Any:
+            """Enforce deterministic ordering on lists and dictionaries for canonical serialization.
+
+            Raises:
+                TypeError: If an unsortable collection structure is encountered.
+            """
             if isinstance(obj, dict):
                 return {k: _sort_collections(v) for k, v in obj.items()}
             if isinstance(obj, list):

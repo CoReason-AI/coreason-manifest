@@ -44,6 +44,7 @@ class SteeringConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_mutation_permissions(self) -> "SteeringConfig":
+        """Verify that the interactive component strictly adheres to configured mutability constraints."""
         if not self.allow_variable_mutation and self.allowed_targets is not None:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_HUMAN_STEERING,
@@ -108,6 +109,7 @@ class HumanNode(Node):
 
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
+        """Ensure human-in-the-loop nodes declare valid synchronous or asynchronous interruption parameters."""
         if self.collaboration_mode == CollaborationMode.SHADOW and (
             self.input_schema is not None or self.options is not None
         ):

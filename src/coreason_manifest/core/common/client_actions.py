@@ -82,6 +82,11 @@ class ClientActionMap(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_trigger(self) -> "ClientActionMap":
+        """Enforce that client action triggers conform strictly to predefined execution contexts.
+
+        Raises:
+            ValueError: If an unrecognized or unsupported trigger type is specified.
+        """
         if self.trigger.lower() in ("on_mount", "on_render"):
             raise ValueError(
                 f"Invalid trigger '{self.trigger}'. Client actions must be explicitly triggered by user interaction."

@@ -102,6 +102,7 @@ class RiskLevel(StrEnum):
 
     @property
     def weight(self) -> int:
+        """Compute edge latency or cost weight deterministically based on static routing criteria."""
         if self == RiskLevel.SAFE:
             return 0
         if self == RiskLevel.STANDARD:
@@ -122,7 +123,7 @@ ProfileID = Annotated[
 
 
 def _coerce_comma_strings(v: Any) -> Any:
-    """Coerces 'a, b' into ['a', 'b'] before strict validation."""
+    """Coerce comma-separated string inputs into strongly typed list structures."""
     if isinstance(v, str):
         return [item.strip() for item in v.split(",") if item.strip()]
     return v

@@ -11,25 +11,22 @@ class AsyncSSEMultiplexer:
     """
 
     def __init__(self) -> None:
+        """Initialize the multiplexer ring buffer with capacity constraints."""
         self._queue: asyncio.Queue[StreamPacket] | None = None
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
+        """Retrieve or initialize the designated async queue for a specific stream subscriber."""
         if self._queue is None:
             self._queue = asyncio.Queue(maxsize=250)
         return self._queue
 
     async def push(self, packet: StreamPacket) -> None:
-        """
-        Push a stream packet into the buffer.
-        """
+        """Broadcast telemetry envelopes synchronously across all active consumer queues."""
         queue = await self._get_queue()
         await queue.put(packet)
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
-        """
-        Consume the queue and yield strings formatted as SSE.
-        Terminates upon encountering a StreamCloseEnvelope.
-        """
+        """Generator that continuously yields Server-Sent Events from the multiplexer buffer."""
         queue = await self._get_queue()
         while True:
             packet = await queue.get()

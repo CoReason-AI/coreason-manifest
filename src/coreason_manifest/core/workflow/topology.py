@@ -3,7 +3,7 @@ from coreason_manifest.core.workflow.nodes import AnyNode
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
-    """Tarjan's algorithm to find strongly connected components."""
+    """Compute strongly connected components (SCCs) using Tarjan's algorithm to identify cyclic subgraphs."""
     visited: set[str] = set()
     stack: list[str] = []
     on_stack: set[str] = set()
@@ -13,6 +13,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
     id_counter = 0
 
     def dfs(at: str) -> None:
+        """Recursive Depth-First Search (DFS) subroutine for cycle detection and path traversal."""
         nonlocal id_counter
         stack.append(at)
         on_stack.add(at)
@@ -45,7 +46,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
 
 
 def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> set[str]:
-    """BFS to find all nodes reachable from the entry points."""
+    """Perform a Breadth-First Search (BFS) to compute the full reachability set from a given start node."""
     reachable = set(entry_nodes)
     queue = list(entry_nodes)
 
@@ -60,10 +61,7 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
 
 
 def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], list[Edge]]:
-    """
-    Returns a unified view of the flow topology (nodes and edges).
-    For LinearFlow, it generates implicit edges between sequential steps.
-    """
+    """Merge linearly declared steps and explicitly routed edges into a single definitive DAG."""
     if isinstance(flow, GraphFlow):
         return list(flow.graph.nodes.values()), flow.graph.edges
     if isinstance(flow, LinearFlow):

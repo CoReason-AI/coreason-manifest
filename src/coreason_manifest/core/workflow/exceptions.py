@@ -13,6 +13,7 @@ class LineageIntegrityError(ManifestError):
     """
 
     def __init__(self, message: str) -> None:
+        """Initialize an execution halting error specifying the failed node and execution phase."""
         super().__init__(
             SemanticFault(
                 error_code=ManifestErrorCode.SEC_LINEAGE_001,

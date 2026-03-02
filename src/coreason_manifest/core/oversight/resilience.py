@@ -45,6 +45,11 @@ class ResilienceStrategy(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name_slug(cls, v: str | None) -> str | None:
+        """Assert that names strictly conform to alphanumeric slug constraints for path safety.
+
+        Raises:
+            ValueError: If the strategy name is not lowercase, alphanumeric, with underscores or dashes only.
+        """
         if v is not None and not re.match(r"^[a-z0-9_\-]+$", v):
             raise ValueError(
                 "Strategy name must be lowercase, alphanumeric, with underscores or dashes only (metric-safe)."
@@ -107,6 +112,11 @@ class ReflexionStrategy(ResilienceStrategy):
     @field_validator("critic_schema")
     @classmethod
     def validate_json_schema(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Enforce that embedded schemas parse as minimally valid JSON Schema.
+
+        Raises:
+            ValueError: If the schema object lacks foundational properties like 'type', 'properties', or '$ref'.
+        """
         # Minimal check for JSON Schema validity
         if v is not None:
             if "type" not in v and "properties" not in v and "$ref" not in v:
@@ -118,6 +128,7 @@ class ReflexionStrategy(ResilienceStrategy):
     @model_validator(mode="before")
     @classmethod
     def validate_trace_config(cls, data: Any) -> Any:
+        """Enforce rigorous semantic tracing fields for execution auditing compliance."""
         # If include_trace is explicitly False, force max_trace_turns to None
         if isinstance(data, dict) and data.get("include_trace") is False:
             data["max_trace_turns"] = None
@@ -125,6 +136,11 @@ class ReflexionStrategy(ResilienceStrategy):
 
     @model_validator(mode="after")
     def validate_capabilities(self) -> "ReflexionStrategy":
+        """Ensure resource allocations enforce the required capabilities for verification.
+
+        Raises:
+            ValueError: If 'json_mode' capability is missing when a critic schema is defined.
+        """
         if self.critic_schema is not None and isinstance(self.critic_model, ModelCriteria):
             caps = self.critic_model.capabilities or []
             if "json_mode" not in caps:
@@ -165,6 +181,7 @@ class EscalationStrategy(ResilienceStrategy):
     @field_validator("template")
     @classmethod
     def validate_template_syntax(cls, v: str | None) -> str | None:
+        """Check syntactic correctness of prompt templates strictly before instantiation."""
         if v and "{{" not in v:
             # Warning or Note: This looks like a static string, not a Jinja2 template.
             # We won't block it (valid use case), but it's good to note mentally.
@@ -227,6 +244,7 @@ class ErrorHandler(BaseModel):
     @field_validator("match_error_code", mode="before")
     @classmethod
     def normalize_error_codes(cls, v: Any) -> list[str] | None:
+        """Sanitize unstructured exceptions to standard canonical error representations."""
         if v is None:
             return None
         if isinstance(v, (int, str)):
@@ -238,12 +256,18 @@ class ErrorHandler(BaseModel):
 
     @model_validator(mode="after")
     def validate_criteria_existence(self) -> "ErrorHandler":
+        """Enforce that conditional transition edges map precisely to defined boolean expressions.
+
+        Raises:
+            ValueError: If no matching criterion (domain, pattern, or code) is specified.
+        """
         if not any([self.match_domain, self.match_pattern, self.match_error_code]):
             raise ValueError("ErrorHandler must specify at least one matching criterion (domain, pattern, or code).")
         return self
 
     @model_validator(mode="after")
     def validate_security_policy(self) -> "ErrorHandler":
+        """Assert compliance with established OPA or generic authorization policies."""
         # Security Policy: Never blindly retry security violations.
         # Allow Reflexion (Correction) or Escalate (Human Review), but forbid Retry.
         if self.match_domain and ErrorDomain.SECURITY in self.match_domain and self.strategy.type == "retry":
@@ -256,6 +280,11 @@ class ErrorHandler(BaseModel):
     @field_validator("match_pattern")
     @classmethod
     def validate_regex(cls, v: str | None) -> str | None:
+        """Ensure regular expressions compile properly to prevent malicious backtracking DoS.
+
+        Raises:
+            ValueError: If the provided regular expression pattern is invalid.
+        """
         if v:
             try:
                 re.compile(v)
@@ -294,6 +323,7 @@ class SupervisionPolicy(BaseModel):
 
     @model_validator(mode="after")
     def validate_limits(self) -> "SupervisionPolicy":
+        """Enforce invariant that retry boundaries and concurrency limits never fall below zero."""
         strategies = [h.strategy for h in self.handlers]
         if self.default_strategy:
             strategies.append(self.default_strategy)

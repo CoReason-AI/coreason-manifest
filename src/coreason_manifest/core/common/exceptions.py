@@ -86,17 +86,19 @@ class ManifestError(Exception):
     """
 
     def __init__(self, fault: SemanticFault) -> None:
+        """Initialize a serialization-specific error that extends the core Manifest error domain."""
         self.fault = fault
         super().__init__(fault.message)
 
     def __str__(self) -> str:
+        """Format the error message to include its explicit code and context."""
         return f"[{self.fault.error_code}] {self.fault.message} (Severity: {self.fault.severity})"
 
     @classmethod
     def critical_halt(
         cls, code: ManifestErrorCode | str, message: str, context: dict[str, Any] | None = None
     ) -> "ManifestError":
-        """Factory for critical errors that halt execution."""
+        """Instantiate a fatal error signifying a critical invariant violation that must halt execution immediately."""
         return cls(
             SemanticFault(
                 error_code=code,
@@ -115,6 +117,7 @@ class SecurityJailViolationError(ManifestError):
     """
 
     def __init__(self, message: str) -> None:
+        """Initialize a serialization-specific error that extends the core Manifest error domain."""
         super().__init__(
             SemanticFault(
                 error_code=ManifestErrorCode.SEC_JAIL_002,

@@ -34,6 +34,11 @@ class JSONPatchOperation(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_rfc6902_semantics(self) -> "JSONPatchOperation":
+        """Enforce strict zero-trust rules on JSON Patch operations to prevent unauthorized state mutations.
+
+        Raises:
+            ValueError: If RFC 6902 constraints (like 'from' requirements or forbidden paths) are violated.
+        """
         # Rule A: Move/Copy require 'from'
         if self.op in (PatchOp.MOVE, PatchOp.COPY) and self.from_ is None:
             raise ValueError(f"RFC 6902 Violation: operation '{self.op}' requires a 'from' path.")
