@@ -1,4 +1,3 @@
-
 from coreason_manifest.core.workflow.evals import (
     AdversaryProfile,
     ChaosConfig,
