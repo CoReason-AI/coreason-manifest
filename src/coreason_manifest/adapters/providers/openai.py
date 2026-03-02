@@ -1,7 +1,7 @@
 from typing import Any
 
 from coreason_manifest.adapters.system.config import AdapterConfig
-from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.security.compliance import RemediationAction
 from coreason_manifest.core.state.tools import ToolPack
 from coreason_manifest.core.workflow.flow import FlowDefinitions

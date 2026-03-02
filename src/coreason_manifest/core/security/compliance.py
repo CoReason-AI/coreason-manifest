@@ -4,7 +4,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 
 
 class ErrorCatalog(StrEnum):
@@ -64,6 +64,8 @@ class RemediationAction(BaseModel):
         "update_field",
         "semantic_repair",
         "prune_topology",
+        "update_profile",
+        "add_symbolic_guard",
     ]
     target_node_id: str | None = None
     format: Literal["json_patch", "merge_patch"] = "json_patch"

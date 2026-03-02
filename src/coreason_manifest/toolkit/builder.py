@@ -8,17 +8,19 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import TYPE_CHECKING, Any, Literal, Self, cast
-
-if TYPE_CHECKING:
-    from coreason_manifest.core.workflow.nodes import Constraint
+from typing import Any, Literal, Self, cast
 
 from coreason_manifest.core.common.presentation import AdaptiveUIContract, NotificationRouting, RenderStrategy
 from coreason_manifest.core.compute.reasoning import (
+    AdversarialConfig,
     FastPath,
+    GapScanConfig,
+    ModelCriteria,
     ReasoningConfig,
+    ReviewStrategy,
     StandardReasoning,
 )
+from coreason_manifest.core.compute.resources import ModelProfile, PricingUnit, RateCard
 from coreason_manifest.core.oversight.governance import (
     CircuitBreaker,
     ComputeLimits,
@@ -27,8 +29,10 @@ from coreason_manifest.core.oversight.governance import (
     Governance,
     OperationalPolicy,
     RequestCriticality,
+    Safety,
     SemanticCacheConfig,
     TrafficPolicy,
+    UnicodeSanitization,
 )
 from coreason_manifest.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.core.oversight.resilience import (
@@ -42,8 +46,8 @@ from coreason_manifest.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.core.primitives.types import RiskLevel
-from coreason_manifest.core.rebuild import rebuild_manifest
 from coreason_manifest.core.state.memory import (
+    ConsolidationStrategy,
     EpisodicMemoryConfig,
     KnowledgeScope,
     MemorySubsystem,
@@ -52,6 +56,7 @@ from coreason_manifest.core.state.memory import (
     WorkingMemoryConfig,
 )
 from coreason_manifest.core.state.tools import ToolPack
+from coreason_manifest.core.system.rebuild import rebuild_manifest
 from coreason_manifest.core.workflow.evals import EvalsManifest
 from coreason_manifest.core.workflow.flow import (
     AnyNode,
@@ -64,9 +69,20 @@ from coreason_manifest.core.workflow.flow import (
     Graph,
     GraphFlow,
     LinearFlow,
+    ProvenanceData,
+    ProvenanceType,
 )
-from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile, HumanNode, InspectorNode, PlannerNode
+from coreason_manifest.core.workflow.nodes import (
+    AgentNode,
+    CognitiveProfile,
+    Constraint,
+    ConstraintOperator,
+    HumanNode,
+    InspectorNode,
+    PlannerNode,
+)
 from coreason_manifest.core.workflow.nodes.base import Constraint, ConstraintOperator
+from coreason_manifest.core.workflow.nodes.human import CollaborationMode
 from coreason_manifest.toolkit.validator import validate_flow
 
 
@@ -489,7 +505,7 @@ class AgentBuilder:
 
         episodic = None
         if salience_threshold is not None:
-            from coreason_manifest.core.state.memory import ConsolidationStrategy
+
 
             episodic = EpisodicMemoryConfig(
                 salience_threshold=salience_threshold,
@@ -533,7 +549,7 @@ class AgentBuilder:
         Returns:
             AgentBuilder: The builder instance for chaining.
         """
-        from coreason_manifest.core.workflow.nodes import Constraint, ConstraintOperator
+
 
         self.constraints.append(
             Constraint(
@@ -556,7 +572,7 @@ class AgentBuilder:
             ValueError: If agent identity (role, persona) is not set.
         """
         # Ensure schema is built
-        from coreason_manifest.core.rebuild import rebuild_manifest
+
 
         rebuild_manifest()
 
@@ -564,7 +580,7 @@ class AgentBuilder:
             raise ValueError("Agent identity (role, persona) must be set.")
 
         if self.reasoning:
-            from coreason_manifest.core.compute.reasoning import AdversarialConfig, GapScanConfig, ReviewStrategy
+
 
             adversarial_config = None
             if self.review_strategy == "adversarial" or self.adversarial_persona is not None:
@@ -582,7 +598,7 @@ class AgentBuilder:
             }
 
             if self._rate_card_config:
-                from coreason_manifest.core.compute.resources import ModelProfile, PricingUnit, RateCard
+
 
                 rc = RateCard(
                     input_cost=self._rate_card_config["input_cost"],
@@ -593,7 +609,7 @@ class AgentBuilder:
 
                 # Retrieve existing primary_profile if models is already ModelCriteria
                 existing_models = self.reasoning.models
-                from coreason_manifest.core.compute.reasoning import ModelCriteria
+
 
                 if isinstance(existing_models, ModelCriteria):
                     models_copy = existing_models.model_copy()
@@ -613,7 +629,7 @@ class AgentBuilder:
 
             self.reasoning = self.reasoning.model_copy(update=updates)
 
-        from coreason_manifest.core.workflow.nodes import AgentNode, CognitiveProfile
+
 
         profile = CognitiveProfile(
             role=self.role,
@@ -669,7 +685,7 @@ class BaseFlowBuilder:
         self.evals: EvalsManifest | None = None
 
     def with_attestation(self, attestation: Any) -> Self:
-        from coreason_manifest.core.workflow.flow import ProvenanceData, ProvenanceType
+
 
         if self.metadata.provenance:
             self.metadata = self.metadata.model_copy(
@@ -684,7 +700,7 @@ class BaseFlowBuilder:
     def with_unicode_sanitization(
         self, strip_tags: bool = True, strip_bidi: bool = True, norm: Literal["NFC", "NFKC", "none"] = "NFC"
     ) -> Self:
-        from coreason_manifest.core.oversight.governance import Governance, Safety, UnicodeSanitization
+
 
         sanitization = UnicodeSanitization(
             strip_invisible_tags=strip_tags, strip_bidi_overrides=strip_bidi, normalization_form=norm
@@ -797,7 +813,7 @@ class BaseFlowBuilder:
         if self.governance:
             self.governance = self.governance.model_copy(update={"mixed_initiative": policy})
         else:
-            from coreason_manifest.core.oversight.governance import Governance
+
 
             self.governance = Governance(mixed_initiative=policy)
         return self
@@ -991,7 +1007,7 @@ class BaseFlowBuilder:
         Returns:
             Self: The builder instance for chaining.
         """
-        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
 
         node = HumanNode(
             id=node_id,
@@ -1009,7 +1025,7 @@ class BaseFlowBuilder:
         return self
 
     def add_human_gate(self, node_id: str, prompt: str, routes: dict[str, str], shadow_timeout: int = 300) -> Self:
-        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
 
         node = HumanNode(
             id=node_id,
@@ -1035,7 +1051,7 @@ class BaseFlowBuilder:
         routes: dict[str, str] | None = None,
         shadow_timeout: int = 300,
     ) -> Self:
-        from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+
 
         # Validate and coerce if dictionary provided
         if isinstance(contract, dict):

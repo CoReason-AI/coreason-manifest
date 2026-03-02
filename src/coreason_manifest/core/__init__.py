@@ -43,7 +43,7 @@ from coreason_manifest.core.oversight.resilience import (
 )
 from coreason_manifest.core.primitives.registry import resolve_node_union
 from coreason_manifest.core.primitives.types import WasmMiddlewareDef
-from coreason_manifest.core.state.persistence import Checkpoint, PersistenceConfig, StateCheckpoint, JSONPatchOperation
+from coreason_manifest.core.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
 from coreason_manifest.core.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
 from coreason_manifest.core.workflow.evals import EvalsManifest, FuzzingTarget, TestCase
 from coreason_manifest.core.workflow.flow import (
@@ -119,6 +119,7 @@ __all__ = [
     "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
+    "JSONPatchOperation",
     "LinearFlow",
     "MCPPrompt",
     "MCPResourceTemplate",
@@ -138,7 +139,6 @@ __all__ = [
     "Safety",
     "StandardReasoning",
     "StateCheckpoint",
-    "JSONPatchOperation",
     "SupervisionPolicy",
     "SwarmNode",
     "SwitchNode",

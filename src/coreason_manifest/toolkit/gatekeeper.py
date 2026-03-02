@@ -13,6 +13,8 @@ from coreason_manifest.core.security.compliance import (
 )
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 from coreason_manifest.core.workflow.topology import (
     get_reachable_nodes,
     get_strongly_connected_components,
@@ -123,8 +125,6 @@ def _enforce_red_button_rule(
             violation_reason.append(f"critical tools {critical_tools}")
 
         if needs_guard and not _is_guarded(node, flow):
-            from coreason_manifest.core.workflow.nodes.human import CollaborationMode
-
             human_node_id = f"guard_{node.id}"
             human_node = HumanNode(
                 id=human_node_id,
@@ -352,7 +352,6 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
             is_guarded = False
             for next_node_id in outgoing_edges[node.id]:
                 target = node_map.get(next_node_id)
-                from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 
                 if isinstance(target, InspectorNode) and target.mode == "symbolic_execution":
                     is_guarded = True
@@ -512,7 +511,6 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
             is_guarded = False
             for next_node_id in outgoing_edges[node.id]:
                 target = node_map.get(next_node_id)
-                from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 
                 if isinstance(target, InspectorNode) and target.mode == "symbolic_execution":
                     if target.target_solver in ["mesh_ontology_validator", "emtree_validator", "meddra_validator"]:
