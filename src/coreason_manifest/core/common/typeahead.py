@@ -31,12 +31,14 @@ class SuggestionMapper(CoreasonModel):
     @model_validator(mode="after")
     def validate_pointers(self) -> "SuggestionMapper":
         pointers = [
-            self.results_path,
             self.title_pointer,
             self.subtitle_pointer,
             self.icon_pointer,
             self.value_pointer,
         ]
+
+        if self.results_path is not None and self.results_path != "" and not self.results_path.startswith("/"):
+            raise ValueError(f"JSON pointer '{self.results_path}' must start with '/' or be an empty string")
 
         for pointer in pointers:
             if pointer is not None and not pointer.startswith("/"):

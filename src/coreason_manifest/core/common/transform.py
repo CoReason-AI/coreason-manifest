@@ -19,6 +19,8 @@ class TransformOperator(StrEnum):
     REGEX_MATCH = "REGEX_MATCH"
     IN_LIST = "IN_LIST"
     NOT_IN_LIST = "NOT_IN_LIST"
+    IS_NULL = "IS_NULL"
+    IS_NOT_NULL = "IS_NOT_NULL"
 
 
 class LogicalOperator(StrEnum):
@@ -46,8 +48,9 @@ class FilterRule(CoreasonModel):
         if self.value_pointer is not None and not self.value_pointer.startswith("$local."):
             raise ValueError("value_pointer MUST start with '$local.'")
 
-        if (self.value is not None and self.value_pointer is not None) or (
-            self.value is None and self.value_pointer is None
+        if self.operator not in (TransformOperator.IS_NULL, TransformOperator.IS_NOT_NULL) and (
+            (self.value is not None and self.value_pointer is not None)
+            or (self.value is None and self.value_pointer is None)
         ):
             raise ValueError("Exactly one of value or value_pointer must be provided")
 

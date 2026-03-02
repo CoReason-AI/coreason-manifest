@@ -42,7 +42,7 @@ def test_suggestion_mapper_invalid_pointer() -> None:
             title_pointer="/name",
             value_pointer="/id",
         )
-    assert "must start with '/'" in str(exc_info.value)
+    assert "must start with '/' or be an empty string" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
         SuggestionMapper(
@@ -134,3 +134,13 @@ def test_typeahead_config_min_chars_too_low() -> None:
             min_chars_to_trigger=0,
         )
     assert "min_chars_to_trigger must be strictly >= 1" in str(exc_info.value)
+
+
+def test_suggestion_mapper_empty_results_path() -> None:
+    """Test SuggestionMapper allows empty string for results_path."""
+    mapper = SuggestionMapper(
+        results_path="",
+        title_pointer="/name",
+        value_pointer="/id",
+    )
+    assert mapper.results_path == ""

@@ -96,3 +96,19 @@ def test_filter_group_recursion_depth_limit() -> None:
 
     with pytest.raises(ValidationError, match="FilterGroup recursion depth cannot exceed 3 levels"):
         FilterGroup(logic=LogicalOperator.AND, conditions=[group_level_2])
+
+
+def test_filter_rule_is_null_operators() -> None:
+    """Test FilterRule allows IS_NULL and IS_NOT_NULL without value/value_pointer"""
+    # Should not raise validation error
+    rule1 = FilterRule(
+        field_pointer="/item/price",
+        operator=TransformOperator.IS_NULL,
+    )
+    assert rule1.operator == TransformOperator.IS_NULL
+
+    rule2 = FilterRule(
+        field_pointer="/item/price",
+        operator=TransformOperator.IS_NOT_NULL,
+    )
+    assert rule2.operator == TransformOperator.IS_NOT_NULL
