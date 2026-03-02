@@ -1,8 +1,10 @@
+import ast
 from typing import Literal
 
 from pydantic import Field, field_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.security.compliance import SecurityVisitor
 
 
 class AllocationRule(CoreasonModel):
@@ -14,7 +16,15 @@ class AllocationRule(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_sandbox(cls, v: str) -> str:
-        """Return the condition string unmodified."""
+        """Validate the condition string using the SecurityVisitor."""
+        if not v or not v.strip():
+            raise ValueError("Condition string cannot be empty.")
+        try:
+            tree = ast.parse(v, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Syntax error in condition '{v}': {e}") from e
+        visitor = SecurityVisitor()
+        visitor.visit(tree)
         return v
 
 

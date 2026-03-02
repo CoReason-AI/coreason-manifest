@@ -1,3 +1,4 @@
+import ast
 from enum import StrEnum
 from typing import Any, Literal
 
@@ -83,3 +84,51 @@ class ComplianceReport(BaseModel):
     node_id: str | None = None
     remediation: RemediationAction | None = None
     details: dict[str, Any] = Field(default_factory=dict)
+
+
+class SecurityVisitor(ast.NodeVisitor):
+    """Strict AST whitelister to prevent arbitrary code execution in conditions."""
+
+    ALLOWED_NODES = (
+        ast.Expression,
+        ast.Name,
+        ast.Load,
+        ast.Constant,
+        ast.Compare,
+        ast.BoolOp,
+        ast.BinOp,
+        ast.UnaryOp,
+        ast.Eq,
+        ast.NotEq,
+        ast.Lt,
+        ast.LtE,
+        ast.Gt,
+        ast.GtE,
+        ast.Is,
+        ast.IsNot,
+        ast.In,
+        ast.NotIn,
+        ast.And,
+        ast.Or,
+        ast.Add,
+        ast.Sub,
+        ast.Mult,
+        ast.Div,
+        ast.FloorDiv,
+        ast.Mod,
+        ast.Pow,
+        ast.LShift,
+        ast.RShift,
+        ast.BitOr,
+        ast.BitXor,
+        ast.BitAnd,
+        ast.UAdd,
+        ast.USub,
+        ast.Not,
+        ast.Invert,
+    )
+
+    def generic_visit(self, node: ast.AST) -> None:
+        if not isinstance(node, self.ALLOWED_NODES):
+            raise ValueError(f"Unsafe AST node detected: {type(node).__name__}")
+        super().generic_visit(node)

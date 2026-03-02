@@ -1,3 +1,6 @@
+import ast
+import datetime
+import re
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import uuid4
@@ -9,6 +12,7 @@ from coreason_manifest.core.common.exceptions import ManifestError, ManifestErro
 from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.oversight.governance import Governance
 from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
+from coreason_manifest.core.security.compliance import SecurityVisitor
 from coreason_manifest.core.state.persistence import PersistenceConfig
 from coreason_manifest.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.core.workflow.evals import EvalsManifest
@@ -35,6 +39,24 @@ class CryptographicAttestation(CoreasonModel):
     public_key_ref: str = Field(..., description="URI or ID of the public key used to verify the signature.")
     algorithm: SignatureAlgorithm = Field(default=SignatureAlgorithm.ECDSA, description="The signing algorithm used.")
     signed_at: str = Field(..., description="ISO-8601 timestamp of when the manifest was cryptographically sealed.")
+
+    @field_validator("signature")
+    @classmethod
+    def validate_base64_signature(cls, v: str) -> str:
+        """Enforce that the signature is a valid Base64 string."""
+        if not re.match(r"^[A-Za-z0-9+/]+={0,2}$", v):
+            raise ValueError("Signature must be a valid Base64 string.")
+        return v
+
+    @field_validator("signed_at")
+    @classmethod
+    def validate_iso8601(cls, v: str) -> str:
+        """Enforce that signed_at is a valid ISO-8601 timestamp."""
+        try:
+            datetime.datetime.fromisoformat(v)
+        except ValueError as e:
+            raise ValueError(f"Invalid ISO-8601 timestamp: {v}") from e
+        return v
 
 
 class ProvenanceData(CoreasonModel):
@@ -99,6 +121,14 @@ class Edge(CoreasonModel):
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
         """Return the condition string unmodified."""
+        if v is None or not v.strip():
+            return v
+        try:
+            tree = ast.parse(v, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Syntax error in condition '{v}': {e}") from e
+        visitor = SecurityVisitor()
+        visitor.visit(tree)
         return v
 
 
