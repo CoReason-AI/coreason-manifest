@@ -55,9 +55,7 @@ def test_template_string_missing_variable():
                 # Missing 'brands'
             },
         )
-    assert "Placeholder 'brands' extracted from template is missing from variables dictionary." in str(
-        exc_info.value
-    )
+    assert "Placeholder 'brands' extracted from template is missing from variables dictionary." in str(exc_info.value)
 
 
 def test_state_dependency_config_valid():

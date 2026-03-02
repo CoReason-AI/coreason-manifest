@@ -24,9 +24,7 @@ class ArrayEncodingStyle(StrEnum):
 
 
 class TemplateVariable(CoreasonModel):
-    pointer: str = Field(
-        ..., description="The ephemeral state pointer, e.g., '$local.selected_brands'."
-    )
+    pointer: str = Field(..., description="The ephemeral state pointer, e.g., '$local.selected_brands'.")
     array_encoding: ArrayEncodingStyle = Field(default=ArrayEncodingStyle.COMMA)
     fallback_value: Any | None = Field(
         default=None, description="Value to use if the local variable is currently null."
@@ -40,9 +38,7 @@ class TemplateVariable(CoreasonModel):
 
 
 class TemplateString(CoreasonModel):
-    template: str = Field(
-        ..., description="The parameterized URI, e.g., '/api/search?q={query}&b={brands}'."
-    )
+    template: str = Field(..., description="The parameterized URI, e.g., '/api/search?q={query}&b={brands}'.")
     variables: dict[str, TemplateVariable] = Field(
         ..., description="Maps template placeholders to variable definitions."
     )
@@ -52,9 +48,7 @@ class TemplateString(CoreasonModel):
         placeholders = set(re.findall(r"\{([a-zA-Z0-9_]+)\}", self.template))
         for p in placeholders:
             if p not in self.variables:
-                raise ValueError(
-                    f"Placeholder '{p}' extracted from template is missing from variables dictionary."
-                )
+                raise ValueError(f"Placeholder '{p}' extracted from template is missing from variables dictionary.")
         return self
 
 
@@ -63,9 +57,7 @@ class StateDependencyConfig(CoreasonModel):
         ...,
         description="List of $local pointers that should trigger a network re-fetch when mutated.",
     )
-    debounce_ms: int = Field(
-        default=300, description="Network throttling delay after the last state mutation."
-    )
+    debounce_ms: int = Field(default=300, description="Network throttling delay after the last state mutation.")
     auto_suspend: bool = Field(
         default=True,
         description="If true, the widget automatically drops into its Suspense skeleton while the new fetch resolves.",
