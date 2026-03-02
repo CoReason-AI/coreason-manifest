@@ -54,7 +54,10 @@ class DeduplicationConfig(BaseModel):
     retain_lineage: Annotated[
         bool,
         Field(
-            description="If True, merges the deleted duplicate's IDs (e.g., preprint DOI) into the surviving record's metadata."
+            description=(
+                "If True, merges the deleted duplicate's IDs "
+                "(e.g., preprint DOI) into the surviving record's metadata."
+            )
         ),
     ] = True
 
