@@ -32,6 +32,10 @@ class VisualInspectorNode(InspectorNodeBase):
         "visual_inspector", description="The type of the node.", examples=["visual_inspector"]
     )
 
+    is_security_guard: Literal[True] = Field(
+        True, description="Indicates this node acts as a valid cryptographic barrier for high-risk execution."
+    )
+
     rubrics: VisBenchRubricConfig = Field(
         default_factory=VisBenchRubricConfig, description="The visual rubrics to apply."
     )

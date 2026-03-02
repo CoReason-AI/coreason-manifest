@@ -6,6 +6,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.common.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
 
 
 class CryptographicSignature(CoreasonModel):
@@ -113,11 +114,20 @@ class NodeExecution(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "NodeExecution":
-        """
-        Enforces strict lineage integrity.
-        """
+        errors = []
         if self.parent_request_id and not self.root_request_id:
-            raise ValueError("Orphaned trace detected.")  # pragma: no cover
+            errors.append(LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing)."))
+        if self.root_request_id == self.request_id and self.parent_request_id is not None:
+            errors.append(LineageIntegrityError("Broken Lineage: Root request cannot imply a parent."))
+        if self.parent_request_id and self.parent_request_id == self.request_id:
+            errors.append(LineageIntegrityError("Broken Lineage: Self-referential parent_request_id detected."))
+
+        if errors:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.SEC_LINEAGE_001,
+                message="Multiple Trace Integrity Violations detected.",
+                context={"violations": [str(e) for e in errors]},
+            )
         return self
 
 
@@ -147,8 +157,8 @@ class MemoryMutationEvent(CoreasonModel):
     request_id: str | None = Field(
         default_factory=lambda: str(uuid4()), description="Unique ID for this mutation event."
     )
-    parent_request_id: str = Field(..., description="The execution ID that triggered this mutation.")
-    root_request_id: str = Field(..., description="The trace ID.")
+    parent_request_id: str | None = Field(default=None, description="The execution ID that triggered this mutation.")
+    root_request_id: str | None = Field(default=None, description="The trace ID.")
     tier: Literal["working", "episodic", "semantic", "procedural"] = Field(
         ...,
         description="The memory tier affected.",
@@ -172,6 +182,24 @@ class MemoryMutationEvent(CoreasonModel):
     parent_hash: str | None = Field(default=None, description="Hash of the preceding execution state.")
 
     _hash_exclude_: ClassVar[set[str]] = {"mutation_hash"}
+
+    @model_validator(mode="after")
+    def validate_trace_integrity(self) -> "MemoryMutationEvent":
+        errors = []
+        if self.parent_request_id and not self.root_request_id:
+            errors.append(LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing)."))
+        if self.root_request_id == self.request_id and self.parent_request_id is not None:
+            errors.append(LineageIntegrityError("Broken Lineage: Root request cannot imply a parent."))
+        if self.parent_request_id and self.parent_request_id == self.request_id:
+            errors.append(LineageIntegrityError("Broken Lineage: Self-referential parent_request_id detected."))
+
+        if errors:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.SEC_LINEAGE_001,
+                message="Multiple Trace Integrity Violations detected.",
+                context={"violations": [str(e) for e in errors]},
+            )
+        return self
 
 
 class ExecutionSnapshot(BaseModel):
@@ -227,6 +255,10 @@ class AuthLifecycleEvent(CoreasonModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
+    request_id: str | None = Field(default_factory=lambda: str(uuid4()))
+    parent_request_id: str | None = None
+    root_request_id: str | None = None
+
     event_type: Literal[
         "login_success", "token_refresh", "logout", "device_flow_initiated", "device_flow_completed"
     ] = Field(..., description="The lifecycle state transition.")
@@ -242,3 +274,21 @@ class AuthLifecycleEvent(CoreasonModel):
     # W3C Lineage
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     trace_id: str | None = Field(None, description="W3C traceparent ID linking to the agent execution.")
+
+    @model_validator(mode="after")
+    def validate_trace_integrity(self) -> "AuthLifecycleEvent":
+        errors = []
+        if self.parent_request_id and not self.root_request_id:
+            errors.append(LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing)."))
+        if self.root_request_id == self.request_id and self.parent_request_id is not None:
+            errors.append(LineageIntegrityError("Broken Lineage: Root request cannot imply a parent."))
+        if self.parent_request_id and self.parent_request_id == self.request_id:
+            errors.append(LineageIntegrityError("Broken Lineage: Self-referential parent_request_id detected."))
+
+        if errors:
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.SEC_LINEAGE_001,
+                message="Multiple Trace Integrity Violations detected.",
+                context={"violations": [str(e) for e in errors]},
+            )
+        return self
