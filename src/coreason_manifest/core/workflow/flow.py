@@ -1,11 +1,11 @@
 import ast
 import datetime
-import re
+from collections import deque
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 from uuid import uuid4
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, StringConstraints, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
@@ -35,18 +35,12 @@ class SignatureAlgorithm(StrEnum):
 
 
 class CryptographicAttestation(CoreasonModel):
-    signature: str = Field(..., description="Base64 encoded cryptographic signature of the manifest's canonical hash.")
+    signature: Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9+/]+={0,2}$")] = Field(
+        ..., description="Base64 encoded cryptographic signature of the manifest's canonical hash."
+    )
     public_key_ref: str = Field(..., description="URI or ID of the public key used to verify the signature.")
     algorithm: SignatureAlgorithm = Field(default=SignatureAlgorithm.ECDSA, description="The signing algorithm used.")
     signed_at: str = Field(..., description="ISO-8601 timestamp of when the manifest was cryptographically sealed.")
-
-    @field_validator("signature")
-    @classmethod
-    def validate_base64_signature(cls, v: str) -> str:
-        """Enforce that the signature is a valid Base64 string."""
-        if not re.match(r"^[A-Za-z0-9+/]+={0,2}$", v):
-            raise ValueError("Signature must be a valid Base64 string.")
-        return v
 
     @field_validator("signed_at")
     @classmethod
@@ -120,14 +114,21 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
-        """Parse the condition string into an Abstract Syntax Tree (AST) and enforce the
-        SecurityVisitor whitelist to prevent arbitrary code execution.
+        """
+        Parse the condition string into an Abstract Syntax Tree (AST) and enforce the SecurityVisitor whitelist.
+
+        Enforces a strict 2048-character limit to prevent AST parsing Denial of Service (DoS) memory exhaustion.
 
         Raises:
-            ValueError: If the condition contains invalid Python syntax or unsafe AST nodes.
+            ValueError: If the condition exceeds 2048 characters, contains invalid Python
+                syntax, or uses unsafe AST nodes.
         """
         if v is None or not v.strip():
             return v
+        if len(v) > 2048:
+            raise ValueError(
+                "Condition expression exceeds maximum safe length of 2048 characters to prevent AST parsing DoS."
+            )
         try:
             tree = ast.parse(v, mode="eval")
         except SyntaxError as e:
@@ -144,10 +145,14 @@ class Graph(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
-        """Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
+        """
+        Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
+
+        Utilizes Kahn's Algorithm (iterative topological sort) for cycle detection to guarantee memory
+        safety and prevent RecursionErrors on massively deep graphs.
 
         Raises:
-            ManifestError: For structural or cycle violations.
+            ManifestError: For structural violations or if a cycle is detected.
         """
         valid_ids = set(self.nodes.keys())
 
@@ -200,30 +205,31 @@ class Graph(CoreasonModel):
 
         # Cycle Detection
         adj_map: dict[str, set[str]] = {n: set() for n in valid_ids}
+        in_degree: dict[str, int] = dict.fromkeys(valid_ids, 0)
+
         for edge in self.edges:
             adj_map[edge.from_node].add(edge.to_node)
 
-        def has_cycle(v: str, visited: set[str], rec_stack: set[str]) -> bool:
-            """Check for cycles using depth-first search."""
-            visited.add(v)
-            rec_stack.add(v)
-            for neighbor in adj_map.get(v, []):
-                if neighbor not in visited:
-                    if has_cycle(neighbor, visited, rec_stack):
-                        return True
-                elif neighbor in rec_stack:
-                    return True
-            rec_stack.remove(v)
-            return False
+        for neighbors in adj_map.values():
+            for neighbor in neighbors:
+                in_degree[neighbor] += 1
 
-        visited: set[str] = set()
-        rec_stack: set[str] = set()
-        for n in valid_ids:
-            if n not in visited and has_cycle(n, visited, rec_stack):
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.VAL_TOPOLOGY_CYCLE,
-                    message="Execution graphs must be strict Directed Acyclic Graphs (DAGs). Cycle detected.",
-                )
+        queue = deque([n for n in valid_ids if in_degree[n] == 0])
+        processed_nodes = 0
+
+        while queue:
+            current = queue.popleft()
+            processed_nodes += 1
+            for neighbor in adj_map.get(current, []):
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+
+        if processed_nodes != len(valid_ids):
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.VAL_TOPOLOGY_CYCLE,
+                message="Execution graphs must be strict Directed Acyclic Graphs (DAGs). Cycle detected.",
+            )
 
         return self
 
