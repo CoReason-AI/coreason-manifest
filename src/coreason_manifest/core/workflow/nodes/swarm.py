@@ -4,8 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.compute.reasoning import ModelRef
-from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.governance import OperationalPolicy
 from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import ProfileID, VariableID

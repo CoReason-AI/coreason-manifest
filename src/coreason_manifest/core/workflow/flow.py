@@ -8,8 +8,8 @@ from jsonschema.exceptions import SchemaError  # type: ignore[import-untyped]
 from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.semantic import SemanticRef
-from coreason_manifest.core.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.oversight.governance import Governance
 from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
 from coreason_manifest.core.security.compliance import RemediationAction, SecurityVisitor

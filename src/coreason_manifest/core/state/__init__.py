@@ -1,3 +1,3 @@
-from coreason_manifest.core.state.persistence import Checkpoint, PersistenceConfig, StateCheckpoint, JSONPatchOperation
+from coreason_manifest.core.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
 
-__all__ = ["Checkpoint", "PersistenceConfig", "StateCheckpoint", "PersistenceConfig", "JSONPatchOperation"]
+__all__ = ["Checkpoint", "JSONPatchOperation", "PersistenceConfig", "PersistenceConfig", "StateCheckpoint"]
