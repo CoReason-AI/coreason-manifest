@@ -1,6 +1,6 @@
 from typing import Any
 
-from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.core.workflow import GraphFlow, LinearFlow
 from coreason_manifest.toolkit.visualizer import to_mermaid
 
 

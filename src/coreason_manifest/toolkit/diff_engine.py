@@ -5,8 +5,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
-from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
-from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.core.state import JSONPatchOperation, PatchOp
+from coreason_manifest.core.workflow import GraphFlow, LinearFlow
 
 type DomainType = Literal["resource", "topology", "governance", "evals"]
 type MutationOp = Literal["add", "remove", "replace", "move", "copy", "test"]

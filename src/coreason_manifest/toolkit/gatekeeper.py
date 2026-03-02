@@ -11,10 +11,16 @@ from coreason_manifest.core.security.compliance import (
     ErrorCatalog,
     RemediationAction,
 )
-from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
-from coreason_manifest.core.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+from coreason_manifest.core.workflow import (
+    AgentNode,
+    AnyNode,
+    GraphFlow,
+    HumanNode,
+    InspectorNode,
+    LinearFlow,
+)
+from coreason_manifest.core.workflow.nodes import SwarmNode
 from coreason_manifest.core.workflow.nodes.human import CollaborationMode
-from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
 from coreason_manifest.core.workflow.topology import (
     get_reachable_nodes,
     get_strongly_connected_components,
@@ -22,7 +28,7 @@ from coreason_manifest.core.workflow.topology import (
 )
 
 if TYPE_CHECKING:
-    from coreason_manifest.core.state.tools import AnyTool
+    from coreason_manifest.core.state import AnyTool
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
