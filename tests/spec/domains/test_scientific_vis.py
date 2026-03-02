@@ -175,6 +175,8 @@ def test_vector_render_payload() -> None:
         format="svg",
         source_code="<svg></svg>",
         interaction_steps=1,
+        provenance_manifest_reference="urn:c2pa:manifest:123",
     )
     assert payload.format == "svg"
     assert payload.raster_preview_url is None
+    assert payload.provenance_manifest_reference == "urn:c2pa:manifest:123"

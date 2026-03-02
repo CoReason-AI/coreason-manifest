@@ -113,3 +113,6 @@ class VectorRenderPayload(BaseModel):
     source_code: str
     interaction_steps: int
     raster_preview_url: str | None = None
+    provenance_manifest_reference: str | None = Field(
+        default=None, description="Pointer to the C2PA ProvenanceManifest to be embedded in the SVG metadata."
+    )
