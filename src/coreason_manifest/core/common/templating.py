@@ -29,6 +29,10 @@ class TemplateVariable(CoreasonModel):
     fallback_value: Any | None = Field(
         default=None, description="Value to use if the local variable is currently null."
     )
+    required: bool = Field(
+        default=False,
+        description="If true and the local variable is null with no fallback, the client aborts the network fetch.",
+    )
 
     @model_validator(mode="after")
     def validate_pointer(self) -> "TemplateVariable":

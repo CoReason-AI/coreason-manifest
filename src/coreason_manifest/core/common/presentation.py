@@ -7,7 +7,12 @@ from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.state.ephemeral import LocalStateManifest
 
 from .client_actions import ClientActionMap
+from .highlighting import HighlightConfig
+from .search_layout import HybridSearchLayout
 from .suspense import SuspenseConfig
+from .templating import ParameterizedDataRef
+from .transform import DataTransformSchema
+from .typeahead import TypeaheadConfig
 from .validation import UIValidationSchema
 
 
@@ -66,6 +71,14 @@ class UIComponentNode(CoreasonModel):
     local_state: LocalStateManifest | None = Field(
         default=None, description="Ephemeral Scratchpad memory for this component."
     )
+    data_ref: ParameterizedDataRef | None = Field(
+        default=None, description="Reactive data source for out-of-band fetching."
+    )
+    data_transform: DataTransformSchema | None = Field(
+        default=None, description="Edge-computed filtering/sorting rules."
+    )
+    typeahead: TypeaheadConfig | None = Field(default=None, description="Fast-path autocomplete configuration.")
+    highlighting: HighlightConfig | None = Field(default=None, description="Client-side text highlighting rules.")
 
 
 class AdaptiveUIContract(CoreasonModel):
@@ -88,6 +101,9 @@ class AdaptiveUIContract(CoreasonModel):
     mcp_ui_resource_uri: str | None = Field(
         default=None,
         description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865).",
+    )
+    hybrid_search: HybridSearchLayout | None = Field(
+        default=None, description="Bipartite search layout for side-by-side Lexical/Semantic results."
     )
 
     @model_validator(mode="before")

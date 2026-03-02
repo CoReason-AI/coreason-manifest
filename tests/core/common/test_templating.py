@@ -20,20 +20,20 @@ from coreason_manifest.core.common.templating import (
 )
 
 
-def test_template_variable_valid():
+def test_template_variable_valid() -> None:
     var = TemplateVariable(pointer="$local.selected_brands")
     assert var.pointer == "$local.selected_brands"
     assert var.array_encoding == ArrayEncodingStyle.COMMA
     assert var.fallback_value is None
 
 
-def test_template_variable_invalid_pointer():
+def test_template_variable_invalid_pointer() -> None:
     with pytest.raises(ValidationError) as exc_info:
         TemplateVariable(pointer="selected_brands")
     assert "pointer must strictly start with '$local.'" in str(exc_info.value)
 
 
-def test_template_string_valid():
+def test_template_string_valid() -> None:
     ts = TemplateString(
         template="/api/search?q={query}&b={brands}",
         variables={
@@ -46,7 +46,7 @@ def test_template_string_valid():
     assert "brands" in ts.variables
 
 
-def test_template_string_missing_variable():
+def test_template_string_missing_variable() -> None:
     with pytest.raises(ValidationError) as exc_info:
         TemplateString(
             template="/api/search?q={query}&b={brands}",
@@ -58,7 +58,7 @@ def test_template_string_missing_variable():
     assert "Placeholder 'brands' extracted from template is missing from variables dictionary." in str(exc_info.value)
 
 
-def test_state_dependency_config_valid():
+def test_state_dependency_config_valid() -> None:
     config = StateDependencyConfig(
         trigger_pointers=["$local.selected_brands", "$local.query"],
         debounce_ms=300,
@@ -68,7 +68,7 @@ def test_state_dependency_config_valid():
     assert config.trigger_pointers == ["$local.selected_brands", "$local.query"]
 
 
-def test_state_dependency_config_invalid_debounce():
+def test_state_dependency_config_invalid_debounce() -> None:
     with pytest.raises(ValidationError) as exc_info:
         StateDependencyConfig(
             trigger_pointers=["$local.selected_brands"],
@@ -77,7 +77,7 @@ def test_state_dependency_config_invalid_debounce():
     assert "debounce_ms must be strictly >= 50." in str(exc_info.value)
 
 
-def test_state_dependency_config_invalid_pointer():
+def test_state_dependency_config_invalid_pointer() -> None:
     with pytest.raises(ValidationError) as exc_info:
         StateDependencyConfig(
             trigger_pointers=["$local.selected_brands", "query"],
@@ -85,7 +85,7 @@ def test_state_dependency_config_invalid_pointer():
     assert "trigger_pointer 'query' must strictly start with '$local.'" in str(exc_info.value)
 
 
-def test_parameterized_data_ref_valid():
+def test_parameterized_data_ref_valid() -> None:
     ref = ParameterizedDataRef(
         uri_template=TemplateString(
             template="/api/search?q={query}",
@@ -102,3 +102,8 @@ def test_parameterized_data_ref_valid():
     assert ref.headers == {"Authorization": "Bearer token"}
     assert ref.uri_template.template == "/api/search?q={query}"
     assert ref.dependency_config.debounce_ms == 100
+
+
+def test_template_variable_required() -> None:
+    var = TemplateVariable(pointer="$local.selected_brands", required=True)
+    assert var.required is True
