@@ -4,12 +4,15 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from coreason_manifest.spec.domains.scientific_vis import (
+    EquationElement,
     FunctionalModule,
     GraphicElement,
     HierarchicalBlueprint,
     InterModuleConnection,
     SciVisIntent,
+    ShapeElement,
     SpatialCorrection,
+    TextElement,
     VectorRenderPayload,
     VisInformationType,
     VisualCriticFeedback,
@@ -45,10 +48,29 @@ def component_template_strategy(draw: st.DrawFn) -> ComponentTemplate:
 
 @st.composite
 def graphic_element_strategy(draw: st.DrawFn) -> GraphicElement:
-    return GraphicElement(
-        id=draw(st.text(min_size=1)),
-        semantic_role=draw(st.text()),
-        proposed_shape=draw(st.sampled_from(["rectangle", "cylinder", "document", "none"])),
+    return draw(
+        st.one_of(
+            st.builds(
+                ShapeElement,
+                id=st.text(min_size=1),
+                semantic_role=st.text(),
+                proposed_shape=st.sampled_from(["rectangle", "cylinder", "document", "none"]),
+            ),
+            st.builds(
+                TextElement,
+                id=st.text(min_size=1),
+                semantic_role=st.text(),
+                raw_text=st.text(),
+                markdown_enabled=st.booleans(),
+            ),
+            st.builds(
+                EquationElement,
+                id=st.text(min_size=1),
+                semantic_role=st.text(),
+                latex_source=st.text(min_size=1),
+                render_mode=st.sampled_from(["inline", "display"]),
+            ),
+        )
     )
 
 
@@ -193,3 +215,19 @@ def test_data_artifact_element():
     assert element.semantic_role == "distribution_scatter_plot"
     assert element.artifact_uri == "s3://data/artifacts/scatter.svg"
     assert element.maintain_aspect_ratio is True
+def test_parse_equation_element() -> None:
+    json_payload = (
+        '{"element_type": "EQUATION", "id": "eq1", "semantic_role": "formula", '
+        '"latex_source": "\\\\sum_{i=1}^{n} x_i", "render_mode": "display"}'
+    )
+
+    # We parse it as part of a FunctionalModule to exercise the Annotated union discriminator
+    module_payload = f'{{"module_id": "m1", "title": "Math Module", "elements": [{json_payload}]}}'
+    module = FunctionalModule.model_validate_json(module_payload)
+
+    assert len(module.elements) == 1
+    element = module.elements[0]
+    assert isinstance(element, EquationElement)
+    assert element.id == "eq1"
+    assert element.latex_source == "\\sum_{i=1}^{n} x_i"
+    assert element.render_mode == "display"
