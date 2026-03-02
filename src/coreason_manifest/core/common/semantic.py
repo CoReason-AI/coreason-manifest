@@ -88,11 +88,17 @@ class PICOLeafNode(CoreasonModel):
 
     type: Literal["leaf"] = "leaf"
     pico_class: Annotated[PICOClass | None, Field(description="The PICO category this term belongs to.")] = None
-    term: Annotated[str, Field(description="The exact search string or ontology ID (e.g., 'D006339' or 'Heart Failure').")]
-    term_type: Annotated[SearchTermType, Field(description="Whether this is a controlled term (e.g. MeSH) or free text.")]
+    term: Annotated[
+        str, Field(description="The exact search string or ontology ID (e.g., 'D006339' or 'Heart Failure').")
+    ]
+    term_type: Annotated[
+        SearchTermType, Field(description="Whether this is a controlled term (e.g. MeSH) or free text.")
+    ]
     explode: Annotated[bool, Field(description="If True, search all narrower terms in the ontology tree.")] = False
     truncate: Annotated[bool, Field(description="If True, apply wildcard truncation to the term.")] = False
-    field_restrictions: Annotated[list[str] | None, Field(description="Specific fields to search (e.g., ['tiab', 'tw']).")] = None
+    field_restrictions: Annotated[
+        list[str] | None, Field(description="Specific fields to search (e.g., ['tiab', 'tw']).")
+    ] = None
 
 
 class PICOOperatorNode(CoreasonModel):
@@ -102,8 +108,10 @@ class PICOOperatorNode(CoreasonModel):
 
     type: Literal["operator"] = "operator"
     operator: Annotated[PICOOperator, Field(description="The logic operator applied to the children.")]
-    proximity_distance: Annotated[int | None, Field(description="Distance 'n' required if operator is PROXIMITY.")] = None
-    children: Annotated[list['PICONode'], Field(description="Child nodes connected by this operator.")]
+    proximity_distance: Annotated[
+        int | None, Field(description="Distance 'n' required if operator is PROXIMITY.")
+    ] = None
+    children: Annotated[list[PICONode], Field(description="Child nodes connected by this operator.")]
 
 
 # Discriminated Union for recursive tree walking
@@ -115,18 +123,22 @@ class PICOASTConfig(CoreasonModel):
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    enforce_pico_ast: Annotated[bool, Field(description="If True, the agent must output a valid PICONode JSON tree.")] = True
-    default_operator: Annotated[PICOOperator, Field(description="The default operator to combine disjoint PICO classes at the root.")] = PICOOperator.AND
+    enforce_pico_ast: Annotated[
+        bool, Field(description="If True, the agent must output a valid PICONode JSON tree.")
+    ] = True
+    default_operator: Annotated[
+        PICOOperator, Field(description="The default operator to combine disjoint PICO classes at the root.")
+    ] = PICOOperator.AND
 
 
 __all__ = [
     "OptimizationIntent",
-    "SemanticRef",
-    "PICOClass",
-    "SearchTermType",
-    "PICOOperator",
-    "PICOLeafNode",
-    "PICOOperatorNode",
-    "PICONode",
     "PICOASTConfig",
+    "PICOClass",
+    "PICOLeafNode",
+    "PICONode",
+    "PICOOperator",
+    "PICOOperatorNode",
+    "SearchTermType",
+    "SemanticRef",
 ]
