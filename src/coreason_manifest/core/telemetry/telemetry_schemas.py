@@ -5,7 +5,6 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from coreason_manifest.adapters.security.antibody import AntibodyBase
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.workflow import LineageIntegrityError
@@ -34,11 +33,11 @@ class NodeState(StrEnum):
     CANCELLED = "CANCELLED"
 
 
-class NodeExecution(AntibodyBase):
+class NodeExecution(CoreasonModel):
     """
     Telemetry record for a single node execution attempt.
     Includes Veritas integrity fields for cryptographic chaining.
-    Inherits AntibodyBase for Zero-Trust validation (NaN/Inf quarantine).
+    Inherits CoreasonModel.
     """
 
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
@@ -134,7 +133,7 @@ class NodeExecution(AntibodyBase):
         return self
 
 
-class HumanSteeringEvent(AntibodyBase):
+class HumanSteeringEvent(CoreasonModel):
     """
     Records a state mutation injected by a human (Time Travel/Steering).
     Used to preserve the Merkle execution trace when state is altered mid-flight.
@@ -148,7 +147,7 @@ class HumanSteeringEvent(AntibodyBase):
     human_identity: str = Field(..., description="ID/Email of the human operator.")
 
 
-class MemoryMutationEvent(AntibodyBase):
+class MemoryMutationEvent(CoreasonModel):
     """
     Telemetry record for memory mutations (ADD, UPDATE, DELETE, EVICT, CONSOLIDATE)
     within the 4-tier memory subsystem. Ensures the Merkle DAG lineage isn't broken
@@ -215,7 +214,7 @@ class ExecutionSnapshot(BaseModel):
 from datetime import UTC  # noqa: E402
 
 
-class SecurityViolationEvent(AntibodyBase):
+class SecurityViolationEvent(CoreasonModel):
     """
     SIEM-Native Security Alerting Contract.
     Emitted when the identity middleware detects malicious activity or strict policy breaches.
@@ -250,7 +249,7 @@ class SecurityViolationEvent(AntibodyBase):
     )
 
 
-class AuthLifecycleEvent(AntibodyBase):
+class AuthLifecycleEvent(CoreasonModel):
     """
     Zero-Knowledge Identity Telemetry.
     Tracks authentication state changes strictly without leaking PII.

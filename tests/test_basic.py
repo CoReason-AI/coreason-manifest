@@ -2,5 +2,7 @@ import pytest
 
 
 @pytest.mark.evals
-def test_dummy() -> None:
-    pass
+def test_schema_import() -> None:
+    import coreason_manifest
+
+    assert coreason_manifest is not None
