@@ -120,7 +120,12 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
-        """Return the condition string unmodified."""
+        """Parse the condition string into an Abstract Syntax Tree (AST) and enforce the
+        SecurityVisitor whitelist to prevent arbitrary code execution.
+
+        Raises:
+            ValueError: If the condition contains invalid Python syntax or unsafe AST nodes.
+        """
         if v is None or not v.strip():
             return v
         try:
@@ -142,7 +147,8 @@ class Graph(CoreasonModel):
         """Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
 
         Raises:
-            ManifestError: For structural or cycle violations."""
+            ManifestError: For structural or cycle violations.
+        """
         valid_ids = set(self.nodes.keys())
 
         if not self.nodes:
@@ -246,6 +252,7 @@ class VariableDef(CoreasonModel):
 class GraphFlow(CoreasonModel):
     """
     Standard graph-based execution flow.
+
     """
 
     type: Literal["graph"] = "graph"
@@ -284,7 +291,8 @@ class GraphFlow(CoreasonModel):
         """Enforce that published flows have no unresolved semantic references.
 
         Raises:
-            ManifestError: If unresolved references are found."""
+            ManifestError: If unresolved references are found.
+        """
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))
@@ -308,6 +316,7 @@ class GraphFlow(CoreasonModel):
 class LinearFlow(CoreasonModel):
     """
     Simplified linear execution flow (sequence of steps).
+
     """
 
     type: Literal["linear"] = "linear"
@@ -327,7 +336,8 @@ class LinearFlow(CoreasonModel):
         """Enforce that linear sequence is not empty and has unique step IDs.
 
         Raises:
-            ManifestError: For structural violations."""
+            ManifestError: For structural violations.
+        """
         if not self.steps:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_TOPOLOGY_LINEAR_EMPTY,
@@ -366,7 +376,8 @@ class LinearFlow(CoreasonModel):
         """Enforce that published flows have no unresolved semantic references.
 
         Raises:
-            ManifestError: If unresolved references are found."""
+            ManifestError: If unresolved references are found.
+        """
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))
