@@ -1,3 +1,6 @@
+import ast
+import datetime
+import re
 from enum import StrEnum
 from typing import Any, Literal
 from uuid import uuid4
@@ -9,6 +12,7 @@ from coreason_manifest.core.common.exceptions import ManifestError, ManifestErro
 from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.oversight.governance import Governance
 from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
+from coreason_manifest.core.security.compliance import SecurityVisitor
 from coreason_manifest.core.state.persistence import PersistenceConfig
 from coreason_manifest.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.core.workflow.evals import EvalsManifest
@@ -35,6 +39,24 @@ class CryptographicAttestation(CoreasonModel):
     public_key_ref: str = Field(..., description="URI or ID of the public key used to verify the signature.")
     algorithm: SignatureAlgorithm = Field(default=SignatureAlgorithm.ECDSA, description="The signing algorithm used.")
     signed_at: str = Field(..., description="ISO-8601 timestamp of when the manifest was cryptographically sealed.")
+
+    @field_validator("signature")
+    @classmethod
+    def validate_base64_signature(cls, v: str) -> str:
+        """Enforce that the signature is a valid Base64 string."""
+        if not re.match(r"^[A-Za-z0-9+/]+={0,2}$", v):
+            raise ValueError("Signature must be a valid Base64 string.")
+        return v
+
+    @field_validator("signed_at")
+    @classmethod
+    def validate_iso8601(cls, v: str) -> str:
+        """Enforce that signed_at is a valid ISO-8601 timestamp."""
+        try:
+            datetime.datetime.fromisoformat(v)
+        except ValueError as e:
+            raise ValueError(f"Invalid ISO-8601 timestamp: {v}") from e
+        return v
 
 
 class ProvenanceData(CoreasonModel):
@@ -98,6 +120,20 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
+        """Parse the condition string into an Abstract Syntax Tree (AST) and enforce the
+        SecurityVisitor whitelist to prevent arbitrary code execution.
+
+        Raises:
+            ValueError: If the condition contains invalid Python syntax or unsafe AST nodes.
+        """
+        if v is None or not v.strip():
+            return v
+        try:
+            tree = ast.parse(v, mode="eval")
+        except SyntaxError as e:
+            raise ValueError(f"Syntax error in condition '{v}': {e}") from e
+        visitor = SecurityVisitor()
+        visitor.visit(tree)
         return v
 
 
@@ -108,6 +144,11 @@ class Graph(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
+        """Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
+
+        Raises:
+            ManifestError: For structural or cycle violations.
+        """
         valid_ids = set(self.nodes.keys())
 
         if not self.nodes:
@@ -163,6 +204,7 @@ class Graph(CoreasonModel):
             adj_map[edge.from_node].add(edge.to_node)
 
         def has_cycle(v: str, visited: set[str], rec_stack: set[str]) -> bool:
+            """Check for cycles using depth-first search."""
             visited.add(v)
             rec_stack.add(v)
             for neighbor in adj_map.get(v, []):
@@ -210,6 +252,7 @@ class VariableDef(CoreasonModel):
 class GraphFlow(CoreasonModel):
     """
     Standard graph-based execution flow.
+
     """
 
     type: Literal["graph"] = "graph"
@@ -228,6 +271,7 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
+        """Enforce that published flows have valid metadata, entry point, and no placeholders."""
         if self.status != "published":
             return self
         if getattr(self.metadata, "provenance", None) is None:
@@ -244,6 +288,11 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_aot_compilation(self) -> "GraphFlow":
+        """Enforce that published flows have no unresolved semantic references.
+
+        Raises:
+            ManifestError: If unresolved references are found.
+        """
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))
@@ -267,6 +316,7 @@ class GraphFlow(CoreasonModel):
 class LinearFlow(CoreasonModel):
     """
     Simplified linear execution flow (sequence of steps).
+
     """
 
     type: Literal["linear"] = "linear"
@@ -283,6 +333,11 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":
+        """Enforce that linear sequence is not empty and has unique step IDs.
+
+        Raises:
+            ManifestError: For structural violations.
+        """
         if not self.steps:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_TOPOLOGY_LINEAR_EMPTY,
@@ -303,6 +358,7 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "LinearFlow":
+        """Enforce that published flows have valid metadata, entry point, and no placeholders."""
         if self.status != "published":
             return self
         if getattr(self.metadata, "provenance", None) is None:
@@ -317,6 +373,11 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_aot_compilation(self) -> "LinearFlow":
+        """Enforce that published flows have no unresolved semantic references.
+
+        Raises:
+            ManifestError: If unresolved references are found.
+        """
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))

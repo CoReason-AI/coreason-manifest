@@ -25,6 +25,7 @@ class InspectorNodeBase(Node):
 
     @property
     def to_node_variable(self) -> VariableID:
+        """Return the target variable."""
         return self.target_variable
 
 
@@ -53,6 +54,7 @@ class InspectorNode(InspectorNodeBase):
 
     @model_validator(mode="after")
     def validate_symbolic_requirements(self) -> "InspectorNode":
+        """Enforce that symbolic execution mode requires target_solver and tutor_prompt."""
         if self.mode == "symbolic_execution":
             if self.target_solver is None:
                 raise ValueError("target_solver must be provided when mode is 'symbolic_execution'")

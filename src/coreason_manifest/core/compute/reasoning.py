@@ -168,12 +168,13 @@ class BaseReasoning(BaseModel):
 
     @model_validator(mode="after")
     def _validate_adversarial(self) -> "BaseReasoning":
+        """Enforce that adversarial review strategy requires an adversarial config."""
         if self.review_strategy == ReviewStrategy.ADVERSARIAL and self.adversarial_config is None:
             raise ValueError("adversarial_config is required when review_strategy is ADVERSARIAL")
         return self
 
     def required_capabilities(self) -> list[str]:
-        """Returns a list of high-risk capabilities required by this engine."""
+        """Return the list of required capabilities."""
         return []
 
 
@@ -361,6 +362,7 @@ class EnsembleReasoning(BaseReasoning):
 
     @model_validator(mode="after")
     def validate_verification_model(self) -> "EnsembleReasoning":
+        """Enforce that verification mode requires a similarity model."""
         if self.verification_mode in ("always", "ambiguous_only") and self.similarity_model is None:
             raise ValueError(
                 f"A 'similarity_model' is strictly required when verification_mode is '{self.verification_mode}'."
@@ -399,6 +401,7 @@ class RedTeamingReasoning(BaseReasoning):
 
     @property
     def to_node_model(self) -> Any:
+        """Return None."""
         return None
 
 
@@ -442,6 +445,7 @@ class ComputerUseReasoning(BaseReasoning):
     ] = 1000
 
     def required_capabilities(self) -> list[str]:
+        """Return the list of required capabilities."""
         return [NodeCapability.COMPUTER_USE.value]
 
 
@@ -457,6 +461,7 @@ class CodeExecutionReasoning(BaseReasoning):
     timeout_seconds: Annotated[float, Field(description="Max execution time.")] = 30.0
 
     def required_capabilities(self) -> list[str]:
+        """Return the list of required capabilities."""
         return [NodeCapability.CODE_EXECUTION.value]
 
 
@@ -511,6 +516,7 @@ class WasmExecutionReasoning(BaseReasoning):
     ]
 
     def required_capabilities(self) -> list[str]:
+        """Return the list of required capabilities."""
         return [NodeCapability.WASM_EXECUTION.value]
 
 

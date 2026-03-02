@@ -131,6 +131,10 @@ class SwarmNode(Node):
 
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":
+        """Enforce strategy and policy requirements for swarm topologies.
+
+        Raises:
+            ManifestError: If reducer is summarize without an aggregator_model."""
         if self.reducer_function == "tournament" and self.tournament_config is None:
             raise ValueError("SwarmNode with reducer_function='tournament' requires a 'tournament_config'.")
 

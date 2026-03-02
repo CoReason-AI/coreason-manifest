@@ -26,6 +26,7 @@ class SuspenseConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_reserved_height(self) -> "SuspenseConfig":
+        """Enforce that reserved_height matches valid CSS dimension syntax."""
         if self.reserved_height is not None:
             # Check if it's a valid CSS dimension
             pattern = re.compile(r"^\d+(?:\.\d+)?(?:px|rem|em|vh|vw|%)$")

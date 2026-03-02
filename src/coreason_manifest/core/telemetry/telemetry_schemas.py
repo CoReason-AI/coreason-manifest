@@ -80,10 +80,7 @@ class NodeExecution(CoreasonModel):
     @model_validator(mode="before")
     @classmethod
     def enforce_envelope_consistency(cls, data: Any) -> Any:
-        """
-        Single-pass pre-validation to enforce both lineage rooting
-        and DAG topology consistency, minimizing dict.copy() overhead.
-        """
+        """Perform single-pass pre-validation to enforce lineage rooting and DAG topology consistency."""
         if isinstance(data, dict):
             # One copy for all mutations
             data = data.copy()
@@ -116,6 +113,10 @@ class NodeExecution(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "NodeExecution":
+        """Enforce strict trace integrity and lineage validity.
+
+        Raises:
+            ManifestError: If lineage integrity is broken."""
         errors = []
         if self.parent_request_id and not self.root_request_id:
             errors.append(LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing)."))
@@ -187,6 +188,10 @@ class MemoryMutationEvent(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "MemoryMutationEvent":
+        """Enforce strict trace integrity and lineage validity.
+
+        Raises:
+            ManifestError: If lineage integrity is broken."""
         errors = []
         if self.parent_request_id and not self.root_request_id:
             errors.append(LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing)."))
@@ -279,6 +284,10 @@ class AuthLifecycleEvent(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "AuthLifecycleEvent":
+        """Enforce strict trace integrity and lineage validity.
+
+        Raises:
+            ManifestError: If lineage integrity is broken."""
         errors = []
         if self.parent_request_id and not self.root_request_id:
             errors.append(LineageIntegrityError("Broken Lineage: Orphaned request (parent set, root missing)."))

@@ -11,6 +11,7 @@ class AsyncSSEMultiplexer:
     """
 
     def __init__(self) -> None:
+        """Initialize the multiplexer with a queue."""
         self._queue: asyncio.Queue[StreamPacket] | None = None
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
