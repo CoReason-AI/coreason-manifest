@@ -4,15 +4,15 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.presentation.highlighting import HighlightConfig
+from coreason_manifest.core.presentation.search_layout import HybridSearchLayout
+from coreason_manifest.core.presentation.templating import ParameterizedDataRef
+from coreason_manifest.core.presentation.transform import DataTransformSchema
+from coreason_manifest.core.presentation.typeahead import TypeaheadConfig
 from coreason_manifest.core.state.ephemeral import LocalStateManifest
 
 from .client_actions import ClientActionMap
-from .highlighting import HighlightConfig
-from .search_layout import HybridSearchLayout
 from .suspense import SuspenseConfig
-from .templating import ParameterizedDataRef
-from .transform import DataTransformSchema
-from .typeahead import TypeaheadConfig
 from .validation import UIValidationSchema
 
 
