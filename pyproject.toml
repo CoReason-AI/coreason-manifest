@@ -18,21 +18,13 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "idna>=3.7",
-    "jsonschema>=4.23.0",
     "pydantic>=2.12.5",
-    "pyyaml>=6.0.3",
-    "typer>=0.9.0",
-    "rich>=13.0.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/CoReason-AI/coreason_manifest"
 Repository = "https://github.com/CoReason-AI/coreason_manifest"
 Documentation = "https://github.com/CoReason-AI/coreason_manifest"
-
-[project.scripts]
-coreason = "coreason_manifest.cli.main:main"
 
 [dependency-groups]
 dev = [
