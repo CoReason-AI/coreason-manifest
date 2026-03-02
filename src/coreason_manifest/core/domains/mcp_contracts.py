@@ -3,6 +3,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from coreason_manifest.spec.domains.scivis_provenance import ActorIdentity
+
 
 class MCPToolName(StrEnum):
     """Names of the Universal Canvas API tools."""
@@ -13,6 +15,9 @@ class MCPToolName(StrEnum):
     CANVAS_GROUP_ELEMENTS = "CANVAS_GROUP_ELEMENTS"
     CANVAS_ADD_CONNECTION = "CANVAS_ADD_CONNECTION"
     CANVAS_APPLY_STYLE = "CANVAS_APPLY_STYLE"
+    CANVAS_IMPORT_ARTIFACT = "CANVAS_IMPORT_ARTIFACT"
+    CANVAS_ADD_MATH_NODE = "CANVAS_ADD_MATH_NODE"
+    CANVAS_UPDATE_MATH_NODE = "CANVAS_UPDATE_MATH_NODE"
 
 
 class MCPOperation(BaseModel):
@@ -25,6 +30,9 @@ class MCPOperation(BaseModel):
     )
     parameters: dict[str, Any] = Field(
         default_factory=dict, description="The kwargs payload for the tool (e.g., x, y, width, fill_color)."
+    )
+    actor: ActorIdentity | None = Field(
+        default=None, description="Cryptographically tags the specific agent/human issuing this canvas command."
     )
 
 
