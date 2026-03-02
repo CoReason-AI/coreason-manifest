@@ -47,40 +47,43 @@ from coreason_manifest.core.oversight.resilience import (
     SupervisionPolicy,
 )
 from coreason_manifest.core.primitives.types import RiskLevel
-from coreason_manifest.core.state.memory import (
-    ConsolidationStrategy,
+from coreason_manifest.core.state import (
     EpisodicMemoryConfig,
-    KnowledgeScope,
     MemorySubsystem,
     ProceduralMemoryConfig,
     SemanticMemoryConfig,
     WorkingMemoryConfig,
 )
+from coreason_manifest.core.state.memory import ConsolidationStrategy, KnowledgeScope
 from coreason_manifest.core.system.rebuild import rebuild_manifest
 
 if TYPE_CHECKING:
-    from coreason_manifest.core.state.tools import ToolPack
+    from coreason_manifest.core.state import ToolPack
+    from coreason_manifest.core.workflow import AnyNode
     from coreason_manifest.core.workflow.evals import EvalsManifest
-    from coreason_manifest.core.workflow.flow import AnyNode
 
-from coreason_manifest.core.workflow.flow import (
+from coreason_manifest.core.workflow import (
+    AgentNode,
     Blackboard,
-    DataSchema,
+    CognitiveProfile,
     Edge,
+    Graph,
+    GraphFlow,
+    HumanNode,
+    InspectorNode,
+    LinearFlow,
+    PlannerNode,
+)
+from coreason_manifest.core.workflow.flow import (
+    DataSchema,
     FlowDefinitions,
     FlowInterface,
     FlowMetadata,
-    Graph,
-    GraphFlow,
-    LinearFlow,
     ProvenanceData,
     ProvenanceType,
 )
-from coreason_manifest.core.workflow.nodes.agent import AgentNode, CognitiveProfile
 from coreason_manifest.core.workflow.nodes.base import Constraint, ConstraintOperator
-from coreason_manifest.core.workflow.nodes.human import CollaborationMode, HumanNode
-from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
-from coreason_manifest.core.workflow.nodes.planner import PlannerNode
+from coreason_manifest.core.workflow.nodes.human import CollaborationMode
 from coreason_manifest.toolkit.validator import validate_flow
 
 

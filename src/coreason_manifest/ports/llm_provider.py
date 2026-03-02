@@ -1,7 +1,7 @@
 from typing import Any, Protocol
 
-from coreason_manifest.core.state.tools import ToolPack
-from coreason_manifest.core.workflow.nodes import AgentNode
+from coreason_manifest.core.state import ToolPack
+from coreason_manifest.core.workflow import AgentNode
 
 
 class GenerativeAdapter(Protocol):
