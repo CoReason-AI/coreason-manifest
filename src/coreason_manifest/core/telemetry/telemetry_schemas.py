@@ -14,6 +14,7 @@ class HardwareFingerprint(CoreasonModel):
     """
     Tracks compute environment and precision details to establish Epistemic trace.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     architecture: str = Field(..., description="The hardware architecture, e.g., Ampere, Ada.")
@@ -25,6 +26,7 @@ class AgentSignature(CoreasonModel):
     """
     Tracks agent model and parameters to verify origin of generation.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     model_weights_hash: str = Field(..., description="Hash of the model weights.")

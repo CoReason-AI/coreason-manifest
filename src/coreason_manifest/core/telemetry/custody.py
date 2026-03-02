@@ -12,6 +12,7 @@ class EpistemicEvent(Protocol):
     """
     Mock Protocol for EpistemicEvent being built by Epic 1.
     """
+
     event_id: str
     timestamp: float
 
@@ -21,16 +22,16 @@ class EpistemicLedger(Protocol):
     """
     Mock Protocol for EpistemicLedger being built by Epic 1.
     """
-    def append_event(self, event: EpistemicEvent) -> None:
-        ...
-    def get_history(self) -> list[EpistemicEvent]:
-        ...
+
+    def append_event(self, event: EpistemicEvent) -> None: ...
+    def get_history(self) -> list[EpistemicEvent]: ...
 
 
 class MerkleHasher:
     """
     Cryptographic utility for tamper-proofing telemetry envelopes.
     """
+
     @staticmethod
     def compute_hash(agent_signature: AgentSignature, payload: Any, parent_envelope_hash: str | None) -> str:
         """
@@ -60,6 +61,7 @@ class EpistemicEnvelope(BaseModel):
     Wraps a data payload in a cryptographically secure envelope, ensuring
     traceability back to the GPU hardware, model weights, and inference parameters.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     payload: Any = Field(..., description="The extracted data or proposition.")

@@ -8,21 +8,13 @@ from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, H
 
 @pytest.fixture
 def base_hardware_fingerprint() -> HardwareFingerprint:
-    return HardwareFingerprint(
-        architecture="Ampere",
-        compute_precision="fp8",
-        vram_allocated=16.0
-    )
+    return HardwareFingerprint(architecture="Ampere", compute_precision="fp8", vram_allocated=16.0)
 
 
 @pytest.fixture
 def base_agent_signature() -> AgentSignature:
     return AgentSignature(
-        model_weights_hash="hash_a1",
-        prompt_commit_hash="commit_xyz",
-        temperature=0.7,
-        seed=42,
-        inference_engine="vLLM"
+        model_weights_hash="hash_a1", prompt_commit_hash="commit_xyz", temperature=0.7, seed=42, inference_engine="vLLM"
     )
 
 
@@ -41,7 +33,7 @@ def test_chain_of_custody_tamper_proof(
         agent_signature=base_agent_signature,
         hardware_fingerprint=base_hardware_fingerprint,
         parent_envelope_hash=None,
-        merkle_hash=hash_1
+        merkle_hash=hash_1,
     )
 
     # 2. Create second envelope (chained to first)
@@ -52,7 +44,7 @@ def test_chain_of_custody_tamper_proof(
         agent_signature=base_agent_signature,
         hardware_fingerprint=base_hardware_fingerprint,
         parent_envelope_hash=env_1.merkle_hash,
-        merkle_hash=hash_2
+        merkle_hash=hash_2,
     )
 
     # 3. Create third envelope (chained to second)
@@ -63,7 +55,7 @@ def test_chain_of_custody_tamper_proof(
         agent_signature=base_agent_signature,
         hardware_fingerprint=base_hardware_fingerprint,
         parent_envelope_hash=env_2.merkle_hash,
-        merkle_hash=hash_3
+        merkle_hash=hash_3,
     )
 
     assert env_3.merkle_hash == hash_3
@@ -94,7 +86,7 @@ def test_suspense_envelope_captures_hardware(
         agent_signature=base_agent_signature,
         hardware_fingerprint=base_hardware_fingerprint,
         parent_envelope_hash=None,
-        merkle_hash=merkle_hash
+        merkle_hash=merkle_hash,
     )
 
     suspense_config = SuspenseConfig(fallback_type=SkeletonType.SPINNER)
@@ -105,7 +97,7 @@ def test_suspense_envelope_captures_hardware(
         timestamp=1620000000.0,
         reasoning_trace="Failed due to OCR confidence score < 0.2",
         epistemic_envelope=epistemic_envelope,
-        hardware_fingerprint=base_hardware_fingerprint
+        hardware_fingerprint=base_hardware_fingerprint,
     )
 
     # Verify that the HardwareFingerprint is stored correctly inside the SuspenseEnvelope
