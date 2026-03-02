@@ -86,7 +86,6 @@ def test_human_node_with_steering():
         prompt="Please verify.",
         escalation=escalation,
         steering_config=config,
-
     )
     assert human.steering_config is not None
     assert human.steering_config.timeout_seconds == 60
