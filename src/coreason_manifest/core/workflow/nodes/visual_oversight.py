@@ -3,7 +3,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.workflow.nodes.base import Constraint
 from coreason_manifest.core.workflow.nodes.oversight import InspectorNodeBase
 
@@ -24,7 +23,6 @@ class VisBenchRubricConfig(BaseModel):
     check_hallucinations: bool = Field(True, description="Check for hallucinations.")
 
 
-@register_node
 class VisualInspectorNode(InspectorNodeBase):
     """A node that applies visual rubrics to an artifact."""
 

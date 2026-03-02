@@ -8,7 +8,6 @@ from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.compute.reasoning import FastPath, ReasoningConfig
 from coreason_manifest.core.oversight.governance import OperationalPolicy
 from coreason_manifest.core.oversight.intervention import EscalationCriteria
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import CoercibleStringList, ProfileID
 from coreason_manifest.core.state.memory import MemorySubsystem
 
@@ -36,7 +35,6 @@ class CognitiveProfile(CoreasonModel):
     )
 
 
-@register_node
 class AgentNode(Node):
     """Executes a cognitive task using a CognitiveProfile configuration."""
 

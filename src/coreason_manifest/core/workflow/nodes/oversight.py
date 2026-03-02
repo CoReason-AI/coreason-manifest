@@ -4,7 +4,6 @@ from typing import Annotated, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.compute.reasoning import ModelRef, Optimizer
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import VariableID
 
 from .base import Node
@@ -29,7 +28,6 @@ class InspectorNodeBase(Node):
         return self.target_variable
 
 
-@register_node
 class InspectorNode(InspectorNodeBase):
     """A node that evaluates a variable against criteria in deterministic or semantic mode."""
 
@@ -65,7 +63,6 @@ class InspectorNode(InspectorNodeBase):
         return self
 
 
-@register_node
 class EmergenceInspectorNode(InspectorNodeBase):
     """Specialized inspector for detecting novel/emergent behaviors."""
 

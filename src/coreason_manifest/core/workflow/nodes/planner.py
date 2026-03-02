@@ -4,12 +4,10 @@ from typing import Any, Literal
 from pydantic import Field, field_validator
 
 from coreason_manifest.core.compute.reasoning import Optimizer, ReasoningConfig
-from coreason_manifest.core.primitives.registry import register_node
 
 from .base import Node
 
 
-@register_node
 class PlannerNode(Node):
     """A node that generates a structured plan to achieve a goal."""
 

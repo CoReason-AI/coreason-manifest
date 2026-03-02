@@ -55,7 +55,6 @@ from coreason_manifest.core.state import (
     WorkingMemoryConfig,
 )
 from coreason_manifest.core.state.memory import ConsolidationStrategy, KnowledgeScope
-from coreason_manifest.core.system.rebuild import rebuild_manifest
 
 if TYPE_CHECKING:
     from coreason_manifest.core.state import ToolPack
@@ -569,8 +568,6 @@ class AgentBuilder:
         """
         # Ensure schema is built
 
-        rebuild_manifest()
-
         if not self.role or not self.persona:
             raise ValueError("Agent identity (role, persona) must be set.")
 
@@ -599,7 +596,7 @@ class AgentBuilder:
                 )
 
                 # Retrieve existing primary_profile if models is already ModelCriteria
-                existing_models = self.reasoning.models
+                existing_models = getattr(self.reasoning, "models", None)
 
                 if isinstance(existing_models, ModelCriteria):
                     models_copy = existing_models.model_copy()
@@ -1093,7 +1090,6 @@ class BaseFlowBuilder:
             ValueError: If validation fails.
         """
         # Ensure schema is built
-        rebuild_manifest()
 
         flow = self._create_flow_instance()
 

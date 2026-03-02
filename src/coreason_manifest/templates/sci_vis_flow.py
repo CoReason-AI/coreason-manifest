@@ -98,7 +98,9 @@ def get_sota_scivis_topology() -> GraphFlow:
         Edge(from_node="human_expert_review", to_node="semantic_parser", condition="reject_to_planner"),
     ]
 
-    nodes_dict = {
+    from coreason_manifest.core.workflow.nodes import AnyNode
+
+    nodes_dict: dict[str, AnyNode] = {
         semantic_parser.id: semantic_parser,
         layout_agent.id: layout_agent,
         visual_critic.id: visual_critic,

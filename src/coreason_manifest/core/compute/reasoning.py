@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.compute.resources import ModelProfile
 from coreason_manifest.core.primitives.constants import NodeCapability
-from coreason_manifest.core.primitives.registry import register_engine, resolve_engine_union
 from coreason_manifest.core.primitives.types import WasiCapability
 
 # =========================================================================
@@ -178,7 +177,6 @@ class BaseReasoning(BaseModel):
         return []
 
 
-@register_engine
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
 
@@ -188,7 +186,6 @@ class StandardReasoning(BaseReasoning):
     forcing_function: Annotated[str | None, Field(description="Force the start of the assistant's response.")] = None
 
 
-@register_engine
 class AdaptiveReasoning(BaseReasoning):
     """
     Adaptive Reasoning (Test-Time Scaling).
@@ -210,7 +207,6 @@ class AdaptiveReasoning(BaseReasoning):
     ] = True
 
 
-@register_engine
 class AttentionReasoning(BaseReasoning):
     """
     System 2 Attention (S2A).
@@ -224,7 +220,6 @@ class AttentionReasoning(BaseReasoning):
     focus_model: Annotated[ModelRef | None, Field(description="Model used for the S2A filtering step.")] = None
 
 
-@register_engine
 class BufferReasoning(BaseReasoning):
     """
     Buffer of Thoughts (BoT).
@@ -244,7 +239,6 @@ class BufferReasoning(BaseReasoning):
     ] = "read_only"
 
 
-@register_engine
 class TreeSearchReasoning(BaseReasoning):
     """Language Agent Tree Search (LATS) with MCTS."""
 
@@ -258,7 +252,6 @@ class TreeSearchReasoning(BaseReasoning):
     evaluator_model: Annotated[ModelRef | None, Field(description="Model used to score leaf nodes.")] = None
 
 
-@register_engine
 class DecompositionReasoning(BaseReasoning):
     """Decomposition (Atom of Thoughts) DAG splitting."""
 
@@ -269,7 +262,6 @@ class DecompositionReasoning(BaseReasoning):
     global_context_window: int = 4096
 
 
-@register_engine
 class EvolutionaryReasoning(BaseReasoning):
     """
     Evolutionary Search & Hypothesis Generation Engine.
@@ -297,7 +289,6 @@ class EvolutionaryReasoning(BaseReasoning):
     ]
 
 
-@register_engine
 class CouncilReasoning(BaseReasoning):
     """Multi-Persona Consensus, now supporting Protocol-Bound Methodological Execution."""
 
@@ -322,7 +313,6 @@ class CouncilReasoning(BaseReasoning):
     )
 
 
-@register_engine
 class EnsembleReasoning(BaseReasoning):
     """
     Multi-Model Consensus with Cascading Verification.
@@ -378,7 +368,6 @@ class EnsembleReasoning(BaseReasoning):
         return self
 
 
-@register_engine
 class RedTeamingReasoning(BaseReasoning):
     """
     Agentic Red Teaming (ART).
@@ -413,7 +402,6 @@ class RedTeamingReasoning(BaseReasoning):
         return None
 
 
-@register_engine
 class ComputerUseReasoning(BaseReasoning):
     """
     Computer Use / GUI Automation.
@@ -457,7 +445,6 @@ class ComputerUseReasoning(BaseReasoning):
         return [NodeCapability.COMPUTER_USE.value]
 
 
-@register_engine
 class CodeExecutionReasoning(BaseReasoning):
     """
     Executes Python code in a sandboxed environment.
@@ -473,7 +460,6 @@ class CodeExecutionReasoning(BaseReasoning):
         return [NodeCapability.CODE_EXECUTION.value]
 
 
-@register_engine
 class GraphReasoning(BaseReasoning):
     """
     GraphRAG (Graph-based Retrieval Augmented Generation).
@@ -508,7 +494,6 @@ class GraphReasoning(BaseReasoning):
     ] = 1
 
 
-@register_engine
 class WasmExecutionReasoning(BaseReasoning):
     """
     Executes tasks in an isolated WebAssembly (Wasm) sandbox.
@@ -532,7 +517,23 @@ class WasmExecutionReasoning(BaseReasoning):
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
-ReasoningConfig: Any = resolve_engine_union()
+ReasoningConfig = Annotated[
+    StandardReasoning
+    | AdaptiveReasoning
+    | AttentionReasoning
+    | BufferReasoning
+    | TreeSearchReasoning
+    | DecompositionReasoning
+    | EvolutionaryReasoning
+    | CouncilReasoning
+    | EnsembleReasoning
+    | RedTeamingReasoning
+    | ComputerUseReasoning
+    | CodeExecutionReasoning
+    | GraphReasoning
+    | WasmExecutionReasoning,
+    Field(discriminator="type"),
+]
 
 
 # =========================================================================

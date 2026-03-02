@@ -154,11 +154,13 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
                         break
                 if not label and source_node.default == target_id:
                     label = "|default|"
-            elif source_node and isinstance(source_node, HumanNode) and getattr(source_node, "routes", None):
-                for cmd, cmd_target in source_node.routes.items():
-                    if cmd_target == target_id:
-                        label = f"|{_escape_label(str(cmd))} ⚙️|"
-                        break
+            elif source_node and isinstance(source_node, HumanNode):
+                routes = getattr(source_node, "routes", None)
+                if routes:
+                    for cmd, cmd_target in routes.items():
+                        if cmd_target == target_id:
+                            label = f"|{_escape_label(str(cmd))} ⚙️|"
+                            break
 
             if (
                 not label

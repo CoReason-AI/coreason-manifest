@@ -3,13 +3,11 @@ from typing import Literal
 
 from pydantic import Field
 
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import NodeID, VariableID
 
 from .base import Node
 
 
-@register_node
 class SwitchNode(Node):
     """A node that routes execution based on the value of a blackboard variable."""
 
