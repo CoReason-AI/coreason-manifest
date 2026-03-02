@@ -1,7 +1,10 @@
-from typing import Any
+from typing import Any, override
 
+from coreason_manifest.core.state import ToolPack
+from coreason_manifest.core.workflow import AgentNode
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.topology import get_unified_topology
+from coreason_manifest.ports.llm_provider import GenerativeAdapter
 
 
 def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
@@ -26,3 +29,16 @@ def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:
         }
 
     return {}  # pragma: no cover
+
+
+class LangchainAdapter(GenerativeAdapter):
+    """
+    Langchain implementation of the GenerativeAdapter protocol.
+    """
+
+    @override
+    def node_to_provider_assistant(self, node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
+        """
+        Convert an AgentNode into a Langchain-specific configuration.
+        """
+        return {}

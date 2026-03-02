@@ -123,19 +123,3 @@ class SecurityJailViolationError(ManifestError):
                 recovery_action=RecoveryAction.HALT,
             )
         )
-
-
-class LineageIntegrityError(ManifestError):
-    """
-    Raised when a trace lineage violation is detected.
-    """
-
-    def __init__(self, message: str) -> None:
-        super().__init__(
-            SemanticFault(
-                error_code=ManifestErrorCode.SEC_LINEAGE_001,
-                message=message,
-                severity=FaultSeverity.CRITICAL,
-                recovery_action=RecoveryAction.HALT,
-            )
-        )

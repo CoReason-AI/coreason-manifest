@@ -1,11 +1,13 @@
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Any, Literal, override
 
 from pydantic import BaseModel, Field
 
 from coreason_manifest.core.common.presentation import UIEventMap
 from coreason_manifest.core.state import ToolPack
 from coreason_manifest.core.state.tools import MCPTool
+from coreason_manifest.core.workflow import AgentNode
+from coreason_manifest.ports.llm_provider import GenerativeAdapter
 
 
 class MCPRequestMethod(StrEnum):
@@ -107,3 +109,16 @@ def parse_mcp_tool_payload(tool: MCPTool) -> dict[str, Any]:
         "capabilities": tool.supported_capabilities,
         "server_uri": str(tool.server_uri),
     }
+
+
+class MCPAdapter(GenerativeAdapter):
+    """
+    MCP implementation of the GenerativeAdapter protocol.
+    """
+
+    @override
+    def node_to_provider_assistant(self, node: AgentNode, tool_packs: list[ToolPack] | None = None) -> dict[str, Any]:
+        """
+        Convert an AgentNode into an MCP-specific configuration.
+        """
+        return {}
