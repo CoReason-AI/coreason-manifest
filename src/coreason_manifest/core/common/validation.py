@@ -121,9 +121,7 @@ class EpistemicValidator:
     }
 
     @staticmethod
-    def validate_statistical_grounding(
-        relation: str, has_p_value: bool, has_confidence_interval: bool
-    ) -> bool:
+    def validate_statistical_grounding(relation: str, has_p_value: bool, has_confidence_interval: bool) -> bool:
         """
         Enforce statistical grounding.
 

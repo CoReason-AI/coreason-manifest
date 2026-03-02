@@ -15,7 +15,6 @@ These schemas enforce Ontological Reification, Absolute Provenance,
 and Statistical Grounding before any AI data is allowed into the system memory.
 """
 
-
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
