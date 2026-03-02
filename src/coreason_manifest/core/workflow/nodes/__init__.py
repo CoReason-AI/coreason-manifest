@@ -23,7 +23,7 @@ AnyNode = Annotated[
     | EmergenceInspectorNode
     | VisualInspectorNode
     | PlaceholderNode,
-    Field(discriminator="type")
+    Field(discriminator="type"),
 ]
 
 __all__ = [
