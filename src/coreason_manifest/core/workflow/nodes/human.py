@@ -94,10 +94,6 @@ class HumanNode(Node):
         description="Map of SteeringCommands or string options to target Node IDs. If None, flow defaults to linear.",
     )
 
-    is_security_guard: Literal[True] = Field(
-        True, description="Indicates this node acts as a valid cryptographic barrier for high-risk execution."
-    )
-
     collaboration_mode: CollaborationMode = Field(default=CollaborationMode.APPROVAL_ONLY)
     render_strategy: RenderStrategy = Field(default=RenderStrategy.JSON_FORMS)
     ui_contract: AdaptiveUIContract | None = Field(
