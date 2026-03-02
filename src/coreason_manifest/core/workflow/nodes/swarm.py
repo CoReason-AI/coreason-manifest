@@ -34,6 +34,33 @@ class CALConfig(BaseModel):
     ] = StatisticalStoppingRule.CMH_CORMACK_GROSSMAN
 
 
+class DeduplicationStrategy(StrEnum):
+    EXACT_MATCH = "exact_match"
+    BRAMER_METHOD = "bramer_method"
+    EPISTEMIC_LINKAGE = "epistemic_linkage"
+
+
+class DeduplicationConfig(BaseModel):
+    """Configuration for epistemic entity resolution and deduplication."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    strategy: Annotated[
+        DeduplicationStrategy, Field(description="The algorithmic approach to resolving duplicate records.")
+    ]
+    similarity_threshold: Annotated[
+        float, Field(ge=0.0, le=1.0, description="Threshold for fuzzy matching during epistemic linkage.")
+    ] = 0.85
+    retain_lineage: Annotated[
+        bool,
+        Field(
+            description=(
+                "If True, merges the deleted duplicate's IDs (e.g., preprint DOI) into the surviving record's metadata."
+            )
+        ),
+    ] = True
+
+
 class TournamentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
     bracket_style: Literal["single_elimination", "round_robin"] = "single_elimination"
@@ -79,13 +106,26 @@ class SwarmNode(Node):
     ] = 0.0
 
     reducer_function: (
-        Literal["concat", "vote", "summarize", "tournament", "tabular_join", "meta_analysis_matrix"] | None
+        Literal[
+            "concat",
+            "vote",
+            "summarize",
+            "tournament",
+            "tabular_join",
+            "meta_analysis_matrix",
+            "epistemic_deduplication",
+        ]
+        | None
     ) = Field(..., description="How to combine results.", examples=["concat"])
 
     tournament_config: TournamentConfig | None = None
 
     cal_config: CALConfig | None = Field(
         None, description="Active learning bounds for high-volume screening. If set, overrides standard exhaustion."
+    )
+
+    deduplication_config: DeduplicationConfig | None = Field(
+        None, description="Required if reducer_function is set to 'epistemic_deduplication'."
     )
 
     sub_swarm_count: Annotated[
@@ -135,6 +175,11 @@ class SwarmNode(Node):
 
         Raises:
             ManifestError: If reducer is summarize without an aggregator_model."""
+        if self.reducer_function == "epistemic_deduplication" and self.deduplication_config is None:
+            raise ValueError(
+                "SwarmNode with reducer_function='epistemic_deduplication' requires a 'deduplication_config'."
+            )
+
         if self.reducer_function == "tournament" and self.tournament_config is None:
             raise ValueError("SwarmNode with reducer_function='tournament' requires a 'tournament_config'.")
 

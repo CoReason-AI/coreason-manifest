@@ -1,7 +1,7 @@
 # Prosperity-3.0
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.semantic import SemanticRef
@@ -35,6 +35,31 @@ class CognitiveProfile(CoreasonModel):
     )
 
 
+class FederatedSearchConfig(BaseModel):
+    """Contract enforcing that an agent queries multiple mandatory databases to prevent bias."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    minimum_database_count: Annotated[
+        int,
+        Field(
+            ge=1,
+            description="The absolute minimum number of distinct databases that must be queried "
+            "(e.g., 3 for Cochrane).",
+        ),
+    ] = 3
+    mandatory_sources: Annotated[
+        list[str],
+        Field(description="Exact identifiers of required databases (e.g., ['pubmed', 'embase', 'cochrane_central'])."),
+    ]
+    require_grey_literature: Annotated[
+        bool,
+        Field(
+            description="If True, forces the agent to include non-peer-reviewed registries (e.g., ClinicalTrials.gov)."
+        ),
+    ] = True
+
+
 class AgentNode(Node):
     """Executes a cognitive task using a CognitiveProfile configuration."""
 
@@ -66,4 +91,9 @@ class AgentNode(Node):
         default_factory=list,
         description="Local escalation rules for this agent.",
         examples=[[{"condition": "confidence < 0.5", "role": "supervisor"}]],
+    )
+    federated_search: FederatedSearchConfig | None = Field(
+        None,
+        description="If set, computationally binds this agent to a multi-database execution "
+        "contract to prevent database bias.",
     )
