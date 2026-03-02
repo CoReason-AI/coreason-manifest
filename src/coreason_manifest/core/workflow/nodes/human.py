@@ -8,7 +8,6 @@ from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.presentation import AdaptiveUIContract, RenderStrategy
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import VariableID
 from coreason_manifest.core.security.compliance import RemediationAction
 
@@ -72,7 +71,6 @@ class SteeringConfig(CoreasonModel):
         return self
 
 
-@register_node
 class HumanNode(Node):
     """Human-in-the-Loop interaction node for approval, shadow, or hijack modes."""
 

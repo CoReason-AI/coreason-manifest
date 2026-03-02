@@ -3,13 +3,11 @@ from typing import Literal
 
 from pydantic import Field
 
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import CoercibleStringList
 
 from .base import Node
 
 
-@register_node
 class PlaceholderNode(Node):
     """A node that acts as a placeholder requiring specific capabilities to be fulfilled."""
 

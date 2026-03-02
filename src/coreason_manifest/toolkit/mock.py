@@ -233,10 +233,11 @@ class MockFactory:
 
                 # Mock inputs injection (if applicable) would go to the first node's context
                 for n_id in expected_path:
-                    node = graph.nodes.get(n_id)
-                    if not node:
+                    n = graph.nodes.get(n_id)
+                    if n is None:
                         logger.warning(f"Eval requested node {n_id} not in graph.")
                         break
+                    node = n
 
                     exec_records = self._execute_node(
                         node, execution_map, prev_hashes, resolver, fuzzing_vars, chaos_config

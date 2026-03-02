@@ -7,7 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.compute.reasoning import ModelRef
 from coreason_manifest.core.oversight.governance import OperationalPolicy
-from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import ProfileID, VariableID
 from coreason_manifest.core.security.compliance import RemediationAction
 
@@ -43,7 +42,6 @@ class TournamentConfig(BaseModel):
     )
 
 
-@register_node
 class SwarmNode(Node):
     """Dynamic Swarm Spawning. Spins up N ephemeral worker agents to process a dataset/workload in parallel."""
 

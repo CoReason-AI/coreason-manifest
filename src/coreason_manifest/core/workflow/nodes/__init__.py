@@ -1,7 +1,7 @@
 # Prosperity-3.0
-from typing import Any
+from typing import Annotated
 
-from coreason_manifest.core.primitives.registry import resolve_node_union
+from pydantic import Field
 
 from .agent import AgentNode, CognitiveProfile
 from .base import Constraint, ConstraintOperator, LockConfig, Node
@@ -13,8 +13,18 @@ from .swarm import SwarmNode
 from .system import PlaceholderNode
 from .visual_oversight import MultimodalConstraint, VisualInspectorNode
 
-# AnyNode is now resolved dynamically
-AnyNode: Any = resolve_node_union()
+AnyNode = Annotated[
+    AgentNode
+    | HumanNode
+    | PlannerNode
+    | SwarmNode
+    | SwitchNode
+    | InspectorNode
+    | EmergenceInspectorNode
+    | VisualInspectorNode
+    | PlaceholderNode,
+    Field(discriminator="type")
+]
 
 __all__ = [
     "AgentNode",

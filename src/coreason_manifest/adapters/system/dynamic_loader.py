@@ -23,7 +23,6 @@ from yaml.nodes import MappingNode
 
 from coreason_manifest.adapters.system.io_jail import ManifestIO, SecurityViolationError
 from coreason_manifest.core.common.exceptions import SecurityJailViolationError
-from coreason_manifest.core.system.rebuild import rebuild_manifest
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.ports.system import ManifestLoader
 
@@ -494,7 +493,6 @@ class LocalFileLoader(ManifestLoader):
         kind = data.get("kind")
 
         # Ensure all string forward references are resolved before validation
-        rebuild_manifest()
 
         if kind == "LinearFlow":
             return LinearFlow.model_validate(data)

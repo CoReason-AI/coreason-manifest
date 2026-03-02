@@ -1216,10 +1216,15 @@ def _validate_budget_constraints(flow: LinearFlow | GraphFlow) -> list[Complianc
                         if attempts > 5:
                             # Check for high cost model or RateCard
                             is_high_cost = False
-                            if getattr(node, "profile", None) and getattr(node.profile, "reasoning", None):
-                                primary_prof = getattr(node.profile.reasoning.models, "primary_profile", None)
-                                if primary_prof and getattr(primary_prof, "pricing", None):
-                                    is_high_cost = True
+                            profile = getattr(node, "profile", None)
+                            if profile:
+                                reasoning = getattr(profile, "reasoning", None)
+                                if reasoning:
+                                    models = getattr(reasoning, "models", None)
+                                    if models:
+                                        primary_prof = getattr(models, "primary_profile", None)
+                                        if primary_prof and getattr(primary_prof, "pricing", None):
+                                            is_high_cost = True
 
                             if is_high_cost:
                                 errors.append(

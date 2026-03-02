@@ -41,7 +41,6 @@ from coreason_manifest.core.oversight.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.core.primitives.registry import resolve_node_union
 from coreason_manifest.core.primitives.types import WasmMiddlewareDef
 from coreason_manifest.core.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
 from coreason_manifest.core.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
@@ -72,20 +71,11 @@ from coreason_manifest.core.workflow.nodes import (
     SwitchNode,
 )
 
-AnyNodeUnion = resolve_node_union()
-
-# Use cast or string typing to avoid strict mypy 'ModelMetaclass' errors for model_rebuild
-Graph.model_rebuild()
-LinearFlow.model_rebuild()
-GraphFlow.model_rebuild()
-FlowDefinitions.model_rebuild()
-
 __all__ = [
     # Nodes
     "AgentNode",
     # Flow
     "AnyNode",
-    "AnyNodeUnion",
     # Engines
     "AttentionReasoning",
     # Governance

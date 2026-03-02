@@ -60,8 +60,12 @@ class OpenAIGenerativeAdapter(GenerativeAdapter):
 
         profile = node.profile
 
-        if profile.reasoning and profile.reasoning.model:
-            model = profile.reasoning.model
+        if profile.reasoning and getattr(profile.reasoning, "model", None):
+            # If it's a ModelRef or string we assume string logic works downstream
+            # or handle type properly
+            model_val = getattr(profile.reasoning, "model")
+            if isinstance(model_val, str):
+                model = model_val
 
         # Instructions: Combine role and persona
         instructions = f"{profile.role} {profile.persona}"

@@ -207,8 +207,8 @@ class Graph(CoreasonModel):
 
         visited: set[str] = set()
         rec_stack: set[str] = set()
-        for node in valid_ids:
-            if node not in visited and has_cycle(node, visited, rec_stack):
+        for n in valid_ids:
+            if n not in visited and has_cycle(n, visited, rec_stack):
                 raise ManifestError.critical_halt(
                     code=ManifestErrorCode.VAL_TOPOLOGY_CYCLE,
                     message="Execution graphs must be strict Directed Acyclic Graphs (DAGs). Cycle detected.",
