@@ -1,7 +1,4 @@
 from coreason_manifest.core.domains.mcp_contracts import MCPOperationSequence
-from coreason_manifest.core.domains.scientific_vis import HierarchicalBlueprint, SciVisIntent
-from coreason_manifest.core.domains.scivis_spatial import SpatialLayoutBlueprint
-from coreason_manifest.core.domains.scivis_style import DesignSystemConfig
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.workflow.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow
 from coreason_manifest.core.workflow.nodes import (
@@ -13,6 +10,9 @@ from coreason_manifest.core.workflow.nodes import (
     SwitchNode,
 )
 from coreason_manifest.core.workflow.nodes.visual_oversight import VisBenchRubricConfig, VisualInspectorNode
+from coreason_manifest.templates.scientific_vis import HierarchicalBlueprint, SciVisIntent
+from coreason_manifest.templates.scivis_spatial import SpatialLayoutBlueprint
+from coreason_manifest.templates.scivis_style import DesignSystemConfig
 
 
 def get_sota_scivis_topology() -> GraphFlow:

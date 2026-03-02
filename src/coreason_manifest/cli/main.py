@@ -15,10 +15,15 @@ from importlib.metadata import PackageNotFoundError, version
 import typer
 from rich import print as rprint
 
-from coreason_manifest.adapters.system.dynamic_loader import load_flow_from_file
-from coreason_manifest.core.domains.scientific_vis import HierarchicalBlueprint
-from coreason_manifest.core.workflow.topologies.sci_vis_flow import get_sota_scivis_topology
-from coreason_manifest.toolkit import export_html_diagram, render_agent_card, to_mermaid, validate_flow
+from coreason_manifest.templates.sci_vis_flow import get_sota_scivis_topology
+from coreason_manifest.templates.scientific_vis import HierarchicalBlueprint
+from coreason_manifest.toolkit import (
+    WorkspaceManager,
+    export_html_diagram,
+    render_agent_card,
+    to_mermaid,
+    validate_flow,
+)
 
 app = typer.Typer(help="CoReason Manifest CLI")
 
@@ -104,7 +109,8 @@ def export_diagram(
 
 def _handle_validate(file_path: str) -> int:
     try:
-        flow = load_flow_from_file(file_path)
+        workspace = WorkspaceManager()
+        flow = workspace.load_flow(file_path)
     except (FileNotFoundError, ValueError) as e:
         rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
         raise typer.Exit(code=1) from e
@@ -126,7 +132,8 @@ def _handle_validate(file_path: str) -> int:
 
 def _handle_visualize(file_path: str) -> int:
     try:
-        flow = load_flow_from_file(file_path)
+        workspace = WorkspaceManager()
+        flow = workspace.load_flow(file_path)
     except (FileNotFoundError, ValueError) as e:
         rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
         raise typer.Exit(code=1) from e
@@ -152,7 +159,8 @@ def generate_docs(file: str = typer.Argument(..., help="Path to the manifest fil
     Generate an Agent Card (Markdown) from the manifest
     """
     try:
-        flow = load_flow_from_file(file)
+        workspace = WorkspaceManager()
+        flow = workspace.load_flow(file)
     except (FileNotFoundError, ValueError) as e:
         rprint(f"[red]❌ Error loading file: {e}[/red]", file=sys.stderr)
         raise typer.Exit(code=1) from e

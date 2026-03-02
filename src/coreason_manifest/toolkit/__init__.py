@@ -3,6 +3,7 @@ from coreason_manifest.toolkit.diff_engine import SemanticPatchReport, apply_rew
 from coreason_manifest.toolkit.exporter import render_agent_card
 from coreason_manifest.toolkit.validator import validate_flow
 from coreason_manifest.toolkit.visualizer import export_html_diagram, to_mermaid
+from coreason_manifest.toolkit.workspace import WorkspaceManager
 
 __all__ = [
     "AgentBuilder",
@@ -10,6 +11,7 @@ __all__ = [
     "NewLinearFlow",
     "PlannerBuilder",
     "SemanticPatchReport",
+    "WorkspaceManager",
     "apply_rewind",
     "compare_flows",
     "export_html_diagram",
