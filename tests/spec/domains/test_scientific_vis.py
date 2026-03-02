@@ -202,6 +202,19 @@ def test_vector_render_payload() -> None:
     assert payload.raster_preview_url is None
 
 
+def test_data_artifact_element():
+    from coreason_manifest.spec.domains.scientific_vis import DataArtifactElement
+
+    element = DataArtifactElement(
+        id="ele-001",
+        semantic_role="distribution_scatter_plot",
+        artifact_uri="s3://data/artifacts/scatter.svg",
+        maintain_aspect_ratio=True,
+    )
+    assert element.id == "ele-001"
+    assert element.semantic_role == "distribution_scatter_plot"
+    assert element.artifact_uri == "s3://data/artifacts/scatter.svg"
+    assert element.maintain_aspect_ratio is True
 def test_parse_equation_element() -> None:
     json_payload = (
         '{"element_type": "EQUATION", "id": "eq1", "semantic_role": "formula", '
