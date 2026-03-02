@@ -81,7 +81,6 @@ from coreason_manifest.core.workflow.nodes import (
     InspectorNode,
     PlannerNode,
 )
-from coreason_manifest.core.workflow.nodes.base import Constraint, ConstraintOperator
 from coreason_manifest.core.workflow.nodes.human import CollaborationMode
 from coreason_manifest.toolkit.validator import validate_flow
 
