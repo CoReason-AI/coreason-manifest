@@ -1,7 +1,6 @@
 from typing import Any
 
-from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
-from coreason_manifest.core.workflow.topology import get_unified_topology
+from coreason_manifest.core.workflow import GraphFlow, LinearFlow, get_unified_topology
 
 
 def flow_to_langchain_config(flow: LinearFlow | GraphFlow) -> dict[str, Any]:

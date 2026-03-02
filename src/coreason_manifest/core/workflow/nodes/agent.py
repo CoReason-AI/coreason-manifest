@@ -10,7 +10,7 @@ from coreason_manifest.core.oversight.governance import OperationalPolicy
 from coreason_manifest.core.oversight.intervention import EscalationCriteria
 from coreason_manifest.core.primitives.registry import register_node
 from coreason_manifest.core.primitives.types import CoercibleStringList, ProfileID
-from coreason_manifest.core.state.memory import MemorySubsystem
+from coreason_manifest.core.state import MemorySubsystem
 
 from .base import Node
 

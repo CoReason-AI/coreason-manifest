@@ -4,7 +4,7 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.state.ephemeral import LocalStateManifest
+from coreason_manifest.core.state import LocalStateManifest
 
 from .client_actions import ClientActionMap
 from .suspense import SuspenseConfig

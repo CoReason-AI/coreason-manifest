@@ -1,5 +1,4 @@
-from coreason_manifest.core.workflow.flow import Edge, GraphFlow, LinearFlow
-from coreason_manifest.core.workflow.nodes import AnyNode
+from coreason_manifest.core.workflow import AnyNode, Edge, GraphFlow, LinearFlow
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:

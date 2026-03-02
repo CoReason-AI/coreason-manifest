@@ -24,7 +24,7 @@ from yaml.nodes import MappingNode
 from coreason_manifest.adapters.system.io_jail import ManifestIO, SecurityViolationError
 from coreason_manifest.core.common.exceptions import SecurityJailViolationError
 from coreason_manifest.core.system.rebuild import rebuild_manifest
-from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.core.workflow import GraphFlow, LinearFlow
 
 __all__ = [
     "RuntimeSecurityWarning",

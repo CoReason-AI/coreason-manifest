@@ -6,7 +6,7 @@ from pydantic import Field
 
 if TYPE_CHECKING:
     from coreason_manifest.core.compute.reasoning import BaseReasoning
-    from coreason_manifest.core.workflow.nodes import Node
+    from coreason_manifest.core.workflow import Node
 
 
 TNode = TypeVar("TNode", bound="Node")
