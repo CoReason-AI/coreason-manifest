@@ -1,3 +1,4 @@
+from coreason_manifest.core.workflow.exceptions import LineageIntegrityError
 from coreason_manifest.core.workflow.flow import Blackboard, Edge, Graph, GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import (
     AgentNode,
@@ -18,6 +19,7 @@ __all__ = [
     "GraphFlow",
     "HumanNode",
     "InspectorNode",
+    "LineageIntegrityError",
     "LinearFlow",
     "PlannerNode",
 ]
