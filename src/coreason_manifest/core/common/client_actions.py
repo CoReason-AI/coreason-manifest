@@ -82,7 +82,11 @@ class ClientActionMap(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_trigger(self) -> "ClientActionMap":
-        """Enforce that client actions are explicitly triggered by user interaction."""
+        """Enforce that client actions are explicitly triggered by user interaction.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.trigger.lower() in ("on_mount", "on_render"):
             raise ValueError(
                 f"Invalid trigger '{self.trigger}'. Client actions must be explicitly triggered by user interaction."

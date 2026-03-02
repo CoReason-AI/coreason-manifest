@@ -171,10 +171,12 @@ class SwarmNode(Node):
 
     @model_validator(mode="after")
     def validate_reducer_requirements(self) -> "SwarmNode":
-        """Enforce strategy and policy requirements for swarm topologies.
+        """Enforce semantic consistency between swarm configuration and chosen reducer function.
 
         Raises:
-            ManifestError: If reducer is summarize without an aggregator_model."""
+            ManifestError: Yields a CRITICAL execution fault on validation or security policy failure.
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.reducer_function == "epistemic_deduplication" and self.deduplication_config is None:
             raise ValueError(
                 "SwarmNode with reducer_function='epistemic_deduplication' requires a 'deduplication_config'."

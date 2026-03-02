@@ -3,7 +3,7 @@ from coreason_manifest.core.workflow.nodes import AnyNode
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
-    """Find strongly connected components using Tarjan's algorithm."""
+    """Execute Tarjan's algorithm to identify strongly connected components."""
     visited: set[str] = set()
     stack: list[str] = []
     on_stack: set[str] = set()
@@ -13,7 +13,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
     id_counter = 0
 
     def dfs(at: str) -> None:
-        """Perform depth-first search for strongly connected components."""
+        """Perform recursive depth-first search for cycle and component detection."""
         nonlocal id_counter
         stack.append(at)
         on_stack.add(at)
@@ -46,7 +46,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
 
 
 def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> set[str]:
-    """Find all nodes reachable from the entry points using BFS."""
+    """Perform breadth-first traversal discovering nodes reachable from entries."""
     reachable = set(entry_nodes)
     queue = list(entry_nodes)
 
@@ -61,7 +61,11 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
 
 
 def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], list[Edge]]:
-    """Return a unified view of the flow topology nodes and edges."""
+    """Extract unified topological edges resolving polymorphic node linkages.
+
+    Raises:
+        ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+    """
     if isinstance(flow, GraphFlow):
         return list(flow.graph.nodes.values()), flow.graph.edges
     if isinstance(flow, LinearFlow):

@@ -137,7 +137,11 @@ class SemanticMemoryConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_epistemic_strategy(self) -> "SemanticMemoryConfig":
-        """Enforce that epistemic retrieval strategy requires epistemic tracking."""
+        """Enforce functional boundary limits constraining active learning strategies.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.retrieval_strategy == RetrievalStrategy.EPISTEMIC and not self.epistemic_tracking:
             raise ValueError("If retrieval_strategy is set to EPISTEMIC, epistemic_tracking must be True.")
         return self

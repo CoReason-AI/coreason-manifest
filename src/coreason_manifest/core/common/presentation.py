@@ -39,7 +39,11 @@ class UIEventMap(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_zero_trust_mapping(self) -> "UIEventMap":
-        """Enforce that payload_mapping requires mutates_variables and targets are allowed."""
+        """Validate presentation payload mappings against Zero-Trust security controls.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.payload_mapping:
             if not self.mutates_variables:
                 raise ValueError("payload_mapping requires mutates_variables to be defined.")
@@ -109,7 +113,7 @@ class AdaptiveUIContract(CoreasonModel):
     @model_validator(mode="before")
     @classmethod
     def migrate_legacy_widget(cls, data: Any) -> Any:
-        """Migrate legacy widget dictionary structure to layout nodes."""
+        """Migrate legacy unversioned widget definitions to the current v1 semantic schema."""
         if isinstance(data, dict):
             layout = data.get("layout")
             widget_id = data.get("widget_id")

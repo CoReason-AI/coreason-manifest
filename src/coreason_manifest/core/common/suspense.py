@@ -26,7 +26,11 @@ class SuspenseConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_reserved_height(self) -> "SuspenseConfig":
-        """Enforce that reserved_height matches valid CSS dimension syntax."""
+        """Enforce dimensional constraints on visual presentation slots.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.reserved_height is not None:
             # Check if it's a valid CSS dimension
             pattern = re.compile(r"^\d+(?:\.\d+)?(?:px|rem|em|vh|vw|%)$")

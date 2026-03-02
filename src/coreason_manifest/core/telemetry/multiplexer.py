@@ -11,7 +11,7 @@ class AsyncSSEMultiplexer:
     """
 
     def __init__(self) -> None:
-        """Initialize the multiplexer with a queue."""
+        """Initialize instance."""
         self._queue: asyncio.Queue[StreamPacket] | None = None
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
@@ -20,17 +20,12 @@ class AsyncSSEMultiplexer:
         return self._queue
 
     async def push(self, packet: StreamPacket) -> None:
-        """
-        Push a stream packet into the buffer.
-        """
+        """Queue incoming telemetry packets onto internal memory buffer bounds."""
         queue = await self._get_queue()
         await queue.put(packet)
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
-        """
-        Consume the queue and yield strings formatted as SSE.
-        Terminates upon encountering a StreamCloseEnvelope.
-        """
+        """Yield continuous Server-Sent Events consuming internal buffers."""
         queue = await self._get_queue()
         while True:
             packet = await queue.get()

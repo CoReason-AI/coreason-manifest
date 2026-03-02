@@ -99,7 +99,11 @@ class ToolAccessPolicy(CoreasonModel):
     @model_validator(mode="before")
     @classmethod
     def set_defaults(cls, data: Any) -> Any:
-        """Enforce that critical tools require authentication."""
+        """Enforce baseline operational requirements on incoming component payload.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if isinstance(data, dict):
             # Functional purity: copy data
             data = data.copy()
@@ -222,13 +226,13 @@ class Governance(CoreasonModel):
     @field_validator("active_middlewares")
     @classmethod
     def deduplicate_middlewares(cls, v: list[MiddlewareID]) -> list[MiddlewareID]:
-        """Ensure middleware execution pipeline contains unique references while preserving order."""
+        """Deduplicate middleware identifiers while preserving topological execution order."""
         return list(dict.fromkeys(v))
 
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:
-        """Normalize allowed domains to stripped lowercase strings."""
+        """Enforce explicit canonicalization across all allowed operational domains."""
         return [d.strip().lower() for d in v]
 
 
@@ -247,8 +251,11 @@ class CircuitOpenError(Exception):
 def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:
     """Enforce circuit breaker policy prior to execution.
 
+    Mutates state_store to reflect state changes.
+
     Raises:
-        ManifestError: If the circuit is open and timeout has not expired."""
+        ManifestError: Yields a CRITICAL execution fault on validation or security policy failure.
+    """
     # Get or create state
     state = state_store.get(node_id)
     if not state:
@@ -280,7 +287,10 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
 
 
 def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, CircuitState]) -> None:
-    """Record an execution failure and conditionally open the circuit."""
+    """Record a failed execution, transitioning circuit to open if threshold exceeded.
+
+    Mutates state_store to reflect state changes.
+    """
     state = state_store.get(node_id)
     if not state:
         state = CircuitState()
@@ -303,7 +313,10 @@ def record_failure(node_id: str, policy: CircuitBreaker, state_store: dict[str, 
 
 
 def record_success(node_id: str, state_store: dict[str, CircuitState]) -> None:
-    """Record an execution success and reset the circuit to a closed state."""
+    """Record successful execution, resetting failure metrics and closing circuit.
+
+    Mutates state_store to reflect state changes.
+    """
     state = state_store.get(node_id)
     if state:
         new_state = state.model_copy(update={"state": "closed", "failure_count": 0, "last_failure_time": None})

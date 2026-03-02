@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
-    """Helper to resolve profile and get capabilities."""
+    """Extract required capabilities recursively from a node's profile reasoning."""
     reasoning = None
     if isinstance(node, AgentNode):
         # Resolve profile
@@ -50,7 +50,7 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
 
 
 def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]) -> list[ComplianceReport]:
-    """0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)"""
+    """Enforce strict domain whitelisting on all registered tools against the policy."""
     reports: list[ComplianceReport] = []
     allowed_domains_raw = []
     if flow.governance and flow.governance.allowed_domains:
@@ -96,7 +96,7 @@ def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, An
 def _enforce_red_button_rule(
     nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]
 ) -> list[ComplianceReport]:
-    """1. Capability Analysis & Red Button Rule"""
+    """Enforce the Red Button Rule ensuring critical nodes are topologically guarded by HumanNodes."""
     reports: list[ComplianceReport] = []
     for node in nodes:
         caps = _get_capabilities(node, flow)
@@ -196,7 +196,7 @@ def _enforce_red_button_rule(
 
 
 def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
-    """5. Topology Analysis (GraphFlow Only)"""
+    """Execute Tarjan's algorithm to identify and optionally prune unreachable nodes (Utility Islands)."""
     reports: list[ComplianceReport] = []
 
     # Build Adjacency List
@@ -325,7 +325,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
 
 def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 4: Ensure Evolutionary pipelines are guarded by Symbolic Execution."""
+    """Ensure evolutionary pipelines are topologically guarded by symbolic execution."""
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -384,7 +384,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
 
 
 def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Phase 2 Cohesion: Ensure Island Model swarms are utilizing Evolutionary Reasoning."""
+    """Bind evolutionary capabilities to epistemically constrained island environments."""
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -420,7 +420,7 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
 
 
 def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 5 Cohesion: Meta-Analysis swarms MUST define interoperability exports."""
+    """Validate that meta-analysis endpoints satisfy clinical interoperability requirements."""
     nodes, _ = get_unified_topology(flow)
 
     return [
@@ -449,7 +449,7 @@ def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[C
 
 
 def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion Rule: Meta-Analysis swarms MUST enforce visual bounding box provenance."""
+    """Enforce strict visual bounding box provenance for regulatory-grade meta-analyses."""
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -491,7 +491,7 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
 
 
 def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion Rule: PRISMA-S Search generation MUST be guarded by an Ontological Validator."""
+    """Ensure PRISMA-S pipeline outputs are guarded by Ontological validation."""
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -555,7 +555,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
 
 
 def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 6 Cohesion: Federated Search MUST be peer-reviewed by a PRESS-2015 Council."""
+    """Require PRESS-2015 peer-review council for federated search endpoints."""
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -609,7 +609,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
 
 
 def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 6 Cohesion: Conformal Active Learning MUST be preceded by Epistemic Deduplication."""
+    """Prevent double-counting in Conformal Active Learning via epistemic deduplication."""
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -658,16 +658,7 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """
-    Enforces security policies and capability contracts.
-
-    1. Capability Analysis: Ensures high-risk capabilities are declared.
-    2. Topology Check (Red Button Rule): Critical nodes must be guarded by HumanNode.
-    3. Swarm Safety: Recursively checks worker profiles in Swarms.
-    4. Domain Policy: Checks tool URLs against allowed domains (Strict Canonicalization).
-    5. Topology Analysis: Checks for hazardous utility islands using Tarjan's algorithm.
-    6. Neuro-Symbolic Gatekeeping: Ensure Evolutionary pipelines are guarded by Symbolic Execution.
-    """
+    """Execute comprehensive security, compliance, and topological policy checks."""
     reports: list[ComplianceReport] = []
 
     # Extract all nodes
@@ -715,10 +706,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
 
 def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
-    """
-    Checks if the target node is topologically guarded by a HumanNode.
-    Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
-    """
+    """Verify topological guarding of a target node by traversing the adjacency graph."""
     nodes, edges = get_unified_topology(flow)
 
     all_ids = {n.id for n in nodes}

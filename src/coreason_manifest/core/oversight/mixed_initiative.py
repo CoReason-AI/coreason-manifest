@@ -16,7 +16,11 @@ class AllocationRule(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_sandbox(cls, v: str) -> str:
-        """Validate the condition string using the SecurityVisitor."""
+        """Enforce functional purity inside conditional sandboxes.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if not v or not v.strip():
             raise ValueError("Condition string cannot be empty.")
         try:

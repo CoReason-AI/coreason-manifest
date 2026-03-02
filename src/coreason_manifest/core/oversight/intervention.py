@@ -35,7 +35,11 @@ class EscalationCriteria(CoreasonModel):
     @field_validator("condition")
     @classmethod
     def validate_python_expression(cls, v: str) -> str:
-        """Validate the condition string using the SecurityVisitor."""
+        """Execute safe AST parsing to block dangerous function calls in Python constraints.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if not v or not v.strip():
             raise ValueError("Condition string cannot be empty.")
         try:

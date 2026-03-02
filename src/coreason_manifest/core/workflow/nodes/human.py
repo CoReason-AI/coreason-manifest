@@ -44,10 +44,11 @@ class SteeringConfig(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_mutation_permissions(self) -> "SteeringConfig":
-        """Enforce that allowed_targets requires allow_variable_mutation.
+        """Validate interaction boundary schemas against specified human interaction bounds.
 
         Raises:
-            ManifestError: For structural violations."""
+            ManifestError: Yields a CRITICAL execution fault on validation or security policy failure.
+        """
         if not self.allow_variable_mutation and self.allowed_targets is not None:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_HUMAN_STEERING,
@@ -112,10 +113,11 @@ class HumanNode(Node):
 
     @model_validator(mode="after")
     def validate_interaction_mode(self) -> "HumanNode":
-        """Enforce configuration requirements for various human collaboration modes.
+        """Ensure defined modes map correctly into valid human-in-the-loop states.
 
         Raises:
-            ManifestError: For structural violations."""
+            ManifestError: Yields a CRITICAL execution fault on validation or security policy failure.
+        """
         if self.collaboration_mode == CollaborationMode.SHADOW and (
             self.input_schema is not None or self.options is not None
         ):

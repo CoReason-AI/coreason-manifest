@@ -13,7 +13,7 @@ class LineageIntegrityError(ManifestError):
     """
 
     def __init__(self, message: str) -> None:
-        """Initialize LineageIntegrityError with a critical security fault."""
+        """Initialize the core exception envelope backed by a semantic fault."""
         super().__init__(
             SemanticFault(
                 error_code=ManifestErrorCode.SEC_LINEAGE_001,

@@ -50,7 +50,7 @@ class AgentRequest(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def enforce_lineage_rooting(cls, data: Any) -> Any:
-        """Promote current request_id to root_request_id if no root and parent exist."""
+        """Ensure telemetry metadata payload roots trace identifiers securely."""
         if isinstance(data, dict):
             # COPY data to avoid side effects on the input dict
             data = data.copy()
@@ -80,10 +80,11 @@ class AgentRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "AgentRequest":
-        """Enforce strict trace integrity and lineage validity.
+        """Validate referential bounds between internal spans and lineage attributes.
 
         Raises:
-            ManifestError: If lineage integrity is broken."""
+            ManifestError: Yields a CRITICAL execution fault on validation or security policy failure.
+        """
         errors = []
 
         # Rule 1: Orphaned trace check (Parent exists, but Root missing)

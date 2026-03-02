@@ -23,7 +23,11 @@ class LocalVariable(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_default_type(self) -> "LocalVariable":
-        """Enforce that the default value matches the defined variable type."""
+        """Enforce type safety checks aligning default values with schema boundaries.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.default is not None:
             if self.type == LocalVariableType.STRING and not isinstance(self.default, str):
                 raise ValueError("Default value must be a string for STRING type.")

@@ -34,7 +34,11 @@ class JSONPatchOperation(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_rfc6902_semantics(self) -> "JSONPatchOperation":
-        """Enforce RFC 6902 semantics for path operations."""
+        """Validate that operational paths strictly align to JSON Patch RFC6902 specifications.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         # Rule A: Move/Copy require 'from'
         if self.op in (PatchOp.MOVE, PatchOp.COPY) and self.from_ is None:
             raise ValueError(f"RFC 6902 Violation: operation '{self.op}' requires a 'from' path.")

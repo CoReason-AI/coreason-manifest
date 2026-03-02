@@ -176,13 +176,17 @@ class BaseReasoning(BaseModel):
 
     @model_validator(mode="after")
     def _validate_adversarial(self) -> "BaseReasoning":
-        """Enforce that adversarial review strategy requires an adversarial config."""
+        """Enforce safety invariants preventing ungrounded reasoning in adversarial contexts.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.review_strategy == ReviewStrategy.ADVERSARIAL and self.adversarial_config is None:
             raise ValueError("adversarial_config is required when review_strategy is ADVERSARIAL")
         return self
 
     def required_capabilities(self) -> list[str]:
-        """Return the list of required capabilities."""
+        """Resolve capability matrices bounding required systemic privileges."""
         return []
 
 
@@ -370,7 +374,11 @@ class EnsembleReasoning(BaseReasoning):
 
     @model_validator(mode="after")
     def validate_verification_model(self) -> "EnsembleReasoning":
-        """Enforce that verification mode requires a similarity model."""
+        """Enforce bounded resolution contexts specifying model requirements.
+
+        Raises:
+            ValueError: Yields a validation error if input logic fails syntactic or topological constraints.
+        """
         if self.verification_mode in ("always", "ambiguous_only") and self.similarity_model is None:
             raise ValueError(
                 f"A 'similarity_model' is strictly required when verification_mode is '{self.verification_mode}'."
@@ -409,7 +417,7 @@ class RedTeamingReasoning(BaseReasoning):
 
     @property
     def to_node_model(self) -> Any:
-        """Return None."""
+        """Resolve logical configuration definitions into bounded inference node graphs."""
         return None
 
 
@@ -453,7 +461,7 @@ class ComputerUseReasoning(BaseReasoning):
     ] = 1000
 
     def required_capabilities(self) -> list[str]:
-        """Return the list of required capabilities."""
+        """Resolve capability matrices bounding required systemic privileges."""
         return [NodeCapability.COMPUTER_USE.value]
 
 
@@ -469,7 +477,7 @@ class CodeExecutionReasoning(BaseReasoning):
     timeout_seconds: Annotated[float, Field(description="Max execution time.")] = 30.0
 
     def required_capabilities(self) -> list[str]:
-        """Return the list of required capabilities."""
+        """Resolve capability matrices bounding required systemic privileges."""
         return [NodeCapability.CODE_EXECUTION.value]
 
 
@@ -533,7 +541,7 @@ class WasmExecutionReasoning(BaseReasoning):
     ]
 
     def required_capabilities(self) -> list[str]:
-        """Return the list of required capabilities."""
+        """Resolve capability matrices bounding required systemic privileges."""
         return [NodeCapability.WASM_EXECUTION.value]
 
 

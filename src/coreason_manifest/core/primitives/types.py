@@ -102,7 +102,7 @@ class RiskLevel(StrEnum):
 
     @property
     def weight(self) -> int:
-        """Return the numeric weight corresponding to the risk level."""
+        """Calculate weighted score based on explicit priority enumerations."""
         if self == RiskLevel.SAFE:
             return 0
         if self == RiskLevel.STANDARD:
@@ -123,7 +123,7 @@ ProfileID = Annotated[
 
 
 def _coerce_comma_strings(v: Any) -> Any:
-    """Coerce comma-separated strings into lists."""
+    """Split raw comma-delimited strings into strictly typed list bounds."""
     if isinstance(v, str):
         return [item.strip() for item in v.split(",") if item.strip()]
     return v
