@@ -73,10 +73,6 @@ class EmergenceInspectorNode(InspectorNodeBase):
         "emergence_inspector", description="The type of the node.", examples=["emergence_inspector"]
     )
 
-    is_security_guard: Literal[True] = Field(
-        True, description="Indicates this node acts as a valid cryptographic barrier for high-risk execution."
-    )
-
     detect_sycophancy: bool = Field(True, description="Detect if the agent is being sycophantic.", examples=[True])
     detect_power_seeking: bool = Field(True, description="Detect power-seeking behavior.", examples=[True])
     detect_deception: bool = Field(True, description="Detect deceptive behavior.", examples=[True])

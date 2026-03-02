@@ -1,2 +1,6 @@
+import pytest
+
+
+@pytest.mark.evals
 def test_schema_import():
-    pass
+    import coreason_manifest

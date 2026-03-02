@@ -1,10 +1,10 @@
-from typing import Any, Literal
+from typing import Any, Literal, Self
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.exceptions import LineageIntegrityError, ManifestError, ManifestErrorCode
-from coreason_manifest.core.common.identity import IdentityPassport
+from coreason_manifest.core.common.identity import SessionContext
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
 
@@ -40,10 +40,23 @@ class AgentRequest(BaseModel):
     # Execution Manifest
     manifest: GraphFlow | LinearFlow = Field(..., description="The AOT-compiled execution graph.")
 
-    # Strictly bound to IdentityPassport post-merge.
-    passport: IdentityPassport | None = Field(
-        None, description="The cryptographic Zero-Trust Identity Passport for this request."
+    # Context Envelope
+    context: SessionContext | None = Field(
+        None, description="The Zero-Trust Identity Context Envelope for this request."
     )
+
+    # SOTA 2026: The Zero-Trust Identity Envelope.
+    # Typed as Any during parallel development; will be strictly bound to IdentityPassport post-merge.
+    passport: Any | None = Field(None, description="The cryptographic Zero-Trust Identity Passport for this request.")
+
+    def create_child(self, metadata: dict[str, Any]) -> Self:
+        return self.model_copy(
+            update={
+                "request_id": str(uuid4()),
+                "parent_request_id": self.request_id,
+                "metadata": metadata,
+            }
+        )
 
     @model_validator(mode="before")
     @classmethod
