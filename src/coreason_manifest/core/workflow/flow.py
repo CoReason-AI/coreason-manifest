@@ -1,5 +1,6 @@
 import ast
 import datetime
+from collections import deque
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 from uuid import uuid4
@@ -113,11 +114,14 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
-        """Parse the condition string into an Abstract Syntax Tree (AST) and enforce the
-        SecurityVisitor whitelist to prevent arbitrary code execution.
+        """
+        Parse the condition string into an Abstract Syntax Tree (AST) and enforce the SecurityVisitor whitelist.
+
+        Enforces a strict 2048-character limit to prevent AST parsing Denial of Service (DoS) memory exhaustion.
 
         Raises:
-            ValueError: If the condition contains invalid Python syntax or unsafe AST nodes.
+            ValueError: If the condition exceeds 2048 characters, contains invalid Python
+                syntax, or uses unsafe AST nodes.
         """
         if v is None or not v.strip():
             return v
@@ -141,10 +145,14 @@ class Graph(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
-        """Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
+        """
+        Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
+
+        Utilizes Kahn's Algorithm (iterative topological sort) for cycle detection to guarantee memory
+        safety and prevent RecursionErrors on massively deep graphs.
 
         Raises:
-            ManifestError: For structural or cycle violations.
+            ManifestError: For structural violations or if a cycle is detected.
         """
         valid_ids = set(self.nodes.keys())
 
@@ -206,9 +214,7 @@ class Graph(CoreasonModel):
             for neighbor in neighbors:
                 in_degree[neighbor] += 1
 
-        import collections
-
-        queue = collections.deque([n for n in valid_ids if in_degree[n] == 0])
+        queue = deque([n for n in valid_ids if in_degree[n] == 0])
         processed_nodes = 0
 
         while queue:
