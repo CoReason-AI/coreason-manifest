@@ -55,8 +55,7 @@ class DeduplicationConfig(BaseModel):
         bool,
         Field(
             description=(
-                "If True, merges the deleted duplicate's IDs "
-                "(e.g., preprint DOI) into the surviving record's metadata."
+                "If True, merges the deleted duplicate's IDs (e.g., preprint DOI) into the surviving record's metadata."
             )
         ),
     ] = True
