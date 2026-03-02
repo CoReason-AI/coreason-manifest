@@ -64,6 +64,8 @@ class RemediationAction(BaseModel):
         "prune_topology",
         "update_profile",
         "add_symbolic_guard",
+        "add_press_guard",
+        "add_deduplication_guard",
     ]
     target_node_id: str | None = None
     format: Literal["json_patch", "merge_patch"] = "json_patch"
