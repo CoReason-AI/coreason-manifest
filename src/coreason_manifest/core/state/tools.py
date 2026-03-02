@@ -53,6 +53,7 @@ class BaseTool(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_critical_description(self) -> "BaseTool":
+        """Enforce that critical tools have a description."""
         if self.risk_level == "critical" and not self.description:
             raise ValueError(
                 f"Tool '{self.name}' is Critical but lacks a description. Critical tools must be documented."
@@ -61,6 +62,7 @@ class BaseTool(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_lazy_loading(self) -> "BaseTool":
+        """Enforce that lazy loading requires a trigger_intent."""
         if self.load_strategy == LoadStrategy.LAZY and (not self.trigger_intent or not self.trigger_intent.strip()):
             raise ValueError(
                 "A valid, non-empty 'trigger_intent' is required for vector discovery when load_strategy is LAZY."

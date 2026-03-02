@@ -99,6 +99,7 @@ class ToolAccessPolicy(CoreasonModel):
     @model_validator(mode="before")
     @classmethod
     def set_defaults(cls, data: Any) -> Any:
+        """Enforce that critical tools require authentication."""
         if isinstance(data, dict):
             # Functional purity: copy data
             data = data.copy()
@@ -221,12 +222,13 @@ class Governance(CoreasonModel):
     @field_validator("active_middlewares")
     @classmethod
     def deduplicate_middlewares(cls, v: list[MiddlewareID]) -> list[MiddlewareID]:
-        """Ensures middleware execution pipeline contains unique references while preserving order."""
+        """Ensure middleware execution pipeline contains unique references while preserving order."""
         return list(dict.fromkeys(v))
 
     @field_validator("allowed_domains")
     @classmethod
     def validate_allowed_domains(cls, v: list[str]) -> list[str]:
+        """Normalize allowed domains to stripped lowercase strings."""
         return [d.strip().lower() for d in v]
 
 
@@ -246,8 +248,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
     """Enforce circuit breaker policy prior to execution.
 
     Raises:
-        ManifestError: If the circuit is open and timeout has not expired.
-    """
+        ManifestError: If the circuit is open and timeout has not expired."""
     # Get or create state
     state = state_store.get(node_id)
     if not state:

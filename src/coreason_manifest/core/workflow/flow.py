@@ -98,6 +98,7 @@ class Edge(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
+        """Return the condition string unmodified."""
         return v
 
 
@@ -108,6 +109,10 @@ class Graph(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
+        """Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
+
+        Raises:
+            ManifestError: For structural or cycle violations."""
         valid_ids = set(self.nodes.keys())
 
         if not self.nodes:
@@ -163,6 +168,7 @@ class Graph(CoreasonModel):
             adj_map[edge.from_node].add(edge.to_node)
 
         def has_cycle(v: str, visited: set[str], rec_stack: set[str]) -> bool:
+            """Check for cycles using depth-first search."""
             visited.add(v)
             rec_stack.add(v)
             for neighbor in adj_map.get(v, []):
@@ -228,6 +234,7 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
+        """Enforce that published flows have valid metadata, entry point, and no placeholders."""
         if self.status != "published":
             return self
         if getattr(self.metadata, "provenance", None) is None:
@@ -244,6 +251,10 @@ class GraphFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_aot_compilation(self) -> "GraphFlow":
+        """Enforce that published flows have no unresolved semantic references.
+
+        Raises:
+            ManifestError: If unresolved references are found."""
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))
@@ -283,6 +294,10 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":
+        """Enforce that linear sequence is not empty and has unique step IDs.
+
+        Raises:
+            ManifestError: For structural violations."""
         if not self.steps:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_TOPOLOGY_LINEAR_EMPTY,
@@ -303,6 +318,7 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "LinearFlow":
+        """Enforce that published flows have valid metadata, entry point, and no placeholders."""
         if self.status != "published":
             return self
         if getattr(self.metadata, "provenance", None) is None:
@@ -317,6 +333,10 @@ class LinearFlow(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_aot_compilation(self) -> "LinearFlow":
+        """Enforce that published flows have no unresolved semantic references.
+
+        Raises:
+            ManifestError: If unresolved references are found."""
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))

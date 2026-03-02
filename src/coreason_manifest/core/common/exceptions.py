@@ -86,17 +86,19 @@ class ManifestError(Exception):
     """
 
     def __init__(self, fault: SemanticFault) -> None:
+        """Initialize the exception with a SemanticFault."""
         self.fault = fault
         super().__init__(fault.message)
 
     def __str__(self) -> str:
+        """Return the formatted error message with code and severity."""
         return f"[{self.fault.error_code}] {self.fault.message} (Severity: {self.fault.severity})"
 
     @classmethod
     def critical_halt(
         cls, code: ManifestErrorCode | str, message: str, context: dict[str, Any] | None = None
     ) -> "ManifestError":
-        """Factory for critical errors that halt execution."""
+        """Construct a critical ManifestError that halts execution."""
         return cls(
             SemanticFault(
                 error_code=code,
@@ -115,6 +117,7 @@ class SecurityJailViolationError(ManifestError):
     """
 
     def __init__(self, message: str) -> None:
+        """Initialize the exception with a SemanticFault."""
         super().__init__(
             SemanticFault(
                 error_code=ManifestErrorCode.SEC_JAIL_002,

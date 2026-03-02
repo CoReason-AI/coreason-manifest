@@ -33,6 +33,7 @@ class EscalationCriteria(CoreasonModel):
     @field_validator("condition")
     @classmethod
     def validate_python_expression(cls, v: str) -> str:
+        """Return the condition string unmodified."""
         return v
 
 

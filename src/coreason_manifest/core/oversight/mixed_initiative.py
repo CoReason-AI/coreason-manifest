@@ -14,6 +14,7 @@ class AllocationRule(CoreasonModel):
     @field_validator("condition", mode="before")
     @classmethod
     def validate_condition_sandbox(cls, v: str) -> str:
+        """Return the condition string unmodified."""
         return v
 
 

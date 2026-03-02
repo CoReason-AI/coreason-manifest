@@ -131,6 +131,7 @@ class DelegationContract(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_temporal_bounds(self) -> "DelegationContract":
+        """Enforce that expiration time is strictly after issuance time."""
         if self.expires_at <= self.issued_at:
             raise ValueError("Delegation expires_at must be strictly greater than issued_at.")
         return self

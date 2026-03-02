@@ -45,6 +45,7 @@ class ResilienceStrategy(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name_slug(cls, v: str | None) -> str | None:
+        """Enforce that the strategy name is a valid slug."""
         if v is not None and not re.match(r"^[a-z0-9_\-]+$", v):
             raise ValueError(
                 "Strategy name must be lowercase, alphanumeric, with underscores or dashes only (metric-safe)."
@@ -107,6 +108,7 @@ class ReflexionStrategy(ResilienceStrategy):
     @field_validator("critic_schema")
     @classmethod
     def validate_json_schema(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Enforce that the critic schema is a valid JSON Schema."""
         # Minimal check for JSON Schema validity
         if v is not None:
             if "type" not in v and "properties" not in v and "$ref" not in v:
@@ -118,6 +120,7 @@ class ReflexionStrategy(ResilienceStrategy):
     @model_validator(mode="before")
     @classmethod
     def validate_trace_config(cls, data: Any) -> Any:
+        """Set max_trace_turns to None if include_trace is False."""
         # If include_trace is explicitly False, force max_trace_turns to None
         if isinstance(data, dict) and data.get("include_trace") is False:
             data["max_trace_turns"] = None
@@ -125,6 +128,7 @@ class ReflexionStrategy(ResilienceStrategy):
 
     @model_validator(mode="after")
     def validate_capabilities(self) -> "ReflexionStrategy":
+        """Enforce that ReflexionStrategy with critic_schema requires json_mode capability."""
         if self.critic_schema is not None and isinstance(self.critic_model, ModelCriteria):
             caps = self.critic_model.capabilities or []
             if "json_mode" not in caps:
@@ -165,6 +169,7 @@ class EscalationStrategy(ResilienceStrategy):
     @field_validator("template")
     @classmethod
     def validate_template_syntax(cls, v: str | None) -> str | None:
+        """Return the template string unmodified."""
         if v and "{{" not in v:
             # Warning or Note: This looks like a static string, not a Jinja2 template.
             # We won't block it (valid use case), but it's good to note mentally.
@@ -227,6 +232,7 @@ class ErrorHandler(BaseModel):
     @field_validator("match_error_code", mode="before")
     @classmethod
     def normalize_error_codes(cls, v: Any) -> list[str] | None:
+        """Normalize match_error_code to a list of strings."""
         if v is None:
             return None
         if isinstance(v, (int, str)):
@@ -238,12 +244,14 @@ class ErrorHandler(BaseModel):
 
     @model_validator(mode="after")
     def validate_criteria_existence(self) -> "ErrorHandler":
+        """Enforce that at least one matching criterion is specified."""
         if not any([self.match_domain, self.match_pattern, self.match_error_code]):
             raise ValueError("ErrorHandler must specify at least one matching criterion (domain, pattern, or code).")
         return self
 
     @model_validator(mode="after")
     def validate_security_policy(self) -> "ErrorHandler":
+        """Enforce that RetryStrategy cannot be used with SECURITY domain."""
         # Security Policy: Never blindly retry security violations.
         # Allow Reflexion (Correction) or Escalate (Human Review), but forbid Retry.
         if self.match_domain and ErrorDomain.SECURITY in self.match_domain and self.strategy.type == "retry":
@@ -256,6 +264,7 @@ class ErrorHandler(BaseModel):
     @field_validator("match_pattern")
     @classmethod
     def validate_regex(cls, v: str | None) -> str | None:
+        """Enforce that match_pattern is a valid regular expression."""
         if v:
             try:
                 re.compile(v)
@@ -294,6 +303,7 @@ class SupervisionPolicy(BaseModel):
 
     @model_validator(mode="after")
     def validate_limits(self) -> "SupervisionPolicy":
+        """Enforce that strategy attempt limits do not exceed global cumulative action limits."""
         strategies = [h.strategy for h in self.handlers]
         if self.default_strategy:
             strategies.append(self.default_strategy)

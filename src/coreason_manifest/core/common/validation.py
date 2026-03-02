@@ -38,6 +38,7 @@ class RuleLength(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_bounds(self) -> "RuleLength":
+        """Enforce that at least one bound is provided and min is not greater than max."""
         if self.min is None and self.max is None:
             raise ValueError("At least one bound (min or max) must be provided.")
         if self.min is not None and self.max is not None and self.min > self.max:
@@ -53,6 +54,7 @@ class RuleRange(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_bounds(self) -> "RuleRange":
+        """Enforce that at least one bound is provided and min is not greater than max."""
         if self.min is None and self.max is None:
             raise ValueError("At least one bound (min or max) must be provided.")
         if self.min is not None and self.max is not None and self.min > self.max:
@@ -91,6 +93,7 @@ class UIValidationSchema(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_rules(self) -> "UIValidationSchema":
+        """Enforce that only one rule of specific types is allowed per schema."""
         rule_types_seen = set()
         for rule in self.rules:
             if rule.rule_type in (
