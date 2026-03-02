@@ -155,8 +155,9 @@ def test_document_text_projection() -> None:
 
 def test_fallback_project() -> None:
     ledger = EpistemicLedger()
-    from datetime import datetime, timezone
-    base_time = datetime.now(timezone.utc)
+    from datetime import datetime
+
+    base_time = datetime.now(UTC)
 
     event1 = EpistemicEvent(
         event_id="event-1",
@@ -164,7 +165,7 @@ def test_fallback_project() -> None:
         context_envelope={},
         event_type=EventType.STRUCTURAL_PARSED,
         payload={"text_block": "Hello"},
-        epistemic_anchor=EpistemicAnchor()
+        epistemic_anchor=EpistemicAnchor(),
     )
     ledger.append(event1)
 
