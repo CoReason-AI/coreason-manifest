@@ -69,6 +69,29 @@ class TournamentConfig(BaseModel):
     )
 
 
+class HarmonizationStrategy(StrEnum):
+    NLI_ENTAILMENT = "nli_entailment"
+    PICO_AST_ALIGNMENT = "pico_ast_alignment"
+
+
+class HarmonizationConfig(BaseModel):
+    """Configuration for cross-document Risk of Bias (RoB 2.0) triangulation."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    strategy: Annotated[
+        HarmonizationStrategy, Field(description="The algorithmic approach to detecting reporting contradictions.")
+    ]
+    flag_swapped_endpoints: Annotated[
+        bool,
+        Field(description="If True, strictly checks if primary/secondary hierarchies were altered from the registry."),
+    ] = True
+    enforce_rob2_domain5: Annotated[
+        bool,
+        Field(description="If True, mathematically forces the output to include a formal Risk of Bias Domain 5 grade."),
+    ] = True
+
+
 class SwarmNode(Node):
     """Dynamic Swarm Spawning. Spins up N ephemeral worker agents to process a dataset/workload in parallel."""
 
@@ -114,6 +137,7 @@ class SwarmNode(Node):
             "tabular_join",
             "meta_analysis_matrix",
             "epistemic_deduplication",
+            "protocol_harmonization",
         ]
         | None
     ) = Field(..., description="How to combine results.", examples=["concat"])
@@ -126,6 +150,10 @@ class SwarmNode(Node):
 
     deduplication_config: DeduplicationConfig | None = Field(
         None, description="Required if reducer_function is set to 'epistemic_deduplication'."
+    )
+
+    harmonization_config: HarmonizationConfig | None = Field(
+        None, description="Required if reducer_function is set to 'protocol_harmonization'."
     )
 
     sub_swarm_count: Annotated[
@@ -178,6 +206,11 @@ class SwarmNode(Node):
         if self.reducer_function == "epistemic_deduplication" and self.deduplication_config is None:
             raise ValueError(
                 "SwarmNode with reducer_function='epistemic_deduplication' requires a 'deduplication_config'."
+            )
+
+        if self.reducer_function == "protocol_harmonization" and self.harmonization_config is None:
+            raise ValueError(
+                "SwarmNode with reducer_function='protocol_harmonization' requires a 'harmonization_config'."
             )
 
         if self.reducer_function == "tournament" and self.tournament_config is None:

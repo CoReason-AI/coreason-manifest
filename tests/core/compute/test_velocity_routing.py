@@ -39,6 +39,7 @@ def test_intent_router_invalid_intent() -> None:
 @pytest.mark.asyncio
 async def test_latency_sla_exceeded_error_handling() -> None:
     """Test 2: Prove that raising a LatencySLAExceededError can be cleanly caught and handled."""
+
     async def dummy_async_execution() -> None:
         raise LatencySLAExceededError("Real-Time task took > 60s")
 

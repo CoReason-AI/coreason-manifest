@@ -98,7 +98,8 @@ class AdaptiveUIContract(CoreasonModel):
         default=None, description="Bipartite search layout for side-by-side Lexical/Semantic results."
     )
     ambient_listeners: list[AmbientListenerConfig] | None = Field(
-        default=None, description="Silent background observers that trigger out-of-band AI workflows based on user interactions."
+        default=None,
+        description="Silent background observers that trigger out-of-band AI workflows based on user interactions.",
     )
 
 
