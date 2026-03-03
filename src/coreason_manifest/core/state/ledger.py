@@ -28,6 +28,18 @@ class EpistemicLedger:
         """
         self.append(event)
 
+    def get_event_by_id(self, event_id: str) -> EpistemicEvent | None:
+        """
+        Returns a specific event by its ID in O(1) time.
+        """
+        return self._events.get(event_id)
+
+    def get_history(self) -> list[EpistemicEvent]:
+        """
+        Returns a snapshot of the ledger history.
+        """
+        return self.get_events()
+
     def get_events(self) -> list[EpistemicEvent]:
         """
         Returns all events sorted by causal order (timestamp).

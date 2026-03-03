@@ -4,6 +4,7 @@ from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.suspense import SkeletonType, SuspenseConfig
+from coreason_manifest.core.state.ledger import EpistemicLedger
 from coreason_manifest.core.telemetry.suspense_envelope import StreamSuspenseEnvelope
 
 
@@ -18,7 +19,7 @@ class Bid(CoreasonModel):
     )
 
 
-def fallback_routing(bids: list[Bid], threshold: float = 0.5) -> StreamSuspenseEnvelope | Bid:
+def yield_to_suspense(bids: list[Bid], ledger: EpistemicLedger, threshold: float = 0.5) -> StreamSuspenseEnvelope | Bid:
     """
     Evaluates bids and returns the highest bid if it meets the threshold.
     If no bid meets the threshold, returns a SuspenseEnvelope yielding to human oversight.
@@ -28,6 +29,7 @@ def fallback_routing(bids: list[Bid], threshold: float = 0.5) -> StreamSuspenseE
             op="suspense_mount",
             p=SuspenseConfig(fallback_type=SkeletonType.SPINNER),
             timestamp=time.time(),
+            ledger_history_snapshot=ledger.get_history(),
         )
 
     best_bid = max(bids, key=lambda b: b.confidence_score)
@@ -37,6 +39,7 @@ def fallback_routing(bids: list[Bid], threshold: float = 0.5) -> StreamSuspenseE
             op="suspense_mount",
             p=SuspenseConfig(fallback_type=SkeletonType.SPINNER),
             timestamp=time.time(),
+            ledger_history_snapshot=ledger.get_history(),
         )
 
     return best_bid

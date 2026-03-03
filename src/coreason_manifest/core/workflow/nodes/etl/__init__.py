@@ -1,9 +1,11 @@
 import asyncio
+import logging
 from abc import ABC, abstractmethod
 from typing import Any
 
 from coreason_manifest.core.state.events import EpistemicEvent
 from coreason_manifest.core.workflow.bidding import Bid
+from coreason_manifest.core.workflow.exceptions import HardwarePreemptionInterrupt, LatencySLAExceededError
 
 
 class BaseNode(ABC):
@@ -39,7 +41,13 @@ class ExtractorNode(BaseNode):
         while True:
             _ = await self.queue.get()
             # Simulate processing the event
-            await asyncio.sleep(0.1)
+            try:
+                await asyncio.sleep(0.1)
+            except LatencySLAExceededError:
+                logging.warning("Latency SLA exceeded, graceful degradation triggered.")
+            except HardwarePreemptionInterrupt:
+                self.queue.task_done()
+                break
             self.queue.task_done()
 
     def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
@@ -58,7 +66,13 @@ class SemanticNode(BaseNode):
         while True:
             _ = await self.queue.get()
             # Simulate processing the event
-            await asyncio.sleep(0.1)
+            try:
+                await asyncio.sleep(0.1)
+            except LatencySLAExceededError:
+                logging.warning("Latency SLA exceeded, graceful degradation triggered.")
+            except HardwarePreemptionInterrupt:
+                self.queue.task_done()
+                break
             self.queue.task_done()
 
     def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
@@ -75,7 +89,13 @@ class AuditorNode(BaseNode):
         while True:
             _ = await self.queue.get()
             # Simulate processing the event
-            await asyncio.sleep(0.1)
+            try:
+                await asyncio.sleep(0.1)
+            except LatencySLAExceededError:
+                logging.warning("Latency SLA exceeded, graceful degradation triggered.")
+            except HardwarePreemptionInterrupt:
+                self.queue.task_done()
+                break
             self.queue.task_done()
 
     def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:

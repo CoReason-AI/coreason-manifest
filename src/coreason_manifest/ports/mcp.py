@@ -14,6 +14,7 @@ from mcp.server.fastmcp import FastMCP
 from coreason_manifest.core.domains.epistemic import ClinicalProposition
 from coreason_manifest.core.state.events import EpistemicAnchor, EpistemicEvent, EventType
 from coreason_manifest.core.state.ledger import EpistemicLedger
+from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
 
 
 def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
@@ -38,10 +39,9 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         """
         Fetch a specific EpistemicEvent from the ledger and return its canonical JSON representation.
         """
-        events = ledger.get_events()
-        for event in events:
-            if event.event_id == event_id:
-                return event.model_dump_json()
+        event = ledger.get_event_by_id(event_id)
+        if event is not None:
+            return event.model_dump_json()
         raise ValueError(f"Event {event_id} not found in ledger")
 
     @mcp.tool()
@@ -50,12 +50,25 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         Intercept a call to append a ClinicalProposition, run strict Pydantic validation natively,
         wrap it in an EpistemicEvent, and append it to the Ledger.
         """
+        agent_sig = AgentSignature(
+            model_weights_hash="mock_hash",
+            prompt_commit_hash="1.0",
+            temperature=0.0,
+            seed=42,
+            inference_engine="mcp",
+        )
+        hw_fp = HardwareFingerprint(
+            architecture="mcp_node",
+            compute_precision="native",
+            vram_allocated=0,
+        )
+
         event = EpistemicEvent(
             event_id=str(uuid4()),
             timestamp=datetime.now(UTC),
             context_envelope={
-                "agent_signature": "mcp_tool",
-                "hardware_cluster": "mcp",
+                "agent_signature": agent_sig.model_dump(),
+                "hardware_cluster": hw_fp.model_dump(),
                 "prompt_version": "1.0",
             },
             event_type=EventType.SEMANTIC_EXTRACTED,
