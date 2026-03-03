@@ -347,7 +347,7 @@ class EnsembleReasoning(BaseReasoning):
         Field(
             description="Low confidence mismatch threshold. Note: disagreement_threshold < 0.6 is a strong "
             "signal of emergent instability."
-        )
+        ),
     ] = 0.60
 
     # Slow Path Trigger

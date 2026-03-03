@@ -7,6 +7,7 @@ class TaskClaim(BaseModel):
     """
     Represents an exclusive claim on a task (event) by an agent.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
     agent_signature: str = Field(..., description="The signature of the claiming agent.")
@@ -18,6 +19,7 @@ class BlackboardBrokerConfig(BaseModel):
     A pure Pydantic schema representing the passive configuration/state
     definition of the blackboard broker.
     """
+
     model_config = ConfigDict(extra="forbid", strict=True, frozen=True, arbitrary_types_allowed=True)
 
     ledger: EpistemicLedger = Field(..., description="The EpistemicLedger attached to this broker.")

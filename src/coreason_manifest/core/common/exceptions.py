@@ -107,5 +107,3 @@ class ManifestError(Exception):
                 context=context or {},
             )
         )
-
-
