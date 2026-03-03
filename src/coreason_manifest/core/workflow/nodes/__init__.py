@@ -1,6 +1,7 @@
 # Prosperity-3.0
 from typing import Annotated
 
+import pydantic
 from pydantic import Field
 
 from .agent import AgentNode, CognitiveProfile
@@ -13,8 +14,6 @@ from .routing import SwitchNode
 from .swarm import SwarmNode
 from .system import PlaceholderNode
 from .visual_oversight import MultimodalConstraint, VisualInspectorNode
-
-import pydantic
 
 AnyNode = Annotated[
     AgentNode
