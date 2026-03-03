@@ -371,7 +371,7 @@ class EnsembleReasoning(BaseReasoning):
     def validate_disagreement_threshold(self) -> "EnsembleReasoning":
         """Trigger an alert if the disagreement threshold risks emergent instability."""
         if self.disagreement_threshold < 0.6:
-            from coreason_manifest.utils.logger import logger
+            from coreason_manifest.telemetry.logger import logger
 
             logger.warning("emergent_instability_detected")
         return self
