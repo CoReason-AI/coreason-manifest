@@ -42,9 +42,8 @@ class AgentRequest(BaseModel):
     manifest: GraphFlow | LinearFlow = Field(..., description="The AOT-compiled execution graph.")
 
     # V2 Standard: The Zero-Trust Identity Envelope.
-    # Strictly bound to IdentityPassport post-merge.
-    passport: IdentityPassport | None = Field(
-        None, description="The cryptographic Zero-Trust Identity Passport for this request."
+    passport: IdentityPassport = Field(
+        ..., description="The cryptographic Zero-Trust Identity Passport for this request."
     )
 
     @model_validator(mode="before")
