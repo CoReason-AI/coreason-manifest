@@ -7,7 +7,6 @@ from coreason_manifest.core.state.events import EpistemicAnchor, EpistemicEvent,
 from coreason_manifest.core.state.ledger import EpistemicLedger
 from coreason_manifest.core.workflow.bidding import CapabilityRouter
 from coreason_manifest.core.workflow.blackboard import BlackboardBroker
-from coreason_manifest.core.workflow.nodes.etl.auditor import AuditorNode
 from coreason_manifest.core.workflow.nodes.etl.semantic import SemanticNode
 
 
