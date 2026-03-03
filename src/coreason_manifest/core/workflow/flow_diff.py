@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import difflib
-import json
 from enum import StrEnum
 from typing import Any
 
