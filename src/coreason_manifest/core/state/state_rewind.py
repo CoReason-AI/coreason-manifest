@@ -63,7 +63,7 @@ def generate_inverse_patches(
     inverses: list[JSONPatchOperation] = []
 
     for patch in patches:
-        match patch.model_dump(exclude_unset=True):
+        match patch.model_dump(exclude_unset=True, by_alias=True):
             case {"op": "test"}:
                 continue
             case {"op": "add", "path": path, "value": val}:
@@ -173,7 +173,7 @@ def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchO
     """
     state: dict[str, Any] | list[Any] = current_state
     for patch in reverse_patches:
-        match patch.model_dump(exclude_unset=True):
+        match patch.model_dump(exclude_unset=True, by_alias=True):
             case {"op": "test"}:
                 continue
             case {"op": "add", "path": path, "value": val}:
