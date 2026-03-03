@@ -282,7 +282,7 @@ def check_circuit(node_id: str, policy: CircuitBreaker, state_store: dict[str, C
             # Immutability: Create new state and update store
             new_state = state.model_copy(update={"state": "half-open"})
             state_store[node_id] = new_state
-            # We don't reset failure_count here; usually we wait for a success to close and reset.
+            # State Transition Constraint: The failure_count is intentionally preserved during half-open states; resetting occurs strictly upon subsequent execution success.  # noqa: E501
         else:
             # Raise strict structured error instead of raw exception
             raise ManifestError(

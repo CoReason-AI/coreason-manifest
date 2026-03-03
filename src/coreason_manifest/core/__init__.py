@@ -46,7 +46,6 @@ from coreason_manifest.core.state.persistence import Checkpoint, JSONPatchOperat
 from coreason_manifest.core.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
 from coreason_manifest.core.workflow.evals import EvalsManifest, FuzzingTarget
 from coreason_manifest.core.workflow.flow import (
-    AnyNode,
     Blackboard,
     Edge,
     FlowDefinitions,
@@ -75,7 +74,6 @@ __all__ = [
     # Nodes
     "AgentNode",
     # Flow
-    "AnyNode",
     # Engines
     "AttentionReasoning",
     # Governance

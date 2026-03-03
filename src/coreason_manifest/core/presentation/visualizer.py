@@ -170,7 +170,7 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
             ):
                 for event in source_node.ui_contract.events:
                     if event.action == target_id:
-                        # Use the trigger name as the edge label, with a UI sparkle emoji
+                        # Append a visual GenUI indicator glyph (✨)
                         label = f"|{_escape_label(str(event.trigger))} ✨|"
                         break
 

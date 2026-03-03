@@ -1,7 +1,7 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.common.presentation import RenderStrategy
@@ -20,6 +20,7 @@ from coreason_manifest.core.workflow.topology import (
     get_strongly_connected_components,
     get_unified_topology,
 )
+from coreason_manifest.core.workflow.utils import extract_fallbacks
 from coreason_manifest.utils.logger import logger
 
 
@@ -333,7 +334,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     all_nodes = set(flow.graph.nodes.keys())
     unreachable = all_nodes - reachable
 
-    # Sequential Patch Index Corruption - Aggregate ALL unreachable nodes
+    # Aggregate ALL unreachable nodes
     if unreachable:
         safe_node_ids = set()
         dangerous_node_ids = set()
@@ -361,12 +362,11 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
             if edge.from_node in unreachable or edge.to_node in unreachable:
                 bulk_edge_indices.add(idx)
 
-        # Sort descending to prevent index invalidation during sequential removal
-        sorted_edge_indices = sorted(bulk_edge_indices, reverse=True)
+        from coreason_manifest.utils.patch import generate_safe_array_removal_patch
 
         patch_list = []
-        # 1. Remove Edges (must be done by index, high to low)
-        patch_list.extend([{"op": "remove", "path": f"/graph/edges/{idx}"} for idx in sorted_edge_indices])
+        # 1. Remove Edges (use safe utility that handles sorting inherently)
+        patch_list.extend(generate_safe_array_removal_patch("/graph/edges", list(bulk_edge_indices)))
 
         # 2. Remove Nodes (by key, safe order)
         patch_list.extend([{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable])
@@ -396,7 +396,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
                         patch_data=patch_list,
                         description=(
                             f"Atomic Prune: Remove {len(unreachable)} unreachable nodes "
-                            f"and {len(sorted_edge_indices)} connected edges."
+                            f"and {len(bulk_edge_indices)} connected edges."
                         ),
                     ),
                 )
@@ -416,7 +416,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
                         patch_data=patch_list,
                         description=(
                             f"Tree Shake: Remove {len(safe_node_ids)} dead code nodes "
-                            f"and {len(sorted_edge_indices)} edges."
+                            f"and {len(bulk_edge_indices)} edges."
                         ),
                     ),
                 )
@@ -1041,36 +1041,6 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             adj[edge.from_node].append(edge.to_node)
 
     # Detect implicit fallback routes to prevent security "wormholes"
-    def extract_fallbacks(data: Any) -> list[str]:
-        """Recursively scan dynamic execution parameters identifying implicit edge routing declarations.
-
-        Preconditions:
-            - Complex nested mappings configure target nodes leveraging automated error handling configurations.
-
-        Postconditions:
-            - Guarantees exhaustive isolation of dynamically assigned edge routes embedded deep within node configurations.
-
-        Malicious States Prevented:
-            - Disables clandestine route manipulation actively utilizing unstructured fallback parameters resolving around critical oversight nodes.
-
-        Args:
-            data: The structural context parameter isolated for recursive routing evaluation.
-
-        Returns:
-            The complete sequential extraction of unmapped fallback node identifiers.
-        """  # noqa: E501
-        fallbacks = []
-        if isinstance(data, dict):
-            for k, v in data.items():
-                if k == "fallback_node_id" and isinstance(v, str):
-                    fallbacks.append(v)
-                else:
-                    fallbacks.extend(extract_fallbacks(v))
-        elif isinstance(data, list):
-            for item in data:
-                fallbacks.extend(extract_fallbacks(item))
-        return fallbacks
-
     for node in nodes:
         node_data = node.model_dump(exclude_none=True)
         for fallback_id in extract_fallbacks(node_data):
