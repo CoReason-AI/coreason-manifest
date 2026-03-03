@@ -366,9 +366,9 @@ class EnsembleReasoning(BaseReasoning):
     aggregation: AggregationStrategy = "majority_vote"
 
     # Tie-Breaker: If models disagree, this judge decides.
-    judge_model: Annotated[ModelRef | None, Field(description="The 'Supreme Court' model that resolves conflicts.")] = (
-        None
-    )
+    judge_model: Annotated[
+        ModelRef | None, Field(description="The final authoritative model used to resolve consensus conflicts.")
+    ] = None
 
     @model_validator(mode="after")
     def validate_verification_model(self) -> "EnsembleReasoning":
