@@ -56,6 +56,7 @@ class AsyncSSEMultiplexer:
 
         async def _push_task() -> None:
             import time
+
             queue = await self._get_queue()
             await queue.put(StreamEpistemicEnvelope(op="epistemic", p=envelope, timestamp=time.time()))
 

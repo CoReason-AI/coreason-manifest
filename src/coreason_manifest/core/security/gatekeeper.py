@@ -803,11 +803,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     for node in nodes:
         node_data = node.model_dump(exclude_none=True)
         for fallback_id in extract_fallbacks(node_data):
-            if (
-                node.id in adj
-                and fallback_id in adj
-                and fallback_id not in adj[node.id]
-            ):
+            if node.id in adj and fallback_id in adj and fallback_id not in adj[node.id]:
                 # Add implicit fallback edge to adjacency map
                 adj[node.id].append(fallback_id)
 

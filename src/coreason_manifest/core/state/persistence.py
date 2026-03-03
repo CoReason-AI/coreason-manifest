@@ -32,6 +32,7 @@ class JSONPatchOperation(CoreasonModel):
         if v.startswith(restricted_namespaces):
             raise ValueError(f"Security Violation: Mutation of restricted namespace '{v}' is forbidden.")
         return v
+
     from_: Annotated[
         str | None,
         Field(
