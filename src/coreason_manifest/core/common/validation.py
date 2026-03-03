@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, ClassVar, Literal
 
 from pydantic import Field, model_validator
 
@@ -106,3 +106,30 @@ class UIValidationSchema(CoreasonModel):
                     raise ValueError(f"Duplicate rule type found: {rule.rule_type}. Only one allowed per schema.")
                 rule_types_seen.add(rule.rule_type)
         return self
+
+
+class EpistemicValidator:
+    """Validator for enforcing epistemic and ontological constraints."""
+
+    EFFICACY_RELATIONS: ClassVar[set[str]] = {
+        "treats",
+        "cures",
+        "increases survival",
+        "decreases risk",
+        "improves",
+        "prevents",
+    }
+
+    @staticmethod
+    def validate_statistical_grounding(relation: str, has_p_value: bool, has_confidence_interval: bool) -> bool:
+        """
+        Enforce statistical grounding.
+
+        If a relation implies efficacy, the claim must include a statistical marker
+        (like p_value or confidence_interval).
+        """
+        return not (
+            relation.lower() in EpistemicValidator.EFFICACY_RELATIONS
+            and not has_p_value
+            and not has_confidence_interval
+        )
