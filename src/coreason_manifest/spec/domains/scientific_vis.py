@@ -8,16 +8,17 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field, model_validator
 from pydantic_core import PydanticCustomError
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.spec.domains.scivis_templates import ComponentTemplate
 
 
-class VisInformationType(str, Enum):  # noqa: UP042
+class VisInformationType(StrEnum):
     """
     Taxonomy for scientific visualization types.
     """
@@ -28,7 +29,7 @@ class VisInformationType(str, Enum):  # noqa: UP042
     HYBRID_META = "HYBRID_META"
 
 
-class SciVisIntent(BaseModel):
+class SciVisIntent(CoreasonModel):
     vis_type: VisInformationType = Field(
         ...,
         description="Classify the scientific visualization type based on the MECE taxonomy.",
@@ -42,21 +43,21 @@ class SciVisIntent(BaseModel):
     )
 
 
-class GraphicElementType(str, Enum):  # noqa: UP042
+class GraphicElementType(StrEnum):
     SHAPE = "SHAPE"
     TEXT = "TEXT"
     EQUATION = "EQUATION"
     DATA_ARTIFACT = "DATA_ARTIFACT"
 
 
-class ShapeElement(BaseModel):
+class ShapeElement(CoreasonModel):
     element_type: Literal[GraphicElementType.SHAPE] = GraphicElementType.SHAPE
     id: str
     semantic_role: str
     proposed_shape: Literal["rectangle", "cylinder", "document", "none"]
 
 
-class TextElement(BaseModel):
+class TextElement(CoreasonModel):
     element_type: Literal[GraphicElementType.TEXT] = GraphicElementType.TEXT
     id: str
     semantic_role: str
@@ -64,7 +65,7 @@ class TextElement(BaseModel):
     markdown_enabled: bool = Field(default=True)
 
 
-class EquationElement(BaseModel):
+class EquationElement(CoreasonModel):
     element_type: Literal[GraphicElementType.EQUATION] = GraphicElementType.EQUATION
     id: str
     semantic_role: str
@@ -72,7 +73,7 @@ class EquationElement(BaseModel):
     render_mode: Literal["inline", "display"] = Field(..., description="Dictates MathJax rendering context.")
 
 
-class DataArtifactElement(BaseModel):
+class DataArtifactElement(CoreasonModel):
     element_type: Literal[GraphicElementType.DATA_ARTIFACT] = GraphicElementType.DATA_ARTIFACT
     id: str
     semantic_role: str = Field(description="e.g., 'distribution_scatter_plot' or 'results_bar_chart'")
@@ -89,7 +90,7 @@ GraphicElement = Annotated[
 ]
 
 
-class FunctionalModule(BaseModel):
+class FunctionalModule(CoreasonModel):
     module_id: str
     title: str
     elements: list[GraphicElement]
@@ -99,7 +100,7 @@ class FunctionalModule(BaseModel):
     )
 
 
-class InterModuleConnection(BaseModel):
+class InterModuleConnection(CoreasonModel):
     source_module_id: str
     target_module_id: str
     label: str | None = None
@@ -110,7 +111,7 @@ class InterModuleConnection(BaseModel):
     )
 
 
-class HierarchicalBlueprint(BaseModel):
+class HierarchicalBlueprint(CoreasonModel):
     modules: list[FunctionalModule]
     connections: list[InterModuleConnection]
     aspect_ratio_preference: Literal["16:9", "4:3", "1:1"]
@@ -134,13 +135,13 @@ class HierarchicalBlueprint(BaseModel):
         return self
 
 
-class SpatialCorrection(BaseModel):
+class SpatialCorrection(CoreasonModel):
     target_element_id: str
     issue: Literal["overlap", "out_of_bounds", "misaligned", "poor_contrast"]
     suggested_action: str
 
 
-class VisualCriticFeedback(BaseModel):
+class VisualCriticFeedback(CoreasonModel):
     is_publication_ready: bool
     hallucinated_elements: list[str]
     missing_required_elements: list[str]
@@ -153,7 +154,7 @@ class VisualCriticFeedback(BaseModel):
     global_aesthetic_score: float = Field(ge=0, le=10)
 
 
-class VectorRenderPayload(BaseModel):
+class VectorRenderPayload(CoreasonModel):
     format: Literal["svg", "mxgraph_xml", "tikz", "mcp_visio_trace"]
     source_code: str
     interaction_steps: int

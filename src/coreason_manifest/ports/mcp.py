@@ -1,8 +1,9 @@
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import Field, model_validator
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.spec.domains.scivis_provenance import ActorIdentity
 
 
@@ -20,7 +21,7 @@ class MCPToolName(StrEnum):
     CANVAS_UPDATE_MATH_NODE = "CANVAS_UPDATE_MATH_NODE"
 
 
-class MCPOperation(BaseModel):
+class MCPOperation(CoreasonModel):
     """An atomic design action executed on a headless canvas."""
 
     operation_id: str = Field(..., description="Unique ID for tracing and logging this specific action.")
@@ -35,8 +36,28 @@ class MCPOperation(BaseModel):
         default=None, description="Cryptographically tags the specific agent/human issuing this canvas command."
     )
 
+    @model_validator(mode="after")
+    def enforce_strict_provenance(self) -> "MCPOperation":
+        if (
+            self.tool_name in {MCPToolName.CANVAS_ADD_MATH_NODE, MCPToolName.CANVAS_UPDATE_MATH_NODE}
+            and self.actor is None
+        ):
+            raise ValueError("Regulatory SciVis operations require a cryptographically verifiable ActorIdentity.")
+        return self
 
-class MCPOperationSequence(BaseModel):
+    @model_validator(mode="after")
+    def validate_target_element_id(self) -> "MCPOperation":
+        requires_id = {
+            MCPToolName.CANVAS_UPDATE_ELEMENT,
+            MCPToolName.CANVAS_REMOVE_ELEMENT,
+            MCPToolName.CANVAS_UPDATE_MATH_NODE,
+        }
+        if self.tool_name in requires_id and self.target_element_id is None:
+            raise ValueError(f"target_element_id cannot be None when tool_name is {self.tool_name}")
+        return self
+
+
+class MCPOperationSequence(CoreasonModel):
     """An ordered, transactional sequence of atomic design actions."""
 
     sequence_id: str
