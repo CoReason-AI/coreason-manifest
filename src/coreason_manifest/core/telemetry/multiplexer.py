@@ -22,6 +22,7 @@ class AsyncSSEMultiplexer:
         self._queue: asyncio.Queue[StreamPacket] | None = None
         self._background_tasks: set[asyncio.Task[None]] = set()
         self.ui_observers = ui_observers
+        self._dead_letter_queue: list[StreamPacket] = []
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
         if self._queue is None:
@@ -46,7 +47,8 @@ class AsyncSSEMultiplexer:
         try:
             await asyncio.wait_for(queue.put(packet), timeout=1.0)
         except TimeoutError:
-            logger.warning("telemetry_queue_full", action="dropped_stream_packet", reason="prevent_llm_stalling")
+            self._dead_letter_queue.append(packet)
+            logger.error("telemetry_queue_full", action="packet_routed_to_dlq", reason="prevent_llm_stalling")
 
     async def broadcast_envelope(self, envelope: EpistemicEnvelope) -> None:
         """

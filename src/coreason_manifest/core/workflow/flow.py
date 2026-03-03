@@ -149,6 +149,12 @@ class Graph(CoreasonModel):
 
         Raises:
             ManifestError: For structural violations or if a cycle is detected.
+
+        Notes:
+            While dict keys are unique natively, we enforce key == node.id.
+            The seen_ids check acts as a strict Defense-in-Depth against advanced
+            Pydantic aliasing attacks where multiple distinct keys might resolve
+            to pointers sharing the same inner ID.
         """
         valid_ids = set(self.nodes.keys())
 
@@ -158,10 +164,6 @@ class Graph(CoreasonModel):
                 message="Graph must contain at least one node.",
             )
 
-        # Note: While dict keys are unique natively, we enforce key == node.id.
-        # The seen_ids check acts as a strict Defense-in-Depth against advanced
-        # Pydantic aliasing attacks where multiple distinct keys might resolve
-        # to pointers sharing the same inner ID.
         seen_ids = set()
         for key, node in self.nodes.items():
             if key != node.id:

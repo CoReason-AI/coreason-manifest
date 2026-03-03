@@ -42,9 +42,12 @@ class CoreasonModel(BaseModel):
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)
 
-        # Architectural Note: Array Sorting Constraints
         def _sort_collections(obj: Any) -> Any:
-            """Recursively sorts dictionaries for canonical serialization while explicitly preserving RFC 8785 array ordering."""  # noqa: E501
+            """
+            Recursively sorts dictionaries for canonical serialization while explicitly preserving RFC 8785 array ordering.
+
+            Architectural Note: Array Sorting Constraints
+            """  # noqa: E501
             if isinstance(obj, dict):
                 return {k: _sort_collections(v) for k, v in obj.items()}
             if isinstance(obj, list):
