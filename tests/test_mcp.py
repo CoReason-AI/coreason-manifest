@@ -1,11 +1,13 @@
-import pytest
 from typing import Any, cast
+
+import pytest
 from mcp.server.fastmcp import Context
 from mcp.shared.context import RequestContext
 
-from coreason_manifest.core.compute.epistemic import ClinicalProposition, ReifiedEntity, ProvenanceSpan
+from coreason_manifest.core.compute.epistemic import ClinicalProposition, ProvenanceSpan, ReifiedEntity
 from coreason_manifest.core.state.ledger import EpistemicLedger
 from coreason_manifest.ports.mcp import create_mcp_server
+
 
 class MockRequestContext:
     def __init__(self, meta_kwargs: dict[str, Any]):
@@ -13,7 +15,7 @@ class MockRequestContext:
 
 class MockContext(Context[Any, Any, Any]):
     def __init__(self, request_context: MockRequestContext):
-        self._request_context = cast(RequestContext[Any, Any, Any], request_context)
+        self._request_context = cast("RequestContext[Any, Any, Any]", request_context)
 
     @property
     def request_context(self) -> RequestContext[Any, Any, Any]:
