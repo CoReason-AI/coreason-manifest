@@ -1,7 +1,8 @@
 # Prosperity-3.0
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.semantic import SemanticRef
@@ -33,6 +34,38 @@ class CognitiveProfile(CoreasonModel):
     ui_capabilities: list[str] | None = Field(
         default=None, description="List of frontend component registry IDs this agent is permitted to render."
     )
+
+
+class TransparencyLevel(StrEnum):
+    opaque = "opaque"
+    observable = "observable"
+    interactive = "interactive"
+
+
+class InterventionTrigger(StrEnum):
+    on_start = "on_start"
+    on_plan_generation = "on_plan_generation"
+    on_tool_evaluation = "on_tool_evaluation"
+    on_failure = "on_failure"
+    on_completion = "on_completion"
+
+
+class InspectionConfig(CoreasonModel):
+    """Passive trigger schemas that yield control to a human without breaking graph topology."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    transparency: TransparencyLevel = Field(..., description="The transparency level.")
+    triggers: list[InterventionTrigger] = Field(..., description="List of intervention triggers.")
+    editable_pointers: list[str] = Field(..., description="List of editable JSON pointers.")
+
+    @field_validator("editable_pointers")
+    @classmethod
+    def validate_editable_pointers(cls, v: list[str]) -> list[str]:
+        for pointer in v:
+            if not pointer.startswith("/"):
+                raise ValueError(f"Invalid JSON Pointer: '{pointer}'. Must start with '/'.")
+        return v
 
 
 class FederatedSearchConfig(BaseModel):
@@ -92,6 +125,7 @@ class AgentNode(Node):
         description="Local escalation rules for this agent.",
         examples=[[{"condition": "confidence < 0.5", "role": "supervisor"}]],
     )
+    inspection: InspectionConfig | None = Field(None, description="Inspection configuration for human steering.")
     federated_search: FederatedSearchConfig | None = Field(
         None,
         description="If set, computationally binds this agent to a multi-database execution "

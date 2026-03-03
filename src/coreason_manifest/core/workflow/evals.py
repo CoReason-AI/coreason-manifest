@@ -1,9 +1,19 @@
+from enum import StrEnum
 from typing import Any
 
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.primitives.types import NodeID
+
+
+class ValidationLogic(StrEnum):
+    EXACT_MATCH = "exact_match"
+    FUZZY = "fuzzy"
+    LLM_JUDGE = "llm_judge"
+    SYMBOLIC_EXECUTION = "symbolic_execution"
+    VLM_RUBRIC = "vlm_rubric"
+    JSON_SCHEMA_INVARIANT = "json_schema_invariant"
 
 
 class ChaosConfig(CoreasonModel, frozen=True):
@@ -17,9 +27,11 @@ class ChaosConfig(CoreasonModel, frozen=True):
 class AdversaryProfile(CoreasonModel, frozen=True):
     goal: str = Field(..., description="The adversary's objective.")
     attack_strategy: str = Field(..., description="Methodology.")
+    strategy_model: str | None = Field(default=None, description="Model to use for generating the strategy.")
+    attack_model: str | None = Field(default=None, description="Model to use for executing the attack.")
 
 
-class TestCase(CoreasonModel):
+class SimulationScenario(CoreasonModel, frozen=True, extra="forbid"):
     """
     A deterministic test case for an agent graph.
     """
@@ -31,13 +43,16 @@ class TestCase(CoreasonModel):
         default_factory=list, description="List of Node IDs that MUST be hit in sequence."
     )
     assertions: dict[str, Any] = Field(default_factory=dict, description="JSON Schema validations on the final output.")
+    validation_logic: ValidationLogic = Field(
+        default=ValidationLogic.EXACT_MATCH, description="Logic used to evaluate assertions."
+    )
     chaos_config: ChaosConfig | None = Field(
         default=None, description="Infrastructure faults to apply during this test."
     )
     adversary: AdversaryProfile | None = Field(default=None, description="Red-team configuration for semantic fuzzing.")
 
 
-class FuzzingTarget(CoreasonModel):
+class FuzzingTarget(CoreasonModel, frozen=True, extra="forbid"):
     """
     Definition of a fuzzing target for automated adversarial probing.
     """
@@ -55,10 +70,16 @@ class FuzzingTarget(CoreasonModel):
     )
 
 
-class EvalsManifest(CoreasonModel):
+class EvalsManifest(CoreasonModel, frozen=True, extra="forbid"):
     """
     Manifest defining how an agent graph is deterministically tested.
     """
 
-    test_cases: list[TestCase] = Field(default_factory=list, description="List of test cases to execute.")
+    test_cases: list[SimulationScenario] = Field(default_factory=list, description="List of test cases to execute.")
     fuzzing_targets: list[FuzzingTarget] = Field(default_factory=list, description="List of fuzzing targets.")
+
+
+class TestCase(SimulationScenario):
+    """Alias for SimulationScenario used in standard test runs."""
+
+    pass

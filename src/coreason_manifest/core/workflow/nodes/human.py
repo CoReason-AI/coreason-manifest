@@ -14,6 +14,12 @@ from coreason_manifest.core.security.compliance import RemediationAction
 from .base import Node
 
 
+class TimeoutBehavior(StrEnum):
+    proceed_with_default = "proceed_with_default"
+    escalate = "escalate"
+    fail = "fail"
+
+
 class CollaborationMode(StrEnum):
     APPROVAL_ONLY = "approval_only"
     CO_EDIT = "co_edit"
@@ -33,6 +39,9 @@ class SteeringCommand(StrEnum):
 class SteeringConfig(CoreasonModel):
     """Configuration for human steering permissions."""
 
+    timeout_seconds: int | None = Field(None, description="Timeout in seconds.")
+    timeout_behavior: TimeoutBehavior = Field(TimeoutBehavior.escalate, description="Behavior on timeout.")
+    default_fallback_payload: dict[str, Any] | None = Field(None, description="Fallback payload.")
     allow_variable_mutation: bool = Field(
         False, description="Whether the human can mutate blackboard variables.", examples=[True]
     )
