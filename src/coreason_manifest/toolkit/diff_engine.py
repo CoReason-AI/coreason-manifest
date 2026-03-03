@@ -1,8 +1,10 @@
 import copy
+from datetime import UTC, datetime
 from typing import Any
 
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
+from coreason_manifest.core.telemetry.stream import StreamStateDeltaEnvelope
 
 
 def _resolve_parent_and_key(
@@ -148,6 +150,21 @@ def generate_inverse_patches(
 
     inverses.reverse()
     return inverses
+
+
+def generate_revert_envelope(
+    original_state: dict[str, Any], patches: list[JSONPatchOperation], trace_id: str | None = None
+) -> StreamStateDeltaEnvelope:
+    """
+    Generates a reverting state delta envelope to broadcast to edge observers.
+    """
+    inverse_patches = generate_inverse_patches(original_state, patches)
+    return StreamStateDeltaEnvelope(
+        op="state_delta",
+        p=inverse_patches,
+        trace_id=trace_id,
+        timestamp=datetime.now(UTC).timestamp(),
+    )
 
 
 def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchOperation]) -> dict[str, Any]:
