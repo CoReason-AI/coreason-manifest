@@ -82,16 +82,7 @@ class UIComponentNode(CoreasonModel):
 
 
 class AdaptiveUIContract(CoreasonModel):
-    layout: list[UIComponentNode] = Field(default_factory=list, description="The root elements of the generated UI.")
-    widget_id: str | None = Field(
-        None, description="[DEPRECATED] The abstract identifier for the frontend component registry."
-    )
-    props_schema: dict[str, Any] | None = Field(
-        None, description="[DEPRECATED] JSON Schema defining the data required to render the widget."
-    )
-    props_mapping: dict[str, str] = Field(
-        default_factory=dict, description="[DEPRECATED] Maps Blackboard variables (values) to widget props (keys)."
-    )
+    layout: list[UIComponentNode] = Field(..., description="The root elements of the generated UI.")
     events: list[UIEventMap] = Field(
         default_factory=list, description="Maps widget interactions to orchestrator commands."
     )
@@ -105,21 +96,6 @@ class AdaptiveUIContract(CoreasonModel):
     hybrid_search: HybridSearchLayout | None = Field(
         default=None, description="Bipartite search layout for side-by-side Lexical/Semantic results."
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_legacy_widget(cls, data: Any) -> Any:
-        """Migrate legacy widget dictionary structure to layout nodes."""
-        if isinstance(data, dict):
-            layout = data.get("layout")
-            widget_id = data.get("widget_id")
-
-            # If layout is empty/missing but widget_id is provided, auto-migrate to the new structure
-            if not layout and widget_id:
-                props = data.get("props_mapping", {})
-                node = {"type": widget_id, "props": props, "children": []}
-                data["layout"] = [node]
-        return data
 
 
 class NotificationRouting(CoreasonModel):
