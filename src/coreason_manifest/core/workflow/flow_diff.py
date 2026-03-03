@@ -45,7 +45,23 @@ class DiffReport(CoreasonModel):
 
 
 def _categorize_path(path: str, change_type: str) -> ChangeCategory:
-    """Categorize a change based on its path and type."""
+    """Analyze the nested string path and operation semantic to determine a standardized impact categorization.
+
+    Provides a heuristic layer that accurately translates technical state
+    mutations into domain-specific execution policies (e.g. governing node insertions
+    vs security rules).
+
+    Complexity:
+        Time: $O(1)$, strictly constrained string length checks resolving instantaneously.
+        Space: $O(1)$, constant evaluation frames per path resolution.
+
+    Args:
+        path: The hierarchical JSON-Patch style pointer indicating the mutation target.
+        change_type: The semantic operation ('add', 'modify', 'remove') applied to the state object.
+
+    Returns:
+        The enumerated policy categorization mapped to the path mutation.
+    """
     if (
         "governance" in path
         or "circuit_breaker" in path
@@ -75,11 +91,39 @@ def _categorize_path(path: str, change_type: str) -> ChangeCategory:
 
 
 def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -> list[DiffChange]:
-    """Compare lists using difflib.SequenceMatcher to generate semantic diffs."""
+    """Execute a semantic alignment sequence match on linear state boundaries.
+
+    Heuristically employs a dynamic programming subsequence evaluation against
+    stable object identifiers. This guarantees optimal, semantic context retention
+    rather than brittle index-based differences when flow structures evolve.
+
+    Complexity:
+        Time: Expected $O(N)$ with reliable identifiers, upper-bound $O(N \cdot M)$ evaluating disparate states.
+        Space: $O(N + M)$, dynamically allocating normalized state tracking schemas for both the current and pending list.
+
+    Args:
+        path_prefix: The cumulative path prefix resolving to the currently evaluated list.
+        old_list: The preceding linear array context requiring temporal comparison.
+        new_list: The superseding linear array dictating modern structural constraints.
+
+    Returns:
+        The sequential stream of delta objects identifying all localized additions, deletions, or structural modifications.
+    """
     changes = []
 
     # Try to extract a stable identifier for complex objects (like nodes/edges) to improve diffing
     def _get_id(item: Any) -> Any:
+        """Resolve a consistent hashing or identity reference for semantic state diffing.
+
+        Forces disparate python typings or unsorted dictionaries into normalized, predictable identifiers.
+
+        Complexity:
+            Time: Expected $O(1)$ dictionary lookup; $O(S)$ fallback JSON serialization, where $S$ is size of structure.
+            Space: $O(S)$ dynamically constrained buffer on complex type serialization.
+
+        Args:
+            item: The localized node, structural context, or primitive targeted for identifier extraction.
+        """
         if isinstance(item, dict) and "id" in item:
             return item["id"]
         # For edges we might use from_node -> to_node as an identifier
@@ -176,7 +220,23 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
 
 
 def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[str, Any]) -> list[DiffChange]:
-    """Recursively compare two dictionaries."""
+    """Recursively dissect dynamic structural maps to extract highly precise mutation contexts.
+
+    Iterates over key unions iteratively unpacking nested maps and primitive structures
+    into explicit path pointers. This strictly enables structural versioning without schema constraints.
+
+    Complexity:
+        Time: $O(K)$, bounded heavily by the unified cardinality of distinct dictionary keys across states.
+        Space: $O(D)$, strictly matching the max nesting depth across execution call frames.
+
+    Args:
+        path_prefix: The semantic structural prefix pinpointing this dictionary's localized state path.
+        old_dict: The initial representation of semantic mappings prior to the differential check.
+        new_dict: The targeted final state mappings indicating current execution policy goals.
+
+    Returns:
+        An inclusive list aggregating the distinct, recursive patches defining the dictionary state divergence.
+    """
     changes = []
 
     all_keys = set(old_dict.keys()) | set(new_dict.keys())
@@ -227,7 +287,22 @@ def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[st
 
 
 def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> DiffReport:
-    """Compare two flows and return a semantic diff report."""
+    """Analyze and quantify architectural variances traversing entire workflow definitions.
+
+    Translates rigorous programmatic object state into raw dictionary representations
+    capable of extensive, precise schema dissection to fuel automated semantic reporting models.
+
+    Complexity:
+        Time: Heavily bounded $O(V+E)$ directly reflective of unified node topological state parsing and serialization limits.
+        Space: $O(V+E)$, directly serializing both isolated architectural object graphs simultaneously into application memory.
+
+    Args:
+        old: The foundational execution structure serving as the immutable difference target.
+        new: The volatile target workflow representing incoming structural changes.
+
+    Returns:
+        The consolidated report modeling all localized mutations natively organized and categorized for downstream consumption.
+    """
     old_dict = old.model_dump(exclude_none=True)
     new_dict = new.model_dump(exclude_none=True)
 

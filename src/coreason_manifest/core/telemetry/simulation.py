@@ -48,7 +48,9 @@ class SimulationStep(CoreasonModel, frozen=True, extra="forbid"):
     traceparent: str = Field(..., description="W3C traceparent string.")
     tracestate: str = Field(..., description="W3C tracestate string.")
     state_mutations: list[JSONPatchOperation] = Field(default_factory=list, description="RFC 6902 state mutations.")
-    execution_hash: str = Field(..., description="Cryptographic lineage hash to prevent post-execution tampering or metric manipulation.")
+    execution_hash: str = Field(
+        ..., description="Cryptographic lineage hash to prevent post-execution tampering or metric manipulation."
+    )
     thought: str | dict[str, Any] | None = Field(default=None, description="Multimodal thought payload.")
 
 

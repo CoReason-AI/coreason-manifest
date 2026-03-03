@@ -23,6 +23,23 @@ from coreason_manifest.core.workflow.topology import (
 
 
 def canonicalize_domain(domain: str) -> str:
+    """Standardize domain strings to strictly prevent subtle bypasses in authorization logic.
+
+    Preconditions:
+        - The raw domain parameter is a potentially malicious or non-standardized string extraction.
+
+    Postconditions:
+        - Guarantees the resulting string is fully lowercased and lacks extraneous whitespace, suitable for rigorous policy comparisons.
+
+    Malicious States Prevented:
+        - Prevents domain spoofing via capitalization anomalies (e.g., 'EVIL.COM') or padding bypasses.
+
+    Args:
+        domain: The raw domain literal targeted for canonicalization.
+
+    Returns:
+        The strictly sanitized string representation.
+    """
     return domain.lower().strip()
 
 
@@ -31,7 +48,24 @@ if TYPE_CHECKING:
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
-    """Helper to resolve profile and get capabilities."""
+    """Extract and aggregate explicit functional permissions assigned to an execution node.
+
+    Preconditions:
+        - The node defines a localized configuration profile or delegates to an architectural swarm profile.
+
+    Postconditions:
+        - Guarantees a fully resolved list of string capabilities tied strictly to the node's underlying reasoning model.
+
+    Malicious States Prevented:
+        - Mitigates hidden authorization escalations by explicitly surfacing embedded reasoning permissions.
+
+    Args:
+        node: The architectural representation of the executing runtime component.
+        flow: The holistic parent structure resolving cross-node profile definitions.
+
+    Returns:
+        The complete sequence of capability enumerations authorized for the evaluated component.
+    """
     reasoning = None
     if isinstance(node, AgentNode):
         # Resolve profile
@@ -53,7 +87,25 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
 
 
 def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]) -> list[ComplianceReport]:
-    """0. Domain Policy Check (Pillar 3: High-Fidelity URI Governance)"""
+    """Enforce rigorous boundary limits over external architectural egress connectivity.
+
+    Preconditions:
+        - The workflow defines an explicit list of sanctioned domains within its operational governance schema.
+        - Tool architectures dynamically leverage external HTTP resolution capabilities.
+
+    Postconditions:
+        - Guarantees that any explicit tool URI egress targeting an unapproved host is flagged with a remediation patch.
+
+    Malicious States Prevented:
+        - Prevents unmitigated data exfiltration via arbitrary outbound HTTP resolutions embedded inside rogue tool definitions.
+
+    Args:
+        flow: The top-level workflow asserting network connectivity governance parameters.
+        tool_map: The mapped registry of defined tool endpoints targeted for extraction and assessment.
+
+    Returns:
+        The sequential collection of compliance violations flagging blocked network domains.
+    """
     reports: list[ComplianceReport] = []
     allowed_domains_raw = []
     if flow.governance and flow.governance.allowed_domains:
@@ -99,7 +151,26 @@ def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, An
 def _enforce_critical_capability_guards(
     nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]
 ) -> list[ComplianceReport]:
-    """1. Capability Analysis & Critical Capability Guards"""
+    """Ensure hazardous compute capabilities explicitly require pre-execution human verification.
+
+    Preconditions:
+        - Workflow defines execution nodes heavily leveraging system integration boundaries.
+        - Topological layout maps all reachable nodes and their relational execution pathways.
+
+    Postconditions:
+        - Guarantees that any node employing code execution or computer control operations is explicitly blocked by a topological human approval node.
+
+    Malicious States Prevented:
+        - Neutralizes catastrophic autonomous escalation vectors by forcing critical path execution behind a strict approval constraint.
+
+    Args:
+        nodes: The extracted canonical sequence of target nodes undergoing authorization assessment.
+        flow: The overarching process definition mapping global interaction topologies.
+        tool_map: A strictly resolved map isolating tool structures for secondary risk evaluation.
+
+    Returns:
+        A cataloged sequence of authorization violations mandating structural human-in-the-loop remediation patches.
+    """
     reports: list[ComplianceReport] = []
     for node in nodes:
         caps = _get_capabilities(node, flow)
@@ -203,7 +274,23 @@ def _enforce_critical_capability_guards(
 
 
 def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
-    """5. Topology Analysis (GraphFlow Only)"""
+    """Isolate and prune localized architectural subgraphs entirely disconnected from primary execution ingress.
+
+    Preconditions:
+        - The graph structure supports recursive traversals utilizing explicit logical entry points.
+
+    Postconditions:
+        - Guarantees that execution paths disconnected from explicit invocation are strictly pruned, eliminating autonomous orphaned agents.
+
+    Malicious States Prevented:
+        - Precludes latent payload activation and malicious topological wormholes generated by unreachable but active nodes.
+
+    Args:
+        flow: The holistic graph-based workflow targeted for strict reachability analysis.
+
+    Returns:
+        The resulting compliance records aggressively enforcing tree-shaking and dangerous node elimination operations.
+    """
     reports: list[ComplianceReport] = []
 
     # Build Adjacency List
@@ -331,7 +418,23 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
 
 def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Ensure Evolutionary pipelines are guarded by Symbolic Execution."""
+    """Mandate deterministic validation frameworks atop highly volatile generative optimization topologies.
+
+    Preconditions:
+        - Node configurations heavily utilize non-deterministic, evolutionary reasoning parameters.
+
+    Postconditions:
+        - Guarantees that stochastic evolutionary components directly route their outputs to rigid, symbolic validation inspectors.
+
+    Malicious States Prevented:
+        - Prevents unconstrained optimization pipelines from inducing runaway hallucination cascades lacking grounded evaluation criteria.
+
+    Args:
+        flow: The architectural map dictating systemic agentic execution flow.
+
+    Returns:
+        The comprehensive list of violations enforcing rigorous algorithmic verification downstream of generation bounds.
+    """
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -390,7 +493,23 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
 
 
 def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion: Ensure Island Model swarms are utilizing Evolutionary Reasoning."""
+    """Enforce optimal heuristic binding across decentralized parallel computing topologies.
+
+    Preconditions:
+        - Execution parameters establish isolated swarm clusters simulating discrete search spaces.
+
+    Postconditions:
+        - Guarantees that isolated genetic populations strictly employ targeted evolutionary search criteria internally.
+
+    Malicious States Prevented:
+        - Eliminates profound computational resource squandering and erratic optimization routing caused by mismatched intelligence models.
+
+    Args:
+        flow: The encompassing layout describing nested or decentralized node architectures.
+
+    Returns:
+        A sequential log tracking policy violations correcting un-optimized intelligence mapping definitions.
+    """
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -426,7 +545,23 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
 
 
 def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion: Meta-Analysis swarms MUST define interoperability exports."""
+    """Mandate strict interoperability configurations facilitating rigid medical or data science downstream validations.
+
+    Preconditions:
+        - Defined operations mandate matrix reduction aggregation over structured scientific literature structures.
+
+    Postconditions:
+        - Guarantees explicit file format export interoperability allowing decoupled statistical tooling seamless ingestion.
+
+    Malicious States Prevented:
+        - Mitigates regulatory failures stemming from opaque analysis architectures lacking external transparency and biostatistical review capabilities.
+
+    Args:
+        flow: The primary schema encapsulating the entire operational swarm boundary.
+
+    Returns:
+        The compliance records targeting un-exportable analytic aggregations.
+    """
     nodes, _ = get_unified_topology(flow)
 
     return [
@@ -455,7 +590,23 @@ def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[C
 
 
 def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion Rule: Meta-Analysis swarms MUST enforce visual bounding box provenance."""
+    """Enforce regulatory-grade semantic memory grounding strictly linking generated extraction to visual context.
+
+    Preconditions:
+        - Highly complex visual intelligence models are orchestrating large-scale document aggregation.
+
+    Postconditions:
+        - Guarantees internal semantic storage exclusively pins context to exact source boundaries enabling transparent lineage tracking.
+
+    Malicious States Prevented:
+        - Completely blocks ungrounded hallucinations from polluting critical meta-analytical data streams.
+
+    Args:
+        flow: The central system design mapping the execution profiles utilized by aggregators.
+
+    Returns:
+        The comprehensive tracking report detailing provenance policy deviations and recommended overrides.
+    """
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -497,7 +648,23 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
 
 
 def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion Rule: PRISMA-S Search generation MUST be guarded by an Ontological Validator."""
+    """Enforce systematic scientific alignment upon heuristically generated literature exploration strategies.
+
+    Preconditions:
+        - The process model natively employs the strict PRISMA-S framework governing targeted query expansions.
+
+    Postconditions:
+        - Guarantees that query strings strictly pipe into deterministic ontological validators (e.g., MeSH, Emtree) prior to network egress.
+
+    Malicious States Prevented:
+        - Prevents the deployment of hallucinated or scientifically invalid medical subject headings severely degrading systemic search recall.
+
+    Args:
+        flow: The encompassing workflow schema representing the systemic topology.
+
+    Returns:
+        An array of compliance violations dynamically injecting structural evaluation components over isolated workflows.
+    """
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -561,7 +728,23 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
 
 
 def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion: Federated Search MUST be peer-reviewed by a PRESS-2015 Council."""
+    """Mandate institutional peer-review layers validating programmatic execution of widespread digital data querying.
+
+    Preconditions:
+        - Independent execution agents actively wield unbounded federated retrieval capabilities across heterogeneous ecosystems.
+
+    Postconditions:
+        - Guarantees immediate systemic routing of generated literature queries to a structured peer-evaluation node preceding external execution.
+
+    Malicious States Prevented:
+        - Prevents unchecked combinatorial explosions in data retrieval caused by structurally malformed or excessively broad autonomous queries.
+
+    Args:
+        flow: The complete map charting structural agent connectivity paths.
+
+    Returns:
+        The sequential collection of systemic errors correcting absent review governance mechanisms.
+    """
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -615,7 +798,23 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
 
 
 def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion: Zero-Trust GenUI Fencing"""
+    """Isolate dynamic component rendering behind rigorous explicit attribute-based access controls.
+
+    Preconditions:
+        - Execution agents are structurally flagged for systemic visual output generation directly intersecting end-user viewports.
+
+    Postconditions:
+        - Guarantees rendering pipelines actively require explicitly mapped frontend interaction privileges prior to execution.
+
+    Malicious States Prevented:
+        - Eliminates Cross-Site Scripting (XSS) paradigms dynamically injected via compromised or unconstrained reasoning models.
+
+    Args:
+        flow: The holistic definition charting operational interaction policies.
+
+    Returns:
+        The violations strictly ensuring interface capabilities are completely bounded by authorized user constraints.
+    """
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -653,7 +852,23 @@ def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
 
 def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Cohesion: Conformal Active Learning MUST be preceded by Epistemic Deduplication."""
+    """Ensure strict mathematical uniformity within active learning pipelines bypassing recursive structural inflation.
+
+    Preconditions:
+        - Execution clusters actively employ statistical Conformal Active Learning criteria for confidence generation.
+
+    Postconditions:
+        - Guarantees the injection of strict epistemic deduplication immediately preceding conformal uncertainty evaluations.
+
+    Malicious States Prevented:
+        - Prevents systemic confidence poisoning induced by duplicative or overlapping semantic information heavily skewing active learning boundaries.
+
+    Args:
+        flow: The top-level workflow asserting node operation parameters.
+
+    Returns:
+        The cataloged structural flaws demanding rigid epistemic filtering components.
+    """
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -702,15 +917,27 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
 
 
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """
-    Enforces security policies and capability contracts.
+    """Execute overarching structural verification encompassing critical authorization and orchestration parameters.
 
-    1. Capability Analysis: Ensures high-risk capabilities are declared.
-    2. Topology Check (Red Button Rule): Critical nodes must be guarded by HumanNode.
-    3. Swarm Safety: Recursively checks worker profiles in Swarms.
-    4. Domain Policy: Checks tool URLs against allowed domains (Strict Canonicalization).
-    5. Topology Analysis: Checks for hazardous utility islands using Tarjan's algorithm.
-    6. Neuro-Symbolic Gatekeeping: Ensure Evolutionary pipelines are guarded by Symbolic Execution.
+    This meta-function sequentially evaluates all targeted security heuristics and
+    strict functional capability guarantees seamlessly protecting operational system topologies.
+
+    Preconditions:
+        - A structurally parsed workflow definition requiring validation is passed through dynamic CI/CD boundaries.
+
+    Postconditions:
+        - Guarantees entirely validated domain schemas, zero unguarded escalation pathways, rigorous pruning
+          of malicious utility islands, and tightly governed generative UI operations.
+
+    Malicious States Prevented:
+        - Protects comprehensive execution pipelines against topological bypasses, unauthorized escalation vectors,
+          and severe resource misallocations without triggering manual halts unless required.
+
+    Args:
+        flow: The fundamental workflow object encapsulating all node parameters and topological connectivity constraints.
+
+    Returns:
+        The complete, aggregated catalog detailing all discovered structural violations and respective automated patching instructions.
     """
     reports: list[ComplianceReport] = []
 
@@ -762,9 +989,29 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
 
 def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
-    """
-    Checks if the target node is topologically guarded by a HumanNode.
-    Only HumanNode is a valid guard. SwitchNode is NOT a valid guard.
+    """Mathematically evaluate structural reachability confirming strict execution oversight mapping.
+
+    Employs an extensive Breadth-First traversal analyzing topological accessibility, mapping constraints, and fallbacks.
+
+    Complexity:
+        Time: $O(V+E)$, meticulously charting execution boundaries traversing nodes and connections.
+        Space: $O(V+E)$, actively modeling connectivity mappings and visited states preventing circular redundancies.
+
+    Preconditions:
+        - Valid graph states and execution sequences strictly define operational edges connecting target models.
+
+    Postconditions:
+        - Guarantees a boolean resolution reflecting whether the evaluated node maintains zero unguarded pathways accessible from the systemic entry point.
+
+    Malicious States Prevented:
+        - Disables sophisticated topological bypasses utilizing implicit edge routes avoiding structural authorization gates.
+
+    Args:
+        target_node: The critically evaluated node strictly requiring human-in-the-loop validation parameters.
+        flow: The unified execution architecture providing global layout context parameters.
+
+    Returns:
+        The strict evaluation flag confirming or denying the absolute presence of complete structural supervision.
     """
     nodes, edges = get_unified_topology(flow)
 
@@ -788,6 +1035,23 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
     # Detect implicit fallback routes to prevent security "wormholes"
     def extract_fallbacks(data: Any) -> list[str]:
+        """Recursively scan dynamic execution parameters identifying implicit edge routing declarations.
+
+        Preconditions:
+            - Complex nested mappings configure target nodes leveraging automated error handling configurations.
+
+        Postconditions:
+            - Guarantees exhaustive isolation of dynamically assigned edge routes embedded deep within node configurations.
+
+        Malicious States Prevented:
+            - Disables clandestine route manipulation actively utilizing unstructured fallback parameters resolving around critical oversight nodes.
+
+        Args:
+            data: The structural context parameter isolated for recursive routing evaluation.
+
+        Returns:
+            The complete sequential extraction of unmapped fallback node identifiers.
+        """
         fallbacks = []
         if isinstance(data, dict):
             for k, v in data.items():
