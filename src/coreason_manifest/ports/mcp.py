@@ -10,8 +10,8 @@ from enum import StrEnum
 from typing import Any, Literal
 from uuid import uuid4
 
-from mcp.server.fastmcp import FastMCP
-from pydantic import Field, model_validator
+from mcp.server.fastmcp import Context, FastMCP
+from pydantic import Field, ValidationError, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.compute.epistemic import ClinicalProposition
@@ -49,17 +49,39 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         raise ValueError(f"Event {event_id} not found in ledger")
 
     @mcp.tool()
-    async def append_clinical_proposition(
-        proposition: ClinicalProposition, agent_sig: AgentSignature, hardware_fingerprint: HardwareFingerprint
-    ) -> str:
+    async def append_clinical_proposition(proposition: ClinicalProposition, ctx: Context[Any, Any, Any]) -> str:
         """
         Intercept a call to append a ClinicalProposition, run strict Pydantic validation natively,
         wrap it in an EpistemicEvent, and append it to the Ledger.
         """
-        if agent_sig is None:
-            raise ValueError("SecurityException: agent_sig is required for Zero-Trust validation")
-        if hardware_fingerprint is None:
-            raise ValueError("SecurityException: hardware_fingerprint is required for Zero-Trust validation")
+        if ctx.request_context is None or ctx.request_context.meta is None:
+            raise ValueError("SecurityException: Context metadata is missing.")
+
+        # The prompt instructed to use `ctx.request_context.meta.get("x-agent-signature")`,
+        # but mypy complains because meta is typed as RequestParams.Meta which doesn't have get.
+        # However, at runtime it might be a dict, or a Pydantic model with extra fields.
+        meta_obj = ctx.request_context.meta
+        if isinstance(meta_obj, dict):
+            meta_get = meta_obj.get
+        else:
+            meta_dict = getattr(meta_obj, "model_extra", None) or getattr(meta_obj, "__dict__", {})
+            meta_get = getattr(meta_obj, "get", meta_dict.get)
+
+        agent_sig_raw = meta_get("x-agent-signature")
+        if agent_sig_raw is None or not isinstance(agent_sig_raw, dict):
+            raise ValueError("SecurityException: x-agent-signature header is missing or invalid in Context metadata")
+
+        hw_fingerprint_raw = meta_get("x-hardware-fingerprint")
+        if hw_fingerprint_raw is None or not isinstance(hw_fingerprint_raw, dict):
+            raise ValueError(
+                "SecurityException: x-hardware-fingerprint header is missing or invalid in Context metadata"
+            )
+
+        try:
+            agent_sig = AgentSignature.model_validate(agent_sig_raw)
+            hardware_fingerprint = HardwareFingerprint.model_validate(hw_fingerprint_raw)
+        except ValidationError as e:
+            raise ValueError(f"SecurityException: Validation failed for Zero-Trust credentials: {e}") from e
 
         event = EpistemicEvent(
             event_id=str(uuid4()),
