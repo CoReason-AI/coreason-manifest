@@ -23,6 +23,17 @@ class VisBenchRubricConfig(BaseModel):
     check_hallucinations: bool = Field(True, description="Check for hallucinations.")
 
 
+class SpatialValidationConfig(BaseModel):
+    """Configuration to enforce that bounding boxes map correctly to the extracted image patches."""
+
+    enforce_coordinate_bounds: bool = Field(
+        True, description="Ensure coordinates do not mathematically exceed source image dimensions."
+    )
+    allow_normalized_coordinates: bool = Field(
+        True, description="Support 0.0-1.0 relative coordinates instead of absolute pixels."
+    )
+
+
 class VisualInspectorNode(InspectorNodeBase):
     """A node that applies visual rubrics to an artifact."""
 
@@ -40,4 +51,8 @@ class VisualInspectorNode(InspectorNodeBase):
 
     target_artifact_key: str = Field(
         ..., description="The state key where the rendering agent stored the image/SVG URL"
+    )
+
+    spatial_validation: SpatialValidationConfig | None = Field(
+        None, description="If set, mathematically validates bounding box provenance from upstream extractors."
     )
