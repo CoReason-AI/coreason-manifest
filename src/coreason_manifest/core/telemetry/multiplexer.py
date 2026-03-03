@@ -1,7 +1,10 @@
 import asyncio
-from collections.abc import AsyncGenerator
+import logging
+from collections.abc import AsyncGenerator, Awaitable, Callable
 
-from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket
+from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket, StreamUIEnvelope
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncSSEMultiplexer:
@@ -10,9 +13,10 @@ class AsyncSSEMultiplexer:
     and multiplex stream packets into Server-Sent Events (SSE).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, ui_observers: list[Callable[[StreamPacket], Awaitable[None]]] | None = None) -> None:
         """Initialize the multiplexer with a queue."""
         self._queue: asyncio.Queue[StreamPacket] | None = None
+        self.ui_observers = ui_observers
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
         if self._queue is None:
@@ -24,6 +28,13 @@ class AsyncSSEMultiplexer:
         Push a stream packet into the buffer with a timeout to prevent deadlock.
         """
         import contextlib
+
+        if isinstance(packet, StreamUIEnvelope) and self.ui_observers:
+            for observer in self.ui_observers:
+                try:
+                    await observer(packet)
+                except Exception as e:
+                    logger.error(f"UI Observer {getattr(observer, '__name__', str(observer))} failed: {e}")
 
         queue = await self._get_queue()
         with contextlib.suppress(TimeoutError):
