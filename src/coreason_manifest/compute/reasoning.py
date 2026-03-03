@@ -184,6 +184,25 @@ class BaseReasoning(BaseModel):
         return []
 
 
+class BoundingBox(BaseModel):
+    """Spatial coordinates for visual provenance in Multimodal RAG."""
+
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
+
+    page_number: Annotated[int, Field(ge=1, description="The 1-indexed page number of the document.")]
+    x_min: Annotated[float, Field(ge=0.0, description="Minimum X coordinate.")]
+    y_min: Annotated[float, Field(ge=0.0, description="Minimum Y coordinate.")]
+    x_max: Annotated[float, Field(ge=0.0, description="Maximum X coordinate.")]
+    y_max: Annotated[float, Field(ge=0.0, description="Maximum Y coordinate.")]
+
+    @model_validator(mode="after")
+    def _validate_coordinates(self) -> "BoundingBox":
+        """Mathematically enforce that the bounding box is a valid rectangle."""
+        if self.x_min >= self.x_max or self.y_min >= self.y_max:
+            raise ValueError("Invalid bounding box: min coordinates must be strictly less than max coordinates.")
+        return self
+
+
 class StandardReasoning(BaseReasoning):
     """Linear Chain-of-Thought (CoT) / ROMA."""
 
@@ -544,6 +563,34 @@ class WasmExecutionReasoning(BaseReasoning):
         return [NodeCapability.WASM_EXECUTION.value]
 
 
+class VisualExtractionReasoning(BaseReasoning):
+    """
+    Multimodal RAG (ColPali/Vision) execution engine.
+    Replaces destructive text-chunking with high-fidelity spatial reasoning over document images.
+    """
+
+    type: Literal["visual_extraction"] = "visual_extraction"
+
+    provenance_mode: Annotated[
+        Literal["text_citation", "visual_bounding_box", "hybrid"],
+        Field(description="The mandatory mathematical contract for data extraction traceability."),
+    ] = "visual_bounding_box"
+
+    require_patch_level_retrieval: Annotated[
+        bool,
+        Field(description="If True, utilizes late-interaction visual patch embeddings (e.g., ColPali)."),
+    ] = True
+
+    def required_capabilities(self) -> list[str]:
+        from coreason_manifest.core.primitives.constants import NodeCapability
+
+        # Utilizing NodeCapability.VISION if it exists, fallback to string
+        cap = getattr(NodeCapability, "VISION", None)
+        if cap is not None and hasattr(cap, "value"):
+            return [str(cap.value)]
+        return ["vision"]
+
+
 # -------------------------------------------------------------------------
 # POLYMORPHIC UNION
 # -------------------------------------------------------------------------
@@ -561,7 +608,8 @@ ReasoningConfig = Annotated[
     | ComputerUseReasoning
     | CodeExecutionReasoning
     | GraphReasoning
-    | WasmExecutionReasoning,
+    | WasmExecutionReasoning
+    | VisualExtractionReasoning,
     Field(discriminator="type"),
 ]
 
@@ -596,6 +644,7 @@ __all__ = [
     "AdversarialConfig",
     "AttentionReasoning",
     "BaseReasoning",
+    "BoundingBox",
     "BufferReasoning",
     "CodeExecutionReasoning",
     "ComputerUseReasoning",
@@ -618,5 +667,6 @@ __all__ = [
     "ReviewStrategy",
     "StandardReasoning",
     "TreeSearchReasoning",
+    "VisualExtractionReasoning",
     "WasmExecutionReasoning",
 ]
