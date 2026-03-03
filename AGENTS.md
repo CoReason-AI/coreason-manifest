@@ -62,7 +62,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 * **Consumer Responsibility:** The consuming application (Builder/Engine) will configure sinks, formats, and levels.
 * **Pattern:**
     ```python
-    from coreason_manifest.utils.logger import logger
+    from coreason_manifest.telemetry.logger import logger
     # usage is fine
     logger.debug("Validating manifest...")
     # configuration (logger.add) is FORBIDDEN in library code

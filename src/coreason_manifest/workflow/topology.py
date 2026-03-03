@@ -1,4 +1,4 @@
-from coreason_manifest.utils.logger import logger
+from coreason_manifest.telemetry.logger import logger
 from coreason_manifest.workflow.flow import Edge, GraphFlow, LinearFlow
 from coreason_manifest.workflow.nodes import AnyNode
 

@@ -3,13 +3,13 @@ import time
 from collections.abc import AsyncGenerator, Awaitable, Callable
 
 from coreason_manifest.telemetry.custody import EpistemicEnvelope
+from coreason_manifest.telemetry.logger import logger
 from coreason_manifest.telemetry.stream import (
     StreamCloseEnvelope,
     StreamEpistemicEnvelope,
     StreamPacket,
     StreamUIEnvelope,
 )
-from coreason_manifest.utils.logger import logger
 
 
 class AsyncSSEMultiplexer:

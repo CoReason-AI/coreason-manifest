@@ -3,8 +3,8 @@ from typing import Any
 
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.state.persistence import JSONPatchOperation, PatchOp
+from coreason_manifest.telemetry.logger import logger
 from coreason_manifest.telemetry.stream import StreamStateDeltaEnvelope
-from coreason_manifest.utils.logger import logger
 
 
 def _get_cow_parent(

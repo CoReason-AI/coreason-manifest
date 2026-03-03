@@ -1,4 +1,4 @@
-# src/coreason_manifest/utils/gatekeeper.py
+# src/coreason_manifest/core/security/gatekeeper.py
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
@@ -13,7 +13,7 @@ from coreason_manifest.core.security.compliance import (
     RemediationAction,
 )
 from coreason_manifest.oversight.resilience import EscalationStrategy
-from coreason_manifest.utils.logger import logger
+from coreason_manifest.telemetry.logger import logger
 from coreason_manifest.workflow.flow import GraphFlow, LinearFlow
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
 from coreason_manifest.workflow.topology import (
@@ -362,7 +362,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
             if edge.from_node in unreachable or edge.to_node in unreachable:
                 bulk_edge_indices.add(idx)
 
-        from coreason_manifest.utils.patch import generate_safe_array_removal_patch
+        from coreason_manifest.state.patch import generate_safe_array_removal_patch
 
         patch_list = []
         # 1. Remove Edges (use safe utility that handles sorting inherently)
