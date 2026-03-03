@@ -108,7 +108,7 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
 
     Returns:
         The sequential stream of delta objects identifying all localized additions, deletions, or structural modifications.
-    """
+    """  # noqa: E501
     changes = []
 
     # Try to extract a stable identifier for complex objects (like nodes/edges) to improve diffing
@@ -302,7 +302,7 @@ def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> D
 
     Returns:
         The consolidated report modeling all localized mutations natively organized and categorized for downstream consumption.
-    """
+    """  # noqa: E501
     old_dict = old.model_dump(exclude_none=True)
     new_dict = new.model_dump(exclude_none=True)
 

@@ -17,7 +17,7 @@ class AmbientTriggerRule(CoreasonModel):
     @model_validator(mode="after")
     def validate_debounce_ms(self) -> "AmbientTriggerRule":
         if self.debounce_ms < 100 or self.debounce_ms > 5000:
-            raise ValueError("debounce_ms must be mathematically sane (>= 100 and <= 5000).")
+            raise ValueError("debounce_ms must fall within the allowed range (>= 100 and <= 5000).")
         return self
 
 
