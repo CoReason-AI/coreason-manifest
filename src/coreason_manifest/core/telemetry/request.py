@@ -47,38 +47,15 @@ class AgentRequest(BaseModel):
         None, description="The cryptographic Zero-Trust Identity Passport for this request."
     )
 
-    @model_validator(mode="before")
-    @classmethod
-    def enforce_lineage_rooting(cls, data: Any) -> Any:
-        """Promote current request_id to root_request_id if no root and parent exist."""
-        if isinstance(data, dict):
-            # COPY data to avoid side effects on the input dict
-            data = data.copy()
-
-            req_id = data.get("request_id")
-            parent = data.get("parent_request_id")
-            root = data.get("root_request_id")
-
-            # If request_id is not provided, we can't auto-root reliably here if we rely on default_factory.
-            # But typically requests are created with an ID.
-            # If not, Pydantic will generate it later, but we need it for root.
-            # So if missing, generate it now.
-            if not req_id:
-                req_id = str(uuid4())
-                data["request_id"] = req_id
-
-            # Case 1: No parent, no root -> New Root
-            if not parent and not root:
-                data["root_request_id"] = req_id
-
-        return data
-
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "AgentRequest":
         """Enforce strict trace integrity and lineage validity.
 
         Raises:
             ManifestError: If lineage integrity is broken."""
+        if self.root_request_id is None and self.parent_request_id is None:
+            object.__setattr__(self, "root_request_id", self.request_id)
+
         errors = []
 
         # Rule 1: Orphaned trace check (Parent exists, but Root missing)

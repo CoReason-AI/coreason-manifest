@@ -209,7 +209,7 @@ class SwarmNode(Node):
                             {
                                 "op": "add",
                                 "path": "/aggregator_model",
-                                "value": "gpt-4-turbo",  # Reasonable default
+                                "value": "default_aggregator_model",
                             }
                         ],
                     ).model_dump()

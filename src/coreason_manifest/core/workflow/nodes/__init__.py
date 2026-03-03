@@ -14,6 +14,8 @@ from .swarm import SwarmNode
 from .system import PlaceholderNode
 from .visual_oversight import MultimodalConstraint, VisualInspectorNode
 
+import pydantic
+
 AnyNode = Annotated[
     AgentNode
     | HumanNode
@@ -24,7 +26,7 @@ AnyNode = Annotated[
     | EmergenceInspectorNode
     | VisualInspectorNode
     | PlaceholderNode,
-    Field(discriminator="type"),
+    Field(discriminator=pydantic.Discriminator("type")),
 ]
 
 __all__ = [
