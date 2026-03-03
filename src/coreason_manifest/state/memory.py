@@ -1,8 +1,56 @@
 from enum import StrEnum
+from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+
+
+class ScreeningPhase(StrEnum):
+    DEDUPLICATION = "deduplication"
+    TITLE_ABSTRACT_SCREEN = "title_abstract_screen"
+    FULL_TEXT_RETRIEVAL = "full_text_retrieval"
+    FULL_TEXT_SCREEN = "full_text_screen"
+
+
+class ExclusionReason(StrEnum):
+    WRONG_POPULATION = "wrong_population"
+    WRONG_INTERVENTION = "wrong_intervention"
+    WRONG_COMPARATOR = "wrong_comparator"
+    WRONG_OUTCOME = "wrong_outcome"
+    WRONG_STUDY_DESIGN = "wrong_study_design"
+    ANIMAL_IN_VITRO = "animal_in_vitro"
+    LANGUAGE = "language"
+    DUPLICATE = "duplicate"
+    FULL_TEXT_UNAVAILABLE = "full_text_unavailable"
+
+
+class AttritionEvent(CoreasonModel):
+    """An immutable record of a document's transition through the screening pipeline."""
+
+    document_id: Annotated[str, Field(description="The unique identifier of the paper (e.g., PMID or DOI).")]
+    phase: Annotated[ScreeningPhase, Field(description="The screening phase where this event occurred.")]
+    status: Annotated[Literal["included", "excluded"], Field(description="The outcome of the screening phase.")]
+    reason: Annotated[
+        ExclusionReason | None, Field(description="Strict ontology-mapped reason. Mandatory if status is 'excluded'.")
+    ] = None
+    agent_id: Annotated[str, Field(description="The ID of the Agent or Swarm that made the decision.")]
+
+    @model_validator(mode="after")
+    def validate_exclusion_reason(self) -> "AttritionEvent":
+        """Mathematically enforce that an exclusion event MUST provide a clinical reason."""
+        if self.status == "excluded" and self.reason is None:
+            raise ValueError("An exclusion event MUST provide a strictly typed ExclusionReason.")
+        return self
+
+
+class PRISMAAttritionLedger(CoreasonModel):
+    """Cryptographic state machine for generating PRISMA 2020 flow diagrams."""
+
+    events: Annotated[
+        list[AttritionEvent],
+        Field(description="Append-only log of all document filtering events.")
+    ] = Field(default_factory=list)
 
 
 class WorkingMemoryConfig(CoreasonModel):
@@ -164,3 +212,6 @@ class MemorySubsystem(CoreasonModel):
         None, description="Configuration for Semantic Memory (Knowledge Graph)."
     )
     procedural: ProceduralMemoryConfig | None = Field(None, description="Configuration for Procedural Memory (Skills).")
+    prisma_ledger: PRISMAAttritionLedger | None = Field(
+        None, description="Append-only ledger for tracking PRISMA document attrition and generating flow diagrams."
+    )
