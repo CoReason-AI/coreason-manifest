@@ -6,16 +6,16 @@ from typing import Annotated, Any, Literal
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.presentation.highlighting import HighlightConfig  # noqa: TC001
-from coreason_manifest.core.presentation.search_layout import HybridSearchLayout  # noqa: TC001
-from coreason_manifest.core.presentation.templating import ParameterizedDataRef  # noqa: TC001
-from coreason_manifest.core.presentation.transform import DataTransformSchema  # noqa: TC001
-from coreason_manifest.core.presentation.typeahead import TypeaheadConfig  # noqa: TC001
-from coreason_manifest.core.state.ephemeral import LocalStateManifest  # noqa: TC001
+from coreason_manifest.presentation.actions import ClientActionMap  # noqa: TC001
+from coreason_manifest.presentation.ambient import AmbientListenerConfig  # noqa: TC001
+from coreason_manifest.presentation.components.highlighting import HighlightConfig  # noqa: TC001
+from coreason_manifest.presentation.components.search_layout import HybridSearchLayout  # noqa: TC001
+from coreason_manifest.presentation.components.templating import ParameterizedDataRef  # noqa: TC001
+from coreason_manifest.presentation.components.transform import DataTransformSchema  # noqa: TC001
+from coreason_manifest.presentation.components.typeahead import TypeaheadConfig  # noqa: TC001
+from coreason_manifest.presentation.streaming import SuspenseConfig  # noqa: TC001
+from coreason_manifest.state.ephemeral import LocalStateManifest  # noqa: TC001
 
-from .ambient import AmbientListenerConfig  # noqa: TC001
-from .client_actions import ClientActionMap  # noqa: TC001
-from .suspense import SuspenseConfig  # noqa: TC001
 from .validation import UIValidationSchema  # noqa: TC001
 
 

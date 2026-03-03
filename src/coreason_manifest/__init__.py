@@ -8,6 +8,17 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+import coreason_manifest.core  # noqa: F401
+from coreason_manifest.compute.reasoning import (
+    BaseReasoning,
+    CouncilReasoning,
+    DecompositionReasoning,
+    FastPath,
+    Optimizer,
+    ReasoningConfig,
+    StandardReasoning,
+    TreeSearchReasoning,
+)
 from coreason_manifest.core.common.identity import (
     AgentIdentity,
     DelegationContract,
@@ -20,31 +31,21 @@ from coreason_manifest.core.common.identity import (
 from coreason_manifest.core.common.semantic import (
     SemanticRef,
 )
-from coreason_manifest.core.compute.reasoning import (
-    BaseReasoning,
-    CouncilReasoning,
-    DecompositionReasoning,
-    FastPath,
-    Optimizer,
-    ReasoningConfig,
-    StandardReasoning,
-    TreeSearchReasoning,
-)
-from coreason_manifest.core.oversight.governance import (
+from coreason_manifest.oversight.governance import (
     Audit,
     Governance,
     Safety,
 )
-from coreason_manifest.core.oversight.resilience import SupervisionPolicy
-from coreason_manifest.core.state.tools import (
+from coreason_manifest.oversight.resilience import SupervisionPolicy
+from coreason_manifest.state.tools import (
     Dependency,
     ToolPack,
 )
-from coreason_manifest.core.workflow.evals import (
+from coreason_manifest.workflow.evals import (
     AdversaryProfile,
     ChaosConfig,
 )
-from coreason_manifest.core.workflow.flow import (
+from coreason_manifest.workflow.flow import (
     Blackboard,
     Edge,
     FlowInterface,
@@ -54,7 +55,7 @@ from coreason_manifest.core.workflow.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.core.workflow.nodes import (
+from coreason_manifest.workflow.nodes import (
     AgentNode,
     CognitiveProfile,
     HumanNode,
