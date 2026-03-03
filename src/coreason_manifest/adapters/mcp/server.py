@@ -10,7 +10,6 @@ from enum import StrEnum
 from typing import Any, Literal, cast  # noqa: F401
 from uuid import uuid4
 
-from mcp.server.fastmcp import Context, FastMCP
 from pydantic import Field, ValidationError, model_validator
 
 from coreason_manifest.compute.epistemic import ClinicalProposition
@@ -19,6 +18,7 @@ from coreason_manifest.presentation.scivis.scivis_provenance import ActorIdentit
 from coreason_manifest.state.events import EpistemicAnchor, EpistemicEvent, EventType
 from coreason_manifest.state.ledger import EpistemicLedger
 from coreason_manifest.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
+from mcp.server.fastmcp import Context, FastMCP
 
 
 def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
