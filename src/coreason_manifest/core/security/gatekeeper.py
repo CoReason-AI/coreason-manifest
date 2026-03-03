@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.presentation import RenderStrategy
+from coreason_manifest.core.compute.reasoning import CouncilReasoning, EvolutionaryReasoning
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.security.compliance import (
@@ -95,10 +96,10 @@ def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, An
     return reports
 
 
-def _enforce_red_button_rule(
+def _enforce_critical_capability_guards(
     nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]
 ) -> list[ComplianceReport]:
-    """1. Capability Analysis & Red Button Rule"""
+    """1. Capability Analysis & Critical Capability Guards"""
     reports: list[ComplianceReport] = []
     for node in nodes:
         caps = _get_capabilities(node, flow)
@@ -209,8 +210,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     _, edges = get_unified_topology(flow)
     adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
     for edge in edges:
-        # Hotfix 1: Prevent null reference exception during draft mode traversal.
-        if edge.from_node in adj:
+        if edge.from_node in adj and edge.to_node in adj:
             adj[edge.from_node].append(edge.to_node)
 
     # 5a. Tarjan's Algorithm for SCCs (Reachability Context)
@@ -354,7 +354,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
 
             if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
                 reasoning = flow.definitions.profiles[profile_ref].reasoning
-                if getattr(reasoning, "type", "") == "evolutionary":
+                if isinstance(reasoning, EvolutionaryReasoning):
                     is_evolutionary = True
 
         if is_evolutionary:
@@ -401,7 +401,7 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
 
             if flow.definitions and profile_ref in flow.definitions.profiles:
                 reasoning = flow.definitions.profiles[profile_ref].reasoning
-                if getattr(reasoning, "type", "") == "evolutionary":
+                if isinstance(reasoning, EvolutionaryReasoning):
                     is_evolutionary = True
 
             if not is_evolutionary:
@@ -519,7 +519,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
                 reasoning = flow.definitions.profiles[profile_ref].reasoning
                 # Check if it's a CouncilReasoning with methodology.standard == "prisma_s"
                 if (
-                    getattr(reasoning, "type", "") == "council"
+                    isinstance(reasoning, CouncilReasoning)
                     and getattr(reasoning, "methodology", None)
                     and getattr(reasoning.methodology, "standard", "") == "prisma_s"
                 ):
@@ -584,7 +584,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
                     if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
                         reasoning = flow.definitions.profiles[profile_ref].reasoning
                         if (
-                            getattr(reasoning, "type", "") == "council"
+                            isinstance(reasoning, CouncilReasoning)
                             and getattr(reasoning, "methodology", None)
                             and getattr(reasoning.methodology, "standard", "") == "press_2015"
                         ):
@@ -727,8 +727,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # 0. Domain Policy Check
     reports.extend(_check_domain_whitelist(flow, tool_map))
 
-    # 1. Capability Analysis & Red Button Rule
-    reports.extend(_enforce_red_button_rule(nodes, flow, tool_map))
+    # 1. Capability Analysis & Critical Capability Guards
+    reports.extend(_enforce_critical_capability_guards(nodes, flow, tool_map))
 
     # 5. Topology Analysis (GraphFlow Only)
     if isinstance(flow, GraphFlow):
@@ -783,7 +783,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     # Construct adjacency map
     adj: dict[str, list[str]] = {nid: [] for nid in all_ids}
     for edge in edges:
-        if edge.from_node in adj:
+        if edge.from_node in adj and edge.to_node in adj:
             adj[edge.from_node].append(edge.to_node)
 
     guards = {n.id for n in nodes if isinstance(n, valid_guards)}
@@ -813,10 +813,11 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
         if curr == target_node.id:
             reachable = True
             break
-        for n in adj.get(curr or "", []):
-            if n not in full_visited:
-                full_visited.add(n)
-                full_queue.append(n)
+        if curr in adj:
+            for n in adj[curr]:
+                if n not in full_visited:
+                    full_visited.add(n)
+                    full_queue.append(n)
 
     if not reachable:
         return False  # Island -> Fail Closed
@@ -834,10 +835,11 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
             continue
 
         # Expand neighbors
-        for neighbor in adj.get(curr_id or "", []):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append(neighbor)
+        if curr_id in adj:
+            for neighbor in adj[curr_id]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
 
     # If reachable but not via unguarded path -> Guarded
     return True
