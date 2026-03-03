@@ -1,8 +1,8 @@
 # **AGENTS.md**
 
-**Note to Agent:** This file contains the **Supreme Law** for this repository. It defines the architectural constraints of a "Shared Kernel." Read this before planning or executing *any* task.
+**Note to Agent:** This file contains the Core Architectural Directives for this repository. It defines the architectural constraints of a "Shared Kernel." Read this before planning or executing *any* task.
 
-# **PRIMARY DIRECTIVE: THE SHARED KERNEL PROTOCOL**
+# Strict Engineering Constraints: THE SHARED KERNEL PROTOCOL
 
 **Current Status:** Pure Data Library
 **Role:** Definitive Source of Truth for Schemas and Contracts.

@@ -221,35 +221,30 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     queue: deque[str] = deque([n_id for n_id, d in in_degree.items() if d == 0])
     ranks: dict[str, int] = {}
 
-    # If no roots (pure cycle), pick first node as root
-    if not queue and nodes:
-        first_node = next(iter(nodes)).id
-        queue.append(first_node)
-        in_degree[first_node] = 0  # Explicitly reset in_degree to 0 to artificially break the graph cycle.
-
     for n_id in queue:
         ranks[n_id] = 0
 
-    while queue:
+    while len(ranks) < len(nodes):
+        if not queue:
+            # Handle cycles / disconnected components not reachable from roots
+            # Assign them to a rank beyond the max found so far
+            current_max_rank = max(ranks.values(), default=0)
+            unvisited = [n.id for n in nodes if n.id not in ranks]
+
+            # Artificially push unvisited nodes with the smallest apparent incoming connections
+            # to break the cycle mathematically without destructing global in_degree metrics.
+            first_node = min(unvisited, key=lambda n: in_degree[n])
+            ranks[first_node] = current_max_rank + 1
+            queue.append(first_node)
+
         u = queue.popleft()
         r = ranks[u]
 
         for v in adj.get(u, []):
             in_degree[v] -= 1
-            if in_degree[v] == 0:
+            if in_degree[v] == 0 and v not in ranks:
                 ranks[v] = r + 1
                 queue.append(v)
-
-    # Handle cycles / disconnected components not reachable from roots
-    # Assign them to a rank beyond the max found so far
-    current_max_rank = max(ranks.values(), default=0)
-    unvisited = [n.id for n in nodes if n.id not in ranks]
-
-    if unvisited:
-        # Assign remaining disconnected components to the subsequent rank
-        fallback_rank = current_max_rank + 1
-        for n_id in unvisited:
-            ranks[n_id] = fallback_rank
 
     # Assign Positions
     positions = {}

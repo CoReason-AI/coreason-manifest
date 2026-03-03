@@ -344,10 +344,7 @@ class EnsembleReasoning(BaseReasoning):
     agreement_threshold: Annotated[float, Field(description="High confidence match threshold.")] = 0.85
     disagreement_threshold: Annotated[
         float,
-        Field(
-            description="Low confidence mismatch threshold. Note: disagreement_threshold < 0.6 is a strong "
-            "signal of emergent instability."
-        ),
+        Field(description="Low confidence mismatch threshold."),
     ] = 0.60
 
     # Slow Path Trigger
@@ -371,6 +368,15 @@ class EnsembleReasoning(BaseReasoning):
     ] = None
 
     @model_validator(mode="after")
+    def validate_disagreement_threshold(self) -> "EnsembleReasoning":
+        """Trigger an alert if the disagreement threshold risks emergent instability."""
+        if self.disagreement_threshold < 0.6:
+            from coreason_manifest.utils.logger import logger
+
+            logger.warning("emergent_instability_detected")
+        return self
+
+    @model_validator(mode="after")
     def validate_verification_model(self) -> "EnsembleReasoning":
         """Enforce that verification mode requires a similarity model."""
         if self.verification_mode in ("always", "ambiguous_only") and self.similarity_model is None:
@@ -391,7 +397,7 @@ class RedTeamingReasoning(BaseReasoning):
     # The adversarial agent (Red Team)
     attacker_model: Annotated[ModelRef, Field(description="The model configured to generate attack vectors.")]
 
-    # The victim agent (Blue Team). If None, the agent attacks itself (Self-Correction).
+    # The target agent (system under test). If None, the agent attacks itself (Self-Correction).
     target_model: Annotated[ModelRef | None, Field(description="The target model under evaluation.")] = None
 
     # Modern Attack Vectors

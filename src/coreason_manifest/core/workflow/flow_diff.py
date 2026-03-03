@@ -9,7 +9,6 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import difflib
-import json
 from enum import StrEnum
 from typing import Any
 
@@ -132,17 +131,17 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         # For simple types just use the value
         if isinstance(item, (str, int, float, bool)) or item is None:
             return item
-        # Fallback for complex objects without 'id': deterministic state comparison
-        if hasattr(item, "model_dump_json"):
+
+        # ENFORCED STRICT HASHING
+        if hasattr(item, "canonical_id"):
             try:
-                return item.model_dump_json()
+                return item.canonical_id()
             except (TypeError, ValueError):
                 pass
 
-        try:
-            return json.dumps(item, sort_keys=True)
-        except (TypeError, ValueError):
-            return str(item)
+        raise ValueError(
+            f"Object of type {type(item).__name__} must implement a .canonical_id() method for strict hashing."
+        )
 
     old_ids = [_get_id(item) for item in old_list]
     new_ids = [_get_id(item) for item in new_list]

@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 
-from pydantic import AwareDatetime, ConfigDict, Field, SecretStr, model_validator
+from pydantic import ConfigDict, Field, SecretStr, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.primitives.types import DataClassification
@@ -37,40 +37,6 @@ class UserIdentity(CoreasonModel):
     user_id: str = Field(..., description="The principal human or service account initiating the trace.")
     roles: list[str] = Field(
         default_factory=list, description="Persona-Based Access Control (PBAC) roles assigned to the user."
-    )
-
-
-class DelegationScope(CoreasonModel):
-    model_config = ConfigDict(frozen=True)
-    """
-    The strict boundaries of authority granted to the agent for this specific trace.
-    Part of the Zero-Trust Identity Context Envelope.
-    """
-
-    allowed_tools: list[str] = Field(
-        default_factory=list, description="Strictly scoped tool whitelist for this specific request."
-    )
-    max_budget_usd: float | None = Field(None, description="Financial cap for this trace.")
-    session_expiry: AwareDatetime | None = Field(
-        None, description="When this context envelope expires. Must be TZ-aware."
-    )
-
-
-class SessionContext(CoreasonModel):
-    model_config = ConfigDict(frozen=True)
-    """
-    The Zero-Trust Identity Context Envelope for this request.
-    Proves cryptographically who is making the request, who the agent is, and what its delegated authority is.
-    """
-
-    session_id: str = Field(..., description="ID of the interaction session.")
-    user: UserIdentity = Field(..., description="The delegating principal.")
-    agent: AgentIdentity = Field(..., description="The acting agent.")
-    delegation: DelegationScope = Field(..., description="The authority granted.")
-    trace_id: str | None = Field(
-        None,
-        pattern=r"^00-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$",
-        description="W3C Trace Context ID for distributed secure tracking.",
     )
 
 

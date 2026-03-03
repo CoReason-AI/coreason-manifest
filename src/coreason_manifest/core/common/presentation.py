@@ -1,20 +1,22 @@
+from __future__ import annotations
+
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.presentation.highlighting import HighlightConfig
-from coreason_manifest.core.presentation.search_layout import HybridSearchLayout
-from coreason_manifest.core.presentation.templating import ParameterizedDataRef
-from coreason_manifest.core.presentation.transform import DataTransformSchema
-from coreason_manifest.core.presentation.typeahead import TypeaheadConfig
-from coreason_manifest.core.state.ephemeral import LocalStateManifest
+from coreason_manifest.core.presentation.highlighting import HighlightConfig  # noqa: TC001
+from coreason_manifest.core.presentation.search_layout import HybridSearchLayout  # noqa: TC001
+from coreason_manifest.core.presentation.templating import ParameterizedDataRef  # noqa: TC001
+from coreason_manifest.core.presentation.transform import DataTransformSchema  # noqa: TC001
+from coreason_manifest.core.presentation.typeahead import TypeaheadConfig  # noqa: TC001
+from coreason_manifest.core.state.ephemeral import LocalStateManifest  # noqa: TC001
 
-from .ambient import AmbientListenerConfig
-from .client_actions import ClientActionMap
-from .suspense import SuspenseConfig
-from .validation import UIValidationSchema
+from .ambient import AmbientListenerConfig  # noqa: TC001
+from .client_actions import ClientActionMap  # noqa: TC001
+from .suspense import SuspenseConfig  # noqa: TC001
+from .validation import UIValidationSchema  # noqa: TC001
 
 
 class RenderStrategy(StrEnum):
@@ -39,7 +41,7 @@ class UIEventMap(CoreasonModel):
     )
 
     @model_validator(mode="after")
-    def validate_zero_trust_mapping(self) -> "UIEventMap":
+    def validate_zero_trust_mapping(self) -> UIEventMap:
         """Enforce that payload_mapping requires mutates_variables and targets are allowed."""
         if self.payload_mapping:
             if not self.mutates_variables:
@@ -57,7 +59,7 @@ class UIComponentNode(CoreasonModel):
     props: dict[str, Any] = Field(
         default_factory=dict, description="The evaluated property data to bind to the widget."
     )
-    children: list["UIComponentNode"] = Field(
+    children: list[UIComponentNode] = Field(
         default_factory=list, description="Child component nodes for recursive nesting."
     )
     client_actions: list[ClientActionMap] = Field(
@@ -195,7 +197,3 @@ class PresentationHints(CoreasonModel):
         str | None,
         Field(description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865)."),
     ] = None
-
-
-UIComponentNode.model_rebuild()
-AdaptiveUIContract.model_rebuild()

@@ -1,4 +1,5 @@
 import asyncio
+import time
 from collections.abc import AsyncGenerator, Awaitable, Callable
 
 from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
@@ -57,8 +58,6 @@ class AsyncSSEMultiplexer:
         """
 
         async def _push_task() -> None:
-            import time
-
             queue = await self._get_queue()
             await queue.put(StreamEpistemicEnvelope(op="epistemic", p=envelope, timestamp=time.time()))
 
