@@ -17,6 +17,9 @@ class ObservabilityTelemetry:
         if not span:
             return
 
+        from typing import cast
+        from opentelemetry.util.types import Attributes
+
         attributes = {
             "genui.event.type": event_type,
             "genui.event.timestamp": timestamp,
@@ -25,6 +28,6 @@ class ObservabilityTelemetry:
         # Add semantic convention events to the span
         span.add_event(
             name=f"genui.milestone.{event_type}",
-            attributes=attributes,
+            attributes=cast(Attributes, attributes),
             timestamp=int(timestamp * 1e9),  # OpenTelemetry expects nanoseconds
         )

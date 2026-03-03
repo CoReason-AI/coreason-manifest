@@ -89,6 +89,12 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         if isinstance(item, (str, int, float, bool)) or item is None:
             return item
         # Fallback for complex objects without 'id': deterministic state comparison
+        if hasattr(item, "model_dump_json"):
+            try:
+                return item.model_dump_json()
+            except Exception:
+                pass
+
         try:
             return json.dumps(item, sort_keys=True)
         except (TypeError, ValueError):

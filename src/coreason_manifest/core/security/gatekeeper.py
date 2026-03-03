@@ -110,7 +110,7 @@ def _enforce_red_button_rule(
                 resolved_tool = tool_map.get(tool_name)
                 if not resolved_tool or not getattr(resolved_tool, "risk_level", None):
                     raise ManifestError.critical_halt(
-                        code=ManifestErrorCode.VAL_TOOL_MISSING,
+                        code="VAL-TOOL-MISSING",
                         message=f"Tool '{tool_name}' lacks a valid risk level.",
                     )
                 risk = resolved_tool.risk_level

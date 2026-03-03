@@ -49,26 +49,24 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         raise ValueError(f"Event {event_id} not found in ledger")
 
     @mcp.tool()
-    async def append_clinical_proposition(proposition: ClinicalProposition, agent_sig: AgentSignature) -> str:
+    async def append_clinical_proposition(
+        proposition: ClinicalProposition, agent_sig: AgentSignature, hardware_fingerprint: HardwareFingerprint
+    ) -> str:
         """
         Intercept a call to append a ClinicalProposition, run strict Pydantic validation natively,
         wrap it in an EpistemicEvent, and append it to the Ledger.
         """
         if agent_sig is None:
             raise ValueError("SecurityException: agent_sig is required for Zero-Trust validation")
-
-        hw_fp = HardwareFingerprint(
-            architecture="mcp_node",
-            compute_precision="native",
-            vram_allocated=0,
-        )
+        if hardware_fingerprint is None:
+            raise ValueError("SecurityException: hardware_fingerprint is required for Zero-Trust validation")
 
         event = EpistemicEvent(
             event_id=str(uuid4()),
             timestamp=datetime.now(UTC),
             context_envelope={
                 "agent_signature": agent_sig.model_dump(),
-                "hardware_cluster": hw_fp.model_dump(),
+                "hardware_cluster": hardware_fingerprint.model_dump(),
                 "prompt_version": "1.0",
             },
             event_type=EventType.SEMANTIC_EXTRACTED,

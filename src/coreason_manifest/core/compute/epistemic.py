@@ -89,10 +89,12 @@ class ReifiedEntity(CoreasonModel):
     @model_validator(mode="after")
     def validate_ontology(self, info: ValidationInfo) -> "ReifiedEntity":
         """Enforce that the global_id is valid using an injected registry or callable."""
-        if info.context and "ontology_validator" in info.context:
-            validator = info.context["ontology_validator"]
-            if not validator(self.global_id):
-                raise ValueError(f"Ontology Error: '{self.global_id}' is not a valid global_id.")
+        if info.context is None or "ontology_validator" not in info.context:
+            raise ValueError("SecurityException: 'ontology_validator' dependency missing from validation context.")
+
+        validator = info.context["ontology_validator"]
+        if not validator(self.global_id):
+            raise ValueError(f"Ontology Error: '{self.global_id}' is not a valid global_id.")
         return self
 
 
