@@ -125,9 +125,15 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         """
         if isinstance(item, dict) and "id" in item:
             return item["id"]
+        if hasattr(item, "id"):
+            return item.id
+
         # For edges we might use from_node -> to_node as an identifier
         if isinstance(item, dict) and "from_node" in item and "to_node" in item:
             return f"{item['from_node']}->{item['to_node']}"
+        if hasattr(item, "from_node") and hasattr(item, "to_node"):
+            return f"{item.from_node}->{item.to_node}"
+
         # For simple types just use the value
         if isinstance(item, (str, int, float, bool)) or item is None:
             return item
@@ -150,11 +156,14 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "replace":
-            # For a replace, we pair up the items and do a deeper diff if they are dicts
+            # For a replace, we pair up the items and do a deeper diff if they are dicts or objects
             for i, j in zip(range(i1, i2), range(j1, j2), strict=False):
                 current_path = f"{path_prefix}[{i}]"
-                if isinstance(old_list[i], dict) and isinstance(new_list[j], dict):
-                    changes.extend(_compare_dicts(current_path, old_list[i], new_list[j]))
+                is_old_complex = isinstance(old_list[i], dict) or hasattr(old_list[i], "model_fields")
+                is_new_complex = isinstance(new_list[j], dict) or hasattr(new_list[j], "model_fields")
+
+                if is_old_complex and is_new_complex:
+                    changes.extend(_compare_objects(current_path, old_list[i], new_list[j]))
                 else:
                     changes.append(
                         DiffChange(
@@ -218,8 +227,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
     return changes
 
 
-def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[str, Any]) -> list[DiffChange]:
-    """Recursively dissect dynamic structural maps to extract highly precise mutation contexts.
+def _compare_objects(path_prefix: str, old_obj: Any, new_obj: Any) -> list[DiffChange]:
+    """Recursively dissect dynamic structural maps and objects to extract highly precise mutation contexts.
 
     Iterates over key unions iteratively unpacking nested maps and primitive structures
     into explicit path pointers. This strictly enables structural versioning without schema constraints.
@@ -229,46 +238,71 @@ def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[st
         Space: $O(D)$, strictly matching the max nesting depth across execution call frames.
 
     Args:
-        path_prefix: The semantic structural prefix pinpointing this dictionary's localized state path.
-        old_dict: The initial representation of semantic mappings prior to the differential check.
-        new_dict: The targeted final state mappings indicating current execution policy goals.
+        path_prefix: The semantic structural prefix pinpointing this localized state path.
+        old_obj: The initial representation of semantic mappings prior to the differential check.
+        new_obj: The targeted final state mappings indicating current execution policy goals.
 
     Returns:
         An inclusive list aggregating the distinct, recursive patches defining the dictionary state divergence.
     """
     changes = []
 
-    all_keys = set(old_dict.keys()) | set(new_dict.keys())
+    def get_keys(obj: Any) -> set[str]:
+        if isinstance(obj, dict):
+            return set(obj.keys())
+        if hasattr(obj, "model_fields"):
+            keys = set()
+            for key in obj.model_fields:
+                val = getattr(obj, key)
+                if val is not None:
+                    keys.add(key)
+            return keys
+        return set()
+
+    def get_val(obj: Any, key: str) -> Any:
+        if isinstance(obj, dict):
+            return obj.get(key)
+        return getattr(obj, key, None)
+
+    old_keys = get_keys(old_obj)
+    new_keys = get_keys(new_obj)
+    all_keys = old_keys | new_keys
 
     for key in all_keys:
         current_path = f"{path_prefix}.{key}" if path_prefix else key
 
-        if key not in old_dict:
+        old_has_key = key in old_keys
+        new_has_key = key in new_keys
+
+        if not old_has_key and new_has_key:
             changes.append(
                 DiffChange(
                     path=current_path,
                     category=_categorize_path(current_path, ChangeType.ADD),
                     change_type=ChangeType.ADD,
                     old_value=None,
-                    new_value=new_dict[key],
+                    new_value=get_val(new_obj, key),
                 )
             )
-        elif key not in new_dict:
+        elif old_has_key and not new_has_key:
             changes.append(
                 DiffChange(
                     path=current_path,
                     category=_categorize_path(current_path, ChangeType.REMOVE),
                     change_type=ChangeType.REMOVE,
-                    old_value=old_dict[key],
+                    old_value=get_val(old_obj, key),
                     new_value=None,
                 )
             )
         else:
-            old_val = old_dict[key]
-            new_val = new_dict[key]
+            old_val = get_val(old_obj, key)
+            new_val = get_val(new_obj, key)
 
-            if isinstance(old_val, dict) and isinstance(new_val, dict):
-                changes.extend(_compare_dicts(current_path, old_val, new_val))
+            is_old_complex = isinstance(old_val, dict) or hasattr(old_val, "model_fields")
+            is_new_complex = isinstance(new_val, dict) or hasattr(new_val, "model_fields")
+
+            if is_old_complex and is_new_complex:
+                changes.extend(_compare_objects(current_path, old_val, new_val))
             elif isinstance(old_val, list) and isinstance(new_val, list):
                 changes.extend(_compare_lists(current_path, old_val, new_val))
             elif old_val != new_val:
@@ -302,9 +336,6 @@ def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> D
     Returns:
         The consolidated report modeling all localized mutations natively organized and categorized for downstream consumption.
     """  # noqa: E501
-    old_dict = old.model_dump(exclude_none=True)
-    new_dict = new.model_dump(exclude_none=True)
-
-    changes = _compare_dicts("", old_dict, new_dict)
+    changes = _compare_objects("", old, new)
 
     return DiffReport(changes=changes)
