@@ -39,7 +39,7 @@ from coreason_manifest.oversight.resilience import (
 )
 from coreason_manifest.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
 from coreason_manifest.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
-from coreason_manifest.workflow.evals import EvalsManifest, FuzzingTarget
+from coreason_manifest.workflow.evals import EvalsManifest, FuzzingTarget, SimulationScenario as TestCase
 from coreason_manifest.workflow.flow import (
     Blackboard,
     Edge,
@@ -133,3 +133,16 @@ __all__ = [
     "WasmExecutionReasoning",
     "WasmMiddlewareDef",
 ]
+
+# Late binding resolution for recursive types
+GraphFlow.model_rebuild()
+AgentNode.model_rebuild()
+HumanNode.model_rebuild()
+SwarmNode.model_rebuild()
+SwitchNode.model_rebuild()
+PlaceholderNode.model_rebuild()
+EmergenceInspectorNode.model_rebuild()
+PlannerNode.model_rebuild()
+InspectorNode.model_rebuild()
+InspectorNodeBase.model_rebuild()
+Node.model_rebuild()
