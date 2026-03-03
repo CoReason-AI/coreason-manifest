@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+from collections import deque
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -217,7 +218,7 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
             in_degree[tgt] += 1
 
     # Initialize queue with roots (in-degree 0)
-    queue = [n_id for n_id, d in in_degree.items() if d == 0]
+    queue: deque[str] = deque([n_id for n_id, d in in_degree.items() if d == 0])
     ranks: dict[str, int] = {}
 
     # If no roots (pure cycle), pick first node as root
@@ -229,10 +230,8 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     for n_id in queue:
         ranks[n_id] = 0
 
-    head = 0
-    while head < len(queue):
-        u = queue[head]
-        head += 1
+    while queue:
+        u = queue.popleft()
         r = ranks[u]
 
         for v in adj.get(u, []):
