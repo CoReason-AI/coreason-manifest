@@ -249,9 +249,7 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     unvisited = [n.id for n in nodes if n.id not in ranks]
 
     if unvisited:
-        # Simple fallback: dump them all in next rank
-        # Or better: Iterate and if we find a node with remaining in-degree, force it.
-        # But for visualization, just placing them is enough.
+        # Assign remaining disconnected components to the subsequent rank
         fallback_rank = current_max_rank + 1
         for n_id in unvisited:
             ranks[n_id] = fallback_rank

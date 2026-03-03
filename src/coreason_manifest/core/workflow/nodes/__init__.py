@@ -5,7 +5,7 @@ from pydantic import Field
 
 from .agent import AgentNode, CognitiveProfile
 from .base import Constraint, ConstraintOperator, LockConfig, Node
-from .etl import AuditorNode, BaseNode, ExtractorNode, SemanticNode
+from .etl import AuditorNode, ExtractorNode, SemanticNode
 from .human import HumanNode, SteeringConfig
 from .oversight import EmergenceInspectorNode, InspectorNode, InspectorNodeBase
 from .planner import PlannerNode
@@ -31,7 +31,6 @@ __all__ = [
     "AgentNode",
     "AnyNode",
     "AuditorNode",
-    "BaseNode",
     "CognitiveProfile",
     "Constraint",
     "ConstraintOperator",

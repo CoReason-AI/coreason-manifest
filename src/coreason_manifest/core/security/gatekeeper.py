@@ -107,7 +107,7 @@ def _enforce_red_button_rule(
         if isinstance(node, AgentNode) and isinstance(node.tools, list):
             for tool_name in node.tools:
                 resolved_tool = tool_map.get(tool_name)
-                # Fix 3: Fail-Open Vulnerability - Default to 'critical' if unknown
+                # Fail-Open Vulnerability - Default to 'critical' if unknown
                 risk = resolved_tool.risk_level if resolved_tool else "critical"
                 if risk == "critical":
                     critical_tools.append(tool_name)
@@ -155,7 +155,7 @@ def _enforce_red_button_rule(
                         break
                 patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
             elif isinstance(flow, GraphFlow):
-                # Fix 1: Ghost Guard Graph Injection Failure - Rewire edges
+                # Ghost Guard Graph Injection Failure - Rewire edges
 
                 # 1. Add Guard Node
                 patch_ops.append(
@@ -238,7 +238,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     all_nodes = set(flow.graph.nodes.keys())
     unreachable = all_nodes - reachable
 
-    # Fix 2: Sequential Patch Index Corruption - Aggregate ALL unreachable nodes
+    # Sequential Patch Index Corruption - Aggregate ALL unreachable nodes
     if unreachable:
         safe_node_ids = set()
         dangerous_node_ids = set()
@@ -326,7 +326,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
 
 def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 4: Ensure Evolutionary pipelines are guarded by Symbolic Execution."""
+    """Ensure Evolutionary pipelines are guarded by Symbolic Execution."""
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -366,7 +366,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
             if not is_guarded:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_SEC_MISSING_SYMBOLIC_GUARD_004",
+                        code=ErrorCatalog.ERR_SEC_MISSING_SYMBOLIC_GUARD_004,
                         severity="violation",
                         message=(
                             f"Node '{node.id}' uses EvolutionaryReasoning but is not "
@@ -385,7 +385,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
 
 
 def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Phase 2 Cohesion: Ensure Island Model swarms are utilizing Evolutionary Reasoning."""
+    """Cohesion: Ensure Island Model swarms are utilizing Evolutionary Reasoning."""
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -402,7 +402,7 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
             if not is_evolutionary:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_SWARM_ISLAND_NON_EVOLUTIONARY_005",
+                        code=ErrorCatalog.ERR_SWARM_ISLAND_NON_EVOLUTIONARY_005,
                         severity="violation",
                         message=(
                             f"SwarmNode '{node.id}' uses 'island_model' but its "
@@ -421,12 +421,12 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
 
 
 def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 5 Cohesion: Meta-Analysis swarms MUST define interoperability exports."""
+    """Cohesion: Meta-Analysis swarms MUST define interoperability exports."""
     nodes, _ = get_unified_topology(flow)
 
     return [
         ComplianceReport(
-            code="ERR_SWARM_META_ANALYSIS_MISSING_EXPORT_006",
+            code=ErrorCatalog.ERR_SWARM_META_ANALYSIS_MISSING_EXPORT_006,
             severity="violation",
             message=(
                 f"SwarmNode '{node.id}' uses a 'meta_analysis_matrix' reducer but "
@@ -473,7 +473,7 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
             if not has_visual_provenance:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_SWARM_META_ANALYSIS_UNGROUNDED_007",
+                        code=ErrorCatalog.ERR_SWARM_META_ANALYSIS_UNGROUNDED_007,
                         severity="violation",
                         message=(
                             f"SwarmNode '{node.id}' performs meta-analysis but its worker profile "
@@ -537,7 +537,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
             if not is_guarded:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_COUNCIL_PRISMA_S_UNGUARDED_008",
+                        code=ErrorCatalog.ERR_COUNCIL_PRISMA_S_UNGUARDED_008,
                         severity="violation",
                         message=(
                             f"Node '{node.id}' uses PRISMA-S methodology but its output is not "
@@ -556,7 +556,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
 
 
 def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 6 Cohesion: Federated Search MUST be peer-reviewed by a PRESS-2015 Council."""
+    """Cohesion: Federated Search MUST be peer-reviewed by a PRESS-2015 Council."""
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -588,7 +588,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
             if not is_guarded:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_SEARCH_PRESS_UNGUARDED_009",
+                        code=ErrorCatalog.ERR_SEARCH_PRESS_UNGUARDED_009,
                         severity="violation",
                         message=(
                             f"AgentNode '{node.id}' executes a FederatedSearchConfig but its output is not "
@@ -610,7 +610,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
 
 
 def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 5 Cohesion: Zero-Trust GenUI Fencing"""
+    """Cohesion: Zero-Trust GenUI Fencing"""
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -631,7 +631,7 @@ def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
                 if not ui_capabilities:
                     reports.append(
                         ComplianceReport(
-                            code="ERR_SEC_GENUI_UNAUTHORIZED_011",
+                            code=ErrorCatalog.ERR_SEC_GENUI_UNAUTHORIZED_011,
                             severity="violation",
                             message="Agent is assigned to render GenUI but lacks explicit ui_capabilities.",
                             node_id=node.id,
@@ -648,7 +648,7 @@ def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
 
 def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
-    """Epic 6 Cohesion: Conformal Active Learning MUST be preceded by Epistemic Deduplication."""
+    """Cohesion: Conformal Active Learning MUST be preceded by Epistemic Deduplication."""
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -675,7 +675,7 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
             if not is_guarded:
                 reports.append(
                     ComplianceReport(
-                        code="ERR_SWARM_CAL_POISONING_010",
+                        code=ErrorCatalog.ERR_SWARM_CAL_POISONING_010,
                         severity="violation",
                         message=(
                             f"SwarmNode '{node.id}' uses Conformal Active Learning (CAL) but is not "

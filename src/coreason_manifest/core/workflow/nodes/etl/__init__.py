@@ -1,105 +1,35 @@
-import asyncio
-import logging
-from abc import ABC, abstractmethod
-from typing import Any
+from typing import Literal
 
-from coreason_manifest.core.state.events import EpistemicEvent
-from coreason_manifest.core.workflow.bidding import Bid
-from coreason_manifest.core.workflow.exceptions import HardwarePreemptionInterrupt, LatencySLAExceededError
+from pydantic import ConfigDict, Field
 
-logger = logging.getLogger(__name__)
+from coreason_manifest.core.workflow.nodes.base import Node
 
 
-class BaseNode(ABC):
-    """
-    Abstract base class for all ETL Hardware-Aligned Nodes.
-    """
-
-    def __init__(self, node_id: str) -> None:
-        self.node_id = node_id
-        # Note: In practice, this would be an asyncio.Queue instance created per node
-        # or passed in during subscription, which holds EpistemicEvent objects.
-        self.queue: asyncio.Queue[EpistemicEvent] = asyncio.Queue()
-
-    @abstractmethod
-    async def watch_board(self) -> None:
-        """
-        Continuously pulls from its specific asyncio.Queue to process events.
-        """
-
-    @abstractmethod
-    def evaluate_capability(self, event: EpistemicEvent) -> Bid:
-        """
-        Returns a Bid object estimating capability for the given event.
-        """
-
-
-class ExtractorNode(BaseNode):
+class ExtractorNode(Node):
     """
     Watches for raw document upload events.
     """
 
-    async def watch_board(self) -> None:
-        while True:
-            _ = await self.queue.get()
-            # Simulate processing the event
-            try:
-                await asyncio.sleep(0.1)
-            except LatencySLAExceededError:
-                logger.warning("Latency SLA exceeded, graceful degradation triggered.")
-            except HardwarePreemptionInterrupt:
-                self.queue.task_done()
-                break
-            self.queue.task_done()
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
-        # The argument event is purposefully unused in this simulation,
-        # but kept to satisfy the interface.
-        _ = event
-        return Bid(node_id=self.node_id, confidence_score=0.85)
+    type: Literal["extractor"] = Field("extractor", description="The type of the node.")
 
 
-class SemanticNode(BaseNode):
+class SemanticNode(Node):
     """
     Watches for STRUCTURAL_MILESTONE events.
     """
 
-    async def watch_board(self) -> None:
-        while True:
-            _ = await self.queue.get()
-            # Simulate processing the event
-            try:
-                await asyncio.sleep(0.1)
-            except LatencySLAExceededError:
-                logger.warning("Latency SLA exceeded, graceful degradation triggered.")
-            except HardwarePreemptionInterrupt:
-                self.queue.task_done()
-                break
-            self.queue.task_done()
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
-        _ = event
-        return Bid(node_id=self.node_id, confidence_score=0.85)
+    type: Literal["semantic"] = Field("semantic", description="The type of the node.")
 
 
-class AuditorNode(BaseNode):
+class AuditorNode(Node):
     """
     Watches for SEMANTIC_MILESTONE events.
     """
 
-    async def watch_board(self) -> None:
-        while True:
-            _ = await self.queue.get()
-            # Simulate processing the event
-            try:
-                await asyncio.sleep(0.1)
-            except LatencySLAExceededError:
-                logger.warning("Latency SLA exceeded, graceful degradation triggered.")
-            except HardwarePreemptionInterrupt:
-                self.queue.task_done()
-                break
-            self.queue.task_done()
+    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
 
-    def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
-        _ = event
-        return Bid(node_id=self.node_id, confidence_score=0.85)
+    type: Literal["auditor"] = Field("auditor", description="The type of the node.")

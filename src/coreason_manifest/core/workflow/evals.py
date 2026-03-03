@@ -77,7 +77,3 @@ class EvalsManifest(CoreasonModel, frozen=True, extra="forbid"):
 
     test_cases: list[SimulationScenario] = Field(default_factory=list, description="List of test cases to execute.")
     fuzzing_targets: list[FuzzingTarget] = Field(default_factory=list, description="List of fuzzing targets.")
-
-
-class TestCase(SimulationScenario):
-    """Alias for SimulationScenario used in standard test runs."""

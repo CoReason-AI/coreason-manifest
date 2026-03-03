@@ -16,7 +16,7 @@ class ChartThemePayload(BaseModel):
     base_font_size_pt: float
     color_cycle: list[str] = Field(
         ...,
-        description="List of hex codes derived from Epic 1's SemanticColorMap to strictly enforce data-point colors.",
+        description="List of hex codes derived from SemanticColorMap to strictly enforce data-point colors.",
     )
     background_color: str | None = Field(
         default=None,
