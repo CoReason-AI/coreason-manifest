@@ -81,3 +81,5 @@ class EvalsManifest(CoreasonModel, frozen=True, extra="forbid"):
 
 class TestCase(SimulationScenario):
     """Alias for SimulationScenario used in standard test runs."""
+
+    pass
