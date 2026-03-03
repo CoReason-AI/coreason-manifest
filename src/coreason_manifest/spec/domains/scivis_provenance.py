@@ -1,6 +1,8 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from coreason_manifest.core.common.base import CoreasonModel
 
 
 class ActorType(StrEnum):
@@ -10,31 +12,31 @@ class ActorType(StrEnum):
     HUMAN_EXPERT = "HUMAN_EXPERT"
 
 
-class ActorIdentity(BaseModel):
+class ActorIdentity(CoreasonModel):
     actor_type: ActorType
     actor_version_or_id: str = Field(..., description="e.g., 'gemini-3.1-pro' or human 'user_uuid_123'")
 
 
-class ElementAttribution(BaseModel):
+class ElementAttribution(CoreasonModel):
     target_element_id: str
     created_by: ActorIdentity
     last_modified_by: ActorIdentity
     was_human_verified: bool = Field(default=False)
 
 
-class ExecutionAudit(BaseModel):
+class ExecutionAudit(CoreasonModel):
     target_element_id: str
     dataset_checksum: str | None = None
     execution_script_hash: str | None = None
 
 
-class StateHashLog(BaseModel):
+class StateHashLog(CoreasonModel):
     intent_hash: str
     semantic_ast_hash: str
     spatial_ast_hash: str
 
 
-class ProvenanceManifest(BaseModel):
+class ProvenanceManifest(CoreasonModel):
     manifest_id: str
     timestamp_utc: str
     state_chain: StateHashLog
