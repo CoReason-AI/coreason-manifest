@@ -4,6 +4,7 @@ from typing import Any
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
 from coreason_manifest.core.telemetry.stream import StreamStateDeltaEnvelope
+from coreason_manifest.utils.logger import logger
 
 
 def _get_cow_parent(
@@ -15,6 +16,7 @@ def _get_cow_parent(
     Returns:
         (new_root, copied_parent_node, resolved_key)
     """
+    logger.trace("resolving_cow_path", pointer=pointer, doc_type=type(doc).__name__)
     if pointer == "" or pointer == "/":
         raise ValueError("Cannot resolve parent of root")
 
@@ -59,6 +61,9 @@ def generate_inverse_patches(
     """
     Calculates the exact inverse of applied patches to support reverting state changes.
     """
+    logger.trace(
+        "generating_inverse_patches", original_state_keys=list(original_state.keys()), num_patches=len(patches)
+    )
     state: dict[str, Any] | list[Any] = original_state
     inverses: list[JSONPatchOperation] = []
 
@@ -171,6 +176,7 @@ def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchO
     """
     Applies inverse patches cleanly to a state dictionary, simulating rollback.
     """
+    logger.trace("applying_inverse_patch", num_reverse_patches=len(reverse_patches))
     state: dict[str, Any] | list[Any] = current_state
     for patch in reverse_patches:
         match patch.model_dump(exclude_unset=True, by_alias=True):

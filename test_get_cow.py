@@ -1,5 +1,6 @@
 from typing import Any
 
+
 def _get_cow_parent(
     doc: dict[str, Any] | list[Any], pointer: str
 ) -> tuple[dict[str, Any] | list[Any], dict[str, Any] | list[Any], str | int]:
@@ -46,6 +47,7 @@ def _get_cow_parent(
             raise ValueError(f"Invalid array index in pointer: '{last_part}'") from e
 
     return new_doc, current, last_part
+
 
 d = {"a": {"b": [1, 2, 3]}}
 new_d, parent, key = _get_cow_parent(d, "/a/b/-")

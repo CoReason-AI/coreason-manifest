@@ -1,11 +1,11 @@
-from coreason_manifest.core.state.state_rewind import apply_rewind, generate_inverse_patches
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
+from coreason_manifest.core.state.state_rewind import apply_rewind, generate_inverse_patches
 
 state = {"a": {"b": [1, 2, 3]}, "c": "test"}
 patches = [
     JSONPatchOperation(op=PatchOp.ADD, path="/a/b/-", value=4),
     JSONPatchOperation(op=PatchOp.REPLACE, path="/c", value="changed"),
-    JSONPatchOperation(op=PatchOp.REMOVE, path="/a/b/0", value=None)
+    JSONPatchOperation(op=PatchOp.REMOVE, path="/a/b/0", value=None),
 ]
 
 # Apply patches locally (mock application)

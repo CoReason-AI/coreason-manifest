@@ -1,5 +1,5 @@
-from coreason_manifest.core.state.state_rewind import apply_rewind, _get_cow_parent
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
+from coreason_manifest.core.state.state_rewind import apply_rewind
 
 state = {"a": {"b": [1, 2, 3]}, "c": "test"}
 patch = JSONPatchOperation(op=PatchOp.ADD, path="/a/b/-", value=4)

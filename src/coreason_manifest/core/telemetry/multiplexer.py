@@ -1,8 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator, Awaitable, Callable
 
-from loguru import logger
-
 from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
 from coreason_manifest.core.telemetry.stream import (
     StreamCloseEnvelope,
@@ -10,8 +8,7 @@ from coreason_manifest.core.telemetry.stream import (
     StreamPacket,
     StreamUIEnvelope,
 )
-
-logger.disable("coreason_manifest")
+from coreason_manifest.utils.logger import logger
 
 
 class AsyncSSEMultiplexer:

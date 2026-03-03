@@ -10,6 +10,7 @@ class MockOp:
             d["value"] = self.value
         return d
 
+
 patch = MockOp("add", "/a/b", 5)
 
 match patch.model_dump():

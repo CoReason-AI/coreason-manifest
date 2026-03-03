@@ -1,14 +1,17 @@
 from typing import Any
+
 from pydantic import BaseModel, ConfigDict
-from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
+
 
 class Inner(BaseModel):
     model_config = ConfigDict(frozen=True)
     val: int
 
+
 class Outer(BaseModel):
     model_config = ConfigDict(frozen=True)
     inner: Inner
+
 
 def _cow_update(current: Any, parts: list[str], op: str, value: Any = None, from_value: Any = None) -> Any:
     if not parts:
@@ -53,9 +56,7 @@ def _cow_update(current: Any, parts: list[str], op: str, value: Any = None, from
                 # Pydantic removal usually means setting to None, but RFC6902 on objects means removing key.
                 pass
     else:
-        if isinstance(current, dict):
-            new_current[key] = _cow_update(current[key], parts[1:], op, value, from_value)
-        elif isinstance(current, list):
+        if isinstance(current, dict) or isinstance(current, list):
             new_current[key] = _cow_update(current[key], parts[1:], op, value, from_value)
         else:
             child_val = getattr(current, key)
@@ -63,6 +64,7 @@ def _cow_update(current: Any, parts: list[str], op: str, value: Any = None, from
             return current.model_copy(update={str(key): new_child})
 
     return new_current
+
 
 state = {"outer": Outer(inner=Inner(val=1))}
 parts = ["outer", "inner", "val"]

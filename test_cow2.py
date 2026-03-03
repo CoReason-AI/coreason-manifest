@@ -1,14 +1,18 @@
 from typing import Any
+
 from pydantic import BaseModel
+
 
 class MyModel(BaseModel, frozen=True):
     name: str
     items: list[int]
 
+
 def _resolve_parts(pointer: str) -> list[str]:
     if pointer == "" or pointer == "/":
         return []
     return [p.replace("~1", "/").replace("~0", "~") for p in pointer.split("/")[1:]]
+
 
 def _get_value(current: Any, parts: list[str]) -> Any:
     for part in parts:
@@ -19,6 +23,7 @@ def _get_value(current: Any, parts: list[str]) -> Any:
         elif hasattr(current, "model_copy"):
             current = getattr(current, part)
     return current
+
 
 def _cow_update(current: Any, parts: list[str], op: str, value: Any = None) -> Any:
     if not parts:
@@ -61,9 +66,7 @@ def _cow_update(current: Any, parts: list[str], op: str, value: Any = None) -> A
                 # Actually pydantic has fields.
                 pass
     else:
-        if isinstance(current, dict):
-            new_current[key] = _cow_update(new_current[key], parts[1:], op, value)
-        elif isinstance(current, list):
+        if isinstance(current, dict) or isinstance(current, list):
             new_current[key] = _cow_update(new_current[key], parts[1:], op, value)
         else:
             child_val = getattr(current, key)
@@ -72,9 +75,8 @@ def _cow_update(current: Any, parts: list[str], op: str, value: Any = None) -> A
 
     return new_current
 
-state = {
-    "a": MyModel(name="test", items=[1, 2, 3])
-}
+
+state = {"a": MyModel(name="test", items=[1, 2, 3])}
 
 new_state = _cow_update(state, _resolve_parts("/a/items/1"), "replace", 99)
 print("Original:", state)

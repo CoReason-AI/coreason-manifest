@@ -1,5 +1,6 @@
 from coreason_manifest.core.workflow.flow import Edge, GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import AnyNode
+from coreason_manifest.utils.logger import logger
 
 
 def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[str]]:
@@ -68,6 +69,7 @@ def get_strongly_connected_components(adj: dict[str, list[str]]) -> list[list[st
         if node_id not in visited:
             dfs(node_id)
 
+    logger.debug("detected_strongly_connected_components", component_count=len(sccs))
     return sccs
 
 
@@ -99,6 +101,7 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
                 reachable.add(neighbor)
                 queue.append(neighbor)
 
+    logger.debug("detected_reachable_nodes", entry_count=len(entry_nodes), reachable_count=len(reachable))
     return reachable
 
 
