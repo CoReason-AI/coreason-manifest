@@ -119,9 +119,7 @@ def test_flow_to_mermaid_linear_flow_and_default_shape() -> None:
     node1 = PlaceholderNode.model_construct(
         id="step_1", type="unknown_type_for_default_shape", required_capabilities=[]
     )
-    node2 = PlaceholderNode.model_construct(
-        id="step_2", type="placeholder", required_capabilities=[]
-    )
+    node2 = PlaceholderNode.model_construct(id="step_2", type="placeholder", required_capabilities=[])
 
     flow = LinearFlow.model_construct(
         type="linear",
