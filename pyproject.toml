@@ -18,6 +18,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "fastmcp>=3.0.2",
+    "mcp>=1.26.0",
     "pydantic>=2.12.5",
 ]
 
