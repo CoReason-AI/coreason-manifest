@@ -39,7 +39,7 @@ def canonicalize_domain(domain: str) -> str:
 
     Returns:
         The strictly sanitized string representation.
-    """
+    """  # noqa: E501
     return domain.lower().strip()
 
 
@@ -65,7 +65,7 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
 
     Returns:
         The complete sequence of capability enumerations authorized for the evaluated component.
-    """
+    """  # noqa: E501
     reasoning = None
     if isinstance(node, AgentNode):
         # Resolve profile
@@ -105,7 +105,7 @@ def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, An
 
     Returns:
         The sequential collection of compliance violations flagging blocked network domains.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     allowed_domains_raw = []
     if flow.governance and flow.governance.allowed_domains:
@@ -170,7 +170,7 @@ def _enforce_critical_capability_guards(
 
     Returns:
         A cataloged sequence of authorization violations mandating structural human-in-the-loop remediation patches.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     for node in nodes:
         caps = _get_capabilities(node, flow)
@@ -290,7 +290,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
     Returns:
         The resulting compliance records aggressively enforcing tree-shaking and dangerous node elimination operations.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
 
     # Build Adjacency List
@@ -434,7 +434,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
 
     Returns:
         The comprehensive list of violations enforcing rigorous algorithmic verification downstream of generation bounds.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -509,7 +509,7 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
 
     Returns:
         A sequential log tracking policy violations correcting un-optimized intelligence mapping definitions.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -561,7 +561,7 @@ def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[C
 
     Returns:
         The compliance records targeting un-exportable analytic aggregations.
-    """
+    """  # noqa: E501
     nodes, _ = get_unified_topology(flow)
 
     return [
@@ -606,7 +606,7 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
 
     Returns:
         The comprehensive tracking report detailing provenance policy deviations and recommended overrides.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -664,7 +664,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
 
     Returns:
         An array of compliance violations dynamically injecting structural evaluation components over isolated workflows.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
 
     if not isinstance(flow, GraphFlow):
@@ -744,7 +744,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
 
     Returns:
         The sequential collection of systemic errors correcting absent review governance mechanisms.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -814,7 +814,7 @@ def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     Returns:
         The violations strictly ensuring interface capabilities are completely bounded by authorized user constraints.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     nodes, _ = get_unified_topology(flow)
 
@@ -868,7 +868,7 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
 
     Returns:
         The cataloged structural flaws demanding rigid epistemic filtering components.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
     if not isinstance(flow, GraphFlow):
         return reports
@@ -938,7 +938,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     Returns:
         The complete, aggregated catalog detailing all discovered structural violations and respective automated patching instructions.
-    """
+    """  # noqa: E501
     reports: list[ComplianceReport] = []
 
     # Extract all nodes
@@ -1012,7 +1012,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
     Returns:
         The strict evaluation flag confirming or denying the absolute presence of complete structural supervision.
-    """
+    """  # noqa: E501
     nodes, edges = get_unified_topology(flow)
 
     all_ids = {n.id for n in nodes}
@@ -1051,7 +1051,7 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
         Returns:
             The complete sequential extraction of unmapped fallback node identifiers.
-        """
+        """  # noqa: E501
         fallbacks = []
         if isinstance(data, dict):
             for k, v in data.items():

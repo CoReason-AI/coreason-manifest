@@ -118,7 +118,7 @@ def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], l
 
     Returns:
         A strictly normalized tuple containing the sequential collection of execution nodes and the synthesized routing edges.
-    """
+    """  # noqa: E501
     if isinstance(flow, GraphFlow):
         return list(flow.graph.nodes.values()), flow.graph.edges
     if isinstance(flow, LinearFlow):

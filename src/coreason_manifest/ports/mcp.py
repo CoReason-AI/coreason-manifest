@@ -7,7 +7,7 @@ Epistemic Ledger, our strict Neuro-Symbolic Data Contracts, and dynamic prompts.
 
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Any, Literal, cast  # noqa: F401
 from uuid import uuid4
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -57,7 +57,7 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         if ctx.request_context is None or ctx.request_context.meta is None:
             raise ValueError("SecurityException: Context metadata is missing.")
 
-        from pydantic import BaseModel, ConfigDict, Field
+        from pydantic import BaseModel, ConfigDict
 
         class SecurityMetadata(BaseModel):
             model_config = ConfigDict(extra="ignore")
