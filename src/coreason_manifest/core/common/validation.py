@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 from enum import StrEnum
-from typing import Annotated, ClassVar, Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
@@ -111,25 +111,21 @@ class UIValidationSchema(CoreasonModel):
 class EpistemicValidator:
     """Validator for enforcing epistemic and ontological constraints."""
 
-    EFFICACY_RELATIONS: ClassVar[set[str]] = {
-        "treats",
-        "cures",
-        "increases survival",
-        "decreases risk",
-        "improves",
-        "prevents",
-    }
-
     @staticmethod
-    def validate_statistical_grounding(relation: str, has_p_value: bool, has_confidence_interval: bool) -> bool:
+    def validate_statistical_grounding(
+        intent_label: str, p_value: float | None, has_p_value: bool, has_confidence_interval: bool
+    ) -> bool:
         """
         Enforce statistical grounding.
 
-        If a relation implies efficacy, the claim must include a statistical marker
-        (like p_value or confidence_interval).
+        If a claim's intent implies proven efficacy, the claim must include a statistical marker
+        (like p_value or confidence_interval) and must satisfy a mathematical threshold (p <= 0.05).
         """
-        return not (
-            relation.lower() in EpistemicValidator.EFFICACY_RELATIONS
-            and not has_p_value
-            and not has_confidence_interval
-        )
+        if intent_label == "proven_efficacy":
+            if not has_p_value and not has_confidence_interval:
+                return False
+
+            if p_value is not None and p_value > 0.05:
+                raise ValueError("Epistemic Failure: Claim is not statistically significant (p > 0.05).")
+
+        return True

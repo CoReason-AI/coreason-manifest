@@ -37,6 +37,20 @@ class ProvenanceSpan(CoreasonModel):
     raw_text_crop: str = Field(..., description="The exact text snippet that justifies this fact.")
 
 
+class MathToken(CoreasonModel):
+    """Strongly typed math token."""
+
+    latex_content: str = Field(..., description="The LaTeX content of the math token.")
+    is_block: bool = Field(..., description="Whether the math token is a block or inline.")
+
+
+class TabularSerialization(CoreasonModel):
+    """Strongly typed tabular serialization."""
+
+    html_grid: str = Field(..., description="The HTML grid representation of the table.")
+    omop_mapped: bool = Field(default=False, description="Whether the table has been mapped to OMOP concepts.")
+
+
 class StructuralMilestone(CoreasonModel):
     """
     Intermediate representation for structural milestones.
@@ -45,8 +59,10 @@ class StructuralMilestone(CoreasonModel):
     """
 
     layout_blocks: list[str] = Field(default_factory=list, description="Extracted layout blocks.")
-    math_tokens: list[str] = Field(default_factory=list, description="Extracted math formulas/tokens.")
-    hierarchical_tables: list[str] = Field(default_factory=list, description="Extracted hierarchical tables.")
+    math_tokens: list[MathToken] = Field(default_factory=list, description="Extracted math formulas/tokens.")
+    hierarchical_tables: list[TabularSerialization] = Field(
+        default_factory=list, description="Extracted hierarchical tables."
+    )
 
 
 class SemanticMilestone(CoreasonModel):
@@ -60,6 +76,9 @@ class SemanticMilestone(CoreasonModel):
     entities: list[str] = Field(default_factory=list, description="Entities identified by the NLP swarm.")
 
 
+VALID_ONTOLOGY_MOCKS = {"OMOP:12345", "SNOMED:67890", "RXNORM:1191"}
+
+
 class ReifiedEntity(CoreasonModel):
     """
     Ontological Reification mapping.
@@ -69,6 +88,13 @@ class ReifiedEntity(CoreasonModel):
 
     entity_string: str = Field(..., description="The raw string of the extracted entity.")
     global_id: str = Field(..., description="The global ontology identifier (e.g., OMOP Concept ID).")
+
+    @model_validator(mode="after")
+    def validate_ontology(self) -> "ReifiedEntity":
+        """Enforce that the global_id is in the valid mock set."""
+        if self.global_id not in VALID_ONTOLOGY_MOCKS:
+            raise ValueError(f"Ontology Error: '{self.global_id}' is not a valid global_id.")
+        return self
 
 
 class ClinicalProposition(CoreasonModel):
@@ -82,6 +108,7 @@ class ClinicalProposition(CoreasonModel):
     subject: ReifiedEntity = Field(..., description="The subject of the proposition.")
     relation: str = Field(..., description="The relation connecting subject and object.")
     object: ReifiedEntity = Field(..., description="The object of the proposition.")
+    intent_label: str = Field(default="observation", description="The intent of the proposition.")
     p_value: float | None = Field(default=None, description="P-value supporting the relation, if applicable.")
     confidence_interval: str | None = Field(default=None, description="Confidence interval, if applicable.")
     provenance: ProvenanceSpan = Field(..., description="Absolute provenance of this claim.")
@@ -91,23 +118,25 @@ class ClinicalProposition(CoreasonModel):
         """
         Enforce statistical grounding.
 
-        If a claim's relation implies efficacy, the schema must check if a statistical marker
-        is present in the payload. If not, it raises a structured ValueError.
+        If a claim's intent implies proven efficacy, the schema must check if a statistical marker
+        is present and valid. If not, it raises a structured ValueError.
         """
-        has_p_value = self.p_value is not None
-        has_ci = self.confidence_interval is not None
+        if self.intent_label == "proven_efficacy":
+            has_p_value = self.p_value is not None
+            has_ci = self.confidence_interval is not None
 
-        is_grounded = EpistemicValidator.validate_statistical_grounding(
-            relation=self.relation,
-            has_p_value=has_p_value,
-            has_confidence_interval=has_ci,
-        )
-
-        if not is_grounded:
-            raise ValueError(
-                f"Statistical Grounding Error: The relation '{self.relation}' implies efficacy "
-                "but lacks statistical markers (`p_value` or `confidence_interval`). "
-                "Epistemic constraints reject this claim."
+            is_grounded = EpistemicValidator.validate_statistical_grounding(
+                intent_label=self.intent_label,
+                p_value=self.p_value,
+                has_p_value=has_p_value,
+                has_confidence_interval=has_ci,
             )
+
+            if not is_grounded:
+                raise ValueError(
+                    f"Statistical Grounding Error: The intent '{self.intent_label}' requires "
+                    "statistical markers (`p_value` or `confidence_interval`). "
+                    "Epistemic constraints reject this claim."
+                )
 
         return self
