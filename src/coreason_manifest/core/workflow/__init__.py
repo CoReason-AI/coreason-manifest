@@ -1,4 +1,4 @@
-from coreason_manifest.core.workflow.bidding import Bid, fallback_routing
+from coreason_manifest.core.workflow.bidding import Bid, yield_to_suspense
 from coreason_manifest.core.workflow.blackboard import BlackboardBroker
 from coreason_manifest.core.workflow.exceptions import LineageIntegrityError
 from coreason_manifest.core.workflow.flow import Blackboard, Edge, Graph, GraphFlow, LinearFlow
@@ -32,5 +32,5 @@ __all__ = [
     "LinearFlow",
     "PlannerNode",
     "SemanticNode",
-    "fallback_routing",
+    "yield_to_suspense",
 ]

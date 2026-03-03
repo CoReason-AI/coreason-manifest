@@ -42,14 +42,11 @@ async def test_latency_sla_exceeded_error_handling() -> None:
     async def dummy_async_execution() -> None:
         raise LatencySLAExceededError("Real-Time task took > 60s")
 
-    caught = False
-    try:
+    with pytest.raises(LatencySLAExceededError) as exc_info:
         await dummy_async_execution()
-    except LatencySLAExceededError as e:
-        caught = True
-        assert e.fault.error_code == "SLA-LATENCY-001"
-        assert e.fault.severity == "RECOVERABLE"
-        assert e.fault.recovery_action == "PROMPT_RETRY"
-        assert "Real-Time task took > 60s" in str(e)
 
-    assert caught is True
+    e = exc_info.value
+    assert e.fault.error_code == "SLA-LATENCY-001"
+    assert e.fault.severity == "RECOVERABLE"
+    assert e.fault.recovery_action == "PROMPT_RETRY"
+    assert "Real-Time task took > 60s" in str(e)
