@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 
 def scrub_genui_payload(payload: dict[str, Any]) -> dict[str, Any]:
@@ -16,11 +16,11 @@ def scrub_genui_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         return payload
 
-    scrubbed = {}
+    scrubbed: dict[str, Any] = {}
     for key, value in payload.items():
         if key == "props" and isinstance(value, dict):
             # Scrub values inside props
-            scrubbed[key] = {k: "[REDACTED_PII]" for k in value.keys()}
+            scrubbed[key] = dict.fromkeys(value, "[REDACTED_PII]")
         elif isinstance(value, dict):
             # Recursively scrub nested dictionaries
             scrubbed[key] = scrub_genui_payload(value)

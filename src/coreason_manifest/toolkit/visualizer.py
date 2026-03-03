@@ -8,7 +8,9 @@ if TYPE_CHECKING:
 
     from coreason_manifest.core.telemetry.telemetry_schemas import ExecutionSnapshot
 
-from coreason_manifest.core.workflow import AnyNode, GraphFlow, HumanNode, LinearFlow, SwitchNode, get_unified_topology
+from coreason_manifest.core.workflow import AnyNode, GraphFlow, HumanNode, LinearFlow
+from coreason_manifest.core.workflow.nodes import SwitchNode
+from coreason_manifest.core.workflow.topology import get_unified_topology
 
 
 def _safe_id(node_id: str) -> str:
@@ -154,7 +156,8 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
                 if not label and source_node.default == target_id:
                     label = "|default|"
             elif source_node and isinstance(source_node, HumanNode) and getattr(source_node, "routes", None):
-                for cmd, cmd_target in source_node.routes.items():
+                routes = getattr(source_node, "routes", {}) or {}
+                for cmd, cmd_target in routes.items():
                     if cmd_target == target_id:
                         label = f"|{_escape_label(str(cmd))} ⚙️|"
                         break
@@ -195,7 +198,11 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
     lines.append("    classDef pending fill:#ffffff,stroke:#333,stroke-width:1px,stroke-dasharray: 2 2;")
 
     # GenUI style
-    lines.append("    classDef genui fill:#f5eef8,stroke:#9b59b6,stroke-width:4px,color:#6c3483,filter:drop-shadow(0 0 10px #9b59b6);")
+    # Split long line to satisfy ruff line-length rule
+    lines.append(
+        "    classDef genui fill:#f5eef8,stroke:#9b59b6,"
+        "stroke-width:4px,color:#6c3483,filter:drop-shadow(0 0 10px #9b59b6);"
+    )
 
     return "\n".join(lines)
 

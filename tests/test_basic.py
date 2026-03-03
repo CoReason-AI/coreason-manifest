@@ -18,13 +18,13 @@ def test_schema_import() -> None:
 def test_genui_multiplexer_emission() -> None:
     """Mock the emission of a Thought and UI Envelope, ensuring non-blocking and proper PII scrubbing."""
     # Mocking future stream contracts from parallel epics
-    StreamThoughtEnvelope = MagicMock()
-    StreamThoughtEnvelope.type = "thought"
-    StreamThoughtEnvelope.content = "Reasoning about user request..."
+    stream_thought_envelope = MagicMock()
+    stream_thought_envelope.type = "thought"
+    stream_thought_envelope.content = "Reasoning about user request..."
 
-    StreamUIEnvelope = MagicMock()
-    StreamUIEnvelope.type = "ui"
-    StreamUIEnvelope.payload = {
+    stream_ui_envelope = MagicMock()
+    stream_ui_envelope.type = "ui"
+    stream_ui_envelope.payload = {
         "layout": {
             "type": "widget",
             "props": {
@@ -36,8 +36,8 @@ def test_genui_multiplexer_emission() -> None:
 
     # Simulate a multiplexer yielding these envelopes
     def mock_stream():
-        yield StreamThoughtEnvelope
-        yield StreamUIEnvelope
+        yield stream_thought_envelope
+        yield stream_ui_envelope
 
     emissions = []
     start_time = time.time()
