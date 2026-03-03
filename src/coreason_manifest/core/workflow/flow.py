@@ -202,6 +202,30 @@ class Graph(CoreasonModel):
                     message=f"Target '{edge.to_node}' not found in graph nodes.",
                 )
 
+        # Fallback ID Integrity
+        def extract_fallbacks(data: Any) -> list[str]:
+            fallbacks = []
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    if k == "fallback_node_id" and isinstance(v, str):
+                        fallbacks.append(v)
+                    else:
+                        fallbacks.extend(extract_fallbacks(v))
+            elif isinstance(data, list):
+                for item in data:
+                    fallbacks.extend(extract_fallbacks(item))
+            return fallbacks
+
+        for node in self.nodes.values():
+            node_data = node.model_dump(exclude_none=True)
+            for fallback_id in extract_fallbacks(node_data):
+                if fallback_id not in valid_ids:
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
+                        message=f"Fallback target '{fallback_id}' in node '{node.id}' not found in graph nodes.",
+                        context={"node_id": node.id, "fallback_id": fallback_id},
+                    )
+
         # Cycle Detection
         adj_map: dict[str, set[str]] = {n: set() for n in valid_ids}
         in_degree: dict[str, int] = dict.fromkeys(valid_ids, 0)
@@ -275,6 +299,26 @@ class GraphFlow(CoreasonModel):
     evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
 
     @model_validator(mode="after")
+    def validate_middleware_integrity(self) -> "GraphFlow":
+        """Verify that all active middlewares are defined in the manifest to prevent fail-open bypass."""
+        if self.governance and self.governance.active_middlewares:
+            available_middlewares = (
+                self.definitions.middlewares.keys() if self.definitions and self.definitions.middlewares else set()
+            )
+            for middleware_id in self.governance.active_middlewares:
+                if middleware_id not in available_middlewares:
+                    msg = (
+                        f"Security Fail-Open Risk: Active middleware '{middleware_id}' "
+                        "is not defined in definitions.middlewares."
+                    )
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED,
+                        message=msg,
+                        context={"middleware_id": middleware_id},
+                    )
+        return self
+
+    @model_validator(mode="after")
     def enforce_lifecycle_constraints(self) -> "GraphFlow":
         """Enforce that published flows have valid metadata, entry point, and no placeholders."""
         if self.status != "published":
@@ -335,6 +379,26 @@ class LinearFlow(CoreasonModel):
     governance: Governance | None = None
     definitions: FlowDefinitions | None = None
     evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
+
+    @model_validator(mode="after")
+    def validate_middleware_integrity(self) -> "LinearFlow":
+        """Verify that all active middlewares are defined in the manifest to prevent fail-open bypass."""
+        if self.governance and self.governance.active_middlewares:
+            available_middlewares = (
+                self.definitions.middlewares.keys() if self.definitions and self.definitions.middlewares else set()
+            )
+            for middleware_id in self.governance.active_middlewares:
+                if middleware_id not in available_middlewares:
+                    msg = (
+                        f"Security Fail-Open Risk: Active middleware '{middleware_id}' "
+                        "is not defined in definitions.middlewares."
+                    )
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED,
+                        message=msg,
+                        context={"middleware_id": middleware_id},
+                    )
+        return self
 
     @model_validator(mode="after")
     def validate_linear_structure(self) -> "LinearFlow":

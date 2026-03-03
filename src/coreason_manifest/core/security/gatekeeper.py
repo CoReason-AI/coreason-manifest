@@ -1,9 +1,9 @@
 # src/coreason_manifest/utils/gatekeeper.py
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
+from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.common.presentation import RenderStrategy
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.constants import NodeCapability
@@ -785,6 +785,31 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
     for edge in edges:
         if edge.from_node in adj:
             adj[edge.from_node].append(edge.to_node)
+
+    # Detect implicit fallback routes to prevent security "wormholes"
+    def extract_fallbacks(data: Any) -> list[str]:
+        fallbacks = []
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if k == "fallback_node_id" and isinstance(v, str):
+                    fallbacks.append(v)
+                else:
+                    fallbacks.extend(extract_fallbacks(v))
+        elif isinstance(data, list):
+            for item in data:
+                fallbacks.extend(extract_fallbacks(item))
+        return fallbacks
+
+    for node in nodes:
+        node_data = node.model_dump(exclude_none=True)
+        for fallback_id in extract_fallbacks(node_data):
+            if (
+                node.id in adj
+                and fallback_id in adj
+                and fallback_id not in adj[node.id]
+            ):
+                # Add implicit fallback edge to adjacency map
+                adj[node.id].append(fallback_id)
 
     guards = {n.id for n in nodes if isinstance(n, valid_guards)}
 
