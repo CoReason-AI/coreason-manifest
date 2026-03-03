@@ -107,8 +107,12 @@ def _enforce_red_button_rule(
         if isinstance(node, AgentNode) and isinstance(node.tools, list):
             for tool_name in node.tools:
                 resolved_tool = tool_map.get(tool_name)
-                # Fail-Open Vulnerability - Default to 'critical' if unknown
-                risk = resolved_tool.risk_level if resolved_tool else "critical"
+                if not resolved_tool or not getattr(resolved_tool, "risk_level", None):
+                    raise ManifestError.critical_halt(
+                        code=ManifestErrorCode.VAL_TOOL_MISSING,
+                        message=f"Tool '{tool_name}' lacks a valid risk level.",
+                    )
+                risk = resolved_tool.risk_level
                 if risk == "critical":
                     critical_tools.append(tool_name)
 

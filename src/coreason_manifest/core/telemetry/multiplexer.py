@@ -3,7 +3,12 @@ import logging
 from collections.abc import AsyncGenerator, Awaitable, Callable
 
 from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
-from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket, StreamUIEnvelope
+from coreason_manifest.core.telemetry.stream import (
+    StreamCloseEnvelope,
+    StreamEpistemicEnvelope,
+    StreamPacket,
+    StreamUIEnvelope,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,10 +55,8 @@ class AsyncSSEMultiplexer:
         """
 
         async def _push_task() -> None:
-            # Note: We assume the queue consumer can handle raw EpistemicEnvelopes.
-            # We push the envelope itself, ignoring the strict StreamPacket type.
             queue = await self._get_queue()
-            await queue.put(envelope)  # type: ignore[arg-type]
+            await queue.put(StreamEpistemicEnvelope(op="epistemic", p=envelope))
 
         task = asyncio.create_task(_push_task())
         self._background_tasks.add(task)
