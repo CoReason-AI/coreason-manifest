@@ -11,7 +11,8 @@ def extract_fallbacks(data: Any) -> list[str]:
         - Guarantees exhaustive isolation of dynamically assigned edge routes embedded deep within node configurations.
 
     Malicious States Prevented:
-        - Disables clandestine route manipulation actively utilizing unstructured fallback parameters resolving around critical oversight nodes.  # noqa: E501
+        - Disables clandestine route manipulation actively utilizing unstructured fallback
+          parameters resolving around critical oversight nodes.  # noqa: E501
 
     Args:
         data: The structural context parameter isolated for recursive routing evaluation.

@@ -109,8 +109,8 @@ def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None 
         lines.append("graph TD")
     elif isinstance(flow, GraphFlow):
         lines.append("graph LR")
-    else:  # pragma: no cover
-        return ""  # pragma: no cover
+    else:
+        raise ValueError(f"Unsupported flow type: {type(flow)}")
 
     # Grouping
     grouped_nodes: dict[str, list[AnyNode]] = {}
@@ -225,7 +225,7 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     if not queue and nodes:
         first_node = next(iter(nodes)).id
         queue.append(first_node)
-        in_degree[first_node] = 0  # Force it
+        in_degree[first_node] = 0  # Explicitly reset in_degree to 0 to artificially break the graph cycle.
 
     for n_id in queue:
         ranks[n_id] = 0
