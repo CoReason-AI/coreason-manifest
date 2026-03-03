@@ -139,10 +139,13 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
             except (TypeError, ValueError):
                 pass
 
-        try:
-            return json.dumps(item, sort_keys=True)
-        except (TypeError, ValueError):
-            return str(item)
+        if hasattr(item, "canonical_id"):
+            try:
+                return item.canonical_id()
+            except (TypeError, ValueError):
+                pass
+
+        raise ValueError("Object must implement a .canonical_id() method for strict hashing.")
 
     old_ids = [_get_id(item) for item in old_list]
     new_ids = [_get_id(item) for item in new_list]

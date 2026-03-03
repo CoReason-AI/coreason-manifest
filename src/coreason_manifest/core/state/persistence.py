@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -20,9 +20,19 @@ class PatchOp(StrEnum):
 
 
 class JSONPatchOperation(CoreasonModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     op: Annotated[PatchOp, Field(description="The operation to perform.")]
     path: Annotated[str, Field(description="A JSON Pointer path pointing to the target location.")]
     value: Annotated[Any | None, Field(default=None, description="The value to add, replace, or test.")]
+    from_: Annotated[
+        str | None,
+        Field(
+            default=None,
+            alias="from",
+            description="A JSON Pointer path pointing to the source location (for move and copy).",
+        ),
+    ]
 
     @field_validator("path", "from_", mode="after")
     @classmethod
@@ -37,15 +47,6 @@ class JSONPatchOperation(CoreasonModel):
                     f"Security Violation: Access or mutation of restricted namespace '{namespace}' is forbidden."
                 )
         return v
-
-    from_: Annotated[
-        str | None,
-        Field(
-            default=None,
-            alias="from",
-            description="A JSON Pointer path pointing to the source location (for move and copy).",
-        ),
-    ]
 
     @model_validator(mode="after")
     def validate_rfc6902_semantics(self) -> "JSONPatchOperation":
@@ -63,7 +64,7 @@ class JSONPatchOperation(CoreasonModel):
 
 
 # =========================================================================
-#  CHECKPOINTING ("Time Travel")
+#  TEMPORAL STATE ROLLBACK
 # =========================================================================
 
 

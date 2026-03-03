@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
@@ -195,7 +197,3 @@ class PresentationHints(CoreasonModel):
         str | None,
         Field(description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865)."),
     ] = None
-
-
-UIComponentNode.model_rebuild()
-AdaptiveUIContract.model_rebuild()

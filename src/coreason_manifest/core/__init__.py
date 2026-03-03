@@ -1,10 +1,5 @@
 # Core specification package
-
-# -----------------------------------------------------------------------------
-# LATE UNION RESOLUTION & REBUILD
-# Execute dynamic Pydantic resolution strictly at the bottom of the module
-# to guarantee no forward references block the graph structure.
-# -----------------------------------------------------------------------------
+from __future__ import annotations
 
 from coreason_manifest.core.compute.reasoning import (
     AttentionReasoning,
