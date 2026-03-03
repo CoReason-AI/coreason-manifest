@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.identity import IdentityPassport
-from coreason_manifest.core.workflow import LineageIntegrityError
+from coreason_manifest.core.workflow.exceptions import LineageIntegrityError
 from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
 
 

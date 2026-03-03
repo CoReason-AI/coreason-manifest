@@ -34,7 +34,7 @@ class EpistemicLedger:
         """
         return sorted(self._events.values(), key=lambda e: e.timestamp)
 
-    def project(self, projection_class: type[Any]) -> Any:
+    def project(self, projection_class: type[Any] | Any) -> Any:
         """
         Replays the event stream in causal order and folds it into a single Pydantic state model
         using the provided projection class.
