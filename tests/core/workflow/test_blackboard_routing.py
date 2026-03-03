@@ -58,6 +58,7 @@ async def test_thundering_herd(broker: BlackboardBroker, mock_event: EpistemicEv
     """
     Test 2: Prove EXACTLY ONE node gets the lock when 3 attempt simultaneously.
     """
+
     async def claim_attempt(agent_signature: str) -> bool:
         return await broker.claim_task(mock_event.event_id, agent_signature=agent_signature, ttl_seconds=30)
 
@@ -103,9 +104,7 @@ async def test_capability_routing(mock_event: EpistemicEvent) -> None:
     # SemanticNode scores 0.9 for STRUCTURAL_PARSED
     # Since 0.9 < 0.95, it should fallback to suspense envelope
     semantic_node = SemanticNode(
-        id="semantic_1",
-        hardware_profile="nlp-cluster-1",
-        profile="profile_1", operational_policy=None
+        id="semantic_1", hardware_profile="nlp-cluster-1", profile="profile_1", operational_policy=None
     )
 
     result = await router.offer_task(mock_event, [semantic_node])
