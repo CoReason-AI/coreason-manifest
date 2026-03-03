@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 import difflib
+import json
 from enum import StrEnum
 from typing import Any
 
@@ -25,10 +26,16 @@ class ChangeCategory(StrEnum):
     PATCH = "PATCH"
 
 
+class ChangeType(StrEnum):
+    ADD = "add"
+    REMOVE = "remove"
+    MODIFY = "modify"
+
+
 class DiffChange(CoreasonModel):
     path: str
     category: ChangeCategory
-    change_type: str = Field(..., description="'add', 'remove', or 'modify'")
+    change_type: ChangeType = Field(..., description="'add', 'remove', or 'modify'")
     old_value: Any | None = None
     new_value: Any | None = None
 
@@ -83,8 +90,6 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
             return item
         # Fallback for complex objects without 'id', hash their string representation
         # It's not perfect but works for simple diffing
-        import json
-
         try:
             return json.dumps(item, sort_keys=True)
         except Exception:
@@ -106,8 +111,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
                     changes.append(
                         DiffChange(
                             path=current_path,
-                            category=_categorize_path(current_path, "modify"),
-                            change_type="modify",
+                            category=_categorize_path(current_path, ChangeType.MODIFY),
+                            change_type=ChangeType.MODIFY,
                             old_value=old_list[i],
                             new_value=new_list[j],
                         )
@@ -119,8 +124,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
                     changes.append(
                         DiffChange(
                             path=current_path,
-                            category=_categorize_path(current_path, "remove"),
-                            change_type="remove",
+                            category=_categorize_path(current_path, ChangeType.REMOVE),
+                            change_type=ChangeType.REMOVE,
                             old_value=old_list[i],
                             new_value=None,
                         )
@@ -131,8 +136,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
                     changes.append(
                         DiffChange(
                             path=current_path,
-                            category=_categorize_path(current_path, "add"),
-                            change_type="add",
+                            category=_categorize_path(current_path, ChangeType.ADD),
+                            change_type=ChangeType.ADD,
                             old_value=None,
                             new_value=new_list[j],
                         )
@@ -143,8 +148,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
                 changes.append(
                     DiffChange(
                         path=current_path,
-                        category=_categorize_path(current_path, "remove"),
-                        change_type="remove",
+                        category=_categorize_path(current_path, ChangeType.REMOVE),
+                        change_type=ChangeType.REMOVE,
                         old_value=old_list[i],
                         new_value=None,
                     )
@@ -155,8 +160,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
                 changes.append(
                     DiffChange(
                         path=current_path,
-                        category=_categorize_path(current_path, "add"),
-                        change_type="add",
+                        category=_categorize_path(current_path, ChangeType.ADD),
+                        change_type=ChangeType.ADD,
                         old_value=None,
                         new_value=new_list[j],
                     )
@@ -178,8 +183,8 @@ def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[st
             changes.append(
                 DiffChange(
                     path=current_path,
-                    category=_categorize_path(current_path, "add"),
-                    change_type="add",
+                    category=_categorize_path(current_path, ChangeType.ADD),
+                    change_type=ChangeType.ADD,
                     old_value=None,
                     new_value=new_dict[key],
                 )
@@ -188,8 +193,8 @@ def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[st
             changes.append(
                 DiffChange(
                     path=current_path,
-                    category=_categorize_path(current_path, "remove"),
-                    change_type="remove",
+                    category=_categorize_path(current_path, ChangeType.REMOVE),
+                    change_type=ChangeType.REMOVE,
                     old_value=old_dict[key],
                     new_value=None,
                 )
@@ -206,8 +211,8 @@ def _compare_dicts(path_prefix: str, old_dict: dict[str, Any], new_dict: dict[st
                 changes.append(
                     DiffChange(
                         path=current_path,
-                        category=_categorize_path(current_path, "modify"),
-                        change_type="modify",
+                        category=_categorize_path(current_path, ChangeType.MODIFY),
+                        change_type=ChangeType.MODIFY,
                         old_value=old_val,
                         new_value=new_val,
                     )
