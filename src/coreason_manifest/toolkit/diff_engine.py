@@ -1,5 +1,6 @@
 import copy
 
+from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
 
 
@@ -13,13 +14,20 @@ def _resolve_parent_and_key(doc: dict | list, pointer: str) -> tuple[dict | list
         if isinstance(current, dict):
             current = current[part]
         elif isinstance(current, list):
-            current = current[int(part)]
+            try:
+                current = current[int(part)]
+            except ValueError as e:
+                raise ManifestError(f"Invalid array index in pointer: '{part}'") from e
     last_part = parts[-1].replace("~1", "/").replace("~0", "~")
     if isinstance(current, list):
         if last_part == "-":
             return current, len(current)
-        return current, int(last_part)
+        try:
+            return current, int(last_part)
+        except ValueError as e:
+            raise ManifestError(f"Invalid array index in pointer: '{last_part}'") from e
     return current, last_part
+
 
 def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperation]) -> list[JSONPatchOperation]:
     """
@@ -128,6 +136,7 @@ def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperat
 
     inverses.reverse()
     return inverses
+
 
 def apply_rewind(current_state: dict, reverse_patches: list[JSONPatchOperation]) -> dict:
     """
