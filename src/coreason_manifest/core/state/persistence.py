@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -23,6 +23,16 @@ class JSONPatchOperation(CoreasonModel):
     op: Annotated[PatchOp, Field(description="The operation to perform.")]
     path: Annotated[str, Field(description="A JSON Pointer path pointing to the target location.")]
     value: Annotated[Any | None, Field(default=None, description="The value to add, replace, or test.")]
+
+    @field_validator("path", mode="after")
+    @classmethod
+    def validate_restricted_paths(cls, v: str) -> str:
+        """Reject paths that start with restricted namespaces."""
+        restricted_namespaces = ("/system", "/_internal", "/auth", "/governance")
+        if v.startswith(restricted_namespaces):
+            raise ValueError(f"Security Violation: Mutation of restricted namespace '{v}' is forbidden.")
+        return v
+
     from_: Annotated[
         str | None,
         Field(
