@@ -2,6 +2,7 @@ import copy
 
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
 
+
 def _resolve_parent_and_key(doc: dict | list, pointer: str) -> tuple[dict | list, str | int]:
     if pointer == "" or pointer == "/":
         raise ValueError("Cannot resolve parent of root")
