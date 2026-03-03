@@ -1,0 +1,49 @@
+site_name: CoReason Manifest
+site_description: Universal contracts for AI agent workflows, DAG execution, state management, governance, and oversight.
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - content.code.copy
+    - content.code.select
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - admonition
+  - pymdownx.details
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_heading: true
+            show_source: true
+            show_bases: false
+            show_signature_annotations: true
+
+nav:
+  - Home: index.md
+  - Explanations:
+      - Architecture Overview: architecture.md
+  - How-To Guides:
+      - Building Agent Graphs: guides/building_agent_graphs.md
+      - Enforcing Governance: guides/enforcing_governance.md
+      - Resilience Strategies: guides/resilience_strategies.md
+  - API Reference:
+      - Workflow: api/workflow.md
+      - Oversight: api/oversight.md
+      - State: api/state.md
