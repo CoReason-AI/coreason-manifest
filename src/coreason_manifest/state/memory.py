@@ -47,10 +47,9 @@ class AttritionEvent(CoreasonModel):
 class PRISMAAttritionLedger(CoreasonModel):
     """Cryptographic state machine for generating PRISMA 2020 flow diagrams."""
 
-    events: Annotated[
-        list[AttritionEvent],
-        Field(description="Append-only log of all document filtering events.")
-    ] = Field(default_factory=list)
+    events: Annotated[list[AttritionEvent], Field(description="Append-only log of all document filtering events.")] = (
+        Field(default_factory=list)
+    )
 
 
 class WorkingMemoryConfig(CoreasonModel):
