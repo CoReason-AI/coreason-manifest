@@ -344,9 +344,7 @@ class EnsembleReasoning(BaseReasoning):
     agreement_threshold: Annotated[float, Field(description="High confidence match threshold.")] = 0.85
     disagreement_threshold: Annotated[
         float,
-        Field(
-            description="Low confidence mismatch threshold."
-        ),
+        Field(description="Low confidence mismatch threshold."),
     ] = 0.60
 
     # Slow Path Trigger
