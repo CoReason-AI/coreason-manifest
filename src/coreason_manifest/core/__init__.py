@@ -39,7 +39,8 @@ from coreason_manifest.oversight.resilience import (
 )
 from coreason_manifest.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
 from coreason_manifest.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
-from coreason_manifest.workflow.evals import EvalsManifest, FuzzingTarget, SimulationScenario as TestCase
+from coreason_manifest.workflow.evals import EvalsManifest, FuzzingTarget
+from coreason_manifest.workflow.evals import SimulationScenario as TestCase
 from coreason_manifest.workflow.flow import (
     Blackboard,
     Edge,
