@@ -1,10 +1,13 @@
 import copy
+from typing import Any
 
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
 
 
-def _resolve_parent_and_key(doc: dict | list, pointer: str) -> tuple[dict | list, str | int]:
+def _resolve_parent_and_key(
+    doc: dict[str, Any] | list[Any], pointer: str
+) -> tuple[dict[str, Any] | list[Any], str | int]:
     if pointer == "" or pointer == "/":
         raise ValueError("Cannot resolve parent of root")
     parts = pointer.split("/")[1:]
@@ -17,7 +20,9 @@ def _resolve_parent_and_key(doc: dict | list, pointer: str) -> tuple[dict | list
             try:
                 current = current[int(part)]
             except ValueError as e:
-                raise ManifestError(f"Invalid array index in pointer: '{part}'") from e
+                raise ManifestError.critical_halt(
+                    "VAL-SCHEMA-INVALID", f"Invalid array index in pointer: '{part}'"
+                ) from e
     last_part = parts[-1].replace("~1", "/").replace("~0", "~")
     if isinstance(current, list):
         if last_part == "-":
@@ -25,11 +30,15 @@ def _resolve_parent_and_key(doc: dict | list, pointer: str) -> tuple[dict | list
         try:
             return current, int(last_part)
         except ValueError as e:
-            raise ManifestError(f"Invalid array index in pointer: '{last_part}'") from e
+            raise ManifestError.critical_halt(
+                "VAL-SCHEMA-INVALID", f"Invalid array index in pointer: '{last_part}'"
+            ) from e
     return current, last_part
 
 
-def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperation]) -> list[JSONPatchOperation]:
+def generate_inverse_patches(
+    original_state: dict[str, Any], patches: list[JSONPatchOperation]
+) -> list[JSONPatchOperation]:
     """
     Calculates the exact inverse of applied patches to support reverting state changes.
     """
@@ -47,40 +56,43 @@ def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperat
 
         if op == PatchOp.ADD:
             if isinstance(parent, dict):
-                if key in parent:
+                if str(key) in parent:
                     # Replacing existing key in dict
-                    old_value = copy.deepcopy(parent[key])
-                    inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_value))
-                    parent[key] = copy.deepcopy(patch.value)
+                    old_value = copy.deepcopy(parent[str(key)])
+                    inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_value, from_=None))
+                    parent[str(key)] = copy.deepcopy(patch.value)
                 else:
                     # Adding new key to dict
-                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=path))
-                    parent[key] = copy.deepcopy(patch.value)
+                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=path, value=None, from_=None))
+                    parent[str(key)] = copy.deepcopy(patch.value)
             elif isinstance(parent, list):
                 # Inserting into list
                 # Inverse is remove at the same index
-                idx = key
+                idx = int(key)
                 if idx == len(parent):
                     # It was appended, so path might be /.../-
                     # In the inverse, we should remove the exact index it became
                     actual_path = f"{path.rsplit('/', 1)[0]}/{idx}" if path.endswith("/-") else path
-                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=actual_path))
+                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=actual_path, value=None, from_=None))
                 else:
-                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=path))
+                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=path, value=None, from_=None))
                 parent.insert(idx, copy.deepcopy(patch.value))
 
         elif op == PatchOp.REMOVE:
-            old_value = copy.deepcopy(parent[key])
+            old_value = copy.deepcopy(parent[key])  # type: ignore[index]
             if isinstance(parent, dict):
-                del parent[key]
+                del parent[str(key)]
             else:
-                parent.pop(key)
-            inverses.append(JSONPatchOperation(op=PatchOp.ADD, path=path, value=old_value))
+                parent.pop(int(key))
+            inverses.append(JSONPatchOperation(op=PatchOp.ADD, path=path, value=old_value, from_=None))
 
         elif op == PatchOp.REPLACE:
-            old_value = copy.deepcopy(parent[key])
-            parent[key] = copy.deepcopy(patch.value)
-            inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_value))
+            old_value = copy.deepcopy(parent[key])  # type: ignore[index]
+            if isinstance(parent, dict):
+                parent[str(key)] = copy.deepcopy(patch.value)
+            else:
+                parent[int(key)] = copy.deepcopy(patch.value)
+            inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_value, from_=None))
 
         elif op == PatchOp.MOVE:
             from_path = patch.from_
@@ -89,23 +101,23 @@ def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperat
 
             from_parent, from_key = _resolve_parent_and_key(state, from_path)
             # Remove from from_path
-            old_value = copy.deepcopy(from_parent[from_key])
+            old_value = copy.deepcopy(from_parent[from_key])  # type: ignore[index]
             if isinstance(from_parent, dict):
-                del from_parent[from_key]
+                del from_parent[str(from_key)]
             else:
-                from_parent.pop(from_key)
+                from_parent.pop(int(from_key))
 
             # Inverse: move from path to from_path
-            inverses.append(JSONPatchOperation(op=PatchOp.MOVE, path=from_path, from_=path))
+            inverses.append(JSONPatchOperation(op=PatchOp.MOVE, path=from_path, from_=path, value=None))
 
             # Add to path
             if isinstance(parent, dict):
-                parent[key] = old_value
+                parent[str(key)] = old_value
             elif isinstance(parent, list):
-                if key == len(parent):
+                if int(key) == len(parent):
                     parent.append(old_value)
                 else:
-                    parent.insert(key, old_value)
+                    parent.insert(int(key), old_value)
 
         elif op == PatchOp.COPY:
             from_path = patch.from_
@@ -113,24 +125,24 @@ def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperat
                 raise ValueError("COPY operation requires a 'from' path")
 
             from_parent, from_key = _resolve_parent_and_key(state, from_path)
-            copied_value = copy.deepcopy(from_parent[from_key])
+            copied_value = copy.deepcopy(from_parent[from_key])  # type: ignore[index]
 
             # This is like an ADD. The inverse is a REMOVE at the target path.
             if isinstance(parent, dict) and key in parent:
                 # Replaced existing value
-                old_val = copy.deepcopy(parent[key])
-                inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_val))
-                parent[key] = copied_value
+                old_val = copy.deepcopy(parent[str(key)])
+                inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_val, from_=None))
+                parent[str(key)] = copied_value
             else:
-                idx = key
+                idx = int(key)
                 if isinstance(parent, list) and idx == len(parent):
                     actual_path = f"{path.rsplit('/', 1)[0]}/{idx}" if path.endswith("/-") else path
-                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=actual_path))
+                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=actual_path, value=None, from_=None))
                     parent.insert(idx, copied_value)
                 else:
-                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=path))
+                    inverses.append(JSONPatchOperation(op=PatchOp.REMOVE, path=path, value=None, from_=None))
                     if isinstance(parent, dict):
-                        parent[key] = copied_value
+                        parent[str(key)] = copied_value
                     else:
                         parent.insert(idx, copied_value)
 
@@ -138,7 +150,7 @@ def generate_inverse_patches(original_state: dict, patches: list[JSONPatchOperat
     return inverses
 
 
-def apply_rewind(current_state: dict, reverse_patches: list[JSONPatchOperation]) -> dict:
+def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchOperation]) -> dict[str, Any]:
     """
     Applies inverse patches cleanly to a state dictionary, simulating rollback.
     """
@@ -154,21 +166,24 @@ def apply_rewind(current_state: dict, reverse_patches: list[JSONPatchOperation])
 
         if op == PatchOp.ADD:
             if isinstance(parent, dict):
-                parent[key] = copy.deepcopy(patch.value)
+                parent[str(key)] = copy.deepcopy(patch.value)
             elif isinstance(parent, list):
-                if key == len(parent):
+                if int(key) == len(parent):
                     parent.append(copy.deepcopy(patch.value))
                 else:
-                    parent.insert(key, copy.deepcopy(patch.value))
+                    parent.insert(int(key), copy.deepcopy(patch.value))
 
         elif op == PatchOp.REMOVE:
             if isinstance(parent, dict):
-                del parent[key]
+                del parent[str(key)]
             elif isinstance(parent, list):
-                parent.pop(key)
+                parent.pop(int(key))
 
         elif op == PatchOp.REPLACE:
-            parent[key] = copy.deepcopy(patch.value)
+            if isinstance(parent, dict):
+                parent[str(key)] = copy.deepcopy(patch.value)
+            else:
+                parent[int(key)] = copy.deepcopy(patch.value)
 
         elif op == PatchOp.MOVE:
             from_path = patch.from_
@@ -176,20 +191,20 @@ def apply_rewind(current_state: dict, reverse_patches: list[JSONPatchOperation])
                 raise ValueError("MOVE operation requires a 'from' path")
 
             from_parent, from_key = _resolve_parent_and_key(state, from_path)
-            old_value = copy.deepcopy(from_parent[from_key])
+            old_value = copy.deepcopy(from_parent[from_key])  # type: ignore[index]
 
             if isinstance(from_parent, dict):
-                del from_parent[from_key]
+                del from_parent[str(from_key)]
             else:
-                from_parent.pop(from_key)
+                from_parent.pop(int(from_key))
 
             if isinstance(parent, dict):
-                parent[key] = old_value
+                parent[str(key)] = old_value
             elif isinstance(parent, list):
-                if key == len(parent):
+                if int(key) == len(parent):
                     parent.append(old_value)
                 else:
-                    parent.insert(key, old_value)
+                    parent.insert(int(key), old_value)
 
         elif op == PatchOp.COPY:
             from_path = patch.from_
@@ -197,14 +212,14 @@ def apply_rewind(current_state: dict, reverse_patches: list[JSONPatchOperation])
                 raise ValueError("COPY operation requires a 'from' path")
 
             from_parent, from_key = _resolve_parent_and_key(state, from_path)
-            copied_value = copy.deepcopy(from_parent[from_key])
+            copied_value = copy.deepcopy(from_parent[from_key])  # type: ignore[index]
 
             if isinstance(parent, dict):
-                parent[key] = copied_value
+                parent[str(key)] = copied_value
             elif isinstance(parent, list):
-                if key == len(parent):
+                if int(key) == len(parent):
                     parent.append(copied_value)
                 else:
-                    parent.insert(key, copied_value)
+                    parent.insert(int(key), copied_value)
 
     return state
