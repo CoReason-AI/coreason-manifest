@@ -38,9 +38,11 @@ class MCPOperation(CoreasonModel):
 
     @model_validator(mode="after")
     def enforce_strict_provenance(self) -> "MCPOperation":
-        if self.tool_name in {MCPToolName.CANVAS_ADD_MATH_NODE, MCPToolName.CANVAS_UPDATE_MATH_NODE}:
-            if self.actor is None:
-                raise ValueError("Regulatory SciVis operations require a cryptographically verifiable ActorIdentity.")
+        if (
+            self.tool_name in {MCPToolName.CANVAS_ADD_MATH_NODE, MCPToolName.CANVAS_UPDATE_MATH_NODE}
+            and self.actor is None
+        ):
+            raise ValueError("Regulatory SciVis operations require a cryptographically verifiable ActorIdentity.")
         return self
 
     @model_validator(mode="after")
