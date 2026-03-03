@@ -22,12 +22,6 @@ class EpistemicLedger:
         if event.event_id not in self._events:
             self._events[event.event_id] = event
 
-    async def aappend(self, event: EpistemicEvent) -> None:
-        """
-        Asynchronous out-of-order event appending.
-        """
-        self.append(event)
-
     def get_event_by_id(self, event_id: str) -> EpistemicEvent | None:
         """
         Returns a specific event by its ID in O(1) time.

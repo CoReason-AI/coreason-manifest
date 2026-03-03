@@ -91,7 +91,7 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
             payload=proposition.model_dump(mode="json"),
             epistemic_anchor=EpistemicAnchor(),
         )
-        await ledger.aappend(event)
+        ledger.append(event)
         return f"Successfully appended event {event.event_id}"
 
     @mcp.prompt("auditor_recovery_prompt")
