@@ -1,7 +1,7 @@
 # Prosperity-3.0
 from typing import Annotated, Any, Literal
 
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.compute.reasoning import ModelRef, Optimizer
 from coreason_manifest.core.primitives.types import VariableID
