@@ -21,10 +21,14 @@ class AsyncSSEMultiplexer:
 
     async def push(self, packet: StreamPacket) -> None:
         """
-        Push a stream packet into the buffer.
+        Push a stream packet into the buffer with a timeout to prevent deadlock.
         """
+        import contextlib
         queue = await self._get_queue()
-        await queue.put(packet)
+        with contextlib.suppress(TimeoutError):
+            # If the queue is full and timing out, we drop the packet to prevent
+            # stalling the LLM orchestrator. In a real system we might want to log this.
+            await asyncio.wait_for(queue.put(packet), timeout=1.0)
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
         """
@@ -36,8 +40,10 @@ class AsyncSSEMultiplexer:
             packet = await queue.get()
 
             try:
-                # Use model_dump_json directly, formatting as SSE
-                yield f"data: {packet.model_dump_json()}\n\n"
+                # Format as SSE, ensuring multi-line JSON has `data: ` prefix on every line.
+                json_str = packet.model_dump_json()
+                formatted_data = "\n".join(f"data: {line}" for line in json_str.split("\n"))
+                yield f"{formatted_data}\n\n"
             finally:
                 queue.task_done()
 
