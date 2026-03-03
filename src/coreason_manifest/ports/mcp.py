@@ -15,7 +15,7 @@ from pydantic import Field, ValidationError, model_validator
 
 from coreason_manifest.compute.epistemic import ClinicalProposition
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.scivis.scivis_provenance import ActorIdentity
+from coreason_manifest.presentation.scivis.scivis_provenance import ActorIdentity
 from coreason_manifest.state.events import EpistemicAnchor, EpistemicEvent, EventType
 from coreason_manifest.state.ledger import EpistemicLedger
 from coreason_manifest.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
