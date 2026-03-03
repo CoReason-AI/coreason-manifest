@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-from coreason_manifest.core.scivis.scivis_style import ColorToken
+from coreason_manifest.presentation.scivis.scivis_style import ColorToken
 
 TemplateURN = Annotated[str, Field(pattern=r"^urn:sci-design:[a-z0-9-]+:[a-z0-9-]+:v[0-9]+$")]
 

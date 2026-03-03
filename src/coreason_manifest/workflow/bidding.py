@@ -3,7 +3,7 @@ import time
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.common.suspense import SkeletonType, SuspenseConfig
+from coreason_manifest.presentation.streaming import SkeletonType, SuspenseConfig
 from coreason_manifest.state.ledger import EpistemicLedger
 from coreason_manifest.telemetry.suspense_envelope import StreamSuspenseEnvelope
 
