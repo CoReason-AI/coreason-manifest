@@ -11,7 +11,7 @@ from coreason_manifest.core.presentation.search_layout import HybridSearchLayout
 from coreason_manifest.core.presentation.templating import ParameterizedDataRef  # noqa: TC001
 from coreason_manifest.core.presentation.transform import DataTransformSchema  # noqa: TC001
 from coreason_manifest.core.presentation.typeahead import TypeaheadConfig  # noqa: TC001
-from coreason_manifest.core.state.ephemeral import LocalStateManifest  # noqa: TC001
+from coreason_manifest.state.ephemeral import LocalStateManifest  # noqa: TC001
 
 from .ambient import AmbientListenerConfig  # noqa: TC001
 from .client_actions import ClientActionMap  # noqa: TC001

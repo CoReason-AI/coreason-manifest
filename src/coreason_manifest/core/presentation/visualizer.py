@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from coreason_manifest.core.telemetry.telemetry_schemas import ExecutionSnapshot
+    from coreason_manifest.telemetry.telemetry_schemas import ExecutionSnapshot
 
-from coreason_manifest.core.workflow import AnyNode, GraphFlow, HumanNode, LinearFlow
-from coreason_manifest.core.workflow.nodes import SwitchNode
-from coreason_manifest.core.workflow.topology import get_unified_topology
+from coreason_manifest.workflow import AnyNode, GraphFlow, HumanNode, LinearFlow
+from coreason_manifest.workflow.nodes import SwitchNode
+from coreason_manifest.workflow.topology import get_unified_topology
 
 
 def _safe_id(node_id: str) -> str:
