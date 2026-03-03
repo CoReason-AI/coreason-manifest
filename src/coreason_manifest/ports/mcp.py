@@ -7,7 +7,7 @@ Epistemic Ledger, our strict Neuro-Symbolic Data Contracts, and dynamic prompts.
 
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Any, Literal, cast  # noqa: F401
 from uuid import uuid4
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -57,25 +57,21 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         if ctx.request_context is None or ctx.request_context.meta is None:
             raise ValueError("SecurityException: Context metadata is missing.")
 
-        # The prompt instructed to use `ctx.request_context.meta.get("x-agent-signature")`,
-        # but mypy complains because meta is typed as RequestParams.Meta which doesn't have get.
-        # However, at runtime it might be a dict, or a Pydantic model with extra fields.
-        meta_obj = ctx.request_context.meta
-        if isinstance(meta_obj, dict):
-            meta_get = meta_obj.get
-        else:
-            meta_dict = getattr(meta_obj, "model_extra", None) or getattr(meta_obj, "__dict__", {})
-            meta_get = getattr(meta_obj, "get", meta_dict.get)
+        from pydantic import BaseModel, ConfigDict
 
-        agent_sig_raw = meta_get("x-agent-signature")
-        if agent_sig_raw is None or not isinstance(agent_sig_raw, dict):
-            raise ValueError("SecurityException: x-agent-signature header is missing or invalid in Context metadata")
+        class SecurityMetadata(BaseModel):
+            model_config = ConfigDict(extra="ignore")
+            agent_signature: dict[str, Any] = Field(alias="x-agent-signature")
+            hardware_fingerprint: dict[str, Any] = Field(alias="x-hardware-fingerprint")
 
-        hw_fingerprint_raw = meta_get("x-hardware-fingerprint")
-        if hw_fingerprint_raw is None or not isinstance(hw_fingerprint_raw, dict):
+        try:
+            sec_meta = SecurityMetadata.model_validate(ctx.request_context.meta, from_attributes=True)
+            agent_sig_raw = sec_meta.agent_signature
+            hw_fingerprint_raw = sec_meta.hardware_fingerprint
+        except ValidationError as e:
             raise ValueError(
-                "SecurityException: x-hardware-fingerprint header is missing or invalid in Context metadata"
-            )
+                f"SecurityException: Security headers are missing or invalid in Context metadata. Details: {e}"
+            ) from e
 
         try:
             agent_sig = AgentSignature.model_validate(agent_sig_raw)
