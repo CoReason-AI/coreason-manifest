@@ -1,5 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
+from typing import Any
 
 from coreason_manifest.core.state.events import EpistemicEvent
 from coreason_manifest.core.workflow.bidding import Bid
@@ -34,13 +35,18 @@ class ExtractorNode(BaseNode):
     Watches for raw document upload events.
     """
 
-    @abstractmethod
     async def watch_board(self) -> None:
-        pass
+        while True:
+            _ = await self.queue.get()
+            # Simulate processing the event
+            await asyncio.sleep(0.1)
+            self.queue.task_done()
 
-    @abstractmethod
-    def evaluate_capability(self, event: EpistemicEvent) -> Bid:
-        pass
+    def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
+        # The argument event is purposefully unused in this simulation,
+        # but kept to satisfy the interface.
+        _ = event
+        return Bid(node_id=self.node_id, confidence_score=0.85)
 
 
 class SemanticNode(BaseNode):
@@ -48,13 +54,16 @@ class SemanticNode(BaseNode):
     Watches for STRUCTURAL_MILESTONE events.
     """
 
-    @abstractmethod
     async def watch_board(self) -> None:
-        pass
+        while True:
+            _ = await self.queue.get()
+            # Simulate processing the event
+            await asyncio.sleep(0.1)
+            self.queue.task_done()
 
-    @abstractmethod
-    def evaluate_capability(self, event: EpistemicEvent) -> Bid:
-        pass
+    def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
+        _ = event
+        return Bid(node_id=self.node_id, confidence_score=0.85)
 
 
 class AuditorNode(BaseNode):
@@ -62,10 +71,13 @@ class AuditorNode(BaseNode):
     Watches for SEMANTIC_MILESTONE events.
     """
 
-    @abstractmethod
     async def watch_board(self) -> None:
-        pass
+        while True:
+            _ = await self.queue.get()
+            # Simulate processing the event
+            await asyncio.sleep(0.1)
+            self.queue.task_done()
 
-    @abstractmethod
-    def evaluate_capability(self, event: EpistemicEvent) -> Bid:
-        pass
+    def evaluate_capability(self, event: EpistemicEvent | Any) -> Bid:
+        _ = event
+        return Bid(node_id=self.node_id, confidence_score=0.85)
