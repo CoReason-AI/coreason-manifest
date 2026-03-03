@@ -11,6 +11,7 @@ from coreason_manifest.core.presentation.transform import DataTransformSchema
 from coreason_manifest.core.presentation.typeahead import TypeaheadConfig
 from coreason_manifest.core.state.ephemeral import LocalStateManifest
 
+from .ambient import AmbientListenerConfig
 from .client_actions import ClientActionMap
 from .suspense import SuspenseConfig
 from .validation import UIValidationSchema
@@ -95,6 +96,9 @@ class AdaptiveUIContract(CoreasonModel):
     )
     hybrid_search: HybridSearchLayout | None = Field(
         default=None, description="Bipartite search layout for side-by-side Lexical/Semantic results."
+    )
+    ambient_listeners: list[AmbientListenerConfig] | None = Field(
+        default=None, description="Silent background observers that trigger out-of-band AI workflows based on user interactions."
     )
 
 
@@ -193,3 +197,4 @@ class PresentationHints(CoreasonModel):
 
 
 UIComponentNode.model_rebuild()
+AdaptiveUIContract.model_rebuild()
