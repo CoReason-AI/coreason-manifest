@@ -15,6 +15,7 @@ class HardwareFingerprint(CoreasonModel):
     Hardware characteristics used to fingerprint the specific GPU/Compute node
     running the inference. Critical for epistemic custody tracing.
     """
+
     architecture: str = Field(..., description="GPU Architecture (e.g., Ampere, Hopper).")
     compute_precision: str = Field(..., description="Quantization/precision format (e.g., int4_awq, fp16).")
     vram_allocated: int = Field(..., description="VRAM allocated for the model in megabytes.")
@@ -25,6 +26,7 @@ class AgentSignature(CoreasonModel):
     Software and runtime parameters used to fingerprint the specific LLM agent
     instance generating the epistemic event.
     """
+
     model_weights_hash: str = Field(..., description="Hash of the LLM weights.")
     prompt_commit_hash: str = Field(..., description="Commit hash of the prompt template used.")
     temperature: float = Field(..., description="Inference temperature.")
@@ -99,9 +101,7 @@ class NodeExecution(CoreasonModel):
     hardware_fingerprint: HardwareFingerprint | None = Field(
         default=None, description="Hardware fingerprint of the compute node."
     )
-    agent_signature: AgentSignature | None = Field(
-        default=None, description="Signature of the LLM agent instance."
-    )
+    agent_signature: AgentSignature | None = Field(default=None, description="Signature of the LLM agent instance.")
 
     _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature", "hardware_fingerprint", "agent_signature"}
 

@@ -41,8 +41,7 @@ class MerkleHasher:
         # Try canonical serialization of the payload
         try:
             if isinstance(envelope.payload, CoreasonModel):
-                # We use the actual canonical dump implemented in CoreasonModel
-                payload_bytes = envelope.payload.model_dump_canonical()
+                payload_bytes = envelope.payload.model_dump_json(exclude_none=True, by_alias=True).encode("utf-8")
             elif isinstance(envelope.payload, dict):
                 # For basic dicts, just let json.dumps handle the sorting
                 payload_bytes = json.dumps(
@@ -65,17 +64,19 @@ class MerkleHasher:
 
         # 2. Hardware Fingerprint
         if envelope.hardware_fingerprint:
-            hasher.update(envelope.hardware_fingerprint.model_dump_canonical())
+            hasher.update(
+                envelope.hardware_fingerprint.model_dump_json(exclude_none=True, by_alias=True).encode("utf-8")
+            )
         hasher.update(b"\x00")
 
         # 3. Agent Signature
         if envelope.agent_signature:
-            hasher.update(envelope.agent_signature.model_dump_canonical())
+            hasher.update(envelope.agent_signature.model_dump_json(exclude_none=True, by_alias=True).encode("utf-8"))
         hasher.update(b"\x00")
 
         # 4. Cryptographic Signature
         if envelope.signature:
-            hasher.update(envelope.signature.model_dump_canonical())
+            hasher.update(envelope.signature.model_dump_json(exclude_none=True, by_alias=True).encode("utf-8"))
         hasher.update(b"\x00")
 
         # 5. The Payload itself

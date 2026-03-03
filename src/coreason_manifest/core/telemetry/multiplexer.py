@@ -33,6 +33,7 @@ class AsyncSSEMultiplexer:
         Broadcasts an EpistemicEnvelope asynchronously without blocking the GPU.
         The packet is pushed to the buffer via a background task.
         """
+
         async def _push_task() -> None:
             # Note: We assume the queue consumer can handle raw EpistemicEnvelopes.
             # We push the envelope itself, ignoring the strict StreamPacket type.
