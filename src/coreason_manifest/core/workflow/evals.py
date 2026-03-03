@@ -31,7 +31,7 @@ class AdversaryProfile(CoreasonModel, frozen=True):
     attack_model: str | None = Field(default=None, description="Model to use for executing the attack.")
 
 
-class SimulationScenario(CoreasonModel):
+class SimulationScenario(CoreasonModel, frozen=True, extra="forbid"):
     """
     A deterministic test case for an agent graph.
     """
@@ -52,7 +52,7 @@ class SimulationScenario(CoreasonModel):
     adversary: AdversaryProfile | None = Field(default=None, description="Red-team configuration for semantic fuzzing.")
 
 
-class FuzzingTarget(CoreasonModel):
+class FuzzingTarget(CoreasonModel, frozen=True, extra="forbid"):
     """
     Definition of a fuzzing target for automated adversarial probing.
     """
@@ -70,7 +70,7 @@ class FuzzingTarget(CoreasonModel):
     )
 
 
-class EvalsManifest(CoreasonModel):
+class EvalsManifest(CoreasonModel, frozen=True, extra="forbid"):
     """
     Manifest defining how an agent graph is deterministically tested.
     """
@@ -79,4 +79,7 @@ class EvalsManifest(CoreasonModel):
     fuzzing_targets: list[FuzzingTarget] = Field(default_factory=list, description="List of fuzzing targets.")
 
 
-TestCase = SimulationScenario
+class TestCase(SimulationScenario):
+    """Alias for SimulationScenario used in standard test runs."""
+
+    pass

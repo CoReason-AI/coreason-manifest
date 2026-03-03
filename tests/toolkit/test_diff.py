@@ -11,7 +11,7 @@
 from coreason_manifest.core.oversight.resilience import RetryStrategy
 from coreason_manifest.core.workflow.flow import Edge, FlowInterface, FlowMetadata, Graph, GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes.agent import AgentNode, CognitiveProfile
-from coreason_manifest.toolkit.diff import ChangeCategory, compare_flows
+from coreason_manifest.toolkit.diff import ChangeCategory, ChangeType, compare_flows
 
 
 def test_compare_flows_add_tool() -> None:
@@ -39,7 +39,7 @@ def test_compare_flows_add_tool() -> None:
     tool_changes = [c for c in report.changes if "tools" in c.path]
     assert len(tool_changes) > 0
     assert any(c.category == ChangeCategory.FEATURE for c in tool_changes)
-    assert any(c.change_type == "add" and c.new_value == "tool_b" for c in tool_changes)
+    assert any(c.change_type == ChangeType.ADD and c.new_value == "tool_b" for c in tool_changes)
 
 
 def test_compare_flows_change_governance() -> None:
@@ -102,7 +102,7 @@ def test_compare_flows_remove_edge() -> None:
     edge_changes = [c for c in report.changes if "edges" in c.path]
     assert len(edge_changes) > 0
     assert any(c.category == ChangeCategory.BREAKING for c in edge_changes)
-    assert any(c.change_type == "remove" for c in edge_changes)
+    assert any(c.change_type == ChangeType.REMOVE for c in edge_changes)
 
 
 def test_compare_flows_change_description() -> None:
@@ -182,7 +182,7 @@ def test_compare_flows_list_different_lengths() -> None:
 
     report = compare_flows(old_flow, new_flow)
 
-    tool_changes = [c for c in report.changes if "tools" in c.path and c.change_type == "add"]
+    tool_changes = [c for c in report.changes if "tools" in c.path and c.change_type == ChangeType.ADD]
     assert len(tool_changes) == 2  # Added tool_3 and tool_4
 
 
@@ -245,10 +245,10 @@ def test_compare_flows_linear_list_complex() -> None:
     report = compare_flows(old_flow, new_flow)
 
     # Check that steps were removed
-    step_removals = [c for c in report.changes if "steps" in c.path and c.change_type == "remove"]
+    step_removals = [c for c in report.changes if "steps" in c.path and c.change_type == ChangeType.REMOVE]
     assert len(step_removals) == 2
 
     # Now test the reverse (1 step -> 3 steps)
     report2 = compare_flows(new_flow, old_flow)
-    step_additions = [c for c in report2.changes if "steps" in c.path and c.change_type == "add"]
+    step_additions = [c for c in report2.changes if "steps" in c.path and c.change_type == ChangeType.ADD]
     assert len(step_additions) == 2
