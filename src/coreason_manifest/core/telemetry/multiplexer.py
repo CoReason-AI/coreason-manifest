@@ -1,8 +1,10 @@
 import asyncio
+import logging
 from collections.abc import AsyncGenerator, Awaitable, Callable
 
 from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket, StreamUIEnvelope
 
+logger = logging.getLogger(__name__)
 
 class AsyncSSEMultiplexer:
     """
@@ -28,7 +30,10 @@ class AsyncSSEMultiplexer:
 
         if isinstance(packet, StreamUIEnvelope) and self.ui_observers:
             for observer in self.ui_observers:
-                await observer(packet)
+                try:
+                    await observer(packet)
+                except Exception as e:
+                    logger.error(f"UI Observer {getattr(observer, '__name__', str(observer))} failed: {e}")
 
         queue = await self._get_queue()
         with contextlib.suppress(TimeoutError):
