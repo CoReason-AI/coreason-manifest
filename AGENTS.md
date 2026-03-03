@@ -40,7 +40,7 @@ You are strictly forbidden from introducing "Active" or "Runtime" logic into thi
 
 1.  **Architectural Audit:** Before writing code, ask: *"Does this change introduce a runtime side effect?"* If yes, STOP.
 2.  **Atomic Implementation:** Break tasks into the smallest testable units.
-3.  **Regression Check:** Ensure no re-introduction of "Ghosts" (e.g., do not accidentally re-add a Dockerfile because a generic template suggested it).
+3.  **Regression Check:** Ensure no re-introduction of deprecated legacy artifacts (e.g., do not accidentally re-add a Dockerfile because a generic template suggested it).
 4.  **Test Coverage (The 95% Rule):** Maintain a strict `>= 95%` test coverage floor. **Do not write "filler tests" just to hit 100%.** If a branch of code is already proven impossible by strict Pydantic/mypy typing, remove the branch (Dead Code Elimination) rather than mocking Python internals to test it. Tests must verify *behavior* and *contracts*, not just line execution.
 
 ---

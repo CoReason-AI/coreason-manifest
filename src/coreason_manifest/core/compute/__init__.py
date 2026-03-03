@@ -3,7 +3,6 @@ Compute provisioning and resource routing structures.
 """
 
 from .resources import (
-    IntentRouter,
     provision_compute,
 )
 from .velocity import (
@@ -14,7 +13,6 @@ from .velocity import (
 
 __all__ = [
     "ComputeIntent",
-    "IntentRouter",
     "VelocityAConfig",
     "VelocityBConfig",
     "provision_compute",

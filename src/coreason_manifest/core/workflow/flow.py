@@ -16,10 +16,9 @@ from coreason_manifest.core.security.compliance import SecurityVisitor
 from coreason_manifest.core.state.persistence import PersistenceConfig
 from coreason_manifest.core.state.tools import AnyTool, ToolPack
 from coreason_manifest.core.workflow.evals import EvalsManifest
-from coreason_manifest.core.workflow.nodes import (
-    AnyNode,
-)
+from coreason_manifest.core.workflow.nodes import AnyNode
 from coreason_manifest.core.workflow.nodes.base import Constraint
+from coreason_manifest.core.workflow.utils import extract_fallbacks
 
 
 class ProvenanceType(StrEnum):
@@ -64,9 +63,7 @@ class ProvenanceData(CoreasonModel):
     )
 
 
-# Export AnyNode so it can be imported from here as well
 __all__ = [
-    "AnyNode",
     "Blackboard",
     "DataSchema",
     "Edge",
@@ -203,19 +200,6 @@ class Graph(CoreasonModel):
                 )
 
         # Fallback ID Integrity
-        def extract_fallbacks(data: Any) -> list[str]:
-            fallbacks = []
-            if isinstance(data, dict):
-                for k, v in data.items():
-                    if k == "fallback_node_id" and isinstance(v, str):
-                        fallbacks.append(v)
-                    else:
-                        fallbacks.extend(extract_fallbacks(v))
-            elif isinstance(data, list):
-                for item in data:
-                    fallbacks.extend(extract_fallbacks(item))
-            return fallbacks
-
         for node in self.nodes.values():
             node_data = node.model_dump(exclude_none=True)
             for fallback_id in extract_fallbacks(node_data):

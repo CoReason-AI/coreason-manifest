@@ -42,14 +42,14 @@ class LatencySLAExceededError(ManifestError):
         )
 
 
-class HardwarePreemptionInterrupt(ManifestError):  # noqa: N818
+class HardwarePreemptionError(ManifestError):
     """
     Raised when a cloud provider sends a preemption warning.
     This signals the pipeline to flush telemetry and checkpoint the Ledger.
     """
 
     def __init__(self, message: str) -> None:
-        """Initialize HardwarePreemptionInterrupt."""
+        """Initialize HardwarePreemptionError."""
         super().__init__(
             SemanticFault(
                 error_code="HW-PREEMPTION-001",

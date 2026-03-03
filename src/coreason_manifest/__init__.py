@@ -46,7 +46,6 @@ from coreason_manifest.core.workflow.evals import (
     ChaosConfig,
 )
 from coreason_manifest.core.workflow.flow import (
-    AnyNode,
     Blackboard,
     Edge,
     FlowInterface,
@@ -70,7 +69,6 @@ __all__ = [
     "AdversaryProfile",
     "AgentIdentity",
     "AgentNode",
-    "AnyNode",
     "Audit",
     "BaseReasoning",
     "Blackboard",

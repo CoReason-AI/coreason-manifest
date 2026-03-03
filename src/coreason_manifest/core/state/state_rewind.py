@@ -64,7 +64,7 @@ def generate_inverse_patches(
     logger.trace(
         "generating_inverse_patches",
         original_state_keys=list(original_state.keys()) if isinstance(original_state, dict) else len(original_state),
-        num_patches=len(patches)
+        num_patches=len(patches),
     )
     state: dict[str, Any] | list[Any] = original_state
     inverses: list[JSONPatchOperation] = []
@@ -94,30 +94,33 @@ def generate_inverse_patches(
 
             case {"op": "remove", "path": path}:
                 state, parent, key = _get_cow_parent(state, path)
-                old_value = parent[key]  # type: ignore[index]
                 if isinstance(parent, dict):
+                    old_value = parent[str(key)]
                     del parent[str(key)]
                 else:
+                    old_value = parent[int(key)]
                     parent.pop(int(key))
                 inverses.append(JSONPatchOperation(op=PatchOp.ADD, path=path, value=old_value, from_=None))
 
             case {"op": "replace", "path": path, "value": val}:
                 state, parent, key = _get_cow_parent(state, path)
-                old_value = parent[key]  # type: ignore[index]
                 if isinstance(parent, dict):
+                    old_value = parent[str(key)]
                     parent[str(key)] = val
                 else:
+                    old_value = parent[int(key)]
                     parent[int(key)] = val
                 inverses.append(JSONPatchOperation(op=PatchOp.REPLACE, path=path, value=old_value, from_=None))
 
             case {"op": "move", "path": path, "from": from_path}:
                 # Note: `from_` is aliased to `from` in Pydantic serialization
                 state, from_parent, from_key = _get_cow_parent(state, from_path)
-                old_value = from_parent[from_key]  # type: ignore[index]
 
                 if isinstance(from_parent, dict):
+                    old_value = from_parent[str(from_key)]
                     del from_parent[str(from_key)]
                 else:
+                    old_value = from_parent[int(from_key)]
                     from_parent.pop(int(from_key))
 
                 state, parent, key = _get_cow_parent(state, path)
@@ -133,7 +136,10 @@ def generate_inverse_patches(
 
             case {"op": "copy", "path": path, "from": from_path}:
                 state, from_parent, from_key = _get_cow_parent(state, from_path)
-                copied_value = from_parent[from_key]  # type: ignore[index]
+                if isinstance(from_parent, dict):
+                    copied_value = from_parent[str(from_key)]
+                else:
+                    copied_value = from_parent[int(from_key)]
 
                 state, parent, key = _get_cow_parent(state, path)
                 if isinstance(parent, dict) and str(key) in parent:
@@ -210,11 +216,11 @@ def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchO
 
             case {"op": "move", "path": path, "from": from_path}:
                 state, from_parent, from_key = _get_cow_parent(state, from_path)
-                old_value = from_parent[from_key]  # type: ignore[index]
-
                 if isinstance(from_parent, dict):
+                    old_value = from_parent[str(from_key)]
                     del from_parent[str(from_key)]
                 else:
+                    old_value = from_parent[int(from_key)]
                     from_parent.pop(int(from_key))
 
                 state, parent, key = _get_cow_parent(state, path)
@@ -228,7 +234,10 @@ def apply_rewind(current_state: dict[str, Any], reverse_patches: list[JSONPatchO
 
             case {"op": "copy", "path": path, "from": from_path}:
                 state, from_parent, from_key = _get_cow_parent(state, from_path)
-                copied_value = from_parent[from_key]  # type: ignore[index]
+                if isinstance(from_parent, dict):
+                    copied_value = from_parent[str(from_key)]
+                else:
+                    copied_value = from_parent[int(from_key)]
 
                 state, parent, key = _get_cow_parent(state, path)
                 if isinstance(parent, dict):
