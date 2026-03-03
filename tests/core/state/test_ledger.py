@@ -172,5 +172,5 @@ def test_fallback_project() -> None:
     def dummy_projection(events: list[EpistemicEvent]) -> int:
         return len(events)
 
-    result = ledger.project(dummy_projection)
+    result = ledger.project(dummy_projection)  # type: ignore
     assert result == 1

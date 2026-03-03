@@ -5,6 +5,7 @@ from pydantic import Field
 
 from .agent import AgentNode, CognitiveProfile
 from .base import Constraint, ConstraintOperator, LockConfig, Node
+from .etl import AuditorNode, ETLNode, ExtractorNode, SemanticNode
 from .human import HumanNode, SteeringConfig
 from .oversight import EmergenceInspectorNode, InspectorNode, InspectorNodeBase
 from .planner import PlannerNode
@@ -22,7 +23,11 @@ AnyNode = Annotated[
     | InspectorNode
     | EmergenceInspectorNode
     | VisualInspectorNode
-    | PlaceholderNode,
+    | PlaceholderNode
+    | ETLNode
+    | ExtractorNode
+    | SemanticNode
+    | AuditorNode,
     Field(discriminator="type"),
 ]
 
