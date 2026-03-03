@@ -41,7 +41,7 @@ class AgentRequest(BaseModel):
     # Execution Manifest
     manifest: GraphFlow | LinearFlow = Field(..., description="The AOT-compiled execution graph.")
 
-    # SOTA 2026: The Zero-Trust Identity Envelope.
+    # V2 Standard: The Zero-Trust Identity Envelope.
     # Strictly bound to IdentityPassport post-merge.
     passport: IdentityPassport | None = Field(
         None, description="The cryptographic Zero-Trust Identity Passport for this request."

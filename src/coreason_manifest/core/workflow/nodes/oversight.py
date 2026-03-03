@@ -1,5 +1,5 @@
 # Prosperity-3.0
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, model_validator
 
@@ -71,6 +71,15 @@ class EmergenceInspectorNode(InspectorNodeBase):
     type: Literal["emergence_inspector"] = Field(
         "emergence_inspector", description="The type of the node.", examples=["emergence_inspector"]
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_legacy_type(cls, data: Any) -> Any:
+        """Normalize legacy node names upon ingestion."""
+        if isinstance(data, dict) and data.get("type") == "EmergenceInspectorNode":
+            data = data.copy()
+            data["type"] = "emergence_inspector"
+        return data
 
     is_security_guard: Literal[True] = Field(
         True, description="Indicates this node acts as a valid cryptographic barrier for high-risk execution."

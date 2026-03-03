@@ -62,7 +62,7 @@ class StreamEpistemicEnvelope(BaseEnvelope):
     p: EpistemicEnvelope
 
 
-# SOTA Python 3.12 Union syntax mapped to a Pydantic Discriminator
+# PEP 695 Type Aliasing mapped to a Pydantic Discriminator
 StreamPacket = Annotated[
     StreamErrorEnvelope
     | StreamDeltaEnvelope

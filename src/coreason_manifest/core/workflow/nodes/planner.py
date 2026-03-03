@@ -18,7 +18,7 @@ class PlannerNode(Node):
     )
     reasoning: ReasoningConfig | None = Field(
         None,
-        description="The SOTA reasoning engine (e.g., TreeSearchReasoning, AdaptiveReasoning) "
+        description="The advanced reasoning engine (e.g., TreeSearchReasoning, AdaptiveReasoning) "
         "assigned to generate the plan.",
     )
     output_schema: dict[str, Any] = Field(

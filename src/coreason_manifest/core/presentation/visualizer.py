@@ -63,8 +63,6 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
     if not (node.presentation and node.presentation.label):
         # Convert snake_case to Title Case (e.g. emergence_inspector -> Emergence Inspector)
         type_label = node.type.replace("_", " ").title()
-        # Special case for Emergence Inspector if needed, but generic is fine.
-        # Legacy used "EmergenceInspectorNode", we stick to clean UI "Emergence Inspector"
 
         label += f"<br/>({type_label})"
         if node.type == "human" and hasattr(node, "options") and node.options:

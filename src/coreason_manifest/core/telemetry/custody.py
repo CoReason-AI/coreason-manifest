@@ -2,7 +2,7 @@ import hashlib
 import json
 from typing import Any
 
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import Field, TypeAdapter
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.telemetry.telemetry_schemas import (
@@ -27,7 +27,7 @@ class EpistemicEnvelope(CoreasonModel):
 class MerkleHasher:
     """
     Computes a cryptographic Merkle hash of an EpistemicEnvelope.
-    SOTA constraints: uses purely canonical serialization and injects boundary locks
+    Strict constraints: uses purely canonical serialization and injects boundary locks
     to prevent collision attacks.
     """
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.presentation import RenderStrategy
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.constants import NodeCapability
@@ -159,7 +160,7 @@ def _enforce_red_button_rule(
                         break
                 patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
             elif isinstance(flow, GraphFlow):
-                # Ghost Guard Graph Injection Failure - Rewire edges
+                # Handle non-linear edge rewiring for dynamic security guard insertion.
 
                 # 1. Add Guard Node
                 patch_ops.append(
@@ -208,7 +209,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     _, edges = get_unified_topology(flow)
     adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
     for edge in edges:
-        # SOTA Fix 1: Defensive check for Draft Mode Fatality
+        # Hotfix 1: Prevent null reference exception during draft mode traversal.
         if edge.from_node in adj:
             adj[edge.from_node].append(edge.to_node)
 
@@ -736,10 +737,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # 6. Neuro-Symbolic Gatekeeping
     reports.extend(_check_neuro_symbolic_guard(flow))
 
-    # 7. Swarm-Evolution Cohesion (Epic 1 & 3 Binding)
+    # 7. Swarm-Evolution Cohesion (Ref: ADR-011: Swarm-Evolution Cohesion)
     reports.extend(_check_island_evolution_binding(flow))
 
-    # 8. Regulatory-Grade Meta-Analysis Cohesion (Epic 5)
+    # 8. Regulatory-Grade Meta-Analysis Cohesion (Ref: ADR-012: Regulatory-Grade Meta-Analysis Cohesion)
     reports.extend(_check_meta_analysis_export_contract(flow))
 
     # 9. Meta-Analysis Provenance Binding
@@ -748,10 +749,10 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # 10. PRISMA-S Ontological Guarding
     reports.extend(_check_prisma_s_ontological_guard(flow))
 
-    # 11. Federated Search PRESS Guard (Epic 6)
+    # 11. Federated Search PRESS Guard (Ref: ADR-014: Federated Search Guarding)
     reports.extend(_check_federated_search_press_guard(flow))
 
-    # 12. Epistemic Deduplication Guard (Epic 6)
+    # 12. Epistemic Deduplication Guard (Ref: ADR-014: Federated Search Guarding)
     reports.extend(_check_cal_deduplication_guard(flow))
 
     # 13. Zero-Trust GenUI Fencing
