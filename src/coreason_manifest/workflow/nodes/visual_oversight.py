@@ -14,6 +14,17 @@ class MultimodalConstraint(Constraint):
     source_text_reference: str = Field(..., description="The text claim the image must visually satisfy.")
 
 
+class SpatialValidationConfig(BaseModel):
+    """Configuration to enforce that bounding boxes map correctly to the extracted image patches."""
+
+    enforce_coordinate_bounds: bool = Field(
+        True, description="Ensure coordinates do not mathematically exceed source image dimensions."
+    )
+    allow_normalized_coordinates: bool = Field(
+        True, description="Support 0.0-1.0 relative coordinates instead of absolute pixels."
+    )
+
+
 class VisBenchRubricConfig(BaseModel):
     """Rubrics for VLM-as-a-Judge multimodal evaluation."""
 
@@ -40,4 +51,8 @@ class VisualInspectorNode(InspectorNodeBase):
 
     target_artifact_key: str = Field(
         ..., description="The state key where the rendering agent stored the image/SVG URL"
+    )
+
+    spatial_validation: SpatialValidationConfig | None = Field(
+        None, description="If set, mathematically validates bounding box provenance from upstream extractors."
     )
