@@ -30,6 +30,8 @@ def test_genui_multiplexer_emission() -> None:
             "props": {
                 "user_name": "Alice PII",
                 "email": "alice@example.com",
+                "variant": "danger",
+                "disabled": True,
             },
         }
     }
@@ -61,5 +63,8 @@ def test_genui_multiplexer_emission() -> None:
     props = ui_emission["layout"]["props"]
     assert props["user_name"] == "[REDACTED_PII]"
     assert props["email"] == "[REDACTED_PII]"
+    # Verify safe UI properties are preserved
+    assert props["variant"] == "danger"
+    assert props["disabled"] is True
     # Verify the structure remains intact
     assert ui_emission["layout"]["type"] == "widget"
