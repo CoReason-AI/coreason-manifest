@@ -14,7 +14,7 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.domains.epistemic import ClinicalProposition
+from coreason_manifest.core.compute.epistemic import ClinicalProposition
 from coreason_manifest.core.state.events import EpistemicAnchor, EpistemicEvent, EventType
 from coreason_manifest.core.state.ledger import EpistemicLedger
 from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
