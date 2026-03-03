@@ -696,6 +696,131 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
     return reports
 
 
+def _check_prisma_ledger_mandate(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 7 Cohesion: Document-dropping swarms MUST have a PRISMA Attrition Ledger."""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, SwarmNode) and (
+            getattr(node, "cal_config", None) is not None or
+            getattr(node, "reducer_function", None) == "epistemic_deduplication"
+        ):
+            has_ledger = False
+            if flow.definitions and getattr(node, "worker_profile", None) in flow.definitions.profiles:
+                profile = flow.definitions.profiles[node.worker_profile]
+                memory = getattr(profile, "memory", None)
+                if memory and getattr(memory, "prisma_ledger", None) is not None:
+                    has_ledger = True
+
+            if not has_ledger:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_PRISMA_LEDGER_MISSING_011",
+                        severity="violation",
+                        message=(
+                            f"SwarmNode '{node.id}' performs document exclusion (CAL or Deduplication) "
+                            "but its worker_profile lacks a 'prisma_ledger'. PRISMA compliance is broken."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="update_field",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Initialize a PRISMAAttritionLedger in the worker profile's MemorySubsystem.",
+                        ),
+                    )
+                )
+    return reports
+
+
+def _check_harmonization_vision_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 7 Cohesion: Harmonization Swarms MUST use Multimodal Vision RAG."""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, SwarmNode) and getattr(node, "reducer_function", None) == "protocol_harmonization":
+            is_vision = False
+            if flow.definitions and getattr(node, "worker_profile", None) in flow.definitions.profiles:
+                profile = flow.definitions.profiles[node.worker_profile]
+                reasoning = getattr(profile, "reasoning", None)
+                if getattr(reasoning, "type", "") == "visual_extraction":
+                    is_vision = True
+
+            if not is_vision:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_HARMONIZATION_REQUIRES_VISION_012",
+                        severity="violation",
+                        message=(
+                            f"SwarmNode '{node.id}' performs protocol_harmonization but its worker_profile "
+                            "does not use VisualExtractionReasoning. Text-chunking destroys trial table structures."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="update_field",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Change the worker_profile's reasoning to VisualExtractionReasoning.",
+                        ),
+                    )
+                )
+    return reports
+
+
+def _check_visual_extraction_inspector_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 7 Cohesion: Visual Extraction MUST be topologically verified by a Spatial Inspector."""
+    reports: list[ComplianceReport] = []
+    if not isinstance(flow, GraphFlow):
+        return reports
+
+    nodes, edges = get_unified_topology(flow)
+    node_map = {n.id: n for n in nodes}
+
+    outgoing_edges: dict[str, list[str]] = {n.id: [] for n in nodes}
+    for edge in edges:
+        outgoing_edges[edge.from_node].append(edge.to_node)
+
+    for node in nodes:
+        is_visual_extraction = False
+        if isinstance(node, (AgentNode, SwarmNode)):
+            profile_ref = getattr(node, "profile", None) or getattr(node, "worker_profile", None)
+            if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
+                reasoning = flow.definitions.profiles[profile_ref].reasoning
+                if getattr(reasoning, "type", "") == "visual_extraction":
+                    is_visual_extraction = True
+
+        if is_visual_extraction:
+            is_guarded = False
+            for next_node_id in outgoing_edges.get(node.id, []):
+                target = node_map.get(next_node_id)
+                # Avoid circular imports by checking type name or safely importing
+                if type(target).__name__ == "VisualInspectorNode" and getattr(target, "spatial_validation", None) is not None:
+                    is_guarded = True
+                    break
+
+            if not is_guarded:
+                reports.append(
+                    ComplianceReport(
+                        code="ERR_VISUAL_EXTRACTION_UNGUARDED_013",
+                        severity="violation",
+                        message=(
+                            f"Node '{node.id}' uses VisualExtractionReasoning but its output is not "
+                            "topologically guarded by a VisualInspectorNode with spatial_validation enabled."
+                        ),
+                        node_id=node.id,
+                        remediation=RemediationAction(
+                            type="add_inspector_guard",
+                            target_node_id=node.id,
+                            patch_data=[],
+                            description="Route this node's output to a VisualInspectorNode verifying bounding boxes.",
+                        ),
+                    )
+                )
+    return reports
+
+
 def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """
     Enforces security policies and capability contracts.
@@ -752,6 +877,11 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 13. Zero-Trust GenUI Fencing
     reports.extend(_check_genui_rbac(flow))
+
+    # Epic 7: SOTA Regulatory Extraction & Provenance Hooks
+    reports.extend(_check_prisma_ledger_mandate(flow))
+    reports.extend(_check_harmonization_vision_guard(flow))
+    reports.extend(_check_visual_extraction_inspector_guard(flow))
 
     return reports
 
