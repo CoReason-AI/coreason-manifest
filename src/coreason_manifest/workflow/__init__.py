@@ -7,11 +7,17 @@ from coreason_manifest.workflow.nodes import (
     AnyNode,
     AuditorNode,
     CognitiveProfile,
+    EmergenceInspectorNode,
     ExtractorNode,
     HumanNode,
     InspectorNode,
+    InspectorNodeBase,
+    Node,
+    PlaceholderNode,
     PlannerNode,
     SemanticNode,
+    SwarmNode,
+    SwitchNode,
 )
 
 __all__ = [
@@ -23,14 +29,33 @@ __all__ = [
     "BlackboardBrokerConfig",
     "CognitiveProfile",
     "Edge",
+    "EmergenceInspectorNode",
     "ExtractorNode",
     "Graph",
     "GraphFlow",
     "HumanNode",
     "InspectorNode",
+    "InspectorNodeBase",
     "LineageIntegrityError",
     "LinearFlow",
+    "Node",
+    "PlaceholderNode",
     "PlannerNode",
     "SemanticNode",
+    "SwarmNode",
+    "SwitchNode",
     "yield_to_suspense",
 ]
+
+# Late binding resolution for recursive types
+GraphFlow.model_rebuild()
+AgentNode.model_rebuild()
+HumanNode.model_rebuild()
+SwarmNode.model_rebuild()
+SwitchNode.model_rebuild()
+PlaceholderNode.model_rebuild()
+EmergenceInspectorNode.model_rebuild()
+PlannerNode.model_rebuild()
+InspectorNode.model_rebuild()
+InspectorNodeBase.model_rebuild()
+Node.model_rebuild()
