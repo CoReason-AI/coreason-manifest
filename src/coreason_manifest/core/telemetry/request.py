@@ -71,11 +71,6 @@ class AgentRequest(BaseModel):
             if not parent and not root:
                 data["root_request_id"] = req_id
 
-            # Case 2: Parent exists, but no root -> Error (handled by after validator or strictly here)
-            # The prompt says "Strictly assert...". We'll let the 'after' validator handle the error checks
-            # to be cleaner, or checking here.
-            # However, if parent is present, we cannot auto-guess the root. It MUST be provided.
-
         return data
 
     @model_validator(mode="after")

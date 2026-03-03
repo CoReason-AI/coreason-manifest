@@ -47,7 +47,6 @@ class ManifestErrorCode(StrEnum):
 
     # Security
     SEC_KILL_SWITCH_VIOLATION = "SEC-KILL-SWITCH-VIOLATION"
-    SEC_JAIL_002 = "SEC-JAIL-002"
     SEC_LINEAGE_001 = "SEC-LINEAGE-001"
 
     # Standard Authentication Errors (OAuth2/OIDC)
@@ -110,19 +109,3 @@ class ManifestError(Exception):
         )
 
 
-class SecurityJailViolationError(ManifestError):
-    """
-    Raised when a file operation attempts to escape the sandbox jail.
-    Legacy exception retained for compatibility with loader.py but upgraded to SOTA.
-    """
-
-    def __init__(self, message: str) -> None:
-        """Initialize the exception with a SemanticFault."""
-        super().__init__(
-            SemanticFault(
-                error_code=ManifestErrorCode.SEC_JAIL_002,
-                message=message,
-                severity=FaultSeverity.CRITICAL,
-                recovery_action=RecoveryAction.HALT,
-            )
-        )
