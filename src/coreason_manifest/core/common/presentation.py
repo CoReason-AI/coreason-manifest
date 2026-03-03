@@ -210,5 +210,10 @@ class PresentationHints(CoreasonModel):
         Field(description="Preferred metadata detail level."),
     ] = "basic"
 
+    mcp_ui_resource_uri: Annotated[
+        str | None,
+        Field(description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865)."),
+    ] = None
+
 
 UIComponentNode.model_rebuild()
