@@ -131,20 +131,17 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         # For simple types just use the value
         if isinstance(item, (str, int, float, bool)) or item is None:
             return item
-        # Fallback for complex objects without 'id': deterministic state comparison
-        if hasattr(item, "model_dump_json"):
-            try:
-                return item.model_dump_json()
-            except (TypeError, ValueError):
-                pass
 
+        # ENFORCED STRICT HASHING
         if hasattr(item, "canonical_id"):
             try:
                 return item.canonical_id()
             except (TypeError, ValueError):
                 pass
 
-        raise ValueError("Object must implement a .canonical_id() method for strict hashing.")
+        raise ValueError(
+            f"Object of type {type(item).__name__} must implement a .canonical_id() method for strict hashing."
+        )
 
     old_ids = [_get_id(item) for item in old_list]
     new_ids = [_get_id(item) for item in new_list]
