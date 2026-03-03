@@ -1,5 +1,5 @@
 from coreason_manifest.core.workflow.bidding import Bid, yield_to_suspense
-from coreason_manifest.core.workflow.blackboard import BlackboardBroker
+from coreason_manifest.core.workflow.blackboard import BlackboardBrokerConfig
 from coreason_manifest.core.workflow.exceptions import LineageIntegrityError
 from coreason_manifest.core.workflow.flow import Blackboard, Edge, Graph, GraphFlow, LinearFlow
 from coreason_manifest.core.workflow.nodes import (
@@ -20,7 +20,7 @@ __all__ = [
     "AuditorNode",
     "Bid",
     "Blackboard",
-    "BlackboardBroker",
+    "BlackboardBrokerConfig",
     "CognitiveProfile",
     "Edge",
     "ExtractorNode",

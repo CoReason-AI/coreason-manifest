@@ -93,7 +93,6 @@ class FlowMetadata(CoreasonModel):
 
 
 class DataSchema(CoreasonModel):
-    # Compatibility: Field is 'json_schema' to avoid shadowing BaseModel.schema
     id: str = Field(default_factory=lambda: str(uuid4()))
     json_schema: dict[str, Any] = Field(default_factory=dict)
 

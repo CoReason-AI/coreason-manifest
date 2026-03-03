@@ -172,10 +172,6 @@ class EscalationStrategy(ResilienceStrategy):
     @classmethod
     def validate_template_syntax(cls, v: str | None) -> str | None:
         """Return the template string unmodified."""
-        if v and "{{" not in v:
-            # Warning or Note: This looks like a static string, not a Jinja2 template.
-            # We won't block it (valid use case), but it's good to note mentally.
-            pass
         return v
 
 

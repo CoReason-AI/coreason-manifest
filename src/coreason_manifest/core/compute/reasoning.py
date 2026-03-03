@@ -160,13 +160,11 @@ class BaseReasoning(BaseModel):
     temperature: Annotated[float, Field(description="Sampling temperature.")] = 0.0
     max_tokens: Annotated[int | None, Field(description="Hard limit on output tokens.")] = None
 
-    # *** FIX 3: GUIDED DECODING ***
     # Enforces syntax constraints at the token level (SOTA reliability)
     guided_decoding: Annotated[
         GuidedDecodingMode, Field(description="If set, restricts the model to output valid syntax only.")
     ] = "none"
 
-    # *** UPGRADE: CONSTITUTIONAL AI ***
     constitution: Annotated[ConstitutionalScope | None, Field(description="Intrinsic safety constraints.")] = None
 
     review_strategy: ReviewStrategy = Field(default=ReviewStrategy.NONE)
@@ -241,7 +239,6 @@ class BufferReasoning(BaseReasoning):
     similarity_threshold: Annotated[float, Field(description="Min cosine similarity.")] = 0.75
     template_collection: Annotated[str, Field(description="Vector collection name.")]
 
-    # *** FIX 1: LEARNING STRATEGY ***
     # Allows the agent to contribute new knowledge back to the buffer
     learning_strategy: Annotated[
         BoTLearningStrategy, Field(description="Whether to save successful executions back to the buffer.")
@@ -326,7 +323,6 @@ class EnsembleReasoning(BaseReasoning):
     """
     Multi-Model Consensus with Cascading Verification.
     Executes parallel queries and uses a hybrid fast/slow path to verify agreement.
-    NOTE: disagreement_threshold < 0.6 is a strong signal of emergent instability.
     """
 
     type: Literal["ensemble"] = "ensemble"
@@ -346,11 +342,17 @@ class EnsembleReasoning(BaseReasoning):
     # Score < disagreement_threshold -> Auto-Reject as Different.
     # Between -> Ambiguous (Trigger Slow Path).
     agreement_threshold: Annotated[float, Field(description="High confidence match threshold.")] = 0.85
-    disagreement_threshold: Annotated[float, Field(description="Low confidence mismatch threshold.")] = 0.60
+    disagreement_threshold: Annotated[
+        float,
+        Field(
+            description="Low confidence mismatch threshold. Note: disagreement_threshold < 0.6 is a strong "
+            "signal of emergent instability."
+        ),
+    ] = 0.60
 
     # Slow Path Trigger
     # 'ambiguous_only': Trigger LLM check only if score is in the grey zone (0.60-0.85).
-    # 'always': Always double-check with LLM (Paranoid mode).
+    # 'always': Always double-check with LLM (Strict verification mode).
     # 'never': Trust the fast path implicitly (Fastest).
     verification_mode: Annotated[
         VerificationMode, Field(description="When to trigger the deep similarity_model check.")
@@ -426,7 +428,6 @@ class ComputerUseReasoning(BaseReasoning):
         tuple[int, int] | None, Field(description="Target display dimensions (width, height). If None, auto-detected.")
     ] = None
 
-    # *** FIX 2: COORDINATE SYSTEM ***
     # Critical for model portability across screen sizes
     coordinate_system: Annotated[CoordinateSystem, Field(description="Coordinate format (pixels vs relative).")] = (
         "normalized_0_1"

@@ -29,7 +29,6 @@ class AsyncSSEMultiplexer:
         """
         Push a stream packet into the buffer with a timeout to prevent deadlock.
         """
-        import contextlib
 
         if isinstance(packet, StreamUIEnvelope) and self.ui_observers:
             for observer in self.ui_observers:
@@ -39,10 +38,10 @@ class AsyncSSEMultiplexer:
                     logger.error(f"UI Observer {getattr(observer, '__name__', str(observer))} failed: {e}")
 
         queue = await self._get_queue()
-        with contextlib.suppress(TimeoutError):
-            # If the queue is full and timing out, we drop the packet to prevent
-            # stalling the LLM orchestrator. In a real system we might want to log this.
+        try:
             await asyncio.wait_for(queue.put(packet), timeout=1.0)
+        except TimeoutError:
+            logger.warning("Telemetry queue full. Dropped stream packet to prevent LLM stalling.")
 
     async def broadcast_envelope(self, envelope: EpistemicEnvelope) -> None:
         """
