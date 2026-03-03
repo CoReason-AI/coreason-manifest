@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, Any, ClassVar, Literal
 from uuid import uuid4
@@ -242,9 +242,6 @@ class ExecutionSnapshot(BaseModel):
 
     node_states: dict[str, NodeState]
     active_path: list[str]
-
-
-from datetime import UTC  # noqa: E402
 
 
 class SecurityViolationEvent(CoreasonModel):

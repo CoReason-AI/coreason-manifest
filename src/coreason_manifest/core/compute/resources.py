@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 from pydantic import Field
 
@@ -43,37 +43,25 @@ class ModelProfile(CoreasonModel):
     pricing: RateCard | None = Field(None, description="The rate card associated with the model's pricing.")
 
 
-class IntentRouter:
+@runtime_checkable
+class ComputeProvisionerClient(Protocol):
     """
-    Dynamically slices workloads into distinct SLA profiles based on intent.
-    Routes tasks to appropriate compute hardware tiers (Velocity A vs B).
+    RPC/HTTP client interface to execute real hardware provisioning requests
+    against the system orchestrator.
     """
 
-    def route(self, task_def: Any, intent: ComputeIntent) -> VelocityAConfig | VelocityBConfig:  # noqa: ARG002
+    async def provision(self, task_def: Any, intent: ComputeIntent) -> VelocityAConfig | VelocityBConfig:
         """
-        Evaluate task intent and generate the strict SLA configuration.
+        Executes real RPC/HTTP call to orchestrator to allocate Velocity tier.
         """
-        if intent == ComputeIntent.REALTIME_SYNC:
-            # Velocity A: User-facing, latency matters, bursting mode.
-            return VelocityAConfig(
-                max_latency_seconds=60,
-                allow_model_downgrade=True,
-                target_compute_tier="serverless_burst",
-            )
-        if intent == ComputeIntent.BATCH_BACKGROUND:
-            # Velocity B: Data-lake, throughput matters, preemptible node.
-            return VelocityBConfig(
-                max_retries=-1,
-                preemption_safe=True,
-                target_compute_tier="spot_fleet",
-            )
-        raise ValueError(f"Unknown compute intent: {intent}")
+        ...
 
 
-async def provision_compute(intent: ComputeIntent, task_def: Any = None) -> VelocityAConfig | VelocityBConfig:
+async def provision_compute(
+    client: ComputeProvisionerClient, intent: ComputeIntent, task_def: Any = None
+) -> VelocityAConfig | VelocityBConfig:
     """
-    Mock method to simulate requesting hardware from the orchestrator.
-    Evaluates routing and returns the provisioned velocity configuration profile.
+    Executes hardware allocation utilizing the provided injection client interface.
+    Returns the provisioned velocity configuration profile.
     """
-    router = IntentRouter()
-    return router.route(task_def, intent)
+    return await client.provision(task_def, intent)

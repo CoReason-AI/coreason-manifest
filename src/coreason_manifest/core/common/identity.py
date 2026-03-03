@@ -170,7 +170,7 @@ class SystemContext(CoreasonModel):
 
 class IdentityPassport(CoreasonModel):
     """
-    The Supreme Zero-Trust Context Envelope.
+    The primary Zero-Trust Context Envelope.
     Replaces legacy SessionContext. Travels alongside the W3C Trace Context.
     """
 

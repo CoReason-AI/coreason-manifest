@@ -136,7 +136,7 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         if hasattr(item, "model_dump_json"):
             try:
                 return item.model_dump_json()
-            except Exception:  # noqa: S110
+            except (TypeError, ValueError):
                 pass
 
         try:

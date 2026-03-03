@@ -47,15 +47,28 @@ class AgentRequest(BaseModel):
         None, description="The cryptographic Zero-Trust Identity Passport for this request."
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def inject_root_request_id(cls, data: Any) -> Any:
+        """Inject root_request_id if it is missing and there is no parent_request_id."""
+        if isinstance(data, dict):
+            # One copy for mutations
+            data = data.copy()
+            req_id = data.get("request_id")
+            if not req_id:
+                req_id = str(uuid4())
+                data["request_id"] = req_id
+
+            if data.get("parent_request_id") is None and data.get("root_request_id") is None:
+                data["root_request_id"] = req_id
+        return data
+
     @model_validator(mode="after")
     def validate_trace_integrity(self) -> "AgentRequest":
         """Enforce strict trace integrity and lineage validity.
 
         Raises:
             ManifestError: If lineage integrity is broken."""
-        if self.root_request_id is None and self.parent_request_id is None:
-            object.__setattr__(self, "root_request_id", self.request_id)
-
         errors = []
 
         # Rule 1: Orphaned trace check (Parent exists, but Root missing)

@@ -84,7 +84,7 @@ class TypeaheadConfig(CoreasonModel):
     @model_validator(mode="after")
     def validate_security_guards(self) -> "TypeaheadConfig":
         if self.debounce_ms < 100:
-            raise ValueError("debounce_ms must be strictly >= 100 to prevent DDoS.")
+            raise ValueError("debounce_ms must be >= 100 to prevent excessive API polling.")
         if self.min_chars_to_trigger < 1:
             raise ValueError("min_chars_to_trigger must be strictly >= 1.")
         return self
