@@ -24,6 +24,7 @@ class AsyncSSEMultiplexer:
         Push a stream packet into the buffer with a timeout to prevent deadlock.
         """
         import contextlib
+
         queue = await self._get_queue()
         with contextlib.suppress(TimeoutError):
             # If the queue is full and timing out, we drop the packet to prevent
