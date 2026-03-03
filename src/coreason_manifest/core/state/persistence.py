@@ -24,13 +24,18 @@ class JSONPatchOperation(CoreasonModel):
     path: Annotated[str, Field(description="A JSON Pointer path pointing to the target location.")]
     value: Annotated[Any | None, Field(default=None, description="The value to add, replace, or test.")]
 
-    @field_validator("path", mode="after")
+    @field_validator("path", "from_", mode="after")
     @classmethod
-    def validate_restricted_paths(cls, v: str) -> str:
+    def validate_restricted_paths(cls, v: str | None) -> str | None:
         """Reject paths that start with restricted namespaces."""
+        if v is None:
+            return v
         restricted_namespaces = ("/system", "/_internal", "/auth", "/governance")
-        if v.startswith(restricted_namespaces):
-            raise ValueError(f"Security Violation: Mutation of restricted namespace '{v}' is forbidden.")
+        for namespace in restricted_namespaces:
+            if v == namespace or v.startswith(f"{namespace}/"):
+                raise ValueError(
+                    f"Security Violation: Access or mutation of restricted namespace '{namespace}' is forbidden."
+                )
         return v
 
     from_: Annotated[
