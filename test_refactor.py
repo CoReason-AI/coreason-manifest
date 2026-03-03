@@ -1,11 +1,11 @@
 from typing import Any
 
-from coreason_manifest.core.state.persistence import JSONPatchOperation, PatchOp
 
 def _resolve_path(pointer: str) -> list[str]:
     if pointer in ("", "/"):
         raise ValueError("Cannot resolve parent of root")
     return [p.replace("~1", "/").replace("~0", "~") for p in pointer.split("/")[1:]]
+
 
 def _get_value(doc: Any, pointer: str) -> Any:
     if pointer in ("", "/"):
@@ -20,6 +20,7 @@ def _get_value(doc: Any, pointer: str) -> Any:
             current = getattr(current, part)
     return current
 
+
 def _has_key(doc: Any, pointer: str) -> bool:
     if pointer in ("", "/"):
         return True
@@ -28,11 +29,12 @@ def _has_key(doc: Any, pointer: str) -> bool:
     last = parts[-1]
     if isinstance(parent, dict):
         return last in parent
-    elif isinstance(parent, list):
+    if isinstance(parent, list):
         return int(last) < len(parent) and last != "-"
-    elif hasattr(parent, "model_copy"):
+    if hasattr(parent, "model_copy"):
         return hasattr(parent, last)
     return False
+
 
 def _cow_update(current: Any, parts: list[str], op: str, value: Any = None) -> Any:
     if not parts:
@@ -74,9 +76,7 @@ def _cow_update(current: Any, parts: list[str], op: str, value: Any = None) -> A
             elif isinstance(current, list):
                 new_current.pop(key)  # type: ignore[arg-type]
     else:
-        if isinstance(current, dict):
-            new_current[key] = _cow_update(new_current[key], parts[1:], op, value)  # type: ignore[index]
-        elif isinstance(current, list):
+        if isinstance(current, dict) or isinstance(current, list):
             new_current[key] = _cow_update(new_current[key], parts[1:], op, value)  # type: ignore[index]
         else:
             child_val = getattr(current, key)

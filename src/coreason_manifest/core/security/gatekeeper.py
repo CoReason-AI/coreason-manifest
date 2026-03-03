@@ -20,6 +20,7 @@ from coreason_manifest.core.workflow.topology import (
     get_strongly_connected_components,
     get_unified_topology,
 )
+from coreason_manifest.utils.logger import logger
 
 
 def canonicalize_domain(domain: str) -> str:
@@ -131,6 +132,7 @@ def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, An
                 if allowed:
                     continue
 
+                logger.warning("domain_blocked", tool_name=tool_obj.name, domain=domain)
                 reports.append(
                     ComplianceReport(
                         code=ErrorCatalog.ERR_SEC_DOMAIN_BLOCKED_002,
@@ -251,6 +253,7 @@ def _enforce_critical_capability_guards(
                     {"op": "add", "path": "/graph/edges/-", "value": {"from_node": human_node_id, "to_node": node.id}}
                 )
 
+            logger.info("critical_capability_guarded", node_id=node.id, reason=", ".join(violation_reason))
             reports.append(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_SEC_UNGUARDED_CRITICAL_003,
@@ -370,6 +373,9 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
         if dangerous_node_ids:
             # Severity violation if any dangerous nodes are present
+            logger.warning(
+                "utility_islands_detected", dangerous_nodes=list(dangerous_node_ids), safe_nodes=list(safe_node_ids)
+            )
             reports.append(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_TOPOLOGY_UNREACHABLE_RISK_003,
@@ -397,6 +403,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
             )
         elif safe_node_ids:
             # Just warning if only safe nodes
+            logger.warning("utility_islands_detected", dangerous_nodes=[], safe_nodes=list(safe_node_ids))
             reports.append(
                 ComplianceReport(
                     code=ErrorCatalog.ERR_TOPOLOGY_ORPHAN_001,
