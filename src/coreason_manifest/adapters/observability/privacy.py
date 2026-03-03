@@ -1,6 +1,5 @@
 from typing import Any
 
-
 SAFE_UI_PROPS = {"variant", "size", "disabled", "color", "isLoading", "className", "style", "id", "name", "type", "key"}
 
 
@@ -23,9 +22,7 @@ def scrub_genui_payload(payload: dict[str, Any]) -> dict[str, Any]:
     for key, value in payload.items():
         if key == "props" and isinstance(value, dict):
             # Scrub values inside props unless they are in SAFE_UI_PROPS
-            scrubbed[key] = {
-                k: v if k in SAFE_UI_PROPS else "[REDACTED_PII]" for k, v in value.items()
-            }
+            scrubbed[key] = {k: v if k in SAFE_UI_PROPS else "[REDACTED_PII]" for k, v in value.items()}
         elif isinstance(value, dict):
             # Recursively scrub nested dictionaries
             scrubbed[key] = scrub_genui_payload(value)

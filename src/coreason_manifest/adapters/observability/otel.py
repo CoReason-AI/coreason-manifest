@@ -1,4 +1,4 @@
-from typing import Protocol, Any
+from typing import Any, Protocol
 
 # Optional: if you have OpenTelemetry SDK imported, you can use those types.
 # We define a Protocol to safely type hint the span.
