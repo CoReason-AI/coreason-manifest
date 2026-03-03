@@ -1,6 +1,7 @@
 import asyncio
-import logging
 from collections.abc import AsyncGenerator, Awaitable, Callable
+
+from loguru import logger
 
 from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
 from coreason_manifest.core.telemetry.stream import (
@@ -10,7 +11,7 @@ from coreason_manifest.core.telemetry.stream import (
     StreamUIEnvelope,
 )
 
-logger = logging.getLogger(__name__)
+logger.disable("coreason_manifest")
 
 
 class AsyncSSEMultiplexer:
@@ -40,13 +41,15 @@ class AsyncSSEMultiplexer:
                 try:
                     await observer(packet)
                 except Exception as e:
-                    logger.error(f"UI Observer {getattr(observer, '__name__', str(observer))} failed: {e}")
+                    logger.error(
+                        "ui_observer_failed", observer=getattr(observer, "__name__", str(observer)), error=str(e)
+                    )
 
         queue = await self._get_queue()
         try:
             await asyncio.wait_for(queue.put(packet), timeout=1.0)
         except TimeoutError:
-            logger.warning("Telemetry queue full. Dropped stream packet to prevent LLM stalling.")
+            logger.warning("telemetry_queue_full", action="dropped_stream_packet", reason="prevent_llm_stalling")
 
     async def broadcast_envelope(self, envelope: EpistemicEnvelope) -> None:
         """
@@ -70,7 +73,21 @@ class AsyncSSEMultiplexer:
         before a spot-instance shutdown.
         """
         if self._background_tasks:
-            await asyncio.gather(*self._background_tasks, return_exceptions=True)
+            results = await asyncio.gather(*self._background_tasks, return_exceptions=True)
+            exceptions = [r for r in results if isinstance(r, Exception)]
+
+            if exceptions:
+                eg = ExceptionGroup("Telemetry flush failures", exceptions)
+                try:
+                    raise eg
+                except* asyncio.CancelledError:
+                    pass
+                except* (TimeoutError, ConnectionError) as eg_network:
+                    for e_net in eg_network.exceptions:
+                        logger.error("flush_network_error", error=str(e_net))
+                except* Exception as eg_generic:
+                    for e_gen in eg_generic.exceptions:
+                        logger.error("flush_generic_error", error=str(e_gen))
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
         """
