@@ -76,7 +76,7 @@ class SessionContext(CoreasonModel):
 
 class ResourceCaveat(CoreasonModel):
     """
-    SOTA UCAN/Macaroon-style capability attenuation.
+    Standard UCAN/Macaroon-style capability attenuation.
     Defines strict boundaries on a delegated resource.
     """
 
@@ -117,7 +117,7 @@ class DelegationContract(CoreasonModel):
         ),
     )
 
-    # SOTA Temporal Bounding
+    # Time-bounded validation
     issued_at: float = Field(..., description="Unix epoch timestamp of delegation issuance.")
     expires_at: float = Field(..., description="Unix epoch timestamp of delegation expiry.")
 

@@ -15,7 +15,7 @@ These schemas enforce Ontological Reification, Absolute Provenance,
 and Statistical Grounding before any AI data is allowed into the system memory.
 """
 
-from pydantic import Field, model_validator
+from pydantic import Field, ValidationInfo, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.validation import EpistemicValidator
@@ -76,9 +76,6 @@ class SemanticMilestone(CoreasonModel):
     entities: list[str] = Field(default_factory=list, description="Entities identified by the NLP swarm.")
 
 
-VALID_ONTOLOGY_MOCKS = {"OMOP:12345", "SNOMED:67890", "RXNORM:1191"}
-
-
 class ReifiedEntity(CoreasonModel):
     """
     Ontological Reification mapping.
@@ -90,9 +87,13 @@ class ReifiedEntity(CoreasonModel):
     global_id: str = Field(..., description="The global ontology identifier (e.g., OMOP Concept ID).")
 
     @model_validator(mode="after")
-    def validate_ontology(self) -> "ReifiedEntity":
-        """Enforce that the global_id is in the valid mock set."""
-        if self.global_id not in VALID_ONTOLOGY_MOCKS:
+    def validate_ontology(self, info: ValidationInfo) -> "ReifiedEntity":
+        """Enforce that the global_id is valid using an injected registry or callable."""
+        if info.context is None or "ontology_validator" not in info.context:
+            raise ValueError("SecurityException: 'ontology_validator' dependency missing from validation context.")
+
+        validator = info.context["ontology_validator"]
+        if not validator(self.global_id):
             raise ValueError(f"Ontology Error: '{self.global_id}' is not a valid global_id.")
         return self
 

@@ -55,8 +55,9 @@ class AsyncSSEMultiplexer:
         """
 
         async def _push_task() -> None:
+            import time
             queue = await self._get_queue()
-            await queue.put(StreamEpistemicEnvelope(op="epistemic", p=envelope))
+            await queue.put(StreamEpistemicEnvelope(op="epistemic", p=envelope, timestamp=time.time()))
 
         task = asyncio.create_task(_push_task())
         self._background_tasks.add(task)

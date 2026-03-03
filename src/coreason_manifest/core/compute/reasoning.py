@@ -160,7 +160,7 @@ class BaseReasoning(BaseModel):
     temperature: Annotated[float, Field(description="Sampling temperature.")] = 0.0
     max_tokens: Annotated[int | None, Field(description="Hard limit on output tokens.")] = None
 
-    # Enforces syntax constraints at the token level (SOTA reliability)
+    # Enforces syntax constraints at the token level (high reliability)
     guided_decoding: Annotated[
         GuidedDecodingMode, Field(description="If set, restricts the model to output valid syntax only.")
     ] = "none"
@@ -394,7 +394,7 @@ class RedTeamingReasoning(BaseReasoning):
     # The victim agent (Blue Team). If None, the agent attacks itself (Self-Correction).
     target_model: Annotated[ModelRef | None, Field(description="The target model under evaluation.")] = None
 
-    # SOTA Attack Vectors (2025/2026)
+    # Modern Attack Vectors
     # crescendo: Multi-turn context escalation.
     # refusal_suppression: Rhetorical constraints to prevent standard refusals.
     # payload_splitting: Breaking malicious payloads across tokens.
@@ -492,7 +492,7 @@ class GraphReasoning(BaseReasoning):
         ModelRef | None, Field(description="Model used to translate user prompt into graph queries.")
     ] = None
 
-    # 3. SOTA Retrieval Strategies
+    # 3. Graph Retrieval Strategies
     # local: "Entity-Centric". Good for "Who is X?" or "How are X and Y related?"
     # global: "Corpus-Centric". Good for "What are the themes?" (uses pre-computed community summaries).
     # hybrid: The best of both worlds.

@@ -88,11 +88,16 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         # For simple types just use the value
         if isinstance(item, (str, int, float, bool)) or item is None:
             return item
-        # Fallback for complex objects without 'id', hash their string representation
-        # It's not perfect but works for simple diffing
+        # Fallback for complex objects without 'id': deterministic state comparison
+        if hasattr(item, "model_dump_json"):
+            try:
+                return item.model_dump_json()
+            except Exception:
+                pass
+
         try:
-            return hash(item)
-        except TypeError:
+            return json.dumps(item, sort_keys=True)
+        except (TypeError, ValueError):
             return str(item)
 
     old_ids = [_get_id(item) for item in old_list]

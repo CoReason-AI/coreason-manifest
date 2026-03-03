@@ -202,7 +202,7 @@ class SystemRole(StrEnum):
 
 class DataClassification(StrEnum):
     """
-    SOTA 2026: Standardized Information Flow Control (IFC) clearance levels.
+    Standardized Information Flow Control (IFC) clearance levels.
     """
 
     PUBLIC = "public"
