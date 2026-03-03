@@ -6,11 +6,16 @@ Epistemic Ledger, our strict Neuro-Symbolic Data Contracts, and dynamic prompts.
 """
 
 from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any, Literal
 from uuid import uuid4
 
 from mcp.server.fastmcp import FastMCP
+from pydantic import Field, model_validator
 
-from coreason_manifest.core.domains.epistemic import ClinicalProposition
+from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.compute.epistemic import ClinicalProposition
+from coreason_manifest.core.scivis.scivis_provenance import ActorIdentity
 from coreason_manifest.core.state.events import EpistemicAnchor, EpistemicEvent, EventType
 from coreason_manifest.core.state.ledger import EpistemicLedger
 from coreason_manifest.core.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
@@ -90,13 +95,6 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         )
 
     return mcp
-from enum import StrEnum
-from typing import Any, Literal
-
-from pydantic import Field, model_validator
-
-from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.spec.domains.scivis_provenance import ActorIdentity
 
 
 class MCPToolName(StrEnum):

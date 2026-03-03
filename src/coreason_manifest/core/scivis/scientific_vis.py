@@ -15,7 +15,7 @@ from pydantic import Field, model_validator
 from pydantic_core import PydanticCustomError
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.spec.domains.scivis_templates import ComponentTemplate
+from coreason_manifest.core.scivis.scivis_templates import ComponentTemplate
 
 
 class VisInformationType(StrEnum):
