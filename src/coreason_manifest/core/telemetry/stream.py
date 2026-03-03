@@ -1,14 +1,15 @@
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.presentation import AdaptiveUIContract
 from coreason_manifest.core.state.persistence import JSONPatchOperation
 from coreason_manifest.core.telemetry.stream_base import BaseEnvelope
 from coreason_manifest.core.telemetry.suspense_envelope import StreamSuspenseEnvelope
 
 
-class StreamError(BaseModel):
+class StreamError(CoreasonModel):
     """
     Strict error packet for stream multiplexing.
     """
@@ -69,7 +70,7 @@ StreamPacket = Annotated[
 ]
 
 
-class PacketContainer(BaseModel):
+class PacketContainer(CoreasonModel):
     """
     Container to facilitate validation and transport of StreamPackets.
     """

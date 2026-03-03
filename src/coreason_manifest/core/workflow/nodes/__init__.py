@@ -5,6 +5,7 @@ from pydantic import Field
 
 from .agent import AgentNode, CognitiveProfile
 from .base import Constraint, ConstraintOperator, LockConfig, Node
+from .etl import AuditorNode, BaseNode, ExtractorNode, SemanticNode
 from .human import HumanNode, SteeringConfig
 from .oversight import EmergenceInspectorNode, InspectorNode, InspectorNodeBase
 from .planner import PlannerNode
@@ -29,10 +30,13 @@ AnyNode = Annotated[
 __all__ = [
     "AgentNode",
     "AnyNode",
+    "AuditorNode",
+    "BaseNode",
     "CognitiveProfile",
     "Constraint",
     "ConstraintOperator",
     "EmergenceInspectorNode",
+    "ExtractorNode",
     "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
@@ -41,6 +45,7 @@ __all__ = [
     "Node",
     "PlaceholderNode",
     "PlannerNode",
+    "SemanticNode",
     "SteeringConfig",
     "SwarmNode",
     "SwitchNode",

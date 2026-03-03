@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from coreason_manifest.core.common.presentation import RenderStrategy
 from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.security.compliance import (
@@ -608,6 +609,44 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
     return reports
 
 
+def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+    """Epic 5 Cohesion: Zero-Trust GenUI Fencing"""
+    reports: list[ComplianceReport] = []
+    nodes, _ = get_unified_topology(flow)
+
+    for node in nodes:
+        if isinstance(node, AgentNode):
+            presentation = getattr(node, "presentation", None)
+            if presentation and getattr(presentation, "render_strategy", None) == RenderStrategy.GEN_UI:
+                profile_ref = getattr(node, "profile", None)
+
+                # Try to get ui_capabilities from the profile
+                ui_capabilities = None
+                if isinstance(profile_ref, str) and flow.definitions and profile_ref in flow.definitions.profiles:
+                    profile = flow.definitions.profiles[profile_ref]
+                    ui_capabilities = getattr(profile, "ui_capabilities", None)
+                elif hasattr(profile_ref, "ui_capabilities"):
+                    ui_capabilities = getattr(profile_ref, "ui_capabilities", None)
+
+                if not ui_capabilities:
+                    reports.append(
+                        ComplianceReport(
+                            code="ERR_SEC_GENUI_UNAUTHORIZED_011",
+                            severity="violation",
+                            message="Agent is assigned to render GenUI but lacks explicit ui_capabilities.",
+                            node_id=node.id,
+                            remediation=RemediationAction(
+                                type="update_field",
+                                target_node_id=node.id,
+                                patch_data=[],
+                                description="Populate the AgentProfile's ui_capabilities list.",
+                            ),
+                        )
+                    )
+
+    return reports
+
+
 def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     """Epic 6 Cohesion: Conformal Active Learning MUST be preceded by Epistemic Deduplication."""
     reports: list[ComplianceReport] = []
@@ -710,6 +749,9 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
 
     # 12. Epistemic Deduplication Guard (Epic 6)
     reports.extend(_check_cal_deduplication_guard(flow))
+
+    # 13. Zero-Trust GenUI Fencing
+    reports.extend(_check_genui_rbac(flow))
 
     return reports
 

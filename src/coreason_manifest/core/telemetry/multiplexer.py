@@ -1,7 +1,11 @@
 import asyncio
-from collections.abc import AsyncGenerator
+import logging
+from collections.abc import AsyncGenerator, Awaitable, Callable
 
-from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket
+from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
+from coreason_manifest.core.telemetry.stream import StreamCloseEnvelope, StreamPacket, StreamUIEnvelope
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncSSEMultiplexer:
@@ -10,9 +14,11 @@ class AsyncSSEMultiplexer:
     and multiplex stream packets into Server-Sent Events (SSE).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, ui_observers: list[Callable[[StreamPacket], Awaitable[None]]] | None = None) -> None:
         """Initialize the multiplexer with a queue."""
         self._queue: asyncio.Queue[StreamPacket] | None = None
+        self._background_tasks: set[asyncio.Task[None]] = set()
+        self.ui_observers = ui_observers
 
     async def _get_queue(self) -> asyncio.Queue[StreamPacket]:
         if self._queue is None:
@@ -21,10 +27,46 @@ class AsyncSSEMultiplexer:
 
     async def push(self, packet: StreamPacket) -> None:
         """
-        Push a stream packet into the buffer.
+        Push a stream packet into the buffer with a timeout to prevent deadlock.
         """
+        import contextlib
+
+        if isinstance(packet, StreamUIEnvelope) and self.ui_observers:
+            for observer in self.ui_observers:
+                try:
+                    await observer(packet)
+                except Exception as e:
+                    logger.error(f"UI Observer {getattr(observer, '__name__', str(observer))} failed: {e}")
+
         queue = await self._get_queue()
-        await queue.put(packet)
+        with contextlib.suppress(TimeoutError):
+            # If the queue is full and timing out, we drop the packet to prevent
+            # stalling the LLM orchestrator. In a real system we might want to log this.
+            await asyncio.wait_for(queue.put(packet), timeout=1.0)
+
+    async def broadcast_envelope(self, envelope: EpistemicEnvelope) -> None:
+        """
+        Broadcasts an EpistemicEnvelope asynchronously without blocking the GPU.
+        The packet is pushed to the buffer via a background task.
+        """
+
+        async def _push_task() -> None:
+            # Note: We assume the queue consumer can handle raw EpistemicEnvelopes.
+            # We push the envelope itself, ignoring the strict StreamPacket type.
+            queue = await self._get_queue()
+            await queue.put(envelope)  # type: ignore[arg-type]
+
+        task = asyncio.create_task(_push_task())
+        self._background_tasks.add(task)
+        task.add_done_callback(self._background_tasks.discard)
+
+    async def flush(self) -> None:
+        """
+        Awaits all background tasks to explicitly clear telemetry
+        before a spot-instance shutdown.
+        """
+        if self._background_tasks:
+            await asyncio.gather(*self._background_tasks, return_exceptions=True)
 
     async def stream_sse(self) -> AsyncGenerator[str, None]:
         """
@@ -36,8 +78,10 @@ class AsyncSSEMultiplexer:
             packet = await queue.get()
 
             try:
-                # Use model_dump_json directly, formatting as SSE
-                yield f"data: {packet.model_dump_json()}\n\n"
+                # Format as SSE, ensuring multi-line JSON has `data: ` prefix on every line.
+                json_str = packet.model_dump_json()
+                formatted_data = "\n".join(f"data: {line}" for line in json_str.split("\n"))
+                yield f"{formatted_data}\n\n"
             finally:
                 queue.task_done()
 

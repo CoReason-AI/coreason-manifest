@@ -11,6 +11,7 @@ from coreason_manifest.core.presentation.transform import DataTransformSchema
 from coreason_manifest.core.presentation.typeahead import TypeaheadConfig
 from coreason_manifest.core.state.ephemeral import LocalStateManifest
 
+from .ambient import AmbientListenerConfig
 from .client_actions import ClientActionMap
 from .suspense import SuspenseConfig
 from .validation import UIValidationSchema
@@ -82,16 +83,7 @@ class UIComponentNode(CoreasonModel):
 
 
 class AdaptiveUIContract(CoreasonModel):
-    layout: list[UIComponentNode] = Field(default_factory=list, description="The root elements of the generated UI.")
-    widget_id: str | None = Field(
-        None, description="[DEPRECATED] The abstract identifier for the frontend component registry."
-    )
-    props_schema: dict[str, Any] | None = Field(
-        None, description="[DEPRECATED] JSON Schema defining the data required to render the widget."
-    )
-    props_mapping: dict[str, str] = Field(
-        default_factory=dict, description="[DEPRECATED] Maps Blackboard variables (values) to widget props (keys)."
-    )
+    layout: list[UIComponentNode] = Field(..., description="The root elements of the generated UI.")
     events: list[UIEventMap] = Field(
         default_factory=list, description="Maps widget interactions to orchestrator commands."
     )
@@ -105,21 +97,9 @@ class AdaptiveUIContract(CoreasonModel):
     hybrid_search: HybridSearchLayout | None = Field(
         default=None, description="Bipartite search layout for side-by-side Lexical/Semantic results."
     )
-
-    @model_validator(mode="before")
-    @classmethod
-    def migrate_legacy_widget(cls, data: Any) -> Any:
-        """Migrate legacy widget dictionary structure to layout nodes."""
-        if isinstance(data, dict):
-            layout = data.get("layout")
-            widget_id = data.get("widget_id")
-
-            # If layout is empty/missing but widget_id is provided, auto-migrate to the new structure
-            if not layout and widget_id:
-                props = data.get("props_mapping", {})
-                node = {"type": widget_id, "props": props, "children": []}
-                data["layout"] = [node]
-        return data
+    ambient_listeners: list[AmbientListenerConfig] | None = Field(
+        default=None, description="Silent background observers that trigger out-of-band AI workflows based on user interactions."
+    )
 
 
 class NotificationRouting(CoreasonModel):
@@ -210,5 +190,11 @@ class PresentationHints(CoreasonModel):
         Field(description="Preferred metadata detail level."),
     ] = "basic"
 
+    mcp_ui_resource_uri: Annotated[
+        str | None,
+        Field(description="The ui:// scheme URI pointing to the bundled HTML/JS for sandboxed execution (SEP-1865)."),
+    ] = None
+
 
 UIComponentNode.model_rebuild()
+AdaptiveUIContract.model_rebuild()

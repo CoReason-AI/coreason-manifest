@@ -106,3 +106,26 @@ class UIValidationSchema(CoreasonModel):
                     raise ValueError(f"Duplicate rule type found: {rule.rule_type}. Only one allowed per schema.")
                 rule_types_seen.add(rule.rule_type)
         return self
+
+
+class EpistemicValidator:
+    """Validator for enforcing epistemic and ontological constraints."""
+
+    @staticmethod
+    def validate_statistical_grounding(
+        intent_label: str, p_value: float | None, has_p_value: bool, has_confidence_interval: bool
+    ) -> bool:
+        """
+        Enforce statistical grounding.
+
+        If a claim's intent implies proven efficacy, the claim must include a statistical marker
+        (like p_value or confidence_interval) and must satisfy a mathematical threshold (p <= 0.05).
+        """
+        if intent_label == "proven_efficacy":
+            if not has_p_value and not has_confidence_interval:
+                return False
+
+            if p_value is not None and p_value > 0.05:
+                raise ValueError("Epistemic Failure: Claim is not statistically significant (p > 0.05).")
+
+        return True
