@@ -6,7 +6,6 @@ Epistemic Ledger, our strict Neuro-Symbolic Data Contracts, and dynamic prompts.
 """
 
 from datetime import UTC, datetime
-from typing import Any
 from uuid import uuid4
 
 from mcp.server.fastmcp import FastMCP

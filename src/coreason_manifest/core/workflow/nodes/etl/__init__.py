@@ -7,6 +7,8 @@ from coreason_manifest.core.state.events import EpistemicEvent
 from coreason_manifest.core.workflow.bidding import Bid
 from coreason_manifest.core.workflow.exceptions import HardwarePreemptionInterrupt, LatencySLAExceededError
 
+logger = logging.getLogger(__name__)
+
 
 class BaseNode(ABC):
     """
@@ -44,7 +46,7 @@ class ExtractorNode(BaseNode):
             try:
                 await asyncio.sleep(0.1)
             except LatencySLAExceededError:
-                logging.warning("Latency SLA exceeded, graceful degradation triggered.")
+                logger.warning("Latency SLA exceeded, graceful degradation triggered.")
             except HardwarePreemptionInterrupt:
                 self.queue.task_done()
                 break
@@ -69,7 +71,7 @@ class SemanticNode(BaseNode):
             try:
                 await asyncio.sleep(0.1)
             except LatencySLAExceededError:
-                logging.warning("Latency SLA exceeded, graceful degradation triggered.")
+                logger.warning("Latency SLA exceeded, graceful degradation triggered.")
             except HardwarePreemptionInterrupt:
                 self.queue.task_done()
                 break
@@ -92,7 +94,7 @@ class AuditorNode(BaseNode):
             try:
                 await asyncio.sleep(0.1)
             except LatencySLAExceededError:
-                logging.warning("Latency SLA exceeded, graceful degradation triggered.")
+                logger.warning("Latency SLA exceeded, graceful degradation triggered.")
             except HardwarePreemptionInterrupt:
                 self.queue.task_done()
                 break
