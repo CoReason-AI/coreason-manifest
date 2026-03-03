@@ -100,8 +100,14 @@ class NodeExecution(CoreasonModel):
     signature: CryptographicSignature | None = Field(
         default=None, description="Optional cryptographic signature of the event."
     )
+    hardware_fingerprint: HardwareFingerprint | None = Field(
+        default=None, description="Compute details for Epistemic trace."
+    )
+    agent_signature: AgentSignature | None = Field(
+        default=None, description="Agent parameters for generation origin."
+    )
 
-    _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature"}
+    _hash_exclude_: ClassVar[set[str]] = {"execution_hash", "signature", "hardware_fingerprint", "agent_signature"}
 
     @model_validator(mode="before")
     @classmethod

@@ -43,6 +43,14 @@ class AsyncSSEMultiplexer:
         self._background_tasks.add(task)
         task.add_done_callback(self._background_tasks.discard)
 
+    async def flush(self) -> None:
+        """
+        Explicitly await all background telemetry tasks to ensure SOTA dual-velocity
+        pipelines don't drop Chain of Custody during node preemption.
+        """
+        if self._background_tasks:
+            await asyncio.gather(*self._background_tasks, return_exceptions=True)
+
     async def stream_sse(self) -> AsyncGenerator[str, None]:
         """
         Consume the queue and yield strings formatted as SSE.

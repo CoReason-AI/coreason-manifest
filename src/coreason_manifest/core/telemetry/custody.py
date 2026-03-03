@@ -41,11 +41,16 @@ class MerkleHasher:
         # Serialize components deterministically
         sig_dict = agent_signature.model_dump(mode="json")
 
-        # Simple serialization for payload
-        try:
-            payload_str = json.dumps(payload, sort_keys=True)
-        except (TypeError, ValueError):
-            payload_str = str(payload)
+        # Strict canonical serialization for payload
+        if isinstance(payload, BaseModel):
+            payload_str = payload.model_dump_json()
+        elif isinstance(payload, dict | list | str | int | float | bool | type(None)):
+            try:
+                payload_str = json.dumps(payload, sort_keys=True)
+            except (TypeError, ValueError) as e:
+                raise ValueError(f"Payload contains non-deterministic types: {e}") from e
+        else:
+            raise ValueError("Payload must be a Pydantic model or strictly JSON serializable primitive.")
 
         hasher = hashlib.sha256()
         hasher.update(json.dumps(sig_dict, sort_keys=True).encode("utf-8"))
