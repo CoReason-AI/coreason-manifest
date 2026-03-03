@@ -1,7 +1,7 @@
 # Core specification package
 from __future__ import annotations
 
-from coreason_manifest.core.compute.reasoning import (
+from coreason_manifest.compute.reasoning import (
     AttentionReasoning,
     BaseReasoning,
     BufferReasoning,
@@ -20,13 +20,14 @@ from coreason_manifest.core.compute.reasoning import (
     TreeSearchReasoning,
     WasmExecutionReasoning,
 )
-from coreason_manifest.core.oversight.governance import (
+from coreason_manifest.core.primitives.types import WasmMiddlewareDef
+from coreason_manifest.oversight.governance import (
     Audit,
     CircuitBreaker,
     Governance,
     Safety,
 )
-from coreason_manifest.core.oversight.resilience import (
+from coreason_manifest.oversight.resilience import (
     ErrorDomain,
     ErrorHandler,
     EscalationStrategy,
@@ -36,11 +37,10 @@ from coreason_manifest.core.oversight.resilience import (
     RetryStrategy,
     SupervisionPolicy,
 )
-from coreason_manifest.core.primitives.types import WasmMiddlewareDef
-from coreason_manifest.core.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
-from coreason_manifest.core.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
-from coreason_manifest.core.workflow.evals import EvalsManifest, FuzzingTarget
-from coreason_manifest.core.workflow.flow import (
+from coreason_manifest.state.persistence import Checkpoint, JSONPatchOperation, PersistenceConfig, StateCheckpoint
+from coreason_manifest.state.tools import MCPPrompt, MCPResourceTemplate, MCPTool, ToolPack
+from coreason_manifest.workflow.evals import EvalsManifest, FuzzingTarget
+from coreason_manifest.workflow.flow import (
     Blackboard,
     Edge,
     FlowDefinitions,
@@ -51,7 +51,7 @@ from coreason_manifest.core.workflow.flow import (
     LinearFlow,
     VariableDef,
 )
-from coreason_manifest.core.workflow.nodes import (
+from coreason_manifest.workflow.nodes import (
     AgentNode,
     CognitiveProfile,
     EmergenceInspectorNode,

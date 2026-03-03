@@ -3,25 +3,25 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
+from coreason_manifest.compute.reasoning import CouncilReasoning, EvolutionaryReasoning
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.core.common.presentation import RenderStrategy
-from coreason_manifest.core.compute.reasoning import CouncilReasoning, EvolutionaryReasoning
-from coreason_manifest.core.oversight.resilience import EscalationStrategy
 from coreason_manifest.core.primitives.constants import NodeCapability
 from coreason_manifest.core.security.compliance import (
     ComplianceReport,
     ErrorCatalog,
     RemediationAction,
 )
-from coreason_manifest.core.workflow.flow import GraphFlow, LinearFlow
-from coreason_manifest.core.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
-from coreason_manifest.core.workflow.topology import (
+from coreason_manifest.oversight.resilience import EscalationStrategy
+from coreason_manifest.utils.logger import logger
+from coreason_manifest.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
+from coreason_manifest.workflow.topology import (
     get_reachable_nodes,
     get_strongly_connected_components,
     get_unified_topology,
 )
-from coreason_manifest.core.workflow.utils import extract_fallbacks
-from coreason_manifest.utils.logger import logger
+from coreason_manifest.workflow.utils import extract_fallbacks
 
 
 def canonicalize_domain(domain: str) -> str:
@@ -46,7 +46,7 @@ def canonicalize_domain(domain: str) -> str:
 
 
 if TYPE_CHECKING:
-    from coreason_manifest.core.state.tools import AnyTool
+    from coreason_manifest.state.tools import AnyTool
 
 
 def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
@@ -208,7 +208,7 @@ def _enforce_critical_capability_guards(
             violation_reason.append(f"critical tools {critical_tools}")
 
         if needs_guard and not _is_guarded(node, flow):
-            from coreason_manifest.core.workflow.nodes.human import CollaborationMode
+            from coreason_manifest.workflow.nodes.human import CollaborationMode
 
             human_node_id = f"guard_{node.id}"
             human_node = HumanNode(
@@ -472,7 +472,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
             is_guarded = False
             for next_node_id in outgoing_edges[node.id]:
                 target = node_map.get(next_node_id)
-                from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+                from coreason_manifest.workflow.nodes.oversight import InspectorNode
 
                 if isinstance(target, InspectorNode) and target.mode == "symbolic_execution":
                     is_guarded = True
@@ -703,7 +703,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
             is_guarded = False
             for next_node_id in outgoing_edges[node.id]:
                 target = node_map.get(next_node_id)
-                from coreason_manifest.core.workflow.nodes.oversight import InspectorNode
+                from coreason_manifest.workflow.nodes.oversight import InspectorNode
 
                 if (
                     isinstance(target, InspectorNode)
