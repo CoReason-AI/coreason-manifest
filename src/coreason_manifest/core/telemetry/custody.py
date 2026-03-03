@@ -2,7 +2,7 @@ import hashlib
 import json
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, TypeAdapter
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.telemetry.telemetry_schemas import (
@@ -48,12 +48,8 @@ class MerkleHasher:
                     envelope.payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True
                 ).encode("utf-8")
             else:
-                # Use standard Pydantic JSON dump if possible via a dummy BaseModel
-                class PayloadWrapper(BaseModel):
-                    data: Any
-
-                wrapper = PayloadWrapper(data=envelope.payload)
-                payload_bytes = wrapper.model_dump_json().encode("utf-8")
+                # Use standard Pydantic JSON dump
+                payload_bytes = TypeAdapter(Any).dump_json(envelope.payload)
         except Exception as e:
             raise ValueError(f"Strict serialization failure. Cannot hash payload: {e}") from e
 

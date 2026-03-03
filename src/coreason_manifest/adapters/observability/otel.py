@@ -1,19 +1,11 @@
-from typing import Any, Protocol
-
-# Optional: if you have OpenTelemetry SDK imported, you can use those types.
-# We define a Protocol to safely type hint the span.
-
-
-class SpanProtocol(Protocol):
-    def add_event(self, name: str, attributes: dict[str, Any] | None = None, timestamp: int | None = None) -> None: ...
-    def set_attribute(self, key: str, value: Any) -> None: ...
+from opentelemetry.trace import Span
 
 
 class ObservabilityTelemetry:
     """Wrapper for OpenTelemetry to add Agentic UX semantic conventions."""
 
     @staticmethod
-    def record_genui_milestone(span: SpanProtocol | None, event_type: str, timestamp: float) -> None:
+    def record_genui_milestone(span: Span | None, event_type: str, timestamp: float) -> None:
         """
         Logs a GenUI milestone, specifically designed to log "Time to First Component" (TTFC).
 
@@ -31,11 +23,8 @@ class ObservabilityTelemetry:
         }
 
         # Add semantic convention events to the span
-        if hasattr(span, "add_event"):
-            span.add_event(
-                name=f"genui.milestone.{event_type}",
-                attributes=attributes,
-                timestamp=int(timestamp * 1e9),  # OpenTelemetry expects nanoseconds
-            )
-        elif hasattr(span, "set_attribute"):
-            span.set_attribute(f"genui.milestone.{event_type}", timestamp)
+        span.add_event(
+            name=f"genui.milestone.{event_type}",
+            attributes=attributes,
+            timestamp=int(timestamp * 1e9),  # OpenTelemetry expects nanoseconds
+        )

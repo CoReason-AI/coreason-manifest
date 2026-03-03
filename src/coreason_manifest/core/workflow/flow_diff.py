@@ -91,8 +91,8 @@ def _compare_lists(path_prefix: str, old_list: list[Any], new_list: list[Any]) -
         # Fallback for complex objects without 'id', hash their string representation
         # It's not perfect but works for simple diffing
         try:
-            return json.dumps(item, sort_keys=True)
-        except Exception:
+            return hash(item)
+        except TypeError:
             return str(item)
 
     old_ids = [_get_id(item) for item in old_list]

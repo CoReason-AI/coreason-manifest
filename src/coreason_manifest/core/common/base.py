@@ -35,6 +35,9 @@ class CoreasonModel(BaseModel):
     # Storage for unknown fields caught by the funnel
     annotations: dict[str, Any] = Field(default_factory=dict)
 
+    def __hash__(self) -> int:
+        return hash(self.model_dump_canonical())
+
     def model_dump_canonical(self) -> bytes:
         """Return a strictly sorted, canonical JSON serialization for cryptographic hashing."""
         raw_dict = self.model_dump(mode="json", exclude_none=True, by_alias=True)

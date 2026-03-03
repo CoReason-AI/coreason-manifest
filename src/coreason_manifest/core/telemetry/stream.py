@@ -5,6 +5,7 @@ from pydantic import ConfigDict, Field
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.presentation import AdaptiveUIContract
 from coreason_manifest.core.state.persistence import JSONPatchOperation
+from coreason_manifest.core.telemetry.custody import EpistemicEnvelope
 from coreason_manifest.core.telemetry.stream_base import BaseEnvelope
 from coreason_manifest.core.telemetry.suspense_envelope import StreamSuspenseEnvelope
 
@@ -56,6 +57,11 @@ class StreamStateDeltaEnvelope(BaseEnvelope):
     p: list[JSONPatchOperation]
 
 
+class StreamEpistemicEnvelope(BaseEnvelope):
+    op: Literal["epistemic"]
+    p: EpistemicEnvelope
+
+
 # SOTA Python 3.12 Union syntax mapped to a Pydantic Discriminator
 StreamPacket = Annotated[
     StreamErrorEnvelope
@@ -65,7 +71,8 @@ StreamPacket = Annotated[
     | StreamToolCallEnvelope
     | StreamUIEnvelope
     | StreamStateDeltaEnvelope
-    | StreamSuspenseEnvelope,
+    | StreamSuspenseEnvelope
+    | StreamEpistemicEnvelope,
     Field(discriminator="op"),
 ]
 
