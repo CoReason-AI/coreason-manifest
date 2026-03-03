@@ -62,7 +62,9 @@ def generate_inverse_patches(
     Calculates the exact inverse of applied patches to support reverting state changes.
     """
     logger.trace(
-        "generating_inverse_patches", original_state_keys=list(original_state.keys()), num_patches=len(patches)
+        "generating_inverse_patches",
+        original_state_keys=list(original_state.keys()) if isinstance(original_state, dict) else len(original_state),
+        num_patches=len(patches)
     )
     state: dict[str, Any] | list[Any] = original_state
     inverses: list[JSONPatchOperation] = []
