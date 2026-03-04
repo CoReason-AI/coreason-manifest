@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -68,12 +68,39 @@ class DAGTopology(BaseTopology):
     )
 
     @model_validator(mode="after")
-    def verify_edges_exist(self) -> DAGTopology:
+    def verify_edges_exist(self) -> Self:
+        # Step 1: Referential integrity
         for source, target in self.edges:
             if source not in self.nodes:
                 raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
             if target not in self.nodes:
                 raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
+
+        # Step 2: Cycle detection
+        if not self.allow_cycles:
+            adj: dict[NodeID, list[NodeID]] = {node_id: [] for node_id in self.nodes}
+            for source, target in self.edges:
+                adj[source].append(target)
+
+            visited: set[NodeID] = set()
+            recursion_stack: set[NodeID] = set()
+
+            def dfs(node: NodeID) -> bool:
+                visited.add(node)
+                recursion_stack.add(node)
+                for neighbor in adj[node]:
+                    if neighbor not in visited:
+                        if dfs(neighbor):
+                            return True
+                    elif neighbor in recursion_stack:
+                        return True
+                recursion_stack.remove(node)
+                return False
+
+            for node in self.nodes:
+                if node not in visited and dfs(node):
+                    raise ValueError("Graph contains cycles but allow_cycles is False.")
+
         return self
 
 
@@ -89,7 +116,7 @@ class CouncilTopology(BaseTopology):
     )
 
     @model_validator(mode="after")
-    def check_adjudicator_id(self) -> CouncilTopology:
+    def check_adjudicator_id(self) -> Self:
         if self.adjudicator_id not in self.nodes:
             raise ValueError(f"Adjudicator ID '{self.adjudicator_id}' is not in nodes registry.")
         return self

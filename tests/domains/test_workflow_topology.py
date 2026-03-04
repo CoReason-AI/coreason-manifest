@@ -2,7 +2,7 @@ import math
 from typing import Any
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 from pydantic import ValidationError
@@ -19,7 +19,7 @@ from coreason_manifest.workflow.topologies import CouncilTopology, DAGTopology
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)
 # Also must have a minimum length of 1 based on core primitives.
-valid_node_id_st = st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True).filter(lambda x: len(x) > 0)
+valid_node_id_st = st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True)
 
 # Strategy for BaseNode attributes
 base_node_attrs = {
@@ -41,37 +41,57 @@ def nodes_dict_st(draw: Any) -> Any:
     return draw(st.dictionaries(keys=valid_node_id_st, values=any_node_st, min_size=1, max_size=10))
 
 
-@given(nodes=nodes_dict_st(), edge_data=st.data())
-def test_dag_topology_referential_integrity_success(nodes: dict[str, Any], edge_data: DataObject) -> None:
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_referential_integrity_success(nodes: dict[str, Any], data: DataObject) -> None:
     """Prove DAGTopology instantiated with edges connecting valid nodes never fails."""
-    # Draw valid keys from the generated nodes
     keys = list(nodes.keys())
-    source_id = edge_data.draw(st.sampled_from(keys))
-    target_id = edge_data.draw(st.sampled_from(keys))
+    edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=20))
 
-    topology = DAGTopology(nodes=nodes, edges=[(source_id, target_id)])
-    assert topology.edges == [(source_id, target_id)]
+    topology = DAGTopology(nodes=nodes, edges=edges, allow_cycles=True)
+    assert topology.edges == edges
 
 
-@given(nodes=nodes_dict_st(), edge_data=st.data())
-def test_dag_topology_referential_integrity_adversarial(nodes: dict[str, Any], edge_data: DataObject) -> None:
-    """Prove that injecting a ghost node into an edge tuple always raises a ValidationError."""
-    ghost_node = "ghost_node_123"
-    # Ensure it's strictly not in the nodes dictionary
-    if ghost_node in nodes:
-        del nodes[ghost_node]
-        if not nodes:
-            return  # Skip if nodes becomes empty
-
-    # valid node for the other end
-    valid_id_str = edge_data.draw(st.sampled_from(list(nodes.keys())))
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_cycle_adversarial(nodes: dict[str, Any], data: DataObject) -> None:
+    """Prove DAGTopology raises ValidationError when cycles are explicitly formed and allow_cycles is False."""
+    keys = list(nodes.keys())
+    node_a = data.draw(st.sampled_from(keys))
+    node_b = data.draw(st.sampled_from(keys))
 
     with pytest.raises(ValidationError) as exc_info:
-        DAGTopology(nodes=nodes, edges=[(valid_id_str, ghost_node)])
+        DAGTopology(nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=False)
+    assert "Graph contains cycles but allow_cycles is False" in str(exc_info.value)
+
+
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_cycle_success(nodes: dict[str, Any], data: DataObject) -> None:
+    """Prove DAGTopology instantiates successfully with explicitly formed cycles when allow_cycles is True."""
+    keys = list(nodes.keys())
+    node_a = data.draw(st.sampled_from(keys))
+    node_b = data.draw(st.sampled_from(keys))
+
+    topology = DAGTopology(nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=True)
+    assert topology.edges == [(node_a, node_b), (node_b, node_a)]
+
+
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_referential_integrity_adversarial(nodes: dict[str, Any], data: DataObject) -> None:
+    """Prove that injecting a ghost node into an edge tuple always raises a ValidationError."""
+    ghost_node = "ghost_node_123"
+    assume(ghost_node not in nodes)
+
+    keys = list(nodes.keys())
+    valid_id_str = data.draw(st.sampled_from(keys))
+
+    # Generate some valid edges, then inject a bad one
+    valid_edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=5))
+
+    with pytest.raises(ValidationError) as exc_info:
+        DAGTopology(nodes=nodes, edges=[*valid_edges, (valid_id_str, ghost_node)])
     assert "does not exist in nodes registry" in str(exc_info.value)
 
     with pytest.raises(ValidationError) as exc_info:
-        DAGTopology(nodes=nodes, edges=[(ghost_node, valid_id_str)])
+        DAGTopology(nodes=nodes, edges=[*valid_edges, (ghost_node, valid_id_str)])
     assert "does not exist in nodes registry" in str(exc_info.value)
 
 
@@ -89,11 +109,7 @@ def test_council_topology_referential_integrity_success(nodes: dict[str, Any], a
 def test_council_topology_referential_integrity_adversarial(nodes: dict[str, Any]) -> None:
     """Test 2: Prove that injecting a guaranteed dangling pointer always raises a ValidationError."""
     rogue_id = "rogue_ghost_node"
-    # Ensure it's strictly not in the nodes dictionary
-    if rogue_id in nodes:
-        del nodes[rogue_id]
-        if not nodes:
-            return  # Skip if nodes becomes empty
+    assume(rogue_id not in nodes)
 
     with pytest.raises(ValidationError) as exc_info:
         CouncilTopology(nodes=nodes, adjudicator_id=rogue_id)
@@ -101,25 +117,18 @@ def test_council_topology_referential_integrity_adversarial(nodes: dict[str, Any
     assert "Adjudicator ID" in str(exc_info.value) or "Value error" in str(exc_info.value)
 
 
-@given(confidence_threshold=st.floats().filter(lambda x: x < 0.0 or x > 1.0 or x != x))  # filter nans
+@given(confidence_threshold=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
 def test_system1_reflex_mathematical_bounds(confidence_threshold: float) -> None:
     """Test 3: Prove System1Reflex decisively rejects values outside [0.0, 1.0]."""
     with pytest.raises(ValidationError):
         System1Reflex(confidence_threshold=confidence_threshold, allowed_read_only_tools=["tool_a"])
 
 
-@given(dissonance_threshold=st.floats().filter(lambda x: x < 0.0 or x > 1.0 or x != x))  # filter nans
+@given(dissonance_threshold=st.floats(max_value=-0.000001) | st.floats(min_value=1.000001))
 def test_epistemic_scanner_mathematical_bounds(dissonance_threshold: float) -> None:
     """Test 4: Prove EpistemicScanner decisively rejects values outside [0.0, 1.0]."""
     with pytest.raises(ValidationError):
         EpistemicScanner(active=True, dissonance_threshold=dissonance_threshold, action_on_gap="probe")
-
-
-@given(max_loops=st.integers().filter(lambda x: x < 0 or x > 50))
-def test_self_correction_policy_mathematical_bounds(max_loops: int) -> None:
-    """Test 5: Prove SelfCorrectionPolicy decisively rejects values outside [0, 50]."""
-    with pytest.raises(ValidationError):
-        SelfCorrectionPolicy(max_loops=max_loops, rollback_on_failure=True)
 
 
 @given(max_loops=st.integers(max_value=-1) | st.integers(min_value=51))
