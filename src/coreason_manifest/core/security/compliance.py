@@ -17,6 +17,9 @@ class ErrorCatalog(StrEnum):
     ERR_SEC_MISSING_SYMBOLIC_GUARD_004 = "ERR_SEC_MISSING_SYMBOLIC_GUARD_004"
     ERR_SEC_KILL_SWITCH_VIOLATION = "ERR_SEC_KILL_SWITCH_VIOLATION"
     ERR_SEC_GENUI_UNAUTHORIZED_011 = "ERR_SEC_GENUI_UNAUTHORIZED_011"
+    ERR_SEC_MCP_DOMAIN_BLOCKED = "ERR_SEC_MCP_DOMAIN_BLOCKED"
+    ERR_SEC_UNGUARDED_MCP_EXPORT = "ERR_SEC_UNGUARDED_MCP_EXPORT"
+    ERR_SEC_MCP_STDIO_UNSAFE = "ERR_SEC_MCP_STDIO_UNSAFE"
 
     # Swarms / Cohesion
     ERR_SWARM_ISLAND_NON_EVOLUTIONARY_005 = "ERR_SWARM_ISLAND_NON_EVOLUTIONARY_005"
@@ -76,6 +79,8 @@ class RemediationAction(BaseModel):
         "add_symbolic_guard",
         "add_press_guard",
         "add_deduplication_guard",
+        "prune_mcp_client",
+        "guard_mcp_export",
     ]
     target_node_id: str | None = None
     format: Literal["json_patch", "merge_patch"] = "json_patch"
