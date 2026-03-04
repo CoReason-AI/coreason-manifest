@@ -4,7 +4,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 
@@ -81,6 +81,17 @@ class PICOOperator(StrEnum):
     PROXIMITY = "PROXIMITY"
 
 
+FORBIDDEN_BROAD_EXPLOSIONS = {
+    "neoplasms",
+    "infections",
+    "diseases",
+    "anatomy",
+    "chemicals and drugs",
+    "cardiovascular diseases",
+    "bacterial infections and mycoses",
+}
+
+
 class PICOLeafNode(CoreasonModel):
     """An atomic search term decoupled from database-specific syntax."""
 
@@ -95,10 +106,24 @@ class PICOLeafNode(CoreasonModel):
         SearchTermType, Field(description="Whether this is a controlled term (e.g. MeSH) or free text.")
     ]
     explode: Annotated[bool, Field(description="If True, search all narrower terms in the ontology tree.")] = False
+    override_max_depth: Annotated[
+        int | None,
+        Field(description="Optional bypass for deep traversals on highly specific nodes (if Gatekeeper allows)."),
+    ] = None
     truncate: Annotated[bool, Field(description="If True, apply wildcard truncation to the term.")] = False
     field_restrictions: Annotated[
         list[str] | None, Field(description="Specific fields to search (e.g., ['tiab', 'tw']).")
     ] = None
+
+    @model_validator(mode="after")
+    def _validate_explosion_safety(self) -> PICOLeafNode:
+        """Mathematically prevent the explosion of catastrophically broad ontology roots."""
+        if self.explode and self.term.strip().lower() in FORBIDDEN_BROAD_EXPLOSIONS:
+            raise ValueError(
+                f"Ontological DOS Protection: Cannot explode dangerously broad term '{self.term}'. "
+                "You must specify a narrower child term (e.g., 'Breast Neoplasms')."
+            )
+        return self
 
 
 class PICOOperatorNode(CoreasonModel):
@@ -129,6 +154,13 @@ class PICOASTConfig(CoreasonModel):
     default_operator: Annotated[
         PICOOperator, Field(description="The default operator to combine disjoint PICO classes at the root.")
     ] = PICOOperator.AND
+    max_explosion_depth: Annotated[
+        int | None,
+        Field(description="Global circuit breaker. Max hierarchical levels to traverse when explode=True (e.g., 2)."),
+    ] = 2
+    restricted_broad_terms: Annotated[
+        list[str], Field(description="Dynamic list of root ontology terms strictly forbidden from being exploded.")
+    ] = Field(default_factory=lambda: list(FORBIDDEN_BROAD_EXPLOSIONS))
 
 
 __all__ = [
