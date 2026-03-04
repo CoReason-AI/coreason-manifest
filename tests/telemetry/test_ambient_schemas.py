@@ -46,4 +46,4 @@ def test_multimodal_telemetry_stream_invalid_framerate() -> None:
             privacy_masking_zones=[],
         )
 
-    assert "screen_capture_framerate must be <= 1.0 FPS" in str(excinfo.value)
+    assert "Input should be less than or equal to 1" in str(excinfo.value)

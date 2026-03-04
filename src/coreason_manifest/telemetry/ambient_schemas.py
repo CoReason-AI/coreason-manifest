@@ -9,10 +9,12 @@
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field
+
+from coreason_manifest.core.common.base import CoreasonModel
 
 
-class PrivacyMaskingZone(BaseModel):
+class PrivacyMaskingZone(CoreasonModel):
     """
     A schema defining application bounds or coordinate boxes that the ambient listener must completely ignore.
 
@@ -35,7 +37,7 @@ class PrivacyMaskingZone(BaseModel):
     )
 
 
-class MultimodalTelemetryStream(BaseModel):
+class MultimodalTelemetryStream(CoreasonModel):
     """
     A schema extending standard text-based telemetry to include passive environmental exhaust.
 
@@ -50,19 +52,10 @@ class MultimodalTelemetryStream(BaseModel):
     )
     screen_capture_framerate: float = Field(
         ...,
+        le=1.0,
         description="The FPS of semantic screen extraction. Must be strictly <= 1.0 FPS to prevent battery drain.",
     )
     privacy_masking_zones: list[PrivacyMaskingZone] = Field(
         default_factory=list,
         description="List of zones that must be masked out of the screen capture before processing.",
     )
-
-    @model_validator(mode="after")
-    def validate_screen_capture_framerate(self) -> "MultimodalTelemetryStream":
-        """
-        Ensures the screen capture framerate is highly constrained (<= 1.0 FPS)
-        to prevent battery drain and excessive compute overhead.
-        """
-        if self.screen_capture_framerate > 1.0:
-            raise ValueError("screen_capture_framerate must be <= 1.0 FPS to prevent battery drain and overhead.")
-        return self

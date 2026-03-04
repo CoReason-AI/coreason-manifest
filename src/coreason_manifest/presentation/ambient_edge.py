@@ -10,13 +10,14 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.presentation.ambient import AmbientListenerConfig
 from coreason_manifest.telemetry.ambient_schemas import MultimodalTelemetryStream
 
 
-class EdgeSLMProcessor(BaseModel):
+class EdgeSLMProcessor(CoreasonModel):
     """
     A schema configuring the local Small Language Model (running on the user's device).
 
@@ -31,6 +32,7 @@ class EdgeSLMProcessor(BaseModel):
     )
     max_latency_ms: int = Field(
         ...,
+        lt=250,
         description="Hard constraint for edge processing. Must be < 250ms to guarantee zero UI blocking.",
     )
     local_feature_extraction_only: bool = Field(
@@ -41,14 +43,8 @@ class EdgeSLMProcessor(BaseModel):
         ),
     )
 
-    @model_validator(mode="after")
-    def validate_max_latency_ms(self) -> "EdgeSLMProcessor":
-        if self.max_latency_ms >= 250:
-            raise ValueError("max_latency_ms must be < 250ms to guarantee zero UI blocking.")
-        return self
 
-
-class AutonomousPrecomputeIntent(BaseModel):
+class AutonomousPrecomputeIntent(CoreasonModel):
     """
     A schema representing a 'shadow task' in the 2026 Zero-UI architecture.
 
@@ -63,10 +59,13 @@ class AutonomousPrecomputeIntent(BaseModel):
     )
     confidence_score: float = Field(
         ...,
+        ge=0.0,
+        le=1.0,
         description="Prediction confidence from 0.0 to 1.0.",
     )
     background_resource_allocation_mb: int = Field(
         ...,
+        gt=0,
         description="Max memory the shadow task can consume in megabytes.",
     )
     auto_inject_ui_target: str | None = Field(
@@ -74,14 +73,8 @@ class AutonomousPrecomputeIntent(BaseModel):
         description="A DOM or application pointer where the results should be streamed if prediction is correct.",
     )
 
-    @model_validator(mode="after")
-    def validate_confidence_score(self) -> "AutonomousPrecomputeIntent":
-        if self.confidence_score < 0.0 or self.confidence_score > 1.0:
-            raise ValueError("confidence_score must be between 0.0 and 1.0.")
-        return self
 
-
-class EdgeNativeAmbientListener(BaseModel):
+class EdgeNativeAmbientListener(CoreasonModel):
     """
     The composite schema that an application mounts on startup for Edge-Native ambient observation.
 
@@ -103,5 +96,7 @@ class EdgeNativeAmbientListener(BaseModel):
     )
     precompute_threshold: float = Field(
         ...,
+        ge=0.0,
+        le=1.0,
         description="The minimum confidence_score required to trigger an AutonomousPrecomputeIntent.",
     )

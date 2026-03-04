@@ -31,7 +31,7 @@ def test_edge_slm_processor_invalid_latency() -> None:
             local_feature_extraction_only=False,
         )
 
-    assert "max_latency_ms must be < 250ms" in str(excinfo.value)
+    assert "Input should be less than 250" in str(excinfo.value)
 
     with pytest.raises(ValidationError) as excinfo2:
         EdgeSLMProcessor(
@@ -40,7 +40,7 @@ def test_edge_slm_processor_invalid_latency() -> None:
             local_feature_extraction_only=False,
         )
 
-    assert "max_latency_ms must be < 250ms" in str(excinfo2.value)
+    assert "Input should be less than 250" in str(excinfo2.value)
 
 
 def test_autonomous_precompute_intent_valid() -> None:
@@ -65,7 +65,7 @@ def test_autonomous_precompute_intent_invalid_confidence() -> None:
             confidence_score=-0.1,
             background_resource_allocation_mb=512,
         )
-    assert "confidence_score must be between 0.0 and 1.0" in str(excinfo_low.value)
+    assert "Input should be greater than or equal to 0" in str(excinfo_low.value)
 
     with pytest.raises(ValidationError) as excinfo_high:
         AutonomousPrecomputeIntent(
@@ -73,7 +73,18 @@ def test_autonomous_precompute_intent_invalid_confidence() -> None:
             confidence_score=1.1,
             background_resource_allocation_mb=512,
         )
-    assert "confidence_score must be between 0.0 and 1.0" in str(excinfo_high.value)
+    assert "Input should be less than or equal to 1" in str(excinfo_high.value)
+
+
+def test_autonomous_precompute_intent_invalid_allocation() -> None:
+    """Test that background_resource_allocation_mb <= 0 raises a ValidationError."""
+    with pytest.raises(ValidationError) as excinfo_low:
+        AutonomousPrecomputeIntent(
+            predicted_query_hash="1234abcd",
+            confidence_score=0.5,
+            background_resource_allocation_mb=0,
+        )
+    assert "Input should be greater than 0" in str(excinfo_low.value)
 
 
 def test_edge_native_ambient_listener_valid() -> None:
@@ -112,3 +123,47 @@ def test_edge_native_ambient_listener_valid() -> None:
     assert listener.base_config.listener_id == "listener_001"
     assert listener.telemetry_stream.screen_capture_framerate == 1.0
     assert listener.edge_processor.max_latency_ms == 200
+
+
+def test_edge_native_ambient_listener_invalid_threshold() -> None:
+    """Test that precompute_threshold < 0.0 or > 1.0 raises a ValidationError."""
+    trigger_rule = AmbientTriggerRule(
+        trigger_events=["CANVAS_ADD_CONNECTION"],
+        debounce_ms=800,
+        extract_triplets=True,
+    )
+    base_config = AmbientListenerConfig(
+        listener_id="listener_001",
+        target_canvas_id="canvas_001",
+        trigger_rules=[trigger_rule],
+        action_route="node_001",
+        ui_target_pointer="$local.results",
+    )
+    telemetry_stream = MultimodalTelemetryStream(
+        audio_exhaust_enabled=False,
+        screen_capture_framerate=1.0,
+        privacy_masking_zones=[],
+    )
+    processor = EdgeSLMProcessor(
+        model_quantization="int4",
+        max_latency_ms=200,
+        local_feature_extraction_only=True,
+    )
+
+    with pytest.raises(ValidationError) as excinfo_low:
+        EdgeNativeAmbientListener(
+            base_config=base_config,
+            telemetry_stream=telemetry_stream,
+            edge_processor=processor,
+            precompute_threshold=-0.1,
+        )
+    assert "Input should be greater than or equal to 0" in str(excinfo_low.value)
+
+    with pytest.raises(ValidationError) as excinfo_high:
+        EdgeNativeAmbientListener(
+            base_config=base_config,
+            telemetry_stream=telemetry_stream,
+            edge_processor=processor,
+            precompute_threshold=1.1,
+        )
+    assert "Input should be less than or equal to 1" in str(excinfo_high.value)
