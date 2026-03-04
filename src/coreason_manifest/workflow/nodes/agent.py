@@ -2,7 +2,7 @@
 from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from coreason_manifest.compute.reasoning import FastPath, ReasoningConfig
 from coreason_manifest.core.common.base import CoreasonModel
@@ -15,12 +15,28 @@ from coreason_manifest.state.memory import MemorySubsystem
 from .base import Node
 
 
+class MCPPromptRef(CoreasonModel):
+    """Reference to a remote prompt via the Model Context Protocol (MCP)."""
+
+    server_id: str = Field(..., description="The ID of the MCP server to connect to.")
+    prompt_name: str = Field(..., description="The exact semantic identifier on the remote server.")
+    arguments: dict[str, Any] = Field(
+        default_factory=dict, description="Variables to inject into the remote prompt template."
+    )
+    fallback_persona: str | None = Field(None, description="Optional static fallback string if the server times out.")
+    prompt_hash: str | None = Field(
+        None, description="Optional SHA-256 hash to cryptographically pin the remote prompt."
+    )
+
+
 class CognitiveProfile(CoreasonModel):
     """The active processing unit of an agent."""
 
     role: str = Field(..., description="The role of the agent.", examples=["Assistant", "Researcher"])
-    persona: str = Field(
-        ..., description="The system prompt/persona description.", examples=["You are a helpful assistant."]
+    persona: str | MCPPromptRef = Field(
+        ...,
+        description="The system prompt/persona description. Can be a static string or a dynamic MCP pointer.",
+        examples=["You are a helpful assistant.", {"server_id": "mcp-server-1", "prompt_name": "assistant"}],
     )
     reasoning: ReasoningConfig | None = Field(
         None, description="The reasoning engine configuration.", examples=[{"type": "standard", "model": "gpt-4"}]
@@ -131,3 +147,22 @@ class AgentNode(Node):
         description="If set, computationally binds this agent to a multi-database execution "
         "contract to prevent database bias.",
     )
+
+    @model_validator(mode="after")
+    def validate_dynamic_prompt_resilience(self) -> "AgentNode":
+        if (
+            isinstance(self.profile, CognitiveProfile)
+            and isinstance(self.profile.persona, MCPPromptRef)
+            and self.profile.persona.fallback_persona is None
+            and (
+                self.operational_policy is None
+                or self.operational_policy.compute is None
+                or self.operational_policy.compute.max_execution_time_seconds is None
+            )
+        ):
+            raise ValueError(
+                "AgentNode relies on a dynamic MCPPromptRef without a fallback_persona. "
+                "To prevent infinite cognitive hangs during network partitioning, an "
+                "operational_policy.compute.max_execution_time_seconds must be defined."
+            )
+        return self
