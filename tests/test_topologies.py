@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from coreason_manifest.core.common.exceptions import ManifestError
 from coreason_manifest.workflow.flow import (
@@ -12,6 +13,7 @@ from coreason_manifest.workflow.flow import (
     SwarmTopology,
 )
 from coreason_manifest.workflow.nodes.agent import AgentNode
+from coreason_manifest.workflow.topologies.delphi import AutomatedDelphiTopology
 
 
 def test_dag_topology() -> None:
@@ -124,3 +126,68 @@ def test_event_driven_topology() -> None:
     node1 = AgentNode(id="agent1", profile="p1", operational_policy=None)
     ed = EventDrivenTopology(nodes={"agent1": node1}, trigger_schemas={"agent1": ["var1"]})
     assert ed.topology_type == "event_driven"
+
+
+def test_automated_delphi_topology() -> None:
+    delphi = AutomatedDelphiTopology(
+        evaluator_nodes=("node1", "node2", "node3"),
+        anonymize_bids=True,
+        consensus_threshold=0.80,
+        max_iterations=5,
+        current_iteration=1,
+        bidding_schema_reference="StandardBidSchema",
+    )
+    assert delphi.topology_type == "DELPHI"
+    assert len(delphi.evaluator_nodes) == 3
+    assert delphi.consensus_threshold == 0.80
+    assert delphi.bidding_schema_reference == "StandardBidSchema"
+
+
+def test_automated_delphi_topology_validation() -> None:
+    # Test valid
+    delphi = AutomatedDelphiTopology(
+        evaluator_nodes=("node1", "node2"),
+        anonymize_bids=True,
+        consensus_threshold=0.80,
+        max_iterations=5,
+        current_iteration=1,
+        bidding_schema_reference="Schema",
+    )
+    assert delphi.consensus_threshold == 0.80
+    assert len(delphi.evaluator_nodes) == 2
+
+    # Test invalid threshold > 1.0
+    with pytest.raises(ValidationError) as excinfo:
+        AutomatedDelphiTopology(
+            evaluator_nodes=("node1",),
+            anonymize_bids=True,
+            consensus_threshold=1.5,
+            max_iterations=5,
+            current_iteration=1,
+            bidding_schema_reference="Schema",
+        )
+    assert "less than or equal to 1" in str(excinfo.value)
+
+    # Test invalid threshold < 0.0
+    with pytest.raises(ValidationError) as excinfo:
+        AutomatedDelphiTopology(
+            evaluator_nodes=("node1",),
+            anonymize_bids=True,
+            consensus_threshold=-0.5,
+            max_iterations=5,
+            current_iteration=1,
+            bidding_schema_reference="Schema",
+        )
+    assert "greater than or equal to 0" in str(excinfo.value)
+
+    # Test invalid iteration logic
+    with pytest.raises(ValidationError, match="current_iteration cannot exceed max_iterations") as excinfo2:
+        AutomatedDelphiTopology(
+            evaluator_nodes=("node1",),
+            anonymize_bids=True,
+            consensus_threshold=0.8,
+            max_iterations=2,
+            current_iteration=5,
+            bidding_schema_reference="Schema",
+        )
+    assert "current_iteration cannot exceed max_iterations" in str(excinfo2.value)
