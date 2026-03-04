@@ -19,6 +19,7 @@ from pydantic import Field, ValidationInfo, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.validation import EpistemicValidator
+from coreason_manifest.core.primitives.types import WasiCapability
 
 
 class ProvenanceSpan(CoreasonModel):
@@ -141,3 +142,17 @@ class ClinicalProposition(CoreasonModel):
                 )
 
         return self
+
+
+class ExecutionTrace(CoreasonModel):
+    """
+    Open-Science Epistemic Provability trace for a sandboxed execution.
+    Logs the exact conditions under which a WebAssembly module was executed.
+    """
+
+    wasm_module_hash: str = Field(..., description="SHA-256 hash of the Wasm binary executed.")
+    wasi_granted_capabilities: list[WasiCapability] = Field(
+        default_factory=list, description="List of capabilities injected into the Wasm environment."
+    )
+    instruction_count_used: int = Field(..., description="The amount of Wasm fuel consumed during the run.")
+    deterministic_output: str = Field(..., description="The verifiable output string produced by the Wasm execution.")

@@ -14,6 +14,7 @@ from .routing import SwitchNode
 from .swarm import SwarmNode
 from .system import PlaceholderNode
 from .visual_oversight import MultimodalConstraint, VisualInspectorNode
+from .wasm import WasmExecutionNode, WasmExecutionPayload
 
 AnyNode = Annotated[
     AgentNode
@@ -24,6 +25,7 @@ AnyNode = Annotated[
     | InspectorNode
     | EmergenceInspectorNode
     | VisualInspectorNode
+    | WasmExecutionNode
     | PlaceholderNode,
     Field(discriminator=pydantic.Discriminator("type")),
 ]
@@ -50,4 +52,6 @@ __all__ = [
     "SwarmNode",
     "SwitchNode",
     "VisualInspectorNode",
+    "WasmExecutionNode",
+    "WasmExecutionPayload",
 ]

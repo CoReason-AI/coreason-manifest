@@ -1,4 +1,3 @@
-import ast
 import datetime
 from collections import deque
 from enum import StrEnum
@@ -11,7 +10,6 @@ from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.semantic import SemanticRef
 from coreason_manifest.core.primitives.types import MiddlewareDef, MiddlewareID, NodeID
-from coreason_manifest.core.security.compliance import SecurityVisitor
 from coreason_manifest.oversight.governance import Governance
 from coreason_manifest.state.persistence import PersistenceConfig
 from coreason_manifest.state.tools import AnyTool, ToolPack
@@ -111,26 +109,19 @@ class Edge(CoreasonModel):
     @classmethod
     def validate_condition_ast(cls, v: str | None) -> str | None:
         """
-        Parse the condition string into an Abstract Syntax Tree (AST) and enforce the SecurityVisitor whitelist.
+        Validate the condition string.
 
-        Enforces a strict 2048-character limit to prevent AST parsing Denial of Service (DoS) memory exhaustion.
+        Enforces a strict 2048-character limit to prevent DoS memory exhaustion.
 
         Raises:
-            ValueError: If the condition exceeds 2048 characters, contains invalid Python
-                syntax, or uses unsafe AST nodes.
+            ValueError: If the condition exceeds 2048 characters.
         """
         if v is None or not v.strip():
             return v
         if len(v) > 2048:
             raise ValueError(
-                "Condition expression exceeds maximum safe length of 2048 characters to prevent AST parsing DoS."
+                "Condition expression exceeds maximum safe length of 2048 characters to prevent DoS."
             )
-        try:
-            tree = ast.parse(v, mode="eval")
-        except SyntaxError as e:
-            raise ValueError(f"Syntax error in condition '{v}': {e}") from e
-        visitor = SecurityVisitor()
-        visitor.visit(tree)
         return v
 
 

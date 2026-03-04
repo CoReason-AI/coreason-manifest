@@ -199,9 +199,6 @@ def _enforce_critical_capability_guards(
         if NodeCapability.COMPUTER_USE in caps:
             needs_guard = True
             violation_reason.append("computer_use capability")
-        if NodeCapability.CODE_EXECUTION in caps:
-            needs_guard = True
-            violation_reason.append("code_execution capability")
 
         if critical_tools:
             needs_guard = True
@@ -347,8 +344,6 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
             risk_reasons = []
             if NodeCapability.COMPUTER_USE in caps:
                 risk_reasons.append(NodeCapability.COMPUTER_USE)
-            if NodeCapability.CODE_EXECUTION in caps:
-                risk_reasons.append(NodeCapability.CODE_EXECUTION)
 
             if risk_reasons:
                 dangerous_node_ids.add(node_id)

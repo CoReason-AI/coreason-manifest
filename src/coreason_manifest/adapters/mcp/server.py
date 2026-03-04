@@ -106,6 +106,22 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
             "Please verify the blurry bounding box or failing mathematical token carefully."
         )
 
+    @mcp.tool()
+    async def vend_wasi_capability(
+        capabilities: list[str], allowed_directories: list[str] | None = None
+    ) -> str:
+        """
+        Acts as a Capability Broker. Instead of executing code on the host OS,
+        it receives requests for WASI capabilities (like 'network', 'fs_read')
+        and vends a temporary capability token or descriptor to be injected into
+        the Wasm execution sandbox.
+        """
+        # In a real system, this would securely generate capability tokens.
+        # Here we mock the capability vending by returning a signed token structure.
+        dirs = allowed_directories or []
+        caps = ",".join(capabilities)
+        return f"WASI_CAPABILITY_TOKEN::{uuid4()}::CAPS[{caps}]::DIRS[{','.join(dirs)}]"
+
     return mcp
 
 

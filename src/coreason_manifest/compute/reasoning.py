@@ -483,22 +483,6 @@ class ComputerUseReasoning(BaseReasoning):
         return [NodeCapability.COMPUTER_USE.value]
 
 
-class CodeExecutionReasoning(BaseReasoning):
-    """
-    Executes Python code in a sandboxed environment.
-    """
-
-    type: Literal["code_execution"] = "code_execution"
-
-    # Environment
-    allow_network: Annotated[bool, Field(description="Allow external network access.")] = False
-    timeout_seconds: Annotated[float, Field(description="Max execution time.")] = 30.0
-
-    def required_capabilities(self) -> list[str]:
-        """Return the list of required capabilities."""
-        return [NodeCapability.CODE_EXECUTION.value]
-
-
 class GraphReasoning(BaseReasoning):
     """
     GraphRAG (Graph-based Retrieval Augmented Generation).
@@ -606,7 +590,6 @@ ReasoningConfig = Annotated[
     | EnsembleReasoning
     | RedTeamingReasoning
     | ComputerUseReasoning
-    | CodeExecutionReasoning
     | GraphReasoning
     | WasmExecutionReasoning
     | VisualExtractionReasoning,
@@ -646,7 +629,6 @@ __all__ = [
     "BaseReasoning",
     "BoundingBox",
     "BufferReasoning",
-    "CodeExecutionReasoning",
     "ComputerUseReasoning",
     "ConstitutionalScope",
     "CouncilReasoning",
