@@ -10,8 +10,10 @@ from coreason_manifest.workflow.nodes import (
 )
 from coreason_manifest.workflow.topologies import (
     AnyTopology,
+    BackpressurePolicy,
     CouncilTopology,
     DAGTopology,
+    DiversityConstraint,
     SwarmTopology,
 )
 
@@ -19,8 +21,10 @@ __all__ = [
     "AgentNode",
     "AnyNode",
     "AnyTopology",
+    "BackpressurePolicy",
     "CouncilTopology",
     "DAGTopology",
+    "DiversityConstraint",
     "EpistemicScanner",
     "HumanNode",
     "SelfCorrectionPolicy",

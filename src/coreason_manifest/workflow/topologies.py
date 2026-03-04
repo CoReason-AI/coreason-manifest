@@ -7,6 +7,36 @@ from coreason_manifest.core.primitives import NodeID
 from coreason_manifest.workflow.nodes import AnyNode
 
 
+class DiversityConstraint(CoreasonBaseModel):
+    """
+    Constraints enforcing cognitive heterogeneity.
+    """
+
+    min_adversaries: int = Field(
+        description="The minimum number of adversarial or 'Devil's Advocate' roles required to prevent groupthink."
+    )
+    model_variance_required: bool = Field(
+        description="If True, forces the orchestrator to route sub-agents to different foundational models."
+    )
+    temperature_variance: float | None = Field(
+        default=None, description="Required statistical variance in temperature settings across the council."
+    )
+
+
+class BackpressurePolicy(CoreasonBaseModel):
+    """
+    Declarative backpressure constraints.
+    """
+
+    max_queue_depth: int = Field(
+        description="The maximum number of unprocessed messages/observations "
+        "allowed between connected nodes before yielding."
+    )
+    token_budget_per_branch: float | None = Field(
+        default=None, description="The maximum token cost allowed per execution branch before rate-limiting."
+    )
+
+
 class BaseTopology(CoreasonBaseModel):
     """
     Base configuration for any workflow topology.
@@ -25,6 +55,9 @@ class DAGTopology(BaseTopology):
         default=False,
         description="Configuration indicating if cycles are allowed during validation.",
     )
+    backpressure: BackpressurePolicy | None = Field(
+        default=None, description="Declarative backpressure constraints for the graph edges."
+    )
 
 
 class CouncilTopology(BaseTopology):
@@ -34,6 +67,9 @@ class CouncilTopology(BaseTopology):
 
     type: Literal["council"] = Field(default="council", description="Discriminator for a Council topology.")
     adjudicator_id: NodeID = Field(description="The NodeID of the adjudicator that synthesizes the council's output.")
+    diversity_policy: DiversityConstraint | None = Field(
+        default=None, description="Constraints enforcing cognitive heterogeneity across the council."
+    )
 
 
 class SwarmTopology(BaseTopology):
