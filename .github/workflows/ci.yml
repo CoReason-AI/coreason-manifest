@@ -43,6 +43,10 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: "3.14"
+
+      - name: Install Dependencies
+        run: uv sync
 
       - name: Generate Schema
         run: uv run coreason-export
@@ -63,14 +67,10 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: "3.14"
 
       - name: Install Dependencies
         run: uv sync
-
-      - name: Start MCP Server
-        run: |
-          uv run coreason-mcp &
-          sleep 5
 
       - name: MCP Ping
         run: uv run scripts/mcp_ping.py
@@ -85,6 +85,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: "3.14"
 
       - name: Architectural Gate
         env:
@@ -145,6 +146,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: "3.14"
 
       - name: Build wheel
         run: uv build
