@@ -12,6 +12,7 @@ scientific artifact.
 """
 
 import re
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import Any
 
@@ -57,7 +58,7 @@ class OMOPResourceTemplate(CoreasonModel):
     @classmethod
     def validate_uri_template(cls, v: str) -> str:
         """Ensure the URI template strictly matches the omop:// protocol pattern."""
-        if not re.match(r"^omop://[a-zA-Z0-9_/-]+(?:/\{[a-zA-Z0-9_]+\})?[a-zA-Z0-9_/-]*$", v):
+        if not re.match(r"^omop://(?:[a-zA-Z0-9_/-]+|/\{[a-zA-Z0-9_]+\})+$", v):
             raise ValueError("uri_template must follow the 'omop://' protocol pattern")
         return v
 
@@ -71,23 +72,23 @@ class CohortDiagnosticsRequest(CoreasonModel):
     R package function arguments to execute OHDSI CohortDiagnostics.
     """
 
-    inclusion_rules: list[str | dict[str, Any]] = Field(
+    inclusion_rules: tuple[str | Mapping[str, Any], ...] = Field(
         ...,
         description="Array of heavily typed JSON-logic or criteria string representations.",
     )
-    target_cohort_ids: list[int] = Field(
+    target_cohort_ids: tuple[int, ...] = Field(
         ...,
         description="List of target cohort IDs.",
     )
-    comparator_cohort_ids: list[int] | None = Field(
+    comparator_cohort_ids: tuple[int, ...] | None = Field(
         default=None,
         description="Optional list of comparator cohort IDs.",
     )
-    evaluation_windows: list[int] = Field(
+    evaluation_windows: tuple[int, ...] = Field(
         ...,
         description="List of integers representing days (e.g., [0, 30, 365]).",
     )
-    diagnostic_flags: dict[str, bool] = Field(
+    diagnostic_flags: Mapping[str, bool] = Field(
         ...,
         description="Mapping of string flags to booleans, matching the R package's execution parameters.",
     )

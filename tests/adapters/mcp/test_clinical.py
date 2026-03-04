@@ -19,6 +19,16 @@ def test_omop_resource_template_valid() -> None:
     assert template.resource_type == OMOPDomain.CONCEPT
 
 
+def test_omop_resource_template_valid_multiple_vars() -> None:
+    template = OMOPResourceTemplate(
+        uri_template="omop://cohort/{cohort_id}/concept/{concept_id}",
+        resource_type=OMOPDomain.CONCEPT,
+        description="A concept resource with multiple vars.",
+    )
+    assert template.uri_template == "omop://cohort/{cohort_id}/concept/{concept_id}"
+    assert template.resource_type == OMOPDomain.CONCEPT
+
+
 def test_omop_resource_template_invalid_uri() -> None:
     with pytest.raises(ValidationError) as exc_info:
         OMOPResourceTemplate(
@@ -31,14 +41,14 @@ def test_omop_resource_template_invalid_uri() -> None:
 
 def test_cohort_diagnostics_request_valid() -> None:
     request = CohortDiagnosticsRequest(
-        inclusion_rules=["rule1", {"type": "json_logic"}],
-        target_cohort_ids=[1, 2],
-        comparator_cohort_ids=[3],
-        evaluation_windows=[0, 30, 365],
+        inclusion_rules=("rule1", {"type": "json_logic"}),
+        target_cohort_ids=(1, 2),
+        comparator_cohort_ids=(3,),
+        evaluation_windows=(0, 30, 365),
         diagnostic_flags={"runInclusionStatistics": True},
     )
-    assert request.target_cohort_ids == [1, 2]
-    assert request.comparator_cohort_ids == [3]
+    assert request.target_cohort_ids == (1, 2)
+    assert request.comparator_cohort_ids == (3,)
 
 
 def test_epistemic_prompt_manifest_valid() -> None:
