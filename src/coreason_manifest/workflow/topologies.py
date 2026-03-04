@@ -7,7 +7,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
@@ -58,6 +58,7 @@ class DAGTopology(BaseTopology):
     """
 
     type: Literal["dag"] = Field(default="dag", description="Discriminator for a DAG topology.")
+    edges: list[tuple[NodeID, NodeID]] = Field(default_factory=list, description="List of edges between nodes.")
     allow_cycles: bool = Field(
         default=False,
         description="Configuration indicating if cycles are allowed during validation.",
@@ -65,6 +66,15 @@ class DAGTopology(BaseTopology):
     backpressure: BackpressurePolicy | None = Field(
         default=None, description="Declarative backpressure constraints for the graph edges."
     )
+
+    @model_validator(mode="after")
+    def verify_edges_exist(self) -> DAGTopology:
+        for source, target in self.edges:
+            if source not in self.nodes:
+                raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
+            if target not in self.nodes:
+                raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
+        return self
 
 
 class CouncilTopology(BaseTopology):
@@ -77,6 +87,12 @@ class CouncilTopology(BaseTopology):
     diversity_policy: DiversityConstraint | None = Field(
         default=None, description="Constraints enforcing cognitive heterogeneity across the council."
     )
+
+    @model_validator(mode="after")
+    def check_adjudicator_id(self) -> CouncilTopology:
+        if self.adjudicator_id not in self.nodes:
+            raise ValueError(f"Adjudicator ID '{self.adjudicator_id}' is not in nodes registry.")
+        return self
 
 
 class SwarmTopology(BaseTopology):
