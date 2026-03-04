@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.state.events import EpistemicEvent, EventType
+from coreason_manifest.state.events import EpistemicEvent, EventType, LegacyPayload
 
 
 class BaseProjection(ABC, CoreasonModel):
@@ -40,11 +40,10 @@ class DocumentTextProjection(BaseProjection):
         blocks_processed = 0
 
         for event in events:
-            if (
-                event.event_type == EventType.STRUCTURAL_PARSED
-                and getattr(event.payload, "trace_type", "") == "legacy_payload"
-            ):
-                text_block = getattr(event.payload, "text_block", None)
+            if event.event_type == EventType.STRUCTURAL_PARSED:
+                text_block = None
+                if isinstance(event.payload, LegacyPayload):
+                    text_block = event.payload.data.get("text_block")
                 if text_block is not None:
                     # Append text with a newline separator if needed
                     if aggregated_text:

@@ -27,8 +27,30 @@ class EventType(StrEnum):
 
     STRUCTURAL_PARSED = "STRUCTURAL_PARSED"
     SEMANTIC_EXTRACTED = "SEMANTIC_EXTRACTED"
+    GRAPH_RETRIEVAL_TRACE = "GRAPH_RETRIEVAL_TRACE"
     WASM_EXECUTION_TRACE_RECORDED = "WASM_EXECUTION_TRACE_RECORDED"
     # Other event types can be added here
+
+
+class LegacyPayload(CoreasonModel):
+    """
+    Temporary bounded recursive wrapper for unstructured JSON values.
+    """
+
+    trace_type: Literal["legacy_payload"] = Field("legacy_payload", description="Tagged union discriminator.")
+    data: dict[str, Any] = Field(default_factory=dict, description="Arbitrary unstructured data.")
+
+
+class GraphRetrievalTrace(CoreasonModel):
+    """
+    A cryptographic trace linking a semantic traversal request to its topological response.
+    """
+
+    trace_type: Literal["graph_retrieval"] = Field("graph_retrieval", description="Tagged union discriminator.")
+    traversal_request_hash: str = Field(..., description="SHA-256 of the semantic request.")
+    subgraph_topology_hash: str = Field(..., description="SHA-256 of the returned normalized subgraph.")
+    nodes_retrieved_count: int = Field(..., description="Number of nodes returned.")
+    edges_retrieved_count: int = Field(..., description="Number of edges returned.")
 
 
 class WasmExecutionTrace(CoreasonModel):
@@ -60,15 +82,6 @@ class WasmExecutionTrace(CoreasonModel):
     )
 
 
-class LegacyPayload(CoreasonModel):
-    """
-    Fallback payload for legacy un-discriminated events.
-    """
-
-    model_config = ConfigDict(extra="allow", frozen=True)
-    trace_type: Literal["legacy_payload"] = Field("legacy_payload", description="Tagged union discriminator.")
-
-
 class EpistemicAnchor(CoreasonModel):
     """
     A reference to maintain the Chain of Custody.
@@ -94,7 +107,8 @@ class EpistemicEvent(CoreasonModel):
     )
     event_type: EventType = Field(..., description="The type of the event.")
     payload: Annotated[
-        WasmExecutionTrace | LegacyPayload, Field(discriminator="trace_type", description="The actual data mutation.")
+        GraphRetrievalTrace | WasmExecutionTrace | LegacyPayload,
+        Field(discriminator="trace_type", description="The actual data mutation."),
     ]
     epistemic_anchor: EpistemicAnchor = Field(
         ..., description="A reference to the parent event and spatial coordinates."
