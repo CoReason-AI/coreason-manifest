@@ -13,6 +13,8 @@ from typing import Literal
 
 from pydantic import Field
 
+from coreason_manifest.compute.argumentation import ArgumentationDAG
+from coreason_manifest.compute.uncertainty import EpistemicWeight
 from coreason_manifest.core.common.base import CoreasonModel
 
 
@@ -43,9 +45,13 @@ class AdjudicationFormContract(CoreasonModel):
     uncertain_concepts: Sequence[str] = Field(
         ..., description="Sequence of strings representing the ambiguous clinical terms or OMOP concept IDs."
     )
-    proposed_options: Sequence[AdjudicationOption] = Field(
+    proposed_options: list[AdjudicationOption] = Field(
         ...,
         description=("Sequence of AdjudicationOption representing the multi-choice options the human can select."),
+    )
+    optional_debate_context: ArgumentationDAG | None = Field(
+        default=None,
+        description="Optional link to the argumentation DAG that caused the AI swarm to fail to reach consensus.",
     )
     requires_consensus: bool = Field(
         ..., description="Boolean indicating if multiple humans must respond before the workflow resumes."
@@ -65,3 +71,7 @@ class AmbientInsightContract(CoreasonModel):
     )
     mathematical_deviation: float = Field(..., description="Float representing the magnitude of the anomaly.")
     suggested_review_action: str = Field(..., description="Suggested action for the user to review the finding.")
+    confidence_vector: EpistemicWeight | None = Field(
+        default=None,
+        description="Confidence weight associated with this ambient insight.",
+    )

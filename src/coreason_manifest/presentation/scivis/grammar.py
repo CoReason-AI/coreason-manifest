@@ -58,7 +58,7 @@ class TimelineVisContract(CoreasonModel):
 
     trajectory_id: str = Field(..., description="Identifier for the trajectory.")
     time_zero_event: str = Field(..., description="Description of the index date (time zero) event.")
-    events: Sequence[TimelineEvent] = Field(
+    events: list[TimelineEvent] = Field(
         ...,
         description=("A sequence of TimelineEvent objects representing events in the timeline."),
     )

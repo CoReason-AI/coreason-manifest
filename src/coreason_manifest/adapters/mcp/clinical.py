@@ -116,9 +116,9 @@ class EpistemicPromptManifest(CoreasonModel):
         ...,
         description="The core LLM directive.",
     )
-    required_guideline_citations: bool = Field(
-        ...,
-        description="Indicates if the LLM must provide W3C PROV-O structured citations in its output.",
+    citation_requirement_schema: str | None = Field(
+        default=None,
+        description="If populated, this maps to the SyntaxTreeCitationAnchor defined in the uncertainty module.",
     )
     expected_output_schema: str = Field(
         ...,
