@@ -19,11 +19,13 @@ def test_wasm_execution_node() -> None:
 
 def test_wasm_execution_trace() -> None:
     trace = WasmExecutionTrace(
+        trace_type="wasm_execution",
         executed_module_hash="a" * 64,
         granted_capabilities=["DirectoryReadCapability"],
         fuel_consumed=50000,
         output_payload_hash="b" * 64,
     )
+    assert trace.trace_type == "wasm_execution"
     assert trace.executed_module_hash == "a" * 64
     assert trace.fuel_consumed == 50000
     assert trace.output_payload_hash == "b" * 64

@@ -40,8 +40,11 @@ class DocumentTextProjection(BaseProjection):
         blocks_processed = 0
 
         for event in events:
-            if event.event_type == EventType.STRUCTURAL_PARSED and isinstance(event.payload, dict):
-                text_block = event.payload.get("text_block")
+            if (
+                event.event_type == EventType.STRUCTURAL_PARSED
+                and getattr(event.payload, "trace_type", "") == "legacy_payload"
+            ):
+                text_block = getattr(event.payload, "text_block", None)
                 if text_block is not None:
                     # Append text with a newline separator if needed
                     if aggregated_text:

@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Protocol, runtime_checkable
+from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
 from pydantic import ConfigDict, Field, model_validator
 
@@ -38,6 +38,7 @@ class WasmExecutionTrace(CoreasonModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
+    trace_type: Literal["wasm_execution"] = Field("wasm_execution", description="Tagged union discriminator.")
     executed_module_hash: str = Field(
         ...,
         pattern=r"^[a-fA-F0-9]{64}$",
@@ -57,6 +58,15 @@ class WasmExecutionTrace(CoreasonModel):
         pattern=r"^[a-fA-F0-9]{64}$",
         description="The exact SHA-256 hash of the output payload generated.",
     )
+
+
+class LegacyPayload(CoreasonModel):
+    """
+    Fallback payload for legacy un-discriminated events.
+    """
+
+    model_config = ConfigDict(extra="allow", frozen=True)
+    trace_type: Literal["legacy_payload"] = Field("legacy_payload", description="Tagged union discriminator.")
 
 
 class EpistemicAnchor(CoreasonModel):
@@ -83,7 +93,9 @@ class EpistemicEvent(CoreasonModel):
         ..., description="A generic dict or Protocol representing hardware, prompt version, agent signature."
     )
     event_type: EventType = Field(..., description="The type of the event.")
-    payload: dict[str, Any] | WasmExecutionTrace = Field(..., description="The actual data mutation.")
+    payload: Annotated[
+        WasmExecutionTrace | LegacyPayload, Field(discriminator="trace_type", description="The actual data mutation.")
+    ]
     epistemic_anchor: EpistemicAnchor = Field(
         ..., description="A reference to the parent event and spatial coordinates."
     )

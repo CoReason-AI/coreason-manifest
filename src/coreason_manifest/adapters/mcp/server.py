@@ -79,6 +79,8 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
         except ValidationError as e:
             raise ValueError(f"SecurityException: Validation failed for Zero-Trust credentials: {e}") from e
 
+        from coreason_manifest.state.events import LegacyPayload
+
         event = EpistemicEvent(
             event_id=str(uuid4()),
             timestamp=datetime.now(UTC),
@@ -88,7 +90,7 @@ def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
                 "prompt_version": "1.0",
             },
             event_type=EventType.SEMANTIC_EXTRACTED,
-            payload=proposition.model_dump(mode="json"),
+            payload=LegacyPayload.model_validate(proposition.model_dump(mode="json")),
             epistemic_anchor=EpistemicAnchor(),
         )
         ledger.append(event)
