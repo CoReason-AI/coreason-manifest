@@ -106,7 +106,10 @@ class Edge(CoreasonModel):
     condition: str | None = None
     cost_weight: float = Field(0.0, ge=0.0, description="Estimated financial cost (USD) to traverse this edge.")
     latency_weight_ms: float = Field(0.0, ge=0.0, description="Estimated latency in milliseconds.")
-    is_feedback: bool = Field(default=False, description="Marks an edge as a backward loop for UI visualization and circuit-breaker routing.")
+    is_feedback: bool = Field(
+        default=False,
+        description="Marks an edge as a backward loop for UI visualization and circuit-breaker routing.",
+    )
 
     @field_validator("condition", mode="before")
     @classmethod
@@ -139,7 +142,9 @@ class Graph(CoreasonModel):
     nodes: dict[str, AnyNode]
     edges: list[Edge]
     entry_point: NodeID | None = None
-    allow_cycles: bool = Field(default=False, description="If true, bypasses strict DAG validation to allow agentic feedback loops.")
+    allow_cycles: bool = Field(
+        default=False, description="If true, bypasses strict DAG validation to allow agentic feedback loops."
+    )
 
     @model_validator(mode="after")
     def validate_graph_structure(self) -> "Graph":
@@ -284,7 +289,9 @@ class GraphFlow(CoreasonModel):
     blackboard: Blackboard | None = Field(default_factory=Blackboard)
     definitions: FlowDefinitions | None = None
     graph: Graph
-    max_iterations: int | None = Field(default=None, description="Circuit breaker for cyclic graphs to prevent infinite token burn.")
+    max_iterations: int | None = Field(
+        default=None, description="Circuit breaker for cyclic graphs to prevent infinite token burn."
+    )
     evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
 
     @model_validator(mode="after")
