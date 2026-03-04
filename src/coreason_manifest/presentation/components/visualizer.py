@@ -105,12 +105,10 @@ def to_mermaid(flow: WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None
     nodes, edge_objs = get_unified_topology(flow)
     edges = [(e.from_node, e.to_node, e.condition) for e in edge_objs]
 
-    if isinstance(flow, WorkflowEnvelope):
+    if getattr(flow.topology, "topology_type", "") in ("dag", "dcg", "hierarchical"):
         lines.append("graph TD")
-    elif isinstance(flow, WorkflowEnvelope):
-        lines.append("graph LR")
     else:
-        raise ValueError(f"Unsupported flow type: {type(flow)}")
+        lines.append("graph LR")
 
     # Grouping
     grouped_nodes: dict[str, list[AnyNode]] = {}

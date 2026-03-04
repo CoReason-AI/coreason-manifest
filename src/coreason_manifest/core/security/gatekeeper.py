@@ -247,7 +247,11 @@ def _enforce_critical_capability_guards(
 
                 # 3. Add edge (Guard -> Target)
                 patch_ops.append(
-                    {"op": "add", "path": "/graph/edges/-", "value": {"from_node": human_node_id, "to_node": node.id}}
+                    {
+                        "op": "add",
+                        "path": "/topology/edges/-",
+                        "value": {"from_node": human_node_id, "to_node": node.id},
+                    }
                 )
 
             logger.info("critical_capability_guarded", node_id=node.id, reason=", ".join(violation_reason))
