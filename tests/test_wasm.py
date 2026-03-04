@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from coreason_manifest.core.primitives.wasm_types import WasmResourceLimits
-from coreason_manifest.state.events import EpistemicEvent, EventType, WasmExecutionTrace, EpistemicAnchor
+from coreason_manifest.state.events import EpistemicAnchor, EpistemicEvent, EventType, WasmExecutionTrace
 from coreason_manifest.workflow.nodes.wasm import WasmExecutionNode
 
 
