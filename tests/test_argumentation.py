@@ -93,3 +93,51 @@ def test_defeasible_claim_validation() -> None:
             semantic_reasoning="Methodology was flawed.",
             citation_anchors=[anchor],
         )
+
+def test_defeasible_claim_proposal_validation() -> None:
+    anchor = SyntaxTreeCitationAnchor(
+        pmcid="PMC12345",
+        source_text_tokens=["patient", "has", "hypertension"],
+        retrieval_timestamp=datetime.now(UTC),
+        guideline_version="1.0"
+    )
+    with pytest.raises(ValueError, match="1 validation error for"):
+        DefeasibleClaim(
+            claim_id="claim_1",
+            agent_id="agent_a",
+            claim_type="PROPOSAL",
+            target_claim_id="some_other_claim",
+            semantic_reasoning="The patient exhibits symptoms.",
+            citation_anchors=[anchor]
+        )
+
+def test_argumentation_dag_validation() -> None:
+    anchor = SyntaxTreeCitationAnchor(
+        pmcid="PMC12345",
+        source_text_tokens=["patient", "has", "hypertension"],
+        retrieval_timestamp=datetime.now(UTC),
+        guideline_version="1.0"
+    )
+    claim1 = DefeasibleClaim(
+        claim_id="claim_1",
+        agent_id="agent_a",
+        claim_type="PROPOSAL",
+        semantic_reasoning="The patient exhibits symptoms.",
+        citation_anchors=[anchor]
+    )
+    claim2 = DefeasibleClaim(
+        claim_id="claim_2",
+        agent_id="agent_b",
+        claim_type="REBUTTAL",
+        target_claim_id="non_existent_claim",
+        semantic_reasoning="Symptoms are non-specific.",
+        citation_anchors=[]
+    )
+
+    with pytest.raises(ValueError, match="1 validation error for"):
+        ArgumentationDAG(
+            graph_id="dag_1",
+            target_phenotype_id="phenotype_X",
+            claims={"claim_1": claim1, "claim_2": claim2},
+            resolution_status="UNRESOLVED"
+        )

@@ -48,9 +48,11 @@ class DefeasibleClaim(CoreasonModel):
 
     @model_validator(mode="after")
     def validate_target_claim(self) -> "DefeasibleClaim":
-        """Enforce that Rebuttals and Undercuts must point to a target claim."""
+        """Enforce that Rebuttals and Undercuts must point to a target claim, and Proposals must not."""
         if self.claim_type in {"REBUTTAL", "UNDERCUT"} and not self.target_claim_id:
             raise ValueError(f"Validation Error: A claim of type '{self.claim_type}' MUST have a target_claim_id.")
+        if self.claim_type == "PROPOSAL" and self.target_claim_id is not None:
+            raise ValueError(f"Validation Error: A claim of type '{self.claim_type}' MUST NOT have a target_claim_id.")
         return self
 
 
@@ -70,3 +72,13 @@ class ArgumentationDAG(CoreasonModel):
     resolution_status: Literal["UNRESOLVED", "CONSENSUS_REACHED", "OVERRIDDEN_BY_HUMAN"] = Field(
         ..., description="The final consensus state of this multi-agent argumentation process."
     )
+
+    @model_validator(mode="after")
+    def validate_graph_edges(self) -> "ArgumentationDAG":
+        """Enforce that every target_claim_id in the graph resolves to a valid key within self.claims."""
+        for claim in self.claims.values():
+            if claim.target_claim_id and claim.target_claim_id not in self.claims:
+                raise ValueError(
+                    f"Validation Error: target_claim_id '{claim.target_claim_id}' is missing from the DAG."
+                )
+        return self
