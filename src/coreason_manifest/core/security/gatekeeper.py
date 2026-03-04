@@ -14,7 +14,7 @@ from coreason_manifest.core.security.compliance import (
 )
 from coreason_manifest.oversight.resilience import EscalationStrategy
 from coreason_manifest.telemetry.logger import logger
-from coreason_manifest.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.workflow.flow import WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SwarmNode
 from coreason_manifest.workflow.topology import (
     get_reachable_nodes,
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from coreason_manifest.state.tools import AnyTool
 
 
-def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
+def _get_capabilities(node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope) -> list[str]:
     """Extract and aggregate explicit functional permissions assigned to an execution node.
 
     Preconditions:
@@ -88,7 +88,9 @@ def _get_capabilities(node: AnyNode, flow: LinearFlow | GraphFlow) -> list[str]:
     return []
 
 
-def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]) -> list[ComplianceReport]:
+def _check_domain_whitelist(
+    flow: WorkflowEnvelope | WorkflowEnvelope, tool_map: dict[str, AnyTool]
+) -> list[ComplianceReport]:
     """Enforce rigorous boundary limits over external architectural egress connectivity.
 
     Preconditions:
@@ -152,7 +154,7 @@ def _check_domain_whitelist(flow: LinearFlow | GraphFlow, tool_map: dict[str, An
 
 
 def _enforce_critical_capability_guards(
-    nodes: list[AnyNode], flow: LinearFlow | GraphFlow, tool_map: dict[str, AnyTool]
+    nodes: list[AnyNode], flow: WorkflowEnvelope | WorkflowEnvelope, tool_map: dict[str, AnyTool]
 ) -> list[ComplianceReport]:
     """Ensure hazardous compute capabilities explicitly require pre-execution human verification.
 
@@ -226,27 +228,23 @@ def _enforce_critical_capability_guards(
 
             # Construct Patch
             patch_ops = []
-            if isinstance(flow, LinearFlow):
-                # Find index
-                idx = 0
-                for i, n in enumerate(flow.steps):
-                    if n.id == node.id:
-                        idx = i
-                        break
-                patch_ops.append({"op": "add", "path": f"/sequence/{idx}", "value": human_node.model_dump(mode="json")})
-            elif isinstance(flow, GraphFlow):
+            if isinstance(flow, WorkflowEnvelope):
                 # Handle non-linear edge rewiring for dynamic security guard insertion.
 
                 # 1. Add Guard Node
                 patch_ops.append(
-                    {"op": "add", "path": f"/graph/nodes/{human_node_id}", "value": human_node.model_dump(mode="json")}
+                    {
+                        "op": "add",
+                        "path": f"/topology/nodes/{human_node_id}",
+                        "value": human_node.model_dump(mode="json"),
+                    }
                 )
 
                 # 2. Rewire incoming edges (Target -> Guard)
-                for edge_idx, edge in enumerate(flow.graph.edges):
+                for edge_idx, edge in enumerate(getattr(flow.topology, "edges", [])):
                     if edge.to_node == node.id:
                         patch_ops.append(
-                            {"op": "replace", "path": f"/graph/edges/{edge_idx}/to_node", "value": human_node_id}
+                            {"op": "replace", "path": f"/topology/edges/{edge_idx}/to_node", "value": human_node_id}
                         )
 
                 # 3. Add edge (Guard -> Target)
@@ -277,7 +275,7 @@ def _enforce_critical_capability_guards(
     return reports
 
 
-def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
+def _detect_utility_islands(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Isolate and prune localized architectural subgraphs entirely disconnected from primary execution ingress.
 
     Preconditions:
@@ -299,7 +297,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
     # Build Adjacency List
     _, edges = get_unified_topology(flow)
-    adj: dict[str, list[str]] = {nid: [] for nid in flow.graph.nodes}
+    adj: dict[str, list[str]] = {nid: [] for nid in flow.topology.nodes}
     for edge in edges:
         if edge.from_node in adj and edge.to_node in adj:
             adj[edge.from_node].append(edge.to_node)
@@ -324,14 +322,15 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     # 5b. Utility Island Detection (Unreachable from Entry)
     # Architectural Note: Use explicit entry point
     entry_nodes = []
-    if flow.graph.entry_point:
-        entry_nodes.append(flow.graph.entry_point)
+    entry_point = getattr(flow.topology, "entry_point", None)
+    if entry_point:
+        entry_nodes.append(entry_point)
 
     # BFS from entry nodes to find reachable set
     reachable = get_reachable_nodes(adj, entry_nodes)
 
     # Identify Unreachable Nodes
-    all_nodes = set(flow.graph.nodes.keys())
+    all_nodes = set(flow.topology.nodes.keys())
     unreachable = all_nodes - reachable
 
     # Aggregate ALL unreachable nodes
@@ -341,7 +340,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
         risk_details = {}  # Map node_id -> list of risk reasons
 
         for node_id in unreachable:
-            node = flow.graph.nodes[node_id]
+            node = flow.topology.nodes[node_id]
             caps = _get_capabilities(node, flow)
 
             risk_reasons = []
@@ -358,7 +357,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
         # Gather all edges connected to ANY unreachable node
         bulk_edge_indices = set()
-        for idx, edge in enumerate(flow.graph.edges):
+        for idx, edge in enumerate(getattr(flow.topology, "edges", [])):
             if edge.from_node in unreachable or edge.to_node in unreachable:
                 bulk_edge_indices.add(idx)
 
@@ -366,10 +365,10 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
 
         patch_list = []
         # 1. Remove Edges (use safe utility that handles sorting inherently)
-        patch_list.extend(generate_safe_array_removal_patch("/graph/edges", list(bulk_edge_indices)))
+        patch_list.extend(generate_safe_array_removal_patch("/topology/edges", list(bulk_edge_indices)))
 
         # 2. Remove Nodes (by key, safe order)
-        patch_list.extend([{"op": "remove", "path": f"/graph/nodes/{node_id}"} for node_id in unreachable])
+        patch_list.extend([{"op": "remove", "path": f"/topology/nodes/{node_id}"} for node_id in unreachable])
 
         if dangerous_node_ids:
             # Severity violation if any dangerous nodes are present
@@ -424,7 +423,7 @@ def _detect_utility_islands(flow: GraphFlow) -> list[ComplianceReport]:
     return reports
 
 
-def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_neuro_symbolic_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Mandate deterministic validation frameworks atop highly volatile generative optimization topologies.
 
     Preconditions:
@@ -444,7 +443,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
     """  # noqa: E501
     reports: list[ComplianceReport] = []
 
-    if not isinstance(flow, GraphFlow):
+    if not isinstance(flow, WorkflowEnvelope):
         return reports
 
     nodes, edges = get_unified_topology(flow)
@@ -499,7 +498,7 @@ def _check_neuro_symbolic_guard(flow: LinearFlow | GraphFlow) -> list[Compliance
     return reports
 
 
-def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_island_evolution_binding(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Enforce optimal heuristic binding across decentralized parallel computing topologies.
 
     Preconditions:
@@ -551,7 +550,7 @@ def _check_island_evolution_binding(flow: LinearFlow | GraphFlow) -> list[Compli
     return reports
 
 
-def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_meta_analysis_export_contract(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Mandate strict interoperability configurations facilitating rigid medical or data science downstream validations.
 
     Preconditions:
@@ -596,7 +595,7 @@ def _check_meta_analysis_export_contract(flow: LinearFlow | GraphFlow) -> list[C
     ]
 
 
-def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_meta_analysis_provenance_contract(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Enforce regulatory-grade semantic memory grounding strictly linking generated extraction to visual context.
 
     Preconditions:
@@ -654,7 +653,7 @@ def _check_meta_analysis_provenance_contract(flow: LinearFlow | GraphFlow) -> li
     return reports
 
 
-def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_prisma_s_ontological_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Enforce systematic scientific alignment upon heuristically generated literature exploration strategies.
 
     Preconditions:
@@ -674,7 +673,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
     """  # noqa: E501
     reports: list[ComplianceReport] = []
 
-    if not isinstance(flow, GraphFlow):
+    if not isinstance(flow, WorkflowEnvelope):
         return reports
 
     nodes, edges = get_unified_topology(flow)
@@ -734,7 +733,7 @@ def _check_prisma_s_ontological_guard(flow: LinearFlow | GraphFlow) -> list[Comp
     return reports
 
 
-def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_federated_search_press_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Mandate institutional peer-review layers validating programmatic execution of widespread digital data querying.
 
     Preconditions:
@@ -753,7 +752,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
         The sequential collection of systemic errors correcting absent review governance mechanisms.
     """  # noqa: E501
     reports: list[ComplianceReport] = []
-    if not isinstance(flow, GraphFlow):
+    if not isinstance(flow, WorkflowEnvelope):
         return reports
 
     nodes, edges = get_unified_topology(flow)
@@ -804,7 +803,7 @@ def _check_federated_search_press_guard(flow: LinearFlow | GraphFlow) -> list[Co
     return reports
 
 
-def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_genui_rbac(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Isolate dynamic component rendering behind rigorous explicit attribute-based access controls.
 
     Preconditions:
@@ -858,7 +857,7 @@ def _check_genui_rbac(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     return reports
 
 
-def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_cal_deduplication_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Ensure strict mathematical uniformity within active learning pipelines bypassing recursive structural inflation.
 
     Preconditions:
@@ -877,7 +876,7 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
         The cataloged structural flaws demanding rigid epistemic filtering components.
     """  # noqa: E501
     reports: list[ComplianceReport] = []
-    if not isinstance(flow, GraphFlow):
+    if not isinstance(flow, WorkflowEnvelope):
         return reports
 
     nodes, edges = get_unified_topology(flow)
@@ -923,7 +922,7 @@ def _check_cal_deduplication_guard(flow: LinearFlow | GraphFlow) -> list[Complia
     return reports
 
 
-def _check_prisma_ledger_mandate(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_prisma_ledger_mandate(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Document-dropping swarms MUST have a PRISMA Attrition Ledger."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
@@ -964,7 +963,7 @@ def _check_prisma_ledger_mandate(flow: LinearFlow | GraphFlow) -> list[Complianc
     return reports
 
 
-def _check_harmonization_vision_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_harmonization_vision_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Harmonization Swarms MUST use Multimodal Vision RAG."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
@@ -1002,13 +1001,13 @@ def _check_harmonization_vision_guard(flow: LinearFlow | GraphFlow) -> list[Comp
     return reports
 
 
-def _check_visual_extraction_inspector_guard(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def _check_visual_extraction_inspector_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Visual Extraction MUST be topologically verified by a Spatial Inspector."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
 
     reports: list[ComplianceReport] = []
-    if type(flow).__name__ != "GraphFlow":
+    if type(flow).__name__ != "WorkflowEnvelope":
         return reports
 
     nodes, edges = get_unified_topology(flow)
@@ -1060,7 +1059,7 @@ def _check_visual_extraction_inspector_guard(flow: LinearFlow | GraphFlow) -> li
     return reports
 
 
-def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
+def validate_policy(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
     """Execute overarching structural verification encompassing critical authorization and orchestration parameters.
 
     This meta-function sequentially evaluates all targeted security heuristics and
@@ -1101,8 +1100,8 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     # 1. Capability Analysis & Critical Capability Guards
     reports.extend(_enforce_critical_capability_guards(nodes, flow, tool_map))
 
-    # 5. Topology Analysis (GraphFlow Only)
-    if isinstance(flow, GraphFlow):
+    # 5. Topology Analysis (WorkflowEnvelope Only)
+    if isinstance(flow, WorkflowEnvelope):
         reports.extend(_detect_utility_islands(flow))
 
     # 6. Neuro-Symbolic Gatekeeping
@@ -1137,7 +1136,7 @@ def validate_policy(flow: LinearFlow | GraphFlow) -> list[ComplianceReport]:
     return reports
 
 
-def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
+def _is_guarded(target_node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope) -> bool:
     """Mathematically evaluate structural reachability confirming strict execution oversight mapping.
 
     Employs an extensive Breadth-First traversal analyzing topological accessibility, mapping constraints, and fallbacks.
@@ -1168,10 +1167,8 @@ def _is_guarded(target_node: AnyNode, flow: LinearFlow | GraphFlow) -> bool:
 
     # Determine entry point
     entry_id = None
-    if isinstance(flow, GraphFlow):
-        entry_id = flow.graph.entry_point
-    elif isinstance(flow, LinearFlow) and flow.steps:
-        entry_id = flow.steps[0].id
+    if isinstance(flow, WorkflowEnvelope):
+        entry_id = getattr(flow.topology, "entry_point", None)
 
     # Valid guards: HumanNode only.
     valid_guards = (HumanNode,)

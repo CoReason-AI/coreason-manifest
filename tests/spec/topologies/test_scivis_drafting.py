@@ -15,23 +15,23 @@ def test_scivis_drafting_flow_initialization() -> None:
     assert flow.metadata.version == "1.0.0"
 
     # Assert nodes presence and type
-    assert "planner" in flow.graph.nodes
-    assert isinstance(flow.graph.nodes["planner"], SciVisPlannerNode)
-    assert flow.graph.nodes["planner"].id == "planner"
+    assert "planner" in flow.topology.nodes
+    assert isinstance(flow.topology.nodes["planner"], SciVisPlannerNode)
+    assert flow.topology.nodes["planner"].id == "planner"
 
-    assert "drafter" in flow.graph.nodes
-    assert isinstance(flow.graph.nodes["drafter"], SciVisLayoutAgentNode)
-    assert flow.graph.nodes["drafter"].id == "drafter"
+    assert "drafter" in flow.topology.nodes
+    assert isinstance(flow.topology.nodes["drafter"], SciVisLayoutAgentNode)
+    assert flow.topology.nodes["drafter"].id == "drafter"
 
-    assert "critic" in flow.graph.nodes
-    assert isinstance(flow.graph.nodes["critic"], SciVisCriticNode)
-    assert flow.graph.nodes["critic"].id == "critic"
+    assert "critic" in flow.topology.nodes
+    assert isinstance(flow.topology.nodes["critic"], SciVisCriticNode)
+    assert flow.topology.nodes["critic"].id == "critic"
 
     # Assert entry point
-    assert flow.graph.entry_point == "planner"
+    assert getattr(flow.topology, "entry_point", None) == "planner"
 
     # Assert strictly 2 edges for the DAG (planner -> drafter, drafter -> critic)
-    edges = flow.graph.edges
+    edges = getattr(flow.topology, "edges", [])
     assert len(edges) == 2
 
     planner_drafter_edge = next((e for e in edges if e.from_node == "planner" and e.to_node == "drafter"), None)

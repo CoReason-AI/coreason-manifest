@@ -1,5 +1,5 @@
 from coreason_manifest.telemetry.logger import logger
-from coreason_manifest.workflow.flow import Edge, GraphFlow, LinearFlow
+from coreason_manifest.workflow.flow import Edge, WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AnyNode
 
 
@@ -105,7 +105,7 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
     return reachable
 
 
-def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], list[Edge]]:
+def get_unified_topology(flow: WorkflowEnvelope) -> tuple[list[AnyNode], list[Edge]]:
     """Construct a unified, canonical graph representation from disparate flow definitions.
 
     This abstraction layer normalizes sequential and explicitly defined graph flows
@@ -122,11 +122,10 @@ def get_unified_topology(flow: LinearFlow | GraphFlow) -> tuple[list[AnyNode], l
     Returns:
         A strictly normalized tuple containing the sequential collection of execution nodes and the synthesized routing edges.
     """  # noqa: E501
-    if isinstance(flow, GraphFlow):
-        return list(flow.graph.nodes.values()), flow.graph.edges
-    if isinstance(flow, LinearFlow):
-        nodes = flow.steps
-        edges = [Edge(from_node=nodes[i].id, to_node=nodes[i + 1].id) for i in range(len(nodes) - 1)]
+    if isinstance(flow, WorkflowEnvelope):
+        nodes = list(flow.topology.nodes.values())
+        edges = getattr(flow.topology, "edges", [])
         return nodes, edges
+
     # Raise error for unknown flow types to ensure strict typing/handling
-    raise ValueError(f"Unknown flow type: {type(flow)}. Expected LinearFlow or GraphFlow.")
+    raise ValueError(f"Unknown flow type: {type(flow)}. Expected WorkflowEnvelope.")

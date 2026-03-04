@@ -1,7 +1,7 @@
 from coreason_manifest.workflow.bidding import Bid, yield_to_suspense
 from coreason_manifest.workflow.blackboard import BlackboardBrokerConfig
 from coreason_manifest.workflow.exceptions import LineageIntegrityError
-from coreason_manifest.workflow.flow import Blackboard, Edge, Graph, GraphFlow, LinearFlow
+from coreason_manifest.workflow.flow import Blackboard, Edge, WorkflowEnvelope
 from coreason_manifest.workflow.nodes import (
     AgentNode,
     AnyNode,
@@ -32,23 +32,23 @@ __all__ = [
     "EmergenceInspectorNode",
     "ExtractorNode",
     "Graph",
-    "GraphFlow",
     "HumanNode",
     "InspectorNode",
     "InspectorNodeBase",
     "LineageIntegrityError",
-    "LinearFlow",
     "Node",
     "PlaceholderNode",
     "PlannerNode",
     "SemanticNode",
     "SwarmNode",
     "SwitchNode",
+    "WorkflowEnvelope",
+    "WorkflowEnvelope",
     "yield_to_suspense",
 ]
 
 # Late binding resolution for recursive types
-GraphFlow.model_rebuild()
+WorkflowEnvelope.model_rebuild()
 AgentNode.model_rebuild()
 HumanNode.model_rebuild()
 SwarmNode.model_rebuild()
