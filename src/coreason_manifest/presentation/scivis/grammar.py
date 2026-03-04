@@ -8,7 +8,7 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import Literal
 
 from pydantic import Field
