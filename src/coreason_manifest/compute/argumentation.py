@@ -50,9 +50,7 @@ class DefeasibleClaim(CoreasonModel):
     def validate_target_claim(self) -> "DefeasibleClaim":
         """Enforce that Rebuttals and Undercuts must point to a target claim."""
         if self.claim_type in {"REBUTTAL", "UNDERCUT"} and not self.target_claim_id:
-            raise ValueError(
-                f"Validation Error: A claim of type '{self.claim_type}' MUST have a target_claim_id."
-            )
+            raise ValueError(f"Validation Error: A claim of type '{self.claim_type}' MUST have a target_claim_id.")
         return self
 
 
