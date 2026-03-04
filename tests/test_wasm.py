@@ -1,6 +1,7 @@
-from coreason_manifest.core.primitives.wasm_types import WasmResourceLimits, WasiCapability
-from coreason_manifest.workflow.nodes.wasm import WasmExecutionNode
+from coreason_manifest.core.primitives.wasm_types import WasmResourceLimits
 from coreason_manifest.state.events import WasmExecutionTrace
+from coreason_manifest.workflow.nodes.wasm import WasmExecutionNode
+
 
 def test_wasm_execution_node() -> None:
     node = WasmExecutionNode(
