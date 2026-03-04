@@ -19,6 +19,9 @@ jobs:
           enable-cache: true
           python-version: "3.14"
 
+      - name: Install Dependencies
+        run: uv sync --all-extras --dev
+
       - name: Ruff Check
         run: uvx ruff check .
 
@@ -26,10 +29,10 @@ jobs:
         run: uvx ruff format --check .
 
       - name: Mypy Check
-        run: uvx mypy src/ tests/
+        run: uv run mypy src/ tests/
 
       - name: Deptry Check
-        run: uvx deptry src/
+        run: uv run deptry src/
 
   schema-contracts:
     name: Schema Contracts (Semantic Backward-Compatibility)
@@ -96,6 +99,9 @@ jobs:
           else
             echo "Skipping PR diff for non-pull_request event"
           fi
+
+      - name: Install Dependencies
+        run: uv sync
 
       - name: Prompt/Template Fuzzing
         run: uv run scripts/llm_fuzz.py

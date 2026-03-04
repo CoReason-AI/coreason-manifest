@@ -30,6 +30,13 @@ def main() -> None:
         print(diff)
         sys.exit(1)
 
+    if "iterable_item_added" in diff:
+        for path in diff["iterable_item_added"]:
+            # e.g. root['$defs']['AgentNode']['required'][1]
+            if "['required']" in path:
+                print(f"Error: Backward-breaking schema change detected! A new required field was added: {path}")
+                sys.exit(1)
+
     print("Schema change is backward-compatible.")
     sys.exit(0)
 

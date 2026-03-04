@@ -65,8 +65,7 @@ def test_pydantic_field_descriptions() -> None:
                             f"must be explicitly assigned a Field(...)."
                         )
                         assert isinstance(body_item.value, ast.Call), (
-                            f"Class attribute '{target_id}' in '{node.name}' ({py_file}) "
-                            f"must be a call to Field(...)."
+                            f"Class attribute '{target_id}' in '{node.name}' ({py_file}) must be a call to Field(...)."
                         )
                         func = body_item.value.func
                         if isinstance(func, ast.Name):
