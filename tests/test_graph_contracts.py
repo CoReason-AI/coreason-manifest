@@ -4,11 +4,12 @@ from coreason_manifest.state.events import EventType, GraphRetrievalTrace
 
 
 def test_graph_reasoning() -> None:
-    gr = GraphReasoning(
-        semantic_intent="Find concepts", anchor_nodes=["A"], max_hops=2, allowed_edge_types=["MAPS_TO"], model="gpt-4o"
+    req = SemanticTraversalRequest(
+        semantic_intent="Find concepts", anchor_nodes=["A"], max_hops=2, allowed_edge_types=["MAPS_TO"]
     )
+    gr = GraphReasoning(default_request=req.model_dump(), model="gpt-4o")
     assert gr.type == "graph"
-    assert gr.semantic_intent == "Find concepts"
+    assert gr.default_request["semantic_intent"] == "Find concepts"
 
 
 def test_semantic_traversal_request() -> None:

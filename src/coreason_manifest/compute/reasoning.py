@@ -500,10 +500,10 @@ class GraphReasoning(BaseReasoning):
 
     type: Literal["graph"] = "graph"
 
-    semantic_intent: Annotated[str, Field(description="The high-level objective.")]
-    anchor_nodes: Annotated[list[str], Field(description="Strict entry points.")]
-    max_hops: Annotated[int, Field(description="Depth limit to prevent graph explosion.")]
-    allowed_edge_types: Annotated[list[str], Field(description="Strict boundary filters.")]
+    default_request: Annotated[
+        dict[str, Any],
+        Field(description="The default semantic traversal request specification."),
+    ]
 
 
 class WasmExecutionReasoning(BaseReasoning):
