@@ -256,8 +256,13 @@ class CouncilTopology(BaseTopology):
 
     topology_type: Literal["moa"] = "moa"
     nodes: dict[str, AnyNode]
-    proposer_agents: list[NodeID] = Field(..., description="List of agents generating proposals in parallel.")
+    layers: list[list[NodeID]] = Field(
+        ..., description="Nested list where each sub-list represents a layer of parallel proposer agents."
+    )
     aggregator_agent: NodeID = Field(..., description="Agent synthesizing the proposals.")
+    diversity_maximization: bool = Field(
+        default=True, description="If True, the orchestrator auto-injects divergent personas into parallel proposers."
+    )
 
 
 class SwarmTopology(BaseTopology):
@@ -266,6 +271,9 @@ class SwarmTopology(BaseTopology):
     topology_type: Literal["swarm"] = "swarm"
     nodes: dict[str, AnyNode]
     entry_point: NodeID = Field(..., description="Starting node ID for the swarm.")
+    swarm_type: Literal["mesh", "star", "ring"] = Field(
+        default="mesh", description="The structural archetype of the dynamic handoff boundaries."
+    )
     allowed_handoffs: dict[NodeID, list[NodeID]] = Field(
         ..., description="Access control matrix defining valid handoff paths."
     )
@@ -282,8 +290,25 @@ class EventDrivenTopology(BaseTopology):
     )
 
 
+class HierarchicalTopology(BaseTopology):
+    """A Supervisor-Worker topology supporting infinitely nested sub-graphs."""
+
+    topology_type: Literal["hierarchical"] = "hierarchical"
+    nodes: dict[str, AnyNode]
+    entry_point: NodeID = Field(..., description="The Supervisor Node ID.")
+    sub_flows: dict[NodeID, Any] = Field(
+        default_factory=dict, description="Maps a worker node ID to an entirely nested WorkflowEnvelope."
+    )
+
+
 AnyTopology = Annotated[
-    DAGTopology | DCGTopology | MapReduceTopology | CouncilTopology | SwarmTopology | EventDrivenTopology,
+    DAGTopology
+    | DCGTopology
+    | MapReduceTopology
+    | CouncilTopology
+    | SwarmTopology
+    | EventDrivenTopology
+    | HierarchicalTopology,
     Field(discriminator="topology_type"),
 ]
 

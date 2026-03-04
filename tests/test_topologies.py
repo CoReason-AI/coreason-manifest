@@ -7,6 +7,7 @@ from coreason_manifest.workflow.flow import (
     DCGTopology,
     Edge,
     EventDrivenTopology,
+    HierarchicalTopology,
     MapReduceTopology,
     SwarmTopology,
 )
@@ -89,14 +90,24 @@ def test_map_reduce_topology() -> None:
 def test_council_topology() -> None:
     node1 = AgentNode(id="prop1", profile="p1", operational_policy=None)
     node2 = AgentNode(id="agg", profile="p2", operational_policy=None)
-    moa = CouncilTopology(nodes={"prop1": node1, "agg": node2}, proposer_agents=["prop1"], aggregator_agent="agg")
+    moa = CouncilTopology(
+        nodes={"prop1": node1, "agg": node2}, layers=[["prop1"]], aggregator_agent="agg", diversity_maximization=True
+    )
     assert moa.topology_type == "moa"
 
 
 def test_swarm_topology() -> None:
     node1 = AgentNode(id="agent1", profile="p1", operational_policy=None)
-    swarm = SwarmTopology(nodes={"agent1": node1}, entry_point="agent1", allowed_handoffs={"agent1": []})
+    swarm = SwarmTopology(
+        nodes={"agent1": node1}, entry_point="agent1", allowed_handoffs={"agent1": []}, swarm_type="mesh"
+    )
     assert swarm.topology_type == "swarm"
+
+
+def test_hierarchical_topology() -> None:
+    node1 = AgentNode(id="sup", profile="p1", operational_policy=None)
+    hier = HierarchicalTopology(nodes={"sup": node1}, entry_point="sup", sub_flows={"sup": {}})
+    assert hier.topology_type == "hierarchical"
 
 
 def test_event_driven_topology() -> None:
