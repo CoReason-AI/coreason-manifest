@@ -67,6 +67,15 @@ class DAGTopology(BaseTopology):
         default=None, description="Declarative backpressure constraints for the graph edges."
     )
 
+    @model_validator(mode="after")
+    def verify_edges_exist(self) -> DAGTopology:
+        for source, target in self.edges:
+            if source not in self.nodes:
+                raise ValueError(f"Edge source '{source}' does not exist in nodes registry.")
+            if target not in self.nodes:
+                raise ValueError(f"Edge target '{target}' does not exist in nodes registry.")
+        return self
+
 
 class CouncilTopology(BaseTopology):
     """
