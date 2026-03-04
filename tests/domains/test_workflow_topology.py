@@ -2,7 +2,7 @@ import math
 from typing import Any
 
 import pytest
-from hypothesis import given
+from hypothesis import assume, given
 from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 from pydantic import ValidationError
@@ -19,7 +19,7 @@ from coreason_manifest.workflow.topologies import CouncilTopology, DAGTopology
 
 # Strategy for valid NodeIDs (alphanumeric, underscores, hyphens)
 # Also must have a minimum length of 1 based on core primitives.
-valid_node_id_st = st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True).filter(lambda x: len(x) > 0)
+valid_node_id_st = st.from_regex(r"^[a-zA-Z0-9_-]+$", fullmatch=True)
 
 # Strategy for BaseNode attributes
 base_node_attrs = {
@@ -47,18 +47,38 @@ def test_dag_topology_referential_integrity_success(nodes: dict[str, Any], data:
     keys = list(nodes.keys())
     edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=20))
 
-    topology = DAGTopology(nodes=nodes, edges=edges)
+    topology = DAGTopology(nodes=nodes, edges=edges, allow_cycles=True)
     assert topology.edges == edges
+
+
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_cycle_adversarial(nodes: dict[str, Any], data: DataObject) -> None:
+    """Prove DAGTopology raises ValidationError when cycles are explicitly formed and allow_cycles is False."""
+    keys = list(nodes.keys())
+    node_a = data.draw(st.sampled_from(keys))
+    node_b = data.draw(st.sampled_from(keys))
+
+    with pytest.raises(ValidationError) as exc_info:
+        DAGTopology(nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=False)
+    assert "Graph contains cycles but allow_cycles is False" in str(exc_info.value)
+
+
+@given(nodes=nodes_dict_st(), data=st.data())
+def test_dag_topology_cycle_success(nodes: dict[str, Any], data: DataObject) -> None:
+    """Prove DAGTopology instantiates successfully with explicitly formed cycles when allow_cycles is True."""
+    keys = list(nodes.keys())
+    node_a = data.draw(st.sampled_from(keys))
+    node_b = data.draw(st.sampled_from(keys))
+
+    topology = DAGTopology(nodes=nodes, edges=[(node_a, node_b), (node_b, node_a)], allow_cycles=True)
+    assert topology.edges == [(node_a, node_b), (node_b, node_a)]
 
 
 @given(nodes=nodes_dict_st(), data=st.data())
 def test_dag_topology_referential_integrity_adversarial(nodes: dict[str, Any], data: DataObject) -> None:
     """Prove that injecting a ghost node into an edge tuple always raises a ValidationError."""
     ghost_node = "ghost_node_123"
-    if ghost_node in nodes:
-        del nodes[ghost_node]
-        if not nodes:
-            return
+    assume(ghost_node not in nodes)
 
     keys = list(nodes.keys())
     valid_id_str = data.draw(st.sampled_from(keys))
@@ -89,11 +109,7 @@ def test_council_topology_referential_integrity_success(nodes: dict[str, Any], a
 def test_council_topology_referential_integrity_adversarial(nodes: dict[str, Any]) -> None:
     """Test 2: Prove that injecting a guaranteed dangling pointer always raises a ValidationError."""
     rogue_id = "rogue_ghost_node"
-    # Ensure it's strictly not in the nodes dictionary
-    if rogue_id in nodes:
-        del nodes[rogue_id]
-        if not nodes:
-            return  # Skip if nodes becomes empty
+    assume(rogue_id not in nodes)
 
     with pytest.raises(ValidationError) as exc_info:
         CouncilTopology(nodes=nodes, adjudicator_id=rogue_id)
