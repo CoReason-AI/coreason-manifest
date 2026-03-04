@@ -3,6 +3,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
+from coreason_manifest.adapters.mcp.server import MCPResourceList
 from coreason_manifest.core.common.base import CoreasonModel
 
 
@@ -180,6 +181,10 @@ class SemanticMemoryConfig(CoreasonModel):
         description=(
             "Strict provenance requirements for ensuring extracted evidence is mathematically and visually grounded."
         ),
+    )
+    mcp_resources: list[MCPResourceList] = Field(
+        default_factory=list,
+        description="Remote, read-only context automatically synchronized via MCP.",
     )
 
     @model_validator(mode="after")

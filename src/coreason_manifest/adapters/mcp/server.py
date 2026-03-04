@@ -1,112 +1,69 @@
 """
 Native Model Context Protocol (MCP) Integration for the CoReason Manifest.
 
-This module defines a production-ready FastMCP server that natively exposes our
-Epistemic Ledger, our strict Neuro-Symbolic Data Contracts, and dynamic prompts.
+This module defines the core MCP connection primitives and universal canvas API tools.
 """
 
-from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Literal, cast  # noqa: F401
-from uuid import uuid4
+from typing import Annotated, Any, Literal
 
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, HttpUrl, model_validator
 
-from coreason_manifest.compute.epistemic import ClinicalProposition
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.presentation.scivis.scivis_provenance import ActorIdentity
-from coreason_manifest.state.events import EpistemicAnchor, EpistemicEvent, EventType, LegacyPayload
-from coreason_manifest.state.ledger import EpistemicLedger
-from coreason_manifest.telemetry.telemetry_schemas import AgentSignature, HardwareFingerprint
-from mcp.server.fastmcp import Context, FastMCP
 
 
-def create_mcp_server(ledger: EpistemicLedger) -> FastMCP:
-    """
-    Creates and configures a FastMCP server connected to the given EpistemicLedger.
+class StdioTransportConfig(CoreasonModel):
+    """Configuration for local Stdio-based MCP transport."""
 
-    The server exposes:
-      - Resources: Read-only access to ledger events via epistemic:// URIs.
-      - Tools: Neuro-symbolic data appending (e.g., ClinicalProposition).
-      - Prompts: Dynamic context injection.
+    type: Literal["stdio"] = "stdio"
+    command: str = Field(..., description="The command executable to run (e.g., 'node', 'python').")
+    args: list[str] = Field(default_factory=list, description="List of arguments to pass to the command.")
+    env_vars: dict[str, str] = Field(
+        default_factory=dict, description="Environment variables required by the transport."
+    )
 
-    Args:
-        ledger: The central CRDT EpistemicLedger instance.
 
-    Returns:
-        The configured FastMCP server instance.
-    """
-    mcp = FastMCP("CoReason Manifest MCP Server")
+class SSETransportConfig(CoreasonModel):
+    """Configuration for remote SSE-based MCP transport."""
 
-    @mcp.resource("epistemic://ledger/events/{event_id}")
-    async def get_event(event_id: str) -> str:
-        """
-        Fetch a specific EpistemicEvent from the ledger and return its canonical JSON representation.
-        """
-        event = ledger.get_event_by_id(event_id)
-        if event is not None:
-            return event.model_dump_json()
-        raise ValueError(f"Event {event_id} not found in ledger")
+    type: Literal["sse"] = "sse"
+    uri: HttpUrl = Field(..., description="The HTTP URL endpoint for the SSE connection.")
+    headers: dict[str, str] = Field(default_factory=dict, description="HTTP headers, e.g., for authentication.")
 
-    @mcp.tool()
-    async def append_clinical_proposition(proposition: ClinicalProposition, ctx: Context[Any, Any, Any]) -> str:
-        """
-        Intercept a call to append a ClinicalProposition, run strict Pydantic validation natively,
-        wrap it in an EpistemicEvent, and append it to the Ledger.
-        """
-        if ctx.request_context is None or ctx.request_context.meta is None:
-            raise ValueError("SecurityException: Context metadata is missing.")
 
-        from pydantic import BaseModel, ConfigDict
+MCPTransport = Annotated[
+    StdioTransportConfig | SSETransportConfig,
+    Field(discriminator="type", description="Polymorphic transport configuration."),
+]
 
-        class SecurityMetadata(BaseModel):
-            model_config = ConfigDict(extra="ignore")
-            agent_signature: dict[str, Any] = Field(alias="x-agent-signature")
-            hardware_fingerprint: dict[str, Any] = Field(alias="x-hardware-fingerprint")
 
-        try:
-            sec_meta = SecurityMetadata.model_validate(ctx.request_context.meta, from_attributes=True)
-            agent_sig_raw = sec_meta.agent_signature
-            hw_fingerprint_raw = sec_meta.hardware_fingerprint
-        except ValidationError as e:
-            raise ValueError(
-                f"SecurityException: Security headers are missing or invalid in Context metadata. Details: {e}"
-            ) from e
+class MCPServerConfig(CoreasonModel):
+    """Configuration definition for connecting to an MCP Server."""
 
-        try:
-            agent_sig = AgentSignature.model_validate(agent_sig_raw)
-            hardware_fingerprint = HardwareFingerprint.model_validate(hw_fingerprint_raw)
-        except ValidationError as e:
-            raise ValueError(f"SecurityException: Validation failed for Zero-Trust credentials: {e}") from e
+    server_id: str = Field(..., description="A unique identifier for this server instance.")
+    transport: MCPTransport
+    required_capabilities: list[str] = Field(
+        default_factory=lambda: ["tools", "resources", "prompts"],
+        description="A list of capabilities required from the MCP server.",
+    )
 
-        event = EpistemicEvent(
-            event_id=str(uuid4()),
-            timestamp=datetime.now(UTC),
-            context_envelope={
-                "agent_signature": agent_sig.model_dump(),
-                "hardware_cluster": hardware_fingerprint.model_dump(),
-                "prompt_version": "1.0",
-            },
-            event_type=EventType.SEMANTIC_EXTRACTED,
-            payload=LegacyPayload(data=proposition.model_dump(mode="json")),
-            epistemic_anchor=EpistemicAnchor(),
-        )
-        ledger.append(event)
-        return f"Successfully appended event {event.event_id}"
 
-    @mcp.prompt("auditor_recovery_prompt")
-    async def auditor_recovery_prompt(suspense_reason: str, hardware_profile: str) -> str:
-        """
-        Return a structured system prompt directing a Heavy Reasoner on how to verify
-        a blurry bounding box or failing mathematical token based on the failure context.
-        """
-        return (
-            f"You are a Heavy Reasoner operating on {hardware_profile}.\n"
-            f"The previous extraction failed due to: {suspense_reason}.\n"
-            "Please verify the blurry bounding box or failing mathematical token carefully."
-        )
+class MCPResourceList(CoreasonModel):
+    """A collection of Semantic Memory resource URIs provided by a specific MCP server."""
 
-    return mcp
+    server_id: str = Field(..., description="The ID of the MCP server providing these resources.")
+    uris: list[str] = Field(default_factory=list, description="List of resource URIs available to the agent.")
+
+
+class MCPPromptRef(CoreasonModel):
+    """A dynamic reference to an MCP-provided prompt template."""
+
+    server_id: str = Field(..., description="The ID of the MCP server providing this prompt.")
+    prompt_name: str = Field(..., description="The name of the prompt template.")
+    arguments: dict[str, Any] = Field(default_factory=dict, description="Arguments to fill the prompt template.")
+    fallback_persona: str | None = Field(None, description="A fallback persona if the prompt fails to load.")
+    prompt_hash: str | None = Field(None, description="Cryptographic hash for prompt integrity verification.")
 
 
 class MCPToolName(StrEnum):
