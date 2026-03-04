@@ -79,7 +79,7 @@ class CouncilTopology(BaseTopology):
         default=None, description="Constraints enforcing cognitive heterogeneity across the council."
     )
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_adjudicator_id(self) -> CouncilTopology:
         if self.adjudicator_id not in self.nodes:
             raise ValueError(f"Adjudicator ID '{self.adjudicator_id}' is not in nodes registry.")
