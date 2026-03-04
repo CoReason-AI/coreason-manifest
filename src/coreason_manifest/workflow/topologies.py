@@ -5,7 +5,7 @@
 #
 # For a commercial version of this software, please contact us at gowtham.rao@coreason.ai.
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, model_validator
 
@@ -68,7 +68,7 @@ class DAGTopology(BaseTopology):
     )
 
     @model_validator(mode="after")
-    def verify_edges_exist(self) -> DAGTopology:
+    def verify_edges_exist(self) -> Self:
         # Step 1: Referential integrity
         for source, target in self.edges:
             if source not in self.nodes:
@@ -116,7 +116,7 @@ class CouncilTopology(BaseTopology):
     )
 
     @model_validator(mode="after")
-    def check_adjudicator_id(self) -> CouncilTopology:
+    def check_adjudicator_id(self) -> Self:
         if self.adjudicator_id not in self.nodes:
             raise ValueError(f"Adjudicator ID '{self.adjudicator_id}' is not in nodes registry.")
         return self
