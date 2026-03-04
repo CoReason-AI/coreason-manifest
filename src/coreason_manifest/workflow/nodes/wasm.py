@@ -1,5 +1,5 @@
 # Prosperity-3.0
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
