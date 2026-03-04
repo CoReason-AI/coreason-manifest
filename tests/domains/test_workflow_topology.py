@@ -45,13 +45,7 @@ def nodes_dict_st(draw: Any) -> Any:
 def test_dag_topology_referential_integrity_success(nodes: dict[str, Any], data: DataObject) -> None:
     """Prove DAGTopology instantiated with edges connecting valid nodes never fails."""
     keys = list(nodes.keys())
-    edges = data.draw(
-        st.lists(
-            st.tuples(st.sampled_from(keys), st.sampled_from(keys)),
-            min_size=0,
-            max_size=20
-        )
-    )
+    edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=20))
 
     topology = DAGTopology(nodes=nodes, edges=edges)
     assert topology.edges == edges
@@ -70,13 +64,7 @@ def test_dag_topology_referential_integrity_adversarial(nodes: dict[str, Any], d
     valid_id_str = data.draw(st.sampled_from(keys))
 
     # Generate some valid edges, then inject a bad one
-    valid_edges = data.draw(
-        st.lists(
-            st.tuples(st.sampled_from(keys), st.sampled_from(keys)),
-            min_size=0,
-            max_size=5
-        )
-    )
+    valid_edges = data.draw(st.lists(st.tuples(st.sampled_from(keys), st.sampled_from(keys)), min_size=0, max_size=5))
 
     with pytest.raises(ValidationError) as exc_info:
         DAGTopology(nodes=nodes, edges=[*valid_edges, (valid_id_str, ghost_node)])
