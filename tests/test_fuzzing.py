@@ -37,7 +37,7 @@ resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResilienc
         st.none(),
         st.fixed_dictionaries(
             {
-                "confidence_threshold": st.floats(allow_nan=False, allow_infinity=False),
+                "confidence_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
                 "allowed_read_only_tools": st.lists(st.text()),
             }
         ),
@@ -47,7 +47,7 @@ resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResilienc
         st.fixed_dictionaries(
             {
                 "active": st.booleans(),
-                "dissonance_threshold": st.floats(allow_nan=False, allow_infinity=False),
+                "dissonance_threshold": st.floats(min_value=0.0, max_value=1.0, allow_nan=False, allow_infinity=False),
                 "action_on_gap": st.sampled_from(["fail", "probe", "clarify"]),
             }
         ),
@@ -56,7 +56,7 @@ resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResilienc
         st.none(),
         st.fixed_dictionaries(
             {
-                "max_loops": st.integers(),
+                "max_loops": st.integers(min_value=0, max_value=50),
                 "rollback_on_failure": st.booleans(),
             }
         ),
