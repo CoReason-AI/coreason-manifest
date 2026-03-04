@@ -1,7 +1,7 @@
 # Prosperity-3.0
-from typing import Union
+from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.spec.intent_protocols import UniversalIntentURI
@@ -39,7 +39,11 @@ class LiquidTopologyNode(Node):
     that autonomously spawns and dissolves a swarm of micro-agents at runtime.
     """
 
-    macro_intent: Union[str, UniversalIntentURI] = Field(
+    type: Literal["liquid"] = Field(
+        default="liquid",
+        description="The type of the node, used for polymorphic deserialization.",
+    )
+    macro_intent: str | UniversalIntentURI = Field(
         ...,
         description="The high-level goal that this topology aims to satisfy, represented either as a string or a strict URI.",
         examples=["Migrate all user data to the new schema"],
@@ -50,14 +54,7 @@ class LiquidTopologyNode(Node):
     )
     ephemeral_ttl_seconds: int = Field(
         ...,
+        gt=0,
         description="The time-to-live for the dynamically generated swarm before it dissolves to free up compute resources.",
         examples=[3600],
     )
-
-    @field_validator("ephemeral_ttl_seconds")
-    @classmethod
-    def validate_positive_ttl(cls, v: int) -> int:
-        """Ensure TTL is strictly positive."""
-        if v <= 0:
-            raise ValueError("ephemeral_ttl_seconds must be a positive integer strictly greater than 0.")
-        return v

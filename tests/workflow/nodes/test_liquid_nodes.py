@@ -40,7 +40,6 @@ def test_liquid_topology_node_inheritance() -> None:
 
     node = LiquidTopologyNode(
         id="liquid-node-1",
-        type="liquid",
         macro_intent=uri,
         decomposition=decomp,
         ephemeral_ttl_seconds=3600,
@@ -70,10 +69,9 @@ def test_liquid_topology_negative_ttl_validation() -> None:
         require_human_oversight_on_synthesis=False,
     )
 
-    with pytest.raises(ValidationError, match="ephemeral_ttl_seconds must be a positive integer"):
+    with pytest.raises(ValidationError):
         LiquidTopologyNode(
             id="liquid-node-2",
-            type="liquid",
             macro_intent=uri,
             decomposition=decomp,
             ephemeral_ttl_seconds=-5,
