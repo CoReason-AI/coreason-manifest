@@ -148,6 +148,76 @@ def _check_domain_whitelist(flow: WorkflowEnvelope, tool_map: dict[str, AnyTool]
                         ),
                     )
                 )
+
+    # EPIC 4: Zero-Trust MCP Egress Validation
+    mcp_clients = getattr(flow, "mcp_clients", [])
+    if isinstance(mcp_clients, dict):
+        mcp_clients = list(mcp_clients.values())
+
+    for client in mcp_clients:
+        transport = getattr(client, "transport", None)
+        if not transport:
+            continue
+
+        t_type = getattr(transport, "type", "")
+        if t_type == "sse":
+            uri = getattr(transport, "uri", None)
+            if uri:
+                # uri could be a Pydantic HttpUrl or a string
+                host = getattr(uri, "host", None)
+                if not host:
+                    from urllib.parse import urlparse
+
+                    parsed = urlparse(str(uri))
+                    host = parsed.hostname
+
+                if host:
+                    domain = canonicalize_domain(str(host))
+                    allowed = False
+                    for allowed_d in allowed_domains:
+                        if domain == allowed_d or domain.endswith("." + allowed_d):
+                            allowed = True
+                            break
+
+                    if not allowed:
+                        client_name = getattr(client, "name", "unknown_mcp_client")
+                        logger.warning("mcp_domain_blocked", client_name=client_name, domain=domain)
+                        reports.append(
+                            ComplianceReport(
+                                code=ErrorCatalog.ERR_SEC_MCP_DOMAIN_BLOCKED,
+                                severity="violation",
+                                message=f"MCP Client '{client_name}' uses blocked domain: {domain}",
+                                details={"domain": domain, "client_name": client_name},
+                                remediation=RemediationAction(
+                                    type="whitelist_domain",
+                                    format="json_patch",
+                                    patch_data=[
+                                        {"op": "add", "path": "/governance/allowed_domains/-", "value": domain}
+                                    ],
+                                    description=f"Add '{domain}' to allowed_domains for MCP client '{client_name}'",
+                                ),
+                            )
+                        )
+        elif t_type == "stdio":
+            command = getattr(transport, "command", "")
+            if command in ["bash", "sh", "cmd", "powershell"]:
+                client_name = getattr(client, "name", "unknown_mcp_client")
+                logger.warning("mcp_stdio_unsafe", client_name=client_name, command=command)
+                reports.append(
+                    ComplianceReport(
+                        code=ErrorCatalog.ERR_SEC_MCP_STDIO_UNSAFE,
+                        severity="violation",
+                        message=f"Local MCP Client '{client_name}' uses unconfined shell binary: {command}",
+                        details={"command": command, "client_name": client_name},
+                        remediation=RemediationAction(
+                            type="prune_mcp_client",
+                            format="json_patch",
+                            patch_data=[{"op": "remove", "path": f"/mcp_clients/{client_name}"}],
+                            description=f"Remove unsafe MCP client '{client_name}'",
+                        ),
+                    )
+                )
+
     return reports
 
 
@@ -1076,6 +1146,108 @@ def _check_visual_extraction_inspector_guard(flow: WorkflowEnvelope) -> list[Com
     return reports
 
 
+def _enforce_red_button_rule(flow: WorkflowEnvelope) -> list[ComplianceReport]:
+    """Enforce the Red Button Rule for MCP exported graphs.
+
+    If a high-risk graph is exposed to the outside world as an MCP Tool, it must have a HumanNode
+    at its entry point to prevent autonomous execution via remote triggering.
+    """
+    reports: list[ComplianceReport] = []
+
+    mcp_export = getattr(flow, "mcp_export", None)
+    if not mcp_export:
+        return reports
+
+    is_exported = getattr(mcp_export, "expose_as_tool", False)
+    if not is_exported:
+        return reports
+
+    nodes, _ = get_unified_topology(flow)
+
+    # Check if any node requires COMPUTER_USE or CODE_EXECUTION
+    has_high_risk = False
+    for node in nodes:
+        caps = _get_capabilities(node, flow)
+        if NodeCapability.COMPUTER_USE in caps or NodeCapability.CODE_EXECUTION in caps:
+            has_high_risk = True
+            break
+
+    if not has_high_risk:
+        return reports
+
+    # Find entry nodes
+    entry_nodes: list[str] = []
+    if isinstance(flow, WorkflowEnvelope):
+        match flow.topology.topology_type:
+            case "dag" | "dcg" | "swarm" | "hierarchical":
+                entry_point = getattr(flow.topology, "entry_point", None)
+                if entry_point:
+                    entry_nodes.append(entry_point)
+            case "moa":
+                layers = getattr(flow.topology, "layers", [])
+                if layers and len(layers) > 0:
+                    entry_nodes.extend(layers[0])
+            case "map_reduce":
+                mapper = getattr(flow.topology, "mapper_node_id", None)
+                if mapper:
+                    entry_nodes.append(mapper)
+
+    # Ensure entry nodes exist
+    if not entry_nodes:
+        return reports
+
+    # Get the actual node object for the first entry point
+    entry_node_id = entry_nodes[0]
+    entry_node = None
+    for n in nodes:
+        if n.id == entry_node_id:
+            entry_node = n
+            break
+
+    if not entry_node:
+        return reports
+
+    # Check if entry is already a HumanNode
+    if isinstance(entry_node, HumanNode):
+        return reports
+
+    # Check if guarded using _is_guarded logic
+    if _is_guarded(entry_node, flow):
+        return reports
+
+    logger.warning("unguarded_mcp_export", entry_node=entry_node_id)
+
+    # Needs guard
+    reports.append(
+        ComplianceReport(
+            code=ErrorCatalog.ERR_SEC_UNGUARDED_MCP_EXPORT,
+            severity="violation",
+            message=f"MCP Export exposes a high-risk graph without a HumanNode guard at entry point '{entry_node_id}'.",
+            node_id=entry_node_id,
+            remediation=RemediationAction(
+                type="guard_mcp_export",
+                format="json_patch",
+                target_node_id=entry_node_id,
+                patch_data=[
+                    {
+                        "op": "add",
+                        "path": f"/topology/nodes/guard_{entry_node_id}",
+                        "value": {"id": f"guard_{entry_node_id}", "type": "human"},
+                    },
+                    {
+                        "op": "replace",
+                        "path": "/topology/entry_point",
+                        "value": f"guard_{entry_node_id}",
+                    },
+                ],
+                description="Inject a HumanNode at the entry point of the exported graph",
+            ),
+        )
+    )
+
+    return reports
+
+
 def validate_policy(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Execute overarching structural verification encompassing critical authorization and orchestration parameters.
 
@@ -1144,6 +1316,9 @@ def validate_policy(flow: WorkflowEnvelope) -> list[ComplianceReport]:
 
     # 13. Zero-Trust GenUI Fencing
     reports.extend(_check_genui_rbac(flow))
+
+    # EPIC 4: Zero-Trust MCP Red Button Boundary
+    reports.extend(_enforce_red_button_rule(flow))
 
     # Epic 7: SOTA Regulatory Extraction & Provenance Hooks
     reports.extend(_check_prisma_ledger_mandate(flow))
