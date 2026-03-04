@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from coreason_manifest.state.tools import AnyTool
 
 
-def _get_capabilities(node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope) -> list[str]:
+def _get_capabilities(node: AnyNode, flow: WorkflowEnvelope) -> list[str]:
     """Extract and aggregate explicit functional permissions assigned to an execution node.
 
     Preconditions:
@@ -88,9 +88,7 @@ def _get_capabilities(node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope) 
     return []
 
 
-def _check_domain_whitelist(
-    flow: WorkflowEnvelope | WorkflowEnvelope, tool_map: dict[str, AnyTool]
-) -> list[ComplianceReport]:
+def _check_domain_whitelist(flow: WorkflowEnvelope, tool_map: dict[str, AnyTool]) -> list[ComplianceReport]:
     """Enforce rigorous boundary limits over external architectural egress connectivity.
 
     Preconditions:
@@ -154,7 +152,7 @@ def _check_domain_whitelist(
 
 
 def _enforce_critical_capability_guards(
-    nodes: list[AnyNode], flow: WorkflowEnvelope | WorkflowEnvelope, tool_map: dict[str, AnyTool]
+    nodes: list[AnyNode], flow: WorkflowEnvelope, tool_map: dict[str, AnyTool]
 ) -> list[ComplianceReport]:
     """Ensure hazardous compute capabilities explicitly require pre-execution human verification.
 
@@ -293,6 +291,11 @@ def _detect_utility_islands(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     Returns:
         The resulting compliance records aggressively enforcing tree-shaking and dangerous node elimination operations.
     """  # noqa: E501
+    if flow.topology.topology_type == "event_driven":
+        # Event-driven nodes are disjointed by design and trigger via Blackboard.
+        # Static reachability analysis does not apply.
+        return []
+
     reports: list[ComplianceReport] = []
 
     # Build Adjacency List
@@ -322,9 +325,19 @@ def _detect_utility_islands(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     # 5b. Utility Island Detection (Unreachable from Entry)
     # Architectural Note: Use explicit entry point
     entry_nodes = []
-    entry_point = getattr(flow.topology, "entry_point", None)
-    if entry_point:
-        entry_nodes.append(entry_point)
+    match flow.topology.topology_type:
+        case "dag" | "dcg" | "swarm" | "hierarchical":
+            entry_point = getattr(flow.topology, "entry_point", None)
+            if entry_point:
+                entry_nodes.append(entry_point)
+        case "moa":
+            layers = getattr(flow.topology, "layers", [])
+            if layers and len(layers) > 0:
+                entry_nodes.extend(layers[0])
+        case "map_reduce":
+            mapper = getattr(flow.topology, "mapper_node_id", None)
+            if mapper:
+                entry_nodes.append(mapper)
 
     # BFS from entry nodes to find reachable set
     reachable = get_reachable_nodes(adj, entry_nodes)
@@ -423,7 +436,7 @@ def _detect_utility_islands(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     return reports
 
 
-def _check_neuro_symbolic_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_neuro_symbolic_guard(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Mandate deterministic validation frameworks atop highly volatile generative optimization topologies.
 
     Preconditions:
@@ -498,7 +511,7 @@ def _check_neuro_symbolic_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> li
     return reports
 
 
-def _check_island_evolution_binding(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_island_evolution_binding(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Enforce optimal heuristic binding across decentralized parallel computing topologies.
 
     Preconditions:
@@ -550,7 +563,7 @@ def _check_island_evolution_binding(flow: WorkflowEnvelope | WorkflowEnvelope) -
     return reports
 
 
-def _check_meta_analysis_export_contract(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_meta_analysis_export_contract(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Mandate strict interoperability configurations facilitating rigid medical or data science downstream validations.
 
     Preconditions:
@@ -595,7 +608,7 @@ def _check_meta_analysis_export_contract(flow: WorkflowEnvelope | WorkflowEnvelo
     ]
 
 
-def _check_meta_analysis_provenance_contract(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_meta_analysis_provenance_contract(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Enforce regulatory-grade semantic memory grounding strictly linking generated extraction to visual context.
 
     Preconditions:
@@ -653,7 +666,7 @@ def _check_meta_analysis_provenance_contract(flow: WorkflowEnvelope | WorkflowEn
     return reports
 
 
-def _check_prisma_s_ontological_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_prisma_s_ontological_guard(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Enforce systematic scientific alignment upon heuristically generated literature exploration strategies.
 
     Preconditions:
@@ -733,7 +746,7 @@ def _check_prisma_s_ontological_guard(flow: WorkflowEnvelope | WorkflowEnvelope)
     return reports
 
 
-def _check_federated_search_press_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_federated_search_press_guard(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Mandate institutional peer-review layers validating programmatic execution of widespread digital data querying.
 
     Preconditions:
@@ -803,7 +816,7 @@ def _check_federated_search_press_guard(flow: WorkflowEnvelope | WorkflowEnvelop
     return reports
 
 
-def _check_genui_rbac(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_genui_rbac(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Isolate dynamic component rendering behind rigorous explicit attribute-based access controls.
 
     Preconditions:
@@ -857,7 +870,7 @@ def _check_genui_rbac(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[Complia
     return reports
 
 
-def _check_cal_deduplication_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_cal_deduplication_guard(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Ensure strict mathematical uniformity within active learning pipelines bypassing recursive structural inflation.
 
     Preconditions:
@@ -922,7 +935,7 @@ def _check_cal_deduplication_guard(flow: WorkflowEnvelope | WorkflowEnvelope) ->
     return reports
 
 
-def _check_prisma_ledger_mandate(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_prisma_ledger_mandate(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Document-dropping swarms MUST have a PRISMA Attrition Ledger."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
@@ -963,7 +976,7 @@ def _check_prisma_ledger_mandate(flow: WorkflowEnvelope | WorkflowEnvelope) -> l
     return reports
 
 
-def _check_harmonization_vision_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_harmonization_vision_guard(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Harmonization Swarms MUST use Multimodal Vision RAG."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
@@ -1001,7 +1014,7 @@ def _check_harmonization_vision_guard(flow: WorkflowEnvelope | WorkflowEnvelope)
     return reports
 
 
-def _check_visual_extraction_inspector_guard(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def _check_visual_extraction_inspector_guard(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Epic 7 Cohesion: Visual Extraction MUST be topologically verified by a Spatial Inspector."""
     from coreason_manifest.core.security.compliance import ComplianceReport, RemediationAction
     from coreason_manifest.workflow.topology import get_unified_topology
@@ -1059,7 +1072,7 @@ def _check_visual_extraction_inspector_guard(flow: WorkflowEnvelope | WorkflowEn
     return reports
 
 
-def validate_policy(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[ComplianceReport]:
+def validate_policy(flow: WorkflowEnvelope) -> list[ComplianceReport]:
     """Execute overarching structural verification encompassing critical authorization and orchestration parameters.
 
     This meta-function sequentially evaluates all targeted security heuristics and
@@ -1136,7 +1149,7 @@ def validate_policy(flow: WorkflowEnvelope | WorkflowEnvelope) -> list[Complianc
     return reports
 
 
-def _is_guarded(target_node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope) -> bool:
+def _is_guarded(target_node: AnyNode, flow: WorkflowEnvelope) -> bool:
     """Mathematically evaluate structural reachability confirming strict execution oversight mapping.
 
     Employs an extensive Breadth-First traversal analyzing topological accessibility, mapping constraints, and fallbacks.
@@ -1166,9 +1179,21 @@ def _is_guarded(target_node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope)
     all_ids = {n.id for n in nodes}
 
     # Determine entry point
-    entry_id = None
+    entry_nodes = []
     if isinstance(flow, WorkflowEnvelope):
-        entry_id = getattr(flow.topology, "entry_point", None)
+        match flow.topology.topology_type:
+            case "dag" | "dcg" | "swarm" | "hierarchical":
+                entry_point = getattr(flow.topology, "entry_point", None)
+                if entry_point:
+                    entry_nodes.append(entry_point)
+            case "moa":
+                layers = getattr(flow.topology, "layers", [])
+                if layers and len(layers) > 0:
+                    entry_nodes.extend(layers[0])
+            case "map_reduce":
+                mapper = getattr(flow.topology, "mapper_node_id", None)
+                if mapper:
+                    entry_nodes.append(mapper)
 
     # Valid guards: HumanNode only.
     valid_guards = (HumanNode,)
@@ -1189,24 +1214,17 @@ def _is_guarded(target_node: AnyNode, flow: WorkflowEnvelope | WorkflowEnvelope)
 
     guards = {n.id for n in nodes if isinstance(n, valid_guards)}
 
-    if entry_id:
-        queue = [entry_id]
-        visited = {entry_id}
-    else:
-        queue = []
-        visited = set()
+    # Initialize queues with all polymorphic entry nodes
+    queue = list(entry_nodes)
+    visited = set(entry_nodes)
 
-    # Handle case where target is the entry node
-    if entry_id and target_node.id == entry_id:
+    # Handle edge-case where target is one of the entry nodes
+    if target_node.id in entry_nodes:
         return False
 
     # 1. Check strict reachability (ignoring guards) to identify Islands
-    if entry_id:
-        full_queue = [entry_id]
-        full_visited = {entry_id}
-    else:
-        full_queue = []
-        full_visited = set()
+    full_queue = list(entry_nodes)
+    full_visited = set(entry_nodes)
 
     reachable = False
     while full_queue:

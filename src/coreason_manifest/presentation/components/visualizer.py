@@ -98,7 +98,7 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
     return definition
 
 
-def to_mermaid(flow: WorkflowEnvelope | WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None) -> str:
+def to_mermaid(flow: WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None) -> str:
     """Generates valid Mermaid.js diagram code."""
     lines = []
 
@@ -263,9 +263,7 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     return positions
 
 
-def to_react_flow(
-    flow: WorkflowEnvelope | WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None
-) -> dict[str, Any]:
+def to_react_flow(flow: WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None) -> dict[str, Any]:
     """Generates React Flow compatible JSON."""
     rf_nodes: list[dict[str, Any]] = []
     rf_edges: list[dict[str, Any]] = []
@@ -318,7 +316,7 @@ def to_react_flow(
     return {"nodes": rf_nodes, "edges": rf_edges}
 
 
-def export_html_diagram(flow: WorkflowEnvelope | WorkflowEnvelope, output_path: str = "graph.html") -> None:
+def export_html_diagram(flow: WorkflowEnvelope, output_path: str = "graph.html") -> None:
     """Exports a flow to an HTML file containing a Mermaid.js diagram."""
     mermaid_str = to_mermaid(flow)
     html_content = f"""<!DOCTYPE html>

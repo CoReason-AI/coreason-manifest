@@ -39,7 +39,7 @@ class AgentRequest(BaseModel):
     hash_version: Literal["v2"] = Field(default="v2", description="Versioning for integrity strategies.")
 
     # Execution Manifest
-    manifest: WorkflowEnvelope | WorkflowEnvelope = Field(..., description="The AOT-compiled execution graph.")
+    manifest: WorkflowEnvelope = Field(..., description="The AOT-compiled execution graph.")
 
     # V2 Standard: The Zero-Trust Identity Envelope.
     passport: IdentityPassport = Field(

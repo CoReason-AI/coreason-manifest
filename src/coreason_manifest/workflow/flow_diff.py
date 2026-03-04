@@ -319,7 +319,7 @@ def _compare_objects(path_prefix: str, old_obj: Any, new_obj: Any) -> list[DiffC
     return changes
 
 
-def compare_flows(old: WorkflowEnvelope | WorkflowEnvelope, new: WorkflowEnvelope | WorkflowEnvelope) -> DiffReport:
+def compare_flows(old: WorkflowEnvelope, new: WorkflowEnvelope) -> DiffReport:
     """Analyze and quantify architectural variances traversing entire workflow definitions.
 
     Translates rigorous programmatic object state into raw dictionary representations
