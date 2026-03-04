@@ -31,32 +31,6 @@
       "title": "AdjudicationRubric",
       "type": "object"
     },
-    "AdversaryProfile": {
-      "additionalProperties": false,
-      "properties": {
-        "persona": {
-          "description": "The assigned persona or character the attacker agent must adopt.",
-          "title": "Persona",
-          "type": "string"
-        },
-        "attack_vector": {
-          "$ref": "#/$defs/AttackVector",
-          "description": "The method or angle of the adversarial attack."
-        },
-        "goal": {
-          "description": "The explicit adversarial goal (e.g., 'Extract the adjudicator system prompt').",
-          "title": "Goal",
-          "type": "string"
-        }
-      },
-      "required": [
-        "persona",
-        "attack_vector",
-        "goal"
-      ],
-      "title": "AdversaryProfile",
-      "type": "object"
-    },
     "AgentNode": {
       "additionalProperties": false,
       "description": "A node representing an autonomous agent.",
@@ -72,75 +46,12 @@
           "description": "Discriminator for an Agent node.",
           "title": "Type",
           "type": "string"
-        },
-        "reflex_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/System1Reflex"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The policy governing System 1 reflex actions."
-        },
-        "epistemic_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EpistemicScanner"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The policy governing epistemic scanning."
-        },
-        "correction_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SelfCorrectionPolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The policy governing self-correction loops."
         }
       },
       "required": [
         "description"
       ],
       "title": "AgentNode",
-      "type": "object"
-    },
-    "AiTMStrategy": {
-      "additionalProperties": false,
-      "properties": {
-        "source_node_id": {
-          "description": "The node originating the intercepted message.",
-          "title": "Source Node Id",
-          "type": "string"
-        },
-        "target_node_id": {
-          "description": "The node intended to receive the message.",
-          "title": "Target Node Id",
-          "type": "string"
-        },
-        "mutation_instruction": {
-          "description": "The instruction dictating how the red-team agent should subtly corrupt the intercepted state event.",
-          "title": "Mutation Instruction",
-          "type": "string"
-        }
-      },
-      "required": [
-        "source_node_id",
-        "target_node_id",
-        "mutation_instruction"
-      ],
-      "title": "AiTMStrategy",
       "type": "object"
     },
     "AnyNode": {
@@ -209,45 +120,6 @@
         }
       ]
     },
-    "AttackVector": {
-      "enum": [
-        "semantic_hijacking",
-        "system_prompt_extraction",
-        "sabotage",
-        "deception",
-        "data_exfiltration"
-      ],
-      "type": "string"
-    },
-    "BackpressurePolicy": {
-      "additionalProperties": false,
-      "description": "Declarative backpressure constraints.",
-      "properties": {
-        "max_queue_depth": {
-          "description": "The maximum number of unprocessed messages/observations allowed between connected nodes before yielding.",
-          "title": "Max Queue Depth",
-          "type": "integer"
-        },
-        "token_budget_per_branch": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The maximum token cost allowed per execution branch before rate-limiting.",
-          "title": "Token Budget Per Branch"
-        }
-      },
-      "required": [
-        "max_queue_depth"
-      ],
-      "title": "BackpressurePolicy",
-      "type": "object"
-    },
     "BeliefUpdateEvent": {
       "additionalProperties": false,
       "properties": {
@@ -274,35 +146,6 @@
         "timestamp"
       ],
       "title": "BeliefUpdateEvent",
-      "type": "object"
-    },
-    "ChaosExperiment": {
-      "additionalProperties": false,
-      "properties": {
-        "experiment_id": {
-          "description": "The unique identifier for the chaos experiment.",
-          "title": "Experiment Id",
-          "type": "string"
-        },
-        "hypothesis": {
-          "$ref": "#/$defs/SteadyStateHypothesis",
-          "description": "The baseline steady state hypothesis being tested."
-        },
-        "faults": {
-          "description": "The list of fault injection profiles defining the chaotic elements.",
-          "items": {
-            "$ref": "#/$defs/FaultInjectionProfile"
-          },
-          "title": "Faults",
-          "type": "array"
-        }
-      },
-      "required": [
-        "experiment_id",
-        "hypothesis",
-        "faults"
-      ],
-      "title": "ChaosExperiment",
       "type": "object"
     },
     "ConstitutionalRule": {
@@ -373,18 +216,6 @@
         "adjudicator_id": {
           "$ref": "#/$defs/NodeID",
           "description": "The NodeID of the adjudicator that synthesizes the council's output."
-        },
-        "diversity_policy": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DiversityConstraint"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Constraints enforcing cognitive heterogeneity across the council."
         }
       },
       "required": [
@@ -421,59 +252,12 @@
           "description": "Configuration indicating if cycles are allowed during validation.",
           "title": "Allow Cycles",
           "type": "boolean"
-        },
-        "backpressure": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/BackpressurePolicy"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Declarative backpressure constraints for the graph edges."
         }
       },
       "required": [
         "nodes"
       ],
       "title": "DAGTopology",
-      "type": "object"
-    },
-    "DiversityConstraint": {
-      "additionalProperties": false,
-      "description": "Constraints enforcing cognitive heterogeneity.",
-      "properties": {
-        "min_adversaries": {
-          "description": "The minimum number of adversarial or 'Devil's Advocate' roles required to prevent groupthink.",
-          "title": "Min Adversaries",
-          "type": "integer"
-        },
-        "model_variance_required": {
-          "description": "If True, forces the orchestrator to route sub-agents to different foundational models.",
-          "title": "Model Variance Required",
-          "type": "boolean"
-        },
-        "temperature_variance": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Required statistical variance in temperature settings across the council.",
-          "title": "Temperature Variance"
-        }
-      },
-      "required": [
-        "min_adversaries",
-        "model_variance_required"
-      ],
-      "title": "DiversityConstraint",
       "type": "object"
     },
     "EpistemicLedger": {
@@ -493,82 +277,6 @@
       ],
       "title": "EpistemicLedger",
       "type": "object"
-    },
-    "EpistemicScanner": {
-      "additionalProperties": false,
-      "description": "Policy for epistemic scanning and gap detection.",
-      "properties": {
-        "active": {
-          "description": "Whether the epistemic scanner is active.",
-          "title": "Active",
-          "type": "boolean"
-        },
-        "dissonance_threshold": {
-          "description": "The threshold for cognitive dissonance before triggering an action.",
-          "title": "Dissonance Threshold",
-          "type": "number"
-        },
-        "action_on_gap": {
-          "description": "The action to take when an epistemic gap is detected.",
-          "enum": [
-            "fail",
-            "probe",
-            "clarify"
-          ],
-          "title": "Action On Gap",
-          "type": "string"
-        }
-      },
-      "required": [
-        "active",
-        "dissonance_threshold",
-        "action_on_gap"
-      ],
-      "title": "EpistemicScanner",
-      "type": "object"
-    },
-    "FaultInjectionProfile": {
-      "additionalProperties": false,
-      "properties": {
-        "fault_type": {
-          "$ref": "#/$defs/FaultType",
-          "description": "The specific type of fault to inject."
-        },
-        "target_node_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "The specific node to attack, or None for swarm-wide.",
-          "title": "Target Node Id"
-        },
-        "intensity": {
-          "description": "The severity of the fault, represented from 0.0 to 1.0.",
-          "title": "Intensity",
-          "type": "number"
-        }
-      },
-      "required": [
-        "fault_type",
-        "intensity"
-      ],
-      "title": "FaultInjectionProfile",
-      "type": "object"
-    },
-    "FaultType": {
-      "enum": [
-        "context_overload",
-        "incorrect_context",
-        "format_corruption",
-        "latency_spike",
-        "token_throttle"
-      ],
-      "type": "string"
     },
     "GovernancePolicy": {
       "additionalProperties": false,
@@ -816,28 +524,6 @@
       "title": "RateCard",
       "type": "object"
     },
-    "SelfCorrectionPolicy": {
-      "additionalProperties": false,
-      "description": "Policy for self-correction and iterative refinement.",
-      "properties": {
-        "max_loops": {
-          "description": "The maximum number of self-correction loops allowed.",
-          "title": "Max Loops",
-          "type": "integer"
-        },
-        "rollback_on_failure": {
-          "description": "Whether to rollback to the previous state on failure.",
-          "title": "Rollback On Failure",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "max_loops",
-        "rollback_on_failure"
-      ],
-      "title": "SelfCorrectionPolicy",
-      "type": "object"
-    },
     "SemanticVersion": {
       "description": "A semantic version string (e.g., '1.0.0').",
       "examples": [
@@ -911,43 +597,6 @@
       "title": "SpanTrace",
       "type": "object"
     },
-    "SteadyStateHypothesis": {
-      "additionalProperties": false,
-      "properties": {
-        "expected_max_latency": {
-          "description": "The expected maximum latency under normal conditions.",
-          "title": "Expected Max Latency",
-          "type": "number"
-        },
-        "max_loops_allowed": {
-          "description": "The maximum allowed loops for the swarm to reach a conclusion.",
-          "title": "Max Loops Allowed",
-          "type": "integer"
-        },
-        "required_tool_usage": {
-          "anyOf": [
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "A list of required tools that must be utilized.",
-          "title": "Required Tool Usage"
-        }
-      },
-      "required": [
-        "expected_max_latency",
-        "max_loops_allowed"
-      ],
-      "title": "SteadyStateHypothesis",
-      "type": "object"
-    },
     "SwarmTopology": {
       "additionalProperties": false,
       "description": "A dynamic Swarm workflow topology.",
@@ -981,31 +630,6 @@
         "nodes"
       ],
       "title": "SwarmTopology",
-      "type": "object"
-    },
-    "System1Reflex": {
-      "additionalProperties": false,
-      "description": "Policy for fast, intuitive system 1 thinking.",
-      "properties": {
-        "confidence_threshold": {
-          "description": "The confidence threshold required to execute a reflex action.",
-          "title": "Confidence Threshold",
-          "type": "number"
-        },
-        "allowed_read_only_tools": {
-          "description": "List of read-only tools allowed during a reflex action.",
-          "items": {
-            "type": "string"
-          },
-          "title": "Allowed Read Only Tools",
-          "type": "array"
-        }
-      },
-      "required": [
-        "confidence_threshold",
-        "allowed_read_only_tools"
-      ],
-      "title": "System1Reflex",
       "type": "object"
     },
     "SystemFaultEvent": {

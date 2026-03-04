@@ -26,7 +26,7 @@ jobs:
         run: uvx ruff format --check .
 
       - name: Mypy Check
-        run: uvx --with pydantic --with pytest --with hypothesis --with mcp mypy src/ tests/
+        run: uvx mypy src/ tests/
 
       - name: Deptry Check
         run: uvx deptry src/
@@ -51,10 +51,7 @@ jobs:
         run: git diff --exit-code coreason_ontology.schema.json
 
       - name: Semantic Diff Check
-        run: |
-          mkdir -p scripts
-          touch scripts/semantic_diff.py
-          uv run scripts/semantic_diff.py origin/main coreason_ontology.schema.json
+        run: uv run scripts/semantic_diff.py origin/main coreason_ontology.schema.json
 
   mcp-conformance:
     name: MCP Conformance (Protocol Health)
@@ -71,13 +68,12 @@ jobs:
         run: uv sync
 
       - name: Start MCP Server
-        run: uv run coreason-mcp &
+        run: |
+          uv run coreason-mcp &
+          sleep 5
 
       - name: MCP Ping
-        run: |
-          mkdir -p scripts
-          touch scripts/mcp_ping.py
-          uv run scripts/mcp_ping.py
+        run: uv run scripts/mcp_ping.py
 
   security-sast:
     name: Security SAST (AI-Specific Fuzzing & Architectural Gate)
@@ -94,8 +90,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p scripts
-          touch scripts/evaluate_architecture.py
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             gh pr diff ${{ github.event.pull_request.number }} | uv run scripts/evaluate_architecture.py
           else
@@ -103,10 +97,7 @@ jobs:
           fi
 
       - name: Prompt/Template Fuzzing
-        run: |
-          mkdir -p scripts
-          touch scripts/llm_fuzz.py
-          uv run scripts/llm_fuzz.py
+        run: uv run scripts/llm_fuzz.py
 
   test:
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
