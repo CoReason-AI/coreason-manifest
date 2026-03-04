@@ -10,8 +10,8 @@ from coreason_manifest.workflow.topologies import DAGTopology
 def test_workflow_envelope_determinism() -> None:
     node1 = AgentNode(description="First node")
     node2 = AgentNode(description="Second node")
-    topology1 = DAGTopology(nodes={"node_a": node1, "node_b": node2}, allow_cycles=False)
-    topology2 = DAGTopology(nodes={"node_b": node2, "node_a": node1}, allow_cycles=False)
+    topology1 = DAGTopology(nodes={"node_a": node1, "node_b": node2}, allow_cycles=False, backpressure=None)
+    topology2 = DAGTopology(nodes={"node_b": node2, "node_a": node1}, allow_cycles=False, backpressure=None)
 
     env1 = WorkflowEnvelope(manifest_version="1.0.0", topology=topology1)
     env2 = WorkflowEnvelope(manifest_version="1.0.0", topology=topology2)

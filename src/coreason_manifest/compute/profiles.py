@@ -1,6 +1,10 @@
+from typing import Literal
+
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
+
+type QoSClassification = Literal["critical", "high", "interactive", "background_batch"]
 
 
 class RateCard(CoreasonBaseModel):
@@ -37,4 +41,8 @@ class ComputeProvisioningRequest(CoreasonBaseModel):
     max_budget: float = Field(description="The maximum cost budget allowable for the provisioned compute.")
     required_capabilities: list[str] = Field(
         description="The minimal functional capabilities required by the requested compute."
+    )
+    qos_class: QoSClassification = Field(
+        default="interactive",
+        description="The Quality of Service priority, used by the compute spot market for semantic load shedding.",
     )
