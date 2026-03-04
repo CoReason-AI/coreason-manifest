@@ -323,7 +323,7 @@ class HierarchicalTopology(BaseTopology):
     topology_type: Literal["hierarchical"] = "hierarchical"
     nodes: dict[str, AnyNode]
     entry_point: NodeID = Field(..., description="The Supervisor Node ID.")
-    sub_flows: dict[NodeID, Any] = Field(
+    sub_flows: dict[NodeID, "WorkflowEnvelope"] = Field(
         default_factory=dict, description="Maps a worker node ID to an entirely nested WorkflowEnvelope."
     )
 
@@ -410,8 +410,8 @@ class WorkflowEnvelope(CoreasonModel):
             ]
             if unresolved:
                 msg = (
-                    f"Lifecycle Violation: Cannot publish graph. Nodes [{','.join(unresolved)}] "
-                    "contain unresolved SemanticRefs. A Weaver must compile this graph into "
+                    f"Lifecycle Violation: Cannot publish workflow. Nodes [{','.join(unresolved)}] "
+                    "contain unresolved SemanticRefs. A Weaver must compile this workflow into "
                     "concrete profiles before publication."
                 )
                 raise ManifestError.critical_halt(code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED, message=msg)

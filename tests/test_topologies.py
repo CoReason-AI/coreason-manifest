@@ -106,7 +106,17 @@ def test_swarm_topology() -> None:
 
 def test_hierarchical_topology() -> None:
     node1 = AgentNode(id="sup", profile="p1", operational_policy=None)
-    hier = HierarchicalTopology(nodes={"sup": node1}, entry_point="sup", sub_flows={"sup": {}})
+
+    # Create a minimal valid WorkflowEnvelope to test HierarchicalTopology sub_flows
+    from coreason_manifest.workflow.flow import FlowInterface, FlowMetadata, WorkflowEnvelope
+
+    sub_flow = WorkflowEnvelope(
+        metadata=FlowMetadata(name="SubFlow", version="1.0"),
+        interface=FlowInterface(),
+        topology=EventDrivenTopology(nodes={"agent1": node1}, trigger_schemas={"agent1": ["var1"]}),
+    )
+
+    hier = HierarchicalTopology(nodes={"sup": node1}, entry_point="sup", sub_flows={"sup": sub_flow})
     assert hier.topology_type == "hierarchical"
 
 
