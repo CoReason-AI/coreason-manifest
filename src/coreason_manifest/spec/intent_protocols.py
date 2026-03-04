@@ -49,7 +49,9 @@ class GracefulDegradationPolicy(CoreasonModel):
     )
     allow_synthetic_bootstrapping: bool = Field(
         ...,
-        description="If True, the orchestrator is allowed to synthetically generate a less optimal swarm to fulfill the intent.",
+        description=(
+            "If True, the orchestrator is allowed to synthetically generate a less optimal swarm to fulfill the intent."
+        ),
         examples=[False],
     )
 
@@ -68,7 +70,10 @@ class UniversalIntentURI(CoreasonModel):
     )
     ecosystem_target: str = Field(
         ...,
-        description="The target registry, catalog, or provider where the intent should be resolved (e.g., 'huggingface', 'internal-registry').",
+        description=(
+            "The target registry, catalog, or provider where the intent should be resolved "
+            "(e.g., 'huggingface', 'internal-registry')."
+        ),
         examples=["internal-registry"],
     )
     semantic_payload: str = Field(

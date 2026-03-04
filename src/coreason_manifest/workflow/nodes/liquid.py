@@ -27,7 +27,10 @@ class DecompositionStrategy(CoreasonModel):
     )
     require_human_oversight_on_synthesis: bool = Field(
         ...,
-        description="Whether a human-in-the-loop confirmation is required before the swarm collapses and synthesizes its final result.",
+        description=(
+            "Whether a human-in-the-loop confirmation is required before the swarm collapses "
+            "and synthesizes its final result."
+        ),
         examples=[True],
     )
 
@@ -45,7 +48,9 @@ class LiquidTopologyNode(Node):
     )
     macro_intent: str | UniversalIntentURI = Field(
         ...,
-        description="The high-level goal that this topology aims to satisfy, represented either as a string or a strict URI.",
+        description=(
+            "The high-level goal that this topology aims to satisfy, represented either as a string or a strict URI."
+        ),
         examples=["Migrate all user data to the new schema"],
     )
     decomposition: DecompositionStrategy = Field(
@@ -55,6 +60,8 @@ class LiquidTopologyNode(Node):
     ephemeral_ttl_seconds: int = Field(
         ...,
         gt=0,
-        description="The time-to-live for the dynamically generated swarm before it dissolves to free up compute resources.",
+        description=(
+            "The time-to-live for the dynamically generated swarm before it dissolves to free up compute resources."
+        ),
         examples=[3600],
     )
