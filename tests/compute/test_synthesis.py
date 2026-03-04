@@ -48,7 +48,7 @@ def test_rl_reward_compiler_invalid_threshold() -> None:
         metric_name="accuracy",
     )
 
-    with pytest.raises(ValidationError, match=r"target_metric_threshold must be between 0\.0 and 1\.0"):
+    with pytest.raises(ValidationError, match="Input should be less than or equal to 1"):
         RLRewardCompiler(
             base_optimization=optimization,
             target_metric_threshold=1.5,  # Invalid
@@ -57,7 +57,7 @@ def test_rl_reward_compiler_invalid_threshold() -> None:
             semantic_density_reward=1.2,
         )
 
-    with pytest.raises(ValidationError, match=r"target_metric_threshold must be between 0\.0 and 1\.0"):
+    with pytest.raises(ValidationError, match="Input should be greater than or equal to 0"):
         RLRewardCompiler(
             base_optimization=optimization,
             target_metric_threshold=-0.1,  # Invalid
@@ -82,7 +82,7 @@ def test_continuous_self_play_config_valid() -> None:
 
 def test_continuous_self_play_config_invalid_temperature() -> None:
     """Test that ContinuousSelfPlayConfig raises ValidationError when mutation_temperature is out of bounds."""
-    with pytest.raises(ValidationError, match=r"mutation_temperature must be between 0\.0 and 2\.0"):
+    with pytest.raises(ValidationError, match="Input should be less than or equal to 2"):
         ContinuousSelfPlayConfig(
             sleep_cycle_cron="0 2 * * *",
             teacher_model_uri="frontier-model-v1",
@@ -90,7 +90,7 @@ def test_continuous_self_play_config_invalid_temperature() -> None:
             mutation_temperature=2.5,  # Invalid
         )
 
-    with pytest.raises(ValidationError, match=r"mutation_temperature must be between 0\.0 and 2\.0"):
+    with pytest.raises(ValidationError, match="Input should be greater than or equal to 0"):
         ContinuousSelfPlayConfig(
             sleep_cycle_cron="0 2 * * *",
             teacher_model_uri="frontier-model-v1",
@@ -111,3 +111,22 @@ def test_ephemeral_adapter_manifest_valid() -> None:
     assert manifest.adapter_hash.startswith("a3f4b5c")
     assert manifest.ttl_seconds == 3600
     assert manifest.training_steps_taken == 150
+
+
+def test_ephemeral_adapter_manifest_invalid_ttl() -> None:
+    """Test that EphemeralAdapterManifest raises ValidationError when ttl_seconds is less than or equal to 0."""
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
+        EphemeralAdapterManifest(
+            adapter_hash="a3f4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+            base_model_uri="base-model-v2",
+            ttl_seconds=0,  # Invalid
+            training_steps_taken=150,
+        )
+
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
+        EphemeralAdapterManifest(
+            adapter_hash="a3f4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+            base_model_uri="base-model-v2",
+            ttl_seconds=-10,  # Invalid
+            training_steps_taken=150,
+        )

@@ -15,22 +15,24 @@ This module defines the data contracts for how an agent is algorithmically boots
 evaluated, and iteratively improved over time within the 2026 Autonomous Agent Synthesis architecture.
 """
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import Field
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.semantic import OptimizationIntent
 
 
-class RLRewardCompiler(BaseModel):
+class RLRewardCompiler(CoreasonModel):
     """
     A schema linking an OptimizationIntent to specific judge evaluation weights.
     This replaces manual prompt tuning with Reinforcement Learning targets for autonomous agent synthesis.
     """
 
-    model_config = ConfigDict(frozen=True, strict=True)
-
     base_optimization: OptimizationIntent = Field(..., description="The OptimizationIntent this compiler targets.")
     target_metric_threshold: float = Field(
-        ..., description="The minimum acceptable score (0.0 to 1.0) before an agent is considered 'compiled'."
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="The minimum acceptable score (0.0 to 1.0) before an agent is considered 'compiled'.",
     )
     latency_penalty_weight: float = Field(..., description="Multiplier for penalizing slow generation.")
     hallucination_penalty_weight: float = Field(..., description="Multiplier for penalizing factual deviations.")
@@ -38,22 +40,12 @@ class RLRewardCompiler(BaseModel):
         ..., description="Multiplier for rewarding concise, high-information outputs."
     )
 
-    @field_validator("target_metric_threshold")
-    @classmethod
-    def check_threshold(cls, v: float) -> float:
-        """Ensure target_metric_threshold is between 0.0 and 1.0."""
-        if not (0.0 <= v <= 1.0):
-            raise ValueError("target_metric_threshold must be between 0.0 and 1.0")
-        return v
 
-
-class ContinuousSelfPlayConfig(BaseModel):
+class ContinuousSelfPlayConfig(CoreasonModel):
     """
     A schema defining the boundaries for background idle compute (when the system tests agents against
     synthetic edge cases) in the autonomous self-play loops.
     """
-
-    model_config = ConfigDict(frozen=True, strict=True)
 
     sleep_cycle_cron: str = Field(
         ..., description="Standard cron expression defining when self-play is allowed (e.g., '0 2 * * *')."
@@ -64,29 +56,23 @@ class ContinuousSelfPlayConfig(BaseModel):
     synthetic_edge_case_budget: int = Field(..., description="Maximum number of test scenarios generated per cycle.")
     mutation_temperature: float = Field(
         ...,
+        ge=0.0,
+        le=2.0,
         description="How aggressively the teacher model mutates instructions upon failure (between 0.0 and 2.0).",
     )
 
-    @field_validator("mutation_temperature")
-    @classmethod
-    def check_mutation_temperature(cls, v: float) -> float:
-        """Ensure mutation_temperature is between 0.0 and 2.0 inclusive."""
-        if not (0.0 <= v <= 2.0):
-            raise ValueError("mutation_temperature must be between 0.0 and 2.0")
-        return v
 
-
-class EphemeralAdapterManifest(BaseModel):
+class EphemeralAdapterManifest(CoreasonModel):
     """
     A schema representing the output of a successful synthesis loop-a Just-In-Time
     compiled LoRA (Low-Rank Adaptation) adapter.
     """
 
-    model_config = ConfigDict(frozen=True, strict=True)
-
     adapter_hash: str = Field(..., description="A unique SHA-256 hash identifying the specific learned weights.")
     base_model_uri: str = Field(..., description="The underlying model this adapter attaches to.")
-    ttl_seconds: int = Field(..., description="Time-to-live before this specialized adapter is purged from memory.")
+    ttl_seconds: int = Field(
+        ..., gt=0, description="Time-to-live before this specialized adapter is purged from memory."
+    )
     training_steps_taken: int = Field(
         ..., description="The number of synthetic iterations required to reach the target_metric_threshold."
     )
