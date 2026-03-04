@@ -1,20 +1,10 @@
-# Copyright (c) 2025 CoReason, Inc.
-#
-# This software is proprietary and dual-licensed.
-# Licensed under the Prosperity Public License 3.0 (the "License").
-# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
-# For details, see the LICENSE file.
-# Commercial use beyond a 30-day trial requires a separate license.
-#
-# Source Code: https://github.com/CoReason-AI/coreason-manifest
-
 import json
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
-class CoreasonModel(BaseModel):
+class CoreasonBaseModel(BaseModel):
     """
     Base class for all domain models in the Coreason Manifest.
 
@@ -28,12 +18,9 @@ class CoreasonModel(BaseModel):
     model_config = ConfigDict(
         frozen=True,
         extra="forbid",
+        validate_assignment=True,
         strict=True,
-        populate_by_name=True,  # Allow using field names or aliases
     )
-
-    # Storage for unknown fields caught by the funnel
-    annotations: dict[str, Any] = Field(default_factory=dict)
 
     def __hash__(self) -> int:
         return hash(self.model_dump_canonical())
@@ -44,12 +31,11 @@ class CoreasonModel(BaseModel):
 
         def _sort_collections(obj: Any) -> Any:
             """
-            Recursively sorts dictionaries for canonical serialization while explicitly preserving RFC 8785 array ordering.
-
-            Architectural Note: Array Sorting Constraints
-            """  # noqa: E501
+            Recursively sorts dictionaries for canonical serialization while explicitly preserving
+            RFC 8785 array ordering.
+            """
             if isinstance(obj, dict):
-                return {k: _sort_collections(v) for k, v in obj.items()}
+                return {k: _sort_collections(v) for k, v in sorted(obj.items())}
             if isinstance(obj, list):
                 # Arrays in JSON are strictly ordered (RFC 8785). We must not sort them.
                 return [_sort_collections(v) for v in obj]
