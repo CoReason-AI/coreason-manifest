@@ -5,7 +5,7 @@ This module defines the core MCP connection primitives and pure, passive contrac
 """
 
 import re
-from collections.abc import Mapping  # noqa: TC003
+from collections.abc import Mapping
 from enum import StrEnum
 from typing import Any, Literal
 

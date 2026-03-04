@@ -1,5 +1,13 @@
 from coreason_manifest.workflow.envelope import WorkflowEnvelope
-from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
+from coreason_manifest.workflow.nodes import (
+    AgentNode,
+    AnyNode,
+    EpistemicScanner,
+    HumanNode,
+    SelfCorrectionPolicy,
+    System1Reflex,
+    SystemNode,
+)
 from coreason_manifest.workflow.topologies import (
     AnyTopology,
     CouncilTopology,
@@ -13,8 +21,11 @@ __all__ = [
     "AnyTopology",
     "CouncilTopology",
     "DAGTopology",
+    "EpistemicScanner",
     "HumanNode",
+    "SelfCorrectionPolicy",
     "SwarmTopology",
+    "System1Reflex",
     "SystemNode",
     "WorkflowEnvelope",
 ]

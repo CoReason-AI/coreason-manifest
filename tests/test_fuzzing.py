@@ -15,15 +15,60 @@ from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid,
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
 
-node_adapter = TypeAdapter(AnyNode)
-event_adapter = TypeAdapter(AnyStateEvent)
-panel_adapter = TypeAdapter(AnyPanel)
-resilience_adapter = TypeAdapter(AnyResiliencePayload)
+node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
+event_adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
+panel_adapter: TypeAdapter[AnyPanel] = TypeAdapter(AnyPanel)
+resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResiliencePayload)
 
 
-@given(st.sampled_from(["agent", "human", "system"]), st.text())
-def test_anynode_routing(node_type: str, description: str) -> None:
-    payload = {"type": node_type, "description": description}
+@given(
+    st.sampled_from(["agent", "human", "system"]),
+    st.text(),
+    st.one_of(
+        st.none(),
+        st.fixed_dictionaries(
+            {
+                "confidence_threshold": st.floats(allow_nan=False, allow_infinity=False),
+                "allowed_read_only_tools": st.lists(st.text()),
+            }
+        ),
+    ),
+    st.one_of(
+        st.none(),
+        st.fixed_dictionaries(
+            {
+                "active": st.booleans(),
+                "dissonance_threshold": st.floats(allow_nan=False, allow_infinity=False),
+                "action_on_gap": st.sampled_from(["fail", "probe", "clarify"]),
+            }
+        ),
+    ),
+    st.one_of(
+        st.none(),
+        st.fixed_dictionaries(
+            {
+                "max_loops": st.integers(),
+                "rollback_on_failure": st.booleans(),
+            }
+        ),
+    ),
+)
+def test_anynode_routing(
+    node_type: str,
+    description: str,
+    reflex_policy: dict[str, Any] | None,
+    epistemic_policy: dict[str, Any] | None,
+    correction_policy: dict[str, Any] | None,
+) -> None:
+    payload: dict[str, Any] = {"type": node_type, "description": description}
+    if node_type == "agent":
+        if reflex_policy is not None:
+            payload["reflex_policy"] = reflex_policy
+        if epistemic_policy is not None:
+            payload["epistemic_policy"] = epistemic_policy
+        if correction_policy is not None:
+            payload["correction_policy"] = correction_policy
+
     parsed = node_adapter.validate_python(payload)
     if node_type == "agent":
         assert isinstance(parsed, AgentNode)
