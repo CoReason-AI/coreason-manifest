@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from pydantic import Field, StringConstraints, field_validator, model_validator
 
+from coreason_manifest.adapters.mcp.server import MCPServerConfig
 from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.semantic import SemanticRef
@@ -159,6 +160,23 @@ class VariableDef(CoreasonModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     type: str
     description: str | None = None
+
+
+class MCPServerExport(CoreasonModel):
+    """Configuration to expose a workflow as an MCP Tool/Server."""
+
+    expose_as_tool: bool = Field(default=True, description="If true, the workflow execution is exposed as an MCP Tool.")
+    tool_name: str = Field(..., description="The exact name exposed to the calling MCP Client.")
+    tool_description: str = Field(
+        ..., description="Semantic description of the workflow's capability for the LLM tool-calling router."
+    )
+    expose_blackboard_as_resources: bool = Field(
+        default=False, description="If True, blackboard variables become URI-addressable MCP resources."
+    )
+    propagate_trace_context: bool = Field(
+        default=True,
+        description="Enforces that W3C trace contexts from the caller are passed into this workflow's execution.",
+    )
 
 
 class BaseTopology(CoreasonModel):
@@ -355,6 +373,13 @@ class WorkflowEnvelope(CoreasonModel):
     )
     human_in_the_loop: bool = Field(
         default=False, description="If True, the orchestrator enforces HITL pause/resume checkpoints."
+    )
+
+    mcp_export: MCPServerExport | None = Field(
+        default=None, description="Configuration to host this workflow as an MCP Server."
+    )
+    mcp_clients: list[MCPServerConfig] = Field(
+        default_factory=list, description="External MCP Servers this workflow connects to, registered top-down."
     )
 
     # Shared State & Governance
