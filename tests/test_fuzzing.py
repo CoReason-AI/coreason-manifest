@@ -13,9 +13,11 @@ from coreason_manifest.oversight.resilience import (
 )
 from coreason_manifest.presentation.scivis import AnyPanel, CohortAttritionGrid, InsightCard, TimeSeriesPanel
 from coreason_manifest.state.events import AnyStateEvent, BeliefUpdateEvent, ObservationEvent, SystemFaultEvent
+from coreason_manifest.testing.chaos import ChaosExperiment
 from coreason_manifest.workflow.nodes import AgentNode, AnyNode, HumanNode, SystemNode
 
 node_adapter: TypeAdapter[AnyNode] = TypeAdapter(AnyNode)
+chaos_adapter: TypeAdapter[ChaosExperiment] = TypeAdapter(ChaosExperiment)
 event_adapter: TypeAdapter[AnyStateEvent] = TypeAdapter(AnyStateEvent)
 panel_adapter: TypeAdapter[AnyPanel] = TypeAdapter(AnyPanel)
 resilience_adapter: TypeAdapter[AnyResiliencePayload] = TypeAdapter(AnyResiliencePayload)
@@ -169,3 +171,49 @@ def test_anyresilience_routing(res_type: str, target: str, fallback: str, reason
         assert isinstance(parsed, CircuitBreakerTrip)
     elif res_type == "fallback":
         assert isinstance(parsed, FallbackTrigger)
+
+
+@given(
+    st.text(),
+    st.floats(allow_nan=False, allow_infinity=False),
+    st.integers(),
+    st.one_of(st.none(), st.lists(st.text())),
+    st.lists(
+        st.fixed_dictionaries(
+            {
+                "fault_type": st.sampled_from(
+                    [
+                        "context_overload",
+                        "incorrect_context",
+                        "format_corruption",
+                        "latency_spike",
+                        "token_throttle",
+                    ]
+                ),
+                "target_node_id": st.one_of(st.none(), st.text()),
+                "intensity": st.floats(allow_nan=False, allow_infinity=False),
+            }
+        )
+    ),
+)
+def test_chaosexperiment_fuzzing(
+    experiment_id: str,
+    expected_max_latency: float,
+    max_loops_allowed: int,
+    required_tool_usage: list[str] | None,
+    faults: list[dict[str, Any]],
+) -> None:
+    payload: dict[str, Any] = {
+        "experiment_id": experiment_id,
+        "hypothesis": {
+            "expected_max_latency": expected_max_latency,
+            "max_loops_allowed": max_loops_allowed,
+        },
+        "faults": faults,
+    }
+    if required_tool_usage is not None:
+        payload["hypothesis"]["required_tool_usage"] = required_tool_usage
+
+    parsed = chaos_adapter.validate_python(payload)
+    assert isinstance(parsed, ChaosExperiment)
+    assert parsed.experiment_id == experiment_id
