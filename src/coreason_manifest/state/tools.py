@@ -80,7 +80,7 @@ class ToolCapability(BaseTool):
 
 
 # Polymorphic Tool Type (Extensible for future)
-AnyTool = Annotated[ToolCapability, Field(discriminator="type")]
+AnyTool = ToolCapability
 
 
 class ToolPack(CoreasonModel):
