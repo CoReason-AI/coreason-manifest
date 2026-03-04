@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.presentation.scivis import MacroGrid  # noqa: TC001
+from coreason_manifest.presentation.scivis import MacroGrid
 
 
 class BaseIntent(CoreasonBaseModel):

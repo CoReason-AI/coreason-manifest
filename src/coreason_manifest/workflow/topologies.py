@@ -3,8 +3,8 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import NodeID  # noqa: TC001
-from coreason_manifest.workflow.nodes import AnyNode  # noqa: TC001
+from coreason_manifest.core.primitives import NodeID
+from coreason_manifest.workflow.nodes import AnyNode
 
 
 class BaseTopology(CoreasonBaseModel):

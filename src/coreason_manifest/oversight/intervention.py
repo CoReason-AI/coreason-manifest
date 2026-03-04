@@ -1,9 +1,31 @@
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
 from coreason_manifest.core.primitives import NodeID
+
+
+class BoundedInterventionScope(CoreasonBaseModel):
+    """
+    Constraints bounding human interaction for interventions.
+    """
+
+    allowed_fields: list[str] = Field(description="List of specific fields the human is permitted to mutate.")
+    json_schema_whitelist: dict[str, str | int | float | bool | None | list[Any] | dict[str, Any]] = Field(
+        description="Strict JSON Schema constraints for the human's input."
+    )
+
+
+class FallbackSLA(CoreasonBaseModel):
+    """
+    SLA defining bounds on human intervention delays.
+    """
+
+    timeout_seconds: int = Field(description="The maximum allowed delay for a human intervention.")
+    timeout_action: Literal["fail_safe", "proceed_with_defaults", "escalate"] = Field(
+        description="The action to take when the timeout expires."
+    )
 
 
 class InterventionRequest(CoreasonBaseModel):
@@ -12,6 +34,10 @@ class InterventionRequest(CoreasonBaseModel):
     """
 
     type: Literal["request"] = Field(default="request", description="The type of the intervention payload.")
+    intervention_scope: BoundedInterventionScope | None = Field(
+        default=None, description="The scope constraints bounding the intervention."
+    )
+    fallback_sla: FallbackSLA | None = Field(default=None, description="The SLA constraints on the intervention delay.")
     target_node_id: NodeID = Field(description="The ID of the target node.")
     context_summary: str = Field(description="A summary of the context requiring intervention.")
     proposed_action: dict[str, str | int | float | bool | None] = Field(

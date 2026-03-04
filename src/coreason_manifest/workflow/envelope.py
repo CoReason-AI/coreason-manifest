@@ -1,8 +1,8 @@
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.core.primitives import SemanticVersion  # noqa: TC001
-from coreason_manifest.workflow.topologies import AnyTopology  # noqa: TC001
+from coreason_manifest.core.primitives import SemanticVersion
+from coreason_manifest.workflow.topologies import AnyTopology
 
 
 class WorkflowEnvelope(CoreasonBaseModel):

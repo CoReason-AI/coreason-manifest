@@ -1,7 +1,7 @@
 from pydantic import Field
 
 from coreason_manifest.core.base import CoreasonBaseModel
-from coreason_manifest.state.events import AnyStateEvent  # noqa: TC001
+from coreason_manifest.state.events import AnyStateEvent
 
 
 class EpistemicLedger(CoreasonBaseModel):
