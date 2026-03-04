@@ -21,7 +21,7 @@ def test_hybrid_mcts_config_valid():
 
 
 def test_hybrid_mcts_config_invalid_population_zero():
-    with pytest.raises(ValueError, match="population_limit must be greater than 0"):
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
         HybridMCTSEvolutionConfig(
             population_limit=0,
             mcts_lookahead_depth=5,
@@ -31,7 +31,7 @@ def test_hybrid_mcts_config_invalid_population_zero():
 
 
 def test_hybrid_mcts_config_invalid_population_negative():
-    with pytest.raises(ValueError, match="population_limit must be greater than 0"):
+    with pytest.raises(ValidationError, match="Input should be greater than 0"):
         HybridMCTSEvolutionConfig(
             population_limit=-5,
             mcts_lookahead_depth=5,
@@ -59,8 +59,25 @@ def test_shadow_population_config_valid():
     assert config.background_mutation_rate == 0.5
 
 
+def test_cost_aware_fitness_metric_invalid_penalties():
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 0"):
+        CostAwareFitnessMetric(
+            base_reward_metric_uri="s3://metrics/acc.json",
+            token_bloat_penalty=0.01,
+            latency_penalty_ms=-0.005,
+            max_acceptable_cost_usd=5.0
+        )
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 0"):
+        CostAwareFitnessMetric(
+            base_reward_metric_uri="s3://metrics/acc.json",
+            token_bloat_penalty=-0.01,
+            latency_penalty_ms=0.005,
+            max_acceptable_cost_usd=5.0
+        )
+
+
 def test_shadow_population_config_invalid_mutation_high():
-    with pytest.raises(ValueError, match="background_mutation_rate must be between 0.0 and 1.0"):
+    with pytest.raises(ValidationError, match=r"Input should be less than or equal to 1"):
         ShadowPopulationConfig(
             background_mutation_rate=1.5,
             hot_swap_threshold=0.1,
@@ -69,7 +86,7 @@ def test_shadow_population_config_invalid_mutation_high():
 
 
 def test_shadow_population_config_invalid_mutation_low():
-    with pytest.raises(ValueError, match="background_mutation_rate must be between 0.0 and 1.0"):
+    with pytest.raises(ValidationError, match=r"Input should be greater than or equal to 0"):
         ShadowPopulationConfig(
             background_mutation_rate=-0.1,
             hot_swap_threshold=0.1,
@@ -86,8 +103,8 @@ def test_evolutionary_reasoning_topology_instantiation():
     )
     fitness_eval = CostAwareFitnessMetric(
         base_reward_metric_uri="local://test",
-        token_bloat_penalty=0.5,
-        latency_penalty_ms=0.1,
+        token_bloat_penalty=-0.5,
+        latency_penalty_ms=-0.1,
         max_acceptable_cost_usd=10.0
     )
     shadow_config = ShadowPopulationConfig(

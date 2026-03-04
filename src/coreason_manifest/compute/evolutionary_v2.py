@@ -1,17 +1,19 @@
-from typing import Literal, Optional
+from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import Field
 
+from coreason_manifest.core.common.base import CoreasonModel
 from coreason_manifest.workflow.nodes.base import Node
 
 
-class HybridMCTSEvolutionConfig(BaseModel):
+class HybridMCTSEvolutionConfig(CoreasonModel):
     """
     Configuration for blending Monte Carlo Tree Search (MCTS) with genetic mutations
     to explore reasoning paths in a 2026 Evolutionary MCTS architecture.
     """
     population_limit: int = Field(
         ...,
+        gt=0,
         description="Maximum concurrent reasoning variants. Must be strictly greater than 0."
     )
     mcts_lookahead_depth: int = Field(
@@ -27,15 +29,8 @@ class HybridMCTSEvolutionConfig(BaseModel):
         description="How two successful reasoning paths are merged."
     )
 
-    @model_validator(mode="after")
-    def validate_population_limit(self) -> "HybridMCTSEvolutionConfig":
-        """Validate that population limit is strictly positive."""
-        if self.population_limit <= 0:
-            raise ValueError("population_limit must be greater than 0")
-        return self
 
-
-class CostAwareFitnessMetric(BaseModel):
+class CostAwareFitnessMetric(CoreasonModel):
     """
     Extends standard accuracy metrics to penalize heavy test-time compute.
     This ensures the evolutionary loop selects for efficiency, not just raw intelligence
@@ -47,10 +42,12 @@ class CostAwareFitnessMetric(BaseModel):
     )
     token_bloat_penalty: float = Field(
         ...,
+        le=0.0,
         description="Negative weight applied per 1k tokens generated."
     )
     latency_penalty_ms: float = Field(
         ...,
+        le=0.0,
         description="Negative weight applied for slow execution."
     )
     max_acceptable_cost_usd: float = Field(
@@ -59,13 +56,15 @@ class CostAwareFitnessMetric(BaseModel):
     )
 
 
-class ShadowPopulationConfig(BaseModel):
+class ShadowPopulationConfig(CoreasonModel):
     """
     Dictates how a deployed agent maintains a silent, background population of variants
     in a 2026 Evolutionary MCTS architecture.
     """
     background_mutation_rate: float = Field(
         ...,
+        ge=0.0,
+        le=1.0,
         description="The percentage chance of an idle variant mutating its instructions (must be between 0.0 and 1.0)."
     )
     hot_swap_threshold: float = Field(
@@ -76,13 +75,6 @@ class ShadowPopulationConfig(BaseModel):
         ...,
         description="Whether the shadow variants use real-time user telemetry for their fitness evaluations."
     )
-
-    @model_validator(mode="after")
-    def validate_background_mutation_rate(self) -> "ShadowPopulationConfig":
-        """Validate that background mutation rate is a valid percentage (0.0 to 1.0)."""
-        if not (0.0 <= self.background_mutation_rate <= 1.0):
-            raise ValueError("background_mutation_rate must be between 0.0 and 1.0")
-        return self
 
 
 class EvolutionaryReasoningTopology(Node):
@@ -106,7 +98,7 @@ class EvolutionaryReasoningTopology(Node):
         ...,
         description="Metric that extends standard accuracy with compute cost penalties."
     )
-    shadow_deployment: Optional[ShadowPopulationConfig] = Field(
+    shadow_deployment: ShadowPopulationConfig | None = Field(
         None,
         description="Optional configuration for a background shadow variant population."
     )
