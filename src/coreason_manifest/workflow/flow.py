@@ -18,7 +18,6 @@ from coreason_manifest.state.tools import AnyTool, ToolPack
 from coreason_manifest.workflow.evals import EvalsManifest
 from coreason_manifest.workflow.nodes import AnyNode
 from coreason_manifest.workflow.nodes.base import Constraint
-from coreason_manifest.workflow.utils import extract_fallbacks
 
 
 class ProvenanceType(StrEnum):
@@ -64,16 +63,23 @@ class ProvenanceData(CoreasonModel):
 
 
 __all__ = [
+    "AnyTopology",
+    "BaseTopology",
     "Blackboard",
+    "CouncilTopology",
+    "DAGTopology",
+    "DCGTopology",
     "DataSchema",
-    "Edge",
+    "EventDrivenTopology",
+    "ExplicitGraphTopology",
     "FlowDefinitions",
     "FlowInterface",
     "FlowMetadata",
-    "Graph",
-    "GraphFlow",
-    "LinearFlow",
+    "HierarchicalTopology",
+    "MapReduceTopology",
+    "SwarmTopology",
     "VariableDef",
+    "WorkflowEnvelope",
 ]
 
 
@@ -134,28 +140,43 @@ class Edge(CoreasonModel):
         return v
 
 
-class Graph(CoreasonModel):
+class FlowInterface(CoreasonModel):
+    inputs: dict[str, Any] | DataSchema = Field(default_factory=dict)
+    outputs: dict[str, Any] | DataSchema = Field(default_factory=dict)
+
+
+class FlowDefinitions(CoreasonModel):
+    profiles: dict[str, Any] = Field(default_factory=dict)
+    schemas: dict[str, Any] = Field(default_factory=dict)
+    tools: dict[str, AnyTool] = Field(default_factory=dict)
+    tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
+    skills: dict[str, Any] = Field(default_factory=dict)
+    middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
+    supervision_templates: Any | None = None
+
+
+class VariableDef(CoreasonModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    type: str
+    description: str | None = None
+
+
+class BaseTopology(CoreasonModel):
+    """Base boundary for all routing logic."""
+
+    topology_type: str
+
+
+class ExplicitGraphTopology(BaseTopology):
+    """Intermediate boundary for topologies that rely on explicit node-to-node edges."""
+
     nodes: dict[str, AnyNode]
     edges: list[Edge]
     entry_point: NodeID | None = None
 
     @model_validator(mode="after")
-    def validate_graph_structure(self) -> "Graph":
-        """
-        Enforce topology constraints, missing entry point, dangling edges, and strict DAG properties.
-
-        Utilizes Kahn's Algorithm (iterative topological sort) for cycle detection to guarantee memory
-        safety and prevent RecursionErrors on massively deep graphs.
-
-        Raises:
-            ManifestError: For structural violations or if a cycle is detected.
-
-        Notes:
-            While dict keys are unique natively, we enforce key == node.id.
-            The seen_ids check acts as a strict Defense-in-Depth against advanced
-            Pydantic aliasing attacks where multiple distinct keys might resolve
-            to pointers sharing the same inner ID.
-        """
+    def validate_structural_integrity(self) -> "ExplicitGraphTopology":
+        """Enforces base structural rules: No empty graphs, no dangling edges, valid entry points."""
         valid_ids = set(self.nodes.keys())
 
         if not self.nodes:
@@ -169,8 +190,7 @@ class Graph(CoreasonModel):
             if key != node.id:
                 raise ManifestError.critical_halt(
                     code=ManifestErrorCode.VAL_TOPOLOGY_ID_MISMATCH,
-                    message=f"Routing contradiction: Node dictionary key '{key}' "
-                    f"does not match inner Node ID '{node.id}'.",
+                    message=f"Routing contradiction: Node dictionary key '{key}' does not match inner ID '{node.id}'.",
                     context={"dict_key": key, "node_id": node.id},
                 )
             if node.id in seen_ids:
@@ -181,14 +201,12 @@ class Graph(CoreasonModel):
                 )
             seen_ids.add(node.id)
 
-        # Entry Point
         if self.entry_point and self.entry_point not in valid_ids:
             raise ManifestError.critical_halt(
                 code=ManifestErrorCode.VAL_TOPOLOGY_MISSING_ENTRY,
                 message=f"Entry point '{self.entry_point}' not found in nodes.",
             )
 
-        # Edges
         for edge in self.edges:
             if edge.from_node not in valid_ids:
                 raise ManifestError.critical_halt(
@@ -200,19 +218,18 @@ class Graph(CoreasonModel):
                     code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
                     message=f"Target '{edge.to_node}' not found in graph nodes.",
                 )
+        return self
 
-        # Fallback ID Integrity
-        for node in self.nodes.values():
-            node_data = node.model_dump(exclude_none=True)
-            for fallback_id in extract_fallbacks(node_data):
-                if fallback_id not in valid_ids:
-                    raise ManifestError.critical_halt(
-                        code=ManifestErrorCode.VAL_TOPOLOGY_DANGLING_EDGE,
-                        message=f"Fallback target '{fallback_id}' in node '{node.id}' not found in graph nodes.",
-                        context={"node_id": node.id, "fallback_id": fallback_id},
-                    )
 
-        # Cycle Detection
+class DAGTopology(ExplicitGraphTopology):
+    """A strict sequential/branching pipeline enforcing a Directed Acyclic Graph."""
+
+    topology_type: Literal["dag"] = "dag"
+
+    @model_validator(mode="after")
+    def validate_dag_structure(self) -> "DAGTopology":
+        """Utilizes Kahn's Algorithm for strict cycle detection."""
+        valid_ids = set(self.nodes.keys())
         adj_map: dict[str, set[str]] = {n: set() for n in valid_ids}
         in_degree: dict[str, int] = dict.fromkeys(valid_ids, 0)
 
@@ -243,49 +260,119 @@ class Graph(CoreasonModel):
         return self
 
 
-class FlowInterface(CoreasonModel):
-    inputs: dict[str, Any] | DataSchema = Field(default_factory=dict)
-    outputs: dict[str, Any] | DataSchema = Field(default_factory=dict)
+class DCGTopology(ExplicitGraphTopology):
+    """A Directed Cyclic Graph for ReAct loops and reflection, explicitly allowing cycles."""
+
+    topology_type: Literal["dcg"] = "dcg"
+    max_iterations: int = Field(default=10, description="Circuit breaker for maximum loop iterations.")
 
 
-class FlowDefinitions(CoreasonModel):
-    profiles: dict[str, Any] = Field(default_factory=dict)
-    schemas: dict[str, Any] = Field(default_factory=dict)
-    tools: dict[str, AnyTool] = Field(default_factory=dict)
-    tool_packs: dict[str, ToolPack] = Field(default_factory=dict)
-    skills: dict[str, Any] = Field(default_factory=dict)
-    middlewares: dict[MiddlewareID, MiddlewareDef] = Field(default_factory=dict)
-    supervision_templates: Any | None = None
+class MapReduceTopology(BaseTopology):
+    """A scatter-gather topology for mapping operations across a dataset and reducing results."""
+
+    topology_type: Literal["map_reduce"] = "map_reduce"
+    nodes: dict[str, AnyNode]
+    iterator_variable: str = Field(..., description="Blackboard variable to iterate over.")
+    mapper_node_id: NodeID = Field(..., description="Node ID of the mapper agent.")
+    reducer_node_id: NodeID = Field(..., description="Node ID of the reducer agent.")
+    max_concurrency: int = Field(default=10, description="Maximum number of parallel mappers.")
 
 
-class VariableDef(CoreasonModel):
-    id: str = Field(default_factory=lambda: str(uuid4()))
-    type: str
-    description: str | None = None
+class CouncilTopology(BaseTopology):
+    """A Mixture-of-Agents (MoA) topology where parallel proposer agents feed into an aggregator."""
+
+    topology_type: Literal["moa"] = "moa"
+    nodes: dict[str, AnyNode]
+    layers: list[list[NodeID]] = Field(
+        ..., description="Nested list where each sub-list represents a layer of parallel proposer agents."
+    )
+    aggregator_agent: NodeID = Field(..., description="Agent synthesizing the proposals.")
+    diversity_maximization: bool = Field(
+        default=True, description="If True, the orchestrator auto-injects divergent personas into parallel proposers."
+    )
 
 
-class GraphFlow(CoreasonModel):
+class SwarmTopology(BaseTopology):
+    """A swarm topology allowing emergent agentic handoffs without static edges."""
+
+    topology_type: Literal["swarm"] = "swarm"
+    nodes: dict[str, AnyNode]
+    entry_point: NodeID = Field(..., description="Starting node ID for the swarm.")
+    swarm_type: Literal["mesh", "star", "ring"] = Field(
+        default="mesh", description="The structural archetype of the dynamic handoff boundaries."
+    )
+    allowed_handoffs: dict[NodeID, list[NodeID]] = Field(
+        ..., description="Access control matrix defining valid handoff paths."
+    )
+    max_turns: int = Field(default=20, description="Circuit breaker for maximum agentic handoffs.")
+
+
+class EventDrivenTopology(BaseTopology):
+    """An event-driven topology reactive to Pub-Sub or Blackboard variable changes."""
+
+    topology_type: Literal["event_driven"] = "event_driven"
+    nodes: dict[str, AnyNode]
+    trigger_schemas: dict[NodeID, list[str]] = Field(
+        ..., description="Mapping of agents to Blackboard variables that trigger them."
+    )
+
+
+class HierarchicalTopology(BaseTopology):
+    """A Supervisor-Worker topology supporting infinitely nested sub-graphs."""
+
+    topology_type: Literal["hierarchical"] = "hierarchical"
+    nodes: dict[str, AnyNode]
+    entry_point: NodeID = Field(..., description="The Supervisor Node ID.")
+    sub_flows: dict[NodeID, "WorkflowEnvelope"] = Field(
+        default_factory=dict, description="Maps a worker node ID to an entirely nested WorkflowEnvelope."
+    )
+
+
+AnyTopology = Annotated[
+    DAGTopology
+    | DCGTopology
+    | MapReduceTopology
+    | CouncilTopology
+    | SwarmTopology
+    | EventDrivenTopology
+    | HierarchicalTopology,
+    Field(discriminator="topology_type"),
+]
+
+
+class WorkflowEnvelope(CoreasonModel):
     """
-    Standard graph-based execution flow.
-
+    SOTA Multi-Agent Orchestration Engine Envelope.
+    Decouples State, Governance, and Telemetry from the Routing Topology.
     """
 
-    type: Literal["graph"] = "graph"
-    kind: Literal["GraphFlow"] = "GraphFlow"
+    type: Literal["workflow"] = "workflow"
     status: Literal["draft", "published", "archived"] = "draft"
+
+    # 2026 SOTA Envelope Execution Primitives
+    execution_mode: Literal["sync", "async", "streaming"] = Field(
+        default="async", description="The runtime execution concurrency model."
+    )
+    human_in_the_loop: bool = Field(
+        default=False, description="If True, the orchestrator enforces HITL pause/resume checkpoints."
+    )
+
+    # Shared State & Governance
     metadata: FlowMetadata
     interface: FlowInterface
     pre_flight_constraints: list[Constraint] = Field(
         default_factory=list, description="Feasibility gates evaluated before the workflow is allocated compute."
     )
     governance: Governance | None = None
-    blackboard: Blackboard | None = Field(default_factory=Blackboard)
+    blackboard: Blackboard | None = Field(default_factory=Blackboard, description="The Shared State Object.")
     definitions: FlowDefinitions | None = None
-    graph: Graph
     evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
 
+    # The plug-and-play polymorphic routing logic
+    topology: AnyTopology
+
     @model_validator(mode="after")
-    def validate_middleware_integrity(self) -> "GraphFlow":
+    def validate_middleware_integrity(self) -> "WorkflowEnvelope":
         """Verify that all active middlewares are defined in the manifest to prevent fail-open bypass."""
         if self.governance and self.governance.active_middlewares:
             available_middlewares = (
@@ -305,24 +392,7 @@ class GraphFlow(CoreasonModel):
         return self
 
     @model_validator(mode="after")
-    def enforce_lifecycle_constraints(self) -> "GraphFlow":
-        """Enforce that published flows have valid metadata, entry point, and no placeholders."""
-        if self.status != "published":
-            return self
-        if getattr(self.metadata, "provenance", None) is None:
-            raise ValueError(
-                "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. "
-                "The Weaver must declare its lineage."
-            )
-        for node in self.graph.nodes.values():
-            if node.type == "placeholder":
-                raise ValueError("Cannot publish a flow with placeholder nodes")
-        if self.graph.entry_point is None:
-            raise ValueError("Cannot publish a GraphFlow without an entry point")
-        return self
-
-    @model_validator(mode="after")
-    def enforce_aot_compilation(self) -> "GraphFlow":
+    def enforce_aot_compilation(self) -> "WorkflowEnvelope":
         """Enforce that published flows have no unresolved semantic references.
 
         Raises:
@@ -331,7 +401,7 @@ class GraphFlow(CoreasonModel):
         if self.status == "published":
             unresolved = [
                 str(getattr(node, "id", ""))
-                for node in self.graph.nodes.values()
+                for node in self.topology.nodes.values()
                 if getattr(node, "type", None) == "agent"
                 and (
                     isinstance(getattr(node, "profile", None), SemanticRef)
@@ -340,79 +410,15 @@ class GraphFlow(CoreasonModel):
             ]
             if unresolved:
                 msg = (
-                    f"Lifecycle Violation: Cannot publish graph. Nodes [{','.join(unresolved)}] "
-                    "contain unresolved SemanticRefs. A Weaver must compile this graph into "
+                    f"Lifecycle Violation: Cannot publish workflow. Nodes [{','.join(unresolved)}] "
+                    "contain unresolved SemanticRefs. A Weaver must compile this workflow into "
                     "concrete profiles before publication."
                 )
                 raise ManifestError.critical_halt(code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self
 
-
-class LinearFlow(CoreasonModel):
-    """
-    Simplified linear execution flow (sequence of steps).
-
-    """
-
-    type: Literal["linear"] = "linear"
-    kind: Literal["LinearFlow"] = "LinearFlow"
-    status: Literal["draft", "published", "archived"] = "draft"
-    metadata: FlowMetadata
-    pre_flight_constraints: list[Constraint] = Field(
-        default_factory=list, description="Feasibility gates evaluated before the workflow is allocated compute."
-    )
-    steps: list[AnyNode] = Field(default_factory=list)
-    governance: Governance | None = None
-    definitions: FlowDefinitions | None = None
-    evals: EvalsManifest | None = Field(None, description="Embedded executable specifications and test scenarios.")
-
     @model_validator(mode="after")
-    def validate_middleware_integrity(self) -> "LinearFlow":
-        """Verify that all active middlewares are defined in the manifest to prevent fail-open bypass."""
-        if self.governance and self.governance.active_middlewares:
-            available_middlewares = (
-                self.definitions.middlewares.keys() if self.definitions and self.definitions.middlewares else set()
-            )
-            for middleware_id in self.governance.active_middlewares:
-                if middleware_id not in available_middlewares:
-                    msg = (
-                        f"Security Fail-Open Risk: Active middleware '{middleware_id}' "
-                        "is not defined in definitions.middlewares."
-                    )
-                    raise ManifestError.critical_halt(
-                        code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED,
-                        message=msg,
-                        context={"middleware_id": middleware_id},
-                    )
-        return self
-
-    @model_validator(mode="after")
-    def validate_linear_structure(self) -> "LinearFlow":
-        """Enforce that linear sequence is not empty and has unique step IDs.
-
-        Raises:
-            ManifestError: For structural violations.
-        """
-        if not self.steps:
-            raise ManifestError.critical_halt(
-                code=ManifestErrorCode.VAL_TOPOLOGY_LINEAR_EMPTY,
-                message="Sequence cannot be empty.",
-            )
-
-        seen = set()
-        for step in self.steps:
-            if step.id in seen:
-                raise ManifestError.critical_halt(
-                    code=ManifestErrorCode.VAL_TOPOLOGY_NODE_ID_COLLISION,
-                    message=f"Duplicate Node ID '{step.id}' found in LinearFlow steps.",
-                    context={"node_id": step.id},
-                )
-            seen.add(step.id)
-
-        return self
-
-    @model_validator(mode="after")
-    def enforce_lifecycle_constraints(self) -> "LinearFlow":
+    def enforce_lifecycle_constraints(self) -> "WorkflowEnvelope":
         """Enforce that published flows have valid metadata, entry point, and no placeholders."""
         if self.status != "published":
             return self
@@ -421,33 +427,14 @@ class LinearFlow(CoreasonModel):
                 "Lifecycle Violation: Cannot publish flow without a signed ProvenanceData block. "
                 "The Weaver must declare its lineage."
             )
-        for node in self.steps:
+        for node in self.topology.nodes.values():
             if node.type == "placeholder":
                 raise ValueError("Cannot publish a flow with placeholder nodes")
-        return self
 
-    @model_validator(mode="after")
-    def enforce_aot_compilation(self) -> "LinearFlow":
-        """Enforce that published flows have no unresolved semantic references.
+        if (
+            self.topology.topology_type in ["dag", "dcg", "swarm", "hierarchical"]
+            and getattr(self.topology, "entry_point", None) is None
+        ):
+            raise ValueError(f"Cannot publish a {self.topology.topology_type} WorkflowEnvelope without an entry point")
 
-        Raises:
-            ManifestError: If unresolved references are found.
-        """
-        if self.status == "published":
-            unresolved = [
-                str(getattr(node, "id", ""))
-                for node in self.steps
-                if getattr(node, "type", None) == "agent"
-                and (
-                    isinstance(getattr(node, "profile", None), SemanticRef)
-                    or isinstance(getattr(node, "tools", None), SemanticRef)
-                )
-            ]
-            if unresolved:
-                msg = (
-                    f"Lifecycle Violation: Cannot publish linear flow. Nodes [{','.join(unresolved)}] "
-                    "contain unresolved SemanticRefs. A Weaver must compile this linear flow into "
-                    "concrete profiles before publication."
-                )
-                raise ManifestError.critical_halt(code=ManifestErrorCode.VAL_LIFECYCLE_UNRESOLVED, message=msg)
         return self

@@ -5,7 +5,7 @@ from coreason_manifest.presentation.scivis.scientific_vis import (
     SciVisIntent,
     VisualCriticFeedback,
 )
-from coreason_manifest.workflow.flow import Blackboard, Edge, Graph, GraphFlow
+from coreason_manifest.workflow.flow import Blackboard, DAGTopology, Edge, WorkflowEnvelope
 from coreason_manifest.workflow.nodes import AgentNode, PlannerNode, VisualInspectorNode
 
 
@@ -28,7 +28,7 @@ class SciVisCriticNode(VisualInspectorNode):
     pass
 
 
-class SciVisDraftingFlow(GraphFlow):
+class SciVisDraftingFlow(WorkflowEnvelope):
     def __init__(self, **data: Any) -> None:
         planner = SciVisPlannerNode(
             id="planner",
@@ -49,7 +49,7 @@ class SciVisDraftingFlow(GraphFlow):
             Edge(from_node="drafter", to_node="critic"),
         ]
 
-        graph = Graph(
+        topology = DAGTopology(
             nodes={"planner": planner, "drafter": drafter, "critic": critic},
             edges=edges,
             entry_point="planner",
@@ -60,6 +60,6 @@ class SciVisDraftingFlow(GraphFlow):
         if "interface" not in data:
             data["interface"] = {}
 
-        data["graph"] = graph
+        data["topology"] = topology
 
         super().__init__(**data)

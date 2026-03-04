@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from coreason_manifest.core.common.exceptions import ManifestError, ManifestErrorCode
 from coreason_manifest.core.common.identity import IdentityPassport
 from coreason_manifest.workflow.exceptions import LineageIntegrityError
-from coreason_manifest.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.workflow.flow import WorkflowEnvelope
 
 
 class AgentRequest(BaseModel):
@@ -39,7 +39,7 @@ class AgentRequest(BaseModel):
     hash_version: Literal["v2"] = Field(default="v2", description="Versioning for integrity strategies.")
 
     # Execution Manifest
-    manifest: GraphFlow | LinearFlow = Field(..., description="The AOT-compiled execution graph.")
+    manifest: WorkflowEnvelope = Field(..., description="The AOT-compiled execution graph.")
 
     # V2 Standard: The Zero-Trust Identity Envelope.
     passport: IdentityPassport = Field(

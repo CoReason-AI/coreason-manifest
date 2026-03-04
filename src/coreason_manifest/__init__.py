@@ -50,10 +50,8 @@ from coreason_manifest.workflow.flow import (
     Edge,
     FlowInterface,
     FlowMetadata,
-    Graph,
-    GraphFlow,
-    LinearFlow,
     VariableDef,
+    WorkflowEnvelope,
 )
 from coreason_manifest.workflow.nodes import (
     AgentNode,
@@ -83,11 +81,8 @@ __all__ = [
     "FlowInterface",
     "FlowMetadata",
     "Governance",
-    "Graph",
-    "GraphFlow",
     "HumanNode",
     "IdentityPassport",
-    "LinearFlow",
     "Node",
     "Optimizer",
     "PlaceholderNode",
@@ -105,4 +100,5 @@ __all__ = [
     "UserContext",
     "UserIdentity",
     "VariableDef",
+    "WorkflowEnvelope",
 ]

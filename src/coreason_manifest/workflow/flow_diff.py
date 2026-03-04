@@ -15,7 +15,7 @@ from typing import Any
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.workflow.flow import GraphFlow, LinearFlow
+from coreason_manifest.workflow.flow import WorkflowEnvelope
 
 
 class ChangeCategory(StrEnum):
@@ -319,7 +319,7 @@ def _compare_objects(path_prefix: str, old_obj: Any, new_obj: Any) -> list[DiffC
     return changes
 
 
-def compare_flows(old: GraphFlow | LinearFlow, new: GraphFlow | LinearFlow) -> DiffReport:
+def compare_flows(old: WorkflowEnvelope, new: WorkflowEnvelope) -> DiffReport:
     """Analyze and quantify architectural variances traversing entire workflow definitions.
 
     Translates rigorous programmatic object state into raw dictionary representations
