@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from coreason_manifest.workflow.flow import BaseTopology
 
@@ -18,13 +18,15 @@ class AutomatedDelphiTopology(BaseTopology):
         default="DELPHI",
         description="The strictly typed literal discriminator for an Automated Delphi topology.",
     )
-    evaluator_nodes: list[str] = Field(
+    evaluator_nodes: tuple[str, ...] = Field(
         description="The IDs of the agents or human nodes participating in the consensus panel.",
     )
     anonymize_bids: bool = Field(
         description="Indicates if the orchestrator must blind the origin of claims during the execution phase.",
     )
     consensus_threshold: float = Field(
+        ge=0.0,
+        le=1.0,
         description="The mathematical percentage of agreement required to resolve the node (e.g., 0.80).",
     )
     max_iterations: int = Field(
@@ -36,3 +38,9 @@ class AutomatedDelphiTopology(BaseTopology):
     bidding_schema_reference: str = Field(
         description="The specific Pydantic model name that all bids must conform to.",
     )
+
+    @model_validator(mode="after")
+    def validate_iterations(self) -> "AutomatedDelphiTopology":
+        if self.current_iteration > self.max_iterations:
+            raise ValueError("current_iteration cannot exceed max_iterations.")
+        return self
