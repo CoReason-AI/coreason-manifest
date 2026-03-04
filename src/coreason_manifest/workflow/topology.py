@@ -105,27 +105,76 @@ def get_reachable_nodes(adj: dict[str, list[str]], entry_nodes: list[str]) -> se
     return reachable
 
 
-def get_unified_topology(flow: WorkflowEnvelope) -> tuple[list[AnyNode], list[Edge]]:
-    """Construct a unified, canonical graph representation from disparate flow definitions.
+def get_unified_topology(envelope: WorkflowEnvelope) -> tuple[list[AnyNode], list[Edge]]:
+    """Construct a unified, canonical graph representation from polymorphic workflow topologies.
 
-    This abstraction layer normalizes sequential and explicitly defined graph flows
-    into a cohesive node-edge topology, allowing unified downstream algorithmic processing,
-    policy validation, and static analysis without divergent logic paths.
+    Implements SOTA Virtual Adjacency Synthesis. For edge-less topologies (Swarms, MoA, MapReduce),
+    this middleware dynamically synthesizes virtual edges from access matrices and structural schemas.
+    This normalizes the execution space for downstream security scanners, telemetry, and UI rendering.
 
     Complexity:
-        Time: $O(V+E)$, constrained by the node extraction and edge synthesis process.
+        Time: $O(V+E)$, constrained by the node extraction and virtual edge synthesis process.
         Space: $O(V+E)$, allocating memory for the canonical representation of the entire workflow.
 
     Args:
-        flow: The execution flow object containing either a sequential or graph-based routing structure.
+        envelope: The SOTA multi-agent WorkflowEnvelope containing a polymorphic topology.
 
     Returns:
-        A strictly normalized tuple containing the sequential collection of execution nodes and the synthesized routing edges.
-    """  # noqa: E501
-    if isinstance(flow, WorkflowEnvelope):
-        nodes = list(flow.topology.nodes.values())
-        edges = getattr(flow.topology, "edges", [])
-        return nodes, edges
+        A strictly normalized tuple of sequential execution nodes and synthesized routing edges.
+    """
+    topology = envelope.topology
+    nodes = list(topology.nodes.values())
+    synthesized_edges: list[Edge] = []
 
-    # Raise error for unknown flow types to ensure strict typing/handling
-    raise ValueError(f"Unknown flow type: {type(flow)}. Expected WorkflowEnvelope.")
+    match topology.topology_type:
+        case "dag" | "dcg":
+            synthesized_edges = topology.edges
+
+        case "swarm":
+            # Synthesize edges from the dynamic Access Control matrix
+            for source, targets in getattr(topology, "allowed_handoffs", {}).items():
+                for target in targets:
+                    synthesized_edges.append(Edge(from_node=source, to_node=target))
+
+        case "moa":
+            # Synthesize fan-out / fan-in edges for the Mixture-of-Agents layers
+            layers = getattr(topology, "layers", [])
+            aggregator = getattr(topology, "aggregator_agent", "")
+
+            # Connect adjacent layers
+            for i in range(len(layers) - 1):
+                current_layer = layers[i]
+                next_layer = layers[i + 1]
+                for source in current_layer:
+                    for target in next_layer:
+                        synthesized_edges.append(Edge(from_node=source, to_node=target))
+
+            # Connect the final layer to the aggregator
+            if layers:
+                final_layer = layers[-1]
+                for source in final_layer:
+                    synthesized_edges.append(Edge(from_node=source, to_node=aggregator))
+
+        case "map_reduce":
+            # Synthesize generic parallel pathways
+            mapper = getattr(topology, "mapper_node_id", "")
+            reducer = getattr(topology, "reducer_node_id", "")
+            if mapper and reducer:
+                synthesized_edges.append(Edge(from_node=mapper, to_node=reducer))
+
+        case "hierarchical":
+            # Synthesize edges from the supervisor to all worker nodes in the subgraph dictionary
+            supervisor = getattr(topology, "entry_point", "")
+            sub_flows = getattr(topology, "sub_flows", {})
+            for worker_id in sub_flows:
+                synthesized_edges.append(Edge(from_node=supervisor, to_node=worker_id))
+
+        case "event_driven":
+            # Event-Driven architectures are fundamentally disjointed graph islands.
+            # They rely entirely on asynchronous Blackboard diffs, so no static edges exist.
+            pass
+
+        case _:
+            raise ValueError(f"Unknown topology type: {topology.topology_type}. Cannot synthesize edges.")
+
+    return nodes, synthesized_edges
