@@ -501,8 +501,8 @@ class GraphReasoning(BaseReasoning):
     type: Literal["graph"] = "graph"
 
     default_request: Annotated[
-        dict[str, Any],
-        Field(description="The default semantic traversal request specification."),
+        Any | None,
+        Field(default=None, description="The default semantic traversal request specification."),
     ]
 
 
@@ -514,6 +514,7 @@ class WasmExecutionReasoning(BaseReasoning):
     type: Literal["wasm_execution"] = "wasm_execution"
 
     memory_limit_mb: Annotated[int, Field(gt=0, description="Memory limit for the Wasm sandbox in megabytes.")]
+    instruction_fuel_limit: Annotated[int, Field(gt=0, description="Maximum amount of instruction fuel allowed.")]
     imported_host_functions: Annotated[
         list[str], Field(default_factory=list, description="List of allowed host functions the Wasm module can call.")
     ]

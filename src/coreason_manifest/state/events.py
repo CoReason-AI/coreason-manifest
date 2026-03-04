@@ -2,9 +2,11 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.primitives.types import GitSHA
+from coreason_manifest.core.primitives.wasm_types import WasiCapability
 
 
 @runtime_checkable
@@ -27,6 +29,7 @@ class EventType(StrEnum):
     STRUCTURAL_PARSED = "STRUCTURAL_PARSED"
     SEMANTIC_EXTRACTED = "SEMANTIC_EXTRACTED"
     GRAPH_RETRIEVAL_TRACE = "GRAPH_RETRIEVAL_TRACE"
+    WASM_EXECUTION_TRACE = "WASM_EXECUTION_TRACE"
     # Other event types can be added here
 
 
@@ -49,6 +52,22 @@ class GraphRetrievalTrace(CoreasonModel):
     subgraph_topology_hash: str = Field(..., description="SHA-256 of the returned normalized subgraph.")
     nodes_retrieved_count: int = Field(..., description="Number of nodes returned.")
     edges_retrieved_count: int = Field(..., description="Number of edges returned.")
+
+
+class WasmExecutionTrace(CoreasonModel):
+    """
+    A cryptographic trace recording the exact deterministic outcome of external Wasm execution.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    trace_type: Literal["wasm_execution"] = Field("wasm_execution", description="Tagged union discriminator.")
+    executed_module_hash: GitSHA = Field(..., description="SHA-256 hash or Git SHA of the executed module.")
+    granted_capabilities: list[WasiCapability] = Field(
+        ..., description="The capabilities actually granted by the runner."
+    )
+    fuel_consumed: int = Field(..., strict=True, description="The amount of instruction fuel consumed.")
+    output_payload_hash: str = Field(..., description="SHA-256 hash of the output payload.")
 
 
 class EpistemicAnchor(CoreasonModel):
@@ -76,7 +95,7 @@ class EpistemicEvent(CoreasonModel):
     )
     event_type: EventType = Field(..., description="The type of the event.")
     payload: Annotated[
-        GraphRetrievalTrace | LegacyPayload,
+        GraphRetrievalTrace | LegacyPayload | WasmExecutionTrace,
         Field(discriminator="trace_type", description="The actual data mutation."),
     ]
     epistemic_anchor: EpistemicAnchor = Field(
