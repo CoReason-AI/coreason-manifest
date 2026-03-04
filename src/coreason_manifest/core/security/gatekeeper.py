@@ -933,8 +933,8 @@ def _check_prisma_ledger_mandate(flow) -> list:
 
     for node in nodes:
         if type(node).__name__ == "SwarmNode" and (
-            getattr(node, "cal_config", None) is not None or
-            getattr(node, "reducer_function", None) == "epistemic_deduplication"
+            getattr(node, "cal_config", None) is not None
+            or getattr(node, "reducer_function", None) == "epistemic_deduplication"
         ):
             has_ledger = False
             if flow.definitions and getattr(node, "worker_profile", None) in flow.definitions.profiles:
