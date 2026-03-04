@@ -2,9 +2,10 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, Protocol, runtime_checkable
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.primitives.wasm_types import WasiCapability
 
 
 @runtime_checkable
@@ -26,7 +27,36 @@ class EventType(StrEnum):
 
     STRUCTURAL_PARSED = "STRUCTURAL_PARSED"
     SEMANTIC_EXTRACTED = "SEMANTIC_EXTRACTED"
+    WASM_EXECUTION_TRACE_RECORDED = "WASM_EXECUTION_TRACE_RECORDED"
     # Other event types can be added here
+
+
+class WasmExecutionTrace(CoreasonModel):
+    """
+    Records the exact deterministic outcome of the external execution of a Wasm module.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    executed_module_hash: str = Field(
+        ...,
+        pattern=r"^[a-fA-F0-9]{64}$",
+        description="The exact SHA-256 hash of the target Wasm module executed.",
+    )
+    granted_capabilities: list[WasiCapability] = Field(
+        ...,
+        description="The strictly typed list of WASI capabilities the runner actually allowed.",
+    )
+    fuel_consumed: int = Field(
+        ...,
+        ge=0,
+        description="The number of instructions (fuel) consumed during execution.",
+    )
+    output_payload_hash: str = Field(
+        ...,
+        pattern=r"^[a-fA-F0-9]{64}$",
+        description="The exact SHA-256 hash of the output payload generated.",
+    )
 
 
 class EpistemicAnchor(CoreasonModel):
@@ -53,7 +83,7 @@ class EpistemicEvent(CoreasonModel):
         ..., description="A generic dict or Protocol representing hardware, prompt version, agent signature."
     )
     event_type: EventType = Field(..., description="The type of the event.")
-    payload: dict[str, Any] = Field(..., description="The actual data mutation.")
+    payload: dict[str, Any] | WasmExecutionTrace = Field(..., description="The actual data mutation.")
     epistemic_anchor: EpistemicAnchor = Field(
         ..., description="A reference to the parent event and spatial coordinates."
     )
