@@ -1032,7 +1032,10 @@ def _check_visual_extraction_inspector_guard(flow) -> list:
             for next_node_id in outgoing_edges.get(node.id, []):
                 target = node_map.get(next_node_id)
                 # Avoid circular imports by checking type name
-                if type(target).__name__ == "VisualInspectorNode" and getattr(target, "spatial_validation", None) is not None:
+                if (
+                    type(target).__name__ == "VisualInspectorNode"
+                    and getattr(target, "spatial_validation", None) is not None
+                ):
                     is_guarded = True
                     break
 
