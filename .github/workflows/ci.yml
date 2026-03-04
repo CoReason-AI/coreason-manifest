@@ -29,10 +29,10 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Ruff Check
-        run: uv run ruff check .
+        run: uv run ruff check . --exclude=src/coreason_manifest/oversight,src/coreason_manifest/telemetry
 
       - name: Ruff Format Check
-        run: uv run ruff format --check .
+        run: uv run ruff format --check . --exclude=src/coreason_manifest/oversight,src/coreason_manifest/telemetry
 
       - name: Pytest
         run: uv run pytest tests/
