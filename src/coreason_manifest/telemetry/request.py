@@ -63,7 +63,7 @@ class AgentRequest(BaseModel):
         return data
 
     @model_validator(mode="after")
-    def validate_trace_integrity(self) -> "AgentRequest":
+    def validate_trace_integrity(self) -> AgentRequest:
         """Enforce strict trace integrity and lineage validity.
 
         Raises:

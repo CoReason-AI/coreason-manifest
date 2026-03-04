@@ -1,9 +1,8 @@
-from pydantic import ConfigDict
+from pydantic import Field
 
-from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.base import CoreasonBaseModel
 
 
-class BaseEnvelope(CoreasonModel):
-    model_config = ConfigDict(extra="forbid", strict=True, frozen=True)
-    trace_id: str | None = None
-    timestamp: float
+class BaseEnvelope(CoreasonBaseModel):
+    trace_id: str | None = Field(default=None, description="W3C Trace ID.")
+    timestamp: float = Field(..., description="Unix timestamp.")

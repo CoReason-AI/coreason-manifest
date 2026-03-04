@@ -11,10 +11,10 @@
 
 from pydantic import Field
 
-from coreason_manifest.core.common.base import CoreasonModel
+from coreason_manifest.core.base import CoreasonBaseModel
 
 
-class PrivacyMaskingZone(CoreasonModel):
+class PrivacyMaskingZone(CoreasonBaseModel):
     """
     A schema defining application bounds or coordinate boxes that the ambient listener must completely ignore.
 
@@ -37,7 +37,7 @@ class PrivacyMaskingZone(CoreasonModel):
     )
 
 
-class MultimodalTelemetryStream(CoreasonModel):
+class MultimodalTelemetryStream(CoreasonBaseModel):
     """
     A schema extending standard text-based telemetry to include passive environmental exhaust.
 
