@@ -1,66 +1,34 @@
-import ast
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
-from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.security.compliance import SecurityVisitor
-from coreason_manifest.oversight.resilience import EscalationStrategy
-
-InterventionMode = Literal["blocking", "shadow", "hijack_only"]
+from coreason_manifest.core.base import CoreasonBaseModel
+from coreason_manifest.core.primitives import NodeID
 
 
-class EscalationCriteria(CoreasonModel):
-    """Defines conditions under which an agent should escalate to a human."""
+class InterventionRequest(CoreasonBaseModel):
+    """
+    Emitted when an agent needs human approval or further intervention.
+    """
 
-    condition: str = Field(
-        ...,
-        description="Python expression string (AST-whitelisted) to evaluate against agent state.",
-        examples=["risk_level == 'CRITICAL'", "confidence < 0.85"],
+    type: Literal["request"] = Field(default="request", description="The type of the intervention payload.")
+    target_node_id: NodeID = Field(description="The ID of the target node.")
+    context_summary: str = Field(description="A summary of the context requiring intervention.")
+    proposed_action: dict[str, str | int | float | bool | None] = Field(
+        description="The action proposed by the agent that requires approval."
     )
-    role: str = Field(
-        ...,
-        description="The human role required to handle this escalation.",
-        examples=["supervisor", "legal_compliance"],
-    )
-    priority: Literal["low", "medium", "high", "critical"] = Field(
-        "medium", description="The priority level of the escalation.", examples=["medium"]
-    )
-    strategy: EscalationStrategy | None = Field(
-        None,
-        description="Local SLA/Queue routing. Overrides global default_sla if set.",
-        examples=[{"strategy": "escalate"}],
-    )
-
-    @field_validator("condition")
-    @classmethod
-    def validate_python_expression(cls, v: str) -> str:
-        """Validate the condition string using the SecurityVisitor."""
-        if not v or not v.strip():
-            raise ValueError("Condition string cannot be empty.")
-        try:
-            tree = ast.parse(v, mode="eval")
-        except SyntaxError as e:
-            raise ValueError(f"Syntax error in condition '{v}': {e}") from e
-        visitor = SecurityVisitor()
-        visitor.visit(tree)
-        return v
+    adjudication_deadline: float = Field(description="The deadline for adjudication, represented as a UNIX timestamp.")
 
 
-class CoIntelligencePolicy(CoreasonModel):
-    """Global policy for Human-AI Co-Intelligence."""
+class InterventionVerdict(CoreasonBaseModel):
+    """
+    Emitted by a human or oversight AI to resume the swarm.
+    """
 
-    global_intervention_mode: InterventionMode = Field(
-        "blocking", description="Default intervention mode for the entire flow.", examples=["blocking"]
-    )
-    escalation_rules: list[EscalationCriteria] = Field(
-        default_factory=list,
-        description="Global list of conditions that trigger escalation.",
-        examples=[[{"condition": "confidence < 0.5", "role": "supervisor"}]],
-    )
-    default_sla: EscalationStrategy | None = Field(
-        None, description="Default escalation strategy for global interventions.", examples=[{"strategy": "escalate"}]
-    )
+    type: Literal["verdict"] = Field(default="verdict", description="The type of the intervention payload.")
+    target_node_id: NodeID = Field(description="The ID of the target node.")
+    approved: bool = Field(description="Indicates whether the proposed action was approved.")
+    feedback: str | None = Field(description="Optional feedback provided along with the verdict.")
 
 
-__all__ = ["CoIntelligencePolicy", "EscalationCriteria", "InterventionMode"]
+type AnyInterventionPayload = Annotated[InterventionRequest | InterventionVerdict, Field(discriminator="type")]

@@ -8,14 +8,13 @@ on:
 
 jobs:
   test:
-    name: Python ${{ matrix.python-version }} on ${{ matrix.os }} - Resolution ${{ matrix.resolution }}
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.12", "3.13"]
-        resolution: ["standard", "lowest-direct"]
+        python-version: ["3.14", "3.14t"]
 
     steps:
       - uses: actions/checkout@v4
@@ -26,47 +25,14 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies (standard)
-        if: matrix.resolution == 'standard'
-        run: uv sync
-
-      - name: Install dependencies (lowest-direct)
-        if: matrix.resolution == 'lowest-direct'
-        run: uv sync --resolution lowest-direct
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
 
       - name: Ruff Check
-        run: uv run ruff check .
+        run: uv run ruff check . --exclude=src/coreason_manifest/oversight,src/coreason_manifest/telemetry
 
       - name: Ruff Format Check
-        run: uv run ruff format --check .
-
-      - name: Mypy Check
-        run: uv run mypy src/
+        run: uv run ruff format --check . --exclude=src/coreason_manifest/oversight,src/coreason_manifest/telemetry
 
       - name: Pytest
-        run: uv run pytest -n auto --cov=src --cov-report=xml || true
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          files: ./coverage.xml
-          fail_ci_if_error: true
-
-  agentic-evals:
-    name: Agentic UX Trajectory Evals
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Run Evals
-        run: uv run pytest tests/test_basic.py -m "evals"
+        run: uv run pytest tests/

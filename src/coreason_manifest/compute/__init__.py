@@ -1,19 +1,11 @@
-"""
-Compute provisioning and resource routing structures.
-"""
-
-from .resources import (
-    provision_compute,
-)
-from .velocity import (
-    ComputeIntent,
-    VelocityAConfig,
-    VelocityBConfig,
+from coreason_manifest.compute.profiles import (
+    ComputeProvisioningRequest,
+    ModelProfile,
+    RateCard,
 )
 
 __all__ = [
-    "ComputeIntent",
-    "VelocityAConfig",
-    "VelocityBConfig",
-    "provision_compute",
+    "ComputeProvisioningRequest",
+    "ModelProfile",
+    "RateCard",
 ]

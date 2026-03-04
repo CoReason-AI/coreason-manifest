@@ -1,111 +1,36 @@
-from datetime import UTC, datetime
-from enum import StrEnum
-from typing import Annotated, Any, Literal, Protocol, runtime_checkable
+from typing import Annotated, Literal
 
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import Field
 
-from coreason_manifest.core.common.base import CoreasonModel
-from coreason_manifest.core.primitives.types import GitSHA
-from coreason_manifest.core.primitives.wasm_types import WasiCapability
+from coreason_manifest.core.base import CoreasonBaseModel
 
 
-@runtime_checkable
-class ContextEnvelopeProtocol(Protocol):
-    """
-    Mock protocol for external telemetry envelopes representing hardware,
-    prompt version, agent signature, etc.
-    """
-
-    hardware_cluster: str
-    agent_signature: str
-    prompt_version: str
+class BaseStateEvent(CoreasonBaseModel):
+    event_id: str = Field(description="A unique identifier for the event.")
+    timestamp: float = Field(description="The timestamp when the event occurred.")
 
 
-class EventType(StrEnum):
-    """
-    The type of epistemic event occurring in the system.
-    """
-
-    STRUCTURAL_PARSED = "STRUCTURAL_PARSED"
-    SEMANTIC_EXTRACTED = "SEMANTIC_EXTRACTED"
-    GRAPH_RETRIEVAL_TRACE = "GRAPH_RETRIEVAL_TRACE"
-    WASM_EXECUTION_TRACE = "WASM_EXECUTION_TRACE"
-    # Other event types can be added here
-
-
-class LegacyPayload(CoreasonModel):
-    """
-    Temporary bounded recursive wrapper for unstructured JSON values.
-    """
-
-    trace_type: Literal["legacy_payload"] = Field("legacy_payload", description="Tagged union discriminator.")
-    data: dict[str, Any] = Field(default_factory=dict, description="Arbitrary unstructured data.")
-
-
-class GraphRetrievalTrace(CoreasonModel):
-    """
-    A cryptographic trace linking a semantic traversal request to its topological response.
-    """
-
-    trace_type: Literal["graph_retrieval"] = Field("graph_retrieval", description="Tagged union discriminator.")
-    traversal_request_hash: str = Field(..., description="SHA-256 of the semantic request.")
-    subgraph_topology_hash: str = Field(..., description="SHA-256 of the returned normalized subgraph.")
-    nodes_retrieved_count: int = Field(..., description="Number of nodes returned.")
-    edges_retrieved_count: int = Field(..., description="Number of edges returned.")
-
-
-class WasmExecutionTrace(CoreasonModel):
-    """
-    A cryptographic trace recording the exact deterministic outcome of external Wasm execution.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    trace_type: Literal["wasm_execution"] = Field("wasm_execution", description="Tagged union discriminator.")
-    executed_module_hash: GitSHA = Field(..., description="SHA-256 hash or Git SHA of the executed module.")
-    granted_capabilities: list[WasiCapability] = Field(
-        ..., description="The capabilities actually granted by the runner."
+class ObservationEvent(BaseStateEvent):
+    type: Literal["observation"] = Field(
+        default="observation", description="Discriminator type for an observation event."
     )
-    fuel_consumed: int = Field(..., strict=True, description="The amount of instruction fuel consumed.")
-    output_payload_hash: str = Field(..., description="SHA-256 hash of the output payload.")
+    # Adding arbitrary payload to make it useful, even though not explicitly asked,
+    # to be safe, I'll just stick strictly to the requested structure or minimalist
 
 
-class EpistemicAnchor(CoreasonModel):
-    """
-    A reference to maintain the Chain of Custody.
-    """
-
-    parent_event_id: str | None = Field(
-        default=None, description="The ID of the parent event that caused this event, if any."
-    )
-    spatial_coordinates: list[float] | None = Field(
-        default=None, description="Bounding box coordinates (e.g., [x1, y1, x2, y2]) to anchor to a specific region."
+class BeliefUpdateEvent(BaseStateEvent):
+    type: Literal["belief_update"] = Field(
+        default="belief_update", description="Discriminator type for a belief update event."
     )
 
 
-class EpistemicEvent(CoreasonModel):
-    """
-    An immutable event appended to the ledger representing a state mutation.
-    """
-
-    event_id: str = Field(..., description="A unique UUID/ULID for the event.")
-    timestamp: datetime = Field(..., description="UTC datetime when the event occurred.")
-    context_envelope: dict[str, Any] = Field(
-        ..., description="A generic dict or Protocol representing hardware, prompt version, agent signature."
-    )
-    event_type: EventType = Field(..., description="The type of the event.")
-    payload: Annotated[
-        GraphRetrievalTrace | LegacyPayload | WasmExecutionTrace,
-        Field(discriminator="trace_type", description="The actual data mutation."),
-    ]
-    epistemic_anchor: EpistemicAnchor = Field(
-        ..., description="A reference to the parent event and spatial coordinates."
+class SystemFaultEvent(BaseStateEvent):
+    type: Literal["system_fault"] = Field(
+        default="system_fault", description="Discriminator type for a system fault event."
     )
 
-    @model_validator(mode="after")
-    def validate_utc(self) -> "EpistemicEvent":
-        """Ensure the timestamp is UTC."""
-        if self.timestamp.tzinfo is None or self.timestamp.tzinfo != UTC:
-            # We enforce UTC strictly for the distributed ledger
-            raise ValueError("Timestamp must be timezone-aware and set to UTC.")
-        return self
+
+type AnyStateEvent = Annotated[
+    ObservationEvent | BeliefUpdateEvent | SystemFaultEvent,
+    Field(discriminator="type", description="A discriminated union of state events."),
+]

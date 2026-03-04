@@ -1,8 +1,23 @@
-# Core specification package
-from __future__ import annotations
-
-from coreason_manifest.core.primitives.types import WasmMiddlewareDef
+from .base import CoreasonBaseModel
+from .primitives import (
+    DataClassification,
+    GitSHA,
+    NodeID,
+    ProfileID,
+    RiskLevel,
+    SemanticVersion,
+    SystemRole,
+    ToolID,
+)
 
 __all__ = [
-    "WasmMiddlewareDef",
+    "CoreasonBaseModel",
+    "DataClassification",
+    "GitSHA",
+    "NodeID",
+    "ProfileID",
+    "RiskLevel",
+    "SemanticVersion",
+    "SystemRole",
+    "ToolID",
 ]
