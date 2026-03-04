@@ -8,11 +8,22 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
-from typing import Any, Literal
+from collections.abc import Mapping, Sequence
+from typing import Literal
 
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
+
+
+class TimelineEvent(CoreasonModel):
+    """
+    Represents a specific event in a timeline or patient trajectory.
+    """
+
+    event_name: str = Field(..., description="The name of the event.")
+    days_from_index: int = Field(..., description="The number of days from the index date.")
+    event_domain: str = Field(..., description="The clinical domain of the event (e.g., Condition, Drug).")
 
 
 class GrammarOfGraphicsSpecification(CoreasonModel):
@@ -31,10 +42,10 @@ class GrammarOfGraphicsSpecification(CoreasonModel):
     mark_type: Literal["LINE", "BAR", "POINT", "AREA", "TICK"] = Field(
         ..., description="The visual mark type to use (e.g. LINE, BAR, POINT, AREA, TICK)."
     )
-    data_bindings: dict[str, str] = Field(
+    data_bindings: Mapping[str, str] = Field(
         ..., description="Dictionary mapping string keys to expected data structures or OMOP column names."
     )
-    encoding: dict[str, str] = Field(
+    encoding: Mapping[str, str] = Field(
         ..., description="Dictionary mapping visual channels like `x`, `y`, `color`, `tooltip` to data fields."
     )
 
@@ -47,12 +58,9 @@ class TimelineVisContract(CoreasonModel):
 
     trajectory_id: str = Field(..., description="Identifier for the trajectory.")
     time_zero_event: str = Field(..., description="Description of the index date (time zero) event.")
-    events: list[dict[str, Any]] = Field(
+    events: Sequence[TimelineEvent] = Field(
         ...,
-        description=(
-            "A list of dictionaries representing events in the timeline, expected to "
-            "contain `event_name`, `days_from_index`, and `event_domain`."
-        ),
+        description=("A sequence of TimelineEvent objects representing events in the timeline."),
     )
     base_specification: GrammarOfGraphicsSpecification = Field(
         ..., description="Reference to a GrammarOfGraphicsSpecification base contract."

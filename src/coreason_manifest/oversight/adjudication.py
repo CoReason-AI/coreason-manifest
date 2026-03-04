@@ -8,11 +8,21 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason-manifest
 
+from collections.abc import Sequence
 from typing import Literal
 
 from pydantic import Field
 
 from coreason_manifest.core.common.base import CoreasonModel
+
+
+class AdjudicationOption(CoreasonModel):
+    """
+    Represents a specific choice in an adjudication form.
+    """
+
+    option_id: str = Field(..., description="The unique identifier for the option.")
+    clinical_justification: str = Field(..., description="The clinical justification for the option.")
 
 
 class AdjudicationFormContract(CoreasonModel):
@@ -30,15 +40,12 @@ class AdjudicationFormContract(CoreasonModel):
     epistemic_context: str = Field(
         ..., description="String explaining exactly *why* the AI is uncertain and requires human input."
     )
-    uncertain_concepts: list[str] = Field(
-        ..., description="List of strings representing the ambiguous clinical terms or OMOP concept IDs."
+    uncertain_concepts: Sequence[str] = Field(
+        ..., description="Sequence of strings representing the ambiguous clinical terms or OMOP concept IDs."
     )
-    proposed_options: list[dict[str, str]] = Field(
+    proposed_options: Sequence[AdjudicationOption] = Field(
         ...,
-        description=(
-            "List of dictionaries representing the multi-choice options the human can select, "
-            "expected to include an `option_id` and `clinical_justification`."
-        ),
+        description=("Sequence of AdjudicationOption representing the multi-choice options the human can select."),
     )
     requires_consensus: bool = Field(
         ..., description="Boolean indicating if multiple humans must respond before the workflow resumes."
