@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Protocol, runtime_checkable
+from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
 from pydantic import Field, model_validator
 
@@ -26,7 +26,29 @@ class EventType(StrEnum):
 
     STRUCTURAL_PARSED = "STRUCTURAL_PARSED"
     SEMANTIC_EXTRACTED = "SEMANTIC_EXTRACTED"
+    GRAPH_RETRIEVAL_TRACE = "GRAPH_RETRIEVAL_TRACE"
     # Other event types can be added here
+
+
+class LegacyPayload(CoreasonModel):
+    """
+    Temporary bounded recursive wrapper for unstructured JSON values.
+    """
+
+    trace_type: Literal["legacy_payload"] = Field("legacy_payload", description="Tagged union discriminator.")
+    data: dict[str, Any] = Field(default_factory=dict, description="Arbitrary unstructured data.")
+
+
+class GraphRetrievalTrace(CoreasonModel):
+    """
+    A cryptographic trace linking a semantic traversal request to its topological response.
+    """
+
+    trace_type: Literal["graph_retrieval"] = Field("graph_retrieval", description="Tagged union discriminator.")
+    traversal_request_hash: str = Field(..., description="SHA-256 of the semantic request.")
+    subgraph_topology_hash: str = Field(..., description="SHA-256 of the returned normalized subgraph.")
+    nodes_retrieved_count: int = Field(..., description="Number of nodes returned.")
+    edges_retrieved_count: int = Field(..., description="Number of edges returned.")
 
 
 class EpistemicAnchor(CoreasonModel):
@@ -53,7 +75,10 @@ class EpistemicEvent(CoreasonModel):
         ..., description="A generic dict or Protocol representing hardware, prompt version, agent signature."
     )
     event_type: EventType = Field(..., description="The type of the event.")
-    payload: dict[str, Any] = Field(..., description="The actual data mutation.")
+    payload: Annotated[
+        GraphRetrievalTrace | LegacyPayload,
+        Field(discriminator="trace_type", description="The actual data mutation."),
+    ]
     epistemic_anchor: EpistemicAnchor = Field(
         ..., description="A reference to the parent event and spatial coordinates."
     )
