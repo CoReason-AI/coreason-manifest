@@ -134,6 +134,117 @@ class Edge(CoreasonModel):
         return v
 
 
+class BaseTopology(CoreasonModel):
+    """Base boundary for all routing logic."""
+
+    topology_type: str
+
+
+class DAGTopology(BaseTopology):
+    """A strict sequential/branching pipeline enforcing a Directed Acyclic Graph."""
+
+    topology_type: Literal["dag"] = "dag"
+    nodes: dict[str, AnyNode]
+    edges: list[Edge]
+    entry_point: NodeID | None = None
+
+    @model_validator(mode="after")
+    def validate_dag_structure(self) -> "DAGTopology":
+        """
+        Utilizes Kahn's Algorithm (iterative topological sort) for cycle detection to guarantee memory
+        safety and prevent RecursionErrors on massively deep graphs.
+        """
+        valid_ids = set(self.nodes.keys())
+
+        adj_map: dict[str, set[str]] = {n: set() for n in valid_ids}
+        in_degree: dict[str, int] = dict.fromkeys(valid_ids, 0)
+
+        for edge in self.edges:
+            if edge.from_node in valid_ids and edge.to_node in valid_ids:
+                adj_map[edge.from_node].add(edge.to_node)
+
+        for neighbors in adj_map.values():
+            for neighbor in neighbors:
+                in_degree[neighbor] += 1
+
+        queue = deque([n for n in valid_ids if in_degree[n] == 0])
+        processed_nodes = 0
+
+        while queue:
+            current = queue.popleft()
+            processed_nodes += 1
+            for neighbor in adj_map.get(current, []):
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+
+        if processed_nodes != len(valid_ids):
+            raise ManifestError.critical_halt(
+                code=ManifestErrorCode.VAL_TOPOLOGY_CYCLE,
+                message="Execution graphs must be strict Directed Acyclic Graphs (DAGs). Cycle detected.",
+            )
+
+        return self
+
+
+class DCGTopology(BaseTopology):
+    """A Directed Cyclic Graph for ReAct loops and reflection, explicitly allowing cycles."""
+
+    topology_type: Literal["dcg"] = "dcg"
+    nodes: dict[str, AnyNode]
+    edges: list[Edge]
+    entry_point: NodeID | None = None
+    max_iterations: int = Field(default=10, description="Circuit breaker for maximum loop iterations.")
+
+
+class MapReduceTopology(BaseTopology):
+    """A scatter-gather topology for mapping operations across a dataset and reducing results."""
+
+    topology_type: Literal["map_reduce"] = "map_reduce"
+    nodes: dict[str, AnyNode]
+    iterator_variable: str = Field(..., description="Blackboard variable to iterate over.")
+    mapper_node_id: NodeID = Field(..., description="Node ID of the mapper agent.")
+    reducer_node_id: NodeID = Field(..., description="Node ID of the reducer agent.")
+    max_concurrency: int = Field(default=10, description="Maximum number of parallel mappers.")
+
+
+class CouncilTopology(BaseTopology):
+    """A Mixture-of-Agents (MoA) topology where parallel proposer agents feed into an aggregator."""
+
+    topology_type: Literal["moa"] = "moa"
+    nodes: dict[str, AnyNode]
+    proposer_agents: list[NodeID] = Field(..., description="List of agents generating proposals in parallel.")
+    aggregator_agent: NodeID = Field(..., description="Agent synthesizing the proposals.")
+
+
+class SwarmTopology(BaseTopology):
+    """A swarm topology allowing emergent agentic handoffs without static edges."""
+
+    topology_type: Literal["swarm"] = "swarm"
+    nodes: dict[str, AnyNode]
+    entry_point: NodeID = Field(..., description="Starting node ID for the swarm.")
+    allowed_handoffs: dict[NodeID, list[NodeID]] = Field(
+        ..., description="Access control matrix defining valid handoff paths."
+    )
+    max_turns: int = Field(default=20, description="Circuit breaker for maximum agentic handoffs.")
+
+
+class EventDrivenTopology(BaseTopology):
+    """An event-driven topology reactive to Pub-Sub or Blackboard variable changes."""
+
+    topology_type: Literal["event_driven"] = "event_driven"
+    nodes: dict[str, AnyNode]
+    trigger_schemas: dict[NodeID, list[str]] = Field(
+        ..., description="Mapping of agents to Blackboard variables that trigger them."
+    )
+
+
+AnyTopology = Annotated[
+    DAGTopology | DCGTopology | MapReduceTopology | CouncilTopology | SwarmTopology | EventDrivenTopology,
+    Field(discriminator="topology_type"),
+]
+
+
 class Graph(CoreasonModel):
     nodes: dict[str, AnyNode]
     edges: list[Edge]
