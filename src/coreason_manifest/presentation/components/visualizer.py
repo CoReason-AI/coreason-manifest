@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
     from coreason_manifest.telemetry.telemetry_schemas import ExecutionSnapshot
 
-from coreason_manifest.workflow import AnyNode, GraphFlow, HumanNode, LinearFlow
+from coreason_manifest.workflow import AnyNode, HumanNode, WorkflowEnvelope
 from coreason_manifest.workflow.nodes import SwitchNode
 from coreason_manifest.workflow.topology import get_unified_topology
 
@@ -98,19 +98,17 @@ def _render_mermaid_node(node: AnyNode, snapshot: ExecutionSnapshot | None = Non
     return definition
 
 
-def to_mermaid(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None = None) -> str:
+def to_mermaid(flow: WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None) -> str:
     """Generates valid Mermaid.js diagram code."""
     lines = []
 
     nodes, edge_objs = get_unified_topology(flow)
     edges = [(e.from_node, e.to_node, e.condition) for e in edge_objs]
 
-    if isinstance(flow, LinearFlow):
+    if getattr(flow.topology, "topology_type", "") in ("dag", "dcg", "hierarchical"):
         lines.append("graph TD")
-    elif isinstance(flow, GraphFlow):
-        lines.append("graph LR")
     else:
-        raise ValueError(f"Unsupported flow type: {type(flow)}")
+        lines.append("graph LR")
 
     # Grouping
     grouped_nodes: dict[str, list[AnyNode]] = {}
@@ -263,7 +261,7 @@ def _compute_layout(nodes: Sequence[AnyNode], edges: list[tuple[str, str, str | 
     return positions
 
 
-def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | None = None) -> dict[str, Any]:
+def to_react_flow(flow: WorkflowEnvelope, snapshot: ExecutionSnapshot | None = None) -> dict[str, Any]:
     """Generates React Flow compatible JSON."""
     rf_nodes: list[dict[str, Any]] = []
     rf_edges: list[dict[str, Any]] = []
@@ -316,7 +314,7 @@ def to_react_flow(flow: GraphFlow | LinearFlow, snapshot: ExecutionSnapshot | No
     return {"nodes": rf_nodes, "edges": rf_edges}
 
 
-def export_html_diagram(flow: GraphFlow | LinearFlow, output_path: str = "graph.html") -> None:
+def export_html_diagram(flow: WorkflowEnvelope, output_path: str = "graph.html") -> None:
     """Exports a flow to an HTML file containing a Mermaid.js diagram."""
     mermaid_str = to_mermaid(flow)
     html_content = f"""<!DOCTYPE html>
