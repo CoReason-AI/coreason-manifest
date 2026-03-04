@@ -7,9 +7,10 @@ def test_graph_reasoning() -> None:
     req = SemanticTraversalRequest(
         semantic_intent="Find concepts", anchor_nodes=["A"], max_hops=2, allowed_edge_types=["MAPS_TO"]
     )
-    gr = GraphReasoning(default_request=req.model_dump(), model="gpt-4o")
+    gr = GraphReasoning(default_request=req, model="gpt-4o")
     assert gr.type == "graph"
-    assert gr.default_request["semantic_intent"] == "Find concepts"
+    assert gr.default_request is not None
+    assert gr.default_request.semantic_intent == "Find concepts"
 
 
 def test_semantic_traversal_request() -> None:
